@@ -96,7 +96,7 @@ const MODEL_HEALTH = [
     lastIncident: '12h ago',
     failoverTarget: 'Qwen3-8B',
     canaryVersion: 'v4.0.3',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
   },
 ];
 

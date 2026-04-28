@@ -65,13 +65,13 @@ function ScoreTier({ tier }: { tier: string }) {
       label: 'MEDIUM',
     },
     low: {
-      color: '#64748b',
+      color: '#4a6070',
       bg: 'rgba(100,116,139,0.1)',
       border: 'rgba(100,116,139,0.3)',
       label: 'LOW',
     },
   }[tier] ?? {
-    color: '#64748b',
+    color: '#4a6070',
     bg: 'rgba(100,116,139,0.1)',
     border: 'rgba(100,116,139,0.3)',
     label: tier.toUpperCase(),
@@ -108,7 +108,7 @@ function SeverityDot({ severity }: { severity: string }) {
         ? '#f59e0b'
         : severity === 'medium'
           ? '#60a5fa'
-          : '#64748b';
+          : 'var(--gi-text-muted)';
   return (
     <span className="w-2 h-2 rounded-full flex-shrink-0 mt-0.5" style={{ background: color }} />
   );
@@ -525,7 +525,7 @@ function OwnershipTab({ ownership }: { ownership: OwnershipChain | undefined }) 
               Entities
             </p>
             {nodes.map((node: OwnerNode) => {
-              const color = NODE_COLORS[node.type] ?? '#64748b';
+              const color = NODE_COLORS[node.type] ?? '#4a6070';
               const Icon = NODE_ICONS[node.type] ?? Building2;
               return (
                 <button
@@ -785,7 +785,7 @@ function FinancingTab({ financing }: { financing: FinancingStress | undefined })
                 </div>
                 <span
                   className="ml-auto text-[9px] font-bold uppercase"
-                  style={{ color: pressureColors[clue.severity] ?? '#64748b' }}
+                  style={{ color: pressureColors[clue.severity] ?? 'var(--gi-text-muted)' }}
                 >
                   {clue.severity}
                 </span>

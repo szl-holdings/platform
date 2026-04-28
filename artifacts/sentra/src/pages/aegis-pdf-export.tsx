@@ -97,18 +97,18 @@ export default function AegisPdfExport() {
             left: 0;
             width: 100%;
             font-family: 'Helvetica Neue', Arial, sans-serif;
-            color: #0f172a;
+            color: var(--gi-bg-base);
             background: white;
           }
           .no-print { display: none !important; }
           .print-break { page-break-after: always; }
           .print-section { padding: 24px 32px; }
           .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-          .metric-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; }
-          .metric-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+          .metric-card { border: 1px solid var(--gi-text-primary); border-radius: 8px; padding: 12px 16px; }
+          .metric-label { font-size: 10px; color: var(--gi-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
           .metric-value { font-size: 20px; font-weight: 700; margin-top: 4px; }
           .incident-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-          .incident-table th { background: #f8fafc; padding: 8px 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+          .incident-table th { background: #f8fafc; padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--gi-text-primary); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gi-text-muted); }
           .incident-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
         }
       `}</style>
@@ -199,7 +199,7 @@ export default function AegisPdfExport() {
                   ref={printRef}
                   style={{
                     background: 'white',
-                    color: '#0f172a',
+                    color: 'var(--gi-bg-base)',
                     fontFamily: "'Helvetica Neue', Arial, sans-serif",
                     borderRadius: '8px',
                     overflow: 'hidden',
@@ -230,13 +230,13 @@ export default function AegisPdfExport() {
                   {/* Metrics Grid */}
                   {sections.find((s) => s.id === 'executive-summary' && s.included) && (
                     <div style={{ padding: '28px 48px', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--gi-text-muted)', marginBottom: '16px' }}>
                         Executive Summary
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                         {REPORT_METRICS.slice(0, 4).map((m) => (
-                          <div key={m.label} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
-                            <div style={{ fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
+                          <div key={m.label} style={{ border: '1px solid var(--gi-text-primary)', borderRadius: '8px', padding: '12px 14px' }}>
+                            <div style={{ fontSize: '9px', color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
                             <div style={{ fontSize: '18px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#c9b787' : m.status === 'warn' ? '#d97706' : '#f5f5f5' }}>
                               {m.value}
                             </div>
@@ -250,13 +250,13 @@ export default function AegisPdfExport() {
                   {/* Threat Posture */}
                   {sections.find((s) => s.id === 'threat-posture' && s.included) && (
                     <div style={{ padding: '24px 48px', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--gi-text-muted)', marginBottom: '12px' }}>
                         Threat Posture
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                         {REPORT_METRICS.slice(4).map((m) => (
-                          <div key={m.label} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
-                            <div style={{ fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label}</div>
+                          <div key={m.label} style={{ border: '1px solid var(--gi-text-primary)', borderRadius: '6px', padding: '10px 12px' }}>
+                            <div style={{ fontSize: '9px', color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label}</div>
                             <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#c9b787' : m.status === 'warn' ? '#d97706' : '#f5f5f5' }}>
                               {m.value}
                             </div>
@@ -269,14 +269,14 @@ export default function AegisPdfExport() {
                   {/* Incident Timeline */}
                   {sections.find((s) => s.id === 'incident-timeline' && s.included) && (
                     <div style={{ padding: '24px 48px', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--gi-text-muted)', marginBottom: '12px' }}>
                         Incident Timeline
                       </div>
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
                         <thead>
                           <tr>
                             {['Period', 'Total Incidents', 'Critical', 'Resolved'].map((h) => (
-                              <th key={h} style={{ padding: '8px 12px', textAlign: 'left', background: '#f8fafc', borderBottom: '2px solid #e2e8f0', fontSize: '9px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>{h}</th>
+                              <th key={h} style={{ padding: '8px 12px', textAlign: 'left', background: '#f8fafc', borderBottom: '2px solid var(--gi-text-primary)', fontSize: '9px', textTransform: 'uppercase', color: 'var(--gi-text-muted)', letterSpacing: '0.05em' }}>{h}</th>
                             ))}
                           </tr>
                         </thead>

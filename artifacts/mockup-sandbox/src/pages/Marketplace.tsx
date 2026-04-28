@@ -441,7 +441,7 @@ function ScoreBar({ label, value, max, color }: { label: string; value: number; 
         <span className="text-[10px] text-muted-foreground/70">{label}</span>
         <span className="text-[10px] font-mono" style={{ color }}>{value}/{max}</span>
       </div>
-      <div className="h-1.5 rounded-full bg-[#0d1520]">
+      <div className="h-1.5 rounded-full bg-[var(--gi-bg-surface)]">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
     </div>
@@ -485,7 +485,7 @@ function GovernedAutonomyStrip() {
   const shortNs = (ns: string) => ns.replace('com.szlholdings.', '');
 
   return (
-    <div className="rounded-xl border border-nexus-cyan/20 bg-[#060b12] overflow-hidden">
+    <div className="rounded-xl border border-nexus-cyan/20 bg-[var(--gi-bg-base)] overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-nexus-cyan/10">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-nexus-cyan pulse-dot" />
@@ -638,7 +638,7 @@ function MarketplaceHome({ navigate }: { navigate: (v: MarketplaceView, server?:
               Any aggregator can cite our trust records. The canonical SZL trust record is publicly 
               documented and returns tier, score components, drift history, and signed digest.
             </p>
-            <div className="bg-[#060b12] rounded-lg p-3 font-mono text-xs text-nexus-green/80">
+            <div className="bg-[var(--gi-bg-base)] rounded-lg p-3 font-mono text-xs text-nexus-green/80">
               GET /api/marketplace/v1/servers/com.szlholdings.vessels
             </div>
             <button
@@ -829,15 +829,15 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
             <p className="text-[11px] font-mono text-muted-foreground/50 mb-3">{server.namespace}</p>
             <p className="text-sm text-muted-foreground/80 leading-relaxed mb-4">{server.description}</p>
             <div className="grid grid-cols-3 gap-3 text-[11px]">
-              <div className="bg-[#060b12] rounded-lg p-2">
+              <div className="bg-[var(--gi-bg-base)] rounded-lg p-2">
                 <div className="text-muted-foreground/40 mb-0.5">Transport</div>
                 <div className="font-mono text-foreground/80">{server.transport}</div>
               </div>
-              <div className="bg-[#060b12] rounded-lg p-2">
+              <div className="bg-[var(--gi-bg-base)] rounded-lg p-2">
                 <div className="text-muted-foreground/40 mb-0.5">Spec Version</div>
                 <div className="font-mono text-foreground/80">{server.specVersion}</div>
               </div>
-              <div className="bg-[#060b12] rounded-lg p-2">
+              <div className="bg-[var(--gi-bg-base)] rounded-lg p-2">
                 <div className="text-muted-foreground/40 mb-0.5">Uptime (30d)</div>
                 <div className="font-mono" style={{ color: server.uptimePct30d >= 99 ? '#a3e635' : '#f59e0b' }}>
                   {server.uptimePct30d}%
@@ -854,7 +854,7 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
               {server.tools.map((tool) => {
                 const rColor = reversibilityColor(tool.reversibility);
                 return (
-                  <div key={tool.name} className="bg-[#060b12] rounded-lg p-3">
+                  <div key={tool.name} className="bg-[var(--gi-bg-base)] rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11px] font-mono font-semibold text-nexus-cyan">{tool.name}</span>
                       <span
@@ -873,7 +873,7 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
               <div className="mt-3">
                 <div className="text-[10px] font-mono text-muted-foreground/40 mb-2 uppercase tracking-widest">Resources</div>
                 {server.resources.map((r) => (
-                  <div key={r.uri} className="bg-[#060b12] rounded-lg p-3 mb-2">
+                  <div key={r.uri} className="bg-[var(--gi-bg-base)] rounded-lg p-3 mb-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-mono text-nexus-amber">{r.uri}</span>
                       {r.mimeType && <span className="text-[9px] text-muted-foreground/40">{r.mimeType}</span>}
@@ -896,7 +896,7 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
                 {server.driftEvents.map((e, i) => {
                   const driftColor = e.severity === 'critical' ? '#f87171' : e.severity === 'warn' ? '#f59e0b' : '#a3e635';
                   return (
-                    <div key={i} className="bg-[#060b12] rounded-lg p-3 flex items-start gap-3">
+                    <div key={i} className="bg-[var(--gi-bg-base)] rounded-lg p-3 flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: driftColor }} />
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
@@ -937,7 +937,7 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
             <h3 className="text-xs font-semibold mb-3 flex items-center gap-2">
               <Terminal className="w-3.5 h-3.5 text-nexus-green" /> Manifest Digest
             </h3>
-            <div className="bg-[#060b12] rounded-lg p-2 mb-2">
+            <div className="bg-[var(--gi-bg-base)] rounded-lg p-2 mb-2">
               <p className="text-[9px] font-mono text-nexus-green/70 break-all">{server.manifestDigest}</p>
             </div>
             <button
@@ -1049,7 +1049,7 @@ function MethodologyView() {
           The canonical trust record is publicly available, unauthenticated, and citable. 
           Other aggregators can reference it — we want the citation graph.
         </p>
-        <div className="bg-[#060b12] rounded-lg p-4 font-mono text-xs space-y-2">
+        <div className="bg-[var(--gi-bg-base)] rounded-lg p-4 font-mono text-xs space-y-2">
           <div className="text-muted-foreground/50">{'# GET /api/marketplace/v1/servers/{namespace}'}</div>
           <div className="text-nexus-green/80">GET /api/marketplace/v1/servers/com.szlholdings.vessels</div>
           <div className="text-muted-foreground/30 mt-3">{'# Response'}</div>
@@ -1109,7 +1109,7 @@ function SubmitView() {
           <CheckCircle className="w-10 h-10 text-nexus-green mx-auto mb-3" />
           <h3 className="font-semibold mb-2">Submission Received</h3>
           <p className="text-sm text-muted-foreground/70 mb-4">Your server is in the governance queue. We'll notify you at <strong>{contact || 'your email'}</strong> when tier assignment is complete.</p>
-          <div className="bg-[#060b12] rounded-lg p-3 text-left mb-4">
+          <div className="bg-[var(--gi-bg-base)] rounded-lg p-3 text-left mb-4">
             {log.map((l, i) => (
               <div key={i} className="text-[10px] font-mono text-nexus-green/70">{l}</div>
             ))}
@@ -1147,7 +1147,7 @@ function SubmitView() {
           </div>
 
           {log.length > 0 && (
-            <div className="bg-[#060b12] rounded-lg p-4">
+            <div className="bg-[var(--gi-bg-base)] rounded-lg p-4">
               {log.map((l, i) => (
                 <div key={i} className="text-[10px] font-mono text-nexus-green/70">{l}</div>
               ))}

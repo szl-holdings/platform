@@ -378,7 +378,7 @@ export default function MemoryExplorer() {
             }}
           >
             <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
           </div>
         ))}
       </div>
@@ -395,7 +395,7 @@ export default function MemoryExplorer() {
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 7,
             padding: '7px 12px',
-            color: '#e2e8f0',
+            color: 'var(--gi-text-primary)',
             fontSize: 12,
             outline: 'none',
           }}
@@ -595,7 +595,7 @@ export default function MemoryExplorer() {
                     >
                       {rec.key}
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', fontFamily: 'monospace' }}>
                       {rec.entity}
                     </div>
                   </div>
@@ -739,7 +739,7 @@ export default function MemoryExplorer() {
                   style={{
                     fontSize: 13,
                     fontWeight: 600,
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     fontFamily: 'monospace',
                   }}
                 >
@@ -860,7 +860,7 @@ export default function MemoryExplorer() {
                     {PROVENANCE_ICONS[selected.provenanceType]}
                   </span>
                   <div>
-                    <div style={{ fontSize: 12, color: '#e2e8f0', fontWeight: 500 }}>
+                    <div style={{ fontSize: 12, color: 'var(--gi-text-primary)', fontWeight: 500 }}>
                       {selected.provenance}
                     </div>
                     <div style={{ fontSize: 10, color: '#475569', textTransform: 'capitalize' }}>
@@ -884,13 +884,13 @@ export default function MemoryExplorer() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div>
-                    <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4 }}>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginBottom: 4 }}>
                       Confidence
                     </div>
                     <ConfidenceBar value={selected.confidence} color={TYPE_COLORS[selected.type]} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4 }}>Freshness</div>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginBottom: 4 }}>Freshness</div>
                     <FreshnessBar value={selected.freshness} />
                   </div>
                 </div>
@@ -914,7 +914,7 @@ export default function MemoryExplorer() {
                       key={tag}
                       style={{
                         fontSize: 10,
-                        color: '#64748b',
+                        color: 'var(--gi-text-muted)',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.08)',
                         padding: '2px 7px',

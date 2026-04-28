@@ -655,10 +655,10 @@ function PropControl({
 const PREVIEW_THEMES = {
   dark: {
     label: 'Dark',
-    bg: '#060b12',
-    surface: '#0d1520',
-    border: '#1a2535',
-    text: '#c8d8e8',
+    bg: 'var(--gi-bg-base)',
+    surface: 'var(--gi-bg-surface)',
+    border: 'var(--gi-border-subtle)',
+    text: 'var(--gi-text-primary)',
     muted: '#7c8ea4',
     cssVars: {
       '--background': '215 50% 4%',
@@ -681,9 +681,9 @@ const PREVIEW_THEMES = {
     label: 'Light',
     bg: '#f5f7fa',
     surface: '#ffffff',
-    border: '#e2e8f0',
-    text: '#1e293b',
-    muted: '#64748b',
+    border: 'var(--gi-text-primary)',
+    text: 'var(--gi-border-subtle)',
+    muted: 'var(--gi-text-muted)',
     cssVars: {
       '--background': '210 40% 98%',
       '--foreground': '215 30% 15%',

@@ -93,8 +93,8 @@ const SAMPLE_EDGES: GraphEdge[] = [
   { id: 'a-p', source: 'alloy', target: 'pulse', color: 'var(--gi-accent-amber)', weight: 1.5 },
   { id: 'a-l', source: 'alloy', target: 'lyte', color: 'var(--gi-accent-green)', dashed: true },
   { id: 'a-v', source: 'alloy', target: 'vessels', color: '#14b8a6', dashed: true },
-  { id: 'g-l', source: 'guardian', target: 'lyte', color: '#243040' },
-  { id: 'p-v', source: 'pulse', target: 'vessels', color: '#243040' },
+  { id: 'g-l', source: 'guardian', target: 'lyte', color: 'var(--gi-border-default)' },
+  { id: 'p-v', source: 'pulse', target: 'vessels', color: 'var(--gi-border-default)' },
 ];
 
 const SAMPLE_MARKERS: MapMarker[] = [
@@ -208,9 +208,9 @@ function Section({
 }) {
   return (
     <section className="mb-10">
-      <div className="mb-4 border-b border-[#1a2535] pb-2">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-[#4a6070]">{title}</h2>
-        {subtitle && <p className="mt-0.5 text-xs text-[#4a6070]">{subtitle}</p>}
+      <div className="mb-4 border-b border-[var(--gi-border-subtle)] pb-2">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--gi-text-muted)]">{title}</h2>
+        {subtitle && <p className="mt-0.5 text-xs text-[var(--gi-text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -219,9 +219,9 @@ function Section({
 
 function Preview({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-[#1a2535] bg-[#060b12] overflow-hidden">
-      <div className="border-b border-[#1a2535] bg-[#0d1520] px-3 py-1.5">
-        <span className="font-mono text-[10px] text-[#4a6070]">{label}</span>
+    <div className="rounded-lg border border-[var(--gi-border-subtle)] bg-[var(--gi-bg-base)] overflow-hidden">
+      <div className="border-b border-[var(--gi-border-subtle)] bg-[var(--gi-bg-surface)] px-3 py-1.5">
+        <span className="font-mono text-[10px] text-[var(--gi-text-muted)]">{label}</span>
       </div>
       <div className="p-4 flex flex-wrap gap-3 items-start">{children}</div>
     </div>
@@ -234,7 +234,7 @@ export default function DesignSystemPage() {
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
 
   return (
-    <div className="min-h-full bg-[#060b12] px-6 py-8 text-[#c8d8e8]">
+    <div className="min-h-full bg-[var(--gi-bg-base)] px-6 py-8 text-[var(--gi-text-primary)]">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <div className="mb-1 flex items-center gap-2">
@@ -244,10 +244,10 @@ export default function DesignSystemPage() {
             </span>
             <div className="h-px flex-1 bg-gradient-to-l from-praxis-cyan/40 to-transparent" />
           </div>
-          <h1 className="text-center text-2xl font-bold tracking-tight text-[#c8d8e8]">
+          <h1 className="text-center text-2xl font-bold tracking-tight text-[var(--gi-text-primary)]">
             Governed-Intelligence Design Language
           </h1>
-          <p className="mt-2 text-center text-sm text-[#4a6070]">
+          <p className="mt-2 text-center text-sm text-[var(--gi-text-muted)]">
             Dark-first · Evidence-backed · Traceable autonomy · Policy-gated
           </p>
         </div>
@@ -256,7 +256,7 @@ export default function DesignSystemPage() {
         <Section title="Design Tokens" subtitle="Color, typography, motion, elevation">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="mb-2 text-[10px] uppercase tracking-wider text-[#4a6070]">
+              <p className="mb-2 text-[10px] uppercase tracking-wider text-[var(--gi-text-muted)]">
                 Semantic Colors
               </p>
               <div className="grid grid-cols-2 gap-1.5">
@@ -265,38 +265,38 @@ export default function DesignSystemPage() {
                   .map(([k, v]) => (
                   <div
                     key={k}
-                    className="flex items-center gap-2 rounded border border-[#1a2535] bg-[#0d1520] px-2 py-1.5"
+                    className="flex items-center gap-2 rounded border border-[var(--gi-border-subtle)] bg-[var(--gi-bg-surface)] px-2 py-1.5"
                   >
                     <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: v }} />
-                    <span className="text-[11px] text-[#7a99b8]">{k}</span>
-                    <span className="ml-auto font-mono text-[10px] text-[#4a6070]">{v}</span>
+                    <span className="text-[11px] text-[var(--gi-text-secondary)]">{k}</span>
+                    <span className="ml-auto font-mono text-[10px] text-[var(--gi-text-muted)]">{v}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[10px] uppercase tracking-wider text-[#4a6070]">
+              <p className="mb-2 text-[10px] uppercase tracking-wider text-[var(--gi-text-muted)]">
                 Product Accents
               </p>
               <div className="grid grid-cols-2 gap-1.5">
                 {Object.entries(productAccent).map(([k, v]) => (
                   <div
                     key={k}
-                    className="flex items-center gap-2 rounded border border-[#1a2535] bg-[#0d1520] px-2 py-1.5"
+                    className="flex items-center gap-2 rounded border border-[var(--gi-border-subtle)] bg-[var(--gi-bg-surface)] px-2 py-1.5"
                   >
                     <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: v }} />
-                    <span className="text-[11px] text-[#7a99b8] capitalize">{k}</span>
+                    <span className="text-[11px] text-[var(--gi-text-secondary)] capitalize">{k}</span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 mb-2 text-[10px] uppercase tracking-wider text-[#4a6070]">
+              <p className="mt-3 mb-2 text-[10px] uppercase tracking-wider text-[var(--gi-text-muted)]">
                 Motion Durations
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(motion.duration).map(([k, v]) => (
-                  <div key={k} className="rounded border border-[#1a2535] bg-[#0d1520] px-2 py-1">
-                    <span className="block text-[10px] text-[#4a6070]">{k}</span>
-                    <span className="font-mono text-[11px] text-[#7a99b8]">{v}</span>
+                  <div key={k} className="rounded border border-[var(--gi-border-subtle)] bg-[var(--gi-bg-surface)] px-2 py-1">
+                    <span className="block text-[10px] text-[var(--gi-text-muted)]">{k}</span>
+                    <span className="font-mono text-[11px] text-[var(--gi-text-secondary)]">{v}</span>
                   </div>
                 ))}
               </div>
@@ -346,8 +346,8 @@ export default function DesignSystemPage() {
             <Preview label="<AutonomyModeToggle /> — observe → recommend → draft → ask-to-act → approved-act">
               <div className="w-full space-y-2">
                 <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} />
-                <p className="text-[11px] text-[#4a6070]">
-                  Current mode: <span className="text-[#c8d8e8] font-medium">{autonomyMode}</span>
+                <p className="text-[11px] text-[var(--gi-text-muted)]">
+                  Current mode: <span className="text-[var(--gi-text-primary)] font-medium">{autonomyMode}</span>
                 </p>
                 <AutonomyModeToggle value="observe" readOnly variant="compact" />
               </div>
@@ -371,8 +371,8 @@ export default function DesignSystemPage() {
             onAutonomyChange={setAutonomyMode}
             accentColor="var(--gi-accent-blue)"
           >
-            <p className="text-sm text-[#7a99b8] leading-relaxed">
-              Reroute the <span className="text-[#c8d8e8] font-medium">7 vessels</span> currently
+            <p className="text-sm text-[var(--gi-text-secondary)] leading-relaxed">
+              Reroute the <span className="text-[var(--gi-text-primary)] font-medium">7 vessels</span> currently
               queued at Tanjong Pagar to the Pasir Panjang terminal. Expected clearing time
               reduction: <span className="text-praxis-green font-semibold">−9.4 days</span>. Recovery
               value estimate: <span className="text-praxis-green font-semibold">$2.1M</span>. Two
@@ -388,8 +388,8 @@ export default function DesignSystemPage() {
         >
           <div className="space-y-4">
             <div>
-              <p className="mb-2 text-[11px] text-[#4a6070]">
-                <span className="font-mono text-[#7a99b8]">&lt;DenseTable /&gt;</span> — sortable,
+              <p className="mb-2 text-[11px] text-[var(--gi-text-muted)]">
+                <span className="font-mono text-[var(--gi-text-secondary)]">&lt;DenseTable /&gt;</span> — sortable,
                 scrollable, operator data grid
               </p>
               <DenseTable
@@ -404,16 +404,16 @@ export default function DesignSystemPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="mb-2 text-[11px] text-[#4a6070]">
-                  <span className="font-mono text-[#7a99b8]">&lt;TimelineLane /&gt;</span> — event
+                <p className="mb-2 text-[11px] text-[var(--gi-text-muted)]">
+                  <span className="font-mono text-[var(--gi-text-secondary)]">&lt;TimelineLane /&gt;</span> — event
                   severity ramp
                 </p>
                 <TimelineLane events={SAMPLE_EVENTS} relative maxVisible={4} />
               </div>
 
               <div>
-                <p className="mb-2 text-[11px] text-[#4a6070]">
-                  <span className="font-mono text-[#7a99b8]">&lt;GraphCanvas /&gt;</span>
+                <p className="mb-2 text-[11px] text-[var(--gi-text-muted)]">
+                  <span className="font-mono text-[var(--gi-text-secondary)]">&lt;GraphCanvas /&gt;</span>
                   {selectedNode && (
                     <span className="ml-2 text-praxis-cyan">Selected: {selectedNode.label}</span>
                   )}
@@ -429,8 +429,8 @@ export default function DesignSystemPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-[11px] text-[#4a6070]">
-                <span className="font-mono text-[#7a99b8]">&lt;MapSurface /&gt;</span>
+              <p className="mb-2 text-[11px] text-[var(--gi-text-muted)]">
+                <span className="font-mono text-[var(--gi-text-secondary)]">&lt;MapSurface /&gt;</span>
                 {selectedMarker && (
                   <span className="ml-2 text-praxis-cyan">{selectedMarker.tooltip}</span>
                 )}
@@ -444,8 +444,8 @@ export default function DesignSystemPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-[11px] text-[#4a6070]">
-                <span className="font-mono text-[#7a99b8]">&lt;NarrativePanel /&gt;</span> —
+              <p className="mb-2 text-[11px] text-[var(--gi-text-muted)]">
+                <span className="font-mono text-[var(--gi-text-secondary)]">&lt;NarrativePanel /&gt;</span> —
                 evidence-backed synthesis
               </p>
               <NarrativePanel
@@ -480,7 +480,7 @@ export default function DesignSystemPage() {
                   'unexplainable',
                   'fully autonomous AI',
                 ].map((t) => (
-                  <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
+                  <li key={t} className="flex items-center gap-2 text-[11px] text-[var(--gi-text-secondary)]">
                     <span className="text-praxis-red">✕</span> {t}
                   </li>
                 ))}
@@ -501,22 +501,22 @@ export default function DesignSystemPage() {
                   'human-in-the-loop',
                   'audit trail',
                 ].map((t) => (
-                  <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
+                  <li key={t} className="flex items-center gap-2 text-[11px] text-[var(--gi-text-secondary)]">
                     <span className="text-praxis-green">✓</span> {t}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          <p className="mt-3 text-[11px] text-[#4a6070]">
-            Run <span className="font-mono text-[#7a99b8]">bash scripts/lint-copy.sh</span> to scan
+          <p className="mt-3 text-[11px] text-[var(--gi-text-muted)]">
+            Run <span className="font-mono text-[var(--gi-text-secondary)]">bash scripts/lint-copy.sh</span> to scan
             all source files for forbidden phrases.
           </p>
         </Section>
 
-        <div className="border-t border-[#1a2535] pt-4 text-center">
-          <p className="text-[11px] text-[#4a6070]">
-            <span className="font-mono text-[#7a99b8]">@szl-holdings/design-system v0.1.0</span>
+        <div className="border-t border-[var(--gi-border-subtle)] pt-4 text-center">
+          <p className="text-[11px] text-[var(--gi-text-muted)]">
+            <span className="font-mono text-[var(--gi-text-secondary)]">@szl-holdings/design-system v0.1.0</span>
             {' · '}Every surface. Every signal. Governed.
           </p>
         </div>

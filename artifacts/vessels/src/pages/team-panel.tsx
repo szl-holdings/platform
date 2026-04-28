@@ -34,7 +34,7 @@ const ROLE_STYLES: Record<string, { label: string; cls: string; icon: typeof Shi
   },
   ops: {
     label: 'Operations',
-    cls: 'bg-[rgba(77,143,204,0.10)] text-[#4d8fcc] border-[rgba(77,143,204,0.20)]',
+    cls: 'bg-[rgba(77,143,204,0.10)] text-[var(--gi-accent-blue)] border-[rgba(77,143,204,0.20)]',
     icon: Shield,
   },
   compliance: {
@@ -148,7 +148,7 @@ function MemberAvatar({ member }: { member: TeamMember }) {
   return (
     <div className="relative shrink-0">
       <div className="w-9 h-9 rounded-full bg-[rgba(77,143,204,0.10)] border border-[rgba(77,143,204,0.20)] flex items-center justify-center">
-        <span className="text-[11px] font-bold text-[#4d8fcc]">
+        <span className="text-[11px] font-bold text-[var(--gi-accent-blue)]">
           {initials(member.displayName ?? member.username)}
         </span>
       </div>
@@ -207,7 +207,7 @@ export default function TeamPanelPage() {
         </div>
         <button
           onClick={() => refetch()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[#4d8fcc] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[var(--gi-accent-blue)] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           Refresh
@@ -217,7 +217,7 @@ export default function TeamPanelPage() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total members', value: members.length, icon: Users, color: 'text-[#4d8fcc]' },
+          { label: 'Total members', value: members.length, icon: Users, color: 'text-[var(--gi-accent-blue)]' },
           { label: 'Online now', value: onlineCount, icon: UserCheck, color: 'text-emerald-400' },
           {
             label: 'Admins',
@@ -252,7 +252,7 @@ export default function TeamPanelPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1 rounded-full border transition-colors capitalize',
                 roleFilter === r
-                  ? 'bg-[rgba(77,143,204,0.12)] border-[rgba(77,143,204,0.28)] text-[#4d8fcc]'
+                  ? 'bg-[rgba(77,143,204,0.12)] border-[rgba(77,143,204,0.28)] text-[var(--gi-accent-blue)]'
                   : 'bg-transparent border-[var(--gi-border-subtle)] text-[var(--gi-text-muted)] hover:border-[var(--gi-border-default)] hover:text-[var(--gi-text-secondary)]',
               )}
             >
@@ -319,7 +319,7 @@ export default function TeamPanelPage() {
             Add colleagues and assign fleet access roles
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.20)] text-[#4d8fcc] text-xs font-medium hover:bg-[rgba(77,143,204,0.14)] transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.20)] text-[var(--gi-accent-blue)] text-xs font-medium hover:bg-[rgba(77,143,204,0.14)] transition-colors">
           <Mail className="w-3.5 h-3.5" />
           Send invite
         </button>

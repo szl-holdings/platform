@@ -181,7 +181,7 @@ function _TimelineMarker({ hours, label }: { hours: number; label: string }) {
     >
       <div
         className="w-2.5 h-2.5 rounded-full border-2"
-        style={{ borderColor: GOLD, background: '#080c14' }}
+        style={{ borderColor: GOLD, background: 'var(--gi-bg-base)' }}
       />
       <div
         className="text-[8px] mt-1 text-center whitespace-nowrap"

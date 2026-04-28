@@ -88,7 +88,7 @@ function EvidenceRow({ ev }: { ev: RecommendationEvidence }) {
       <Icon size={12} style={{ color: style.color, flexShrink: 0, marginTop: 2 }} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e2e8f0' }}>{ev.label}</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--gi-text-primary)' }}>{ev.label}</span>
           <span
             style={{
               fontSize: '0.6rem',
@@ -126,12 +126,12 @@ function EvidenceRow({ ev }: { ev: RecommendationEvidence }) {
             style={{
               fontSize: '0.6rem',
               fontFamily: 'var(--font-mono, monospace)',
-              color: '#64748b',
+              color: '#4a6070',
             }}
           >
             {Math.round(ev.weight * 100)}% wt
           </span>
-          <span style={{ fontSize: '0.6rem', color: '#64748b' }}>{ev.freshness}</span>
+          <span style={{ fontSize: '0.6rem', color: 'var(--gi-text-muted)' }}>{ev.freshness}</span>
         </div>
       </div>
       <span
@@ -192,7 +192,7 @@ export function RecommendationExplainer({ rec }: { rec: Recommendation }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#e2e8f0' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--gi-text-primary)' }}>
               {rec.title}
             </span>
             <span
@@ -228,7 +228,7 @@ export function RecommendationExplainer({ rec }: { rec: Recommendation }) {
               style={{
                 fontSize: '0.6rem',
                 fontFamily: 'var(--font-mono, monospace)',
-                color: '#64748b',
+                color: '#4a6070',
               }}
             >
               {rec.confidence}% confidence · {rec.confidenceLabel}

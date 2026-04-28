@@ -125,7 +125,7 @@ export default function ForgeHomePage() {
       <div
         className="min-h-screen"
         style={{
-          background: '#080c14',
+          background: 'var(--gi-bg-base)',
           color: 'rgba(255,255,255,0.85)',
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
@@ -222,7 +222,7 @@ export default function ForgeHomePage() {
     <div
       className="min-h-screen"
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         color: 'rgba(255,255,255,0.85)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}

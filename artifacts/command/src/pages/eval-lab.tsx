@@ -146,7 +146,7 @@ export default function EvalLab() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -157,7 +157,7 @@ export default function EvalLab() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Eval Lab</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Eval Lab</span>
             <span
               style={{
                 fontSize: 11,
@@ -172,7 +172,7 @@ export default function EvalLab() {
               BETA
             </span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Run evaluations across strategies, models, and orchestration configs. Track precision,
             recall, usefulness, policy compliance, override rates, and regressions over time.
           </p>
@@ -230,7 +230,7 @@ export default function EvalLab() {
                   color: '#22c55e',
                 },
                 { label: 'Suites w/ Regression', value: suitesWithRegression, color: '#f59e0b' },
-                { label: 'Run Sources', value: strategiesCompared, color: '#4d8fcc' },
+                { label: 'Run Sources', value: strategiesCompared, color: 'var(--gi-accent-blue)' },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -242,7 +242,7 @@ export default function EvalLab() {
                   }}
                 >
                   <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
                 </div>
               ))}
             </div>
@@ -264,7 +264,7 @@ export default function EvalLab() {
                   onClick={() => setActiveTab(t.id)}
                   style={{
                     background: activeTab === t.id ? ACCENT : 'transparent',
-                    color: activeTab === t.id ? '#fff' : '#64748b',
+                    color: activeTab === t.id ? '#fff' : '#4a6070',
                     border: 'none',
                     borderRadius: 6,
                     padding: '7px 18px',
@@ -335,7 +335,7 @@ export default function EvalLab() {
                           <p
                             style={{
                               fontSize: 12,
-                              color: '#64748b',
+                              color: '#4a6070',
                               margin: '0 0 10px',
                               lineHeight: 1.5,
                             }}
@@ -412,7 +412,7 @@ export default function EvalLab() {
                         <p
                           style={{
                             fontSize: 12,
-                            color: '#64748b',
+                            color: '#4a6070',
                             lineHeight: 1.5,
                             marginBottom: 14,
                           }}
@@ -435,7 +435,7 @@ export default function EvalLab() {
                             }}
                           >
                             <span style={{ color: '#475569' }}>Cases</span>
-                            <span style={{ color: '#e2e8f0' }}>{selectedSuite.caseCount}</span>
+                            <span style={{ color: 'var(--gi-text-primary)' }}>{selectedSuite.caseCount}</span>
                           </div>
                           <div
                             style={{
@@ -455,7 +455,7 @@ export default function EvalLab() {
                             }}
                           >
                             <span style={{ color: '#475569' }}>Type</span>
-                            <span style={{ color: '#e2e8f0' }}>{selectedSuite.evalType}</span>
+                            <span style={{ color: 'var(--gi-text-primary)' }}>{selectedSuite.evalType}</span>
                           </div>
                         </div>
                         <button
@@ -554,7 +554,7 @@ export default function EvalLab() {
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 500, color: '#e2e8f0' }}>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--gi-text-primary)' }}>
                         {r.suiteName ?? r.suiteId}
                       </div>
                       <div style={{ fontSize: 11, color: '#475569' }}>

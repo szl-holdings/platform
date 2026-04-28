@@ -177,7 +177,7 @@ const PLATFORM_APPS: PlatformApp[] = [
     label: 'Stephen Site',
     description: 'Personal portfolio and thought-leadership platform',
     icon: Globe,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     external: true,
     category: 'Ecosystem',
   },
@@ -398,7 +398,7 @@ interface CommandBarProps {
   mode?: 'all' | 'apps';
 }
 
-const BG_ELEVATED = '#10141e';
+const BG_ELEVATED = 'var(--gi-bg-raised)';
 const BORDER_SUBTLE = 'rgba(255,255,255,0.06)';
 const TEXT_PRIMARY = 'rgba(255,255,255,0.88)';
 const TEXT_SECONDARY = 'rgba(255,255,255,0.5)';

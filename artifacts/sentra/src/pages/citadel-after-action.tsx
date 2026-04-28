@@ -702,7 +702,7 @@ export default function CitadelAfterAction() {
               <div className="space-y-2">
                 {AI_RECOMMENDATIONS.map((rec, i) => {
                   const isExpanded = expandedRec === i;
-                  const color = PRIORITY_COLORS[rec.priority] ?? '#64748b';
+                  const color = PRIORITY_COLORS[rec.priority] ?? '#4a6070';
                   return (
                     <div
                       key={i}

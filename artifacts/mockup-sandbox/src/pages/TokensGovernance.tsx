@@ -73,12 +73,12 @@ function buildRemediationDiff(artifact: ArtifactReport): RemediationDiff[] {
       description: "Replace raw hex with CSS token alias",
     },
     {
-      before: "backgroundColor: '#060b12'",
+      before: "backgroundColor: 'var(--gi-bg-base)'",
       after: "backgroundColor: 'var(--gi-bg-base)'",
       description: "Replace raw hex background with bg-base token",
     },
     {
-      before: "borderColor: '#1a2535'",
+      before: "borderColor: 'var(--gi-border-subtle)'",
       after: "borderColor: 'var(--gi-border-default)'",
       description: "Replace raw border hex with border-default token",
     },

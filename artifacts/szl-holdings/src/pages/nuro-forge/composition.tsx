@@ -127,7 +127,7 @@ const PIPELINES: Pipeline[] = [
     steps: [
       { model: 'Gemini 2.5 Pro', task: 'Image + Text Fusion', color: '#3b82f6' },
       { model: 'Claude 4 Sonnet', task: 'Report Structuring', color: '#8b5cf6' },
-      { model: 'Phi-4 Mini', task: 'Chart Generation', color: '#4d8fcc' },
+      { model: 'Phi-4 Mini', task: 'Chart Generation', color: 'var(--gi-accent-blue)' },
     ],
     qualityScore: 83.9,
     avgLatency: 5200,

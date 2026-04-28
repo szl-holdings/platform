@@ -320,7 +320,7 @@ function ModelLineage() {
     model: '#8a8a8a',
     experiment: '#c9b787',
     deploy: '#c9b787',
-    archived: '#64748b',
+    archived: 'var(--gi-text-muted)',
   };
   return (
     <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
@@ -349,7 +349,7 @@ function ModelLineage() {
             />
           ))}
           {modelLineageNodes.map((node) => {
-            const color = node.status === 'archived' ? '#64748b' : colorMap[node.type] || '#8a8a8a';
+            const color = node.status === 'archived' ? 'var(--gi-text-muted)' : colorMap[node.type] || '#8a8a8a';
             return (
               <g key={node.id}>
                 <circle cx={node.x} cy={node.y} r="4" fill={color} opacity="0.2" />
@@ -516,13 +516,13 @@ function ModelPerformanceCharts() {
                   <LineChart data={chartData}>
                     <XAxis
                       dataKey="date"
-                      stroke="#64748b"
+                      stroke="var(--gi-text-muted)"
                       fontSize={8}
                       tickLine={false}
                       axisLine={false}
                     />
                     <YAxis
-                      stroke="#64748b"
+                      stroke="var(--gi-text-muted)"
                       fontSize={8}
                       tickLine={false}
                       axisLine={false}

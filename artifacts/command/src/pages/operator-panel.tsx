@@ -25,14 +25,14 @@ const RISK_COLORS: Record<string, { color: string; bg: string }> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:           '#64748b',
+  pending:           '#4a6070',
   awaiting_approval: '#f59e0b',
   approved:          '#22c55e',
   rejected:          '#ef4444',
   executing:         '#8b7ac8',
   completed:         '#22c55e',
   failed:            '#ef4444',
-  skipped:           '#64748b',
+  skipped:           '#4a6070',
 };
 
 const RUN_STATUS_COLORS: Record<string, string> = {
@@ -41,7 +41,7 @@ const RUN_STATUS_COLORS: Record<string, string> = {
   executing:         '#8b7ac8',
   completed:         '#22c55e',
   failed:            '#ef4444',
-  cancelled:         '#64748b',
+  cancelled:         '#4a6070',
 };
 
 interface PlanStep {
@@ -132,7 +132,7 @@ const EVENT_COLORS: Record<string, string> = {
   step_failed:      '#ef4444',
   run_completed:    '#22c55e',
   run_failed:       '#ef4444',
-  run_cancelled:    '#64748b',
+  run_cancelled:    '#4a6070',
 };
 
 function card(extra: React.CSSProperties = {}): React.CSSProperties {
@@ -146,7 +146,7 @@ function card(extra: React.CSSProperties = {}): React.CSSProperties {
 }
 
 function RiskBadge({ level }: { level: string }) {
-  const s = RISK_COLORS[level] ?? { color: '#64748b', bg: '#64748b18' };
+  const s = RISK_COLORS[level] ?? { color: '#4a6070', bg: '#64748b18' };
   return (
     <span style={{ fontSize: 10, fontWeight: 700, color: s.color, background: s.bg, padding: '2px 7px', borderRadius: 4, border: `1px solid ${s.color}40` }}>
       {level.toUpperCase()}
@@ -155,7 +155,7 @@ function RiskBadge({ level }: { level: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const color = STATUS_COLORS[status] ?? '#64748b';
+  const color = STATUS_COLORS[status] ?? '#4a6070';
   return (
     <span style={{ fontSize: 10, fontWeight: 600, color, background: `${color}15`, padding: '2px 7px', borderRadius: 4, border: `1px solid ${color}30` }}>
       {status.replace(/_/g, ' ')}
@@ -164,7 +164,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function RunStatusBadge({ status }: { status: string }) {
-  const color = RUN_STATUS_COLORS[status] ?? '#64748b';
+  const color = RUN_STATUS_COLORS[status] ?? '#4a6070';
   return (
     <span style={{ fontSize: 11, fontWeight: 700, color, background: `${color}18`, padding: '3px 10px', borderRadius: 5, border: `1px solid ${color}35` }}>
       {status.replace(/_/g, ' ').toUpperCase()}
@@ -228,8 +228,8 @@ function StepCard({ step, runId, onAction }: { step: PlanStep; runId: string; on
             {step.stepNumber}
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>{step.title}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{step.description}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)' }}>{step.title}</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{step.description}</div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
@@ -316,7 +316,7 @@ function StepCard({ step, runId, onAction }: { step: PlanStep; runId: string; on
             placeholder="Rejection reason…"
             value={rejectReason}
             onChange={(e) => setRejectReason(e.currentTarget.value)}
-            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '7px 10px', color: '#e2e8f0', fontSize: 12, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '7px 10px', color: 'var(--gi-text-primary)', fontSize: 12, boxSizing: 'border-box' }}
           />
           <button
             disabled={busy || !rejectReason.trim()}
@@ -355,7 +355,7 @@ function AuditLogPanel({ log }: { log: AuditEntry[] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {[...log].reverse().map((entry) => {
-        const color = EVENT_COLORS[entry.eventType] ?? '#64748b';
+        const color = EVENT_COLORS[entry.eventType] ?? '#4a6070';
         const icon = EVENT_ICONS[entry.eventType] ?? '·';
         return (
           <div key={entry.entryId} style={{ display: 'flex', gap: 10, padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.015)', borderLeft: `2px solid ${color}40` }}>
@@ -401,7 +401,7 @@ function ReplayViewer({ data }: { data: ReplayData }) {
               </div>
               <div style={{ width: 1, background: `${ACCENT}30`, alignSelf: 'stretch', flexShrink: 0, margin: '0 6px' }} />
               <div style={{ fontSize: 11, color: '#94a3b8', flex: 1, paddingTop: 2, wordBreak: 'break-word' }}>
-                <span style={{ color: '#64748b', marginRight: 6 }}>[{event.actor}]</span>
+                <span style={{ color: 'var(--gi-text-muted)', marginRight: 6 }}>[{event.actor}]</span>
                 {event.event}
               </div>
             </div>
@@ -412,13 +412,13 @@ function ReplayViewer({ data }: { data: ReplayData }) {
       <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 8 }}>Step Outcomes</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {data.steps.map((step) => {
-          const sc = STATUS_COLORS[step.status] ?? '#64748b';
+          const sc = STATUS_COLORS[step.status] ?? '#4a6070';
           return (
             <div key={step.stepId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: 7, border: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: `${sc}20`, border: `1px solid ${sc}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: sc, flexShrink: 0 }}>
                 {step.stepNumber}
               </div>
-              <div style={{ flex: 1, fontSize: 12, color: '#e2e8f0' }}>{step.title}</div>
+              <div style={{ flex: 1, fontSize: 12, color: 'var(--gi-text-primary)' }}>{step.title}</div>
               <StatusBadge status={step.status} />
               {step.durationMs != null && <span style={{ fontSize: 10, color: '#475569' }}>{step.durationMs}ms</span>}
             </div>
@@ -430,7 +430,7 @@ function ReplayViewer({ data }: { data: ReplayData }) {
 }
 
 function RunListItem({ run, selected, onClick }: { run: OperatorRun; selected: boolean; onClick: () => void }) {
-  const color = RUN_STATUS_COLORS[run.status] ?? '#64748b';
+  const color = RUN_STATUS_COLORS[run.status] ?? '#4a6070';
   return (
     <div
       onClick={onClick}
@@ -582,7 +582,7 @@ export function OperatorPanel() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', minHeight: 0, background: '#080c14', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100%', minHeight: 0, background: 'var(--gi-bg-base)', color: 'var(--gi-text-primary)', fontFamily: 'system-ui, sans-serif', overflow: 'hidden' }}>
       {/* Left — run list */}
       <div style={{ width: 280, flexShrink: 0, borderRight: '1px solid rgba(255,255,255,0.07)', padding: '16px 12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
@@ -601,7 +601,7 @@ export function OperatorPanel() {
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 14 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: '#e2e8f0', letterSpacing: -0.3 }}>Operator Panel</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--gi-text-primary)', letterSpacing: -0.3 }}>Operator Panel</div>
             <div style={{ fontSize: 11, color: '#475569' }}>Governed Agentic Runtime · Human-in-the-Loop</div>
           </div>
 
@@ -613,7 +613,7 @@ export function OperatorPanel() {
                 onChange={(e) => setIntent(e.currentTarget.value)}
                 onKeyDown={(e) => e.key === 'Enter' && void generatePlan()}
                 placeholder="Describe what you want the agent to do…"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${ACCENT}40`, borderRadius: 8, padding: '10px 14px', color: '#e2e8f0', fontSize: 13, boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${ACCENT}40`, borderRadius: 8, padding: '10px 14px', color: 'var(--gi-text-primary)', fontSize: 13, boxSizing: 'border-box', outline: 'none' }}
               />
             </div>
             <button
@@ -631,7 +631,7 @@ export function OperatorPanel() {
               <button
                 key={i}
                 onClick={() => setIntent(s)}
-                style={{ fontSize: 10, color: '#64748b', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 5, padding: '3px 9px', cursor: 'pointer' }}
+                style={{ fontSize: 10, color: 'var(--gi-text-muted)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 5, padding: '3px 9px', cursor: 'pointer' }}
               >
                 {s.slice(0, 60)}…
               </button>
@@ -646,7 +646,7 @@ export function OperatorPanel() {
             <div style={{ marginBottom: 24 }}>
               <div style={{ ...card({ marginBottom: 16 }), borderColor: `${ACCENT}40` }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>Proposed Plan</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Proposed Plan</div>
                   <div style={{ fontSize: 11, color: '#8b7ac8', fontFamily: 'monospace' }}>vertical: {planProposal.vertical}</div>
                 </div>
                 <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 14 }}>{planProposal.planSummary}</div>
@@ -685,11 +685,11 @@ export function OperatorPanel() {
                     <div style={{ width: 22, height: 22, borderRadius: '50%', background: `${ACCENT}20`, border: `1px solid ${ACCENT}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: ACCENT, flexShrink: 0 }}>
                       {step.stepNumber}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', flex: 1 }}>{step.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)', flex: 1 }}>{step.title}</div>
                     <RiskBadge level={step.riskLevel} />
                     {step.requiresApproval && <span style={{ fontSize: 9, fontWeight: 700, color: '#f59e0b', background: '#f59e0b12', padding: '2px 6px', borderRadius: 3, border: '1px solid #f59e0b30' }}>APPROVAL</span>}
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748b', paddingLeft: 32 }}>{step.description}</div>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', paddingLeft: 32 }}>{step.description}</div>
                   <div style={{ display: 'flex', gap: 6, paddingLeft: 32, marginTop: 6, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 10, color: '#8b7ac8', fontFamily: 'monospace', background: '#8b7ac810', padding: '1px 7px', borderRadius: 4 }}>{step.toolName}</span>
                     {step.sideEffects.map((se, i) => (
@@ -721,11 +721,11 @@ export function OperatorPanel() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', fontFamily: 'monospace', marginBottom: 4 }}>{selectedRun.runId}</div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.5 }}>{selectedRun.intent}</div>
+                    <div style={{ fontSize: 13, color: 'var(--gi-text-primary)', lineHeight: 1.5 }}>{selectedRun.intent}</div>
                   </div>
                   <RunStatusBadge status={selectedRun.status} />
                 </div>
-                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12, lineHeight: 1.5 }}>{selectedRun.planSummary}</div>
+                <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', marginBottom: 12, lineHeight: 1.5 }}>{selectedRun.planSummary}</div>
 
                 {selectedRun.estimatedSideEffects.length > 0 && (
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -744,7 +744,7 @@ export function OperatorPanel() {
                         if (t === 'replay') void loadReplay(selectedRun.runId);
                         else setTab(t);
                       }}
-                      style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: tab === t ? 700 : 500, cursor: 'pointer', background: tab === t ? `${ACCENT}25` : 'transparent', border: tab === t ? `1px solid ${ACCENT}50` : '1px solid rgba(255,255,255,0.08)', color: tab === t ? ACCENT : '#64748b' }}
+                      style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: tab === t ? 700 : 500, cursor: 'pointer', background: tab === t ? `${ACCENT}25` : 'transparent', border: tab === t ? `1px solid ${ACCENT}50` : '1px solid rgba(255,255,255,0.08)', color: tab === t ? ACCENT : 'var(--gi-text-muted)' }}
                     >
                       {t === 'plan' ? `Steps (${selectedRun.plan.length})` : t === 'audit' ? `Audit (${selectedRun.auditLog.length})` : 'Replay Viewer'}
                     </button>

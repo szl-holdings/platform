@@ -178,7 +178,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   warning: '#f59e0b',
   medium: '#f59e0b',
   info: '#4d8fcc',
-  low: '#64748b',
+  low: '#4a6070',
 };
 const STATUS_COLORS: Record<string, string> = {
   healthy: '#22c55e',
@@ -216,7 +216,7 @@ function Dot({ color, pulse: p = false }: { color: string; pulse?: boolean }) {
 }
 
 function Badge({ label, color }: { label: string; color?: string }) {
-  const c = color ?? '#64748b';
+  const c = color ?? '#4a6070';
   return (
     <span
       className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide"
@@ -379,7 +379,7 @@ function ProductsPanel({ products, layout }: { products: Product[]; layout: Pane
                     {p.label}
                   </span>
                 </div>
-                <Dot color={STATUS_COLORS[p.status] ?? '#64748b'} pulse={p.status === 'critical'} />
+                <Dot color={STATUS_COLORS[p.status] ?? 'var(--gi-text-muted)'} pulse={p.status === 'critical'} />
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -421,14 +421,14 @@ function SignalsPanel({
         icon={Radio}
         title="Active Signals"
         count={signals.length}
-        accent="#4d8fcc"
+        accent="var(--gi-accent-blue)"
         layout={layout}
       />
       {layout.collapsed ? null : (
         <div className="flex-1 overflow-y-auto divide-y">
           {signals.map((s) => {
-            const sc = SEVERITY_COLORS[s.severity] ?? '#64748b';
-            const pc = PRODUCT_COLORS[s.product] ?? '#64748b';
+            const sc = SEVERITY_COLORS[s.severity] ?? 'var(--gi-text-muted)';
+            const pc = PRODUCT_COLORS[s.product] ?? '#4a6070';
             const policyState: PolicyState =
               s.severity === 'critical' ? 'requires-approval' : 'allowed';
             return (
@@ -551,9 +551,9 @@ function RunsPanel({
       {layout.collapsed ? null : (
         <div className="flex-1 overflow-y-auto divide-y">
           {runs.map((r) => {
-            const sc = STATUS_COLORS[r.status] ?? '#64748b';
-            const pc = PRODUCT_COLORS[r.product] ?? '#64748b';
-            const ac = STATUS_COLORS[r.autonomyMode] ?? '#64748b';
+            const sc = STATUS_COLORS[r.status] ?? 'var(--gi-text-muted)';
+            const pc = PRODUCT_COLORS[r.product] ?? '#4a6070';
+            const ac = STATUS_COLORS[r.autonomyMode] ?? 'var(--gi-text-muted)';
             const isExpanded = expandedId === r.runId;
             return (
               <div key={r.runId}>
@@ -639,9 +639,9 @@ function AlertsPanel({
       {layout.collapsed ? null : (
         <div className="flex-1 overflow-y-auto divide-y">
           {alerts.map((a) => {
-            const sc = SEVERITY_COLORS[a.severity] ?? '#64748b';
-            const pc = PRODUCT_COLORS[a.product] ?? '#64748b';
-            const stc = STATUS_COLORS[a.status] ?? '#64748b';
+            const sc = SEVERITY_COLORS[a.severity] ?? 'var(--gi-text-muted)';
+            const pc = PRODUCT_COLORS[a.product] ?? '#4a6070';
+            const stc = STATUS_COLORS[a.status] ?? 'var(--gi-text-muted)';
             return (
               <div
                 key={a.alertId}
@@ -795,8 +795,8 @@ function ApprovalsPanel({
               const uc =
                 { critical: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#22c55e' }[
                   a.urgency
-                ] ?? '#64748b';
-              const pc = PRODUCT_COLORS[a.product] ?? '#64748b';
+                ] ?? 'var(--gi-text-muted)';
+              const pc = PRODUCT_COLORS[a.product] ?? '#4a6070';
               const isPending = pendingId === a.approvalId;
               return (
                 <div
@@ -907,7 +907,7 @@ function ConnectorsPanel({
       <PanelHeader
         icon={Network}
         title="Connector Health"
-        accent="#4d8fcc"
+        accent="var(--gi-accent-blue)"
         layout={layout}
         right={
           degraded.length > 0 ? (
@@ -921,7 +921,7 @@ function ConnectorsPanel({
         <div className="flex-1 overflow-y-auto divide-y">
           {connectors.map((c) => {
             const sc = STATUS_COLORS[c.status] ?? '#22c55e';
-            const pc = PRODUCT_COLORS[c.product] ?? '#64748b';
+            const pc = PRODUCT_COLORS[c.product] ?? '#4a6070';
             return (
               <div key={c.connectorId} className="px-4 py-2 flex items-center gap-3">
                 {c.status === 'healthy' ? (
@@ -1086,7 +1086,7 @@ function CorrelationCard({ corr, snap }: { corr: Correlation; snap: Snapshot | n
       </p>
       <div className="flex items-center gap-3 flex-wrap">
         {corr.entities.map((e) => {
-          const pc = PRODUCT_COLORS[e.product] ?? '#64748b';
+          const pc = PRODUCT_COLORS[e.product] ?? '#4a6070';
           return (
             <div
               key={e.id}
@@ -1119,7 +1119,7 @@ function CorrelationCard({ corr, snap }: { corr: Correlation; snap: Snapshot | n
             <Badge
               key={sid}
               label={`${sig.title.slice(0, 28)}…`}
-              color={SEVERITY_COLORS[sig.severity] ?? '#64748b'}
+              color={SEVERITY_COLORS[sig.severity] ?? 'var(--gi-text-muted)'}
             />
           );
         })}
@@ -1606,7 +1606,7 @@ export function GlobalFabricPage() {
   return (
     <div
       className="flex flex-col h-full overflow-hidden"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       {/* Header */}
       <div

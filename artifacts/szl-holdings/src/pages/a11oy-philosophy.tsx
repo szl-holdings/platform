@@ -49,7 +49,7 @@ const ELEMENTS = [
     label: "Structural Governance",
     tagline: "The architecture of trust",
     body: "Governance that lives in documentation is theater. Governance that lives in the architecture is structural. A11OY builds governance into the execution layer — not as a UI overlay, not as a configurable feature, but as the actual execution fabric. The approval gate is in the code. The policy is enforced before execution, not reviewed after.",
-    color: "#9b7cc8",
+    color: "var(--gi-accent-violet)",
     muted: "rgba(155, 124, 200, 0.09)",
     border: "rgba(155, 124, 200, 0.18)",
   },
@@ -77,7 +77,7 @@ const PRIMITIVES = [
     icon: Shield,
     name: "Covenant Policy",
     a11oy: "Structural Governance made executable. Policy that lives in the execution layer, not the documentation layer. Human-in-the-loop is structural, not optional.",
-    color: "#9b7cc8",
+    color: "var(--gi-accent-violet)",
   },
   {
     number: "03",

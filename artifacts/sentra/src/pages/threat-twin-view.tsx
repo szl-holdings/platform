@@ -39,7 +39,7 @@ interface TopologyNode {
 const SYNC_COLORS: Record<string, string> = {
   synced: '#c9b787',
   drifted: '#c9b787',
-  offline: '#64748b',
+  offline: '#4a6070',
 };
 
 export default function ThreatTwinView() {

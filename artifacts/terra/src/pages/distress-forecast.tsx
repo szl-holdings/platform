@@ -62,7 +62,7 @@ const SIGNAL_COLORS: Record<string, string> = {
 
 function ForecastCard({ item }: { item: any }) {
   const [expanded, setExpanded] = useState(false);
-  const rankColor = item.rank === 1 ? '#c04a2a' : item.rank === 2 ? '#c8a060' : '#64748b';
+  const rankColor = item.rank === 1 ? '#c04a2a' : item.rank === 2 ? '#c8a060' : '#4a6070';
 
   return (
     <div
@@ -111,7 +111,7 @@ function ForecastCard({ item }: { item: any }) {
                 <div key={i} className="flex items-start gap-2">
                   <div
                     className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
-                    style={{ background: SIGNAL_COLORS[sig.severity] ?? '#64748b' }}
+                    style={{ background: SIGNAL_COLORS[sig.severity] ?? 'var(--gi-text-muted)' }}
                   />
                   <div>
                     <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -253,7 +253,7 @@ export default function DistressForecastPage() {
                 { label: 'Forecast Horizon', value: forecast.horizon, color: ACCENT },
                 { label: 'At-Risk Count', value: forecast.atRiskCount, color: '#c04a2a' },
                 { label: 'Watch Count', value: forecast.watchCount, color: '#c8a060' },
-                { label: 'Total Assessed', value: ranked.length, color: '#64748b' },
+                { label: 'Total Assessed', value: ranked.length, color: 'var(--gi-text-muted)' },
               ].map((m) => (
                 <div
                   key={m.label}

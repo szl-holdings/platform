@@ -166,7 +166,7 @@ function FleetMap({
                 y={y - 2}
                 width={4}
                 height={4}
-                fill="#4d8fcc"
+                fill="var(--gi-accent-blue)"
                 opacity={0.6}
                 transform={`rotate(45 ${x} ${y})`}
               />
@@ -1164,7 +1164,7 @@ export default function FleetDashboard() {
               <div
                 className="absolute top-0 left-0 right-0 h-[2px]"
                 style={{
-                  background: 'linear-gradient(90deg, #4d8fcc, rgba(77,143,204,0.3), transparent)',
+                  background: 'linear-gradient(90deg, var(--gi-accent-blue), rgba(77,143,204,0.3), transparent)',
                 }}
               />
               <div className="flex items-center gap-0.5 px-3 py-1.5 overflow-x-auto">
@@ -1195,7 +1195,7 @@ export default function FleetDashboard() {
                     options={{
                       filename: 'fleet-manifest',
                       title: 'Fleet Manifest',
-                      accentColor: '#4d8fcc',
+                      accentColor: 'var(--gi-accent-blue)',
                     }}
                   />
                 </div>
@@ -1330,7 +1330,7 @@ export default function FleetDashboard() {
             <div className="mx-3 mt-2">
               <ActivationBanner
                 steps={activationSteps}
-                accentColor="#4d8fcc"
+                accentColor="var(--gi-accent-blue)"
                 storageKey="vessels_activation_banner"
                 variant="banner"
                 onNavigate={handleNavigate}
@@ -1432,13 +1432,13 @@ export default function FleetDashboard() {
             </span>
             {[
               { label: 'AIS Live', active: true, color: '#22c55e' },
-              { label: 'SAR', active: roster.some((v) => v.status === 'dark'), color: '#4d8fcc' },
+              { label: 'SAR', active: roster.some((v) => v.status === 'dark'), color: 'var(--gi-accent-blue)' },
               {
                 label: 'RF GEOINT',
                 active: roster.some((v) => v.status === 'detained'),
                 color: '#8b5cf6',
               },
-              { label: 'Port State', active: true, color: '#4d8fcc' },
+              { label: 'Port State', active: true, color: 'var(--gi-accent-blue)' },
               { label: 'Sanctions DB', active: true, color: '#f97316' },
               { label: 'OFAC/EU/UN', active: true, color: '#f97316' },
             ].map((src) => (

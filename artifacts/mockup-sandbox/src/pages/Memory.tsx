@@ -310,7 +310,7 @@ function MemoryCard({
   const typeColor = TYPE_COLORS[item.type] ?? '#8896aa';
 
   return (
-    <div className="bg-praxis-surface border border-praxis rounded-lg px-4 py-3 flex items-start gap-3 group hover:border-[#1a2535]/80 transition-colors">
+    <div className="bg-praxis-surface border border-praxis rounded-lg px-4 py-3 flex items-start gap-3 group hover:border-[var(--gi-border-subtle)]/80 transition-colors">
       <div className="mt-0.5">
         <div
           className="w-2 h-2 rounded-full"

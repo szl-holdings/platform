@@ -100,7 +100,7 @@ const STEP_COLORS: Record<string, string> = {
   contain: '#f5f5f5',
   eradicate: '#f5f5f5',
   recover: '#c9b787',
-  review: '#64748b',
+  review: '#4a6070',
 };
 
 const STEP_ICONS: Record<string, typeof Shield> = {
@@ -683,7 +683,7 @@ const STEP_TYPE_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   completed: '#c9b787',
   active: '#8a8a8a',
-  pending: '#64748b',
+  pending: '#4a6070',
   skipped: '#374151',
 };
 
@@ -998,7 +998,7 @@ export default function CitadelPlaybooks() {
             <div className="space-y-1.5 max-w-2xl">
               {selected.steps.map((step, i) => {
                 const Icon = STEP_ICONS[step.type] ?? Zap;
-                const color = STEP_COLORS[step.type] ?? '#64748b';
+                const color = STEP_COLORS[step.type] ?? '#4a6070';
                 const isExpanded = expandedStep === step.id;
                 const statusColor = step.status ? STATUS_COLORS[step.status] : DS.text.muted;
 

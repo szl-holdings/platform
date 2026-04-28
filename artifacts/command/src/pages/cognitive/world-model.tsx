@@ -843,7 +843,7 @@ export default function WorldModelExplorer() {
           {n.label.length > 9 ? `${n.label.slice(0, 8)}…` : n.label}
         </text>
         {liveF < 0.5 && (
-          <circle r={4} cx={r - 2} cy={-(r - 2)} fill="#ef4444" stroke="#080c14" strokeWidth={1} />
+          <circle r={4} cx={r - 2} cy={-(r - 2)} fill="#ef4444" stroke="var(--gi-bg-base)" strokeWidth={1} />
         )}
       </g>
     );

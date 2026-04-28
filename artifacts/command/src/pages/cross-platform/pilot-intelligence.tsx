@@ -10,7 +10,7 @@ const STATUS_META: Record<string, { color: string; icon: typeof CheckCircle; lab
   active: { color: '#22c55e', icon: CheckCircle, label: 'Active' },
   'at-risk': { color: '#f59e0b', icon: AlertTriangle, label: 'At Risk' },
   degraded: { color: '#ef4444', icon: AlertTriangle, label: 'Degraded' },
-  inactive: { color: '#64748b', icon: MinusCircle, label: 'Inactive' },
+  inactive: { color: 'var(--gi-text-muted)', icon: MinusCircle, label: 'Inactive' },
 };
 
 interface DomainAccount {
@@ -67,7 +67,7 @@ export function PilotIntelligencePage() {
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       <div
         className="px-6 py-4 border-b flex items-center justify-between"
@@ -107,7 +107,7 @@ export function PilotIntelligencePage() {
               { label: 'Products', value: pipeline.totalDomains, color: '#8b7ac8' },
               { label: 'Active', value: pipeline.activeDomains, color: '#22c55e' },
               { label: 'At Risk', value: pipeline.atRisk, color: '#f59e0b' },
-              { label: 'Inactive', value: pipeline.inactive, color: '#64748b' },
+              { label: 'Inactive', value: pipeline.inactive, color: 'var(--gi-text-muted)' },
               {
                 label: 'Total Runs',
                 value: pipeline.totalRuns.toLocaleString(),
@@ -186,7 +186,7 @@ export function PilotIntelligencePage() {
             const StatusIcon = sm.icon;
             const passColor =
               acct.passRate === null
-                ? '#64748b'
+                ? 'var(--gi-text-muted)'
                 : acct.passRate >= 90
                   ? '#22c55e'
                   : acct.passRate >= 70
@@ -252,7 +252,7 @@ export function PilotIntelligencePage() {
                     </div>
                     <div
                       className="text-sm font-mono font-bold"
-                      style={{ color: acct.weeklyRuns > 0 ? '#4d8fcc' : 'rgba(255,255,255,0.25)' }}
+                      style={{ color: acct.weeklyRuns > 0 ? 'var(--gi-accent-blue)' : 'rgba(255,255,255,0.25)' }}
                     >
                       {acct.weeklyRuns.toLocaleString()}
                     </div>

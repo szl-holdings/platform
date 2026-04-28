@@ -228,7 +228,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
 
   const BADGE_COLOR_MAP = {
     red: 'text-red-400 bg-red-500/8 border-red-500/20',
-    amber: 'text-[#c9a85c] bg-white/[0.03] border-white/[0.08]',
+    amber: 'text-[var(--gi-accent-amber)] bg-white/[0.03] border-white/[0.08]',
     default: 'text-[#5e5e5e] bg-white/[0.03] border-white/[0.06]',
   };
 
@@ -240,7 +240,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-3 h-14 border-b border-white/[0.06] shrink-0">
         <div className="w-7 h-7 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
-          <Zap className="w-3.5 h-3.5 text-[#c9a85c]" />
+          <Zap className="w-3.5 h-3.5 text-[var(--gi-accent-amber)]" />
         </div>
         {expanded && (
           <div className="flex-1 min-w-0">
@@ -252,7 +252,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         )}
         <button
           onClick={onToggle}
-          className="ml-auto p-1 rounded hover:bg-white/[0.03] text-[#5e5e5e] hover:text-[#c9a85c] transition-colors shrink-0"
+          className="ml-auto p-1 rounded hover:bg-white/[0.03] text-[#5e5e5e] hover:text-[var(--gi-accent-amber)] transition-colors shrink-0"
           aria-label="Toggle sidebar"
         >
           {expanded ? (
@@ -282,13 +282,13 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
                   href={item.href}
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-xs transition-all group relative ${
                     active
-                      ? 'bg-white/[0.04] text-[#c9a85c] border border-white/[0.08]'
+                      ? 'bg-white/[0.04] text-[var(--gi-accent-amber)] border border-white/[0.08]'
                       : 'text-[#8a8a8a] hover:text-[#e0e0e0] hover:bg-white/[0.03] border border-transparent'
                   }`}
                 >
                   <span
                     className={
-                      active ? 'text-[#c9a85c]' : 'text-[#5e5e5e] group-hover:text-[#c9a85c]'
+                      active ? 'text-[var(--gi-accent-amber)]' : 'text-[#5e5e5e] group-hover:text-[var(--gi-accent-amber)]'
                     }
                   >
                     {item.icon}
@@ -320,7 +320,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         <div className="px-3 py-3 border-t border-white/[0.06] shrink-0 space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-              <Users className="w-3 h-3 text-[#c9a85c]" />
+              <Users className="w-3 h-3 text-[var(--gi-accent-amber)]" />
             </div>
             <div>
               <p className="text-[10px] text-[#8a8a8a]">Demo Mode</p>
@@ -330,7 +330,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
           <UsageIndicator
             featureKey="api_calls"
             label="API usage"
-            accentColor="#c9a85c"
+            accentColor="var(--gi-accent-amber)"
             billingHref={`${BASE.replace(/\/$/, '')}/account/billing`}
           />
         </div>
@@ -339,7 +339,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
   );
 }
 
-const LYTE_ACCENT = '#c9a85c';
+const LYTE_ACCENT = 'var(--gi-accent-amber)';
 
 const SENTIENT_UPDATES: SentientUpdate[] = [
   {
@@ -513,7 +513,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top bar */}
         <header className="h-14 border-b border-white/[0.06] flex items-center gap-3 px-4 shrink-0">
           <button
-            className="md:hidden p-1.5 rounded text-[#8a8a8a] hover:text-[#c9a85c] hover:bg-white/[0.03] transition-colors"
+            className="md:hidden p-1.5 rounded text-[#8a8a8a] hover:text-[var(--gi-accent-amber)] hover:bg-white/[0.03] transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
           >
@@ -524,11 +524,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
             {currentPage && (
               <>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-[#c9a85c]">{currentPage.label}</span>
+                <span className="text-[var(--gi-accent-amber)]">{currentPage.label}</span>
               </>
             )}
             {!currentPage && location === '/' && (
-              <span className="text-[#c9a85c]">Platform</span>
+              <span className="text-[var(--gi-accent-amber)]">Platform</span>
             )}
           </div>
           <div className="ml-auto flex items-center gap-3">

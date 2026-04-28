@@ -229,7 +229,7 @@ const KIND_CONFIG: Record<
   },
   model_routing: {
     label: 'Model Routing',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     bg: 'rgba(77,143,204,0.06)',
     border: 'rgba(77,143,204,0.2)',
     icon: <Zap className="w-3.5 h-3.5" />,

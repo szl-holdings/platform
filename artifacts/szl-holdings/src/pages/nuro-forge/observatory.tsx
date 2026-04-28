@@ -87,7 +87,7 @@ const MODEL_METRICS = [
     errorRate: 0.9,
     drift: 0.25,
     status: 'healthy',
-    color: '#64748b',
+    color: 'var(--gi-text-muted)',
   },
   {
     model: 'Phi-4 Mini',
@@ -97,7 +97,7 @@ const MODEL_METRICS = [
     errorRate: 1.5,
     drift: 0.34,
     status: 'degraded',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
   },
   {
     model: 'Grok 3',

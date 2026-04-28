@@ -691,7 +691,7 @@ function SnapshotTimeline({ snapshots }: { snapshots: SnapshotEntry[] }) {
                     height: 13,
                     borderRadius: '50%',
                     background: cc,
-                    border: '2px solid #080c14',
+                    border: '2px solid var(--gi-bg-base)',
                     flexShrink: 0,
                     marginTop: 2,
                     zIndex: 1,

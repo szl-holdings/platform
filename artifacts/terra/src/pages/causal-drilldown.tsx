@@ -41,10 +41,10 @@ export default function CausalDrilldown() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <GitBranch className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+          <GitBranch className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#4d8fcc' }}
+            style={{ color: 'var(--gi-accent-blue)' }}
           >
             KORA · Causal Drilldown
           </span>
@@ -78,11 +78,11 @@ export default function CausalDrilldown() {
           <div className="p-5 space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Activity className="w-3.5 h-3.5" style={{ color: '#4d8fcc' }} />
+                <Activity className="w-3.5 h-3.5" style={{ color: 'var(--gi-accent-blue)' }} />
                 <span className="text-xs font-semibold text-white">KORA Detections</span>
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded font-bold"
-                  style={{ color: '#4d8fcc', background: 'rgba(77,143,204,0.15)' }}
+                  style={{ color: 'var(--gi-accent-blue)', background: 'rgba(77,143,204,0.15)' }}
                 >
                   DETECT / VERIFY
                 </span>

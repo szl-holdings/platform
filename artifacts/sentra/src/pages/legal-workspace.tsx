@@ -416,7 +416,7 @@ function DeadlineRow({
 
 function MatterHealthCard({ matter }: { matter: (typeof DEMO_MATTERS)[number] }) {
   return (
-    <div className="rounded border border-white/[0.04] p-3" style={{ background: '#080c14' }}>
+    <div className="rounded border border-white/[0.04] p-3" style={{ background: 'var(--gi-bg-base)' }}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div
@@ -611,7 +611,7 @@ export default function LegalWorkspacePage() {
                 <div
                   key={item.label}
                   className="flex items-center justify-between rounded border border-white/[0.04] px-3 py-2"
-                  style={{ background: '#080c14' }}
+                  style={{ background: 'var(--gi-bg-base)' }}
                 >
                   <span className="text-[11px] text-slate-400">{item.label}</span>
                   <div className="flex items-center gap-2">
@@ -661,7 +661,7 @@ export default function LegalWorkspacePage() {
                 <div
                   key={apv.id}
                   className="flex items-start gap-3 rounded border border-white/[0.04] px-3 py-2.5"
-                  style={{ background: '#080c14' }}
+                  style={{ background: 'var(--gi-bg-base)' }}
                 >
                   <div
                     className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0"

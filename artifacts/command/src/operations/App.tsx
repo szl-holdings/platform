@@ -776,7 +776,7 @@ function PrivateApp({
 }) {
   return (
     <PowerUserProvider shortcuts={lyteShortcuts} appName="KORA" accentColor={COMMAND_ACCENT}>
-      <div className="flex flex-col h-screen bg-[#080c14]">
+      <div className="flex flex-col h-screen bg-[var(--gi-bg-base)]">
         <EcosystemNav
           currentAppId="command"
           currentAppName="Unified Command"
@@ -830,7 +830,7 @@ function AppContent({
   const normalizedPath = location.replace(/\/+$/, '') || '/';
   if (normalizedPath === '/pulse') {
     return (
-      <Suspense fallback={<div style={{ height: '100vh', background: '#080c14' }} />}>
+      <Suspense fallback={<div style={{ height: '100vh', background: 'var(--gi-bg-base)' }} />}>
         <CommandPulse />
       </Suspense>
     );
@@ -848,7 +848,7 @@ function AppContent({
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          background: '#080c14',
+          background: 'var(--gi-bg-base)',
         }}
       >
         <div
@@ -867,7 +867,7 @@ function AppContent({
 
   if (!isAuthenticated || forceWebsite) {
     return (
-      <Suspense fallback={<div style={{ height: '100vh', background: '#080c14' }} />}>
+      <Suspense fallback={<div style={{ height: '100vh', background: 'var(--gi-bg-base)' }} />}>
         <CommandMarketingLanding onSignIn={login} />
       </Suspense>
     );

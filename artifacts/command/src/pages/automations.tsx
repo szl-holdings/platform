@@ -146,7 +146,7 @@ function NotConfiguredState() {
         <Workflow size={28} color="#8b7ac8" />
       </div>
       <div>
-        <div style={{ fontSize: '18px', fontWeight: 700, color: '#e2e8f0', marginBottom: '8px' }}>
+        <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: '8px' }}>
           Connect n8n to enable Automations
         </div>
         <div style={{ fontSize: '13px', color: '#718096', lineHeight: '1.6' }}>
@@ -269,7 +269,7 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
     >
       <div
         style={{
-          background: '#0f1520',
+          background: 'var(--gi-bg-surface)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '14px',
           padding: '24px',
@@ -281,7 +281,7 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#e2e8f0' }}>{workflow.name}</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--gi-text-primary)' }}>{workflow.name}</div>
             <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>
               Trigger with optional input data
             </div>
@@ -319,7 +319,7 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
                     borderRadius: '6px',
                     padding: '6px 10px',
                     fontSize: '12px',
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     outline: 'none',
                   }}
                 />
@@ -334,7 +334,7 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
                     borderRadius: '6px',
                     padding: '6px 10px',
                     fontSize: '12px',
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     outline: 'none',
                   }}
                 />
@@ -465,7 +465,7 @@ export default function AutomationsPage() {
   const accentColor = '#8b7ac8';
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100%', padding: '24px', color: '#e2e8f0' }}>
+    <div style={{ background: 'var(--gi-bg-base)', minHeight: '100%', padding: '24px', color: 'var(--gi-text-primary)' }}>
       {showRunForm && selectedWorkflow && (
         <RunForm
           workflow={selectedWorkflow}
@@ -765,7 +765,7 @@ export default function AutomationsPage() {
                       }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                         {wf.name}
                       </div>
                       <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 
 interface BehaviourClass {
   behaviour: string;
@@ -44,7 +44,7 @@ const SAMPLE_NMEA = '!AIVDM,1,1,,A,15N4cJ`P00G?Uf6E`FepT@3n00Sa,0*73';
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct > 55 ? '#ef4444' : pct > 30 ? '#f97316' : '#4d8fcc';
+  const color = pct > 55 ? '#ef4444' : pct > 30 ? '#f97316' : 'var(--gi-accent-blue)';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
@@ -132,7 +132,7 @@ export default function AisDecodePage() {
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
               }}
               placeholder="123456789"
               value={decodeForm.mmsi}
@@ -146,7 +146,7 @@ export default function AisDecodePage() {
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
               }}
               placeholder="PACIFIC MERIDIAN"
               value={decodeForm.vesselName}
@@ -163,7 +163,7 @@ export default function AisDecodePage() {
             style={{
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.06)',
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
             placeholder="Previous port calls, flag state, cargo type…"
             value={decodeForm.context}

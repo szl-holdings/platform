@@ -38,7 +38,7 @@ const STATUS_META: Record<string, { color: string; label: string }> = {
   healthy: { color: '#22c55e', label: 'Healthy' },
   degraded: { color: '#f59e0b', label: 'Degraded' },
   critical: { color: '#ef4444', label: 'Critical' },
-  'no-data': { color: '#64748b', label: 'No Data' },
+  'no-data': { color: 'var(--gi-text-muted)', label: 'No Data' },
 };
 
 function MiniSparkline({
@@ -84,8 +84,8 @@ function AutonomyBar({ mix }: { mix: ProductHealth['autonomyMix'] }) {
   const bars = [
     { label: 'autonomous', color: '#22c55e', value: pct(mix.autonomous) },
     { label: 'supervised', color: '#f59e0b', value: pct(mix.supervised) },
-    { label: 'advisory', color: '#4d8fcc', value: pct(mix.advisory) },
-    { label: 'read-only', color: '#64748b', value: pct(mix.readOnly) },
+    { label: 'advisory', color: 'var(--gi-accent-blue)', value: pct(mix.advisory) },
+    { label: 'read-only', color: 'var(--gi-text-muted)', value: pct(mix.readOnly) },
   ];
 
   return (
@@ -138,7 +138,7 @@ export function RunHealthPage() {
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       <div
         className="px-6 py-4 border-b flex items-center justify-between"
@@ -229,12 +229,12 @@ export function RunHealthPage() {
               delta === null ? Minus : delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
             const deltaColor =
               delta === null
-                ? '#64748b'
+                ? 'var(--gi-text-muted)'
                 : delta < 0
                   ? '#22c55e'
                   : delta > 0
                     ? '#ef4444'
-                    : '#64748b';
+                    : 'var(--gi-text-muted)';
 
             return (
               <div

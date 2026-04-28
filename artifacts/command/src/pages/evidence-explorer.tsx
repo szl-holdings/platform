@@ -46,7 +46,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 const HEALTH_CONFIG: Record<string, { color: string; icon: React.ReactNode }> = {
   healthy: { color: '#22c55e', icon: <CheckCircle className="h-3 w-3" /> },
   degraded: { color: '#f59e0b', icon: <AlertTriangle className="h-3 w-3" /> },
-  stale: { color: '#64748b', icon: <Clock className="h-3 w-3" /> },
+  stale: { color: 'var(--gi-text-muted)', icon: <Clock className="h-3 w-3" /> },
   unknown: { color: '#334155', icon: <Clock className="h-3 w-3" /> },
 };
 
@@ -255,7 +255,7 @@ function EntityList({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                   {entity.label}
                 </span>
                 <span
@@ -349,7 +349,7 @@ function EntityDetailPanel({
       }}
     >
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
           {entity.label}
         </div>
         <div style={{ fontSize: 11, color: '#475569' }}>
@@ -415,7 +415,7 @@ function EntityDetailPanel({
                       >
                         {ev.kind}
                       </span>
-                      <span style={{ fontSize: 11, color: '#64748b' }}>{ev.source}</span>
+                      <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{ev.source}</span>
                     </div>
                     <div
                       style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5, marginBottom: 6 }}
@@ -459,7 +459,7 @@ function EntityDetailPanel({
                     border: '1px solid rgba(255,255,255,0.07)',
                     borderRadius: 6,
                     padding: '7px 0',
-                    color: '#64748b',
+                    color: 'var(--gi-text-muted)',
                     fontSize: 11,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -496,7 +496,7 @@ function EntityDetailPanel({
                     marginBottom: 6,
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#e2e8f0', marginBottom: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
                     {rec.title}
                   </div>
                   <ConfidenceMeter
@@ -703,16 +703,16 @@ export default function EvidenceExplorer() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
       <div style={{ maxWidth: 1440, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
               Evidence Explorer
             </span>
             <span
@@ -730,7 +730,7 @@ export default function EvidenceExplorer() {
             </span>
             <span style={{ fontSize: 11, color: '#475569', marginLeft: 'auto' }}>{meshStatus}</span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Inspect evidence behind every entity and recommendation — raw signals, normalized facts,
             confidence, freshness, and what changed recently.
           </p>
@@ -763,7 +763,7 @@ export default function EvidenceExplorer() {
                 }}
                 style={{
                   background: tab === t.id ? ACCENT : 'transparent',
-                  color: tab === t.id ? '#fff' : '#64748b',
+                  color: tab === t.id ? '#fff' : 'var(--gi-text-muted)',
                   border: 'none',
                   borderRadius: 6,
                   padding: '7px 18px',
@@ -800,7 +800,7 @@ export default function EvidenceExplorer() {
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
                 fontSize: 12,
                 padding: '8px 10px 8px 30px',
                 outline: 'none',
@@ -816,7 +816,7 @@ export default function EvidenceExplorer() {
                 style={{
                   background:
                     domainFilter === d ? (DOMAIN_COLORS[d] ?? ACCENT) : 'rgba(255,255,255,0.04)',
-                  color: domainFilter === d ? '#fff' : '#64748b',
+                  color: domainFilter === d ? '#fff' : 'var(--gi-text-muted)',
                   border: 'none',
                   borderRadius: 5,
                   padding: '5px 10px',
@@ -972,7 +972,7 @@ export default function EvidenceExplorer() {
                       style={{
                         fontSize: 13,
                         fontWeight: 700,
-                        color: '#e2e8f0',
+                        color: 'var(--gi-text-primary)',
                         marginBottom: 6,
                         lineHeight: 1.4,
                       }}
@@ -997,7 +997,7 @@ export default function EvidenceExplorer() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#64748b',
+                      color: 'var(--gi-text-muted)',
                       cursor: 'pointer',
                       fontSize: 18,
                       marginLeft: 10,
@@ -1007,7 +1007,7 @@ export default function EvidenceExplorer() {
                   </button>
                 </div>
 
-                <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 14 }}>
+                <p style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.6, marginBottom: 14 }}>
                   {selectedRec.summary}
                 </p>
 

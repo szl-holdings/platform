@@ -86,13 +86,13 @@ export default function ValueAtRiskPage() {
                 />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 9, fill: '#64748b' }}
+                  tick={{ fontSize: 9, fill: 'var(--gi-text-muted)' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
+                    background: 'var(--gi-bg-base)',
                     border: '1px solid rgba(196,90,74,0.2)',
                     borderRadius: 8,
                     fontSize: 11,
@@ -118,7 +118,7 @@ export default function ValueAtRiskPage() {
               >
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tick={{ fontSize: 10, fill: 'var(--gi-text-muted)' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(v: number) => `$${(v / 1_000_000).toFixed(1)}M`}
@@ -133,7 +133,7 @@ export default function ValueAtRiskPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
+                    background: 'var(--gi-bg-base)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 8,
                     fontSize: 11,
@@ -145,7 +145,7 @@ export default function ValueAtRiskPage() {
                   {valueAtRiskBreakdown.map((entry) => (
                     <Cell
                       key={entry.category}
-                      fill={categoryColors[entry.category] || '#64748b'}
+                      fill={categoryColors[entry.category] || 'var(--gi-text-muted)'}
                       fillOpacity={0.8}
                     />
                   ))}
@@ -190,7 +190,7 @@ export default function ValueAtRiskPage() {
                     className="h-full rounded-full"
                     style={{
                       width: `${(r.amount / totalValueAtRisk) * 100}%`,
-                      backgroundColor: categoryColors[r.category] || '#64748b',
+                      backgroundColor: categoryColors[r.category] || 'var(--gi-text-muted)',
                       opacity: 0.8,
                     }}
                   />
@@ -207,7 +207,7 @@ export default function ValueAtRiskPage() {
               <BarChart data={byWorkflow} layout="vertical" margin={{ left: 10, right: 30 }}>
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tick={{ fontSize: 10, fill: 'var(--gi-text-muted)' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(v: number) => `$${v.toFixed(1)}M`}
@@ -222,7 +222,7 @@ export default function ValueAtRiskPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
+                    background: 'var(--gi-bg-base)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 8,
                     fontSize: 11,

@@ -72,7 +72,7 @@ const EVENT_TYPE_CONFIG: Record<
   model_tokens: {
     label: 'Model Tokens',
     icon: <BarChart2 className="w-3.5 h-3.5" />,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     unit: 'tokens',
   },
 };

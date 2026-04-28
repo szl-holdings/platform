@@ -23,10 +23,10 @@ export default function DriftDetection() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Radar className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+          <Radar className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#4d8fcc' }}
+            style={{ color: 'var(--gi-accent-blue)' }}
           >
             KORA · Drift Detection
           </span>

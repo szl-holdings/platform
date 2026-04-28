@@ -399,7 +399,7 @@ export default function PulsePage() {
               { label: 'Express', value: '5', color: '#f59e0b' },
               { label: 'Drizzle', value: 'ORM', color: '#d4a054' },
               { label: 'Vite', value: '7.3', color: '#ec4899' },
-              { label: 'Expo', value: '53', color: '#64748b' },
+              { label: 'Expo', value: '53', color: 'var(--gi-text-muted)' },
             ].map((tech) => (
               <div
                 key={tech.label}

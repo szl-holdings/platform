@@ -120,7 +120,7 @@ function PageLoader() {
   return (
     <div
       className="flex items-center justify-center min-h-[300px]"
-      style={{ background: '#080c14' }}
+      style={{ background: 'var(--gi-bg-base)' }}
     >
       <div
         className="w-6 h-6 border-2 rounded-full animate-spin"

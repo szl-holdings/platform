@@ -96,7 +96,7 @@ export default function SanctionsScreeningPage() {
               platform="vessels"
               title="Sanctions & Compliance Screening"
               content="Continuously screens vessels, owners, and beneficial owners against OFAC, UN, EU, and UK consolidated sanctions lists. Hits create governed approvals with citation-backed evidence — never silent blocks."
-              accentColor="#4d8fcc"
+              accentColor="var(--gi-accent-blue)"
               iconSize={13}
             />
           </h1>

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const KNOWN_VOYAGES = [

@@ -19,7 +19,7 @@ const SURFACES = [
     description:
       'Unified search across all evidence nodes — policy decisions, compliance events, distress signals, threat actors, and more — with product filters.',
     icon: Database,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     stat: '15 evidence nodes',
   },
   {
@@ -46,7 +46,7 @@ export function CrossPlatformHubPage() {
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       <div className="px-6 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="flex items-center gap-2 mb-1">

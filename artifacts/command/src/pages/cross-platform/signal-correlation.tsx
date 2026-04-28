@@ -29,7 +29,7 @@ const OUTCOME_META: Record<string, { color: string; icon: typeof CheckCircle }> 
   escalated: { color: '#ef4444', icon: AlertCircle },
   'under-review': { color: '#f59e0b', icon: Clock },
   resolved: { color: '#22c55e', icon: CheckCircle },
-  informational: { color: '#4d8fcc', icon: CheckCircle },
+  informational: { color: 'var(--gi-accent-blue)', icon: CheckCircle },
 };
 
 function strengthBar(value: number) {
@@ -102,7 +102,7 @@ export function SignalCorrelationPage() {
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       <div
         className="px-6 py-4 border-b flex items-center justify-between"

@@ -24,7 +24,7 @@ const PILLARS = [
     tagline: 'Cross-session memory fabric',
     description:
       'Long-lived memory built on the memory-fabric multi-tier store (working → session → episodic → semantic). The Skills Library adapts 50+ patterns from public repos into native NEXUS capabilities.',
-    accent: 'var(--gi-accent-violet)',
+    accent: '#9b7cc8',
     bullets: [
       'Facts, preferences, entities persist across sessions',
       'Automatic memory write from Research Swarm',
@@ -54,7 +54,7 @@ const PILLARS = [
     tagline: 'Agent of agents',
     description:
       'Routes user intents to the right artifact — PARAGON, SEXTANT, DOMAINE, Pulse, Command, SZL Holdings, Carlota Jo, KORA, Prism Counsel, Imperium — via the API server and stitches multi-app workflows together.',
-    accent: 'var(--gi-accent-amber)',
+    accent: '#c9a85c',
     bullets: [
       'Knows capabilities of every SZL artifact',
       'Produces an execution plan as a graph',

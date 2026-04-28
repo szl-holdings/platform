@@ -439,7 +439,7 @@ function ContinuumRunDetailRoute({ params }: { params: { id: string } }) {
 
 function ContinuumAppPage({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
+    <div className="flex flex-col h-screen" style={{ background: "var(--gi-bg-base)" }}>
       <div className="flex-1 overflow-hidden">
         <ContinuumLayout>{children}</ContinuumLayout>
       </div>

@@ -63,7 +63,7 @@ const PLATFORMS = [
     name: 'SEXTANT',
     icon: Anchor,
     desc: 'Maritime Fleet Management',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
   },
   {
     id: 'terra',

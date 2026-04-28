@@ -144,7 +144,7 @@ const COLORS: Record<string, string> = {
   crude: '#f97316',
   lng: '#06b6d4',
   grains: '#22c55e',
-  coal: '#64748b',
+  coal: 'var(--gi-text-muted)',
   iron: '#a78bfa',
   containers: '#3b82f6',
 };

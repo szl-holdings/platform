@@ -112,12 +112,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -127,16 +127,16 @@ export default function GovernedCockpit() {
               <Zap className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 Pulse — Governed Executive Briefing
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every briefing signal, dissent, and decision carries a full proof chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -149,7 +149,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Executive Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -158,18 +158,18 @@ export default function GovernedCockpit() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: "Today's Signals", value: '47', icon: Zap, color: ACCENT },
-            { label: 'Briefings Issued', value: '3', icon: BarChart3, color: '#7a99b8' },
+            { label: 'Briefings Issued', value: '3', icon: BarChart3, color: 'var(--gi-text-secondary)' },
             { label: 'Open Decisions', value: '2', icon: TrendingUp, color: color.accent.green },
             { label: 'Dissent Flags', value: '1', icon: AlertTriangle, color: color.accent.red },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
               </div>
@@ -192,7 +192,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Fed Chair remarks confirmed a 'higher for longer' posture, reducing the June FOMC cut
               probability to 22%. Institutional flow data shows $2.3B in put premium and $740M net
               dark pool selling in financials — consistent with institutional de-risking. Portfolio
@@ -202,7 +202,7 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
@@ -211,7 +211,7 @@ export default function GovernedCockpit() {
                   { label: 'Hedge Ratio', value: '61%', color: ACCENT },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -236,7 +236,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Material dissent registered: Goldman Sachs maintains overweight equities with a soft
               landing base case. Q1 earnings revisions are net +2.3%, suggesting markets have
               already priced 60% of the expected rate drag. The CIO flagged that 2018/2022
@@ -246,12 +246,12 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid rgba(201,96,112,0.13)' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid rgba(201,96,112,0.13)' }}
             >
               <span className="font-semibold" style={{ color: color.accent.red }}>
                 Dissent protocol:
               </span>
-              <span style={{ color: '#7a99b8' }}>
+              <span style={{ color: 'var(--gi-text-secondary)' }}>
                 {' '}
                 This view has been formally logged and will appear alongside the primary brief in
                 the CIO packet. Both interpretations are presented without suppression. Investment
@@ -273,7 +273,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Increasing portfolio hedge ratio from 61% to 73% via Treasury futures. Estimated
               execution cost: $840K. Break-even: 23bps rate move within 60 days — within current
               implied volatility. Risk Committee has pre-cleared up to 80% subject to IC
@@ -281,16 +281,16 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Hedge Increase', value: '61%→73%', color: ACCENT },
                   { label: 'Execution Cost', value: '$840K', color: color.accent.amber },
-                  { label: 'Break-even Move', value: '23bps', color: '#7a99b8' },
+                  { label: 'Break-even Move', value: '23bps', color: 'var(--gi-text-secondary)' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>

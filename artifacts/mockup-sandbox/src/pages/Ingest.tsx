@@ -133,12 +133,12 @@ const STAGE_LABELS: Record<IngestJobLocal['status'], string> = {
 
 const STAGE_COLORS: Record<IngestJobLocal['status'], string> = {
   queued: '#8896aa',
-  cloning: 'var(--gi-accent-blue)',
-  parsing: 'var(--gi-accent-violet)',
-  extracting: 'var(--gi-accent-amber)',
-  indexing: 'var(--gi-accent-teal)',
-  done: 'var(--gi-accent-green)',
-  failed: 'var(--gi-accent-red)',
+  cloning: '#4d8fcc',
+  parsing: '#9b7cc8',
+  extracting: '#c9a85c',
+  indexing: '#3ea89a',
+  done: '#5baa8a',
+  failed: '#c96070',
 };
 
 const STAGES: IngestJobLocal['status'][] = ['queued', 'cloning', 'parsing', 'extracting', 'indexing', 'done'];

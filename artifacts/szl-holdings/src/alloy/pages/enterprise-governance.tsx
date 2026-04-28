@@ -364,12 +364,12 @@ function PoliciesTab() {
               value={newPolicy.name}
               onChange={(e) => setNewPolicy((p) => ({ ...p, name: e.target.value }))}
               placeholder="Policy name"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
             />
             <select
               value={newPolicy.policyType}
               onChange={(e) => setNewPolicy((p) => ({ ...p, policyType: e.target.value }))}
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
             >
               {Object.entries(POLICY_TYPE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>
@@ -382,13 +382,13 @@ function PoliciesTab() {
             value={newPolicy.description}
             onChange={(e) => setNewPolicy((p) => ({ ...p, description: e.target.value }))}
             placeholder="Description"
-            className="w-full bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
+            className="w-full bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
           />
           <div className="grid grid-cols-2 gap-3">
             <select
               value={newPolicy.scope}
               onChange={(e) => setNewPolicy((p) => ({ ...p, scope: e.target.value }))}
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
             >
               <option value="global">Global</option>
               <option value="tenant">Tenant</option>
@@ -400,7 +400,7 @@ function PoliciesTab() {
               value={newPolicy.priority}
               onChange={(e) => setNewPolicy((p) => ({ ...p, priority: Number(e.target.value) }))}
               placeholder="Priority"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#d4a054]/50 focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -413,7 +413,7 @@ function PoliciesTab() {
             <button
               onClick={() => createMutation.mutate(newPolicy)}
               disabled={!newPolicy.name}
-              className="px-4 py-1.5 bg-[#d4a054] text-[#080c14] rounded text-sm font-medium hover:bg-[#d4a054]/90 transition disabled:opacity-50"
+              className="px-4 py-1.5 bg-[#d4a054] text-[var(--gi-bg-base)] rounded text-sm font-medium hover:bg-[#d4a054]/90 transition disabled:opacity-50"
             >
               Create
             </button>
@@ -540,19 +540,19 @@ function ModelRoutingTab() {
               value={newRoute.name}
               onChange={(e) => setNewRoute((p) => ({ ...p, name: e.target.value }))}
               placeholder="Route name"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
             />
             <input
               value={newRoute.modelProvider}
               onChange={(e) => setNewRoute((p) => ({ ...p, modelProvider: e.target.value }))}
               placeholder="Provider (openai, anthropic...)"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
             />
             <input
               value={newRoute.modelId}
               onChange={(e) => setNewRoute((p) => ({ ...p, modelId: e.target.value }))}
               placeholder="Model ID (gpt-4o, claude-3...)"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -560,12 +560,12 @@ function ModelRoutingTab() {
               value={newRoute.maxCostPerCall}
               onChange={(e) => setNewRoute((p) => ({ ...p, maxCostPerCall: e.target.value }))}
               placeholder="Max cost per call ($)"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
             />
             <select
               value={newRoute.environment}
               onChange={(e) => setNewRoute((p) => ({ ...p, environment: e.target.value }))}
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#8b7ac8]/50 focus:outline-none"
             >
               <option value="development">Development</option>
               <option value="staging">Staging</option>
@@ -725,12 +725,12 @@ function CostControlsTab() {
               value={newBudget.name}
               onChange={(e) => setNewBudget((p) => ({ ...p, name: e.target.value }))}
               placeholder="Budget name"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
             />
             <select
               value={newBudget.budgetType}
               onChange={(e) => setNewBudget((p) => ({ ...p, budgetType: e.target.value }))}
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -741,7 +741,7 @@ function CostControlsTab() {
               value={newBudget.limitAmount}
               onChange={(e) => setNewBudget((p) => ({ ...p, limitAmount: e.target.value }))}
               placeholder="Limit ($)"
-              className="bg-[#080c14] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
+              className="bg-[var(--gi-bg-base)] border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-[#c8953c]/50 focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -754,7 +754,7 @@ function CostControlsTab() {
             <button
               onClick={() => createMutation.mutate(newBudget)}
               disabled={!newBudget.name || !newBudget.limitAmount}
-              className="px-4 py-1.5 bg-[#c8953c] text-[#080c14] rounded text-sm font-medium hover:bg-[#c8953c]/90 transition disabled:opacity-50"
+              className="px-4 py-1.5 bg-[#c8953c] text-[var(--gi-bg-base)] rounded text-sm font-medium hover:bg-[#c8953c]/90 transition disabled:opacity-50"
             >
               Create
             </button>
@@ -967,7 +967,7 @@ export default function EnterpriseGovernancePage() {
   const [tab, setTab] = useState<TabKey>('overview');
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-gray-200 p-6">
+    <div className="min-h-screen bg-[var(--gi-bg-base)] text-gray-200 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <div className="flex items-center gap-3 mb-1">

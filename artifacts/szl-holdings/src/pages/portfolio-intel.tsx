@@ -22,7 +22,7 @@ const portfolioValue = [
 const sectorAllocation = [
   { name: "Execution Engine", value: 30, color: "#6366f1" },
   { name: "AIOps", value: 22, color: "#f59e0b" },
-  { name: "Business Intel", value: 18, color: "#4d8fcc" },
+  { name: "Business Intel", value: 18, color: "var(--gi-accent-blue)" },
   { name: "Cybersecurity", value: 15, color: "#ef4444" },
   { name: "AI Research", value: 9, color: "#8b5cf6" },
   { name: "Maritime", value: 6, color: "#3b82f6" },

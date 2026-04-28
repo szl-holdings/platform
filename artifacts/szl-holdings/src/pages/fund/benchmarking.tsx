@@ -136,7 +136,7 @@ export default function BenchmarkingPage() {
                         <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 9 }} />
                         <Radar name="SZL Fund I" dataKey="szl" stroke="#6aaa72" fill="#6aaa72" fillOpacity={0.15} strokeWidth={1.5} />
                         <Radar name="Peer Median" dataKey="benchmark" stroke="#c8953c" fill="#c8953c" fillOpacity={0.08} strokeWidth={1} strokeDasharray="4 2" />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                         <Legend iconType="circle" formatter={(v) => <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>{v}</span>} />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -150,7 +150,7 @@ export default function BenchmarkingPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="vintage" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} unit="%" />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
                           formatter={(v: number) => [`${v}%`, ""]} />
                         <Bar dataKey="median" name="CA Median IRR" fill="#4a90b8" fillOpacity={0.6} radius={[3, 3, 0, 0]} />
                         <Bar dataKey="top25" name="CA Top Quartile" fill="#c8953c" fillOpacity={0.7} radius={[3, 3, 0, 0]} />
@@ -172,7 +172,7 @@ export default function BenchmarkingPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis type="number" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} unit="pp" />
                         <YAxis dataKey="company" type="category" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} width={90} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
                           formatter={(v: number) => [`+${v}pp`, "IRR contribution"]} />
                         <Bar dataKey="contribution" name="IRR contribution (pp)" fill="#c8953c" fillOpacity={0.8} radius={[0, 3, 3, 0]} />
                       </BarChart>
@@ -197,7 +197,7 @@ export default function BenchmarkingPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                         <YAxis domain={[0.95, 1.45]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                         <Line type="monotone" dataKey="pme" name="SZL PME" stroke="#6aaa72" strokeWidth={2.5} dot={{ fill: "#6aaa72", r: 4 }} />
                         <Line type="monotone" dataKey="sp500" name="S&P 500 Base (1.0)" stroke="#4a90b8" strokeWidth={1.5} strokeDasharray="6 3" dot={false} />
                         <Legend iconType="circle" formatter={(v) => <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>{v}</span>} />

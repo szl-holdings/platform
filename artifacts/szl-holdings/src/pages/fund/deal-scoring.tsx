@@ -108,7 +108,7 @@ function AttachmentPreviewModal({ attachment, onClose }: { attachment: DealAttac
       style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)" }}
     >
       <div
-        className="relative w-full max-w-4xl rounded-2xl border border-white/[0.1] bg-[#0c1018] flex flex-col overflow-hidden"
+        className="relative w-full max-w-4xl rounded-2xl border border-white/[0.1] bg-[var(--gi-bg-surface)] flex flex-col overflow-hidden"
         style={{ maxHeight: "90vh" }}
         onClick={e => e.stopPropagation()}
       >
@@ -581,7 +581,7 @@ export default function DealScoringPage() {
                             <PolarGrid stroke="rgba(255,255,255,0.06)" />
                             <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} />
                             <Radar name="Score" dataKey="score" stroke="#d4a054" fill="#d4a054" fillOpacity={0.15} strokeWidth={1.5} />
-                            <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                            <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                           </RadarChart>
                         </ResponsiveContainer>
                       </div>

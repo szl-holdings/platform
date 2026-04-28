@@ -324,7 +324,7 @@ const FALLBACK_DIMENSIONS: DimensionScore[] = [
     key: 'operational',
     label: 'Operational',
     icon: Activity,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     score: 74,
     weight: 0.3,
     signals: [

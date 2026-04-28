@@ -347,7 +347,7 @@ export default function NavDashboardPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}M`} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
                         <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
                         <Area type="monotone" dataKey="Fund NAV" stroke="#d4a054" fill="url(#navGrad)" strokeWidth={2} dot={{ fill: "#d4a054", r: 4 }} />
                         <Area type="monotone" dataKey="Called Capital" stroke="#4a90b8" fill="url(#capGrad)" strokeWidth={2} dot={{ fill: "#4a90b8", r: 4 }} />
@@ -454,7 +454,7 @@ export default function NavDashboardPage() {
                           <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
                             {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                           </Pie>
-                          <Tooltip formatter={(v: number) => [fmt(v), ""]} contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
+                          <Tooltip formatter={(v: number) => [fmt(v), ""]} contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
                         </RePie>
                       </ResponsiveContainer>
                       <div className="space-y-2 mt-4">
@@ -499,7 +499,7 @@ export default function NavDashboardPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v)]} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v)]} />
                         <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
                         <Bar dataKey="managementFee" name="Management Fee" fill="#d4a054" radius={[3, 3, 0, 0]} />
                         <Bar dataKey="carryAccrual" name="Carry Accrual" fill="#6aaa72" radius={[3, 3, 0, 0]} />

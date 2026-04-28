@@ -27,7 +27,7 @@ import React, { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Link } from 'wouter';
 
-const BG = { page: '#080c14', surface: '#0b0f19', elevated: '#0f1420', panel: '#0d1118' };
+const BG = { page: 'var(--gi-bg-base)', surface: '#0b0f19', elevated: '#0f1420', panel: '#0d1118' };
 const BORDER = {
   subtle: 'rgba(255,255,255,0.04)',
   muted: 'rgba(255,255,255,0.07)',

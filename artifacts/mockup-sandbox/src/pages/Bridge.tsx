@@ -265,12 +265,12 @@ const TOKEN_CDN_TOOLS: DemoTool[] = [
       format: (args.format as string) || 'json',
       version: '2.4.1',
       tokens: {
-        '--gi-bg-base': '#060b12',
-        '--gi-bg-surface': '#0d1520',
+        '--gi-bg-base': 'var(--gi-bg-base)',
+        '--gi-bg-surface': 'var(--gi-bg-surface)',
         '--gi-accent-cyan': '#22d3ee',
         '--gi-accent-green': '#a3e635',
         '--gi-accent-amber': '#f59e0b',
-        '--gi-text-primary': '#c8d8e8',
+        '--gi-text-primary': 'var(--gi-text-primary)',
         '--gi-text-muted': '#7c8ea4',
       },
       etag: 'W/"2.4.1-1714384000"',
@@ -397,22 +397,22 @@ const ADAPTER_META: Record<string, { color: string; isDemo: boolean }> = {
 
 const PROTOCOL_META: Record<string, { color: string; description: string; badge: string }> = {
   MCP: {
-    color: 'var(--gi-accent-blue)',
+    color: '#4d8fcc',
     description: 'Model Context Protocol — Anthropic standard for tool calling',
     badge: 'Live',
   },
   A2A: {
-    color: 'var(--gi-accent-violet)',
+    color: '#9b7cc8',
     description: 'Agent-to-Agent protocol — Google standard for agent interop',
     badge: 'Loopback',
   },
   ACP: {
-    color: 'var(--gi-accent-green)',
+    color: '#5baa8a',
     description: 'Agent Communication Protocol — IBM standard for enterprise agents',
     badge: 'Loopback',
   },
   ANP: {
-    color: 'var(--gi-accent-amber)',
+    color: '#c9a85c',
     description: 'Agent Network Protocol — decentralized agent discovery',
     badge: 'Loopback',
   },
@@ -508,8 +508,8 @@ export default function Bridge() {
                 onClick={() => setProtocolFilter(protocolFilter === proto ? 'all' : proto)}
                 className="rounded-lg border p-3 text-left transition-all"
                 style={{
-                  borderColor: protocolFilter === proto ? meta.color : '#1a2535',
-                  background: protocolFilter === proto ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)` : '#0d1520',
+                  borderColor: protocolFilter === proto ? meta.color : 'var(--gi-border-subtle)',
+                  background: protocolFilter === proto ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)` : 'var(--gi-bg-surface)',
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -611,7 +611,7 @@ function ToolCard({
   const isDemo = adapterMeta?.isDemo;
 
   return (
-    <div className="rounded-lg border overflow-hidden bg-praxis-surface transition-all" style={{ borderColor: expanded ? `${color}30` : '#1a2535' }}>
+    <div className="rounded-lg border overflow-hidden bg-praxis-surface transition-all" style={{ borderColor: expanded ? `${color}30` : 'var(--gi-border-subtle)' }}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0 text-left">
           {expanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />}

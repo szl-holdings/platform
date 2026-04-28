@@ -30,7 +30,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const ACCENT = "#c9a84c";
-const BG = "#080c14";
+const BG = "var(--gi-bg-base)";
 const PANEL = "#0d131e";
 const BORDER = "rgba(255,255,255,0.08)";
 const TEXT = "hsl(38,8%,92%)";

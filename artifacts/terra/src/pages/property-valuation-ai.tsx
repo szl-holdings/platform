@@ -134,7 +134,7 @@ export default function PropertyValuationAiPage() {
             style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
             placeholder="123 Main St, City, State ZIP"
             value={valuationForm.address}
@@ -158,7 +158,7 @@ export default function PropertyValuationAiPage() {
                 style={{
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.06)',
-                  color: '#e2e8f0',
+                  color: 'var(--gi-text-primary)',
                 }}
                 placeholder={f.placeholder}
                 value={valuationForm[f.field]}
@@ -174,13 +174,13 @@ export default function PropertyValuationAiPage() {
             style={{
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid rgba(255,255,255,0.06)',
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
             value={valuationForm.propertyType}
             onChange={(e) => setValuationForm((f) => ({ ...f, propertyType: e.target.value }))}
           >
             {PROPERTY_TYPES.map((t) => (
-              <option key={t} value={t} style={{ background: '#0f172a' }}>
+              <option key={t} value={t} style={{ background: 'var(--gi-bg-base)' }}>
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </option>
             ))}

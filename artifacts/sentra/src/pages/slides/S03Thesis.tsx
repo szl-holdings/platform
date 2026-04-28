@@ -3,7 +3,7 @@ export default function S03Thesis() {
     <div
       className="w-screen h-screen overflow-hidden relative"
       style={{
-        background: 'linear-gradient(160deg, #070b10 0%, #0d1520 60%, #070b10 100%)',
+        background: 'linear-gradient(160deg, #070b10 0%, var(--gi-bg-surface) 60%, #070b10 100%)',
         fontFamily: "'Sora', sans-serif",
       }}
     >

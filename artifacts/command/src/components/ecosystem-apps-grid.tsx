@@ -30,7 +30,7 @@ export const ECOSYSTEM_APPS = [
     label: 'Stephen Site',
     description: 'Personal portfolio and thought-leadership platform for executive communications',
     icon: Globe,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
   },
 ];
 

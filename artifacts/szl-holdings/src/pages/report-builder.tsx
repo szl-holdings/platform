@@ -221,7 +221,7 @@ const BRAND_THEMES = [
   { value: 'vessels', label: 'SEXTANT', color: '#3b82f6' },
   { value: 'lyte', label: 'KORA', color: '#8b5cf6' },
   { value: 'prism', label: 'PRAXIS', color: '#e879f9' },
-  { value: 'neutral', label: 'Neutral', color: '#64748b' },
+  { value: 'neutral', label: 'Neutral', color: 'var(--gi-text-muted)' },
 ];
 
 const DOMAIN_TEMPLATES = [

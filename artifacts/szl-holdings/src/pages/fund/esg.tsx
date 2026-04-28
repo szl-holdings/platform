@@ -214,7 +214,7 @@ export default function EsgPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
                         <YAxis domain={[0, 100]} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
                         <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
                         <Bar dataKey="Environmental" fill="#6aaa72" radius={[3, 3, 0, 0]} />
                         <Bar dataKey="Social" fill="#8b7ac8" radius={[3, 3, 0, 0]} />

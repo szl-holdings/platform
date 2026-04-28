@@ -279,7 +279,7 @@ function DebtCard({ item }: { item: DebtItem }) {
                 onChange={(e) => setNewOwner(e.target.value)}
                 placeholder="Sarah Kim (VP BD)"
                 data-testid={`input-reassign-owner-${item.id}`}
-                className="w-full text-xs bg-[#0d1520] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-sky-500/40"
+                className="w-full text-xs bg-[var(--gi-bg-surface)] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-sky-500/40"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -319,7 +319,7 @@ function DebtCard({ item }: { item: DebtItem }) {
                 placeholder="Proof ref, link, or description of action taken."
                 rows={2}
                 data-testid={`input-address-evidence-${item.id}`}
-                className="w-full text-xs bg-[#0d1520] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-emerald-500/40"
+                className="w-full text-xs bg-[var(--gi-bg-surface)] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-emerald-500/40"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -377,7 +377,7 @@ interface ChartTooltipProps {
 const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-[#0d1520] border border-amber-500/20 rounded px-3 py-2 text-xs shadow-xl">
+      <div className="bg-[var(--gi-bg-surface)] border border-amber-500/20 rounded px-3 py-2 text-xs shadow-xl">
         <p className="text-amber-400/60 font-mono mb-2">{label}</p>
         {payload.map((p) => (
           <p key={p.name} className="font-mono" style={{ color: p.fill }}>

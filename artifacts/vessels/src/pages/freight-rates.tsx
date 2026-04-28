@@ -178,9 +178,9 @@ export default function FreightRatesPage() {
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={history} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#64748b' }} interval={3} />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: 'var(--gi-text-muted)' }} interval={3} />
                 <YAxis
-                  tick={{ fontSize: 9, fill: '#64748b' }}
+                  tick={{ fontSize: 9, fill: 'var(--gi-text-muted)' }}
                   tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
                 />
                 <Tooltip

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const KNOWN_VESSELS = [

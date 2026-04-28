@@ -122,8 +122,8 @@ function LenderCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const riskColor = RISK_COLORS[lender.riskLabel] ?? '#64748b';
-  const typeColor = TYPE_COLORS[lender.type] ?? '#64748b';
+  const riskColor = RISK_COLORS[lender.riskLabel] ?? '#4a6070';
+  const typeColor = TYPE_COLORS[lender.type] ?? 'var(--gi-text-muted)';
   return (
     <button
       onClick={onSelect}
@@ -217,7 +217,7 @@ export default function LenderExposureMapPage() {
   const pieData = Object.entries(summary?.byType ?? {}).map(([name, value]) => ({
     name: name.replace('_', ' ').toUpperCase(),
     value: value as number,
-    color: TYPE_COLORS[name] ?? '#64748b',
+    color: TYPE_COLORS[name] ?? '#4a6070',
   }));
 
   const maturityBarData = maturityLadder.map((m) => ({
@@ -414,7 +414,7 @@ export default function LenderExposureMapPage() {
                   className="rounded-xl p-4"
                   style={{
                     background: 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${RISK_COLORS[selLender.riskLabel] ?? '#64748b'}30`,
+                    border: `1px solid ${RISK_COLORS[selLender.riskLabel] ?? '#4a6070'}30`,
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2 flex-wrap">

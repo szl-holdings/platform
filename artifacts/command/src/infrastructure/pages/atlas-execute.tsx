@@ -109,7 +109,7 @@ function atlasApi<T>(path: string, opts?: ApiFetchOptions): Promise<T> {
 }
 
 const SEV_COLOR: Record<Severity, string> = {
-  info: '#64748b',
+  info: '#4a6070',
   low: '#22c55e',
   medium: '#f59e0b',
   high: '#f97316',
@@ -119,7 +119,7 @@ const STATUS_ICON: Record<string, ReactElement> = {
   completed: <CheckCircle className="w-3 h-3" style={{ color: '#22c55e' }} />,
   failed: <XCircle className="w-3 h-3" style={{ color: '#ef4444' }} />,
   running: <Activity className="w-3 h-3" style={{ color: ACCENT }} />,
-  pending: <Clock className="w-3 h-3" style={{ color: '#64748b' }} />,
+  pending: <Clock className="w-3 h-3" style={{ color: 'var(--gi-text-muted)' }} />,
 };
 
 export default function ImperiumAtlasExecute() {
@@ -669,7 +669,7 @@ export default function ImperiumAtlasExecute() {
                       className="w-full flex items-center gap-3 p-3 text-left hover:bg-white/5 transition-colors"
                     >
                       {STATUS_ICON[run.status] ?? (
-                        <Clock className="w-3 h-3" style={{ color: '#64748b' }} />
+                        <Clock className="w-3 h-3" style={{ color: 'var(--gi-text-muted)' }} />
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="text-[11px] font-mono font-bold text-white truncate">
@@ -696,7 +696,7 @@ export default function ImperiumAtlasExecute() {
                         {run.steps.map((step) => (
                           <div key={step.id} className="flex items-center gap-2 py-1">
                             {STATUS_ICON[step.status] ?? (
-                              <Clock className="w-3 h-3" style={{ color: '#64748b' }} />
+                              <Clock className="w-3 h-3" style={{ color: 'var(--gi-text-muted)' }} />
                             )}
                             <span className="text-[10px] text-white">{step.name}</span>
                             <span

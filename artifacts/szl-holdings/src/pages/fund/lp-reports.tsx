@@ -177,7 +177,7 @@ export default function LpReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                     <XAxis dataKey="q" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                     <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                    <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                     <Area type="monotone" dataKey="netIrr" name="Net IRR %" stroke="#6aaa72" fill="#6aaa72" fillOpacity={0.1} strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>

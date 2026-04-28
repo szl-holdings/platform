@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchJson } from '../../pages/cognitive/shared';
 
-const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', card: '#0f131c' };
+const BG = { page: 'var(--gi-bg-base)', surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)', card: '#0f131c' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.07)' };
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',
@@ -290,7 +290,7 @@ function ReviewModal({ entry, onClose, onDone }: ReviewModalProps) {
             onClick={handleSubmit}
             disabled={saving || !canSave}
             className="px-3 py-1.5 rounded text-[10px] font-semibold disabled:opacity-40"
-            style={{ color: '#080c14', background: ACCENT }}
+            style={{ color: 'var(--gi-bg-base)', background: ACCENT }}
           >
             {saving ? 'Saving…' : 'Submit Review'}
           </button>
@@ -544,7 +544,7 @@ export default function ProofChainAudit() {
             onClick={handleBulkReview}
             disabled={bulkInFlight}
             className="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] font-semibold disabled:opacity-40"
-            style={{ color: '#080c14', background: ACCENT }}
+            style={{ color: 'var(--gi-bg-base)', background: ACCENT }}
           >
             {bulkInFlight ? 'Applying…' : 'Apply'}
           </button>

@@ -66,7 +66,7 @@ export function ChartTooltipContent({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0c1018] px-4 py-3 text-xs">
+    <div className="rounded-xl border border-white/[0.08] bg-[var(--gi-bg-surface)] px-4 py-3 text-xs">
       <p className="text-white/50 mb-2">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2 py-0.5">
@@ -149,7 +149,7 @@ export function DataEntryModal({
       <m.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#0c1018] p-6"
+        className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[var(--gi-bg-surface)] p-6"
       >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">{title}</h3>

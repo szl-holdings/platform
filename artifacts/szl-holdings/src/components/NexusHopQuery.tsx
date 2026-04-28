@@ -71,7 +71,7 @@ const RISK_COLORS: Record<string, string> = {
   high: '#f97316',
   medium: '#f59e0b',
   low: '#4ade80',
-  none: '#64748b',
+  none: '#4a6070',
 };
 
 const NL_SUGGESTIONS = [
@@ -293,7 +293,7 @@ export function PRAXISHopQuery({ initialAnchorId }: PRAXISHopQueryProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   className="absolute z-20 w-full mt-1 rounded-xl overflow-hidden"
-                  style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)' }}
+                  style={{ background: 'var(--gi-bg-base)', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
                   {filteredEntities.map((entity) => {
                     const Icon = ENTITY_ICONS[entity.type];

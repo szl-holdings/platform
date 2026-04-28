@@ -956,7 +956,7 @@ export default function CovenantMonitoringPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Total Covenants', value: summary?.total ?? 0, color: '#64748b' },
+              { label: 'Total Covenants', value: summary?.total ?? 0, color: 'var(--gi-text-muted)' },
               { label: 'In Breach', value: summary?.breach ?? 0, color: '#c04a2a' },
               { label: 'Watch', value: summary?.watch ?? 0, color: '#c8a060' },
               {

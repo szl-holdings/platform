@@ -22,7 +22,7 @@ const STATUS_COLOR: Record<string, string> = {
   warning: '#d4a054',
   failure: '#ef4444',
   blocked: '#ef4444',
-  pending: '#64748b',
+  pending: '#4a6070',
 };
 
 function MirrorEvalDisplay({ eval: ev }: { eval: MirrorEvalScore }) {
@@ -48,7 +48,7 @@ function MirrorEvalDisplay({ eval: ev }: { eval: MirrorEvalScore }) {
   };
 
   return (
-    <div style={{ background: '#0a0f1a', borderRadius: 10, border: '1px solid #1e293b', padding: 16 }}>
+    <div style={{ background: '#0a0f1a', borderRadius: 10, border: '1px solid var(--gi-border-subtle)', padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>MirrorEval</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -63,12 +63,12 @@ function MirrorEvalDisplay({ eval: ev }: { eval: MirrorEvalScore }) {
         {dims.map((d) => (
           <div key={d.label}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-              <span style={{ fontSize: 10, color: '#64748b' }}>{d.label}</span>
+              <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{d.label}</span>
               <span style={{ fontSize: 10, color: d.value >= 0.85 ? '#22c55e' : d.value >= 0.7 ? '#d4a054' : '#ef4444' }}>
                 {Math.round(d.value * 100)}%
               </span>
             </div>
-            <div style={{ height: 3, background: '#1e293b', borderRadius: 2 }}>
+            <div style={{ height: 3, background: 'var(--gi-border-subtle)', borderRadius: 2 }}>
               <div style={{ height: '100%', width: `${d.value * 100}%`, background: d.value >= 0.85 ? '#22c55e' : d.value >= 0.7 ? '#d4a054' : '#ef4444', borderRadius: 2 }} />
             </div>
           </div>
@@ -99,16 +99,16 @@ function TraceStepRow({ step }: { step: TraceStep }) {
   const Icon = icon;
 
   return (
-    <div style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px solid #0f172a' }}>
+    <div style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--gi-bg-base)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
         <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, border: `1px solid ${color}38`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Icon size={11} color={color} />
         </div>
-        <div style={{ width: 1, flex: 1, background: '#1e293b', marginTop: 4 }} />
+        <div style={{ width: 1, flex: 1, background: 'var(--gi-border-subtle)', marginTop: 4 }} />
       </div>
       <div style={{ flex: 1, paddingBottom: 4 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 2 }}>{step.label}</div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>{step.detail}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 2 }}>{step.label}</div>
+        <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{step.detail}</div>
         {step.tokens && (
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <span style={{ fontSize: 10, color: '#475569' }}>{step.tokens.toLocaleString()} tokens</span>
@@ -130,7 +130,7 @@ export function WorkcellDetailPage() {
 
   if (!wc) {
     return (
-      <div style={{ background: '#080c14', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+      <div style={{ background: 'var(--gi-bg-base)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gi-text-muted)' }}>
         Workcell not found
       </div>
     );
@@ -140,22 +140,22 @@ export function WorkcellDetailPage() {
     proven: '#22c55e', blocked: '#ef4444', executing: '#4d8fcc',
     approval_required: '#f59e0b', approved: '#22c55e', planning: '#8b7ac8',
     action_brief_created: '#8b7ac8', risk_review: '#d4a054',
-    verifying: '#8b7ac8', rejected: '#ef4444', intake: '#64748b', context_building: '#4d8fcc', archived: '#475569',
+    verifying: '#8b7ac8', rejected: '#ef4444', intake: '#4a6070', context_building: '#4d8fcc', archived: '#475569',
   };
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ background: 'var(--gi-bg-base)', minHeight: '100vh', color: 'var(--gi-text-primary)', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1e293b', padding: '16px 28px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => navigate('/agents/workcells')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
+      <div style={{ borderBottom: '1px solid var(--gi-border-subtle)', padding: '16px 28px', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={() => navigate('/agents/workcells')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gi-text-muted)', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
           <ArrowLeft size={14} />
           <span style={{ fontSize: 12 }}>Workcells</span>
         </button>
         <ChevronRight size={12} color="#334155" />
         <div style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9' }}>{wc.title}</div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <div style={{ background: `${statusColor[wc.status] ?? '#64748b'}12`, border: `1px solid ${statusColor[wc.status] ?? '#64748b'}28`, borderRadius: 20, padding: '4px 12px' }}>
-            <span style={{ fontSize: 11, color: statusColor[wc.status] ?? '#64748b', fontWeight: 600 }}>{wc.status.replace(/_/g, ' ')}</span>
+          <div style={{ background: `${statusColor[wc.status] ?? '#4a6070'}12`, border: `1px solid ${statusColor[wc.status] ?? '#4a6070'}28`, borderRadius: 20, padding: '4px 12px' }}>
+            <span style={{ fontSize: 11, color: statusColor[wc.status] ?? 'var(--gi-text-muted)', fontWeight: 600 }}>{wc.status.replace(/_/g, ' ')}</span>
           </div>
           <button
             onClick={() => navigate(`/agents/workcells/${wc.id}/replay`)}
@@ -169,16 +169,16 @@ export function WorkcellDetailPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', height: 'calc(100vh - 65px)' }}>
         {/* Main Content */}
-        <div style={{ overflow: 'auto', padding: '20px 24px', borderRight: '1px solid #1e293b' }}>
+        <div style={{ overflow: 'auto', padding: '20px 24px', borderRight: '1px solid var(--gi-border-subtle)' }}>
           {/* Signals */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Trigger Signals</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Trigger Signals</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {wc.signals.map((s) => (
-                <div key={s.id} style={{ background: '#0f172a', border: `1px solid ${s.severity === 'critical' ? 'rgba(239,68,68,0.2)' : s.severity === 'warning' ? 'rgba(212,160,84,0.2)' : '#1e293b'}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: s.severity === 'critical' ? '#ef4444' : s.severity === 'warning' ? '#d4a054' : '#64748b', marginTop: 4, flexShrink: 0 }} />
+                <div key={s.id} style={{ background: 'var(--gi-bg-base)', border: `1px solid ${s.severity === 'critical' ? 'rgba(239,68,68,0.2)' : s.severity === 'warning' ? 'rgba(212,160,84,0.2)' : 'var(--gi-border-subtle)'}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: s.severity === 'critical' ? '#ef4444' : s.severity === 'warning' ? '#d4a054' : 'var(--gi-text-muted)', marginTop: 4, flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 2 }}>{s.label}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 2 }}>{s.label}</div>
                     <div style={{ fontSize: 11, color: '#94a3b8' }}>{s.value}</div>
                   </div>
                   <span style={{ fontSize: 10, color: '#475569' }}>{s.source}</span>
@@ -189,17 +189,17 @@ export function WorkcellDetailPage() {
 
           {/* Context Pack */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Context Pack</div>
-            <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14 }}>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Context Pack</div>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14 }}>
               <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
-                <div><div style={{ fontSize: 10, color: '#64748b' }}>Mode</div><div style={{ fontSize: 12, color: '#8b7ac8', fontWeight: 600 }}>{wc.contextPack.mode}</div></div>
-                <div><div style={{ fontSize: 10, color: '#64748b' }}>Citations</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.contextPack.citations.length}</div></div>
-                <div><div style={{ fontSize: 10, color: '#64748b' }}>Tokens Used</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.contextPack.tokensUsed.toLocaleString()} / {wc.contextPack.tokenBudget.toLocaleString()}</div></div>
-                <div><div style={{ fontSize: 10, color: '#64748b' }}>Stale</div><div style={{ fontSize: 12, color: wc.contextPack.staleCount > 0 ? '#d4a054' : '#22c55e' }}>{wc.contextPack.staleCount}</div></div>
+                <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Mode</div><div style={{ fontSize: 12, color: '#8b7ac8', fontWeight: 600 }}>{wc.contextPack.mode}</div></div>
+                <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Citations</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.contextPack.citations.length}</div></div>
+                <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Tokens Used</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.contextPack.tokensUsed.toLocaleString()} / {wc.contextPack.tokenBudget.toLocaleString()}</div></div>
+                <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Stale</div><div style={{ fontSize: 12, color: wc.contextPack.staleCount > 0 ? '#d4a054' : '#22c55e' }}>{wc.contextPack.staleCount}</div></div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {wc.contextPack.citations.map((c, i) => (
-                  <div key={c.id} style={{ background: '#080c14', borderRadius: 6, border: `1px solid ${c.isStale ? 'rgba(212,160,84,0.2)' : '#0f172a'}`, padding: '8px 12px' }}>
+                  <div key={c.id} style={{ background: 'var(--gi-bg-base)', borderRadius: 6, border: `1px solid ${c.isStale ? 'rgba(212,160,84,0.2)' : 'var(--gi-bg-base)'}`, padding: '8px 12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1' }}>{c.label}</span>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -208,7 +208,7 @@ export function WorkcellDetailPage() {
                         <span style={{ fontSize: 10, color: '#475569' }}>fresh {Math.round(c.freshnessScore * 100)}%</span>
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748b' }}>{c.source}</div>
+                    <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{c.source}</div>
                     <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{c.content}</div>
                   </div>
                 ))}
@@ -219,25 +219,25 @@ export function WorkcellDetailPage() {
           {/* Action Brief */}
           {wc.actionBrief && (
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Action Brief</div>
-              <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14 }}>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Action Brief</div>
+              <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>{wc.actionBrief.title}</div>
                 <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 12 }}>{wc.actionBrief.objective}</div>
 
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Risk Category</div><div style={{ fontSize: 11, color: '#d4a054', fontWeight: 600 }}>{wc.actionBrief.riskCategory.replace(/_/g, ' ')}</div></div>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Approver Role</div><div style={{ fontSize: 11, color: '#94a3b8' }}>{wc.actionBrief.requiredApproverRole}</div></div>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Impact</div><div style={{ fontSize: 11, color: '#94a3b8' }}>{wc.actionBrief.estimatedImpact.slice(0, 50)}…</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Risk Category</div><div style={{ fontSize: 11, color: '#d4a054', fontWeight: 600 }}>{wc.actionBrief.riskCategory.replace(/_/g, ' ')}</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Approver Role</div><div style={{ fontSize: 11, color: '#94a3b8' }}>{wc.actionBrief.requiredApproverRole}</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Impact</div><div style={{ fontSize: 11, color: '#94a3b8' }}>{wc.actionBrief.estimatedImpact.slice(0, 50)}…</div></div>
                 </div>
 
-                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>Proposed Actions</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginBottom: 6 }}>Proposed Actions</div>
                 {wc.actionBrief.proposedActions.map((pa) => (
-                  <div key={pa.id} style={{ background: '#080c14', borderRadius: 6, border: '1px solid #0f172a', padding: '8px 12px', marginBottom: 6 }}>
+                  <div key={pa.id} style={{ background: 'var(--gi-bg-base)', borderRadius: 6, border: '1px solid var(--gi-bg-base)', padding: '8px 12px', marginBottom: 6 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: '#cbd5e1' }}>{pa.tool}</span>
                       <div style={{ display: 'flex', gap: 6 }}>
                         {pa.requiresApproval && <span style={{ fontSize: 10, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: '1px 6px' }}>approval required</span>}
-                        <span style={{ fontSize: 10, color: '#64748b' }}>{pa.riskLevel}</span>
+                        <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{pa.riskLevel}</span>
                       </div>
                     </div>
                     <div style={{ fontSize: 11, color: '#94a3b8' }}>{pa.description}</div>
@@ -252,7 +252,7 @@ export function WorkcellDetailPage() {
           {/* Execution Result */}
           {wc.executionResult && (
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Execution Result</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Execution Result</div>
               <div style={{ background: wc.executionResult.success ? 'rgba(34,197,94,0.05)' : 'rgba(239,68,68,0.05)', border: `1px solid ${wc.executionResult.success ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`, borderRadius: 8, padding: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                   <CheckCircle2 size={14} color={wc.executionResult.success ? '#22c55e' : '#ef4444'} />
@@ -283,10 +283,10 @@ export function WorkcellDetailPage() {
         </div>
 
         {/* Right Panel — Trace + Proof */}
-        <div style={{ overflow: 'auto', padding: '20px 20px', background: '#080c14' }}>
+        <div style={{ overflow: 'auto', padding: '20px 20px', background: 'var(--gi-bg-base)' }}>
           {/* Operator Sequence */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Operator Sequence</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Operator Sequence</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {wc.operatorSequence.map((op, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
@@ -300,13 +300,13 @@ export function WorkcellDetailPage() {
           {/* Execution Trace */}
           <div style={{ marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Execution Trace</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Execution Trace</div>
               <div style={{ display: 'flex', gap: 12 }}>
                 <span style={{ fontSize: 10, color: '#475569' }}>{wc.executionTrace.totalTokens.toLocaleString()} tokens</span>
                 <span style={{ fontSize: 10, color: '#475569' }}>${wc.totalCostUsd.toFixed(3)}</span>
               </div>
             </div>
-            <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: '12px 14px' }}>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: '12px 14px' }}>
               {wc.executionTrace.steps.map((step) => (
                 <TraceStepRow key={step.id} step={step} />
               ))}
@@ -316,7 +316,7 @@ export function WorkcellDetailPage() {
           {/* Proof Packet */}
           {wc.proofPacket && (
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Proof Packet</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Proof Packet</div>
               <div style={{ background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, padding: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                   <ShieldCheck size={14} color="#22c55e" />
@@ -324,12 +324,12 @@ export function WorkcellDetailPage() {
                 </div>
                 <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>{wc.proofPacket.executionSummary}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Evidence Coverage</div><div style={{ fontSize: 12, color: '#22c55e', fontWeight: 600 }}>{Math.round(wc.proofPacket.evidenceCoverage * 100)}%</div></div>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Agent Calls</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.agentTrace.length}</div></div>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Tool Calls</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.toolCalls.length}</div></div>
-                  <div><div style={{ fontSize: 10, color: '#64748b' }}>Approvals</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.approvalChain.length}</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Evidence Coverage</div><div style={{ fontSize: 12, color: '#22c55e', fontWeight: 600 }}>{Math.round(wc.proofPacket.evidenceCoverage * 100)}%</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Agent Calls</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.agentTrace.length}</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Tool Calls</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.toolCalls.length}</div></div>
+                  <div><div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Approvals</div><div style={{ fontSize: 12, color: '#94a3b8' }}>{wc.proofPacket.approvalChain.length}</div></div>
                 </div>
-                <div style={{ marginTop: 10, padding: '6px 10px', background: '#080c14', borderRadius: 6, border: '1px solid #0f172a' }}>
+                <div style={{ marginTop: 10, padding: '6px 10px', background: 'var(--gi-bg-base)', borderRadius: 6, border: '1px solid var(--gi-bg-base)' }}>
                   <div style={{ fontSize: 9, color: '#475569', marginBottom: 2 }}>Hash Digest</div>
                   <div style={{ fontSize: 10, color: '#22c55e', fontFamily: 'monospace' }}>{wc.proofPacket.hashDigest}</div>
                 </div>

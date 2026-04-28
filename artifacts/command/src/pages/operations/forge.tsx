@@ -41,12 +41,12 @@ import {
 } from 'lucide-react';
 
 const ACCENT = '#d4a054';
-const BG = '#080c14';
+const BG = 'var(--gi-bg-base)';
 const CARD = 'rgba(255,255,255,0.03)';
 const CARD_HOVER = 'rgba(255,255,255,0.05)';
 const BORDER = 'rgba(255,255,255,0.07)';
-const FG = '#e2e8f0';
-const FG_MUT = '#64748b';
+const FG = 'var(--gi-text-primary)';
+const FG_MUT = 'var(--gi-text-muted)';
 const FG_DIM = 'rgba(255,255,255,0.4)';
 
 const BASE = (import.meta.env.BASE_URL ?? '/command/').replace(/\/$/, '');
@@ -79,7 +79,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   communication: '#f59e0b',
   infrastructure: '#14b8a6',
   legal: '#ec4899',
-  custom: '#64748b',
+  custom: '#4a6070',
   vessels: '#4d8fcc',
   terra: '#22c55e',
   counsel: '#a78bfa',
@@ -547,7 +547,7 @@ function OutcomeBadge({ outcome }: { outcome: string }) {
     'require-approval': { color: '#f59e0b', label: 'APPROVAL' },
     'require-dual-approval': { color: '#dc2626', label: 'DUAL-APPROVAL' },
   };
-  const { color, label } = config[outcome] ?? { color: '#64748b', label: outcome.toUpperCase() };
+  const { color, label } = config[outcome] ?? { color: 'var(--gi-text-muted)', label: outcome.toUpperCase() };
   return <Badge color={color}>{label}</Badge>;
 }
 
@@ -763,8 +763,8 @@ function ObservatoryTab() {
 
         {filtered.map((exec) => {
           const isExpanded = expanded === exec.id;
-          const domColor = DOMAIN_COLORS[exec.domain] ?? '#64748b';
-          const tierColor = POLICY_TIER_COLORS[exec.policyTier] ?? '#64748b';
+          const domColor = DOMAIN_COLORS[exec.domain] ?? '#4a6070';
+          const tierColor = POLICY_TIER_COLORS[exec.policyTier] ?? 'var(--gi-text-muted)';
           return (
             <div key={exec.id} style={{ borderBottom: `1px solid ${BORDER}` }}>
               <div
@@ -989,7 +989,7 @@ function ConsoleTab() {
         </div>
         <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {filtered.map((tool) => {
-            const domColor = DOMAIN_COLORS[tool.domain] ?? '#64748b';
+            const domColor = DOMAIN_COLORS[tool.domain] ?? '#4a6070';
             const isSelected = selected?.id === tool.id;
             return (
               <div
@@ -1033,7 +1033,7 @@ function ConsoleTab() {
                   <div style={{ fontSize: 11, color: FG_MUT }}>{selected.description}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                  <Badge color={DOMAIN_COLORS[selected.domain] ?? '#64748b'}>{selected.domain}</Badge>
+                  <Badge color={DOMAIN_COLORS[selected.domain] ?? 'var(--gi-text-muted)'}>{selected.domain}</Badge>
                   {selected.approvalRequired && <Badge color="#ef4444"><Lock size={9} />Approval Required</Badge>}
                 </div>
               </div>
@@ -1058,7 +1058,7 @@ function ConsoleTab() {
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {selected.rateLimits.requestsPerMinute && <Badge color="#8b5cf6">{selected.rateLimits.requestsPerMinute} req/min</Badge>}
                     {selected.rateLimits.concurrency && <Badge color="#8b5cf6">max {selected.rateLimits.concurrency} concurrent</Badge>}
-                    <Badge color="#64748b">timeout {formatDuration(selected.timeoutMs)}</Badge>
+                    <Badge color="var(--gi-text-muted)">timeout {formatDuration(selected.timeoutMs)}</Badge>
                   </div>
                 </div>
                 <div>
@@ -1238,7 +1238,7 @@ function HistoryTab() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {filtered.map((exec, idx) => {
             const isExp = expanded === exec.id;
-            const domColor = DOMAIN_COLORS[exec.domain] ?? '#64748b';
+            const domColor = DOMAIN_COLORS[exec.domain] ?? '#4a6070';
             const outcomeColor = exec.outcome === 'allow' ? '#22c55e' : exec.outcome === 'deny' ? '#ef4444' : '#f59e0b';
             return (
               <div key={exec.id} style={{ display: 'flex', gap: 16, marginLeft: 8 }}>
@@ -1405,8 +1405,8 @@ function CounterfactualTab() {
               {result && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 14 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Circle size={8} style={{ color: '#64748b' }} /> Original
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--gi-text-muted)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Circle size={8} style={{ color: 'var(--gi-text-muted)' }} /> Original
                     </div>
                     <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                       <OutcomeBadge outcome={result.original.outcome} />
@@ -1538,9 +1538,9 @@ function ComposerTab() {
         <div style={{ display: 'flex', gap: 6 }}>
           {DEMO_CATALOG.slice(0, 4).map((t) => (
             <button key={t.id} onClick={() => addTool(t)} style={{
-              padding: '5px 10px', borderRadius: 5, background: `${DOMAIN_COLORS[t.domain] ?? '#64748b'}15`,
-              border: `1px solid ${DOMAIN_COLORS[t.domain] ?? '#64748b'}30`,
-              color: DOMAIN_COLORS[t.domain] ?? '#64748b', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 10px', borderRadius: 5, background: `${DOMAIN_COLORS[t.domain] ?? '#4a6070'}15`,
+              border: `1px solid ${DOMAIN_COLORS[t.domain] ?? '#4a6070'}30`,
+              color: DOMAIN_COLORS[t.domain] ?? '#4a6070', fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
             }}>
               <Plus size={9} /> {t.name}
             </button>
@@ -1695,7 +1695,7 @@ function FusionTab() {
             <div style={{ position: 'absolute', left: 16, top: 0, bottom: 0, width: 1, background: `${ACCENT}30` }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {results.map((sig, idx) => {
-                const domColor = DOMAIN_COLORS[sig.domain] ?? '#64748b';
+                const domColor = DOMAIN_COLORS[sig.domain] ?? '#4a6070';
                 return (
                   <div key={idx} style={{ display: 'flex', gap: 16, marginLeft: 8 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
@@ -1735,7 +1735,7 @@ function FusionTab() {
             <div style={{ fontSize: 12, fontWeight: 700, color: ACCENT, marginBottom: 10 }}>Unified Intelligence Assessment</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 12 }}>
               {results.map((sig) => {
-                const domColor = DOMAIN_COLORS[sig.domain] ?? '#64748b';
+                const domColor = DOMAIN_COLORS[sig.domain] ?? '#4a6070';
                 const pct = (sig.confidence * 100).toFixed(0);
                 return (
                   <div key={sig.domain} style={{ textAlign: 'center' }}>

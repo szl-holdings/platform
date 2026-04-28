@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const RISK_CONFIG: Record<string, { color: string; bg: string; border: string; label: string }> = {

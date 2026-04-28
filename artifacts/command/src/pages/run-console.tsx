@@ -26,7 +26,7 @@ const AUTONOMY_COLORS: Record<string, string> = {
   autonomous: '#22c55e',
   supervised: '#f59e0b',
   advisory: '#4d8fcc',
-  'read-only': '#64748b',
+  'read-only': '#4a6070',
 };
 
 interface RunSummary {
@@ -93,7 +93,7 @@ function fmt(ms: number) {
 }
 
 function OutcomeBadge({ outcome }: { outcome: string }) {
-  const s = OUTCOME_STYLES[outcome] ?? { color: '#64748b', bg: '#64748b18', label: outcome };
+  const s = OUTCOME_STYLES[outcome] ?? { color: '#4a6070', bg: '#64748b18', label: outcome };
   return (
     <span
       style={{
@@ -112,7 +112,7 @@ function OutcomeBadge({ outcome }: { outcome: string }) {
 }
 
 function AutonomyBadge({ mode }: { mode: string }) {
-  const color = AUTONOMY_COLORS[mode] ?? '#64748b';
+  const color = AUTONOMY_COLORS[mode] ?? '#4a6070';
   return (
     <span
       style={{
@@ -136,7 +136,7 @@ function PolicyEventBadge({ event }: { event: string }) {
     ? '#ef4444'
     : event.includes('approval') || event.includes('approved')
       ? '#22c55e'
-      : '#4d8fcc';
+      : 'var(--gi-accent-blue)';
   return (
     <span
       style={{
@@ -214,7 +214,7 @@ function SpanBar({ spans, maxMs }: { spans: RunDetail['spans']; maxMs: number })
                 {fmt(s.latencyMs)}
               </span>
             </div>
-            <div style={{ width: 60, fontSize: 10, color: '#64748b', flexShrink: 0 }}>
+            <div style={{ width: 60, fontSize: 10, color: 'var(--gi-text-muted)', flexShrink: 0 }}>
               {s.model}
             </div>
           </div>
@@ -247,7 +247,7 @@ function DiffPanel({ result, onClose }: { result: ReplayResult; onClose: () => v
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>Replay Diff</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Replay Diff</span>
           <span
             style={{
               fontSize: 11,
@@ -267,7 +267,7 @@ function DiffPanel({ result, onClose }: { result: ReplayResult; onClose: () => v
           style={{
             background: 'none',
             border: 'none',
-            color: '#64748b',
+            color: '#4a6070',
             cursor: 'pointer',
             fontSize: 16,
             lineHeight: 1,
@@ -335,7 +335,7 @@ function DiffPanel({ result, onClose }: { result: ReplayResult; onClose: () => v
         </div>
       </div>
 
-      <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 8 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--gi-text-muted)', marginBottom: 8 }}>
         Span-level diff
       </div>
       {diff.spanDiffs.map((sd) => (
@@ -351,7 +351,7 @@ function DiffPanel({ result, onClose }: { result: ReplayResult; onClose: () => v
         >
           <div style={{ width: 80, fontSize: 11, color: '#94a3b8', flexShrink: 0 }}>{sd.name}</div>
           <div style={{ flex: 1, display: 'flex', gap: 16, fontSize: 11 }}>
-            <span style={{ color: '#64748b' }}>{fmt(sd.originalLatencyMs)}</span>
+            <span style={{ color: 'var(--gi-text-muted)' }}>{fmt(sd.originalLatencyMs)}</span>
             <span style={{ color: '#475569' }}>→</span>
             <span style={{ color: sd.changed ? '#f59e0b' : '#22c55e' }}>
               {fmt(sd.replayedLatencyMs)}
@@ -516,7 +516,7 @@ function RunDetailPanel({ run, onReplay }: { run: RunDetail; onReplay: (runId: s
                   >
                     {pd.decision.toUpperCase()}
                   </span>
-                  <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: 11, color: 'var(--gi-text-muted)', fontFamily: 'monospace' }}>
                     {pd.policyId}
                   </span>
                 </div>
@@ -769,7 +769,7 @@ export function RunConsole() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -780,7 +780,7 @@ export function RunConsole() {
       <div style={{ maxWidth: 1440, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Run Console</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Run Console</span>
             <span
               style={{
                 fontSize: 11,
@@ -795,7 +795,7 @@ export function RunConsole() {
               LIVE
             </span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Inspect, trace, and replay every agent run end-to-end. Examine prompts, tool calls,
             evidence, policy decisions, approvals, and outcomes.
           </p>
@@ -829,7 +829,7 @@ export function RunConsole() {
               }}
             >
               <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -1057,7 +1057,7 @@ export function RunConsole() {
                         alignItems: 'center',
                         gap: 4,
                         fontSize: 11,
-                        color: '#64748b',
+                        color: '#4a6070',
                       }}
                     >
                       {run.policyDecisionCount > 0 && <span>{run.policyDecisionCount}P</span>}
@@ -1120,7 +1120,7 @@ export function RunConsole() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#64748b',
+                    color: '#4a6070',
                     cursor: 'pointer',
                     fontSize: 18,
                     lineHeight: 1,
@@ -1215,7 +1215,7 @@ function FilterSelect({
         }}
       >
         {options.map((o) => (
-          <option key={o} value={o} style={{ background: '#0f172a' }}>
+          <option key={o} value={o} style={{ background: 'var(--gi-bg-base)' }}>
             {o === 'all' ? `All ${label}s` : o}
           </option>
         ))}

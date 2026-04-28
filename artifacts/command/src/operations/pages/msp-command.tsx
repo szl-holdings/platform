@@ -216,7 +216,7 @@ export default function MSPCommand() {
   const avgHealth = Math.round(TENANTS.reduce((a, t) => a + t.healthScore, 0) / TENANTS.length);
 
   return (
-    <div className="h-full overflow-auto" style={{ background: '#080c14' }}>
+    <div className="h-full overflow-auto" style={{ background: 'var(--gi-bg-base)' }}>
       <div className="max-w-[1400px] mx-auto p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>

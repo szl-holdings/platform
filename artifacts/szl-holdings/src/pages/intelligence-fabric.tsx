@@ -980,7 +980,7 @@ function PatternCard({ pattern, index }: { pattern: CorrelationPattern; index: n
         </div>
         <div style={{ textAlign: 'right' }}>
           <div
-            style={{ fontSize: 16, fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em' }}
+            style={{ fontSize: 16, fontWeight: 800, color: 'var(--gi-text-primary)', letterSpacing: '-0.02em' }}
           >
             {Math.round(pattern.confidenceScore * 100)}%
           </div>
@@ -992,7 +992,7 @@ function PatternCard({ pattern, index }: { pattern: CorrelationPattern; index: n
       </div>
       <div style={{ display: 'flex', gap: 14, fontSize: 11 }}>
         <span style={{ color: 'hsl(210,5%,50%)' }}>
-          Hits: <span style={{ color: '#e2e8f0', fontWeight: 700 }}>{pattern.hitCount}</span>
+          Hits: <span style={{ color: 'var(--gi-text-primary)', fontWeight: 700 }}>{pattern.hitCount}</span>
         </span>
         <span style={{ color: 'hsl(210,5%,50%)' }}>
           Feedback adj:{' '}
@@ -1107,7 +1107,7 @@ export default function IntelligenceFabricPage() {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: 'hsl(222,14%,7%)', color: '#e2e8f0' }}>
+    <div style={{ minHeight: '100vh', background: 'hsl(222,14%,7%)', color: 'var(--gi-text-primary)' }}>
       <SiteNav />
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px' }}>

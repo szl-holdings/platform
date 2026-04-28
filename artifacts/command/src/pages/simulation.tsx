@@ -96,7 +96,7 @@ function computeImpact(vars: Record<string, number>): DomainImpact[] {
     {
       domain: 'SEXTANT',
       icon: '⚓',
-      color: '#4d8fcc',
+      color: 'var(--gi-accent-blue)',
       impactLabel: 'Fuel Cost Delta',
       impactValue: oil !== 0 ? `${oil > 0 ? '+' : ''}$${(oil * 0.18).toFixed(1)}M` : 'Neutral',
       trend: oil > 0 ? 'down' : oil < 0 ? 'up' : 'flat',

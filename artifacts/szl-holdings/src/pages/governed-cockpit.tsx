@@ -112,12 +112,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -127,17 +127,17 @@ export default function GovernedCockpit() {
               <BarChart3 className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 SZL Holdings — Governed Portfolio Intelligence
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every fund metric, venture signal, and deployment decision carries a full proof
                 chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -150,7 +150,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Portfolio Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -161,16 +161,16 @@ export default function GovernedCockpit() {
             { label: 'Fund NAV', value: '$142M', icon: BarChart3, color: ACCENT },
             { label: 'IRR (Inception)', value: '24.1%', icon: TrendingUp, color: color.accent.green },
             { label: 'Undeployed Capital', value: '$12.4M', icon: Layers, color: color.accent.amber },
-            { label: 'Portfolio Companies', value: '5', icon: AlertTriangle, color: '#7a99b8' },
+            { label: 'Portfolio Companies', value: '5', icon: AlertTriangle, color: 'var(--gi-text-secondary)' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function GovernedCockpit() {
           actionLabel="Publish LP performance briefing"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Fund NAV stands at $142.3M with $38.7M in unrealised appreciation across 5 portfolio
               companies. IRR since inception is 24.1%, outperforming the top-quartile VC benchmark
               of 19.8%. Composite portfolio health score is 7.3/10. Blended revenue growth across
@@ -202,7 +202,7 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-4 gap-3">
                 {[
@@ -212,7 +212,7 @@ export default function GovernedCockpit() {
                   { label: 'TVPI', value: '1.42x', color: ACCENT },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -238,7 +238,7 @@ export default function GovernedCockpit() {
           actionLabel="Issue PRAXIS Series A readiness brief to IC"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               PRAXIS's Q1 matter volume grew 22% QoQ, with attorney hours saved averaging 31% per
               matter across 3 AmLaw 100 pilot clients. ARR at $2.4M is approaching the $3–5M Series
               A benchmark at current growth trajectory (18 months). Harvey AI's $300M raise
@@ -247,16 +247,16 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'ARR', value: '$2.4M', color: ACCENT },
                   { label: 'QoQ Growth', value: '+22%', color: color.accent.green },
-                  { label: 'Series A ETA', value: '18 mo', color: '#7a99b8' },
+                  { label: 'Series A ETA', value: '18 mo', color: 'var(--gi-text-secondary)' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -283,7 +283,7 @@ export default function GovernedCockpit() {
           actionLabel="Approve Q2 capital deployment ($6.5M)"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               $12.4M in undeployed capital. 3 term sheets active, 2 in diligence. Expected Q2
               deployment of $6.5M across 2–3 companies. Enterprise AI/ML valuations have compressed
               18% from peak — Vintage 2026 entry conditions are historically strong. LegalTech
@@ -292,17 +292,17 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-4 gap-3">
                 {[
                   { label: 'Dry Powder', value: '$12.4M', color: ACCENT },
-                  { label: 'Q2 Pipeline', value: '$6.5M', color: '#7a99b8' },
+                  { label: 'Q2 Pipeline', value: '$6.5M', color: 'var(--gi-text-secondary)' },
                   { label: 'Valuation Compression', value: '-18%', color: color.accent.green },
                   { label: 'Concentration (post)', value: '26%', color: color.accent.amber },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>

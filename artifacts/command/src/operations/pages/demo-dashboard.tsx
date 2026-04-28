@@ -29,7 +29,7 @@ import { useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Link } from 'wouter';
 
-const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };
+const BG = { page: 'var(--gi-bg-base)', surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)', panel: '#0e1219' };
 const BORDER = {
   subtle: 'rgba(255,255,255,0.04)',
   muted: 'rgba(255,255,255,0.06)',
@@ -442,7 +442,7 @@ export default function DemoDashboard() {
                   />
                   <Tooltip
                     contentStyle={{
-                      background: '#0c1018',
+                      background: 'var(--gi-bg-surface)',
                       border: '1px solid rgba(255,255,255,0.08)',
                       fontSize: 10,
                       color: '#fff',
@@ -599,7 +599,7 @@ export default function DemoDashboard() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#0c1018',
+                    background: 'var(--gi-bg-surface)',
                     border: '1px solid rgba(255,255,255,0.08)',
                     fontSize: 9,
                     color: '#fff',

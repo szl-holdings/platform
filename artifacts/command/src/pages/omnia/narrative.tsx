@@ -29,7 +29,7 @@ const SEVERITY_COLORS = {
   critical: '#ef4444',
   high: '#f97316',
   medium: '#f59e0b',
-  low: '#64748b',
+  low: '#4a6070',
 };
 
 interface NarrativeParagraph {
@@ -177,7 +177,7 @@ export default function OmniaNarrativePage() {
                   height: 8,
                   borderRadius: '50%',
                   background: domainColor,
-                  border: '2px solid #060b12',
+                  border: '2px solid var(--gi-bg-base)',
                 }}
               />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>

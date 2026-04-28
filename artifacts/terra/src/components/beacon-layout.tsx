@@ -17,7 +17,7 @@ import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const COMMAND_LOOP = [
-  { phase: 'DETECT', color: '#4d8fcc', active: true },
+  { phase: 'DETECT', color: 'var(--gi-accent-blue)', active: true },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
   { phase: 'DECIDE', color: '#8b5cf6', active: false, link: '/continuum/' },
   { phase: 'EXECUTE', color: '#4B8BDB', active: false, link: '/continuum/' },
@@ -66,7 +66,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             <div
               className="p-1.5 rounded-lg shadow-lg"
               style={{
-                background: 'linear-gradient(135deg, #4d8fcc, #3b82f6)',
+                background: 'linear-gradient(135deg, var(--gi-accent-blue), #3b82f6)',
                 boxShadow: '0 0 12px rgba(77,143,204,0.3)',
               }}
             >
@@ -78,7 +78,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
               </span>
               <span
                 className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
-                style={{ color: '#4d8fcc' }}
+                style={{ color: 'var(--gi-accent-blue)' }}
               >
                 Observability Core
               </span>
@@ -148,7 +148,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                 {isActive && (
                   <div
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full"
-                    style={{ background: '#4d8fcc' }}
+                    style={{ background: 'var(--gi-accent-blue)' }}
                   />
                 )}
                 <item.icon
@@ -264,7 +264,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border"
                 style={{
-                  background: 'linear-gradient(135deg, #4d8fcc, #3b82f6)',
+                  background: 'linear-gradient(135deg, var(--gi-accent-blue), #3b82f6)',
                   borderColor: 'rgba(255,255,255,0.1)',
                 }}
               >
@@ -273,7 +273,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-4 md:p-6" style={{ background: 'var(--gi-bg-base)' }}>
           {children}
         </main>
       </div>

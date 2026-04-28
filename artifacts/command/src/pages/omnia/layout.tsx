@@ -13,7 +13,7 @@ import { Link, useLocation } from 'wouter';
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const ACCENT = '#8b7ac8';
-const BG = '#060b12';
+const BG = 'var(--gi-bg-base)';
 const SURFACE = 'rgba(255,255,255,0.025)';
 const BORDER = `rgba(139,122,200,0.14)`;
 

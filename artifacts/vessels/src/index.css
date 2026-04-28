@@ -59,7 +59,7 @@
 }
 
 :root {
-  /* Vessels product — accent.blue (#4d8fcc ≈ hsl(210 52% 55%)) */
+  /* Vessels product — accent.blue (var(--gi-accent-blue) ≈ hsl(210 52% 55%)) */
   --background: 216 30% 4%;
   --foreground: 205 18% 92%;
   --border: 214 24% 11%;

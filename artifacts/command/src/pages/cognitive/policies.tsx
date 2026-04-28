@@ -664,7 +664,7 @@ export default function CognitivePolicies() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -675,7 +675,7 @@ export default function CognitivePolicies() {
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Policy Console</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Policy Console</span>
             <span
               style={{
                 fontSize: 11,
@@ -721,7 +721,7 @@ export default function CognitivePolicies() {
               </span>
             )}
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Autonomy tier matrix in force per route, skill, and environment — plus model/tool
             allowlists, pending approval queue, and recent rollback events.
           </p>
@@ -748,7 +748,7 @@ export default function CognitivePolicies() {
                 }}
               >
                 <div style={{ fontSize: 22, fontWeight: 700, color }}>{tc.count}</div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{label} routes</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{label} routes</div>
                 <div
                   style={{
                     fontSize: 10,
@@ -781,7 +781,7 @@ export default function CognitivePolicies() {
               onClick={() => setActiveTab(t)}
               style={{
                 background: activeTab === t ? ACCENT : 'transparent',
-                color: activeTab === t ? '#fff' : '#64748b',
+                color: activeTab === t ? '#fff' : '#4a6070',
                 border: 'none',
                 borderRadius: 6,
                 padding: '7px 18px',
@@ -939,10 +939,10 @@ export default function CognitivePolicies() {
                       background: isExpanded ? `${ACCENT}06` : 'transparent',
                     }}
                   >
-                    <div style={{ fontSize: 11, color: '#e2e8f0', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: 11, color: 'var(--gi-text-primary)', fontFamily: 'monospace' }}>
                       {row.route}
                     </div>
-                    <div style={{ fontSize: 10, color: '#64748b', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', fontFamily: 'monospace' }}>
                       {row.skill}
                     </div>
                     <div style={{ fontSize: 10, color: dc, fontWeight: 700 }}>
@@ -952,7 +952,7 @@ export default function CognitivePolicies() {
                     <TierPill tier={row.staging} />
                     <TierPill tier={row.sandbox} />
                     <div style={{ fontSize: 10, color: '#475569' }}>{row.lastChanged}</div>
-                    <div style={{ fontSize: 10, color: '#64748b' }}>{row.changedBy}</div>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{row.changedBy}</div>
                   </div>
                   {isExpanded && (
                     <div
@@ -995,7 +995,7 @@ export default function CognitivePolicies() {
                               >
                                 {label}
                               </div>
-                              <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>
+                              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', lineHeight: 1.4 }}>
                                 {description}
                               </div>
                             </div>
@@ -1226,7 +1226,7 @@ export default function CognitivePolicies() {
                         <div
                           style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}
                         >
-                          <span style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                             {policy.name}
                           </span>
                           <span
@@ -1261,7 +1261,7 @@ export default function CognitivePolicies() {
                             <span
                               style={{
                                 fontSize: 9,
-                                color: '#64748b',
+                                color: '#4a6070',
                                 background: 'rgba(255,255,255,0.05)',
                                 padding: '1px 6px',
                                 borderRadius: 3,
@@ -1331,7 +1331,7 @@ export default function CognitivePolicies() {
             {!isLiveApprovals && (
               <div style={{ fontSize: 11, color: '#475569', marginBottom: 10 }}>
                 Showing sample requests · live data from{' '}
-                <code style={{ fontSize: 10, color: '#64748b' }}>/api/approvals</code>
+                <code style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>/api/approvals</code>
               </div>
             )}
             {pendingApprovals.length === 0 ? (
@@ -1414,9 +1414,9 @@ export default function CognitivePolicies() {
                         <div
                           style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}
                         >
-                          <span style={{ fontSize: 11, color: '#64748b' }}>{req.currentValue}</span>
+                          <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{req.currentValue}</span>
                           <span style={{ color: '#334155', fontSize: 14 }}>→</span>
-                          <span style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 600 }}>
+                          <span style={{ fontSize: 11, color: 'var(--gi-text-primary)', fontWeight: 600 }}>
                             {req.proposedValue}
                           </span>
                         </div>
@@ -1477,7 +1477,7 @@ export default function CognitivePolicies() {
                       <button
                         style={{
                           background: 'rgba(255,255,255,0.03)',
-                          color: '#64748b',
+                          color: '#4a6070',
                           border: '1px solid rgba(255,255,255,0.07)',
                           borderRadius: 6,
                           padding: '6px 14px',
@@ -1602,7 +1602,7 @@ export default function CognitivePolicies() {
                         {rb.reason}
                       </p>
                       <div style={{ fontSize: 10, color: '#475569' }}>
-                        Rolled back by <span style={{ color: '#64748b' }}>{rb.rolledBackBy}</span> ·{' '}
+                        Rolled back by <span style={{ color: 'var(--gi-text-muted)' }}>{rb.rolledBackBy}</span> ·{' '}
                         {new Date(rb.rolledBackAt).toLocaleString()}
                       </div>
                     </div>
@@ -1763,7 +1763,7 @@ export default function CognitivePolicies() {
                             )}
                           </div>
                           {action.reason && (
-                            <div style={{ fontSize: 11, color: '#64748b' }}>{action.reason}</div>
+                            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{action.reason}</div>
                           )}
                           {action.traceId && (
                             <div

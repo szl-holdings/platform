@@ -73,11 +73,11 @@ const DEMO_TENANTS: TenantSummary[] = [
 const MODEL_COLORS: Record<string, string> = {
   'claude-sonnet-4-6': '#8b5cf6',
   'gpt-5.2': '#4B8BDB',
-  'gpt-4o': '#4d8fcc',
+  'gpt-4o': 'var(--gi-accent-blue)',
   'gemini-3.1-pro-preview': '#10b981',
 };
 
-const PIE_COLORS = ['#8b5cf6', '#4B8BDB', '#4d8fcc', '#10b981', '#f59e0b'];
+const PIE_COLORS = ['#8b5cf6', '#4B8BDB', 'var(--gi-accent-blue)', '#10b981', '#f59e0b'];
 
 function formatUsd(n: number) {
   return `$${n.toFixed(2)}`;
@@ -611,7 +611,7 @@ export default function AdminAnalytics() {
                 label: 'Lowest Cost Model',
                 value: 'GPT-4o',
                 sub: '$0.0024/call avg',
-                color: '#4d8fcc',
+                color: 'var(--gi-accent-blue)',
               },
               {
                 label: 'Highest Quality (Eval)',

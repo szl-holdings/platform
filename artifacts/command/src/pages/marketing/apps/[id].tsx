@@ -72,9 +72,9 @@ const appData = {
   vessels: {
     name: 'SEXTANT',
     tagline: 'Fleet Command',
-    color: 'text-[#4d8fcc]',
-    accentHex: '#4d8fcc',
-    bgGradient: 'from-[#4d8fcc]/20',
+    color: 'text-[var(--gi-accent-blue)]',
+    accentHex: 'var(--gi-accent-blue)',
+    bgGradient: 'from-[var(--gi-accent-blue)]/20',
     icon: Anchor,
     description:
       'Real-time AIS tracking, predictive maintenance, and route optimization for modern maritime operations.',

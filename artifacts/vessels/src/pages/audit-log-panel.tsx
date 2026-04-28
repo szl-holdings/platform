@@ -60,12 +60,12 @@ const ACTION_TYPES = [
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
-  vessels: 'text-[#4d8fcc]',
-  aegis:   'text-[#9b7cc8]',
-  terra:   'text-[#5baa8a]',
-  billing: 'text-[#c9a85c]',
-  auth:    'text-[#c96070]',
-  audit:   'text-[#7a99b8]',
+  vessels: 'text-[var(--gi-accent-blue)]',
+  aegis:   'text-[var(--gi-accent-violet)]',
+  terra:   'text-[var(--gi-accent-green)]',
+  billing: 'text-[var(--gi-accent-amber)]',
+  auth:    'text-[var(--gi-accent-red)]',
+  audit:   'text-[var(--gi-text-secondary)]',
 };
 
 function RiskBadge({ level }: { level: string }) {
@@ -85,7 +85,7 @@ function RiskBadge({ level }: { level: string }) {
 function OutcomeIcon({ outcome }: { outcome: string }) {
   if (outcome === 'success') return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />;
   if (outcome === 'failure') return <AlertTriangle className="w-3.5 h-3.5 text-red-400" />;
-  return <Info className="w-3.5 h-3.5 text-[#7a99b8]" />;
+  return <Info className="w-3.5 h-3.5 text-[var(--gi-text-secondary)]" />;
 }
 
 function relTime(dateStr: string) {
@@ -280,7 +280,7 @@ export default function AuditLogPanelPage() {
         </div>
         <button
           onClick={() => refetch()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[#4d8fcc] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[var(--gi-accent-blue)] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           Refresh
@@ -405,7 +405,7 @@ export default function AuditLogPanelPage() {
           <button
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
-            className="text-[11px] text-[#4d8fcc] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
+            className="text-[11px] text-[var(--gi-accent-blue)] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
           >
             ← Previous
           </button>
@@ -416,7 +416,7 @@ export default function AuditLogPanelPage() {
           <button
             disabled={!hasNextPage}
             onClick={() => setPage((p) => p + 1)}
-            className="text-[11px] text-[#4d8fcc] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
+            className="text-[11px] text-[var(--gi-accent-blue)] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
           >
             Next →
           </button>

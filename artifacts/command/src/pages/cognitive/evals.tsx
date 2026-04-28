@@ -488,9 +488,9 @@ export default function CognitiveEvals() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -499,7 +499,7 @@ export default function CognitiveEvals() {
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Eval Console</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Eval Console</span>
             <span
               style={{
                 fontSize: 11,
@@ -548,7 +548,7 @@ export default function CognitiveEvals() {
               <span style={{ fontSize: 10, color: '#f59e0b' }}>⚠ Showing sample data</span>
             )}
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Eval suites, recent runs, and all 9 quality metrics — with regression highlights and
             links to underlying execution traces.
           </p>
@@ -567,7 +567,7 @@ export default function CognitiveEvals() {
             {
               label: 'Total Cases',
               value: suites.reduce((s, x) => s + x.totalCases, 0),
-              color: '#4d8fcc',
+              color: 'var(--gi-accent-blue)',
             },
             {
               label: 'Red-Team Cases',
@@ -595,7 +595,7 @@ export default function CognitiveEvals() {
               }}
             >
               <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -617,7 +617,7 @@ export default function CognitiveEvals() {
               onClick={() => setActiveTab(t)}
               style={{
                 background: activeTab === t ? ACCENT : 'transparent',
-                color: activeTab === t ? '#fff' : '#64748b',
+                color: activeTab === t ? '#fff' : 'var(--gi-text-muted)',
                 border: 'none',
                 borderRadius: 6,
                 padding: '7px 18px',
@@ -693,7 +693,7 @@ export default function CognitiveEvals() {
                         <div
                           style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}
                         >
-                          <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                             {suite.name}
                           </span>
                           {hasRegression && (
@@ -714,7 +714,7 @@ export default function CognitiveEvals() {
                         <p
                           style={{
                             fontSize: 12,
-                            color: '#64748b',
+                            color: 'var(--gi-text-muted)',
                             margin: '0 0 10px',
                             lineHeight: 1.5,
                           }}
@@ -793,10 +793,10 @@ export default function CognitiveEvals() {
               </div>
               {selectedSuite ? (
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0', marginBottom: 4 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
                     {selectedSuite.name}
                   </div>
-                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5, marginBottom: 14 }}>
+                  <p style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.5, marginBottom: 14 }}>
                     {selectedSuite.description}
                   </p>
                   <div style={{ fontSize: 12, color: '#475569', marginBottom: 10 }}>
@@ -819,7 +819,7 @@ export default function CognitiveEvals() {
                             border: `1px solid ${runningId === key ? ACCENT : 'rgba(255,255,255,0.1)'}`,
                             borderRadius: 7,
                             padding: '10px 14px',
-                            color: '#e2e8f0',
+                            color: 'var(--gi-text-primary)',
                             fontSize: 12,
                             fontWeight: 500,
                             cursor: isPending ? 'not-allowed' : 'pointer',
@@ -864,7 +864,7 @@ export default function CognitiveEvals() {
                               marginBottom: 6,
                             }}
                           >
-                            <span style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 500 }}>
+                            <span style={{ fontSize: 11, color: 'var(--gi-text-primary)', fontWeight: 500 }}>
                               {run.model
                                 .replace('gpt-4o-', '4o-')
                                 .replace('claude-3-5-sonnet-', 'claude-')}
@@ -970,7 +970,7 @@ export default function CognitiveEvals() {
                 style={{
                   background: filterRegression ? '#f59e0b18' : 'rgba(255,255,255,0.05)',
                   border: `1px solid ${filterRegression ? '#f59e0b40' : 'rgba(255,255,255,0.1)'}`,
-                  color: filterRegression ? '#f59e0b' : '#64748b',
+                  color: filterRegression ? '#f59e0b' : 'var(--gi-text-muted)',
                   borderRadius: 6,
                   padding: '5px 12px',
                   fontSize: 11,
@@ -1051,14 +1051,14 @@ export default function CognitiveEvals() {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 500, color: '#e2e8f0' }}>
+                    <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--gi-text-primary)' }}>
                       {run.suiteName}
                     </div>
                     <div style={{ fontSize: 10, color: '#475569' }}>
                       {run.model.replace('gpt-4o-', '4o-').replace('claude-3-5-sonnet-', 'claude-')}
                     </div>
                   </div>
-                  <div style={{ fontSize: 10, color: '#64748b' }}>
+                  <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                     {new Date(run.runAt).toLocaleDateString()}
                   </div>
                   {[
@@ -1096,7 +1096,7 @@ export default function CognitiveEvals() {
                   marginTop: 16,
                 }}
               >
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 10 }}>
                   {selectedRun.suiteName} — All 9 Metrics
                 </div>
                 {selectedRun.regressionDetail && (
@@ -1178,7 +1178,7 @@ export default function CognitiveEvals() {
 
         {activeTab === 'compare' && (
           <div>
-            <div style={{ marginBottom: 14, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginBottom: 14, fontSize: 13, color: 'var(--gi-text-muted)' }}>
               9-metric comparison across all recent runs — sorted by suite.
             </div>
             {suites.map((suite) => {
@@ -1197,7 +1197,7 @@ export default function CognitiveEvals() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                       {suite.name}
                     </span>
                     <span

@@ -98,7 +98,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   critical: '#ef4444',
   high: '#f97316',
   medium: '#f59e0b',
-  low: '#64748b',
+  low: '#4a6070',
 };
 
 const RESPONSE_COLORS: Record<string, string> = {
@@ -147,7 +147,7 @@ function GradeBadge({ grade, score }: { grade: DrillScore['grade']; score: numbe
 }
 
 function SeverityBadge({ severity }: { severity: string }) {
-  const color = SEVERITY_COLORS[severity] ?? '#64748b';
+  const color = SEVERITY_COLORS[severity] ?? '#4a6070';
   return (
     <span
       style={{
@@ -168,7 +168,7 @@ function SeverityBadge({ severity }: { severity: string }) {
 }
 
 function ResponseBadge({ type }: { type: string }) {
-  const color = RESPONSE_COLORS[type] ?? '#64748b';
+  const color = RESPONSE_COLORS[type] ?? '#4a6070';
   return (
     <span
       style={{
@@ -200,8 +200,8 @@ function StatCard({
   return (
     <div
       style={{
-        background: '#0f172a',
-        border: '1px solid #1e293b',
+        background: 'var(--gi-bg-base)',
+        border: '1px solid var(--gi-border-subtle)',
         borderRadius: 8,
         padding: '16px 20px',
       }}
@@ -212,13 +212,13 @@ function StatCard({
           fontWeight: 700,
           letterSpacing: 1,
           textTransform: 'uppercase',
-          color: '#64748b',
+          color: '#4a6070',
           marginBottom: 6,
         }}
       >
         {label}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, color: color ?? '#e2e8f0' }}>{value}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, color: color ?? 'var(--gi-text-primary)' }}>{value}</div>
     </div>
   );
 }
@@ -411,7 +411,7 @@ export default function StressDrillPage() {
 
   if (view === 'library') {
     return (
-      <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
+      <div style={{ minHeight: '100vh', background: '#060c1a', color: 'var(--gi-text-primary)' }}>
         <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
           <div style={{ marginBottom: 32 }}>
@@ -461,7 +461,7 @@ export default function StressDrillPage() {
                   fontWeight: 700,
                   letterSpacing: 1,
                   textTransform: 'uppercase',
-                  color: '#64748b',
+                  color: '#4a6070',
                   marginBottom: 12,
                 }}
               >
@@ -483,7 +483,7 @@ export default function StressDrillPage() {
                         key={drill.id}
                         onClick={() => viewDebrief(drill)}
                         style={{
-                          background: '#0f172a',
+                          background: 'var(--gi-bg-base)',
                           border: `1px solid ${gradeColor}40`,
                           borderRadius: 8,
                           padding: '10px 16px',
@@ -515,7 +515,7 @@ export default function StressDrillPage() {
 
           {/* Scenario cards */}
           {loadingScenarios ? (
-            <div style={{ color: '#64748b', padding: 40, textAlign: 'center' }}>
+            <div style={{ color: 'var(--gi-text-muted)', padding: 40, textAlign: 'center' }}>
               Loading scenarios…
             </div>
           ) : (
@@ -551,7 +551,7 @@ export default function StressDrillPage() {
                     </div>
                   </div>
 
-                  <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65, flex: 1 }}>
+                  <p style={{ fontSize: 13, color: 'var(--gi-text-muted)', lineHeight: 1.65, flex: 1 }}>
                     {scenario.summary}
                   </p>
 
@@ -564,7 +564,7 @@ export default function StressDrillPage() {
                           fontWeight: 700,
                           letterSpacing: 1,
                           color: '#94a3b8',
-                          background: '#1e293b',
+                          background: 'var(--gi-border-subtle)',
                           borderRadius: 4,
                           padding: '2px 8px',
                         }}
@@ -579,11 +579,11 @@ export default function StressDrillPage() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      borderTop: '1px solid #1e293b',
+                      borderTop: '1px solid var(--gi-border-subtle)',
                       paddingTop: 16,
                     }}
                   >
-                    <div style={{ fontSize: 12, color: '#64748b' }}>
+                    <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>
                       <span style={{ color: '#94a3b8', fontWeight: 600 }}>
                         {scenario.injectCount} injects
                       </span>{' '}
@@ -630,7 +630,7 @@ export default function StressDrillPage() {
       : null;
 
     return (
-      <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
+      <div style={{ minHeight: '100vh', background: '#060c1a', color: 'var(--gi-text-primary)' }}>
         <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
           {/* Header */}
@@ -658,7 +658,7 @@ export default function StressDrillPage() {
               <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>
                 {scenario?.icon ?? '◆'} {scenario?.name ?? activeDrill.scenarioId}
               </h1>
-              <div style={{ fontSize: 12, color: '#64748b' }}>
+              <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>
                 ID: {activeDrill.id} · Operator: {activeDrill.operatorLabel}
               </div>
             </div>
@@ -734,8 +734,8 @@ export default function StressDrillPage() {
           {/* Progress */}
           <div
             style={{
-              background: '#0f172a',
-              border: '1px solid #1e293b',
+              background: 'var(--gi-bg-base)',
+              border: '1px solid var(--gi-border-subtle)',
               borderRadius: 8,
               padding: '14px 20px',
               marginBottom: 28,
@@ -750,7 +750,7 @@ export default function StressDrillPage() {
                   fontSize: 11,
                   fontWeight: 700,
                   letterSpacing: 1,
-                  color: '#64748b',
+                  color: '#4a6070',
                   marginBottom: 6,
                 }}
               >
@@ -759,7 +759,7 @@ export default function StressDrillPage() {
               <div
                 style={{
                   height: 6,
-                  background: '#1e293b',
+                  background: 'var(--gi-border-subtle)',
                   borderRadius: 3,
                   overflow: 'hidden',
                 }}
@@ -790,7 +790,7 @@ export default function StressDrillPage() {
                   fontWeight: 700,
                   letterSpacing: 1,
                   textTransform: 'uppercase',
-                  color: '#64748b',
+                  color: '#4a6070',
                   marginBottom: 14,
                 }}
               >
@@ -806,8 +806,8 @@ export default function StressDrillPage() {
                     <div
                       key={s.inject.id}
                       style={{
-                        background: isFired ? '#0f172a' : '#0a0f1e',
-                        border: `1px solid ${isCurrent ? (scenario?.accentColor ?? '#ef4444') : '#1e293b'}`,
+                        background: isFired ? 'var(--gi-bg-base)' : '#0a0f1e',
+                        border: `1px solid ${isCurrent ? (scenario?.accentColor ?? '#ef4444') : 'var(--gi-border-subtle)'}`,
                         borderRadius: 8,
                         padding: '16px 18px',
                         opacity: isFired ? 1 : 0.4,
@@ -827,8 +827,8 @@ export default function StressDrillPage() {
                           <span
                             style={{
                               fontSize: 11,
-                              color: '#64748b',
-                              background: '#1e293b',
+                              color: '#4a6070',
+                              background: 'var(--gi-border-subtle)',
                               borderRadius: 4,
                               padding: '2px 7px',
                               fontWeight: 600,
@@ -907,11 +907,11 @@ export default function StressDrillPage() {
                       {isResponded && s.response && (
                         <div
                           style={{
-                            borderTop: '1px solid #1e293b',
+                            borderTop: '1px solid var(--gi-border-subtle)',
                             paddingTop: 8,
                             marginTop: 4,
                             fontSize: 12,
-                            color: '#64748b',
+                            color: '#4a6070',
                           }}
                         >
                           <span style={{ color: '#94a3b8' }}>Response by: </span>
@@ -945,7 +945,7 @@ export default function StressDrillPage() {
               {respondingInject && (
                 <div
                   style={{
-                    background: '#0f172a',
+                    background: 'var(--gi-bg-base)',
                     border: `1px solid ${scenario?.accentColor ?? '#ef4444'}60`,
                     borderRadius: 10,
                     padding: 20,
@@ -970,7 +970,7 @@ export default function StressDrillPage() {
                       style={{
                         fontSize: 11,
                         fontWeight: 700,
-                        color: '#64748b',
+                        color: '#4a6070',
                         display: 'block',
                         marginBottom: 6,
                         textTransform: 'uppercase',
@@ -1011,7 +1011,7 @@ export default function StressDrillPage() {
                       style={{
                         fontSize: 11,
                         fontWeight: 700,
-                        color: '#64748b',
+                        color: '#4a6070',
                         display: 'block',
                         marginBottom: 6,
                         textTransform: 'uppercase',
@@ -1027,7 +1027,7 @@ export default function StressDrillPage() {
                       placeholder="What did the team do? What runbook steps were taken?"
                       style={{
                         width: '100%',
-                        background: '#1e293b',
+                        background: 'var(--gi-border-subtle)',
                         border: '1px solid #334155',
                         borderRadius: 6,
                         color: '#e2e8f0',
@@ -1104,8 +1104,8 @@ export default function StressDrillPage() {
               {!respondingInjectId && currentInject && (
                 <div
                   style={{
-                    background: '#0f172a',
-                    border: '1px solid #1e293b',
+                    background: 'var(--gi-bg-base)',
+                    border: '1px solid var(--gi-border-subtle)',
                     borderRadius: 10,
                     padding: 20,
                     marginBottom: 20,
@@ -1117,7 +1117,7 @@ export default function StressDrillPage() {
                       fontWeight: 700,
                       letterSpacing: 1,
                       textTransform: 'uppercase',
-                      color: '#64748b',
+                      color: '#4a6070',
                       marginBottom: 10,
                     }}
                   >
@@ -1132,8 +1132,8 @@ export default function StressDrillPage() {
               {/* Scenario overview */}
               <div
                 style={{
-                  background: '#0f172a',
-                  border: '1px solid #1e293b',
+                  background: 'var(--gi-bg-base)',
+                  border: '1px solid var(--gi-border-subtle)',
                   borderRadius: 10,
                   padding: 20,
                 }}
@@ -1144,7 +1144,7 @@ export default function StressDrillPage() {
                     fontWeight: 700,
                     letterSpacing: 1,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#4a6070',
                     marginBottom: 10,
                   }}
                 >
@@ -1173,7 +1173,7 @@ export default function StressDrillPage() {
       score.grade === 'D' ? '#f97316' : '#ef4444';
 
     return (
-      <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
+      <div style={{ minHeight: '100vh', background: '#060c1a', color: 'var(--gi-text-primary)' }}>
         <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
           {/* Header */}
@@ -1201,7 +1201,7 @@ export default function StressDrillPage() {
               <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>
                 {scenario?.icon ?? '◆'} {scenario?.name ?? activeDrill.scenarioId}
               </h1>
-              <div style={{ fontSize: 12, color: '#64748b' }}>
+              <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>
                 Operator: {activeDrill.operatorLabel} · Completed:{' '}
                 {new Date(score.completedAt).toLocaleString()}
               </div>
@@ -1212,7 +1212,7 @@ export default function StressDrillPage() {
                 <button
                   onClick={openPdfDebrief}
                   style={{
-                    background: '#1e293b',
+                    background: 'var(--gi-border-subtle)',
                     border: '1px solid #334155',
                     borderRadius: 6,
                     color: '#e2e8f0',
@@ -1229,9 +1229,9 @@ export default function StressDrillPage() {
                   onClick={() => setView('library')}
                   style={{
                     background: 'transparent',
-                    border: '1px solid #1e293b',
+                    border: '1px solid var(--gi-border-subtle)',
                     borderRadius: 6,
-                    color: '#64748b',
+                    color: '#4a6070',
                     fontSize: 12,
                     fontWeight: 700,
                     padding: '8px 16px',
@@ -1300,7 +1300,7 @@ export default function StressDrillPage() {
                   fontWeight: 700,
                   letterSpacing: 1,
                   textTransform: 'uppercase',
-                  color: '#64748b',
+                  color: '#4a6070',
                   marginBottom: 14,
                 }}
               >
@@ -1315,8 +1315,8 @@ export default function StressDrillPage() {
                       <div
                         key={s.inject.id}
                         style={{
-                          background: '#0f172a',
-                          border: '1px solid #1e293b',
+                          background: 'var(--gi-bg-base)',
+                          border: '1px solid var(--gi-border-subtle)',
                           borderRadius: 8,
                           padding: '14px 18px',
                         }}
@@ -1333,7 +1333,7 @@ export default function StressDrillPage() {
                             <span>{DOMAIN_ICONS[s.inject.domain] ?? '◆'}</span>
                             <SeverityBadge severity={s.inject.severity} />
                             <span
-                              style={{ fontSize: 11, color: '#64748b', background: '#1e293b', borderRadius: 4, padding: '2px 7px', fontWeight: 600 }}
+                              style={{ fontSize: 11, color: 'var(--gi-text-muted)', background: 'var(--gi-border-subtle)', borderRadius: 4, padding: '2px 7px', fontWeight: 600 }}
                             >
                               T+{s.inject.t}m
                             </span>
@@ -1348,7 +1348,7 @@ export default function StressDrillPage() {
                           {s.inject.title}
                         </div>
                         {resp?.notes && (
-                          <div style={{ fontSize: 12, color: '#64748b', fontStyle: 'italic' }}>
+                          <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', fontStyle: 'italic' }}>
                             "{resp.notes}"
                           </div>
                         )}
@@ -1374,8 +1374,8 @@ export default function StressDrillPage() {
               {/* Domain breakdown */}
               <div
                 style={{
-                  background: '#0f172a',
-                  border: '1px solid #1e293b',
+                  background: 'var(--gi-bg-base)',
+                  border: '1px solid var(--gi-border-subtle)',
                   borderRadius: 10,
                   overflow: 'hidden',
                 }}
@@ -1386,9 +1386,9 @@ export default function StressDrillPage() {
                     fontWeight: 700,
                     letterSpacing: 1,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#4a6070',
                     padding: '12px 16px',
-                    borderBottom: '1px solid #1e293b',
+                    borderBottom: '1px solid var(--gi-border-subtle)',
                   }}
                 >
                   Domain Breakdown
@@ -1404,10 +1404,10 @@ export default function StressDrillPage() {
                             fontWeight: 700,
                             letterSpacing: 1,
                             textTransform: 'uppercase',
-                            color: '#64748b',
+                            color: '#4a6070',
                             padding: '8px 12px',
                             textAlign: 'left',
-                            background: '#1e293b',
+                            background: 'var(--gi-border-subtle)',
                           }}
                         >
                           {h}
@@ -1417,11 +1417,11 @@ export default function StressDrillPage() {
                   </thead>
                   <tbody>
                     {score.domainBreakdown.map((d) => (
-                      <tr key={d.domain} style={{ borderTop: '1px solid #1e293b' }}>
+                      <tr key={d.domain} style={{ borderTop: '1px solid var(--gi-border-subtle)' }}>
                         <td style={{ padding: '8px 12px', fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
                           {DOMAIN_ICONS[d.domain] ?? '◆'} {d.domain.toUpperCase()}
                         </td>
-                        <td style={{ padding: '8px 12px', fontSize: 13, color: '#e2e8f0', textAlign: 'center' }}>{d.injectCount}</td>
+                        <td style={{ padding: '8px 12px', fontSize: 13, color: 'var(--gi-text-primary)', textAlign: 'center' }}>{d.injectCount}</td>
                         <td style={{ padding: '8px 12px', fontSize: 13, color: '#22c55e', textAlign: 'center' }}>{d.detected}</td>
                         <td style={{ padding: '8px 12px', fontSize: 13, color: '#a78bfa', textAlign: 'center' }}>{d.resolved}</td>
                       </tr>
@@ -1434,7 +1434,7 @@ export default function StressDrillPage() {
               {score.missedSteps.length > 0 && (
                 <div
                   style={{
-                    background: '#0f172a',
+                    background: 'var(--gi-bg-base)',
                     border: '1px solid #ef444440',
                     borderRadius: 10,
                     padding: 16,
@@ -1473,8 +1473,8 @@ export default function StressDrillPage() {
               {/* Recommendations */}
               <div
                 style={{
-                  background: '#0f172a',
-                  border: '1px solid #1e293b',
+                  background: 'var(--gi-bg-base)',
+                  border: '1px solid var(--gi-border-subtle)',
                   borderRadius: 10,
                   padding: 16,
                 }}
@@ -1485,7 +1485,7 @@ export default function StressDrillPage() {
                     fontWeight: 700,
                     letterSpacing: 1,
                     textTransform: 'uppercase',
-                    color: '#64748b',
+                    color: '#4a6070',
                     marginBottom: 10,
                   }}
                 >
@@ -1515,9 +1515,9 @@ export default function StressDrillPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
+    <div style={{ minHeight: '100vh', background: '#060c1a', color: 'var(--gi-text-primary)' }}>
       <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: 48, textAlign: 'center', color: '#64748b' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: 48, textAlign: 'center', color: 'var(--gi-text-muted)' }}>
         Loading…
       </div>
     </div>

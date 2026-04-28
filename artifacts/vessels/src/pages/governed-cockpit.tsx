@@ -113,12 +113,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -128,16 +128,16 @@ export default function GovernedCockpit() {
               <Ship className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 SEXTANT — Governed Maritime Intelligence
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every routing decision, risk flag, and alert carries a full proof chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -150,7 +150,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Fleet Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -166,11 +166,11 @@ export default function GovernedCockpit() {
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function GovernedCockpit() {
           actionLabel="Issue charter-party deviation order (Cyclone Aiko)"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Cyclone Aiko (Cat 2) updated track intersects nominal Singapore–Hamburg route on Day
               4. Northern deviation via Rotterdam adds 1.3 days but reduces weather-related delay
               probability by 67%. Charter Party CP-14b authorises deviation without charterer
@@ -202,16 +202,16 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Delay (Nominal Route)', value: '+3.2d', color: color.accent.red },
                   { label: 'Delay (Deviation)', value: '+1.3d', color: color.accent.amber },
-                  { label: 'Fuel Delta', value: '+$42K', color: '#7a99b8' },
+                  { label: 'Fuel Delta', value: '+$42K', color: 'var(--gi-text-secondary)' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -238,7 +238,7 @@ export default function GovernedCockpit() {
           actionLabel="Onboard counterparty Starline Maritime SA"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Automated sanctions screening identified a 94% name-match against the OFAC SDN list
               for counterparty 'Starline Maritime SA'. Parent entity subject to EU restrictive
               measures. AIS transmitter disabled during two transits through sanctioned
@@ -246,12 +246,12 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid rgba(201,96,112,0.19)' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid rgba(201,96,112,0.19)' }}
             >
               <span className="font-semibold" style={{ color: color.accent.red }}>
                 Transaction blocked:
               </span>
-              <span style={{ color: '#7a99b8' }}>
+              <span style={{ color: 'var(--gi-text-secondary)' }}>
                 {' '}
                 Compliance officer review required before any engagement. Counterparty added to
                 watchlist. Legal hold applied to all related documents.
@@ -274,7 +274,7 @@ export default function GovernedCockpit() {
           actionLabel="Schedule unplanned maintenance port call (MV Horizon Star)"
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Cylinder 4 exhaust temperature deviation (+42°C above baseline for 6 hours) indicates
               probable liner wear. The vessel is approaching class maintenance interval (7,840 of
               8,000 running hours). Probability of failure before next port call is 31%. Proactive
@@ -282,16 +282,16 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Failure Probability', value: '31%', color: color.accent.amber },
-                  { label: 'Running Hours', value: '7,840', color: '#7a99b8' },
+                  { label: 'Running Hours', value: '7,840', color: 'var(--gi-text-secondary)' },
                   { label: 'Downtime Saving', value: '$340K', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>

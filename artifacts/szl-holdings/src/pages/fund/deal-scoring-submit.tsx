@@ -545,7 +545,7 @@ function Section({ icon: Icon, title, children }: { icon: typeof Building2; titl
 }
 
 function Field({ label, value, onChange, placeholder, multiline }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; multiline?: boolean }) {
-  const cls = "w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-3 py-2 text-xs text-white placeholder:text-white/25 focus:border-[#d4a054]/40 focus:outline-none";
+  const cls = "w-full rounded-xl border border-white/[0.08] bg-[var(--gi-bg-surface)] px-3 py-2 text-xs text-white placeholder:text-white/25 focus:border-[#d4a054]/40 focus:outline-none";
   return (
     <label className="block">
       <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">{label}</span>
@@ -562,7 +562,7 @@ function SelectField({ label, value, onChange, options }: { label: string; value
   return (
     <label className="block">
       <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">{label}</span>
-      <select value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-3 py-2 text-xs text-white focus:border-[#d4a054]/40 focus:outline-none">
+      <select value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full rounded-xl border border-white/[0.08] bg-[var(--gi-bg-surface)] px-3 py-2 text-xs text-white focus:border-[#d4a054]/40 focus:outline-none">
         <option value="">Select…</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>

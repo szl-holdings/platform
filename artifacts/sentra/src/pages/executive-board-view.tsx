@@ -400,7 +400,7 @@ export default function ExecutiveBoardView() {
   return (
     <div
       className="flex flex-col min-h-screen"
-      style={{ backgroundColor: '#070A10', color: '#e2e8f0' }}
+      style={{ backgroundColor: '#070A10', color: 'var(--gi-text-primary)' }}
     >
       <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
         <div>

@@ -62,7 +62,7 @@ const STATUS_CONFIG = {
   in_progress: { label: 'In Progress', color: '#c9b787' },
   contained: { label: 'Contained', color: '#8a8a8a' },
   resolved: { label: 'Resolved', color: '#c9b787' },
-  closed: { label: 'Closed', color: '#64748b' },
+  closed: { label: 'Closed', color: 'var(--gi-text-muted)' },
 };
 
 const XDR_INCIDENTS = [
@@ -304,7 +304,7 @@ const NARRATIVE_COVERAGE_CONFIG: Record<
     icon: Brain,
   },
   missing: {
-    color: '#64748b',
+    color: '#4a6070',
     bg: 'rgba(100,116,139,0.05)',
     border: 'rgba(100,116,139,0.15)',
     label: 'Missing',
@@ -717,7 +717,7 @@ export default function XDRIncidentWorkbench() {
                           ENTITY_COLORS[entity.type as keyof typeof ENTITY_COLORS] ?? '#fff';
                         const actionBadge = ACTION_BADGES[entity.action] ?? {
                           label: entity.action,
-                          color: '#64748b',
+                          color: '#4a6070',
                         };
                         const riskSev =
                           SEVERITY_CONFIG[entity.risk as keyof typeof SEVERITY_CONFIG];
@@ -732,7 +732,7 @@ export default function XDRIncidentWorkbench() {
                               </div>
                               <div
                                 className="absolute -top-1 -right-1 w-3 h-3 rounded-full border border-[#060e1a]"
-                                style={{ background: riskSev?.color ?? '#64748b' }}
+                                style={{ background: riskSev?.color ?? 'var(--gi-text-muted)' }}
                               />
                             </div>
                             <div className="text-center">
@@ -991,7 +991,7 @@ export default function XDRIncidentWorkbench() {
                         <span
                           className="text-[9px] px-1.5 py-0.5 rounded border"
                           style={{
-                            color: '#64748b',
+                            color: '#4a6070',
                             borderColor: 'rgba(100,116,139,0.2)',
                             background: 'rgba(100,116,139,0.05)',
                           }}

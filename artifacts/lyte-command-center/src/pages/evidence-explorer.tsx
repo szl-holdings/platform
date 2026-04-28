@@ -49,7 +49,7 @@ const TYPE_CONFIG: Record<
   document: {
     label: 'Document',
     icon: <FileText className="w-3.5 h-3.5" />,
-    color: 'text-[#c9a85c]',
+    color: 'text-[var(--gi-accent-amber)]',
     bg: 'bg-[#c9b787]/8',
     border: 'border-[#c9b787]/15',
   },

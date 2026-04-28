@@ -68,8 +68,8 @@ export default function DiligenceExecutivePage() {
       @media print {
         .no-print { display: none !important; }
         body { background: #fff !important; color: #111 !important; }
-        .brief-card { break-inside: avoid; border: 1px solid #e2e8f0 !important; background: #f8fafc !important; }
-        .brief-header { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .brief-card { break-inside: avoid; border: 1px solid var(--gi-text-primary) !important; background: #f8fafc !important; }
+        .brief-header { background: var(--gi-bg-base) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         a { color: #0369a1 !important; }
       }
     `;
@@ -179,7 +179,7 @@ export default function DiligenceExecutivePage() {
   
           {/* Print footer */}
           <div style={{ marginTop: "1.5rem", display: "none" }} className="print-only">
-            <p style={{ fontSize: "0.75rem", color: "#64748b" }}>SZL Holdings — szlholdings.com/trust — Contact: inquiries@szlholdings.com</p>
+            <p style={{ fontSize: "0.75rem", color: "var(--gi-text-muted)" }}>SZL Holdings — szlholdings.com/trust — Contact: inquiries@szlholdings.com</p>
           </div>
         </main>
   

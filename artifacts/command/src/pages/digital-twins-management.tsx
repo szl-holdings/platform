@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-const BG = '#080c14';
+const BG = 'var(--gi-bg-base)';
 const CARD = 'rgba(255,255,255,0.035)';
 const BORDER = 'rgba(255,255,255,0.07)';
 const ACCENT = '#8b7ac8';
@@ -260,7 +260,7 @@ function TwinCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium truncate" style={{ color: '#e2e8f0' }}>
+            <span className="text-sm font-medium truncate" style={{ color: 'var(--gi-text-primary)' }}>
               {twin.entityName}
             </span>
             <span
@@ -363,7 +363,7 @@ function HistoryPanel({ twinId }: { twinId: string }) {
               }}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium" style={{ color: '#e2e8f0' }}>
+                <span className="text-xs font-medium" style={{ color: 'var(--gi-text-primary)' }}>
                   {run.scenarioName}
                 </span>
                 {isSelected && (
@@ -403,10 +403,10 @@ function HistoryPanel({ twinId }: { twinId: string }) {
             return (
               <div key={key} className="flex items-start gap-2 text-xs py-1.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                 <span className="flex-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{key}</span>
-                <span className="font-mono" style={{ color: '#e2e8f0', minWidth: 80, textAlign: 'right' }}>
+                <span className="font-mono" style={{ color: 'var(--gi-text-primary)', minWidth: 80, textAlign: 'right' }}>
                   {dA ? `${String(dA.before)}→${String(dA.after)}` : '—'}
                 </span>
-                <span className="font-mono" style={{ color: '#e2e8f0', minWidth: 80, textAlign: 'right' }}>
+                <span className="font-mono" style={{ color: 'var(--gi-text-primary)', minWidth: 80, textAlign: 'right' }}>
                   {dB ? `${String(dB.before)}→${String(dB.after)}` : '—'}
                 </span>
               </div>
@@ -474,7 +474,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
           <Icon size={16} style={{ color: typeConfig.color }} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm" style={{ color: '#e2e8f0' }}>{twin.entityName}</div>
+          <div className="font-medium text-sm" style={{ color: 'var(--gi-text-primary)' }}>{twin.entityName}</div>
           <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {typeConfig.label} · {twin.id}
           </div>
@@ -523,7 +523,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                 <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                   {key}
                 </span>
-                <span className="text-xs font-mono text-right" style={{ color: '#e2e8f0', maxWidth: '60%', wordBreak: 'break-all' }}>
+                <span className="text-xs font-mono text-right" style={{ color: 'var(--gi-text-primary)', maxWidth: '60%', wordBreak: 'break-all' }}>
                   {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                 </span>
               </div>
@@ -557,7 +557,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                   {Object.entries(ps.state).map(([k, v]) => (
                     <div key={k} className="flex justify-between text-xs">
                       <span style={{ color: 'rgba(255,255,255,0.5)' }}>{k}</span>
-                      <span className="font-mono" style={{ color: '#e2e8f0' }}>
+                      <span className="font-mono" style={{ color: 'var(--gi-text-primary)' }}>
                         {typeof v === 'number' ? v.toFixed(2) : String(v)}
                       </span>
                     </div>
@@ -605,7 +605,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                         border: `1px solid ${activeScenario?.name === preset.name ? 'rgba(139,122,200,0.4)' : BORDER}`,
                       }}
                     >
-                      <div className="text-sm font-medium mb-0.5" style={{ color: '#e2e8f0' }}>
+                      <div className="text-sm font-medium mb-0.5" style={{ color: 'var(--gi-text-primary)' }}>
                         {preset.name}
                       </div>
                       <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
@@ -662,7 +662,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                       <div className="text-xs font-medium mb-1" style={{ color: simResult.riskAssessment.startsWith('CRITICAL') ? '#f87171' : simResult.riskAssessment.startsWith('HIGH') ? '#fbbf24' : '#34d399' }}>
                         Risk Assessment
                       </div>
-                      <div className="text-xs" style={{ color: '#e2e8f0' }}>{simResult.riskAssessment}</div>
+                      <div className="text-xs" style={{ color: 'var(--gi-text-primary)' }}>{simResult.riskAssessment}</div>
                     </div>
 
                     <div>
@@ -675,7 +675,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                               {String(delta.before)}
                             </span>
                             <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
-                            <span className="font-mono font-medium" style={{ color: delta.changePercent !== undefined && delta.changePercent < 0 ? '#f87171' : delta.changePercent !== undefined && delta.changePercent > 0 ? '#34d399' : '#e2e8f0' }}>
+                            <span className="font-mono font-medium" style={{ color: delta.changePercent !== undefined && delta.changePercent < 0 ? '#f87171' : delta.changePercent !== undefined && delta.changePercent > 0 ? '#34d399' : 'var(--gi-text-primary)' }}>
                               {String(delta.after)}
                             </span>
                             {delta.changePercent !== undefined && (
@@ -694,7 +694,7 @@ function TwinDetail({ twin, onClose }: { twin: TwinState; onClose: () => void })
                         {simResult.recommendedActions.map((action, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs mb-1.5">
                             <span className="font-mono mt-0.5" style={{ color: ACCENT }}>→</span>
-                            <span style={{ color: '#e2e8f0' }}>{action}</span>
+                            <span style={{ color: 'var(--gi-text-primary)' }}>{action}</span>
                           </div>
                         ))}
                       </div>
@@ -785,7 +785,7 @@ export function DigitalTwinsManagementPage() {
       <div className="flex-shrink-0 p-6 pb-4 border-b" style={{ borderColor: BORDER }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-semibold mb-1" style={{ color: '#e2e8f0' }}>
+            <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--gi-text-primary)' }}>
               Digital Twin Registry
             </h1>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
@@ -846,7 +846,7 @@ export function DigitalTwinsManagementPage() {
             style={{
               background: 'rgba(255,255,255,0.05)',
               border: `1px solid ${BORDER}`,
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
           />
           <select
@@ -856,7 +856,7 @@ export function DigitalTwinsManagementPage() {
             style={{
               background: 'rgba(255,255,255,0.05)',
               border: `1px solid ${BORDER}`,
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
           >
             <option value="all">All Types</option>

@@ -176,7 +176,7 @@ export default function ExitModelingPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                     <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                     <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} tickFormatter={v => `$${v}M`} />
-                    <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
+                    <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
                       formatter={(v: number) => [`$${v}M`, ""]} />
                     <Bar dataKey="bear" name="Bear" fill="#c45a4a" fillOpacity={0.7} radius={[3, 3, 0, 0]} />
                     <Bar dataKey="base" name="Base" fill="#d4a054" fillOpacity={0.8} radius={[3, 3, 0, 0]} />
@@ -229,7 +229,7 @@ export default function ExitModelingPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                       <XAxis dataKey="range" tick={{ fill: "rgba(255,255,255,0.2)", fontSize: 8 }} interval={3} />
                       <YAxis tick={{ fill: "rgba(255,255,255,0.2)", fontSize: 9 }} />
-                      <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                      <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                       <Bar dataKey="count" name="Simulations" fill={company.color} fillOpacity={0.7} radius={[2, 2, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>

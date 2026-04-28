@@ -238,7 +238,7 @@ export default function KnowledgeGraph() {
   };
 
   return (
-    <div className="h-full overflow-auto" style={{ background: '#080c14' }}>
+    <div className="h-full overflow-auto" style={{ background: 'var(--gi-bg-base)' }}>
       <div className="max-w-[1400px] mx-auto p-4 space-y-4">
         <div>
           <h1 className="text-base font-bold tracking-tight" style={{ color: DS.text.primary }}>

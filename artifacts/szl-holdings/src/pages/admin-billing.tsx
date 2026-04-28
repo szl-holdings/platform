@@ -144,7 +144,7 @@ export default function AdminBillingPage() {
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#0b0d11', color: '#e2e8f0' }}>
+    <div className="min-h-screen p-6" style={{ background: '#0b0d11', color: 'var(--gi-text-primary)' }}>
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -170,7 +170,7 @@ export default function AdminBillingPage() {
         {actionResult && (
           <div
             className="mb-4 px-4 py-3 rounded-lg text-sm"
-            style={{ background: '#1e293b', color: '#94a3b8', border: '1px solid #334155' }}
+            style={{ background: 'var(--gi-border-subtle)', color: '#94a3b8', border: '1px solid #334155' }}
           >
             {actionResult}
           </div>
@@ -210,7 +210,7 @@ export default function AdminBillingPage() {
                 placeholder="Search org…"
                 className="px-3 py-2 rounded-lg text-sm flex-1 min-w-[180px]"
                 style={{
-                  background: '#1e293b',
+                  background: 'var(--gi-border-subtle)',
                   border: '1px solid rgba(255,255,255,0.1)',
                   color: '#e2e8f0',
                   outline: 'none',
@@ -220,7 +220,7 @@ export default function AdminBillingPage() {
                 value={productFilter}
                 onChange={(e) => setProductFilter(e.target.value)}
                 className="px-3 py-2 rounded-lg text-sm"
-                style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}
+                style={{ background: 'var(--gi-border-subtle)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--gi-text-primary)' }}
               >
                 <option value="all">All Products</option>
                 {products.map((p) => (
@@ -233,7 +233,7 @@ export default function AdminBillingPage() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 rounded-lg text-sm"
-                style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}
+                style={{ background: 'var(--gi-border-subtle)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--gi-text-primary)' }}
               >
                 <option value="all">All Statuses</option>
                 {statuses.map((s) => (
@@ -247,7 +247,7 @@ export default function AdminBillingPage() {
             {filteredSubs.length === 0 ? (
               <div
                 className="text-center py-12 rounded-xl text-sm"
-                style={{ background: '#1e293b', color: 'rgba(255,255,255,0.3)' }}
+                style={{ background: 'var(--gi-border-subtle)', color: 'rgba(255,255,255,0.3)' }}
               >
                 No subscriptions match your filters.
               </div>
@@ -280,7 +280,7 @@ export default function AdminBillingPage() {
                         }}
                       >
                         <td className="px-4 py-3">
-                          <div className="font-medium" style={{ color: '#e2e8f0' }}>
+                          <div className="font-medium" style={{ color: 'var(--gi-text-primary)' }}>
                             {s.orgName}
                           </div>
                           <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
@@ -336,7 +336,7 @@ export default function AdminBillingPage() {
             {overrides.length === 0 ? (
               <div
                 className="text-center py-12 rounded-xl text-sm"
-                style={{ background: '#1e293b', color: 'rgba(255,255,255,0.3)' }}
+                style={{ background: 'var(--gi-border-subtle)', color: 'rgba(255,255,255,0.3)' }}
               >
                 No active entitlement overrides.
               </div>
@@ -377,7 +377,7 @@ export default function AdminBillingPage() {
                         <td className="px-4 py-3">
                           <span
                             className="px-2 py-0.5 rounded text-xs font-mono"
-                            style={{ background: '#1e293b', color: ACCENT }}
+                            style={{ background: 'var(--gi-border-subtle)', color: ACCENT }}
                           >
                             {o.featureKey}
                           </span>
@@ -418,7 +418,7 @@ export default function AdminBillingPage() {
                 onClick={loadDisputes}
                 disabled={disputesLoading}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
-                style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}
+                style={{ background: 'var(--gi-border-subtle)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${disputesLoading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -429,7 +429,7 @@ export default function AdminBillingPage() {
                 Loading disputes…
               </div>
             ) : disputes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: '#1e293b' }}>
+              <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: 'var(--gi-border-subtle)' }}>
                 <AlertTriangle className="w-10 h-10 mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No disputes found</p>
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Disputes are pulled from Stripe</p>
@@ -470,7 +470,7 @@ export default function AdminBillingPage() {
                           <td className="px-4 py-3 text-xs font-mono" style={{ color: '#94a3b8' }}>
                             {d.externalDisputeId}
                           </td>
-                          <td className="px-4 py-3 text-xs" style={{ color: '#e2e8f0' }}>
+                          <td className="px-4 py-3 text-xs" style={{ color: 'var(--gi-text-primary)' }}>
                             {d.reason.replace(/_/g, ' ')}
                           </td>
                           <td className="px-4 py-3 text-xs font-mono" style={{ color: isUrgent ? '#ef4444' : '#94a3b8' }}>

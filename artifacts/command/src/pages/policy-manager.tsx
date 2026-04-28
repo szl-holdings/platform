@@ -62,7 +62,7 @@ const MODE_META: Record<
   draft: {
     label: 'Draft',
     description: 'Produce draft for human review',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     bg: 'rgba(77,143,204,0.10)',
     border: 'rgba(77,143,204,0.30)',
     Icon: FileText,

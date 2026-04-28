@@ -1074,7 +1074,7 @@ const COVERAGE_CONFIG: Record<
   },
   missing: {
     label: 'Missing',
-    color: '#64748b',
+    color: 'var(--gi-text-muted)',
     bg: 'rgba(100,116,139,0.05)',
     border: 'rgba(100,116,139,0.15)',
     icon: Info,
@@ -1123,7 +1123,7 @@ function DemoLabel() {
 
 function ConfidenceBadge({ value, size = 'sm' }: { value: number; size?: 'sm' | 'xs' }) {
   const color =
-    value >= 90 ? '#c9b787' : value >= 75 ? '#c9b787' : value >= 50 ? '#c9b787' : '#64748b';
+    value >= 90 ? '#c9b787' : value >= 75 ? '#c9b787' : value >= 50 ? '#c9b787' : 'var(--gi-text-muted)';
   return (
     <span
       className={cn('font-bold font-mono', size === 'xs' ? 'text-[9px]' : 'text-[11px]')}
@@ -1754,7 +1754,7 @@ export default function AdversaryNarrativeEngine() {
                                       }
                                     : deniedActions.has(step.recommendedAction.id)
                                       ? {
-                                          color: '#64748b',
+                                          color: 'var(--gi-text-muted)',
                                           borderColor: 'rgba(100,116,139,0.2)',
                                           background: 'rgba(100,116,139,0.06)',
                                         }
@@ -2101,7 +2101,7 @@ export default function AdversaryNarrativeEngine() {
                                             }
                                           : deniedActions.has(action.id)
                                             ? {
-                                                color: '#64748b',
+                                                color: 'var(--gi-text-muted)',
                                                 borderColor: 'rgba(100,116,139,0.2)',
                                                 background: 'rgba(100,116,139,0.06)',
                                               }

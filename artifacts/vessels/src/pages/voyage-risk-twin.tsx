@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 const BG_CARD = 'rgba(10,22,40,0.85)';
 const BG_CARD_INNER = 'rgba(255,255,255,0.03)';
 const BORDER = 'rgba(77,143,204,0.12)';

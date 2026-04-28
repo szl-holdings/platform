@@ -1412,7 +1412,7 @@ export function CompetitiveAtlasPage() {
   const lastPolled = status?.lastFullPollAt ? timeAgo(status.lastFullPollAt) : "never";
 
   return (
-    <div className="min-h-screen p-6 lg:p-8" style={{ background: "#070b12", color: "#c8d8e8" }}>
+    <div className="min-h-screen p-6 lg:p-8" style={{ background: "#070b12", color: "var(--gi-text-primary)" }}>
       <div className="max-w-6xl mx-auto space-y-8">
 
         <header className="space-y-2">

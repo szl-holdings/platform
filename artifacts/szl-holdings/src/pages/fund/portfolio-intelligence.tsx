@@ -199,7 +199,7 @@ export default function PortfolioIntelligencePage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                         <Line type="monotone" dataKey="arr" name="ARR ($K)" stroke={company.color} strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="burn" name="Burn ($K)" stroke="#c45a4a" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
                       </LineChart>

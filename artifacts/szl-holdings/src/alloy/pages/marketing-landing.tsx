@@ -127,8 +127,8 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
     <div
       style={{
         minHeight: '100vh',
-        background: '#080c14',
-        color: '#e2e8f0',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
       }}
     >
@@ -179,7 +179,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 fontWeight: 700,
                 fontSize: '15px',
                 letterSpacing: '-0.02em',
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
               }}
             >
               Counsel
@@ -205,7 +205,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 href={link.href}
                 style={{
                   fontSize: '13px',
-                  color: '#64748b',
+                  color: 'var(--gi-text-muted)',
                   textDecoration: 'none',
                   transition: 'color 0.15s',
                 }}
@@ -213,7 +213,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   (e.currentTarget as HTMLElement).style.color = '#94a3b8';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = '#64748b';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-muted)';
                 }}
               >
                 {link.label}
@@ -223,12 +223,12 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <a
               href="/"
-              style={{ fontSize: '13px', color: '#64748b', textDecoration: 'none' }}
+              style={{ fontSize: '13px', color: 'var(--gi-text-muted)', textDecoration: 'none' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.color = '#94a3b8';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = '#64748b';
+                (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-muted)';
               }}
             >
               SZL Holdings
@@ -351,7 +351,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             style={{
               fontSize: '1.0625rem',
               lineHeight: 1.72,
-              color: '#64748b',
+              color: 'var(--gi-text-muted)',
               maxWidth: '36rem',
               margin: '0 auto 2.5rem',
             }}
@@ -370,7 +370,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 fontWeight: 600,
                 cursor: 'pointer',
                 background: '#4B8BDB',
-                color: '#080c14',
+                color: 'var(--gi-bg-base)',
                 border: 'none',
                 transition: 'all 0.15s',
               }}
@@ -402,7 +402,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.2)';
-                (e.currentTarget as HTMLElement).style.color = '#e2e8f0';
+                (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-primary)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.10)';
@@ -460,7 +460,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 style={{
                   fontSize: '0.9375rem',
                   lineHeight: 1.72,
-                  color: '#64748b',
+                  color: 'var(--gi-text-muted)',
                   marginBottom: '1rem',
                 }}
               >
@@ -580,7 +580,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             style={{
               fontSize: '0.9375rem',
               lineHeight: 1.72,
-              color: '#64748b',
+              color: 'var(--gi-text-muted)',
               marginBottom: '2.5rem',
               maxWidth: '32rem',
             }}
@@ -707,7 +707,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   style={{
                     fontSize: '13.5px',
                     fontWeight: 600,
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     marginBottom: '6px',
                   }}
                 >
@@ -859,7 +859,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <br />
                 Not raw data.
               </h2>
-              <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
+              <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: 'var(--gi-text-muted)' }}>
                 Every Counsel workflow produces a clean, traceable output — structured enough to act
                 on, explainable enough to audit, and precise enough to route automatically.
               </p>
@@ -931,7 +931,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               >
                 Humans stay in the loop.
               </h2>
-              <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
+              <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: 'var(--gi-text-muted)' }}>
                 Counsel's governance layer is not a bolt-on. It's built into every workflow.
                 High-consequence decisions pause for human review. Every approval is logged. Every
                 action is attributable. The audit trail is immutable.
@@ -1070,7 +1070,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             style={{
               fontSize: '0.9375rem',
               lineHeight: 1.72,
-              color: '#64748b',
+              color: 'var(--gi-text-muted)',
               marginBottom: '2.5rem',
               maxWidth: '32rem',
             }}
@@ -1175,7 +1175,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             style={{
               fontSize: '0.9375rem',
               lineHeight: 1.65,
-              color: '#64748b',
+              color: 'var(--gi-text-muted)',
               marginBottom: '2rem',
             }}
           >
@@ -1195,7 +1195,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 fontWeight: 600,
                 cursor: 'pointer',
                 background: '#4B8BDB',
-                color: '#080c14',
+                color: 'var(--gi-bg-base)',
                 border: 'none',
                 transition: 'all 0.15s',
               }}
@@ -1228,7 +1228,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.2)';
-                (e.currentTarget as HTMLElement).style.color = '#e2e8f0';
+                (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-primary)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.10)';
@@ -1271,7 +1271,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 >
                   <Zap size={12} style={{ color: '#4B8BDB' }} />
                 </div>
-                <span style={{ fontWeight: 700, fontSize: '14px', color: '#e2e8f0' }}>Counsel</span>
+                <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--gi-text-primary)' }}>Counsel</span>
               </div>
               <p style={{ fontSize: '12px', color: '#334155', lineHeight: 1.65 }}>
                 Intelligence orchestration engine by SZL Holdings. Signal acquisition, reasoning,
@@ -1307,7 +1307,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                       transition: 'color 0.15s',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = '#64748b';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-muted)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.color = '#334155';
@@ -1342,7 +1342,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                       transition: 'color 0.15s',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = '#64748b';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-muted)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.color = '#334155';
@@ -1377,7 +1377,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                       transition: 'color 0.15s',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = '#64748b';
+                      (e.currentTarget as HTMLElement).style.color = 'var(--gi-text-muted)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.color = '#334155';
@@ -1400,10 +1400,10 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               gap: '12px',
             }}
           >
-            <p style={{ fontSize: '11px', color: '#1e293b', fontFamily: 'monospace' }}>
+            <p style={{ fontSize: '11px', color: 'var(--gi-border-subtle)', fontFamily: 'monospace' }}>
               © {new Date().getFullYear()} SZL Holdings. All rights reserved.
             </p>
-            <p style={{ fontSize: '11px', color: '#1e293b', fontFamily: 'monospace' }}>
+            <p style={{ fontSize: '11px', color: 'var(--gi-border-subtle)', fontFamily: 'monospace' }}>
               inquiries@szlholdings.com
             </p>
           </div>

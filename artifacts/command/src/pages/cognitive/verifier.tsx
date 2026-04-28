@@ -566,7 +566,7 @@ export default function VerifierConsole() {
                         </span>
                       </div>
                       <div
-                        style={{ fontSize: 11, fontWeight: 600, color: '#e2e8f0', lineHeight: 1.3 }}
+                        style={{ fontSize: 11, fontWeight: 600, color: 'var(--gi-text-primary)', lineHeight: 1.3 }}
                       >
                         {result.agentName}
                       </div>
@@ -580,7 +580,7 @@ export default function VerifierConsole() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', lineHeight: 1.4, marginBottom: 8 }}>
                     {result.outputSummary}
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -658,10 +658,10 @@ export default function VerifierConsole() {
                     {selectedResult.overallStatus}
                   </span>
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
                   {selectedResult.agentName}
                 </div>
-                <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5, marginBottom: 8 }}>
+                <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.5, marginBottom: 8 }}>
                   {selectedResult.outputSummary}
                 </div>
                 <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#475569' }}>
@@ -715,7 +715,7 @@ export default function VerifierConsole() {
                 onClick={() => setCategoryFilter(cat)}
                 style={{
                   background: categoryFilter === cat ? ACCENT : 'rgba(255,255,255,0.05)',
-                  color: categoryFilter === cat ? '#fff' : '#64748b',
+                  color: categoryFilter === cat ? '#fff' : '#4a6070',
                   border: 'none',
                   borderRadius: 6,
                   padding: '5px 12px',
@@ -781,7 +781,7 @@ export default function VerifierConsole() {
                       </span>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                             {check.name}
                           </span>
                           <span
@@ -829,7 +829,7 @@ export default function VerifierConsole() {
                         </div>
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginBottom: 6 }}>
                       {check.description}
                     </div>
                     <div
@@ -906,7 +906,7 @@ export default function VerifierConsole() {
                   />
                   <div>
                     <div
-                      style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}
+                      style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}
                     >
                       {selectedCheck.name}
                     </div>
@@ -1000,7 +1000,7 @@ export default function VerifierConsole() {
                         <div style={{ fontSize: 9, color: '#475569', marginBottom: 2 }}>
                           {row.label}
                         </div>
-                        <div style={{ fontSize: 11, color: '#e2e8f0', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: 11, color: 'var(--gi-text-primary)', fontFamily: 'monospace' }}>
                           {row.value}
                         </div>
                       </div>

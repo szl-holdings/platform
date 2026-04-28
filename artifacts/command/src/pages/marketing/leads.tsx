@@ -6,7 +6,7 @@ import {
   Ship, Shield, Brain, Users, RefreshCw,
 } from "lucide-react";
 
-const BG = "#080c14";
+const BG = "var(--gi-bg-base)";
 const SURFACE = "rgba(255,255,255,0.03)";
 const BORDER = "rgba(255,255,255,0.07)";
 const TEXT = "hsl(38,8%,92%)";

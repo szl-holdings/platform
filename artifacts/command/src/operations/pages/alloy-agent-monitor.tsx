@@ -2,7 +2,7 @@ import { EnvironmentLabel } from '@szl-holdings/shared-ui/continuum-decision-car
 import { AlertTriangle, Pause, Play, Radio, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
-const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e' } as const;
+const BG = { page: 'var(--gi-bg-base)', surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)' } as const;
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.07)' } as const;
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',

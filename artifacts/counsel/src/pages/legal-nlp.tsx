@@ -61,7 +61,7 @@ const TASKS: Array<{ id: AnalyzeTask; label: string; desc: string; icon: typeof 
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct > 60 ? '#8b5cf6' : pct > 35 ? '#f59e0b' : '#64748b';
+  const color = pct > 60 ? '#8b5cf6' : pct > 35 ? '#f59e0b' : 'var(--gi-text-muted)';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
@@ -127,7 +127,7 @@ export default function LegalNlpPage() {
                 border: `1px solid ${active ? 'rgba(139,92,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
               }}
             >
-              <Icon className="w-4 h-4 mb-2" style={{ color: active ? ACCENT : '#64748b' }} />
+              <Icon className="w-4 h-4 mb-2" style={{ color: active ? ACCENT : 'var(--gi-text-muted)' }} />
               <div className="text-sm font-medium" style={{ color: active ? '#d4b8ff' : '#94a3b8' }}>
                 {t.label}
               </div>
@@ -148,7 +148,7 @@ export default function LegalNlpPage() {
           style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e2e8f0',
+            color: 'var(--gi-text-primary)',
           }}
           placeholder="Paste a contract clause or document excerpt…"
           value={text}

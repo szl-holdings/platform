@@ -70,7 +70,7 @@ const NOTIFICATION_CHANNELS = ['webhook', 'email', 'sms', 'slack', 'teams', 'dis
 const SCENARIOS = ['sanctions-hit', 'threat-detected', 'lease-renewal'];
 
 const sevColor: Record<string, string> = {
-  info: '#64748b',
+  info: 'var(--gi-text-muted)',
   low: '#3b82f6',
   medium: '#f59e0b',
   high: '#f97316',
@@ -134,7 +134,7 @@ export default function RulesStudioPage() {
   const deadLetters = dlQ.data?.deadLetters ?? [];
 
   return (
-    <div style={{ padding: '24px 32px', fontFamily: "'Inter', system-ui, sans-serif", color: '#e2e8f0', minHeight: '100vh', background: '#0a0a0f' }}>
+    <div style={{ padding: '24px 32px', fontFamily: "'Inter', system-ui, sans-serif", color: 'var(--gi-text-primary)', minHeight: '100vh', background: '#0a0a0f' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '0.05em', margin: 0, color: '#f1f5f9' }}>
@@ -159,7 +159,7 @@ export default function RulesStudioPage() {
           <StatCard label="TOTAL RULES" value={stats.totalRules} accent="#6366f1" />
           <StatCard label="ENABLED" value={stats.enabledRules} accent="#10b981" />
           <StatCard label="ROUTED EVENTS" value={stats.totalRoutedEvents} accent="#3b82f6" />
-          <StatCard label="DEAD LETTERS" value={stats.totalDeadLetters} accent={stats.totalDeadLetters > 0 ? '#ef4444' : '#64748b'} />
+          <StatCard label="DEAD LETTERS" value={stats.totalDeadLetters} accent={stats.totalDeadLetters > 0 ? '#ef4444' : 'var(--gi-text-muted)'} />
         </div>
       )}
 
@@ -174,13 +174,13 @@ export default function RulesStudioPage() {
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, borderBottom: '1px solid #1e293b', paddingBottom: 4 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16, borderBottom: '1px solid var(--gi-border-subtle)', paddingBottom: 4 }}>
         {(['rules', 'events', 'dead-letters'] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '8px 16px', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em',
             border: 'none', cursor: 'pointer', borderRadius: '4px 4px 0 0',
-            background: tab === t ? '#1e293b' : 'transparent',
-            color: tab === t ? '#f1f5f9' : '#64748b',
+            background: tab === t ? 'var(--gi-border-subtle)' : 'transparent',
+            color: tab === t ? '#f1f5f9' : '#4a6070',
           }}>
             {t.toUpperCase().replace(/-/g, ' ')}
             {t === 'events' && events.length > 0 && <span style={{ marginLeft: 6, background: '#3b82f6', color: '#fff', padding: '1px 6px', borderRadius: 8, fontSize: 10 }}>{events.length}</span>}
@@ -192,30 +192,30 @@ export default function RulesStudioPage() {
       {tab === 'rules' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {rules.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: 'var(--gi-text-muted)' }}>
               <p style={{ fontSize: 14 }}>NO RULES CONFIGURED</p>
               <p style={{ fontSize: 12 }}>Click "SEED DEMO RULES" to load the three demo flows or "NEW RULE" to create one.</p>
             </div>
           )}
           {rules.map((r) => (
-            <div key={r.ruleId} style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
+            <div key={r.ruleId} style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                     <span style={{ fontSize: 15, fontWeight: 600, color: '#f1f5f9' }}>{r.name}</span>
                     <span style={{
                       fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, letterSpacing: '0.08em',
-                      background: r.enabled === 'true' ? '#065f4620' : '#1e293b',
-                      color: r.enabled === 'true' ? '#10b981' : '#64748b',
+                      background: r.enabled === 'true' ? '#065f4620' : 'var(--gi-border-subtle)',
+                      color: r.enabled === 'true' ? '#10b981' : '#4a6070',
                       border: `1px solid ${r.enabled === 'true' ? '#10b98140' : '#334155'}`,
                     }}>
                       {r.enabled === 'true' ? 'ACTIVE' : 'DISABLED'}
                     </span>
                   </div>
                   {r.description && <p style={{ fontSize: 12, color: '#94a3b8', margin: '2px 0 8px' }}>{r.description}</p>}
-                  <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#64748b' }}>
-                    <span>WHEN <strong style={{ color: '#e2e8f0' }}>{r.sourceDomain}/{r.sourceType}</strong></span>
-                    <span>≥ <strong style={{ color: sevColor[r.minSeverity] ?? '#64748b' }}>{r.minSeverity.toUpperCase()}</strong></span>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--gi-text-muted)' }}>
+                    <span>WHEN <strong style={{ color: 'var(--gi-text-primary)' }}>{r.sourceDomain}/{r.sourceType}</strong></span>
+                    <span>≥ <strong style={{ color: sevColor[r.minSeverity] ?? 'var(--gi-text-muted)' }}>{r.minSeverity.toUpperCase()}</strong></span>
                     <span>→ <strong style={{ color: '#3b82f6' }}>{actionLabel[r.actionType] ?? r.actionType.toUpperCase()}</strong></span>
                     {r.targetDomain && <span>⟶ <strong style={{ color: '#a78bfa' }}>{r.targetDomain}</strong></span>}
                   </div>
@@ -241,20 +241,20 @@ export default function RulesStudioPage() {
       {tab === 'events' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {events.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: 'var(--gi-text-muted)' }}>
               <p style={{ fontSize: 14 }}>NO ROUTED EVENTS YET</p>
               <p style={{ fontSize: 12 }}>Fire a test scenario above to trigger rule evaluation.</p>
             </div>
           )}
           {events.map((e) => (
-            <div key={e.eventId} style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '12px 16px' }}>
+            <div key={e.eventId} style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '12px 16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: '#3b82f620', color: '#3b82f6', border: '1px solid #3b82f640', letterSpacing: '0.06em' }}>
                       {actionLabel[e.actionType] ?? e.actionType.toUpperCase()}
                     </span>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{e.ruleName}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--gi-text-primary)' }}>{e.ruleName}</span>
                     <span style={{
                       fontSize: 10, padding: '1px 6px', borderRadius: 4,
                       background: e.status === 'success' ? '#065f4620' : '#7f1d1d20',
@@ -277,7 +277,7 @@ export default function RulesStudioPage() {
       {tab === 'dead-letters' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {deadLetters.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: 'var(--gi-text-muted)' }}>
               <p style={{ fontSize: 14 }}>NO DEAD LETTERS</p>
               <p style={{ fontSize: 12 }}>Failed rule executions appear here for replay.</p>
             </div>
@@ -302,8 +302,8 @@ export default function RulesStudioPage() {
 
 function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
-      <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>
+    <div style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
+      <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 28, fontWeight: 700, color: accent }}>{value}</div>
     </div>
   );
@@ -348,15 +348,15 @@ function CreateRuleModal({ onClose, onCreated }: { onClose: () => void; onCreate
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '8px 10px', fontSize: 13, background: '#0f172a', border: '1px solid #334155',
-    borderRadius: 4, color: '#e2e8f0', outline: 'none', boxSizing: 'border-box',
+    width: '100%', padding: '8px 10px', fontSize: 13, background: 'var(--gi-bg-base)', border: '1px solid #334155',
+    borderRadius: 4, color: 'var(--gi-text-primary)', outline: 'none', boxSizing: 'border-box',
   };
 
   const labelStyle: React.CSSProperties = { fontSize: 11, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: 4, display: 'block' };
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#00000080', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 12, padding: 28, width: 480, maxHeight: '80vh', overflow: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 12, padding: 28, width: 480, maxHeight: '80vh', overflow: 'auto' }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', margin: '0 0 20px', letterSpacing: '0.04em' }}>NEW ROUTING RULE</h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

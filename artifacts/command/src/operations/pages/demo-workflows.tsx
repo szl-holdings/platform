@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 
-const BG = { surface: '#0c1018', elevated: '#10141e' };
+const BG = { surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.06)' };
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',

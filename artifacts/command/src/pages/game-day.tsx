@@ -139,7 +139,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   critical: '#ef4444',
   high: '#f97316',
   medium: '#f59e0b',
-  low: '#64748b',
+  low: '#4a6070',
 };
 
 const RESPONSE_COLORS: Record<string, string> = {
@@ -168,7 +168,7 @@ const GRADE_COLORS: Record<string, string> = {
 };
 
 function gradeColor(g: string): string {
-  return GRADE_COLORS[g] ?? '#64748b';
+  return GRADE_COLORS[g] ?? 'var(--gi-text-muted)';
 }
 
 function dimScoreColor(s: number): string {
@@ -177,11 +177,11 @@ function dimScoreColor(s: number): string {
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
-    <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 4 }}>
+    <div style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 4 }}>
         {label}
       </div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: color ?? '#e2e8f0' }}>{value}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: color ?? 'var(--gi-text-primary)' }}>{value}</div>
     </div>
   );
 }
@@ -189,15 +189,15 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 function DimensionBar({ dim }: { dim: DimensionScore }) {
   const c = dimScoreColor(dim.score);
   return (
-    <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
+    <div style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>{dim.label}</span>
         <span style={{ fontSize: 20, fontWeight: 800, color: c }}>{dim.score}</span>
       </div>
-      <div style={{ width: '100%', height: 6, background: '#1e293b', borderRadius: 3 }}>
+      <div style={{ width: '100%', height: 6, background: 'var(--gi-border-subtle)', borderRadius: 3 }}>
         <div style={{ width: `${dim.score}%`, height: '100%', background: c, borderRadius: 3, transition: 'width 0.5s ease' }} />
       </div>
-      <div style={{ fontSize: 10, color: '#64748b', marginTop: 4 }}>{dim.detail}</div>
+      <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginTop: 4 }}>{dim.detail}</div>
     </div>
   );
 }
@@ -207,10 +207,10 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       style={{
-        background: active ? '#1e293b' : 'transparent',
+        background: active ? 'var(--gi-border-subtle)' : 'transparent',
         border: active ? '1px solid #334155' : '1px solid transparent',
         borderRadius: 6,
-        color: active ? '#e2e8f0' : '#64748b',
+        color: active ? 'var(--gi-text-primary)' : 'var(--gi-text-muted)',
         fontSize: 13,
         fontWeight: 700,
         padding: '8px 18px',
@@ -387,7 +387,7 @@ export default function GameDayPage() {
   const scenarioFromId = (id: string) => scenarios.find((s) => s.id === id);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
+    <div style={{ minHeight: '100vh', background: '#060c1a', color: 'var(--gi-text-primary)' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 24px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: '#ef4444', marginBottom: 6 }}>
@@ -422,7 +422,7 @@ export default function GameDayPage() {
           <div>
             {drillHistory.filter((d) => d.status === 'completed').length > 0 && (
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
                   Recent Completed Drills
                 </div>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -433,12 +433,12 @@ export default function GameDayPage() {
                         key={drill.id}
                         onClick={() => viewDebrief(drill)}
                         style={{
-                          background: '#0f172a',
+                          background: 'var(--gi-bg-base)',
                           border: `1px solid ${gradeColor(drill.score?.grade ?? 'F')}40`,
                           borderRadius: 8,
                           padding: '8px 14px',
                           cursor: 'pointer',
-                          color: '#e2e8f0',
+                          color: 'var(--gi-text-primary)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: 8,
@@ -450,7 +450,7 @@ export default function GameDayPage() {
                         <span style={{ fontWeight: 800, color: gradeColor(drill.score?.grade ?? 'F') }}>
                           {drill.score?.grade ?? '\u2014'}
                         </span>
-                        <span style={{ fontSize: 10, color: '#64748b' }}>
+                        <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                           RS: {drill.score?.resilienceScore ?? '\u2014'}
                         </span>
                       </button>
@@ -461,7 +461,7 @@ export default function GameDayPage() {
             )}
 
             {loadingScenarios ? (
-              <div style={{ color: '#64748b', padding: 40, textAlign: 'center' }}>Loading scenarios\u2026</div>
+              <div style={{ color: 'var(--gi-text-muted)', padding: 40, textAlign: 'center' }}>Loading scenarios\u2026</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
                 {scenarios.map((scenario) => (
@@ -476,19 +476,19 @@ export default function GameDayPage() {
                         <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{scenario.tagline}</div>
                       </div>
                     </div>
-                    <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, flex: 1 }}>{scenario.summary}</p>
+                    <p style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.6, flex: 1 }}>{scenario.summary}</p>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {scenario.domains.map((d) => (
                         <span
                           key={d}
-                          style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#94a3b8', background: '#1e293b', borderRadius: 4, padding: '2px 7px' }}
+                          style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#94a3b8', background: 'var(--gi-border-subtle)', borderRadius: 4, padding: '2px 7px' }}
                         >
                           {DOMAIN_ICONS[d] ?? '\u25C6'} {d.toUpperCase()}
                         </span>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: 14 }}>
-                      <div style={{ fontSize: 11, color: '#64748b' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--gi-border-subtle)', paddingTop: 14 }}>
+                      <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                         <span style={{ color: '#94a3b8', fontWeight: 600 }}>{scenario.injectCount} injects</span>{' '}
                         · {scenario.durationHours}h window
                       </div>
@@ -609,7 +609,7 @@ function ActiveDrillView({
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 2 }}>
             {scenario?.icon ?? '\u25C6'} {scenario?.name ?? drill.scenarioId}
           </h2>
-          <div style={{ fontSize: 11, color: '#64748b' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
             ID: {drill.id} · Operator: {drill.operatorLabel} · Participants: {drill.participants.length}
           </div>
         </div>
@@ -644,12 +644,12 @@ function ActiveDrillView({
         <StatCard label="Injects Fired" value={`${firedInjects.length}/${totalInjects}`} />
         <StatCard label="Responded" value={firedInjects.filter((s) => s.response !== null).length} color="#22c55e" />
         <StatCard label="Awaiting" value={firedInjects.filter((s) => s.response === null).length} color="#f59e0b" />
-        <StatCard label="Remaining" value={totalInjects - firedInjects.length} color="#64748b" />
+        <StatCard label="Remaining" value={totalInjects - firedInjects.length} color="var(--gi-text-muted)" />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {firedInjects.map((is) => {
-          const sevColor = SEVERITY_COLORS[is.inject.severity] ?? '#64748b';
+          const sevColor = SEVERITY_COLORS[is.inject.severity] ?? '#4a6070';
           const isResponding = respondingInjectId === is.inject.id;
 
           return (
@@ -663,7 +663,7 @@ function ActiveDrillView({
                     <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: sevColor, background: `${sevColor}18`, borderRadius: 3, padding: '2px 6px', border: `1px solid ${sevColor}40` }}>
                       {is.inject.severity.toUpperCase()}
                     </span>
-                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#94a3b8', background: '#1e293b', borderRadius: 3, padding: '2px 6px' }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#94a3b8', background: 'var(--gi-border-subtle)', borderRadius: 3, padding: '2px 6px' }}>
                       {DOMAIN_ICONS[is.inject.domain] ?? '\u25C6'} {is.inject.domain.toUpperCase()}
                     </span>
                     {is.inject.requiresHumanApproval && (
@@ -678,12 +678,12 @@ function ActiveDrillView({
               </div>
 
               {is.response ? (
-                <div style={{ marginTop: 10, padding: '8px 12px', background: '#0f172a', borderRadius: 6, borderLeft: `3px solid ${RESPONSE_COLORS[is.response.responseType] ?? '#64748b'}` }}>
+                <div style={{ marginTop: 10, padding: '8px 12px', background: 'var(--gi-bg-base)', borderRadius: 6, borderLeft: `3px solid ${RESPONSE_COLORS[is.response.responseType] ?? 'var(--gi-text-muted)'}` }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: RESPONSE_COLORS[is.response.responseType], background: `${RESPONSE_COLORS[is.response.responseType]}18`, borderRadius: 3, padding: '2px 6px' }}>
                       {is.response.responseType.toUpperCase()}
                     </span>
-                    <span style={{ fontSize: 10, color: '#64748b' }}>by {is.response.respondedByLabel}</span>
+                    <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>by {is.response.respondedByLabel}</span>
                     {is.response.humanApprovalGiven && (
                       <span style={{ fontSize: 9, fontWeight: 700, color: '#22c55e' }}>\u2713 Approved</span>
                     )}
@@ -693,7 +693,7 @@ function ActiveDrillView({
                   )}
                 </div>
               ) : isResponding ? (
-                <div style={{ marginTop: 10, padding: 12, background: '#0f172a', borderRadius: 6, border: '1px solid #334155' }}>
+                <div style={{ marginTop: 10, padding: 12, background: 'var(--gi-bg-base)', borderRadius: 6, border: '1px solid #334155' }}>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
                     {(['detected', 'contained', 'resolved', 'escalated', 'missed'] as const).map((rt) => (
                       <button
@@ -721,9 +721,9 @@ function ActiveDrillView({
                     style={{
                       width: '100%',
                       background: '#0a0f1e',
-                      border: '1px solid #1e293b',
+                      border: '1px solid var(--gi-border-subtle)',
                       borderRadius: 4,
-                      color: '#e2e8f0',
+                      color: 'var(--gi-text-primary)',
                       fontSize: 12,
                       padding: 8,
                       minHeight: 50,
@@ -755,14 +755,14 @@ function ActiveDrillView({
               ) : (
                 <button
                   onClick={() => onStartRespond(is.inject.id)}
-                  style={{ marginTop: 8, background: '#1e293b', border: '1px solid #334155', borderRadius: 4, color: '#e2e8f0', fontSize: 11, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}
+                  style={{ marginTop: 8, background: 'var(--gi-border-subtle)', border: '1px solid #334155', borderRadius: 4, color: 'var(--gi-text-primary)', fontSize: 11, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}
                 >
                   Respond to Inject
                 </button>
               )}
 
               {is.inject.runbookRef && (
-                <div style={{ marginTop: 6, fontSize: 10, color: '#64748b' }}>
+                <div style={{ marginTop: 6, fontSize: 10, color: 'var(--gi-text-muted)' }}>
                   Runbook: {is.inject.runbookRef}
                 </div>
               )}
@@ -797,7 +797,7 @@ function DebriefView({
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 2 }}>
             {scenario?.icon ?? '\u25C6'} {scenario?.name ?? drill.scenarioId}
           </h2>
-          <div style={{ fontSize: 11, color: '#64748b' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
             Drill {drill.id} · Operator: {drill.operatorLabel} · Completed: {new Date(score.completedAt).toLocaleString()}
           </div>
         </div>
@@ -813,11 +813,11 @@ function DebriefView({
         </div>
       </div>
 
-      <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: 16, marginBottom: 20 }}>
-        <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.6 }}>{score.verdict}</div>
+      <div style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+        <div style={{ fontSize: 13, color: 'var(--gi-text-primary)', lineHeight: 1.6 }}>{score.verdict}</div>
       </div>
 
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
         4-DIMENSION RESILIENCE SCORING
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -839,19 +839,19 @@ function DebriefView({
 
       {score.participantScores.length > 0 && (
         <>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
             PARTICIPANT PERFORMANCE
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
             {score.participantScores.map((ps) => (
               <div
                 key={ps.label}
-                style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 16 }}
+                style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 16 }}
               >
                 <span style={{ fontSize: 20, fontWeight: 900, color: gradeColor(ps.grade), minWidth: 30, textAlign: 'center' }}>{ps.grade}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{ps.label}</div>
-                  <div style={{ fontSize: 11, color: '#64748b' }}>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                     {ps.responsesGiven} responses · Detect: {ps.detectRate}% · Resolve: {ps.resolveRate}% · Avg: {ps.avgResponseMinutes != null ? `${ps.avgResponseMinutes}m` : 'N/A'}
                   </div>
                 </div>
@@ -863,16 +863,16 @@ function DebriefView({
 
       {score.domainBreakdown.length > 0 && (
         <>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
             DOMAIN BREAKDOWN
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8, marginBottom: 24 }}>
             {score.domainBreakdown.map((d) => (
-              <div key={d.domain} style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: '12px 16px' }}>
+              <div key={d.domain} style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '12px 16px' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#94a3b8', marginBottom: 4 }}>
                   {DOMAIN_ICONS[d.domain] ?? '\u25C6'} {d.domain.toUpperCase()}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                   {d.injectCount} injects · {d.detected} detected · {d.resolved} resolved
                 </div>
               </div>
@@ -894,12 +894,12 @@ function DebriefView({
         </>
       )}
 
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
         IMPROVEMENT RECOMMENDATIONS
       </div>
-      <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: 16, marginBottom: 24 }}>
+      <div style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: 16, marginBottom: 24 }}>
         {score.recommendations.map((r, i) => (
-          <div key={i} style={{ fontSize: 12, color: '#e2e8f0', marginBottom: 6, lineHeight: 1.5 }}>{'•'} {r}</div>
+          <div key={i} style={{ fontSize: 12, color: 'var(--gi-text-primary)', marginBottom: 6, lineHeight: 1.5 }}>{'•'} {r}</div>
         ))}
       </div>
 
@@ -926,7 +926,7 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 4 }}>
             INTERNAL LEADERBOARD
           </div>
           <div style={{ fontSize: 12, color: '#94a3b8' }}>
@@ -937,7 +937,7 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
           <button
             onClick={onToggleOptIn}
             style={{
-              background: myOptIn ? '#1e293b' : '#1e40af',
+              background: myOptIn ? 'var(--gi-border-subtle)' : '#1e40af',
               border: `1px solid ${myOptIn ? '#334155' : '#2563eb'}`,
               borderRadius: 6,
               color: myOptIn ? '#94a3b8' : '#fff',
@@ -951,7 +951,7 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
           </button>
           <button
             onClick={onRefresh}
-            style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 6, color: '#94a3b8', fontSize: 11, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}
+            style={{ background: 'var(--gi-border-subtle)', border: '1px solid #334155', borderRadius: 6, color: '#94a3b8', fontSize: 11, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}
           >
             Refresh
           </button>
@@ -959,16 +959,16 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
       </div>
 
       {myOptIn && (
-        <div style={{ background: '#0f172a', border: '1px solid #1e40af40', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 12, color: '#94a3b8' }}>
+        <div style={{ background: 'var(--gi-bg-base)', border: '1px solid #1e40af40', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 12, color: '#94a3b8' }}>
           You are opted in to the leaderboard. Your scores from completed drills will appear publicly.
         </div>
       )}
 
       {entries.length === 0 ? (
-        <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 12, padding: 40, textAlign: 'center' }}>
+        <div style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 12, padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>{'\uD83C\uDFC6'}</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>No leaderboard entries yet</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>Complete drills and opt in to appear on the leaderboard</div>
+          <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>Complete drills and opt in to appear on the leaderboard</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -979,7 +979,7 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
                 key={entry.participantLabel}
                 style={{
                   background: '#0a0f1e',
-                  border: `1px solid ${idx < 3 ? '#c8a05040' : '#1e293b'}`,
+                  border: `1px solid ${idx < 3 ? '#c8a05040' : 'var(--gi-border-subtle)'}`,
                   borderRadius: 10,
                   padding: '14px 18px',
                   display: 'flex',
@@ -987,18 +987,18 @@ function LeaderboardView({ entries, onRefresh, myOptIn, onToggleOptIn }: { entri
                   gap: 16,
                 }}
               >
-                <span style={{ fontSize: idx < 3 ? 24 : 14, fontWeight: 800, minWidth: 36, textAlign: 'center', color: idx < 3 ? '#c8a050' : '#64748b' }}>
+                <span style={{ fontSize: idx < 3 ? 24 : 14, fontWeight: 800, minWidth: 36, textAlign: 'center', color: idx < 3 ? '#c8a050' : 'var(--gi-text-muted)' }}>
                   {medal}
                 </span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{entry.participantLabel}</div>
-                  <div style={{ fontSize: 11, color: '#64748b' }}>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                     {entry.totalDrills} drills · {entry.totalInjectsHandled} injects handled · Best: {entry.bestGrade}
                     {entry.avgDetectMinutes !== null && ` · Avg detect: ${entry.avgDetectMinutes}m`}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#64748b' }}>RESILIENCE</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--gi-text-muted)' }}>RESILIENCE</span>
                   <span style={{ fontSize: 24, fontWeight: 900, color: entry.avgResilienceScore >= 80 ? '#22c55e' : entry.avgResilienceScore >= 60 ? '#f59e0b' : '#ef4444' }}>
                     {entry.avgResilienceScore}
                   </span>
@@ -1045,18 +1045,18 @@ function ResilienceTrendView({
       </div>
 
       {history.length === 0 ? (
-        <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 12, padding: 40, textAlign: 'center' }}>
+        <div style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 12, padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>{'\uD83D\uDCC8'}</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>No resilience data yet</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>Complete drills to build your resilience score trend</div>
+          <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>Complete drills to build your resilience score trend</div>
         </div>
       ) : (
         <>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
             RESILIENCE SCORE TREND
           </div>
 
-          <div style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 12, padding: 20, marginBottom: 24 }}>
+          <div style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120 }}>
               {history.map((point, idx) => {
                 const height = maxScore > 0 ? (point.score / 100) * 100 : 50;
@@ -1080,7 +1080,7 @@ function ResilienceTrendView({
                         transition: 'height 0.5s ease',
                       }}
                     />
-                    <span style={{ fontSize: 8, color: '#64748b', textAlign: 'center' }}>
+                    <span style={{ fontSize: 8, color: 'var(--gi-text-muted)', textAlign: 'center' }}>
                       {sc?.icon ?? '\u25C6'}
                     </span>
                   </div>
@@ -1089,7 +1089,7 @@ function ResilienceTrendView({
             </div>
           </div>
 
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
             DIMENSION TRENDS
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -1103,15 +1103,15 @@ function ResilienceTrendView({
               const latest = history.length > 0 ? history[history.length - 1].dimensions[dimKey] : 0;
               const avg = history.length > 0 ? Math.round(history.reduce((sum, h) => sum + h.dimensions[dimKey], 0) / history.length) : 0;
               return (
-                <div key={dimKey} style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
+                <div key={dimKey} style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>{dimLabels[dimKey]}</span>
                     <span style={{ fontSize: 18, fontWeight: 800, color: dimScoreColor(latest) }}>{latest}</span>
                   </div>
-                  <div style={{ width: '100%', height: 6, background: '#1e293b', borderRadius: 3 }}>
+                  <div style={{ width: '100%', height: 6, background: 'var(--gi-border-subtle)', borderRadius: 3 }}>
                     <div style={{ width: `${latest}%`, height: '100%', background: dimScoreColor(latest), borderRadius: 3 }} />
                   </div>
-                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 4 }}>
+                  <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginTop: 4 }}>
                     Avg across {history.length} drills: {avg}
                   </div>
                 </div>
@@ -1119,25 +1119,25 @@ function ResilienceTrendView({
             })}
           </div>
 
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: '#64748b', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--gi-text-muted)', marginBottom: 10 }}>
             DRILL HISTORY
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[...history].reverse().map((point) => {
               const sc = scenarioFromId(point.scenarioId);
               return (
-                <div key={point.drillId} style={{ background: '#0a0f1e', border: '1px solid #1e293b', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div key={point.drillId} style={{ background: '#0a0f1e', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <span style={{ fontSize: 20 }}>{sc?.icon ?? '\u25C6'}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{sc?.name ?? point.scenarioId}</div>
-                    <div style={{ fontSize: 10, color: '#64748b' }}>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                       {new Date(point.completedAt).toLocaleString()} · {point.drillId}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <span style={{ fontSize: 18, fontWeight: 900, color: gradeColor(point.grade) }}>{point.grade}</span>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#64748b' }}>RESILIENCE</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--gi-text-muted)' }}>RESILIENCE</div>
                       <div style={{ fontSize: 18, fontWeight: 800, color: '#c8a050' }}>{point.score}</div>
                     </div>
                   </div>

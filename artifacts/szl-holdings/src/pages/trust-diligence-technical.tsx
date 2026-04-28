@@ -76,8 +76,8 @@ export default function DiligenceTechnicalPage() {
       @media print {
         .no-print { display: none !important; }
         body { background: #fff !important; color: #111 !important; }
-        .brief-card { break-inside: avoid; border: 1px solid #e2e8f0 !important; background: #f8fafc !important; }
-        .brief-header { background: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .brief-card { break-inside: avoid; border: 1px solid var(--gi-text-primary) !important; background: #f8fafc !important; }
+        .brief-header { background: var(--gi-bg-base) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         a { color: #6d28d9 !important; }
       }
     `;

@@ -39,7 +39,7 @@ const LEVEL_CONFIG: Record<
   warn: { label: 'WARN', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: AlertTriangle },
   info: { label: 'INFO', color: '#60a5fa', bg: 'rgba(96,165,250,0.08)', icon: Info },
   debug: { label: 'DEBUG', color: '#94a3b8', bg: 'rgba(148,163,184,0.06)', icon: Activity },
-  trace: { label: 'TRACE', color: '#64748b', bg: 'rgba(100,116,139,0.05)', icon: ChevronRight },
+  trace: { label: 'TRACE', color: 'var(--gi-text-muted)', bg: 'rgba(100,116,139,0.05)', icon: ChevronRight },
 };
 
 const _SERVICES = [

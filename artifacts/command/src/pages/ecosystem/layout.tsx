@@ -33,7 +33,7 @@ export function EcosystemLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#080c14' }}>
+    <div className="flex flex-col h-full" style={{ background: 'var(--gi-bg-base)' }}>
       {/* Header */}
       <div
         className="shrink-0 px-5 pt-4 pb-0"

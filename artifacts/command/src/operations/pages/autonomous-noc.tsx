@@ -648,7 +648,7 @@ export default function AutonomousNOC() {
   const resolvedCount = SEED_CASES.filter((c) => c.state === 'resolved').length;
 
   return (
-    <div className="h-full overflow-auto" style={{ background: '#080c14' }}>
+    <div className="h-full overflow-auto" style={{ background: 'var(--gi-bg-base)' }}>
       <div className="max-w-[1400px] mx-auto p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

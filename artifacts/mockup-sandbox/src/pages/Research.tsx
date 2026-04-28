@@ -100,7 +100,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
       {open && (
         <div className="px-4 pb-3 space-y-2">
           {lane.log.length > 0 && (
-            <div className="bg-[#060b12] rounded p-2 space-y-1 max-h-32 overflow-y-auto">
+            <div className="bg-[var(--gi-bg-base)] rounded p-2 space-y-1 max-h-32 overflow-y-auto">
               {lane.log.map((entry, i) => (
                 <div
                   key={i}

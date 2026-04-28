@@ -191,7 +191,7 @@ export default function PresenterMode() {
   const shellStyle: CSSProperties = {
     minHeight: '100vh',
     background: 'linear-gradient(160deg, #07080d 0%, #0a1322 100%)',
-    color: '#e2e8f0',
+    color: 'var(--gi-text-primary)',
     fontFamily: 'Inter, sans-serif',
     padding: '20px 24px',
     boxSizing: 'border-box',
@@ -362,7 +362,7 @@ export default function PresenterMode() {
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 8,
               padding: 12,
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
               fontSize: 13,
               lineHeight: 1.55,

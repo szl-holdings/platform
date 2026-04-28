@@ -109,12 +109,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -124,16 +124,16 @@ export default function GovernedCockpit() {
               <Shield className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 PARAGON — Governed Security Intelligence
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every threat, compliance gap, and risk carries a full proof chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -146,7 +146,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Live Threat Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -161,11 +161,11 @@ export default function GovernedCockpit() {
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
               </div>
@@ -188,7 +188,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Credential harvesting activity consistent with APT-29 TTPs detected on HOST-042 in the
               treasury network segment. C2 beacon confirmed to threat-actor-controlled
               infrastructure. Lateral movement to 3 adjacent hosts detected.
@@ -210,12 +210,12 @@ export default function GovernedCockpit() {
             </div>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Suggested containment:
               </span>
-              <span style={{ color: '#7a99b8' }}>
+              <span style={{ color: 'var(--gi-text-secondary)' }}>
                 {' '}
                 Isolate HOST-042, force password reset for 4 harvested accounts, block C2 IP range
                 at perimeter firewall. Pre-authorised under IR-12 subject to CISO sign-off.
@@ -235,14 +235,14 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               23 accounts with administrative console access are operating without MFA enforcement,
               violating SOC 2 CC6.1 and the firm's access control policy. Remediation velocity
               projects full compliance in 5.4 days — within the 7-day SLA.
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
@@ -251,7 +251,7 @@ export default function GovernedCockpit() {
                   { label: 'SLA Remaining', value: '1.6d' },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color: ACCENT }}>
@@ -276,7 +276,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               CISA added CVE-2026-1147 to the Known Exploited Vulnerabilities catalog 6 hours ago. A
               public PoC has been available for 48 hours. 8 of the 14 unpatched hosts are Tier-1
               revenue-critical systems requiring a change management approval for emergency
@@ -284,7 +284,7 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-4 gap-3">
                 {[
@@ -294,7 +294,7 @@ export default function GovernedCockpit() {
                   { label: 'Patch ETA', value: '4h', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>

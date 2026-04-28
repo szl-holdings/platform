@@ -32,7 +32,7 @@ export function MarketingHome() {
       name: 'SEXTANT',
       icon: Anchor,
       desc: 'Maritime fleet management & routing',
-      color: 'text-[#4d8fcc]',
+      color: 'text-[var(--gi-accent-blue)]',
     },
     {
       id: 'terra',

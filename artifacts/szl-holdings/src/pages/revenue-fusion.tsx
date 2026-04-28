@@ -76,7 +76,7 @@ const REVENUE_STREAMS: RevenueStream[] = [
     label: 'Maritime Revenue',
     domain: 'SEXTANT',
     icon: '⚓',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     totalRevenue: 21400000,
     mrr: 1783333,
     qoqChange: 7.3,
@@ -293,7 +293,7 @@ export default function RevenueFusionPage() {
               label: 'MRR (Combined)',
               value: formatCurrency(107000 + 1783333 + 570000 + 300000),
               sub: '+14% growth rate',
-              color: '#4d8fcc',
+              color: 'var(--gi-accent-blue)',
             },
             {
               label: 'Revenue Streams',

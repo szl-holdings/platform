@@ -1373,7 +1373,7 @@ const STATUS_STYLES: Record<
   deploying: { color: '#8b7ac8', label: 'Deploying', icon: Loader2 },
   'rolled-back': { color: '#f59e0b', label: 'Rolled Back', icon: RotateCcw },
   failed: { color: '#ef4444', label: 'Failed', icon: XCircle },
-  inactive: { color: '#64748b', label: 'Inactive', icon: Clock },
+  inactive: { color: 'var(--gi-text-muted)', label: 'Inactive', icon: Clock },
 };
 
 function StatusBadge({ status }: { status: DeploymentStatus }) {

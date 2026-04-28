@@ -25,7 +25,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { jsPDF } from 'jspdf';
 
-const BG = '#080c14';
+const BG = 'var(--gi-bg-base)';
 const SURFACE = 'rgba(255,255,255,0.025)';
 const SURFACE_HOVER = 'rgba(255,255,255,0.04)';
 const BORDER = 'rgba(255,255,255,0.07)';

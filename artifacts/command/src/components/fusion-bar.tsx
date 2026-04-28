@@ -41,7 +41,7 @@ interface FusionBarProps {
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
-  vessels: '#4d8fcc',
+  vessels: 'var(--gi-accent-blue)',
   aegis: '#ef4444',
   terra: '#22c55e',
   prism: '#8b5cf6',

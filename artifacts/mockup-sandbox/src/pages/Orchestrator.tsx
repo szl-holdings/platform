@@ -36,11 +36,11 @@ const EXAMPLE_INTENTS = [
 ];
 
 const APP_COLORS: Record<string, string> = {
-  aegis: 'var(--gi-accent-red)',
-  vessels: 'var(--gi-accent-blue)',
-  terra: 'var(--gi-accent-green)',
-  pulse: 'var(--gi-accent-amber)',
-  command: 'var(--gi-accent-violet)',
+  aegis: '#c96070',
+  vessels: '#4d8fcc',
+  terra: '#5baa8a',
+  pulse: '#c9a85c',
+  command: '#9b7cc8',
   'szl-holdings': '#22d3ee',
   'carlota-jo': '#f472b6',
   'prism-counsel': '#818cf8',
@@ -146,7 +146,7 @@ const STEP_EXPLANATIONS: Record<
 
 function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
   const pct = (used / total) * 100;
-  const color = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
+  const color = pct >= 95 ? '#c96070' : pct >= 80 ? '#c9a85c' : '#5baa8a';
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1 w-12 rounded-full bg-praxis-bg overflow-hidden">
@@ -320,7 +320,7 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
             <div className="text-[10px] font-mono text-praxis-cyan mb-1.5 uppercase tracking-widest">
               Raw API Payload
             </div>
-            <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[#060b12] rounded p-2 border border-praxis">
+            <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[var(--gi-bg-base)] rounded p-2 border border-praxis">
               {step.rawPayload}
             </pre>
           </div>

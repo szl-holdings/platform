@@ -145,7 +145,7 @@ const POLICIES = [
     hallucinationThreshold: 0.91,
     toxicityThreshold: 0.95,
     piiPolicy: 'moderate',
-    color: '#64748b',
+    color: 'var(--gi-text-muted)',
   },
 ];
 

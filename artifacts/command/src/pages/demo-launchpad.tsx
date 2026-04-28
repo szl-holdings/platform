@@ -17,9 +17,9 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 
-const BG = '#080c14';
-const SURFACE = '#0c1018';
-const ELEVATED = '#10141e';
+const BG = 'var(--gi-bg-base)';
+const SURFACE = 'var(--gi-bg-surface)';
+const ELEVATED = 'var(--gi-bg-raised)';
 const ACCENT = '#d4a054';
 const ACCENT_DIM = 'rgba(212,160,84,0.15)';
 const BORDER = 'rgba(255,255,255,0.06)';

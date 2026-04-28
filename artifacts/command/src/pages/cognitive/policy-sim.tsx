@@ -432,9 +432,9 @@ export default function CognitivePolicySim() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -451,7 +451,7 @@ export default function CognitivePolicySim() {
               flexWrap: 'wrap',
             }}
           >
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
               Policy Simulation
             </span>
             <span
@@ -484,7 +484,7 @@ export default function CognitivePolicySim() {
               <span style={{ fontSize: 10, color: '#475569' }}>Loading recent traces…</span>
             )}
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Run a proposed policy change against historical agent traces and preview the outcome
             delta — allowed, approval-required, and blocked counts — before applying to production.
           </p>
@@ -537,7 +537,7 @@ export default function CognitivePolicySim() {
                       borderRadius: 8,
                       padding: '10px 12px',
                       cursor: 'pointer',
-                      color: '#e2e8f0',
+                      color: 'var(--gi-text-primary)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -562,7 +562,7 @@ export default function CognitivePolicySim() {
                               ? '#22c55e'
                               : p.riskCategory === 'tightening'
                                 ? '#f59e0b'
-                                : '#64748b',
+                                : 'var(--gi-text-muted)',
                           textTransform: 'uppercase',
                           fontWeight: 700,
                         }}
@@ -574,13 +574,13 @@ export default function CognitivePolicySim() {
                       style={{
                         fontSize: 12,
                         fontWeight: 600,
-                        color: isSel ? '#e2e8f0' : '#cbd5e1',
+                        color: isSel ? 'var(--gi-text-primary)' : '#cbd5e1',
                         marginBottom: 4,
                       }}
                     >
                       {p.title}
                     </div>
-                    <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', lineHeight: 1.5 }}>
                       {p.rationale}
                     </div>
                   </button>
@@ -610,7 +610,7 @@ export default function CognitivePolicySim() {
             >
               Change Specification
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0', marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 12 }}>
               {change.title}
             </div>
 
@@ -738,15 +738,15 @@ export default function CognitivePolicySim() {
               }}
             >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                   Outcome Delta — {inScope.length} traces simulated
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>
                   {inScopeCount} in policy scope · {changedCount} outcome change
                   {changedCount === 1 ? '' : 's'} under proposed policy
                 </div>
               </div>
-              <div style={{ fontSize: 10, color: '#64748b' }}>
+              <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                 Simulation only — nothing applied to production
               </div>
             </div>
@@ -780,7 +780,7 @@ export default function CognitivePolicySim() {
                       {m.label}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                      <span style={{ fontSize: 26, fontWeight: 700, color: '#e2e8f0' }}>{a}</span>
+                      <span style={{ fontSize: 26, fontWeight: 700, color: 'var(--gi-text-primary)' }}>{a}</span>
                       <span style={{ fontSize: 11, color: '#475569' }}>was {b}</span>
                       {delta !== 0 && (
                         <span
@@ -945,7 +945,7 @@ export default function CognitivePolicySim() {
                       <td
                         style={{
                           padding: '10px 10px',
-                          color: '#64748b',
+                          color: 'var(--gi-text-muted)',
                           maxWidth: 320,
                           lineHeight: 1.5,
                         }}

@@ -37,7 +37,7 @@ function LatencyBar({ latency, sla }: { latency: number; sla: number }) {
             width: `${pct}%`,
             background: overSla
               ? 'linear-gradient(90deg, #f59e0b, #ef4444)'
-              : 'linear-gradient(90deg, #4d8fcc, #10b981)',
+              : 'linear-gradient(90deg, var(--gi-accent-blue), #10b981)',
             maxWidth: '100%',
           }}
         />
@@ -62,10 +62,10 @@ export default function WorkflowHealth() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Activity className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+          <Activity className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#4d8fcc' }}
+            style={{ color: 'var(--gi-accent-blue)' }}
           >
             KORA · Workflow Health
           </span>

@@ -58,7 +58,7 @@ const FALLBACK_DOMAIN_BUDGETS = [
   {
     id: 'vessels',
     name: 'SEXTANT',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     budget: 35000,
     spent: 38200,
     apiCalls: 2100000,
@@ -198,7 +198,7 @@ export default function CostsPage() {
               value: `${(DOMAIN_BUDGETS.reduce((s, d) => s + d.apiCalls, 0) / 1000000).toFixed(1)}M`,
               sub: 'this month',
               icon: Activity,
-              color: '#4d8fcc',
+              color: 'var(--gi-accent-blue)',
             },
             {
               label: 'Total Storage',
@@ -376,7 +376,7 @@ export default function CostsPage() {
                       }}
                     />
                     {[
-                      { key: 'vessels', color: '#4d8fcc' },
+                      { key: 'vessels', color: 'var(--gi-accent-blue)' },
                       { key: 'aegis', color: '#ef4444' },
                       { key: 'lyte', color: '#f97316' },
                       { key: 'terra', color: '#22c55e' },
@@ -497,7 +497,7 @@ export default function CostsPage() {
                 {API_BREAKDOWN.map((api, i) => {
                   const maxCost = Math.max(...API_BREAKDOWN.map((a) => a.cost));
                   const pct = (api.cost / maxCost) * 100;
-                  const colors = ['#8b7ac8', '#4d8fcc', '#22c55e', '#f97316', '#a855f7', '#f59e0b'];
+                  const colors = ['#8b7ac8', 'var(--gi-accent-blue)', '#22c55e', '#f97316', '#a855f7', '#f59e0b'];
                   return (
                     <div key={api.name}>
                       <div className="flex justify-between mb-1">

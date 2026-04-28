@@ -107,7 +107,7 @@ export default function TreasuryPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                         <Area type="monotone" dataKey="cash" name="Cash Position ($M)" stroke="#6aaa72" fill="#6aaa72" fillOpacity={0.1} strokeWidth={2} />
                         <Area type="monotone" dataKey="deployed" name="Monthly Deployed ($M)" stroke="#d4a054" fill="#d4a054" fillOpacity={0.05} strokeWidth={1.5} />
                       </AreaChart>
@@ -180,7 +180,7 @@ export default function TreasuryPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                         <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                         <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
-                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                        <Tooltip contentStyle={{ background: "var(--gi-bg-surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
                         <Bar dataKey="inflow" name="Inflows ($K)" fill="#6aaa72" fillOpacity={0.8} radius={[3, 3, 0, 0]} />
                         <Bar dataKey="outflow" name="Outflows ($K)" fill="#c45a4a" fillOpacity={0.7} radius={[3, 3, 0, 0]} />
                       </BarChart>

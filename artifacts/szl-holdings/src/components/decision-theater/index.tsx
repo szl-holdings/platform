@@ -427,7 +427,7 @@ function CaseStageRenderer({
                     ? '#10b981'
                     : step.status === 'running'
                       ? '#f59e0b'
-                      : '#64748b';
+                      : 'var(--gi-text-muted)';
                 return (
                   <li
                     key={i}

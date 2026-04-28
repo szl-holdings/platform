@@ -712,7 +712,7 @@ export default function GuardrailConfigsPage() {
                             item.enforcement === 'enforce'
                               ? '#ef4444'
                               : item.enforcement === 'monitor'
-                                ? '#4d8fcc'
+                                ? 'var(--gi-accent-blue)'
                                 : '#7c8a9a',
                           background:
                             item.enforcement === 'enforce'

@@ -236,7 +236,7 @@ const TYPE_ICONS: Record<ChangeType, React.ElementType> = {
 const TYPE_COLORS: Record<ChangeType, string> = {
   deploy: '#8b7ac8',
   feature: '#22c55e',
-  fix: '#4d8fcc',
+  fix: 'var(--gi-accent-blue)',
   security: 'var(--color-critical)',
   config: 'var(--color-medium)',
   breaking: 'var(--color-high)',

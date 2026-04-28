@@ -286,7 +286,7 @@ function DriftCard({ item }: { item: DriftItem }) {
                 placeholder="What was the proof of resolution? (e.g. 'Step 1 voided, Sarah Kim assigned, buyer call scheduled.')"
                 rows={2}
                 data-testid={`input-resolve-note-${item.id}`}
-                className="w-full text-xs bg-[#0d1520] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-emerald-500/40"
+                className="w-full text-xs bg-[var(--gi-bg-surface)] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-emerald-500/40"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -337,7 +337,7 @@ interface DriftTooltipProps {
 const CustomTooltip = ({ active, payload, label }: DriftTooltipProps) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-[#0d1520] border border-amber-500/20 rounded px-3 py-2 text-xs shadow-xl">
+      <div className="bg-[var(--gi-bg-surface)] border border-amber-500/20 rounded px-3 py-2 text-xs shadow-xl">
         <p className="text-amber-400/60 font-mono mb-1">{label}</p>
         <p className="text-amber-300 font-mono">{payload[0]?.value} drift items</p>
       </div>

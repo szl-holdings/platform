@@ -217,7 +217,7 @@ export default function GovernedCockpit() {
       value: counts.loading ? null : (counts.domains ?? 5),
       demo: true,
       icon: Command,
-      color: '#7a99b8',
+      color: 'var(--gi-text-secondary)',
     },
   ];
 
@@ -225,12 +225,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: '#e2e8f0',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -240,16 +240,16 @@ export default function GovernedCockpit() {
               <Command className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 Command — Unified Governed Decision Surface
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every cross-domain signal, correlation, and approval carries a full proof chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -262,7 +262,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Cross-Domain Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -273,11 +273,11 @@ export default function GovernedCockpit() {
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
                 {demo && <DemoBadge />}
@@ -304,7 +304,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               47 signals ingested across PARAGON, SEXTANT, DOMAINE, and Pulse in the last 2 minutes.
               Composite portfolio health: 7.2/10. Counsel has correlated signals across domains —
               notable overlap between PARAGON threat activity and SEXTANT counterparty exposure.
@@ -313,7 +313,7 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-5 gap-2">
                 {[
@@ -324,7 +324,7 @@ export default function GovernedCockpit() {
                   { label: "PARAGON", value: '6.9', color: '#ffb700' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="text-center">
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-lg font-bold" style={{ color }}>
@@ -349,7 +349,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Counsel has detected a correlated exposure across three domains: the APT-29
               infrastructure provider identified in the PARAGON incident shares hosting with two
               active SEXTANT counterparties. Separately, the Pulse rate signal is compressing
@@ -358,12 +358,12 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid rgba(201,168,92,0.19)' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid rgba(201,168,92,0.19)' }}
             >
               <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Correlated domains:
               </span>
-              <span style={{ color: '#7a99b8' }}>
+              <span style={{ color: 'var(--gi-text-secondary)' }}>
                 {' '}
                 PARAGON (threat infrastructure) → SEXTANT (counterparty hosting) → DOMAINE (credit
                 spread impact via Pulse rate signal). Recommend unified response brief for CRO
@@ -384,7 +384,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               3 approval items are queued across domains with a combined decision exposure of $4.7M.
               All items are within their SLA windows. Policy engine has correctly routed each item
               to the appropriate approver — no escalation required. Context packets have been
@@ -420,7 +420,7 @@ export default function GovernedCockpit() {
                 <div
                   key={domain}
                   className="rounded-lg p-3 flex items-center justify-between"
-                  style={{ background: '#060b12', border: '1px solid #1a2535' }}
+                  style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-subtle)' }}
                 >
                   <div>
                     <span
@@ -429,15 +429,15 @@ export default function GovernedCockpit() {
                     >
                       {domain}
                     </span>
-                    <span className="text-xs" style={{ color: '#c8d8e8' }}>
+                    <span className="text-xs" style={{ color: 'var(--gi-text-primary)' }}>
                       {item}
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs" style={{ color: '#7a99b8' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-secondary)' }}>
                       {approver}
                     </div>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {elapsed} / {sla} SLA
                     </div>
                   </div>

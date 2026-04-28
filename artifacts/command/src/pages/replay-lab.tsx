@@ -30,10 +30,10 @@ interface ReplayRun {
 }
 
 function OutcomeBadge({ outcome }: { outcome?: string | null }) {
-  if (!outcome) return <span style={{ color: '#64748b', fontSize: 11 }}>Not run</span>;
+  if (!outcome) return <span style={{ color: 'var(--gi-text-muted)', fontSize: 11 }}>Not run</span>;
   const colors: Record<string, string> = { pass: '#22c55e', fail: '#ef4444', partial: '#f59e0b' };
   const labels: Record<string, string> = { pass: 'PASS', fail: 'FAIL', partial: 'PARTIAL' };
-  const color = colors[outcome] ?? '#64748b';
+  const color = colors[outcome] ?? '#4a6070';
   return (
     <span
       style={{
@@ -61,7 +61,7 @@ function Delta({
   higherIsBetter?: boolean;
   suffix?: string;
 }) {
-  if (Math.abs(value) < 0.001) return <span style={{ color: '#64748b', fontSize: 11 }}>—</span>;
+  if (Math.abs(value) < 0.001) return <span style={{ color: 'var(--gi-text-muted)', fontSize: 11 }}>—</span>;
   const positive = higherIsBetter ? value > 0 : value < 0;
   const color = positive ? '#22c55e' : '#ef4444';
   const arrow = value > 0 ? '▲' : '▼';
@@ -144,7 +144,7 @@ function CompareOutcomePanel({ runA, runB, onClose }: ComparePanel & { onClose: 
         }}
       >
         <div>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
             Outcome Comparison
           </span>
           {!sameDomain && (
@@ -189,7 +189,7 @@ function CompareOutcomePanel({ runA, runB, onClose }: ComparePanel & { onClose: 
             <div
               style={{
                 fontSize: 10,
-                color: '#64748b',
+                color: '#4a6070',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 marginBottom: 4,
@@ -197,11 +197,11 @@ function CompareOutcomePanel({ runA, runB, onClose }: ComparePanel & { onClose: 
             >
               {label}
             </div>
-            <div style={{ fontSize: 12, color: '#e2e8f0', fontWeight: 500, marginBottom: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--gi-text-primary)', fontWeight: 500, marginBottom: 2 }}>
               {run.scenarioName}
             </div>
             <div style={{ fontSize: 10, color: '#475569' }}>{run.runId.slice(0, 22)}…</div>
-            <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginTop: 2 }}>
               {new Date(run.startedAt).toLocaleString()}
             </div>
           </div>
@@ -222,7 +222,7 @@ function CompareOutcomePanel({ runA, runB, onClose }: ComparePanel & { onClose: 
           >
             <span style={{ color: '#475569', fontSize: 11 }}>{m.label}</span>
             <span style={{ color: '#94a3b8' }}>{m.format(runA)}</span>
-            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{m.format(runB)}</span>
+            <span style={{ color: 'var(--gi-text-primary)', fontWeight: 500 }}>{m.format(runB)}</span>
             <Delta value={m.delta} higherIsBetter={m.higherBetter} suffix={m.suffix} />
           </div>
         ))}
@@ -295,7 +295,7 @@ function CompareOutcomePanel({ runA, runB, onClose }: ComparePanel & { onClose: 
             padding: '8px 0',
           }}
         >
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#64748b' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--gi-text-muted)' }}>
             {metrics.length - improvements - regressions}
           </div>
           <div
@@ -366,7 +366,7 @@ function ReplayRunRow({
         </div>
       )}
       <div>
-        <div style={{ color: '#e2e8f0', fontWeight: 500, fontSize: 11 }}>{run.scenarioName}</div>
+        <div style={{ color: 'var(--gi-text-primary)', fontWeight: 500, fontSize: 11 }}>{run.scenarioName}</div>
         <div style={{ fontSize: 10, color: '#475569' }}>{run.runId.slice(0, 22)}…</div>
       </div>
       <div style={{ color }}>
@@ -483,7 +483,7 @@ export default function ReplayLab() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -494,7 +494,7 @@ export default function ReplayLab() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Replay Lab</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Replay Lab</span>
             <span
               style={{
                 fontSize: 11,
@@ -509,7 +509,7 @@ export default function ReplayLab() {
               BETA
             </span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Browse captured scenarios from real incidents and flows. Replay them against agents to
             measure decision quality and compare outcomes across runs.
           </p>
@@ -560,7 +560,7 @@ export default function ReplayLab() {
             >
               {[
                 { label: 'Scenarios', value: scenarios.length, color: ACCENT },
-                { label: 'Total Snapshots', value: totalSnapshots, color: '#4d8fcc' },
+                { label: 'Total Snapshots', value: totalSnapshots, color: 'var(--gi-accent-blue)' },
                 { label: 'Replay Runs', value: runs.length, color: '#22c55e' },
                 {
                   label: 'Avg GT Match',
@@ -578,7 +578,7 @@ export default function ReplayLab() {
                   }}
                 >
                   <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
                 </div>
               ))}
             </div>
@@ -664,7 +664,7 @@ export default function ReplayLab() {
                         <div
                           style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}
                         >
-                          <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                             {s.name}
                           </span>
                           <OutcomeBadge outcome={s.lastOutcome} />
@@ -698,7 +698,7 @@ export default function ReplayLab() {
                           >
                             {s.domain.toUpperCase()}
                           </span>
-                          <span style={{ fontSize: 11, color: '#64748b' }}>
+                          <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                             {s.snapshotCount} snapshot{s.snapshotCount !== 1 ? 's' : ''}
                           </span>
                           {s.groundTruthMatchRate != null && (
@@ -711,7 +711,7 @@ export default function ReplayLab() {
                               key={t}
                               style={{
                                 fontSize: 10,
-                                color: '#64748b',
+                                color: '#4a6070',
                                 background: 'rgba(255,255,255,0.05)',
                                 padding: '1px 6px',
                                 borderRadius: 3,
@@ -794,14 +794,14 @@ export default function ReplayLab() {
                   {selected ? (
                     <div>
                       <div
-                        style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0', marginBottom: 6 }}
+                        style={{ fontSize: 14, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 6 }}
                       >
                         {selected.name}
                       </div>
                       <div
                         style={{
                           fontSize: 12,
-                          color: '#64748b',
+                          color: '#4a6070',
                           lineHeight: 1.6,
                           marginBottom: 12,
                         }}
@@ -830,7 +830,7 @@ export default function ReplayLab() {
                             }}
                           >
                             <span style={{ color: '#475569' }}>{row.label}</span>
-                            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>
+                            <span style={{ color: 'var(--gi-text-primary)', fontWeight: 500 }}>
                               {String(row.value)}
                             </span>
                           </div>

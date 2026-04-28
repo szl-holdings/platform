@@ -31,15 +31,15 @@ export function ModelRouterPage() {
   const totalCost = ROUTING_METRICS.reduce((s, r) => s + r.avgCostUsd * r.calls, 0);
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ background: 'var(--gi-bg-base)', minHeight: '100vh', color: 'var(--gi-text-primary)', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ borderBottom: '1px solid var(--gi-border-subtle)', padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ width: 36, height: 36, background: 'rgba(77,143,204,0.15)', border: '1px solid rgba(77,143,204,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Cpu size={18} color="#4d8fcc" />
+          <Cpu size={18} color="var(--gi-accent-blue)" />
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>Model Router</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>Provider selection · routing rules · per-operator model assignment</div>
+          <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>Provider selection · routing rules · per-operator model assignment</div>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 6, padding: '5px 12px' }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
@@ -48,17 +48,17 @@ export function ModelRouterPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid #1e293b' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid var(--gi-border-subtle)' }}>
         {[
           { label: 'Total Tokens (7d)', value: (totalTokens / 1000).toFixed(0) + 'K', color: '#8b7ac8', icon: Activity },
-          { label: 'Total Calls (7d)', value: totalCalls.toLocaleString(), color: '#4d8fcc', icon: Zap },
+          { label: 'Total Calls (7d)', value: totalCalls.toLocaleString(), color: 'var(--gi-accent-blue)', icon: Zap },
           { label: 'Avg Latency', value: `${((ROUTING_METRICS.reduce((s, r) => s + r.avgLatencyMs, 0) / ROUTING_METRICS.length) / 1000).toFixed(2)}s`, color: '#d4a054', icon: Clock },
           { label: 'Total Cost (7d)', value: `$${totalCost.toFixed(2)}`, color: '#22c55e', icon: DollarSign },
         ].map((s) => (
-          <div key={s.label} style={{ padding: '16px 24px', background: '#080c14' }}>
+          <div key={s.label} style={{ padding: '16px 24px', background: 'var(--gi-bg-base)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <s.icon size={14} color={s.color} />
-              <span style={{ fontSize: 11, color: '#64748b' }}>{s.label}</span>
+              <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{s.label}</span>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: s.color }}>{s.value}</div>
           </div>
@@ -67,8 +67,8 @@ export function ModelRouterPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', height: 'calc(100vh - 200px)' }}>
         {/* Provider List */}
-        <div style={{ borderRight: '1px solid #1e293b', overflow: 'auto', padding: 20 }}>
-          <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Model Providers</div>
+        <div style={{ borderRight: '1px solid var(--gi-border-subtle)', overflow: 'auto', padding: 20 }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Model Providers</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {MODEL_PROVIDERS.map((p) => {
               const isActive = activeProvider === p.id;
@@ -79,8 +79,8 @@ export function ModelRouterPage() {
                   key={p.id}
                   onClick={() => setActiveProvider(p.id)}
                   style={{
-                    background: isActive ? 'rgba(77,143,204,0.08)' : '#0f172a',
-                    border: `1px solid ${isActive ? 'rgba(77,143,204,0.3)' : '#1e293b'}`,
+                    background: isActive ? 'rgba(77,143,204,0.08)' : 'var(--gi-bg-base)',
+                    border: `1px solid ${isActive ? 'rgba(77,143,204,0.3)' : 'var(--gi-border-subtle)'}`,
                     borderRadius: 10, padding: 14, cursor: 'pointer',
                   }}
                 >
@@ -91,7 +91,7 @@ export function ModelRouterPage() {
                       <span style={{ fontSize: 10, color: statusColor }}>{p.isAvailable ? 'Available' : 'No API key'}</span>
                     </div>
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginBottom: 8 }}>
                     {p.isMock ? 'Demo mock — no API calls' : `Env: ${p.envKey}`}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -107,13 +107,13 @@ export function ModelRouterPage() {
 
           {/* Routing Rules */}
           <div style={{ marginTop: 20 }}>
-            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Routing Rules</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Routing Rules</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ROUTING_RULES.map((r, i) => (
-                <div key={i} style={{ background: '#0f172a', borderRadius: 6, border: '1px solid #1e293b', padding: '8px 12px' }}>
+                <div key={i} style={{ background: 'var(--gi-bg-base)', borderRadius: 6, border: '1px solid var(--gi-border-subtle)', padding: '8px 12px' }}>
                   <div style={{ fontSize: 10, color: '#8b7ac8', fontFamily: 'monospace', marginBottom: 4 }}>{r.condition}</div>
                   <div style={{ fontSize: 10, color: '#d4a054', marginBottom: 3 }}>→ {r.provider}</div>
-                  <div style={{ fontSize: 10, color: '#64748b' }}>{r.reason}</div>
+                  <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{r.reason}</div>
                 </div>
               ))}
             </div>
@@ -122,18 +122,18 @@ export function ModelRouterPage() {
 
         {/* Per-Operator Routing Table */}
         <div style={{ overflow: 'auto', padding: 20 }}>
-          <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Per-Operator Model Assignment</div>
-          <div style={{ background: '#0f172a', borderRadius: 10, border: '1px solid #1e293b', overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 1fr 0.8fr 0.8fr 1fr', padding: '10px 16px', borderBottom: '1px solid #1e293b' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Per-Operator Model Assignment</div>
+          <div style={{ background: 'var(--gi-bg-base)', borderRadius: 10, border: '1px solid var(--gi-border-subtle)', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 1fr 0.8fr 0.8fr 1fr', padding: '10px 16px', borderBottom: '1px solid var(--gi-border-subtle)' }}>
               {['Operator', 'Model Type', 'Tokens (7d)', 'Calls', 'Avg Latency', 'Avg Cost/Call'].map((h) => (
-                <div key={h} style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+                <div key={h} style={{ fontSize: 10, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
               ))}
             </div>
             {ROUTING_METRICS.map((r, i) => (
               <div key={r.operator} style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 1fr 0.8fr 0.8fr 1fr', padding: '12px 16px', borderBottom: i < ROUTING_METRICS.length - 1 ? '1px solid rgba(30,41,59,0.5)' : 'none' }}>
-                <div style={{ fontSize: 12, color: '#e2e8f0', fontWeight: 500 }}>{r.operator}</div>
+                <div style={{ fontSize: 12, color: 'var(--gi-text-primary)', fontWeight: 500 }}>{r.operator}</div>
                 <div>
-                  <span style={{ fontSize: 10, color: r.model === 'reasoning' ? '#8b7ac8' : '#4d8fcc', background: r.model === 'reasoning' ? 'rgba(139,122,200,0.1)' : 'rgba(77,143,204,0.1)', border: `1px solid ${r.model === 'reasoning' ? 'rgba(139,122,200,0.25)' : 'rgba(77,143,204,0.25)'}`, borderRadius: 10, padding: '2px 8px' }}>
+                  <span style={{ fontSize: 10, color: r.model === 'reasoning' ? '#8b7ac8' : 'var(--gi-accent-blue)', background: r.model === 'reasoning' ? 'rgba(139,122,200,0.1)' : 'rgba(77,143,204,0.1)', border: `1px solid ${r.model === 'reasoning' ? 'rgba(139,122,200,0.25)' : 'rgba(77,143,204,0.25)'}`, borderRadius: 10, padding: '2px 8px' }}>
                     {r.model}
                   </span>
                 </div>
@@ -147,8 +147,8 @@ export function ModelRouterPage() {
 
           {/* Env Key Status */}
           <div style={{ marginTop: 20 }}>
-            <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Environment Key Status</div>
-            <div style={{ background: '#0f172a', borderRadius: 10, border: '1px solid #1e293b', padding: 16 }}>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Environment Key Status</div>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 10, border: '1px solid var(--gi-border-subtle)', padding: 16 }}>
               {[
                 { key: 'OPENAI_API_KEY', status: 'not set' },
                 { key: 'DEEPSEEK_API_KEY', status: 'not set' },
@@ -158,7 +158,7 @@ export function ModelRouterPage() {
                 { key: 'DEFAULT_FAST_MODEL', status: 'not set — default: provider default' },
               ].map((e, i) => (
                 <div key={e.key} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 5 ? '1px solid #0a0f1a' : 'none' }}>
-                  <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>{e.key}</span>
+                  <span style={{ fontSize: 11, color: 'var(--gi-text-muted)', fontFamily: 'monospace' }}>{e.key}</span>
                   <span style={{ fontSize: 11, color: e.status.startsWith('not set') ? '#475569' : '#22c55e' }}>{e.status}</span>
                 </div>
               ))}

@@ -85,8 +85,8 @@ const RISK_COLORS: Record<RiskLevel, string> = {
 };
 
 const STATUS_COLORS: Record<PlanStepStatus, string> = {
-  pending: '#64748b',
-  ready: '#4d8fcc',
+  pending: 'var(--gi-text-muted)',
+  ready: 'var(--gi-accent-blue)',
   running: '#22c55e',
   blocked: '#ef4444',
   completed: '#10b981',
@@ -95,7 +95,7 @@ const STATUS_COLORS: Record<PlanStepStatus, string> = {
 };
 
 const PLAN_STATUS_COLORS: Record<PlanGraph['status'], string> = {
-  draft: '#64748b',
+  draft: '#4a6070',
   ready: '#4d8fcc',
   executing: '#22c55e',
   completed: '#10b981',
@@ -187,7 +187,7 @@ function StepNode({
       </div>
       <div style={{ minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>{step.title}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)' }}>{step.title}</span>
           {step.requiredApproval && (
             <span
               style={{
@@ -205,7 +205,7 @@ function StepNode({
             </span>
           )}
         </div>
-        <div style={{ fontSize: 11, color: '#64748b' }}>
+        <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
           {step.route.modelProvider ?? '—'}
           {step.route.model ? ` · ${step.route.model}` : ''}
           {step.route.toolId ? ` · ${step.route.toolId}` : ''}
@@ -277,7 +277,7 @@ function PlanSummaryCard({ plan, dim }: { plan: PlanGraph; dim?: boolean }) {
         style={{
           fontSize: 12,
           fontWeight: 600,
-          color: '#e2e8f0',
+          color: 'var(--gi-text-primary)',
           marginBottom: 6,
           lineHeight: 1.3,
         }}
@@ -290,7 +290,7 @@ function PlanSummaryCard({ plan, dim }: { plan: PlanGraph; dim?: boolean }) {
           gridTemplateColumns: '1fr 1fr 1fr',
           gap: 6,
           fontSize: 10,
-          color: '#64748b',
+          color: 'var(--gi-text-muted)',
         }}
       >
         <div>
@@ -337,7 +337,7 @@ function FallbackCompare({ plan, fallback }: { plan: PlanGraph; fallback: PlanGr
           >
             {idx === 0 ? 'Primary' : `Fallback (rank ${fallback.rank})`}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 8 }}>
             {p.title}
           </div>
           <div
@@ -346,7 +346,7 @@ function FallbackCompare({ plan, fallback }: { plan: PlanGraph; fallback: PlanGr
               gridTemplateColumns: '1fr 1fr',
               gap: 6,
               fontSize: 10,
-              color: '#64748b',
+              color: 'var(--gi-text-muted)',
               marginBottom: 10,
             }}
           >
@@ -481,11 +481,11 @@ function StepDetailPanel({
           ✕
         </button>
       </div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
         {step.title}
       </div>
       {step.description && (
-        <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5, marginBottom: 14 }}>
+        <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.5, marginBottom: 14 }}>
           {step.description}
         </div>
       )}
@@ -495,7 +495,7 @@ function StepDetailPanel({
           { label: 'Status', value: step.status, color: STATUS_COLORS[step.status] },
           { label: 'Risk', value: step.riskLevel, color: RISK_COLORS[step.riskLevel] },
           { label: 'Risk score', value: step.estimatedRisk.toFixed(2), color: undefined },
-          { label: 'Value', value: step.estimatedValue.toFixed(2), color: '#4d8fcc' },
+          { label: 'Value', value: step.estimatedValue.toFixed(2), color: 'var(--gi-accent-blue)' },
           { label: 'Route class', value: step.route.routeClass, color: '#8b7ac8' },
           { label: 'Provider', value: step.route.modelProvider ?? '—', color: undefined },
           { label: 'Model', value: step.route.model ?? '—', color: undefined },
@@ -601,7 +601,7 @@ function StepDetailPanel({
             >
               {audit.decision === 'approved' ? '✓ Approved' : '✕ Rejected'}
             </div>
-            <div style={{ fontSize: 10, color: '#64748b' }}>
+            <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
               by {audit.actorId ?? 'operator'}
               {audit.actorRole ? ` · ${audit.actorRole}` : ''} · {fmtTime(audit.at)}
             </div>
@@ -626,7 +626,7 @@ function StepDetailPanel({
                 background: 'rgba(0,0,0,0.3)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 6,
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
                 padding: 8,
                 fontSize: 11,
                 resize: 'vertical',
@@ -677,7 +677,7 @@ function StepDetailPanel({
             )}
           </>
         ) : (
-          <div style={{ fontSize: 11, color: '#64748b' }}>No approval required for this step.</div>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>No approval required for this step.</div>
         )}
       </div>
     </div>
@@ -788,7 +788,7 @@ export default function PlannerStudio() {
     >
       <Toaster richColors closeButton position="bottom-right" />
       {plansQuery.isLoading && (
-        <div style={{ padding: 40, color: '#64748b', fontSize: 13 }}>Loading plans…</div>
+        <div style={{ padding: 40, color: 'var(--gi-text-muted)', fontSize: 13 }}>Loading plans…</div>
       )}
 
       {!plansQuery.isLoading && plansQuery.isError && (
@@ -818,7 +818,7 @@ export default function PlannerStudio() {
             lineHeight: 1.6,
           }}
         >
-          <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: 6 }}>No plans yet</div>
+          <div style={{ fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 6 }}>No plans yet</div>
           When the planner generates a plan graph for an agent run or a manual objective, it will
           appear here for review and approval. Plans created through the Run Console or via{' '}
           <code>POST /api/plans</code> show up immediately.
@@ -892,11 +892,11 @@ export default function PlannerStudio() {
                   >
                     <div style={{ minWidth: 0 }}>
                       <div
-                        style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}
+                        style={{ fontSize: 16, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}
                       >
                         {selectedPlan.title}
                       </div>
-                      <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', lineHeight: 1.5 }}>
                         {selectedPlan.objective}
                       </div>
                       <div
@@ -969,7 +969,7 @@ export default function PlannerStudio() {
                       {
                         label: 'Confidence',
                         value: `${(selectedPlan.confidence * 100).toFixed(0)}%`,
-                        color: '#4d8fcc',
+                        color: 'var(--gi-accent-blue)',
                       },
                       {
                         label: 'Est. Cost',
@@ -1083,7 +1083,7 @@ export default function PlannerStudio() {
                           Compare with fallback
                         </div>
                         {fallbacksQuery.isLoading && (
-                          <div style={{ color: '#64748b', fontSize: 12, padding: 16 }}>
+                          <div style={{ color: 'var(--gi-text-muted)', fontSize: 12, padding: 16 }}>
                             Loading fallbacks…
                           </div>
                         )}
@@ -1106,7 +1106,7 @@ export default function PlannerStudio() {
                                       selectedFallbackId === fb.planId
                                         ? '#f59e0b'
                                         : 'rgba(255,255,255,0.05)',
-                                    color: selectedFallbackId === fb.planId ? '#0f172a' : '#94a3b8',
+                                    color: selectedFallbackId === fb.planId ? 'var(--gi-bg-base)' : '#94a3b8',
                                     border: 'none',
                                     borderRadius: 6,
                                     padding: '5px 10px',
@@ -1142,7 +1142,7 @@ export default function PlannerStudio() {
                           Plan Replay
                         </div>
                         {replayMutation.isPending && (
-                          <div style={{ color: '#64748b', fontSize: 12, padding: 16 }}>
+                          <div style={{ color: 'var(--gi-text-muted)', fontSize: 12, padding: 16 }}>
                             Replaying…
                           </div>
                         )}
@@ -1183,8 +1183,8 @@ export default function PlannerStudio() {
                                   >
                                     {i + 1}
                                   </span>
-                                  <span style={{ color: '#e2e8f0' }}>{s.title}</span>
-                                  <span style={{ color: '#64748b' }}>
+                                  <span style={{ color: 'var(--gi-text-primary)' }}>{s.title}</span>
+                                  <span style={{ color: 'var(--gi-text-muted)' }}>
                                     {s.routeProvider ?? '—'}
                                     {s.routeModel ? ` · ${s.routeModel}` : ''}
                                   </span>
@@ -1236,7 +1236,7 @@ export default function PlannerStudio() {
                 </div>
               </>
             ) : (
-              <div style={{ color: '#64748b', fontSize: 12, padding: 32 }}>Loading plan…</div>
+              <div style={{ color: 'var(--gi-text-muted)', fontSize: 12, padding: 32 }}>Loading plan…</div>
             )}
           </div>
         </div>

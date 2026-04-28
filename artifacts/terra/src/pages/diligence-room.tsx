@@ -246,7 +246,7 @@ function EvidenceCard({
   };
   const cfg = STATUS_CONFIG[evidence.status] ?? STATUS_CONFIG.pending;
   const Icon = cfg.Icon;
-  const catColor = CATEGORY_COLORS[evidence.category] ?? '#64748b';
+  const catColor = CATEGORY_COLORS[evidence.category] ?? '#4a6070';
 
   const handleAdvance = async (e: React.MouseEvent, next: string) => {
     e.stopPropagation();

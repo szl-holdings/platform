@@ -131,7 +131,7 @@ function AssignModal({ workflowName, currentOwner, onAssign, onClose }: AssignMo
     >
       <div
         className="rounded-2xl p-6 w-full max-w-sm shadow-2xl"
-        style={{ background: '#0d1520', border: '1px solid rgba(255,255,255,0.1)' }}
+        style={{ background: 'var(--gi-bg-surface)', border: '1px solid rgba(255,255,255,0.1)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -172,7 +172,7 @@ function AssignModal({ workflowName, currentOwner, onAssign, onClose }: AssignMo
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.12)',
-                color: '#c8d8e8',
+                color: 'var(--gi-text-primary)',
               }}
             />
           </div>
@@ -183,7 +183,7 @@ function AssignModal({ workflowName, currentOwner, onAssign, onClose }: AssignMo
             className="w-full py-2 rounded-lg text-sm font-semibold transition-all"
             style={{
               background: name.trim() ? '#d4a054' : 'rgba(212,160,84,0.15)',
-              color: name.trim() ? '#060b12' : 'rgba(212,160,84,0.4)',
+              color: name.trim() ? 'var(--gi-bg-base)' : 'rgba(212,160,84,0.4)',
               cursor: name.trim() ? 'pointer' : 'not-allowed',
             }}
           >

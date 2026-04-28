@@ -18,7 +18,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { OwnerCargoForceGraph } from '../components/owner-cargo-force-graph';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 interface Provenance {

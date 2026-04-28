@@ -92,7 +92,7 @@ export default function SiemExportPage() {
     fontSize: 12,
     fontWeight: 700,
     letterSpacing: '0.06em',
-    color: active ? '#c8a84b' : '#64748b',
+    color: active ? '#c8a84b' : 'var(--gi-text-muted)',
     background: active ? '#c8a84b15' : 'transparent',
     border: `1px solid ${active ? '#c8a84b40' : 'transparent'}`,
     borderRadius: 6,
@@ -100,7 +100,7 @@ export default function SiemExportPage() {
   });
 
   return (
-    <div style={{ padding: '24px 32px', fontFamily: "'Inter', system-ui, sans-serif", color: '#e2e8f0' }}>
+    <div style={{ padding: '24px 32px', fontFamily: "'Inter', system-ui, sans-serif", color: 'var(--gi-text-primary)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: '#f1f5f9' }}>
@@ -132,18 +132,18 @@ export default function SiemExportPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-        <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.06em', marginBottom: 4 }}>CONNECTIONS</div>
+        <div style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', letterSpacing: '0.06em', marginBottom: 4 }}>CONNECTIONS</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: '#3b82f6' }}>{connections.length}</div>
         </div>
-        <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.06em', marginBottom: 4 }}>TOTAL EXPORTED</div>
+        <div style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', letterSpacing: '0.06em', marginBottom: 4 }}>TOTAL EXPORTED</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: '#10b981' }}>
             {connections.reduce((s, c) => s + c.totalExported, 0)}
           </div>
         </div>
-        <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px' }}>
-          <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.06em', marginBottom: 4 }}>TOTAL FAILED</div>
+        <div style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', letterSpacing: '0.06em', marginBottom: 4 }}>TOTAL FAILED</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: '#ef4444' }}>
             {connections.reduce((s, c) => s + c.totalFailed, 0)}
           </div>
@@ -162,7 +162,7 @@ export default function SiemExportPage() {
       {tab === 'connections' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {connections.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: 'var(--gi-text-muted)' }}>
               <Upload size={32} style={{ marginBottom: 8, opacity: 0.4 }} />
               <p style={{ fontSize: 14 }}>No export connections configured</p>
               <p style={{ fontSize: 12 }}>Add a connection to start exporting findings to your SIEM.</p>
@@ -175,7 +175,7 @@ export default function SiemExportPage() {
                 key={conn.connectionId}
                 style={{
                   background: '#111827',
-                  border: `1px solid ${conn.enabled === 'true' ? '#1e293b' : '#7f1d1d40'}`,
+                  border: `1px solid ${conn.enabled === 'true' ? 'var(--gi-border-subtle)' : '#7f1d1d40'}`,
                   borderRadius: 8,
                   padding: '14px 18px',
                   display: 'flex',
@@ -214,7 +214,7 @@ export default function SiemExportPage() {
                       {conn.enabled === 'true' ? 'ENABLED' : 'DISABLED'}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: 16, fontSize: 11, color: '#64748b' }}>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--gi-text-muted)' }}>
                     <span>Exported: {conn.totalExported}</span>
                     <span>Failed: {conn.totalFailed}</span>
                     <span>Last: {conn.lastExportAt ? new Date(conn.lastExportAt).toLocaleString() : '—'}</span>
@@ -261,7 +261,7 @@ export default function SiemExportPage() {
       {tab === 'events' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {events.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: 'var(--gi-text-muted)' }}>
               <p style={{ fontSize: 14 }}>No export events yet</p>
             </div>
           )}
@@ -270,7 +270,7 @@ export default function SiemExportPage() {
               key={evt.eventId}
               style={{
                 background: '#111827',
-                border: '1px solid #1e293b',
+                border: '1px solid var(--gi-border-subtle)',
                 borderRadius: 6,
                 padding: '10px 14px',
                 display: 'flex',
@@ -291,8 +291,8 @@ export default function SiemExportPage() {
                 >
                   {evt.status.toUpperCase()}
                 </span>
-                <span style={{ fontSize: 12, color: '#e2e8f0' }}>{evt.findingId.slice(0, 16)}…</span>
-                <span style={{ fontSize: 10, color: '#64748b' }}>{evt.format.toUpperCase()}</span>
+                <span style={{ fontSize: 12, color: 'var(--gi-text-primary)' }}>{evt.findingId.slice(0, 16)}…</span>
+                <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{evt.format.toUpperCase()}</span>
               </div>
               <span style={{ fontSize: 11, color: '#475569' }}>
                 {new Date(evt.createdAt).toLocaleString()}
@@ -353,10 +353,10 @@ function CreateExportConnectionModal({
     width: '100%',
     padding: '8px 10px',
     fontSize: 13,
-    background: '#0f172a',
+    background: 'var(--gi-bg-base)',
     border: '1px solid #334155',
     borderRadius: 4,
-    color: '#e2e8f0',
+    color: 'var(--gi-text-primary)',
     outline: 'none',
     boxSizing: 'border-box',
   };
@@ -374,10 +374,10 @@ function CreateExportConnectionModal({
       style={{ position: 'fixed', inset: 0, background: '#00000080', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}
       onClick={onClose}
     >
-      <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 12, padding: 28, width: 500, maxHeight: '80vh', overflow: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: '#111827', border: '1px solid var(--gi-border-subtle)', borderRadius: 12, padding: 28, width: 500, maxHeight: '80vh', overflow: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>NEW EXPORT CONNECTION</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--gi-text-muted)', cursor: 'pointer' }}>
             <X size={18} />
           </button>
         </div>
@@ -395,7 +395,7 @@ function CreateExportConnectionModal({
               ))}
             </select>
             {selectedAdapter && (
-              <p style={{ fontSize: 11, color: '#64748b', margin: '4px 0 0' }}>{selectedAdapter.description}</p>
+              <p style={{ fontSize: 11, color: 'var(--gi-text-muted)', margin: '4px 0 0' }}>{selectedAdapter.description}</p>
             )}
           </div>
           {selectedAdapter?.configFields.map((field) => (

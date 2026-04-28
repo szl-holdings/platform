@@ -46,7 +46,7 @@ export default function ValueRecovery() {
           <TrendingDown className="w-4 h-4" style={{ color: '#10b981' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#4d8fcc' }}
+            style={{ color: 'var(--gi-accent-blue)' }}
           >
             KORA · Value Recovery
           </span>
@@ -74,7 +74,7 @@ export default function ValueRecovery() {
           {
             label: 'Recovery Rate',
             value: '91%',
-            color: '#4d8fcc',
+            color: 'var(--gi-accent-blue)',
             sub: 'Intervention success rate',
           },
         ].map((c) => (

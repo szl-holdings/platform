@@ -930,7 +930,7 @@ export default function CoreCommandCenter() {
                           className="text-2xl font-bold font-display"
                           style={{
                             color:
-                              rec.score >= 80 ? '#ef4444' : rec.score >= 65 ? '#f59e0b' : '#4d8fcc',
+                              rec.score >= 80 ? '#ef4444' : rec.score >= 65 ? '#f59e0b' : 'var(--gi-accent-blue)',
                           }}
                         >
                           {Math.round(rec.score)}

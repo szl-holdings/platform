@@ -113,12 +113,12 @@ export default function GovernedCockpit() {
     <div
       className="min-h-screen"
       style={{
-        background: '#060b12',
-        color: '#c8d8e8',
+        background: 'var(--gi-bg-base)',
+        color: 'var(--gi-text-primary)',
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
+      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -128,16 +128,16 @@ export default function GovernedCockpit() {
               <Building2 className="w-4 h-4" style={{ color: ACCENT }} />
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
+              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
                 DOMAINE — Governed Real Estate Intelligence
               </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
+              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                 Every acquisition signal, valuation, and risk factor carries a full proof chain
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
               Autonomy Mode
             </span>
             <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
@@ -150,7 +150,7 @@ export default function GovernedCockpit() {
           <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
           <span
             className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
+            style={{ color: 'var(--gi-text-muted)' }}
           >
             Property Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
@@ -161,16 +161,16 @@ export default function GovernedCockpit() {
             { label: 'Active Deals', value: '34', icon: Building2, color: ACCENT },
             { label: 'Distress Signals', value: '847', icon: AlertTriangle, color: color.accent.amber },
             { label: 'Pipeline Value', value: '$284M', icon: TrendingUp, color: color.accent.green },
-            { label: 'Markets Tracked', value: '12', icon: MapPin, color: '#7a99b8' },
+            { label: 'Markets Tracked', value: '12', icon: MapPin, color: 'var(--gi-text-secondary)' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
               className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
+              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
                   {label}
                 </span>
               </div>
@@ -192,7 +192,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Notice of Default filed 14 February 2026. Confidence-weighted AVM of $4.82M against
               outstanding balance of $2.3M creates a $2.5M equity cushion. 73% upzone probability
               within 18 months under Austin HOME II ordinance expansion. Off-market seller with
@@ -200,17 +200,17 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-4 gap-3">
                 {[
                   { label: 'AVM', value: '$4.82M', color: ACCENT },
                   { label: 'Equity Cushion', value: '$2.5M', color: color.accent.green },
                   { label: '5yr IRR', value: '18.4%', color: ACCENT },
-                  { label: 'Cap Rate', value: '5.8%', color: '#7a99b8' },
+                  { label: 'Cap Rate', value: '5.8%', color: 'var(--gi-text-secondary)' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -234,7 +234,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               23 new Notices of Default recorded this week in Austin MSA. Average equity cushion
               across tracked distress properties is $1.8M, creating a 60–90 day acquisition window
               before foreclosure sale. Portfolio concentration headroom permits up to 7 additional
@@ -242,7 +242,7 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3"
-              style={{ background: '#060b12', border: '1px solid #243040' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid var(--gi-border-default)' }}
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
@@ -251,7 +251,7 @@ export default function GovernedCockpit() {
                   { label: 'Avg Equity', value: '$1.8M', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
-                    <div className="text-xs" style={{ color: '#4a6070' }}>
+                    <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
                       {label}
                     </div>
                     <div className="text-base font-bold" style={{ color }}>
@@ -276,7 +276,7 @@ export default function GovernedCockpit() {
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
-            <p className="text-sm" style={{ color: '#c8d8e8' }}>
+            <p className="text-sm" style={{ color: 'var(--gi-text-primary)' }}>
               Financing the 847 Meridian acquisition at standard 65% LTV would bring portfolio LTV
               to 63.7%, leaving only 1.3% headroom against the lender covenant maximum of 65%.
               Investment Committee approval required before committing to offer. Value-add
@@ -284,12 +284,12 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid rgba(201,168,92,0.19)' }}
+              style={{ background: 'var(--gi-bg-base)', border: '1px solid rgba(201,168,92,0.19)' }}
             >
               <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Risk mitigation:
               </span>
-              <span style={{ color: '#7a99b8' }}>
+              <span style={{ color: 'var(--gi-text-secondary)' }}>
                 {' '}
                 Consider equity-only acquisition or 60% LTV financing to preserve covenant headroom.
                 Alternative: defer one other pipeline acquisition to reclaim LTV buffer.

@@ -76,7 +76,7 @@ export default function DiligenceSecurityPage() {
       @media print {
         .no-print { display: none !important; }
         body { background: #fff !important; color: #111 !important; }
-        .brief-card { break-inside: avoid; border: 1px solid #e2e8f0 !important; background: #f8fafc !important; }
+        .brief-card { break-inside: avoid; border: 1px solid var(--gi-text-primary) !important; background: #f8fafc !important; }
         a { color: #15803d !important; }
       }
     `;

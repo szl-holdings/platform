@@ -382,7 +382,7 @@ function StatPill({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <span style={{ fontSize: 10, color: '#475569' }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: color ?? '#e2e8f0' }}>{value}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: color ?? 'var(--gi-text-primary)' }}>{value}</span>
     </div>
   );
 }
@@ -552,7 +552,7 @@ function PhaseDetail({
             label="Model"
             value={snapshot.model.replace('gpt-4o-', '4o-').replace('claude-3-5-sonnet-', 'cs-')}
           />
-          <StatPill label="Latency" value={`${snapshot.latencyMs}ms`} color="#4d8fcc" />
+          <StatPill label="Latency" value={`${snapshot.latencyMs}ms`} color="var(--gi-accent-blue)" />
           <StatPill
             label="Tokens"
             value={`${snapshot.inputTokens + snapshot.outputTokens}`}
@@ -603,12 +603,12 @@ function PhaseDetail({
                 style={{
                   width: `${Math.min(100, snapshot.inputTokens / 30)}%`,
                   height: '100%',
-                  background: '#4d8fcc',
+                  background: 'var(--gi-accent-blue)',
                   borderRadius: 2,
                 }}
               />
             </div>
-            <span style={{ fontSize: 10, color: '#64748b', width: 34 }}>
+            <span style={{ fontSize: 10, color: 'var(--gi-text-muted)', width: 34 }}>
               {snapshot.inputTokens}
             </span>
           </div>
@@ -626,7 +626,7 @@ function PhaseDetail({
                 }}
               />
             </div>
-            <span style={{ fontSize: 10, color: '#64748b', width: 34 }}>
+            <span style={{ fontSize: 10, color: 'var(--gi-text-muted)', width: 34 }}>
               {snapshot.outputTokens}
             </span>
           </div>
@@ -687,7 +687,7 @@ function PhaseDetail({
               <div
                 style={{
                   fontSize: 12,
-                  color: '#e2e8f0',
+                  color: 'var(--gi-text-primary)',
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: 6,
@@ -706,7 +706,7 @@ function PhaseDetail({
             <div
               style={{
                 fontSize: 12,
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
                 background: `${ACCENT}12`,
                 border: `1px solid ${ACCENT}30`,
                 borderRadius: 6,
@@ -749,7 +749,7 @@ function PhaseDetail({
                 border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: 6,
                 padding: '8px 10px',
-                color: '#e2e8f0',
+                color: 'var(--gi-text-primary)',
                 fontSize: 12,
                 resize: 'vertical',
                 minHeight: 64,
@@ -852,9 +852,9 @@ export default function CognitiveTraces() {
     return (
       <div
         style={{
-          background: '#080c14',
+          background: 'var(--gi-bg-base)',
           minHeight: '100vh',
-          color: '#e2e8f0',
+          color: 'var(--gi-text-primary)',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
@@ -866,7 +866,7 @@ export default function CognitiveTraces() {
         <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px 20px' }}>
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-              <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Trace Replay</span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Trace Replay</span>
               <span
                 style={{
                   fontSize: 11,
@@ -900,7 +900,7 @@ export default function CognitiveTraces() {
                 <span style={{ fontSize: 10, color: '#f59e0b' }}>⚠ API unavailable</span>
               )}
             </div>
-            <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+            <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
               No traces available yet. Once agents start running, their reasoning traces will appear
               here.
             </p>
@@ -943,9 +943,9 @@ export default function CognitiveTraces() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -954,7 +954,7 @@ export default function CognitiveTraces() {
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Trace Replay</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Trace Replay</span>
             <span
               style={{
                 fontSize: 11,
@@ -988,7 +988,7 @@ export default function CognitiveTraces() {
               <span style={{ fontSize: 10, color: '#f59e0b' }}>⚠ Showing sample traces</span>
             )}
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Step through agent execution phases — perceive, reason, plan, act, reflect — with
             snapshot deltas, model telemetry, and regression markers vs prior runs.
           </p>
@@ -1007,7 +1007,7 @@ export default function CognitiveTraces() {
             {
               label: 'Phases Logged',
               value: traces.reduce((s, t) => s + t.phases.length, 0),
-              color: '#4d8fcc',
+              color: 'var(--gi-accent-blue)',
             },
             {
               label: 'Regression Flags',
@@ -1033,7 +1033,7 @@ export default function CognitiveTraces() {
               }}
             >
               <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -1041,7 +1041,7 @@ export default function CognitiveTraces() {
         <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Traces</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-muted)' }}>Traces</span>
               <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
                 {domains.map((d) => (
                   <button
@@ -1087,7 +1087,7 @@ export default function CognitiveTraces() {
                   disabled={!hasPrev || tracesQuery.isFetching}
                   style={{
                     background: hasPrev ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-                    color: hasPrev ? '#e2e8f0' : '#475569',
+                    color: hasPrev ? 'var(--gi-text-primary)' : '#475569',
                     border: '1px solid rgba(255,255,255,0.07)',
                     borderRadius: 4,
                     padding: '3px 10px',
@@ -1099,7 +1099,7 @@ export default function CognitiveTraces() {
                 >
                   ← Newer
                 </button>
-                <span style={{ fontSize: 10, color: '#64748b' }}>
+                <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                   Page {page + 1} of {totalPages} · {totalTraces.toLocaleString()} total
                 </span>
                 <button
@@ -1112,7 +1112,7 @@ export default function CognitiveTraces() {
                   disabled={!hasNext || tracesQuery.isFetching}
                   style={{
                     background: hasNext ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-                    color: hasNext ? '#e2e8f0' : '#475569',
+                    color: hasNext ? 'var(--gi-text-primary)' : '#475569',
                     border: '1px solid rgba(255,255,255,0.07)',
                     borderRadius: 4,
                     padding: '3px 10px',
@@ -1133,7 +1133,7 @@ export default function CognitiveTraces() {
                   border: '1px dashed rgba(255,255,255,0.1)',
                   borderRadius: 8,
                   padding: '16px 14px',
-                  color: '#64748b',
+                  color: 'var(--gi-text-muted)',
                   fontSize: 12,
                   textAlign: 'center',
                 }}
@@ -1169,7 +1169,7 @@ export default function CognitiveTraces() {
                       style={{
                         fontSize: 11,
                         fontWeight: 600,
-                        color: isSelected ? '#e2e8f0' : '#94a3b8',
+                        color: isSelected ? 'var(--gi-text-primary)' : '#94a3b8',
                         marginBottom: 3,
                         lineHeight: 1.4,
                       }}
@@ -1234,10 +1234,10 @@ export default function CognitiveTraces() {
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
                     {selectedTrace.label}
                   </div>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 12, color: 'var(--gi-text-muted)', margin: 0, lineHeight: 1.5 }}>
                     {selectedTrace.taskDescription}
                   </p>
                 </div>
@@ -1245,7 +1245,7 @@ export default function CognitiveTraces() {
                   <StatPill
                     label="Total Latency"
                     value={`${(selectedTrace.totalLatencyMs / 1000).toFixed(2)}s`}
-                    color="#4d8fcc"
+                    color="var(--gi-accent-blue)"
                   />
                   <StatPill
                     label="Total Cost"
@@ -1284,7 +1284,7 @@ export default function CognitiveTraces() {
                           style={{
                             fontSize: 10,
                             fontWeight: 600,
-                            color: activePhaseIndex === i ? c : '#64748b',
+                            color: activePhaseIndex === i ? c : 'var(--gi-text-muted)',
                             textTransform: 'capitalize',
                           }}
                         >

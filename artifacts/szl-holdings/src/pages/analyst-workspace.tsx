@@ -798,7 +798,7 @@ export default function AnalystWorkspacePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'hsl(222,14%,7%)', color: '#e2e8f0' }}>
+    <div style={{ minHeight: '100vh', background: 'hsl(222,14%,7%)', color: 'var(--gi-text-primary)' }}>
       <SiteNav />
 
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 24px' }}>
@@ -1541,7 +1541,7 @@ export default function AnalystWorkspacePage() {
                                   >
                                     {j > 0 && <ArrowRight size={12} color="#6b7280" />}
                                     <span
-                                      style={{ fontSize: 12.5, fontWeight: 700, color: '#e2e8f0' }}
+                                      style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--gi-text-primary)' }}
                                     >
                                       {label}
                                     </span>

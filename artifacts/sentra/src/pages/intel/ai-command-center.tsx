@@ -306,7 +306,7 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
                 y={threadY + 16}
                 textAnchor="middle"
                 fontSize="9"
-                fill={isActive ? '#c9b787' : '#64748b'}
+                fill={isActive ? '#c9b787' : 'var(--gi-text-muted)'}
                 fontFamily="monospace"
               >
                 {agent.id.toUpperCase()}

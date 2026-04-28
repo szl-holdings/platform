@@ -12,11 +12,11 @@ import { useState } from 'react';
 import type { AuditEntry } from '../lib/types';
 
 const APP_COLORS: Record<string, string> = {
-  aegis: 'var(--gi-accent-red)',
-  vessels: 'var(--gi-accent-blue)',
-  terra: 'var(--gi-accent-green)',
-  pulse: 'var(--gi-accent-amber)',
-  command: 'var(--gi-accent-violet)',
+  aegis: '#c96070',
+  vessels: '#4d8fcc',
+  terra: '#5baa8a',
+  pulse: '#c9a85c',
+  command: '#9b7cc8',
   'szl-holdings': '#22d3ee',
   'carlota-jo': '#f472b6',
   'prism-counsel': '#818cf8',
@@ -164,7 +164,7 @@ const REPLAY_TRACES: Record<string, { label: string; outputSummary: string; reas
 
 function RateLimitBar({ used, total, label }: { used: number; total: number; label: string }) {
   const pct = Math.round((used / total) * 100);
-  const color = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
+  const color = pct >= 95 ? '#c96070' : pct >= 80 ? '#c9a85c' : '#5baa8a';
   return (
     <div>
       <div className="flex items-center justify-between mb-0.5">
@@ -183,7 +183,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
   const [replayed, setReplayed] = useState(false);
   const [replaying, setReplaying] = useState(false);
   const color = APP_COLORS[entry.agentSlug] ?? '#8896aa';
-  const statusColor = entry.status === 'success' ? 'var(--gi-accent-green)' : entry.status === 'error' ? 'var(--gi-accent-red)' : '#8896aa';
+  const statusColor = entry.status === 'success' ? '#5baa8a' : entry.status === 'error' ? '#c96070' : '#8896aa';
   const replayData = REPLAY_TRACES[entry.action];
 
   const displayOutput = replayed && replayData ? replayData.outputSummary : entry.outputSummary;
@@ -317,7 +317,7 @@ function AgentRateLimitPanel({ entries }: { entries: AuditEntry[] }) {
         {agents.map((e) => {
           const color = APP_COLORS[e.agentSlug] ?? '#8896aa';
           const pct = Math.round((e.rateLimit.requestsUsedThisMinute / e.rateLimit.requestsPerMinute) * 100);
-          const statusColor = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
+          const statusColor = pct >= 95 ? '#c96070' : pct >= 80 ? '#c9a85c' : '#5baa8a';
           return (
             <div key={e.agentSlug} className="bg-praxis-bg rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">

@@ -606,23 +606,23 @@ export default function CisoDashboard() {
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData}>
-                  <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                  <XAxis dataKey="week" stroke="#64748b" fontSize={11} />
-                  <YAxis stroke="#64748b" fontSize={11} />
+                  <CartesianGrid stroke="var(--gi-border-subtle)" strokeDasharray="3 3" />
+                  <XAxis dataKey="week" stroke="var(--gi-text-muted)" fontSize={11} />
+                  <YAxis stroke="var(--gi-text-muted)" fontSize={11} />
                   <Tooltip
                     contentStyle={{
-                      background: '#0f172a',
-                      border: '1px solid #1e293b',
+                      background: 'var(--gi-bg-base)',
+                      border: '1px solid var(--gi-border-subtle)',
                       borderRadius: 8,
                     }}
-                    labelStyle={{ color: '#e2e8f0' }}
+                    labelStyle={{ color: 'var(--gi-text-primary)' }}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line
                     type="monotone"
                     dataKey="previous"
                     name="Last Quarter"
-                    stroke="#64748b"
+                    stroke="var(--gi-text-muted)"
                     strokeWidth={2}
                     dot={false}
                   />
@@ -658,8 +658,8 @@ export default function CisoDashboard() {
                   <RadialBar background dataKey="uv" cornerRadius={12} fill="#22d3ee" />
                   <Tooltip
                     contentStyle={{
-                      background: '#0f172a',
-                      border: '1px solid #1e293b',
+                      background: 'var(--gi-bg-base)',
+                      border: '1px solid var(--gi-border-subtle)',
                       borderRadius: 8,
                     }}
                   />
@@ -683,13 +683,13 @@ export default function CisoDashboard() {
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={domainCompare}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="domain" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} />
+                <CartesianGrid stroke="var(--gi-border-subtle)" strokeDasharray="3 3" />
+                <XAxis dataKey="domain" stroke="var(--gi-text-muted)" fontSize={11} />
+                <YAxis stroke="var(--gi-text-muted)" fontSize={11} />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
-                    border: '1px solid #1e293b',
+                    background: 'var(--gi-bg-base)',
+                    border: '1px solid var(--gi-border-subtle)',
                     borderRadius: 8,
                   }}
                 />

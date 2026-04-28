@@ -23,7 +23,7 @@ const SEVERITY_CONFIG = {
   critical: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', dot: '#ef4444' },
   high: { color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20', dot: '#f97316' },
   medium: { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', dot: '#f59e0b' },
-  low: { color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20', dot: '#4d8fcc' },
+  low: { color: 'text-sky-400', bg: 'bg-sky-500/10', border: 'border-sky-500/20', dot: 'var(--gi-accent-blue)' },
 };
 
 const LIST_LABEL: Record<string, string> = {
@@ -62,7 +62,7 @@ function ScoreArc({ score, tier }: { score: number; tier: string }) {
         <path
           d={arcPath(startAngle, endAngle, r)}
           fill="none"
-          stroke="#1e293b"
+          stroke="var(--gi-border-subtle)"
           strokeWidth={10}
           strokeLinecap="round"
         />

@@ -67,8 +67,8 @@ function MetricCard({ m }: { m: OverviewMetric }) {
 
 const SEV_COLORS: Record<string, string> = {
   critical: 'text-[#8a8a8a] bg-white/[0.03] border-white/[0.1]',
-  high: 'text-[#c9a85c] bg-white/[0.03] border-white/[0.1]',
-  medium: 'text-[#c9a85c] bg-white/[0.03] border-amber-500/25',
+  high: 'text-[var(--gi-accent-amber)] bg-white/[0.03] border-white/[0.1]',
+  medium: 'text-[var(--gi-accent-amber)] bg-white/[0.03] border-amber-500/25',
   low: 'text-[#5e5e5e] bg-white/[0.03] border-white/[0.1]',
 };
 
@@ -98,11 +98,11 @@ function RecRow({ rec }: { rec: DecisionRecommendation }) {
     rec.urgency === 'critical'
       ? 'text-[#8a8a8a]'
       : rec.urgency === 'urgent'
-        ? 'text-[#c9a85c]'
-        : 'text-[#c9a85c]';
+        ? 'text-[var(--gi-accent-amber)]'
+        : 'text-[var(--gi-accent-amber)]';
   const approvalColor =
     rec.approvalState === 'pending'
-      ? 'text-[#c9a85c]'
+      ? 'text-[var(--gi-accent-amber)]'
       : rec.approvalState === 'approved'
         ? 'text-[#8a8a8a]'
         : 'text-[#5e5e5e]';
@@ -133,7 +133,7 @@ function WorkflowRow({ wf }: { wf: WorkflowItem }) {
       : wf.status === 'stalled'
         ? 'text-[#8a8a8a]'
         : wf.status === 'at_risk'
-          ? 'text-[#c9a85c]'
+          ? 'text-[var(--gi-accent-amber)]'
           : wf.status === 'on_track'
             ? 'text-[#8a8a8a]'
             : 'text-[#8a8a8a]';
@@ -150,7 +150,7 @@ function WorkflowRow({ wf }: { wf: WorkflowItem }) {
           </span>
         )}
         {wf.valueAtRiskUsd && (
-          <span className="text-[10px] font-mono text-[#c9a85c]">
+          <span className="text-[10px] font-mono text-[var(--gi-accent-amber)]">
             ${(wf.valueAtRiskUsd / 1e6).toFixed(1)}M
           </span>
         )}
@@ -239,7 +239,7 @@ export default function OverviewPage() {
       <div className="cockpit-panel p-5 border border-white/[0.06]">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
-            <Brain className="w-4 h-4 text-[#c9a85c]" />
+            <Brain className="w-4 h-4 text-[var(--gi-accent-amber)]" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -300,7 +300,7 @@ export default function OverviewPage() {
         <div className="cockpit-panel">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
             <div className="flex items-center gap-2">
-              <Brain className="w-3.5 h-3.5 text-[#c9a85c]" />
+              <Brain className="w-3.5 h-3.5 text-[var(--gi-accent-amber)]" />
               <p className="text-xs font-semibold text-[#f5f5f5]">Decision Backlog</p>
             </div>
             <Link
@@ -321,7 +321,7 @@ export default function OverviewPage() {
         <div className="cockpit-panel">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-[#c9a85c]" />
+              <Zap className="w-3.5 h-3.5 text-[var(--gi-accent-amber)]" />
               <p className="text-xs font-semibold text-[#f5f5f5]">At-Risk Workflows</p>
             </div>
             <Link

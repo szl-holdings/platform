@@ -50,7 +50,7 @@
 }
 
 :root {
-  /* Counsel product — accent.violet (#9b7cc8 ≈ hsl(270 36% 63%)) */
+  /* Counsel product — accent.violet (var(--gi-accent-violet) ≈ hsl(270 36% 63%)) */
   --background: 260 30% 4%;
   --foreground: 260 18% 92%;
   --border: 260 20% 11%;

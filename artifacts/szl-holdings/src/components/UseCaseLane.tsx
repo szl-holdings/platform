@@ -113,7 +113,7 @@ export function UseCaseLane({
             lineHeight: 1.3,
             marginTop: "0.4rem",
             marginBottom: "0.375rem",
-            ...(isCounsel ? { color: "#e2e8f0" } : {}),
+            ...(isCounsel ? { color: "var(--gi-text-primary)" } : {}),
           }}
         >
           {useCase.title}
@@ -151,9 +151,9 @@ export function UseCaseLane({
             ? signalStyle.numberColor
             : step.proof
             ? proofColor
-            : isCounsel ? "#64748b" : "hsl(214,7%,52%)";
+            : isCounsel ? "var(--gi-text-muted)" : "hsl(214,7%,52%)";
           const textColor = step.signal
-            ? isCounsel ? "#e2e8f0" : "hsl(38,8%,88%)"
+            ? isCounsel ? "var(--gi-text-primary)" : "hsl(38,8%,88%)"
             : step.proof
             ? proofTextColor
             : isCounsel ? "#94a3b8" : "hsl(214,7%,62%)";
@@ -309,7 +309,7 @@ export function UseCaseLane({
                 fontWeight: 600,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: isCounsel ? "#64748b" : "hsl(214,7%,52%)",
+                color: isCounsel ? "#4a6070" : "hsl(214,7%,52%)",
                 cursor: "pointer",
                 transition: "border-color 0.2s",
               }}

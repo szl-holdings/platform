@@ -11,7 +11,7 @@ const portfolio = [
   { name: "DOMAINE", sector: "Property Intelligence · OBSERVE", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#4d7c0f", status: "Scaling" },
   { name: "PARAGON", sector: "Defense & Intelligence", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+84%", headcount: 28, color: "#6366f1", status: "Hypergrowth" },
   { name: "SZL APEX", sector: "AI Research · MLOps", stage: "Early", ownership: 100, arr: "$0.4M", growth: "+93%", headcount: 6, color: "#a855f7", status: "Hypergrowth" },
-  { name: "Carlota Jo", sector: "Consulting", stage: "Mature", ownership: 100, arr: "$4.4M", growth: "+18%", headcount: 14, color: "#64748b", status: "Profitable" },
+  { name: "Carlota Jo", sector: "Consulting", stage: "Mature", ownership: 100, arr: "$4.4M", growth: "+18%", headcount: 14, color: "var(--gi-text-muted)", status: "Profitable" },
 ];
 
 const totalARR = portfolio.reduce((a, p) => {

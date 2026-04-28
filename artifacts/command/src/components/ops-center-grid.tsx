@@ -59,7 +59,7 @@ const OPS_ITEMS: OpsItem[] = [
     label: 'Release Feed',
     description: 'Auto-generated change log for all apps — deployments, features, fixes',
     icon: GitCommit,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
   },
   {
     path: '/operations/deployments',

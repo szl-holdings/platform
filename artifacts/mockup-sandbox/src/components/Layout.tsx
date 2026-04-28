@@ -147,7 +147,7 @@ export default function Layout({
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-left transition-all w-full group ${
                     active
                       ? 'bg-praxis-cyan/10 text-praxis-cyan'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-[#1a2535]/60'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-[var(--gi-border-subtle)]/60'
                   }`}
                 >
                   <Icon

@@ -505,7 +505,7 @@ export default function CommandHome() {
   return (
     <div
       className="flex flex-col h-full min-h-screen"
-      style={{ backgroundColor: DS.page, color: '#e2e8f0' }}
+      style={{ backgroundColor: DS.page, color: 'var(--gi-text-primary)' }}
     >
       {/* Topbar */}
       <div

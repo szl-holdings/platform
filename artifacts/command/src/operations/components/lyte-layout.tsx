@@ -150,7 +150,7 @@ const COMMAND_ONBOARDING_CONFIG: OnboardingConfig = {
   ],
 };
 
-const BG = { sidebar: '#060a12', header: 'rgba(6,10,18,0.85)', main: '#080c14' };
+const BG = { sidebar: '#060a12', header: 'rgba(6,10,18,0.85)', main: 'var(--gi-bg-base)' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.06)' };
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',

@@ -168,10 +168,10 @@ export default function ExecutiveOverview() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Eye className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+            <Eye className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
             <span
               className="text-xs font-medium uppercase tracking-widest"
-              style={{ color: '#4d8fcc' }}
+              style={{ color: 'var(--gi-accent-blue)' }}
             >
               KORA · Executive Overview
             </span>
@@ -233,7 +233,7 @@ export default function ExecutiveOverview() {
             <a
               href="/workflow-health"
               className="text-xs hover:text-white transition-colors"
-              style={{ color: '#4d8fcc' }}
+              style={{ color: 'var(--gi-accent-blue)' }}
             >
               View all →
             </a>
@@ -331,13 +331,13 @@ export default function ExecutiveOverview() {
           style={{ borderColor: 'rgba(255,255,255,0.05)' }}
         >
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+            <Zap className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
             <span className="text-sm font-semibold text-white">Recent Signals & Events</span>
           </div>
           <a
             href="/drift-detection"
             className="text-xs hover:text-white transition-colors"
-            style={{ color: '#4d8fcc' }}
+            style={{ color: 'var(--gi-accent-blue)' }}
           >
             View drift events →
           </a>
@@ -374,14 +374,14 @@ export default function ExecutiveOverview() {
         style={{ borderColor: 'rgba(77,143,204,0.2)', background: 'rgba(77,143,204,0.04)' }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-4 h-4" style={{ color: '#4d8fcc' }} />
+          <TrendingUp className="w-4 h-4" style={{ color: 'var(--gi-accent-blue)' }} />
           <span className="text-sm font-semibold text-white">
             Golden Flow Demo — Active Scenario
           </span>
           <span
             className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ml-2"
             style={{
-              color: '#4d8fcc',
+              color: 'var(--gi-accent-blue)',
               background: 'rgba(77,143,204,0.15)',
               border: '1px solid rgba(77,143,204,0.3)',
             }}

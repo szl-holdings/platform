@@ -305,7 +305,7 @@ function NdaGate({ onAccept, accepting }: { onAccept: () => void; accepting?: bo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm px-4">
-      <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#0c1018] p-8 shadow-2xl">
+      <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-[var(--gi-bg-surface)] p-8 shadow-2xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d4a054]/30 bg-[#d4a054]/10">
             <Lock className="h-5 w-5 text-[#d4a054]" />
@@ -837,7 +837,7 @@ function RequestDemoPanel() {
               name="role"
               value={form.role}
               onChange={handleChange}
-              className="w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
+              className="w-full rounded-xl border border-white/[0.08] bg-[var(--gi-bg-surface)] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
             >
               <option value="">Select a role…</option>
               <option value="General Partner">General Partner</option>
@@ -1099,7 +1099,7 @@ function AccessInquiryPanel({ onBack }: { onBack?: () => void }) {
               name="role"
               value={form.role}
               onChange={handleChange}
-              className="w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
+              className="w-full rounded-xl border border-white/[0.08] bg-[var(--gi-bg-surface)] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
             >
               <option value="">Select a role…</option>
               <option value="General Partner">General Partner</option>
@@ -1559,7 +1559,7 @@ export default function InvestorsDataRoomPage() {
 
               {/* Search results */}
               {searchQuery.trim().length >= 2 && (
-                <div className="mt-2 rounded-xl border border-white/[0.06] bg-[#080c14] overflow-hidden">
+                <div className="mt-2 rounded-xl border border-white/[0.06] bg-[var(--gi-bg-base)] overflow-hidden">
                   {searchLoading ? (
                     <div className="flex items-center gap-2 px-3 py-3">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-white/30" />

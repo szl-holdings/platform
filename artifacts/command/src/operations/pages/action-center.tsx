@@ -504,7 +504,7 @@ export default function ActionCenter() {
                     background: band.color,
                   }}
                 />
-                <span style={{ fontSize: '10px', color: '#64748b' }}>
+                <span style={{ fontSize: '10px', color: 'var(--gi-text-muted)' }}>
                   {band.label}{' '}
                   <span style={{ color: band.color, fontWeight: 700 }}>{band.count}</span>
                 </span>

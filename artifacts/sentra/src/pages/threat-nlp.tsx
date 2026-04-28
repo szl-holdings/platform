@@ -55,7 +55,7 @@ const SAMPLE_CONTEXT =
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct > 60 ? '#ef4444' : pct > 35 ? '#f97316' : '#64748b';
+  const color = pct > 60 ? '#ef4444' : pct > 35 ? '#f97316' : 'var(--gi-text-muted)';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
@@ -145,7 +145,7 @@ export default function ThreatNlpPage() {
             style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e2e8f0',
+              color: 'var(--gi-text-primary)',
             }}
             placeholder="IP, domain, hash, file, command…"
             value={newIndicator}

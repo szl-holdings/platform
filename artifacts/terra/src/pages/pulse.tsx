@@ -78,7 +78,7 @@ const EVENT_TYPES = [
 
 function DealPipeline() {
   const stages = [
-    { name: 'Sourced', count: 47, color: '#64748b' },
+    { name: 'Sourced', count: 47, color: 'var(--gi-text-muted)' },
     { name: 'Qualified', count: 23, color: '#3b82f6' },
     { name: 'Diligence', count: 8, color: '#f59e0b' },
     { name: 'Under Contract', count: 4, color: '#10b981' },
@@ -348,7 +348,7 @@ export default function TerraPulse() {
               { label: 'Distress', value: 'Live', color: '#ef4444' },
               { label: 'Valuations', value: 'ML', color: '#8b5cf6' },
               { label: 'Pipeline', value: 'CRM', color: '#06b6d4' },
-              { label: 'Reports', value: 'Auto', color: '#64748b' },
+              { label: 'Reports', value: 'Auto', color: 'var(--gi-text-muted)' },
             ]}
             title="Real Estate Stack"
           />

@@ -165,7 +165,7 @@ function buildDemoLensHistory(lens: string): PrismScore[] {
   return out;
 }
 
-const _BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
+const _BG = { page: "var(--gi-bg-base)", surface: "var(--gi-bg-surface)", elevated: "var(--gi-bg-raised)" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 
 function ScoreGauge({ score, color, size = 52 }: { score: number; color: string; size?: number }) {

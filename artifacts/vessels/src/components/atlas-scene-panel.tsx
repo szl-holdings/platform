@@ -90,7 +90,7 @@ export function AtlasScenePanel({ vesselId, isDemo }: AtlasScenePanelProps) {
   const v = DEMO_VESSEL;
   const vesselIdStr = vesselId != null ? String(vesselId) : undefined;
   const displayId = vesselIdStr ? `VSL-${vesselIdStr.slice(-6).toUpperCase()}` : v.imo;
-  const ACCENT = '#4d8fcc';
+  const ACCENT = 'var(--gi-accent-blue)';
 
   const tabs: { id: Tab; label: string; icon: typeof Anchor }[] = [
     { id: 'position', label: 'Position & Voyage', icon: MapPin },

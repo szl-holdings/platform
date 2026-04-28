@@ -90,7 +90,7 @@ export function EvidenceRegistryPage() {
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: '#080c14', color: 'rgba(255,255,255,0.85)' }}
+      style={{ background: 'var(--gi-bg-base)', color: 'rgba(255,255,255,0.85)' }}
     >
       <div
         className="px-6 py-4 border-b flex items-center justify-between"

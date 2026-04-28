@@ -72,7 +72,7 @@
 }
 
 :root {
-  /* Terra product — accent.green (#5baa8a ≈ hsl(152 38% 42%)) */
+  /* Terra product — accent.green (var(--gi-accent-green) ≈ hsl(152 38% 42%)) */
   --background: 225 15% 3%;
   --foreground: 220 12% 90%;
   --card: 225 15% 5%;

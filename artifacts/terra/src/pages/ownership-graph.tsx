@@ -102,7 +102,7 @@ function NodeCard({
   onSelect: () => void;
 }) {
   const isUnresolved = node.riskFlag === 'unresolved_owner';
-  const color = isUnresolved ? '#64748b' : (NODE_COLORS[node.type] ?? '#64748b');
+  const color = isUnresolved ? '#4a6070' : (NODE_COLORS[node.type] ?? '#4a6070');
   const Icon = NODE_ICONS[node.type] ?? Building2;
   return (
     <button
@@ -128,7 +128,7 @@ function NodeCard({
           style={{ background: isUnresolved ? 'rgba(148,163,184,0.08)' : `${color}20` }}
         >
           {isUnresolved ? (
-            <HelpCircle className="w-3.5 h-3.5" style={{ color: '#64748b' }} />
+            <HelpCircle className="w-3.5 h-3.5" style={{ color: 'var(--gi-text-muted)' }} />
           ) : (
             <Icon className="w-3.5 h-3.5" style={{ color }} />
           )}
@@ -274,7 +274,7 @@ export default function OwnershipGraphPage() {
                   Entity Nodes ({nodes.length})
                 </div>
                 {nodes.some((n) => n.riskFlag === 'unresolved_owner') && (
-                  <div className="flex items-center gap-1.5 text-[9px] font-mono" style={{ color: '#64748b' }}>
+                  <div className="flex items-center gap-1.5 text-[9px] font-mono" style={{ color: 'var(--gi-text-muted)' }}>
                     <span
                       className="inline-block w-3 border-t"
                       style={{ borderStyle: 'dashed', borderColor: 'rgba(148,163,184,0.35)' }}
@@ -371,7 +371,7 @@ export default function OwnershipGraphPage() {
                         {r.label === 'Unresolved Owners' && r.warn && (
                           <HelpCircle
                             className="inline w-2.5 h-2.5 ml-1 -mt-0.5"
-                            style={{ color: '#64748b' }}
+                            style={{ color: 'var(--gi-text-muted)' }}
                           />
                         )}
                       </span>
@@ -492,7 +492,7 @@ export default function OwnershipGraphPage() {
                 className="rounded-xl p-4"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${NODE_COLORS[selNode.type] ?? '#64748b'}30`,
+                  border: `1px solid ${NODE_COLORS[selNode.type] ?? '#4a6070'}30`,
                 }}
               >
                 <div className="flex items-center gap-2 mb-2">

@@ -1004,7 +1004,7 @@ function VesselsSidebarContent({
             <UsageIndicator
               featureKey="vessels_tracked"
               label="Vessel tracking"
-              accentColor="#4d8fcc"
+              accentColor="var(--gi-accent-blue)"
               billingHref={`${(import.meta.env.BASE_URL ?? '/vessels/').replace(/\/$/, '')}/account/billing`}
             />
             <button

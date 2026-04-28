@@ -32,7 +32,7 @@ type Tab = 'suites' | 'results' | 'compare';
 
 const EVAL_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   rule: { icon: <Shield className="h-3.5 w-3.5" />, color: '#8b7ac8', label: 'Rule Eval' },
-  simulation: { icon: <Brain className="h-3.5 w-3.5" />, color: '#4d8fcc', label: 'Simulation' },
+  simulation: { icon: <Brain className="h-3.5 w-3.5" />, color: 'var(--gi-accent-blue)', label: 'Simulation' },
   'recommendation-quality': {
     icon: <CheckCircle className="h-3.5 w-3.5" />,
     color: '#22c55e',
@@ -206,10 +206,10 @@ function SuiteCard({
               </span>
             )}
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', marginBottom: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
             {suite.name}
           </div>
-          <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 8px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: 'var(--gi-text-muted)', margin: '0 0 8px', lineHeight: 1.5 }}>
             {suite.description}
           </p>
           <div style={{ display: 'flex', gap: 12, fontSize: 11, color: '#475569' }}>
@@ -563,7 +563,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
                   )}
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#e2e8f0' }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--gi-text-primary)' }}>
                     {run.suiteName}
                   </div>
                   <div style={{ fontSize: 10, color: '#475569' }}>
@@ -641,7 +641,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
               }}
             >
               <span style={{ color: '#475569' }}>Baseline: </span>
-              <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{baseline.suiteName}</span>
+              <span style={{ color: 'var(--gi-text-primary)', fontWeight: 500 }}>{baseline.suiteName}</span>
               <span style={{ color: '#475569' }}>
                 {' '}
                 · {(baseline.passRate * 100).toFixed(1)}% pass
@@ -672,7 +672,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
                 }}
               >
                 {options.map((o) => (
-                  <option key={o} value={o} style={{ background: '#0f172a' }}>
+                  <option key={o} value={o} style={{ background: 'var(--gi-bg-base)' }}>
                     {o}
                   </option>
                 ))}
@@ -772,7 +772,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
               >
                 Live variant cases
               </div>
-              <div style={{ fontSize: 10, color: '#64748b' }}>
+              <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                 {liveCases.filter((c) => c.passed).length} pass ·{' '}
                 {liveCases.filter((c) => !c.passed).length} fail
               </div>
@@ -841,10 +841,10 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
                     >
                       {c.label}
                     </span>
-                    <span style={{ color: '#64748b', textAlign: 'right' }}>
+                    <span style={{ color: 'var(--gi-text-muted)', textAlign: 'right' }}>
                       {(c.score * 100).toFixed(0)}%
                     </span>
-                    <span style={{ color: '#64748b', textAlign: 'right' }}>{c.latencyMs}ms</span>
+                    <span style={{ color: 'var(--gi-text-muted)', textAlign: 'right' }}>{c.latencyMs}ms</span>
                   </div>
                 ))}
               {liveCases.length === 0 && (
@@ -867,7 +867,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
               padding: 18,
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
               Variant vs Baseline
             </div>
             <div style={{ fontSize: 11, color: '#475569', marginBottom: 14 }}>
@@ -934,7 +934,7 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
               const delta = b - a;
               const improved = higherBetter ? delta > 0.005 : delta < -0.001;
               const regressed = higherBetter ? delta < -0.005 : delta > 0.001;
-              const deltaColor = improved ? '#22c55e' : regressed ? '#ef4444' : '#64748b';
+              const deltaColor = improved ? '#22c55e' : regressed ? '#ef4444' : 'var(--gi-text-muted)';
               const deltaLabel =
                 Math.abs(delta) < 0.001
                   ? '—'
@@ -953,8 +953,8 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
                   }}
                 >
                   <span style={{ color: '#475569' }}>{label}</span>
-                  <span style={{ color: '#64748b' }}>{format(a)}</span>
-                  <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{format(b)}</span>
+                  <span style={{ color: 'var(--gi-text-muted)' }}>{format(a)}</span>
+                  <span style={{ color: 'var(--gi-text-primary)', fontWeight: 500 }}>{format(b)}</span>
                   <span style={{ color: deltaColor, fontWeight: 700 }}>{deltaLabel}</span>
                 </div>
               );
@@ -1114,7 +1114,7 @@ export default function EvalStudio() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -1123,7 +1123,7 @@ export default function EvalStudio() {
       <div style={{ maxWidth: 1440, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Eval Studio</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Eval Studio</span>
             <span
               style={{
                 fontSize: 11,
@@ -1138,7 +1138,7 @@ export default function EvalStudio() {
               BETA
             </span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Run and compare evaluations across rule, simulation, recommendation quality,
             hallucination, latency/cost, policy compliance, and operator acceptance suites. Replay
             runs against variant models, prompts, and orchestration strategies.
@@ -1156,7 +1156,7 @@ export default function EvalStudio() {
           >
             {[
               { label: 'Eval Suites', value: suites.length, color: ACCENT },
-              { label: 'Total Cases', value: totalCases, color: '#4d8fcc' },
+              { label: 'Total Cases', value: totalCases, color: 'var(--gi-accent-blue)' },
               { label: 'Red-Team Cases', value: totalRedTeam, color: '#ef4444' },
               {
                 label: 'Avg Pass Rate',
@@ -1179,7 +1179,7 @@ export default function EvalStudio() {
                 }}
               >
                 <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
               </div>
             ))}
           </div>
@@ -1243,7 +1243,7 @@ export default function EvalStudio() {
                     onClick={() => setTab(t.id)}
                     style={{
                       background: tab === t.id ? ACCENT : 'transparent',
-                      color: tab === t.id ? '#fff' : '#64748b',
+                      color: tab === t.id ? '#fff' : '#4a6070',
                       border: 'none',
                       borderRadius: 6,
                       padding: '7px 18px',
@@ -1270,7 +1270,7 @@ export default function EvalStudio() {
                         onClick={() => setFilterType(et)}
                         style={{
                           background: isActive ? cfg.color : 'rgba(255,255,255,0.04)',
-                          color: isActive ? '#fff' : '#64748b',
+                          color: isActive ? '#fff' : '#4a6070',
                           border: 'none',
                           borderRadius: 5,
                           padding: '4px 10px',
@@ -1366,7 +1366,7 @@ export default function EvalStudio() {
                             }}
                           >
                             <span style={{ color: '#475569' }}>{label}</span>
-                            <span style={{ color: '#e2e8f0' }}>{String(value)}</span>
+                            <span style={{ color: 'var(--gi-text-primary)' }}>{String(value)}</span>
                           </div>
                         ))}
                       </div>

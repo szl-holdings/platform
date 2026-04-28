@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
   return (
     <>
       {__pageMeta}
-      <div className="min-h-screen" style={{ background: "#080c14" }}>
+      <div className="min-h-screen" style={{ background: "var(--gi-bg-base)" }}>
         <SiteNav />
   
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">

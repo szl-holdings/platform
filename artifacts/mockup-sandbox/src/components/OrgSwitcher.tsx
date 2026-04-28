@@ -75,8 +75,8 @@ export default function OrgSwitcher({
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all hover:bg-[#1a2535]/60 ${
-          open ? 'border-praxis-cyan/30 bg-[#1a2535]/80' : 'border-praxis'
+        className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all hover:bg-[var(--gi-border-subtle)]/60 ${
+          open ? 'border-praxis-cyan/30 bg-[var(--gi-border-subtle)]/80' : 'border-praxis'
         }`}
         title={expanded ? undefined : org.name}
       >
@@ -119,7 +119,7 @@ export default function OrgSwitcher({
                     onChange(o);
                     setOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left hover:bg-[#1a2535]/60 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left hover:bg-[var(--gi-border-subtle)]/60 transition-colors"
                 >
                   <div
                     className="w-7 h-7 rounded flex items-center justify-center shrink-0 text-[9px] font-mono font-bold"

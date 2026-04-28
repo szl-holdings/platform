@@ -152,7 +152,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
 };
 
 const COMMAND_LOOP = [
-  { phase: 'DETECT', color: '#4d8fcc', active: false },
+  { phase: 'DETECT', color: 'var(--gi-accent-blue)', active: false },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
   { phase: 'DECIDE', color: '#8b5cf6', active: false },
   { phase: 'EXECUTE', color: '#4B8BDB', active: true },
@@ -974,7 +974,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
+        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: 'var(--gi-bg-base)' }}>
           <SectionErrorBoundary sectionName="Counsel">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />

@@ -74,7 +74,7 @@ export default function LinkInBioPage() {
   return (
     <>
       {__pageMeta}
-      <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #070a10 0%, #0c1018 50%, #070a10 100%)" }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #070a10 0%, var(--gi-bg-surface) 50%, #070a10 100%)" }}>
         <div style={{ maxWidth: "480px", margin: "0 auto", padding: "3rem 1.5rem 2rem" }}>
   
           <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ textAlign: "center", marginBottom: "2rem" }}>

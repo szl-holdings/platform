@@ -38,10 +38,10 @@ function formatRelative(iso?: string): string {
 }
 
 const PRIMITIVE_COLORS: Record<string, string> = {
-  Skill: 'var(--gi-accent-blue)',
-  Hook: 'var(--gi-accent-violet)',
-  Command: 'var(--gi-accent-amber)',
-  Agent: 'var(--gi-accent-green)',
+  Skill: '#4d8fcc',
+  Hook: '#9b7cc8',
+  Command: '#c9a85c',
+  Agent: '#5baa8a',
   MemorySchema: '#f472b6',
   RAGStrategy: '#22d3ee',
   Tool: '#fb923c',
@@ -322,7 +322,7 @@ function SkillCard({
   expanded: boolean;
   onExpand: () => void;
 }) {
-  const primColor = PRIMITIVE_COLORS[skill.primitiveType] ?? 'var(--gi-accent-blue)';
+  const primColor = PRIMITIVE_COLORS[skill.primitiveType] ?? '#4d8fcc';
 
   const modifiedRel = formatRelative(skill.lastModifiedAt);
   const modifiedTitle = skill.lastModifiedAt
@@ -447,7 +447,7 @@ function SkillCard({
               </h4>
               <div
                 className="bg-praxis-bg rounded-lg p-3 text-xs leading-relaxed"
-                style={{ color: '#c8d8e8' }}
+                style={{ color: 'var(--gi-text-primary)' }}
               >
                 {skill.praxisAdaptation}
               </div>

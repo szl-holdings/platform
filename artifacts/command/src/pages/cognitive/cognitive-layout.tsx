@@ -15,7 +15,7 @@ import { Link, useLocation } from 'wouter';
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const ACCENT = '#8b7ac8';
-const BG = '#080c14';
+const BG = 'var(--gi-bg-base)';
 const BORDER = 'rgba(139,122,200,0.12)';
 
 const NAV_ITEMS = [
@@ -43,7 +43,7 @@ export function CognitiveLayout({ title, subtitle, children }: CognitiveLayoutPr
       style={{
         background: BG,
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -98,7 +98,7 @@ export function CognitiveLayout({ title, subtitle, children }: CognitiveLayoutPr
         {title && (
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-              <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>{title}</span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>{title}</span>
               <span
                 style={{
                   fontSize: 10,
@@ -114,7 +114,7 @@ export function CognitiveLayout({ title, subtitle, children }: CognitiveLayoutPr
                 COGNITIVE
               </span>
             </div>
-            {subtitle && <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>{subtitle}</p>}
+            {subtitle && <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>{subtitle}</p>}
           </div>
         )}
         {children}

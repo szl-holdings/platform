@@ -333,7 +333,7 @@ function EvalForgeDashboard() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -372,7 +372,7 @@ function EvalForgeDashboard() {
               ↻ Refresh
             </button>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Browse Eval Forge suites by type, trigger runs, and track regressions across all nine
             metric categories.
           </p>
@@ -404,7 +404,7 @@ function EvalForgeDashboard() {
         >
           {[
             { label: 'Eval Suites', value: suites.length, color: ACCENT },
-            { label: 'Total Cases', value: totalCases, color: '#4d8fcc' },
+            { label: 'Total Cases', value: totalCases, color: 'var(--gi-accent-blue)' },
             { label: 'Red-Team Cases', value: totalRedTeam, color: '#ef4444' },
             {
               label: 'Avg Pass Rate',
@@ -415,7 +415,7 @@ function EvalForgeDashboard() {
           ].map((m) => (
             <div key={m.label} style={{ ...cardStyle, padding: '14px 18px' }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -482,7 +482,7 @@ function EvalForgeDashboard() {
                   ...cardStyle,
                   padding: 32,
                   textAlign: 'center',
-                  color: '#64748b',
+                  color: '#4a6070',
                   fontSize: 13,
                 }}
               >
@@ -499,10 +499,10 @@ function EvalForgeDashboard() {
                     <div
                       style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}
                     >
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                         {EVAL_TYPE_LABEL[type]}
                       </span>
-                      <span style={{ fontSize: 11, color: '#64748b' }}>
+                      <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                         {ofType.length} suite{ofType.length === 1 ? '' : 's'}
                       </span>
                     </div>
@@ -523,7 +523,7 @@ function EvalForgeDashboard() {
                                     marginBottom: 4,
                                   }}
                                 >
-                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                                     {suite.name}
                                   </span>
                                   <span
@@ -537,7 +537,7 @@ function EvalForgeDashboard() {
                                   >
                                     {suite.domain.toUpperCase()}
                                   </span>
-                                  <span style={{ fontSize: 10, color: '#64748b' }}>
+                                  <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
                                     v{suite.version}
                                   </span>
                                 </div>
@@ -556,7 +556,7 @@ function EvalForgeDashboard() {
                                     display: 'flex',
                                     gap: 12,
                                     fontSize: 11,
-                                    color: '#64748b',
+                                    color: '#4a6070',
                                     flexWrap: 'wrap',
                                   }}
                                 >
@@ -668,8 +668,8 @@ function EvalForgeDashboard() {
                   marginBottom: 12,
                 }}
               >
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>Recent Runs</span>
-                <span style={{ fontSize: 11, color: '#64748b' }}>{runs.length}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gi-text-primary)' }}>Recent Runs</span>
+                <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{runs.length}</span>
               </div>
 
               {runs.length === 0 && (
@@ -725,7 +725,7 @@ function EvalForgeDashboard() {
                         display: 'flex',
                         justifyContent: 'space-between',
                         fontSize: 10,
-                        color: '#64748b',
+                        color: '#4a6070',
                       }}
                     >
                       <span>{new Date(r.runAt).toLocaleString()}</span>
@@ -794,7 +794,7 @@ function FilterPill({
 function MetricCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ ...cardStyle, padding: 16 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)', marginBottom: 10 }}>
         {title}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>{children}</div>
@@ -820,8 +820,8 @@ function MetricRow({
         fontSize: 12,
       }}
     >
-      <span style={{ color: '#64748b' }}>{label}</span>
-      <span style={{ color: color ?? '#e2e8f0', fontWeight: 600 }}>{value}</span>
+      <span style={{ color: 'var(--gi-text-muted)' }}>{label}</span>
+      <span style={{ color: color ?? 'var(--gi-text-primary)', fontWeight: 600 }}>{value}</span>
     </div>
   );
 }
@@ -888,7 +888,7 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
         color: '#e2e8f0',
         fontFamily: 'system-ui, sans-serif',
@@ -994,7 +994,7 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                   display: 'flex',
                   gap: 16,
                   fontSize: 12,
-                  color: '#64748b',
+                  color: '#4a6070',
                   flexWrap: 'wrap',
                 }}
               >
@@ -1089,36 +1089,36 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                 >
                   {fmtPct(report.passRate)}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Pass Rate</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>Pass Rate</div>
               </div>
               <div style={{ ...cardStyle, padding: '14px 18px' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                   {fmtPct(report.avgScore)}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Avg Score</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>Avg Score</div>
               </div>
               <div style={{ ...cardStyle, padding: '14px 18px' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                   {report.passed}/{report.totalCases}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Cases Passed</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>Cases Passed</div>
               </div>
               <div style={{ ...cardStyle, padding: '14px 18px' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                   {fmtMs(report.avgLatencyMs ?? 0)}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Avg Latency</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>Avg Latency</div>
               </div>
               <div style={{ ...cardStyle, padding: '14px 18px' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                   {fmtUsd(report.totalCostUsd ?? 0)}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Total Cost</div>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>Total Cost</div>
               </div>
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 12 }}>
                 Metric Categories
               </div>
               <div
@@ -1320,9 +1320,9 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                 alignItems: 'center',
               }}
             >
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--gi-text-primary)' }}>
                 Per-Case Results{' '}
-                <span style={{ color: '#64748b', fontWeight: 400, fontSize: 12 }}>
+                <span style={{ color: 'var(--gi-text-muted)', fontWeight: 400, fontSize: 12 }}>
                   ({visibleCases.length} of {report.caseResults.length})
                 </span>
               </div>
@@ -1369,7 +1369,7 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                 <div>Cost</div>
               </div>
               {visibleCases.length === 0 && (
-                <div style={{ padding: 24, textAlign: 'center', color: '#64748b', fontSize: 13 }}>
+                <div style={{ padding: 24, textAlign: 'center', color: 'var(--gi-text-muted)', fontSize: 13 }}>
                   No cases to display.
                 </div>
               )}
@@ -1413,7 +1413,7 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                         <div
                           style={{
                             fontSize: 10,
-                            color: '#64748b',
+                            color: '#4a6070',
                             display: 'flex',
                             gap: 8,
                             marginTop: 2,
@@ -1468,7 +1468,7 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                           </div>
                         )}
                         {c.traceId && (
-                          <div style={{ gridColumn: '1 / -1', fontSize: 11, color: '#64748b' }}>
+                          <div style={{ gridColumn: '1 / -1', fontSize: 11, color: 'var(--gi-text-muted)' }}>
                             Trace: <code style={{ color: '#94a3b8' }}>{c.traceId}</code>
                           </div>
                         )}

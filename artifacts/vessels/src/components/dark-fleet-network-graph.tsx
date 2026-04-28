@@ -52,11 +52,11 @@ function radiusFor(n: EntityNode): number {
 
 function nodeColor(n: EntityNode): string {
   if (n.sanctioned) return '#ef4444';
-  return ENTITY_TYPE_CONFIG[n.type]?.color ?? '#64748b';
+  return ENTITY_TYPE_CONFIG[n.type]?.color ?? 'var(--gi-text-muted)';
 }
 
 function tierRingColor(tier: EntityNode['riskTier']): string {
-  return TIER_CONFIG[tier]?.dot ?? '#64748b';
+  return TIER_CONFIG[tier]?.dot ?? 'var(--gi-text-muted)';
 }
 
 const SANCTION_LIST_ABBR: Record<string, string> = {
@@ -273,8 +273,8 @@ export function DarkFleetNetworkGraph({
     contracted_with: { stroke: '#fb923c', dash: '6 3' },
     insured_by: { stroke: '#06b6d4', dash: '3 3' },
     chartered_to: { stroke: '#f59e0b', dash: '5 2' },
-    crewed_by: { stroke: '#64748b', dash: '2 2' },
-    agent_in: { stroke: '#64748b', dash: '2 2' },
+    crewed_by: { stroke: 'var(--gi-text-muted)', dash: '2 2' },
+    agent_in: { stroke: 'var(--gi-text-muted)', dash: '2 2' },
   };
 
   return (
@@ -353,7 +353,7 @@ export function DarkFleetNetworkGraph({
           })}
 
           {simNodes.map((n) => {
-            const cfg = ENTITY_TYPE_CONFIG[n.type as EntityNodeType] ?? { color: '#64748b', abbr: '?' };
+            const cfg = ENTITY_TYPE_CONFIG[n.type as EntityNodeType] ?? { color: 'var(--gi-text-muted)', abbr: '?' };
             const fill = nodeColor(n);
             const ring = tierRingColor(n.riskTier);
             const isSelected = selectedId === n.id;
@@ -412,7 +412,7 @@ export function DarkFleetNetworkGraph({
                   y={n.r + 12}
                   textAnchor="middle"
                   fontSize={9.5}
-                  fill={isSelected ? '#e2e8f0' : '#94a3b8'}
+                  fill={isSelected ? 'var(--gi-text-primary)' : '#94a3b8'}
                   className="pointer-events-none"
                 >
                   {n.label.length > 22 ? n.label.slice(0, 20) + '…' : n.label}

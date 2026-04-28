@@ -34,7 +34,7 @@ const SEV: Record<string, string> = {
   high: '#c9b787',
   medium: '#c9b787',
   low: '#c9b787',
-  info: '#64748b',
+  info: '#4a6070',
 };
 
 interface CrisisEvent {
@@ -299,13 +299,13 @@ const COMM_COLORS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   active: '#c9b787',
   standby: '#c9b787',
-  unavailable: '#64748b',
+  unavailable: '#4a6070',
 };
 
 const DECISION_COLORS: Record<string, string> = {
   enacted: '#c9b787',
   pending: '#c9b787',
-  superseded: '#64748b',
+  superseded: '#4a6070',
 };
 
 type WarRoomTab = 'timeline' | 'resources' | 'decisions' | 'comms' | 'drill';
@@ -360,7 +360,7 @@ function mapDrillScenario(s: Record<string, unknown>): DrillScenario {
 const DRILL_STATUS_COLOR: Record<string, string> = {
   running: '#c9b787',
   paused: '#c9b787',
-  pending: '#64748b',
+  pending: '#4a6070',
   completed: '#c9b787',
   failed: '#f5f5f5',
 };
@@ -971,7 +971,7 @@ export default function CitadelWarRoom() {
 
               {(drillScenarios ?? []).map((scenario) => {
                 const busy = drillBusy && drillActiveId === scenario.id;
-                const sc = DRILL_STATUS_COLOR[scenario.status] ?? '#64748b';
+                const sc = DRILL_STATUS_COLOR[scenario.status] ?? '#4a6070';
                 return (
                   <div
                     key={scenario.id}

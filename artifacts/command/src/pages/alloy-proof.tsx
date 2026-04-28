@@ -52,21 +52,21 @@ interface RecommendationResult {
 }
 
 const URGENCY_COLOR: Record<Urgency, string> = {
-  routine: '#64748b',
+  routine: 'var(--gi-text-muted)',
   moderate: '#f59e0b',
   urgent: '#f97316',
   critical: '#ef4444',
 };
 
 const POLICY_COLOR: Record<PolicyState, string> = {
-  unchecked: '#64748b',
+  unchecked: 'var(--gi-text-muted)',
   allowed: '#22c55e',
   requires_approval: '#f59e0b',
   blocked: '#ef4444',
 };
 
 const APPROVAL_COLOR: Record<ApprovalMode, string> = {
-  none: '#64748b',
+  none: 'var(--gi-text-muted)',
   pending: '#f59e0b',
   approved: '#22c55e',
   rejected: '#ef4444',
@@ -106,7 +106,7 @@ function ConfidenceBar({ value }: { value: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <div
-        style={{ flex: 1, height: 8, background: '#1e293b', borderRadius: 4, overflow: 'hidden' }}
+        style={{ flex: 1, height: 8, background: 'var(--gi-border-subtle)', borderRadius: 4, overflow: 'hidden' }}
       >
         <div
           style={{
@@ -155,11 +155,11 @@ function EvidenceCard({
   isContra: boolean;
 }) {
   const borderColor = isContra ? '#ef444440' : isSupporting ? '#22c55e40' : '#334155';
-  const accent = isContra ? '#ef4444' : isSupporting ? '#22c55e' : '#64748b';
+  const accent = isContra ? '#ef4444' : isSupporting ? '#22c55e' : 'var(--gi-text-muted)';
   return (
     <div
       style={{
-        background: '#0f172a',
+        background: 'var(--gi-bg-base)',
         border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accent}`,
         borderRadius: 6,
@@ -170,7 +170,7 @@ function EvidenceCard({
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>{ev.label}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gi-text-primary)' }}>{ev.label}</span>
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           <Chip label={ev.kind} color="#8b7ac8" small />
           {isContra && <Chip label="contra" color="#ef4444" small />}
@@ -180,8 +180,8 @@ function EvidenceCard({
       </div>
       <div style={{ fontSize: 11, color: '#94a3b8' }}>{ev.value}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 10, color: '#64748b' }}>Source: {ev.source}</span>
-        <span style={{ fontSize: 10, color: '#64748b' }}>
+        <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Source: {ev.source}</span>
+        <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>
           confidence {Math.round(ev.confidence * 100)}% · weight {ev.weight.toFixed(2)}
         </span>
       </div>
@@ -198,8 +198,8 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div
         style={{
-          background: '#0f172a',
-          border: '1px solid #1e293b',
+          background: 'var(--gi-bg-base)',
+          border: '1px solid var(--gi-border-subtle)',
           borderRadius: 10,
           padding: '20px 24px',
           display: 'flex',
@@ -210,7 +210,7 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>{result.title}</div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', marginTop: 2 }}>
               run/{result.runId.slice(0, 8)}… · trace/{result.traceId.slice(0, 8)}…
             </div>
           </div>
@@ -231,7 +231,7 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
           <div
             style={{
               fontSize: 11,
-              color: '#64748b',
+              color: '#4a6070',
               marginBottom: 4,
               textTransform: 'uppercase',
               letterSpacing: 1,
@@ -248,11 +248,11 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
         </div>
 
         {result.suggestedAction && (
-          <div style={{ background: '#1e293b', borderRadius: 6, padding: '10px 14px' }}>
+          <div style={{ background: 'var(--gi-border-subtle)', borderRadius: 6, padding: '10px 14px' }}>
             <div
               style={{
                 fontSize: 11,
-                color: '#64748b',
+                color: '#4a6070',
                 marginBottom: 2,
                 textTransform: 'uppercase',
                 letterSpacing: 1,
@@ -260,7 +260,7 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
             >
               Suggested Action
             </div>
-            <div style={{ fontSize: 13, color: '#e2e8f0' }}>{result.suggestedAction}</div>
+            <div style={{ fontSize: 13, color: 'var(--gi-text-primary)' }}>{result.suggestedAction}</div>
           </div>
         )}
 
@@ -268,7 +268,7 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
           <div
             style={{
               fontSize: 11,
-              color: '#64748b',
+              color: '#4a6070',
               marginBottom: 4,
               textTransform: 'uppercase',
               letterSpacing: 1,
@@ -291,13 +291,13 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
       {result.policyDecision && (
         <div
           style={{
-            background: '#0f172a',
-            border: '1px solid #1e293b',
+            background: 'var(--gi-bg-base)',
+            border: '1px solid var(--gi-border-subtle)',
             borderRadius: 10,
             padding: '16px 20px',
           }}
         >
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 10 }}>
             Policy Decision
           </div>
           <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>
@@ -306,9 +306,9 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
           {result.policyDecision.matchedPolicies.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {result.policyDecision.matchedPolicies.map((p, i) => (
-                <div key={i} style={{ fontSize: 11, color: '#64748b' }}>
+                <div key={i} style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>
                   <span style={{ color: '#8b7ac8' }}>{p.policyId}</span> / {p.ruleName} →{' '}
-                  <span style={{ color: '#e2e8f0' }}>{p.effect}</span>
+                  <span style={{ color: 'var(--gi-text-primary)' }}>{p.effect}</span>
                 </div>
               ))}
             </div>
@@ -331,7 +331,7 @@ function ProofEnvelope({ result }: { result: RecommendationResult }) {
             style={{
               fontSize: 12,
               fontWeight: 700,
-              color: '#64748b',
+              color: '#4a6070',
               marginBottom: 8,
               textTransform: 'uppercase',
               letterSpacing: 1,
@@ -448,7 +448,7 @@ export function AlloyProofPage() {
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: 2,
-                color: '#64748b',
+                color: '#4a6070',
                 textTransform: 'uppercase',
               }}
             >
@@ -458,7 +458,7 @@ export function AlloyProofPage() {
           <div style={{ fontSize: 26, fontWeight: 800, color: '#f8fafc', letterSpacing: -0.5 }}>
             Counsel Recommendation Surface
           </div>
-          <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
+          <div style={{ fontSize: 14, color: 'var(--gi-text-muted)', marginTop: 4 }}>
             Every recommendation carries a full proof envelope — evidence, freshness, confidence,
             policy state, and autonomy mode.
           </div>
@@ -466,21 +466,21 @@ export function AlloyProofPage() {
 
         <div
           style={{
-            background: '#0f172a',
-            border: '1px solid #1e293b',
+            background: 'var(--gi-bg-base)',
+            border: '1px solid var(--gi-border-subtle)',
             borderRadius: 10,
             padding: '20px 24px',
             marginBottom: 20,
           }}
         >
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', marginBottom: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 14 }}>
             Parameters
           </div>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}
           >
             <div>
-              <label style={{ fontSize: 10, color: '#64748b', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 10, color: 'var(--gi-text-muted)', display: 'block', marginBottom: 4 }}>
                 DOMAIN
               </label>
               <select
@@ -488,7 +488,7 @@ export function AlloyProofPage() {
                 onChange={(e) => setParams((p) => ({ ...p, domain: e.target.value }))}
                 style={{
                   width: '100%',
-                  background: '#1e293b',
+                  background: 'var(--gi-border-subtle)',
                   border: '1px solid #334155',
                   borderRadius: 6,
                   padding: '6px 10px',
@@ -504,7 +504,7 @@ export function AlloyProofPage() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 10, color: '#64748b', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 10, color: 'var(--gi-text-muted)', display: 'block', marginBottom: 4 }}>
                 AUTONOMY MODE
               </label>
               <select
@@ -514,7 +514,7 @@ export function AlloyProofPage() {
                 }
                 style={{
                   width: '100%',
-                  background: '#1e293b',
+                  background: 'var(--gi-border-subtle)',
                   border: '1px solid #334155',
                   borderRadius: 6,
                   padding: '6px 10px',
@@ -530,7 +530,7 @@ export function AlloyProofPage() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 10, color: '#64748b', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 10, color: 'var(--gi-text-muted)', display: 'block', marginBottom: 4 }}>
                 URGENCY
               </label>
               <select
@@ -538,7 +538,7 @@ export function AlloyProofPage() {
                 onChange={(e) => setParams((p) => ({ ...p, urgency: e.target.value as Urgency }))}
                 style={{
                   width: '100%',
-                  background: '#1e293b',
+                  background: 'var(--gi-border-subtle)',
                   border: '1px solid #334155',
                   borderRadius: 6,
                   padding: '6px 10px',
@@ -554,7 +554,7 @@ export function AlloyProofPage() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 10, color: '#64748b', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 10, color: 'var(--gi-text-muted)', display: 'block', marginBottom: 4 }}>
                 BASE CONFIDENCE ({Math.round(params.baseConfidence * 100)}%)
               </label>
               <input
@@ -574,7 +574,7 @@ export function AlloyProofPage() {
             style={{
               fontSize: 11,
               color: '#475569',
-              background: '#1e293b',
+              background: 'var(--gi-border-subtle)',
               borderRadius: 6,
               padding: '8px 12px',
             }}
@@ -590,8 +590,8 @@ export function AlloyProofPage() {
           style={{
             width: '100%',
             padding: '12px 0',
-            background: loading ? '#1e293b' : ACCENT,
-            color: loading ? '#64748b' : '#fff',
+            background: loading ? 'var(--gi-border-subtle)' : ACCENT,
+            color: loading ? '#4a6070' : '#fff',
             border: 'none',
             borderRadius: 8,
             fontSize: 14,
@@ -628,9 +628,9 @@ export function AlloyProofPage() {
                 onClick={() => setShowRaw((v) => !v)}
                 style={{
                   background: 'transparent',
-                  border: '1px solid #1e293b',
+                  border: '1px solid var(--gi-border-subtle)',
                   borderRadius: 6,
-                  color: '#64748b',
+                  color: '#4a6070',
                   fontSize: 11,
                   padding: '4px 12px',
                   cursor: 'pointer',
@@ -642,8 +642,8 @@ export function AlloyProofPage() {
                 <pre
                   style={{
                     marginTop: 8,
-                    background: '#0f172a',
-                    border: '1px solid #1e293b',
+                    background: 'var(--gi-bg-base)',
+                    border: '1px solid var(--gi-border-subtle)',
                     borderRadius: 8,
                     padding: 16,
                     fontSize: 10,
@@ -662,8 +662,8 @@ export function AlloyProofPage() {
         <div
           style={{
             marginTop: 32,
-            background: '#0f172a',
-            border: '1px solid #1e293b',
+            background: 'var(--gi-bg-base)',
+            border: '1px solid var(--gi-border-subtle)',
             borderRadius: 10,
             padding: '16px 20px',
           }}
@@ -672,7 +672,7 @@ export function AlloyProofPage() {
             style={{
               fontSize: 11,
               fontWeight: 700,
-              color: '#64748b',
+              color: '#4a6070',
               textTransform: 'uppercase',
               letterSpacing: 1,
               marginBottom: 10,
@@ -685,7 +685,7 @@ export function AlloyProofPage() {
               ([mode, desc]) => (
                 <div key={mode} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                   <Chip label={mode} color={ACCENT} />
-                  <span style={{ fontSize: 12, color: '#64748b' }}>{desc}</span>
+                  <span style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>{desc}</span>
                 </div>
               ),
             )}

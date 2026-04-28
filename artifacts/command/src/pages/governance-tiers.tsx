@@ -96,7 +96,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 const RISK_LABEL: Record<number, { label: string; color: string }> = {
   1: { label: 'Minimal', color: '#7c8a9a' },
   2: { label: 'Low', color: '#22c55e' },
-  3: { label: 'Moderate', color: '#4d8fcc' },
+  3: { label: 'Moderate', color: 'var(--gi-accent-blue)' },
   4: { label: 'Elevated', color: '#d4a054' },
   5: { label: 'High', color: '#f97316' },
   6: { label: 'Critical', color: '#ef4444' },

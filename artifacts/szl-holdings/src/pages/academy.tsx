@@ -136,7 +136,7 @@ export default function AcademyPage() {
   return (
     <>
       {__pageMeta}
-      <div style={{ minHeight: "100vh", background: "#080c14", color: "hsl(38,8%,88%)" }}>
+      <div style={{ minHeight: "100vh", background: "var(--gi-bg-base)", color: "hsl(38,8%,88%)" }}>
         <SiteNav />
 
         <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "6rem 1.5rem 4rem" }}>

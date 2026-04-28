@@ -182,7 +182,7 @@ export default function CapacityPlanning() {
   const totalCost = RESOURCES.reduce((a, r) => a + r.current.cost, 0);
 
   return (
-    <div className="h-full overflow-auto" style={{ background: '#080c14' }}>
+    <div className="h-full overflow-auto" style={{ background: 'var(--gi-bg-base)' }}>
       <div className="max-w-[1400px] mx-auto p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>

@@ -313,14 +313,14 @@ const OUTCOME_COLORS: Record<OutcomeClass, string> = {
 };
 
 const SKILL_STATUS_COLORS: Record<CandidateSkillStatus, string> = {
-  proposed: '#64748b',
+  proposed: '#4a6070',
   'under-review': '#f59e0b',
   adopted: '#22c55e',
   rejected: '#ef4444',
 };
 
 const IMPACT_COLORS: Record<string, string> = {
-  low: '#64748b',
+  low: '#4a6070',
   medium: '#4d8fcc',
   high: '#22c55e',
 };
@@ -505,7 +505,7 @@ export default function ReflectionConsole() {
           { label: 'Total Reflections', value: reflections.length, color: ACCENT },
           { label: 'Candidate Skills', value: allCandidateSkills.length, color: '#f59e0b' },
           { label: 'Skills Adopted', value: adoptedSkills, color: '#22c55e' },
-          { label: 'Under Review', value: proposedSkills, color: '#4d8fcc' },
+          { label: 'Under Review', value: proposedSkills, color: 'var(--gi-accent-blue)' },
         ].map((m) => (
           <div
             key={m.label}
@@ -517,7 +517,7 @@ export default function ReflectionConsole() {
             }}
           >
             <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
           </div>
         ))}
       </div>
@@ -658,14 +658,14 @@ export default function ReflectionConsole() {
                   style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     marginBottom: 4,
                     lineHeight: 1.3,
                   }}
                 >
                   {ref.title}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginBottom: 6 }}>
                   {ref.agentName}
                 </div>
                 <div style={{ display: 'flex', gap: 8, fontSize: 10, color: '#334155' }}>
@@ -782,10 +782,10 @@ export default function ReflectionConsole() {
                 Trace: {selected.traceId} ↗
               </a>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 4 }}>
               {selected.title}
             </div>
-            <div style={{ fontSize: 12, color: '#64748b', display: 'flex', gap: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--gi-text-muted)', display: 'flex', gap: 12 }}>
               <span>{selected.agentName}</span>
               <span>{new Date(selected.timestamp).toLocaleString()}</span>
             </div>
@@ -813,7 +813,7 @@ export default function ReflectionConsole() {
                 onClick={() => setActiveTab(tab)}
                 style={{
                   background: activeTab === tab ? ACCENT : 'transparent',
-                  color: activeTab === tab ? '#fff' : '#64748b',
+                  color: activeTab === tab ? '#fff' : 'var(--gi-text-muted)',
                   border: 'none',
                   borderRadius: 6,
                   padding: '6px 14px',
@@ -978,7 +978,7 @@ export default function ReflectionConsole() {
                 >
                   ◈ Core Lesson
                 </div>
-                <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.7 }}>
+                <div style={{ fontSize: 13, color: 'var(--gi-text-primary)', lineHeight: 1.7 }}>
                   {selected.lesson}
                 </div>
               </div>
@@ -1001,7 +1001,7 @@ export default function ReflectionConsole() {
                       key={tag}
                       style={{
                         fontSize: 10,
-                        color: '#64748b',
+                        color: 'var(--gi-text-muted)',
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.08)',
                         padding: '2px 8px',
@@ -1070,7 +1070,7 @@ export default function ReflectionConsole() {
                         style={{
                           fontSize: 13,
                           fontWeight: 700,
-                          color: '#e2e8f0',
+                          color: 'var(--gi-text-primary)',
                           fontFamily: 'monospace',
                           marginBottom: 8,
                         }}
@@ -1204,7 +1204,7 @@ export default function ReflectionConsole() {
                     }}
                   >
                     <div
-                      style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 14 }}
+                      style={{ fontSize: 13, fontWeight: 700, color: 'var(--gi-text-primary)', marginBottom: 14 }}
                     >
                       Strategy Update: {update.area}
                     </div>
@@ -1319,7 +1319,7 @@ export default function ReflectionConsole() {
                         disabled={anyPending}
                         style={{
                           background: 'rgba(255,255,255,0.05)',
-                          color: '#64748b',
+                          color: 'var(--gi-text-muted)',
                           border: '1px solid rgba(255,255,255,0.08)',
                           borderRadius: 6,
                           padding: '7px 16px',

@@ -86,7 +86,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     description:
       'Average time from alert ingestion to agent classification and priority assignment',
   },
@@ -98,7 +98,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     description: 'Average time from triage to recommended action (excluding human approval wait)',
   },
   {
@@ -109,7 +109,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     description: 'Average end-to-end time from alert to confirmed resolution',
   },
   {
@@ -190,7 +190,7 @@ const DOMAIN_ROWS: DomainTrustRow[] = [
   {
     domain: 'SEXTANT Maritime',
     icon: '⚓',
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     acceptanceRate: 0.88,
     overrideRate: 0.12,
     executionSuccessRate: 0.982,
@@ -315,11 +315,11 @@ const RECENT_INCIDENTS: IncidentRecord[] = [
   },
 ];
 
-const TREND_COLORS = { improving: '#22c55e', stable: '#64748b', degrading: '#ef4444' };
+const TREND_COLORS = { improving: '#22c55e', stable: 'var(--gi-text-muted)', degrading: '#ef4444' };
 const OUTCOME_COLORS = {
   accepted: '#22c55e',
   overridden: '#f59e0b',
-  escalated: '#4d8fcc',
+  escalated: 'var(--gi-accent-blue)',
   failed: '#ef4444',
 };
 
@@ -342,7 +342,7 @@ function MetricCard({ metric }: { metric: TrustMetric }) {
           marginBottom: 6,
         }}
       >
-        <span style={{ fontSize: 11, color: '#64748b', lineHeight: 1.4 }}>{metric.label}</span>
+        <span style={{ fontSize: 11, color: 'var(--gi-text-muted)', lineHeight: 1.4 }}>{metric.label}</span>
         {metric.delta !== undefined && (
           <span
             style={{
@@ -385,9 +385,9 @@ export default function TrustConsole() {
   return (
     <div
       style={{
-        background: '#080c14',
+        background: 'var(--gi-bg-base)',
         minHeight: '100vh',
-        color: '#e2e8f0',
+        color: 'var(--gi-text-primary)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -396,7 +396,7 @@ export default function TrustConsole() {
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>Trust Console</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--gi-text-primary)' }}>Trust Console</span>
             <span
               style={{
                 fontSize: 11,
@@ -413,7 +413,7 @@ export default function TrustConsole() {
                 : '✓ SYSTEMS HEALTHY'}
             </span>
           </div>
-          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--gi-text-muted)', fontSize: 13, margin: 0 }}>
             Production trust dashboard — recommendation quality, autonomous action safety, failure
             modes, and agent regression history across all domains.
           </p>
@@ -463,7 +463,7 @@ export default function TrustConsole() {
               }}
             >
               <div style={{ fontSize: 24, fontWeight: 700, color: m.color }}>{m.value}</div>
-              <div style={{ fontSize: 12, color: '#e2e8f0', marginTop: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 12, color: 'var(--gi-text-primary)', marginTop: 2 }}>{m.label}</div>
               <div style={{ fontSize: 11, color: '#475569', marginTop: 1 }}>{m.sub}</div>
             </div>
           ))}
@@ -486,7 +486,7 @@ export default function TrustConsole() {
               onClick={() => setActiveView(v)}
               style={{
                 background: activeView === v ? ACCENT : 'transparent',
-                color: activeView === v ? '#fff' : '#64748b',
+                color: activeView === v ? '#fff' : 'var(--gi-text-muted)',
                 border: 'none',
                 borderRadius: 6,
                 padding: '7px 18px',
@@ -538,7 +538,7 @@ export default function TrustConsole() {
                     {row.icon}
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--gi-text-primary)' }}>
                       {row.domain}
                     </div>
                     <div style={{ fontSize: 11, color: TREND_COLORS[row.trend], fontWeight: 600 }}>
@@ -599,7 +599,7 @@ export default function TrustConsole() {
                       >
                         {m.value}
                       </div>
-                      <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>{m.label}</div>
+                      <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginTop: 2 }}>{m.label}</div>
                     </div>
                   ))}
                 </div>
@@ -704,7 +704,7 @@ export default function TrustConsole() {
                   alignItems: 'center',
                 }}
               >
-                <div style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', fontFamily: 'monospace' }}>
                   {inc.id}
                 </div>
                 <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase' }}>
@@ -721,7 +721,7 @@ export default function TrustConsole() {
                           ? '#f97316'
                           : inc.severity === 'medium'
                             ? '#f59e0b'
-                            : '#64748b',
+                            : 'var(--gi-text-muted)',
                     textTransform: 'uppercase',
                   }}
                 >
@@ -731,7 +731,7 @@ export default function TrustConsole() {
                 <div
                   style={{
                     fontSize: 11,
-                    color: '#e2e8f0',
+                    color: 'var(--gi-text-primary)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',

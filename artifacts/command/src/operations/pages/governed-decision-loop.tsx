@@ -36,7 +36,7 @@ import {
 } from '../components/governed-decision/proof-provenance-panel';
 import { DEMO_SCENARIOS, type DemoScenarioKey, useDemoMode } from '../lib/demo-mode';
 
-const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };
+const BG = { page: 'var(--gi-bg-base)', surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)', panel: '#0e1219' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.07)' };
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',
@@ -80,7 +80,7 @@ const LOOP_STEPS: LoopStep[] = [
     id: 'simulation',
     label: 'Simulation',
     icon: Activity,
-    color: '#4d8fcc',
+    color: 'var(--gi-accent-blue)',
     description: 'Monte Carlo scenario modeling — best / base / worst case analysis',
   },
   {

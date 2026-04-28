@@ -49,7 +49,7 @@ function CopyButton({ text }: { text: string }) {
       style={{
         background: copied ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.04)',
         border: `1px solid ${copied ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.08)'}`,
-        color: copied ? '#a5b4fc' : '#64748b',
+        color: copied ? '#a5b4fc' : 'var(--gi-text-muted)',
       }}
     >
       <Copy className="w-3 h-3" />
@@ -118,7 +118,7 @@ export default function AiSummarizePage() {
           style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e2e8f0',
+            color: 'var(--gi-text-primary)',
             lineHeight: '1.6',
           }}
           placeholder="Paste any document, report, briefing, or memo…"

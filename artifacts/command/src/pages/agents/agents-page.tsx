@@ -16,7 +16,7 @@ import type { A11oyOperator, AutonomyLevel } from '@szl/a11oy-runtime';
 import { OPERATORS, AUTONOMY_LEVELS } from '@szl/a11oy-runtime';
 
 const RISK_COLOR: Record<string, string> = {
-  observe_only: '#64748b',
+  observe_only: '#4a6070',
   recommend_only: '#8b7ac8',
   draft_only: '#4d8fcc',
   execute_approved: '#d4a054',
@@ -34,26 +34,26 @@ export function AgentsPage() {
   const avgLatencyMs = 1240;
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ background: 'var(--gi-bg-base)', minHeight: '100vh', color: 'var(--gi-text-primary)', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ borderBottom: '1px solid var(--gi-border-subtle)', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 36, height: 36, background: 'rgba(139,122,200,0.15)', border: '1px solid rgba(139,122,200,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Bot size={18} color="#8b7ac8" />
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>Operator Control Plane</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>A11oy Agent Runtime — Phase 2</div>
+            <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>A11oy Agent Runtime — Phase 2</div>
           </div>
         </div>
 
         {/* Global Autonomy Selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 12, color: '#64748b' }}>Global Autonomy:</span>
+          <span style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>Global Autonomy:</span>
           <select
             value={globalAutonomy}
             onChange={(e) => setGlobalAutonomy(e.target.value as AutonomyLevel)}
-            style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: RISK_COLOR[globalAutonomy], fontSize: 12, cursor: 'pointer' }}
+            style={{ background: 'var(--gi-bg-base)', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: RISK_COLOR[globalAutonomy], fontSize: 12, cursor: 'pointer' }}
           >
             {Object.entries(AUTONOMY_LEVELS).map(([k, v]) => (
               <option key={k} value={k} style={{ color: RISK_COLOR[k] }}>{v.label}</option>
@@ -70,22 +70,22 @@ export function AgentsPage() {
       <div style={{ background: `${RISK_COLOR[globalAutonomy]}12`, borderBottom: `1px solid ${RISK_COLOR[globalAutonomy]}22`, padding: '10px 32px', display: 'flex', alignItems: 'center', gap: 8 }}>
         <Shield size={14} color={RISK_COLOR[globalAutonomy]} />
         <span style={{ fontSize: 12, color: RISK_COLOR[globalAutonomy] }}>{AUTONOMY_LEVELS[globalAutonomy].label}</span>
-        <span style={{ fontSize: 12, color: '#64748b' }}>—</span>
+        <span style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>—</span>
         <span style={{ fontSize: 12, color: '#94a3b8' }}>{AUTONOMY_LEVELS[globalAutonomy].description}</span>
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid #1e293b' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid var(--gi-border-subtle)' }}>
         {[
           { label: 'Active Operators', value: '9', icon: Bot, color: '#8b7ac8' },
-          { label: 'Total Calls (24h)', value: totalCalls.toLocaleString(), icon: Activity, color: '#4d8fcc' },
+          { label: 'Total Calls (24h)', value: totalCalls.toLocaleString(), icon: Activity, color: 'var(--gi-accent-blue)' },
           { label: 'Success Rate', value: `${(successRate * 100).toFixed(1)}%`, icon: TrendingUp, color: '#22c55e' },
           { label: 'Avg Latency', value: `${(avgLatencyMs / 1000).toFixed(2)}s`, icon: Clock, color: '#d4a054' },
         ].map((s) => (
-          <div key={s.label} style={{ padding: '16px 24px', background: '#080c14' }}>
+          <div key={s.label} style={{ padding: '16px 24px', background: 'var(--gi-bg-base)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <s.icon size={14} color={s.color} />
-              <span style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+              <span style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
             </div>
             <div style={{ fontSize: 24, fontWeight: 700, color: s.color }}>{s.value}</div>
           </div>
@@ -105,8 +105,8 @@ export function AgentsPage() {
                   key={op.id}
                   onClick={() => setSelected(isSelected ? null : op.id)}
                   style={{
-                    background: isSelected ? 'rgba(139,122,200,0.08)' : '#0f172a',
-                    border: `1px solid ${isSelected ? 'rgba(139,122,200,0.4)' : '#1e293b'}`,
+                    background: isSelected ? 'rgba(139,122,200,0.08)' : 'var(--gi-bg-base)',
+                    border: `1px solid ${isSelected ? 'rgba(139,122,200,0.4)' : 'var(--gi-border-subtle)'}`,
                     borderRadius: 10,
                     padding: 16,
                     cursor: 'pointer',
@@ -120,7 +120,7 @@ export function AgentsPage() {
                       </div>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>{op.name}</div>
-                        <div style={{ fontSize: 10, color: '#64748b', marginTop: 1 }}>{op.id}</div>
+                        <div style={{ fontSize: 10, color: 'var(--gi-text-muted)', marginTop: 1 }}>{op.id}</div>
                       </div>
                     </div>
                     {exceeds && (
@@ -136,17 +136,17 @@ export function AgentsPage() {
                   {/* Trust Score */}
                   <div style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 10, color: '#64748b' }}>Trust Score</span>
+                      <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Trust Score</span>
                       <span style={{ fontSize: 10, color: '#8b7ac8', fontWeight: 600 }}>{op.trustScore.overall}%</span>
                     </div>
-                    <div style={{ height: 3, background: '#1e293b', borderRadius: 2 }}>
+                    <div style={{ height: 3, background: 'var(--gi-border-subtle)', borderRadius: 2 }}>
                       <div style={{ height: '100%', width: `${op.trustScore.overall}%`, background: 'linear-gradient(90deg, #8b7ac8, #a78bfa)', borderRadius: 2 }} />
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 10, color: '#64748b' }}>Max autonomy:</span>
+                      <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>Max autonomy:</span>
                       <span style={{ fontSize: 10, color: RISK_COLOR[op.maxAutonomyLevel], fontWeight: 600, marginLeft: 4 }}>
                         {AUTONOMY_LEVELS[op.maxAutonomyLevel].label}
                       </span>
@@ -161,13 +161,13 @@ export function AgentsPage() {
 
         {/* Detail Panel */}
         {selectedOp && (
-          <div style={{ width: 380, borderLeft: '1px solid #1e293b', background: '#080c14', overflow: 'auto', padding: 24 }}>
+          <div style={{ width: 380, borderLeft: '1px solid var(--gi-border-subtle)', background: 'var(--gi-bg-base)', overflow: 'auto', padding: 24 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>{selectedOp.name}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 16 }}>{selectedOp.description}</div>
+            <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', marginBottom: 16 }}>{selectedOp.description}</div>
 
             {/* Trust Score Breakdown */}
-            <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Trust Score Breakdown</div>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14, marginBottom: 14 }}>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Trust Score Breakdown</div>
               {[
                 { label: 'Groundedness', value: selectedOp.trustScore.groundedness },
                 { label: 'Evidence Coverage', value: selectedOp.trustScore.evidenceCoverage },
@@ -181,7 +181,7 @@ export function AgentsPage() {
                     <span style={{ fontSize: 11, color: '#94a3b8' }}>{d.label}</span>
                     <span style={{ fontSize: 11, color: d.value >= 90 ? '#22c55e' : d.value >= 80 ? '#d4a054' : '#ef4444' }}>{d.value}</span>
                   </div>
-                  <div style={{ height: 3, background: '#1e293b', borderRadius: 2 }}>
+                  <div style={{ height: 3, background: 'var(--gi-border-subtle)', borderRadius: 2 }}>
                     <div style={{ height: '100%', width: `${d.value}%`, background: d.value >= 90 ? '#22c55e' : d.value >= 80 ? '#d4a054' : '#ef4444', borderRadius: 2 }} />
                   </div>
                 </div>
@@ -189,8 +189,8 @@ export function AgentsPage() {
             </div>
 
             {/* Allowed Tools */}
-            <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Allowed Tools</div>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14, marginBottom: 14 }}>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Allowed Tools</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {selectedOp.allowedTools.map((t) => (
                   <span key={t} style={{ fontSize: 10, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', borderRadius: 4, padding: '3px 8px' }}>{t}</span>
@@ -200,8 +200,8 @@ export function AgentsPage() {
 
             {/* Blocked Tools */}
             {selectedOp.blockedTools.length > 0 && (
-              <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14, marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Blocked Tools</div>
+              <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14, marginBottom: 14 }}>
+                <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Blocked Tools</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {selectedOp.blockedTools.map((t) => (
                     <span key={t} style={{ fontSize: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', borderRadius: 4, padding: '3px 8px' }}>{t}</span>
@@ -211,8 +211,8 @@ export function AgentsPage() {
             )}
 
             {/* Handoff Targets */}
-            <div style={{ background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Handoff Targets</div>
+            <div style={{ background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14 }}>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Handoff Targets</div>
               {selectedOp.allowedHandoffTargets.length === 0 ? (
                 <div style={{ fontSize: 11, color: '#475569' }}>Terminal operator — no handoffs</div>
               ) : (
@@ -225,8 +225,8 @@ export function AgentsPage() {
             </div>
 
             {/* Instructions Preview */}
-            <div style={{ marginTop: 14, background: '#0f172a', borderRadius: 8, border: '1px solid #1e293b', padding: 14 }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>System Instructions (Excerpt)</div>
+            <div style={{ marginTop: 14, background: 'var(--gi-bg-base)', borderRadius: 8, border: '1px solid var(--gi-border-subtle)', padding: 14 }}>
+              <div style={{ fontSize: 11, color: 'var(--gi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>System Instructions (Excerpt)</div>
               <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.6 }}>{selectedOp.instructions}</div>
             </div>
           </div>

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const BG = { surface: '#0c1018', elevated: '#10141e' };
+const BG = { surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.06)' };
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',
@@ -229,7 +229,7 @@ export default function DemoSettingsPage() {
                 description="The default role dashboard shown to new users"
                 control={
                   <select
-                    className="bg-[#10141e] text-[10px] border rounded px-2 py-1"
+                    className="bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1"
                     style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                   >
                     <option>Executive</option>
@@ -302,7 +302,7 @@ export default function DemoSettingsPage() {
                       defaultValue={3}
                       min={1}
                       max={10}
-                      className="w-12 bg-[#10141e] text-[10px] border rounded px-2 py-1 text-center"
+                      className="w-12 bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1 text-center"
                       style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                     />
                     <span className="text-[9px]" style={{ color: TEXT.muted }}>
@@ -319,7 +319,7 @@ export default function DemoSettingsPage() {
                     <input
                       type="time"
                       defaultValue="22:00"
-                      className="bg-[#10141e] text-[10px] border rounded px-2 py-1"
+                      className="bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1"
                       style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                     />
                     <span className="text-[9px]" style={{ color: TEXT.muted }}>
@@ -328,7 +328,7 @@ export default function DemoSettingsPage() {
                     <input
                       type="time"
                       defaultValue="07:00"
-                      className="bg-[#10141e] text-[10px] border rounded px-2 py-1"
+                      className="bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1"
                       style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                     />
                   </div>
@@ -368,7 +368,7 @@ export default function DemoSettingsPage() {
                       type="number"
                       value={settings.sessionTimeout}
                       readOnly
-                      className="w-16 bg-[#10141e] text-[10px] border rounded px-2 py-1 text-center"
+                      className="w-16 bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1 text-center"
                       style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                     />
                     <span className="text-[9px]" style={{ color: TEXT.muted }}>
@@ -587,7 +587,7 @@ export default function DemoSettingsPage() {
                       type="number"
                       value={settings.dataRetention}
                       readOnly
-                      className="w-16 bg-[#10141e] text-[10px] border rounded px-2 py-1 text-center"
+                      className="w-16 bg-[var(--gi-bg-raised)] text-[10px] border rounded px-2 py-1 text-center"
                       style={{ color: TEXT.primary, borderColor: BORDER.muted }}
                     />
                     <span className="text-[9px]" style={{ color: TEXT.muted }}>

@@ -17,11 +17,11 @@ import { Link } from 'wouter';
 import { ACCENT, apiUrl, fetchJson } from './shared';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
-const BG = '#080c14';
+const BG = 'var(--gi-bg-base)';
 const CARD = 'rgba(255,255,255,0.03)';
 const BORDER = 'rgba(255,255,255,0.07)';
-const FG = '#e2e8f0';
-const FG_MUT = '#64748b';
+const FG = 'var(--gi-text-primary)';
+const FG_MUT = 'var(--gi-text-muted)';
 
 interface ApiEvalRun {
   runId: string;

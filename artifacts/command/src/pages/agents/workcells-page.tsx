@@ -18,14 +18,14 @@ import { DEMO_WORKCELLS } from '@szl/a11oy-runtime';
 import type { WorkcellStatus, Workcell } from '@szl/a11oy-runtime';
 
 const STATUS_CONFIG: Record<WorkcellStatus, { label: string; color: string; icon: typeof CheckCircle2 }> = {
-  intake: { label: 'Intake', color: '#64748b', icon: Eye },
+  intake: { label: 'Intake', color: 'var(--gi-text-muted)', icon: Eye },
   planning: { label: 'Planning', color: '#8b7ac8', icon: GitBranch },
-  context_building: { label: 'Context Building', color: '#4d8fcc', icon: Layers },
+  context_building: { label: 'Context Building', color: 'var(--gi-accent-blue)', icon: Layers },
   risk_review: { label: 'Risk Review', color: '#d4a054', icon: AlertTriangle },
   action_brief_created: { label: 'Brief Created', color: '#8b7ac8', icon: FileCheck },
   approval_required: { label: 'Approval Required', color: '#f59e0b', icon: Clock },
   approved: { label: 'Approved', color: '#22c55e', icon: CheckCircle2 },
-  executing: { label: 'Executing', color: '#4d8fcc', icon: PlayCircle },
+  executing: { label: 'Executing', color: 'var(--gi-accent-blue)', icon: PlayCircle },
   verifying: { label: 'Verifying', color: '#8b7ac8', icon: ShieldCheck },
   proven: { label: 'Proven', color: '#22c55e', icon: ShieldCheck },
   blocked: { label: 'Blocked', color: '#ef4444', icon: XCircle },
@@ -33,7 +33,7 @@ const STATUS_CONFIG: Record<WorkcellStatus, { label: string; color: string; icon
   archived: { label: 'Archived', color: '#475569', icon: Eye },
 };
 
-const PRIORITY_COLOR = { low: '#64748b', medium: '#4d8fcc', high: '#d4a054', critical: '#ef4444' };
+const PRIORITY_COLOR = { low: 'var(--gi-text-muted)', medium: 'var(--gi-accent-blue)', high: '#d4a054', critical: '#ef4444' };
 
 export function WorkcellsPage() {
   const [, navigate] = useLocation();
@@ -52,25 +52,25 @@ export function WorkcellsPage() {
   }, {} as Record<string, number>);
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ background: 'var(--gi-bg-base)', minHeight: '100vh', color: 'var(--gi-text-primary)', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ borderBottom: '1px solid var(--gi-border-subtle)', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 36, height: 36, background: 'rgba(139,122,200,0.15)', border: '1px solid rgba(139,122,200,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Layers size={18} color="#8b7ac8" />
           </div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>Workcells</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>12 demo workcells — A11oy Phase 2</div>
+            <div style={{ fontSize: 12, color: 'var(--gi-text-muted)' }}>12 demo workcells — A11oy Phase 2</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
-          <Filter size={14} color="#64748b" style={{ marginTop: 8 }} />
+          <Filter size={14} color="var(--gi-text-muted)" style={{ marginTop: 8 }} />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as WorkcellStatus | 'all')}
-            style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
+            style={{ background: 'var(--gi-bg-base)', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
           >
             <option value="all">All Statuses</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -80,7 +80,7 @@ export function WorkcellsPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
+            style={{ background: 'var(--gi-bg-base)', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
           >
             <option value="all">All Priorities</option>
             <option value="critical">Critical</option>
@@ -92,7 +92,7 @@ export function WorkcellsPage() {
       </div>
 
       {/* Status Summary */}
-      <div style={{ display: 'flex', gap: 8, padding: '12px 32px', borderBottom: '1px solid #1e293b', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', gap: 8, padding: '12px 32px', borderBottom: '1px solid var(--gi-border-subtle)', overflowX: 'auto' }}>
         {[
           { status: 'proven', count: statusCounts['proven'] ?? 0 },
           { status: 'executing', count: statusCounts['executing'] ?? 0 },
@@ -109,13 +109,13 @@ export function WorkcellsPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px',
                 background: filterStatus === status ? `${cfg.color}18` : 'transparent',
-                border: `1px solid ${filterStatus === status ? cfg.color + '40' : '#1e293b'}`,
+                border: `1px solid ${filterStatus === status ? cfg.color + '40' : 'var(--gi-border-subtle)'}`,
                 borderRadius: 20, cursor: 'pointer', whiteSpace: 'nowrap',
               }}
             >
               <cfg.icon size={10} color={cfg.color} />
               <span style={{ fontSize: 11, color: cfg.color }}>{cfg.label}</span>
-              <span style={{ fontSize: 11, color: '#64748b' }}>{count}</span>
+              <span style={{ fontSize: 11, color: 'var(--gi-text-muted)' }}>{count}</span>
             </button>
           );
         })}
@@ -131,8 +131,8 @@ export function WorkcellsPage() {
                 key={wc.id}
                 onClick={() => navigate(`/agents/workcells/${wc.id}`)}
                 style={{
-                  background: '#0f172a',
-                  border: '1px solid #1e293b',
+                  background: 'var(--gi-bg-base)',
+                  border: '1px solid var(--gi-border-subtle)',
                   borderRadius: 10,
                   padding: '14px 18px',
                   cursor: 'pointer',
@@ -143,16 +143,16 @@ export function WorkcellsPage() {
                   transition: 'border-color 0.15s',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(139,122,200,0.3)')}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1e293b')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--gi-border-subtle)')}
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', marginBottom: 3 }}>{wc.title}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <span style={{ fontSize: 10, color: '#64748b' }}>{wc.vertical}</span>
+                    <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{wc.vertical}</span>
                     <span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                    <span style={{ fontSize: 10, color: '#64748b' }}>{wc.domain}</span>
+                    <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{wc.domain}</span>
                     <span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                    <span style={{ fontSize: 10, color: '#64748b' }}>{wc.operatorSequence.length} operators</span>
+                    <span style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>{wc.operatorSequence.length} operators</span>
                   </div>
                 </div>
 
@@ -165,7 +165,7 @@ export function WorkcellsPage() {
                 {/* Cost */}
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 11, color: '#94a3b8' }}>${wc.totalCostUsd.toFixed(3)}</div>
-                  <div style={{ fontSize: 10, color: '#64748b' }}>cost</div>
+                  <div style={{ fontSize: 10, color: 'var(--gi-text-muted)' }}>cost</div>
                 </div>
 
                 {/* Status */}

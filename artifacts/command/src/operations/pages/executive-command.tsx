@@ -28,7 +28,7 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { GovernedDecisionSummary } from '../components/governed-decision/decision-summary-card';
 
-const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };
+const BG = { page: 'var(--gi-bg-base)', surface: 'var(--gi-bg-surface)', elevated: 'var(--gi-bg-raised)', panel: '#0e1219' };
 const BORDER = {
   subtle: 'rgba(255,255,255,0.04)',
   muted: 'rgba(255,255,255,0.06)',
