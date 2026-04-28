@@ -81,6 +81,10 @@ export function register(router: IRouter): void {
   router.use('/ai/ops', _readLimiter);
   router.use(lazyMatch('/ai', () => import('../ai-ops-dashboard'), 'ai-ops-dashboard'));
 
+  router.use('/ai/usage', _readLimiter);
+  router.use('/ai/usage', _writeLimiter);
+  router.use(lazyMatch('/ai', () => import('../ai-usage'), 'ai-usage'));
+
   router.use('/copilot', _writeLimiter);
   router.use(lazyMatch('/copilot', () => import('../copilot'), 'copilot'));
 

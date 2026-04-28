@@ -1,5 +1,6 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel, enforceBudgetForOrg, recordModelUsage } from '../../services/ai/call-model';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { tagAIContent, type ProvenanceSourceClass } from '@szl-holdings/proof-chain';
 import { services } from '@szl-holdings/services';
@@ -1079,6 +1080,8 @@ router.post(
         try {
           if (agent.provider === 'anthropic') {
             const nonSystem = messages.filter((m) => m.role !== 'system');
+            const streamStart = Date.now();
+            await enforceBudgetForOrg(undefined, 'anthropic', agent.model);
             const streamResp = anthropic.messages.stream({
               model: agent.model,
               max_tokens: maxTokens,
@@ -1092,18 +1095,38 @@ router.post(
                 );
               }
             }
+            const fm = await streamResp.finalMessage().catch(() => null);
+            recordModelUsage({
+              provider: 'anthropic', model: agent.model, surface: 'intelligence-domain-agent',
+              promptTokens: fm?.usage.input_tokens ?? 0,
+              completionTokens: fm?.usage.output_tokens ?? 0,
+              latencyMs: Date.now() - streamStart,
+            }).catch(() => {});
           } else {
+            const domainStreamStart = Date.now();
+            const domainStreamModel = agent.model;
+            await enforceBudgetForOrg(undefined, 'openai', domainStreamModel);
+            const domainStreamMessages = [
+              { role: 'system' as const, content: agent.systemPrompt },
+              ...messages,
+            ];
+            const domainPromptChars = domainStreamMessages.reduce((n, m) => n + m.content.length, 0);
+            let domainOutputChars = 0;
             for await (const chunk of createResponseStream(
-              [
-                { role: 'system' as const, content: agent.systemPrompt },
-                ...messages,
-              ],
-              { model: agent.model, maxOutputTokens: maxTokens },
+              domainStreamMessages,
+              { model: domainStreamModel, maxOutputTokens: maxTokens },
             )) {
+              domainOutputChars += chunk.length;
               res.write(
                 `data: ${JSON.stringify({ content: chunk, agent: agentId, agentName: agent.name })}\n\n`,
               );
             }
+            recordModelUsage({
+              provider: 'openai', model: domainStreamModel, surface: 'intelligence-domain-agent',
+              promptTokens: Math.round(domainPromptChars / 4),
+              completionTokens: Math.round(domainOutputChars / 4),
+              latencyMs: Date.now() - domainStreamStart,
+            }).catch(() => {});
           }
           res.write(
             `data: ${JSON.stringify({ done: true, agent: agentId, agentName: agent.name, model: agent.model, provider: agent.provider })}\n\n`,
@@ -1126,26 +1149,39 @@ router.post(
         return;
       }
 
-      let content = '';
       const startTime = Date.now();
+      let content = '';
       if (agent.provider === 'anthropic') {
         const nonSystem = messages.filter((m) => m.role !== 'system');
-        const result = await anthropic.messages.create({
+        const cmResult = await callModel({
+          provider: 'anthropic',
           model: agent.model,
-          max_tokens: maxTokens,
-          system: agent.systemPrompt,
-          messages: nonSystem as unknown as any[],
+          surface: 'intelligence-domain-agent',
+          fn: async () => {
+            const result = await anthropic.messages.create({
+              model: agent.model,
+              max_tokens: maxTokens,
+              system: agent.systemPrompt,
+              messages: nonSystem as unknown as any[],
+            });
+            const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+            return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+          },
         });
-        content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+        content = cmResult.content;
       } else {
-        const result = await createResponse(
-          [
-            { role: 'system' as const, content: agent.systemPrompt },
-            ...messages,
-          ],
-          { model: agent.model, maxOutputTokens: maxTokens },
-        );
-        content = result.content ?? '';
+        const domainNonStreamMessages = [
+          { role: 'system' as const, content: agent.systemPrompt },
+          ...messages,
+        ];
+        const domainNsResult = await callModel({
+          provider: 'openai', model: agent.model, surface: 'intelligence-domain-agent',
+          fn: async () => {
+            const r = await createResponse(domainNonStreamMessages, { model: agent.model, maxOutputTokens: maxTokens });
+            return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+          },
+        });
+        content = domainNsResult.content ?? '';
       }
 
       fireProofTag({
@@ -1233,17 +1269,29 @@ Format as structured sections with clear headers.`;
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
+      const campaignStreamStart = Date.now();
+      const campaignModel = 'gpt-5.2';
+      await enforceBudgetForOrg(undefined, 'openai', campaignModel);
+      const campaignPromptChars = systemPrompt.length + userPrompt.length;
       let campaignContent = '';
+      let campaignOutputChars = 0;
       for await (const chunk of createResponseStream(
         [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        { model: 'gpt-5.2', maxOutputTokens: 2048 },
+        { model: campaignModel, maxOutputTokens: 2048 },
       )) {
         campaignContent += chunk;
+        campaignOutputChars += chunk.length;
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
       }
+      recordModelUsage({
+        provider: 'openai', model: campaignModel, surface: 'intelligence-campaign',
+        promptTokens: Math.round(campaignPromptChars / 4),
+        completionTokens: Math.round(campaignOutputChars / 4),
+        latencyMs: Date.now() - campaignStreamStart,
+      }).catch(() => {});
       fireProofTag({
         contentId: `campaign-copy:${Date.now()}`,
         contentType: 'creative:campaign-copy',
@@ -1305,14 +1353,21 @@ Provide:
 Use precise language with specific control references where applicable.`;
 
       const startTime = Date.now();
-      const result = await anthropic.messages.create({
+      const { content } = await callModel({
+        provider: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 3000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        surface: 'intelligence-risk-assessment',
+        fn: async () => {
+          const result = await anthropic.messages.create({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 3000,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+          });
+          const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+        },
       });
-
-      const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
       fireProofTag({
         contentId: `risk-assessment:${Date.now()}`,
         contentType: 'intelligence:risk-assessment',
@@ -1365,6 +1420,8 @@ router.post(
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
+      const advisoryStreamStart = Date.now();
+      await enforceBudgetForOrg(undefined, 'anthropic', 'claude-sonnet-4-6');
       const stream = anthropic.messages.stream({
         model: 'claude-sonnet-4-6',
         max_tokens: 2048,
@@ -1377,6 +1434,13 @@ router.post(
           res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
         }
       }
+      const advisoryFm = await stream.finalMessage().catch(() => null);
+      recordModelUsage({
+        provider: 'anthropic', model: 'claude-sonnet-4-6', surface: 'intelligence-advisory',
+        promptTokens: advisoryFm?.usage.input_tokens ?? 0,
+        completionTokens: advisoryFm?.usage.output_tokens ?? 0,
+        latencyMs: Date.now() - advisoryStreamStart,
+      }).catch(() => {});
       fireProofTag({
         contentId: `advisory:${Date.now()}`,
         contentType: 'intelligence:advisory',
@@ -1442,15 +1506,19 @@ Provide:
 Be concise and action-oriented.`;
 
       const startTime = Date.now();
-      const result = await createResponse(
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        { model: 'gpt-5.2', maxOutputTokens: 800 },
-      );
+      const triageMessages = [
+        { role: 'system' as const, content: systemPrompt },
+        { role: 'user' as const, content: userPrompt },
+      ];
+      const triageResult = await callModel({
+        provider: 'openai', model: 'gpt-5.2', surface: 'intelligence-ticket-triage',
+        fn: async () => {
+          const r = await createResponse(triageMessages, { model: 'gpt-5.2', maxOutputTokens: 800 });
+          return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+        },
+      });
 
-      const content = result.content ?? '';
+      const content = triageResult.content ?? '';
       fireProofTag({
         contentId: `ticket-triage:${Date.now()}`,
         contentType: 'intelligence:ticket-triage',
@@ -1515,6 +1583,8 @@ Use professional board-level language. Be specific about numbers and timelines.`
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
+      const readinessStreamStart = Date.now();
+      await enforceBudgetForOrg(undefined, 'anthropic', 'claude-sonnet-4-6');
       const stream = anthropic.messages.stream({
         model: 'claude-sonnet-4-6',
         max_tokens: 1500,
@@ -1527,6 +1597,13 @@ Use professional board-level language. Be specific about numbers and timelines.`
           res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
         }
       }
+      const readinessFm = await stream.finalMessage().catch(() => null);
+      recordModelUsage({
+        provider: 'anthropic', model: 'claude-sonnet-4-6', surface: 'intelligence-readiness-summary',
+        promptTokens: readinessFm?.usage.input_tokens ?? 0,
+        completionTokens: readinessFm?.usage.output_tokens ?? 0,
+        latencyMs: Date.now() - readinessStreamStart,
+      }).catch(() => {});
       fireProofTag({
         contentId: `readiness-summary:${Date.now()}`,
         contentType: 'intelligence:readiness-summary',
@@ -1587,14 +1664,21 @@ Perform Windward-grade dark vessel analysis:
 Use IMCO and OFAC screening terminology.`;
 
       const startTime = Date.now();
-      const result = await anthropic.messages.create({
+      const { content } = await callModel({
+        provider: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        surface: 'intelligence-dark-vessel',
+        fn: async () => {
+          const result = await anthropic.messages.create({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 1500,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+          });
+          const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+        },
       });
-
-      const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
       fireProofTag({
         contentId: `dark-vessel:${Date.now()}`,
         contentType: 'intelligence:maritime-dark-vessel',
@@ -1659,14 +1743,21 @@ Generate a CrowdStrike Charlotte-grade triage response:
 Be precise, tactical, and time-sensitive.`;
 
       const startTime = Date.now();
-      const result = await anthropic.messages.create({
+      const { content } = await callModel({
+        provider: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        surface: 'intelligence-threat-triage',
+        fn: async () => {
+          const result = await anthropic.messages.create({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 2000,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+          });
+          const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+        },
       });
-
-      const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
       fireProofTag({
         contentId: `threat-triage:${Date.now()}`,
         contentType: 'intelligence:threat-triage',
@@ -1719,14 +1810,21 @@ router.post(
       const userPrompt = `${context ? `Context: ${context}\n\n` : ''}${query}`;
 
       const startTime = Date.now();
-      const result = await anthropic.messages.create({
+      const { content } = await callModel({
+        provider: 'anthropic',
         model: 'claude-sonnet-4-6',
-        max_tokens: 1800,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        surface: 'intelligence-maritime',
+        fn: async () => {
+          const result = await anthropic.messages.create({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 1800,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+          });
+          const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+        },
       });
-
-      const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
       fireProofTag({
         contentId: `maritime-intel:${Date.now()}`,
         contentType: 'intelligence:maritime',

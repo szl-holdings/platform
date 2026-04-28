@@ -27,6 +27,7 @@
  */
 
 import { fusionCortex, ontologyEngine } from '@szl-holdings/ai-engine';
+import { callModel, enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   alloyAuditLogTable,
@@ -889,15 +890,19 @@ async function callWhatIfLLM(
       '[APEX] LLM what-if context assembled',
     );
 
-    const completion = await createResponse(
-      [
-        { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
-        { role: 'user', content: `Scenario: ${query}` },
-      ],
-      { model: 'gpt-5.2', maxOutputTokens: 2048 },
-    );
+    const whatIfMessages = [
+      { role: 'system' as const, content: buildWhatIfSystemPrompt(orgContext) },
+      { role: 'user' as const, content: `Scenario: ${query}` },
+    ];
+    const whatIfResult = await callModel({
+      provider: 'openai', model: 'gpt-5.2', surface: 'cortex-whatif', orgId: orgId?.toString(),
+      fn: async () => {
+        const r = await createResponse(whatIfMessages, { model: 'gpt-5.2', maxOutputTokens: 2048 });
+        return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+      },
+    });
 
-    const raw = completion.content ?? '';
+    const raw = whatIfResult.content ?? '';
   const res = parseWhatIfJSON(raw, query);
   if (res) {
     return {
@@ -951,16 +956,29 @@ async function callWhatIfLLMStream(
       '[APEX] LLM what-if stream context assembled',
     );
 
+    const cortexStreamStart = Date.now();
+    const cortexStreamModel = 'gpt-5.2';
+    await enforceBudgetForOrg(orgId?.toString(), 'openai', cortexStreamModel);
+    const cortexStreamMessages = [
+      { role: 'system' as const, content: buildWhatIfSystemPrompt(orgContext) },
+      { role: 'user' as const, content: `Scenario: ${query}` },
+    ];
+    const cortexPromptChars = cortexStreamMessages.reduce((n, m) => n + m.content.length, 0);
+    let cortexOutputChars = 0;
     for await (const chunk of createResponseStream(
-      [
-        { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
-        { role: 'user', content: `Scenario: ${query}` },
-      ],
-      { model: 'gpt-5.2', maxOutputTokens: 2048 },
+      cortexStreamMessages,
+      { model: cortexStreamModel, maxOutputTokens: 2048 },
     )) {
       tokensEmitted = true;
+      cortexOutputChars += chunk.length;
       res.write(`data: ${JSON.stringify({ type: 'token', content: chunk })}\n\n`);
     }
+    recordModelUsage({
+      provider: 'openai', model: cortexStreamModel, surface: 'cortex-whatif', orgId: orgId?.toString(),
+      promptTokens: Math.round(cortexPromptChars / 4),
+      completionTokens: Math.round(cortexOutputChars / 4),
+      latencyMs: Date.now() - cortexStreamStart,
+    }).catch(() => {});
 
     logger.info(
       { query: query.substring(0, 100), source: 'llm-stream' },

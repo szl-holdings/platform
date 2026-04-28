@@ -1,5 +1,6 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel, enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { type RequestHandler, type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
@@ -134,12 +135,15 @@ copilotRouter.post(
       res.flushHeaders();
 
       try {
+        const orgId = (req as unknown as { tenantOrgId?: number }).tenantOrgId?.toString();
         if (provider === 'anthropic') {
           const anthropicMessages = chatMessages.map((m) => ({
             role: m.role as 'user' | 'assistant',
             content: m.content,
           }));
 
+          const streamStart = Date.now();
+          await enforceBudgetForOrg(orgId, 'anthropic', model);
           const streamResult = anthropic.messages.stream({
             model,
             max_tokens: 4096,
@@ -152,6 +156,13 @@ copilotRouter.post(
               res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
             }
           }
+          const fm = await streamResult.finalMessage().catch(() => null);
+          recordModelUsage({
+            provider: 'anthropic', model, surface: 'copilot', orgId,
+            promptTokens: fm?.usage.input_tokens ?? 0,
+            completionTokens: fm?.usage.output_tokens ?? 0,
+            latencyMs: Date.now() - streamStart,
+          }).catch(() => {});
         } else {
           const openaiMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
             { role: 'system', content: systemPrompt },
@@ -161,12 +172,24 @@ copilotRouter.post(
             })),
           ];
 
+          const openaiStreamStart = Date.now();
+          const openaiStreamModel = model;
+          await enforceBudgetForOrg(orgId, 'openai', openaiStreamModel);
+          const openaiPromptChars = openaiMessages.reduce((n, m) => n + m.content.length, 0);
+          let openaiOutputChars = 0;
           for await (const chunk of createResponseStream(openaiMessages, {
             model,
             maxOutputTokens: 4096,
           })) {
+            openaiOutputChars += chunk.length;
             res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
           }
+          recordModelUsage({
+            provider: 'openai', model: openaiStreamModel, surface: 'copilot', orgId,
+            promptTokens: Math.round(openaiPromptChars / 4),
+            completionTokens: Math.round(openaiOutputChars / 4),
+            latencyMs: Date.now() - openaiStreamStart,
+          }).catch(() => {});
         }
 
         res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
@@ -178,19 +201,30 @@ copilotRouter.post(
       }
     } else {
       try {
+        const orgId = (req as unknown as { tenantOrgId?: number }).tenantOrgId?.toString();
         let content = '';
         if (provider === 'anthropic') {
           const anthropicMessages = chatMessages.map((m) => ({
             role: m.role as 'user' | 'assistant',
             content: m.content,
           }));
-          const result = await anthropic.messages.create({
+          const cmResult = await callModel({
+            provider: 'anthropic',
             model,
-            max_tokens: 4096,
-            system: systemPrompt,
-            messages: anthropicMessages,
+            surface: 'copilot',
+            orgId,
+            fn: async () => {
+              const result = await anthropic.messages.create({
+                model,
+                max_tokens: 4096,
+                system: systemPrompt,
+                messages: anthropicMessages,
+              });
+              const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+              return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+            },
           });
-          content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          content = cmResult.content;
         } else {
           const openaiMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
             { role: 'system', content: systemPrompt },
@@ -199,11 +233,14 @@ copilotRouter.post(
               content: m.content,
             })),
           ];
-          const result = await createResponse(openaiMessages, {
-            model,
-            maxOutputTokens: 4096,
+          const openaiResult = await callModel({
+            provider: 'openai', model, surface: 'copilot', orgId,
+            fn: async () => {
+              const r = await createResponse(openaiMessages, { model, maxOutputTokens: 4096 });
+              return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+            },
           });
-          content = result.content ?? '';
+          content = openaiResult.content ?? '';
         }
 
         res.json({ content });

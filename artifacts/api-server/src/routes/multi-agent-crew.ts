@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getTrustEngineForTenant, extractTenantId } from '../services/tenant-trust-registry';
 import type { CrewRunResult, PendingApproval } from '@workspace/alloy';
+import { callModel } from '../services/ai/call-model';
 
 const router = Router();
 
@@ -33,15 +34,24 @@ async function createLlmClient(): Promise<import('@workspace/alloy').LlmChatClie
       maxTokens?: number;
       messages: Array<{ role: string; content: string }>;
     }): Promise<string> {
-      const response = await openai.chat.completions.create({
+      const { content } = await callModel({
+        provider: 'openai',
         model: params.model,
-        max_completion_tokens: params.maxTokens,
-        messages: params.messages.map((m) => ({
-          role: m.role as 'system' | 'user' | 'assistant',
-          content: m.content,
-        })),
+        surface: 'multi-agent-crew',
+        fn: async () => {
+          const response = await openai.chat.completions.create({
+            model: params.model,
+            max_completion_tokens: params.maxTokens,
+            messages: params.messages.map((m) => ({
+              role: m.role as 'system' | 'user' | 'assistant',
+              content: m.content,
+            })),
+          });
+          const text = response.choices[0]?.message?.content ?? '[No response]';
+          return { promptTokens: response.usage?.prompt_tokens ?? 0, completionTokens: response.usage?.completion_tokens ?? 0, content: text };
+        },
       });
-      return response.choices[0]?.message?.content ?? '[No response]';
+      return content;
     },
   };
 }

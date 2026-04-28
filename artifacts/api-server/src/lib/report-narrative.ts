@@ -4,6 +4,7 @@
  * Uses the available AI gateway (Anthropic/OpenAI) to produce human-quality narrative copy.
  */
 import { logger } from './logger';
+import { callModel } from '../services/ai/call-model';
 
 export interface NarrativeRequest {
   domain:
@@ -188,17 +189,29 @@ export async function generateReportNarrative(request: NarrativeRequest): Promis
         };
       };
       if (anthropic.default?.messages?.create) {
-        const response = await anthropic.default.messages.create({
+        const createFn = anthropic.default.messages.create.bind(anthropic.default.messages);
+        const cmResult = await callModel({
+          provider: 'anthropic',
           model: 'claude-3-5-haiku-20241022',
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: [{ role: 'user', content: userPrompt }],
+          surface: 'report-narrative',
+          fn: async () => {
+            const response = await createFn({
+              model: 'claude-3-5-haiku-20241022',
+              max_tokens: 1024,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userPrompt }],
+            });
+            const text = response.content.find((c: { type: string; text: string }) => c.type === 'text')?.text || '';
+            return {
+              promptTokens: response.usage?.input_tokens || 0,
+              completionTokens: response.usage?.output_tokens || 0,
+              content: text,
+            };
+          },
         });
-        responseText =
-          response.content.find((c: { type: string; text: string }) => c.type === 'text')?.text ||
-          null;
-        tokensUsed = (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0);
-        modelName = response.model;
+        responseText = cmResult.content || null;
+        tokensUsed = cmResult.promptTokens + cmResult.completionTokens;
+        modelName = 'claude-3-5-haiku-20241022';
       }
     } catch (anthropicErr) {
       logger.warn({ err: anthropicErr }, 'Anthropic narrative generation failed, trying OpenAI');
@@ -206,17 +219,25 @@ export async function generateReportNarrative(request: NarrativeRequest): Promis
 
     if (!responseText) {
       try {
-        const { createResponse } = await import('@szl-holdings/ai-engine/providers/openai');
-        const response = await createResponse(
-          [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          { model: 'gpt-4o-mini', maxOutputTokens: 1024 },
-        );
-        responseText = response.content || null;
-        tokensUsed = response.usage.promptTokens + response.usage.completionTokens;
-        modelName = response.model;
+        const cmResult = await callModel({
+          provider: 'openai',
+          model: 'gpt-4o-mini',
+          surface: 'report-narrative',
+          fn: async () => {
+            const { createResponse } = await import('@szl-holdings/ai-engine/providers/openai');
+            const response = await createResponse(
+              [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt },
+              ],
+              { model: 'gpt-4o-mini', maxOutputTokens: 1024 },
+            );
+            return { promptTokens: response.usage.promptTokens, completionTokens: response.usage.completionTokens, content: response.content || '' };
+          },
+        });
+        responseText = cmResult.content || null;
+        tokensUsed = cmResult.promptTokens + cmResult.completionTokens;
+        modelName = 'gpt-4o-mini';
       } catch (openaiErr) {
         logger.warn({ err: openaiErr }, 'OpenAI narrative generation failed, using fallback');
       }

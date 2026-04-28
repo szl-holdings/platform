@@ -1,6 +1,7 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ai as geminiAi } from '@szl-holdings/ai-engine/providers/gemini';
 import { createResponse, createResponseStream, openai } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel, enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { runAgentToolLoop } from '@szl-holdings/ai-engine/agent-tool-loop';
 import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import {
@@ -662,44 +663,77 @@ async function callAgent(
 
     if (!success) {
     if (agent.preferredProvider === 'anthropic') {
-      const result = await anthropic.messages.create({
+      const cmResult = await callModel({
+        provider: 'anthropic',
         model: agent.preferredModel,
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: fullPrompt }],
+        surface: 'nuro-mesh',
+        orgId: opts?.orgId?.toString() ?? undefined,
+        userId: opts?.callerUserId ?? undefined,
+        fn: async () => {
+          const result = await anthropic.messages.create({
+            model: agent.preferredModel,
+            max_tokens: 2048,
+            messages: [{ role: 'user', content: fullPrompt }],
+          });
+          const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+          return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+        },
       });
-      response = result.content[0]?.type === 'text' ? result.content[0].text : '';
-      tokensUsed = result.usage.input_tokens + result.usage.output_tokens;
+      response = cmResult.content;
+      tokensUsed = cmResult.promptTokens + cmResult.completionTokens;
       success = true;
     } else if (agent.preferredProvider === 'openai') {
-      const result = await createResponse(
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userQuery },
-        ],
-        { model: agent.preferredModel, maxOutputTokens: 2048 },
-      );
-      response = result.content ?? '';
-      tokensUsed = result.usage.promptTokens + result.usage.completionTokens;
+      const oaiMessages = [
+        { role: 'system' as const, content: systemPrompt },
+        { role: 'user' as const, content: userQuery },
+      ];
+      const oaiResult = await callModel({
+        provider: 'openai', model: agent.preferredModel, surface: 'nuro-mesh',
+        orgId: opts?.orgId?.toString() ?? undefined, userId: opts?.callerUserId ?? undefined,
+        fn: async () => {
+          const r = await createResponse(oaiMessages, { model: agent.preferredModel, maxOutputTokens: 2048 });
+          return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+        },
+      });
+      response = oaiResult.content ?? '';
+      tokensUsed = oaiResult.promptTokens + oaiResult.completionTokens;
       success = true;
     } else if (agent.preferredProvider === 'gemini') {
       try {
-        const result = await geminiAi.models.generateContent({
-          model: agent.preferredModel,
-          contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-          config: { maxOutputTokens: 2048 },
+        const geminiResult = await callModel({
+          provider: 'gemini', model: agent.preferredModel, surface: 'nuro-mesh',
+          orgId: opts?.orgId?.toString() ?? undefined, userId: opts?.callerUserId ?? undefined,
+          fn: async () => {
+            const r = await geminiAi.models.generateContent({
+              model: agent.preferredModel,
+              contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+              config: { maxOutputTokens: 2048 },
+            });
+            return {
+              promptTokens: (r as unknown as { usageMetadata?: { promptTokenCount?: number } }).usageMetadata?.promptTokenCount ?? 0,
+              completionTokens: (r as unknown as { usageMetadata?: { candidatesTokenCount?: number } }).usageMetadata?.candidatesTokenCount ?? 0,
+              content: r.text ?? '',
+            };
+          },
         });
-        response = result.text ?? '';
+        response = geminiResult.content ?? '';
+        tokensUsed = geminiResult.promptTokens + geminiResult.completionTokens;
         success = true;
       } catch {
-        const fallback = await createResponse(
-          [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userQuery },
-          ],
-          { model: 'gpt-5.2', maxOutputTokens: 2048 },
-        );
-        response = fallback.content ?? '';
-        tokensUsed = fallback.usage.promptTokens + fallback.usage.completionTokens;
+        const geminiFallbackMessages = [
+          { role: 'system' as const, content: systemPrompt },
+          { role: 'user' as const, content: userQuery },
+        ];
+        const fallbackResult = await callModel({
+          provider: 'openai', model: 'gpt-5.2', surface: 'nuro-mesh',
+          orgId: opts?.orgId?.toString() ?? undefined, userId: opts?.callerUserId ?? undefined,
+          fn: async () => {
+            const fb = await createResponse(geminiFallbackMessages, { model: 'gpt-5.2', maxOutputTokens: 2048 });
+            return { promptTokens: fb.usage.promptTokens, completionTokens: fb.usage.completionTokens, content: fb.content };
+          },
+        });
+        response = fallbackResult.content ?? '';
+        tokensUsed = fallbackResult.promptTokens + fallbackResult.completionTokens;
         success = true;
       }
     }
@@ -771,12 +805,20 @@ NOTES: [Your validation notes]
 ADJUSTED_OUTPUT: [If approved or approved_with_notes, provide the final output (can be same as original if no changes needed)]`;
 
   try {
-    const result = await anthropic.messages.create({
+    const { content: validatorResponse } = await callModel({
+      provider: 'anthropic',
       model: validatorAgent.preferredModel,
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: validationPrompt }],
+      surface: 'nuro-mesh-validator',
+      fn: async () => {
+        const result = await anthropic.messages.create({
+          model: validatorAgent.preferredModel,
+          max_tokens: 2048,
+          messages: [{ role: 'user', content: validationPrompt }],
+        });
+        const text = result.content[0]?.type === 'text' ? result.content[0].text : '';
+        return { promptTokens: result.usage.input_tokens, completionTokens: result.usage.output_tokens, content: text };
+      },
     });
-    const validatorResponse = result.content[0]?.type === 'text' ? result.content[0].text : '';
 
     const validationMatch = validatorResponse.match(
       /VALIDATION:\s*(APPROVED|APPROVED_WITH_NOTES|REJECTED)/i,
@@ -949,16 +991,27 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       );
 
       const synthStartTime = Date.now();
+      const synthModel = alloyAgent.preferredModel;
+      await enforceBudgetForOrg(orgId?.toString(), 'openai', synthModel);
+      const synthPromptChars = aggregationPrompt.length;
       let synthesisContent = '';
+      let synthOutputChars = 0;
       let streamError: string | null = null;
       try {
         for await (const chunk of createResponseStream(
           [{ role: 'user', content: aggregationPrompt }],
-          { model: alloyAgent.preferredModel, maxOutputTokens: 4096 },
+          { model: synthModel, maxOutputTokens: 4096 },
         )) {
           synthesisContent += chunk;
+          synthOutputChars += chunk.length;
           res.write(`data: ${JSON.stringify({ type: 'synthesis_chunk', content: chunk })}\n\n`);
         }
+        recordModelUsage({
+          provider: 'openai', model: synthModel, surface: 'nuro-mesh', orgId: orgId?.toString(),
+          promptTokens: Math.round(synthPromptChars / 4),
+          completionTokens: Math.round(synthOutputChars / 4),
+          latencyMs: Date.now() - synthStartTime,
+        }).catch(() => {});
       } catch (streamChunkErr) {
         streamError =
           streamChunkErr instanceof Error ? streamChunkErr.message : 'Stream interrupted';

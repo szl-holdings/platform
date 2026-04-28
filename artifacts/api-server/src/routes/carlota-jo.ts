@@ -1,4 +1,5 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
+import { callModel } from '../services/ai/call-model';
 import { ingestCarlotaService } from '@szl-holdings/ai-engine/domain-embedding-hooks';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
@@ -4004,14 +4005,23 @@ When you believe the visitor is a strong fit for Carlota Jo's services, end your
 
       let aiResponse: string;
       try {
-        const completion = await anthropic.messages.create({
+        const { content: aiText } = await callModel({
+          provider: 'anthropic',
           model: 'claude-sonnet-4-6',
-          max_tokens: 600,
-          system: systemPrompt,
-          messages: anthropicMessages,
+          surface: 'carlota-jo-advisor',
+          fn: async () => {
+            const completion = await anthropic.messages.create({
+              model: 'claude-sonnet-4-6',
+              max_tokens: 600,
+              system: systemPrompt,
+              messages: anthropicMessages,
+            });
+            const block = completion.content[0];
+            const text = block?.type === 'text' ? block.text : '';
+            return { promptTokens: completion.usage.input_tokens, completionTokens: completion.usage.output_tokens, content: text };
+          },
         });
-        const block = completion.content[0];
-        aiResponse = block.type === 'text' ? block.text : 'I apologise — something went wrong. Please try again.';
+        aiResponse = aiText || 'I apologise — something went wrong. Please try again.';
       } catch (aiErr) {
         logger.warn({ err: aiErr }, '[carlota-advisor] AI call failed, using fallback');
         aiResponse =

@@ -33,6 +33,7 @@
     "test:watch": "vitest",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
+    "lint:ai-calls": "bash src/scripts/lint-ai-direct-calls.sh",
     "format": "biome format --write ./src"
   },
   "dependencies": {

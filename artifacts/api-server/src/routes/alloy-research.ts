@@ -1,4 +1,5 @@
 import { createResponse } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel } from '../services/ai/call-model';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { pool } from '@szl-holdings/db';
 import { type IRouter, type Request, type Response, Router } from 'express';
@@ -157,12 +158,15 @@ Format as JSON array:
 
 Return ONLY valid JSON.`;
 
-        const result = await createResponse(
-          [{ role: 'user', content: researchPrompt }],
-          { model: 'gpt-5.2', maxOutputTokens: 2048 },
-        );
+        const researchResult = await callModel({
+          provider: 'openai', model: 'gpt-5.2', surface: 'alloy-research',
+          fn: async () => {
+            const r = await createResponse([{ role: 'user', content: researchPrompt }], { model: 'gpt-5.2', maxOutputTokens: 2048 });
+            return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+          },
+        });
 
-        const content = result.content ?? '';
+        const content = researchResult.content ?? '';
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]) as Array<{

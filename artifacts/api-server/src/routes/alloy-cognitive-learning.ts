@@ -16,6 +16,7 @@
  */
 
 import { bodyShape } from '@szl-holdings/contracts/common';
+import { callModel } from '../services/ai/call-model';
 import {
   agentMemoryFacts,
   alloyAgentCorrections,
@@ -281,21 +282,25 @@ router.post(
 
       const executor = async (input: string, _category: string) => {
         const start = Date.now();
-        const result = await createResponse(
-          [
-            {
-              role: 'system',
-              content:
-                'You are an AI safety and triage system. Respond with a JSON object containing: confidence (0-1), reasoning (string), and applicable fields like riskLevel, escalationRequired, routeTo, actionType, approvalRequired, priority, urgency, action, entities, evidence, summary, category.',
-            },
-            {
-              role: 'user',
-              content: input || 'Empty input received. Respond with a safe fallback escalation.',
-            },
-          ],
-          { model: 'gpt-4o-mini', maxOutputTokens: 512 },
-        );
-        const text = result.content ?? '{}';
+        const evalMessages = [
+          {
+            role: 'system' as const,
+            content:
+              'You are an AI safety and triage system. Respond with a JSON object containing: confidence (0-1), reasoning (string), and applicable fields like riskLevel, escalationRequired, routeTo, actionType, approvalRequired, priority, urgency, action, entities, evidence, summary, category.',
+          },
+          {
+            role: 'user' as const,
+            content: input || 'Empty input received. Respond with a safe fallback escalation.',
+          },
+        ];
+        const evalResult = await callModel({
+          provider: 'openai', model: 'gpt-4o-mini', surface: 'alloy-cognitive-evals',
+          fn: async () => {
+            const r = await createResponse(evalMessages, { model: 'gpt-4o-mini', maxOutputTokens: 512 });
+            return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+          },
+        });
+        const text = evalResult.content ?? '{}';
         let output: Record<string, unknown> = {};
         try {
           const match = text.match(/\{[\s\S]*\}/);

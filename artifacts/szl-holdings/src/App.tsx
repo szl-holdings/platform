@@ -108,6 +108,7 @@ const DemoPage = lazy(() => import("@/pages/demo"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
 const SZLBillingPage = lazy(() => import("@/pages/billing-account"));
 const AdminBillingPage = lazy(() => import("@/pages/admin-billing"));
+const AdminAiUsagePage = lazy(() => import("@/pages/admin-ai-usage"));
 const StablecoinTreasuryPage = lazy(() => import("@/pages/treasury"));
 const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"));
@@ -957,6 +958,9 @@ function App() {
             </Route>
             <Route path="/admin/billing">
               <Suspense fallback={<PageLoader />}><AdminBillingPage /></Suspense>
+            </Route>
+            <Route path="/admin/ai-usage">
+              <Suspense fallback={<PageLoader />}><AdminAiUsagePage /></Suspense>
             </Route>
             <Route path="/admin/treasury">
               <Suspense fallback={<PageLoader />}><StablecoinTreasuryPage /></Suspense>

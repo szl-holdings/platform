@@ -12,6 +12,7 @@
  */
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
+import { enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { conversations, db, messages, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import crypto from 'node:crypto';
@@ -489,6 +490,8 @@ alloyChatRouter.post(
       let fullResponse = '';
 
       if (chosenProvider === 'anthropic') {
+        const streamStart = Date.now();
+        await enforceBudgetForOrg(tenantOrgId?.toString(), 'anthropic', model);
         const stream = anthropic.messages.stream({
           model,
           max_tokens: 8192,
@@ -502,10 +505,23 @@ alloyChatRouter.post(
             res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
           }
         }
+        const fm = await stream.finalMessage().catch(() => null);
+        recordModelUsage({
+          provider: 'anthropic', model, surface: 'alloy-chat', orgId: tenantOrgId?.toString(),
+          promptTokens: fm?.usage.input_tokens ?? 0,
+          completionTokens: fm?.usage.output_tokens ?? 0,
+          latencyMs: Date.now() - streamStart,
+        }).catch(() => {});
       } else {
+        const alloyOaiStart = Date.now();
+        const alloyOaiModel = model;
+        await enforceBudgetForOrg(tenantOrgId?.toString(), 'openai', alloyOaiModel);
+        const alloyMessages = [{ role: 'system' as const, content: systemPrompt }, ...chatMessages];
+        const alloyPromptChars = alloyMessages.reduce((n, m) => n + m.content.length, 0);
+        let alloyOutputChars = 0;
         const prevResponseId = getConversationResponseId(id);
         for await (const chunk of createResponseStream(
-          [{ role: 'system', content: systemPrompt }, ...chatMessages],
+          alloyMessages,
           { model, maxOutputTokens: 8192, ...(prevResponseId ? { previousResponseId: prevResponseId } : {}) },
           {
             onComplete: ({ responseId }) => {
@@ -513,9 +529,16 @@ alloyChatRouter.post(
             },
           },
         )) {
+          alloyOutputChars += chunk.length;
           fullResponse += chunk;
           res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
         }
+        recordModelUsage({
+          provider: 'openai', model: alloyOaiModel, surface: 'alloy-chat', orgId: tenantOrgId?.toString(),
+          promptTokens: Math.round(alloyPromptChars / 4),
+          completionTokens: Math.round(alloyOutputChars / 4),
+          latencyMs: Date.now() - alloyOaiStart,
+        }).catch(() => {});
       }
 
       if (fullResponse) {

@@ -8,6 +8,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { logger } from "../../lib/logger";
 import { authMiddleware } from "../../middlewares/auth";
+import { callModel } from "../../services/ai/call-model";
 
 // ---------------------------------------------------------------------------
 // Lazy-init guards for OpenAI integration modules.
@@ -373,19 +374,24 @@ router.post("/text-query", async (req, res) => {
     const historyMessages: Array<{ role: "user" | "assistant"; content: string }> =
       session?.messages.slice(-6) ?? [];
 
-    const completion = await getOpenAI().chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemMessage },
-        ...historyMessages,
-        { role: "user", content: query },
-      ],
-      max_tokens: 400,
+    const { content: response } = await callModel({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      surface: 'omnia-chat',
+      fn: async () => {
+        const completion = await getOpenAI().chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemMessage },
+            ...historyMessages,
+            { role: "user", content: query },
+          ],
+          max_tokens: 400,
+        });
+        const text = completion.choices[0]?.message?.content?.trim() ?? "Unable to retrieve portfolio data at this time.";
+        return { promptTokens: completion.usage?.prompt_tokens ?? 0, completionTokens: completion.usage?.completion_tokens ?? 0, content: text };
+      },
     });
-
-    const response =
-      completion.choices[0]?.message?.content?.trim() ??
-      "Unable to retrieve portfolio data at this time.";
 
     // Persist to session history
     if (session) {
@@ -394,12 +400,6 @@ router.post("/text-query", async (req, res) => {
       session.lastActiveAt = Date.now();
     }
 
-    // Estimated cost: gpt-4o-mini $0.15/1M input tokens, $0.60/1M output tokens
-    const estInputTokensTq = Math.round((query.length + historyMessages.reduce((s, m) => s + m.content.length, 0)) / 4);
-    const estOutputTokensTq = Math.round(response.length / 4);
-    const estCostUsdTq =
-      Math.round((estInputTokensTq * 0.00000015 + estOutputTokensTq * 0.0000006) * 100000) / 100000;
-
     logger.info(
       {
         conversationId,
@@ -407,9 +407,6 @@ router.post("/text-query", async (req, res) => {
         responseChars: response.length,
         historyTurns: session?.messages.length ?? 0,
         model: "gpt-4o-mini",
-        estInputTokens: estInputTokensTq,
-        estOutputTokens: estOutputTokensTq,
-        estCostUsd: estCostUsdTq,
       },
       "[voice-telemetry] Text query processed",
     );

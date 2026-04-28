@@ -11,6 +11,7 @@
  */
 
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel, enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
@@ -824,14 +825,18 @@ async function generateAIFusedAnswer(
   live: LiveDomainData,
 ): Promise<string> {
   const { system, user } = buildAIPrompt(query, domains, results, live);
+  const cdqMessages = [
+    { role: 'system' as const, content: system },
+    { role: 'user' as const, content: user },
+  ];
   const completion = await Promise.race([
-    createResponse(
-      [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
-      { model: AI_FUSED_ANSWER_MODEL, maxOutputTokens: 600 },
-    ),
+    callModel({
+      provider: 'openai', model: AI_FUSED_ANSWER_MODEL, surface: 'cross-domain-query',
+      fn: async () => {
+        const r = await createResponse(cdqMessages, { model: AI_FUSED_ANSWER_MODEL, maxOutputTokens: 600 });
+        return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+      },
+    }),
     new Promise<never>((_, reject) =>
       setTimeout(
         () => reject(new Error(`LLM timed out after ${AI_FUSED_ANSWER_TIMEOUT_MS}ms`)),
@@ -853,15 +858,27 @@ async function* streamAIFusedAnswer(
   live: LiveDomainData,
 ): AsyncGenerator<string> {
   const { system, user } = buildAIPrompt(query, domains, results, live);
+  const cdqStreamMessages = [
+    { role: 'system' as const, content: system },
+    { role: 'user' as const, content: user },
+  ];
+  const cdqStreamStart = Date.now();
+  await enforceBudgetForOrg(undefined, 'openai', AI_FUSED_ANSWER_MODEL);
+  const cdqPromptChars = cdqStreamMessages.reduce((n, m) => n + m.content.length, 0);
+  let cdqOutputChars = 0;
   for await (const chunk of createResponseStream(
-    [
-      { role: 'system', content: system },
-      { role: 'user', content: user },
-    ],
+    cdqStreamMessages,
     { model: AI_FUSED_ANSWER_MODEL, maxOutputTokens: 600 },
   )) {
+    cdqOutputChars += chunk.length;
     yield chunk;
   }
+  recordModelUsage({
+    provider: 'openai', model: AI_FUSED_ANSWER_MODEL, surface: 'cross-domain-query',
+    promptTokens: Math.round(cdqPromptChars / 4),
+    completionTokens: Math.round(cdqOutputChars / 4),
+    latencyMs: Date.now() - cdqStreamStart,
+  }).catch(() => {});
 }
 
 function generateFusedAnswer(

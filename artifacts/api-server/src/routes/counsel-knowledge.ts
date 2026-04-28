@@ -26,6 +26,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import multer from 'multer';
 import { createResponse } from '@szl-holdings/ai-engine/providers/openai';
+import { callModel } from '../services/ai/call-model';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 
 const router: IRouter = Router();
@@ -230,11 +231,14 @@ Focus on legally significant entities and relationships (obligations, claims, pa
 Return ONLY valid JSON, no markdown.`;
 
   try {
-    const response = await createResponse(
-      [{ role: 'user', content: prompt }],
-      { model: 'gpt-5-mini', maxOutputTokens: 2000 },
-    );
-    const raw = response.content ?? '{}';
+    const entityResult = await callModel({
+      provider: 'openai', model: 'gpt-5-mini', surface: 'counsel-knowledge',
+      fn: async () => {
+        const r = await createResponse([{ role: 'user', content: prompt }], { model: 'gpt-5-mini', maxOutputTokens: 2000 });
+        return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+      },
+    });
+    const raw = entityResult.content ?? '{}';
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);
     return {
@@ -273,12 +277,15 @@ ${chunkContext}
 
 Provide a comprehensive, accurate answer. Cite every claim with [Source N]. If information spans multiple documents, synthesize it clearly. If the answer cannot be fully determined from the provided context, say so explicitly.`;
 
-  const response = await createResponse(
-    [{ role: 'user', content: prompt }],
-    { model: 'gpt-5.1', maxOutputTokens: 2000 },
-  );
+  const qaResult = await callModel({
+    provider: 'openai', model: 'gpt-5.1', surface: 'counsel-knowledge',
+    fn: async () => {
+      const r = await createResponse([{ role: 'user', content: prompt }], { model: 'gpt-5.1', maxOutputTokens: 2000 });
+      return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+    },
+  });
 
-  return { answer: response.content ?? 'Unable to generate an answer.' };
+  return { answer: qaResult.content ?? 'Unable to generate an answer.' };
 }
 
 // --- Routes ---
