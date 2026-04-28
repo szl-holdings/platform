@@ -3,6 +3,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { Toaster } from 'sonner';
 import { Layout } from '@/components/layout';
 import Dashboard from '@/pages/dashboard';
+import ComputePage from '@/pages/compute';
 import ConnectionsList from '@/pages/connections/list';
 import ConnectionsNew from '@/pages/connections/new';
 import SyncsList from '@/pages/syncs/list';
@@ -27,6 +28,7 @@ function AppContent() {
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/compute" component={ComputePage} />
         <Route path="/connections" component={ConnectionsList} />
         <Route path="/connections/new" component={ConnectionsNew} />
         <Route path="/syncs" component={SyncsList} />

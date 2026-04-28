@@ -158,6 +158,14 @@ const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m 
 const Praxis = lazy(() => import('./pages/Praxis').then(m => ({ default: m.Praxis })));
 const McpHub = lazy(() => import('./pages/McpHub').then(m => ({ default: m.McpHub })));
 const AgenticRag = lazy(() => import('./pages/AgenticRag').then(m => ({ default: m.AgenticRag })));
+const SubstrateCompute = lazy(() => import('./pages/SubstrateCompute').then(m => ({ default: m.SubstrateCompute })));
+const TotoForecaster = lazy(() => import('./pages/TotoForecaster').then(m => ({ default: m.TotoForecaster })));
+const CausalRCA = lazy(() => import('./pages/CausalRCA').then(m => ({ default: m.CausalRCA })));
+const SyntheticMetrics = lazy(() => import('./pages/SyntheticMetrics').then(m => ({ default: m.SyntheticMetrics })));
+const SelfHealingEngine = lazy(() => import('./pages/SelfHealingEngine').then(m => ({ default: m.SelfHealingEngine })));
+const ObservabilityAsCode = lazy(() => import('./pages/ObservabilityAsCode').then(m => ({ default: m.ObservabilityAsCode })));
+const AlertTriage = lazy(() => import('./pages/AlertTriage').then(m => ({ default: m.AlertTriage })));
+const CostAwareMonitoring = lazy(() => import('./pages/CostAwareMonitoring').then(m => ({ default: m.CostAwareMonitoring })));
 
 
 export default function App() {
@@ -291,6 +299,14 @@ export default function App() {
         <Route path={`${base}/self-optimization`} component={SelfOptimization} />
         <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
         <Route path={`${base}/karpathy-evolution`} component={KarpathyEvolution} />
+        <Route path={`${base}/substrate-compute`} component={SubstrateCompute} />
+        <Route path={`${base}/toto-forecaster`} component={TotoForecaster} />
+        <Route path={`${base}/causal-rca`} component={CausalRCA} />
+        <Route path={`${base}/synthetic-metrics`} component={SyntheticMetrics} />
+        <Route path={`${base}/self-healing`} component={SelfHealingEngine} />
+        <Route path={`${base}/observability-as-code`} component={ObservabilityAsCode} />
+        <Route path={`${base}/alert-triage`} component={AlertTriage} />
+        <Route path={`${base}/cost-monitoring`} component={CostAwareMonitoring} />
 
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>

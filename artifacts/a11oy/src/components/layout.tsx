@@ -81,7 +81,6 @@ const NAV_GROUPS = [
       { href: '/verifier',       label: 'Verifier Agent' },
       { href: '/memory',         label: 'Memory Vault' },
       { href: '/pce',            label: 'PCE' },
-      { href: '/flexcache',      label: 'FlexCache Runtime' },
     ],
   },
   {
@@ -104,6 +103,26 @@ const NAV_GROUPS = [
       { href: '/nexus',        label: 'a1.1oy Chat' },
       { href: '/mcp-hub',      label: 'MCP Hub' },
       { href: '/agentic-rag',  label: 'Agentic RAG' },
+    ],
+  },
+  {
+    label: 'INFRASTRUCTURE',
+    items: [
+      { href: '/substrate-compute', label: 'Substrate Compute' },
+      { href: '/flexcache',         label: 'FlexCache Runtime' },
+      { href: '/control-tower',     label: 'Control Tower' },
+    ],
+  },
+  {
+    label: 'OBSERVABILITY AI',
+    items: [
+      { href: '/toto-forecaster',       label: 'Toto Forecaster' },
+      { href: '/causal-rca',            label: 'Causal RCA' },
+      { href: '/synthetic-metrics',     label: 'Synthetic Metrics' },
+      { href: '/self-healing',          label: 'Self-Healing Engine' },
+      { href: '/alert-triage',          label: 'Alert Triage' },
+      { href: '/cost-monitoring',       label: 'Cost Monitoring' },
+      { href: '/observability-as-code', label: 'Observability as Code' },
     ],
   },
   {
@@ -205,7 +224,7 @@ const NAV_GROUPS = [
   {
     label: 'OPERATIONS',
     items: [
-      { href: '/control-tower', label: 'Control Tower' },
+      { href: '/karpathy-evolution', label: 'Karpathy Evolution' },
     ],
   },
 ];

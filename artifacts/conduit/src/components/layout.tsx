@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   Activity,
   Cable,
+  Cpu,
   FolderSync,
   History,
   LayoutTemplate,
@@ -13,6 +14,7 @@ import {
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Activity },
+  { name: 'Compute', href: '/compute', icon: Cpu },
   { name: 'Connections', href: '/connections', icon: Cable },
   { name: 'Syncs', href: '/syncs', icon: FolderSync },
   { name: 'Runs', href: '/runs', icon: History },

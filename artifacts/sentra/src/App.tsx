@@ -160,6 +160,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/controls', label: 'Control Drift', icon: ShieldCheck, comp: L(() => import('@/pages/control-drift')) },
       { path: '/resilience', label: 'Resilience Scorecard', icon: Shield, comp: L(() => import('@/pages/resilience-scorecard')) },
       { path: '/forecast', label: 'Forecast', icon: TrendingUp, comp: L(() => import('@/pages/forecast')) },
+      { path: '/predictive-engine', label: 'Predictive Threat Engine', icon: Gauge, comp: L(() => import('@/pages/predictive-threat-engine')) },
     ],
   },
   {

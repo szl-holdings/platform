@@ -224,6 +224,8 @@ export const DESTINATIONS = [
   { id: 'mailchimp', label: 'Mailchimp', color: '#FFE01B' },
   { id: 'segment', label: 'Segment', color: '#52BD95' },
   { id: 'webhook', label: 'Webhook', color: '#6366F1' },
+  { id: 'lambda_cloud', label: 'Lambda Cloud', color: '#6C3AED' },
+  { id: 'dstack', label: 'dstack', color: '#06B6D4' },
 ] as const;
 
 export type DestinationId = typeof DESTINATIONS[number]['id'];
