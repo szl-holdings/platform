@@ -1,14 +1,15 @@
 /**
  * INTERNAL — Alloy Chat Persistence
  *
- * Status: Alpha — tenant isolation pending.
+ * Status: Beta — tenant isolation implemented.
  *
- * The `conversations` and `messages` tables do not currently carry an `org_id`
- * column, making this a single-tenant-safe surface only. Cross-tenant data
- * isolation for chat history is tracked as AF-008 in `threat_model.md` and
- * must be resolved before this surface is exposed to multi-tenant production traffic.
+ * The `conversations` and `messages` tables carry an `org_id` column and all
+ * read, write, and delete routes enforce tenant ownership via `req.tenantOrgId`.
+ * The `/alloy-chat` prefix is also protected by `tenantScope({ required: true })`
+ * in `routes/groups/alloy.ts`, ensuring unauthenticated and cross-tenant requests
+ * are rejected at the router level before reaching any handler.
  *
- * Do NOT expand the public footprint of these routes without resolving AF-008.
+ * AF-008 (cross-tenant chat isolation) from `threat_model.md` is resolved.
  */
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
