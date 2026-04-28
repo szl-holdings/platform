@@ -39,8 +39,8 @@
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/env": "workspace:*",
-    "@workspace/cf-domain-profiles": "workspace:*",
-    "@workspace/cf-evals": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
+    "@workspace/aef-evals": "workspace:*",
     "@workspace/memory-fabric": "workspace:*"
   },
   "devDependencies": {

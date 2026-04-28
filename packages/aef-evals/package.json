@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@workspace/continuum-vector-worker": "workspace:*",
+    "@workspace/alloy-vector-worker": "workspace:*",
     "vitest": "^4.1.2"
   },
   "scripts": {

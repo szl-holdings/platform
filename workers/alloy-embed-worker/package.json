@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

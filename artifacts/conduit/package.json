@@ -48,8 +48,6 @@
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
     "@workspace/tokens": "workspace:*",
-    "@szl-holdings/api-client-react": "workspace:*",
-    "framer-motion": "^12.12.2",
-    "recharts": "^2.15.3"
+    "@szl-holdings/api-client-react": "workspace:*"
   }
 }

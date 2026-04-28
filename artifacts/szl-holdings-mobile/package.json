@@ -68,7 +68,9 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.1.3",
     "@react-native-community/netinfo": "11.4.1",
+    "@shopify/flash-list": "^1.7.4",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
@@ -80,10 +82,13 @@
     "expo-av": "~16.0.8",
     "expo-camera": "^17.0.10",
     "expo-file-system": "~19.0.21",
+    "expo-image": "~2.0.3",
     "expo-screen-capture": "^8.0.9",
     "expo-speech": "^14.0.8",
     "expo-sqlite": "^55.0.15",
     "graphql": "^16.13.2",
+    "moti": "^0.30.0",
+    "react-native-mmkv": "^3.3.0",
     "urql": "^5.0.1"
   }
 }

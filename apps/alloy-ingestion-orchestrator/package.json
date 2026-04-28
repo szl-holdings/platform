@@ -23,10 +23,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
-    "@workspace/cf-evidence-ledger": "workspace:*",
-    "@workspace/cf-policy-guard": "workspace:*",
-    "@workspace/cf-retrieval-core": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-evidence-ledger": "workspace:*",
+    "@workspace/aef-policy-guard": "workspace:*",
+    "@workspace/aef-retrieval-core": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
     "cors": "^2.8.5",
     "express": "^5",

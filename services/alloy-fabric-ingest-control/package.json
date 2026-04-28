@@ -6,12 +6,12 @@
   "description": "Alloy Embedding Fabric \u2014 ingestion control service. Orchestrates ingest_document, rebuild_index, verify_index_health, run_retrieval_eval, and rotate_profile_version workflows with approval gates and audit emission.",
   "main": "src/server.ts",
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
-    "@workspace/cf-evidence-ledger": "workspace:*",
-    "@workspace/cf-policy-guard": "workspace:*",
-    "@workspace/cf-workflow-runtime": "workspace:*",
-    "@workspace/cf-storage-adapters": "workspace:*",
-    "@workspace/cf-domain-profiles": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-evidence-ledger": "workspace:*",
+    "@workspace/aef-policy-guard": "workspace:*",
+    "@workspace/aef-workflow-runtime": "workspace:*",
+    "@workspace/aef-storage-adapters": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
     "express": "^5.0.0",
     "zod": "catalog:"
   },
