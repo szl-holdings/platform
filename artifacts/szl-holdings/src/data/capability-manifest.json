@@ -1,1 +1,10 @@
-../../../audit/platform-capability-manifest.json
+{
+  "meta": {
+    "title": "SZL Holdings Platform Capability Manifest",
+    "version": "1.0.0",
+    "generated": "2026-04-28",
+    "auditor": "platform-agent",
+    "scope": "All registered artifacts"
+  },
+  "capabilities": []
+}

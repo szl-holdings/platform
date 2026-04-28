@@ -64,6 +64,23 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
+      external: [
+        '@google-cloud/storage',
+        'node:fs',
+        'node:path',
+        'node:url',
+        'node:crypto',
+        'node:stream',
+        'node:buffer',
+        'node:os',
+        'node:http',
+        'node:https',
+        'fs',
+        'path',
+        'url',
+        'crypto',
+        'stream',
+      ],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {
