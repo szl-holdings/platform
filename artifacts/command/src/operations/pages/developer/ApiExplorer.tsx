@@ -145,14 +145,14 @@ const ENDPOINTS: Endpoint[] = [
 
   {
     method: 'GET',
-    path: '/api/alloy/health',
+    path: '/api/continuum/health',
     summary: 'Counsel orchestration layer health',
     tag: 'AI',
     auth: false,
   },
   {
     method: 'GET',
-    path: '/api/alloy/signals',
+    path: '/api/continuum/signals',
     summary: 'Active signal queue from Counsel engine',
     tag: 'AI',
     auth: true,
@@ -174,14 +174,14 @@ const ENDPOINTS: Endpoint[] = [
   },
   {
     method: 'GET',
-    path: '/api/alloy/agents',
+    path: '/api/continuum/agents',
     summary: 'Counsel agent registry and status',
     tag: 'Infrastructure',
     auth: false,
   },
   {
     method: 'GET',
-    path: '/api/alloy/workflow-templates',
+    path: '/api/continuum/workflow-templates',
     summary: 'Counsel workflow pattern templates',
     tag: 'Infrastructure',
     auth: true,

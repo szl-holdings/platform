@@ -26,13 +26,13 @@ Each step is a real component, not a marketing label:
 
 | Step | What it is | Where it lives |
 |---|---|---|
-| **Signal** | Continuous read of operating systems (CRM, GRC, ITSM, comms, AIS, market, threat) | Lyte (signal ingest), Alloy connector mesh |
-| **Context** | The operator-relevant state assembled around the signal — who owns it, what it depends on, what it costs if it slips | Lyte (decision objects), Alloy (state fabric) |
-| **Recommendation** | Model-assisted reasoning over the contextualised signal — what the system suggests doing | Alloy (reasoning runtime), domain-pack rule sets |
-| **Simulation** | Pre-execution modelling of the recommended action's likely effect, blast radius, and policy interactions | Alloy (simulation layer) |
-| **Policy** | The covenant policy layer that gates which actions are permitted, by whom, under what conditions | Alloy (covenant policy engine) |
-| **Execution** | The governed action — taken automatically or routed to a human approver, depending on policy | Alloy (workflow engine), CORTEX (mobile approval surface) |
-| **Proof** | The immutable, attributed record of what happened, what was recommended, who decided, and why | Alloy (Proof Chain) |
+| **Signal** | Continuous read of operating systems (CRM, GRC, ITSM, comms, AIS, market, threat) | Lyte (signal ingest), Continuum connector mesh |
+| **Context** | The operator-relevant state assembled around the signal — who owns it, what it depends on, what it costs if it slips | Lyte (decision objects), Continuum (state fabric) |
+| **Recommendation** | Model-assisted reasoning over the contextualised signal — what the system suggests doing | Continuum (reasoning runtime), domain-pack rule sets |
+| **Simulation** | Pre-execution modelling of the recommended action's likely effect, blast radius, and policy interactions | Continuum (simulation layer) |
+| **Policy** | The covenant policy layer that gates which actions are permitted, by whom, under what conditions | Continuum (covenant policy engine) |
+| **Execution** | The governed action — taken automatically or routed to a human approver, depending on policy | Continuum (workflow engine), CORTEX (mobile approval surface) |
+| **Proof** | The immutable, attributed record of what happened, what was recommended, who decided, and why | Continuum (Proof Chain) |
 | **Outcome** | The observed real-world result, measured against the recommendation and the policy | Lyte (outcome telemetry) |
 | **Learning** | The structured improvement loop — what we now know about this class of decision, fed back into recommendation and policy | Forge (model and policy update pipeline) |
 
@@ -43,15 +43,15 @@ The site introduces the platform in three tiers, and only three. More than three
 ### 4.1 Lyte — Flagship Command Surface
 The operator-facing layer. Lyte is what the executive buyer, the operator, and the analyst look at every day. It surfaces what is stuck, at risk, or about to break, in the operator's own vocabulary. Lyte renders the loop; it does not run it.
 
-### 4.2 Alloy — Governance Execution Fabric
-The infrastructure layer. Alloy is the engine of the loop. It runs signal ingest, contextualisation, recommendation, simulation, policy enforcement, action routing, Proof Chain capture, and outcome telemetry. Alloy is what makes the same governed decision loop available to every domain pack.
+### 4.2 Continuum — Governance Execution Fabric
+The infrastructure layer. Continuum is the engine of the loop. It runs signal ingest, contextualisation, recommendation, simulation, policy enforcement, action routing, Proof Chain capture, and outcome telemetry. Continuum is what makes the same governed decision loop available to every domain pack.
 
 ### 4.3 CORTEX — Mobile Command
 The away-from-desk surface. CORTEX is how the human approver participates in the loop when the policy layer routes a decision to them and they are not in front of Lyte. Mobile is not a feature of Lyte; it is a peer surface to it, with its own governance posture (biometric auth, on-device policy cache, audited offline approvals).
 
 ## 5. The six domain packs
 
-Domain packs sit on top of Alloy. Each pack is a vertical configuration of the loop — domain-specific signals, domain-specific decision objects, domain-specific policy templates, domain-specific recommendation patterns. The pack does not re-implement the loop. It teaches the loop the vocabulary of one industry.
+Domain packs sit on top of Continuum. Each pack is a vertical configuration of the loop — domain-specific signals, domain-specific decision objects, domain-specific policy templates, domain-specific recommendation patterns. The pack does not re-implement the loop. It teaches the loop the vocabulary of one industry.
 
 | Pack | Domain | Status |
 |---|---|---|
@@ -103,7 +103,7 @@ Three guarantees:
 ## 9. What this document does not cover
 
 - **Pricing and packaging architecture** — see `packaging-model.md`, `founder-pricing-notes.md`, `pilot-vs-production-commercial-model.md`.
-- **Internal operator surfaces** (Forge, Alloy admin, command center) — these are not part of the public architecture story.
+- **Internal operator surfaces** (Forge, Continuum admin, command center) — these are not part of the public architecture story.
 - **Specific integration list** — lives on `/api` and `/docs`.
 - **Roadmap detail** — lives on `/roadmap`.
 - **Compliance certification status** — lives on `/trust/security`. The architecture story makes the *posture* claim; the trust center makes the *certification* claim.

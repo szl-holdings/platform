@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getTrustEngineForTenant, extractTenantId } from '../services/tenant-trust-registry';
-import type { CrewRunResult, PendingApproval } from '@workspace/alloy';
+import type { CrewRunResult, PendingApproval } from '@workspace/continuum';
 import { callModel } from '../services/ai/call-model';
 
 const router = Router();
@@ -25,7 +25,7 @@ function pruneExpiredPlans(): void {
   }
 }
 
-async function createLlmClient(): Promise<import('@workspace/alloy').LlmChatClient> {
+async function createLlmClient(): Promise<import('@workspace/continuum').LlmChatClient> {
   const mod = await import('@szl-holdings/ai-engine/providers/openai');
   const openai = mod.openai;
   return {
@@ -65,7 +65,7 @@ router.post('/crew/run', async (req, res) => {
     }
 
     const tenantId = extractTenantId(req as Record<string, unknown>);
-    const { MultiAgentCrew } = await import('@workspace/alloy');
+    const { MultiAgentCrew } = await import('@workspace/continuum');
     const [llmClient, trustEngine] = await Promise.all([
       createLlmClient(),
       getTrustEngineForTenant(tenantId),
@@ -95,7 +95,7 @@ router.post('/crew/run', async (req, res) => {
 
 router.get('/crew/members', async (_req, res) => {
   try {
-    const { getDefaultCrew } = await import('@workspace/alloy');
+    const { getDefaultCrew } = await import('@workspace/continuum');
     res.json({ members: getDefaultCrew() });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to list crew' });
@@ -152,7 +152,7 @@ router.post('/crew/plans/:planId/approve', async (req, res) => {
       }
     }
 
-    const { MultiAgentCrew } = await import('@workspace/alloy');
+    const { MultiAgentCrew } = await import('@workspace/continuum');
     const [llmClient, trustEngine] = await Promise.all([
       createLlmClient(),
       getTrustEngineForTenant(tenantId),
@@ -205,7 +205,7 @@ router.post('/crew/custom', async (req, res) => {
     }
 
     const tenantId = extractTenantId(req as Record<string, unknown>);
-    const { createCrew } = await import('@workspace/alloy');
+    const { createCrew } = await import('@workspace/continuum');
     const [llmClient, trustEngine] = await Promise.all([
       createLlmClient(),
       getTrustEngineForTenant(tenantId),

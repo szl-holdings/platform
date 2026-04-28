@@ -20,7 +20,7 @@ And yet the problem still compounds — because no one connected *seeing it* to 
 
 A dashboard tells you something is broken. A command layer tells you who owns it, routes the right action to the right person, gets human approval before anything consequential happens, and records everything.
 
-That gap is what Lyte + Alloy is built to close.
+That gap is what Lyte + Continuum is built to close.
 
 Signal → context → recommendation → simulation → policy → execution → proof → outcome → learning.
 
@@ -70,7 +70,7 @@ The one where AI acts autonomously on things that matter — financial decisions
 
 Not because I can't. Because the accountability gap is not a feature gap. It's a trust gap.
 
-In Alloy, every recommendation that crosses the threshold into consequential action requires explicit human approval before it executes. That approval is logged with attribution, context, and rationale. If someone overrides a flag, that override is recorded.
+In Continuum, every recommendation that crosses the threshold into consequential action requires explicit human approval before it executes. That approval is logged with attribution, context, and rationale. If someone overrides a flag, that override is recorded.
 
 The audit trail isn't a compliance checkbox. It's how operators, capital partners, and customers can actually trust the system.
 
@@ -88,23 +88,23 @@ Human-in-the-loop is not a limitation. It's the product.
 
 ---
 
-People ask what makes Lyte + Alloy different from a workflow tool or a BI platform.
+People ask what makes Lyte + Continuum different from a workflow tool or a BI platform.
 
 Here's the honest answer: most tools solve one stage of the pipeline.
 
 BI solves visibility. Workflow tools solve routing. Approval systems solve authorization. Ticketing solves tracking.
 
-Lyte + Alloy solves the connection between all of them — from signal detection to confirmed action — with one audit-grade record that runs the full length.
+Lyte + Continuum solves the connection between all of them — from signal detection to confirmed action — with one audit-grade record that runs the full length.
 
 Stage 1: Signal. Lyte's PRISM engine detects it — approval latency, ownership gap, performance anomaly, threshold crossing.
 
 Stage 2: Interpretation. Context, priority, owner attribution, risk scoring.
 
-Stage 3: Recommendation. Alloy proposes the specific action, routing path, and SLA expectation.
+Stage 3: Recommendation. Continuum proposes the specific action, routing path, and SLA expectation.
 
 Stage 4: Approval. A human reviews the full context and says yes, no, or modify.
 
-Stage 5: Action. Alloy executes — scoped to exactly what was approved.
+Stage 5: Action. Continuum executes — scoped to exactly what was approved.
 
 Stage 6: Audit. An immutable, attributable record of everything that happened.
 
@@ -126,7 +126,7 @@ Something I care about in how we present the company:
 
 We don't show demo data and call it live. We don't show a pilot and call it a customer. We don't claim certifications we don't have.
 
-What Lyte + Alloy is right now: a functioning multi-application operating platform with a shared data layer, a governed execution model, an immutable audit trail, and four vertical-specific intelligence packs built on top.
+What Lyte + Continuum is right now: a functioning multi-application operating platform with a shared data layer, a governed execution model, an immutable audit trail, and four vertical-specific intelligence packs built on top.
 
 It is running. The code is real. The architecture is documented.
 
@@ -154,7 +154,7 @@ The question I get most often: why does SZL have products in defense, maritime, 
 
 Here's the architecture behind it:
 
-Lyte + Alloy is a domain-agnostic operating platform. Signal detection, workflow routing, human-in-the-loop approval, and audit-grade execution work the same way whether the signals come from a SOC, a fleet of vessels, an acquisition pipeline, or an executive advisory engagement.
+Lyte + Continuum is a domain-agnostic operating platform. Signal detection, workflow routing, human-in-the-loop approval, and audit-grade execution work the same way whether the signals come from a SOC, a fleet of vessels, an acquisition pipeline, or an executive advisory engagement.
 
 The difference is the signal vocabulary.
 
@@ -218,7 +218,7 @@ The operating system most organizations run on is:
 
 That stack doesn't scale. It doesn't audit. And it certainly doesn't close the loop between decision and confirmed outcome.
 
-That's the problem Lyte + Alloy is built to solve.
+That's the problem Lyte + Continuum is built to solve.
 
 Not a clever idea. A real problem, solved correctly.
 

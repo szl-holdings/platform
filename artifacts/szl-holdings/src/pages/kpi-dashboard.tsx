@@ -30,7 +30,7 @@ interface KpiData {
   platforms: {
     terra: { distressProperties: number; activeDeals: number; href: string };
     vessels: { trackedVessels: number; fleets: number; href: string };
-    alloy: { workflowRuns: number; activeWorkflows: number; href: string };
+    continuum: { workflowRuns: number; activeWorkflows: number; href: string };
     lyte: { incidents: number; href: string };
     aegis: { incidents: number; findings: number; href: string };
     carlotaJo: { inquiries: number; href: string };
@@ -1280,7 +1280,7 @@ export default function KpiDashboardPage() {
                       value={agg.totalWorkflowRuns}
                       sub="Counsel orchestration"
                       accent="hsl(214,80%,65%)"
-                      href={platforms?.alloy?.href}
+                      href={platforms?.continuum?.href}
                       icon={Layers}
                       delay={0}
                     />
@@ -1347,11 +1347,11 @@ export default function KpiDashboardPage() {
                       name="Counsel"
                       icon={Layers}
                       accent="hsl(214,80%,65%)"
-                      href={platforms?.alloy?.href}
+                      href={platforms?.continuum?.href}
                       delay={0.1}
                       metrics={[
-                        { label: 'Workflow Runs', value: platforms?.alloy?.workflowRuns },
-                        { label: 'Active Workflows', value: platforms?.alloy?.activeWorkflows },
+                        { label: 'Workflow Runs', value: platforms?.continuum?.workflowRuns },
+                        { label: 'Active Workflows', value: platforms?.continuum?.activeWorkflows },
                       ]}
                     />
                     <PlatformBlock

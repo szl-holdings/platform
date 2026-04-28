@@ -46,7 +46,7 @@ function userOrgKeyGenerator(req: Request): string {
  * Skip function that bypasses rate limiting for verified internal service
  * callers (those presenting a valid X-Internal-Token header matched against
  * INTERNAL_SERVICE_TOKENS). Internal callers are trusted pipeline services
- * (e.g. Alloy runner, health-prober) that should never be throttled.
+ * (e.g. Continuum runner, health-prober) that should never be throttled.
  *
  * NOTE: This is a single-instance in-memory limiter (v1). A distributed
  * deployment sharing rate-limit state across instances should migrate to

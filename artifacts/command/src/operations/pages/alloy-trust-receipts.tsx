@@ -102,7 +102,7 @@ const RECEIPTS: TrustReceipt[] = [
     ],
     overallConfidence: 0.97,
     approvals: [{ role: 'CISO', approved: true, at: '2026-04-01T06:14:23Z' }],
-    signedBy: 'alloy-covenant-engine-v2',
+    signedBy: 'continuum-covenant-engine-v2',
     immutable: true,
   },
   {
@@ -148,7 +148,7 @@ const RECEIPTS: TrustReceipt[] = [
     ],
     overallConfidence: 0.91,
     approvals: [{ role: 'CFO', approved: false }],
-    signedBy: 'alloy-covenant-engine-v2',
+    signedBy: 'continuum-covenant-engine-v2',
     immutable: true,
   },
   {
@@ -190,7 +190,7 @@ const RECEIPTS: TrustReceipt[] = [
     ],
     overallConfidence: 0.88,
     approvals: [{ role: 'Finance', approved: false }],
-    signedBy: 'alloy-covenant-engine-v2',
+    signedBy: 'continuum-covenant-engine-v2',
     immutable: true,
   },
   {
@@ -230,7 +230,7 @@ const RECEIPTS: TrustReceipt[] = [
     ],
     overallConfidence: 0.93,
     approvals: [],
-    signedBy: 'alloy-covenant-engine-v2',
+    signedBy: 'continuum-covenant-engine-v2',
     immutable: true,
   },
 ];
@@ -537,7 +537,7 @@ function mapApiReceipt(r: Record<string, unknown>): TrustReceipt {
     status: RECEIPT_STATUS_MAP[rawStatus] ?? 'partial',
     generatedAt: String(r.createdAt ?? new Date().toISOString()),
     duration: '—',
-    triggeredBy: String(provenance.modelId ?? provenance.modelProvider ?? 'alloy-engine'),
+    triggeredBy: String(provenance.modelId ?? provenance.modelProvider ?? 'continuum-engine'),
     modelUsed: String(provenance.modelId ?? '—'),
     inputs: {
       'Content Type': String(r.contentType ?? '—'),
@@ -554,7 +554,7 @@ function mapApiReceipt(r: Record<string, unknown>): TrustReceipt {
     evidence: Array.isArray(provenance.whatWasSeen) ? (provenance.whatWasSeen as string[]) : [],
     overallConfidence: typeof r.confidenceScore === 'number' ? r.confidenceScore : undefined,
     approvals: [],
-    signedBy: String(r.serviceAttribution ?? 'alloy-receipt-graph'),
+    signedBy: String(r.serviceAttribution ?? 'continuum-receipt-graph'),
     immutable: false,
   };
 }

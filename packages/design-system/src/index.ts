@@ -14,7 +14,7 @@ export {
   runStateToFreshnessLevel,
   runStateToPolicyReason,
   runStatusToPolicyState,
-} from './alloy-bridge.js';
+} from './continuum-bridge.js';
 export * from './a11y/index.js';
 export * from './cockpit/index.js';
 export * from './data/index.js';

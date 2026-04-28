@@ -16,10 +16,10 @@ const CASE_STUDIES = [
     sectorColor: 'hsl(206, 72%, 40%)',
     duration: '6 weeks',
     headline: 'From manual port-call audits to real-time dark vessel detection',
-    summary: `A maritime operations team was spending 40+ analyst hours per week manually auditing vessel port calls for compliance and sanctions exposure. We instrumented their AIS data feed through ${productName('vessels')}, connected it to ${productName('alloy')}'s workflow engine, and automated the compliance signal generation — reducing manual audit time by 78% while increasing coverage to the full fleet.`,
+    summary: `A maritime operations team was spending 40+ analyst hours per week manually auditing vessel port calls for compliance and sanctions exposure. We instrumented their AIS data feed through ${productName('vessels')}, connected it to ${productName('continuum')}'s workflow engine, and automated the compliance signal generation — reducing manual audit time by 78% while increasing coverage to the full fleet.`,
     outcome:
       '78% reduction in manual audit hours. Full-fleet coverage. Audit-grade record for every compliance check.',
-    tags: [productName('vessels'), productName('alloy'), 'Maritime Intelligence', 'Compliance'],
+    tags: [productName('vessels'), productName('continuum'), 'Maritime Intelligence', 'Compliance'],
   },
   {
     slug: 'real-estate-pipeline-intelligence',
@@ -28,10 +28,10 @@ const CASE_STUDIES = [
     sectorColor: 'hsl(140, 50%, 38%)',
     duration: '8 weeks',
     headline: "Surfacing $4.8B in distressed deal flow that wasn't visible before",
-    summary: `A real estate investment firm had no systematic way to identify distressed properties in their target markets before they hit the open market. We deployed ${productName('terra')}'s distress detection engine against their target neighborhoods in NYC, connected ownership graph tracking to their deal CRM, and built a tiered alert system through ${productName('alloy')}. Within 6 weeks, they had a live pipeline of distressed opportunities with full ownership chain visibility.`,
+    summary: `A real estate investment firm had no systematic way to identify distressed properties in their target markets before they hit the open market. We deployed ${productName('terra')}'s distress detection engine against their target neighborhoods in NYC, connected ownership graph tracking to their deal CRM, and built a tiered alert system through ${productName('continuum')}. Within 6 weeks, they had a live pipeline of distressed opportunities with full ownership chain visibility.`,
     outcome:
       '$4.8B in tracked deal pipeline. 340+ distressed properties surfaced. First deals under LOI within 60 days of deployment.',
-    tags: [productName('terra'), productName('alloy'), 'Real Estate Intelligence', 'Deal Pipeline'],
+    tags: [productName('terra'), productName('continuum'), 'Real Estate Intelligence', 'Deal Pipeline'],
   },
   {
     slug: 'fintech-operational-risk',
@@ -40,10 +40,10 @@ const CASE_STUDIES = [
     sectorColor: 'hsl(38, 52%, 58%)',
     duration: '10 weeks',
     headline: 'Closing the loop between payment anomaly detection and operational response',
-    summary: `A fintech platform processing millions in daily transactions had robust monitoring but no structured operational response layer. Anomalies surfaced in dashboards; response happened through Slack and email. We instrumented their payment processing signals through ${productName('lyte')}'s PRAXIS engine, built approval-gated response workflows in ${productName('alloy')}, and gave their operations team a governed command surface. Incident response time dropped from 4.2 hours average to 38 minutes.`,
+    summary: `A fintech platform processing millions in daily transactions had robust monitoring but no structured operational response layer. Anomalies surfaced in dashboards; response happened through Slack and email. We instrumented their payment processing signals through ${productName('lyte')}'s PRAXIS engine, built approval-gated response workflows in ${productName('continuum')}, and gave their operations team a governed command surface. Incident response time dropped from 4.2 hours average to 38 minutes.`,
     outcome:
       '89% reduction in mean time to resolution. Every incident response now has a complete proof chain. Zero unauthorized autonomous actions in production.',
-    tags: [productName('lyte'), productName('alloy'), 'Fintech', 'Operational Risk'],
+    tags: [productName('lyte'), productName('continuum'), 'Fintech', 'Operational Risk'],
   },
 ];
 

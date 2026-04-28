@@ -12,7 +12,8 @@
 
 export { db, pool } from '@szl-holdings/db';
 export * from '@szl-holdings/db/schema';
-export { alloyRepo } from './repositories/alloy';
+export { alloyRepo, continuumRepo } from './repositories/alloy';
+export { continuumRepo } from './repositories/continuum';
 export type { AuditLogRow, NewAuditLog } from './repositories/audit';
 export { auditRepo } from './repositories/audit';
 export type { NewUser, SessionRow, UserRow } from './repositories/auth';

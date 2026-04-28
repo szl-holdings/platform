@@ -1,4 +1,4 @@
-import { LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import { LocalCpuBackend } from '@workspace/continuum-vector-worker';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ALL_FIXTURE_SETS } from './fixtures/index.js';
 import { runEval } from './runner.js';

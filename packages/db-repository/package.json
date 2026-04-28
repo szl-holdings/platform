@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./auth": "./src/auth.ts",
     "./alloy": "./src/alloy.ts",
+    "./continuum": "./src/continuum.ts",
     "./audit": "./src/audit.ts",
     "./eval-registry": "./src/eval-registry.ts",
     "./vessels": "./src/vessels.ts",

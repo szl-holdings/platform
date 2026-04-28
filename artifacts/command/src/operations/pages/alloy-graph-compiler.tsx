@@ -476,7 +476,7 @@ export default function AlloyGraphCompilerPage() {
   const [apiError, setApiError] = useState<string | null>(null);
 
   const { data: workflowsData } = useStandardQuery({
-    queryKey: ['alloy-workflows-compiler'],
+    queryKey: ['continuum-workflows-compiler'],
     queryFn: () => api.alloyWorkflows.list({ limit: 5 }),
     staleTime: 60_000,
   });

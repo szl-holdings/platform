@@ -51,7 +51,7 @@ const PLATFORM_NODES = [
     id: 'api-gateway',
     label: 'API Gateway',
     platform: 'Core',
-    connects: ['lyte-core', 'alloy-engine', 'firestorm-soc', 'terra-lyte'],
+    connects: ['lyte-core', 'continuum-engine', 'firestorm-soc', 'terra-lyte'],
   },
   {
     id: 'lyte-core',
@@ -60,7 +60,7 @@ const PLATFORM_NODES = [
     connects: ['signal-bus', 'action-router', 'prism-engine'],
   },
   {
-    id: 'alloy-engine',
+    id: 'continuum-engine',
     label: 'Counsel Engine',
     platform: 'Counsel',
     connects: ['signal-bus', 'workflow-exec', 'ml-inference'],
@@ -130,7 +130,7 @@ function initNodes(w: number, h: number): NodeState[] {
     centerY = h / 2;
   const rings = [
     ['api-gateway'],
-    ['lyte-core', 'alloy-engine', 'firestorm-soc', 'terra-lyte'],
+    ['lyte-core', 'continuum-engine', 'firestorm-soc', 'terra-lyte'],
     ['signal-bus', 'ml-inference', 'workflow-exec', 'prism-engine', 'threat-db', 'geo-index'],
     ['alert-engine', 'escalation-mgr', 'action-router', 'metrics-store', 'notification-svc'],
   ];

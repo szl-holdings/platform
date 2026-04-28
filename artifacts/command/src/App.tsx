@@ -200,23 +200,23 @@ const PrismDashboard = lazy(() => import('@lyte/pages/prism-dashboard'));
 const BlockerBoard = lazy(() => import('@lyte/pages/blocker-board'));
 const DigestCenter = lazy(() => import('@lyte/pages/digest-center'));
 const TrustAudit = lazy(() => import('@lyte/pages/trust-audit'));
-const AlloyActionConsole = lazy(() => import('@lyte/pages/alloy-action-console'));
+const ContinuumActionConsole = lazy(() => import('@lyte/pages/continuum-action-console'));
 const DecisionCenterPage = lazy(() => import('./pages/decision-center'));
 const EvidenceExplorerPage = lazy(() => import('./pages/intelligence/evidence-explorer'));
-const AlloyWorkflowCanvas = lazy(() => import('@lyte/pages/alloy-workflow-canvas'));
-const AlloyIntelligence = lazy(() => import('@lyte/pages/alloy-intelligence'));
-const AlloyGovernance = lazy(() => import('@lyte/pages/alloy-governance'));
-const AlloyWorkflowTemplates = lazy(() => import('@lyte/pages/alloy-workflow-templates'));
-const AlloyWriteBack = lazy(() => import('@lyte/pages/alloy-write-back'));
-const AlloyAgentMonitor = lazy(() => import('@lyte/pages/alloy-agent-monitor'));
-const AlloyExecutionTraces = lazy(() => import('@lyte/pages/alloy-execution-traces'));
-const AlloyReplayTimeline = lazy(() => import('@lyte/pages/alloy-replay-timeline'));
-const AlloyPolicySim = lazy(() => import('@lyte/pages/alloy-policy-sim'));
-const AlloyAgentHandoffs = lazy(() => import('@lyte/pages/alloy-agent-handoffs'));
-const AlloyTrustReceipts = lazy(() => import('@lyte/pages/alloy-trust-receipts'));
-const AlloyIntegrationHealth = lazy(() => import('@lyte/pages/alloy-integration-health'));
-const AlloyGraphCompiler = lazy(() => import('@lyte/pages/alloy-graph-compiler'));
-const AlloyPolicyCompiler = lazy(() => import('@lyte/pages/alloy-policy-compiler'));
+const ContinuumWorkflowCanvas = lazy(() => import('@lyte/pages/continuum-workflow-canvas'));
+const ContinuumIntelligence = lazy(() => import('@lyte/pages/continuum-intelligence'));
+const ContinuumGovernance = lazy(() => import('@lyte/pages/continuum-governance'));
+const ContinuumWorkflowTemplates = lazy(() => import('@lyte/pages/continuum-workflow-templates'));
+const ContinuumWriteBack = lazy(() => import('@lyte/pages/continuum-write-back'));
+const ContinuumAgentMonitor = lazy(() => import('@lyte/pages/continuum-agent-monitor'));
+const ContinuumExecutionTraces = lazy(() => import('@lyte/pages/continuum-execution-traces'));
+const ContinuumReplayTimeline = lazy(() => import('@lyte/pages/continuum-replay-timeline'));
+const ContinuumPolicySim = lazy(() => import('@lyte/pages/continuum-policy-sim'));
+const ContinuumAgentHandoffs = lazy(() => import('@lyte/pages/continuum-agent-handoffs'));
+const ContinuumTrustReceipts = lazy(() => import('@lyte/pages/continuum-trust-receipts'));
+const ContinuumIntegrationHealth = lazy(() => import('@lyte/pages/continuum-integration-health'));
+const ContinuumGraphCompiler = lazy(() => import('@lyte/pages/continuum-graph-compiler'));
+const ContinuumPolicyCompiler = lazy(() => import('@lyte/pages/continuum-policy-compiler'));
 const OmniaHubPage = lazy(() => import('./pages/omnia/index'));
 const OmniaWorldModelPage = lazy(() => import('./pages/omnia/world-model'));
 const OmniaNarrativePage = lazy(() => import('./pages/omnia/narrative'));
@@ -225,7 +225,7 @@ const OmniaStoryPage = lazy(() => import('./pages/omnia/story'));
 const CognitiveCommandCenter = lazy(() => import('./pages/cognitive/index'));
 const CognitiveLoopPage = lazy(() => import('./pages/cognitive/loop'));
 const AlloyProofPage = lazy(() =>
-  import('./pages/alloy-proof').then((m) => ({ default: m.AlloyProofPage })),
+  import('./pages/continuum-proof').then((m) => ({ default: m.AlloyProofPage })),
 );
 const RetrievalProofChainPage = lazy(() =>
   import('./pages/retrieval-proof-chain').then((m) => ({ default: m.RetrievalProofChainPage })),
@@ -469,21 +469,21 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/ai-ops', label: 'AI Quality Dashboard', group: 'Operations' },
   { href: '/operations/fabric', label: 'Global Fabric', group: 'Operations' },
   { href: '/operations/automations', label: 'Automations — n8n Bridge', group: 'Operations' },
-  { href: '/operations/alloy/canvas', label: 'Counsel Workflow Canvas', group: 'Counsel' },
-  { href: '/operations/alloy/actions', label: 'Counsel Action Console', group: 'Counsel' },
-  { href: '/operations/alloy/templates', label: 'Counsel Templates', group: 'Counsel' },
-  { href: '/operations/alloy/intelligence', label: 'Counsel Intelligence', group: 'Counsel' },
-  { href: '/operations/alloy/governance', label: 'Counsel Governance', group: 'Counsel' },
-  { href: '/operations/alloy/agents', label: 'Counsel Agent Monitor', group: 'Counsel' },
-  { href: '/operations/alloy/traces', label: 'Counsel Execution Traces', group: 'Counsel' },
-  { href: '/operations/alloy/replay', label: 'Counsel Replay Timeline', group: 'Counsel' },
-  { href: '/operations/alloy/simulate', label: 'Counsel Policy Sim', group: 'Counsel' },
-  { href: '/operations/alloy/handoffs', label: 'Counsel Agent Handoffs', group: 'Counsel' },
-  { href: '/operations/alloy/receipts', label: 'Counsel Trust Receipts', group: 'Counsel' },
-  { href: '/operations/alloy/integrations', label: 'Counsel Integration Health', group: 'Counsel' },
-  { href: '/operations/alloy/compiler', label: 'Counsel Graph Compiler', group: 'Counsel' },
-  { href: '/operations/alloy/policy-compiler', label: 'Counsel Policy Compiler', group: 'Counsel' },
-  { href: '/operations/alloy/proof', label: 'Counsel Proof', group: 'Counsel' },
+  { href: '/operations/continuum/canvas', label: 'Counsel Workflow Canvas', group: 'Counsel' },
+  { href: '/operations/continuum/actions', label: 'Counsel Action Console', group: 'Counsel' },
+  { href: '/operations/continuum/templates', label: 'Counsel Templates', group: 'Counsel' },
+  { href: '/operations/continuum/intelligence', label: 'Counsel Intelligence', group: 'Counsel' },
+  { href: '/operations/continuum/governance', label: 'Counsel Governance', group: 'Counsel' },
+  { href: '/operations/continuum/agents', label: 'Counsel Agent Monitor', group: 'Counsel' },
+  { href: '/operations/continuum/traces', label: 'Counsel Execution Traces', group: 'Counsel' },
+  { href: '/operations/continuum/replay', label: 'Counsel Replay Timeline', group: 'Counsel' },
+  { href: '/operations/continuum/simulate', label: 'Counsel Policy Sim', group: 'Counsel' },
+  { href: '/operations/continuum/handoffs', label: 'Counsel Agent Handoffs', group: 'Counsel' },
+  { href: '/operations/continuum/receipts', label: 'Counsel Trust Receipts', group: 'Counsel' },
+  { href: '/operations/continuum/integrations', label: 'Counsel Integration Health', group: 'Counsel' },
+  { href: '/operations/continuum/compiler', label: 'Counsel Graph Compiler', group: 'Counsel' },
+  { href: '/operations/continuum/policy-compiler', label: 'Counsel Policy Compiler', group: 'Counsel' },
+  { href: '/operations/continuum/proof', label: 'Counsel Proof', group: 'Counsel' },
   { href: '/operations/retrieval/proof-chain', label: 'Retrieval Proof Chain', group: 'Counsel' },
   { href: '/operations/operator', label: 'Operator Panel', group: 'Operations' },
   { href: '/operations/runs', label: 'Run Console', group: 'Operations' },
@@ -755,7 +755,7 @@ function AppShell() {
               <Route path="/operations/signals" component={() => <LiveSignals />} />
               <Route path="/operations/alerts" component={() => <AlertManagement />} />
               <Route path="/operations/priorities" component={() => <ActionQueue />} />
-              <Route path="/operations/workflows" component={() => <AlloyWorkflowCanvas />} />
+              <Route path="/operations/workflows" component={() => <ContinuumWorkflowCanvas />} />
               <Route path="/operations/recommendations" component={() => <LiveRecommendations />} />
               <Route path="/operations/audit" component={() => <TrustAudit />} />
               <Route path="/operations/exceptions" component={() => <EscalationCenter />} />
@@ -796,35 +796,35 @@ function AppShell() {
               <Route path="/operations/automations" component={() => <AutomationsPage />} />
               <Route path="/alerts" component={() => <AlertsPage />} />
               <Route path="/operations/fabric" component={() => <GlobalFabricPage />} />
-              <Route path="/operations/alloy/canvas" component={() => <AlloyWorkflowCanvas />} />
-              <Route path="/operations/alloy/actions" component={() => <AlloyActionConsole />} />
+              <Route path="/operations/continuum/canvas" component={() => <ContinuumWorkflowCanvas />} />
+              <Route path="/operations/continuum/actions" component={() => <ContinuumActionConsole />} />
               <Route
-                path="/operations/alloy/templates"
-                component={() => <AlloyWorkflowTemplates />}
+                path="/operations/continuum/templates"
+                component={() => <ContinuumWorkflowTemplates />}
               />
-              <Route path="/operations/alloy/gates" component={() => <AlloyWriteBack />} />
+              <Route path="/operations/continuum/gates" component={() => <ContinuumWriteBack />} />
               <Route
-                path="/operations/alloy/intelligence"
-                component={() => <AlloyIntelligence />}
+                path="/operations/continuum/intelligence"
+                component={() => <ContinuumIntelligence />}
               />
-              <Route path="/operations/alloy/governance" component={() => <AlloyGovernance />} />
-              <Route path="/operations/alloy/agents" component={() => <AlloyAgentMonitor />} />
-              <Route path="/operations/alloy/traces" component={() => <AlloyExecutionTraces />} />
-              <Route path="/operations/alloy/replay" component={() => <AlloyReplayTimeline />} />
-              <Route path="/operations/alloy/simulate" component={() => <AlloyPolicySim />} />
-              <Route path="/operations/alloy/handoffs" component={() => <AlloyAgentHandoffs />} />
-              <Route path="/operations/alloy/receipts" component={() => <AlloyTrustReceipts />} />
+              <Route path="/operations/continuum/governance" component={() => <ContinuumGovernance />} />
+              <Route path="/operations/continuum/agents" component={() => <ContinuumAgentMonitor />} />
+              <Route path="/operations/continuum/traces" component={() => <ContinuumExecutionTraces />} />
+              <Route path="/operations/continuum/replay" component={() => <ContinuumReplayTimeline />} />
+              <Route path="/operations/continuum/simulate" component={() => <ContinuumPolicySim />} />
+              <Route path="/operations/continuum/handoffs" component={() => <ContinuumAgentHandoffs />} />
+              <Route path="/operations/continuum/receipts" component={() => <ContinuumTrustReceipts />} />
               <Route
-                path="/operations/alloy/integrations"
-                component={() => <AlloyIntegrationHealth />}
+                path="/operations/continuum/integrations"
+                component={() => <ContinuumIntegrationHealth />}
               />
-              <Route path="/operations/alloy/compiler" component={() => <AlloyGraphCompiler />} />
+              <Route path="/operations/continuum/compiler" component={() => <ContinuumGraphCompiler />} />
               <Route
-                path="/operations/alloy/policy-compiler"
-                component={() => <AlloyPolicyCompiler />}
+                path="/operations/continuum/policy-compiler"
+                component={() => <ContinuumPolicyCompiler />}
               />
-              <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
-              <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
+              <Route path="/operations/continuum/replay-lab" component={() => <ReplayLab />} />
+              <Route path="/operations/continuum/eval-lab" component={() => <EvalLab />} />
               <Route path="/operations/operator" component={() => <OperatorPanel />} />
               <Route path="/operations/runs" component={() => <RunConsole />} />
               <Route path="/operations/evidence-explorer" component={() => <EvidenceExplorer />} />
@@ -850,8 +850,8 @@ function AppShell() {
               <Route path="/evolution/evaluation" component={() => <PEREvaluationConsole />} />
               <Route path="/evolution/governance" component={() => <PERGovernanceConsole />} />
               <Route path="/evolution/diagnostics" component={() => <PERDiagnostics />} />
-              <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
-              <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
+              <Route path="/operations/continuum/trust-console" component={() => <TrustConsole />} />
+              <Route path="/operations/continuum/proof" component={() => <AlloyProofPage />} />
               <Route path="/operations/retrieval/proof-chain" component={() => <RetrievalProofChainPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />
               <Route path="/operations/structured-intelligence" component={() => <StructuredIntelligencePage />} />

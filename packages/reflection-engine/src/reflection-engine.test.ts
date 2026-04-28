@@ -15,7 +15,7 @@ function makeTrace(overrides: Partial<TraceRecord> = {}): TraceRecord {
     requestId: 'req-001',
     sessionId: 'sess-001',
     workflowId: 'wf-001',
-    agentId: 'alloy',
+    agentId: 'continuum',
     model: 'gpt-4o',
     promptVersion: 'v1.2',
     toolCalls: [],
@@ -284,7 +284,7 @@ describe('skill-drafter', () => {
     expect(skill.skillId).toBeTruthy();
     expect(skill.status).toBe('draft');
     expect(skill.derivedFromTraceId).toBe('trace-test-001');
-    expect(skill.triggerKeywords).toContain('alloy');
+    expect(skill.triggerKeywords).toContain('continuum');
     expect(skill.inputFields.length).toBeGreaterThan(0);
     expect(skill.outputFields.length).toBeGreaterThan(0);
   });
@@ -353,7 +353,7 @@ describe('reflect()', () => {
     const writer = new TraceWriter(traceStore);
     writer.startTrace({
       traceId: 'reflect-trace-001',
-      agentId: 'alloy',
+      agentId: 'continuum',
       model: 'gpt-4o',
       workflowId: 'wf-test',
     });

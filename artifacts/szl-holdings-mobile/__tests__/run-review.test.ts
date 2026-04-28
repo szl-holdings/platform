@@ -35,12 +35,12 @@ const baseRun: WorkflowRunLike = {
 
 describe('run-review endpoints', () => {
   it('lists runs from the alloy runs endpoint with a limit', () => {
-    expect(RUNS_LIST_PATH).toBe('/api/alloy/runs?limit=30');
+    expect(RUNS_LIST_PATH).toBe('/api/continuum/runs?limit=30');
   });
 
   it('exposes per-run detail and steps endpoints', () => {
-    expect(runDetailPath(42)).toBe('/api/alloy/runs/42');
-    expect(runStepsPath(42)).toBe('/api/alloy/runs/42/steps');
+    expect(runDetailPath(42)).toBe('/api/continuum/runs/42');
+    expect(runStepsPath(42)).toBe('/api/continuum/runs/42/steps');
   });
 });
 
@@ -94,8 +94,8 @@ describe('run-review loadRunDetail — happy path', () => {
     const detail = await loadRunDetail(baseRun, api);
 
     expect(api).toHaveBeenCalledTimes(2);
-    expect(api).toHaveBeenCalledWith('/api/alloy/runs/7');
-    expect(api).toHaveBeenCalledWith('/api/alloy/runs/7/steps');
+    expect(api).toHaveBeenCalledWith('/api/continuum/runs/7');
+    expect(api).toHaveBeenCalledWith('/api/continuum/runs/7/steps');
 
     expect(detail.errorMessage).toBe('details');
     expect(detail.steps).toEqual(steps);

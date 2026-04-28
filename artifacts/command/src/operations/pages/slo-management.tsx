@@ -159,7 +159,7 @@ const SEED: SLO[] = [
   {
     id: 's2',
     name: 'Counsel Workflow Completion Rate',
-    service: 'szl-alloy-workflow',
+    service: 'szl-continuum-workflow',
     metric: 'completion_rate',
     target: 99.5,
     current: 99.62,
@@ -207,7 +207,7 @@ const SEED: SLO[] = [
   {
     id: 's4',
     name: 'Emergency Approval Delivery',
-    service: 'szl-alloy-workflow',
+    service: 'szl-continuum-workflow',
     metric: 'approval_latency',
     target: 99.5,
     current: 99.88,
@@ -1111,21 +1111,21 @@ export default function SLOManagement() {
             className="font-mono text-[9px] px-1 py-0.5 rounded"
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >
-            alloy.workflow.start
+            continuum.workflow.start
           </code>
           ,{' '}
           <code
             className="font-mono text-[9px] px-1 py-0.5 rounded"
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >
-            alloy.workflow.step.execute
+            continuum.workflow.step.execute
           </code>
           , and{' '}
           <code
             className="font-mono text-[9px] px-1 py-0.5 rounded"
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >
-            alloy.workflow.approval.receive
+            continuum.workflow.approval.receive
           </code>{' '}
           spans including actor attribution (
           <code

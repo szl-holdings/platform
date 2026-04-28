@@ -68,7 +68,7 @@ interface CoreMetrics {
   firestorm: {
     open_vulnerabilities: number;
   };
-  alloy: {
+  continuum: {
     workflow_runs_30d: number;
     total_recommendations: number;
     recent_recommendations: Array<{
@@ -130,7 +130,7 @@ const platformLinks = [
     name: 'Counsel Creative',
     role: 'CREATE',
     subtitle: 'Creative Workflows',
-    href: '/alloy/creative',
+    href: '/continuum/creative',
     icon: Brain,
     color: '#ec4899',
   },
@@ -138,7 +138,7 @@ const platformLinks = [
     name: 'Counsel',
     role: 'EXECUTE',
     subtitle: 'Execution Fabric',
-    href: '/alloy/',
+    href: '/continuum/',
     icon: Layers,
     color: '#6366f1',
   },
@@ -319,7 +319,7 @@ function InvestorKPISection({
   const kpiValues: Record<string, number | null> = {
     distress: terra?.total_distress_properties ?? null,
     deals: terra?.total_deals ?? null,
-    recs: metrics?.alloy?.total_recommendations ?? null,
+    recs: metrics?.continuum?.total_recommendations ?? null,
   };
 
   return (
@@ -439,7 +439,7 @@ export default function CoreCommandCenter() {
   });
 
   const { data: recsData, isLoading: recsLoading } = useStandardQuery<{
-    data: CoreMetrics['alloy']['recent_recommendations'];
+    data: CoreMetrics['continuum']['recent_recommendations'];
     meta: { total: number };
   }>({
     queryKey: ['core-recs-tab'],
@@ -466,7 +466,7 @@ export default function CoreCommandCenter() {
 
   const serviceEntries = health?.services ? Object.entries(health.services) : [];
   const uptimeH = health ? Math.floor(health.uptime_seconds / 3600) : null;
-  const recentRecs = metrics?.alloy?.recent_recommendations ?? [];
+  const recentRecs = metrics?.continuum?.recent_recommendations ?? [];
   const auditEvents = (auditData?.data ?? auditData?.items ?? []) as Record<string, unknown>[];
 
   const openVulns = metrics?.firestorm?.open_vulnerabilities ?? 0;
@@ -604,7 +604,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="AI Recommendations"
-                  value={metrics?.alloy?.total_recommendations ?? '—'}
+                  value={metrics?.continuum?.total_recommendations ?? '—'}
                   sub="All-time"
                   icon={Brain}
                   color="#ec4899"
@@ -612,7 +612,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="Workflow Runs"
-                  value={metrics?.alloy?.workflow_runs_30d ?? '—'}
+                  value={metrics?.continuum?.workflow_runs_30d ?? '—'}
                   sub="Last 30 days"
                   icon={GitBranch}
                   color="#6366f1"
@@ -807,7 +807,7 @@ export default function CoreCommandCenter() {
                       },
                       {
                         label: 'Counsel — Creative Workflows',
-                        href: '/alloy/creative',
+                        href: '/continuum/creative',
                         color: '#ec4899',
                         icon: Eye,
                       },

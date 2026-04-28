@@ -46,7 +46,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 | **Authenticated platform user** | Low-Medium | Enterprise employees using web or mobile surfaces. Trust is bounded by their assigned role in the 11-role RBAC hierarchy. They must not be able to access other tenants or platform-global operator surfaces unless explicitly authorized. |
 | **Tenant admin / org admin** | Medium | Manages users, roles, and settings within their own org. Cannot access other tenants. Cannot grant `super_admin`. |
 | **Platform super_admin / ops user** | High | SZL Holdings staff with cross-tenant administrative capability. Access should be minimized and auditable. |
-| **Alloy AI execution engine** | Medium-High | Internal service calling privileged API endpoints with `ALLOY_INTERNAL_TOKEN`. Advisory-only — cannot execute consequential actions without human approval via Covenant Policy. |
+| **Continuum AI execution engine** | Medium-High | Internal service calling privileged API endpoints with `CONTINUUM_INTERNAL_TOKEN`. Advisory-only — cannot execute consequential actions without human approval via Covenant Policy. |
 | **External AI providers** | External | OpenAI, Anthropic, Gemini, HuggingFace — receive prompt data and return inference results. Operate under no-training-on-customer-data terms. |
 | **Third-party connectors** | External | OAuth-connected customer systems (maritime data feeds, Mapbox, Stripe, etc.). Credentials are stored encrypted and used through connector adapters. |
 | **Webhook source** | Untrusted | External systems posting events to inbound webhook endpoints. Every production webhook must be authenticated with a provider signature or equivalent shared secret before mutation/persistence. |
@@ -80,7 +80,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
     │   [substrate-mcp-gateway sidecar]
     │
     ├── Internal service endpoints
-    │       └── `ALLOY_INTERNAL_TOKEN` / internal token auth
+    │       └── `CONTINUUM_INTERNAL_TOKEN` / internal token auth
     │
     ├── PostgreSQL 16
     ├── Object storage
@@ -91,7 +91,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 - Most browser → API flows cross `globalAuthEnforcer`, but standalone and pre-auth-mounted surfaces require separate review (`/api/graphql/ws`, `/mcp/*`).
 - Tenant isolation depends on correct route-group use of `tenantScope` plus per-record/org ownership checks; it is not universal across all route families.
 - Object storage flows are private by default and tracked-file serving is scan-status gated; the older blanket “no virus scanning” assumption is stale.
-- Internal service flows require `ALLOY_INTERNAL_TOKEN` or a narrow loopback trust condition; any bypass that synthesizes elevated identity is a high-risk boundary.
+- Internal service flows require `CONTINUUM_INTERNAL_TOKEN` or a narrow loopback trust condition; any bypass that synthesizes elevated identity is a high-risk boundary.
 - Global third-party objects (Stripe customers/sessions, webhook destinations, RMM connector endpoints) must be explicitly bound or validated before server-side use.
 - Every **non-public** browser/mobile flow must cross server-side authentication before it reaches business logic.
 - Tenant-owned data flows must enforce `tenantScope` and/or equivalent `org_id` ownership checks at the server and query level.
@@ -107,7 +107,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 | **Tenant operational data** | Fleet positions, decision records, deal scenarios, legal matters, and AI agent outputs are confidential business data. Cross-tenant leakage is a severe trust and liability failure. |
 | **AI agent outputs and Proof Chain entries** | The Proof Chain is the platform’s governance artifact. Tampering corrupts the evidence basis for consequential business decisions. |
 | **Connector credentials** | OAuth tokens and API keys for third-party integrations are field-encrypted with `CONNECTOR_ENCRYPTION_KEY`. Leakage enables unauthorized access to connected systems. |
-| **Internal service tokens** | `ALLOY_INTERNAL_TOKEN` and similar internal secrets gate privileged service-to-service flows. Leakage can bypass normal auth. |
+| **Internal service tokens** | `CONTINUUM_INTERNAL_TOKEN` and similar internal secrets gate privileged service-to-service flows. Leakage can bypass normal auth. |
 | **Session signing key (`SESSION_SECRET`)** | Compromise allows forged session cookies. |
 | **Database connection string** | Leakage gives direct full-database access, bypassing application-level scoping. |
 | **Uploaded documents and files** | Object-stored documents are private by default; exposure is a confidentiality failure. |
@@ -143,17 +143,17 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 - `artifacts/api-server/src/middlewares/tenant-scope.ts` — tenant isolation enforcement
 
 **Highest-risk code areas:**
-- `artifacts/api-server/src/routes/alloy-governance.ts` — AI policy mutation
+- `artifacts/api-server/src/routes/continuum-governance.ts` — AI policy mutation
 - `artifacts/api-server/src/routes/admin/` — Super-admin operations, impersonation
 - `artifacts/api-server/src/graphql/` — GraphQL HTTP/WS auth boundaries and directive-backed RBAC
 - `artifacts/api-server/src/routes/mcp.ts` — Agent Gateway tool calls (per-tool RBAC)
 - `artifacts/api-server/src/routes/mcp-gateway.ts` and `services/substrate-mcp-gateway/` — MCP governance plane, sidecar auth, SSE/discovery exposure
 - `artifacts/api-server/src/routes/nexus.ts` — Shared AI control plane and loopback orchestration
-- `artifacts/api-server/src/routes/alloy-chat.ts` — Tenantless persistence and cross-tenant chat/KB access
+- `artifacts/api-server/src/routes/continuum-chat.ts` — Tenantless persistence and cross-tenant chat/KB access
 - `artifacts/api-server/src/routes/fund-inbound-deals.ts` — Internal pipeline records and attachments exposed under baseline auth
 - `artifacts/api-server/src/routes/billing.ts` — Stripe object ownership verification
 - `artifacts/api-server/src/routes/vessels.ts` — Tenant isolation enforced via `tenantScope()` + `org_id` filters (AF-003, AF-007 resolved Apr-2026, Task #1048)
-- `artifacts/api-server/src/lib/ai-engine/src/retrieval/alloy-retrieval.ts` — Retrieval engine tenant filtering
+- `artifacts/api-server/src/lib/ai-engine/src/retrieval/continuum-retrieval.ts` — Retrieval engine tenant filtering
 - `artifacts/api-server/src/routes/documents.ts` — File upload and object storage ACL
 - `artifacts/api-server/src/routes/email-webhooks.ts` — inbound email trust boundary, public mutation routes
 - `artifacts/api-server/src/routes/streaming-ingestion.ts` — public SIEM ingestion
@@ -208,7 +208,7 @@ Privileged mutations should generate auditable records including actor identity,
 
 ### Information Disclosure
 
-Multi-tenant isolation is the most critical information disclosure surface. Four intended enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and channel/stream filtering for live transports. The previously open Vessels gap (AF-003, AF-007) was closed Apr-2026 (Task #1048) — `routes/vessels.ts` now applies `tenantScope()` + `org_id` filters and migration `0076_vessels_org_id.sql` adds the column at the DB level. The backup export authority issue (AF-004) also appears fixed in `routes/backup.ts`. Current disclosure hotspots are route families that omit tenant scope or bind global platform objects to an authenticated caller without proving ownership (`alloy-chat`, billing, NEXUS, inbound deals, GraphQL subscriptions). Operational control-plane inventory and telemetry are also sensitive because they reveal internal architecture, secrets posture, and live workflows.
+Multi-tenant isolation is the most critical information disclosure surface. Four intended enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and channel/stream filtering for live transports. The previously open Vessels gap (AF-003, AF-007) was closed Apr-2026 (Task #1048) — `routes/vessels.ts` now applies `tenantScope()` + `org_id` filters and migration `0076_vessels_org_id.sql` adds the column at the DB level. The backup export authority issue (AF-004) also appears fixed in `routes/backup.ts`. Current disclosure hotspots are route families that omit tenant scope or bind global platform objects to an authenticated caller without proving ownership (`continuum-chat`, billing, NEXUS, inbound deals, GraphQL subscriptions). Operational control-plane inventory and telemetry are also sensitive because they reveal internal architecture, secrets posture, and live workflows.
 
 **Guarantees required:**
 - Every database query that returns tenant-owned data MUST include a `WHERE org_id = ?` clause. The Drizzle ORM layer MUST enforce this; raw SQL bypasses are prohibited.
@@ -255,7 +255,7 @@ RBAC is intended to protect admin, operator, and cross-tenant functions. In prac
 | AF-001 | `adminGuard` uses non-timing-safe token comparison | P1 | ✅ Resolved Apr-2026 (Task #2693) |
 | AF-003 / AF-007 | Vessels routes and DB tables lack tenant scoping | P1 | ✅ Resolved Apr-2026 (Task #1048) |
 | AF-004 | Backup export accepts arbitrary `orgId` without authority check | P2 | ✅ Resolved Apr-2026 (verified 2026-04-25) |
-| AF-008 | `conversations` / AlloyChat persistence lacks `org_id` and is exposed via `/api/alloy-chat/*` | P1 | Open — expanded Apr-2026 |
+| AF-008 | `conversations` / ContinuumChat persistence lacks `org_id` and is exposed via `/api/continuum-chat/*` | P1 | Open — expanded Apr-2026 |
 | AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | P2 | Open |
 | AF-013 | Internal token verification duplicated with divergent patterns | P2 | Open |
 | AF-014 | No ORM-layer cross-tenant query guard | P2 | Open |

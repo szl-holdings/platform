@@ -586,8 +586,8 @@ export default function AlloyAgentHandoffsPage() {
         >
           {`{
   "receipt_id":    "REC-A2A-{id}",
-  "protocol":      "alloy-a2a-v1",
-  "from_agent":    "alloy-orchestrator",
+  "protocol":      "continuum-a2a-v1",
+  "from_agent":    "continuum-orchestrator",
   "to_agent":      "{agent_id}",
   "agent_type":    "internal | remote",
   "subtask":       "{task_description}",
@@ -598,7 +598,7 @@ export default function AlloyAgentHandoffsPage() {
   "evidence":      ["{evidence_item}", ...],
   "result":        "{structured_result} | null",
   "confidence":    0.0..1.0,
-  "issued_by":     "alloy-covenant-engine",
+  "issued_by":     "continuum-covenant-engine",
   "receipt_class":  "delegation"
 }`}
         </div>

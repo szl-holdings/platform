@@ -29,7 +29,7 @@ const ALLOY_RGB = '92,155,228';
 export function AlloyBackbone() {
   return (
     <section
-      id="alloy"
+      id="continuum"
       style={{
         padding: '6rem 0',
         background: 'hsl(210,12%,5%)',
@@ -82,7 +82,7 @@ export function AlloyBackbone() {
               outputs, and decision support across the SZL ecosystem.
             </p>
             <a
-              href="/alloy"
+              href="/continuum"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

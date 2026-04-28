@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy OS — cognitive runtime and execution fabric. Run manager, checkpoint/replay hooks, model router interface, tool invocation through Tool Mesh, approval gate via Guardian, action ledger writer, for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "Continuum — Business Observability Fabric — cognitive runtime and execution fabric. Run manager, checkpoint/replay hooks, model router interface, tool invocation through Tool Mesh, approval gate via Guardian, action ledger writer, for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -32,7 +32,7 @@ const TYPE_CONFIG: Record<
     bg: 'bg-purple-500/8',
     border: 'border-purple-500/20',
   },
-  alloy: {
+  continuum: {
     label: 'Counsel / AI',
     icon: <Bot className="w-3.5 h-3.5" />,
     color: 'text-amber-400',

@@ -431,7 +431,7 @@ const AUDIT_LOG = [
     id: 'al1',
     ts: '2026-04-01T03:22:48Z',
     level: 'info',
-    actor: 'alloy-engine',
+    actor: 'continuum-engine',
     event: 'Run #101 started',
     workflow: 'Incident Triage Pipeline',
     runId: 101,
@@ -440,7 +440,7 @@ const AUDIT_LOG = [
     id: 'al2',
     ts: '2026-04-01T03:22:49Z',
     level: 'info',
-    actor: 'alloy-engine',
+    actor: 'continuum-engine',
     event: 'Step 1 completed — Alert Ingested',
     workflow: 'Incident Triage Pipeline',
     runId: 101,
@@ -449,7 +449,7 @@ const AUDIT_LOG = [
     id: 'al3',
     ts: '2026-04-01T03:22:50Z',
     level: 'info',
-    actor: 'alloy-engine',
+    actor: 'continuum-engine',
     event: 'Step 3 completed — Context Enriched',
     workflow: 'Incident Triage Pipeline',
     runId: 101,
@@ -458,7 +458,7 @@ const AUDIT_LOG = [
     id: 'al4',
     ts: '2026-04-01T03:22:51Z',
     level: 'warn',
-    actor: 'alloy-engine',
+    actor: 'continuum-engine',
     event: 'Approval gate triggered — awaiting J. Martinez',
     workflow: 'Incident Triage Pipeline',
     runId: 101,
@@ -476,7 +476,7 @@ const AUDIT_LOG = [
     id: 'al6',
     ts: '2026-04-01T02:10:04Z',
     level: 'error',
-    actor: 'alloy-engine',
+    actor: 'continuum-engine',
     event: 'Run #104 failed — API timeout at Step 4',
     workflow: 'Incident Triage Pipeline',
     runId: 104,
@@ -669,49 +669,49 @@ function WorkflowDAGView({ wf }: { wf: AlloyWorkflow }) {
 
 export default function AlloyWorkflowCanvas() {
   const [location] = useLocation();
-  const [tab, setTab] = useState<TabView>(location.includes('/alloy/runs') ? 'runs' : 'canvas');
+  const [tab, setTab] = useState<TabView>(location.includes('/continuum/runs') ? 'runs' : 'canvas');
   const [searchQ, setSearchQ] = useState('');
   const [expandedWf, setExpandedWf] = useState<number | null>(null);
   const qc = useQueryClient();
 
   const { data: dashData, isError: isDashError } = useStandardQuery<DashboardResponse>({
-    queryKey: ['alloy-dashboard'],
-    queryFn: () => apiFetch<DashboardResponse>('/alloy/dashboard'),
+    queryKey: ['continuum-dashboard'],
+    queryFn: () => apiFetch<DashboardResponse>('/continuum/dashboard'),
     refetchInterval: 20000,
     retry: 1,
   });
 
   const { data: workflowsData } = useStandardQuery<WorkflowsResponse>({
-    queryKey: ['alloy-workflows'],
-    queryFn: () => apiFetch<WorkflowsResponse>('/alloy/workflows'),
+    queryKey: ['continuum-workflows'],
+    queryFn: () => apiFetch<WorkflowsResponse>('/continuum/workflows'),
     refetchInterval: 30000,
     retry: 1,
   });
 
   const { data: runsData } = useStandardQuery<RunsResponse>({
-    queryKey: ['alloy-runs'],
-    queryFn: () => apiFetch<RunsResponse>('/alloy/runs'),
+    queryKey: ['continuum-runs'],
+    queryFn: () => apiFetch<RunsResponse>('/continuum/runs'),
     refetchInterval: 10000,
     retry: 1,
   });
 
   const triggerMutation = useStandardMutation({
     mutationFn: (workflowId: number) =>
-      apiFetch(`/alloy/workflows/${workflowId}/run`, { method: 'POST', body: JSON.stringify({}) }),
+      apiFetch(`/continuum/workflows/${workflowId}/run`, { method: 'POST', body: JSON.stringify({}) }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['alloy-runs'] });
-      qc.invalidateQueries({ queryKey: ['alloy-dashboard'] });
+      qc.invalidateQueries({ queryKey: ['continuum-runs'] });
+      qc.invalidateQueries({ queryKey: ['continuum-dashboard'] });
     },
   });
 
   const retryMutation = useStandardMutation({
-    mutationFn: (runId: number) => apiFetch(`/alloy/runs/${runId}/retry`, { method: 'POST' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['alloy-runs'] }),
+    mutationFn: (runId: number) => apiFetch(`/continuum/runs/${runId}/retry`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['continuum-runs'] }),
   });
 
   const cancelMutation = useStandardMutation({
-    mutationFn: (runId: number) => apiFetch(`/alloy/runs/${runId}/cancel`, { method: 'POST' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['alloy-runs'] }),
+    mutationFn: (runId: number) => apiFetch(`/continuum/runs/${runId}/cancel`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['continuum-runs'] }),
   });
 
   const dash = dashData?.data;

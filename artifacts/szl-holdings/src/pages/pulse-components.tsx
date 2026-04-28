@@ -98,7 +98,7 @@ export const PLATFORM_APPS = [
     desc: 'Cross-domain fusion canvas',
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     name: 'Counsel',
     icon: Cpu,
     color: '#64748b',
@@ -189,7 +189,7 @@ export const AGENT_TYPES = [
   { id: 'msp-autonomous', domain: 'msp', name: 'MSP Watchdog', color: '#64748b' },
   { id: 'lexis-autonomous', domain: 'legal', name: 'Lexis Legal', color: '#a855f7' },
   { id: 'atlas-autonomous', domain: 'financial', name: 'Atlas Finance', color: '#d4a054' },
-  { id: 'helmsman-autonomous', domain: 'alloy', name: 'Helmsman', color: '#94a3b8' },
+  { id: 'helmsman-autonomous', domain: 'continuum', name: 'Helmsman', color: '#94a3b8' },
   { id: 'compass-autonomous', domain: 'advisory', name: 'Compass CJ', color: '#c4a265' },
   { id: 'muse-autonomous', domain: 'creative', name: 'Muse Creative', color: '#f472b6' },
 ];

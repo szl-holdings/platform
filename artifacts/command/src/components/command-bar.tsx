@@ -311,7 +311,7 @@ const QUICK_NAV: QuickNavItem[] = [
     color: '#38bdf8',
   },
   {
-    href: '/operations/alloy/governance',
+    href: '/operations/continuum/governance',
     label: 'Governance',
     section: 'Governance',
     icon: Shield,
@@ -360,14 +360,14 @@ const QUICK_NAV: QuickNavItem[] = [
     color: '#8b7ac8',
   },
   {
-    href: '/operations/alloy/canvas',
+    href: '/operations/continuum/canvas',
     label: 'Workflow Canvas',
     section: 'Autonomous',
     icon: Workflow,
     color: '#4a90b8',
   },
   {
-    href: '/operations/alloy/agents',
+    href: '/operations/continuum/agents',
     label: 'Agent Monitor',
     section: 'Autonomous',
     icon: Brain,

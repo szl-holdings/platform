@@ -821,7 +821,7 @@ export default function MemoryExplorer() {
                 >
                   <span style={{ color: '#475569' }}>Trace ID</span>
                   <a
-                    href={`/operations/alloy/traces?traceId=${selected.traceId}`}
+                    href={`/operations/continuum/traces?traceId=${selected.traceId}`}
                     style={{
                       color: ACCENT,
                       fontFamily: 'monospace',

@@ -4,7 +4,7 @@
  * Scenario: Meridian Capital Group — CFO discovers a revenue stall in Q2
  * pipeline that conventional reporting missed. Lyte surfaces the signal,
  * PRISM assembles context, AI recommends intervention, CFO approves escalation,
- * Alloy routes to the right owner, outcome is captured with proof chain.
+ * Continuum routes to the right owner, outcome is captured with proof chain.
  *
  * Signal → Context → Recommendation → Approval → Execution → Outcome → Executive Summary
  */

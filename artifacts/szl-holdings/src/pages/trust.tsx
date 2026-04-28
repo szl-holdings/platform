@@ -134,9 +134,9 @@ const TRUST_PAGES = [
   {
     href: "/trust/governance",
     icon: Brain,
-    color: "var(--color-alloy-light)",
-    colorMuted: "var(--color-alloy-muted)",
-    colorBorder: "var(--color-alloy-border)",
+    color: "var(--color-continuum-light)",
+    colorMuted: "var(--color-continuum-muted)",
+    colorBorder: "var(--color-continuum-border)",
     label: "Governance",
     headline: "Approval model, human-in-the-loop gates & decision lineage",
     items: ["AI never acts without human sign-off", "Configurable HITL approval gates", "Complete decision lineage exportable", "Override records — not hidden"],
@@ -833,10 +833,10 @@ export default function TrustPage() {
                   },
                   {
                     name: "Counsel Approval Gate",
-                    slug: "alloy-approval",
+                    slug: "continuum-approval",
                     description: "Human-in-the-loop enforcement at the execution fabric level. Consequential actions cannot bypass approval — enforced in code, not UI convention.",
                     tags: ["hitl", "approvals", "enforcement"],
-                    href: "https://github.com/szl-holdings/alloy-approval",
+                    href: "https://github.com/szl-holdings/continuum-approval",
                   },
                 ].map((lib, i) => (
                   <m.div

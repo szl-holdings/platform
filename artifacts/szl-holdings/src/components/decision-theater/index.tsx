@@ -93,12 +93,12 @@ function LiveGenericStage({ stageId, metrics }: { stageId: StageId; metrics: Liv
   const metricItems = [
     {
       label: 'AI Recommendations',
-      value: metrics.alloy.total_recommendations.toLocaleString(),
+      value: metrics.continuum.total_recommendations.toLocaleString(),
       color: '#ec4899',
     },
     {
       label: 'Workflow Runs (30d)',
-      value: metrics.alloy.workflow_runs_30d.toLocaleString(),
+      value: metrics.continuum.workflow_runs_30d.toLocaleString(),
       color: '#8b5cf6',
     },
     {

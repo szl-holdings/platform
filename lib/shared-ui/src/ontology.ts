@@ -43,7 +43,7 @@ export interface SZLSignal {
   confidence: ConfidenceLevel;
   freshness: FreshnessWindow;
   timestamp: string;
-  platform: 'lyte' | 'aegis' | 'terra' | 'vessels' | 'alloy';
+  platform: 'lyte' | 'aegis' | 'terra' | 'vessels' | 'continuum';
   owner?: string;
   businessImpact?: BusinessImpact;
   relatedEntityId?: string;

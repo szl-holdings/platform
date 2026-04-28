@@ -58,7 +58,7 @@ function inferDomainFromTrace(trace: TraceRecord): string {
     return 'maritime';
   if (agentId.includes('research') || agentId.includes('inca')) return 'research';
   if (agentId.includes('terra') || agentId.includes('real-estate')) return 'real-estate';
-  if (agentId.includes('alloy') || agentId.includes('orchestrat')) return 'orchestration';
+  if (agentId.includes('continuum') || agentId.includes('orchestrat')) return 'orchestration';
   return 'general';
 }
 
@@ -76,7 +76,7 @@ function inferCategory(trace: TraceRecord): CandidateSkill['category'] {
     return 'validation';
   if (tools.includes('monitor') || tools.includes('alert') || tools.includes('watch'))
     return 'monitoring';
-  if (agentId.includes('orchestrat') || agentId.includes('alloy')) return 'orchestration';
+  if (agentId.includes('orchestrat') || agentId.includes('continuum')) return 'orchestration';
   return 'synthesis';
 }
 

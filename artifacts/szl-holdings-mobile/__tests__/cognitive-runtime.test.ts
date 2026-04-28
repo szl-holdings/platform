@@ -299,10 +299,10 @@ describe('approval API endpoint contracts', () => {
 
   it('run detail endpoint uses correct path', () => {
     const runId = 7;
-    const detailPath = `/api/alloy/runs/${runId}`;
-    const stepsPath = `/api/alloy/runs/${runId}/steps`;
-    expect(detailPath).toBe('/api/alloy/runs/7');
-    expect(stepsPath).toBe('/api/alloy/runs/7/steps');
+    const detailPath = `/api/continuum/runs/${runId}`;
+    const stepsPath = `/api/continuum/runs/${runId}/steps`;
+    expect(detailPath).toBe('/api/continuum/runs/7');
+    expect(stepsPath).toBe('/api/continuum/runs/7/steps');
   });
 
   it('briefings endpoint uses correct paths', () => {
@@ -319,7 +319,7 @@ describe('approval API endpoint contracts', () => {
       priority: 'critical',
       payload: {
         templateId: 'suspend-agent',
-        domain: 'alloy',
+        domain: 'continuum',
         requiresBiometric: true,
         rollbackPoint: new Date().toISOString(),
         initiatedFrom: 'mobile:secure-quick-actions',

@@ -115,7 +115,7 @@ export function mapPipelineSummaryToRun(
   const meta = summary.metadata as Record<string, unknown>;
 
   const vertical: Vertical =
-    base?.vertical ?? (typeof meta?.vertical === 'string' ? (meta.vertical as Vertical) : 'alloy');
+    base?.vertical ?? (typeof meta?.vertical === 'string' ? (meta.vertical as Vertical) : 'continuum');
 
   return {
     id: summary.runId,
@@ -370,7 +370,7 @@ export function usePendingApprovals(): {
               id: entry.id,
               runId: entry.recommendationId,
               workflow: entry.domain,
-              vertical: 'alloy' as const,
+              vertical: 'continuum' as const,
               tenant: entry.surface,
               riskLevel: 'medium' as const,
               policyId: entry.proofRef,

@@ -82,11 +82,11 @@ const DOMAIN_LINKS = [
     icon: Navigation,
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     label: 'Counsel',
     description: 'Intelligence Engine',
     color: '#60a5fa',
-    href: '/alloy/',
+    href: '/continuum/',
     icon: GitBranch,
   },
 ];
@@ -95,7 +95,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   lyte: 'text-amber-400',
   vessels: 'text-sky-400',
   terra: 'text-orange-400',
-  alloy: 'text-cyan-400',
+  continuum: 'text-cyan-400',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -392,7 +392,7 @@ export default function UnifiedCommandDashboard() {
             <GitBranch className="w-4 h-4 text-cyan-400" />
             <span className="text-sm font-semibold text-white">Recent Workflow Runs</span>
             <a
-              href="/alloy"
+              href="/continuum"
               className="ml-auto text-[10px] text-cyan-400 flex items-center gap-1 hover:opacity-80"
             >
               View All <ExternalLink className="w-2.5 h-2.5" />
@@ -440,7 +440,7 @@ export default function UnifiedCommandDashboard() {
                 { label: 'View Lyte Action Queue', href: '/command/operations/action-queue' },
                 { label: 'Vessels Exceptions', href: '/vessels/exceptions' },
                 { label: 'Terra Listings', href: '/terra/listings' },
-                { label: 'Counsel Workflows', href: '/alloy/' },
+                { label: 'Counsel Workflows', href: '/continuum/' },
               ].map(({ label, href }) => (
                 <a
                   key={href}

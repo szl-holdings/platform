@@ -29,7 +29,7 @@ const platformRegistry = [
   },
   {
     name: 'Counsel',
-    slug: 'alloy',
+    slug: 'continuum',
     type: 'Intelligence Engine',
     tier: 'Flagship',
     status: 'operational',

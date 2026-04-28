@@ -1,5 +1,5 @@
 /**
- * Alloy Meridian Intelligence — Cognitive Observability OS
+ * Continuum Meridian Intelligence — Cognitive Observability OS
  *
  * Surfaces: Decision Weather, Forecast Tournament, Signal Debt,
  * Business Flight Recorder, MCP activation status, Agent Constellation
@@ -1040,7 +1040,7 @@ export default function MeridianIntelligence() {
           <Brain size={20} color="#fff" />
         </div>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>Alloy Meridian</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>Continuum Meridian</h1>
           <p style={{ fontSize: 11, color: DS.text.muted, margin: 0 }}>Cognitive Observability OS · Governed Intelligence Layer</p>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>

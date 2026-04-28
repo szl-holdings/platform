@@ -94,7 +94,7 @@ The platform hierarchy must be stated consistently. These are the canonical desc
 |---|---|
 | **SZL Holdings** | Governed decision infrastructure — the shared platform layer |
 | **Lyte** | The operator command surface — where signals become decisions, under governance |
-| **Alloy** | The execution fabric — workflow orchestration, approval gates, and audit trail |
+| **Continuum** | The execution fabric — workflow orchestration, approval gates, and audit trail |
 | **CORTEX** | Unified mobile command — all domain workspaces in one app |
 | **Aegis** | Security and defense intelligence on governed infrastructure |
 | **Vessels** | Maritime intelligence on governed infrastructure |

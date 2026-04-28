@@ -42,7 +42,7 @@ Cross-domain synthesis. What the CEO sees at the start of every day — pre-gove
 | Signal Feed | `/operations/prism/signals` | Live triage |
 | Approvals Center | `/operations/approvals` | Human-in-the-loop |
 | Proof Chain Audit | `/operations/trust-audit` | Compliance evidence |
-| Action Queue | `/operations/alloy/actions` | Execution detail |
-| Policy Engine | `/operations/alloy/governance` | Covenant rules |
+| Action Queue | `/operations/continuum/actions` | Execution detail |
+| Policy Engine | `/operations/continuum/governance` | Covenant rules |
 
 > Operators know exactly what they're approving and why. Every decision is traceable. Every action is reversible.

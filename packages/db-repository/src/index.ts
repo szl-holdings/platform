@@ -7,10 +7,10 @@
  *
  * Usage:
  *   import { authRepository } from "@szl-holdings/db-repository/auth";
- *   import { alloyRepository } from "@szl-holdings/db-repository/alloy";
+ *   import { continuumRepository } from "@szl-holdings/db-repository/continuum";
  */
 
-export { AlloyRepository, alloyRepository } from './alloy';
+export { AlloyRepository, alloyRepository } from './continuum';
 export { type AuditEntry, AuditRepository, auditRepository } from './audit';
 export { AuthRepository, authRepository } from './auth';
 export {

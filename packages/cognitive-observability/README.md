@@ -4,7 +4,7 @@ Cognitive Observability is the **telemetry, quality, cost, drift, and value metr
 
 ## Contract
 
-Cognitive Observability exports every metric listed in the platform spec with an OpenTelemetry-compatible exporter. Alloy, Tool Mesh, and Trace Graph wire into this layer to emit the full metric set.
+Cognitive Observability exports every metric listed in the platform spec with an OpenTelemetry-compatible exporter. Continuum, Tool Mesh, and Trace Graph wire into this layer to emit the full metric set.
 
 ### Metric Definitions
 

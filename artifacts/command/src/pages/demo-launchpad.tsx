@@ -83,13 +83,13 @@ const ALL_STOPS: DemoStop[] = [
     tag: 'SIGNATURE',
   },
   {
-    id: 'alloy-policy-compiler',
+    id: 'continuum-policy-compiler',
     label: 'Policy Compiler',
     domain: 'Counsel',
     domainColor: '#d4a054',
     description:
       'Plain-English → validated, versioned, rollback-able policy objects with workflow coverage.',
-    href: `${BASE}/operations/alloy/policy-compiler`,
+    href: `${BASE}/operations/continuum/policy-compiler`,
     time: 5,
     capability: 'Policy Governance',
     tag: 'SIGNATURE',
@@ -157,12 +157,12 @@ const ALL_STOPS: DemoStop[] = [
     tag: 'SIGNATURE',
   },
   {
-    id: 'alloy-audit',
+    id: 'continuum-audit',
     label: 'Counsel Audit Trail',
     domain: 'Counsel',
     domainColor: '#d4a054',
     description: 'Every decision, every agent action, every approval — immutable proof chain.',
-    href: `${BASE}/operations/alloy/receipts`,
+    href: `${BASE}/operations/continuum/receipts`,
     time: 3,
     capability: 'Audit & Compliance',
   },
@@ -208,7 +208,7 @@ const PERSONA_CONFIGS: Record<
     focusIds: [
       'command-overview',
       'lyte-decision-twin',
-      'alloy-policy-compiler',
+      'continuum-policy-compiler',
       'terra-why-now',
       'aegis-adversary',
       'vessels-voyage-risk',
@@ -226,7 +226,7 @@ const PERSONA_CONFIGS: Record<
       'lyte-decision-twin',
       'terra-why-now',
       'carlota-concierge',
-      'alloy-audit',
+      'continuum-audit',
     ],
   },
   coo: {
@@ -237,9 +237,9 @@ const PERSONA_CONFIGS: Record<
     focusIds: [
       'lyte-signals',
       'lyte-decision-twin',
-      'alloy-policy-compiler',
+      'continuum-policy-compiler',
       'prism-dashboard',
-      'alloy-audit',
+      'continuum-audit',
       'command-evidence',
     ],
   },
@@ -250,9 +250,9 @@ const PERSONA_CONFIGS: Record<
     description: 'Threat intelligence, incident response, compliance, audit.',
     focusIds: [
       'aegis-adversary',
-      'alloy-audit',
+      'continuum-audit',
       'command-evidence',
-      'alloy-policy-compiler',
+      'continuum-policy-compiler',
       'prism-dashboard',
     ],
   },
@@ -276,7 +276,7 @@ const DEMO_PATHS: Record<DemoLength, { label: string; description: string; stopI
   10: {
     label: '10-Minute',
     description: 'The investor hook. Platform story + two signature innovations.',
-    stopIds: ['command-overview', 'lyte-decision-twin', 'alloy-policy-compiler'],
+    stopIds: ['command-overview', 'lyte-decision-twin', 'continuum-policy-compiler'],
   },
   20: {
     label: '20-Minute',
@@ -285,9 +285,9 @@ const DEMO_PATHS: Record<DemoLength, { label: string; description: string; stopI
       'command-overview',
       'lyte-signals',
       'lyte-decision-twin',
-      'alloy-policy-compiler',
+      'continuum-policy-compiler',
       'terra-why-now',
-      'alloy-audit',
+      'continuum-audit',
     ],
   },
   45: {
@@ -298,14 +298,14 @@ const DEMO_PATHS: Record<DemoLength, { label: string; description: string; stopI
       'command-overview',
       'lyte-signals',
       'lyte-decision-twin',
-      'alloy-policy-compiler',
+      'continuum-policy-compiler',
       'terra-why-now',
       'terra-map',
       'aegis-adversary',
       'vessels-voyage-risk',
       'carlota-concierge',
       'command-evidence',
-      'alloy-audit',
+      'continuum-audit',
     ],
   },
 };
@@ -955,7 +955,7 @@ export function DemoLaunchpad() {
                 {
                   label: 'Counsel — Policy Compiler',
                   color: '#4ade80',
-                  href: `${BASE}/operations/alloy/policy-compiler`,
+                  href: `${BASE}/operations/continuum/policy-compiler`,
                   status: 'LIVE',
                 },
                 {
@@ -1045,7 +1045,7 @@ export function DemoLaunchpad() {
                   label: 'Policy Compiler',
                   domain: 'Counsel',
                   color: ACCENT,
-                  href: `${BASE}/operations/alloy/policy-compiler`,
+                  href: `${BASE}/operations/continuum/policy-compiler`,
                 },
                 {
                   label: 'Why This Property Now',

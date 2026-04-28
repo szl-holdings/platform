@@ -34,8 +34,8 @@ const HELP_CATEGORIES = [
     description: "Workflow orchestration, connector setup, approval gates, and execution history.",
     links: [
       { label: "Workflow docs", href: "/docs/control-plane" },
-      { label: "Connector mesh", href: "/alloy/connectors" },
-      { label: "Governance audit", href: "/alloy/governance" },
+      { label: "Connector mesh", href: "/continuum/connectors" },
+      { label: "Governance audit", href: "/continuum/governance" },
     ],
     color: "hsl(258,55%,68%)",
   },

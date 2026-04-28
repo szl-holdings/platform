@@ -172,7 +172,7 @@ const DEMO_ACTIONS: DemoAction[] = [
       {
         id: 'ah1a',
         action: 'Signal surfaced',
-        actor: 'alloy-signal-engine',
+        actor: 'continuum-signal-engine',
         actorType: 'agent',
         timestamp: new Date(Date.now() - 48 * 3600000).toISOString(),
       },

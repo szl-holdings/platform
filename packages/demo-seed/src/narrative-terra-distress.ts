@@ -5,7 +5,7 @@
  * an active lis pendens AND a recently filed tax lien. Terra detects the
  * compounded distress, assembles a property twin (title, tax, ownership,
  * comps, climate, zoning, ARV), runs an underwriting recommendation,
- * routes diligence approval through Alloy, and produces a full proof chain.
+ * routes diligence approval through Continuum, and produces a full proof chain.
  *
  * Signal → Context → Recommendation → Approval → Diligence → Outcome → Executive Summary
  */
@@ -266,7 +266,7 @@ export const TERRA_DISTRESS_NARRATIVE = {
       step: 'Partner Approval',
       duration: '2 min',
       narrative:
-        "Marcus reviews, approves, and adds notes about pulling a fresh title abstract and flagging the LLC's other properties. Approval routed through Alloy.",
+        "Marcus reviews, approves, and adds notes about pulling a fresh title abstract and flagging the LLC's other properties. Approval routed through Continuum.",
       showIn: ['terra/approval-review', 'terra/diligence-prep'],
     },
     {

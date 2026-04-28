@@ -40,9 +40,9 @@ const ELEMENTS = [
     label: "Machine Intelligence",
     tagline: "Signal at scale",
     body: "Enterprise environments produce more signal than any human team can process manually. Machine intelligence — pattern recognition, correlation, anomaly detection, probabilistic modeling — handles the scale problem. The machine doesn't decide. It surfaces, ranks, and prepares the decision for the human who does.",
-    color: "var(--color-alloy-light)",
-    muted: "var(--color-alloy-muted)",
-    border: "var(--color-alloy-border)",
+    color: "var(--color-continuum-light)",
+    muted: "var(--color-continuum-muted)",
+    border: "var(--color-continuum-border)",
   },
   {
     icon: Shield,
@@ -91,7 +91,7 @@ const PRIMITIVES = [
     icon: GitBranch,
     name: "Monte Carlo Engine",
     a11oy: "Machine Intelligence given honest uncertainty. Not a confident answer — a probability distribution. Operators see the range of consequences before they decide.",
-    color: "var(--color-alloy-light)",
+    color: "var(--color-continuum-light)",
   },
   {
     number: "05",
@@ -565,7 +565,7 @@ export default function A11oyPhilosophyPage() {
             </div>
           </section>
 
-          {/* ── The Alloy Metaphor ── */}
+          {/* ── The Continuum Metaphor ── */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div
@@ -580,7 +580,7 @@ export default function A11oyPhilosophyPage() {
                   letterSpacing: "0.12em", textTransform: "uppercase",
                   color: "var(--color-szl-accent)", marginBottom: "1rem",
                 }}>
-                  The Alloy Metaphor
+                  The Continuum Metaphor
                 </p>
                 <h2 style={{
                   fontSize: "clamp(1.5rem,3.5vw,2.5rem)", fontWeight: 600,
@@ -593,7 +593,7 @@ export default function A11oyPhilosophyPage() {
                   fontSize: "0.9375rem", lineHeight: 1.75,
                   color: "hsl(214,7%,60%)", maxWidth: "58ch",
                 }}>
-                  Metallurgists discovered centuries ago that combining elements creates properties that neither possesses alone. Steel — iron and carbon — doesn't just add hardness. It creates a new material category. The same principle applies to enterprise AI systems. Human judgment and machine intelligence are not opponents. Structural governance and operational autonomy are not contradictions. They are elements. Combined correctly, under pressure, with precision — they form an alloy that no single element can replicate.
+                  Metallurgists discovered centuries ago that combining elements creates properties that neither possesses alone. Steel — iron and carbon — doesn't just add hardness. It creates a new material category. The same principle applies to enterprise AI systems. Human judgment and machine intelligence are not opponents. Structural governance and operational autonomy are not contradictions. They are elements. Combined correctly, under pressure, with precision — they form an continuum that no single element can replicate.
                 </p>
               </m.div>
 
@@ -1115,7 +1115,7 @@ export default function A11oyPhilosophyPage() {
                     subtitle="Market Positioning & Landscape"
                     pages="5 pages"
                     description="A detailed competitive landscape analysis: how A11OY/Counsel stacks up against Palantir AIP/Foundry, ServiceNow, C3.ai, UiPath/Automation Anywhere, Microsoft Copilot Studio, and LangChain/CrewAI. Includes the capability matrix, competitor assessments, and the six structural advantages that no competitor in any category currently combines."
-                    accentColor="var(--color-alloy-light)"
+                    accentColor="var(--color-continuum-light)"
                     onDownload={handleDownloadBrief}
                     downloading={downloadingBrief}
                     pdfBlobUrl={briefBlobUrl}
@@ -1152,7 +1152,7 @@ export default function A11oyPhilosophyPage() {
                   </p>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-                  <Link href="/alloy-fabric" className="szl-btn-primary">
+                  <Link href="/continuum-fabric" className="szl-btn-primary">
                     Explore Counsel <ArrowRight size={15} />
                   </Link>
                   <Link href="/platform" className="szl-btn-secondary">

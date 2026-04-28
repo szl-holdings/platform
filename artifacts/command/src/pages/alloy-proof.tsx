@@ -410,7 +410,7 @@ export function AlloyProofPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(apiUrl('/alloy/recommend'), {
+      const res = await fetch(apiUrl('/continuum/recommend'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -452,7 +452,7 @@ export function AlloyProofPage() {
                 textTransform: 'uppercase',
               }}
             >
-              @szl/alloy · Proof Envelope
+              @szl/continuum · Proof Envelope
             </span>
           </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: '#f8fafc', letterSpacing: -0.5 }}>

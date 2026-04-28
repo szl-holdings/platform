@@ -28,13 +28,13 @@ const SKIP_PATH_PREFIXES = [
 ];
 
 const PATH_TO_CATEGORY: Array<{ prefix: string; category: string }> = [
-  { prefix: '/alloy', category: 'alloy' },
+  { prefix: '/alloy', category: 'continuum' },
   { prefix: '/governance', category: 'governance' },
   { prefix: '/memory', category: 'memory' },
-  { prefix: '/workflow-runs', category: 'alloy' },
-  { prefix: '/workflows', category: 'alloy' },
+  { prefix: '/workflow-runs', category: 'continuum' },
+  { prefix: '/workflows', category: 'continuum' },
   { prefix: '/agents', category: 'agents' },
-  { prefix: '/actions', category: 'alloy' },
+  { prefix: '/actions', category: 'continuum' },
   { prefix: '/ai', category: 'ai' },
   { prefix: '/decisions', category: 'decisions' },
   { prefix: '/self-model', category: 'self-model' },
@@ -44,7 +44,7 @@ const PATH_TO_CATEGORY: Array<{ prefix: string; category: string }> = [
   { prefix: '/reflections', category: 'reflections' },
   { prefix: '/nexus', category: 'nexus' },
   { prefix: '/signals', category: 'signals' },
-  { prefix: '/recommendations', category: 'alloy' },
+  { prefix: '/recommendations', category: 'continuum' },
   { prefix: '/models', category: 'ai' },
   { prefix: '/prompts', category: 'ai' },
 ];

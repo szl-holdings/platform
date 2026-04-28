@@ -43,7 +43,7 @@ const EXPORT_FLOW = [
   { step: "02", label: "Sources verified", desc: "Every source document referenced in the export is version-locked and verified as accessible to the requesting tenant.", color: "hsl(258,55%,68%)" },
   { step: "03", label: "Privilege screened", desc: "Content is scanned for privilege flags, confidential markings, and attorney work product. Blocked if flagged pending clearance.", color: "hsl(40,90%,54%)" },
   { step: "04", label: "Claims reviewed", desc: "AI-generated content within the export is surfaced in the Review Before Send surface with supporting sources and confidence scores.", color: "hsl(25,90%,55%)" },
-  { step: "05", label: "Human approved", desc: "Named reviewer signs off on the export package. Rationale is recorded. The approver's identity is included in the proof chain.", color: "var(--color-alloy-light)" },
+  { step: "05", label: "Human approved", desc: "Named reviewer signs off on the export package. Rationale is recorded. The approver's identity is included in the proof chain.", color: "var(--color-continuum-light)" },
   { step: "06", label: "Export + audit", desc: "Document is generated, proof chain attached, and export event permanently recorded. Post-export access tracking begins.", color: "hsl(145,62%,46%)" },
 ];
 

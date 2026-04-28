@@ -20,7 +20,7 @@ const NOW = [
   },
   {
     area: "Counsel maturity",
-    color: "var(--color-alloy-light)",
+    color: "var(--color-continuum-light)",
     items: [
       { label: "Counsel execution fabric operational across all verticals", done: true },
       { label: "Connector mesh — task, notification, API, document connectors live", done: true },

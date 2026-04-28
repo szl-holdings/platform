@@ -61,7 +61,7 @@ export const DOMAIN_COLORS: Record<string, string> = {
   terra: 'text-green-400',
   lyte: 'text-amber-400',
   prism: 'text-violet-400',
-  alloy: 'text-fuchsia-400',
+  continuum: 'text-fuchsia-400',
   orchestration: 'text-cyan-400',
   pipeline: 'text-orange-400',
 };

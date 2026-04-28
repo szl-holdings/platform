@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-policy-guard",
+  "name": "@workspace/cf-policy-guard",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — policy rule evaluation, tenant boundary enforcement, retention controls, and redaction hook registry. Returns structured PolicyDecision objects; no silent fallbacks.",
+  "description": "Continuum Fabric Fabric — policy rule evaluation, tenant boundary enforcement, retention controls, and redaction hook registry. Returns structured PolicyDecision objects; no silent fallbacks.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -31,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

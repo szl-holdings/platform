@@ -1272,7 +1272,7 @@ export const runItems: RunItem[] = [
 export interface EvidenceItem {
   id: string;
   label: string;
-  type: 'system' | 'human' | 'alloy' | 'signal' | 'document' | 'audit_log' | 'external';
+  type: 'system' | 'human' | 'continuum' | 'signal' | 'document' | 'audit_log' | 'external';
   source: string;
   sourceId?: string;
   value: string;
@@ -1364,7 +1364,7 @@ export const evidenceItems: EvidenceItem[] = [
   {
     id: 'ev-005',
     label: 'Historical pattern — 78% close rate with CFO sponsorship',
-    type: 'alloy',
+    type: 'continuum',
     source: 'Lyte Evidence Graph (pattern match)',
     value: '78% close rate with CFO-direct sponsorship at comparable stage',
     detail:
@@ -1857,7 +1857,7 @@ export interface ReplayEvent {
   action: string;
   signal?: string;
   detail: string;
-  evidenceType: 'system' | 'human' | 'alloy' | 'escalation';
+  evidenceType: 'system' | 'human' | 'continuum' | 'escalation';
   proofRef: string;
 }
 
@@ -2130,7 +2130,7 @@ export const replayScenarios: ReplayScenario[] = [
         action: 'Recommendation generated',
         detail:
           'rec-001 generated: Emergency CFO escalation. Confidence: 87%. Submitted to approval queue.',
-        evidenceType: 'alloy',
+        evidenceType: 'continuum',
         proofRef: 'LYTE-REC-001',
       },
       {
@@ -2141,7 +2141,7 @@ export const replayScenarios: ReplayScenario[] = [
         action: 'Simulation run',
         detail:
           '3 scenarios modeled. CFO escalation: 74% close, 3d recovery. Partial: 51%. No action: 12%.',
-        evidenceType: 'alloy',
+        evidenceType: 'continuum',
         proofRef: 'LYTE-RUN-007',
       },
       {
@@ -2174,7 +2174,7 @@ export const replayScenarios: ReplayScenario[] = [
         action: 'Approval chain updated',
         detail:
           'Step 1 voided. Sarah Kim designated new approval owner. Chain unblocked. Steps 2–4 can now proceed.',
-        evidenceType: 'alloy',
+        evidenceType: 'continuum',
         proofRef: 'LYTE-WF-001',
       },
       {
@@ -2185,7 +2185,7 @@ export const replayScenarios: ReplayScenario[] = [
         action: 'Downstream actions executed',
         detail:
           '4 actions completed: ownership reassigned, buyer email queued, CFO calendar block created, monitoring reactivated.',
-        evidenceType: 'alloy',
+        evidenceType: 'continuum',
         proofRef: 'LYTE-WF-002',
       },
       {

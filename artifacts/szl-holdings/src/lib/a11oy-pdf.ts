@@ -168,10 +168,10 @@ function buildPhilosophyDoc(): jsPDF {
 
   drawFooterBar(doc);
 
-  // ─── Page 2: The Alloy Thesis ─────────────────────────────────────────────
+  // ─── Page 2: The Continuum Thesis ─────────────────────────────────────────────
   doc.addPage();
   drawPageBackground(doc);
-  drawHeaderBar(doc, 2, totalPages, "The Alloy Thesis");
+  drawHeaderBar(doc, 2, totalPages, "The Continuum Thesis");
 
   let y = 28;
 
@@ -190,7 +190,7 @@ function buildPhilosophyDoc(): jsPDF {
 
   const thesisParas = [
     "Metallurgists discovered centuries ago that combining elements creates properties that neither possesses alone. Steel — iron and carbon — doesn't just add hardness. It creates a new material category with properties emergent from the fusion, not additive from the parts.",
-    "The same principle applies to enterprise AI. Human judgment and machine intelligence are not opponents competing for the same role. Structural governance and operational autonomy are not contradictions that must be traded off. They are elements. Combined correctly, under architectural pressure, with precision — they form an alloy that no single element can replicate.",
+    "The same principle applies to enterprise AI. Human judgment and machine intelligence are not opponents competing for the same role. Structural governance and operational autonomy are not contradictions that must be traded off. They are elements. Combined correctly, under architectural pressure, with precision — they form an continuum that no single element can replicate.",
     "A11OY names this fusion. Counsel is its product implementation. Every primitive in the platform — Proof Chain, Covenant Policy, Outcome Graph, Monte Carlo Engine, Event Fabric, Domain-Pack Architecture — is one element of A11OY made executable.",
   ];
 

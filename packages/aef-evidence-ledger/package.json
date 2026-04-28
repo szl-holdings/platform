@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-evidence-ledger",
+  "name": "@workspace/cf-evidence-ledger",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — append-only evidence ledger recording request, chunk, source, scoring, and policy provenance for every retrieval operation. Ships an in-memory adapter and a JSONL filesystem adapter for development.",
+  "description": "Continuum Fabric Fabric — append-only evidence ledger recording request, chunk, source, scoring, and policy provenance for every retrieval operation. Ships an in-memory adapter and a JSONL filesystem adapter for development.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -27,7 +27,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

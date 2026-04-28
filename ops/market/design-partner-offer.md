@@ -45,7 +45,7 @@ This is honest about stage. Design partners know they are early. That is the poi
 ## What Partners Receive
 
 ### Platform Access
-- Full access to the relevant domain pack and all underlying primitives (Lyte, Alloy, Proof Chain, etc.)
+- Full access to the relevant domain pack and all underlying primitives (Lyte, Continuum, Proof Chain, etc.)
 - CORTEX mobile access for key users (iOS or Android)
 - Designated sandbox workspace isolated from other partners
 - Role-based access for up to 10 users (larger teams by agreement)

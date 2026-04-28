@@ -10,7 +10,7 @@
  */
 
 export * from './ai';
-export * from './alloy';
+export * from './continuum';
 export * from './entities';
 export * from './firestorm';
 export * from './terra';

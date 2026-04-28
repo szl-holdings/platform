@@ -57,7 +57,7 @@ const result = engine.decide({
 ## Non-goals
 
 - Guardian does not persist rules to a database (use a persistence adapter in app code).
-- Guardian does not execute approvals — it signals that approval is required. The approval workflow is in Alloy.
+- Guardian does not execute approvals — it signals that approval is required. The approval workflow is in Continuum.
 - Guardian does not replace domain-level authorization (row-level security, RBAC).
 
 ## Absorption

@@ -27,7 +27,7 @@ The brand registry is an enforced gate, not a style guide. CI runs `scripts/lint
 - **Vessels** — not "Fleet Intelligence" or "AIS Platform"
 - **Terra** — not "Property Intelligence Platform"
 - **CORTEX** — the mobile app brand name; not "SZL Mobile"
-- **Alloy** — the execution fabric; not "workflow engine" in user-facing copy
+- **Continuum** — the execution fabric; not "workflow engine" in user-facing copy
 - **Carlota Jo** — always two words, always with "Jo"
 
 ## Rules for This Package

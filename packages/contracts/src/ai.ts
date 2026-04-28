@@ -9,7 +9,7 @@ export const aiDomainSchema = z.enum([
   'terra',
   'vessels',
   'prism_counsel',
-  'alloy',
+  'continuum',
   'lyte',
   'cortex',
   'global',

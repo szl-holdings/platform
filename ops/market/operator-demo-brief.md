@@ -200,6 +200,6 @@ Return to `/command/strategy`.
 | Signal Feed | `/operations/prism/signals` | Live signal triage |
 | Approvals Center | `/operations/approvals` | Human-in-the-loop evidence |
 | Proof Chain Audit | `/operations/trust-audit` | Compliance and audit surface |
-| Action Queue | `/operations/alloy/actions` | Execution log detail |
-| Workflow Canvas | `/operations/alloy/canvas` | Workflow configuration |
-| Policy Engine | `/operations/alloy/governance` | Covenant Policy rules |
+| Action Queue | `/operations/continuum/actions` | Execution log detail |
+| Workflow Canvas | `/operations/continuum/canvas` | Workflow configuration |
+| Policy Engine | `/operations/continuum/governance` | Covenant Policy rules |

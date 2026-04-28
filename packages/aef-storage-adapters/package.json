@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-storage-adapters",
+  "name": "@workspace/cf-storage-adapters",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — unified storage adapter interface with working local-filesystem and SQLite implementations for development, plus interface stubs for pgvector, Azure AI Search, and object storage for production scale.",
+  "description": "Continuum Fabric Fabric — unified storage adapter interface with working local-filesystem and SQLite implementations for development, plus interface stubs for pgvector, Azure AI Search, and object storage for production scale.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -27,7 +27,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

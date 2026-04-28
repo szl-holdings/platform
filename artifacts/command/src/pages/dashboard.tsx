@@ -112,7 +112,7 @@ export function Dashboard() {
       label: 'Deploy your first workflow',
       description: 'Choose a template and launch it through Counsel',
       completed: activation.workflowDeployed,
-      href: `${BASE}/alloy/factory-floor`,
+      href: `${BASE}/continuum/factory-floor`,
     },
     {
       id: 'triage-action',

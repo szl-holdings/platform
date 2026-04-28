@@ -1,8 +1,8 @@
 {
-  "name": "@workspace/alloy",
+  "name": "@workspace/continuum",
   "version": "1.0.0",
   "type": "module",
-  "description": "Alloy — governed multi-agent coordinator. Composes specialist sub-agents, persists tool-call ledger, and returns Open-Responses-style envelopes.",
+  "description": "Continuum — Business Observability Fabric. Governed multi-agent coordinator providing a continuous, governed view of every signal and decision flowing through the business. Composes specialist sub-agents, persists tool-call ledger, and returns Open-Responses-style envelopes.",
   "exports": {
     ".": "./src/index.ts",
     "./envelope": "./src/envelope.ts",

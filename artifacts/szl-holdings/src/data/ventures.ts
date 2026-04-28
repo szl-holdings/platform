@@ -489,7 +489,7 @@ export const ventures: Venture[] = [
     externalPath: '/terra/',
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     name: 'Counsel',
     tagline: 'Execution Fabric — ENGINE Layer',
     oneLiner:
@@ -545,8 +545,8 @@ export const ventures: Venture[] = [
       'Integration with SZL APEX, Aegis, Lyte, and Vessels',
     ],
     nextMilestone: 'Counsel Scenario Model Library public launch (Q2 2026)',
-    path: '/ventures/alloy',
-    externalPath: '/alloy/',
+    path: '/ventures/continuum',
+    externalPath: '/continuum/',
   },
   {
     id: 'msp',

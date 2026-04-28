@@ -26,7 +26,7 @@ export interface DebtHistoryPoint {
 }
 
 // Polling intervals (ms) — critical surfaces refresh within seconds so operators
-// see new signals/workflow events as Alloy emits them; secondary surfaces poll
+// see new signals/workflow events as Continuum emits them; secondary surfaces poll
 // less aggressively to limit network churn.
 const LIVE_REFRESH_CRITICAL_MS = 5_000;
 const LIVE_REFRESH_STANDARD_MS = 15_000;

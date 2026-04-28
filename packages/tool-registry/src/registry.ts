@@ -1,7 +1,7 @@
 /**
  * @workspace/tool-registry — Tool Definition Registry
  *
- * A typed catalog of every tool available to Alloy specialists.
+ * A typed catalog of every tool available to Continuum specialists.
  * Each entry declares the tool's ID, display name, owning specialist,
  * input/output shape description, and whether it has side effects.
  *

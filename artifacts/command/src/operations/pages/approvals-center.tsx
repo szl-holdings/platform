@@ -188,7 +188,7 @@ export default function ApprovalsCenter() {
                   Defer
                 </button>
                 <a
-                  href="/alloy"
+                  href="/continuum"
                   className="text-[9px] px-2.5 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto"
                   style={{
                     color: '#8b7ac8',

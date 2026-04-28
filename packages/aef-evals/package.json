@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-evals",
+  "name": "@workspace/cf-evals",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
+  "description": "Continuum Fabric Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -31,9 +31,9 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
-    "@workspace/aef-domain-profiles": "workspace:*",
-    "@workspace/aef-retrieval-core": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/cf-domain-profiles": "workspace:*",
+    "@workspace/cf-retrieval-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

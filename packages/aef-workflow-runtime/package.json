@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-workflow-runtime",
+  "name": "@workspace/cf-workflow-runtime",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — deterministic, checkpointed workflow state machine. Defines actor roles (IngestionPlanner, SourceNormalizer, ChunkPlanner, PolicyGuard, VectorDispatch, IndexVerifier, RetrievalEvaluator, ApprovalGate), approval interrupt support, resumable execution across restarts, and audit event emission at each step.",
+  "description": "Continuum Fabric Fabric — deterministic, checkpointed workflow state machine. Defines actor roles (IngestionPlanner, SourceNormalizer, ChunkPlanner, PolicyGuard, VectorDispatch, IndexVerifier, RetrievalEvaluator, ApprovalGate), approval interrupt support, resumable execution across restarts, and audit event emission at each step.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -31,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "@workspace/alloy-vector-worker": "workspace:*",
     "zod": "catalog:"
   },

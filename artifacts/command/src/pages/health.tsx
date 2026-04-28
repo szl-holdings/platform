@@ -27,7 +27,7 @@ const CONNECTOR_FRESHNESS = [
     domain: 'Vessels',
   },
   {
-    id: 'alloy-kb',
+    id: 'continuum-kb',
     label: 'Counsel Knowledge Base',
     source: 'Internal',
     status: 'live' as const,

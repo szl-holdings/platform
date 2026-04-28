@@ -1,4 +1,4 @@
-import { getKernel } from '@szl/alloy/prompts';
+import { getKernel } from '@szl/continuum/prompts';
 import { BookOpen, Brain, RefreshCw, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -23,7 +23,7 @@ export function AlloyKernelPanel() {
           <div>
             <div className="text-sm font-bold">Meeting → CRM Update</div>
             <div className="text-[10px] font-mono" style={{ color: 'rgba(200,168,75,0.5)' }}>
-              Alloy Codex · {kernel.name} · v{kernel.version}
+              Continuum Codex · {kernel.name} · v{kernel.version}
             </div>
           </div>
         </div>

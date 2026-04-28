@@ -1,4 +1,4 @@
-import { getKernel } from '@szl/alloy/prompts';
+import { getKernel } from '@szl/continuum/prompts';
 import { BookOpen, Brain, Scale, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -17,7 +17,7 @@ export function AlloyKernelPanel() {
           <div>
             <div className="text-sm font-bold text-white">Decision Intelligence</div>
             <div className="text-[10px] text-slate-500 font-mono">
-              Alloy Codex · {kernel.name} · v{kernel.version}
+              Continuum Codex · {kernel.name} · v{kernel.version}
             </div>
           </div>
         </div>

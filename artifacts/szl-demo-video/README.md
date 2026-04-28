@@ -13,7 +13,7 @@
 
 This artifact is a programmatic motion-graphics video built in React — not an edited video file. Every animation, transition, and scene is code. This means the demo can be updated like software: change the content, redeploy, done.
 
-The video walks through the SZL Holdings platform thesis in ~70 seconds: the governance problem, a tour of all 10 product surfaces, the Alloy Fabric decision architecture, CORTEX mobile command, and the "governed autonomy" closing brand moment.
+The video walks through the SZL Holdings platform thesis in ~70 seconds: the governance problem, a tour of all 10 product surfaces, the Continuum Fabric decision architecture, CORTEX mobile command, and the "governed autonomy" closing brand moment.
 
 ## Video Cuts
 
@@ -34,7 +34,7 @@ Captions are burned in by default. Toggle with the top-left CC button.
 |-------|------|---------|
 | `open` | The Governance Problem | Hook: "The era of AI without receipts is ending" |
 | `reel` | Meet the Platform | All 10 product surfaces cycling with animated UI frames |
-| `fabric` | The Alloy Fabric | Decision fabric constellation graph (Guardian, Proof Chain, etc.) |
+| `fabric` | The Continuum Fabric | Decision fabric constellation graph (Guardian, Proof Chain, etc.) |
 | `cortex` | CORTEX Mobile | Cross-domain alert correlation on mobile command |
 | `close` | Governed Autonomy | SZL Holdings brand lockup + tagline |
 

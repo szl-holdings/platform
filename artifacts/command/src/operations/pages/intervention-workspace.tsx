@@ -248,7 +248,7 @@ export default function InterventionWorkspace() {
                     );
                   })}
                   <a
-                    href="/alloy"
+                    href="/continuum"
                     className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto"
                     style={{
                       color: '#4B8BDB',

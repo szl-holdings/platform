@@ -29,7 +29,7 @@ const APP_SOURCES = [
   { id: 'terra', label: 'Terra' },
   { id: 'lyte', label: 'Lyte' },
   { id: 'carlota-jo', label: 'Carlota Jo' },
-  { id: 'alloy', label: 'Counsel' },
+  { id: 'continuum', label: 'Counsel' },
   { id: 'system', label: 'System' },
 ];
 

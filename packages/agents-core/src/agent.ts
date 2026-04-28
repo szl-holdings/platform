@@ -312,15 +312,15 @@ export const lyteAgent = new Agent({
 });
 
 export const alloyAgent = new Agent({
-  agentId: 'alloy',
+  agentId: 'continuum',
   name: 'A11oy Brand Orchestration',
   description: 'Workflow execution, signal routing, artifact quality, orchestration health.',
   instructions:
-    'You are an Alloy intelligence analyst. Evaluate workflow execution, signal patterns, artifact quality, and operational orchestration across the SZL ecosystem.',
+    'You are a Continuum intelligence analyst. Evaluate workflow execution, signal patterns, artifact quality, and operational orchestration across the SZL ecosystem.',
   tools: [
-    { toolId: 'alloy.workflowAnalysis', description: 'Analyze workflow execution' },
-    { toolId: 'alloy.signalRoute', description: 'Route signals to handlers' },
-    { toolId: 'alloy.artifactReview', description: 'Review artifact quality' },
+    { toolId: 'continuum.workflowAnalysis', description: 'Analyze workflow execution' },
+    { toolId: 'continuum.signalRoute', description: 'Route signals to handlers' },
+    { toolId: 'continuum.artifactReview', description: 'Review artifact quality' },
   ],
   handoffs: [
     { targetAgentId: 'vessels', description: 'Delegate maritime queries to Vessels', historyMode: 'full' },

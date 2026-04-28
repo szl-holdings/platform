@@ -496,21 +496,21 @@ export const api = {
       if (params?.state) q.set('state', params.state);
       if (params?.limit) q.set('limit', String(params.limit));
       return apiFetch<{ data: AlloyWorkflowRun[]; meta: { total: number } }>(
-        `/alloy/runs?${q.toString()}`,
+        `/continuum/runs?${q.toString()}`,
       );
     },
-    get: (id: number) => apiFetch<AlloyWorkflowRun>(`/alloy/runs/${id}`),
+    get: (id: number) => apiFetch<AlloyWorkflowRun>(`/continuum/runs/${id}`),
   },
   alloyWorkflows: {
     list: (params?: { limit?: number }) => {
       const q = new URLSearchParams();
       if (params?.limit) q.set('limit', String(params.limit));
       return apiFetch<{ data: AlloyWorkflow[]; meta: { total: number } }>(
-        `/alloy/workflows?${q.toString()}`,
+        `/continuum/workflows?${q.toString()}`,
       );
     },
     run: (id: number, input?: Record<string, unknown>) =>
-      apiFetch<AlloyWorkflowRun>(`/alloy/workflows/${id}/run`, {
+      apiFetch<AlloyWorkflowRun>(`/continuum/workflows/${id}/run`, {
         method: 'POST',
         body: JSON.stringify({ input }),
       }),

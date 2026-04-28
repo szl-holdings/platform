@@ -212,12 +212,12 @@ const OPERATIONS_NAV: NavGroup[] = [
   {
     section: 'Counsel — Execution',
     items: [
-      { href: '/operations/alloy/policy-compiler', label: 'Policy Compiler', icon: Code },
-      { href: '/operations/alloy/canvas', label: 'Workflow Canvas', icon: Workflow },
-      { href: '/operations/alloy/actions', label: 'Action Queue', icon: Activity },
-      { href: '/operations/alloy/governance', label: 'Covenant Policy', icon: Lock },
-      { href: '/operations/alloy/intelligence', label: 'Intelligence', icon: Brain },
-      { href: '/operations/alloy/traces', label: 'Execution Traces', icon: GitBranch },
+      { href: '/operations/continuum/policy-compiler', label: 'Policy Compiler', icon: Code },
+      { href: '/operations/continuum/canvas', label: 'Workflow Canvas', icon: Workflow },
+      { href: '/operations/continuum/actions', label: 'Action Queue', icon: Activity },
+      { href: '/operations/continuum/governance', label: 'Covenant Policy', icon: Lock },
+      { href: '/operations/continuum/intelligence', label: 'Intelligence', icon: Brain },
+      { href: '/operations/continuum/traces', label: 'Execution Traces', icon: GitBranch },
       { href: '/operations/runs', label: 'Run Console', icon: Play },
       { href: '/operations/evidence-explorer', label: 'Evidence Explorer', icon: Database },
       { href: '/operations/eval-studio', label: 'Eval Studio', icon: FlaskConical },

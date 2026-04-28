@@ -23,7 +23,7 @@ No hidden fees. No surprise usage charges. No enterprise-only pricing that requi
 
 ### 1. Platform Access
 
-The base layer — access to the SZL Holdings governed decision infrastructure including Lyte command surface, Alloy execution fabric, CORTEX mobile, Proof Chain, Outcome Graph, Covenant Policy, Decision Simulation, and Workflow Engine.
+The base layer — access to the SZL Holdings governed decision infrastructure including Lyte command surface, Continuum execution fabric, CORTEX mobile, Proof Chain, Outcome Graph, Covenant Policy, Decision Simulation, and Workflow Engine.
 
 Platform access is included with every commercial agreement. You cannot purchase a domain pack without platform access — the domain packs run on the shared infrastructure.
 
@@ -70,7 +70,7 @@ Domain packs include:
 - Domain-specific signal sources (as connected to real data in production)
 - Domain-specific action vocabulary
 - Domain-specific UI workspaces
-- Integration with the shared Proof Chain, Alloy, and Event Fabric
+- Integration with the shared Proof Chain, Continuum, and Event Fabric
 
 ---
 

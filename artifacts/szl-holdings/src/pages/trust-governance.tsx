@@ -70,17 +70,17 @@ export default function TrustGovernancePage() {
         <SiteNav />
         <main id="main-content" >
   
-          <section className="szl-grid-texture szl-depth-glow-alloy" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <section className="szl-grid-texture szl-depth-glow-continuum" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
                   <Link href="/trust" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Trust Center</Link>
                   <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-alloy-light)" }}>Governance</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-continuum-light)" }}>Governance</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                  <div style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.5625rem" }}>
-                    <Brain size={20} color="var(--color-alloy-light)" />
+                  <div style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.5625rem" }}>
+                    <Brain size={20} color="var(--color-continuum-light)" />
                   </div>
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>AI Governance</h1>
                 </div>
@@ -96,7 +96,7 @@ export default function TrustGovernancePage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>Six principles</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>Six principles</p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
                   How we build AI into Lyte + Counsel.
                 </h2>
@@ -106,8 +106,8 @@ export default function TrustGovernancePage() {
                   const Icon = p.icon;
                   return (
                     <m.div key={p.title} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
-                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", flexShrink: 0, marginTop: "1px" }}>
-                        <Icon size={16} color="var(--color-alloy-light)" />
+                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.4375rem", flexShrink: 0, marginTop: "1px" }}>
+                        <Icon size={16} color="var(--color-continuum-light)" />
                       </div>
                       <div>
                         <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em", marginBottom: "0.625rem", lineHeight: 1.4 }}>{p.title}</h3>
@@ -123,7 +123,7 @@ export default function TrustGovernancePage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>HITL Model</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>HITL Model</p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
                   Which actions require human approval and why.
                 </h2>
@@ -151,7 +151,7 @@ export default function TrustGovernancePage() {
                     }}
                   >
                     <span style={{ fontSize: "0.875rem", fontWeight: 500, color: "hsl(38,8%,85%)" }}>{row.action}</span>
-                    <span style={{ fontSize: "0.875rem", color: "var(--color-alloy-light)", fontWeight: 500 }}>{row.gate}</span>
+                    <span style={{ fontSize: "0.875rem", color: "var(--color-continuum-light)", fontWeight: 500 }}>{row.gate}</span>
                     <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)", lineHeight: 1.55 }}>{row.note}</span>
                   </m.div>
                 ))}
@@ -162,7 +162,7 @@ export default function TrustGovernancePage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-alloy-light)", marginBottom: "1rem" }}>Six Governance Primitives</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-continuum-light)", marginBottom: "1rem" }}>Six Governance Primitives</p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
                   Governance enforced at the library layer — not the UI.
                 </h2>
@@ -176,8 +176,8 @@ export default function TrustGovernancePage() {
                   return (
                     <m.div key={p.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.625rem" }}>
-                        <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.375rem", flexShrink: 0 }}>
-                          <Icon size={14} color="var(--color-alloy-light)" />
+                        <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.375rem", flexShrink: 0 }}>
+                          <Icon size={14} color="var(--color-continuum-light)" />
                         </div>
                         <div>
                           <span style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,88%)" }}>{p.label}</span>
@@ -196,8 +196,8 @@ export default function TrustGovernancePage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                  <FileText size={14} color="var(--color-alloy-light)" />
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-alloy-light)" }}>Diligence Materials</p>
+                  <FileText size={14} color="var(--color-continuum-light)" />
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-continuum-light)" }}>Diligence Materials</p>
                 </div>
                 <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.2, maxWidth: "32ch", marginBottom: "1.5rem" }}>
                   Governance documentation for enterprise evaluators.
@@ -212,7 +212,7 @@ export default function TrustGovernancePage() {
                     <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
                         <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,85%)" }}>{item.label}</span>
-                        <ArrowRight size={13} color="var(--color-alloy-light)" />
+                        <ArrowRight size={13} color="var(--color-continuum-light)" />
                       </div>
                       <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(214,7%,52%)" }}>{item.desc}</p>
                     </Link>
@@ -221,7 +221,7 @@ export default function TrustGovernancePage() {
               </div>
               <m.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.2 }} style={{ fontSize: "12px", color: "hsl(214,7%,38%)", marginTop: "1.25rem" }}>
                 Full diligence packet on request —{" "}
-                <a href="mailto:security@szlholdings.com" style={{ color: "var(--color-alloy-light)", textDecoration: "none" }}>security@szlholdings.com</a>
+                <a href="mailto:security@szlholdings.com" style={{ color: "var(--color-continuum-light)", textDecoration: "none" }}>security@szlholdings.com</a>
               </m.p>
             </div>
           </section>

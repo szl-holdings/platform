@@ -28,7 +28,7 @@ interface GraphNode {
 }
 
 const CAPABILITIES: Record<string, string[]> = {
-  alloy: [
+  continuum: [
     'Workflow orchestration, connector management, and agent coordination across every vertical',
     'Confidence scoring, evidence capture, and signal-to-action routing',
     'Tamper-evident proof chain — every recommendation, approval, and override is recorded',
@@ -79,7 +79,7 @@ const CAPABILITIES: Record<string, string[]> = {
 };
 
 const SECONDARY_LINKS: Record<string, SecondaryLink[]> = {
-  alloy: [
+  continuum: [
     { label: 'Trust & Governance', href: '/trust' },
     { label: 'Proof Chain', href: '/trust/proof-chain' },
     { label: 'Public Claims', href: '/trust/claims' },
@@ -124,14 +124,14 @@ function hexToHsl(hex: string): string {
 }
 
 const FALLBACK_COLOR = '#6366f1';
-const alloyProduct = registry.products.find((p) => p.id === 'alloy')!;
+const alloyProduct = registry.products.find((p) => p.id === 'continuum')!;
 const peripheralProducts = registry.products.filter(
-  (p) => p.id !== 'alloy' && PRODUCT_POSITIONS[p.id],
+  (p) => p.id !== 'continuum' && PRODUCT_POSITIONS[p.id],
 );
 
 const NODES: GraphNode[] = [
   {
-    id: 'alloy',
+    id: 'continuum',
     label: alloyProduct.name,
     sublabel: 'Execution Fabric',
     color: hexToHsl(alloyProduct.color ?? FALLBACK_COLOR),
@@ -139,11 +139,11 @@ const NODES: GraphNode[] = [
     y: 50,
     r: 38,
     kind: 'core',
-    link: alloyProduct.link ?? '/alloy',
+    link: alloyProduct.link ?? '/continuum',
     linkLabel: 'Open Counsel',
     description: alloyProduct.description,
-    capabilities: CAPABILITIES.alloy,
-    secondaryLinks: SECONDARY_LINKS.alloy,
+    capabilities: CAPABILITIES.continuum,
+    secondaryLinks: SECONDARY_LINKS.continuum,
     status: alloyProduct.status,
   },
   ...peripheralProducts.map((p) => {
@@ -165,7 +165,7 @@ const NODES: GraphNode[] = [
   }),
 ];
 
-const EDGES: GraphEdge[] = peripheralProducts.map((p) => ({ from: p.id, to: 'alloy' }));
+const EDGES: GraphEdge[] = peripheralProducts.map((p) => ({ from: p.id, to: 'continuum' }));
 
 const PILLAR_ROWS = [
   {
@@ -201,7 +201,7 @@ const PILLAR_ROWS = [
   {
     role: 'GOVERN',
     label: 'Audit everything',
-    products: ['alloy'],
+    products: ['continuum'],
     color: 'hsl(215, 60%, 48%)',
   },
 ];
@@ -319,7 +319,7 @@ export default function FounderArchitecture() {
             style={{ width: '100%', height: 'auto', display: 'block' }}
           >
             <defs>
-              <radialGradient id="glow-alloy" cx="50%" cy="50%" r="50%">
+              <radialGradient id="glow-continuum" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="hsl(228, 65%, 54%)" stopOpacity="0.2" />
                 <stop offset="100%" stopColor="hsl(228, 65%, 54%)" stopOpacity="0" />
               </radialGradient>

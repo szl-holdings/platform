@@ -422,7 +422,7 @@ const ACTION_QUEUE: QueueItem[] = [
     evidence: 'SLA breach detected by Counsel workflow monitor',
     next_action: 'Escalate to VP Legal with 24h deadline',
     linked_product: 'Counsel',
-    linked_href: '/alloy',
+    linked_href: '/continuum',
   },
   {
     id: 'q-002',
@@ -437,7 +437,7 @@ const ACTION_QUEUE: QueueItem[] = [
     evidence: 'Counsel churn model v3.2 + usage telemetry',
     next_action: 'Schedule executive call within 24h',
     linked_product: 'Counsel',
-    linked_href: '/alloy',
+    linked_href: '/continuum',
   },
   {
     id: 'q-003',
@@ -478,7 +478,7 @@ const ACTION_QUEUE: QueueItem[] = [
     evidence: 'Counsel execution engine — run #GF-2026-Q1-001',
     next_action: 'Assign approver or reroute workflow',
     linked_product: 'Counsel',
-    linked_href: '/alloy',
+    linked_href: '/continuum',
   },
 ];
 

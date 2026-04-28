@@ -246,7 +246,7 @@ export function LiveProofStage({
                 ))
               : [
                   { icon: Clock, label: 'proof_created', sub: 'system' },
-                  { icon: User, label: 'recommendation_generated', sub: 'alloy-engine' },
+                  { icon: User, label: 'recommendation_generated', sub: 'continuum-engine' },
                   { icon: Fingerprint, label: 'human_review_approved', sub: 'J. van der Berg' },
                   { icon: Clock, label: 'export_safety_cleared', sub: 'system' },
                 ].map((entry, i, arr) => {

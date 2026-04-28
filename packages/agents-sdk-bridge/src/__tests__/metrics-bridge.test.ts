@@ -121,20 +121,20 @@ describe('metrics-bridge', () => {
 
   describe('recordRunStart / recordRunComplete', () => {
     it('emits run_started', () => {
-      recordRunStart('trace-run', 'Alloy');
+      recordRunStart('trace-run', 'Continuum');
       expect(globalCollector.recordKnown).toHaveBeenCalledWith(
         'run_started',
         1,
-        expect.objectContaining({ traceId: 'trace-run', agentName: 'Alloy' }),
+        expect.objectContaining({ traceId: 'trace-run', agentName: 'Continuum' }),
       );
     });
 
     it('emits run_completed with latency', () => {
-      recordRunComplete('trace-run', 'Alloy', 2500);
+      recordRunComplete('trace-run', 'Continuum', 2500);
       expect(globalCollector.recordKnown).toHaveBeenCalledWith(
         'run_completed',
         2500,
-        expect.objectContaining({ traceId: 'trace-run', agentName: 'Alloy' }),
+        expect.objectContaining({ traceId: 'trace-run', agentName: 'Continuum' }),
       );
     });
   });

@@ -1,4 +1,4 @@
-import { processSignalIntoWorkflow } from '../alloy-orchestration.js';
+import { processSignalIntoWorkflow } from '../continuum-orchestration.js';
 import { logger } from '../logger.js';
 import { domainEventBus } from './index.js';
 
@@ -8,11 +8,11 @@ export function initializeForgeDomainEventSubscriptions(): void {
   if (initialized) return;
   initialized = true;
 
-  domainEventBus.subscribe('alloy.signal-ingested', async (payload) => {
+  domainEventBus.subscribe('continuum.signal-ingested', async (payload) => {
     if (payload.severity === 'critical' || payload.severity === 'high') {
       logger.info(
         { signalId: payload.signalId, severity: payload.severity },
-        'Alloy: auto-promoting high/critical signal to workflow',
+        'Continuum: auto-promoting high/critical signal to workflow',
       );
       try {
         await processSignalIntoWorkflow(payload.signalId, {
@@ -23,7 +23,7 @@ export function initializeForgeDomainEventSubscriptions(): void {
       } catch (err) {
         logger.error(
           { err, signalId: payload.signalId },
-          'Alloy: failed to promote signal to workflow via domain event',
+          'Continuum: failed to promote signal to workflow via domain event',
         );
       }
     }
@@ -32,30 +32,30 @@ export function initializeForgeDomainEventSubscriptions(): void {
   domainEventBus.subscribe('firestorm.incident-escalated', async (payload) => {
     logger.info(
       { incidentId: payload.incidentId, severity: payload.severity },
-      'Alloy: firestorm incident escalated — checking for workflow promotion',
+      'Continuum: firestorm incident escalated — checking for workflow promotion',
     );
   });
 
   domainEventBus.subscribe('lyte.incident-escalated', async (payload) => {
     logger.info(
       { incidentId: payload.incidentId, targetRole: payload.targetRole },
-      'Alloy: lyte incident escalated',
+      'Continuum: lyte incident escalated',
     );
   });
 
   domainEventBus.subscribe('prism-counsel.deadline-approaching', async (payload) => {
     logger.info(
       { deadlineId: payload.deadlineId, matterId: payload.matterId, priority: payload.priority },
-      'Alloy: prism-counsel deadline approaching',
+      'Continuum: prism-counsel deadline approaching',
     );
   });
 
   domainEventBus.subscribe('terra.deal-updated', (payload) => {
     logger.debug(
       { dealId: payload.dealId, stage: payload.stage },
-      'Alloy: terra deal stage updated',
+      'Continuum: terra deal stage updated',
     );
   });
 
-  logger.info('Alloy domain event subscriptions initialized');
+  logger.info('Continuum domain event subscriptions initialized');
 }

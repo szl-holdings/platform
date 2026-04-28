@@ -581,7 +581,7 @@ export default function AlloyReplayTimelinePage() {
   const [playheadIdx, setPlayheadIdx] = useState<number | null>(null);
 
   const { data: runsData, isLoading: runsLoading } = useStandardQuery({
-    queryKey: ['alloy-runs-replay'],
+    queryKey: ['continuum-runs-replay'],
     queryFn: () => api.alloyRuns.list({ limit: 10 }),
     staleTime: 30_000,
     refetchInterval: 60_000,

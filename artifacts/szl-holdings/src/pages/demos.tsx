@@ -79,7 +79,7 @@ const DEMOS = [
     cta: "Open Mobile preview",
   },
   {
-    id: "alloy",
+    id: "continuum",
     title: "Counsel Execution Fabric",
     subtitle: "Governed action routing",
     description: "Workflow orchestration, connector mesh, human-in-the-loop gates, decision lineage, and enterprise governance. The execution layer that makes every other pack actionable.",
@@ -87,7 +87,7 @@ const DEMOS = [
     color: "hsl(258,55%,68%)",
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
-    href: "/alloy",
+    href: "/continuum",
     cta: "Open Counsel",
   },
 ];

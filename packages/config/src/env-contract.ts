@@ -86,7 +86,7 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
     risksIfMissing: 'Authentication fails for all users.',
   },
   {
-    key: 'ALLOY_INTERNAL_TOKEN',
+    key: 'CONTINUUM_INTERNAL_TOKEN',
     classification: 'required',
     description: 'Privileged agent access token for M2M communication. Minimum 32 characters.',
     risksIfMissing: 'Agent-to-agent calls fail; Counsel execution fabric is broken.',

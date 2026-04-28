@@ -4,7 +4,7 @@ export type Vertical =
   | 'terra'
   | 'lyte'
   | 'prism'
-  | 'alloy'
+  | 'continuum'
   | 'carlota-jo';
 export type RunStatus = 'running' | 'paused' | 'completed' | 'failed' | 'awaiting-approval';
 export type PolicyStatus = 'compliant' | 'violated' | 'pending' | 'escalated';

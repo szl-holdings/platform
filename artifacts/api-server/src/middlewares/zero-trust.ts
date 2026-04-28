@@ -582,7 +582,7 @@ const domainAutonomyStore = new Map<string, DomainAutonomyConfig>([
   ['prism', { domain: 'prism', level: 'manual', requireStepUp: true, auditAll: true }],
   ['nexus', { domain: 'nexus', level: 'auto-with-audit', auditAll: true }],
   ['lyte', { domain: 'lyte', level: 'auto-with-audit', auditAll: true }],
-  ['alloy', { domain: 'alloy', level: 'propose-only', auditAll: true }],
+  ['continuum', { domain: 'continuum', level: 'propose-only', auditAll: true }],
 ]);
 
 /**

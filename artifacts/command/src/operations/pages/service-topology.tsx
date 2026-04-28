@@ -35,7 +35,7 @@ const PLATFORM_NODES = [
     id: 'api-gateway',
     label: 'API Gateway',
     icon: Shield,
-    connects: ['lyte-core', 'alloy-engine', 'terra-lyte', 'vessels-intel', 'firestorm-soc'],
+    connects: ['lyte-core', 'continuum-engine', 'terra-lyte', 'vessels-intel', 'firestorm-soc'],
     platform: 'Core',
   },
   {
@@ -46,7 +46,7 @@ const PLATFORM_NODES = [
     platform: 'Lyte',
   },
   {
-    id: 'alloy-engine',
+    id: 'continuum-engine',
     label: 'Counsel Engine',
     icon: Layers,
     connects: ['signal-bus', 'workflow-exec', 'ml-inference'],

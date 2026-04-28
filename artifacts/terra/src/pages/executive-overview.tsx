@@ -80,8 +80,8 @@ function CommandLoopPanel({ activePhase }: { activePhase: string }) {
   const phases = [
     { phase: 'DETECT', color: '#4d8fcc', current: activePhase === 'DETECT' },
     { phase: 'INTERPRET', color: '#f59e0b', current: false, link: '/command/operations/' },
-    { phase: 'DECIDE', color: '#8b5cf6', current: false, link: '/alloy/' },
-    { phase: 'EXECUTE', color: '#4B8BDB', current: false, link: '/alloy/' },
+    { phase: 'DECIDE', color: '#8b5cf6', current: false, link: '/continuum/' },
+    { phase: 'EXECUTE', color: '#4B8BDB', current: false, link: '/continuum/' },
     { phase: 'VERIFY', color: '#10b981', current: activePhase === 'VERIFY' },
   ];
 

@@ -25,7 +25,7 @@ import { useState } from 'react';
 const _BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 
 type TwinState = 'stable' | 'degraded' | 'awaiting_approval' | 'offline';
-type Domain = 'aegis' | 'terra' | 'vessels' | 'alloy' | 'prism' | 'lyte';
+type Domain = 'aegis' | 'terra' | 'vessels' | 'continuum' | 'prism' | 'lyte';
 
 interface WorldlineTwin {
   id: string;
@@ -57,7 +57,7 @@ const DOMAIN_CONFIG: Record<
   aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
   terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe, appPath: '/terra' },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
-  alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
+  continuum: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe, appPath: '/command' },
   lyte: { label: "Lyte — AIOps", color: '#d4a054', icon: Activity, appPath: '/command' },
 };
@@ -98,7 +98,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     label: 'WL-ALPHA',
     description: 'Primary canonical worldline — approved baseline state for all domains',
     status: 'active',
-    originDomain: 'alloy',
+    originDomain: 'continuum',
     createdAt: 'Mar 1, 2026',
     twins: [
       {
@@ -124,9 +124,9 @@ const DEMO_WORLDLINES: Worldline[] = [
         summary: '14 vessels tracked, AIS data nominal',
       },
       {
-        id: 'tw-alloy-001',
+        id: 'tw-continuum-001',
         name: 'Counsel Execution Fabric',
-        domain: 'alloy',
+        domain: 'continuum',
         state: 'stable',
         driftScore: 2,
         lastSync: '30s ago',

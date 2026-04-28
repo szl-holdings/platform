@@ -126,7 +126,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
     trend: ['fresh', 'fresh', 'stale', 'fresh', 'fresh', 'fresh'],
   },
   {
-    id: 'alloy-workflow-events',
+    id: 'continuum-workflow-events',
     name: 'Workflow State Events',
     domain: 'Counsel',
     domainIcon: Zap,
@@ -188,7 +188,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
     trend: ['live', 'fresh', 'live', 'live', 'fresh', 'live'],
   },
   {
-    id: 'alloy-ai-traces',
+    id: 'continuum-ai-traces',
     name: 'AI Inference Traces',
     domain: 'Counsel',
     domainIcon: Zap,

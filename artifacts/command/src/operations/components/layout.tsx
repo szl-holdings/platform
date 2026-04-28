@@ -228,7 +228,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <span className="text-[10px]">SZL Holdings</span>
       </div>
       <a
-        href="/alloy"
+        href="/continuum"
         className="flex items-center gap-1.5 px-2 py-1 rounded-lg w-full transition-colors"
         style={{ color: toAlpha(COMMAND_ACCENT, 0.45) }}
         title="Counsel Execution Fabric"

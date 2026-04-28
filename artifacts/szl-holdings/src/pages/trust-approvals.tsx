@@ -91,7 +91,7 @@ const APPROVAL_PATH_STAGES = [
   { id: "route", label: "Route", desc: "Approval tier assigned based on action type and risk model. Request routed to designated approver(s) for the tenant.", color: "hsl(40,90%,54%)" },
   { id: "review", label: "Review", desc: "Approver(s) receive full context: signal, interpretation, recommendation, confidence, and proposed action scope.", color: "hsl(25,90%,55%)" },
   { id: "decide", label: "Decide", desc: "Approver approves, modifies, defers, or rejects. For T3+ actions, rationale field is mandatory before submission.", color: "hsl(258,55%,68%)" },
-  { id: "execute", label: "Execute", desc: "Only on approval: Counsel executes the scoped action through the appropriate connector. SLA clock starts.", color: "var(--color-alloy-light)" },
+  { id: "execute", label: "Execute", desc: "Only on approval: Counsel executes the scoped action through the appropriate connector. SLA clock starts.", color: "var(--color-continuum-light)" },
   { id: "record", label: "Record", desc: "Complete approval path — every step, every decision, every attribution — written to the immutable audit trail.", color: "hsl(145,62%,46%)" },
 ];
 

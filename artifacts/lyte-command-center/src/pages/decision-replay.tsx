@@ -63,35 +63,35 @@ const INTERVENTION_TONE: Record<Intervention['type'], string> = {
 };
 
 const EVIDENCE_ICONS: Record<ReplayEvent['evidenceType'], React.ReactNode> = {
-  alloy: <Zap className="w-3 h-3 text-amber-400" />,
+  continuum: <Zap className="w-3 h-3 text-amber-400" />,
   human: <User className="w-3 h-3 text-sky-400" />,
   system: <Brain className="w-3 h-3 text-violet-400" />,
   escalation: <AlertTriangle className="w-3 h-3 text-red-400" />,
 };
 
 const EVIDENCE_COLORS: Record<ReplayEvent['evidenceType'], string> = {
-  alloy: 'border-amber-500/30 bg-amber-500/5',
+  continuum: 'border-amber-500/30 bg-amber-500/5',
   human: 'border-sky-500/30 bg-sky-500/5',
   system: 'border-violet-500/30 bg-violet-500/5',
   escalation: 'border-red-500/30 bg-red-500/5',
 };
 
 const CONNECTOR_COLORS: Record<ReplayEvent['evidenceType'], string> = {
-  alloy: 'bg-amber-500/30',
+  continuum: 'bg-amber-500/30',
   human: 'bg-sky-500/30',
   system: 'bg-violet-500/30',
   escalation: 'bg-red-500/30',
 };
 
 const EVIDENCE_BORDER_COLOR: Record<ReplayEvent['evidenceType'], string> = {
-  alloy: 'rgba(245,158,11,0.4)',
+  continuum: 'rgba(245,158,11,0.4)',
   human: 'rgba(77,143,204,0.4)',
   system: 'rgba(167,139,250,0.4)',
   escalation: 'rgba(239,68,68,0.4)',
 };
 
 const EVIDENCE_TEXT_COLOR: Record<ReplayEvent['evidenceType'], string> = {
-  alloy: '#f59e0b',
+  continuum: '#f59e0b',
   human: '#38bdf8',
   system: '#c4b5fd',
   escalation: '#f87171',
@@ -181,7 +181,7 @@ function EventNode({
             className="mt-2 pt-2 border-t space-y-2"
             style={{
               borderColor:
-                event.evidenceType === 'alloy'
+                event.evidenceType === 'continuum'
                   ? 'rgba(245,158,11,0.15)'
                   : event.evidenceType === 'human'
                     ? 'rgba(77,143,204,0.15)'
@@ -343,7 +343,7 @@ export default function DecisionReplayPage() {
     );
   }
   const replayScenarios = data.scenarios;
-  const alloyEvents = activeScenario.events.filter((e) => e.evidenceType === 'alloy').length;
+  const continuumEvents = activeScenario.events.filter((e) => e.evidenceType === 'continuum').length;
   const humanEvents = activeScenario.events.filter((e) => e.evidenceType === 'human').length;
 
   return (
@@ -370,7 +370,7 @@ export default function DecisionReplayPage() {
       <div className="flex items-center gap-4 flex-wrap">
         <span className="text-[10px] font-mono text-amber-400/40">EVENT TYPES:</span>
         {[
-          { type: 'alloy', label: 'Counsel Signal / System', color: '#f59e0b' },
+          { type: 'continuum', label: 'Counsel Signal / System', color: '#f59e0b' },
           { type: 'human', label: 'Human Actor', color: '#38bdf8' },
           { type: 'escalation', label: 'Escalation', color: '#f87171' },
         ].map((l) => (
@@ -461,7 +461,7 @@ export default function DecisionReplayPage() {
             <p className="text-[10px] font-mono text-amber-400/40 uppercase">Proof Coverage</p>
             <div className="space-y-2">
               {[
-                { label: 'Counsel Signals', value: alloyEvents, color: '#f59e0b' },
+                { label: 'Counsel Signals', value: continuumEvents, color: '#f59e0b' },
                 { label: 'Human Actions', value: humanEvents, color: '#38bdf8' },
                 { label: 'Total Events', value: totalEvents, color: '#a78bfa' },
               ].map((m) => (

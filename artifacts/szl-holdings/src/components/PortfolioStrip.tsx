@@ -7,7 +7,7 @@ const ventures = [
     tagline: 'The AI command center powering the entire ecosystem.',
     category: 'AI Orchestration',
     status: 'Live',
-    href: '/alloy/',
+    href: '/continuum/',
     accent: 'hsl(218,50%,58%)',
     accentMuted: 'hsla(218,50%,58%,0.10)',
   },

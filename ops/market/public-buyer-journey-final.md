@@ -32,7 +32,7 @@ The journey is designed to be largely self-serve through the first three stages.
 **Platform assets:**
 - Homepage hero and problem statement
 - Category positioning copy (drawn from CATEGORY_POSITIONING.md)
-- Platform hierarchy diagram (SZL → Lyte → Alloy → domain packs)
+- Platform hierarchy diagram (SZL → Lyte → Continuum → domain packs)
 - Domain pack overview pages
 
 **Friction points to eliminate:**

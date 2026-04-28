@@ -19,7 +19,7 @@ describe('aiDomainSchema', () => {
     'terra',
     'vessels',
     'prism_counsel',
-    'alloy',
+    'continuum',
     'lyte',
     'cortex',
     'global',
@@ -188,7 +188,7 @@ describe('traceCapturBodySchema', () => {
   const valid = {
     model: 'gpt-4o',
     modelProvider: 'openai',
-    domain: 'alloy' as const,
+    domain: 'continuum' as const,
     promptTokens: 10,
     completionTokens: 20,
     latencyMs: 100,

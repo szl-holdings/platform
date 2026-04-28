@@ -10,7 +10,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { PrismCounselArchitectureDiagram } from "@/components/diagrams/PrismCounselArchitectureDiagram";
-import { AlloyMatterFlowDiagram } from "@/components/diagrams/AlloyMatterFlowDiagram";
+import { ContinuumMatterFlowDiagram } from "@/components/diagrams/ContinuumMatterFlowDiagram";
 
 const WORKFLOW_STEPS = [
   {
@@ -584,7 +584,7 @@ export default function PrismCounselPublicPage() {
                   })}
                 </div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.12 }}>
-                  <AlloyMatterFlowDiagram />
+                  <ContinuumMatterFlowDiagram />
                 </m.div>
               </div>
             </div>

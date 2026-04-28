@@ -144,7 +144,7 @@ workcells
   .command('start [signalId]')
   .description('start a new workcell, optionally seeded from a signal ID')
   .option('--name <name>', 'workcell name', 'CLI Workcell')
-  .option('--vertical <vertical>', 'target vertical', 'alloy-core')
+  .option('--vertical <vertical>', 'target vertical', 'continuum-core')
   .action(async (signalId, options) => {
     const body = {
       name: options.name,

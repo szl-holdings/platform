@@ -1,4 +1,4 @@
-import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
+import { EnvironmentLabel } from '@szl-holdings/shared-ui/continuum-decision-card';
 import { AlertTriangle, Pause, Play, Radio, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 

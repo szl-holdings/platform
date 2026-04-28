@@ -25,9 +25,9 @@ const LAYERS = [
   {
     label: 'Platform services',
     items: ['Signal engine', 'Action engine', 'Audit trail', 'Model mesh'],
-    color: 'var(--color-alloy-light)',
-    bg: 'var(--color-alloy-muted)',
-    border: 'var(--color-alloy-border)',
+    color: 'var(--color-continuum-light)',
+    bg: 'var(--color-continuum-muted)',
+    border: 'var(--color-continuum-border)',
   },
   {
     label: 'Data + connectors',

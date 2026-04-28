@@ -77,7 +77,7 @@ const PLATFORMS = [
     latency: '22ms',
   },
   {
-    key: 'alloy',
+    key: 'continuum',
     name: 'Counsel',
     desc: 'Execution Fabric',
     accent: '#60a5fa',

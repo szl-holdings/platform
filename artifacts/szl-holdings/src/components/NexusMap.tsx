@@ -5,10 +5,10 @@ const ecosystemNodes = [
     type: 'holding',
     x: 50,
     y: 50,
-    connections: ['vessels', 'lyte', 'alloy', 'terra', 'aegis', 'carlota'],
+    connections: ['vessels', 'lyte', 'continuum', 'terra', 'aegis', 'carlota'],
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     name: 'Counsel · ENGINE',
     type: 'engine',
     x: 50,
@@ -21,7 +21,7 @@ const ecosystemNodes = [
     type: 'subsidiary',
     x: 82,
     y: 30,
-    connections: ['szl', 'alloy', 'vessels'],
+    connections: ['szl', 'continuum', 'vessels'],
   },
   {
     id: 'vessels',
@@ -29,7 +29,7 @@ const ecosystemNodes = [
     type: 'subsidiary',
     x: 18,
     y: 30,
-    connections: ['szl', 'alloy', 'lyte'],
+    connections: ['szl', 'continuum', 'lyte'],
   },
   {
     id: 'terra',
@@ -37,7 +37,7 @@ const ecosystemNodes = [
     type: 'subsidiary',
     x: 15,
     y: 75,
-    connections: ['szl', 'alloy'],
+    connections: ['szl', 'continuum'],
   },
   {
     id: 'aegis',
@@ -45,7 +45,7 @@ const ecosystemNodes = [
     type: 'subsidiary',
     x: 50,
     y: 85,
-    connections: ['szl', 'alloy'],
+    connections: ['szl', 'continuum'],
   },
   {
     id: 'carlota',

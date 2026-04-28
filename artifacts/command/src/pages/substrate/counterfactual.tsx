@@ -24,7 +24,7 @@ const MODEL_ADAPTERS = [
 const POLICY_PROFILES: Record<string, string[]> = {
   vessels: ['vessels-standard-v2', 'vessels-conservative-v1', 'vessels-aggressive-v1'],
   terra: ['terra-standard-v1', 'terra-conservative-v1'],
-  alloy: ['alloy-orchestrator-v3', 'alloy-standard-v1'],
+  continuum: ['continuum-orchestrator-v3', 'continuum-standard-v1'],
   prism: ['prism-standard-v1', 'prism-strict-v1'],
   lyte: ['lyte-standard-v1'],
   firestorm: ['firestorm-standard-v1', 'firestorm-conservative-v1'],

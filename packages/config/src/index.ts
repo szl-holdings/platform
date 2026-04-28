@@ -31,7 +31,7 @@ export const APP_VERSION = '0.1.0';
 
 export const PLATFORM_APPS = [
   { slug: 'szl-holdings', name: 'SZL Holdings', icon: 'Building2', color: '#8b5cf6' },
-  { slug: 'alloy', name: 'Counsel — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
+  { slug: 'continuum', name: 'Counsel — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
   { slug: 'lyte', name: 'Lyte Command Center', icon: 'ShoppingBag', color: '#a855f7' },
   { slug: 'vessels', name: 'Vessels Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
   { slug: 'beacon', name: 'Terra', icon: 'BarChart3', color: '#0ea5e9' },
@@ -129,7 +129,7 @@ export const APP_INTEGRATIONS: Record<
     ],
     doctrineRole: 'EXECUTE',
   },
-  alloy: {
+  continuum: {
     connectors: ['ai', 'storage', 'monitoring', 'microsoft-graph'],
     description:
       'Counsel — execution fabric, connectors, automations, DAGs, and predictive intelligence engine across the SZL platform.',
@@ -144,7 +144,7 @@ export const APP_INTEGRATIONS: Record<
   dreamscape: {
     connectors: ['ai', 'figma', 'storage', 'google-drive', 'dropbox', 'elevenlabs'],
     description:
-      'Counsel predictive intelligence layer — scenario modeling, confidence scoring. Absorbed into Alloy.',
+      'Counsel predictive intelligence layer — scenario modeling, confidence scoring. Absorbed into Continuum.',
     liveFeeds: [
       'HuggingFace Hub — AI Creative Tools (live API)',
       'Content Marketing RSS Intelligence',

@@ -1134,7 +1134,7 @@ function ManualLeadModal({
             {inp('Email *', 'email', 'email', 'contact@company.com')}
             {inp('Company', 'company')}
             {inp('Role / Title', 'role')}
-            {inp('Interest Area', 'interestArea', 'text', 'e.g. lyte, alloy, general')}
+            {inp('Interest Area', 'interestArea', 'text', 'e.g. lyte, continuum, general')}
             {inp('Budget', 'budget', 'text', 'e.g. 10k-25k')}
             {inp('Source', 'source', 'text', 'e.g. linkedin, referral')}
             {inp('Medium', 'medium')}

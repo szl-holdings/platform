@@ -107,9 +107,9 @@ const SECTIONS = [
   {
     icon: Cpu,
     title: "Responsible AI Use",
-    color: "var(--color-alloy-light)",
-    colorMuted: "var(--color-alloy-muted)",
-    colorBorder: "var(--color-alloy-border)",
+    color: "var(--color-continuum-light)",
+    colorMuted: "var(--color-continuum-muted)",
+    colorBorder: "var(--color-continuum-border)",
     items: [
       "AI agents in Lyte + Counsel are advisory, not autonomous. Every consequential action requires human approval before execution.",
       "All AI-generated outputs are clearly labeled as such — no generated content is presented as human-authored output.",

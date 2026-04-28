@@ -1037,6 +1037,13 @@
       "when": 1780473600000,
       "tag": "0146_zero_trust_auth_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1780560000000,
+      "tag": "0147_continuum_rebrand",
+      "breakpoints": true
     }
   ]
 }

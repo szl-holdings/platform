@@ -272,7 +272,7 @@ export const envSchema = z.object({
   GOOGLE_PROJECT_ID: optionalStr,
   ATLASSIAN_APP_KEY: optionalStr,
 
-  // ── Alloy Workflow ───────────────────────────────────────────────────────
+  // ── Continuum Workflow ───────────────────────────────────────────────────────
   ALLOY_MAX_BATCH_SIZE: optionalInt("100"),
   ALLOY_WORKFLOW_AUTO_RUN: booleanFromString,
   ALLOY_REQUIRE_APPROVAL_CRITICAL: booleanFromString,

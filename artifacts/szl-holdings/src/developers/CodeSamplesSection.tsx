@@ -252,17 +252,17 @@ curl https://[host]/api/vessels/42 \\
         ]}
       />
 
-      <SubSectionHeader id="samples-alloy" title="Counsel Signal Ingestion" />
+      <SubSectionHeader id="samples-continuum" title="Counsel Signal Ingestion" />
       <LanguageTabs
         tabs={[
           {
             label: 'JavaScript',
             language: 'javascript',
-            filename: 'alloy-signals.js',
+            filename: 'continuum-signals.js',
             code: `const client = createApiClient(token);
 
-// Ingest a signal to trigger an Alloy workflow
-const result = await client.post('/alloy/ingest/signal', {
+// Ingest a signal to trigger an Continuum workflow
+const result = await client.post('/continuum/ingest/signal', {
   domain: 'vessels',
   type: 'port_delay',
   severity: 'medium',
@@ -289,7 +289,7 @@ console.log('Workflows triggered:', result.workflowsTriggered);`,
             code: `client = SZLClient.from_credential(credential)
 
 # Ingest a signal
-result = client.post("/alloy/ingest/signal", {
+result = client.post("/continuum/ingest/signal", {
     "domain": "vessels",
     "type": "port_delay",
     "severity": "medium",
@@ -309,8 +309,8 @@ print(f"Signal {result['signalId']} — {result['workflowsTriggered']} workflows
           {
             label: 'cURL',
             language: 'bash',
-            filename: 'alloy-signals.sh',
-            code: `curl -X POST https://[host]/api/alloy/ingest/signal \\
+            filename: 'continuum-signals.sh',
+            code: `curl -X POST https://[host]/api/continuum/ingest/signal \\
   -H "Authorization: Bearer $SZL_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{

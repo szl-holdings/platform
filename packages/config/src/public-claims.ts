@@ -313,7 +313,7 @@ export const BANNED_HARDCODED_STRINGS: BannedHardcodedString[] = [
       'artifacts/command/src/pages/marketing/apps/[id].tsx',
       'artifacts/command/src/pages/marketing/pricing.tsx',
       'artifacts/command/src/pages/marketing/status.tsx',
-      'artifacts/szl-holdings/src/alloy/pages/marketing-landing.tsx',
+      'artifacts/szl-holdings/src/continuum/pages/marketing-landing.tsx',
       'artifacts/szl-holdings/src/data/ventures.ts',
       'artifacts/szl-holdings/src/pages/control-plane.tsx',
       'artifacts/szl-holdings/src/pages/forge-home.tsx',

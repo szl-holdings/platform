@@ -8,7 +8,7 @@ export const ATLAS_DOMAINS = [
   'terra',
   'vessels',
   'carlota-jo',
-  'alloy',
+  'continuum',
   'platform',
   'command',
 ] as const;

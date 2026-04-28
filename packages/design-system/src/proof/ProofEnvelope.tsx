@@ -33,7 +33,7 @@ export interface ProofEnvelopeProps {
   className?: string;
   /**
    * Domain identifier (e.g. "vessels.routing", "holdings.deal-scoring").
-   * When set, mode changes PATCH /api/alloy/autonomy-mode and the resulting
+   * When set, mode changes PATCH /api/continuum/autonomy-mode and the resulting
    * policy decision is surfaced via the policy chip.
    */
   domain?: string;
@@ -43,7 +43,7 @@ export interface ProofEnvelopeProps {
   actionLabel?: string;
 }
 
-const DEFAULT_AUTONOMY_ENDPOINT = '/api/alloy/autonomy-mode';
+const DEFAULT_AUTONOMY_ENDPOINT = '/api/continuum/autonomy-mode';
 
 async function patchAutonomyMode(
   endpoint: string,
@@ -177,7 +177,7 @@ export function ProofEnvelope({
             aria-live="polite"
           >
             <span style={{ color: v.textMuted }} className="font-semibold uppercase tracking-wide">
-              Alloy:
+              Continuum:
             </span>{' '}
             {liveDecision.policyReason}
           </div>

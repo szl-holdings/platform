@@ -87,7 +87,7 @@ export const caseStudies: CaseStudy[] = [
     },
   },
   {
-    id: 'alloy-workflow-output',
+    id: 'continuum-workflow-output',
     product: 'Counsel',
     productAccent: '#4B8BDB',
     category: 'Workflow Orchestration',

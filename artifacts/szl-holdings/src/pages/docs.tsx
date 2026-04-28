@@ -13,7 +13,7 @@ const PLATFORM_DOCS = [
     links: [
       { label: "Platform overview", href: "/platform" },
       { label: "Lyte — Decision Intelligence", href: "/lyte" },
-      { label: "Counsel — Execution Fabric", href: "/alloy-fabric" },
+      { label: "Counsel — Execution Fabric", href: "/continuum-fabric" },
     ],
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
@@ -42,9 +42,9 @@ const PLATFORM_DOCS = [
       { label: "Vessels — Maritime", href: "/solutions/vessels" },
       { label: "Terra — Real Estate", href: "/solutions/terra" },
     ],
-    color: "var(--color-alloy-light)",
-    colorMuted: "var(--color-alloy-muted)",
-    colorBorder: "var(--color-alloy-border)",
+    color: "var(--color-continuum-light)",
+    colorMuted: "var(--color-continuum-muted)",
+    colorBorder: "var(--color-continuum-border)",
   },
   {
     icon: GitBranch,
@@ -136,15 +136,15 @@ const PILOT_PAGES = [
 ];
 
 const CAPABILITY_MATRIX = [
-  { feature: "Signal detection & classification", lyte: true, alloy: false, aegis: true, vessels: true, terra: true },
-  { feature: "Approval latency tracking", lyte: true, alloy: false, aegis: false, vessels: false, terra: true },
-  { feature: "Workflow orchestration", lyte: false, alloy: true, aegis: true, vessels: true, terra: true },
-  { feature: "Human-in-the-loop gates", lyte: false, alloy: true, aegis: true, vessels: true, terra: true },
-  { feature: "Audit trail (immutable)", lyte: false, alloy: true, aegis: true, vessels: true, terra: true },
-  { feature: "Escalation logic", lyte: false, alloy: true, aegis: true, vessels: true, terra: false },
-  { feature: "Domain signal vocabulary", lyte: false, alloy: false, aegis: true, vessels: true, terra: true },
-  { feature: "Connector mesh", lyte: false, alloy: true, aegis: true, vessels: true, terra: true },
-  { feature: "Role-scoped execution", lyte: false, alloy: true, aegis: true, vessels: true, terra: true },
+  { feature: "Signal detection & classification", lyte: true, continuum: false, aegis: true, vessels: true, terra: true },
+  { feature: "Approval latency tracking", lyte: true, continuum: false, aegis: false, vessels: false, terra: true },
+  { feature: "Workflow orchestration", lyte: false, continuum: true, aegis: true, vessels: true, terra: true },
+  { feature: "Human-in-the-loop gates", lyte: false, continuum: true, aegis: true, vessels: true, terra: true },
+  { feature: "Audit trail (immutable)", lyte: false, continuum: true, aegis: true, vessels: true, terra: true },
+  { feature: "Escalation logic", lyte: false, continuum: true, aegis: true, vessels: true, terra: false },
+  { feature: "Domain signal vocabulary", lyte: false, continuum: false, aegis: true, vessels: true, terra: true },
+  { feature: "Connector mesh", lyte: false, continuum: true, aegis: true, vessels: true, terra: true },
+  { feature: "Role-scoped execution", lyte: false, continuum: true, aegis: true, vessels: true, terra: true },
 ];
 
 const DOT = ({ active }: { active: boolean }) => (
@@ -386,7 +386,7 @@ export default function DocsPage() {
                       <tr key={row.feature} style={{ borderBottom: i < CAPABILITY_MATRIX.length - 1 ? "1px solid var(--color-szl-border)" : "none" }}>
                         <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.875rem", color: "hsl(214,7%,70%)" }}>{row.feature}</td>
                         <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.lyte} /></td>
-                        <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.alloy} /></td>
+                        <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.continuum} /></td>
                         <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.aegis} /></td>
                         <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.vessels} /></td>
                         <td style={{ padding: "0.875rem 1rem" }}><DOT active={row.terra} /></td>

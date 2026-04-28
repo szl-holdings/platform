@@ -111,15 +111,15 @@ const apps = [
     market: '$1.8T TAM',
   },
   {
-    id: 'alloy-predictive',
+    id: 'continuum-predictive',
     name: 'Counsel — Predictive',
     subtitle: 'Execution Fabric — ENGINE',
     category: 'ai',
     status: 'live',
     icon: Palette,
     accent: '#6366f1',
-    path: '/alloy/creative',
-    obsSlug: 'alloy',
+    path: '/continuum/creative',
+    obsSlug: 'continuum',
     description:
       "Counsel's predictive intelligence layer — scenario modeling, confidence scoring, and decision intelligence powering the UNDERSTAND layer across the SZL ecosystem.",
     features: ['Scenario Modeling', 'Confidence Scoring', 'Prediction Studio', 'Risk Analysis'],

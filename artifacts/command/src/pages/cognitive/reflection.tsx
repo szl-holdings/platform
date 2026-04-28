@@ -670,7 +670,7 @@ export default function ReflectionConsole() {
                 </div>
                 <div style={{ display: 'flex', gap: 8, fontSize: 10, color: '#334155' }}>
                   <a
-                    href={`/operations/alloy/traces?traceId=${ref.traceId}`}
+                    href={`/operations/continuum/traces?traceId=${ref.traceId}`}
                     onClick={(e) => e.stopPropagation()}
                     style={{
                       color: ACCENT,
@@ -769,7 +769,7 @@ export default function ReflectionConsole() {
                 {selected.outcomeClass}
               </span>
               <a
-                href={`/operations/alloy/traces?traceId=${selected.traceId}`}
+                href={`/operations/continuum/traces?traceId=${selected.traceId}`}
                 style={{
                   fontSize: 10,
                   color: ACCENT,

@@ -191,9 +191,9 @@ export const stephenTheme = stephenLutarTheme;
 
 // ─── Supporting app themes ────────────────────────────────────────────────────
 
-export const alloyCreativeTheme: BrandTheme = {
+export const continuumCreativeTheme: BrandTheme = {
   name: 'Counsel Creative',
-  slug: 'alloy-creative',
+  slug: 'continuum-creative',
   colors: {
     primary: colors.laneAccents.dreamscape.primary,
     primaryLight: 'hsl(280 52% 70%)',
@@ -317,16 +317,16 @@ export const aegisTheme: BrandTheme = {
   },
 };
 
-export const alloyTheme: BrandTheme = {
+export const continuumTheme: BrandTheme = {
   name: 'Counsel Command',
-  slug: 'alloy',
+  slug: 'continuum',
   colors: {
-    primary: colors.laneAccents.alloy.primary,
+    primary: colors.laneAccents.continuum.primary,
     primaryLight: 'hsl(232 64% 70%)',
     primaryDark: 'hsl(232 64% 46%)',
-    primaryMuted: colors.laneAccents.alloy.muted,
+    primaryMuted: colors.laneAccents.continuum.muted,
     primarySubtle: 'hsla(232 64% 58% / 0.05)',
-    secondary: colors.laneAccents.alloy.secondary,
+    secondary: colors.laneAccents.continuum.secondary,
     secondaryLight: 'hsl(248 52% 74%)',
     surface: 'hsl(228 8% 9%)',
     surfaceHover: 'hsl(228 8% 12%)',
@@ -352,7 +352,7 @@ export const firestormTheme = aegisTheme;
 export const incaTheme = aegisTheme;
 export const mspTheme = aegisTheme;
 
-export const dreamscapeTheme = alloyCreativeTheme;
+export const dreamscapeTheme = continuumCreativeTheme;
 
 // ─── Theme registry ───────────────────────────────────────────────────────────
 
@@ -365,11 +365,11 @@ export const brandThemes = {
   firestorm: aegisTheme,
   inca: aegisTheme,
   msp: aegisTheme,
-  dreamscape: alloyCreativeTheme,
-  'alloy-creative': alloyCreativeTheme,
+  dreamscape: continuumCreativeTheme,
+  'continuum-creative': continuumCreativeTheme,
   terra: terraTheme,
   lyte: lyteTheme,
-  alloy: alloyTheme,
+  continuum: continuumTheme,
 } as const;
 
 export type BrandSlug = keyof typeof brandThemes;

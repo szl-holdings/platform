@@ -20,7 +20,7 @@ export const LANE_ACCENT_HEX = {
     accent: '#c89040',
     muted: 'rgba(212,160,84,0.10)',
   },
-  alloy: {
+  continuum: {
     primary: '#4a6eb5',
     primaryLight: '#6b8fd4',
     accent: '#5a80c8',

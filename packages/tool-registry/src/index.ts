@@ -1,7 +1,7 @@
 /**
  * @workspace/tool-registry
  *
- * Tool Registry — typed catalog of all tools available to Alloy specialists.
+ * Tool Registry — typed catalog of all tools available to Continuum specialists.
  *
  * Usage:
  *   import { getTool, listTools, registerTool } from "@workspace/tool-registry";

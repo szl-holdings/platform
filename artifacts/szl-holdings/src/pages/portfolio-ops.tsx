@@ -60,7 +60,7 @@ const apps: AppReadiness[] = [
   },
   {
     name: 'Counsel',
-    slug: 'alloy',
+    slug: 'continuum',
     icon: Zap,
     accent: 'hsl(222,68%,58%)',
     stage: 'Live',

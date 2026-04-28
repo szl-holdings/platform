@@ -6,7 +6,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
+import { ContinuumOperatingLoopDiagram } from "@/components/diagrams/ContinuumOperatingLoopDiagram";
 
 const WORKFLOW_STEPS = [
   {
@@ -362,7 +362,7 @@ export default function TerraPublicPage() {
                 ))}
               </div>
               <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <AlloyOperatingLoopDiagram compact />
+                <ContinuumOperatingLoopDiagram compact />
               </m.div>
             </div>
           </section>

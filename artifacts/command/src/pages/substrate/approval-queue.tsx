@@ -29,7 +29,7 @@ const VERTICAL_LABELS: Record<Vertical, string> = {
   terra: 'Terra',
   lyte: 'Lyte',
   prism: 'PRAXIS',
-  alloy: 'Counsel',
+  continuum: 'Counsel',
   'carlota-jo': 'Carlota Jo',
 };
 
@@ -39,7 +39,7 @@ const VERTICAL_COLORS: Record<Vertical, string> = {
   terra: '#c87941',
   lyte: '#22d3ee',
   prism: '#a78bfa',
-  alloy: '#60a5fa',
+  continuum: '#60a5fa',
   'carlota-jo': '#d4b896',
 };
 

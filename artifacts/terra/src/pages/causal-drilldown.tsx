@@ -138,7 +138,7 @@ export default function CausalDrilldown() {
                   DECIDE
                 </span>
                 <a
-                  href="/alloy"
+                  href="/continuum"
                   className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80"
                   style={{ color: '#8b5cf6' }}
                 >
@@ -193,7 +193,7 @@ export default function CausalDrilldown() {
                   EXECUTE
                 </span>
                 <a
-                  href="/alloy"
+                  href="/continuum"
                   className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80"
                   style={{ color: '#4B8BDB' }}
                 >

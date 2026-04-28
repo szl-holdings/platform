@@ -174,7 +174,7 @@ export default function DriftDetection() {
                 <ArrowRight className="w-3 h-3" /> Route in Lyte
               </a>
               <a
-                href="/alloy"
+                href="/continuum"
                 className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1"
                 style={{
                   color: '#6366f1',

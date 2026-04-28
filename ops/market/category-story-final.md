@@ -69,7 +69,7 @@ These primitives are shared infrastructure. A new domain pack inherits all six w
 |---|---|---|
 | **Platform** | SZL Holdings | The governed decision layer — shared governance infrastructure |
 | **Flagship command surface** | Lyte | Where operators observe, evaluate, and act — PRISM framework |
-| **Execution fabric** | Alloy | Approval gates, workflow orchestration, audit trail |
+| **Execution fabric** | Continuum | Approval gates, workflow orchestration, audit trail |
 | **Mobile command** | CORTEX | Unified mobile access to all domain workspaces |
 | **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
 

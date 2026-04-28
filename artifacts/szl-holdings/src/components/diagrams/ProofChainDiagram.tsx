@@ -18,7 +18,7 @@ const CHAIN_LINKS = [
     id: 'recommendation',
     label: 'Recommendation',
     detail: 'Action type + confidence + evidence',
-    color: 'var(--color-alloy-light)',
+    color: 'var(--color-continuum-light)',
   },
   {
     id: 'approval',
@@ -30,7 +30,7 @@ const CHAIN_LINKS = [
     id: 'execution',
     label: 'Execution',
     detail: 'Connector + scope + SLA start',
-    color: 'var(--color-alloy)',
+    color: 'var(--color-continuum)',
   },
   {
     id: 'outcome',

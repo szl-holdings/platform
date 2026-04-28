@@ -1,5 +1,5 @@
 import { directiveTypeDefs } from './directives.js';
-import { alloyResolvers, alloyTypeDefs, pubsub } from './domains/alloy.js';
+import { continuumResolvers, continuumTypeDefs, pubsub } from './domains/continuum.js';
 import { approvalsResolvers, approvalsTypeDefs } from './domains/approvals.js';
 import { authResolvers, authTypeDefs } from './domains/auth.js';
 import { carlotaJoResolvers, carlotaJoTypeDefs } from './domains/carlota-jo.js';
@@ -34,7 +34,7 @@ export const typeDefs = [
   directiveTypeDefs,
   baseTypeDefs,
   authTypeDefs,
-  alloyTypeDefs,
+  continuumTypeDefs,
   aegisTypeDefs,
   vesselsTypeDefs,
   terraTypeDefs,
@@ -76,7 +76,7 @@ export const resolvers = mergeResolversSimple(
     },
   },
   authResolvers as Record<string, Record<string, unknown>>,
-  alloyResolvers as Record<string, Record<string, unknown>>,
+  continuumResolvers as Record<string, Record<string, unknown>>,
   aegisResolvers as Record<string, Record<string, unknown>>,
   vesselsResolvers as Record<string, Record<string, unknown>>,
   terraResolvers as Record<string, Record<string, unknown>>,

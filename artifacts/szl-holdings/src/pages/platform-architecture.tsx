@@ -68,7 +68,7 @@ const PLATFORMS = [
     role: "Execution Fabric",
     description: "The backbone of the SZL ecosystem. Counsel orchestrates workflows, normalizes signals, manages multi-agent execution, and provides the shared entity model that makes cross-platform intelligence possible.",
     accent: "hsl(214,80%,65%)",
-    href: "/alloy/",
+    href: "/continuum/",
     icon: Layers,
     loopSteps: ["interpret", "decide", "execute", "verify", "discover"],
   },

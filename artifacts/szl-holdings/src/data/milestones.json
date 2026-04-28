@@ -26,8 +26,8 @@
   {
     "year": "2022",
     "quarter": "Q4",
-    "title": "Aegis & Alloy Execution Fabric Launch",
-    "description": "Simultaneously launched Aegis cybersecurity and defense intelligence platform (securing a DoD subcontractor pilot) and the Alloy execution fabric for workflow orchestration and automation. Team expanded to 45 engineers across three time zones.",
+    "title": "Aegis & Continuum Execution Fabric Launch",
+    "description": "Simultaneously launched Aegis cybersecurity and defense intelligence platform (securing a DoD subcontractor pilot) and the Continuum execution fabric for workflow orchestration and automation. Team expanded to 45 engineers across three time zones.",
     "highlight": "2 New Platforms",
     "metric": { "label": "Team Size", "value": "45" }
   },

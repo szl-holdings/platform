@@ -60,7 +60,7 @@ const SEED_IMPACTS: BusinessImpact[] = [
   {
     id: 'bi2',
     timestamp: Date.now() - 300000,
-    service: 'alloy-engine',
+    service: 'continuum-engine',
     event: 'Error rate surge: 4.2% → 12.1%',
     eventType: 'error',
     revenuePerHour: 8200,
@@ -115,7 +115,7 @@ const REVENUE_STREAMS: RevenueStream[] = [
     name: 'AI Compute Billing',
     revenuePerHour: 9200,
     healthScore: 64,
-    affectedBy: ['ml-inference', 'alloy-engine'],
+    affectedBy: ['ml-inference', 'continuum-engine'],
     trend: [10000, 9800, 9500, 9200, 9100, 9200, 9200],
   },
   {
@@ -457,7 +457,7 @@ export default function BusinessSignalsIntelligence() {
                 {formatUSD(12500)}/hr, 8 clients degraded, SLA breach imminent for Northgate Corp
               </p>
               <p>
-                🟠 <strong className="text-white/80">alloy-engine errors</strong> →{' '}
+                🟠 <strong className="text-white/80">continuum-engine errors</strong> →{' '}
                 {formatUSD(8200)}/hr AI billing impact, Coastal Finance SLA at risk
               </p>
               <p>

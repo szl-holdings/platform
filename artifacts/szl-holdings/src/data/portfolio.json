@@ -77,17 +77,17 @@
     "marketContext": "Personal authority platform for modern operational clarity and execution leadership"
   },
   {
-    "id": "alloy",
-    "name": "Alloy",
+    "id": "continuum",
+    "name": "Continuum",
     "doctrineRole": "EXECUTE",
     "tagline": "Execution Fabric & Predictive Intelligence Engine",
-    "description": "Alloy is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem — connectors, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation (35+ connectors, high-volume orchestration) are embedded capabilities, not bolted-on tools.",
+    "description": "Continuum is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem — connectors, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation (35+ connectors, high-volume orchestration) are embedded capabilities, not bolted-on tools.",
     "status": "Live",
     "category": "Execution Fabric",
-    "link": "/alloy/",
+    "link": "/continuum/",
     "icon": "Workflow",
     "color": "#6366f1",
-    "cta": "View Alloy",
+    "cta": "View Continuum",
     "metrics": [
       { "label": "Prediction Models", "value": "Growing" },
       { "label": "Embedded Revenue", "value": "Active" },

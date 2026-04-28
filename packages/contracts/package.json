@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./auth": "./src/auth.ts",
     "./alloy": "./src/alloy.ts",
+    "./continuum": "./src/continuum.ts",
     "./ai": "./src/ai.ts",
     "./webhooks": "./src/webhooks.ts",
     "./admin": "./src/admin.ts",

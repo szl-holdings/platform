@@ -112,9 +112,9 @@ export function LiveSignalStage({ metrics }: { metrics: LiveMetrics | null }) {
       details: [
         {
           label: 'Total Recommendations',
-          value: metrics.alloy.total_recommendations.toLocaleString(),
+          value: metrics.continuum.total_recommendations.toLocaleString(),
         },
-        { label: 'Workflows (30d)', value: metrics.alloy.workflow_runs_30d.toLocaleString() },
+        { label: 'Workflows (30d)', value: metrics.continuum.workflow_runs_30d.toLocaleString() },
       ],
     },
     {

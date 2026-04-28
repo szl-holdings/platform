@@ -281,7 +281,7 @@ function ModelCard({ model }: { model: ModelState }) {
 
 const MODELS_SEED = [
   {
-    id: 'alloy-gpt4',
+    id: 'continuum-gpt4',
     name: 'Counsel GPT-4o',
     provider: 'OpenAI / Azure',
     baseLatency: 850,
@@ -316,7 +316,7 @@ const MODELS_SEED = [
     baseDrift: 12,
   },
   {
-    id: 'alloy-embed',
+    id: 'continuum-embed',
     name: 'Counsel Embedder v3',
     provider: 'SZL Custom',
     baseLatency: 70,

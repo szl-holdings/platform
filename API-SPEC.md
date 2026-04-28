@@ -61,7 +61,7 @@ across domain packs located in `artifacts/api-server/src/graphql/domains/`.
 | Carlota Jo | `/api/carlota-jo` | Advisory operations, client portal |
 | Command | `/api/command` | Ecosystem hub, cross-domain health |
 | Pulse | `/api/pulse` | AI executive briefing, signal aggregation |
-| Alloy / Workflow | `/api/alloy` | Execution fabric, approval gates |
+| Continuum / Workflow | `/api/continuum` | Business Observability Fabric, execution fabric, approval gates |
 | Decision Fabric | `/api/decision-fabric` | Cross-primitive views, workflow 360 |
 | Forge | `/api/forge` | AI agent registry, lifecycle, promotion |
 | Billing | `/api/billing` | Stripe subscriptions, usage metering |
@@ -89,8 +89,8 @@ Representative paths drawn from the route-group table above. `check-docs-claims.
 | Terra | `/terra/market-intelligence` | `artifacts/api-server/src/routes/terra.ts` |
 | Billing | `/billing/plans` | `artifacts/api-server/src/routes/billing.ts` |
 | Billing | `/billing/products` | `artifacts/api-server/src/routes/billing.ts` |
-| Alloy | `/alloy/workflows` | `artifacts/api-server/src/routes/alloy.ts` |
-| Alloy | `/alloy/ingest/signal` | `artifacts/api-server/src/routes/alloy.ts` |
+| Continuum | `/continuum/workflows` | `artifacts/api-server/src/routes/continuum.ts` |
+| Continuum | `/continuum/ingest/signal` | `artifacts/api-server/src/routes/continuum.ts` |
 | Forge | `/forge/agents` | `artifacts/api-server/src/routes/forge.ts` |
 | Command | `/snapshot` | `artifacts/api-server/src/routes/command.ts` |
 | Command | `/alerts` | `artifacts/api-server/src/routes/command.ts` |

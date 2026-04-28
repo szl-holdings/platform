@@ -19,8 +19,8 @@ import { Link, useLocation } from 'wouter';
 const COMMAND_LOOP = [
   { phase: 'DETECT', color: '#4d8fcc', active: true },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
-  { phase: 'DECIDE', color: '#8b5cf6', active: false, link: '/alloy/' },
-  { phase: 'EXECUTE', color: '#4B8BDB', active: false, link: '/alloy/' },
+  { phase: 'DECIDE', color: '#8b5cf6', active: false, link: '/continuum/' },
+  { phase: 'EXECUTE', color: '#4B8BDB', active: false, link: '/continuum/' },
   { phase: 'VERIFY', color: '#10b981', active: true },
 ];
 
@@ -192,7 +192,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
               Lyte
             </a>
             <a
-              href="/alloy"
+              href="/continuum"
               className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity"
               style={{
                 color: '#6366f1',

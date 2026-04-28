@@ -1,10 +1,10 @@
-# @workspace/alloy
+# @workspace/continuum
 
-Alloy OS is the **cognitive runtime and execution fabric** for the SZL Agentic Cognitive Operating Intelligence Platform.
+Continuum — Business Observability Fabric is the **cognitive runtime and execution fabric** for the SZL Agentic Cognitive Operating Intelligence Platform.
 
 ## Contract
 
-Alloy provides the run manager, checkpoint/replay hooks, model router interface, tool invocation through Tool Mesh, approval gate via Guardian, and an immutable action ledger. Every agent run is tracked end-to-end.
+Continuum provides the run manager, checkpoint/replay hooks, model router interface, tool invocation through Tool Mesh, approval gate via Guardian, and an immutable action ledger. Every agent run is tracked end-to-end.
 
 ### Key Interfaces
 
@@ -54,8 +54,8 @@ const result = await runReferenceWorkflow('hello world', {
 
 ## Non-goals
 
-- Alloy does not ship with a production LLM client — wire your model router per-app.
-- Alloy does not implement human-in-the-loop approval UIs — wire the approval gate per-app.
+- Continuum does not ship with a production LLM client — wire your model router per-app.
+- Continuum does not implement human-in-the-loop approval UIs — wire the approval gate per-app.
 - Per-app 3.0 runtime adoption happens in separate follow-up tasks.
 
 ## Absorption

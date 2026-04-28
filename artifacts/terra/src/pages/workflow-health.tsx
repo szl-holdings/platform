@@ -174,7 +174,7 @@ export default function WorkflowHealth() {
                     Assign in Lyte
                   </a>
                   <a
-                    href="/alloy"
+                    href="/continuum"
                     className="text-[9px] px-2 py-1 rounded font-medium hover:opacity-80 transition-opacity"
                     style={{
                       color: '#4B8BDB',

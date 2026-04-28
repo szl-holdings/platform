@@ -47,9 +47,9 @@ const ENDPOINT_GROUPS = [
   },
   {
     group: "Workflows",
-    color: "var(--color-alloy-light)",
-    colorMuted: "var(--color-alloy-muted)",
-    colorBorder: "var(--color-alloy-border)",
+    color: "var(--color-continuum-light)",
+    colorMuted: "var(--color-continuum-muted)",
+    colorBorder: "var(--color-continuum-border)",
     icon: RefreshCw,
     endpoints: [
       { method: "GET", path: "/workflows", desc: "List workflows for the tenant — active, pending, completed" },

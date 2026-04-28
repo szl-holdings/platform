@@ -78,7 +78,7 @@ export interface ChunkTruncationPolicy {
 
 /**
  * Function that turns text into model-token IDs. Supplied by the embedding
- * backend (e.g. `loadTokenizer()` from `@workspace/alloy-vector-worker`) so
+ * backend (e.g. `loadTokenizer()` from `@workspace/continuum-vector-worker`) so
  * chunk windows align exactly with what the embedder will see.
  */
 export type ChunkTokenizer = {
@@ -99,7 +99,7 @@ export interface ChunkPlannerOptions {
 
 /**
  * Default tokenizer loader: dynamically imports
- * `@workspace/alloy-vector-worker`'s `loadTokenizer()` so token-based
+ * `@workspace/continuum-vector-worker`'s `loadTokenizer()` so token-based
  * chunking matches the embedding model's vocabulary. Returns `undefined`
  * if the package or model cannot be loaded (caller falls back to words).
  */
@@ -107,7 +107,7 @@ export async function loadDefaultChunkTokenizer(
   modelRef = 'Xenova/all-MiniLM-L6-v2',
 ): Promise<ChunkTokenizer | undefined> {
   try {
-    const specifier = '@workspace/alloy-vector-worker';
+    const specifier = '@workspace/continuum-vector-worker';
     const mod = (await import(/* @vite-ignore */ specifier)) as {
       loadTokenizer: (m: string) => Promise<ChunkTokenizer>;
     };

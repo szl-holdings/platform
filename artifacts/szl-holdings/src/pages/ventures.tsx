@@ -16,7 +16,7 @@ const core = [
     name: "Counsel",
     type: "Execution Fabric",
     stage: "Core now",
-    href: "/alloy/",
+    href: "/continuum/",
     body: "The shared engine beneath the product: signals, workflow orchestration, routing, audit trail, and governed action.",
   },
 ];

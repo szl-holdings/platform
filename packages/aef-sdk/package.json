@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-sdk",
+  "name": "@workspace/cf-sdk",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — typed SDK client for AEF native API. Provides embed(), rerank(), hybridSearch(), and ingest() with centralized bearer-token + tenant header management, automatic retry with exponential backoff, OpenTelemetry trace propagation, and React hooks for query-bound usage.",
+  "description": "Continuum Fabric — Business Observability Fabric SDK — typed SDK client for Continuum Fabric native API. Provides embed(), rerank(), hybridSearch(), and ingest() with centralized bearer-token + tenant header management, automatic retry with exponential backoff, OpenTelemetry trace propagation, and React hooks for query-bound usage.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

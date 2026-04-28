@@ -3,7 +3,7 @@ import v8 from 'node:v8';
 import * as Sentry from '@sentry/node';
 import { resolveRuntimeMode } from '@szl-holdings/config';
 import { initializeOpenTelemetry } from '@szl-holdings/observability';
-import { createAefRouter } from '@workspace/alloy-embedding-api';
+import { createAefRouter } from '@workspace/continuum-embedding-api';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';

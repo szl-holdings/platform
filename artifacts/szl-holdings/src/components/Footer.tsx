@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 
 const nav = [
   { label: 'Ecosystem', href: '/ecosystem', external: false },
-  { label: 'Counsel', href: '/alloy/', external: true },
+  { label: 'Counsel', href: '/continuum/', external: true },
   { label: 'Lyte', href: '/command/operations/', external: true },
   { label: 'Vessels', href: '/vessels/', external: true },
   { label: 'Trust', href: '/trust', external: false },

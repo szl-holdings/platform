@@ -47,7 +47,7 @@ router.post(
       const body = req.body as LyteBackboneAnalyzeBody;
       const user = (req as unknown as { user?: { id?: string; tenantId?: string } }).user;
 
-      const { coordinate } = await import('@workspace/alloy');
+      const { coordinate } = await import('@workspace/continuum');
 
       const response = await coordinate(
         {
@@ -95,7 +95,7 @@ router.post(
 
 router.get('/lyte/backbone/health', authMiddleware(), async (_req, res) => {
   try {
-    const { listSpecialists } = await import('@workspace/alloy');
+    const { listSpecialists } = await import('@workspace/continuum');
     const specialists = listSpecialists().map((s) => ({
       id: s.id,
       displayName: s.displayName,

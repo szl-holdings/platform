@@ -463,9 +463,9 @@ export const MOCK_RUNS: SubstrateRun[] = [
     traceSpans: [],
   },
   {
-    id: 'run-alloy-001',
+    id: 'run-continuum-001',
     workflow: 'Cross-Domain Risk Correlation',
-    vertical: 'alloy',
+    vertical: 'continuum',
     tenant: 'SZL Holdings',
     status: 'completed',
     currentStage: 'learning',
@@ -476,8 +476,8 @@ export const MOCK_RUNS: SubstrateRun[] = [
     startedAt: new Date(now - 45 * 60_000).toISOString(),
     ageMs: 45 * 60_000,
     modelAdapter: 'gpt-4o-mini',
-    policyProfile: 'alloy-orchestrator-v3',
-    agentId: 'alloy-orchestrator',
+    policyProfile: 'continuum-orchestrator-v3',
+    agentId: 'continuum-orchestrator',
     objectiveText:
       'Correlate cross-domain risk signals from Vessels, Terra, and PRISM to produce unified executive risk posture report.',
     retriever: { source: 'synthetic', adapterId: null },
@@ -641,7 +641,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     checkpoints: [
       {
         id: 'ackpt-001',
-        runId: 'run-alloy-001',
+        runId: 'run-continuum-001',
         stageId: 'as3',
         capturedAt: new Date(now - 38 * 60_000).toISOString(),
         worldStateHash: 'sha256:b9c37d4e1f2a',

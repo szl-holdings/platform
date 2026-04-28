@@ -20,8 +20,8 @@
 ##
 
 agents:
-  - id: alloy-orchestrator
-    name: Alloy
+  - id: continuum-orchestrator
+    name: Continuum
     subtitle: Orchestration Intelligence
     domain: orchestration
     capabilities:
@@ -64,7 +64,7 @@ agents:
     riskTolerance: medium
     collaborationRules:
       - Sanctions hits require Sentinel co-validation before flagging
-      - Dark vessel alerts trigger Alloy escalation automatically
+      - Dark vessel alerts trigger Continuum escalation automatically
     scopeCertMaxRisk: high
     version: "2.5.3"
 
@@ -96,7 +96,7 @@ agents:
     riskTolerance: high
     collaborationRules:
       - Auto-remediate incidents below medium severity
-      - SLO breach escalates to Alloy for cross-domain correlation
+      - SLO breach escalates to Continuum for cross-domain correlation
     scopeCertMaxRisk: high
     version: "3.0.0"
 

@@ -434,7 +434,7 @@ export default function OperatorAnalyticsPage() {
                               'Decision pending review'}
                           </p>
                           <p className="text-xs text-[#8b9ab0] font-mono">
-                            {a.modelRoute ?? 'alloy'} · {a.caseId ?? a.incidentId ?? '—'}
+                            {a.modelRoute ?? 'continuum'} · {a.caseId ?? a.incidentId ?? '—'}
                           </p>
                         </div>
                         <Link href="/response-orchestration">

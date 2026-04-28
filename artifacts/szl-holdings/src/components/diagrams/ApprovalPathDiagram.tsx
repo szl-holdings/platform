@@ -44,7 +44,7 @@ const _PATH_STEPS = [
   { icon: CheckSquare, label: 'Trigger', color: 'var(--color-lyte-light)' },
   { icon: Clock, label: 'Route to tier', color: 'hsl(40,90%,54%)' },
   { icon: CheckSquare, label: 'Human review', color: 'hsl(258,55%,68%)' },
-  { icon: CheckSquare, label: 'Decision recorded', color: 'var(--color-alloy-light)' },
+  { icon: CheckSquare, label: 'Decision recorded', color: 'var(--color-continuum-light)' },
   { icon: AlertOctagon, label: 'Execute or reject', color: 'hsl(145,62%,46%)' },
 ];
 

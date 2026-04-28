@@ -800,7 +800,7 @@ export default function AlloyPolicyCompilerPage() {
       try {
         const res = await apiFetch<
           ApiEnvelope<PolicyCompilerStateResponse> | PolicyCompilerStateResponse
-        >(`/alloy/policy-compiler/state?studioId=${encodeURIComponent(STUDIO_ID)}`);
+        >(`/continuum/policy-compiler/state?studioId=${encodeURIComponent(STUDIO_ID)}`);
         const payload =
           (res as ApiEnvelope<PolicyCompilerStateResponse>).data ??
           (res as PolicyCompilerStateResponse);
@@ -831,7 +831,7 @@ export default function AlloyPolicyCompilerPage() {
     (async () => {
       try {
         const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
-          `/alloy/policy-compiler/versions`,
+          `/continuum/policy-compiler/versions`,
           {
             method: 'POST',
             body: JSON.stringify({
@@ -944,7 +944,7 @@ export default function AlloyPolicyCompilerPage() {
         },
     );
     try {
-      const res = await fetch(`${API_BASE}/api/alloy/policies/llm-assist`, {
+      const res = await fetch(`${API_BASE}/api/continuum/policies/llm-assist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1053,7 +1053,7 @@ export default function AlloyPolicyCompilerPage() {
     (async () => {
       try {
         const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
-          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/sign`,
+          `/continuum/policy-compiler/versions/${encodeURIComponent(versionId)}/sign`,
           {
             method: 'POST',
             body: JSON.stringify({ name: 'Sarah Mitchell', role: 'compliance_officer' }),
@@ -1082,7 +1082,7 @@ export default function AlloyPolicyCompilerPage() {
       }
       try {
         const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
-          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/activate`,
+          `/continuum/policy-compiler/versions/${encodeURIComponent(versionId)}/activate`,
           { method: 'POST' },
         );
         const payload =
@@ -1111,7 +1111,7 @@ export default function AlloyPolicyCompilerPage() {
       if (!version) return;
       try {
         const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
-          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/deactivate`,
+          `/continuum/policy-compiler/versions/${encodeURIComponent(versionId)}/deactivate`,
           { method: 'POST' },
         );
         const payload =
@@ -1181,7 +1181,7 @@ export default function AlloyPolicyCompilerPage() {
     (async () => {
       try {
         const res = await apiFetch<ApiEnvelope<ServerTestCase> | ServerTestCase>(
-          `/alloy/policy-compiler/test-cases`,
+          `/continuum/policy-compiler/test-cases`,
           { method: 'POST', body: JSON.stringify(payload) },
         );
         const body = (res as ApiEnvelope<ServerTestCase>).data ?? (res as ServerTestCase);
@@ -1201,7 +1201,7 @@ export default function AlloyPolicyCompilerPage() {
     (async () => {
       try {
         await apiFetch<unknown>(
-          `/alloy/policy-compiler/test-cases/${encodeURIComponent(id)}?studioId=${encodeURIComponent(STUDIO_ID)}`,
+          `/continuum/policy-compiler/test-cases/${encodeURIComponent(id)}?studioId=${encodeURIComponent(STUDIO_ID)}`,
           { method: 'DELETE' },
         );
       } catch (err) {

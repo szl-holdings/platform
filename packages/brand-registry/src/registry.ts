@@ -115,7 +115,7 @@ export const registry: BrandRegistry = {
       color: '#f59e0b',
     },
     {
-      id: 'alloy',
+      id: 'continuum',
       name: 'Counsel',
       tagline: 'Execution Fabric & Predictive Intelligence Engine',
       category: 'Execution Fabric',
@@ -125,7 +125,7 @@ export const registry: BrandRegistry = {
         'Counsel is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation are embedded capabilities, not bolted-on tools.',
       status: 'live',
       doctrineRole: 'EXECUTE',
-      link: '/alloy/',
+      link: '/continuum/',
       color: '#6366f1',
     },
     {
@@ -236,13 +236,13 @@ export const registry: BrandRegistry = {
   },
 
   deprecatedStrings: [
-    'Alloy Creative Engine',
+    'Continuum Creative Engine',
     'Nuro Mesh',
     'INCA',
     'Beacon',
     'Business telemetry platform',
-    'Alloy Predict',
-    'Alloy is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations',
+    'Continuum Predict',
+    'Continuum is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations',
     '2.1B+ Sentiment Data Points',
     '4,800+ workflows/day',
   ],

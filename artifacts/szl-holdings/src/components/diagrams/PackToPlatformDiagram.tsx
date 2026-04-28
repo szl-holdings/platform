@@ -38,7 +38,7 @@ const PACKS = [
 
 const PLATFORM_LAYERS = [
   { label: 'Lyte command layer', color: 'var(--color-lyte-light)' },
-  { label: 'Counsel action spine + HITL approval', color: 'var(--color-alloy-light)' },
+  { label: 'Counsel action spine + HITL approval', color: 'var(--color-continuum-light)' },
   { label: 'Proof Chain + audit trail', color: 'hsl(145,62%,46%)' },
   { label: 'GraphQL control plane', color: 'hsl(258,55%,68%)' },
   { label: 'Model mesh + Worldline', color: 'hsl(40,90%,54%)' },

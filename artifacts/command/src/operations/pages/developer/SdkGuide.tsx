@@ -121,7 +121,7 @@ const alerts = await client.maritime.getAlerts();`,
             icon: Zap,
             color: 'text-tag-ai',
             code: `// Counsel signal queue
-const signals = await client.alloy.getSignals();
+const signals = await client.continuum.getSignals();
 
 // AI intelligence
 const campaigns = await client.ai.getCampaigns();`,
@@ -133,7 +133,7 @@ const campaigns = await client.ai.getCampaigns();`,
             code: `// Zeus topology
 const topology = await client.infrastructure.getZeusTopology();
 
-// Alloy workflow templates
+// Continuum workflow templates
 const templates = await client.infrastructure.getAlloyWorkflowTemplates();`,
           },
           {

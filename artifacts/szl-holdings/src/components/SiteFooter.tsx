@@ -8,7 +8,7 @@ const FOOTER_COLS = [
     links: [
       { label: 'Platform Overview', href: '/platform' },
       { label: 'Lyte — Command', href: '/lyte' },
-      { label: 'Counsel — Execution', href: '/alloy-fabric' },
+      { label: 'Counsel — Execution', href: '/continuum-fabric' },
       { label: 'APEX — Mobile', href: 'https://cortex.szlholdings.com' },
       { label: 'Architecture', href: '/architecture' },
     ],

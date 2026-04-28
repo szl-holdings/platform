@@ -2,7 +2,7 @@
   "name": "@workspace/tool-registry",
   "version": "1.0.0",
   "type": "module",
-  "description": "Tool Registry — typed catalog of all tools available to Alloy specialists. Provides tool metadata, schema validation stubs, and capability linking.",
+  "description": "Tool Registry — typed catalog of all tools available to Continuum specialists. Provides tool metadata, schema validation stubs, and capability linking.",
   "exports": {
     ".": "./src/index.ts",
     "./registry": "./src/registry.ts"

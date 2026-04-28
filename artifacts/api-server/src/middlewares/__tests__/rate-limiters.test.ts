@@ -87,8 +87,8 @@ describe('skipForInternalCallers', () => {
 
   it('returns true when x-internal-token matches a registered token', () => {
     const fakeMatch = {
-      token: { name: 'alloy-runner', token: 'secret', scopes: [], pathPrefixes: [], legacy: false },
-      context: { name: 'alloy-runner', scopes: new Set(), legacy: false },
+      token: { name: 'continuum-runner', token: 'secret', scopes: [], pathPrefixes: [], legacy: false },
+      context: { name: 'continuum-runner', scopes: new Set(), legacy: false },
     };
     mockVerify.mockReturnValue(fakeMatch as ReturnType<typeof verifyInternalHeader>);
 
@@ -211,8 +211,8 @@ describe('aiInferenceLimiter', () => {
 
   it('bypasses limit for verified internal callers', async () => {
     const fakeMatch = {
-      token: { name: 'alloy-runner', token: 'tok', scopes: [], pathPrefixes: [], legacy: false },
-      context: { name: 'alloy-runner', scopes: new Set(), legacy: false },
+      token: { name: 'continuum-runner', token: 'tok', scopes: [], pathPrefixes: [], legacy: false },
+      context: { name: 'continuum-runner', scopes: new Set(), legacy: false },
     };
     mockVerify.mockReturnValue(fakeMatch as ReturnType<typeof verifyInternalHeader>);
 

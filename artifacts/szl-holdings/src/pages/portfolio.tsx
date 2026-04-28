@@ -13,7 +13,7 @@ import { ScenarioCard } from "@/components/ScenarioCard";
 
 interface EcosystemSummary {
   checkedAt: string;
-  alloy: { workflowRuns: number };
+  continuum: { workflowRuns: number };
   lyte: { incidents: number };
   vessels: { trackedVessels: number; fleets: number };
   aegis: { incidents: number; findings: number };
@@ -407,9 +407,9 @@ export default function PortfolioPage() {
               name="Counsel"
               tagline="Governed Execution Fabric"
               accentColor="hsl(258,55%,68%)"
-              href="/alloy/home"
+              href="/continuum/home"
               stats={[
-                { label: "Workflow Runs", value: data?.alloy.workflowRuns ?? 0 },
+                { label: "Workflow Runs", value: data?.continuum.workflowRuns ?? 0 },
                 { label: "Status", value: "Running" },
               ]}
               status="live"

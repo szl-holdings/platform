@@ -35,7 +35,7 @@ describe('SzlTracingProcessor — integration', () => {
 
     const trace = {
       traceId: TRACE_ID,
-      name: 'Alloy orchestration run',
+      name: 'Continuum orchestration run',
       groupId: 'conv-001',
       metadata: {},
       type: 'trace' as const,
@@ -49,7 +49,7 @@ describe('SzlTracingProcessor — integration', () => {
       parentId: null,
       spanData: {
         type: 'agent',
-        name: 'Alloy',
+        name: 'Continuum',
         tools: ['system_health', 'admin_overview'],
         handoffs: ['sentinel'],
       },
@@ -170,7 +170,7 @@ describe('SzlTracingProcessor — integration', () => {
       parentId: null,
       spanData: {
         type: 'handoff',
-        from_agent: 'alloy',
+        from_agent: 'continuum',
         to_agent: 'sentinel',
       },
       startedAt: new Date().toISOString(),
@@ -184,7 +184,7 @@ describe('SzlTracingProcessor — integration', () => {
     expect(mockTracer.recordRoutingFork).toHaveBeenCalledWith(
       expect.objectContaining({
         traceId,
-        agentId: 'alloy',
+        agentId: 'continuum',
         decision: expect.stringContaining('sentinel'),
       }),
     );

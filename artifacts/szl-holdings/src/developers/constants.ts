@@ -64,7 +64,7 @@ export const NAV: NavSection[] = [
       { id: 'samples-auth', label: 'Authentication' },
       { id: 'samples-projects', label: 'Projects' },
       { id: 'samples-vessels', label: 'Vessels' },
-      { id: 'samples-alloy', label: 'Counsel Signals' },
+      { id: 'samples-continuum', label: 'Counsel Signals' },
     ],
   },
   {
@@ -209,7 +209,7 @@ export const RATE_LIMIT_TIERS = [
     tier: 'Webhook Ingest',
     rph: '1,800',
     burst: '200 / min',
-    applies: 'POST /alloy/ingest/*',
+    applies: 'POST /continuum/ingest/*',
     color: 'hsl(142,62%,48%)',
   },
 ];

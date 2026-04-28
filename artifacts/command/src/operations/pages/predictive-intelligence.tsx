@@ -106,7 +106,7 @@ const SEED_SIGNALS: PredictiveSignal[] = [
     confidenceScore: 84,
     severity: 'warning',
     timeToEventHours: 2.1,
-    affectedEntities: ['ml-inference', 'alloy-engine'],
+    affectedEntities: ['ml-inference', 'continuum-engine'],
     recommendedActions: [
       'Preemptive service restart in low-traffic window',
       'Drain ML inference queue',

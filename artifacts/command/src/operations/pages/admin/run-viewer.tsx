@@ -117,17 +117,17 @@ export default function RunViewer() {
     error,
   } = useStandardQuery<PaginatedResponse<WorkflowRun>>({
     queryKey: ['admin-runs', stateFilter],
-    queryFn: () => apiFetch(`/alloy/runs${stateFilter !== 'all' ? `?state=${stateFilter}` : ''}`),
+    queryFn: () => apiFetch(`/continuum/runs${stateFilter !== 'all' ? `?state=${stateFilter}` : ''}`),
     refetchInterval: 10000,
   });
 
   const retryMutation = useStandardMutation({
-    mutationFn: (id: number) => apiFetch(`/alloy/runs/${id}/retry`, { method: 'POST' }),
+    mutationFn: (id: number) => apiFetch(`/continuum/runs/${id}/retry`, { method: 'POST' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-runs'] }),
   });
 
   const cancelMutation = useStandardMutation({
-    mutationFn: (id: number) => apiFetch(`/alloy/runs/${id}/cancel`, { method: 'POST' }),
+    mutationFn: (id: number) => apiFetch(`/continuum/runs/${id}/cancel`, { method: 'POST' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-runs'] }),
   });
 

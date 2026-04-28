@@ -92,7 +92,7 @@ const LEARNING_PATHS = [
     href: "/lyte",
   },
   {
-    id: "alloy-execution",
+    id: "continuum-execution",
     title: "Counsel Execution Fabric",
     description: "Workflow orchestration, connector mesh, governance audit, human-in-the-loop gates, and decision lineage.",
     icon: Play,
@@ -102,7 +102,7 @@ const LEARNING_PATHS = [
     color: "hsl(258,55%,68%)",
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
-    href: "/alloy",
+    href: "/continuum",
   },
 ];
 

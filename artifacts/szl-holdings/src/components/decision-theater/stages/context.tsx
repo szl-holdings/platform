@@ -94,8 +94,8 @@ export function LiveContextStage({
     },
     {
       label: 'AI Recommendations Generated',
-      value: metrics.alloy.total_recommendations,
-      max: Math.max(metrics.alloy.total_recommendations, 1000),
+      value: metrics.continuum.total_recommendations,
+      max: Math.max(metrics.continuum.total_recommendations, 1000),
       color: '#ec4899',
     },
     {
@@ -107,7 +107,7 @@ export function LiveContextStage({
   ];
 
   const domainSummary = [
-    { domain: 'Counsel', count: recommendations.filter((r) => r.domain === 'alloy').length },
+    { domain: 'Counsel', count: recommendations.filter((r) => r.domain === 'continuum').length },
     {
       domain: 'Lyte',
       count: recommendations.filter((r) => r.domain === 'beacon' || r.domain === 'terra').length,

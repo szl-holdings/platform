@@ -8,7 +8,7 @@ import {
   DegradedModeBanner,
   EnvironmentLabel,
   EvidencePanel,
-} from '@szl-holdings/shared-ui/alloy-decision-card';
+} from '@szl-holdings/shared-ui/continuum-decision-card';
 import {
   Activity,
   AlertTriangle,
@@ -136,25 +136,25 @@ export default function AlloyIntelligence() {
     isLoading: healthLoading,
     refetch: refetchHealth,
   } = useStandardQuery<AlloyAIHealth>({
-    queryKey: ['alloy-ai-health'],
+    queryKey: ['continuum-ai-health'],
     queryFn: () => api.ai.health(),
     refetchInterval: 30_000,
   });
 
   const { data: models } = useStandardQuery<AlloyAIModels>({
-    queryKey: ['alloy-ai-models'],
+    queryKey: ['continuum-ai-models'],
     queryFn: () => api.ai.models(),
     enabled: tab === 'models' || tab === 'overview',
   });
 
   const { data: tools } = useStandardQuery({
-    queryKey: ['alloy-ai-tools'],
+    queryKey: ['continuum-ai-tools'],
     queryFn: () => api.ai.tools(),
     enabled: tab === 'tools',
   });
 
   const { data: auditData } = useStandardQuery<AlloyAIAuditResult>({
-    queryKey: ['alloy-ai-audit'],
+    queryKey: ['continuum-ai-audit'],
     queryFn: () => api.ai.audit(50),
     enabled: tab === 'audit',
   });
@@ -163,7 +163,7 @@ export default function AlloyIntelligence() {
     total: number;
     decisions: any[];
   }>({
-    queryKey: ['alloy-ai-decisions'],
+    queryKey: ['continuum-ai-decisions'],
     queryFn: () => api.ai.decisions(),
     enabled: tab === 'decisions',
     refetchInterval: tab === 'decisions' ? 15_000 : false,

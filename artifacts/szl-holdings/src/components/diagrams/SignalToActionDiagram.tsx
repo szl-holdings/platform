@@ -21,9 +21,9 @@ const STAGES = [
     id: 'recommend',
     label: 'Recommend',
     sublabel: 'Counsel proposes',
-    color: 'var(--color-alloy-light)',
-    bg: 'var(--color-alloy-muted)',
-    border: 'var(--color-alloy-border)',
+    color: 'var(--color-continuum-light)',
+    bg: 'var(--color-continuum-muted)',
+    border: 'var(--color-continuum-border)',
   },
   {
     id: 'approve',
@@ -37,9 +37,9 @@ const STAGES = [
     id: 'execute',
     label: 'Execute',
     sublabel: 'Counsel acts',
-    color: 'var(--color-alloy)',
-    bg: 'var(--color-alloy-muted)',
-    border: 'var(--color-alloy-border)',
+    color: 'var(--color-continuum)',
+    bg: 'var(--color-continuum-muted)',
+    border: 'var(--color-continuum-border)',
   },
   {
     id: 'audit',
@@ -169,7 +169,7 @@ export function SignalToActionDiagram() {
         {[
           { label: 'Tenant-isolated at every stage', color: 'hsl(145,62%,46%)' },
           { label: 'HITL gate non-bypassable', color: 'hsl(40,90%,54%)' },
-          { label: 'Full lineage exportable', color: 'var(--color-alloy-light)' },
+          { label: 'Full lineage exportable', color: 'var(--color-continuum-light)' },
         ].map((t) => (
           <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
             <div

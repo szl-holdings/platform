@@ -1,5 +1,5 @@
 import { useDemoMode } from '@lyte/lib/demo-mode';
-import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
+import { EnvironmentLabel } from '@szl-holdings/shared-ui/continuum-decision-card';
 import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import {
@@ -262,20 +262,20 @@ const NAV_GROUPS = [
       { href: '/operations/ownership', label: 'Ownership', icon: Users },
       { href: '/operations/workflows', label: 'Workflows', icon: Workflow },
       { href: '/operations/readiness', label: 'Readiness', icon: Shield },
-      { href: '/operations/alloy/actions', label: 'Action Queue', icon: Activity },
-      { href: '/operations/alloy/templates', label: 'Templates', icon: Workflow },
-      { href: '/operations/alloy/gates', label: 'Write-Back Gates', icon: CheckSquare },
-      { href: '/operations/alloy/intelligence', label: 'Intelligence Fabric', icon: Zap },
-      { href: '/operations/alloy/canvas', label: 'Workflow Canvas', icon: Brain },
-      { href: '/operations/alloy/agents', label: 'Agent Monitor', icon: Radio },
-      { href: '/operations/alloy/traces', label: 'Execution Traces', icon: Activity },
-      { href: '/operations/alloy/governance', label: 'Governance', icon: Shield },
-      { href: '/operations/alloy/integrations', label: 'Integration Health', icon: Network },
-      { href: '/operations/alloy/compiler', label: 'Graph Compiler', icon: GitBranch },
-      { href: '/operations/alloy/replay', label: 'Replay Timeline', icon: Play },
-      { href: '/operations/alloy/simulate', label: 'Policy Simulator', icon: Shield },
-      { href: '/operations/alloy/handoffs', label: 'Agent Handoffs', icon: Send },
-      { href: '/operations/alloy/receipts', label: 'Trust Receipts', icon: FileText },
+      { href: '/operations/continuum/actions', label: 'Action Queue', icon: Activity },
+      { href: '/operations/continuum/templates', label: 'Templates', icon: Workflow },
+      { href: '/operations/continuum/gates', label: 'Write-Back Gates', icon: CheckSquare },
+      { href: '/operations/continuum/intelligence', label: 'Intelligence Fabric', icon: Zap },
+      { href: '/operations/continuum/canvas', label: 'Workflow Canvas', icon: Brain },
+      { href: '/operations/continuum/agents', label: 'Agent Monitor', icon: Radio },
+      { href: '/operations/continuum/traces', label: 'Execution Traces', icon: Activity },
+      { href: '/operations/continuum/governance', label: 'Governance', icon: Shield },
+      { href: '/operations/continuum/integrations', label: 'Integration Health', icon: Network },
+      { href: '/operations/continuum/compiler', label: 'Graph Compiler', icon: GitBranch },
+      { href: '/operations/continuum/replay', label: 'Replay Timeline', icon: Play },
+      { href: '/operations/continuum/simulate', label: 'Policy Simulator', icon: Shield },
+      { href: '/operations/continuum/handoffs', label: 'Agent Handoffs', icon: Send },
+      { href: '/operations/continuum/receipts', label: 'Trust Receipts', icon: FileText },
     ],
   },
 ];
@@ -654,7 +654,7 @@ export function CommandLayout({ children }: { children: ReactNode }) {
           <div className="flex gap-1">
             {[
               { label: 'Terra', href: '/terra/', color: '#a07848' },
-              { label: 'Counsel', href: '/alloy', color: '#4B8BDB' },
+              { label: 'Counsel', href: '/continuum', color: '#4B8BDB' },
               { label: 'Vessels', href: '/vessels/', color: '#38bdf8' },
             ].map((p) => (
               <a

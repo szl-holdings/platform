@@ -67,8 +67,8 @@ export const AGENTS: Record<string, Agent> = {
     borderColor: 'rgba(64,200,216,0.4)',
     bgColor: 'rgba(64,200,216,0.1)',
   },
-  alloy: {
-    id: 'alloy',
+  continuum: {
+    id: 'continuum',
     name: 'Counsel',
     domain: 'executive',
     color: '#c8a84b',

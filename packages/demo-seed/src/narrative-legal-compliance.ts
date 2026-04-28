@@ -255,7 +255,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
       step: 'Partner Approval',
       duration: '2 min',
       narrative:
-        'Sophia reviews the recommendation, adds her note about citing prior violations, and approves. Counsel generates the demand packet and routes execution through Alloy. No manual document assembly.',
+        'Sophia reviews the recommendation, adds her note about citing prior violations, and approves. Counsel generates the demand packet and routes execution through Continuum. No manual document assembly.',
       showIn: ['prism-counsel/approval-gate', 'prism-counsel/export'],
     },
     {

@@ -242,7 +242,7 @@ export default function PolicyCenterPage() {
         </div>
         <div className="flex items-center gap-2">
           <a
-            href={`${BASE_COMMAND}/operations/alloy/policy-compiler`}
+            href={`${BASE_COMMAND}/operations/continuum/policy-compiler`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border border-amber-500/20 bg-amber-500/8 text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/35"
@@ -271,7 +271,7 @@ export default function PolicyCenterPage() {
           </p>
         </div>
         <a
-          href={`${BASE_COMMAND}/operations/alloy/policy-compiler`}
+          href={`${BASE_COMMAND}/operations/continuum/policy-compiler`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium shrink-0 transition-all border border-amber-500/20 bg-amber-500/8 text-amber-300 hover:bg-amber-500/15"

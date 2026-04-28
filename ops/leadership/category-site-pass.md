@@ -29,7 +29,7 @@ The canonical loop, displayed beneath the hero in monospace as a category signat
 
 The platform hierarchy is read in one glance:
 
-> **Lyte** (flagship command) → **Alloy** (execution fabric) → **CORTEX** (mobile command) → **Domain Packs** (Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · IMPERIUM)
+> **Lyte** (flagship command) → **Continuum** (execution fabric) → **CORTEX** (mobile command) → **Domain Packs** (Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · IMPERIUM)
 
 ## 3. What changed in this pass
 
@@ -78,7 +78,7 @@ This site does not claim things that are not architecturally true.
 
 ## 7. Out of scope for this pass
 
-- Operator command center surfaces (`/forge`, `/alloy/*`) — these belong to Phase D, not Phase C
+- Operator command center surfaces (`/forge`, `/continuum/*`) — these belong to Phase D, not Phase C
 - Any new product features or domain packs
 - Pricing page logic — handled by the commercial engine task (#796)
 - Other artifacts (`aegis`, `vessels`, `terra`, `carlota-jo`, `command`, `szl-holdings-mobile`) — each has its own elevation queue

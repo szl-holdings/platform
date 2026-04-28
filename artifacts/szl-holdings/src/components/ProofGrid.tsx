@@ -52,7 +52,7 @@ const proofs = [
     desc: '6-layer pipeline: Inputs → Normalization → Reasoning → Orchestration → Outputs → Governance.',
     accent: 'hsl(222, 68%, 58%)',
     accentRgb: '86, 122, 214',
-    href: '/alloy/',
+    href: '/continuum/',
     status: 'Live',
   },
   {

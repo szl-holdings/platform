@@ -68,7 +68,7 @@ const NODES = [
     type: 'organ',
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     name: 'Counsel',
     role: 'Orchestration Engine',
     agent: 'Intelligence Engine',
@@ -122,7 +122,7 @@ const CONNECTIONS = [
   { from: 'lyte', to: 'aegis', weight: 'high' },
   { from: 'lyte', to: 'vessels', weight: 'medium' },
   { from: 'lyte', to: 'terra', weight: 'medium' },
-  { from: 'lyte', to: 'alloy', weight: 'medium' },
+  { from: 'lyte', to: 'continuum', weight: 'medium' },
   { from: 'lyte', to: 'carlota-jo', weight: 'medium' },
   { from: 'lyte', to: 'szl-holdings', weight: 'medium' },
   { from: 'lyte', to: 'stephen', weight: 'low' },

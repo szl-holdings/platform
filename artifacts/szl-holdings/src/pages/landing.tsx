@@ -129,12 +129,12 @@ function AlloyMark() {
   return (
     <svg viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
-        <radialGradient id="alloy-grad" cx="0.5" cy="0.5" r="0.55">
+        <radialGradient id="continuum-grad" cx="0.5" cy="0.5" r="0.55">
           <stop offset="0%" stopColor="rgba(201,183,135,0.18)" />
           <stop offset="100%" stopColor="rgba(201,183,135,0)" />
         </radialGradient>
       </defs>
-      <circle cx="100" cy="100" r="92" fill="url(#alloy-grad)" />
+      <circle cx="100" cy="100" r="92" fill="url(#continuum-grad)" />
       <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
       <circle cx="100" cy="100" r="48" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
       <g stroke="rgba(255,255,255,0.10)" strokeWidth="1">
@@ -331,7 +331,7 @@ export default function HomePage() {
                 <PrimaryButton href="/demo" onClick={() => { analytics.heroCTAClick("request-demo", "hero"); analytics.demoRequest("hero"); }}>
                   Request a demo <ArrowRight size={13} />
                 </PrimaryButton>
-                <SecondaryButton href="/alloy-fabric">
+                <SecondaryButton href="/continuum-fabric">
                   Explore a11oy
                 </SecondaryButton>
               </m.div>
@@ -404,7 +404,7 @@ export default function HomePage() {
 
               <FadeIn delay={0.2}>
                 <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
-                  <PrimaryButton href="/alloy-fabric">
+                  <PrimaryButton href="/continuum-fabric">
                     See a11oy in detail <ArrowRight size={13} />
                   </PrimaryButton>
                   <SecondaryButton href="/docs/proof-chain">

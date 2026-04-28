@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Evidence, EvidenceKind } from './types.js';
 
 function registryTraceId(tenantOrgId: number): string {
-  return `alloy-evidence-registry:${tenantOrgId}`;
+  return `continuum-evidence-registry:${tenantOrgId}`;
 }
 
 function loadRegistry(tenantOrgId: number): Record<string, Evidence> {
@@ -18,7 +18,7 @@ function saveRegistry(tenantOrgId: number, registry: Record<string, Evidence>): 
   const existing = defaultTraceStore.get(traceId);
   defaultTraceStore.save({
     traceId,
-    runId: `alloy-evidence-registry:${tenantOrgId}`,
+    runId: `continuum-evidence-registry:${tenantOrgId}`,
     model: 'alloy.evidence.registry',
     status: 'running',
     startedAt: existing?.startedAt ?? now,

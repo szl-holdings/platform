@@ -138,7 +138,7 @@ export function RestApiSection() {
               { tag: 'auth', count: 12, color: 'hsl(218,72%,60%)' },
               { tag: 'projects', count: 6, color: 'hsl(265,80%,60%)' },
               { tag: 'vessels', count: 18, color: 'hsl(210,78%,50%)' },
-              { tag: 'alloy', count: 24, color: 'hsl(222,68%,58%)' },
+              { tag: 'continuum', count: 24, color: 'hsl(222,68%,58%)' },
               { tag: 'billing', count: 8, color: 'hsl(38,88%,55%)' },
               { tag: 'connectors', count: 10, color: 'hsl(32,65%,52%)' },
               { tag: 'observability', count: 9, color: 'hsl(190,90%,50%)' },

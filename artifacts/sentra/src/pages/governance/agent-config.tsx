@@ -31,7 +31,7 @@ interface AgentDef {
 
 const DEFAULT_AGENTS: AgentDef[] = [
   {
-    id: 'alloy',
+    id: 'continuum',
     name: 'Counsel',
     domain: 'orchestration',
     preferredModel: 'gpt-5.2',
@@ -89,7 +89,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      'You are Terra Analytics, the analytics and operations intelligence agent within the Alloy. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
+      'You are Terra Analytics, the analytics and operations intelligence agent within the Continuum. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
     tools: ['system_health', 'platform_stats', 'ecosystem_health'],
     highStakesDomains: ['financial_alert', 'ops_critical'],
     confidenceThreshold: 0.75,

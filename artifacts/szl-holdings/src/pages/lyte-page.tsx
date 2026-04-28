@@ -74,7 +74,7 @@ const DOMAIN_ICON: Record<string, typeof Shield> = {
 
 const SOURCE_TO_DOMAIN: Record<string, string> = {
   terra: "Terra", vessels: "Vessels", firestorm: "Aegis",
-  prism: "Counsel", alloy: "Counsel", "carlota-jo": "Carlota Jo",
+  prism: "Counsel", continuum: "Counsel", "carlota-jo": "Carlota Jo",
   carlota: "Carlota Jo", manual: "IMPERIUM", monitor: "IMPERIUM",
   api: "Counsel", scheduler: "Counsel",
 };

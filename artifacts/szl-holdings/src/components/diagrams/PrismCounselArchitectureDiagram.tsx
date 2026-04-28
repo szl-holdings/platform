@@ -45,7 +45,7 @@ const PRISM_LAYERS = [
     icon: Brain,
   },
   {
-    id: 'alloy',
+    id: 'continuum',
     label: 'Counsel Control Plane',
     sublabel:
       'Workflow orchestration · Approval gates · Audit trail · AI governance · Source tracing',

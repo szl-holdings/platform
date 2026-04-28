@@ -10,7 +10,7 @@ export interface LiveMetrics {
     converted_deals: number;
   };
   firestorm: { open_vulnerabilities: number };
-  alloy: {
+  continuum: {
     workflow_runs_30d: number;
     total_recommendations: number;
     recent_recommendations: Array<{

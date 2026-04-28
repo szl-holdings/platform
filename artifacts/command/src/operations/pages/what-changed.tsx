@@ -23,7 +23,7 @@ type ChangeType =
   | 'incident_resolved'
   | 'twin_synced'
   | 'worldline_branched';
-type Domain = 'aegis' | 'terra' | 'vessels' | 'alloy' | 'prism' | 'lyte' | 'all';
+type Domain = 'aegis' | 'terra' | 'vessels' | 'continuum' | 'prism' | 'lyte' | 'all';
 
 interface TwinChange {
   id: string;
@@ -65,7 +65,7 @@ const DOMAIN_COLORS: Record<Domain, string> = {
   aegis: '#ef4444',
   terra: '#10b981',
   vessels: '#06b6d4',
-  alloy: '#4B8BDB',
+  continuum: '#4B8BDB',
   prism: '#f59e0b',
   lyte: '#d4a054',
   all: '#8b7ac8',
@@ -83,7 +83,7 @@ const ENTITY_TYPE_DOMAIN: Record<string, Domain> = {
   aegis: 'aegis',
   terra: 'terra',
   vessels: 'vessels',
-  alloy: 'alloy',
+  continuum: 'continuum',
   prism: 'prism',
   lyte: 'lyte',
 };
@@ -94,7 +94,7 @@ function apiChangeToTwinChange(ev: ApiChangeEvent): TwinChange {
   const domain =
     (Object.keys(ENTITY_TYPE_DOMAIN).find(
       (k) => source.includes(k) || ev.entityType.includes(k),
-    ) as Domain) ?? 'alloy';
+    ) as Domain) ?? 'continuum';
   const changeType: ChangeType =
     ENTITY_TYPE_CHANGE[ev.entityType] ??
     (delta.status === 'resolved'
@@ -166,7 +166,7 @@ const SEED_CHANGES: TwinChange[] = [
   {
     id: 'c-004',
     timestamp: '14:21:33',
-    domain: 'alloy',
+    domain: 'continuum',
     twinName: 'Counsel Execution Fabric',
     changeType: 'approval_granted',
     summary:
@@ -221,7 +221,7 @@ const SEED_CHANGES: TwinChange[] = [
   {
     id: 'c-009',
     timestamp: '13:58:44',
-    domain: 'alloy',
+    domain: 'continuum',
     twinName: 'Counsel Execution Fabric',
     changeType: 'twin_synced',
     summary:
@@ -441,7 +441,7 @@ export default function WhatChanged() {
           <Filter className="w-3 h-3" /> Domain:
         </div>
         <div className="flex gap-1 flex-wrap">
-          {(['all', 'aegis', 'lyte', 'alloy', 'vessels', 'terra', 'prism'] as const).map((d) => (
+          {(['all', 'aegis', 'lyte', 'continuum', 'vessels', 'terra', 'prism'] as const).map((d) => (
             <button
               key={d}
               onClick={() => setDomainFilter(d)}

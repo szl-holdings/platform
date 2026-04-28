@@ -8,7 +8,7 @@
  *
  * Usage:
  *   import { usersTable, sessionsTable } from "@szl-holdings/db-schema/auth";
- *   import { alloyWorkflowsTable } from "@szl-holdings/db-schema/alloy";
+ *   import { continuumWorkflowsTable } from '@szl-holdings/db-schema/continuum'";
  */
 
 export * from '@szl-holdings/db/schema';

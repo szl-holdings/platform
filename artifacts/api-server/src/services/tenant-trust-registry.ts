@@ -1,11 +1,11 @@
-import type { TrustScoreEngine } from '@workspace/alloy';
+import type { TrustScoreEngine } from '@workspace/continuum';
 
 const _tenantTrustEngines = new Map<string, TrustScoreEngine>();
 let _TrustScoreEngineCtor: (new (policy?: object) => TrustScoreEngine) | null = null;
 
 async function ensureCtor(): Promise<new (policy?: object) => TrustScoreEngine> {
   if (!_TrustScoreEngineCtor) {
-    const mod = await import('@workspace/alloy');
+    const mod = await import('@workspace/continuum');
     _TrustScoreEngineCtor = mod.TrustScoreEngine as new (policy?: object) => TrustScoreEngine;
   }
   return _TrustScoreEngineCtor;

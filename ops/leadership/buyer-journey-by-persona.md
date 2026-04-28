@@ -32,7 +32,7 @@ This is a *map*, not a script. Personas overlap in real engagements. But each su
 1. Homepage hero → category clarity in one screen
 2. "Where do you start?" → "Executive buyer" → `/platform`
 3. Platform overview → reads the loop, sees the platform hierarchy, sees domain pack relevance
-4. One of: `/lyte`, `/alloy-fabric`, or a domain pack page (Aegis, Vessels, Terra, PRISM Counsel) depending on their workflow
+4. One of: `/lyte`, `/continuum-fabric`, or a domain pack page (Aegis, Vessels, Terra, PRISM Counsel) depending on their workflow
 5. `/case-studies` for shape-matching to their context
 6. CTA: `/demo` or `/design-partner`
 
@@ -52,7 +52,7 @@ This is a *map*, not a script. Personas overlap in real engagements. But each su
 2. "Where do you start?" → "Technical evaluator" → `/architecture`
 3. `/docs/architecture`, `/docs/control-plane`, `/docs/proof-chain`, `/docs/model-mesh`
 4. `/architecture` (full-page architecture story)
-5. `/lyte`, `/alloy-fabric`, `/api` for surface-level integration footprint
+5. `/lyte`, `/continuum-fabric`, `/api` for surface-level integration footprint
 6. CTA: technical review session (founder + architecture)
 
 **Disqualifying signals:** They are looking for a generic ML platform. They want to replace their data warehouse. They expect a Kubernetes operator and helm charts as the integration story.
@@ -127,7 +127,7 @@ This is a *map*, not a script. Personas overlap in real engagements. But each su
 
 ## 5. What this document does not cover
 
-- Internal operator surfaces (`/forge`, `/alloy/*`) — those serve a different audience (active customers and design partners, not prospects)
+- Internal operator surfaces (`/forge`, `/continuum/*`) — those serve a different audience (active customers and design partners, not prospects)
 - Pricing path — see `packaging-model.md` and `founder-pricing-notes.md`
 - Post-pilot expansion path — see `pilot-to-case-study-system.md` and `referenceability-model.md`
 - Specific buyer-objection handling — see `buyer-close-system.md` and `enterprise-close-pack.md`

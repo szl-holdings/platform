@@ -1,9 +1,9 @@
 {
-  "name": "@workspace/aef-domain-profiles",
+  "name": "@workspace/cf-domain-profiles",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — versioned domain profiles for Lyte, Vessels, Terra, Aegis, PRISM Counsel, and Carlota Jo. Each profile declares chunking strategy, query and document prompt templates, default metadata filters, rerank toggle, top-k, score thresholds, privacy level, and retention rules. Ships a model registry with active-profile pointer, deprecation, and rollback semantics.",
+  "description": "Continuum Fabric Fabric — versioned domain profiles for Lyte, Vessels, Terra, Aegis, PRISM Counsel, and Carlota Jo. Each profile declares chunking strategy, query and document prompt templates, default metadata filters, rerank toggle, top-k, score thresholds, privacy level, and retention rules. Ships a model registry with active-profile pointer, deprecation, and rollback semantics.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -27,7 +27,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

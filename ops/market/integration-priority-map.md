@@ -156,7 +156,7 @@ Integrations are prioritized by:
 
 | Integration | Domain | Value | Trigger for Priority Increase |
 |---|---|---|---|
-| Jira / Linear | All | Work item signal integration with Alloy workflows | Design partner with engineering workflow use case |
+| Jira / Linear | All | Work item signal integration with Continuum workflows | Design partner with engineering workflow use case |
 | Court records APIs | PRISM Counsel | External legal docket signals | Jurisdiction-specific PRISM partner |
 | Weather APIs | Vessels, Terra | Environmental signal enrichment | Worldline integration for PRISM Counsel |
 | Bloomberg / Refinitiv | Vessels, Carlota Jo | Market signal enrichment | Financial services design partner |

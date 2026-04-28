@@ -63,7 +63,7 @@ const DOMAIN_CONFIG: Omit<
     icon: Network,
   },
   {
-    domain: 'alloy',
+    domain: 'continuum',
     label: 'Counsel — Execution',
     color: '#4B8BDB',
     appPath: `${BASE}/operations`,

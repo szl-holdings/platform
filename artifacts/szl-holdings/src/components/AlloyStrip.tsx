@@ -167,7 +167,7 @@ export function AlloyStrip() {
               }}
             >
               Counsel is the AI orchestration engine that connects the entire ecosystem. Every
-              intelligent workflow, agent decision, and cross-platform signal flows through Alloy.
+              intelligent workflow, agent decision, and cross-platform signal flows through Continuum.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -245,7 +245,7 @@ export function AlloyStrip() {
                   Orchestration flow
                 </span>
                 <a
-                  href="/alloy"
+                  href="/continuum"
                   style={{
                     display: 'flex',
                     alignItems: 'center',

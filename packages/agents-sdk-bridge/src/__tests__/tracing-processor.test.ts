@@ -229,7 +229,7 @@ describe('SzlTracingProcessor', () => {
 
       const span = makeSpan('trace-handoff', {
         type: 'handoff',
-        from_agent: 'alloy',
+        from_agent: 'continuum',
         to_agent: 'sentinel',
       });
 
@@ -237,7 +237,7 @@ describe('SzlTracingProcessor', () => {
 
       expect(mockTracer.recordRoutingFork).toHaveBeenCalledWith(
         expect.objectContaining({
-          agentId: 'alloy',
+          agentId: 'continuum',
           traceId: 'trace-handoff',
         }),
       );

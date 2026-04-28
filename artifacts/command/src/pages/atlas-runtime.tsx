@@ -38,7 +38,7 @@ function formatAge(seconds: number | null): string {
 }
 
 type TwinState = 'stable' | 'degraded' | 'awaiting_approval';
-type Domain = 'aegis' | 'terra' | 'vessels' | 'alloy' | 'prism' | 'lyte';
+type Domain = 'aegis' | 'terra' | 'vessels' | 'continuum' | 'prism' | 'lyte';
 
 interface CrossDomainTwin {
   id: string;
@@ -65,7 +65,7 @@ const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof
   aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield },
   terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network },
-  alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },
+  continuum: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe },
   lyte: { label: "Lyte — AIOps", color: '#d4a054', icon: Activity },
 };
@@ -156,9 +156,9 @@ const SEED_TWINS: CrossDomainTwin[] = [
     summary: 'Cargo manifest variance on VES-MV-047, awaiting port authority confirmation',
   },
   {
-    id: 'tw-alloy-001',
+    id: 'tw-continuum-001',
     name: 'Counsel Execution Fabric',
-    domain: 'alloy',
+    domain: 'continuum',
     state: 'stable',
     driftScore: 2,
     lastSync: '30s ago',
