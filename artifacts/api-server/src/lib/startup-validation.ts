@@ -1990,9 +1990,8 @@ export function validateStartupConfig(): ValidationResult {
           'Generate a 64-char hex key (openssl rand -hex 32) and add it to Replit Secrets.',
       );
     } else {
-      warnings.push(
-        'SUBSTRATE_SIGNING_KEY is not set — agent-mesh HMAC signing will be disabled. Set before deploying to production.',
-      );
+      // Expected in dev — agent-mesh HMAC signing is optional locally.
+      logger.debug('[startup] SUBSTRATE_SIGNING_KEY not set (dev) — agent-mesh HMAC signing disabled');
     }
   } else if (substrateSigningKey === KNOWN_DEV_SUBSTRATE_KEY) {
     if (isProduction) {
@@ -2001,9 +2000,8 @@ export function validateStartupConfig(): ValidationResult {
           'Set a unique 64-char hex key in Replit Secrets (see docs/SECRETS_POLICY.md).',
       );
     } else {
-      warnings.push(
-        '[B-02] SUBSTRATE_SIGNING_KEY is the known dev value — override via Replit Secrets before deploying.',
-      );
+      // Expected in dev — the .replit dev key is the normal local default.
+      logger.debug('[startup] SUBSTRATE_SIGNING_KEY is the known dev value — expected in local dev');
     }
   }
 
@@ -2015,9 +2013,8 @@ export function validateStartupConfig(): ValidationResult {
           'Generate a key and add it to Replit Secrets (run: bash scripts/rotate-secrets.sh).',
       );
     } else {
-      warnings.push(
-        'SUBSTRATE_GATEWAY_API_KEY is not set — Substrate gateway bearer-token auth is disabled. Set before deploying to production.',
-      );
+      // Expected in dev — Substrate gateway bearer-token auth is optional locally.
+      logger.debug('[startup] SUBSTRATE_GATEWAY_API_KEY not set (dev) — gateway bearer-token auth disabled');
     }
   } else if (substrateGwKey === KNOWN_DEV_SUBSTRATE_GW_KEY) {
     if (isProduction) {
@@ -2026,9 +2023,8 @@ export function validateStartupConfig(): ValidationResult {
           'Rotate and set the production key in Replit Secrets (see docs/SECRETS_POLICY.md).',
       );
     } else {
-      warnings.push(
-        '[B-02] SUBSTRATE_GATEWAY_API_KEY is the known dev value — override via Replit Secrets before deploying.',
-      );
+      // Expected in dev — the .replit dev key is the normal local default.
+      logger.debug('[startup] SUBSTRATE_GATEWAY_API_KEY is the known dev value — expected in local dev');
     }
   }
 
@@ -2067,9 +2063,8 @@ export function validateStartupConfig(): ValidationResult {
         'CONNECTOR_ENCRYPTION_KEY is not set — this is required in production for RMM credential encryption. Generate a 64-char hex key and add it to secrets.',
       );
     } else {
-      warnings.push(
-        'CONNECTOR_ENCRYPTION_KEY not set — RMM provider credentials will use a derived development key (not safe for production)',
-      );
+      // Expected in dev — a derived key is used automatically as a fallback.
+      logger.debug('[startup] CONNECTOR_ENCRYPTION_KEY not set (dev) — using derived development key');
     }
   } else if (!/^[0-9a-fA-F]{64}$/.test(connectorKey)) {
     if (isProduction) {
@@ -2077,6 +2072,7 @@ export function validateStartupConfig(): ValidationResult {
         'CONNECTOR_ENCRYPTION_KEY must be exactly 64 hex characters (256 bits) — replace with a properly generated key.',
       );
     } else {
+      // Log at warn in dev since the key is set but malformed — the dev fallback will not be used.
       warnings.push(
         'CONNECTOR_ENCRYPTION_KEY format is invalid (expected 64 hex chars) — verify before deploying to production',
       );

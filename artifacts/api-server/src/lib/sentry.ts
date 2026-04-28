@@ -6,8 +6,18 @@ export function initServerSentry(): void {
   if (initialized) return;
   initialized = true;
 
-  const dsn = process.env.SENTRY_DSN;
-  if (!dsn) {
+  const rawDsn = process.env.SENTRY_DSN;
+  if (!rawDsn) {
+    return;
+  }
+  let dsn: string;
+  try {
+    const u = new URL(rawDsn);
+    if (!u.protocol.startsWith('http') || !/sentry\.io|ingest\./i.test(u.hostname)) {
+      return;
+    }
+    dsn = rawDsn;
+  } catch {
     return;
   }
 

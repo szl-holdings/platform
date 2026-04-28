@@ -1,7 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 const API = `${BASE}/api`;
@@ -68,13 +68,6 @@ const STATUS_COLORS: Record<ReportStatus, string> = {
   archived: 'text-zinc-500 bg-zinc-900',
 };
 
-const DELIVERY_STATUS_STYLES: Record<DeliveryStatus, string> = {
-  pending: 'text-zinc-400 bg-zinc-800',
-  sent: 'text-blue-400 bg-blue-950',
-  delivered: 'text-emerald-400 bg-emerald-950',
-  opened: 'text-purple-400 bg-purple-950',
-  failed: 'text-red-400 bg-red-950',
-};
 
 const DOMAIN_LABELS: Record<string, string> = {
   szl_holdings: 'SZL Holdings',
@@ -239,103 +232,6 @@ function ReportRow({
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function DistributionLog({
-  reportId,
-  autoRefreshMs,
-}: {
-  reportId: string;
-  autoRefreshMs?: number;
-}) {
-  const [distributions, setDistributions] = useState<Distribution[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDistributions = async () => {
-    try {
-      const result = await apiFetch(`/reports/${reportId}/distributions`);
-      const rows: Distribution[] = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
-      setDistributions(rows);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load distribution log');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDistributions();
-    if (autoRefreshMs) {
-      const interval = setInterval(fetchDistributions, autoRefreshMs);
-      return () => clearInterval(interval);
-    }
-  }, [reportId, autoRefreshMs]);
-
-  if (loading) {
-    return <p className="text-xs text-zinc-600 py-2">Loading delivery log...</p>;
-  }
-
-  if (error) {
-    return <p className="text-xs text-red-400 py-2">{error}</p>;
-  }
-
-  if (!distributions || distributions.length === 0) {
-    return <p className="text-xs text-zinc-600 py-2">No distribution records found.</p>;
-  }
-
-  const sentCount = distributions.filter((d) => d.status === 'sent' || d.status === 'delivered' || d.status === 'opened').length;
-  const failedCount = distributions.filter((d) => d.status === 'failed').length;
-  const pendingCount = distributions.filter((d) => d.status === 'pending').length;
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-xs text-zinc-500">{distributions.length} recipient{distributions.length !== 1 ? 's' : ''}</span>
-        {sentCount > 0 && (
-          <span className="text-xs px-1.5 py-0.5 rounded bg-blue-950 text-blue-400">{sentCount} sent</span>
-        )}
-        {failedCount > 0 && (
-          <span className="text-xs px-1.5 py-0.5 rounded bg-red-950 text-red-400">{failedCount} failed</span>
-        )}
-        {pendingCount > 0 && (
-          <span className="text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{pendingCount} pending</span>
-        )}
-        <button
-          onClick={fetchDistributions}
-          className="ml-auto text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-          title="Refresh"
-        >
-          ↻ Refresh
-        </button>
-      </div>
-      <div className="divide-y divide-zinc-800 border border-zinc-800 rounded-lg overflow-hidden">
-        {distributions.map((d) => (
-          <div key={d.distributionId} className="px-3 py-2 bg-zinc-900/60">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-zinc-300 truncate flex-1">{d.recipientEmail}</span>
-              <span
-                className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${DELIVERY_STATUS_STYLES[d.status] || 'text-zinc-400 bg-zinc-800'}`}
-              >
-                {d.status}
-              </span>
-            </div>
-            {d.sentAt && (
-              <p className="text-xs text-zinc-600 mt-0.5">
-                Sent {new Date(d.sentAt).toLocaleString()}
-              </p>
-            )}
-            {d.status === 'failed' && d.errorMessage && (
-              <p className="text-xs text-red-400 mt-1 bg-red-950/40 px-2 py-1 rounded">
-                {d.errorMessage}
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -630,7 +526,7 @@ const DIST_STATUS_STYLES: Record<string, string> = {
   failed: 'text-red-400 bg-red-950',
 };
 
-function DistributionLog({ reportId }: { reportId: string }) {
+function DistributionLog({ reportId, autoRefreshMs }: { reportId: string; autoRefreshMs?: number }) {
   const qc = useQueryClient();
   const [retrying, setRetrying] = useState<Record<string, boolean>>({});
   const [retryErrors, setRetryErrors] = useState<Record<string, string>>({});
@@ -638,7 +534,7 @@ function DistributionLog({ reportId }: { reportId: string }) {
   const { data, isLoading } = useStandardQuery({
     queryKey: ['distributions', reportId],
     queryFn: () => apiFetch(`/reports/${reportId}/distributions`),
-    refetchInterval: 10_000,
+    refetchInterval: autoRefreshMs ?? 10_000,
   });
 
   const distributions: Distribution[] = data?.data ?? [];

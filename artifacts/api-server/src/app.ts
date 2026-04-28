@@ -52,10 +52,26 @@ assertInternalTokenPolicy({ isProduction });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+function resolveOtlpEndpoint(): string | undefined {
+  const raw = process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+  if (!raw) return undefined;
+  try {
+    const u = new URL(raw);
+    if (!u.protocol.startsWith('http')) return undefined;
+    return raw;
+  } catch {
+    logger.debug(
+      { raw },
+      '[observability] OTLP_ENDPOINT is not a valid URL — OTel export disabled. Set a valid https:// endpoint to enable.',
+    );
+    return undefined;
+  }
+}
+
 export const otelReady = initializeOpenTelemetry({
   serviceName: process.env.OTEL_SERVICE_NAME ?? 'szl-api-server',
   serviceVersion: process.env.npm_package_version ?? '0.0.0',
-  otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  otlpEndpoint: resolveOtlpEndpoint(),
   exportToConsole: process.env.OTEL_CONSOLE_EXPORT === 'true',
 }).catch((_e) => {});
 

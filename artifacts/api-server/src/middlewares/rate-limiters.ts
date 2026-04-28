@@ -1,5 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { sendError } from '../lib/api-response';
 import { verifyInternalHeader } from '../lib/internal-tokens';
 
@@ -39,7 +39,7 @@ function userOrgKeyGenerator(req: Request): string {
     .user;
   if (user?.orgId != null) return `org:${user.orgId}`;
   if (user?.id != null) return `user:${user.id}`;
-  return req.ip ?? 'unknown';
+  return ipKeyGenerator(req.ip ?? '');
 }
 
 /**

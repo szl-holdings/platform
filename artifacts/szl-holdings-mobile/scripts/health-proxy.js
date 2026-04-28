@@ -99,7 +99,7 @@ const PROXY_ROUTES = loadProxyRoutes();
 // If the canonical file is reformatted in a way the regex above can no longer
 // understand (e.g. computed values, spread operators, helper-built tables),
 // fail loudly at startup instead of silently routing to the Expo fallback.
-const REQUIRED_PREFIXES = ['/aegis/', '/command/', '/vessels/'];
+const REQUIRED_PREFIXES = ['/a11oy/', '/command/', '/vessels/'];
 const missing = REQUIRED_PREFIXES.filter((p) => !PROXY_ROUTES.some((r) => r.prefix === p));
 if (missing.length > 0) {
   throw new Error(

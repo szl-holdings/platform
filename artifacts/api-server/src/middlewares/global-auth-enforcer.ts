@@ -203,6 +203,10 @@ const PUBLIC_EXACT_PATHS = new Set([
   // they require a session and return 401 to unauthenticated callers.
   "/api/terra/sourcing/candidates",
   "/api/terra/sourcing/adapters",
+  // Notification badge count — safe to expose unauthenticated; returns
+  // { unreadCount: 0 } when no session is present. Exact-path entry ensures
+  // only the bare /count URL is public; sub-paths remain protected.
+  "/api/notifications/count",
 ]);
 
 const PUBLIC_PREFIXES = [

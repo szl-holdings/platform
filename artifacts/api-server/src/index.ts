@@ -490,7 +490,10 @@ export async function bootstrap(
     // the original promise; if it later rejects (e.g. after DB statement_timeout
     // fires ~60 s), the rejection must already be handled to prevent an
     // unhandledRejection that would trigger process shutdown.
-    const CHAIN_STATE_HYDRATE_TIMEOUT_MS = 10_000;
+    // Allow up to 30 s for chainState to hydrate from the DB before falling
+    // back to in-memory defaults.  The longer window accommodates cold-start
+    // DB connection warm-up without generating spurious timeout warnings.
+    const CHAIN_STATE_HYDRATE_TIMEOUT_MS = 30_000;
     const _chainStatePromise = bootstrapChainState().catch((err) => {
       logger.warn({ err }, '[bootstrap] chainState background hydration error (non-fatal)');
     });
@@ -503,9 +506,9 @@ export async function bootstrap(
         ),
       ),
     ]).catch((err) => {
-      logger.warn(
+      logger.info(
         { err },
-        '[bootstrap] chainState hydration failed or timed out — continuing with in-memory defaults',
+        '[bootstrap] chainState hydration timed out — continuing with in-memory defaults (non-fatal)',
       );
     });
 
