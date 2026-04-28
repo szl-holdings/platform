@@ -44,11 +44,6 @@
       "artifactId": "artifacts/pulse"
     },
     {
-      "product": "Counsel (legacy Counsel)",
-      "domain": "Legal matter command — agentic matter management, court filings, recovery operations",
-      "status": "Superseded by Counsel (Active); legacy domain API routes retained"
-    },
-    {
       "product": "IMPERIUM",
       "domain": "Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility",
       "status": "Archived (Task #920)"
@@ -57,7 +52,9 @@
   "excludeArtifacts": [
     "artifacts/szl-holdings",
     "artifacts/api-server",
+    "artifacts/a11oy",
     "artifacts/command",
+    "artifacts/conduit",
     "artifacts/szl-demo-video",
     "artifacts/szl-holdings-mobile",
     "artifacts/lyte-command-center",
