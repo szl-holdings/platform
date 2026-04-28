@@ -30,7 +30,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { notifyRunFailure } from "../lib/continuum-run-failure-notifications";
+import { notifyRunFailure } from "../lib/alloy-run-failure-notifications";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
 import { listQuerySchema, validateBody, validateQuery, autonomyModeQuerySchema, alloyIngestSignalSchema, alloyIngestBatchSchema, alloyWorkflowMutationSchema, alloyWorkflowDeleteSchema, alloyRunActionSchema, alloyDecisionTransitionSchema, alloyResourceBodySchema } from "../lib/validation";
 import {

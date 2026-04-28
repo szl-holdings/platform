@@ -17,6 +17,17 @@ export * from './continuum_platform';
 export * from './continuum_policy_versions';
 export * from './continuum_run_notifications';
 export * from './continuum_runtime';
+export {
+  alloyOwners,
+  alloySignals,
+  alloyWorkflows,
+  alloyWorkflowRuns,
+  alloyApprovals,
+  alloyActions,
+  alloyArtifacts,
+  alloyAuditLog,
+} from './alloy';
+export { alloyPolicyVersions, alloyPolicyTestCases } from './alloy_policy_versions';
 export * from './analytics';
 export * from './api_keys';
 export * from './approvals';

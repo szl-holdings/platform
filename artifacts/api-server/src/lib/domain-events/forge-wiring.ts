@@ -1,4 +1,4 @@
-import { processSignalIntoWorkflow } from '../continuum-orchestration.js';
+import { processSignalIntoWorkflow } from '../alloy-orchestration.js';
 import { logger } from '../logger.js';
 import { domainEventBus } from './index.js';
 

@@ -5,7 +5,7 @@ import {
   reviewApproval,
   startWorkflowRun,
   writeAuditLog,
-} from '../../lib/continuum-orchestration.js';
+} from '../../lib/alloy-orchestration.js';
 import { domainEventBus } from '../../lib/domain-events/index.js';
 import { CONTINUUM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
