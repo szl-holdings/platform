@@ -230,6 +230,8 @@ const NAV_SECTIONS: NavSection[] = [
     id: 'war-room',
     label: 'War Room & Exercises',
     items: [
+      { path: '/crisis-simulator', label: 'Crisis Simulator', icon: Swords, comp: L(() => import('@/pages/crisis-simulator')) },
+      { path: '/resilience-leaderboard', label: 'Resilience Leaderboard', icon: Trophy, comp: L(() => import('@/pages/resilience-leaderboard')) },
       { path: '/citadel-war-room', label: 'Citadel War Room', icon: Radio, comp: L(() => import('@/pages/citadel-war-room')) },
       { path: '/citadel-playbooks', label: 'Citadel Playbooks', icon: BookOpen, comp: L(() => import('@/pages/citadel-playbooks')) },
       { path: '/citadel-after-action', label: 'After-Action Report', icon: FileText, comp: L(() => import('@/pages/citadel-after-action')) },
@@ -391,6 +393,7 @@ const SentraPricingPage = lazy(() => import('@/pages/pricing'));
 const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
 const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
 const HuntDetailPage = lazy(() => import('@/pages/hunt-detail'));
+const CrisisSimulatorRunPage = lazy(() => import('@/pages/crisis-simulator-run'));
 
 function PageLoader() {
   return (
@@ -437,6 +440,12 @@ function DashboardRoutes() {
           </Suspense>
         </Route>
       ))}
+
+      <Route path="/crisis-simulator/:id">
+        <Suspense fallback={<PageLoader />}>
+          <CrisisSimulatorRunPage />
+        </Suspense>
+      </Route>
       <Route path="/hunt/:id">
         <Suspense fallback={<PageLoader />}>
           <HuntDetailPage />
