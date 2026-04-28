@@ -83,7 +83,7 @@ export default defineConfig({
     strictPort: true,
     host: '::',
     allowedHosts: true,
-    hmr: { clientPort: 443 },
+    hmr: { clientPort: 443, path: basePath },
     fs: { strict: false, deny: ['**/.*'] },
   },
   preview: {

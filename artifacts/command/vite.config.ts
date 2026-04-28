@@ -140,7 +140,7 @@ export default defineConfig({
     warmup: {
       clientFiles: ['src/main.tsx', 'src/App.tsx'],
     },
-    hmr: { clientPort: 443 },
+    hmr: { clientPort: 443, path: basePath },
     fs: {
       strict: false,
       deny: ['**/.*'],
