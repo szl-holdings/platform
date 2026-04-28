@@ -237,7 +237,7 @@ resource swaRoutes 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-02-01' = [fo
     originGroup: {
       id: swaOriginGroups[i].id
     }
-    patternsToMatch: appName == 'rosie' ? ['/*'] : ['/${appName}/*']
+    patternsToMatch: appName == 'szl-holdings' ? ['/*'] : ['/${appName}/*']
     forwardingProtocol: 'HttpsOnly'
     httpsRedirect: 'Enabled'
     linkToDefaultDomain: 'Enabled'
@@ -259,6 +259,75 @@ resource customDomainResource 'Microsoft.Cdn/profiles/customDomains@2024-02-01' 
       minimumTlsVersion: 'TLS12'
     }
   }
+}
+
+resource wwwCustomDomainResource 'Microsoft.Cdn/profiles/customDomains@2024-02-01' = {
+  parent: frontDoor
+  name: replace('www.${customDomain}', '.', '-')
+  properties: {
+    hostName: 'www.${customDomain}'
+    tlsSettings: {
+      certificateType: 'ManagedCertificate'
+      minimumTlsVersion: 'TLS12'
+    }
+  }
+}
+
+resource wwwRedirectRuleSet 'Microsoft.Cdn/profiles/ruleSets@2024-02-01' = {
+  parent: frontDoor
+  name: 'WwwToApexRedirect'
+}
+
+resource wwwRedirectRule 'Microsoft.Cdn/profiles/ruleSets/rules@2024-02-01' = {
+  parent: wwwRedirectRuleSet
+  name: 'RedirectWwwToApex'
+  properties: {
+    order: 1
+    conditions: [
+      {
+        name: 'RequestHeader'
+        parameters: {
+          typeName: 'DeliveryRuleRequestHeaderConditionParameters'
+          selector: 'Host'
+          operator: 'BeginsWith'
+          matchValues: ['www.']
+          transforms: ['Lowercase']
+        }
+      }
+    ]
+    actions: [
+      {
+        name: 'UrlRedirect'
+        parameters: {
+          typeName: 'DeliveryRuleUrlRedirectActionParameters'
+          redirectType: 'Moved'
+          destinationProtocol: 'Https'
+          customHostname: customDomain
+        }
+      }
+    ]
+  }
+}
+
+resource wwwRedirectRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-02-01' = {
+  parent: endpoint
+  name: 'www-redirect-route'
+  properties: {
+    originGroup: {
+      id: apiOriginGroup.id
+    }
+    customDomains: [
+      { id: wwwCustomDomainResource.id }
+    ]
+    patternsToMatch: ['/*']
+    forwardingProtocol: 'HttpsOnly'
+    httpsRedirect: 'Enabled'
+    supportedProtocols: ['Http', 'Https']
+    ruleSets: [
+      { id: wwwRedirectRuleSet.id }
+    ]
+  }
+  dependsOn: [apiOrigin, wwwRedirectRule]
 }
 
 resource customDomainApiRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-02-01' = {
@@ -289,7 +358,7 @@ resource customDomainSwaRoutes 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-
     customDomains: [
       { id: customDomainResource.id }
     ]
-    patternsToMatch: appName == 'rosie' ? ['/*'] : ['/${appName}/*']
+    patternsToMatch: appName == 'szl-holdings' ? ['/*'] : ['/${appName}/*']
     forwardingProtocol: 'HttpsOnly'
     httpsRedirect: 'Enabled'
     supportedProtocols: ['Http', 'Https']
@@ -314,6 +383,7 @@ resource securityPolicy 'Microsoft.Cdn/profiles/securityPolicies@2024-02-01' = {
           domains: [
             { id: endpoint.id }
             { id: customDomainResource.id }
+            { id: wwwCustomDomainResource.id }
           ]
           patternsToMatch: ['/*']
         }

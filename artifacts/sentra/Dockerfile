@@ -1,0 +1,53 @@
+FROM node:22-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+FROM base AS deps
+COPY package.json pnpm-workspace.yaml .npmrc ./
+COPY pnpm-lock.yaml* ./
+COPY lib/shared-ui/package.json ./lib/shared-ui/
+COPY lib/observability/package.json ./lib/observability/
+COPY lib/config/package.json ./lib/config/
+COPY lib/analytics/package.json ./lib/analytics/
+COPY lib/api-client-react/package.json ./lib/api-client-react/
+COPY lib/api-zod/package.json ./lib/api-zod/
+COPY lib/i18n/package.json ./lib/i18n/
+COPY lib/mcp-client/package.json ./lib/mcp-client/
+COPY lib/graphql-client/package.json ./lib/graphql-client/
+COPY lib/replit-auth-web/package.json ./lib/replit-auth-web/
+COPY lib/services/package.json ./lib/services/
+COPY lib/prism-bus/package.json ./lib/prism-bus/
+COPY lib/offline-engine/package.json ./lib/offline-engine/
+COPY packages/security-headers/package.json ./packages/security-headers/
+COPY packages/shared-proxy/package.json ./packages/shared-proxy/
+COPY packages/design-system/package.json ./packages/design-system/
+COPY packages/omnia-shell/package.json ./packages/omnia-shell/
+COPY packages/brand-registry/package.json ./packages/brand-registry/
+COPY packages/domain-claims/package.json ./packages/domain-claims/
+COPY packages/env/package.json ./packages/env/
+COPY packages/tokens/package.json ./packages/tokens/
+COPY packages/szl-alloy/package.json ./packages/szl-alloy/
+COPY packages/aef-sdk/package.json ./packages/aef-sdk/
+COPY artifacts/sentra/package.json ./artifacts/sentra/
+RUN corepack enable pnpm && pnpm install --frozen-lockfile --ignore-scripts
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NODE_ENV=production
+RUN corepack enable pnpm && pnpm --filter "sentra" run build
+
+FROM nginx:alpine AS runner
+COPY --from=builder /app/artifacts/sentra/dist /usr/share/nginx/html
+RUN printf 'server {\n  listen 8080;\n  root /usr/share/nginx/html;\n  index index.html;\n  location / { try_files $uri $uri/ /index.html; }\n}\n' > /etc/nginx/conf.d/default.conf \
+    && sed -i 's|pid\s*/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \
+    && sed -i '/^user /d' /etc/nginx/nginx.conf \
+    && chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
+    && chmod -R 755 /usr/share/nginx/html
+EXPOSE 8080
+LABEL org.opencontainers.image.source="https://github.com/szl-holdings/szl-holdings-platform"
+LABEL org.opencontainers.image.description="Sentra — Cyber Resilience Command"
+LABEL org.opencontainers.image.licenses="UNLICENSED"
+USER nginx
+CMD ["nginx", "-g", "daemon off;"]

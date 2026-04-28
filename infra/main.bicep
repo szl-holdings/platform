@@ -235,24 +235,16 @@ module frontDoor 'modules/frontdoor.bicep' = {
 }
 
 var frontendApps = [
-  'rosie'
-  'aegis'
-  'beacon'
-  'lutar'
-  'nimbus'
-  'firestorm'
-  'dreamera'
-  'dreamscape'
-  'zeus'
-  'apps-showcase'
-  'readiness-report'
-  'career'
-  'vessels'
-  'inca'
-  'lyte'
-  'carlota-jo'
   'szl-holdings'
-  'alloyscape'
+  'aegis'
+  'vessels'
+  'terra'
+  'carlota-jo'
+  'command'
+  'counsel'
+  'pulse'
+  'sentra'
+  'lyte'
 ]
 
 module staticWebApps 'modules/staticwebapp.bicep' = [for app in frontendApps: {

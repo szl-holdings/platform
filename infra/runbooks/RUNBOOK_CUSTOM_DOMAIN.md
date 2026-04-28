@@ -1,7 +1,7 @@
 # Runbook: Custom Domain Setup — SZL Holdings Platform
 
-> Steps to connect a custom domain (e.g., szlholdings.com) to the deployed Replit project.
-> This is out of scope for the initial deployment — complete this after the `.replit.app` production URL is verified and stable.
+> Steps to connect a custom domain (e.g., szlholdings.com) to the deployed project.
+> Two deployment paths are covered: **Replit** (dev/staging) and **Azure Front Door** (production).
 
 ---
 
@@ -9,11 +9,13 @@
 
 - A registered domain name (e.g., szlholdings.com) through a registrar (e.g., Namecheap, Cloudflare, GoDaddy)
 - Access to the domain's DNS management panel
-- The project published and working at its `.replit.app` URL
+- The project published and healthy at its deployment URL
 
 ---
 
-## Step 1: Publish the Project First
+## Path A — Replit Deployment
+
+### Step 1: Publish the Project First
 
 Before connecting a custom domain, ensure the project is live and healthy at its Replit-assigned domain:
 
@@ -28,7 +30,7 @@ Verify:
 
 ---
 
-## Step 2: Add the Custom Domain in Replit
+### Step 2: Add the Custom Domain in Replit
 
 1. Open the project in Replit
 2. Click the **Deploy** button in the top toolbar
@@ -42,11 +44,11 @@ Record these values — you'll need them for DNS.
 
 ---
 
-## Step 3: Configure DNS
+### Step 3: Configure DNS (Replit)
 
 Log into your domain registrar's DNS management panel and add the following records:
 
-### Root domain (`szlholdings.com`)
+#### Root domain (`szlholdings.com`)
 
 Most registrars support CNAME flattening (ALIAS/ANAME records) for the root domain:
 
@@ -60,7 +62,7 @@ If your registrar does not support ALIAS/ANAME at the root, use the A record IP 
 |------|------|---------------|------|
 | A    | @    | `<Replit IP>` | 300  |
 
-### WWW subdomain (`www.szlholdings.com`)
+#### WWW subdomain (`www.szlholdings.com`)
 
 | Type  | Name | Value                | TTL  |
 |-------|------|----------------------|------|
@@ -70,14 +72,107 @@ If your registrar does not support ALIAS/ANAME at the root, use the A record IP 
 
 ---
 
-## Step 4: Wait for DNS Propagation
+## Path B — Azure Front Door Deployment
+
+### Step 1: Deploy the Azure Infrastructure
+
+Run the Bicep deployment (from the `infra/` directory):
+
+```bash
+az deployment group create \
+  --resource-group szlholdings-rg \
+  --template-file main.bicep \
+  --parameters @parameters.json
+```
+
+Once deployed, capture the Front Door endpoint hostname from the deployment output:
+
+```bash
+az deployment group show \
+  --resource-group szlholdings-rg \
+  --name main \
+  --query properties.outputs.frontDoorEndpoint.value \
+  --output tsv
+# Example: szlholdings-endpoint.z01.azurefd.net
+```
+
+---
+
+### Step 2: Validate Custom Domain Ownership
+
+Azure Front Door requires you to prove domain ownership before it issues a managed TLS certificate. The deployment will have created two custom domain resources (`szlholdings.com` and `www.szlholdings.com`). For each domain, retrieve the DNS validation token:
+
+```bash
+az afd custom-domain show \
+  --resource-group szlholdings-rg \
+  --profile-name szlholdings-frontdoor \
+  --custom-domain-name szlholdings-com \
+  --query "validationProperties.validationToken" \
+  --output tsv
+```
+
+Repeat for `www-szlholdings-com`.
+
+Add these DNS records at your registrar for each domain:
+
+| Type | Name                        | Value                          | TTL  |
+|------|-----------------------------|--------------------------------|------|
+| TXT  | `_dnsauth.szlholdings.com`  | `<validationToken for apex>`   | 3600 |
+| TXT  | `_dnsauth.www.szlholdings.com` | `<validationToken for www>`  | 3600 |
+
+---
+
+### Step 3: Configure DNS (Azure Front Door)
+
+After validation is complete, point your domain to the Front Door endpoint:
+
+#### Root domain (`szlholdings.com`)
+
+| Type  | Name | Value                                     | TTL  |
+|-------|------|-------------------------------------------|------|
+| ALIAS | @    | `<frontDoorEndpoint>.azurefd.net`         | 300  |
+
+If your registrar does not support ALIAS/ANAME at the root:
+
+| Type  | Name | Value                                     | TTL  |
+|-------|------|-------------------------------------------|------|
+| CNAME | @    | `<frontDoorEndpoint>.azurefd.net`         | 300  |
+
+#### WWW subdomain (`www.szlholdings.com`)
+
+| Type  | Name | Value                                     | TTL  |
+|-------|------|-------------------------------------------|------|
+| CNAME | www  | `<frontDoorEndpoint>.azurefd.net`         | 300  |
+
+> The `www` subdomain is automatically 301-redirected to the apex domain (`szlholdings.com`) by the Front Door Rules Engine rule `RedirectWwwToApex`.
+
+---
+
+### Step 4: Wait for TLS Certificate Provisioning
+
+Azure Front Door automatically provisions managed TLS certificates once DNS propagation is complete. This typically takes 5–30 minutes.
+
+Check certificate status:
+
+```bash
+az afd custom-domain show \
+  --resource-group szlholdings-rg \
+  --profile-name szlholdings-frontdoor \
+  --custom-domain-name szlholdings-com \
+  --query "domainValidationState" \
+  --output tsv
+# Should return: Approved
+```
+
+---
+
+## Step 4: Wait for DNS Propagation (both paths)
 
 DNS changes typically propagate within 5–30 minutes, but can take up to 48 hours globally.
 
 Check propagation status:
 ```bash
 dig szlholdings.com +short
-# Should return the Replit IP or CNAME target
 nslookup szlholdings.com
 ```
 
@@ -87,12 +182,14 @@ Or use: https://dnschecker.org
 
 ## Step 5: Verify TLS / HTTPS
 
-Replit automatically provisions a TLS certificate via Let's Encrypt once DNS propagation is complete. No manual certificate management is required.
+Once DNS has propagated and the certificate is issued:
 
-Verify HTTPS works:
 ```bash
 curl -I https://szlholdings.com
 # Expected: HTTP/2 200
+
+curl -I https://www.szlholdings.com
+# Expected: HTTP/2 301 → Location: https://szlholdings.com/...
 ```
 
 ---
@@ -102,14 +199,11 @@ curl -I https://szlholdings.com
 After the custom domain is live, update the following production environment variables:
 
 ```bash
-# Update PUBLIC_APP_URL to the custom domain
-PUBLIC_APP_URL=https://szlholdings.com  # (production env)
-
-# Update CORS_ORIGINS to include the custom domain
+PUBLIC_APP_URL=https://szlholdings.com
 CORS_ORIGINS=https://szlholdings.com,https://www.szlholdings.com,https://*.replit.app,https://*.replit.dev
 ```
 
-Also update `robots.txt` and `sitemap.xml` if they reference the Replit domain — they currently reference `szlholdings.com` which is correct.
+Also update `robots.txt` and `sitemap.xml` if they reference the old domain.
 
 ---
 
@@ -144,13 +238,17 @@ After custom domain is live, update any services that reference the old URL:
 ### "Domain already in use" error in Replit
 Another project has claimed this domain in Replit. Contact Replit support if it is your domain.
 
-### Certificate provisioning fails
+### Certificate provisioning fails (Azure)
+- Ensure both `_dnsauth` TXT records are present and DNS has propagated before Azure attempts certificate issuance
+- Check the `domainValidationState` field via the CLI command above
+
+### Certificate provisioning fails (Replit)
 - Ensure DNS is fully propagated before Replit attempts to issue the certificate
 - CNAME records must resolve before TLS provisioning begins
 
 ### Site loads on `www` but not root (or vice versa)
 - Verify both records (ALIAS/A for root, CNAME for www) are configured
-- Check that Replit has both `szlholdings.com` and `www.szlholdings.com` added in the domain panel
+- For Replit: check that both `szlholdings.com` and `www.szlholdings.com` are added in the domain panel
 
 ### Mixed content warnings
 The app is served over HTTPS but some resources may load over HTTP. Check browser console for warnings and update any hardcoded `http://` URLs.
@@ -162,3 +260,4 @@ The app is served over HTTPS but some resources may load over HTTP. Check browse
 - Replit-assigned domains (`*.replit.app`) will continue to work after the custom domain is connected
 - The `.replit.app` domain can serve as a fallback URL if needed
 - Custom domain configuration is per-deployment; if you redeploy from scratch, re-add the domain
+- The Front Door `WwwToApexRedirect` rule set handles all `www.szlholdings.com` → `szlholdings.com` redirects automatically; no extra DNS redirect record is needed
