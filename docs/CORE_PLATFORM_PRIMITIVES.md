@@ -1,7 +1,7 @@
 # SZL Holdings — Core Platform Primitives (Implementation Register)
 
 **Date:** April 22, 2026
-**Cross-reference:** [Architecture Primitives](architecture/platform-primitives.md) for conceptual overview
+**Cross-reference:** [Architecture Primitives](architecture/platform-primitives.md) for conceptual overview | [Policy Registry Spec](POLICY_REGISTRY_SPEC.md) | [Prompt and Policy Registry](PROMPT_AND_POLICY_REGISTRY.md) | [Model Policy Registry](MODEL_POLICY_REGISTRY.md)
 
 ---
 

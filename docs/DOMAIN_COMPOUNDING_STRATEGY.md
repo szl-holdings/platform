@@ -1,5 +1,11 @@
 # SZL Holdings — Domain Compounding Strategy
 
+**Updated:** April 28, 2026
+
+**Operational status of domain mesh:** The six-domain mesh (Vessels, Terra, Sentra, Counsel, Carlota Jo, Holdings/Pulse) is implemented and in Beta. Cross-domain signal chains are operational via `packages/signal-mesh`. The domain addition roadmap items (Supply Chain, Insurance, Energy) are forward-looking — not yet implemented.
+
+---
+
 ## Thesis
 
 Every domain added to the governed decision operating system creates more value than the previous one. This is not additive growth — it is compounding intelligence.

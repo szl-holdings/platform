@@ -1,17 +1,18 @@
 # SZL Holdings — Next 90 Days
 
+> Updated: April 28, 2026
 > Weekly milestones, owners, risk checkpoints, demo milestones, and release gates.
 
 ---
 
 ## Week 1 (Days 1–7): Foundation Repair
 
-| Milestone | Owner | Risk |
-|-----------|-------|------|
-| Fix migration ordering (#2886) | Engineering | Low |
-| Delete dead artifacts (cortex-mobile, imperium, prism-counsel) | Engineering | Low |
-| Configure Redis session store | DevOps | Low |
-| Wire Sentry error monitoring | DevOps | Medium |
+| Milestone | Owner | Status | Risk |
+|-----------|-------|--------|------|
+| Configure Redis session store | DevOps | In Progress | Low |
+| Wire Sentry error monitoring | DevOps | In Progress | Medium |
+| Fix migration ordering warnings | Engineering | In Progress | Low |
+| Add SBOM generation to CI | Engineering | Not Started | Low |
 
 **Risk Checkpoint:** API server boots with zero warnings. Health endpoint returns healthy.
 
@@ -21,12 +22,12 @@
 
 | Milestone | Owner | Risk |
 |-----------|-------|------|
-| Add SBOM generation to CI | Engineering | Low |
 | Add external link check workflow | Engineering | Low |
 | Automate platform metrics regeneration in CI | Engineering | Low |
 | Run full dependency audit and remediate critical findings | Security | Medium |
+| Generate SLSA provenance attestation in release workflow | Engineering | Medium |
 
-**Risk Checkpoint:** CI pipeline covers install → typecheck → lint → build → test → security → metrics.
+**Risk Checkpoint:** CI pipeline covers install → typecheck → lint → build → test → security → metrics → provenance.
 
 ---
 
@@ -37,9 +38,9 @@
 | Add 10 golden scenarios to Command Arena | Engineering | Low |
 | Add 5 regression scenarios from known failure modes | Engineering | Low |
 | Implement arena results diffing (run-over-run comparison) | Engineering | Medium |
-| SLSA provenance attestation in release workflow | Engineering | Medium |
+| Run full security scan and remediate findings | Security | Medium |
 
-**Risk Checkpoint:** 20+ arena scenarios, 90%+ pass rate, provenance in build.
+**Risk Checkpoint:** 20+ arena scenarios, 90%+ pass rate. Provenance in build.
 
 ---
 
@@ -47,11 +48,11 @@
 
 | Milestone | Owner | Risk |
 |-----------|-------|------|
-| Carlota Jo endpoint auth fix (#1367) | Engineering | Low |
 | Full security scan and remediation | Security | Medium |
 | Production deployment with monitoring | DevOps | Medium |
+| Hardening audit for all domain pack endpoints | Engineering | Low |
 
-**Release Gate:** First production-monitored deployment.
+**Release Gate:** First production-monitored deployment with Sentry active.
 
 ---
 
@@ -63,7 +64,7 @@
 | Chain repair tooling for broken links | Engineering | Medium |
 | Proof Chain UI in Command portal | Frontend | Medium |
 
-**Risk Checkpoint:** Proof chain verification endpoint returns pass/fail with evidence.
+**Risk Checkpoint:** Proof chain verification endpoint returns pass/fail with evidence. Any decision verifiable end-to-end.
 
 ---
 
@@ -87,7 +88,7 @@
 | Source entity linking in responses | Engineering | Medium |
 | Policy-aware recommendation in query results | Engineering | Medium |
 
-**Risk Checkpoint:** Analyst layer returns evidence-backed answers with confidence scoring.
+**Risk Checkpoint:** Analyst layer returns evidence-backed answers with confidence scoring and source citations.
 
 ---
 
@@ -98,6 +99,7 @@
 | 3 new cross-domain signal chains | Engineering | Medium |
 | Decision Theater UI (visual replay) | Frontend | High |
 | Monte Carlo simulation UI for Terra | Frontend | Medium |
+| Policy Registry UI (visual governance dashboard) | Frontend | Medium |
 
 **Demo Milestone:** Walk through a cross-domain cascade in Decision Theater — signal → cascade → approval → outcome.
 
@@ -112,7 +114,7 @@
 | Acquire AIS data subscription | Business | Low |
 | Build Trust Center web page (live) | Frontend | Medium |
 
-**Risk Checkpoint:** SOC 2 auditor engaged. Data subscriptions active.
+**Risk Checkpoint:** SOC 2 auditor engaged. Data subscriptions active. Trust Center live and indexed.
 
 ---
 
@@ -124,7 +126,7 @@
 | Vessels real-time tracking with AIS | Engineering | Medium |
 | Live data flowing through signal chains | Engineering | Medium |
 
-**Demo Milestone:** Show live data flowing through governed decision loop — not mock data.
+**Demo Milestone:** Show live data flowing through governed decision loop — not simulated data.
 
 ---
 
@@ -135,9 +137,10 @@
 | Execute Demo Path 1: Maritime Delay Cascade (live) | Product | Medium |
 | Execute Demo Path 2: Security Incident Response (live) | Product | Medium |
 | Execute Demo Path 3: Platform Governance Walk-Through | Product | Low |
+| Execute Demo Path 4: Registry & Release Confidence | Product | Low |
 | Record demo videos | Marketing | Low |
 
-**Demo Milestone:** 3 demo paths recorded with live data. Ready for investor presentation.
+**Demo Milestone:** 4 demo paths recorded with live data. Ready for investor presentation.
 
 ---
 
@@ -164,3 +167,16 @@
 | Executive review of 90-day results | Leadership | Low |
 
 **Final Checkpoint:** Scorecard comparison Day 1 vs Day 90. Category position validated.
+
+---
+
+## Success Metrics at Day 90
+
+| Metric | Target |
+|--------|--------|
+| Command Arena pass rate | ≥ 90% across 20+ scenarios |
+| Domain packs with live data | 5 of 6 (Maritime pending AIS subscription) |
+| Demo paths executable | 4 paths, all with live data where available |
+| Production error monitoring | Sentry active, zero untracked P0s |
+| SOC 2 status | Audit initiated |
+| Investor data room | Complete and reviewed |

@@ -1,6 +1,6 @@
 # SZL Holdings — Company Ascension Plan
 
-> April 22, 2026
+> Updated: April 28, 2026
 
 ## Platform Moat Statement
 
@@ -8,18 +8,29 @@ SZL Holdings is the only company with a governed decision operating system that 
 
 ---
 
+## Current State (April 28, 2026)
+
+**Phase 1 is active.** The platform is in production-hardening mode. Six domain packs are operational in Beta. The governance primitives — Proof Chain, Covenant Policy, Outcome Graph, Decision Replay, Event Fabric — are implemented and tested. The immediate priority is production-readiness and investor/buyer demo readiness.
+
+---
+
 ## Phase 1: Hardening (Days 0–30)
 
 **Objective:** Make the platform production-trustworthy.
 
-### Week 1–2: Infrastructure
-- [ ] Fix migration ordering (Task #2886) — eliminate startup warnings
+### Infrastructure
 - [ ] Configure Redis session store — eliminate in-memory session risk
 - [ ] Wire Sentry error monitoring — production observability
-- [ ] Delete dead artifact directories (cortex-mobile, imperium, prism-counsel) — reduce cognitive overhead
+- [ ] Fix any remaining migration ordering warnings
 - [ ] Add SBOM generation to CI pipeline
+- [x] Global auth enforcer (deny-by-default) — implemented
+- [x] Immutable audit trail — implemented
+- [x] Rate limiting — implemented
+- [x] CSRF protection — implemented
+- [x] CodeQL SAST in CI — active
+- [x] Secret scanning — active (push + scheduled)
 
-### Week 3–4: Quality
+### Quality
 - [ ] Expand Command Arena from 5 to 20 scenarios (add golden + regression packs)
 - [ ] Add external link check to CI
 - [ ] Generate SLSA provenance attestation in release workflow
@@ -38,17 +49,18 @@ SZL Holdings is the only company with a governed decision operating system that 
 
 **Objective:** Make the shared primitives production-grade and demonstrate cross-domain intelligence.
 
-### Week 5–6: Primitives
+### Primitives
 - [ ] Harden Proof Chain API — integrity verification endpoint, chain repair tools
 - [ ] Implement Outcome Graph calibration loop — predicted vs. actual outcome tracking
 - [ ] Build Analyst Layer query interface — structured business question → evidence-backed answer
 - [ ] Add Document Fabric extraction pipeline for Counsel domain — automated clause extraction
+- [ ] Build Policy Registry UI — visual model/prompt governance dashboard
 
-### Week 7–8: Cross-Domain
+### Cross-Domain
 - [ ] Build 3 new cross-domain signal chains (supply chain, insurance, energy)
 - [ ] Implement Decision Theater UI in Command portal — visual replay walkthrough
 - [ ] Add Monte Carlo simulation UI for Terra property risk scenarios
-- [ ] Build Model Policy Registry UI — visual model/prompt governance dashboard
+- [ ] Build Prompt Registry UI with status/lifecycle management
 
 ### Deliverables
 - Proof Chain integrity verification live
@@ -56,6 +68,7 @@ SZL Holdings is the only company with a governed decision operating system that 
 - Analyst Layer answering structured queries with evidence
 - 6+ cross-domain signal chains active
 - Decision Theater UI demonstrable
+- Policy and Prompt Registry UI live
 
 ---
 
@@ -63,14 +76,14 @@ SZL Holdings is the only company with a governed decision operating system that 
 
 **Objective:** Make the platform sellable and fundable.
 
-### Week 9–10: Enterprise Readiness
+### Enterprise Readiness
 - [ ] Initiate SOC 2 Type II audit
 - [ ] Build Trust Center web page (live, not just markdown)
 - [ ] Create guided demo mode — curated walkthrough for prospects
 - [ ] Publish public documentation site from docs/
 - [ ] Acquire Mapbox and AIS subscriptions for live data demos
 
-### Week 11–12: Market Entry
+### Market Entry
 - [ ] Execute 3 demo paths with live data (Maritime Cascade, Security Response, Platform Governance)
 - [ ] Record demo videos for investor materials
 - [ ] Publish CATEGORY_THESIS and COMPETITIVE_POSITIONING as public thought leadership
@@ -90,12 +103,12 @@ SZL Holdings is the only company with a governed decision operating system that 
 
 | Lane | 0–30 Days | 30–60 Days | 60–90 Days |
 |------|-----------|-----------|-----------|
-| **LYTE** | Arena scenario expansion | Decision Theater UI | Demo path: governance walkthrough |
-| **AEGIS** | Sentry integration | Incident replay UI | Demo path: security response |
-| **VESSELS** | Fix boot warnings | AIS data integration | Demo path: maritime cascade |
-| **TERRA** | Mapbox token | Monte Carlo UI | Property risk demo |
-| **COUNSEL** | Document extraction pipeline | Clause-to-action lineage | Legal hold demo |
-| **CARLOTA JO** | Endpoint auth fix (#1367) | Operations accountability UI | Client onboarding demo |
+| **Command / Lyte** | Arena scenario expansion | Decision Theater UI | Demo path: governance walkthrough |
+| **Sentra** | Sentry integration | Incident replay UI | Demo path: security response |
+| **Vessels** | Redis + boot warnings | AIS data integration | Demo path: maritime cascade |
+| **Terra** | Mapbox token | Monte Carlo UI | Property risk demo |
+| **Counsel** | Document extraction pipeline | Clause-to-action lineage | Legal hold demo |
+| **Carlota Jo** | Endpoint hardening | Operations accountability UI | Client onboarding demo |
 
 ---
 
@@ -108,4 +121,20 @@ SZL Holdings is the only company with a governed decision operating system that 
 | AIS subscription | Vessels real-time data | Business — Sprint 3 |
 | SOC 2 auditor engagement | Enterprise procurement | Compliance — Sprint 4 |
 | 1 additional engineer | Accelerate Phase 2 primitives | Hiring — Immediate |
-| 1 DevOps/SRE | Production monitoring + CI hardening | Hiring — Sprint 2 |
+
+---
+
+## What Operational Today (Not Roadmap)
+
+| Capability | Evidence |
+|-----------|---------|
+| 6 domain packs running | 6 registered artifacts, all in Beta |
+| 6 governance primitives implemented | `docs/CORE_PLATFORM_PRIMITIVES.md` |
+| 347 API route files | Verified in `audit/source-of-truth.json` |
+| 1,047 database tables | Live PostgreSQL count |
+| 22 CI/CD workflows | GitHub Actions |
+| Deny-by-default auth | Global auth enforcer |
+| Immutable audit trail | `lib/proof-chain` |
+| Human approval gates | `lib/covenant-policy` + `packages/guardian` |
+| Cross-domain signal chains | `packages/signal-mesh` |
+| AI observability | `packages/cognitive-observability` |

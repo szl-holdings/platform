@@ -1,5 +1,10 @@
 # SZL Holdings — Category Thesis
 
+**Updated:** April 28, 2026
+**Evidence standard:** All platform claims are verifiable from `audit/source-of-truth.json`, `docs/CORE_PLATFORM_PRIMITIVES.md`, and live code in the monorepo. Claims marked with ✓ have been verified against the running codebase.
+
+---
+
 ## The Category: Governed Decision Operating Systems
 
 We are creating a new category. Not another dashboard. Not another copilot. Not another BI tool with AI bolted on.

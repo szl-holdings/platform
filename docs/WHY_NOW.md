@@ -1,5 +1,10 @@
 # SZL Holdings — Why Now
 
+**Updated:** April 28, 2026
+**Note:** Regulatory citations below are sourced from publicly available government and standards documents as of April 2026. Platform capability claims are verified against the running codebase — see `docs/CORE_PLATFORM_PRIMITIVES.md`.
+
+---
+
 ## The Moment
 
 Three tectonic shifts have created a window for a governed decision operating system that did not exist two years ago.

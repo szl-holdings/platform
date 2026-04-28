@@ -1,5 +1,10 @@
 # SZL Holdings — Competitive Positioning
 
+**Updated:** April 28, 2026
+**Verification note:** SZL platform capabilities referenced below are verified from `docs/CORE_PLATFORM_PRIMITIVES.md` and the live monorepo. Competitor assessments are based on publicly available product documentation and analyst reports as of April 2026 — direct feature depth comparisons may differ from internal implementations.
+
+---
+
 ## Category: Governed Decision Operating System
 
 SZL occupies a unique position at the intersection of decision intelligence, AI governance, and multi-domain enterprise operations.
