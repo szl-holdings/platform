@@ -36,6 +36,8 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 - **Security event audit log** — `GET /api/auth/security-events` (admin/ops only): filterable by action/userId/date, supports CSV export.
 - **DB schema additions** — `magicLinksTable`, `userDevicesTable`, `loginAttemptsTable` in `lib/db/src/schema/auth.ts`; migration `0146_zero_trust_auth_hardening.sql`.
 
+**Documentation Validation:** `pnpm docs:claims-check` (run by the pre-commit hook) validates that `ACCESS-CONTROL-MATRIX.md`, `API-SPEC.md`, and `SECURITY-CHECKLIST.md` remain consistent with the live codebase. The validator script is at `scripts/docs/check-docs-claims.js`.
+
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.

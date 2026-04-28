@@ -53,20 +53,19 @@ function fileExists(relPath) {
 }
 
 // Extract all quoted strings from a TypeScript enum array literal.
-// Handles both:
+// Handles both single and double quotes and multiline arrays:
 //   fieldName: text("col_name", { enum: ["a", "b"] })
-//   fieldName: text("col_name", { enum: ["a",
-//                                         "b"] })
-// Pass the column name string as it appears quoted in text("col_name", ...).
+//   fieldName: text('col_name', { enum: ['a',
+//                                         'b'] })
+// Pass the column name string as it appears (unquoted) in text("col_name", ...).
 function extractTsEnumValues(src, colName) {
-  // Match text("col_name", { enum: [...] }) — colName is the quoted string argument
   const escaped = colName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`"${escaped}"\\s*,\\s*\\{[^}]*enum:\\s*\\[([^\\]]+)\\]`, 's');
+  const re = new RegExp(`['"]${escaped}['"]\\s*,\\s*\\{[^}]*enum:\\s*\\[([^\\]]+)\\]`, 's');
   const m = src.match(re);
   if (!m) return null;
-  const items = m[1].match(/"([^"]+)"/g);
+  const items = m[1].match(/['"]([^'"]+)['"]/g);
   if (!items) return [];
-  return items.map((s) => s.replace(/"/g, ''));
+  return items.map((s) => s.replace(/['"]/g, ''));
 }
 
 // Extract backtick-quoted identifiers from the first column of markdown table rows
