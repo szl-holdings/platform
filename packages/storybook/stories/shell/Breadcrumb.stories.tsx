@@ -23,7 +23,7 @@ export const Default: Story = {
   args: {
     items: [
       { label: 'Home', href: '#' },
-      { label: 'Aegis', href: '#' },
+      { label: 'PARAGON', href: '#' },
       { label: 'Threat Analysis' },
     ],
   },
@@ -33,7 +33,7 @@ export const WithIcons: Story = {
   args: {
     items: [
       { label: 'Home', href: '#', icon: <Home size={12} /> },
-      { label: 'Aegis', href: '#', icon: <Shield size={12} /> },
+      { label: 'PARAGON', href: '#', icon: <Shield size={12} /> },
       { label: 'Incident #4829' },
     ],
   },
@@ -43,7 +43,7 @@ export const LongPath: Story = {
   args: {
     items: [
       { label: 'SZL Holdings', href: '#' },
-      { label: 'Aegis', href: '#' },
+      { label: 'PARAGON', href: '#' },
       { label: 'Threat Intelligence', href: '#' },
       { label: 'Incidents', href: '#' },
       { label: 'INC-2024-04829' },

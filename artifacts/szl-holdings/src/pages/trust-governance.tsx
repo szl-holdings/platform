@@ -29,7 +29,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: Eye,
     title: "Model Behavior Is Observable, Not Opaque",
-    body: "Operators can understand why Lyte surfaced a signal or Counsel proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
+    body: "Operators can understand why KORA surfaced a signal or Counsel proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
   },
   {
     icon: GitBranch,
@@ -59,7 +59,7 @@ const HITL_MODEL = [
 export default function TrustGovernancePage() {
   const __pageMeta = usePageMeta({
     title: "AI Governance — Trust Center · SZL Holdings",
-    description: "Lyte + Counsel AI governance: human-in-the-loop approval model, decision lineage tracking, override documentation, and responsible AI execution.",
+    description: "KORA + Counsel AI governance: human-in-the-loop approval model, decision lineage tracking, override documentation, and responsible AI execution.",
     canonical: "https://szlholdings.com/trust/governance",
   });
 
@@ -85,7 +85,7 @@ export default function TrustGovernancePage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>AI Governance</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  How Lyte + Counsel uses AI responsibly — with human-in-the-loop approval gates,
+                  How KORA + Counsel uses AI responsibly — with human-in-the-loop approval gates,
                   complete decision lineage, observable model behavior, and documented override
                   processes for every consequential action.
                 </p>
@@ -98,7 +98,7 @@ export default function TrustGovernancePage() {
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>Six principles</p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
-                  How we build AI into Lyte + Counsel.
+                  How we build AI into KORA + Counsel.
                 </h2>
               </m.div>
               <div className="szl-grid-2">

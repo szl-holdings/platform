@@ -26,7 +26,7 @@ const LOOP_STEPS = [
     label: 'Context',
     icon: Layers,
     color: '#8b5cf6',
-    body: 'Cross-domain enrichment via Event Fabric. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte — full context assembled before any recommendation.',
+    body: 'Cross-domain enrichment via Event Fabric. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in KORA — full context assembled before any recommendation.',
     primitives: ['event-fabric', 'outcome-graph'],
   },
   {

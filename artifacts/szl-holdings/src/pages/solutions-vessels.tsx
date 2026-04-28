@@ -9,8 +9,8 @@ import { UseCaseLane } from "@/components/UseCaseLane";
 const CAPABILITIES = [
   { icon: Map, title: "Fleet Position & Status", body: "Real-time and near-real-time fleet visibility across all your vessels — position, heading, speed, and operational status without tab-switching between systems." },
   { icon: BarChart3, title: "Voyage Performance", body: "Fuel consumption, speed variance, schedule adherence, and cargo milestones — all surfaced as signals when performance deviates from plan." },
-  { icon: AlertOctagon, title: "Exception Detection", body: "Vessels surfaces operational exceptions — port delays, weather reroutes, cargo holds, and crew incidents — before they cascade into commercial damage." },
-  { icon: FileText, title: "Regulatory Audit Trail", body: "Every maritime operation leaves a compliance footprint. Vessels captures it automatically with full attribution for cargo, crew, customs, and port operations." },
+  { icon: AlertOctagon, title: "Exception Detection", body: "SEXTANT surfaces operational exceptions — port delays, weather reroutes, cargo holds, and crew incidents — before they cascade into commercial damage." },
+  { icon: FileText, title: "Regulatory Audit Trail", body: "Every maritime operation leaves a compliance footprint. SEXTANT captures it automatically with full attribution for cargo, crew, customs, and port operations." },
   { icon: Anchor, title: "Port Operations Workflow", body: "Pre-arrival checklists, berth scheduling, agent coordination, and customs workflows — routed through Counsel with approval gates and follow-through verification." },
   { icon: Ship, title: "Fleet Intelligence Dashboard", body: "One command surface for commercial, operations, and chartering teams. Signal-first, not report-first. The right alert at the right moment." },
 ];
@@ -23,7 +23,7 @@ const USE_CASES = [
     steps: [
       { signal: true, text: "AIS transmission gap detected on MV Andromeda — 11 hours of dark sailing in a sanctions-sensitive corridor" },
       { text: "Fleet manager opens vessel record: last confirmed position, voyage context, cargo manifest, and flag state displayed" },
-      { text: "Vessels surfaces correlated signals — similar AIS patterns from this vessel six months prior, current OFAC watch list proximity" },
+      { text: "SEXTANT surfaces correlated signals — similar AIS patterns from this vessel six months prior, current OFAC watch list proximity" },
       { text: "Fleet manager routes incident to compliance officer with full evidence package and recommended escalation path" },
       { proof: true, text: "Proof Chain captures the decision: who reviewed it, what evidence was considered, which action was approved, and when" },
     ],
@@ -63,8 +63,8 @@ const VESSELS_SIGNAL_STYLE = {
 
 export default function SolutionsVesselsPage() {
   const __pageMeta = usePageMeta({
-    title: "Vessels — Maritime Intelligence · SZL Holdings",
-    description: "Fleet command, simulated AIS telemetry, sanctions screening, dark vessel detection, exception-based workflows. Vessels is the maritime domain pack — built on the same governance infrastructure as every SZL product. Public AIS feeds (Digitraffic, BarentsWatch) are integrated; demo dashboards use simulated AIS data.",
+    title: "SEXTANT — Maritime Intelligence · SZL Holdings",
+    description: "Fleet command, simulated AIS telemetry, sanctions screening, dark vessel detection, exception-based workflows. SEXTANT is the maritime domain pack — built on the same governance infrastructure as every SZL product. Public AIS feeds (Digitraffic, BarentsWatch) are integrated; demo dashboards use simulated AIS data.",
     canonical: "https://szlholdings.com/solutions/vessels",
     ogImage: "https://szlholdings.com/og/og-vessels.jpg",
   });
@@ -81,7 +81,7 @@ export default function SolutionsVesselsPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
                   <Link href="/solutions" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Solutions</Link>
                   <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-vessels)", opacity: 0.9 }}>Vessels</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-vessels)", opacity: 0.9 }}>SEXTANT</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem" }}>
                   <div style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-vessels-muted)", border: "1px solid hsla(206,72%,40%,0.20)", borderRadius: "0.5625rem" }}>
@@ -90,7 +90,7 @@ export default function SolutionsVesselsPage() {
                   <div>
                     <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-vessels)", opacity: 0.8 }}>Maritime Intelligence</p>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                      <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Vessels</h1>
+                      <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>SEXTANT</h1>
                       <span style={{ display: "inline-flex", alignItems: "center", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "hsla(206,72%,40%,0.12)", border: "1px solid hsla(206,72%,40%,0.25)", fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-vessels)", alignSelf: "flex-start", marginTop: "0.5rem" }}>Beta</span>
                     </div>
                   </div>

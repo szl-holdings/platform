@@ -9,7 +9,7 @@ export interface PrivateAppGuardProps {
 }
 
 // Shared sessionStorage key for the validated demo PIN. Once a user passes
-// the PIN modal in any app (Pulse, Aegis, Terra, Vessels...), the validated
+// the PIN modal in any app (Pulse, PARAGON, DOMAINE, SEXTANT...), the validated
 // PIN is stored here so subsequent route navigations within the SPA stay in
 // demo mode without prompting again. The PIN is never embedded in the URL or
 // the client bundle — it is entered via the modal and validated server-side.
@@ -184,7 +184,7 @@ function PinModal({
 /**
  * Wraps an entire private app with authentication enforcement.
  * Unauthenticated users see a styled sign-in prompt instead of the app.
- * Used in /app/* surfaces: Alloy, Lyte, Terra, Vessels dashboard, Aegis, etc.
+ * Used in /app/* surfaces: Alloy, KORA, DOMAINE, SEXTANT dashboard, PARAGON, etc.
  *
  * Demo bypass:
  *   - `?demo=<anything>` or `?view=app` query params trigger a PIN modal.

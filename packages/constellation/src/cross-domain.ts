@@ -3,7 +3,7 @@
  *
  * These helpers operate on an in-memory GraphStore and let cognitive subsystems
  * reason about entities that span multiple domains (e.g. a vessel that is also
- * a sanctioned counterparty in the legal domain and a cyber asset in Aegis).
+ * a sanctioned counterparty in the legal domain and a cyber asset in PARAGON).
  */
 
 import type { ConstellationEdge, ConstellationNode } from './schema.js';

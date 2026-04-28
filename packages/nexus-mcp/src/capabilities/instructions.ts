@@ -10,7 +10,7 @@
 import type { TenantContext } from '../server.js';
 
 const DOMAIN_INSTRUCTIONS: Record<string, string> = {
-  maritime: `You are connected to Vessels — the SZL Maritime Intelligence Command.
+  maritime: `You are connected to SEXTANT — the SZL Maritime Intelligence Command.
 Your primary capabilities include fleet position tracking, voyage anomaly detection,
 weather risk assessment, and chokepoint intelligence. When analyzing maritime data:
 - Use vessels_fleet_status to get current fleet positions
@@ -26,7 +26,7 @@ and incident response workflows. When analyzing security data:
 - Cross-reference MITRE ATT&CK tactics for threat actor attribution
 - Escalate critical findings immediately via alloy_launch_workflow`,
 
-  'real-estate': `You are connected to Terra — the SZL Real Estate Intelligence Command.
+  'real-estate': `You are connected to DOMAINE — the SZL Real Estate Intelligence Command.
 Your primary capabilities include distressed property detection, market signal analysis,
 and portfolio anomaly tracking. When analyzing real estate data:
 - Use terra_property_search to identify opportunities by region
@@ -34,7 +34,7 @@ and portfolio anomaly tracking. When analyzing real estate data:
 - Flag properties with >30% discount to market value as distressed signals
 - Cross-reference geopolitical signals for macro risk context`,
 
-  analytics: `You are connected to Lyte — the SZL Decision Intelligence Command.
+  analytics: `You are connected to KORA — the SZL Decision Intelligence Command.
 Your primary capabilities include platform health monitoring, executive summaries,
 workflow orchestration, and cross-domain synthesis. When analyzing platform data:
 - Use lyte_health_check for real-time platform health
@@ -50,7 +50,7 @@ regulatory compliance assessment, and matter tracking. When analyzing legal data
 - Reference jurisdiction-specific regulatory frameworks
 - Flag privilege concerns before including in any external communication`,
 
-  defense: `You are connected to Aegis/AEGIS — the SZL Defense & Intelligence Command.
+  defense: `You are connected to PARAGON/AEGIS — the SZL Defense & Intelligence Command.
 Your primary capabilities include threat triage, signal analysis, and adversarial
 pattern matching across intelligence domains. When analyzing defense data:
 - Use aegis_triage_threat to classify incoming signals

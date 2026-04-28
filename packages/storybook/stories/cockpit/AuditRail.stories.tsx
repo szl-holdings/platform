@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const events: AuditEvent[] = [
-  { id: '1', kind: 'agent_action', message: 'Aegis agent blocked IP range 185.220.0.0/16', actor: 'aegis-agent', timestamp: '2026-04-26T14:32:00Z' },
+  { id: '1', kind: 'agent_action', message: 'PARAGON agent blocked IP range 185.220.0.0/16', actor: 'aegis-agent', timestamp: '2026-04-26T14:32:00Z' },
   { id: '2', kind: 'human_approval', message: 'Sarah Chen approved block action', actor: 'sarah.chen@szl.com', timestamp: '2026-04-26T14:31:45Z' },
   { id: '3', kind: 'policy_change', message: 'Autonomy mode escalated to Ask-to-Act', actor: 'policy-guard', timestamp: '2026-04-26T14:31:20Z' },
   { id: '4', kind: 'agent_action', message: 'Evidence harvester indexed 14 new threat indicators', actor: 'aegis-agent', timestamp: '2026-04-26T14:30:00Z' },

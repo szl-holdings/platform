@@ -12,7 +12,7 @@ const ACCENT = giProductAccent.holdings;
 const PURPLE = giColors.accent.violet;
 const TERRA_COLOR = giProductAccent.terra;
 
-// ── Terra module shortcuts ─────────────────────────────────────────────────────
+// ── DOMAINE module shortcuts ─────────────────────────────────────────────────────
 
 const TERRA_SHORTCUTS: {
   id: string;
@@ -76,7 +76,7 @@ function TerraShortcutsStrip() {
     <View style={terraStyles.wrapper}>
       <View style={terraStyles.headerRow}>
         <Feather name="home" size={10} color={TERRA_COLOR} />
-        <Text style={terraStyles.sectionLabel}>Terra SHORTCUTS</Text>
+        <Text style={terraStyles.sectionLabel}>DOMAINE SHORTCUTS</Text>
       </View>
       <ScrollView
         horizontal
@@ -167,7 +167,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's2',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: giProductAccent.lyte,
     title: 'API P95 Latency Breach',
     detail: '2.4s vs 2.0s target — SLA penalty risk',
@@ -176,7 +176,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's3',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: giProductAccent.aegis,
     title: 'Bundle Size Warning',
     detail: '1.34MB vs 900KB budget — MITRE module over-eager',
@@ -198,16 +198,16 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p2',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: giProductAccent.aegis,
     title: 'Critical CVE Patch Deploy',
-    requester: 'Aegis SOC',
+    requester: 'PARAGON SOC',
     due: 'Within 2 hours',
     urgency: 'critical' as const,
   },
   {
     id: 'p3',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: giProductAccent.terra,
     title: 'LP Q1 Report — CFO Sign-off',
     requester: 'Finance Lead',
@@ -632,7 +632,7 @@ export default function QuickActionsScreen() {
         <BusinessHealthStrip colors={colors} />
       </View>
 
-      {/* Terra shortcuts */}
+      {/* DOMAINE shortcuts */}
       <TerraShortcutsStrip />
 
       {/* Tab bar */}

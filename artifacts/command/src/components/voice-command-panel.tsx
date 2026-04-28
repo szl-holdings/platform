@@ -33,15 +33,15 @@ const T = {
  */
 const ARTIFACT_ROUTE_MAP: Array<{ keywords: string[]; path: string; label: string; external: boolean }> = [
   // External ecosystem apps
-  { keywords: ['aegis', 'defense', 'intelligence command'], path: '/aegis/', label: 'Aegis', external: true },
+  { keywords: ['aegis', 'defense', 'intelligence command'], path: '/aegis/', label: 'PARAGON', external: true },
   { keywords: ['sentra', 'cyber resilience', 'cyber command'], path: '/sentra/', label: 'Sentra', external: true },
-  { keywords: ['vessels', 'maritime', 'fleet', 'ship'], path: '/vessels/', label: 'Vessels', external: true },
-  { keywords: ['terra', 'real estate'], path: '/terra/', label: 'Terra', external: true },
+  { keywords: ['vessels', 'maritime', 'fleet', 'ship'], path: '/vessels/', label: 'SEXTANT', external: true },
+  { keywords: ['terra', 'real estate'], path: '/terra/', label: 'DOMAINE', external: true },
   { keywords: ['counsel', 'legal', 'matter command'], path: '/counsel/', label: 'Counsel', external: true },
   { keywords: ['pulse', 'briefing', 'executive briefing'], path: '/pulse/', label: 'Pulse', external: true },
   { keywords: ['a11oy', 'continuum', 'brand orchestration'], path: '/a11oy/', label: 'A11oy', external: true },
   { keywords: ['holdings', 'szl holdings', 'portfolio dashboard'], path: '/szl-holdings/', label: 'SZL Holdings', external: true },
-  { keywords: ['lyte', 'decision intelligence', 'command center'], path: '/lyte-command-center/', label: 'Lyte', external: true },
+  { keywords: ['lyte', 'decision intelligence', 'command center'], path: '/lyte-command-center/', label: 'KORA', external: true },
   // Internal Command routes
   { keywords: ['strategy', 'strategic overview'], path: '/strategy', label: 'Strategy', external: false },
   { keywords: ['operations', 'live operations', 'ops'], path: '/operations/live', label: 'Live Operations', external: false },
@@ -728,7 +728,7 @@ export function VoiceCommandPanel({ open, onClose, onNavigate }: VoiceCommandPan
               />
               <div>Speak to navigate, query, or approve actions</div>
               <div style={{ marginTop: 6, fontSize: '0.63rem', color: T.textMuted }}>
-                "Show me active threats" · "Navigate to Aegis" · "Read my briefing"
+                "Show me active threats" · "Navigate to PARAGON" · "Read my briefing"
               </div>
             </div>
           )}

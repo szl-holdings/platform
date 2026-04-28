@@ -413,7 +413,7 @@ export default function CrewTrackerPage() {
                         : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
                     )}
                   >
-                    {v === 'all' ? 'All Vessels' : v}
+                    {v === 'all' ? 'All SEXTANT' : v}
                   </button>
                 ))}
               </div>

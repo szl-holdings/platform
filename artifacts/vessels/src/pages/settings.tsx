@@ -188,7 +188,7 @@ function NotificationsPanel() {
   return (
     <SettingsSectionPanel
       title="Notifications"
-      description="Configure how and when Vessels alerts you"
+      description="Configure how and when SEXTANT alerts you"
     >
       <SettingsCard title="Alert Preferences">
         {items.map(({ key, label, description }) => {
@@ -246,7 +246,7 @@ function IntegrationsPanel() {
   return (
     <SettingsSectionPanel
       title="Integrations"
-      description="Status of live data connections powering Vessels"
+      description="Status of live data connections powering SEXTANT"
     >
       <SettingsCard title="Data Sources">
         {services.length === 0 ? (
@@ -363,7 +363,7 @@ function PreferencesPanel() {
   const mapStyle = (getValue(settings, 'map_style') as string) ?? 'dark';
 
   return (
-    <SettingsSectionPanel title="Preferences" description="Personalize your Vessels experience">
+    <SettingsSectionPanel title="Preferences" description="Personalize your SEXTANT experience">
       <SettingsCard title="Units & Display">
         <SettingsRow
           label="Distance Unit"
@@ -449,7 +449,7 @@ function BillingPanel() {
   return (
     <SettingsSectionPanel
       title="Billing"
-      description="Subscription plan and billing information for your Vessels account"
+      description="Subscription plan and billing information for your SEXTANT account"
     >
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
@@ -569,7 +569,7 @@ function AuditPanel() {
   return (
     <SettingsSectionPanel
       title="Settings Change History"
-      description="Audit trail of settings changes in Vessels"
+      description="Audit trail of settings changes in SEXTANT"
     >
       <p className="mb-4 text-xs text-sky-400/40">
         Org admins and platform admins see the full team history. Other members see only their own
@@ -771,7 +771,7 @@ export default function VesselsSettings() {
             'audit',
           ]}
           accentColor={VESSELS_ACCENT}
-          appName="Vessels"
+          appName="SEXTANT"
         >
           {panels[activeSection]}
         </SettingsShell>

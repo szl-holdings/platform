@@ -1,5 +1,5 @@
 /**
- * Aegis / Aegis security operations domain schemas.
+ * PARAGON / PARAGON security operations domain schemas.
  */
 import { z } from 'zod';
 

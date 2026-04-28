@@ -4,9 +4,9 @@ export const aegisSecurityIncident: DomainProfile = {
   profileId: 'aegis_security_incident',
   version: '1.0.0',
   domain: 'aegis_security_incident',
-  displayName: 'Aegis — Security Incident & Threat Intelligence',
+  displayName: 'PARAGON — Security Incident & Threat Intelligence',
   description:
-    'Retrieval profile for Aegis, the unified defense and intelligence command platform. Optimised for incident investigation timelines, threat indicator records, CVE advisories, MITRE ATT&CK technique mappings, MSP operational alerts, and cyber-asset exposure reports. CVE identifiers and incident IDs receive a 2× exact-match boost. Control IDs and compliance regulation codes receive a 1.8× boost, ensuring that structured security references surface their authoritative record without ambiguity.',
+    'Retrieval profile for PARAGON, the unified defense and intelligence command platform. Optimised for incident investigation timelines, threat indicator records, CVE advisories, MITRE ATT&CK technique mappings, MSP operational alerts, and cyber-asset exposure reports. CVE identifiers and incident IDs receive a 2× exact-match boost. Control IDs and compliance regulation codes receive a 1.8× boost, ensuring that structured security references surface their authoritative record without ambiguity.',
   status: 'active',
 
   chunkingStrategy: {
@@ -22,24 +22,24 @@ export const aegisSecurityIncident: DomainProfile = {
     templateId: 'aegis_sec_query_v1',
     version: '1.0.0',
     template:
-      'You are a retrieval query encoder for Aegis, a unified security operations and threat intelligence platform. ' +
+      'You are a retrieval query encoder for PARAGON, a unified security operations and threat intelligence platform. ' +
       'Encode the following question to retrieve incident reports, threat indicator records, CVE advisories, ' +
       'MITRE ATT&CK mappings, control gap findings, and compliance audit results. ' +
       'Preserve CVE IDs, incident IDs, control IDs, MITRE technique IDs (e.g. T1078), and regulation codes exactly.\n\nQuery: {{query}}',
     variables: ['query'],
-    description: 'Query-side prompt for Aegis security incident and threat intelligence corpus',
+    description: 'Query-side prompt for PARAGON security incident and threat intelligence corpus',
   },
 
   documentPromptTemplate: {
     templateId: 'aegis_sec_doc_v1',
     version: '1.0.0',
     template:
-      "You are a document encoder for Aegis's security and threat intelligence knowledge base. " +
+      "You are a document encoder for PARAGON's security and threat intelligence knowledge base. " +
       'Encode the following document so it can be retrieved by queries about threat actors, incident timelines, ' +
       'CVE exploitability, control effectiveness, compliance posture, and cyber-asset criticality. ' +
       'Preserve all CVE IDs, MITRE technique references, incident IDs, and regulation codes exactly.\n\nDocument: {{document}}',
     variables: ['document'],
-    description: 'Document-side prompt for Aegis security corpus',
+    description: 'Document-side prompt for PARAGON security corpus',
   },
 
   defaultMetadataFilters: {

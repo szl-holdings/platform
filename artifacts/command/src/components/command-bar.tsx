@@ -73,7 +73,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/aegis/',
-    label: 'Aegis — Investor Pitch Deck',
+    label: 'PARAGON — Investor Pitch Deck',
     description: 'Investor-facing deck and Series A narrative',
     icon: Presentation,
     color: '#c45a4a',
@@ -110,7 +110,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   // Domain verticals
   {
     href: '/vessels/',
-    label: 'Vessels',
+    label: 'SEXTANT',
     description: 'Maritime intelligence, sanctions, and vessel risk',
     icon: Ship,
     color: '#4a90b8',
@@ -119,7 +119,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/terra/',
-    label: 'Terra',
+    label: 'DOMAINE',
     description: 'Real estate intelligence — pro-forma, waterfall, leases',
     icon: HomeIcon,
     color: '#c8953c',
@@ -165,7 +165,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/lyte-command-center/',
-    label: 'Lyte Command Center',
+    label: 'KORA Command Center',
     description: 'AIOps observability — autonomous NOC, SLOs, self-healing',
     icon: Zap,
     color: '#22c55e',

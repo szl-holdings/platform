@@ -1,9 +1,9 @@
 import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
- * Terra Portfolio Module Seeds
+ * DOMAINE Portfolio Module Seeds
  *
- * Stores the per-module portfolio/list payloads served by the Terra
+ * Stores the per-module portfolio/list payloads served by the DOMAINE
  * intelligence routes (climate-risk, zoning, neighborhood-momentum,
  * seller-motivation, spatial-walkthrough). One row per module key,
  * payload is a JSONB blob matching the module's response shape.

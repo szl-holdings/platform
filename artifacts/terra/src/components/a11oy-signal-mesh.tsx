@@ -23,7 +23,7 @@ interface CrossSignal {
 const SIGNALS: CrossSignal[] = [
   {
     id: 'sig-001',
-    vertical: 'Vessels',
+    vertical: 'SEXTANT',
     verticalColor: '#4a90b8',
     icon: Anchor,
     summary: 'Port Newark congestion — supply chain delay impacting 3 warehouse assets in Queens',
@@ -53,7 +53,7 @@ const SIGNALS: CrossSignal[] = [
   },
   {
     id: 'sig-004',
-    vertical: 'Vessels',
+    vertical: 'SEXTANT',
     verticalColor: '#4a90b8',
     icon: Truck,
     summary: 'Container throughput surge at Red Hook — construction material delivery window opening',

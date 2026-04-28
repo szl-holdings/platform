@@ -245,7 +245,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         {expanded && (
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold text-[#f5f5f5] font-display tracking-tight">
-              Lyte
+              KORA
             </p>
             <p className="text-[10px] text-[#8a8a8a] font-mono">Decision Intelligence</p>
           </div>
@@ -345,7 +345,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu1',
     headline: 'Vantex approval chain still void at step 1 — 47 days stalled',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'critical',
     timestamp: new Date(Date.now() - 8 * 60000).toISOString(),
@@ -354,7 +354,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu2',
     headline: '$4.2M Q2 revenue at risk — close probability collapsed 84% → 31%',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'critical',
     timestamp: new Date(Date.now() - 22 * 60000).toISOString(),
@@ -363,7 +363,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu3',
     headline: '3 escalation attempts blocked by policy — manual override required',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Procurement Approval Chain',
     severity: 'warning',
     timestamp: new Date(Date.now() - 47 * 60000).toISOString(),
@@ -372,7 +372,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu4',
     headline: 'Stratford Partners shows identical pattern — $1.8M secondary risk',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Stratford Expansion',
     severity: 'warning',
     timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
@@ -381,7 +381,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu5',
     headline: 'Buyer engagement decay — David Chen silent for 28 days',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'info',
     timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
@@ -403,7 +403,7 @@ const SENTIENT_ACTIONS: SentientAction[] = [
     id: 'la2',
     label: 'Trigger portfolio-wide approval-gap audit',
     description:
-      'Lyte detected 3/14 portfolio companies showing similar void-owner patterns. Audit prevents an estimated $7.2M further crystallization in Q2.',
+      'KORA detected 3/14 portfolio companies showing similar void-owner patterns. Audit prevents an estimated $7.2M further crystallization in Q2.',
     confidence: 0.84,
     policyVerdict: 'requires_approval',
     href: '/decisions',
@@ -432,21 +432,21 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
   },
   {
     id: 'lcl2',
-    surface: 'Vessels',
+    surface: 'SEXTANT',
     surfaceAccent: '#c9a85c',
     label: 'MV Atlantic Falcon voyage tied to Vantex acquisition',
     description:
-      'Vessels has an active voyage whose financing is contingent on the Vantex deal closing in Q2.',
+      'SEXTANT has an active voyage whose financing is contingent on the Vantex deal closing in Q2.',
     href: '/vessels/fleet',
     preservedContext: { surface: 'lyte', entity: 'lyte-opp-vantex-001' },
   },
   {
     id: 'lcl3',
-    surface: 'Aegis',
+    surface: 'PARAGON',
     surfaceAccent: '#ef4444',
     label: 'Vantex endpoints flagged in CVE-2024-21412 sweep',
     description:
-      'Aegis has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
+      'PARAGON has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
     href: '/tenax/threats',
     preservedContext: { surface: 'lyte', entity: 'lyte-opp-vantex-001' },
   },
@@ -520,7 +520,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2 text-xs text-[#8a8a8a] font-mono">
-            <span>Lyte</span>
+            <span>KORA</span>
             {currentPage && (
               <>
                 <ChevronRight className="w-3 h-3" />
@@ -558,7 +558,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="lyte"
-        surfaceName="Lyte Decision Intelligence"
+        surfaceName="KORA Decision Intelligence"
         accentColor={LYTE_ACCENT}
         entityType="Opportunity"
         entityLabel="Vantex Acquisition — Q2 Close"
@@ -571,9 +571,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="Lyte"
+        appName="KORA"
         accentColor={LYTE_ACCENT}
-        placeholder="Search Lyte — pages, decisions, actions..."
+        placeholder="Search KORA — pages, decisions, actions..."
       />
     </div>
   );

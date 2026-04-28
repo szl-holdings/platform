@@ -503,7 +503,7 @@ const DEMO_BATCHES: PdfBatch[] = [
   {
     id: 2,
     batchId: 'batch_compliance',
-    title: 'Annual Compliance Evidence — Aegis',
+    title: 'Annual Compliance Evidence — PARAGON',
     templateId: 'aegis-compliance-evidence',
     appSource: 'aegis',
     totalJobs: 5,

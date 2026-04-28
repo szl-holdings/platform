@@ -186,20 +186,20 @@ describe('ATLAS Export API Routes — Integration', () => {
   });
 
   describe('Canonical demo scenes — all four domains', () => {
-    it('Aegis ransomware demo scene is export-ready', () => {
+    it('PARAGON ransomware demo scene is export-ready', () => {
       const bundle = buildAegisRansomwareDemoScene();
       expect(bundle.domain).toBe('security');
       expect(bundle.snapshot.format).toBe('json_snapshot');
       expect(bundle.branch).toBeDefined();
     });
 
-    it('Vessels sanctions demo scene is export-ready', () => {
+    it('SEXTANT sanctions demo scene is export-ready', () => {
       const bundle = buildVesselsSanctionsDemoScene();
       expect(bundle.domain).toBe('maritime');
       expect(bundle.branch).toBeDefined();
     });
 
-    it('Terra distress demo scene is export-ready', () => {
+    it('DOMAINE distress demo scene is export-ready', () => {
       const bundle = buildTerraDistressDemoScene();
       expect(bundle.domain).toBe('real_estate');
       expect(bundle.branch).toBeDefined();

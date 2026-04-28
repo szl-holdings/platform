@@ -22,7 +22,7 @@ export { metricDisplay };
 
 const resolveClaim = makeClaimResolver('szl-holdings/claims');
 
-// ─── Lyte / szl-holdings metrics ─────────────────────────────────────────────
+// ─── KORA / szl-holdings metrics ─────────────────────────────────────────────
 
 export const LYTE_SIGNAL_DETECTION_TIME = resolveClaim('lyte-signal-detection-time', '< 4 min');
 
@@ -30,7 +30,7 @@ export const LYTE_SIGNALS_PER_DAY = resolveClaim('lyte-signals-per-day', '2.4M+'
 
 export const LYTE_FALSE_POSITIVE_RATE = resolveClaim('lyte-false-positive-rate', '< 3%');
 
-// ─── Vessels metrics ──────────────────────────────────────────────────────────
+// ─── SEXTANT metrics ──────────────────────────────────────────────────────────
 
 export const VESSELS_COUNT = resolveClaim('vessels-count', '52,000+');
 
@@ -39,7 +39,7 @@ export const VESSELS_DARK_DETECTION_LEAD = resolveClaim(
   '34 days pre-designation',
 );
 
-// ─── Aegis metrics ────────────────────────────────────────────────────────────
+// ─── PARAGON metrics ────────────────────────────────────────────────────────────
 
 export const AEGIS_SIMULATIONS = resolveClaim('aegis-simulations', '31,200+');
 
@@ -61,9 +61,9 @@ export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   truthValue: 'verified',
 };
 
-// ─── Terra metrics (cross-surface mirror) ─────────────────────────────────────
+// ─── DOMAINE metrics (cross-surface mirror) ─────────────────────────────────────
 //
-// Terra's portfolio AUM also surfaces on the szl-holdings ventures landing.
+// DOMAINE's portfolio AUM also surfaces on the szl-holdings ventures landing.
 // Resolved from the same registry id so the value and [Demo] label stay in
 // lockstep with terra/src/lib/claims.ts.
 

@@ -93,7 +93,7 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   },
   {
     appId: 'vessels',
-    appName: 'Vessels',
+    appName: 'SEXTANT',
     layers: ['OBSERVE'],
     description:
       'Maritime command intelligence — fleet visibility, voyage performance, and operational exceptions.',
@@ -101,7 +101,7 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   },
   {
     appId: 'terra',
-    appName: 'Terra',
+    appName: 'DOMAINE',
     layers: ['OBSERVE', 'DECIDE', 'EXECUTE'],
     description:
       'Listings intelligence, inquiry routing, agent coordination, and distress signals for commercial real estate brokers.',
@@ -125,8 +125,8 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   },
   {
     appId: 'aegis',
-    appName: 'Aegis',
-    displayName: 'Aegis — Unified Defense & Intelligence Command',
+    appName: 'PARAGON',
+    displayName: 'PARAGON — Unified Defense & Intelligence Command',
     layers: ['OBSERVE', 'UNDERSTAND', 'DECIDE', 'EXECUTE'],
     description:
       'Unified security, managed operations, and AI intelligence. SOC command, XDR, MSP operations, model registry, and agentic cortex in one platform.',

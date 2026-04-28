@@ -146,14 +146,14 @@ describe('EntityType', () => {
 // ---------------------------------------------------------------------------
 describe('SignalType', () => {
   const DOC_CLAIMED = [
-    // Vessels
+    // SEXTANT
     'ais_dark',
     'ais_position',
     'sanctions_hit',
     'voyage_anomaly',
     'port_arrival',
     'cargo_discrepancy',
-    // Terra
+    // DOMAINE
     'distress_filing',
     'ownership_change',
     'lien_filed',

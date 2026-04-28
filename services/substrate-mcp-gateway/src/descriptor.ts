@@ -389,7 +389,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
           type: 'string',
           description:
             'Agent ID or canonical name from nexus://agents/registry ' +
-            "(e.g. 'helmsman' / 'Vessels', 'sentinel' / 'Sentra', 'terra' / 'Terra', 'lexis' / 'Counsel')",
+            "(e.g. 'helmsman' / 'SEXTANT', 'sentinel' / 'Sentra', 'terra' / 'DOMAINE', 'lexis' / 'Counsel')",
         },
         taskDescription: {
           type: 'string',

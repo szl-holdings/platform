@@ -1,7 +1,7 @@
 /**
  * Source-app adapters that translate domain rows into ontology entities.
  *
- * Each source app (Terra, Vessels, Counsel, …) calls the appropriate
+ * Each source app (DOMAINE, SEXTANT, Counsel, …) calls the appropriate
  * `register*` helper from its write path so the unified entity graph stays
  * in sync with the per-domain tables.
  */

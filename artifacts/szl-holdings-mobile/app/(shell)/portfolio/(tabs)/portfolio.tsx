@@ -19,7 +19,7 @@ import { useColors } from '@/hooks/useColors';
 const VENTURES = [
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     subtitle: 'Defense & Intelligence Command',
     accentColor: '#6366f1',
     status: 'live',
@@ -36,14 +36,14 @@ const VENTURES = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     subtitle: 'Maritime Intelligence',
     accentColor: '#3b82f6',
     status: 'live',
     kpi: '$8.2M ARR',
     market: '$15.4B TAM',
     metrics: [
-      { label: 'Vessels Monitored', value: '52,000+' },
+      { label: 'SEXTANT Monitored', value: '52,000+' },
       { label: 'Shipping Lanes', value: '340+' },
       { label: 'Dark Vessel Detections', value: '34d lead' },
     ],
@@ -53,7 +53,7 @@ const VENTURES = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     subtitle: 'Real Estate Intelligence',
     accentColor: '#4d7c0f',
     status: 'live',
@@ -70,7 +70,7 @@ const VENTURES = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     subtitle: 'Business Observability',
     accentColor: '#f59e0b',
     status: 'live',

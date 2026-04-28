@@ -549,7 +549,7 @@ export default function S05Demo() {
                   fontWeight: 600,
                 }}
               >
-                Governed Autonomy — Aegis
+                Governed Autonomy — PARAGON
               </div>
             </div>
           </div>

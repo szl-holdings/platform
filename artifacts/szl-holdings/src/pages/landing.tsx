@@ -28,7 +28,7 @@ const ALLOY_CHARS = [
 
 const LOOP = [
   { n: "01", label: "Signal", body: "Indicators, anomalies, and threshold breaches detected, normalized, and routed with cross-domain context." },
-  { n: "02", label: "Context", body: "Cross-domain enrichment via the event fabric. Maritime alerts trigger legal flags. Real-estate signals open Lyte cases." },
+  { n: "02", label: "Context", body: "Cross-domain enrichment via the event fabric. Maritime alerts trigger legal flags. Real-estate signals open KORA cases." },
   { n: "03", label: "Recommendation", body: "An AI agent proposes an action with citations, model identity, and a confidence score. No opaque verdicts." },
   { n: "04", label: "Simulation", body: "Monte Carlo modeling estimates expected outcomes, confidence intervals, and key variables before any commitment." },
   { n: "05", label: "Policy", body: "Covenant Policy enforces who can approve, when, and under what conditions — at the platform layer. Non-delegatable." },
@@ -39,18 +39,18 @@ const LOOP = [
 ];
 
 const VERTICALS = [
-  { name: "Aegis", category: "Security & Defense", href: "/solutions/aegis", desc: "SOC command, threat intelligence, MITRE mapping, and governed SOAR playbooks." },
-  { name: "Vessels", category: "Maritime Intelligence", href: "/solutions/vessels", desc: "Fleet command, simulated AIS telemetry, sanctions screening, and voyage economics." },
-  { name: "Terra", category: "Real Estate Intelligence", href: "/solutions/terra", desc: "Distress property pipeline, ownership entity graph, and governed underwriting." },
+  { name: "PARAGON", category: "Security & Defense", href: "/solutions/aegis", desc: "SOC command, threat intelligence, MITRE mapping, and governed SOAR playbooks." },
+  { name: "SEXTANT", category: "Maritime Intelligence", href: "/solutions/vessels", desc: "Fleet command, simulated AIS telemetry, sanctions screening, and voyage economics." },
+  { name: "DOMAINE", category: "Real Estate Intelligence", href: "/solutions/terra", desc: "Distress property pipeline, ownership entity graph, and governed underwriting." },
   { name: "Counsel", category: "Legal Operations", href: "/counsel", desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams." },
   { name: "Carlota Jo", category: "Private Advisory", href: "/carlota-jo/", desc: "Discreet client intake, managed service delivery, and advisory operations for UHNW principals." },
   { name: "IMPERIUM", category: "Cloud Sovereignty", href: "/solutions/imperium", desc: "Multi-cloud governance, policy enforcement, and cloud estate visibility." },
 ];
 
 const ARCHITECTURE = [
-  { tier: "01", title: "Command Surfaces", body: "How operators see and act on signals. Lyte web command, APEX mobile, and the ecosystem portal — each surface speaks the same governance vocabulary.", items: ["Lyte — Web command", "APEX — iOS · Android", "Command — Ecosystem portal"] },
+  { tier: "01", title: "Command Surfaces", body: "How operators see and act on signals. KORA web command, APEX mobile, and the ecosystem portal — each surface speaks the same governance vocabulary.", items: ["KORA — Web command", "APEX — iOS · Android", "Command — Ecosystem portal"] },
   { tier: "02", title: "Execution Fabric", body: "The structural layer beneath every product. a11oy enforces policy, records provenance, and orchestrates durable multi-step workflows.", items: ["a11oy — Orchestration", "Proof Chain — Audit trail", "Covenant — Policy engine", "Simulation — Risk modeling", "Outcome Graph — Feedback"] },
-  { tier: "03", title: "Domain Packs", body: "Industry-specific data models, workflows, and intelligence — all running on the same loop, the same policy engine, and the same proof chain.", items: ["Aegis · Vessels · Terra", "Counsel · Carlota Jo · IMPERIUM"] },
+  { tier: "03", title: "Domain Packs", body: "Industry-specific data models, workflows, and intelligence — all running on the same loop, the same policy engine, and the same proof chain.", items: ["PARAGON · SEXTANT · DOMAINE", "Counsel · Carlota Jo · IMPERIUM"] },
 ];
 
 function FadeIn({ children, delay = 0, className = "", as = "div" }: { children: React.ReactNode; delay?: number; className?: string; as?: string }) {
@@ -181,7 +181,7 @@ function ArchitectureDiagram() {
         {[140, 300, 460].map((x, i) => (
           <g key={`s-${i}`}>
             <rect x={x - 50} y={20} width="100" height="44" rx="4" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-            <text x={x} y={47} textAnchor="middle" fontSize="11" fill={TEXT}>{["Lyte", "APEX", "Command"][i]}</text>
+            <text x={x} y={47} textAnchor="middle" fontSize="11" fill={TEXT}>{["KORA", "APEX", "Command"][i]}</text>
           </g>
         ))}
       </g>
@@ -201,7 +201,7 @@ function ArchitectureDiagram() {
       {[80, 200, 320, 440].map((x, i) => (
         <g key={`d-${i}`}>
           <rect x={x} y={236} width="80" height="44" rx="4" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-          <text x={x + 40} y={263} textAnchor="middle" fontSize="11" fill={TEXT}>{["Aegis", "Vessels", "Terra", "+ 3"][i]}</text>
+          <text x={x + 40} y={263} textAnchor="middle" fontSize="11" fill={TEXT}>{["PARAGON", "SEXTANT", "DOMAINE", "+ 3"][i]}</text>
         </g>
       ))}
       {/* Layer labels */}

@@ -2,7 +2,7 @@
 /**
  * AIS Disclosure Validation
  *
- * Vessels (Vessels) markets AIS tracking, but the in-product demos are
+ * SEXTANT (SEXTANT) markets AIS tracking, but the in-product demos are
  * backed by simulated AIS data. To prevent investor-facing copy from
  * regressing to plain "Live AIS" / "Real-time AIS" claims, this check
  * asserts that each public marketing surface that mentions AIS also

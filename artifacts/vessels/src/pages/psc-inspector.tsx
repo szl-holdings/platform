@@ -226,7 +226,7 @@ export default function PscInspectorPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           {
-            label: 'Vessels Tracked',
+            label: 'SEXTANT Tracked',
             value: profiles.length,
             color: 'text-sky-300',
             icon: Ship,
@@ -244,7 +244,7 @@ export default function PscInspectorPage() {
             icon: FileText,
           },
           {
-            label: 'High Risk Vessels',
+            label: 'High Risk SEXTANT',
             value: totals.highRisk,
             color: 'text-orange-400',
             icon: TrendingUp,

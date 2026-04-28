@@ -66,7 +66,7 @@ export default function MarketingPlatformPage() {
             Built for fleet command, not fleet tracking
           </h1>
           <p className="text-sky-300/50 text-[15px] max-w-2xl mx-auto leading-relaxed">
-            Vessels is a maritime operations platform designed for the full stack of fleet
+            SEXTANT is a maritime operations platform designed for the full stack of fleet
             decision-making — from exception triage to voyage economics to compliance.
           </p>
         </div>

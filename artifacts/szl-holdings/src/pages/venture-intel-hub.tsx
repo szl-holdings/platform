@@ -34,7 +34,7 @@ const MODULES = [
     label: "Portfolio Connections",
     title: "Cross-Portfolio Connections",
     description:
-      "Automatically identifies and quantifies revenue synergies between portfolio companies — Aegis cyber for Vessels maritime clients, Terra property data for PRAXIS litigation, and more.",
+      "Automatically identifies and quantifies revenue synergies between portfolio companies — PARAGON cyber for SEXTANT maritime clients, DOMAINE property data for PRAXIS litigation, and more.",
   },
   {
     href: "/venture-intelligence/lp-portal",

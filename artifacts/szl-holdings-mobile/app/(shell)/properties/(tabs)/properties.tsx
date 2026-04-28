@@ -437,7 +437,7 @@ export default function PropertiesTab() {
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
           <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-            Terra · DISTRESS ENGINE
+            DOMAINE · DISTRESS ENGINE
           </Text>
           <Text style={[styles.title, { color: colors.cream }]}>Properties</Text>
         </View>

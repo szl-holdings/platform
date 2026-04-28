@@ -187,7 +187,7 @@ export default function SanctionsHeatPage() {
     .reduce((s, h) => s + h.hullValue, 0);
 
   const TIER_FILTERS: { id: TierFilter; label: string }[] = [
-    { id: 'all', label: 'All Vessels' },
+    { id: 'all', label: 'All SEXTANT' },
     { id: 'critical', label: 'Critical' },
     { id: 'high', label: 'High' },
     { id: 'watch', label: 'Watch' },
@@ -204,7 +204,7 @@ export default function SanctionsHeatPage() {
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             Portfolio-level sanctions exposure aggregated by vessel holding. Powered by the
-            Vessels rules engine — OFAC SDN, EU Consolidated, UK OFSI, UN Security Council, and
+            SEXTANT rules engine — OFAC SDN, EU Consolidated, UK OFSI, UN Security Council, and
             internal dark-fleet rules.
           </p>
         </div>
@@ -344,8 +344,8 @@ export default function SanctionsHeatPage() {
       <div className="flex items-start gap-3 bg-slate-800/40 border border-slate-700/40 rounded-lg px-4 py-3 text-[11px] text-slate-500">
         <Zap className="w-3.5 h-3.5 text-sky-500/60 shrink-0 mt-0.5" />
         <span>
-          Sanctions Heat scores are computed by the Vessels rules engine every 15 minutes against
-          OFAC SDN, EU Consolidated, UK OFSI, and UN Security Council lists. Vessels marked{' '}
+          Sanctions Heat scores are computed by the SEXTANT rules engine every 15 minutes against
+          OFAC SDN, EU Consolidated, UK OFSI, and UN Security Council lists. SEXTANT marked{' '}
           <span className="text-amber-400">Simulated</span> have not yet received a live AIS feed
           confirmation — scores derive from cached ownership intelligence. Scores above 70 should
           be reviewed by compliance before the next port call. Hits above 85 automatically open

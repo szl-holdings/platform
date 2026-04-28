@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 const featured = [
   {
-    name: 'Lyte',
+    name: 'KORA',
     category: 'Decision Intelligence',
     description:
       'Enterprise-grade platform for operational observability, risk detection, and accountability. Signal cards surface anomalies with action ownership and consequence framing.',
@@ -20,7 +20,7 @@ const featured = [
     weight: 'primary',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     category: 'Maritime Intelligence',
     description:
       'Fleet command and real-time maritime intelligence. Route adherence, anomalous behaviour detection, and comprehensive fleet visibility across global shipping lanes.',
@@ -125,7 +125,7 @@ export function FeaturedVentures() {
               maxWidth: '36rem',
             }}
           >
-            Lyte and Vessels lead the portfolio as full command surfaces. Carlota Jo operates as a
+            KORA and SEXTANT lead the portfolio as full command surfaces. Carlota Jo operates as a
             precision advisory practice.
           </p>
         </m.div>

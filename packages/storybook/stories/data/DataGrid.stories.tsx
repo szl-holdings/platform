@@ -12,7 +12,7 @@ interface Run {
 }
 
 const sampleRows: Run[] = [
-  { id: 'run_01jd8xk', agent: 'Aegis Threat Scanner', status: 'approved', confidence: 94, duration: '3.2s', timestamp: '2026-04-26 14:32' },
+  { id: 'run_01jd8xk', agent: 'PARAGON Threat Scanner', status: 'approved', confidence: 94, duration: '3.2s', timestamp: '2026-04-26 14:32' },
   { id: 'run_01jd8xm', agent: 'Counsel Drafter', status: 'pending', confidence: 78, duration: '8.1s', timestamp: '2026-04-26 14:28' },
   { id: 'run_01jd8xn', agent: 'Policy Guard', status: 'escalated', confidence: 61, duration: '1.4s', timestamp: '2026-04-26 14:25' },
   { id: 'run_01jd8xp', agent: 'Evidence Harvester', status: 'approved', confidence: 97, duration: '12.5s', timestamp: '2026-04-26 14:20' },

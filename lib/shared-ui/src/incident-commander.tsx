@@ -4,8 +4,8 @@
  * Displays the incident timeline, severity, containment steps,
  * active agents, approvals queue, and evidence chain.
  *
- * Consumed by: Sentra (security incidents), Vessels (maritime incidents),
- * Terra (property/legal incidents), Command (platform incidents).
+ * Consumed by: Sentra (security incidents), SEXTANT (maritime incidents),
+ * DOMAINE (property/legal incidents), Command (platform incidents).
  *
  * Domain-specific data is passed via props; the UI and interaction model
  * are shared across all surfaces.

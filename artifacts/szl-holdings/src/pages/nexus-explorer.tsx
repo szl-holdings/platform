@@ -968,7 +968,7 @@ export default function PRAXISExplorerPage() {
       date: 'Apr 12',
       time: '03:10',
       event: 'MV Arctic Eagle entered Red Sea corridor',
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       accent: '#38bdf8',
     },
     {
@@ -981,7 +981,7 @@ export default function PRAXISExplorerPage() {
     {
       date: 'Apr 8',
       time: '09:44',
-      event: 'OFAC SDN composite match confirmed by Aegis',
+      event: 'OFAC SDN composite match confirmed by PARAGON',
       domain: 'Threat',
       accent: '#ef4444',
     },
@@ -989,7 +989,7 @@ export default function PRAXISExplorerPage() {
       date: 'Apr 3',
       time: '14:22',
       event: 'Second MV Arctic Eagle Red Sea transit logged',
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       accent: '#38bdf8',
     },
     {

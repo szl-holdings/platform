@@ -22,7 +22,7 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Launched Vessels Platform',
+        title: 'Launched SEXTANT Platform',
         content:
           'Deployed a maritime fleet tracking and logistics platform serving 200+ vessels across three continents with real-time AIS integration.',
         icon: 'Ship',
@@ -32,9 +32,9 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Aegis v2.0 Release',
+        title: 'PARAGON v2.0 Release',
         content:
-          'Released the second major version of Aegis — a real-time incident response system processing 10,000+ alerts per minute with 99.99% uptime.',
+          'Released the second major version of PARAGON — a real-time incident response system processing 10,000+ alerts per minute with 99.99% uptime.',
         icon: 'Flame',
         date: '2021-01',
         sortOrder: 3,
@@ -52,9 +52,9 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Lyte Smart Energy Launch',
+        title: 'KORA Smart Energy Launch',
         content:
-          'Launched Lyte — an IoT-driven energy management platform reducing commercial building energy consumption by an average of 32%.',
+          'Launched KORA — an IoT-driven energy management platform reducing commercial building energy consumption by an average of 32%.',
         icon: 'Lightbulb',
         date: '2023-02',
         sortOrder: 5,
@@ -229,12 +229,12 @@ async function seed() {
     .insert(stephenCaseStudiesTable)
     .values([
       {
-        title: 'Vessels: Maritime Fleet Intelligence Platform',
+        title: 'SEXTANT: Maritime Fleet Intelligence Platform',
         slug: 'vessels-maritime-fleet',
         summary:
           'Built a real-time maritime tracking platform integrating AIS data, weather overlays, and predictive analytics for a fleet of 200+ commercial vessels.',
         content:
-          'The Vessels platform was designed to provide comprehensive maritime domain awareness for commercial shipping operators. Key challenges included processing high-frequency AIS position reports, integrating multiple weather data providers, and building a predictive ETA model that accounted for currents, weather, and port congestion.\n\nThe solution leverages a microservices architecture with dedicated services for data ingestion, geospatial processing, and real-time client updates via WebSocket connections. The frontend provides an interactive map with vessel tracks, weather overlays, and fleet analytics dashboards.\n\nKey technologies: React, Node.js, PostgreSQL with PostGIS, Redis, Kubernetes, MapboxGL.',
+          'The SEXTANT platform was designed to provide comprehensive maritime domain awareness for commercial shipping operators. Key challenges included processing high-frequency AIS position reports, integrating multiple weather data providers, and building a predictive ETA model that accounted for currents, weather, and port congestion.\n\nThe solution leverages a microservices architecture with dedicated services for data ingestion, geospatial processing, and real-time client updates via WebSocket connections. The frontend provides an interactive map with vessel tracks, weather overlays, and fleet analytics dashboards.\n\nKey technologies: React, Node.js, PostgreSQL with PostGIS, Redis, Kubernetes, MapboxGL.',
         tags: ['Maritime', 'Real-Time', 'IoT', 'Geospatial'],
         featured: true,
         client: 'Global Shipping Corp',
@@ -243,12 +243,12 @@ async function seed() {
           '40% reduction in fuel costs through optimized routing, 99.99% uptime over 18 months of operation.',
       },
       {
-        title: 'Aegis: Enterprise Incident Response System',
+        title: 'PARAGON: Enterprise Incident Response System',
         slug: 'firestorm-incident-response',
         summary:
           'Developed a high-throughput incident response platform processing 10,000+ alerts per minute with intelligent triage and automated escalation workflows.',
         content:
-          'Aegis was built to address the challenge of alert fatigue in enterprise security operations centers. The platform ingests alerts from multiple sources (SIEM, IDS, endpoint agents), applies ML-based correlation and deduplication, and presents operators with prioritized incident queues.\n\nThe system architecture uses Apache Kafka for event streaming, a custom rules engine for alert correlation, and a React-based war room dashboard with real-time collaboration features. Automated playbooks handle common incident types, reducing mean time to resolution by 65%.\n\nKey technologies: TypeScript, React, Kafka, Elasticsearch, Python (ML), Kubernetes.',
+          'PARAGON was built to address the challenge of alert fatigue in enterprise security operations centers. The platform ingests alerts from multiple sources (SIEM, IDS, endpoint agents), applies ML-based correlation and deduplication, and presents operators with prioritized incident queues.\n\nThe system architecture uses Apache Kafka for event streaming, a custom rules engine for alert correlation, and a React-based war room dashboard with real-time collaboration features. Automated playbooks handle common incident types, reducing mean time to resolution by 65%.\n\nKey technologies: TypeScript, React, Kafka, Elasticsearch, Python (ML), Kubernetes.',
         tags: ['Security', 'Real-Time', 'ML', 'Enterprise'],
         featured: true,
         client: 'Fortune 500 Financial Services',
@@ -271,12 +271,12 @@ async function seed() {
           'Deployed to 15 installations serving 5,000+ users, 90% reduction in paper-based assessments.',
       },
       {
-        title: 'Lyte: Smart Energy Management Platform',
+        title: 'KORA: Smart Energy Management Platform',
         slug: 'lyte-energy-management',
         summary:
           'Built an IoT-driven energy management system that reduced commercial building energy consumption by an average of 32% through intelligent automation.',
         content:
-          'Lyte integrates with building management systems, smart meters, and IoT sensors to provide real-time energy monitoring and automated optimization. The platform uses machine learning models to predict energy demand and automatically adjust HVAC, lighting, and equipment schedules.\n\nThe IoT gateway handles thousands of sensor readings per second, with edge computing for latency-sensitive control decisions. The cloud platform provides analytics, benchmarking, and ROI tracking across building portfolios.\n\nKey technologies: TypeScript, React, Python, MQTT, TimescaleDB, TensorFlow, Kubernetes.',
+          'KORA integrates with building management systems, smart meters, and IoT sensors to provide real-time energy monitoring and automated optimization. The platform uses machine learning models to predict energy demand and automatically adjust HVAC, lighting, and equipment schedules.\n\nThe IoT gateway handles thousands of sensor readings per second, with edge computing for latency-sensitive control decisions. The cloud platform provides analytics, benchmarking, and ROI tracking across building portfolios.\n\nKey technologies: TypeScript, React, Python, MQTT, TimescaleDB, TensorFlow, Kubernetes.',
         tags: ['IoT', 'Energy', 'ML', 'Sustainability'],
         featured: false,
         client: 'National Property Group',

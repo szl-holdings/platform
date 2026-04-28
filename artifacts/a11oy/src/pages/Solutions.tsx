@@ -562,7 +562,7 @@ export function Solutions() {
                 {
                   num: '03',
                   title: 'Not single-domain — compounding intelligence',
-                  desc: 'A sanctions match in Vessels surfaces a legal risk in Counsel. No single-domain tool can produce this. The more verticals share the Signal Mesh, the more intelligence compounds.',
+                  desc: 'A sanctions match in SEXTANT surfaces a legal risk in Counsel. No single-domain tool can produce this. The more verticals share the Signal Mesh, the more intelligence compounds.',
                 },
                 {
                   num: '04',

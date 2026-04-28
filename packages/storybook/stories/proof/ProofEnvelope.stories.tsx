@@ -40,7 +40,7 @@ export const Allowed: Story = {
     timestamp: new Date().toISOString(),
     policyState: 'allowed',
     autonomyMode: 'approved-act',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     actionLabel: 'Execute',
     children: content,
   },
@@ -73,7 +73,7 @@ export const Blocked: Story = {
     timestamp: new Date().toISOString(),
     policyState: 'blocked',
     autonomyMode: 'observe',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     children: (
       <div style={{ padding: '12px', background: 'var(--gi-bg-overlay)', borderRadius: 'var(--gi-radius-md)' }}>
         <p style={{ margin: 0, fontSize: 'var(--gi-text-sm)', color: 'var(--gi-text-muted)' }}>
@@ -93,7 +93,7 @@ export const Contradiction: Story = {
     timestamp: new Date().toISOString(),
     policyState: 'requires-approval',
     autonomyMode: 'recommend',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     children: (
       <div style={{ padding: '12px', background: 'var(--gi-bg-overlay)', borderRadius: 'var(--gi-radius-md)' }}>
         <p style={{ margin: 0, fontSize: 'var(--gi-text-sm)', color: 'var(--gi-text-primary)' }}>

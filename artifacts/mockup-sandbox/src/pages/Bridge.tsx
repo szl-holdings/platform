@@ -345,9 +345,9 @@ const EXISTING_ACP_TOOLS: DemoTool[] = [
     params: [],
     mockResponse: () => ({
       agents: [
-        { id: 'aegis', name: 'Aegis Intel Agent', status: 'online', version: '1.4.2' },
-        { id: 'vessels', name: 'Vessels Route Agent', status: 'online', version: '2.1.0' },
-        { id: 'terra', name: 'Terra Distress Agent', status: 'degraded', version: '1.8.5' },
+        { id: 'aegis', name: 'PARAGON Intel Agent', status: 'online', version: '1.4.2' },
+        { id: 'vessels', name: 'SEXTANT Route Agent', status: 'online', version: '2.1.0' },
+        { id: 'terra', name: 'DOMAINE Distress Agent', status: 'degraded', version: '1.8.5' },
         { id: 'pulse', name: 'Pulse Briefing Agent', status: 'online', version: '3.0.1' },
       ],
     }),

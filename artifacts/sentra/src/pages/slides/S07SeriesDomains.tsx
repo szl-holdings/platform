@@ -1,21 +1,21 @@
 export default function S07SeriesDomains() {
   const domains = [
     {
-      name: 'Aegis',
+      name: 'PARAGON',
       subtitle: 'Defense & Security',
       score: '8/10',
       desc: 'SOC command + 8 advanced intelligence modules: OT/ICS, OSINT, Dark Web, SIGINT, Behavioral, Counterintelligence, Quantum, AI Threat Hunter',
       color: '#0cc8d9',
     },
     {
-      name: 'Vessels',
+      name: 'SEXTANT',
       subtitle: 'Maritime Intelligence',
       score: '8/10',
       desc: 'Fleet command + commercial modules: S&P tracking, Demurrage, Freight benchmarking, Voyage P&L, Marine insurance',
       color: '#0cc8d9',
     },
     {
-      name: 'Terra',
+      name: 'DOMAINE',
       subtitle: 'Real Estate Intelligence',
       score: '7/10',
       desc: 'NYC distress pipeline + AI property analysis + ownership graph. Live NYC Open Data feed — closest domain to production live data',
@@ -36,7 +36,7 @@ export default function S07SeriesDomains() {
       color: '#f5a623',
     },
     {
-      name: 'Aegis',
+      name: 'PARAGON',
       subtitle: 'Corporate Platform',
       score: '9/10',
       desc: 'Portfolio command, investor relations, trust center, data room — the corporate presence built on its own governance infrastructure',

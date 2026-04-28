@@ -73,7 +73,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     key: 'aegis',
     name: 'Security Incident',
-    domainLabel: 'Aegis — Defense & Security',
+    domainLabel: 'PARAGON — Defense & Security',
     color: '#c45a4a',
     icon: '🛡️',
     description: 'Unauthorized credential access attempt detected across 3 admin accounts',
@@ -87,7 +87,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Behavioral analytics detected a structured credential sweep across admin accounts at 02:14 UTC. 847 failed attempts over 4 minutes from rotating IPs. Pattern consistent with credential-stuffing attack.',
         severity: 'critical',
-        source: 'Aegis Threat Intelligence',
+        source: 'PARAGON Threat Intelligence',
         sourceType: 'security_monitoring',
         classifiedAs: 'credential_attack',
         confidence: 0.94,
@@ -100,15 +100,15 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Post-authentication, internal API calls show a 340% spike from one compromised service account, querying unauthorized data endpoints.',
         severity: 'high',
-        source: 'Aegis Network Fabric',
+        source: 'PARAGON Network Fabric',
         sourceType: 'network_monitoring',
         classifiedAs: 'lateral_movement',
         confidence: 0.87,
       },
     ],
-    workflowName: 'Aegis Threat Containment — SEC-CRIT-2026',
+    workflowName: 'PARAGON Threat Containment — SEC-CRIT-2026',
     workflowSteps: [
-      { id: 's1', label: 'Detect: Ingest threat signal from Aegis Intelligence fabric' },
+      { id: 's1', label: 'Detect: Ingest threat signal from PARAGON Intelligence fabric' },
       { id: 's2', label: 'Interpret: Classify threat vector and map blast radius' },
       { id: 's3', label: 'Decide: Generate containment recommendation with evidence trail' },
       { id: 's4', label: 'Execute: Isolate compromised accounts, rotate credentials' },
@@ -136,7 +136,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     key: 'vessels',
     name: 'Maritime Exception',
-    domainLabel: 'Vessels — Fleet Command',
+    domainLabel: 'SEXTANT — Fleet Command',
     color: '#38bdf8',
     icon: '⚓',
     description:
@@ -151,7 +151,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'AIS telemetry shows MV Meridian Star deviating 47 nautical miles south of approved route for past 6.3 hours. Fuel consumption anomaly of +34% detected. Cargo: high-value electronics, Port of Rotterdam ETA now missed.',
         severity: 'critical',
-        source: 'Vessels AIS Intelligence',
+        source: 'SEXTANT AIS Intelligence',
         sourceType: 'vessel_monitoring',
         classifiedAs: 'route_deviation',
         confidence: 0.97,
@@ -164,15 +164,15 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Engine telemetry reports fault code ECU-0147 (injector irregularity) alongside elevated fuel draw. Chief Engineer has not acknowledged 3 automated system alerts.',
         severity: 'high',
-        source: 'Vessels Engine Telemetry',
+        source: 'SEXTANT Engine Telemetry',
         sourceType: 'iot_monitoring',
         classifiedAs: 'mechanical_anomaly',
         confidence: 0.91,
       },
     ],
-    workflowName: 'Vessels Deviation Response — VES-EXC-2026',
+    workflowName: 'SEXTANT Deviation Response — VES-EXC-2026',
     workflowSteps: [
-      { id: 's1', label: 'Detect: AIS deviation alert from Vessels telemetry layer' },
+      { id: 's1', label: 'Detect: AIS deviation alert from SEXTANT telemetry layer' },
       { id: 's2', label: 'Interpret: Route analysis, fuel model, cargo risk scoring' },
       { id: 's3', label: 'Decide: Recommend optimal corrective heading and client notification' },
       { id: 's4', label: 'Execute: Dispatch course correction to vessel, notify freight client' },
@@ -201,7 +201,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     key: 'terra',
     name: 'Real Estate Opportunity',
-    domainLabel: 'Terra — Real Estate Intelligence',
+    domainLabel: 'DOMAINE — Real Estate Intelligence',
     color: '#a07848',
     icon: '🏢',
     description:
@@ -216,7 +216,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Proptech intelligence identified a distressed C-class office building at 847 Commerce Blvd. Owner filed for voluntary sale after failed Q1 refinancing. Listed at $4.1M — 22% below comparable sales. 72-hour exclusive window before public listing.',
         severity: 'high',
-        source: 'Terra Market Intelligence',
+        source: 'DOMAINE Market Intelligence',
         sourceType: 'property_monitoring',
         classifiedAs: 'acquisition_opportunity',
         confidence: 0.89,
@@ -229,15 +229,15 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Pro-forma cap rate analysis shows 9.2% at ask price, assuming 85% occupancy target. Current occupancy: 71%. Lease-up runway estimated 14 months based on comparable absorption.',
         severity: 'medium',
-        source: 'Terra Financial Model',
+        source: 'DOMAINE Financial Model',
         sourceType: 'financial_analysis',
         classifiedAs: 'financial_opportunity',
         confidence: 0.82,
       },
     ],
-    workflowName: 'Terra Acquisition Analysis — TER-OPP-2026',
+    workflowName: 'DOMAINE Acquisition Analysis — TER-OPP-2026',
     workflowSteps: [
-      { id: 's1', label: 'Detect: Distress signal from Terra market intelligence layer' },
+      { id: 's1', label: 'Detect: Distress signal from DOMAINE market intelligence layer' },
       { id: 's2', label: 'Interpret: Comparable analysis, cap rate model, risk scoring' },
       {
         id: 's3',

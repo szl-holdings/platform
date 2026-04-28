@@ -319,7 +319,7 @@ export async function run(
     });
 
     // Emit a structured StepLogEntry into agents-core/step-log for every phase.
-    // The Lyte Run Console reads these records via the agents API to render
+    // The KORA Run Console reads these records via the agents API to render
     // the live step log instead of raw trace spans.
     void emitStepLog({
       runId,

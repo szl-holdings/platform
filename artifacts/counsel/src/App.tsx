@@ -525,7 +525,7 @@ function AppShell() {
     },
     {
       id: 'u4',
-      headline: 'New dependency: Vessels sanctions matter linked to Apex case',
+      headline: 'New dependency: SEXTANT sanctions matter linked to Apex case',
       surface: 'Counsel',
       severity: 'info',
       timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
@@ -575,31 +575,31 @@ function AppShell() {
   const sentientCrossLinks: SentientCrossLink[] = [
     {
       id: 'cl1',
-      surface: 'Aegis',
+      surface: 'PARAGON',
       surfaceAccent: '#ef4444',
-      label: 'Aegis: data breach incident linked to Greenfield',
+      label: 'PARAGON: data breach incident linked to Greenfield',
       description:
-        "Aegis's IC-2409 incident is the source event for the Greenfield data breach matter.",
+        "PARAGON's IC-2409 incident is the source event for the Greenfield data breach matter.",
       href: '/sentra/incident',
       preservedContext: { surface: 'counsel', matter: 'greenfield' },
     },
     {
       id: 'cl2',
-      surface: 'Vessels',
+      surface: 'SEXTANT',
       surfaceAccent: '#4d8fcc',
-      label: 'Vessels: MV Atlantic Falcon sanctions linkage',
+      label: 'SEXTANT: MV Atlantic Falcon sanctions linkage',
       description:
-        'Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
+        'SEXTANT flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
       href: '/vessels/sanctions',
       preservedContext: { surface: 'counsel' },
     },
     {
       id: 'cl3',
-      surface: 'Lyte',
+      surface: 'KORA',
       surfaceAccent: '#4d8fcc',
-      label: 'Lyte: 2 legal decisions pending executive approval',
+      label: 'KORA: 2 legal decisions pending executive approval',
       description:
-        "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
+        "KORA's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'counsel' },
     },

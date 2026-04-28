@@ -16,11 +16,11 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'lyte-observability',
     title: 'Operational Signal Intelligence',
-    audience: 'IT operators and engineering leads using Lyte',
+    audience: 'IT operators and engineering leads using KORA',
     problem:
       'High signal volumes produce alert fatigue. Teams struggle to differentiate critical incidents from noise.',
     inputs: [
-      'Lyte service health streams',
+      'KORA service health streams',
       'alert feeds',
       'performance metrics',
       'historical incident data',
@@ -104,7 +104,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'exception-handling',
     title: 'Exception Detection and Response',
-    audience: 'Operations and engineering teams on Lyte and Vessels',
+    audience: 'Operations and engineering teams on KORA and SEXTANT',
     problem:
       'Edge cases and operational exceptions require significant manual investigation before appropriate responses can be formed.',
     inputs: ['System anomalies', 'threshold breaches', 'unclassified events', 'outlier signals'],
@@ -125,7 +125,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'maritime-signal',
     title: 'Maritime Signal Interpretation',
-    audience: 'Fleet operators and maritime intelligence teams using Vessels',
+    audience: 'Fleet operators and maritime intelligence teams using SEXTANT',
     problem:
       'Raw AIS signals and vessel status data require domain expertise to interpret meaningfully.',
     inputs: [
@@ -144,7 +144,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
     ],
     businessImpact:
       'Reduced manual signal analysis, proactive deviation detection, structured fleet intelligence',
-    relatedProduct: 'Vessels Maritime Intelligence',
+    relatedProduct: 'SEXTANT Maritime Intelligence',
     icon: '🚢',
     category: 'Maritime',
   },

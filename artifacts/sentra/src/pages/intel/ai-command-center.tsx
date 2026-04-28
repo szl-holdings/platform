@@ -17,7 +17,7 @@ import { Link } from 'wouter';
 const ECOSYSTEM_APPS = [
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     role: 'Maritime Intelligence',
     agent: 'Maritime Analyst',
     icon: Globe,
@@ -27,7 +27,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'msp',
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     icon: Cpu,
@@ -37,7 +37,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     role: 'Business Telemetry Intel',
     agent: 'Deal Scout',
     icon: TrendingUp,
@@ -67,7 +67,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     role: 'Security Operations',
     agent: 'Adaptive Defense',
     icon: Shield,
@@ -77,7 +77,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     role: 'Observability Layer',
     agent: 'Signal Router',
     icon: Activity,
@@ -87,7 +87,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'szl-holdings',
-    name: 'Aegis',
+    name: 'PARAGON',
     role: 'Portfolio Intelligence',
     agent: 'Portfolio Analyst',
     icon: TrendingUp,

@@ -48,7 +48,7 @@ import { cn } from '@/lib/utils';
 const apps = [
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     subtitle: 'Defense & Intelligence Command',
     category: 'security',
     status: 'live',
@@ -64,7 +64,7 @@ const apps = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     subtitle: 'Property Intelligence — OBSERVE',
     category: 'intelligence',
     status: 'live',
@@ -80,7 +80,7 @@ const apps = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     subtitle: 'Maritime Intelligence',
     category: 'intelligence',
     status: 'live',
@@ -96,7 +96,7 @@ const apps = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     subtitle: 'Business Observability',
     category: 'operations',
     status: 'live',
@@ -157,7 +157,7 @@ const kpiStrip = [
   { label: 'Portfolio ARR', value: '$35M+', trend: '+142% YoY', up: true },
   { label: 'Addressable Market', value: '$2.4B+', trend: '6 verticals', up: true },
   { label: 'Platforms Live', value: '7', trend: '1 beta', up: true },
-  { label: 'Daily AI Inferences', value: '18M+', trend: 'Lyte AI fabric', up: true },
+  { label: 'Daily AI Inferences', value: '18M+', trend: 'KORA AI fabric', up: true },
   { label: 'Deployed Capital', value: '$180M+', trend: 'Since 2021', up: true },
   { label: 'Continents Active', value: '3', trend: 'DC · London · Singapore', up: true },
 ];
@@ -165,7 +165,7 @@ const kpiStrip = [
 const WATCHLIST_DELTAS = [
   {
     entity: 'MV Adriatic Star',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     change: 'AIS gap 6h20m',
     severity: 'high',
     dir: 'down',
@@ -173,7 +173,7 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'CVE-2025-1337',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     change: 'KEV exploitation confirmed',
     severity: 'critical',
     dir: 'down',
@@ -181,7 +181,7 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'NYC Portfolio Cluster A',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     change: '+2 properties at distress threshold',
     severity: 'medium',
     dir: 'down',
@@ -209,7 +209,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa1',
     title: 'Isolate auth-svc, api-gw, reporting hosts',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     priority: 'critical',
     due: 'T+2h',
     owner: null,
@@ -217,7 +217,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa2',
     title: 'OFAC screening — MV Adriatic Star',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     priority: 'high',
     due: 'T+6h',
     owner: 'K. Vasile',
@@ -242,22 +242,22 @@ const PENDING_ACTIONS = [
 
 const CROSS_DOMAIN_CORRELATIONS = [
   {
-    from: 'Aegis',
+    from: 'PARAGON',
     to: 'IMPERIUM',
     type: 'causal',
     label: 'KEV exploit → cloud drift vector',
     strength: 0.87,
   },
   {
-    from: 'Vessels',
-    to: 'Terra',
+    from: 'SEXTANT',
+    to: 'DOMAINE',
     type: 'temporal',
     label: 'Dark vessel ↔ portfolio exposure',
     strength: 0.54,
   },
   {
     from: 'Counsel',
-    to: 'Aegis',
+    to: 'PARAGON',
     type: 'causal',
     label: 'Approval stall → incident response lag',
     strength: 0.63,
@@ -265,17 +265,17 @@ const CROSS_DOMAIN_CORRELATIONS = [
 ];
 
 const STALE_SOURCES = [
-  { source: 'CoStar Market Data', domain: 'Terra', staleFor: '5h', errorMsg: 'Auth token expired' },
-  { source: 'NVD CVE Feed', domain: 'Aegis', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
+  { source: 'CoStar Market Data', domain: 'DOMAINE', staleFor: '5h', errorMsg: 'Auth token expired' },
+  { source: 'NVD CVE Feed', domain: 'PARAGON', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
 ];
 
 const POSTURE_TREND = [71, 74, 73, 76, 74, 72, 75, 76, 75, 78, 76, 78];
 
 const AI_BRIEF_PARAGRAPHS = [
   'The SZL ecosystem is operating at a composite posture of 76/100 — moderately elevated risk across security and operational dimensions. Two critical items require executive attention within the next two hours.',
-  'Aegis has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
-  "Vessels flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with Terra's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
-  'Platform operations: 14 Counsel workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the Aegis incident stream. Escalation required.',
+  'PARAGON has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
+  "SEXTANT flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with DOMAINE's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
+  'Platform operations: 14 Counsel workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the PARAGON incident stream. Escalation required.',
 ];
 
 const SEV_COLORS: Record<string, string> = {
@@ -492,7 +492,7 @@ function AIBriefPanel() {
           Evidence sources
         </p>
         <div className="flex flex-wrap gap-1">
-          {['Aegis SOC', 'Vessels AIS', 'OFAC SDN', 'PRAXIS Calendar', 'IMPERIUM Drift'].map(
+          {['PARAGON SOC', 'SEXTANT AIS', 'OFAC SDN', 'PRAXIS Calendar', 'IMPERIUM Drift'].map(
             (src) => (
               <span
                 key={src}
@@ -702,7 +702,7 @@ function TerraIntelPanel() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
           <Building className="w-3.5 h-3.5" style={{ color: '#4d7c0f' }} />
-          Terra Intel
+          DOMAINE Intel
         </h3>
         <a
           href="/terra/"
@@ -710,7 +710,7 @@ function TerraIntelPanel() {
           rel="noopener noreferrer"
           className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
         >
-          Terra <ArrowUpRight className="w-2.5 h-2.5" />
+          DOMAINE <ArrowUpRight className="w-2.5 h-2.5" />
         </a>
       </div>
 
@@ -1383,7 +1383,7 @@ export default function CommandCenter() {
             {/* Stale source warnings */}
             <StaleSourcesWarning />
 
-            {/* Terra Intel — live portfolio data from Terra */}
+            {/* DOMAINE Intel — live portfolio data from DOMAINE */}
             <TerraIntelPanel />
 
             {/* Watchlist Deltas */}

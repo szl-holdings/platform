@@ -48,7 +48,7 @@ const GITHUB_IS_NOT = [
 export default function DocsGithubPage() {
   const __pageMeta = usePageMeta({
     title: "GitHub — Docs — SZL Holdings",
-    description: "GitHub is technical proof and implementation evidence for the Lyte + Counsel platform — not the company story or the primary CTA. This page explains what the repository demonstrates and why.",
+    description: "GitHub is technical proof and implementation evidence for the KORA + Counsel platform — not the company story or the primary CTA. This page explains what the repository demonstrates and why.",
     canonical: "https://szlholdings.com/docs/github",
   });
 

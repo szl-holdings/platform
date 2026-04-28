@@ -42,7 +42,7 @@ interface StreamSignalEvent {
   timestamp: string;
 }
 
-const PLATFORMS = ['All', 'Aegis', 'Vessels', 'Terra', 'SZL', 'Lyte', 'API'];
+const PLATFORMS = ['All', 'PARAGON', 'SEXTANT', 'DOMAINE', 'SZL', 'KORA', 'API'];
 const SEVERITIES = ['All', 'Critical', 'High', 'Medium', 'Low'] as const;
 
 const SWIPE_THRESHOLD = 80;

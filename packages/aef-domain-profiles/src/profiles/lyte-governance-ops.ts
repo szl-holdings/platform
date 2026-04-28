@@ -4,9 +4,9 @@ export const lyteGovernanceOps: DomainProfile = {
   profileId: 'lyte_governance_ops',
   version: '1.0.0',
   domain: 'lyte_governance_ops',
-  displayName: 'Lyte — Governance & Operations Intelligence',
+  displayName: 'KORA — Governance & Operations Intelligence',
   description:
-    "Retrieval profile for Lyte's governed decision-intelligence surfaces. Optimised for documents describing approval chains, operational risk signals, ownership gaps, stalled workflows, and stakeholder engagement records. Exact-match boost is applied to opportunity IDs, project codes, approval chain IDs, and deliverable references so that structured identifiers always surface their primary document at the top of the result set.",
+    "Retrieval profile for KORA's governed decision-intelligence surfaces. Optimised for documents describing approval chains, operational risk signals, ownership gaps, stalled workflows, and stakeholder engagement records. Exact-match boost is applied to opportunity IDs, project codes, approval chain IDs, and deliverable references so that structured identifiers always surface their primary document at the top of the result set.",
   status: 'active',
 
   chunkingStrategy: {
@@ -22,24 +22,24 @@ export const lyteGovernanceOps: DomainProfile = {
     templateId: 'lyte_gov_query_v1',
     version: '1.0.0',
     template:
-      'You are a retrieval query encoder for Lyte, a governed decision-intelligence platform. ' +
+      'You are a retrieval query encoder for KORA, a governed decision-intelligence platform. ' +
       'Encode the following user question to retrieve operational governance documents, approval chain records, ' +
       'risk signals, and stakeholder briefings. Preserve any identifiers such as opportunity codes, ' +
       'project references, or approval chain IDs verbatim.\n\nQuery: {{query}}',
     variables: ['query'],
-    description: 'Query-side prompt for Lyte governance and operations documents',
+    description: 'Query-side prompt for KORA governance and operations documents',
   },
 
   documentPromptTemplate: {
     templateId: 'lyte_gov_doc_v1',
     version: '1.0.0',
     template:
-      "You are a document encoder for Lyte's operational knowledge base. " +
+      "You are a document encoder for KORA's operational knowledge base. " +
       'Encode the following document so it can be retrieved by queries about operational risk, ' +
       'governance events, approval chain status, stakeholder actions, and business outcomes. ' +
       'Preserve all identifiers and structured references exactly.\n\nDocument: {{document}}',
     variables: ['document'],
-    description: 'Document-side prompt for Lyte governance corpus',
+    description: 'Document-side prompt for KORA governance corpus',
   },
 
   defaultMetadataFilters: {

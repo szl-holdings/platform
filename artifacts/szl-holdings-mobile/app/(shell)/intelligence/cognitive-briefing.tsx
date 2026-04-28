@@ -114,11 +114,11 @@ interface AccountabilityResponse {
 }
 
 const DOMAIN_META: Record<string, { label: string; icon: string; color: string }> = {
-  vessels: { label: 'Vessels', icon: '⚓', color: '#4d8fcc' },
-  aegis: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
-  firestorm: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
-  terra: { label: 'Terra', icon: '⬢', color: '#22c55e' },
-  lyte: { label: 'Lyte', icon: '⚡', color: '#f59e0b' },
+  vessels: { label: 'SEXTANT', icon: '⚓', color: '#4d8fcc' },
+  aegis: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
+  firestorm: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
+  terra: { label: 'DOMAINE', icon: '⬢', color: '#22c55e' },
+  lyte: { label: 'KORA', icon: '⚡', color: '#f59e0b' },
   prism: { label: 'PRISM', icon: '⚖', color: '#a855f7' },
   szl: { label: 'Portfolio', icon: '◆', color: '#c9a84c' },
   operations: { label: 'Operations', icon: '◇', color: '#8b7ac8' },

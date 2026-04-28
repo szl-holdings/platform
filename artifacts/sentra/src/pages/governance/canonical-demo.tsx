@@ -245,7 +245,7 @@ export default function CanonicalDemoPage() {
             <div className="flex items-center gap-3 mb-1">
               <Play size={22} className="text-[#c9b787]" />
               <h1 className="text-xl font-bold text-white font-mono tracking-tight">
-                Aegis Canonical Demo
+                PARAGON Canonical Demo
               </h1>
               <span className="text-xs bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/40 px-2 py-0.5 rounded font-mono font-bold">
                 DEMO / PILOT

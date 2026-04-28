@@ -26,10 +26,10 @@ interface SummarizeResult {
 const SAMPLE_TEXT = `Q1 2026 performance exceeded expectations across three of our four primary verticals. The Intelligence
 Infrastructure segment posted $142M in ARR, a 38% year-over-year increase, driven primarily by the expansion
 of our Sovereign Execution Lab and uptake of the AI Gateway product among enterprise clients. Maritime
-Intelligence (Vessels) returned to growth following the fleet-tracking platform overhaul, registering
+Intelligence (SEXTANT) returned to growth following the fleet-tracking platform overhaul, registering
 $61M ARR (+22% YoY). Legal Matter Command (Counsel) grew modestly at +12% YoY to $48M ARR, constrained
 by a slower-than-expected uptake of the Clause Genome feature among mid-market law firms. The Real Estate
-Intelligence vertical (Terra) was the lone underperformer at -4% YoY ($33M ARR), reflecting the ongoing
+Intelligence vertical (DOMAINE) was the lone underperformer at -4% YoY ($33M ARR), reflecting the ongoing
 commercial real estate liquidity crunch and client budget freezes across the APAC region.
 Gross margin improved 210 bps to 71.4%, reflecting operating leverage and a favourable cloud cost
 renegotiation completed in January. Net Revenue Retention reached 118% driven by seat expansion and upsells

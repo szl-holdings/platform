@@ -80,7 +80,7 @@ const TIMELINE_EVENTS: TimelineEvent[] = [
   {
     id: "evt_2",
     label: "Capital call drafted",
-    description: "Auto-generated draft for Vessels Fund III.",
+    description: "Auto-generated draft for SEXTANT Fund III.",
     status: "complete",
     timestamp: "08:44",
     duration: "3.8s",
@@ -371,7 +371,7 @@ export default function AeepCommandPage() {
       >
         <SectionPanel
           title="Active workflow"
-          subtitle="Vessels Fund III · capital call draft"
+          subtitle="SEXTANT Fund III · capital call draft"
           actions={<StatusBadge variant="pending" label="Approval required" />}
         >
           <Timeline events={isExecutive ? TIMELINE_EVENTS.slice(-3) : TIMELINE_EVENTS} />
@@ -403,21 +403,21 @@ export default function AeepCommandPage() {
           {[
             {
               id: "appr_1",
-              label: "Vessels Fund III — capital call $312k",
+              label: "SEXTANT Fund III — capital call $312k",
               actor: "drafted by agent:fund-ops",
               status: "pending" as const,
               statusLabel: "Awaiting CFO",
             },
             {
               id: "appr_2",
-              label: "Terra — NAV restatement Q1",
+              label: "DOMAINE — NAV restatement Q1",
               actor: "drafted by agent:terra-nav",
               status: "pending" as const,
               statusLabel: "Awaiting Controller",
             },
             {
               id: "appr_3",
-              label: "Aegis — LP exception override",
+              label: "PARAGON — LP exception override",
               actor: "drafted by S. Park",
               status: "escalated" as const,
               statusLabel: "Escalated to Risk",

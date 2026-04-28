@@ -139,7 +139,7 @@ const EXAMPLE_CONSULTATIONS = [
       'El Niño weather pattern will increase Suez Canal delays by 15–22%. Red Sea tensions remain elevated — recommend rerouting 3 key fleet segments via Cape of Good Hope. Panama Canal water levels critical through April.',
   },
   {
-    question: "What is the Aegis portfolio's greatest systemic risk in Q2 2026?",
+    question: "What is the PARAGON portfolio's greatest systemic risk in Q2 2026?",
     oracle: 'Primary AI Model',
     confidence: 91,
     summary:
@@ -163,19 +163,19 @@ interface ComparisonResult {
 }
 
 const COMPARISON_QUESTION =
-  'What is the single highest-leverage action Aegis could take in the next 90 days?';
+  'What is the single highest-leverage action PARAGON could take in the next 90 days?';
 const COMPARISON_RESULTS: ComparisonResult[] = [
   {
     oracle: 'Primary AI Model',
     answer:
-      'Deploy automated cross-domain anomaly correlation — connecting Vessels, MSP, and Terra signals into a unified early warning system would reduce MTTD by an estimated 60%.',
+      'Deploy automated cross-domain anomaly correlation — connecting SEXTANT, MSP, and DOMAINE signals into a unified early warning system would reduce MTTD by an estimated 60%.',
     confidence: 91,
     reasoning: [
       'Each app currently operates in isolation',
       'Cross-domain signals show 3 unrealized correlations',
-      'MSP ticket data predicts Terra market disruptions with 2-week lead time',
+      'MSP ticket data predicts DOMAINE market disruptions with 2-week lead time',
     ],
-    caveats: 'Requires API bridge between Vessels and MSP data layers.',
+    caveats: 'Requires API bridge between SEXTANT and MSP data layers.',
   },
   {
     oracle: 'Financial Oracle',

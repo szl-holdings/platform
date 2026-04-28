@@ -409,9 +409,9 @@ export type ApprovedCTA =
   | 'Read the Insights'
   | 'Start a Private Inquiry'
   | 'Explore Counsel'
-  | 'Explore Lyte'
-  | 'Explore Vessels'
-  | 'Explore Terra'
+  | 'Explore KORA'
+  | 'Explore SEXTANT'
+  | 'Explore DOMAINE'
   | 'Explore Carlota Jo'
   | 'Meet the Founder';
 
@@ -426,9 +426,9 @@ export const APPROVED_CTAS: ApprovedCTA[] = [
   'Read the Insights',
   'Start a Private Inquiry',
   'Explore Counsel',
-  'Explore Lyte',
-  'Explore Vessels',
-  'Explore Terra',
+  'Explore KORA',
+  'Explore SEXTANT',
+  'Explore DOMAINE',
   'Explore Carlota Jo',
   'Meet the Founder',
 ];

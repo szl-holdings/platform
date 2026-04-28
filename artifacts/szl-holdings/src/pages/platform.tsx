@@ -9,7 +9,7 @@ import { PlatformArchitectureDiagram } from "@/components/diagrams/PlatformArchi
 
 const LAYERS = [
   {
-    name: "Lyte + Command",
+    name: "KORA + Command",
     tagline: "Governed Command Surface",
     accent: "hsl(190,90%,55%)",
     accentRgb: "14,201,224",
@@ -40,17 +40,17 @@ const LAYERS = [
 
 const EXPANSION_VERTICALS = [
   {
-    name: "Aegis",
+    name: "PARAGON",
     domain: "Security & defense — SOC command, threat intelligence, MITRE ATT&CK, governed response.",
     accent: "hsl(222,60%,58%)",
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     domain: "Maritime intelligence — fleet command, AIS telemetry, sanctions screening, voyage economics.",
     accent: "hsl(205,85%,55%)",
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     domain: "Real estate intelligence — distress pipeline, ownership graph, governed deal workflow.",
     accent: "hsl(140,52%,46%)",
   },
@@ -75,7 +75,7 @@ const EXPANSION_VERTICALS = [
 export default function PlatformPage() {
   const __pageMeta = usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "Governed decision operating system: Command operator surface, Counsel execution fabric, and six domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
+    description: "Governed decision operating system: Command operator surface, Counsel execution fabric, and six domain packs — PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
     ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });

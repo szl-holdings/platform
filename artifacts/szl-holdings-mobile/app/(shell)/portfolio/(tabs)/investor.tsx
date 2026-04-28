@@ -25,7 +25,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q1 2026 Investor Letter',
     quarter: 'Q1 2026',
     excerpt:
-      'Aegis FedRAMP track opens. Enterprise client expansion across Vessels and Lyte. Platform architecture milestone delivered.',
+      'PARAGON FedRAMP track opens. Enterprise client expansion across SEXTANT and KORA. Platform architecture milestone delivered.',
     date: 'March 31, 2026',
   },
   {
@@ -33,7 +33,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q4 2025 Investor Letter',
     quarter: 'Q4 2025',
     excerpt:
-      'Year in review: 6 live platforms, Counsel 2.0 convergence, Lyte executive command launch, mobile platform launch.',
+      'Year in review: 6 live platforms, Counsel 2.0 convergence, KORA executive command launch, mobile platform launch.',
     date: 'December 31, 2025',
   },
   {
@@ -41,7 +41,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q3 2025 Investor Letter',
     quarter: 'Q3 2025',
     excerpt:
-      'Vessels dark vessel detection lead time improvements. Terra NYC expansion progressing. Aegis SOC capabilities expanded.',
+      'SEXTANT dark vessel detection lead time improvements. DOMAINE NYC expansion progressing. PARAGON SOC capabilities expanded.',
     date: 'September 30, 2025',
   },
 ];
@@ -56,7 +56,7 @@ const STRATEGIC_PRIORITIES: Array<{
 }> = [
   {
     title: 'FedRAMP & Federal Expansion',
-    body: 'Aegis is on the federal readiness track. Defense and intelligence capabilities position the platform for federal sector expansion.',
+    body: 'PARAGON is on the federal readiness track. Defense and intelligence capabilities position the platform for federal sector expansion.',
     color: '#6366f1',
     icon: 'shield',
   },
@@ -68,12 +68,12 @@ const STRATEGIC_PRIORITIES: Array<{
   },
   {
     title: 'Maritime Climate Routing',
-    body: 'Vessels climate routing overlay for charter optimization and route risk intelligence.',
+    body: 'SEXTANT climate routing overlay for charter optimization and route risk intelligence.',
     color: '#3b82f6',
     icon: 'anchor',
   },
   {
-    title: 'Terra National Coverage',
+    title: 'DOMAINE National Coverage',
     body: 'Expanding beyond NYC to national distressed property coverage with API-first architecture for institutional integrations.',
     color: '#4d7c0f',
     icon: 'map',

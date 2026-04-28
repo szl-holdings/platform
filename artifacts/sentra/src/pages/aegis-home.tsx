@@ -248,7 +248,7 @@ export default function AegisHomePage() {
             >
               <Shield size={13} className="text-[#c9b787]" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-white">Aegis</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">PARAGON</span>
             <span aria-hidden="true" className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/60 font-mono ml-1">
               Defense & Intelligence
             </span>
@@ -329,7 +329,7 @@ export default function AegisHomePage() {
       <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
         <Reveal>
           <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-8 font-mono">
-            Aegis &middot; Unified Defense & Intelligence
+            PARAGON &middot; Unified Defense & Intelligence
           </p>
         </Reveal>
 
@@ -346,7 +346,7 @@ export default function AegisHomePage() {
 
         <Reveal delay={300}>
           <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/65 max-w-[640px] mb-12">
-            Aegis unifies security operations, managed services, and AI-driven intelligence into a
+            PARAGON unifies security operations, managed services, and AI-driven intelligence into a
             single console. Defense detects. Legal protects. Command operates. Labs reasons. All
             four share one data context, one correlation engine, one operating model.
           </p>
@@ -495,7 +495,7 @@ export default function AegisHomePage() {
               Cross-module intelligence in action
             </h2>
             <p className="text-[16px] leading-[1.8] text-white/65 mb-16 max-w-[560px]">
-              The real power of Aegis is convergence. When Defense, Legal, Command, and Labs share
+              The real power of PARAGON is convergence. When Defense, Legal, Command, and Labs share
               one data layer, correlations emerge that siloed tools miss entirely.
             </p>
 
@@ -632,7 +632,7 @@ export default function AegisHomePage() {
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
-              How Aegis works in practice
+              How PARAGON works in practice
             </h2>
             <p className="text-[14px] max-w-xl mx-auto text-white/65">
               From deployment to full command in under an hour. Four workspaces, one unified
@@ -646,7 +646,7 @@ export default function AegisHomePage() {
                 {
                   step: '01',
                   title: 'Provision your workspace',
-                  body: 'Choose your deployment model — cloud, on-premises, or air-gapped. Ingest your first data sources: endpoint telemetry, network flows, identity events. Aegis normalizes everything into a unified event schema.',
+                  body: 'Choose your deployment model — cloud, on-premises, or air-gapped. Ingest your first data sources: endpoint telemetry, network flows, identity events. PARAGON normalizes everything into a unified event schema.',
                   tag: 'Setup',
                 },
                 {
@@ -731,7 +731,7 @@ export default function AegisHomePage() {
             Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
           </p>
           <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
-            Every decision in Aegis follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+            Every decision in PARAGON follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
           </p>
         </div>
       </section>
@@ -742,7 +742,7 @@ export default function AegisHomePage() {
             utmSource="aegis"
             variant="banner"
             heading="Intelligence from the front line"
-            subheading="Essays on governed AI, defense operations, and the decision infrastructure behind Aegis — delivered weekly."
+            subheading="Essays on governed AI, defense operations, and the decision infrastructure behind PARAGON — delivered weekly."
           />
         </div>
       </section>
@@ -751,7 +751,7 @@ export default function AegisHomePage() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
             <Shield size={12} className="text-white/60" />
-            <span className="text-[12px] font-semibold text-white/85">Aegis</span>
+            <span className="text-[12px] font-semibold text-white/85">PARAGON</span>
             <span aria-hidden="true" className="text-[10px] text-white/60 font-mono">by a11oy</span>
           </div>
           <p className="text-[10px] text-white/60">{copyrightLine()}</p>
@@ -763,7 +763,7 @@ export default function AegisHomePage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="aegis"
-        subtitle="Aegis — Unified Defense & Intelligence Command"
+        subtitle="PARAGON — Unified Defense & Intelligence Command"
       />
     </div>
   );

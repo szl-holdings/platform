@@ -1137,11 +1137,11 @@ export default function Settings() {
           {[
             { agent: 'Counsel', role: 'Orchestration & synthesis', domain: 'Executive' },
             { agent: 'Helmsman', role: 'Maritime intelligence', domain: 'Fleet' },
-            { agent: 'Sentinel', role: 'Security & threats', domain: 'Aegis' },
-            { agent: 'Terra', role: 'Real estate analytics', domain: 'Property' },
+            { agent: 'Sentinel', role: 'Security & threats', domain: 'PARAGON' },
+            { agent: 'DOMAINE', role: 'Real estate analytics', domain: 'Property' },
             { agent: 'Lexis', role: 'Legal & compliance', domain: 'Counsel' },
             { agent: 'Atlas', role: 'Financial & portfolio', domain: 'Holdings' },
-            { agent: 'Lyte', role: 'Platform health', domain: 'Operations' },
+            { agent: 'KORA', role: 'Platform health', domain: 'Operations' },
           ].map((a) => (
             <div
               key={a.agent}

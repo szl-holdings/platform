@@ -65,10 +65,10 @@ const DEMO_CONFIGS: Record<
         label: 'Agent Processes',
         phase: 'agent',
         description:
-          'Counsel routes to Finance agent (Lyte). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.',
+          'Counsel routes to Finance agent (KORA). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.',
         icon: <Zap className="w-3.5 h-3.5" />,
         durationMs: 1800,
-        evidence: 'Lyte confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated',
+        evidence: 'KORA confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated',
       },
       {
         id: 3,
@@ -203,17 +203,17 @@ const DEMO_CONFIGS: Record<
         icon: <Eye className="w-3.5 h-3.5" />,
         durationMs: 400,
         evidence:
-          'Query source: Counsel console · Agent routing: AI research agent + Lyte (analytics)',
+          'Query source: Counsel console · Agent routing: AI research agent + KORA (analytics)',
       },
       {
         id: 2,
         label: 'Multi-Source Synthesis',
         phase: 'agent',
         description:
-          'AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. Lyte correlates with platform metrics. Responses synthesized by Counsel orchestrator.',
+          'AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. KORA correlates with platform metrics. Responses synthesized by Counsel orchestrator.',
         icon: <Zap className="w-3.5 h-3.5" />,
         durationMs: 2400,
-        evidence: 'Agents: SZL APEX + Lyte · Sources: 11 · Avg confidence: 82%',
+        evidence: 'Agents: SZL APEX + KORA · Sources: 11 · Avg confidence: 82%',
       },
       {
         id: 3,

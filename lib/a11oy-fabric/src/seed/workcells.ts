@@ -382,7 +382,7 @@ export const SEED_WORKCELLS: Workcell[] = [
   },
   {
     id: 'wc-009',
-    name: 'Terra Capex Variance Audit',
+    name: 'DOMAINE Capex Variance Audit',
     vertical: 'terra-real-estate',
     status: 'running',
     objective: 'Identify source of 22% capex overrun in residential portfolio.',
@@ -476,7 +476,7 @@ export const SEED_WORKCELLS: Workcell[] = [
   },
   {
     id: 'wc-011',
-    name: 'Aegis Incident Triage',
+    name: 'PARAGON Incident Triage',
     vertical: 'aegis-defense',
     status: 'running',
     objective: 'Contain state-level APT threat identified in intelligence fusion.',

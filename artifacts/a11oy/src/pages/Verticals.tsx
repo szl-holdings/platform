@@ -4,11 +4,11 @@ import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge } from '../compo
 import { SEED_SIGNALS, SEED_WORKCELLS, SEED_OUTCOMES } from '@workspace/a11oy-fabric';
 
 const VERTICALS = [
-  { id: 'vessels-maritime', label: 'Vessels Maritime', color: '#8a8a8a', icon: '⚓', description: 'Fleet operations, port scheduling, ETA monitoring, demurrage risk and maritime signal mesh.' },
-  { id: 'lyte-revenue', label: 'Lyte Revenue', color: '#c9b787', icon: '◆', description: 'Enterprise pipeline velocity, deal health, forecast modeling, and revenue signal patterns.' },
+  { id: 'vessels-maritime', label: 'SEXTANT Maritime', color: '#8a8a8a', icon: '⚓', description: 'Fleet operations, port scheduling, ETA monitoring, demurrage risk and maritime signal mesh.' },
+  { id: 'lyte-revenue', label: 'KORA Revenue', color: '#c9b787', icon: '◆', description: 'Enterprise pipeline velocity, deal health, forecast modeling, and revenue signal patterns.' },
   { id: 'prism-counsel', label: 'Counsel', color: '#8a8a8a', icon: '⚖', description: 'Legal matter tracking, discovery deadlines, document status, and litigation risk scoring.' },
-  { id: 'terra-real-estate', label: 'Terra Real Estate', color: '#c9b787', icon: '▣', description: 'Portfolio cap rate monitoring, valuation modeling, and real estate market signal analysis.' },
-  { id: 'aegis-defense', label: 'Aegis Defense', color: '#f5f5f5', icon: '⬡', description: 'Threat intelligence, posture assessment, SIGINT correlation, and defense operational monitoring.' },
+  { id: 'terra-real-estate', label: 'DOMAINE Real Estate', color: '#c9b787', icon: '▣', description: 'Portfolio cap rate monitoring, valuation modeling, and real estate market signal analysis.' },
+  { id: 'aegis-defense', label: 'PARAGON Defense', color: '#f5f5f5', icon: '⬡', description: 'Threat intelligence, posture assessment, SIGINT correlation, and defense operational monitoring.' },
   { id: 'carlota-jo', label: 'Carlota Jo', color: '#c9b787', icon: '◎', description: 'Consulting matter management, client follow-ups, advisory brief generation, and engagement signals.' },
   { id: 'alloy-core', label: 'Alloy Core', color: '#8a8a8a', icon: '⬟', description: 'Internal fabric health — signal mesh, proof ledger integrity, layer latency, and operator performance.' },
 ];

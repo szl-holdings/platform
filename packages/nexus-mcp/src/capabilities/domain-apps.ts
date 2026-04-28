@@ -20,7 +20,7 @@ function buildFleetMapApp(ctx: TenantContext): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vessels — Fleet Position Map</title>
+<title>SEXTANT — Fleet Position Map</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0f1729;border-bottom:1px solid #1e3a5f;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -41,12 +41,12 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">Vessels</div>
+  <div class="logo">SEXTANT</div>
   <div class="badge">MARITIME INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Tenant: ${ctx.tenantId ?? 'global'}</div>
 </div>
 <div class="kpi">
-  <div class="kpi-item"><div class="kpi-value">24</div><div class="kpi-label">Active Vessels</div></div>
+  <div class="kpi-item"><div class="kpi-value">24</div><div class="kpi-label">Active SEXTANT</div></div>
   <div class="kpi-item"><div class="kpi-value">3</div><div class="kpi-label">Weather Alerts</div></div>
   <div class="kpi-item"><div class="kpi-value">1</div><div class="kpi-label">AIS Gaps</div></div>
   <div class="kpi-item"><div class="kpi-value">98.2%</div><div class="kpi-label">On Schedule</div></div>
@@ -62,7 +62,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
   <div class="vessel-card"><div class="vessel-name"><span class="status-dot"></span>ATLAS VENTURE</div><div class="vessel-status">Gulf of Aden · Monitoring</div></div>
 </div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via Vessels MCP · Proof-chained · ${new Date().toISOString()}
+  Live data via SEXTANT MCP · Proof-chained · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -119,7 +119,7 @@ function buildPropertyComparisonApp(ctx: TenantContext): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Terra — Property Comparison</title>
+<title>DOMAINE — Property Comparison</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0a1a0e;border-bottom:1px solid #14532d;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -141,7 +141,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">Terra</div>
+  <div class="logo">DOMAINE</div>
   <div class="badge">REAL ESTATE INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Domain: ${ctx.domain ?? 'real-estate'}</div>
 </div>
@@ -169,7 +169,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
   </div>
 </div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via Terra MCP · Proof-chained · ${new Date().toISOString()}
+  Live data via DOMAINE MCP · Proof-chained · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -179,7 +179,7 @@ function buildCaseStatusApp(ctx: TenantContext): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lyte — Decision Intelligence</title>
+<title>KORA — Decision Intelligence</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0e0a1a;border-bottom:1px solid #4c1d95;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -200,7 +200,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">Lyte</div>
+  <div class="logo">KORA</div>
   <div class="badge">DECISION INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Roles: ${(ctx.roles ?? ['viewer']).join(', ')}</div>
 </div>
@@ -212,10 +212,10 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </div>
 <div style="margin:0 16px 8px;font-size:10px;color:#4b5563;font-weight:600;text-transform:uppercase;letter-spacing:1px">Decision Queue</div>
 <div class="decision-item"><div><div class="decision-title">Cross-Domain Risk Escalation — Maritime + Cyber</div><div class="decision-meta">Confidence: 87% · Evidence: 4 items</div></div><span class="status-pill pending">PENDING</span></div>
-<div class="decision-item"><div><div class="decision-title">Terra Portfolio Rebalancing Workflow</div><div class="decision-meta">Stage 3/5 · ETA: 8min</div></div><span class="status-pill running">RUNNING</span></div>
-<div class="decision-item"><div><div class="decision-title">Aegis Threat Containment Execution</div><div class="decision-meta">Approved by J.Chen · 14min ago</div></div><span class="status-pill approved">APPROVED</span></div>
+<div class="decision-item"><div><div class="decision-title">DOMAINE Portfolio Rebalancing Workflow</div><div class="decision-meta">Stage 3/5 · ETA: 8min</div></div><span class="status-pill running">RUNNING</span></div>
+<div class="decision-item"><div><div class="decision-title">PARAGON Threat Containment Execution</div><div class="decision-meta">Approved by J.Chen · 14min ago</div></div><span class="status-pill approved">APPROVED</span></div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via Lyte MCP · Governed Autonomy · ${new Date().toISOString()}
+  Live data via KORA MCP · Governed Autonomy · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -231,7 +231,7 @@ export function createDomainApps(): PRAXISApp[] {
     {
       appId: 'vessels-fleet-map',
       domain: 'maritime',
-      title: 'Vessels Fleet Position Map',
+      title: 'SEXTANT Fleet Position Map',
       description: 'Live maritime fleet positions, voyage status, weather alerts, and AIS anomaly detection.',
       renderHtml: async (ctx: TenantContext) => buildFleetMapApp(ctx),
     },
@@ -245,14 +245,14 @@ export function createDomainApps(): PRAXISApp[] {
     {
       appId: 'terra-property-comparison',
       domain: 'real-estate',
-      title: 'Terra Property Comparison Card',
+      title: 'DOMAINE Property Comparison Card',
       description: 'Distressed property opportunities, portfolio analytics, and market signal comparisons.',
       renderHtml: async (ctx: TenantContext) => buildPropertyComparisonApp(ctx),
     },
     {
       appId: 'lyte-case-status',
       domain: 'analytics',
-      title: 'Lyte Decision Intelligence Dashboard',
+      title: 'KORA Decision Intelligence Dashboard',
       description: 'Pending approvals, active workflow runs, platform health, and decision queue status.',
       renderHtml: async (ctx: TenantContext) => buildCaseStatusApp(ctx),
     },

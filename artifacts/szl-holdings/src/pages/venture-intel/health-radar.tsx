@@ -14,7 +14,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const COMPANIES = [
   {
     id: "lyte",
-    name: "Lyte",
+    name: "KORA",
     tagline: "Business Observability",
     color: "#38bee0",
     rgb: "56,190,224",
@@ -39,7 +39,7 @@ const COMPANIES = [
   },
   {
     id: "vessels",
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime Intelligence",
     color: "#3aa4dc",
     rgb: "58,164,220",
@@ -64,7 +64,7 @@ const COMPANIES = [
   },
   {
     id: "aegis",
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "SOC Command",
     color: "#6366f1",
     rgb: "99,102,241",
@@ -85,11 +85,11 @@ const COMPANIES = [
       { label: "NRR", value: "112%", good: true },
       { label: "MTTR Improvement", value: "62%", good: true },
     ],
-    sentiment: "Solid market position but CAC payback trending above target. Managed SOC bundling with Vessels maritime clients is highest-priority synergy play to accelerate.",
+    sentiment: "Solid market position but CAC payback trending above target. Managed SOC bundling with SEXTANT maritime clients is highest-priority synergy play to accelerate.",
   },
   {
     id: "terra",
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real Estate Intelligence",
     color: "#6b9c30",
     rgb: "107,156,48",

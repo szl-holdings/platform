@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const PRODUCT_HIERARCHY = [
   {
-    name: "Command + Lyte",
+    name: "Command + KORA",
     role: "Governed command surface",
     color: "hsl(192,72%,48%)",
     desc: "The operator command surface. Signal timeline, action queue, approval flow, and AI recommendations — with source citations, confidence scores, and full provenance. Where operators observe signals, review recommendations, run simulations, and make governed decisions.",
@@ -23,9 +23,9 @@ const PRODUCT_HIERARCHY = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Aegis", domain: "Security & defense", color: "#6b7ec8", status: "Active" },
-  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Active" },
-  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Active" },
+  { name: "PARAGON", domain: "Security & defense", color: "#6b7ec8", status: "Active" },
+  { name: "SEXTANT", domain: "Maritime intelligence", color: "#4a90b8", status: "Active" },
+  { name: "DOMAINE", domain: "Real estate intelligence", color: "#5fa87a", status: "Active" },
   { name: "Counsel", domain: "Legal intelligence", color: "#8b7ac8", status: "Governed extension" },
   { name: "Carlota Jo", domain: "Premium advisory", color: "#c8a05a", status: "Live" },
   { name: "IMPERIUM", domain: "Cloud sovereignty", color: "#c87a4a", status: "Governed extension" },

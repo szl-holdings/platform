@@ -48,8 +48,8 @@ const TRUST_CONTROLS = [
 
 export default function PilotVesselsPage() {
   const __pageMeta = usePageMeta({
-    title: "Pilot — Vessels — SZL Holdings",
-    description: "Vessels pilot: instrument one maritime operations workflow with official data, compliance controls, and proof chain output. 30/60/90 day success path.",
+    title: "Pilot — SEXTANT — SZL Holdings",
+    description: "SEXTANT pilot: instrument one maritime operations workflow with official data, compliance controls, and proof chain output. 30/60/90 day success path.",
     canonical: "https://szlholdings.com/pilot/vessels",
   });
 
@@ -65,13 +65,13 @@ export default function PilotVesselsPage() {
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/20 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
                 <Anchor className="h-3.5 w-3.5" />
-                Vessels Pilot
+                SEXTANT Pilot
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
                 One voyage instrumented. Readiness proven with real maritime data.
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                The Vessels pilot takes one maritime operations workflow — from voyage planning through weather risk
+                The SEXTANT pilot takes one maritime operations workflow — from voyage planning through weather risk
                 monitoring, port readiness, compliance checks, exception detection, and operator-approved action —
                 and instruments it with real-time observability, authoritative maritime data, and governed execution.
                 Not a demo voyage. A structured proof of operational improvement.
@@ -124,7 +124,7 @@ export default function PilotVesselsPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Integration requirements</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">Official maritime data sources used in the pilot</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-                Vessels enriches Voyage Twins with authoritative government and regulatory maritime data. Every risk
+                SEXTANT enriches Voyage Twins with authoritative government and regulatory maritime data. Every risk
                 score is traceable to its source.
               </p>
               <div className="mt-6 space-y-2">
@@ -271,7 +271,7 @@ export default function PilotVesselsPage() {
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a href="/vessels/" className="inline-flex items-center gap-2 rounded-xl border border-[#3b82f6]/25 bg-[#3b82f6]/08 px-5 py-2.5 text-sm font-semibold text-[#3b82f6]/90 transition hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/12">
-                    Open live Vessels app <ArrowRight className="h-4 w-4" />
+                    Open live SEXTANT app <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link href="/solutions/vessels" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
                     Product overview

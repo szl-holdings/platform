@@ -555,7 +555,7 @@ export const PRAXIS_EDGES: EdgeRecord[] = [
     confidence: 68,
     strength: 0.68,
     inferred: true,
-    evidenceSources: ['Aegis IP correlation', 'ASN routing overlap'],
+    evidenceSources: ['PARAGON IP correlation', 'ASN routing overlap'],
     discoveredAt: '2026-04-10',
   },
   {

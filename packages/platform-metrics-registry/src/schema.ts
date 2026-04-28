@@ -49,7 +49,7 @@ export const RuntimeFactsSchema = z.object({
     .number()
     .int()
     .nonnegative()
-    .describe('Domain pack count (Lyte/Vessels/Terra/Aegis/PRISM/Carlota)'),
+    .describe('Domain pack count (KORA/Vessels/Terra/Aegis/PRISM/Carlota)'),
   agentRoleCount: z.number().int().nonnegative().describe('Typed role contracts'),
   cognitiveLoopPhaseCount: z.number().int().nonnegative().describe('Cognitive loop phase count'),
   starterWorkflowCount: z.number().int().nonnegative().describe('Starter workflow definitions'),

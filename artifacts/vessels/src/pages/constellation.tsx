@@ -10,8 +10,8 @@ export default function ConstellationPage() {
           Constellation
         </h1>
         <p style={{ fontSize: '0.85rem', color: '#7dd3fc', marginTop: 4 }}>
-          Vessels, ports, charterers, and cases in Vessels — with cross-domain links into Terra,
-          Aegis, Prism, and Lyte highlighted in amber.
+          SEXTANT, ports, charterers, and cases in SEXTANT — with cross-domain links into DOMAINE,
+          PARAGON, Prism, and KORA highlighted in amber.
         </p>
       </div>
       <ConstellationGraph domain="vessels" accentColor={ACCENT} height={520} />

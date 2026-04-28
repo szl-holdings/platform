@@ -6,8 +6,8 @@
  * Also exposes lane-specific ingestors used as reference integrations:
  *
  *   - ingestCounselFiling   — Counsel contract/filing
- *   - ingestVesselsInsuranceException — Vessels insurance exception document
- *   - ingestTerraDistressFiling      — Terra distress filing
+ *   - ingestVesselsInsuranceException — SEXTANT insurance exception document
+ *   - ingestTerraDistressFiling      — DOMAINE distress filing
  */
 
 import type { DocumentPipelineAdapters } from './pipeline.js';
@@ -104,8 +104,8 @@ export async function ingestCounselFiling(
 }
 
 /**
- * Reference integration: Vessels Vessels — insurance exception document ingestion.
- * Used by the Vessels lane for marine insurance claim and exception processing.
+ * Reference integration: SEXTANT SEXTANT — insurance exception document ingestion.
+ * Used by the SEXTANT lane for marine insurance claim and exception processing.
  */
 export async function ingestVesselsInsuranceException(
   params: {
@@ -147,8 +147,8 @@ export async function ingestVesselsInsuranceException(
 }
 
 /**
- * Reference integration: Terra Terra — distress filing ingestion.
- * Used by the Terra lane for distressed asset or legal filing processing.
+ * Reference integration: DOMAINE DOMAINE — distress filing ingestion.
+ * Used by the DOMAINE lane for distressed asset or legal filing processing.
  */
 export async function ingestTerraDistressFiling(
   params: {

@@ -9,9 +9,9 @@ const milestones = [
   },
   {
     date: 'Q3 2022',
-    title: 'Vessels launched',
+    title: 'SEXTANT launched',
     description:
-      'Vessels Maritime Intelligence enters private beta with first fleet operator clients.',
+      'SEXTANT Maritime Intelligence enters private beta with first fleet operator clients.',
   },
   {
     date: 'Q1 2023',
@@ -27,15 +27,15 @@ const milestones = [
   },
   {
     date: 'Q4 2023',
-    title: 'Lyte enters production',
+    title: 'KORA enters production',
     description:
-      'Lyte decision intelligence platform operational, delivering continuous operational observability and risk detection for enterprise clients.',
+      'KORA decision intelligence platform operational, delivering continuous operational observability and risk detection for enterprise clients.',
   },
   {
     date: '2024–2025',
     title: 'Ecosystem expansion',
     description:
-      'Lyte and Counsel platforms launched. Shared infrastructure layer connects all operating platforms.',
+      'KORA and Counsel platforms launched. Shared infrastructure layer connects all operating platforms.',
   },
 ];
 

@@ -12,16 +12,16 @@
  *
  * ── Phase 1 boundary ────────────────────────────────────────────────────────
  * The retrieve-lyte-data stage uses retrieverAdapterId: "lyte-retriever".
- * In Phase 1, no real Lyte retriever is registered; the workflow must be
+ * In Phase 1, no real KORA retriever is registered; the workflow must be
  * started in dry-run or replay mode, OR a real LyteRetrieverAdapter must be
  * registered via `registerLyteRetrieverAdapter()` before running in live mode.
  *
- * Phase 2 will provide a concrete LyteRetrieverAdapter backed by the Lyte
+ * Phase 2 will provide a concrete LyteRetrieverAdapter backed by the KORA
  * metrics store, trace index, and alert corpus (pgvector + Elasticsearch).
  * Until then, the retriever falls back to the no-op adapter registered as
  * "default" — which produces clearly-marked synthetic documents.
  *
- * To run against real Lyte data today:
+ * To run against real KORA data today:
  *   import { registerLyteRetrieverAdapter } from "@szl/substrate";
  *   registerLyteRetrieverAdapter({ retrieve: async ({ query, topK }) => [...] });
  * ─────────────────────────────────────────────────────────────────────────────
@@ -31,11 +31,11 @@ import { type RetrieverAdapter, retrieverAdapterRegistry } from '../adapters.js'
 import { defaultRuntime, type SubstrateRuntimeOptions } from '../engine.js';
 import type { PipelineRun, RuntimeStartOptions, WorkflowDefinition } from '../types.js';
 
-// ─── Real Lyte Retriever Registration ────────────────────────────────────────
+// ─── Real KORA Retriever Registration ────────────────────────────────────────
 
 /**
- * Register a real Lyte retriever adapter so the opportunity-audit pipeline
- * runs against live Lyte data in production.
+ * Register a real KORA retriever adapter so the opportunity-audit pipeline
+ * runs against live KORA data in production.
  *
  * Phase 1: call this before starting the workflow in live mode.
  * Phase 2: a concrete adapter backed by pgvector/Elasticsearch will be shipped.
@@ -43,8 +43,8 @@ import type { PipelineRun, RuntimeStartOptions, WorkflowDefinition } from '../ty
  * @example
  * registerLyteRetrieverAdapter({
  *   id: "lyte-retriever",
- *   name: "Lyte Retriever",
- *   mcpCapabilities: { id: "lyte-retriever", name: "Lyte", version: "1.0.0" },
+ *   name: "KORA Retriever",
+ *   mcpCapabilities: { id: "lyte-retriever", name: "KORA", version: "1.0.0" },
  *   async retrieve({ query, topK }) {
  *     return lyteMetricsStore.search(query, topK);
  *   },
@@ -76,7 +76,7 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
 
   policy: {
     id: 'lyte-ops-policy',
-    name: 'Lyte Operations Policy',
+    name: 'KORA Operations Policy',
     highRiskCategories: [
       'financial',
       'deletion',
@@ -107,9 +107,9 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
     {
       id: 'retrieve-lyte-data',
       type: 'Retrieve',
-      name: 'Retrieve Lyte Service Data',
+      name: 'Retrieve KORA Service Data',
       description:
-        'Retrieves service performance metrics, SLO compliance data, and anomaly signals from Lyte. ' +
+        'Retrieves service performance metrics, SLO compliance data, and anomaly signals from KORA. ' +
         'Tagged runtime:python for heavy-retrieval execution via the Python worker channel (Phase 1 pilot). ' +
         'Phase 2: backed by pgvector + Elasticsearch via LyteRetrieverAdapter.',
       runtime: 'python',
@@ -134,7 +134,7 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
       type: 'Reason',
       name: 'Reason: Identify Anomalies',
       description:
-        'Applies reasoning over retrieved Lyte data to identify service anomalies, ' +
+        'Applies reasoning over retrieved KORA data to identify service anomalies, ' +
         'SLO breaches, and opportunity gaps. Produces structured findings with confidence scores.',
       runtime: 'typescript',
       modelAdapterId: 'default',

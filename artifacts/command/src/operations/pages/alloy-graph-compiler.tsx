@@ -100,7 +100,7 @@ const EXAMPLE_PLANS: Record<string, CompiledPlan> = {
         id: 'n2',
         kind: 'action',
         label: 'Aggregate Portfolio KPIs',
-        sublabel: 'PRISM + Terra + Vessels',
+        sublabel: 'PRISM + DOMAINE + SEXTANT',
         state: 'ready',
       },
       {
@@ -189,14 +189,14 @@ const EXAMPLE_PLANS: Record<string, CompiledPlan> = {
       {
         id: 'n2',
         kind: 'action',
-        label: 'Assess Affected Vessels',
+        label: 'Assess Affected SEXTANT',
         sublabel: 'AIS + weather overlay',
         state: 'ready',
       },
       {
         id: 'n3',
         kind: 'condition',
-        label: 'Vessels at Risk?',
+        label: 'SEXTANT at Risk?',
         sublabel: 'Exposure threshold',
         state: 'ready',
       },

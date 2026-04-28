@@ -453,8 +453,8 @@ function RunListItem({ run, selected, onClick }: { run: OperatorRun; selected: b
 }
 
 const SAMPLE_INTENTS = [
-  'Create a new Terra deal for the SZL Tower project in NYC and draft a Pulse executive briefing',
-  'Open a Counsel matter for maritime sanctions review and create a Vessels alert rule for flag-state changes',
+  'Create a new DOMAINE deal for the SZL Tower project in NYC and draft a Pulse executive briefing',
+  'Open a Counsel matter for maritime sanctions review and create a SEXTANT alert rule for flag-state changes',
   'Query the ontology for regulatory exposure across active deals and notify key stakeholders',
 ];
 
@@ -794,8 +794,8 @@ export function OperatorPanel() {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
                 {[
-                  { icon: '⬢', label: 'Terra Deal', color: '#22c55e' },
-                  { icon: '⚓', label: 'Vessels Alert', color: '#4d8fcc' },
+                  { icon: '⬢', label: 'DOMAINE Deal', color: '#22c55e' },
+                  { icon: '⚓', label: 'SEXTANT Alert', color: '#4d8fcc' },
                   { icon: '⚖', label: 'Counsel Matter', color: '#a855f7' },
                   { icon: '◉', label: 'Pulse Briefing', color: '#f59e0b' },
                   { icon: '◆', label: 'Ontology Query', color: ACCENT },

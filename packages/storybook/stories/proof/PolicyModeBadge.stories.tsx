@@ -24,9 +24,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Aegis: Story = {
+export const PARAGON: Story = {
   args: {
-    product: 'Aegis',
+    product: 'PARAGON',
     actionType: 'block-ip',
     workspace: 'Production',
   },
@@ -42,7 +42,7 @@ export const Counsel: Story = {
 
 export const Light: Story = {
   args: {
-    product: 'Terra',
+    product: 'DOMAINE',
     actionType: 'appraisal',
     workspace: 'APAC',
     variant: 'light',
@@ -53,10 +53,10 @@ export const AllProducts: Story = {
   name: 'All products',
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <PolicyModeBadge product="Aegis" actionType="threat-response" workspace="Production" />
+      <PolicyModeBadge product="PARAGON" actionType="threat-response" workspace="Production" />
       <PolicyModeBadge product="Counsel" actionType="legal-draft" workspace="Legal" />
-      <PolicyModeBadge product="Terra" actionType="appraisal" workspace="APAC" />
-      <PolicyModeBadge product="Vessels" actionType="route-deviation" workspace="Fleet" />
+      <PolicyModeBadge product="DOMAINE" actionType="appraisal" workspace="APAC" />
+      <PolicyModeBadge product="SEXTANT" actionType="route-deviation" workspace="Fleet" />
     </div>
   ),
 };

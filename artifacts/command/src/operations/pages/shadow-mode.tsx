@@ -42,7 +42,7 @@ const COMPARISONS: ShadowComparison[] = [
   {
     id: 'SHD-042',
     title: 'Fuel surcharge approval routing',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     timestamp: 'Apr 3, 9:11 AM',
     aiRecommendation:
@@ -73,7 +73,7 @@ const COMPARISONS: ShadowComparison[] = [
   {
     id: 'SHD-039',
     title: 'M/V Meridian alternate route selection',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     timestamp: 'Apr 2, 3:14 PM',
     aiRecommendation: 'Route via Cape Town — 12% fuel savings, 6h ETA extension acceptable',
@@ -87,8 +87,8 @@ const COMPARISONS: ShadowComparison[] = [
   },
   {
     id: 'SHD-037',
-    title: 'Terra lease renewal — auto-approve low risk',
-    pack: 'Terra',
+    title: 'DOMAINE lease renewal — auto-approve low risk',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     timestamp: 'Apr 1, 9:00 AM',
     aiRecommendation: 'Auto-approve — document appears complete, low risk category',
@@ -102,8 +102,8 @@ const COMPARISONS: ShadowComparison[] = [
   },
   {
     id: 'SHD-035',
-    title: 'Aegis vendor onboarding — defer or expedite?',
-    pack: 'Aegis',
+    title: 'PARAGON vendor onboarding — defer or expedite?',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     timestamp: 'Apr 1, 11:00 AM',
     aiRecommendation:

@@ -32,7 +32,7 @@ const AGENTS = [
   { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     role: 'Analytics',
     icon: 'bar-chart-2',
     color: '#22c55e',

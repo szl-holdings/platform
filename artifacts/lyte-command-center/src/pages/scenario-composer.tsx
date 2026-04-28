@@ -182,7 +182,7 @@ function SensitivityHeatMap({
   cells: SensitivityCell[];
   shocks: string[];
 }) {
-  const domains = ['Vessels', 'Terra', 'SZL Holdings', 'Counsel', 'Aegis'];
+  const domains = ['SEXTANT', 'DOMAINE', 'SZL Holdings', 'Counsel', 'PARAGON'];
   if (cells.length === 0) return null;
 
   return (
@@ -310,7 +310,7 @@ export default function ScenarioComposerPage() {
             Scenario Composer
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Stack cross-portfolio shocks and propagate their impact across Terra, Vessels, Lyte, and SZL Holdings through the entity graph.
+            Stack cross-portfolio shocks and propagate their impact across DOMAINE, SEXTANT, KORA, and SZL Holdings through the entity graph.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

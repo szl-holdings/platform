@@ -353,10 +353,10 @@ function useToasts() {
 
 type DomainId = 'aegis' | 'terra' | 'vessels' | 'lyte' | 'prism' | 'carlota';
 const DOMAINS: Record<DomainId, { name: string; color: string }> = {
-  aegis: { name: 'Aegis', color: '#6366f1' },
-  terra: { name: 'Terra', color: '#4d7c0f' },
-  vessels: { name: 'Vessels', color: '#3b82f6' },
-  lyte: { name: 'Lyte', color: '#f59e0b' },
+  aegis: { name: 'PARAGON', color: '#6366f1' },
+  terra: { name: 'DOMAINE', color: '#4d7c0f' },
+  vessels: { name: 'SEXTANT', color: '#3b82f6' },
+  lyte: { name: 'KORA', color: '#f59e0b' },
   prism: { name: 'PRAXIS', color: '#a855f7' },
   carlota: { name: 'Carlota', color: '#c2a55a' },
 };
@@ -367,7 +367,7 @@ const EXEC_HEALTH = {
   trend: 'up' as const,
   exposure: '$8.4M',
   topIssues: [
-    { title: 'Lyte API P95 breaching 2.4s SLA', severity: 'high', domain: 'lyte' as DomainId },
+    { title: 'KORA API P95 breaching 2.4s SLA', severity: 'high', domain: 'lyte' as DomainId },
     {
       title: 'Carlota Jo real-time feed stale 3h+',
       severity: 'high',
@@ -381,17 +381,17 @@ const EXEC_HEALTH = {
   ],
   topOpps: [
     {
-      title: 'Lyte AI Signal Summarizer usage +34% — expand capacity',
+      title: 'KORA AI Signal Summarizer usage +34% — expand capacity',
       value: '$820K ARR uplift',
       domain: 'lyte' as DomainId,
     },
     {
-      title: 'Vessels Voyage Economics re-engagement possible',
+      title: 'SEXTANT Voyage Economics re-engagement possible',
       value: '$280K saved',
       domain: 'vessels' as DomainId,
     },
     {
-      title: 'Terra distress borough filter = retention lever',
+      title: 'DOMAINE distress borough filter = retention lever',
       value: '$140K ARR',
       domain: 'terra' as DomainId,
     },
@@ -414,17 +414,17 @@ const EXEC_HEALTH = {
     },
   ],
   changesYesterday: [
-    'Vessels fleet uptime maintained 99.8% for 7th consecutive day',
-    'Terra distress engine usage +21% — no borough filter yet deployed',
-    'Aegis bundle grew 1.34MB vs 900KB budget — MITRE module root cause',
+    'SEXTANT fleet uptime maintained 99.8% for 7th consecutive day',
+    'DOMAINE distress engine usage +21% — no borough filter yet deployed',
+    'PARAGON bundle grew 1.34MB vs 900KB budget — MITRE module root cause',
     'PRAXIS matter intake completion 88.3% — up 2.1% this week',
   ],
   changesLastWeek: [
     'Portfolio Health Score improved from 73 → 76 (+3 pts)',
     'Carlota Jo real-time data pipeline SLA breach — 4 occurrences',
-    'Lyte API SLA degradation — 18.5% of readings over threshold',
-    'Aegis client satisfaction NPS held at 82 — stable',
-    'New: Terra Ownership Graph usage declining −22% — intervention needed',
+    'KORA API SLA degradation — 18.5% of readings over threshold',
+    'PARAGON client satisfaction NPS held at 82 — stable',
+    'New: DOMAINE Ownership Graph usage declining −22% — intervention needed',
   ],
 };
 
@@ -525,7 +525,7 @@ const RISK_REGISTER = [
   },
   {
     id: 'r2',
-    title: 'Lyte API latency breach escalation',
+    title: 'KORA API latency breach escalation',
     domain: 'lyte' as DomainId,
     probability: 0.7,
     impact: 'High',
@@ -536,7 +536,7 @@ const RISK_REGISTER = [
   },
   {
     id: 'r3',
-    title: 'Aegis bundle over-budget degrading UX',
+    title: 'PARAGON bundle over-budget degrading UX',
     domain: 'aegis' as DomainId,
     probability: 0.6,
     impact: 'Medium',
@@ -547,7 +547,7 @@ const RISK_REGISTER = [
   },
   {
     id: 'r4',
-    title: 'Terra ownership graph declining usage',
+    title: 'DOMAINE ownership graph declining usage',
     domain: 'terra' as DomainId,
     probability: 0.5,
     impact: 'Medium',
@@ -572,7 +572,7 @@ const RISK_REGISTER = [
 const OPP_REGISTER = [
   {
     id: 'o1',
-    title: 'Lyte AI Signal Summarizer adoption acceleration',
+    title: 'KORA AI Signal Summarizer adoption acceleration',
     domain: 'lyte' as DomainId,
     probability: 0.85,
     value: '$820K ARR',
@@ -582,7 +582,7 @@ const OPP_REGISTER = [
   },
   {
     id: 'o2',
-    title: 'Terra distress borough filter — retention lever',
+    title: 'DOMAINE distress borough filter — retention lever',
     domain: 'terra' as DomainId,
     probability: 0.8,
     value: '$140K ARR',
@@ -602,7 +602,7 @@ const OPP_REGISTER = [
   },
   {
     id: 'o4',
-    title: 'Vessels Voyage Economics re-engagement',
+    title: 'SEXTANT Voyage Economics re-engagement',
     domain: 'vessels' as DomainId,
     probability: 0.6,
     value: '$280K saved',
@@ -627,7 +627,7 @@ const POLICIES_SUMMARY = [
     title: 'Cross-Domain Access Control',
     status: 'active',
     owner: 'James Okafor',
-    domains: ['Aegis', 'Vessels', 'Terra'],
+    domains: ['PARAGON', 'SEXTANT', 'DOMAINE'],
     lastReview: 'Apr 8',
     enforcement: 'auto',
   },
@@ -636,7 +636,7 @@ const POLICIES_SUMMARY = [
     title: 'AI Model Governance',
     status: 'pending',
     owner: 'Stephen Lutar',
-    domains: ['Command', 'Aegis'],
+    domains: ['Command', 'PARAGON'],
     lastReview: 'Apr 14',
     enforcement: 'manual',
   },
@@ -645,7 +645,7 @@ const POLICIES_SUMMARY = [
     title: 'Maritime Cybersecurity IR',
     status: 'active',
     owner: 'James Okafor',
-    domains: ['Vessels', 'Aegis'],
+    domains: ['SEXTANT', 'PARAGON'],
     lastReview: 'Apr 5',
     enforcement: 'auto',
   },
@@ -654,7 +654,7 @@ const POLICIES_SUMMARY = [
     title: 'RE Deal Approval Thresholds',
     status: 'draft',
     owner: 'Sofia Reyes',
-    domains: ['Terra'],
+    domains: ['DOMAINE'],
     lastReview: 'Apr 15',
     enforcement: 'manual',
   },
@@ -672,7 +672,7 @@ const VALUE_LEDGER = [
   {
     id: 'v2',
     type: 'at-risk' as const,
-    label: 'Lyte SLA penalties exposure',
+    label: 'KORA SLA penalties exposure',
     amount: 420000,
     domain: 'lyte' as DomainId,
     note: '2 SLAs breaching, contractual penalties possible',
@@ -680,7 +680,7 @@ const VALUE_LEDGER = [
   {
     id: 'v3',
     type: 'at-risk' as const,
-    label: 'Aegis bundle degradation — churn risk',
+    label: 'PARAGON bundle degradation — churn risk',
     amount: 280000,
     domain: 'aegis' as DomainId,
     note: 'UX degradation in high-usage MITRE module',
@@ -696,7 +696,7 @@ const VALUE_LEDGER = [
   {
     id: 'v5',
     type: 'protected' as const,
-    label: 'Terra AI pre-triage — deal velocity',
+    label: 'DOMAINE AI pre-triage — deal velocity',
     amount: 340000,
     domain: 'terra' as DomainId,
     note: '18% faster response = fewer lost deals',
@@ -704,7 +704,7 @@ const VALUE_LEDGER = [
   {
     id: 'v6',
     type: 'created' as const,
-    label: 'Lyte Signal Summarizer ARR uplift',
+    label: 'KORA Signal Summarizer ARR uplift',
     amount: 820000,
     domain: 'lyte' as DomainId,
     note: '+34% usage → upsell trigger',
@@ -712,7 +712,7 @@ const VALUE_LEDGER = [
   {
     id: 'v7',
     type: 'created' as const,
-    label: 'Terra borough filter conversion value',
+    label: 'DOMAINE borough filter conversion value',
     amount: 140000,
     domain: 'terra' as DomainId,
     note: 'Estimated from user feedback NPS uplift',
@@ -732,7 +732,7 @@ const WORKFLOW_PERF = [
   },
   {
     id: 'w2',
-    name: 'Aegis Incident Response',
+    name: 'PARAGON Incident Response',
     domain: 'aegis' as DomainId,
     steps: 12,
     completion: 91,
@@ -742,7 +742,7 @@ const WORKFLOW_PERF = [
   },
   {
     id: 'w3',
-    name: 'Vessels Inspection Workflow',
+    name: 'SEXTANT Inspection Workflow',
     domain: 'vessels' as DomainId,
     steps: 6,
     completion: 77,
@@ -752,7 +752,7 @@ const WORKFLOW_PERF = [
   },
   {
     id: 'w4',
-    name: 'Terra Due Diligence',
+    name: 'DOMAINE Due Diligence',
     domain: 'terra' as DomainId,
     steps: 10,
     completion: 68,
@@ -785,7 +785,7 @@ const WORKFLOW_PERF = [
 const AGENT_TRUST = [
   {
     id: 'a1',
-    agent: 'Aegis Threat Correlator',
+    agent: 'PARAGON Threat Correlator',
     domain: 'aegis' as DomainId,
     trustScore: 94,
     accuracy: 91,
@@ -795,7 +795,7 @@ const AGENT_TRUST = [
   },
   {
     id: 'a2',
-    agent: 'Lyte Signal Summarizer',
+    agent: 'KORA Signal Summarizer',
     domain: 'lyte' as DomainId,
     trustScore: 89,
     accuracy: 87,
@@ -805,7 +805,7 @@ const AGENT_TRUST = [
   },
   {
     id: 'a3',
-    agent: 'Terra Distress Ranker',
+    agent: 'DOMAINE Distress Ranker',
     domain: 'terra' as DomainId,
     trustScore: 82,
     accuracy: 84,
@@ -815,7 +815,7 @@ const AGENT_TRUST = [
   },
   {
     id: 'a4',
-    agent: 'Vessels Route Risk Scorer',
+    agent: 'SEXTANT Route Risk Scorer',
     domain: 'vessels' as DomainId,
     trustScore: 86,
     accuracy: 88,

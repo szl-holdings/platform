@@ -40,15 +40,15 @@ const DIGESTS: Digest[] = [
     generatedAt: 'Apr 12, 2026 · 7:00 AM',
     status: 'ready',
     summary:
-      'Portfolio performance held steady this week across 4 active packs. Vessels pack reported elevated pressure due to ETA compliance gaps affecting 3 vessels. PRISM flagged an ownership conflict in accounts receivable requiring executive resolution. Aegis delivered a clean security posture audit at 94% score. Terra completed its Q1 appraisal cycle with 6 assets reviewed.',
+      'Portfolio performance held steady this week across 4 active packs. SEXTANT pack reported elevated pressure due to ETA compliance gaps affecting 3 vessels. PRISM flagged an ownership conflict in accounts receivable requiring executive resolution. PARAGON delivered a clean security posture audit at 94% score. DOMAINE completed its Q1 appraisal cycle with 6 assets reviewed.',
     highlights: [
-      'Vessels: 3 vessels outside SLA — fuel surcharge approval stalled (22h)',
+      'SEXTANT: 3 vessels outside SLA — fuel surcharge approval stalled (22h)',
       'PRISM: Q2 pricing revision pending executive sign-off (31h overdue)',
-      'Aegis: Security audit completed — 94% score, 0 critical findings',
-      'Terra: Lease renewal at risk — exhibit B missing signature',
+      'PARAGON: Security audit completed — 94% score, 0 critical findings',
+      'DOMAINE: Lease renewal at risk — exhibit B missing signature',
       'Portfolio: $15.3M total value at risk across open items',
     ],
-    packsCovered: ['PRAXIS', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 412,
   },
   {
@@ -58,14 +58,14 @@ const DIGESTS: Digest[] = [
     generatedAt: 'Apr 5, 2026 · 7:00 AM',
     status: 'ready',
     summary:
-      'Moderate portfolio health across Q1 close period. Vessels completed 4 successful port calls. PRISM Q1 reporting cycle closed. Terra completed 3 asset reviews. Aegis initiated security vendor onboarding process.',
+      'Moderate portfolio health across Q1 close period. SEXTANT completed 4 successful port calls. PRISM Q1 reporting cycle closed. DOMAINE completed 3 asset reviews. PARAGON initiated security vendor onboarding process.',
     highlights: [
       'PRISM: Q1 executive reporting cycle closed — 14 items resolved',
-      'Vessels: 4 successful port calls — Cape Town, Singapore, Rotterdam, Santos',
-      'Terra: 3 asset reviews completed — Building 7A refinancing initiated',
-      'Aegis: Security vendor onboarding initiated — 2 vendors under review',
+      'SEXTANT: 4 successful port calls — Cape Town, Singapore, Rotterdam, Santos',
+      'DOMAINE: 3 asset reviews completed — Building 7A refinancing initiated',
+      'PARAGON: Security vendor onboarding initiated — 2 vendors under review',
     ],
-    packsCovered: ['PRAXIS', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 388,
   },
   {
@@ -75,13 +75,13 @@ const DIGESTS: Digest[] = [
     generatedAt: 'Mar 29, 2026 · 7:00 AM',
     status: 'ready',
     summary:
-      'Stable week. Portfolio health at 82% aggregate. No critical items. Vessels initiated Q2 charter contract cycle. PRISM ownership review completed.',
+      'Stable week. Portfolio health at 82% aggregate. No critical items. SEXTANT initiated Q2 charter contract cycle. PRISM ownership review completed.',
     highlights: [
       'Portfolio: 82% aggregate health — highest in 6 weeks',
-      'Vessels: Q2 charter contract cycle initiated — 7 vessels',
+      'SEXTANT: Q2 charter contract cycle initiated — 7 vessels',
       'PRISM: Ownership review completed — 3 conflicts resolved',
     ],
-    packsCovered: ['PRAXIS', 'Vessels', 'Terra'],
+    packsCovered: ['PRAXIS', 'SEXTANT', 'DOMAINE'],
     wordCount: 301,
   },
   {
@@ -92,7 +92,7 @@ const DIGESTS: Digest[] = [
     status: 'scheduled',
     summary: '',
     highlights: [],
-    packsCovered: ['PRAXIS', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 0,
   },
 ];

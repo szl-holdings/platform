@@ -4,7 +4,7 @@ import { Network } from 'lucide-react';
 const LAYERS = [
   {
     label: 'Frontend surfaces',
-    items: ['Lyte Today', 'Counsel Workflows', 'Pack apps', 'Mobile'],
+    items: ['KORA Today', 'Counsel Workflows', 'Pack apps', 'Mobile'],
     color: 'var(--color-lyte-light)',
     bg: 'var(--color-lyte-muted)',
     border: 'var(--color-lyte-border)',

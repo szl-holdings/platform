@@ -53,11 +53,11 @@ const ROLE_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
 };
 
 const MOCK_AGENTS: AgentTrustInfo[] = [
-  { agentId: 'terra-analyst', displayName: 'Terra Analyst', role: 'analyst', domain: 'terra', currentLevel: 'trusted', overallScore: 0.92, totalActions: 247, successfulActions: 227, consecutiveSuccesses: 18 },
-  { agentId: 'vessels-analyst', displayName: 'Vessels Analyst', role: 'analyst', domain: 'vessels', currentLevel: 'autonomous', overallScore: 0.96, totalActions: 312, successfulActions: 300, consecutiveSuccesses: 34 },
+  { agentId: 'terra-analyst', displayName: 'DOMAINE Analyst', role: 'analyst', domain: 'terra', currentLevel: 'trusted', overallScore: 0.92, totalActions: 247, successfulActions: 227, consecutiveSuccesses: 18 },
+  { agentId: 'vessels-analyst', displayName: 'SEXTANT Analyst', role: 'analyst', domain: 'vessels', currentLevel: 'autonomous', overallScore: 0.96, totalActions: 312, successfulActions: 300, consecutiveSuccesses: 34 },
   { agentId: 'counsel-analyst', displayName: 'Counsel Analyst', role: 'analyst', domain: 'counsel', currentLevel: 'supervised', overallScore: 0.83, totalActions: 128, successfulActions: 106, consecutiveSuccesses: 7 },
   { agentId: 'sentra-analyst', displayName: 'Sentra Analyst', role: 'analyst', domain: 'sentra', currentLevel: 'trusted', overallScore: 0.89, totalActions: 195, successfulActions: 174, consecutiveSuccesses: 12 },
-  { agentId: 'aegis-analyst', displayName: 'Aegis Analyst', role: 'analyst', domain: 'aegis', currentLevel: 'trusted', overallScore: 0.91, totalActions: 203, successfulActions: 185, consecutiveSuccesses: 15 },
+  { agentId: 'aegis-analyst', displayName: 'PARAGON Analyst', role: 'analyst', domain: 'aegis', currentLevel: 'trusted', overallScore: 0.91, totalActions: 203, successfulActions: 185, consecutiveSuccesses: 15 },
   { agentId: 'holdings-analyst', displayName: 'Holdings Analyst', role: 'analyst', domain: 'holdings', currentLevel: 'autonomous', overallScore: 0.94, totalActions: 289, successfulActions: 272, consecutiveSuccesses: 28 },
   { agentId: 'crew-drafter', displayName: 'Document Drafter', role: 'drafter', domain: 'general', currentLevel: 'supervised', overallScore: 0.78, totalActions: 89, successfulActions: 69, consecutiveSuccesses: 4 },
   { agentId: 'crew-hunter', displayName: 'Threat Hunter', role: 'hunter', domain: 'defense', currentLevel: 'trusted', overallScore: 0.87, totalActions: 156, successfulActions: 136, consecutiveSuccesses: 9 },

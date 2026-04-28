@@ -44,7 +44,7 @@ const REPORTS = [
     netIrr: "28.4%", tvpi: "2.1×", dpi: "0.62×", moic: "2.1×",
     nav: "$84.2M", committed: "$65.0M", called: "$52.8M", distributed: "$32.7M",
     mgmtFee: "2.0%", carry: "20%", prefReturn: "8.0%",
-    narrative: "Fund I delivered strong Q1 2026 performance, with net IRR expanding 3.1pp to 28.4% and TVPI reaching 2.1×. Portfolio companies collectively generated $4.2M in new ARR during the quarter. NovaStar AI and RegulaAI showed exceptional growth, with the former crossing $1.2M ARR at 18% MoM growth. The fund made one new investment (RegulaAI, $4M Seed+) and executed a follow-on in Vessels ($1.5M bridge). Treasury is well-positioned with $18.2M in dry powder and one capital call planned for Q2 2026.",
+    narrative: "Fund I delivered strong Q1 2026 performance, with net IRR expanding 3.1pp to 28.4% and TVPI reaching 2.1×. Portfolio companies collectively generated $4.2M in new ARR during the quarter. NovaStar AI and RegulaAI showed exceptional growth, with the former crossing $1.2M ARR at 18% MoM growth. The fund made one new investment (RegulaAI, $4M Seed+) and executed a follow-on in SEXTANT ($1.5M bridge). Treasury is well-positioned with $18.2M in dry powder and one capital call planned for Q2 2026.",
     recipients: 23,
   },
   {
@@ -52,7 +52,7 @@ const REPORTS = [
     netIrr: "25.3%", tvpi: "1.82×", dpi: "0.44×", moic: "1.82×",
     nav: "$75.8M", committed: "$65.0M", called: "$50.1M", distributed: "$22.0M",
     mgmtFee: "2.0%", carry: "20%", prefReturn: "8.0%",
-    narrative: "Q4 2025 marked the fund's strongest quarter to date, with two portfolio companies achieving significant commercial milestones and one strategic exit process initiated. Total portfolio NAV grew 18.3% in the quarter, driven by Lyte's $148M Series B valuation mark and Aegis's government contract wins.",
+    narrative: "Q4 2025 marked the fund's strongest quarter to date, with two portfolio companies achieving significant commercial milestones and one strategic exit process initiated. Total portfolio NAV grew 18.3% in the quarter, driven by KORA's $148M Series B valuation mark and PARAGON's government contract wins.",
     recipients: 23,
   },
   {
@@ -60,7 +60,7 @@ const REPORTS = [
     netIrr: "22.1%", tvpi: "1.64×", dpi: "0.38×", moic: "1.64×",
     nav: "$64.1M", committed: "$65.0M", called: "$46.0M", distributed: "$17.5M",
     mgmtFee: "2.0%", carry: "20%", prefReturn: "8.0%",
-    narrative: "Q3 2025 saw steady portfolio maturation. Terra completed its Series A at a significant markup, and Counsel signed its first Big Law partnership. Fund deployment pace moderated as deal quality in the market improved following a correction in public market comparables.",
+    narrative: "Q3 2025 saw steady portfolio maturation. DOMAINE completed its Series A at a significant markup, and Counsel signed its first Big Law partnership. Fund deployment pace moderated as deal quality in the market improved following a correction in public market comparables.",
     recipients: 23,
   },
 ];

@@ -30,7 +30,7 @@ const INQUIRY_CONFIG: Record<
   client: {
     label: 'Client / Demo Request',
     description: 'Product demonstrations, pilot programs, and enterprise deployments.',
-    subjectPlaceholder: 'e.g. Demo request for Lyte, Pilot inquiry',
+    subjectPlaceholder: 'e.g. Demo request for KORA, Pilot inquiry',
     messagePlaceholder:
       "Tell us about your organization, the challenge you're solving, and which venture you're interested in...",
     extraFields: [

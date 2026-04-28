@@ -199,7 +199,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     subtitle: 'Domain Pack · Maritime Intelligence',
     path: '/vessels/',
     accent: '#8a8a8a',
@@ -208,7 +208,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     subtitle: 'Domain Pack · Real Estate Intelligence',
     path: '/terra/',
     accent: '#c9b787',
@@ -1302,7 +1302,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const searchableContent = [
     {
       keywords: ['fleet', 'vessel', 'ship', 'port', 'maritime', 'route', 'anchor'],
-      app: 'Vessels',
+      app: 'SEXTANT',
       icon: '🚢',
       accent: '#4a90b8',
       href: '/vessels/',

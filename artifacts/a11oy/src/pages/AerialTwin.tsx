@@ -52,7 +52,7 @@ export function AerialTwin() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="PRIMITIVES" value={PRIMITIVES.length} sub="ray-trace → AI-RAN" accent={GOLD} />
         <KpiCard label="OSS LEADERS" value={OPEN_SOURCE_LEADERS.length} sub="public anchors we ground on" accent={GOLD} />
-        <KpiCard label="VERTICALS BOUND" value={VERTICAL_BINDINGS.length} sub="Vessels · Terra · Sentra" accent={GOLD} />
+        <KpiCard label="VERTICALS BOUND" value={VERTICAL_BINDINGS.length} sub="SEXTANT · DOMAINE · Sentra" accent={GOLD} />
         <KpiCard label="INNOVATION SEEDS" value={INNOVATION_SEEDS.length} sub="what we add" accent={GOLD} />
       </div>
 

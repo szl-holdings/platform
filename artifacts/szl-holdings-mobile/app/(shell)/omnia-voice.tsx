@@ -55,7 +55,7 @@ const SUGGESTED_QUERIES = [
   'What is the current portfolio NAV?',
   'Show me active threat alerts',
   'Which vessels are off course?',
-  'Summarize Terra covenant compliance',
+  'Summarize DOMAINE covenant compliance',
   'What HITL approvals are pending in A11oy?',
   'Any legal matter deadlines today?',
 ];

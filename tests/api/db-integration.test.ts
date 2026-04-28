@@ -121,8 +121,8 @@ function buildApp() {
   return app;
 }
 
-// ── Domain: Vessels ───────────────────────────────────────────────────────────
-describe("DB Integration — Vessels domain", () => {
+// ── Domain: SEXTANT ───────────────────────────────────────────────────────────
+describe("DB Integration — SEXTANT domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -226,11 +226,11 @@ describe("DB Integration — Vessels domain", () => {
   });
 });
 
-// ── Domain: Vessels Trading ───────────────────────────────────────────────────
+// ── Domain: SEXTANT Trading ───────────────────────────────────────────────────
 // NOTE: Trading orders are stored in-memory (sessionOrders) — there is no DB
 // table for them. Tests validate the route's validation and success response
 // shapes; no afterAll cleanup is required.
-describe("DB Integration — Vessels Trading domain", () => {
+describe("DB Integration — SEXTANT Trading domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -394,8 +394,8 @@ describe("DB Integration — Carlota Jo domain", () => {
   });
 });
 
-// ── Domain: Lyte (AIOps) ─────────────────────────────────────────────────────
-describe("DB Integration — Lyte domain", () => {
+// ── Domain: KORA (AIOps) ─────────────────────────────────────────────────────
+describe("DB Integration — KORA domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -437,7 +437,7 @@ describe("DB Integration — Lyte domain", () => {
   });
 
   it("POST /lyte/workspaces rejects missing name with 4xx/5xx (DB NOT NULL constraint)", async () => {
-    // Lyte POST handler does not apply Zod validation — missing `name` hits
+    // KORA POST handler does not apply Zod validation — missing `name` hits
     // PostgreSQL NOT NULL constraint and surfaces as 500 from handleRouteError.
     // Any error status ≥ 400 confirms the contract rejects incomplete payloads.
     const res = await request(app)
@@ -452,8 +452,8 @@ describe("DB Integration — Lyte domain", () => {
   });
 });
 
-// ── Domain: Aegis / Aegis ─────────────────────────────────────────────────
-describe("DB Integration — Aegis / Aegis domain", () => {
+// ── Domain: PARAGON / PARAGON ─────────────────────────────────────────────────
+describe("DB Integration — PARAGON / PARAGON domain", () => {
   let app: express.Express;
   let tempAssessmentId: number | undefined;
 
@@ -586,8 +586,8 @@ describe("DB Integration — Aegis / Aegis domain", () => {
 
 // ── Domain: Counsel — REMOVED (Task #2696, routes archived) ────────────
 
-// ── Domain: Terra ─────────────────────────────────────────────────────────────
-describe("DB Integration — Terra (Real Estate) domain", () => {
+// ── Domain: DOMAINE ─────────────────────────────────────────────────────────────
+describe("DB Integration — DOMAINE (Real Estate) domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {

@@ -187,7 +187,7 @@ function buildBriefOutput(
       },
       {
         heading: 'Cross-Domain Connections',
-        body: 'Infrastructure pressure in Lyte correlates with elevated threat surface in Aegis — likely shared dependency on the EU-West-1 cluster. Terra distress signals align with rising vessel route costs.',
+        body: 'Infrastructure pressure in KORA correlates with elevated threat surface in PARAGON — likely shared dependency on the EU-West-1 cluster. DOMAINE distress signals align with rising vessel route costs.',
         dataPoints: ['correlation-id:eu-west-1-cluster', 'confidence:0.72'],
         confidence: 0.72,
       },
@@ -199,7 +199,7 @@ function buildBriefOutput(
       },
       {
         heading: 'Recommended Actions',
-        body: '1. Address Lyte infrastructure pressure (P0 — Platform SRE). 2. Initiate Aegis threat correlation review (P1 — SOC Lead). 3. Monitor Terra distress pipeline (P2 — Portfolio Manager).',
+        body: '1. Address KORA infrastructure pressure (P0 — Platform SRE). 2. Initiate PARAGON threat correlation review (P1 — SOC Lead). 3. Monitor DOMAINE distress pipeline (P2 — Portfolio Manager).',
         dataPoints: ['action-count:3', 'p0-count:1'],
         confidence: 0.84,
       },

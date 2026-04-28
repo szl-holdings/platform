@@ -6,7 +6,7 @@ const paragraphs: NarrativeParagraph[] = [
   {
     id: 'p1',
     heading: 'Threat Detection',
-    body: 'Aegis identified a coordinated credential-stuffing attack originating from Tor exit nodes in IP range 185.220.0.0/16. 847 failed authentication attempts were detected over a 5-minute window — 12× above the baseline rate.',
+    body: 'PARAGON identified a coordinated credential-stuffing attack originating from Tor exit nodes in IP range 185.220.0.0/16. 847 failed authentication attempts were detected over a 5-minute window — 12× above the baseline rate.',
   },
   {
     id: 'p2',

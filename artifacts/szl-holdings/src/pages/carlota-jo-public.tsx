@@ -215,7 +215,7 @@ export default function CarlotaJoPublicPage() {
                     A consulting and services lane — not a product vertical.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
-                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (Lyte, Counsel, Terra, Vessels, Aegis) deliver software platforms, Carlota Jo delivers advisory services — with the same Counsel operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
+                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (KORA, Counsel, DOMAINE, SEXTANT, PARAGON) deliver software platforms, Carlota Jo delivers advisory services — with the same Counsel operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
                     The client service context demands a different user experience — premium, discreet, personally attentive. The operational infrastructure beneath it is the same: Counsel's approval gates, workflow routing, audit trail, and access controls applied to every engagement action.

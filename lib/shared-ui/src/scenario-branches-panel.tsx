@@ -4,8 +4,8 @@
  * Shows a tree of scenario branches with probability, delta from base,
  * confidence, and supporting evidence. Supports base / bull / bear views.
  *
- * Consumed by: Vessels (voyage scenarios), Terra (portfolio scenarios),
- * Aegis (threat scenarios), Lyte (decision simulations).
+ * Consumed by: SEXTANT (voyage scenarios), DOMAINE (portfolio scenarios),
+ * PARAGON (threat scenarios), KORA (decision simulations).
  *
  * Domain data is passed via props. The branching UI and interaction model
  * are shared across all surfaces.

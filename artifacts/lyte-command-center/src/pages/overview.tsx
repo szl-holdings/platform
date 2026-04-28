@@ -244,7 +244,7 @@ export default function OverviewPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <p className="text-[10px] font-mono text-[#5e5e5e] uppercase">
-                Lyte Intelligence Summary
+                KORA Intelligence Summary
               </p>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border text-[#8a8a8a] bg-white/[0.03] border-white/[0.08]">
                 {Math.round(overviewSummary.confidence * 100)}% confidence

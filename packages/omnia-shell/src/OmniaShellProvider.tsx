@@ -25,9 +25,9 @@ const SEED_NOTIFICATIONS: OmniaNotification[] = [
   {
     id: 'omnia-boot-002',
     artifactId: 'aegis',
-    artifactName: 'Aegis',
+    artifactName: 'PARAGON',
     title: 'Threat cluster elevated',
-    message: 'APT-41 cluster upgraded to HIGH. Two downstream assets in Terra affected.',
+    message: 'APT-41 cluster upgraded to HIGH. Two downstream assets in DOMAINE affected.',
     level: 'critical',
     timestamp: new Date(Date.now() - 3 * 60_000).toISOString(),
     read: false,
@@ -37,7 +37,7 @@ const SEED_NOTIFICATIONS: OmniaNotification[] = [
   {
     id: 'omnia-boot-003',
     artifactId: 'vessels',
-    artifactName: 'Vessels',
+    artifactName: 'SEXTANT',
     title: 'Voyage deviation detected',
     message: 'MV Stellarwind — 14 nm off planned route. Insurance tier breach threshold at 82%.',
     level: 'warning',
@@ -49,7 +49,7 @@ const SEED_NOTIFICATIONS: OmniaNotification[] = [
   {
     id: 'omnia-boot-004',
     artifactId: 'terra',
-    artifactName: 'Terra',
+    artifactName: 'DOMAINE',
     title: 'Covenant breach resolved',
     message: 'Property #TER-8821 loan covenant drift corrected after governance action.',
     level: 'success',

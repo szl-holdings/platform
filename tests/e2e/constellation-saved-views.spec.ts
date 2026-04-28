@@ -10,7 +10,7 @@
  *   - Confirm (clicked) issues the DELETE and removes the view from the picker.
  *   - Enter (the confirm button is autoFocused) also issues the DELETE.
  *
- * The test uses the Aegis artifact's /constellation page as the host. All
+ * The test uses the PARAGON artifact's /constellation page as the host. All
  * network calls — auth, graph data, and saved-view CRUD — are mocked at the
  * page.route() level so the spec doesn't depend on the API server or DB.
  */

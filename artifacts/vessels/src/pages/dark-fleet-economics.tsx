@@ -331,7 +331,7 @@ export default function DarkFleetEconomics() {
             color: 'text-purple-400',
           },
           {
-            label: 'Dark Fleet Vessels',
+            label: 'Dark Fleet SEXTANT',
             value: darkFleetCount,
             sub: 'confirmed fleet profile',
             icon: EyeOff,

@@ -754,7 +754,7 @@ export default function FactoryFloor() {
             },
             {
               id: '2',
-              label: 'Investigate failing Vessels AIS sync',
+              label: 'Investigate failing SEXTANT AIS sync',
               type: 'investigate',
               severity: 'critical',
             },
@@ -762,7 +762,7 @@ export default function FactoryFloor() {
             { id: '4', label: 'Retry failed ETL pipeline runs', type: 'remediate' },
             {
               id: '5',
-              label: 'Escalate Lyte routing decision failures',
+              label: 'Escalate KORA routing decision failures',
               type: 'escalate',
               severity: 'high',
             },

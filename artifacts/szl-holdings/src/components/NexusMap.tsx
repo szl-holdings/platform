@@ -25,7 +25,7 @@ const ecosystemNodes = [
   },
   {
     id: 'vessels',
-    name: 'Vessels · TRACK',
+    name: 'SEXTANT · TRACK',
     type: 'subsidiary',
     x: 18,
     y: 30,
@@ -33,7 +33,7 @@ const ecosystemNodes = [
   },
   {
     id: 'terra',
-    name: 'Terra · INTELLIGENCE',
+    name: 'DOMAINE · INTELLIGENCE',
     type: 'subsidiary',
     x: 15,
     y: 75,
@@ -41,7 +41,7 @@ const ecosystemNodes = [
   },
   {
     id: 'aegis',
-    name: 'Aegis · DEFEND',
+    name: 'PARAGON · DEFEND',
     type: 'subsidiary',
     x: 50,
     y: 85,

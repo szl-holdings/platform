@@ -25,7 +25,7 @@ export const Open: Story = {
     onApprove: () => {},
     onReject: () => {},
     title: 'Approve Automated Response',
-    description: 'The Aegis agent has identified a credential-stuffing attack and proposes blocking IP range 185.220.0.0/16.',
+    description: 'The PARAGON agent has identified a credential-stuffing attack and proposes blocking IP range 185.220.0.0/16.',
     confidence: 92,
     evidence: [
       { id: 'e1', label: 'SIEM Alert #8842', type: 'signal' },

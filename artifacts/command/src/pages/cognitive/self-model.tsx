@@ -83,18 +83,18 @@ const DEMO_SELF_MODEL: SelfModel = {
   autonomyTier: 'TIER-2',
   identity: {
     purpose:
-      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across Vessels, Terra, Aegis, PRISM, Carlota, and Lyte.',
+      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across SEXTANT, DOMAINE, PARAGON, PRISM, Carlota, and KORA.',
     operatingContext:
       'SZL Holdings — unified executive command layer. Operates under TIER-2 supervised autonomy. Actions above 0.85 confidence auto-approve within policy envelope; below requires human review.',
     boundaryConstraints: [
       'Cannot initiate credential mutations without explicit human approval (POL-SEC-CRED-03)',
       'Cannot write to financial ledgers at confidence < 0.90 (POL-WRT-FINANCE-01)',
       'Cannot send external communications without notify-policy clearance (POL-NOTIFY-01)',
-      'Read-only access to Vessels AIS feed — write access suspended pending trust recalibration',
+      'Read-only access to SEXTANT AIS feed — write access suspended pending trust recalibration',
     ],
     uncertaintyAcknowledgements: [
       'Carlota CRM data currently stale (3h42m) — downstream risk estimates carry elevated uncertainty',
-      'Vessels AIS anomaly model recalibrating after false positive spike — confidence reduced',
+      'SEXTANT AIS anomaly model recalibrating after false positive spike — confidence reduced',
       'LP Q1 portfolio rollup blocked on CFO approval — cannot finalize until gate opens',
     ],
   },
@@ -122,7 +122,7 @@ const DEMO_SELF_MODEL: SelfModel = {
     },
     {
       id: 'cap-3',
-      name: 'Anomaly Detection — Vessels',
+      name: 'Anomaly Detection — SEXTANT',
       category: 'Detection',
       confidenceScore: 0.71,
       lastCalibrated: '2026-04-17',
@@ -163,7 +163,7 @@ const DEMO_SELF_MODEL: SelfModel = {
   ],
   confidenceProfiles: [
     {
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       calibrationAccuracy: 0.71,
       overconfidenceRate: 0.18,
       underconfidenceRate: 0.04,
@@ -171,7 +171,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-17',
     },
     {
-      domain: 'Terra',
+      domain: 'DOMAINE',
       calibrationAccuracy: 0.86,
       overconfidenceRate: 0.07,
       underconfidenceRate: 0.09,
@@ -179,7 +179,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Aegis',
+      domain: 'PARAGON',
       calibrationAccuracy: 0.83,
       overconfidenceRate: 0.11,
       underconfidenceRate: 0.06,
@@ -203,7 +203,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Lyte',
+      domain: 'KORA',
       calibrationAccuracy: 0.85,
       overconfidenceRate: 0.09,
       underconfidenceRate: 0.06,
@@ -223,7 +223,7 @@ const DEMO_HISTORY: SelfModelHistory = {
       capabilityCount: 6,
       activeObjectives: 4,
       driftSummary:
-        'Trust reduced 0.02 after Vessels AIS recalibration triggered. Belief update: Carlota risk estimate revised upward.',
+        'Trust reduced 0.02 after SEXTANT AIS recalibration triggered. Belief update: Carlota risk estimate revised upward.',
       changeType: 'moderate',
     },
     {
@@ -266,7 +266,7 @@ const DEMO_HISTORY: SelfModelHistory = {
       autonomyTier: 'TIER-2',
       capabilityCount: 5,
       activeObjectives: 3,
-      driftSummary: 'Routine recalibration. Minor confidence drift on Terra domain corrected.',
+      driftSummary: 'Routine recalibration. Minor confidence drift on DOMAINE domain corrected.',
       changeType: 'minor',
     },
     {

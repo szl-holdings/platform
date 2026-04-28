@@ -449,7 +449,7 @@ export default function NeighborhoodMomentum() {
       id: 'cor-2',
       title: 'Port Congestion → Material Delays',
       description:
-        'Port congestion signals from Vessels predict construction material delivery delays by 48 hours',
+        'Port congestion signals from SEXTANT predict construction material delivery delays by 48 hours',
       domains: ['vessels', 'terra'],
       confidence: 0.84,
       timestamp: Date.now(),

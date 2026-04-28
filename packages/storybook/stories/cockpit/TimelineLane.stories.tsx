@@ -4,7 +4,7 @@ import type { CockpitTimelineEvent } from '@szl-holdings/design-system';
 
 const events: CockpitTimelineEvent[] = [
   { id: 'e1', label: 'Incident detected', timestamp: '2026-04-26T08:00:00Z', severity: 'critical' },
-  { id: 'e2', label: 'Aegis agent triggered', timestamp: '2026-04-26T08:00:12Z', severity: 'info' },
+  { id: 'e2', label: 'PARAGON agent triggered', timestamp: '2026-04-26T08:00:12Z', severity: 'info' },
   { id: 'e3', label: 'Evidence collected', timestamp: '2026-04-26T08:00:52Z', severity: 'info' },
   { id: 'e4', label: 'Policy escalation', timestamp: '2026-04-26T08:01:20Z', severity: 'warning' },
   { id: 'e5', label: 'Human approval requested', timestamp: '2026-04-26T08:01:28Z', severity: 'warning' },

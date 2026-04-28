@@ -22,10 +22,10 @@ const FORGE_MODULES = [
     accent: '#d4a054',
     href: '/forge/portfolio',
     detail: [
-      { label: 'Vessels', status: 'Operational', score: '98%', trend: '+2%' },
-      { label: 'Aegis', status: 'Scaling', score: '94%', trend: '+5%' },
-      { label: 'Terra', status: 'Operational', score: '96%', trend: '+1%' },
-      { label: 'Lyte', status: 'Operational', score: '99%', trend: '+0.5%' },
+      { label: 'SEXTANT', status: 'Operational', score: '98%', trend: '+2%' },
+      { label: 'PARAGON', status: 'Scaling', score: '94%', trend: '+5%' },
+      { label: 'DOMAINE', status: 'Operational', score: '96%', trend: '+1%' },
+      { label: 'KORA', status: 'Operational', score: '99%', trend: '+0.5%' },
       { label: 'IMPERIUM', status: 'Beta', score: '87%', trend: '+8%' },
       { label: 'Carlota Jo', status: 'Active', score: '91%', trend: '+3%' },
     ],
@@ -344,19 +344,19 @@ export default function ForgeHomePage() {
             {[
               {
                 action: 'Portfolio health review',
-                detail: 'Vessels Q1 metrics updated',
+                detail: 'SEXTANT Q1 metrics updated',
                 time: '2h ago',
                 color: '#22d3ee',
               },
               {
                 action: 'New design partner onboarded',
-                detail: 'Lyte — TechCorp engagement activated',
+                detail: 'KORA — TechCorp engagement activated',
                 time: '5h ago',
                 color: '#d4a054',
               },
               {
                 action: 'Proposal approved',
-                detail: 'Aegis enterprise tier — Northgate Capital',
+                detail: 'PARAGON enterprise tier — Northgate Capital',
                 time: '1d ago',
                 color: '#ef4444',
               },

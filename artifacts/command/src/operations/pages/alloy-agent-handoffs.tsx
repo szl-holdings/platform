@@ -72,7 +72,7 @@ const HANDOFFS: AgentHandoff[] = [
   {
     id: 'A2A-0041',
     fromAgent: 'Counsel Orchestrator',
-    toAgent: 'Vessels Route Optimizer',
+    toAgent: 'SEXTANT Route Optimizer',
     toAgentType: 'internal',
     subtask: 'Calculate alternate routes for 3 vessels affected by Pacific storm',
     context: 'Storm impact radius: 450nm · Fleet: Pacific cluster · SLA: 6h deadline',
@@ -81,7 +81,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 03:24:18Z',
     receiptId: 'REC-A2A-0041',
     confidence: 0.92,
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     evidence: [
       '3 vessels within storm radius',
@@ -94,7 +94,7 @@ const HANDOFFS: AgentHandoff[] = [
   {
     id: 'A2A-0040',
     fromAgent: 'Counsel Orchestrator',
-    toAgent: 'Terra Valuation Agent',
+    toAgent: 'DOMAINE Valuation Agent',
     toAgentType: 'internal',
     subtask: 'Run DCF valuation on 2 assets flagged by ownership conflict detector',
     context:
@@ -104,7 +104,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 01:06:38Z',
     receiptId: 'REC-A2A-0040',
     confidence: 0.88,
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     evidence: [
       'TA-007: NAV $14.2M, 3 conflicting owners',
@@ -117,13 +117,13 @@ const HANDOFFS: AgentHandoff[] = [
   {
     id: 'A2A-0039',
     fromAgent: 'Counsel Orchestrator',
-    toAgent: 'Aegis Compliance Agent',
+    toAgent: 'PARAGON Compliance Agent',
     toAgentType: 'internal',
     subtask: 'Verify security controls for Q1 compliance certification',
     context: 'Framework: NIST CSF · Scope: 47 controls · Deadline: Q1 close',
     status: 'in_progress',
     initiatedAt: '2026-04-01 03:00:00Z',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     confidence: 0.79,
     evidence: ['28/47 controls assessed so far', '3 medium gaps identified', '0 critical findings'],
@@ -152,7 +152,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 03:20:04Z',
     receiptId: 'REC-A2A-0037',
     confidence: 0.97,
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     evidence: [
       'Storm system detected 38.2N 151.4E',
@@ -172,7 +172,7 @@ const HANDOFFS: AgentHandoff[] = [
     status: 'failed',
     initiatedAt: '2026-04-01 02:55:00Z',
     completedAt: '2026-04-01 02:56:12Z',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     failureReason: 'Remote agent returned error 429 — rate limit exceeded. Retry scheduled in 2h.',
   },

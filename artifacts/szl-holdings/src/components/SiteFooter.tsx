@@ -7,7 +7,7 @@ const FOOTER_COLS = [
     heading: 'Platform',
     links: [
       { label: 'Platform Overview', href: '/platform' },
-      { label: 'Lyte — Command', href: '/lyte' },
+      { label: 'KORA — Command', href: '/lyte' },
       { label: 'Counsel — Execution', href: '/continuum-fabric' },
       { label: 'APEX — Mobile', href: 'https://cortex.szlholdings.com' },
       { label: 'Architecture', href: '/architecture' },
@@ -16,9 +16,9 @@ const FOOTER_COLS = [
   {
     heading: 'Solutions',
     links: [
-      { label: 'Aegis — Security', href: '/solutions/aegis' },
-      { label: 'Vessels — Maritime', href: '/solutions/vessels' },
-      { label: 'Terra — Real Estate', href: '/solutions/terra' },
+      { label: 'PARAGON — Security', href: '/solutions/aegis' },
+      { label: 'SEXTANT — Maritime', href: '/solutions/vessels' },
+      { label: 'DOMAINE — Real Estate', href: '/solutions/terra' },
       { label: 'Counsel — Legal', href: '/counsel' },
     ],
   },

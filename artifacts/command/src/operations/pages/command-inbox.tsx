@@ -451,7 +451,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'ownership',
     evidence: 'Workflow graph gap detected automatically',
     next_action: 'Assign compliance owner and unblock pipeline',
-    linked_product: 'Terra',
+    linked_product: 'DOMAINE',
     linked_href: '/terra/',
   },
   {
@@ -516,7 +516,7 @@ const SIGNAL_FEED = [
   {
     time: '1h ago',
     type: 'event',
-    text: 'New distress signal forwarded from Terra — Northgate portfolio cluster',
+    text: 'New distress signal forwarded from DOMAINE — Northgate portfolio cluster',
     severity: 'medium' as const,
   },
 ];

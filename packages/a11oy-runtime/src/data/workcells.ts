@@ -344,7 +344,7 @@ export const DEMO_WORKCELLS: Workcell[] = [
       objective: 'Reroute Horizon Star to avoid elevated geopolitical risk and cyclone track.',
       proposedActions: [
         { id: 'pa-1', tool: 'email_drafter', description: 'Draft rerouting instruction for fleet operations team.', riskLevel: 'medium', requiresApproval: true, expectedOutcome: 'Operations team notified of rerouting plan.' },
-        { id: 'pa-2', tool: 'workflow_trigger', description: 'Trigger voyage rerouting workflow in Vessels system.', riskLevel: 'medium', requiresApproval: true, expectedOutcome: 'Rerouting workflow active, vessel track updated.' },
+        { id: 'pa-2', tool: 'workflow_trigger', description: 'Trigger voyage rerouting workflow in SEXTANT system.', riskLevel: 'medium', requiresApproval: true, expectedOutcome: 'Rerouting workflow active, vessel track updated.' },
       ],
       riskCategory: 'executive_escalation',
       estimatedImpact: 'Risk reduction from L3 to L1; +18h ETA delay acceptable vs. insurance/safety exposure',
@@ -356,7 +356,7 @@ export const DEMO_WORKCELLS: Workcell[] = [
     approvalStatus: 'approved',
     executionResult: {
       success: true,
-      summary: 'Rerouting instruction sent. Vessel track updated in Vessels.',
+      summary: 'Rerouting instruction sent. Vessel track updated in SEXTANT.',
       toolResults: [
         { toolId: 'email_drafter', result: 'Draft sent to ops team', success: true },
         { toolId: 'workflow_trigger', result: 'Rerouting workflow active', success: true },
@@ -420,10 +420,10 @@ export const DEMO_WORKCELLS: Workcell[] = [
     totalLatencyMs: 168_000,
   },
 
-  /* 6 — Terra Capex */
+  /* 6 — DOMAINE Capex */
   {
     id: 'wc-terra-capex',
-    title: 'Terra Capex — Meridian Acquisition Financing Review',
+    title: 'DOMAINE Capex — Meridian Acquisition Financing Review',
     domain: 'real_estate',
     vertical: 'terra',
     status: 'proven',
@@ -475,10 +475,10 @@ export const DEMO_WORKCELLS: Workcell[] = [
     totalLatencyMs: 5400_000,
   },
 
-  /* 7 — Aegis Incident */
+  /* 7 — PARAGON Incident */
   {
     id: 'wc-aegis-incident',
-    title: 'Aegis Incident — APT-29 Lateral Movement Detected',
+    title: 'PARAGON Incident — APT-29 Lateral Movement Detected',
     domain: 'security',
     vertical: 'aegis',
     status: 'executing',

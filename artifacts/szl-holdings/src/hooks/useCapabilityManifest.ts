@@ -93,26 +93,26 @@ export const PRODUCT_DISPLAY: Record<
   string,
   { label: string; color: string; href: string; appStatus: string }
 > = {
-  'Lyte (Business Observability)': {
-    label: 'Lyte',
+  'KORA (Business Observability)': {
+    label: 'KORA',
     color: '#d4a054',
     href: '/lyte',
     appStatus: 'Beta',
   },
-  'Aegis (Defense & Intelligence)': {
-    label: 'Aegis',
+  'PARAGON (Defense & Intelligence)': {
+    label: 'PARAGON',
     color: '#c45a4a',
     href: '/solutions/aegis',
     appStatus: 'Beta',
   },
-  'Vessels (Maritime Intelligence)': {
-    label: 'Vessels',
+  'SEXTANT (Maritime Intelligence)': {
+    label: 'SEXTANT',
     color: '#4a90b8',
     href: '/solutions/vessels',
     appStatus: 'Partial',
   },
-  'Terra (Real Estate Intelligence)': {
-    label: 'Terra',
+  'DOMAINE (Real Estate Intelligence)': {
+    label: 'DOMAINE',
     color: '#c8953c',
     href: '/solutions/terra',
     appStatus: 'Beta',
@@ -125,8 +125,8 @@ export const PRODUCT_DISPLAY: Record<
   },
   'API Server': { label: 'API Server', color: '#6aaa72', href: '/developers', appStatus: 'GA' },
   'SZL Holdings Corporate': { label: 'Corporate', color: '#8b7ac8', href: '/', appStatus: 'Beta' },
-  'Aegis (Cyber Resilience)': {
-    label: 'Aegis',
+  'PARAGON (Cyber Resilience)': {
+    label: 'PARAGON',
     color: '#ef8c3a',
     href: '/solutions/aegis',
     appStatus: 'Beta',

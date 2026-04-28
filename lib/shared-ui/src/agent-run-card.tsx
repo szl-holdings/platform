@@ -4,7 +4,7 @@
  * Shows: agent name, run ID, status, duration, tool calls, confidence,
  * policy verdict, evidence count, and expandable trace.
  *
- * Consumed by: Sentra, Vessels, Terra, Counsel, Command, Lyte, Pulse.
+ * Consumed by: Sentra, SEXTANT, DOMAINE, Counsel, Command, KORA, Pulse.
  */
 import { useState } from 'react';
 import { cn } from './utils';

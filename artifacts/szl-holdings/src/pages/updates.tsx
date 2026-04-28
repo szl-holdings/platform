@@ -7,14 +7,14 @@ const updates = [
     tag: 'Platform',
     headline: 'Navigation & page architecture overhaul across all portfolio apps',
     summary:
-      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, Vessels, SZL APEX, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
+      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, SEXTANT, SZL APEX, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
   },
   {
     date: 'February 2026',
-    tag: 'Vessels',
+    tag: 'SEXTANT',
     headline: 'AI Route Optimization Engine — Q2 2026 development begins',
     summary:
-      "Development started on Vessels' governed route optimization module. The engine will analyse historical voyage data, weather patterns, and port congestion to surface optimal routing recommendations for fleet operators.",
+      "Development started on SEXTANT' governed route optimization module. The engine will analyse historical voyage data, weather patterns, and port congestion to surface optimal routing recommendations for fleet operators.",
   },
   {
     date: 'February 2026',
@@ -39,10 +39,10 @@ const updates = [
   },
   {
     date: 'December 2025',
-    tag: 'Aegis',
+    tag: 'PARAGON',
     headline: 'XDR Console and Threat Hunting Workbench launched',
     summary:
-      'Aegis shipped the XDR (Extended Detection and Response) Console alongside the Threat Hunting Workbench — enabling security teams to correlate signals across endpoint, network, and cloud telemetry in a unified interface.',
+      'PARAGON shipped the XDR (Extended Detection and Response) Console alongside the Threat Hunting Workbench — enabling security teams to correlate signals across endpoint, network, and cloud telemetry in a unified interface.',
   },
 ];
 

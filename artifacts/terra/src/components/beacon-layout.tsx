@@ -189,7 +189,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245,158,11,0.2)',
               }}
             >
-              Lyte
+              KORA
             </a>
             <a
               href="/continuum"

@@ -15,11 +15,11 @@ const FABRIC_LAYERS = [
 ];
 
 const ALL_VERTICALS = [
-  { id: 'vessels-maritime', label: 'Vessels Maritime', packStatus: 'live' },
+  { id: 'vessels-maritime', label: 'SEXTANT Maritime', packStatus: 'live' },
   { id: 'prism-counsel', label: 'Counsel', packStatus: 'live' },
-  { id: 'terra-real-estate', label: 'Terra Real Estate', packStatus: 'live' },
-  { id: 'aegis-defense', label: 'Aegis Defense', packStatus: 'live' },
-  { id: 'lyte-revenue', label: 'Lyte Revenue', packStatus: 'live' },
+  { id: 'terra-real-estate', label: 'DOMAINE Real Estate', packStatus: 'live' },
+  { id: 'aegis-defense', label: 'PARAGON Defense', packStatus: 'live' },
+  { id: 'lyte-revenue', label: 'KORA Revenue', packStatus: 'live' },
   { id: 'carlota-jo', label: 'Carlota Jo', packStatus: 'live' },
   { id: 'alloy-core', label: 'Alloy Core', packStatus: 'live' },
   { id: 'sentra-cyber', label: 'Sentra Cyber', packStatus: 'stub' },

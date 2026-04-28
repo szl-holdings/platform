@@ -61,7 +61,7 @@ const DOMAIN_BASE_PATH: Record<string, string> = {
   terra: '/terra',
   vessels: '/vessels',
   aegis: '/aegis',
-  prism: '/aegis', // Prism Counsel currently surfaces inside Aegis Command
+  prism: '/aegis', // Prism Counsel currently surfaces inside PARAGON Command
   lyte: '/aegis',
   imperium: '/command',
   'carlota-jo': '/carlota-jo',
@@ -69,11 +69,11 @@ const DOMAIN_BASE_PATH: Record<string, string> = {
 };
 
 const DOMAIN_LABEL: Record<string, string> = {
-  terra: 'Terra',
-  vessels: 'Vessels',
-  aegis: 'Aegis',
+  terra: 'DOMAINE',
+  vessels: 'SEXTANT',
+  aegis: 'PARAGON',
   prism: 'Prism Counsel',
-  lyte: 'Lyte',
+  lyte: 'KORA',
   imperium: 'Command',
   'carlota-jo': 'Carlota Jo',
   platform: 'Platform',
@@ -1119,7 +1119,7 @@ export function ConstellationGraph({
 
   // --- Attach-to-case modal state ------------------------------------------
   // Lets the operator post the currently-traced subgraph as evidence on an
-  // existing Aegis case (or a freshly-created one) without leaving the graph.
+  // existing PARAGON case (or a freshly-created one) without leaving the graph.
   interface AttachCaseSummary {
     id: number;
     caseNumber: string;
@@ -3604,7 +3604,7 @@ export function ConstellationGraph({
                   data-testid="constellation-attach-to-case"
                   title={
                     traceOriginId
-                      ? 'Attach the trace bundle to an Aegis case as evidence'
+                      ? 'Attach the trace bundle to an PARAGON case as evidence'
                       : 'Run a trace first to enable attach'
                   }
                 >
@@ -3805,7 +3805,7 @@ export function ConstellationGraph({
                     textTransform: 'uppercase',
                   }}
                 >
-                  Attach trace to Aegis case
+                  Attach trace to PARAGON case
                 </div>
                 <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
                   {(() => {

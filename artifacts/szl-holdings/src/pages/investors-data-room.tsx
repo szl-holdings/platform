@@ -208,21 +208,21 @@ const DOMAIN_PRODUCTS = [
   },
   {
     icon: Ship,
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime intelligence",
     color: "#4a90b8",
     href: `${BASE}/solutions/vessels`,
   },
   {
     icon: ShieldCheck,
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "Security & defense observability",
     color: "#c45a4a",
     href: `${BASE}/solutions/aegis`,
   },
   {
     icon: Home,
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real estate intelligence",
     color: "#c8953c",
     href: `${BASE}/solutions/terra`,
@@ -780,7 +780,7 @@ function RequestDemoPanel() {
       <p className="text-sm leading-7 text-white/60 mb-8">
         The SZL Holdings demo covers the full decision workflow — from signal detection through
         recommendation, approval, execution, and audit trail. We'll walk through a live vertical
-        (Counsel, Vessels, or Aegis) and show the shared Counsel execution layer.
+        (Counsel, SEXTANT, or PARAGON) and show the shared Counsel execution layer.
         Sessions are 30–45 minutes.
       </p>
 

@@ -1,5 +1,5 @@
 /**
- * Demo Narrative: Vessels — Port Congestion + Route Exception Cluster
+ * Demo Narrative: SEXTANT — Port Congestion + Route Exception Cluster
  *
  * Scenario: Three vessels (MV Soltana, MV Horizon Star, MV Atlantic Carrier)
  * face a compound crisis — Fujairah port at 28-hour wait time, MV Soltana in an
@@ -18,7 +18,7 @@ export type VesselsPortCongestionNarrative = typeof VESSELS_PORT_CONGESTION_NARR
 
 export const VESSELS_PORT_CONGESTION_NARRATIVE = {
   id: 'vessels-port-congestion',
-  title: 'Vessels — Port Congestion + Route Exception Cluster',
+  title: 'SEXTANT — Port Congestion + Route Exception Cluster',
   domain: 'maritime' as const,
   org: 'Arcturus Shipping',
   personas: ['fleet-operator', 'compliance-auditor'],

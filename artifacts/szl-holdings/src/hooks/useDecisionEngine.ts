@@ -341,7 +341,7 @@ export function useDecisionEngine() {
         modelProvider: 'SZL APEX',
         correlationId,
         actions: [
-          `Isolate ${aegisSignal.payload.target} from OT network (Aegis automated response)`,
+          `Isolate ${aegisSignal.payload.target} from OT network (PARAGON automated response)`,
           `Issue HOLD order for ${vesselsSignal.payload.vessel} via VTS channel 14`,
           'Deploy incident response team to port control room',
           `Notify flag state authority (${vesselsSignal.payload.flag} MDA)`,
@@ -400,7 +400,7 @@ export function useDecisionEngine() {
           action: `Isolate ${aegisSignal.payload.target}`,
           status: 'completed',
           duration: '12s',
-          executor: 'Aegis Automated Response',
+          executor: 'PARAGON Automated Response',
           triggeredAt: now,
         },
         {

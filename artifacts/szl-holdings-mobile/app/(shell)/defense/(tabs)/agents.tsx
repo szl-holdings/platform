@@ -60,7 +60,7 @@ const AGENT_DEFS = [
   },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     domain: 'Analytics',
     color: GREEN,
     icon: 'bar-chart-2',

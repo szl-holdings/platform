@@ -624,7 +624,7 @@ function App() {
               <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>
             </Route>
 
-            {/* ── Product pages — Lyte and Counsel (public marketing) ── */}
+            {/* ── Product pages — KORA and Counsel (public marketing) ── */}
             <Route path="/products/lyte">
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
             </Route>
@@ -737,7 +737,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
-            {/* ── Counsel — merged into Aegis Legal workspace ── */}
+            {/* ── Counsel — merged into PARAGON Legal workspace ── */}
             <Route path="/prism-counsel/:rest*">
               {() => { window.location.href = "/aegis/legal"; return null; }}
             </Route>

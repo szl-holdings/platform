@@ -7,7 +7,7 @@ const doctrine = [
     desc: 'Every platform surfaces signals continuously — from operational data, fleet movements, business metrics, and environmental inputs. Nothing waits to be discovered.',
     accent: 'hsl(190,90%,55%)',
     accentRgb: '14,201,224',
-    platform: 'Lyte',
+    platform: 'KORA',
   },
   {
     step: '02',
@@ -23,15 +23,15 @@ const doctrine = [
     desc: 'Leadership teams receive structured, explainable recommendations with confidence scores, value-at-risk estimates, and clear action options — not data dumps.',
     accent: 'hsl(265,80%,60%)',
     accentRgb: '139,92,246',
-    platform: 'Aegis',
+    platform: 'PARAGON',
   },
   {
     step: '04',
     label: 'Execute',
-    desc: 'The Counsel engine orchestrates multi-step workflows with approval gates, routing logic, and audit trails. Vessels applies the same discipline to maritime command. Every action is traceable.',
+    desc: 'The Counsel engine orchestrates multi-step workflows with approval gates, routing logic, and audit trails. SEXTANT applies the same discipline to maritime command. Every action is traceable.',
     accent: 'hsl(205,85%,55%)',
     accentRgb: '38,164,218',
-    platform: 'Counsel + Vessels',
+    platform: 'Counsel + SEXTANT',
   },
   {
     step: '05',

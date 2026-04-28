@@ -70,7 +70,7 @@ export default function S01Title() {
               color: '#0cc8d9',
             }}
           >
-            Aegis
+            PARAGON
           </span>
           <span
             style={{

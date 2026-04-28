@@ -48,7 +48,7 @@ export default function ValueRecovery() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#4d8fcc' }}
           >
-            Lyte · Value Recovery
+            KORA · Value Recovery
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Value Recovery View</h1>

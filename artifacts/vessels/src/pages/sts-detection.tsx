@@ -179,7 +179,7 @@ export default function StsDetectionPage() {
         </h1>
         <p className="text-xs text-sky-400/50 mt-0.5">
           AIS behavioral pattern analysis — speed drops, proximity clusters, transponder gaps —
-          enhanced with Aegis threat intelligence
+          enhanced with PARAGON threat intelligence
         </p>
       </div>
 
@@ -298,7 +298,7 @@ export default function StsDetectionPage() {
                         variant="outline"
                         className="text-[9px] text-violet-400 bg-violet-500/10 border-violet-500/20"
                       >
-                        Aegis Intel
+                        PARAGON Intel
                       </Badge>
                     )}
                   </div>
@@ -398,7 +398,7 @@ export default function StsDetectionPage() {
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
                         <Eye className="w-3 h-3 text-violet-400" />
                         <span className="text-[10px] text-violet-300">
-                          Aegis Threat Intelligence
+                          PARAGON Threat Intelligence
                         </span>
                       </div>
                     )}

@@ -16,7 +16,7 @@ const OPERATING_LOOP = [
     phase: "Ingestion",
     step: "01",
     icon: Database,
-    description: "Counsel receives structured signal feeds from all connected packs and integrations — Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+    description: "Counsel receives structured signal feeds from all connected packs and integrations — Counsel, DOMAINE, SEXTANT, PARAGON, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
   },
   {
     phase: "Normalization",
@@ -97,7 +97,7 @@ const CAPABILITIES = [
   {
     icon: Layers,
     title: "Signal Normalization",
-    body: "Counsel normalizes signals from Lyte and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
+    body: "Counsel normalizes signals from KORA and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
   },
   {
     icon: Workflow,
@@ -107,7 +107,7 @@ const CAPABILITIES = [
   {
     icon: RefreshCw,
     title: "Cross-Pack Orchestration",
-    body: "A single Counsel action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A Counsel approval can gate a Vessels cargo clearance. Counsel orchestrates across the platform.",
+    body: "A single Counsel action can span multiple domain packs. An PARAGON incident can trigger a DOMAINE diligence hold. A Counsel approval can gate a SEXTANT cargo clearance. Counsel orchestrates across the platform.",
   },
   {
     icon: Zap,
@@ -142,11 +142,11 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Lyte", desc: "The governed command surface routes signals from all domain packs into Counsel for cross-domain governed action." },
+  { name: "KORA", desc: "The governed command surface routes signals from all domain packs into Counsel for cross-domain governed action." },
   { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Counsel approval gates." },
-  { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
-  { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
-  { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
+  { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
+  { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
+  { name: "PARAGON", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
   { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Counsel." },
 ];
 
@@ -204,7 +204,7 @@ export default function AlloyPage() {
                       marginBottom: "0.875rem",
                     }}
                   >
-                    Counsel is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from Lyte, from any domain pack, or from any integration — enters Counsel's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
+                    Counsel is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from KORA, from any domain pack, or from any integration — enters Counsel's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
                   </p>
                   <p
                     style={{
@@ -314,7 +314,7 @@ export default function AlloyPage() {
             </div>
           </section>
   
-          {/* Relationship to Lyte and expansion lanes */}
+          {/* Relationship to KORA and expansion lanes */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
@@ -573,7 +573,7 @@ export default function AlloyPage() {
                     Ready to add execution accountability to your workflows?
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                    Talk to us about applying Counsel to one critical workflow — with Lyte for cross-domain signal observability and Counsel for governed, auditable execution.
+                    Talk to us about applying Counsel to one critical workflow — with KORA for cross-domain signal observability and Counsel for governed, auditable execution.
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>

@@ -54,7 +54,7 @@ const TARGETS: ArtifactTarget[] = [
   { slug: 'sentra',              path: '/sentra/',             brand: /Sentra|Cyber Resilience/i,               shotFile: '08-sentra.jpg',                required: true  },
   { slug: 'counsel',             path: '/counsel/',            brand: /Counsel|Legal Matter|Legal Command/i,    shotFile: '09-counsel.jpg',               required: false },
   { slug: 'a11oy',               path: '/a11oy/',              brand: /A11oy|Enterprise Execution/i,            shotFile: '10-a11oy.jpg',                 required: false },
-  { slug: 'lyte-command-center', path: '/lyte-command-center/', brand: /Lyte|Decision Intelligence|Lyte/i,    shotFile: '11-lyte-command-center.jpg',   required: false },
+  { slug: 'lyte-command-center', path: '/lyte-command-center/', brand: /Lyte|Decision Intelligence|KORA/i,    shotFile: '11-lyte-command-center.jpg',   required: false },
 ];
 
 const SENTRA_INNER_PAGES: Array<{

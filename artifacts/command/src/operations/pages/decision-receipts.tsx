@@ -54,7 +54,7 @@ const RECEIPTS: DecisionReceipt[] = [
     rank: 1,
     finalScore: 96,
     rankedAt: '2m ago',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     summary:
       'Ranked #1 because the owner is clear (Finance VP), the action is unambiguous (approve or delegate), and SLA breach activates in 4h with $2.1M penalty exposure. Evidence from 3 correlated signals and a historical pattern of approval delays.',
@@ -67,7 +67,7 @@ const RECEIPTS: DecisionReceipt[] = [
     },
     evidence: [
       {
-        source: 'Vessels Fleet Signal',
+        source: 'SEXTANT Fleet Signal',
         type: 'signal',
         weight: 0.35,
         detail: '3 vessels outside SLA — fuel surcharge pending 22h',
@@ -155,7 +155,7 @@ const RECEIPTS: DecisionReceipt[] = [
       {
         option: 'Rank #1 ahead of vessels',
         score: 82,
-        whyRejected: 'Vessels fuel surcharge has imminent SLA breach (4h) — pricing has 17h window',
+        whyRejected: 'SEXTANT fuel surcharge has imminent SLA breach (4h) — pricing has 17h window',
       },
       {
         option: 'Rank #3 behind AR conflict',

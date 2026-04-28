@@ -336,8 +336,8 @@ serverRegistry.register({
 
 serverRegistry.register({
   serverId: 'szl-terra-portfolio',
-  name: 'Terra Portfolio MCP',
-  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for Terra.',
+  name: 'DOMAINE Portfolio MCP',
+  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for DOMAINE.',
   capabilitiesSummary: 'finance, analytics, real-estate, portfolio, data',
   endpoint: 'internal://terra-portfolio',
 });
@@ -352,7 +352,7 @@ serverRegistry.register({
 
 serverRegistry.register({
   serverId: 'szl-vessels-maritime',
-  name: 'Vessels Maritime Intelligence MCP',
+  name: 'SEXTANT Maritime Intelligence MCP',
   description: 'Maritime voyage anomaly detection, vessel tracking, and logistics intelligence tools.',
   capabilitiesSummary: 'logistics, analytics, infrastructure, maritime, data',
   endpoint: 'internal://vessels-maritime',

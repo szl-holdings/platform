@@ -1,5 +1,5 @@
 /**
- * Vessels Repository — typed access to vessel fleet tables.
+ * SEXTANT Repository — typed access to vessel fleet tables.
  */
 import {
   db,

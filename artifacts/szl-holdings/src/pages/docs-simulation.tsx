@@ -48,7 +48,7 @@ const SIMULATION_MODES = [
 export default function DocsSimulationPage() {
   const __pageMeta = usePageMeta({
     title: "Simulation — Docs — SZL Holdings",
-    description: "Simulation documentation: forward-looking scenario modeling, branch comparison, and pre-authorization impact analysis in the Lyte + Counsel platform.",
+    description: "Simulation documentation: forward-looking scenario modeling, branch comparison, and pre-authorization impact analysis in the KORA + Counsel platform.",
     canonical: "https://szlholdings.com/docs/simulation",
   });
 
@@ -74,7 +74,7 @@ export default function DocsSimulationPage() {
                 Simulation.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Simulation is the forward-looking decision modeling engine in Lyte + Counsel. Operators submit
+                Simulation is the forward-looking decision modeling engine in KORA + Counsel. Operators submit
                 hypothetical scenarios — signal changes, parameter adjustments, alternative decisions — and the
                 platform resolves their projected effects through the Outcome Graph without touching live state.
                 Every significant action can be modeled before it is authorized.

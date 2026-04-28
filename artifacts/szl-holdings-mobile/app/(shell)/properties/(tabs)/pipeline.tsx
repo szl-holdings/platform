@@ -319,7 +319,7 @@ export default function PipelineTab() {
 
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>Terra · CRM PIPELINE</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>DOMAINE · CRM PIPELINE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Deals & Leads</Text>
         </View>
         <Pressable

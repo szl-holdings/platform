@@ -42,7 +42,7 @@ const tiers: PricingTier[] = [
     highlight: true,
     features: [
       'Unlimited team members',
-      'Full Aegis surface — all modules',
+      'Full PARAGON surface — all modules',
       'Mesh map, exposures, containment & drift',
       'Trust provenance & evidence chain',
       'Unlimited signal history',
@@ -72,7 +72,7 @@ export default function SentraPricingPage() {
       />
       <PricingPage
         productKey="sentra"
-        productName="Aegis"
+        productName="PARAGON"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Cyber Resilience at Enterprise Scale"

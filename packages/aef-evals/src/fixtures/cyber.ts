@@ -5,7 +5,7 @@ export const cyberFixtures: GoldenFixtureSet = {
   profileId: 'aegis_security_incident',
   domain: 'cyber',
   description:
-    'Golden retrieval fixtures for the Aegis Security Incident profile. Covers CVE lookup, incident correlation, MITRE ATT&CK technique search, threat actor intelligence, and endpoint investigation.',
+    'Golden retrieval fixtures for the PARAGON Security Incident profile. Covers CVE lookup, incident correlation, MITRE ATT&CK technique search, threat actor intelligence, and endpoint investigation.',
   queries: [
     {
       queryId: 'cyb-q001',

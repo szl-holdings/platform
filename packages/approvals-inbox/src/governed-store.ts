@@ -4,7 +4,7 @@
  * This is the typed, append-only store for ApprovalRequest / ApprovalDecision
  * pairs created by the cognitive-runtime approval-interrupt mechanism. It lives
  * alongside (but is separate from) the existing PendingApprovalRequest API
- * which the Lyte Decision Center uses.
+ * which the KORA Decision Center uses.
  *
  * Decisions are append-only and signed with actor + timestamp. Denials and
  * escalations write a governance_memory stub that callers may forward to

@@ -52,7 +52,7 @@ function AccountPanel() {
   const user = data?.user;
 
   return (
-    <SettingsSectionPanel title="Account" description="Your profile on the Aegis MSP platform">
+    <SettingsSectionPanel title="Account" description="Your profile on the PARAGON MSP platform">
       <SettingsCard title="Profile">
         <SettingsRow label="Display Name">
           <p className="text-sm">{user?.name ?? '—'}</p>
@@ -272,13 +272,13 @@ function BillingPanel() {
   return (
     <SettingsSectionPanel
       title="Billing"
-      description="Subscription, plan, and usage billing for your Aegis MSP account"
+      description="Subscription, plan, and usage billing for your PARAGON MSP account"
     >
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
           <div className="flex items-center gap-2">
             <Building className="w-4 h-4 text-[#8a8a8a]" />
-            <span className="text-sm">Managed via the Aegis platform portal</span>
+            <span className="text-sm">Managed via the PARAGON platform portal</span>
           </div>
         </SettingsRow>
         <SettingsRow label="Billing Portal">
@@ -289,7 +289,7 @@ function BillingPanel() {
       </SettingsCard>
       <div className="mt-4 p-3 rounded-lg bg-[#8a8a8a]/5 border border-indigo-500/15">
         <p className="text-xs text-[#8a8a8a]/70">
-          Billing changes and invoices are managed through the Aegis platform admin panel.
+          Billing changes and invoices are managed through the PARAGON platform admin panel.
           Contact your platform administrator for billing assistance.
         </p>
       </div>
@@ -340,7 +340,7 @@ function AuditPanel() {
   return (
     <SettingsSectionPanel
       title="Settings Change History"
-      description="Audit trail of settings changes in Aegis"
+      description="Audit trail of settings changes in PARAGON"
     >
       <p className="mb-4 text-xs text-muted-foreground/70">
         Org admins and platform admins see the full team history. Other members see only their own
@@ -517,7 +517,7 @@ export default function AegisUnifiedSettings() {
             'audit',
           ]}
           accentColor={AEGIS_ACCENT}
-          appName="Aegis MSP"
+          appName="PARAGON MSP"
         >
           {panels[activeSection] ?? (
             <div className="p-6 text-sm text-muted-foreground">

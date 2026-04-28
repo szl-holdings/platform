@@ -128,7 +128,7 @@ const DOMAIN_CONFIGS: Record<
     ],
   },
   aegis_incidents: {
-    label: 'Aegis Incidents',
+    label: 'PARAGON Incidents',
     endpoint: '/exports/aegis-incidents',
     color: '#06b6d4',
     columns: [
@@ -143,7 +143,7 @@ const DOMAIN_CONFIGS: Record<
     ],
   },
   vessels: {
-    label: 'Vessels Fleet',
+    label: 'SEXTANT Fleet',
     endpoint: '/exports/vessels',
     color: '#3b82f6',
     columns: [
@@ -161,7 +161,7 @@ const DOMAIN_CONFIGS: Record<
     ],
   },
   terra_deals: {
-    label: 'Terra Deals',
+    label: 'DOMAINE Deals',
     endpoint: '/exports/terra-deals',
     color: '#22c55e',
     columns: [
@@ -180,7 +180,7 @@ const DOMAIN_CONFIGS: Record<
     ],
   },
   lyte_signals: {
-    label: 'Lyte Signals',
+    label: 'KORA Signals',
     endpoint: '/exports/lyte-signals',
     color: '#8b5cf6',
     columns: [

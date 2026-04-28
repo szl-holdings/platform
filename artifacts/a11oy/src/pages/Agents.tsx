@@ -20,7 +20,7 @@ const AGENTS = [
   {
     id: 'op-cascade',
     name: 'Cascade Navigator',
-    role: 'Domain Specialist — Vessels Maritime',
+    role: 'Domain Specialist — SEXTANT Maritime',
     vertical: 'vessels-maritime',
     type: 'domain-specialist',
     status: 'active',
@@ -86,7 +86,7 @@ const AGENTS = [
   {
     id: 'op-pipeline',
     name: 'Pipeline Oracle',
-    role: 'Domain Specialist — Lyte Revenue',
+    role: 'Domain Specialist — KORA Revenue',
     vertical: 'lyte-revenue',
     type: 'domain-specialist',
     status: 'active',
@@ -119,7 +119,7 @@ const AGENTS = [
   {
     id: 'op-guardian',
     name: 'Guardian',
-    role: 'Domain Specialist — Aegis Defense',
+    role: 'Domain Specialist — PARAGON Defense',
     vertical: 'aegis-defense',
     type: 'domain-specialist',
     status: 'active',
@@ -151,8 +151,8 @@ const AGENTS = [
   },
   {
     id: 'op-terra',
-    name: 'Terra Analyst',
-    role: 'Domain Specialist — Terra Real Estate',
+    name: 'DOMAINE Analyst',
+    role: 'Domain Specialist — DOMAINE Real Estate',
     vertical: 'terra-real-estate',
     type: 'domain-specialist',
     status: 'active',
@@ -229,7 +229,7 @@ const EVAL_LABELS: Record<string, string> = {
 
 const HANDOFFS = [
   { from: 'Pipeline Oracle', to: 'Counsel Sentinel', reason: 'At-risk contract review', vertical: 'prism-counsel' },
-  { from: 'Cascade Navigator', to: 'Terra Analyst', reason: 'Port-adjacent asset impact', vertical: 'terra-real-estate' },
+  { from: 'Cascade Navigator', to: 'DOMAINE Analyst', reason: 'Port-adjacent asset impact', vertical: 'terra-real-estate' },
   { from: 'Guardian', to: 'Fabric Watchdog', reason: 'Perimeter change verification', vertical: 'alloy-core' },
 ];
 

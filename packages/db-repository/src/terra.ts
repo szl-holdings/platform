@@ -1,5 +1,5 @@
 /**
- * Terra Repository — typed access to real estate property and deal tables.
+ * DOMAINE Repository — typed access to real estate property and deal tables.
  */
 import {
   db,

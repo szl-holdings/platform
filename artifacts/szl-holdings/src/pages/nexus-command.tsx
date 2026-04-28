@@ -28,7 +28,7 @@ import { SiteNav } from '@/components/SiteNav';
 const PLATFORMS = [
   {
     key: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     desc: 'Business Observability',
     accent: '#22d3ee',
     icon: Eye,
@@ -38,7 +38,7 @@ const PLATFORMS = [
   },
   {
     key: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     desc: 'Maritime Intelligence',
     accent: '#38bdf8',
     icon: Ship,
@@ -48,7 +48,7 @@ const PLATFORMS = [
   },
   {
     key: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     desc: 'Defense & Intel Command',
     accent: '#818cf8',
     icon: Shield,
@@ -58,7 +58,7 @@ const PLATFORMS = [
   },
   {
     key: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     desc: 'Real Estate Intelligence',
     accent: '#4ade80',
     icon: BarChart3,
@@ -106,7 +106,7 @@ const AGGREGATE_KPIS = [
     accent: '#f59e0b',
   },
   {
-    label: 'Fleet Vessels',
+    label: 'Fleet SEXTANT',
     value: '847',
     change: '+5.1%',
     up: true,
@@ -145,7 +145,7 @@ const ACTIONS = [
     title: 'Resolve C2 beacon alert — APT29 infrastructure detected',
     urgency: 'immediate' as const,
     owner: 'J. Chen',
-    team: 'Aegis SOC',
+    team: 'PARAGON SOC',
     due: '30m',
     value: 2400000,
   },
@@ -154,7 +154,7 @@ const ACTIONS = [
     title: 'Approve vessel route deviation — MV Pacific Horizon sanctions zone',
     urgency: 'immediate' as const,
     owner: 'S. Park',
-    team: 'Vessels Ops',
+    team: 'SEXTANT Ops',
     due: '1h',
     value: 850000,
   },
@@ -172,7 +172,7 @@ const ACTIONS = [
     title: 'Review distress scoring model update — Brooklyn submarket',
     urgency: 'today' as const,
     owner: 'M. Thompson',
-    team: 'Terra Engine',
+    team: 'DOMAINE Engine',
     due: 'EOD',
     value: 1200000,
   },
@@ -1105,13 +1105,13 @@ export default function PRAXISCommandPage() {
                       {
                         insight:
                           'Sanctions risk elevated for 3 vessels transiting Red Sea corridor',
-                        source: 'Vessels + Aegis',
+                        source: 'SEXTANT + PARAGON',
                         accent: '#38bdf8',
                       },
                       {
                         insight:
                           'Brooklyn distress score up 12% — 4 new acquisition targets identified',
-                        source: 'Terra Engine',
+                        source: 'DOMAINE Engine',
                         accent: '#4ade80',
                       },
                       {
@@ -1121,7 +1121,7 @@ export default function PRAXISCommandPage() {
                       },
                       {
                         insight:
-                          'Cross-platform signal: insurance fraud pattern detected across Terra + PRAXIS',
+                          'Cross-platform signal: insurance fraud pattern detected across DOMAINE + PRAXIS',
                         source: 'Counsel Correlation',
                         accent: '#818cf8',
                       },

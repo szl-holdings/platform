@@ -31,7 +31,7 @@ const FUND_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: FRESH_3M,
     excerpt:
-      'PRAXIS: 8.4. Lyte: 7.1. Vessels: 6.8. Terra (fund stake): 7.4. Aegis: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
+      'PRAXIS: 8.4. KORA: 7.1. SEXTANT: 6.8. DOMAINE (fund stake): 7.4. PARAGON: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
   },
   {
     id: 'ev-szl3',

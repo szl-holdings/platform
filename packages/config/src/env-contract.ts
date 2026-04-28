@@ -108,8 +108,8 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
   {
     key: 'MAPBOX_TOKEN',
     classification: 'recommended',
-    description: 'Mapbox API token for Terra map views.',
-    risksIfMissing: 'All Terra map views render blank. Demo-killer for Terra presentations.',
+    description: 'Mapbox API token for DOMAINE map views.',
+    risksIfMissing: 'All DOMAINE map views render blank. Demo-killer for DOMAINE presentations.',
   },
 
   // Monitoring

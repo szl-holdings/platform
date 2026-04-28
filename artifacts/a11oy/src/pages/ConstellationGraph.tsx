@@ -4,11 +4,11 @@ import { PageHeader, KpiCard, Card } from '../components/ui';
 
 const NODES = [
   { id: 'pulse', name: 'Pulse', vertical: 'Founder Ops', status: 'live', tier: 'platform', x: 250, y: 250, color: '#8a8a8a', icon: '◉' },
-  { id: 'lyte', name: 'Lyte', vertical: 'Revenue', status: 'live', tier: 'enterprise', x: 390, y: 180, color: '#c9b787', icon: '◆' },
-  { id: 'vessels', name: 'Vessels', vertical: 'Maritime', status: 'live', tier: 'enterprise', x: 420, y: 300, color: '#8a8a8a', icon: '⚓' },
+  { id: 'lyte', name: 'KORA', vertical: 'Revenue', status: 'live', tier: 'enterprise', x: 390, y: 180, color: '#c9b787', icon: '◆' },
+  { id: 'vessels', name: 'SEXTANT', vertical: 'Maritime', status: 'live', tier: 'enterprise', x: 420, y: 300, color: '#8a8a8a', icon: '⚓' },
   { id: 'counsel', name: 'Counsel', vertical: 'Legal', status: 'live', tier: 'enterprise', x: 350, y: 380, color: '#c9b787', icon: '⚖' },
-  { id: 'terra', name: 'Terra', vertical: 'Real Estate', status: 'live', tier: 'enterprise', x: 160, y: 370, color: '#8a8a8a', icon: '▣' },
-  { id: 'aegis', name: 'Aegis', vertical: 'Defense', status: 'live', tier: 'sovereign', x: 110, y: 260, color: '#f5f5f5', icon: '⬡' },
+  { id: 'terra', name: 'DOMAINE', vertical: 'Real Estate', status: 'live', tier: 'enterprise', x: 160, y: 370, color: '#8a8a8a', icon: '▣' },
+  { id: 'aegis', name: 'PARAGON', vertical: 'Defense', status: 'live', tier: 'sovereign', x: 110, y: 260, color: '#f5f5f5', icon: '⬡' },
   { id: 'sentra', name: 'Sentra', vertical: 'Cyber', status: 'live', tier: 'enterprise', x: 130, y: 160, color: '#c9b787', icon: '⬡' },
   { id: 'carlota-jo', name: 'Carlota Jo', vertical: 'Consulting', status: 'live', tier: 'professional', x: 390, y: 430, color: '#c9b787', icon: '◎' },
   { id: 'nuro-forge', name: 'NuroForge', vertical: 'AI Infra', status: 'beta', tier: 'platform', x: 250, y: 120, color: '#5e5e5e', icon: '⬟' },

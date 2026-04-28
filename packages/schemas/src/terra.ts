@@ -1,5 +1,5 @@
 /**
- * Terra real estate intelligence domain schemas.
+ * DOMAINE real estate intelligence domain schemas.
  */
 import { z } from 'zod';
 

@@ -30,7 +30,7 @@ export const SEED_DEMO_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'scenario-aegis-incident',
-    name: 'Aegis Incident Response',
+    name: 'PARAGON Incident Response',
     description: 'Coordinate defense response to state-level APT attribution and supply chain compromise.',
     workcellIds: ['wc-010', 'wc-015'],
     initialSignals: ['sig-aegis-001', 'sig-aegis-004'],

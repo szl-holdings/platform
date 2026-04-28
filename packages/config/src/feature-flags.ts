@@ -37,13 +37,13 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   },
   AEGIS_UNWIRED_MODULES: {
     id: 'AEGIS_UNWIRED_MODULES',
-    description: 'Show 8 Aegis modules that are not yet wired to live API. Hidden by default.',
+    description: 'Show 8 PARAGON modules that are not yet wired to live API. Hidden by default.',
     enabledFor: ['local-dev'],
     notes: 'These modules are stubs. Do not show in investor demos or production.',
   },
   VESSELS_COMMERCIAL_MODULES: {
     id: 'VESSELS_COMMERCIAL_MODULES',
-    description: 'Show Vessels commercial modules (insurance, trading, platform) not wired to DB.',
+    description: 'Show SEXTANT commercial modules (insurance, trading, platform) not wired to DB.',
     enabledFor: ['local-dev'],
     notes: 'Stubs only. Do not show in demos until wired.',
   },

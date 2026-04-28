@@ -2,7 +2,7 @@
  * Demo Narrative 1: Business Observability / RevOps / CFO Lens
  *
  * Scenario: Meridian Capital Group — CFO discovers a revenue stall in Q2
- * pipeline that conventional reporting missed. Lyte surfaces the signal,
+ * pipeline that conventional reporting missed. KORA surfaces the signal,
  * PRISM assembles context, AI recommends intervention, CFO approves escalation,
  * Continuum routes to the right owner, outcome is captured with proof chain.
  *
@@ -19,7 +19,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
   scenario: {
     name: 'Q2 Pipeline Stall — Revenue at Risk',
     summary:
-      'A $4.2M pipeline segment has stalled for 47 days without escalation. Approval aging in the procurement cycle is creating downstream revenue exposure. No existing tool surfaced this before Lyte.',
+      'A $4.2M pipeline segment has stalled for 47 days without escalation. Approval aging in the procurement cycle is creating downstream revenue exposure. No existing tool surfaced this before KORA.',
     valueAtRisk: '$4,200,000',
     daysStalled: 47,
     rootCause: 'Approval ownership gap — responsible VP departed without handoff',
@@ -40,7 +40,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       severity: 'high',
       title: 'Pipeline segment stalled — 47 days without owner action',
       body: 'The Vantex Acquisition deal (est. $4.2M Q2 close) has not advanced in 47 days. The approval owner departed on 2026-02-28 with no recorded handoff. The deal is now at risk of falling out of Q2.',
-      source: 'Lyte PRISM — Motion dimension',
+      source: 'KORA PRISM — Motion dimension',
       confidence: 0.91,
       detectedAt: '2026-04-14T08:22:00Z',
       prismDimension: 'Motion',
@@ -59,7 +59,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
     },
     recommendation: {
       id: 'demo-rec-biz-001',
-      agent: 'Lyte',
+      agent: 'KORA',
       action: 'Escalate deal to CFO for emergency ownership reassignment and buyer re-engagement',
       rationale:
         'Deal is past recovery threshold without executive intervention. Buyer last engaged 14 days ago — window is closing. Reassignment to VP of BD with direct CFO sponsorship has 78% historical close rate in comparable situations.',
@@ -80,7 +80,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       id: 'demo-execution-biz-001',
       steps: [
         { step: 1, action: 'Ownership reassigned to Sarah Kim — Counsel workflow triggered' },
-        { step: 2, action: 'Buyer re-engagement email drafted by Lyte and queued for review' },
+        { step: 2, action: 'Buyer re-engagement email drafted by KORA and queued for review' },
         { step: 3, action: 'CFO calendar block created for buyer call (2026-04-16 14:00)' },
         { step: 4, action: 'Deal velocity monitoring reactivated — alert threshold: 7 days' },
       ],
@@ -97,7 +97,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
     executiveSummary: {
       id: 'demo-exsummary-biz-001',
       headline: 'Q2 revenue exposure contained: $4.2M deal reactivated in 26 hours',
-      body: 'A 47-day pipeline stall was detected and resolved within one business day. Without Lyte, this deal would have missed Q2 close and required a full restart in Q3. Total time from signal to resolution: 25 hours 36 minutes. Actions taken: 4. Approvals: 1. Audit record: complete.',
+      body: 'A 47-day pipeline stall was detected and resolved within one business day. Without KORA, this deal would have missed Q2 close and required a full restart in Q3. Total time from signal to resolution: 25 hours 36 minutes. Actions taken: 4. Approvals: 1. Audit record: complete.',
       generatedAt: '2026-04-15T12:00:00Z',
     },
   },
@@ -107,7 +107,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       step: 'Signal Detection',
       duration: '2 min',
       narrative:
-        'Marcus opens Lyte on Monday morning. The Command Inbox surfaces a high-priority item: a $4.2M deal has stalled for 47 days. This is not a new report. PRISM detected this automatically — no one filed a ticket.',
+        'Marcus opens KORA on Monday morning. The Command Inbox surfaces a high-priority item: a $4.2M deal has stalled for 47 days. This is not a new report. PRISM detected this automatically — no one filed a ticket.',
       showIn: ['lyte/command-inbox', 'lyte/prism/motion'],
     },
     {
@@ -121,7 +121,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       step: 'AI Recommendation',
       duration: '2 min',
       narrative:
-        'Lyte has already generated a recommendation: escalate to CFO, reassign to VP BD, re-engage buyer. Confidence: 87%. The rationale cites historical close rates for comparable situations.',
+        'KORA has already generated a recommendation: escalate to CFO, reassign to VP BD, re-engage buyer. Confidence: 87%. The rationale cites historical close rates for comparable situations.',
       showIn: ['lyte/command-inbox/detail', 'lyte/evidence'],
     },
     {

@@ -67,7 +67,7 @@ const DOMAIN_META: Record<
   }
 > = {
   aegis: {
-    label: 'Aegis · Cybersecurity',
+    label: 'PARAGON · Cybersecurity',
     short: 'AEG',
     color: '#f5f5f5',
     bg: 'rgba(245,245,245,0.08)',
@@ -76,7 +76,7 @@ const DOMAIN_META: Record<
     twinCategory: 'endpoint',
   },
   vessels: {
-    label: 'Vessels · Maritime',
+    label: 'SEXTANT · Maritime',
     short: 'VSL',
     color: '#8a8a8a',
     bg: 'rgba(56,189,248,0.08)',
@@ -85,7 +85,7 @@ const DOMAIN_META: Record<
     twinCategory: 'vessel',
   },
   terra: {
-    label: 'Terra · Real Estate',
+    label: 'DOMAINE · Real Estate',
     short: 'TER',
     color: '#c9b787',
     bg: 'rgba(201,183,135,0.08)',
@@ -403,8 +403,8 @@ export default function AegisAtlasCorrelation() {
             Worldline Correlation Theater
           </h1>
           <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Time-aligned threat surface across Aegis security incidents, Vessels route anomalies,
-            and Terra physical / financial signals.
+            Time-aligned threat surface across PARAGON security incidents, SEXTANT route anomalies,
+            and DOMAINE physical / financial signals.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

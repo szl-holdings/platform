@@ -11,11 +11,11 @@ const PIPELINE_STAGES = [
   {
     id: "signal",
     label: "Signal",
-    sublabel: "Lyte / PRAXIS",
+    sublabel: "KORA / PRAXIS",
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    desc: "Lyte's PRAXIS engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
+    desc: "KORA's PRAXIS engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
     details: ["Continuous monitoring across connected integrations", "Signal classification: type, severity, velocity, blast radius", "Deduplication and correlation across signal sources", "Tenant-isolated signal namespace"],
   },
   {
@@ -73,7 +73,7 @@ const PIPELINE_STAGES = [
 const TENANT_ARCH = [
   { label: "Tenant namespace isolation", body: "Every tenant has an isolated signal and workflow namespace. Cross-tenant data access is blocked at the query layer through organization-id guards enforced on every data path." },
   { label: "Role-scoped action model", body: "What a user can see, recommend, approve, and execute is determined by their role within their tenant. Roles are defined by the tenant admin, not the platform." },
-  { label: "Domain pack layering", body: "Vertical domain packs (Aegis, Vessels, Terra) extend the core platform with domain-specific signal vocabulary and workflow logic — they do not bypass the core governance model." },
+  { label: "Domain pack layering", body: "Vertical domain packs (PARAGON, SEXTANT, DOMAINE) extend the core platform with domain-specific signal vocabulary and workflow logic — they do not bypass the core governance model." },
   { label: "Connector permissions", body: "Each external integration has scoped permissions. A connector to a task system cannot read financial records, and vice versa, unless explicitly configured and approved." },
 ];
 

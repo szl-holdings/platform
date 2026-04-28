@@ -12,7 +12,7 @@ interface EcosystemSummary {
 
 const PLATFORM_DEFS = [
   {
-    name: 'Lyte',
+    name: 'KORA',
     label: 'Operational Decision Intelligence',
     copy: 'See risk, latency, ownership gaps, and workflow friction before they hit execution.',
     cta: 'Explore Command',
@@ -28,10 +28,10 @@ const PLATFORM_DEFS = [
     fallbackMetrics: [{ label: 'Observability', value: 'Live' }],
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     label: 'Maritime Intelligence Platform',
     copy: 'Turn fleet visibility, voyage performance, and operational exceptions into command.',
-    cta: 'Explore Vessels',
+    cta: 'Explore SEXTANT',
     href: '/vessels/',
     accent: 'hsl(205,85%,55%)',
     accentRgb: '38,155,212',
@@ -39,7 +39,7 @@ const PLATFORM_DEFS = [
     accentBorder: 'hsla(205,85%,55%,0.12)',
     key: 'vessels' as const,
     getMetrics: (d: EcosystemSummary) => [
-      { label: 'Tracked Vessels', value: d.vessels.trackedVessels.toLocaleString() },
+      { label: 'Tracked SEXTANT', value: d.vessels.trackedVessels.toLocaleString() },
       { label: 'Fleets', value: d.vessels.fleets.toLocaleString() },
     ],
     fallbackMetrics: [
@@ -48,10 +48,10 @@ const PLATFORM_DEFS = [
     ],
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     label: 'Unified Defense & Intelligence Command',
     copy: 'Security operations, managed services, and AI intelligence in one unified platform. SOC command, XDR, MSP ops, and agentic cortex.',
-    cta: 'Enter Aegis',
+    cta: 'Enter PARAGON',
     href: '/aegis/',
     accent: 'hsl(232,68%,60%)',
     accentRgb: '99,102,241',
@@ -68,10 +68,10 @@ const PLATFORM_DEFS = [
     ],
   },
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     label: 'Real Estate Intelligence Platform',
     copy: 'Distress property tracking, deal pipeline management, ownership intelligence, and NYC market data for serious operators.',
-    cta: 'Explore Terra',
+    cta: 'Explore DOMAINE',
     href: '/terra/',
     accent: 'hsl(88,42%,44%)',
     accentRgb: '85,140,48',

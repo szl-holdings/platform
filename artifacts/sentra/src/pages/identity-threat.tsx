@@ -168,7 +168,7 @@ export default function IdentityThreat() {
     type: a.title ?? 'Identity Anomaly',
     severity: ((a.severity ?? 'Medium').charAt(0).toUpperCase() +
       (a.severity ?? 'Medium').slice(1).toLowerCase()) as 'Critical' | 'High' | 'Medium',
-    detail: a.description ?? 'Live identity alert sourced from Aegis',
+    detail: a.description ?? 'Live identity alert sourced from PARAGON',
     status:
       a.status === 'resolved' ? 'Resolved' : a.status === 'acknowledged' ? 'Investigating' : 'Open',
     time: formatRelative(a.createdAt),

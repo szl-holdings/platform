@@ -20,7 +20,7 @@ const ACCENT = "hsl(191,92%,44%)";
 
 const LOOP_STEPS = [
   { n: "01", label: "Signal", icon: Radio, color: "#4d8fcc", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
+  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in KORA." },
   { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
   { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "Decision Simulation models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
   { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
@@ -478,7 +478,7 @@ function PortfolioArchitecture() {
       tier: "Layer 01 — Command Surfaces",
       color: ACCENT,
       items: [
-        { name: "Lyte", desc: "Flagship command surface — signal stream, situation board, governed action panel" },
+        { name: "KORA", desc: "Flagship command surface — signal stream, situation board, governed action panel" },
         { name: "APEX", desc: "Mobile command — all domains, biometric auth, iOS + Android" },
       ],
     },
@@ -498,9 +498,9 @@ function PortfolioArchitecture() {
       tier: "Layer 03 — Domain Packs",
       color: "hsl(260,60%,65%)",
       items: [
-        { name: "Aegis", desc: "Security & defense — SOC, XDR, MITRE ATT&CK" },
-        { name: "Vessels", desc: "Maritime — fleet command, AIS, sanctions, voyage economics" },
-        { name: "Terra", desc: "Real estate — distress pipeline, underwriting, deal governance" },
+        { name: "PARAGON", desc: "Security & defense — SOC, XDR, MITRE ATT&CK" },
+        { name: "SEXTANT", desc: "Maritime — fleet command, AIS, sanctions, voyage economics" },
+        { name: "DOMAINE", desc: "Real estate — distress pipeline, underwriting, deal governance" },
         { name: "Counsel", desc: "Legal — obligation tracking, matter command" },
         { name: "Carlota Jo", desc: "Advisory — client intelligence, strategic diagnostics" },
       ],

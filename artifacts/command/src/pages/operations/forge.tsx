@@ -1641,7 +1641,7 @@ function FusionTab() {
       { domain: 'finance', signal: 'Portfolio activity shows $2.4M in unusual transfers correlated to entity', confidence: 0.81, method: 'Anomaly Detection', timestamp: new Date(Date.now() - 34000).toISOString(), hypothesis: 'May reflect authorized restructuring or potential wash trading' },
       { domain: 'analytics', signal: '847 API calls from entity in last 24h — 3.2σ above baseline', confidence: 0.97, method: 'Statistical Deviation', timestamp: new Date(Date.now() - 67000).toISOString(), hypothesis: 'Automated scraping or legitimate bulk operation' },
       { domain: 'legal', signal: 'No active litigation or compliance flags for entity in Counsel registry', confidence: 0.99, method: 'Registry Lookup', timestamp: new Date(Date.now() - 120000).toISOString(), hypothesis: 'Entity in good standing' },
-      { domain: 'vessels', signal: 'No maritime activity linked to entity in Vessels registry', confidence: 0.88, method: 'Cross-Domain Lookup', timestamp: new Date(Date.now() - 210000).toISOString(), hypothesis: 'Entity not vessel-linked or data lag present' },
+      { domain: 'vessels', signal: 'No maritime activity linked to entity in SEXTANT registry', confidence: 0.88, method: 'Cross-Domain Lookup', timestamp: new Date(Date.now() - 210000).toISOString(), hypothesis: 'Entity not vessel-linked or data lag present' },
     ],
   };
 

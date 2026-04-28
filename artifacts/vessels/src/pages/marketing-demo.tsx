@@ -53,7 +53,7 @@ export default function MarketingDemoPage() {
               Request a Demo
             </p>
             <h1 className="text-3xl font-bold text-sky-50 mb-4">
-              See Vessels built around your fleet
+              See SEXTANT built around your fleet
             </h1>
             <p className="text-sky-300/40 text-[14px] leading-relaxed mb-8">
               Every demo is configured to your fleet size, operational profile, and primary use
@@ -61,7 +61,7 @@ export default function MarketingDemoPage() {
             </p>
             <div className="space-y-4">
               {[
-                'Live session with the Vessels product team',
+                'Live session with the SEXTANT product team',
                 'Fleet-specific configuration and data walkthrough',
                 'Q&A on integration, security, and onboarding',
                 'Pricing discussion based on your fleet profile',

@@ -9219,7 +9219,7 @@ export const useSubscribeCommandPlan = <
 };
 
 /**
- * @summary List Terra real estate intelligence billing plans
+ * @summary List DOMAINE real estate intelligence billing plans
  */
 export const getListTerraBillingPlansUrl = () => {
   return `/api/billing/terra/plans`;
@@ -9270,7 +9270,7 @@ export type ListTerraBillingPlansQueryResult = NonNullable<
 export type ListTerraBillingPlansQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary List Terra real estate intelligence billing plans
+ * @summary List DOMAINE real estate intelligence billing plans
  */
 
 export function useListTerraBillingPlans<
@@ -9294,7 +9294,7 @@ export function useListTerraBillingPlans<
 }
 
 /**
- * @summary Subscribe to a Terra plan
+ * @summary Subscribe to a DOMAINE plan
  */
 export const getSubscribeTerraplanUrl = () => {
   return `/api/billing/terra/subscribe`;
@@ -9357,7 +9357,7 @@ export type SubscribeTerraplanMutationBody = BodyType<SubscribeTerraplanBody>;
 export type SubscribeTerraplanMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Subscribe to a Terra plan
+ * @summary Subscribe to a DOMAINE plan
  */
 export const useSubscribeTerraplan = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -9380,7 +9380,7 @@ export const useSubscribeTerraplan = <
 };
 
 /**
- * @summary Record metered API usage for Terra
+ * @summary Record metered API usage for DOMAINE
  */
 export const getRecordTerraMeteredUsageUrl = () => {
   return `/api/billing/terra/metered-usage`;
@@ -9445,7 +9445,7 @@ export type RecordTerraMeteredUsageMutationError =
   ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Record metered API usage for Terra
+ * @summary Record metered API usage for DOMAINE
  */
 export const useRecordTerraMeteredUsage = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -9468,7 +9468,7 @@ export const useRecordTerraMeteredUsage = <
 };
 
 /**
- * @summary Submit an Aegis enterprise quote request
+ * @summary Submit an PARAGON enterprise quote request
  */
 export const getRequestAegisEnterpriseQuoteUrl = () => {
   return `/api/billing/aegis/enterprise-quote`;
@@ -9533,7 +9533,7 @@ export type RequestAegisEnterpriseQuoteMutationError =
   ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Submit an Aegis enterprise quote request
+ * @summary Submit an PARAGON enterprise quote request
  */
 export const useRequestAegisEnterpriseQuote = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -9888,7 +9888,7 @@ export function useGetBillingRevenueAnalytics<
 }
 
 /**
- * @summary Create an Aegis invoice (admin)
+ * @summary Create an PARAGON invoice (admin)
  */
 export const getCreateAegisInvoiceUrl = () => {
   return `/api/billing/aegis/invoice`;
@@ -9951,7 +9951,7 @@ export type CreateAegisInvoiceMutationBody = BodyType<CreateAegisInvoiceBody>;
 export type CreateAegisInvoiceMutationError = ErrorType<ForbiddenResponse>;
 
 /**
- * @summary Create an Aegis invoice (admin)
+ * @summary Create an PARAGON invoice (admin)
  */
 export const useCreateAegisInvoice = <
   TError = ErrorType<ForbiddenResponse>,
@@ -11061,7 +11061,7 @@ export function useGetTerraCommercialComps<
 }
 
 /**
- * @summary Get Terra enterprise feature flags
+ * @summary Get DOMAINE enterprise feature flags
  */
 export const getGetTerraEnterpriseFlagsUrl = () => {
   return `/api/terra/enterprise/flags`;
@@ -11116,7 +11116,7 @@ export type GetTerraEnterpriseFlagsQueryResult = NonNullable<
 export type GetTerraEnterpriseFlagsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Get Terra enterprise feature flags
+ * @summary Get DOMAINE enterprise feature flags
  */
 
 export function useGetTerraEnterpriseFlags<
@@ -22977,7 +22977,7 @@ export const useExportAuditLog = <
 };
 
 /**
- * @summary Export Aegis security incidents
+ * @summary Export PARAGON security incidents
  */
 export const getExportAegisIncidentsUrl = () => {
   return `/api/exports/aegis-incidents`;
@@ -23040,7 +23040,7 @@ export type ExportAegisIncidentsMutationBody = BodyType<ExportRequest>;
 export type ExportAegisIncidentsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Export Aegis security incidents
+ * @summary Export PARAGON security incidents
  */
 export const useExportAegisIncidents = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -23063,7 +23063,7 @@ export const useExportAegisIncidents = <
 };
 
 /**
- * @summary Export Vessels maritime data
+ * @summary Export SEXTANT maritime data
  */
 export const getExportVesselsDataUrl = () => {
   return `/api/exports/vessels`;
@@ -23126,7 +23126,7 @@ export type ExportVesselsDataMutationBody = BodyType<ExportRequest>;
 export type ExportVesselsDataMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Export Vessels maritime data
+ * @summary Export SEXTANT maritime data
  */
 export const useExportVesselsData = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -23149,7 +23149,7 @@ export const useExportVesselsData = <
 };
 
 /**
- * @summary Export Terra real estate deals
+ * @summary Export DOMAINE real estate deals
  */
 export const getExportTerraDealsUrl = () => {
   return `/api/exports/terra-deals`;
@@ -23212,7 +23212,7 @@ export type ExportTerraDealsMutationBody = BodyType<ExportRequest>;
 export type ExportTerraDealsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Export Terra real estate deals
+ * @summary Export DOMAINE real estate deals
  */
 export const useExportTerraDeals = <
   TError = ErrorType<UnauthorizedResponse>,
@@ -23235,7 +23235,7 @@ export const useExportTerraDeals = <
 };
 
 /**
- * @summary Export Lyte e-commerce signals
+ * @summary Export KORA e-commerce signals
  */
 export const getExportLyteSignalsUrl = () => {
   return `/api/exports/lyte-signals`;
@@ -23298,7 +23298,7 @@ export type ExportLyteSignalsMutationBody = BodyType<ExportRequest>;
 export type ExportLyteSignalsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
- * @summary Export Lyte e-commerce signals
+ * @summary Export KORA e-commerce signals
  */
 export const useExportLyteSignals = <
   TError = ErrorType<UnauthorizedResponse>,

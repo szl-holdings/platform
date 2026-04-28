@@ -42,7 +42,7 @@ const FALLBACK_CONTENT: FounderContent = {
     name: "Stephen Lutar",
     role: "Founder & CEO, SZL Holdings",
     bio:
-      "Founder building Lyte, Counsel, and Vessels at SZL Holdings. Governed decision infrastructure, AI systems, and secure operations. Based in New York, NY.",
+      "Founder building KORA, Counsel, and SEXTANT at SZL Holdings. Governed decision infrastructure, AI systems, and secure operations. Based in New York, NY.",
   },
   philosophy: [
     { icon: Code2, color: "#4a90b8", title: "Builder-operator", body: "Stephen builds the product, runs the operations, and works directly with design partners. There is no separation between vision and execution at this stage." },

@@ -24,10 +24,10 @@ interface ReplayReport {
 }
 
 const VERTICAL_META: Record<string, { tenant: string; domain: string }> = {
-  'lyte-revenue': { tenant: 'Lyte', domain: 'Revenue' },
-  'vessels-maritime': { tenant: 'Vessels', domain: 'Maritime' },
-  'terra-real-estate': { tenant: 'Terra', domain: 'Real Estate' },
-  'aegis-defense': { tenant: 'Aegis', domain: 'Defense' },
+  'lyte-revenue': { tenant: 'KORA', domain: 'Revenue' },
+  'vessels-maritime': { tenant: 'SEXTANT', domain: 'Maritime' },
+  'terra-real-estate': { tenant: 'DOMAINE', domain: 'Real Estate' },
+  'aegis-defense': { tenant: 'PARAGON', domain: 'Defense' },
   'prism-counsel': { tenant: 'Counsel', domain: 'Legal' },
   'carlota-jo': { tenant: 'Carlota Jo', domain: 'Advisory' },
   'alloy-core': { tenant: 'A11oy', domain: 'Platform' },

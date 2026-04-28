@@ -195,7 +195,7 @@ export function GraphQLSection() {
       <LanguageTabs
         tabs={[
           {
-            label: 'Vessels',
+            label: 'SEXTANT',
             language: 'graphql',
             code: GQL_QUERY_VESSELS,
             filename: 'vessels-query.graphql',

@@ -46,7 +46,7 @@ const RECEIPTS: Receipt[] = [
     severity: 'critical',
     rank: 1,
     finalScore: 96,
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     summary:
       'Ranked #1: owner clear, action unambiguous, SLA breach in 4h with $2.1M exposure. 3 correlated signals and historical delay pattern confirmed.',
@@ -55,7 +55,7 @@ const RECEIPTS: Receipt[] = [
     evidenceStrength: 88,
     evidence: [
       {
-        source: 'Vessels Fleet Signal',
+        source: 'SEXTANT Fleet Signal',
         type: 'signal',
         weight: 0.35,
         detail: '3 vessels outside SLA — surcharge pending 22h',

@@ -194,7 +194,7 @@ const ACTIVITY_LOG_ENTRIES = [
       routedTo: 'ops@szlholdings.com',
       signal: 'sig-005',
       priority: 'high',
-      context: 'Vessels fleet exception',
+      context: 'SEXTANT fleet exception',
     },
     actorId: 4,
     actorEmail: 'alloy@system.internal',

@@ -20,7 +20,7 @@ function block(
 }
 
 export const DOCUMENT_TEMPLATES: TemplateDefinition[] = [
-  // ─── Terra ────────────────────────────────────────────────────────────────
+  // ─── DOMAINE ────────────────────────────────────────────────────────────────
   {
     slug: 'terra-deal-memo',
     title: 'Deal Memo',
@@ -196,7 +196,7 @@ export const DOCUMENT_TEMPLATES: TemplateDefinition[] = [
     },
   },
 
-  // ─── Aegis ────────────────────────────────────────────────────────────────
+  // ─── PARAGON ────────────────────────────────────────────────────────────────
   {
     slug: 'aegis-incident-report',
     title: 'Incident Report',
@@ -518,7 +518,7 @@ export const DOCUMENT_TEMPLATES: TemplateDefinition[] = [
     },
   },
 
-  // ─── Vessels ──────────────────────────────────────────────────────────────
+  // ─── SEXTANT ──────────────────────────────────────────────────────────────
   {
     slug: 'vessels-voyage-report',
     title: 'Voyage Report',

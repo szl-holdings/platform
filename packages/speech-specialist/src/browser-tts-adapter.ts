@@ -4,7 +4,7 @@
  * A concrete TTSAdapter backed by the browser's Web Speech API
  * (speechSynthesis). Works out-of-the-box in all modern browsers without
  * requiring any external API key. Intended as the default live adapter for
- * web artifacts (Lyte, Command Portal). Replace with NIM/ElevenLabs/Azure
+ * web artifacts (KORA, Command Portal). Replace with NIM/ElevenLabs/Azure
  * for production voice quality.
  *
  * This adapter produces no Uint8Array audio data — instead it synthesizes

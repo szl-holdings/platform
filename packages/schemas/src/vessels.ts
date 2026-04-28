@@ -1,5 +1,5 @@
 /**
- * Vessels maritime intelligence domain schemas.
+ * SEXTANT maritime intelligence domain schemas.
  */
 import { z } from 'zod';
 

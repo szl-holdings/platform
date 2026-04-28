@@ -95,7 +95,7 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
     { href: '/conduit/', label: 'Conduit — Reverse ETL', icon: Workflow, external: true },
     { href: '/counsel/', label: 'Counsel — Legal', icon: Scale, external: true },
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
-    { href: '/lyte-command-center/', label: 'Lyte Command Center', icon: Zap, external: true },
+    { href: '/lyte-command-center/', label: 'KORA Command Center', icon: Zap, external: true },
     { href: '/stephen-site/', label: 'Stephen Site', icon: Globe, external: true },
   ],
 };
@@ -115,8 +115,8 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: '/strategy/atlas-runtime', label: 'Cross-Domain Twin View', icon: Layers },
       { href: '/strategy/digital-twins', label: 'Digital Twin Registry', icon: Cpu },
       { href: '/strategy/worldline-registry', label: 'Worldline Registry', icon: GitBranch },
-      { href: '/vessels/atlas-runtime', label: 'Vessels ATLAS Runtime', icon: Satellite, external: true },
-      { href: '/terra/atlas-runtime', label: 'Terra ATLAS Runtime', icon: Map, external: true },
+      { href: '/vessels/atlas-runtime', label: 'SEXTANT ATLAS Runtime', icon: Satellite, external: true },
+      { href: '/terra/atlas-runtime', label: 'DOMAINE ATLAS Runtime', icon: Map, external: true },
     ],
   },
   {
@@ -799,9 +799,9 @@ function UnifiedLayoutInner({
           </div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {[
-              { label: "Aegis", href: '/aegis/' },
-              { label: 'Terra', href: '/terra/' },
-              { label: 'Vessels', href: '/vessels/' },
+              { label: "PARAGON", href: '/aegis/' },
+              { label: 'DOMAINE', href: '/terra/' },
+              { label: 'SEXTANT', href: '/vessels/' },
               { label: 'Counsel', href: '/counsel/' },
             ].map((p) => (
               <a

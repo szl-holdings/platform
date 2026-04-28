@@ -112,7 +112,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: -68,
     changeLabel: 'vs 30d ago',
     lane: 'company',
-    description: 'Average time for human-in-the-loop approval tasks in Lyte',
+    description: 'Average time for human-in-the-loop approval tasks in KORA',
   },
   {
     id: 'exception-rate',
@@ -244,7 +244,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: +34.5,
     changeLabel: 'vs 30d ago',
     lane: 'security',
-    description: 'Composite security posture index across Aegis & Aegis Operations',
+    description: 'Composite security posture index across PARAGON & PARAGON Operations',
   },
   {
     id: 'threat-d2c',

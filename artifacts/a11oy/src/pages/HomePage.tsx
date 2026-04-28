@@ -77,10 +77,10 @@ const PRIMITIVES = [
 ];
 
 const VERTICALS = [
-  { name: 'Vessels', desc: 'Maritime fleet intelligence — positions, voyage economics, compliance, exceptions.', domain: 'Maritime', icon: '\u2693' },
+  { name: 'SEXTANT', desc: 'Maritime fleet intelligence — positions, voyage economics, compliance, exceptions.', domain: 'Maritime', icon: '\u2693' },
   { name: 'Counsel', desc: 'Legal matter lifecycle — filings, obligations, risk scoring, document intelligence.', domain: 'Legal', icon: '\u2696' },
-  { name: 'Terra', desc: 'Real estate portfolio intelligence — valuations, climate risk, deal pipeline, analytics.', domain: 'Real Estate', icon: '\u{1F3D7}' },
-  { name: 'Aegis', desc: 'Security and defense — threat detection, incident response, compliance posture, resilience.', domain: 'Security', icon: '\u{1F6E1}' },
+  { name: 'DOMAINE', desc: 'Real estate portfolio intelligence — valuations, climate risk, deal pipeline, analytics.', domain: 'Real Estate', icon: '\u{1F3D7}' },
+  { name: 'PARAGON', desc: 'Security and defense — threat detection, incident response, compliance posture, resilience.', domain: 'Security', icon: '\u{1F6E1}' },
 ];
 
 const MODEL_PROVIDERS = [

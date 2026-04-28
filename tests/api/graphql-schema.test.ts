@@ -308,9 +308,9 @@ describe('GraphQL Schema — introspection and type validity', () => {
   });
 });
 
-// ── Test Suite: Vessels frontend queries ───────────────────────────────────────
+// ── Test Suite: SEXTANT frontend queries ───────────────────────────────────────
 
-describe('GraphQL Schema — Vessels domain (frontend query documents)', () => {
+describe('GraphQL Schema — SEXTANT domain (frontend query documents)', () => {
   it('GET_VESSELS query executes and returns vessels array', async () => {
     const result = await runQuery(
       `
@@ -492,9 +492,9 @@ describe('GraphQL Schema — Holdings domain (frontend query documents)', () => 
   });
 });
 
-// ── Test Suite: Lyte frontend queries ─────────────────────────────────────────
+// ── Test Suite: KORA frontend queries ─────────────────────────────────────────
 
-describe('GraphQL Schema — Lyte domain (frontend query documents)', () => {
+describe('GraphQL Schema — KORA domain (frontend query documents)', () => {
   it('GET_LYTE_INCIDENTS query executes and returns incidents array', async () => {
     const result = await runQuery(
       `

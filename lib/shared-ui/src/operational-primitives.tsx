@@ -2,7 +2,7 @@
  * Shared Operational Primitives
  *
  * Standardized types, components, and utilities for operational entities
- * across Continuum, Lyte, Terra, Aegis, and Vessels.
+ * across Continuum, KORA, DOMAINE, PARAGON, and SEXTANT.
  *
  * These primitives are the canonical pattern for all lanes.
  * Every operational surface inherits from this module.

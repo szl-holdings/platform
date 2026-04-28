@@ -236,7 +236,7 @@ export default function ConstructionMonitorScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>Terra · CONSTRUCTION</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · CONSTRUCTION</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Project Monitor</Text>
         </View>
         {displayProjects.reduce((acc, p) => acc + p.flags.length, 0) > 0 && (

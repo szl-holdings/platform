@@ -101,7 +101,7 @@ function mergeRuns(...lists: SavedRiskRun[][]): SavedRiskRun[] {
 //
 // The API endpoint lives at /api/risk-evidence (see
 // artifacts/api-server/src/routes/risk-evidence.ts) and is public/unauth like
-// the rest of the Terra/Vessels demo surfaces. localStorage stays in place as
+// the rest of the DOMAINE/Vessels demo surfaces. localStorage stays in place as
 // an offline cache so the page still renders cited runs when the API is
 // briefly unreachable, but the API is the source of truth across browsers
 // and devices.
@@ -805,8 +805,8 @@ export function ScenarioCitedRiskRuns({
         <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {emptyHint ??
             (scenarioId
-              ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the Terra or Vessels Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
-              : 'No simulation runs cited yet across Terra or Vessels.')}
+              ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the DOMAINE or SEXTANT Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
+              : 'No simulation runs cited yet across DOMAINE or SEXTANT.')}
         </p>
       ) : (
         <ul className="space-y-2">

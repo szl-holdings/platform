@@ -206,7 +206,7 @@ export function listAgents(): Agent[] {
 
 export const vesselAgent = new Agent({
   agentId: 'vessels',
-  name: 'Vessels Maritime Intelligence',
+  name: 'SEXTANT Maritime Intelligence',
   description: 'Maritime fleet tracking, AIS signal analysis, sanctions risk, and route economics.',
   instructions:
     'You are a maritime intelligence analyst. Analyze vessel data, AIS signals, sanctions risk, and route economics. Be precise and cite specific data points.',
@@ -253,7 +253,7 @@ export const sentraAgent = new Agent({
 
 export const terraAgent = new Agent({
   agentId: 'terra',
-  name: 'Terra Real Estate Intelligence',
+  name: 'DOMAINE Real Estate Intelligence',
   description: 'Real estate market analysis, property scoring, distress detection, investment recommendations.',
   instructions:
     'You are a real estate market intelligence analyst. Evaluate property data, market trends, distress signals, and investment opportunities.',
@@ -292,7 +292,7 @@ export const counselAgent = new Agent({
 
 export const lyteAgent = new Agent({
   agentId: 'lyte',
-  name: 'Lyte Decision Intelligence',
+  name: 'KORA Decision Intelligence',
   description: 'System health, SLO compliance, observability, incident diagnosis.',
   instructions:
     'You are an SRE and observability expert. Analyze system health, service reliability, SLO compliance, and incident patterns.',
@@ -323,11 +323,11 @@ export const alloyAgent = new Agent({
     { toolId: 'continuum.artifactReview', description: 'Review artifact quality' },
   ],
   handoffs: [
-    { targetAgentId: 'vessels', description: 'Delegate maritime queries to Vessels', historyMode: 'full' },
+    { targetAgentId: 'vessels', description: 'Delegate maritime queries to SEXTANT', historyMode: 'full' },
     { targetAgentId: 'sentra', description: 'Delegate cyber queries to Sentra', historyMode: 'full' },
-    { targetAgentId: 'terra', description: 'Delegate real estate queries to Terra', historyMode: 'full' },
+    { targetAgentId: 'terra', description: 'Delegate real estate queries to DOMAINE', historyMode: 'full' },
     { targetAgentId: 'counsel', description: 'Delegate legal queries to Counsel', historyMode: 'full' },
-    { targetAgentId: 'lyte', description: 'Delegate observability queries to Lyte', historyMode: 'full' },
+    { targetAgentId: 'lyte', description: 'Delegate observability queries to KORA', historyMode: 'full' },
   ],
   guardrails: [],
 });

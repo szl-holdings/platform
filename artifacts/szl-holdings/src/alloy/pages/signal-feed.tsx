@@ -32,7 +32,7 @@ const FALLBACK_SIGNALS: Signal[] = [
     sourceType: 'connector',
     severity: 'critical',
     title: 'Pre-foreclosure filing: 234 W 145th St, Manhattan — auction in 11 days',
-    body: 'Signal from Terra connector. Immediate action required — distress opportunity window closing.',
+    body: 'Signal from DOMAINE connector. Immediate action required — distress opportunity window closing.',
     status: 'new',
     normalizedScore: '92.3',
     metadata: { correlationId: 'corr-t001', region: 'us-east-1' },
@@ -254,10 +254,10 @@ const SEVERITY_CONFIG: Record<
 };
 
 const SOURCE_CONFIG: Record<string, { color: string; label: string }> = {
-  terra: { color: '#10b981', label: 'Terra' },
-  aegis: { color: '#ef4444', label: 'Aegis' },
-  vessels: { color: '#4d8fcc', label: 'Vessels' },
-  lyte: { color: '#8b5cf6', label: 'Lyte' },
+  terra: { color: '#10b981', label: 'DOMAINE' },
+  aegis: { color: '#ef4444', label: 'PARAGON' },
+  vessels: { color: '#4d8fcc', label: 'SEXTANT' },
+  lyte: { color: '#8b5cf6', label: 'KORA' },
   alloy: { color: '#4B8BDB', label: 'Counsel' },
 };
 
@@ -425,7 +425,7 @@ export default function SignalFeed() {
               <h1 className="text-base font-bold text-white">Signal & Event Feed</h1>
             </div>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Live feed of cross-platform intelligence signals — Terra, Aegis, Vessels, Lyte, Alloy.
+              Live feed of cross-platform intelligence signals — DOMAINE, PARAGON, SEXTANT, KORA, Alloy.
             </p>
           </div>
           <div className="flex items-center gap-2">

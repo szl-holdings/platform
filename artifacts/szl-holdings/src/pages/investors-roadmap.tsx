@@ -58,14 +58,14 @@ const FALLBACK_CONTENT: RoadmapContent = {
       "Pre-commercial priorities only — the work required to take the platform from Functional Alpha to first commercial deployment and initial design partner engagement. Every item is scoped, estimated, and dependency-mapped.",
   },
   statusBaseline: [
-    { platform: "Lyte (Command)", status: "Functional Alpha", note: "Full PRAXIS framework, signal-to-action loop" },
+    { platform: "KORA (Command)", status: "Functional Alpha", note: "Full PRAXIS framework, signal-to-action loop" },
     { platform: "Counsel", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
     { platform: "APEX (Mobile)", status: "Alpha Prep", note: "All workspaces functional, pre-release hardening" },
-    { platform: "Aegis", status: "Functional Alpha", note: "SOC command, 8 security modules" },
-    { platform: "Vessels", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
-    { platform: "Terra", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
+    { platform: "PARAGON", status: "Functional Alpha", note: "SOC command, 8 security modules" },
+    { platform: "SEXTANT", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
+    { platform: "DOMAINE", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
     { platform: "Carlota Jo", status: "Live", note: "Client portal, advisory ops — paying-client capable" },
-    { platform: "Counsel", status: "Integrated", note: "Legal modules integrated into Aegis" },
+    { platform: "Counsel", status: "Integrated", note: "Legal modules integrated into PARAGON" },
     { platform: "IMPERIUM", status: "In Development", note: "Cloud sovereignty — not yet functional" },
     { platform: "Command Portal", status: "Functional Alpha", note: "8-domain SSE dashboard, executive briefing" },
   ],
@@ -82,7 +82,7 @@ const FALLBACK_CONTENT: RoadmapContent = {
     {
       priority: "P2", label: "Design Partner Readiness", color: "#d4a054", icon: Users,
       items: [
-        { done: false, label: "Demo environment stability", note: "Consistent, non-overlapping seed data across Lyte, Aegis, Vessels, Terra" },
+        { done: false, label: "Demo environment stability", note: "Consistent, non-overlapping seed data across KORA, PARAGON, SEXTANT, DOMAINE" },
         { done: false, label: "CODEOWNERS file (KG013)", note: "Code ownership for all major packages — required for enterprise security reviews. Est. 1 day." },
         { done: false, label: "Environment matrix documentation (KG018)", note: "Document all 80+ environment variables with schema, defaults, status. Est. 2–3 days." },
       ],
@@ -113,7 +113,7 @@ const FALLBACK_CONTENT: RoadmapContent = {
       { label: "Performance baseline (KG024)", note: "Reduce vendor bundle sizes to < 800 KB. Add Lighthouse CI regression guard. Target Core Web Vitals." },
     ]},
     { milestone: "M2", label: "Design Partner Onboarding", timeframe: "45–75 days", color: "#8b7ac8", icon: Users, items: [
-      { label: "First 3–6 design partners — one per domain", note: "Maritime (Vessels), security (Aegis), real estate (Terra)" },
+      { label: "First 3–6 design partners — one per domain", note: "Maritime (SEXTANT), security (PARAGON), real estate (DOMAINE)" },
       { label: "Partner provisioning workflow", note: "Azure AD tenant setup, SCIM provisioning, role assignment, support rotation" },
       { label: "Domain-specific onboarding content", note: "Demo scripts, operator quick-start guides, trust center briefing deck per domain" },
       { label: "Partner success instrumentation", note: "Log first signal reviewed, first simulation, first approval, first workflow completed" },
@@ -130,7 +130,7 @@ const FALLBACK_CONTENT: RoadmapContent = {
     ]},
     { milestone: "M5", label: "IMPERIUM MVP", timeframe: "90 days", color: "#c8953c", icon: Zap, items: [
       { label: "Core cloud inventory and policy modules", note: "Multi-cloud estate visibility (AWS, Azure, GCP). Policy enforcement dashboard. Cost anomaly detection." },
-      { label: "Integration with Command Portal", note: "IMPERIUM signals in 8-domain SSE dashboard. Cross-domain: cloud posture → security posture (Aegis)." },
+      { label: "Integration with Command Portal", note: "IMPERIUM signals in 8-domain SSE dashboard. Cross-domain: cloud posture → security posture (PARAGON)." },
     ]},
   ],
   successMetrics: [

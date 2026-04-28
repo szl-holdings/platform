@@ -340,7 +340,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
     label: 'Cross-Domain Signal Aggregation',
     type: 'model',
     timestamp: FRESH_3M,
-    excerpt: 'Aegis: 3 critical threats. Vessels: 6 alerts. Correlation: 0.71.',
+    excerpt: 'PARAGON: 3 critical threats. SEXTANT: 6 alerts. Correlation: 0.71.',
   },
   {
     id: 'e5',
@@ -361,7 +361,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
 const VESSELS_EVIDENCE: EvidenceSource[] = [
   {
     id: 'e7',
-    label: 'Vessels Health Score',
+    label: 'SEXTANT Health Score',
     type: 'model',
     timestamp: FRESH_10M,
     excerpt: 'Health declining — 6.8/10 vs 7.4 prior period. 6 active alerts.',
@@ -451,7 +451,7 @@ export default function ProofEnvelopeScreen() {
 
         <ProofCard
           title="Cross-Domain Alert: 3 Critical Signals Correlated"
-          summary="Counsel has identified correlated exposure across Aegis (APT-29 threat), Vessels (counterparty sanctions), and Pulse (rate regime shift). 3 approval items pending — all within SLA."
+          summary="Counsel has identified correlated exposure across PARAGON (APT-29 threat), SEXTANT (counterparty sanctions), and Pulse (rate regime shift). 3 approval items pending — all within SLA."
           confidence={85}
           policyState="requires-approval"
           policyReason="Multi-domain action requires CRO approval"
@@ -469,8 +469,8 @@ export default function ProofEnvelopeScreen() {
         />
 
         <ProofCard
-          title="Vessels Portfolio — Health Declining (6.8/10)"
-          summary="Vessels health score has declined from 7.4 to 6.8. One OFAC SDN match blocked. MV Horizon Star cylinder 4 anomaly: 31% failure probability before next port call."
+          title="SEXTANT Portfolio — Health Declining (6.8/10)"
+          summary="SEXTANT health score has declined from 7.4 to 6.8. One OFAC SDN match blocked. MV Horizon Star cylinder 4 anomaly: 31% failure probability before next port call."
           confidence={81}
           policyState="requires-approval"
           policyReason="Maintenance port call requires ops director approval"

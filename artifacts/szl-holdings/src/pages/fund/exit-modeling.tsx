@@ -43,10 +43,10 @@ type NavRecord = {
 };
 
 const PORTFOLIO = [
-  { id: "lyte", name: "Lyte", color: "#6aaa72", costBasis: 12.4, currentFMV: 42.0, arrGrowth: 18, stage: "Series B", scenarios: { bear: 280, base: 440, bull: 680 }, timing: "18–30 mo", exitType: "Strategic Acquisition" },
-  { id: "aegis", name: "Aegis", color: "#4a90b8", costBasis: 6.2, currentFMV: 18.0, arrGrowth: 14, stage: "Series A", scenarios: { bear: 85, base: 145, bull: 240 }, timing: "24–36 mo", exitType: "Strategic / Growth Round" },
-  { id: "vessels", name: "Vessels", color: "#d4a054", costBasis: 3.8, currentFMV: 11.5, arrGrowth: 11, stage: "Series A", scenarios: { bear: 45, base: 78, bull: 130 }, timing: "30–42 mo", exitType: "Strategic Acquisition" },
-  { id: "terra", name: "Terra", color: "#c8953c", costBasis: 5.1, currentFMV: 14.2, arrGrowth: 13, stage: "Series A", scenarios: { bear: 52, base: 96, bull: 165 }, timing: "24–36 mo", exitType: "IPO / Strategic" },
+  { id: "lyte", name: "KORA", color: "#6aaa72", costBasis: 12.4, currentFMV: 42.0, arrGrowth: 18, stage: "Series B", scenarios: { bear: 280, base: 440, bull: 680 }, timing: "18–30 mo", exitType: "Strategic Acquisition" },
+  { id: "aegis", name: "PARAGON", color: "#4a90b8", costBasis: 6.2, currentFMV: 18.0, arrGrowth: 14, stage: "Series A", scenarios: { bear: 85, base: 145, bull: 240 }, timing: "24–36 mo", exitType: "Strategic / Growth Round" },
+  { id: "vessels", name: "SEXTANT", color: "#d4a054", costBasis: 3.8, currentFMV: 11.5, arrGrowth: 11, stage: "Series A", scenarios: { bear: 45, base: 78, bull: 130 }, timing: "30–42 mo", exitType: "Strategic Acquisition" },
+  { id: "terra", name: "DOMAINE", color: "#c8953c", costBasis: 5.1, currentFMV: 14.2, arrGrowth: 13, stage: "Series A", scenarios: { bear: 52, base: 96, bull: 165 }, timing: "24–36 mo", exitType: "IPO / Strategic" },
   { id: "prism-counsel", name: "Counsel", color: "#8b7ac8", costBasis: 2.4, currentFMV: 8.8, arrGrowth: 19, stage: "Seed+", scenarios: { bear: 28, base: 55, bull: 105 }, timing: "36–48 mo", exitType: "Strategic Acquisition" },
   { id: "carlota-jo", name: "Carlota Jo", color: "#c45a4a", costBasis: 1.8, currentFMV: 3.6, arrGrowth: 8, stage: "Seed", scenarios: { bear: 8, base: 15, bull: 28 }, timing: "48–60 mo", exitType: "Strategic / Write-off risk" },
 ];

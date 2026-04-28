@@ -63,7 +63,7 @@ export const NAV: NavSection[] = [
     subsections: [
       { id: 'samples-auth', label: 'Authentication' },
       { id: 'samples-projects', label: 'Projects' },
-      { id: 'samples-vessels', label: 'Vessels' },
+      { id: 'samples-vessels', label: 'SEXTANT' },
       { id: 'samples-continuum', label: 'Counsel Signals' },
     ],
   },
@@ -234,7 +234,7 @@ export const WEBHOOK_EVENTS = [
   { event: 'vessel.alert.triggered', description: 'A vessel tracking alert condition was met.' },
   {
     event: 'security.incident.created',
-    description: 'A new security incident was opened in Aegis SOC.',
+    description: 'A new security incident was opened in PARAGON SOC.',
   },
   { event: 'billing.invoice.paid', description: 'A billing invoice was successfully settled.' },
   { event: 'user.role.changed', description: "A user's role assignment was modified." },

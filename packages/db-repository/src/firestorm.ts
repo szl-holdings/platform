@@ -1,5 +1,5 @@
 /**
- * Aegis Repository — typed access to security simulation tables.
+ * PARAGON Repository — typed access to security simulation tables.
  */
 import {
   db,

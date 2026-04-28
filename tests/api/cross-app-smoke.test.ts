@@ -5,7 +5,7 @@
  * Uses real DB + drizzle-orm (same as db-integration.test.ts) — no drizzle/DB mocks.
  * External side-effects (email, pubsub, AI engine, geocoding) are mocked.
  *
- * Domains covered: Vessels, Terra, Counsel, Aegis/Aegis, Lyte, Carlota Jo, SZL Holdings
+ * Domains covered: SEXTANT, DOMAINE, Counsel, PARAGON/Aegis, KORA, Carlota Jo, SZL Holdings
  */
 import { describe, it, expect, afterAll, afterEach, vi } from "vitest";
 import request from "supertest";
@@ -164,9 +164,9 @@ afterAll(async () => {
   _pool = null;
 });
 
-// ── Domain: Vessels ──────────────────────────────────────────────────────────
+// ── Domain: SEXTANT ──────────────────────────────────────────────────────────
 
-describe("Domain: Vessels", () => {
+describe("Domain: SEXTANT", () => {
   afterEach(async () => {
     await flushCleanup();
   });
@@ -263,9 +263,9 @@ describe("Domain: Vessels", () => {
 
 });
 
-// ── Domain: Terra (Real Estate) ──────────────────────────────────────────────
+// ── Domain: DOMAINE (Real Estate) ──────────────────────────────────────────────
 
-describe("Domain: Terra", () => {
+describe("Domain: DOMAINE", () => {
   it("GET /terra/market-intelligence returns 200 with status", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/terra")).default;
@@ -292,7 +292,7 @@ describe("Domain: Terra", () => {
     expect(res.status).toBe(200);
   });
 
-  it("Terra responses include fetchedAt timestamp field", async () => {
+  it("DOMAINE responses include fetchedAt timestamp field", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/terra")).default;
     app.use(router);
@@ -305,9 +305,9 @@ describe("Domain: Terra", () => {
 
 // ── Domain: Counsel routes were removed in Task #2696 ──────────────────
 
-// ── Domain: Aegis / Aegis ─────────────────────────────────────────────────
+// ── Domain: PARAGON / PARAGON ─────────────────────────────────────────────────
 
-describe("Domain: Aegis / Aegis", () => {
+describe("Domain: PARAGON / PARAGON", () => {
   afterEach(async () => {
     await flushCleanup();
   });
@@ -387,9 +387,9 @@ describe("Domain: Aegis / Aegis", () => {
   });
 });
 
-// ── Domain: Lyte ─────────────────────────────────────────────────────────────
+// ── Domain: KORA ─────────────────────────────────────────────────────────────
 
-describe("Domain: Lyte", () => {
+describe("Domain: KORA", () => {
   it("GET /lyte/workspaces returns 200 with pagination envelope", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/lyte")).default;
@@ -602,7 +602,7 @@ describe("Domain: SZL Holdings", () => {
 // ── Cross-Domain: Response shape contracts ───────────────────────────────────
 
 describe("Cross-Domain: Response shape contracts", () => {
-  it("Lyte domain uses paginated envelope {data, meta} while Vessels uses plain arrays", async () => {
+  it("KORA domain uses paginated envelope {data, meta} while SEXTANT uses plain arrays", async () => {
     const lyteApp = buildAuthApp();
     const lyteRouter = (await import("../../artifacts/api-server/src/routes/lyte")).default;
     lyteApp.use(lyteRouter);
@@ -635,7 +635,7 @@ describe("Cross-Domain: Response shape contracts", () => {
     expect(holdingsRes.body.status).toBe("ok");
   });
 
-  it("Terra endpoints always include fetchedAt ISO timestamp for cache busting", async () => {
+  it("DOMAINE endpoints always include fetchedAt ISO timestamp for cache busting", async () => {
     const app = buildAuthApp();
     const terraRouter = (await import("../../artifacts/api-server/src/routes/terra")).default;
     app.use(terraRouter);

@@ -84,7 +84,7 @@ const DRIFT_SCENARIOS = [
     loop: [
       {
         step: 'Signal',
-        text: 'Aegis control-drift monitor detects MFA enforcement rate drop from 98.1% to 84.3% over 14 days — 23 accounts with active bypass exceptions.',
+        text: 'PARAGON control-drift monitor detects MFA enforcement rate drop from 98.1% to 84.3% over 14 days — 23 accounts with active bypass exceptions.',
       },
       {
         step: 'Context',
@@ -114,7 +114,7 @@ const DRIFT_SCENARIOS = [
     loop: [
       {
         step: 'Signal',
-        text: 'Aegis coverage map detects 3 production subnets (172.16.24.0/24, 172.16.25.0/24, 172.16.30.0/24) not reporting to SIEM — 11-day gap confirmed.',
+        text: 'PARAGON coverage map detects 3 production subnets (172.16.24.0/24, 172.16.25.0/24, 172.16.30.0/24) not reporting to SIEM — 11-day gap confirmed.',
       },
       {
         step: 'Context',
@@ -260,7 +260,7 @@ const RESULTS = [
     label: 'Governance Gaps',
     severity: 'moderate' as const,
     desc: 'You have security tooling but significant governance gaps remain — control drift is detected reactively, incident trails are incomplete, and resilience posture requires manual compilation. A governed resilience infrastructure would close these gaps.',
-    cta: 'See a Aegis Demo',
+    cta: 'See a PARAGON Demo',
   },
   {
     min: 10,
@@ -268,7 +268,7 @@ const RESULTS = [
     label: 'Security-Mature',
     severity: 'ready' as const,
     desc: 'Your security operations have good coverage but rely on manual integration for governance, audit trails, and posture reporting. The opportunity is systematic control governance and Proof Chain-backed incident records.',
-    cta: 'Explore Aegis Features',
+    cta: 'Explore PARAGON Features',
   },
   {
     min: 14,
@@ -328,7 +328,7 @@ function ControlDriftDiagnostic() {
             Security control drift detected. Governed response initiated.
           </h2>
           <p className="text-base max-w-2xl mx-auto" style={{ color: TEXT_SEC }}>
-            Aegis monitors your security control baseline continuously — detecting drift before it
+            PARAGON monitors your security control baseline continuously — detecting drift before it
             becomes an incident, and routing remediation through a governed approval workflow.
           </p>
         </div>
@@ -740,7 +740,7 @@ export default function ResilienceScorecardPage() {
       >
         <Link href="/dashboard">
           <span className="text-sm font-bold" style={{ color: TEXT }}>
-            Aegis
+            PARAGON
           </span>
         </Link>
         <div className="flex items-center gap-4">
@@ -771,7 +771,7 @@ export default function ResilienceScorecardPage() {
               className="w-1.5 h-1.5 rounded-full animate-pulse"
               style={{ background: ACCENT }}
             />
-            Cyber Resilience · Aegis
+            Cyber Resilience · PARAGON
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -789,7 +789,7 @@ export default function ResilienceScorecardPage() {
             className="text-lg mb-8"
             style={{ color: TEXT_SEC }}
           >
-            Aegis monitors your security control baseline, detects drift before it becomes an
+            PARAGON monitors your security control baseline, detects drift before it becomes an
             incident, and routes every remediation through a governed approval workflow with an
             immutable Proof Chain.
           </motion.p>
@@ -826,10 +826,10 @@ export default function ResilienceScorecardPage() {
 
       <footer className="py-12 px-4 text-center border-t" style={{ borderColor: BORDER }}>
         <p className="text-sm" style={{ color: TEXT_SEC }}>
-          Aegis — Cyber Resilience Command · Aegis Platform
+          PARAGON — Cyber Resilience Command · PARAGON Platform
         </p>
         <p className="text-xs mt-2" style={{ color: TEXT_SEC }}>
-          © 2026 Aegis. All rights reserved.
+          © 2026 PARAGON. All rights reserved.
         </p>
       </footer>
     </div>

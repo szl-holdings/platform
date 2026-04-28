@@ -82,7 +82,7 @@ const AGENTS: AgentIdentity[] = [
     vertical: 'lyte-revenue', riskClassification: 'Medium', lastActivity: '2026-04-25T09:25:00Z',
   },
   {
-    id: 'aid-terra', name: 'Terra Analyst', spiffeUri: 'spiffe://a11oy.szl/agents/terra-analyst', certFingerprint: 'SHA256:d4:e5:f6:a7:b8:c9:d1:e2:f3:a4:b5:c6:d7:e8:f9:a1', certIssued: '2026-04-01T00:00:00Z', certExpires: '2027-04-01T00:00:00Z', trustScore: 880, trustTier: 'trusted', behaviorBaseline: 85.0, currentBehavior: 88.4, driftPct: 2.8, driftStatus: 'watch',
+    id: 'aid-terra', name: 'DOMAINE Analyst', spiffeUri: 'spiffe://a11oy.szl/agents/terra-analyst', certFingerprint: 'SHA256:d4:e5:f6:a7:b8:c9:d1:e2:f3:a4:b5:c6:d7:e8:f9:a1', certIssued: '2026-04-01T00:00:00Z', certExpires: '2027-04-01T00:00:00Z', trustScore: 880, trustTier: 'trusted', behaviorBaseline: 85.0, currentBehavior: 88.4, driftPct: 2.8, driftStatus: 'watch',
     capabilities: ['cap-rate-tracking', 'portfolio-analysis', 'valuation-modeling', 'comp-analysis'],
     permissions: [
       { action: 'read:property-data', scope: 'portfolio-only', granted: true },

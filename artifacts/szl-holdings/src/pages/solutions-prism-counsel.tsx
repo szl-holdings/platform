@@ -188,11 +188,11 @@ export default function SolutionsPrismCounselPage() {
         </section>
   
         <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-xl font-semibold text-slate-100 mb-2">How Lyte + Counsel Power It</h2>
-          <p className="text-sm text-slate-500 mb-8">Counsel is built on the Lyte + Counsel platform spine — not bolted on as a side project</p>
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">How KORA + Counsel Power It</h2>
+          <p className="text-sm text-slate-500 mb-8">Counsel is built on the KORA + Counsel platform spine — not bolted on as a side project</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
-              <h3 className="text-sm font-semibold text-slate-200 mb-2">Lyte — Command Surface</h3>
+              <h3 className="text-sm font-semibold text-slate-200 mb-2">KORA — Command Surface</h3>
               <ul className="space-y-1.5 text-[11px] text-slate-400">
                 <li>PRAXIS scoring framework applied to legal matter health</li>
                 <li>Dashboard, watchlist, and forecast surfaces</li>
@@ -314,7 +314,7 @@ export default function SolutionsPrismCounselPage() {
           <span className="px-3 py-1 rounded text-[10px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">
             FUNCTIONAL ALPHA
           </span>
-          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the Lyte + Counsel platform spine</p>
+          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the KORA + Counsel platform spine</p>
           <p className="text-[10px] text-slate-600">SZL Holdings · Counsel · {new Date().getFullYear()}</p>
         </section>
       </div>

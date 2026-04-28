@@ -1,7 +1,7 @@
 /**
  * @workspace/simulation
  *
- * Lyte Simulation Engine — projects downstream outcomes of a governed
+ * KORA Simulation Engine — projects downstream outcomes of a governed
  * recommendation before action is taken. Powers the Decision Center
  * "Simulate" panel for risk-free preview of intervention effects.
  *

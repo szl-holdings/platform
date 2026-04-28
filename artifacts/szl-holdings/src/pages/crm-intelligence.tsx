@@ -532,7 +532,7 @@ export default function CrmIntelligencePage() {
                   },
                   {
                     dir: '→',
-                    from: 'Terra CRM Leads',
+                    from: 'DOMAINE CRM Leads',
                     to: 'Salesforce',
                     detail: 'Auto-push on lead creation',
                   },

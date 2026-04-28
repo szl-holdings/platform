@@ -136,7 +136,7 @@ const METHOD_COLORS: Record<string, string> = {
 export default function ApiPage() {
   const __pageMeta = usePageMeta({
     title: "API — SZL Holdings",
-    description: "Lyte + Counsel API overview: health, auth, signals, workflows, recommendations, audit, reports, and integrations endpoint groups.",
+    description: "KORA + Counsel API overview: health, auth, signals, workflows, recommendations, audit, reports, and integrations endpoint groups.",
     canonical: "https://szlholdings.com/api",
   });
 
@@ -155,10 +155,10 @@ export default function ApiPage() {
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>API Reference</span>
                 </div>
                 <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                  Lyte + Counsel API
+                  KORA + Counsel API
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "54ch", marginBottom: "2rem" }}>
-                  The Lyte + Counsel platform exposes a REST API and a governance API for tenant
+                  The KORA + Counsel platform exposes a REST API and a governance API for tenant
                   configuration, observability access, and audit queries. This page documents the
                   primary REST API surface.
                 </p>

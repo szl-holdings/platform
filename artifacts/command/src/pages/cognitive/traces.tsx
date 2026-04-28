@@ -100,7 +100,7 @@ const PAGE_SIZE = 50;
 const SEEDED_TRACES: TraceRun[] = [
   {
     id: 'trace-aegis-20250416-001',
-    label: 'Aegis — Ransomware Lateral Movement v2',
+    label: 'PARAGON — Ransomware Lateral Movement v2',
     domain: 'aegis',
     taskDescription:
       'Detect and contain ransomware lateral movement across 14 endpoints detected at 08:14 UTC. Classify threat, escalate to SOC-T2, propose containment.',
@@ -179,7 +179,7 @@ const SEEDED_TRACES: TraceRun[] = [
   },
   {
     id: 'trace-vessels-20250416-003',
-    label: 'Vessels — Cyclone Avoidance Reroute',
+    label: 'SEXTANT — Cyclone Avoidance Reroute',
     domain: 'vessels',
     taskDescription:
       'MV Pacific Horizon approaching Typhoon Mawar track. Optimize routing via Cape of Good Hope or Malacca with fuel and schedule P&L tradeoffs.',
@@ -258,7 +258,7 @@ const SEEDED_TRACES: TraceRun[] = [
   },
   {
     id: 'trace-terra-20250415-002',
-    label: 'Terra — Portfolio NAV Stress Test',
+    label: 'DOMAINE — Portfolio NAV Stress Test',
     domain: 'terra',
     taskDescription:
       '200bps interest rate shock scenario — compute cap rate impact, NAV delta, and reallocation recommendations for 12-asset office/industrial portfolio.',

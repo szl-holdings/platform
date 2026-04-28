@@ -198,7 +198,7 @@ const DEALS: Deal[] = [
     convictionScore: 74, founder: "Andrei Petrov (ex-Maersk CTO)", date: "Mar 28, 2026",
     scores: { team: 80, market: 72, product: 78, traction: 74, competitive: 70, financials: 66 },
     status: "active",
-    summary: "Port operations intelligence SaaS. $3.4M ARR, 11 port customers across 4 continents. Strategic overlap with Vessels portfolio.",
+    summary: "Port operations intelligence SaaS. $3.4M ARR, 11 port customers across 4 continents. Strategic overlap with SEXTANT portfolio.",
     strengths: ["Strong domain moat", "Global customer base", "High switching costs"],
     risks: ["Geopolitical exposure", "Concentrated customers", "Integration complexity"],
   },

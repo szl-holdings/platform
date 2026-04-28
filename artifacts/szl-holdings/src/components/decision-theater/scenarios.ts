@@ -81,5 +81,5 @@ export type StageId = (typeof LOOP_STAGES)[number]['id'];
 export const DEMO_SCENARIO = {
   title: 'Cross-Domain Threat: Port Facility Breach + Vessel Route Deviation',
   description:
-    'Aegis detects unauthorized network access at a partner port facility while Vessels flags an AIS anomaly on an approaching tanker. The platform correlates both signals and routes a governed response.',
+    'PARAGON detects unauthorized network access at a partner port facility while SEXTANT flags an AIS anomaly on an approaching tanker. The platform correlates both signals and routes a governed response.',
 } as const;

@@ -68,7 +68,7 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Baseline Established',
     description: 'Ownership Drift calibration completed for Q2',
     severity: 'neutral',
-    actor: 'Lyte',
+    actor: 'KORA',
   },
 ];
 
@@ -84,8 +84,8 @@ const SAMPLE_NODES: GraphNode[] = [
   },
   { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: 'var(--gi-accent-violet)' },
   { id: 'pulse', label: 'Pulse', x: 0.8, y: 0.45, radius: 10, color: 'var(--gi-accent-amber)' },
-  { id: 'lyte', label: 'Lyte', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
-  { id: 'vessels', label: 'Vessels', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
+  { id: 'lyte', label: 'KORA', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
+  { id: 'vessels', label: 'SEXTANT', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
 ];
 
 const SAMPLE_EDGES: GraphEdge[] = [

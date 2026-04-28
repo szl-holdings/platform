@@ -1,5 +1,5 @@
 /**
- * Vessels Write-Path Unit Tests
+ * SEXTANT Write-Path Unit Tests
  *
  * Covers:
  *  1. Alert-rule CRUD schema validation (Zod, no DB)
@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest';
 
 // ─── 1. Alert-rule schema validation (real server schema from @szl-holdings/db) ─
 
-describe('Vessels — Alert Rule schema', () => {
+describe('SEXTANT — Alert Rule schema', () => {
   it('accepts a valid rule with all required fields', () => {
     const result = insertVesselAlertRuleSchema.safeParse({
       name: 'Speed Limit Alert',
@@ -91,7 +91,7 @@ function resolveOrderFill(
   return { fillPrice: limitPrice ?? currentPrice, status: 'open' };
 }
 
-describe('Vessels — Trading order math', () => {
+describe('SEXTANT — Trading order math', () => {
   it('computes notional correctly for market order', () => {
     const notional = computeOrderNotional(10, 1800);
     expect(notional).toBe(18000);
@@ -158,7 +158,7 @@ function computeCostBreakdownPct(voyage: VoyageCosts) {
   return { fuel, port, delay, other };
 }
 
-describe('Vessels — Voyage economics math', () => {
+describe('SEXTANT — Voyage economics math', () => {
   const sampleVoyage: VoyageCosts = {
     estimatedRevenue: 5_000_000,
     operatingCost: 3_500_000,
@@ -237,7 +237,7 @@ function computeDarkVesselSuspicionScore(signal: DarkVesselSignal): number {
   return Math.min(score, 100);
 }
 
-describe('Vessels — Dark vessel suspicion score', () => {
+describe('SEXTANT — Dark vessel suspicion score', () => {
   it('returns low score for normal vessel', () => {
     const score = computeDarkVesselSuspicionScore({
       aisGapMinutes: 10,

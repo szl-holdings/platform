@@ -340,7 +340,7 @@ export default function RemediationPlansPage() {
           <p className="text-xs text-slate-400 leading-relaxed">
             Approved plans are executed autonomously by the agentic operator. Each step that affects
             other business domains publishes a typed signal to the event bus. Downstream products —
-            Counsel (regulatory obligation), Vessels (scheduling disruption), Pulse (exec briefing) —
+            Counsel (regulatory obligation), SEXTANT (scheduling disruption), Pulse (exec briefing) —
             react automatically without manual coordination.
           </p>
         </div>

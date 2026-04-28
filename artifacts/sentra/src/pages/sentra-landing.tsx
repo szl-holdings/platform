@@ -266,8 +266,8 @@ export default function SentraLandingPage() {
               Every module in Sentra is orchestrated by a11oy — the governance-aware AI layer that enforces
               policy boundaries, routes decisions through approval chains, and ensures every autonomous action
               has an auditable provenance trail. a11oy connects Sentra to the broader SZL Holdings ecosystem:
-              Counsel for legal matters, Vessels for maritime intelligence, Lyte for decision support, and
-              Terra for asset exposure.
+              Counsel for legal matters, SEXTANT for maritime intelligence, KORA for decision support, and
+              DOMAINE for asset exposure.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

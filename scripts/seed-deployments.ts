@@ -23,9 +23,9 @@ const APPS: AppSeed[] = [
   { appId: 'szl-holdings', appName: 'SZL Holdings Dashboard', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'szl-holdings-mobile', appName: 'APEX — Mobile Command', versions: ['v1.0.0'] },
   { appId: 'pulse', appName: 'Pulse — AI Executive Briefing', versions: ['v1.0.0', 'v1.1.0'] },
-  { appId: 'aegis', appName: 'Aegis — Defense & Intelligence', versions: ['v1.0.0', 'v1.0.1'] },
-  { appId: 'vessels', appName: 'Vessels Maritime Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
-  { appId: 'terra', appName: 'Terra — Real Estate Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'aegis', appName: 'PARAGON — Defense & Intelligence', versions: ['v1.0.0', 'v1.0.1'] },
+  { appId: 'vessels', appName: 'SEXTANT Maritime Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'terra', appName: 'DOMAINE — Real Estate Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'sentra', appName: 'Sentra — Cyber Resilience', versions: ['v1.0.0'] },
   {
     appId: 'prism-counsel',
@@ -34,7 +34,7 @@ const APPS: AppSeed[] = [
   },
   {
     appId: 'lyte-command-center',
-    appName: 'Lyte — Decision Intelligence',
+    appName: 'KORA — Decision Intelligence',
     versions: ['v1.0.0', 'v1.1.0'],
   },
   { appId: 'carlota-jo', appName: 'Carlota Jo Consulting', versions: ['v1.0.0'] },

@@ -1,5 +1,5 @@
 /**
- * Terra real estate intelligence repository — typed query helpers.
+ * DOMAINE real estate intelligence repository — typed query helpers.
  * Uses @szl-holdings/db as the single relational entry point.
  */
 import { db } from '@szl-holdings/db';

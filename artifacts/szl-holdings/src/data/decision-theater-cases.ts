@@ -1,7 +1,7 @@
 import type { ProofRecord } from '@/components/ProofDrawer';
 
 export type CaseSeverity = 'critical' | 'high' | 'medium' | 'info';
-export type CaseDomain = 'Aegis' | 'Vessels' | 'Terra' | 'Counsel' | 'Carlota Jo';
+export type CaseDomain = 'PARAGON' | 'SEXTANT' | 'DOMAINE' | 'Counsel' | 'Carlota Jo';
 
 export interface ApprovalContext {
   policyId: string;
@@ -69,16 +69,16 @@ export const DECISION_CASES: DecisionCase[] = [
     id: 'DC-2026-0419-001',
     title: 'Port facility breach + tanker route deviation',
     summary:
-      'Aegis flagged unauthorized network access at Rotterdam partner port; Vessels detected an AIS gap on an inbound tanker. Cross-domain correlation triggered a governed isolation recommendation.',
+      'PARAGON flagged unauthorized network access at Rotterdam partner port; SEXTANT detected an AIS gap on an inbound tanker. Cross-domain correlation triggered a governed isolation recommendation.',
     severity: 'critical',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     owner: 'J. van der Berg',
     ownerRole: 'SOC Lead',
     openedAt: '19 Apr 2026 08:14',
     currentStage: 4,
     signal: {
       label: 'Unauthorized auth events on port-edge bastion',
-      sourceSystem: 'Aegis SOC Feed · Prism Bus',
+      sourceSystem: 'PARAGON SOC Feed · Prism Bus',
       receivedAt: '19 Apr 2026 08:14:22',
       raw: {
         signal_id: 'SIG-20260419-001',
@@ -100,8 +100,8 @@ export const DECISION_CASES: DecisionCase[] = [
         'Open evidence envelope linked to correlation CORR-SF1-SF6',
       ],
       sources: [
-        { id: 'SIG-20260419-001', label: 'Aegis threat feed event', type: 'signal' },
-        { id: 'VES-AIS-DRIFT-447', label: 'Vessels AIS anomaly', type: 'signal' },
+        { id: 'SIG-20260419-001', label: 'PARAGON threat feed event', type: 'signal' },
+        { id: 'VES-AIS-DRIFT-447', label: 'SEXTANT AIS anomaly', type: 'signal' },
         { id: 'ASSET-AUTH-SVC', label: 'Asset registry: auth-svc (prod)', type: 'asset' },
         { id: 'POL-AEGIS-ISOLATION', label: 'Covenant: tier-1 isolation policy', type: 'policy' },
       ],
@@ -119,7 +119,7 @@ export const DECISION_CASES: DecisionCase[] = [
       policyId: 'POL-AEGIS-ISOLATION-T1',
       policyName: 'Tier-1 Cross-Domain Isolation',
       covenantText:
-        'Any action that simultaneously affects an Aegis production asset and a Vessels berth-clearance hold requires SOC Lead approval, evidence envelope linkage, and a 2-hour SLA window before automated escalation.',
+        'Any action that simultaneously affects an PARAGON production asset and a SEXTANT berth-clearance hold requires SOC Lead approval, evidence envelope linkage, and a 2-hour SLA window before automated escalation.',
       requiredRoles: ['soc_lead', 'ops_analyst'],
       escalationPath: 'SOC Lead → Head of Security → CTO',
       slaWindow: '2h',
@@ -137,8 +137,8 @@ export const DECISION_CASES: DecisionCase[] = [
     },
     proof: {
       id: 'PCH-DC-2026-0419-001',
-      sourceSystem: 'Aegis SOC Feed',
-      sourceDomain: 'Aegis',
+      sourceSystem: 'PARAGON SOC Feed',
+      sourceDomain: 'PARAGON',
       signalType: 'threat_intelligence',
       confidence: 0.94,
       model: 'gpt-4o-mini',
@@ -147,7 +147,7 @@ export const DECISION_CASES: DecisionCase[] = [
       exportSafety: 'pending_review',
       policyChecks: [
         { label: 'Role: soc_lead — permitted', passed: true },
-        { label: 'Domain: Aegis + Vessels — in scope', passed: true },
+        { label: 'Domain: PARAGON + SEXTANT — in scope', passed: true },
         { label: 'Action: tier-1 isolation — permitted with approval', passed: true },
         { label: 'Human-in-loop gate: SOC Lead approval required', passed: true },
         {
@@ -160,14 +160,14 @@ export const DECISION_CASES: DecisionCase[] = [
       chainLinks: [
         {
           id: 'c1',
-          event: 'Signal ingested from Aegis threat feed',
+          event: 'Signal ingested from PARAGON threat feed',
           actor: 'System / Prism Bus',
           timestamp: '19 Apr 2026 08:14:22',
           hash: 'sha256:a3f7b2c1d…',
         },
         {
           id: 'c2',
-          event: 'Cross-domain correlation with Vessels AIS',
+          event: 'Cross-domain correlation with SEXTANT AIS',
           actor: 'System / Signal Fusion',
           timestamp: '19 Apr 2026 08:14:24',
           hash: 'sha256:9e1d4f2a8…',
@@ -212,16 +212,16 @@ export const DECISION_CASES: DecisionCase[] = [
     id: 'DC-2026-0418-014',
     title: 'Distress property bid window — Cape Town',
     summary:
-      'Terra surfaced a distressed asset with a 36-hour bid window. Capital allocation engine recommends a tier-2 bid below floor, conditional on legal review.',
+      'DOMAINE surfaced a distressed asset with a 36-hour bid window. Capital allocation engine recommends a tier-2 bid below floor, conditional on legal review.',
     severity: 'high',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     owner: 'S. Mokoena',
     ownerRole: 'Capital Lead',
     openedAt: '18 Apr 2026 11:02',
     currentStage: 2,
     signal: {
       label: 'Distressed asset — TER-DST-2026-447',
-      sourceSystem: 'Terra · Distress Pipeline',
+      sourceSystem: 'DOMAINE · Distress Pipeline',
       receivedAt: '18 Apr 2026 11:02:18',
       raw: {
         asset_id: 'TER-DST-2026-447',
@@ -242,7 +242,7 @@ export const DECISION_CASES: DecisionCase[] = [
         'Schedule physical walk-through within 24h',
       ],
       sources: [
-        { id: 'TER-DST-2026-447', label: 'Terra distress signal', type: 'signal' },
+        { id: 'TER-DST-2026-447', label: 'DOMAINE distress signal', type: 'signal' },
         { id: 'TER-COMP-2026-Q1', label: 'Cape Town comp bands Q1 2026', type: 'dataset' },
         { id: 'POL-CAP-TIER2', label: 'Covenant: tier-2 capital allocation', type: 'policy' },
       ],
@@ -277,8 +277,8 @@ export const DECISION_CASES: DecisionCase[] = [
     },
     proof: {
       id: 'PCH-DC-2026-0418-014',
-      sourceSystem: 'Terra Intelligence',
-      sourceDomain: 'Terra',
+      sourceSystem: 'DOMAINE Intelligence',
+      sourceDomain: 'DOMAINE',
       signalType: 'capital_allocation',
       confidence: 0.81,
       model: 'gpt-4o',
@@ -300,7 +300,7 @@ export const DECISION_CASES: DecisionCase[] = [
         {
           id: 'c1',
           event: 'Distress signal ingested',
-          actor: 'System / Terra',
+          actor: 'System / DOMAINE',
           timestamp: '18 Apr 2026 11:02:18',
           hash: 'sha256:7c1a9d…',
         },

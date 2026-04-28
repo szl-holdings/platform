@@ -19,7 +19,7 @@ const SURFACE = 'hsla(0,0%,100%,0.035)';
 const TEXT = 'hsl(38,8%,94%)';
 const TEXT_SEC = 'hsl(214,7%,60%)';
 const TEXT_FAINT = 'hsl(214,7%,38%)';
-const Lyte = 'hsl(192,72%,48%)';
+const KORA = 'hsl(192,72%,48%)';
 const MONO = 'var(--font-mono)';
 const GREEN = 'hsl(142,60%,48%)';
 const YELLOW = 'hsl(48,90%,52%)';
@@ -150,7 +150,7 @@ function ChainEntry({ link, isLast }: { link: ProofRecord['chainLinks'][0]; isLa
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: Lyte,
+            background: KORA,
             flexShrink: 0,
             marginTop: '4px',
           }}
@@ -209,7 +209,7 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
     <div
       style={{
         borderRadius: '8px',
-        border: `1px solid ${open ? `${Lyte}25` : BORDER}`,
+        border: `1px solid ${open ? `${KORA}25` : BORDER}`,
         background: SURFACE,
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',
@@ -235,15 +235,15 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
             width: compact ? 20 : 24,
             height: compact ? 20 : 24,
             borderRadius: 4,
-            background: `${Lyte}15`,
-            border: `1px solid ${Lyte}25`,
+            background: `${KORA}15`,
+            border: `1px solid ${KORA}25`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}
         >
-          <FileCheck size={compact ? 10 : 12} style={{ color: Lyte }} />
+          <FileCheck size={compact ? 10 : 12} style={{ color: KORA }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -254,7 +254,7 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
                 fontWeight: 700,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
-                color: Lyte,
+                color: KORA,
               }}
             >
               Proof Drawer
@@ -324,13 +324,13 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
                     style={{
                       padding: '0.5rem 0.875rem',
                       border: 'none',
-                      borderBottom: `2px solid ${activeSection === tab ? Lyte : 'transparent'}`,
+                      borderBottom: `2px solid ${activeSection === tab ? KORA : 'transparent'}`,
                       background: 'transparent',
                       cursor: 'pointer',
                       fontSize: '0.6875rem',
                       fontWeight: activeSection === tab ? 700 : 500,
                       fontFamily: MONO,
-                      color: activeSection === tab ? Lyte : TEXT_FAINT,
+                      color: activeSection === tab ? KORA : TEXT_FAINT,
                       textTransform: 'capitalize',
                       letterSpacing: '0.06em',
                     }}
@@ -610,12 +610,12 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
                       style={{
                         padding: '0.375rem 0.75rem',
                         borderRadius: 5,
-                        background: `${Lyte}15`,
-                        border: `1px solid ${Lyte}25`,
+                        background: `${KORA}15`,
+                        border: `1px solid ${KORA}25`,
                         cursor: 'pointer',
                         fontSize: '0.6875rem',
                         fontWeight: 600,
-                        color: Lyte,
+                        color: KORA,
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.375rem',
@@ -670,8 +670,8 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
 
 export const SAMPLE_PROOF_RECORD: ProofRecord = {
   id: 'PCH-SF1-20260416',
-  sourceSystem: 'Aegis SOC Feed',
-  sourceDomain: 'Aegis',
+  sourceSystem: 'PARAGON SOC Feed',
+  sourceDomain: 'PARAGON',
   signalType: 'threat_intelligence',
   confidence: 0.94,
   model: 'gpt-4o-mini',
@@ -680,7 +680,7 @@ export const SAMPLE_PROOF_RECORD: ProofRecord = {
   exportSafety: 'pending_review',
   policyChecks: [
     { label: 'Role: ops_analyst — permitted', passed: true },
-    { label: 'Domain: Aegis — in scope', passed: true },
+    { label: 'Domain: PARAGON — in scope', passed: true },
     { label: 'Action: recommend_isolation — permitted', passed: true },
     { label: 'Human-in-loop gate: required before execution', passed: true },
     {
@@ -693,7 +693,7 @@ export const SAMPLE_PROOF_RECORD: ProofRecord = {
   chainLinks: [
     {
       id: 'c1',
-      event: 'Signal ingested from Aegis threat feed',
+      event: 'Signal ingested from PARAGON threat feed',
       actor: 'System / Prism Bus',
       timestamp: '16 Apr 2026 08:14:22',
       hash: 'sha256:a3f7b2c1d...',

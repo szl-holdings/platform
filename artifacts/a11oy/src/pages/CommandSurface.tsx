@@ -78,7 +78,7 @@ const ACTIVE_AGENTS = [
   { id: 'counsel', name: 'Counsel Sentinel', vertical: 'prism-counsel', status: 'active', lastAction: 'Talbot escalation complete', trust: 99 },
   { id: 'pipeline', name: 'Pipeline Oracle', vertical: 'lyte-revenue', status: 'active', lastAction: 'Q2 pipeline analysis running', trust: 91 },
   { id: 'guardian', name: 'Guardian', vertical: 'aegis-defense', status: 'active', lastAction: 'Perimeter hardening verified', trust: 99 },
-  { id: 'domaine', name: 'Terra Analyst', vertical: 'terra-real-estate', status: 'active', lastAction: 'Cap rate model updated', trust: 88 },
+  { id: 'domaine', name: 'DOMAINE Analyst', vertical: 'terra-real-estate', status: 'active', lastAction: 'Cap rate model updated', trust: 88 },
   { id: 'watchdog', name: 'Fabric Watchdog', vertical: 'alloy-core', status: 'active', lastAction: 'Layer health: all nominal', trust: 100 },
 ];
 

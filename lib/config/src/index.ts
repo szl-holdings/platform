@@ -6,14 +6,14 @@ export const APP_VERSION = '0.1.0';
 export const PLATFORM_APPS = [
   { slug: 'szl-holdings', name: 'SZL Holdings', icon: 'Building2', color: '#8b5cf6' },
   { slug: 'alloy', name: 'Counsel — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
-  { slug: 'lyte', name: 'Lyte Command Center', icon: 'ShoppingBag', color: '#a855f7' },
-  { slug: 'vessels', name: 'Vessels Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
-  { slug: 'firestorm', name: 'Aegis Cyber Resilience Command', icon: 'Flame', color: '#f97316' },
+  { slug: 'lyte', name: 'KORA Command Center', icon: 'ShoppingBag', color: '#a855f7' },
+  { slug: 'vessels', name: 'SEXTANT Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
+  { slug: 'firestorm', name: 'PARAGON Cyber Resilience Command', icon: 'Flame', color: '#f97316' },
   { slug: 'inca', name: 'AI Research Lab', icon: 'Brain', color: '#14b8a6' },
-  { slug: 'beacon', name: 'Terra', icon: 'BarChart3', color: '#0ea5e9' },
-  { slug: 'rosie', name: 'Aegis Operations', icon: 'AlertTriangle', color: '#ef4444' },
+  { slug: 'beacon', name: 'DOMAINE', icon: 'BarChart3', color: '#0ea5e9' },
+  { slug: 'rosie', name: 'PARAGON Operations', icon: 'AlertTriangle', color: '#ef4444' },
   { slug: 'carlota-jo', name: 'Carlota Jo Advisory', icon: 'Crown', color: '#f43f5e' },
-  { slug: 'aegis', name: 'Aegis Control Plane', icon: 'Shield', color: '#10b981' },
+  { slug: 'aegis', name: 'PARAGON Control Plane', icon: 'Shield', color: '#10b981' },
   { slug: 'career', name: 'Career — Founder Identity', icon: 'Globe', color: '#6366f1' },
   { slug: 'control-plane', name: 'Admin Control Plane', icon: 'Settings', color: '#64748b' },
 ] as const;
@@ -191,7 +191,7 @@ export const APP_INTEGRATIONS: Record<
       'microsoft-graph',
     ],
     description:
-      'Aegis (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks. Microsoft SharePoint stores compliance evidence files.',
+      'PARAGON (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks. Microsoft SharePoint stores compliance evidence files.',
     liveFeeds: [
       'NIST CSF 2.0 Framework',
       'FedRAMP Marketplace',
@@ -204,7 +204,7 @@ export const APP_INTEGRATIONS: Record<
   rosie: {
     connectors: ['ai', 'monitoring', 'posthog', 'slack', 'gmail'],
     description:
-      'Aegis Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.',
+      'PARAGON Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.',
     liveFeeds: [
       'USAspending.gov Federal Contracts',
       'FedRAMP Authorized Products',
@@ -215,7 +215,7 @@ export const APP_INTEGRATIONS: Record<
   beacon: {
     connectors: ['ai', 'monitoring', 'storage'],
     description:
-      'Terra (slug: beacon) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.',
+      'DOMAINE (slug: beacon) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.',
     liveFeeds: [
       'Census Bureau ACS Demographics',
       'BLS Employment Data',
@@ -314,17 +314,17 @@ export const APP_INTEGRATIONS: Record<
   },
   terra: {
     connectors: ['ai', 'monitoring', 'storage'],
-    description: 'Legacy slug for Terra (beacon) — Business Telemetry',
+    description: 'Legacy slug for DOMAINE (beacon) — Business Telemetry',
     doctrineRole: 'OBSERVE',
   },
   readiness: {
     connectors: ['ai', 'notion', 'confluence', 'google-docs', 'slack', 'monitoring'],
-    description: 'Legacy slug for Aegis — Control Plane',
+    description: 'Legacy slug for PARAGON — Control Plane',
     doctrineRole: 'DECIDE',
   },
   msp: {
     connectors: ['ai', 'monitoring', 'posthog', 'slack', 'gmail'],
-    description: 'Legacy slug for Aegis Operations — Managed Services Command',
+    description: 'Legacy slug for PARAGON Operations — Managed Services Command',
     doctrineRole: 'OBSERVE',
   },
 } as const;

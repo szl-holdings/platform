@@ -239,7 +239,7 @@ function buildLocalResults(q: string, domain: SearchDomain): SearchResult[] {
     { id: 'd1', title: 'CVE-2026-1847', snippet: 'Critical vulnerability in edge firewall — patch available, validation pending.', domain: 'defense', entityType: 'incident', relevance: 0.92, updatedAt: new Date().toISOString() },
     { id: 'i1', title: 'Cross-Domain Anomaly Signal', snippet: 'Pattern detected across fleet and properties — potential supply-chain impact.', domain: 'intelligence', entityType: 'signal', relevance: 0.87, updatedAt: new Date().toISOString() },
     { id: 'a1', title: 'Blackstone Engagement Review', snippet: 'Pending document review for client advisory session.', domain: 'advisory', entityType: 'document', relevance: 0.8, updatedAt: new Date().toISOString() },
-    { id: 'o1', title: 'API Latency Spike Investigation', snippet: 'Lyte agent investigating 12% latency increase in primary API cluster.', domain: 'operations', entityType: 'incident', relevance: 0.78, updatedAt: new Date().toISOString() },
+    { id: 'o1', title: 'API Latency Spike Investigation', snippet: 'KORA agent investigating 12% latency increase in primary API cluster.', domain: 'operations', entityType: 'incident', relevance: 0.78, updatedAt: new Date().toISOString() },
   ];
 
   return entries

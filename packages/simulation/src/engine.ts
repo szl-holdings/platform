@@ -1,5 +1,5 @@
 /**
- * Lyte Simulation Engine
+ * KORA Simulation Engine
  *
  * Projects downstream outcomes of a governed recommendation before action.
  * All projections are probabilistic — confidence ranges reflect model uncertainty.

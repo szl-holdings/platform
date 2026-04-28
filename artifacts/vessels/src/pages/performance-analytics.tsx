@@ -401,7 +401,7 @@ export default function PerformanceAnalyticsPage() {
 
                 <div className="mt-3 grid grid-cols-4 gap-2">
                   <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                    <p className="text-[9px] text-sky-400/40">Vessels</p>
+                    <p className="text-[9px] text-sky-400/40">SEXTANT</p>
                     <p className="text-[10px] font-mono text-sky-300">{corridor.vesselCount}</p>
                   </div>
                   <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">

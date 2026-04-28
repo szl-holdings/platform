@@ -25,7 +25,7 @@ export function ContextStage({ engine }: { engine: EngineState }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        The platform correlates the Aegis and Vessels signals, identifying a coordinated threat
+        The platform correlates the PARAGON and SEXTANT signals, identifying a coordinated threat
         pattern across domains.
       </p>
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
@@ -109,14 +109,14 @@ export function LiveContextStage({
   const domainSummary = [
     { domain: 'Counsel', count: recommendations.filter((r) => r.domain === 'continuum').length },
     {
-      domain: 'Lyte',
+      domain: 'KORA',
       count: recommendations.filter((r) => r.domain === 'beacon' || r.domain === 'terra').length,
     },
     {
       domain: 'Security',
       count: recommendations.filter((r) => r.domain === 'firestorm' || r.domain === 'aegis').length,
     },
-    { domain: 'Vessels', count: recommendations.filter((r) => r.domain === 'vessels').length },
+    { domain: 'SEXTANT', count: recommendations.filter((r) => r.domain === 'vessels').length },
   ].filter((d) => d.count > 0);
 
   return (

@@ -218,7 +218,7 @@ function ModuleTile({
 export default function PortfolioPage() {
   const __pageMeta = usePageMeta({
     title: "Portfolio Dashboard — SZL Holdings",
-    description: "Live portfolio summary for SZL Holdings — Terra, Vessels, Lyte, Aegis, Counsel, and Carlota Jo module health and signal counts.",
+    description: "Live portfolio summary for SZL Holdings — DOMAINE, SEXTANT, KORA, PARAGON, Counsel, and Carlota Jo module health and signal counts.",
     canonical: "https://szlholdings.com/portfolio",
   });
 
@@ -340,7 +340,7 @@ export default function PortfolioPage() {
           >
             <ModuleTile
               icon={BarChart3}
-              name="Lyte"
+              name="KORA"
               tagline="Decision Intelligence Platform"
               accentColor="hsl(191,92%,44%)"
               href="/lyte/overview"
@@ -356,7 +356,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={Building2}
-              name="Terra"
+              name="DOMAINE"
               tagline="Real Estate Intelligence"
               accentColor="hsl(140,50%,46%)"
               href="/terra/dashboard"
@@ -372,7 +372,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={Ship}
-              name="Vessels"
+              name="SEXTANT"
               tagline="Maritime Intelligence"
               accentColor="hsl(200,80%,52%)"
               href="/vessels/dashboard"
@@ -388,7 +388,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={ShieldCheck}
-              name="Aegis"
+              name="PARAGON"
               tagline="Cyber Resilience Command"
               accentColor="hsl(0,72%,56%)"
               href="/sentra/dashboard"

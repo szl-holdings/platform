@@ -129,7 +129,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                Terra — Governed Real Estate Intelligence
+                DOMAINE — Governed Real Estate Intelligence
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every acquisition signal, valuation, and risk factor carries a full proof chain

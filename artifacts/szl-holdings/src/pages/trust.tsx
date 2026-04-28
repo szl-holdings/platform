@@ -98,7 +98,7 @@ const LEGAL_PAGES = [
     href: "/legal/acceptable-use",
     icon: FileText,
     label: "Acceptable Use Policy",
-    description: "What is and isn't permitted on Lyte, Counsel, and the domain pack platforms.",
+    description: "What is and isn't permitted on KORA, Counsel, and the domain pack platforms.",
   },
   {
     href: "/legal/cookies",
@@ -230,7 +230,7 @@ export default function TrustPage() {
                   Trust is part of the product, not a slide at the end.
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
-                  SZL is building Lyte + Counsel for serious operating environments. That means access discipline,
+                  SZL is building KORA + Counsel for serious operating environments. That means access discipline,
                   workflow accountability, observable AI behavior, and full auditability — documented here, not
                   promised in a deck.
                 </p>
@@ -776,7 +776,7 @@ export default function TrustPage() {
                       { milestone: "SOC 2 Type II certification", target: "Q1–Q2 2027", status: "Target", color: "hsl(40,90%,54%)" },
                       { milestone: "Redis session store (scalability pre-req)", target: "Revenue activation phase", status: "Planned", color: "hsl(210,80%,60%)" },
                       { milestone: "External uptime monitoring", target: "Pre-commercial launch", status: "Planned", color: "hsl(210,80%,60%)" },
-                      { milestone: "FedRAMP readiness assessment (Aegis)", target: "18–24 months post-revenue", status: "Roadmap", color: "hsl(258,55%,68%)" },
+                      { milestone: "FedRAMP readiness assessment (PARAGON)", target: "18–24 months post-revenue", status: "Roadmap", color: "hsl(258,55%,68%)" },
                       { milestone: "ISO 27001 scoping", target: "Post Series A", status: "Roadmap", color: "hsl(258,55%,68%)" },
                     ].map((row) => (
                       <div key={row.milestone} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", paddingBottom: "0.875rem", borderBottom: "1px solid var(--color-szl-border)" }}>
@@ -954,7 +954,7 @@ export default function TrustPage() {
                       Why this architecture is hard to copy — and why that matters.
                     </h2>
                     <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "50ch" }}>
-                      The standalone architecture page explains every layer of Lyte + Counsel — Lyte as command layer,
+                      The standalone architecture page explains every layer of KORA + Counsel — KORA as command layer,
                       Counsel as action spine, pack-specific twins, Proof Chain, external intelligence, the governance
                       API, and the governed inference layer — in terms of business value, trust, and defensibility.
                     </p>

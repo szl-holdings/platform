@@ -1,12 +1,12 @@
 /**
  * E2E smoke spec — Decision Center Delegate flow
  *
- * Validates the most critical Approvals interaction in Lyte: clicking the
+ * Validates the most critical Approvals interaction in KORA: clicking the
  * Delegate icon button on a decision card opens the inline Delegate form,
  * the Confirm button is appropriately enabled/disabled, and submitting an
  * owner name triggers a POST to /api/decisions/cards/:id/delegate.
  *
- * Lyte is hosted at /lyte inside the SZL Holdings web app (see
+ * KORA is hosted at /lyte inside the SZL Holdings web app (see
  * tests/e2e/lyte.spec.ts). The Decision Center route is /lyte/decisions.
  */
 import { expect, type Page, test } from '@playwright/test';

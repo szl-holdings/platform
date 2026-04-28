@@ -428,7 +428,7 @@ export default function CommandHome() {
     {
       id: 'connect-feeds',
       label: 'Connect a threat feed',
-      description: 'Link SIEM, EDR, or threat intelligence sources to Aegis',
+      description: 'Link SIEM, EDR, or threat intelligence sources to PARAGON',
       completed: activation.signalSourceConnected,
       href: `${BASE}/settings/integrations`,
     },
@@ -548,7 +548,7 @@ export default function CommandHome() {
               className="text-[9px] font-mono uppercase tracking-[0.15em]"
               style={{ color: DS.text.muted }}
             >
-              Aegis Cyber-Resilience Platform
+              PARAGON Cyber-Resilience Platform
             </p>
           </div>
         </div>

@@ -34,7 +34,7 @@ const auth = {
   session: () => makeKey('auth', 'session'),
 } as const;
 
-// ── Domain: Vessels ──────────────────────────────────────────────────────────
+// ── Domain: SEXTANT ──────────────────────────────────────────────────────────
 
 const vessels = {
   all: () => makeKey('vessels'),
@@ -77,7 +77,7 @@ const alloy = {
     makeKey('alloy', 'audit-log', filters ?? null),
 } as const;
 
-// ── Domain: Terra ─────────────────────────────────────────────────────────────
+// ── Domain: DOMAINE ─────────────────────────────────────────────────────────────
 
 const terra = {
   all: () => makeKey('terra'),
@@ -95,7 +95,7 @@ const terra = {
     makeKey('terra', 'action-items', filters ?? null),
 } as const;
 
-// ── Domain: Lyte ─────────────────────────────────────────────────────────────
+// ── Domain: KORA ─────────────────────────────────────────────────────────────
 
 const lyte = {
   all: () => makeKey('lyte'),
@@ -141,7 +141,7 @@ const holdings = {
   users: (filters?: { orgId?: string | number }) => makeKey('holdings', 'users', filters ?? null),
 } as const;
 
-// ── Domain: Aegis / Firestorm ────────────────────────────────────────────────
+// ── Domain: PARAGON / Firestorm ────────────────────────────────────────────────
 
 const aegis = {
   all: () => makeKey('aegis'),

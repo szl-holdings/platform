@@ -65,7 +65,7 @@ interface SimResult {
 const POLICY_CHANGES: PolicyChange[] = [
   {
     id: 'pc-aegis-ransomware-tighten',
-    title: 'Demote Aegis containment routes to Supervised',
+    title: 'Demote PARAGON containment routes to Supervised',
     rationale:
       'Q2 audit flagged 3 false-positive containments. Add human-in-loop for endpoint isolation > 5 hosts.',
     domain: 'aegis',
@@ -78,7 +78,7 @@ const POLICY_CHANGES: PolicyChange[] = [
   },
   {
     id: 'pc-vessels-bunker-loosen',
-    title: 'Promote Vessels bunker-fuel reroute to Autonomous',
+    title: 'Promote SEXTANT bunker-fuel reroute to Autonomous',
     rationale:
       'Reroute decisions are reversible within 90 min. 47 supervised approvals in last 30d had 100% approval rate.',
     domain: 'vessels',
@@ -103,7 +103,7 @@ const POLICY_CHANGES: PolicyChange[] = [
   },
   {
     id: 'pc-terra-valuation-tighten',
-    title: 'Terra valuation: cap autonomous to <$25M deals',
+    title: 'DOMAINE valuation: cap autonomous to <$25M deals',
     rationale: 'Above $25M, require partner sign-off. 12 above-threshold deals in 90d.',
     domain: 'terra',
     route: 'terra.valuation.deal-screen',
@@ -118,7 +118,7 @@ const POLICY_CHANGES: PolicyChange[] = [
 const SEEDED_TRACES: HistoricalTrace[] = [
   {
     id: 'trace-aegis-20250416-001',
-    label: 'Aegis — Ransomware Lateral Movement v2',
+    label: 'PARAGON — Ransomware Lateral Movement v2',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-16T08:14:22Z',
@@ -131,7 +131,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-aegis-20250415-007',
-    label: 'Aegis — Phishing Cluster Containment',
+    label: 'PARAGON — Phishing Cluster Containment',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-15T14:02:11Z',
@@ -144,7 +144,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-aegis-20250414-002',
-    label: 'Aegis — False-Positive Mass Isolate',
+    label: 'PARAGON — False-Positive Mass Isolate',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-14T22:38:45Z',
@@ -157,7 +157,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-vessels-20250416-014',
-    label: 'Vessels — Bunker Reroute Singapore→Fujairah',
+    label: 'SEXTANT — Bunker Reroute Singapore→Fujairah',
     domain: 'vessels',
     route: 'vessels.bunker.reroute',
     startedAt: '2025-04-16T05:55:00Z',
@@ -170,7 +170,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-vessels-20250415-011',
-    label: 'Vessels — Bunker Reroute Suez → Algeciras',
+    label: 'SEXTANT — Bunker Reroute Suez → Algeciras',
     domain: 'vessels',
     route: 'vessels.bunker.reroute',
     startedAt: '2025-04-15T11:18:00Z',
@@ -183,7 +183,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-vessels-20250413-009',
-    label: 'Vessels — Bunker Reroute Houston → Cristóbal',
+    label: 'SEXTANT — Bunker Reroute Houston → Cristóbal',
     domain: 'vessels',
     route: 'vessels.bunker.reroute',
     startedAt: '2025-04-13T19:42:10Z',
@@ -222,7 +222,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-terra-20250416-005',
-    label: 'Terra — Valuation Brookfield Tower ($42M)',
+    label: 'DOMAINE — Valuation Brookfield Tower ($42M)',
     domain: 'terra',
     route: 'terra.valuation.deal-screen',
     startedAt: '2025-04-16T10:08:00Z',
@@ -235,7 +235,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-terra-20250414-001',
-    label: 'Terra — Valuation 1428 Riverside ($18M)',
+    label: 'DOMAINE — Valuation 1428 Riverside ($18M)',
     domain: 'terra',
     route: 'terra.valuation.deal-screen',
     startedAt: '2025-04-14T09:11:00Z',

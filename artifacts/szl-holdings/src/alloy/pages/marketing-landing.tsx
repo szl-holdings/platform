@@ -50,12 +50,12 @@ const agentRoles = [
 
 const powers = [
   {
-    name: 'Lyte',
+    name: 'KORA',
     desc: 'Decision intelligence and command. Counsel drives signal ingestion, anomaly classification, and workflow routing.',
     accent: '#f59e0b',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     desc: 'Maritime intelligence. Counsel processes voyage data, fleet exceptions, and regulatory signals into command-ready output.',
     accent: '#3b82f6',
   },
@@ -470,7 +470,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 decision.
               </p>
               <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
-                Every platform in the SZL ecosystem — Lyte for decision intelligence, Vessels for
+                Every platform in the SZL ecosystem — KORA for decision intelligence, SEXTANT for
                 maritime command, and Creative Workflows for governed campaign production — is
                 powered by Counsel's orchestration layer. The platforms are the interface. Counsel is
                 the engine.
@@ -1367,7 +1367,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 Ecosystem
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['SZL Holdings', 'Terra', 'Lyte', 'Vessels', 'Aegis'].map((l) => (
+                {['SZL Holdings', 'DOMAINE', 'KORA', 'SEXTANT', 'PARAGON'].map((l) => (
                   <span
                     key={l}
                     style={{

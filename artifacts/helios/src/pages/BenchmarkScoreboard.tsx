@@ -15,10 +15,10 @@ import { heliosApi, type BenchmarkTimeSeries } from '../lib/api';
 const AGENT_COLORS: Record<string, string> = {
   Sentra:  '#f87171',
   Counsel: '#a78bfa',
-  Terra:   '#34d399',
-  Vessels: '#60a5fa',
-  Aegis:   '#fb923c',
-  Lyte:    '#2dd4bf',
+  DOMAINE:   '#34d399',
+  SEXTANT: '#60a5fa',
+  PARAGON:   '#fb923c',
+  KORA:    '#2dd4bf',
   'A11oy': '#f59e0b',
 };
 

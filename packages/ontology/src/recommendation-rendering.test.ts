@@ -8,11 +8,11 @@
  * signal-mesh through the decision-engine and into the recommendation table.
  *
  * Covered domains / products:
- *   maritime      — Vessels Maritime Intelligence
+ *   maritime      — SEXTANT Maritime Intelligence
  *   legal         — Counsel / Counsel Legal Matter Command
  *   security      — Sentra Cyber Resilience Command
  *   finance       — SZL Holdings Treasury / Pulse Executive Briefing
- *   real-estate   — Terra Real Estate Intelligence
+ *   real-estate   — DOMAINE Real Estate Intelligence
  *
  * For each domain this suite asserts:
  *   1. Recommendation object is created without throwing (schema validation)
@@ -61,10 +61,10 @@ function assertProofChain(rec: Recommendation, label: string) {
 }
 
 // ---------------------------------------------------------------------------
-// maritime — Vessels Maritime Intelligence
+// maritime — SEXTANT Maritime Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — maritime (Vessels)', () => {
+describe('recommendation rendering — maritime (SEXTANT)', () => {
   it('renders a complete vessel-reroute recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'maritime',
@@ -165,7 +165,7 @@ describe('recommendation rendering — legal (Counsel / PRISM)', () => {
 // security — Sentra Cyber Resilience Command
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — security (Aegis)', () => {
+describe('recommendation rendering — security (PARAGON)', () => {
   it('renders a complete ransomware-isolation recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'security',
@@ -234,10 +234,10 @@ describe('recommendation rendering — finance (SZL Treasury / Pulse)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// real-estate — Terra Real Estate Intelligence
+// real-estate — DOMAINE Real Estate Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — real-estate (Terra)', () => {
+describe('recommendation rendering — real-estate (DOMAINE)', () => {
   it('renders a property acquisition recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'real-estate',

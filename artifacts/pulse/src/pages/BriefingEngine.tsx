@@ -24,10 +24,10 @@ type Domain = 'consolidated' | 'vessels' | 'aegis' | 'terra' | 'lyte' | 'prism' 
 
 const DOMAIN_LABELS: Record<Domain, string> = {
   consolidated: 'All Domains',
-  vessels: 'Vessels Maritime',
-  aegis: 'Aegis Security',
-  terra: 'Terra Real Estate',
-  lyte: 'Lyte Infrastructure',
+  vessels: 'SEXTANT Maritime',
+  aegis: 'PARAGON Security',
+  terra: 'DOMAINE Real Estate',
+  lyte: 'KORA Infrastructure',
   prism: 'Prism Counsel',
   'szl-holdings': 'SZL Holdings',
 };

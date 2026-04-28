@@ -66,7 +66,7 @@ export const szlHoldingsTheme: BrandTheme = {
 };
 
 export const vesselsTheme: BrandTheme = {
-  name: 'Vessels Maritime Intelligence',
+  name: 'SEXTANT Maritime Intelligence',
   slug: 'vessels',
   colors: {
     primary: colors.lane.vessels.primary,
@@ -223,7 +223,7 @@ export const continuumCreativeTheme: BrandTheme = {
 };
 
 export const terraTheme: BrandTheme = {
-  name: 'Terra Real Estate',
+  name: 'DOMAINE Real Estate',
   slug: 'terra',
   colors: {
     primary: colors.laneAccents.terra.primary,
@@ -254,7 +254,7 @@ export const terraTheme: BrandTheme = {
 };
 
 export const lyteTheme: BrandTheme = {
-  name: 'Lyte Command Center',
+  name: 'KORA Command Center',
   slug: 'lyte',
   colors: {
     primary: colors.laneAccents.lyte.primary,
@@ -285,7 +285,7 @@ export const lyteTheme: BrandTheme = {
 };
 
 export const aegisTheme: BrandTheme = {
-  name: 'Aegis — Unified Defense & Intelligence Command',
+  name: 'PARAGON — Unified Defense & Intelligence Command',
   slug: 'aegis',
   colors: {
     primary: colors.laneAccents.aegis.primary,

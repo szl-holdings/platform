@@ -129,7 +129,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                Vessels — Governed Maritime Intelligence
+                SEXTANT — Governed Maritime Intelligence
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every routing decision, risk flag, and alert carries a full proof chain
@@ -158,7 +158,7 @@ export default function GovernedCockpit() {
 
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Vessels at Sea', value: '47', icon: Ship, color: ACCENT },
+            { label: 'SEXTANT at Sea', value: '47', icon: Ship, color: ACCENT },
             { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: color.accent.red },
             { label: 'Routes Optimised', value: '12', icon: Navigation, color: color.accent.green },
             { label: 'In Port', value: '8', icon: Anchor, color: color.accent.amber },

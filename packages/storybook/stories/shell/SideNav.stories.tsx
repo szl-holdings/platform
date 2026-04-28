@@ -26,7 +26,7 @@ const sections = [
     title: 'Command',
     items: [
       { id: 'dashboard', label: 'Dashboard', href: '#', icon: <LayoutDashboard size={16} /> },
-      { id: 'aegis', label: 'Aegis', href: '#', icon: <Shield size={16} />, badge: 3 },
+      { id: 'aegis', label: 'PARAGON', href: '#', icon: <Shield size={16} />, badge: 3 },
       { id: 'counsel', label: 'Counsel', href: '#', icon: <FileText size={16} /> },
     ],
   },

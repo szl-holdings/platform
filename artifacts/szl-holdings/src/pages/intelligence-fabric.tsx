@@ -28,12 +28,12 @@ import { SiteNav } from '@/components/SiteNav';
 import { apiRequest } from '@/lib/api';
 
 const DOMAIN_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  vessels: { label: 'Vessels', color: '#38bdf8', icon: Ship },
-  firestorm: { label: 'Aegis', color: '#818cf8', icon: Shield },
-  terra: { label: 'Terra', color: '#4ade80', icon: Building2 },
+  vessels: { label: 'SEXTANT', color: '#38bdf8', icon: Ship },
+  firestorm: { label: 'PARAGON', color: '#818cf8', icon: Shield },
+  terra: { label: 'DOMAINE', color: '#4ade80', icon: Building2 },
   'prism-counsel': { label: 'PRAXIS', color: '#d4a054', icon: Scale },
   'szl-holdings': { label: 'SZL Holdings', color: '#3b82f6', icon: Target },
-  lyte: { label: 'Lyte', color: '#22d3ee', icon: Activity },
+  lyte: { label: 'KORA', color: '#22d3ee', icon: Activity },
   maritime: { label: 'Maritime', color: '#38bdf8', icon: Ship },
   security: { label: 'Security', color: '#818cf8', icon: Shield },
   legal: { label: 'Legal', color: '#d4a054', icon: Scale },

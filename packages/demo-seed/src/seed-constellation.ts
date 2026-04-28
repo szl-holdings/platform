@@ -2,11 +2,11 @@
  * Cross-Domain Constellation Demo Seed
  *
  * Populates Constellation with a coherent cross-domain scenario:
- *   • Terra:   A real-estate property — "Harbor View Tower" (San Francisco)
- *   • Vessels: A vessel charter linked to the property's cargo supply chain
+ *   • DOMAINE:   A real-estate property — "Harbor View Tower" (San Francisco)
+ *   • SEXTANT: A vessel charter linked to the property's cargo supply chain
  *   • PRISM:   A legal matter related to the property's title dispute
- *   • Aegis:   A security incident at the property site
- *   • Lyte:    A financial signal showing occupancy revenue trending down
+ *   • PARAGON:   A security incident at the property site
+ *   • KORA:    A financial signal showing occupancy revenue trending down
  *
  * These five entities are cross-linked so every domain has something to
  * render against real Constellation data from day one.
@@ -52,7 +52,7 @@ export interface ConstellationSeedResult {
  */
 export async function seedConstellationDemo(): Promise<ConstellationSeedResult> {
 
-  // ── 1. Terra — Harbor View Tower property ─────────────────────────────────
+  // ── 1. DOMAINE — Harbor View Tower property ─────────────────────────────────
   const TERRA_ALIAS = { type: 'demo_key', value: 'demo-terra-harbor-view-tower' };
   let terraNode = await lookupNodeByAlias(TERRA_ALIAS.type, TERRA_ALIAS.value);
   if (!terraNode) {
@@ -82,7 +82,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
   } else {
   }
 
-  // ── 2. Vessels — MV Pacific Carrier charter ───────────────────────────────
+  // ── 2. SEXTANT — MV Pacific Carrier charter ───────────────────────────────
   const VESSEL_ALIAS = { type: 'demo_key', value: 'demo-vessels-mv-pacific-carrier' };
   let vesselsNode = await lookupNodeByAlias(VESSEL_ALIAS.type, VESSEL_ALIAS.value);
   if (!vesselsNode) {
@@ -147,7 +147,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
   } else {
   }
 
-  // ── 4. Aegis — Physical Security Incident ─────────────────────────────────
+  // ── 4. PARAGON — Physical Security Incident ─────────────────────────────────
   const AEGIS_ALIAS = { type: 'demo_key', value: 'demo-aegis-harbor-view-incident' };
   let aegisNode = await lookupNodeByAlias(AEGIS_ALIAS.type, AEGIS_ALIAS.value);
   if (!aegisNode) {
@@ -157,7 +157,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
       labels: ['physical-security', 'access-control', 'demo'],
       name: 'Harbor View Tower — Unauthorized Access Incident',
       description:
-        'Security breach: unauthorized personnel accessed server room on Floor 12 during the title dispute discovery period. Aegis flagged correlation with litigation timeline as a potential evidence-tampering risk.',
+        'Security breach: unauthorized personnel accessed server room on Floor 12 during the title dispute discovery period. PARAGON flagged correlation with litigation timeline as a potential evidence-tampering risk.',
       provenance: provenance('aegis-demo-seed'),
       confidence: 0.85,
       sensitivityTier: 'restricted',
@@ -178,7 +178,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
   } else {
   }
 
-  // ── 5. Lyte — Revenue Signal ───────────────────────────────────────────────
+  // ── 5. KORA — Revenue Signal ───────────────────────────────────────────────
   const LYTE_ALIAS = { type: 'demo_key', value: 'demo-lyte-harbor-view-occupancy-signal' };
   let lyteNode = await lookupNodeByAlias(LYTE_ALIAS.type, LYTE_ALIAS.value);
   if (!lyteNode) {
@@ -188,7 +188,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
       labels: ['revenue', 'occupancy', 'real-estate', 'demo'],
       name: 'Harbor View Tower — Occupancy Revenue Decline',
       description:
-        'Lyte detected a 23% QoQ occupancy revenue decline at Harbor View Tower. Correlated with the ongoing title dispute uncertainty and the physical security incident. AI recommendation: engage distressed asset advisory.',
+        'KORA detected a 23% QoQ occupancy revenue decline at Harbor View Tower. Correlated with the ongoing title dispute uncertainty and the physical security incident. AI recommendation: engage distressed asset advisory.',
       provenance: provenance('lyte-demo-seed'),
       confidence: 0.91,
       sensitivityTier: 'internal',
@@ -235,17 +235,17 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     }
   }
 
-  // Terra → Vessels: property charter (supply chain link)
+  // DOMAINE → SEXTANT: property charter (supply chain link)
   await ensureEdge(terraNode.id, vesselsNode.id, 'depends-on', 'terra-vessels-charter', 0.87);
-  // Terra → PRISM: property is the subject of the matter
+  // DOMAINE → PRISM: property is the subject of the matter
   await ensureEdge(terraNode.id, prismNode.id, 'affects', 'terra-prism-matter', 0.97);
-  // Aegis → PRISM: security incident correlates with litigation risk
+  // PARAGON → PRISM: security incident correlates with litigation risk
   await ensureEdge(aegisNode.id, prismNode.id, 'relates-to', 'aegis-prism-correlation', 0.82);
-  // Lyte → Terra: signal derives from the property
+  // KORA → DOMAINE: signal derives from the property
   await ensureEdge(lyteNode.id, terraNode.id, 'derived-from', 'lyte-terra-signal', 0.91);
-  // Aegis → Terra: incident is at the property
+  // PARAGON → DOMAINE: incident is at the property
   await ensureEdge(aegisNode.id, terraNode.id, 'affects', 'aegis-terra-incident', 0.85);
-  // Lyte → PRISM: revenue decline amplifies legal exposure
+  // KORA → PRISM: revenue decline amplifies legal exposure
   await ensureEdge(lyteNode.id, prismNode.id, 'triggers', 'lyte-prism-exposure', 0.76);
 
   const result: ConstellationSeedResult = {

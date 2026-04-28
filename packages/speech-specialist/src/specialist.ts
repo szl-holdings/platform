@@ -100,7 +100,7 @@ export class SpeechSpecialist {
 
   /**
    * Executive Briefing Audio Render
-   * Called by Lyte, Command Portal, and APEX to produce audio from
+   * Called by KORA, Command Portal, and APEX to produce audio from
    * a structured brief. Returns audio bytes + provenance metadata.
    */
   renderBriefing(req: BriefingAudioRequest): Promise<BriefingAudioResult> {

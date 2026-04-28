@@ -34,7 +34,7 @@ type EsgScore = {
 
 const ESG_SCORES: EsgScore[] = [
   {
-    company: "Vessels", color: "#4a90b8", sector: "Maritime Tech",
+    company: "SEXTANT", color: "#4a90b8", sector: "Maritime Tech",
     environmental: 82, social: 74, governance: 88, composite: 81,
     trend: "improving",
     carbonTonnes: 142, deiScore: 72, boardDiversity: 40, employeeSatisfaction: 83, communityImpact: 68,
@@ -42,7 +42,7 @@ const ESG_SCORES: EsgScore[] = [
     risks: ["Shipping route carbon exposure", "Supplier chain emissions not fully tracked"],
   },
   {
-    company: "Aegis", color: "#c45a4a", sector: "Defense Tech",
+    company: "PARAGON", color: "#c45a4a", sector: "Defense Tech",
     environmental: 58, social: 71, governance: 90, composite: 73,
     trend: "stable",
     carbonTonnes: 218, deiScore: 65, boardDiversity: 33, employeeSatisfaction: 79, communityImpact: 72,
@@ -50,7 +50,7 @@ const ESG_SCORES: EsgScore[] = [
     risks: ["Dual-use technology governance", "Classified work limits ESG disclosure"],
   },
   {
-    company: "Terra", color: "#c8953c", sector: "PropTech",
+    company: "DOMAINE", color: "#c8953c", sector: "PropTech",
     environmental: 76, social: 80, governance: 83, composite: 80,
     trend: "improving",
     carbonTonnes: 64, deiScore: 81, boardDiversity: 50, employeeSatisfaction: 87, communityImpact: 75,
@@ -58,7 +58,7 @@ const ESG_SCORES: EsgScore[] = [
     risks: ["Real estate market enables gentrification", "AVM bias in low-income neighborhoods"],
   },
   {
-    company: "Lyte", color: "#6aaa72", sector: "Media Tech",
+    company: "KORA", color: "#6aaa72", sector: "Media Tech",
     environmental: 88, social: 77, governance: 79, composite: 81,
     trend: "improving",
     carbonTonnes: 38, deiScore: 78, boardDiversity: 43, employeeSatisfaction: 91, communityImpact: 82,
@@ -403,7 +403,7 @@ export default function EsgPage() {
                             </div>
                             <div className="text-right">
                               <div className="text-sm font-semibold text-[#6aaa72]">1 company carbon-neutral</div>
-                              <div className="text-xs text-white/40 mt-0.5">Lyte — achieved Q4 2025</div>
+                              <div className="text-xs text-white/40 mt-0.5">KORA — achieved Q4 2025</div>
                             </div>
                           </div>
                         </div>

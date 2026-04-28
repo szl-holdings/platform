@@ -318,7 +318,7 @@ export default function OtIcsDashboard() {
       // anomalous packets, keeping the decoder tab consistent with the capture. The
       // pcapng path additionally enriches each packet with a per-frame comment, an
       // anomaly note, and the forensic event link so analysts can pivot from Wireshark
-      // back into Aegis.
+      // back into PARAGON.
       const forensicById = new Map(frames.map((d) => [d.frameId, d.forensicEventId] as const));
       const framesPayload = filteredConversation.map((f) => {
         const fid = f.frameId;

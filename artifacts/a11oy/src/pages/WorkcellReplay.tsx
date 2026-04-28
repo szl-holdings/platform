@@ -17,10 +17,10 @@ const OUTCOME_COLORS: Record<string, string> = { success: '#c9b787', blocked: '#
 const DISP_COLORS: Record<string, string> = { pass: '#c9b787', pass_with_warning: '#c9b787', needs_more_evidence: '#c9b787', requires_human_review: '#c9b787', blocked: '#f5f5f5' };
 
 const VERTICAL_TENANT_MAP: Record<string, { tenant: string; domain: string }> = {
-  'lyte-revenue': { tenant: 'Lyte', domain: 'Revenue' },
-  'vessels-maritime': { tenant: 'Vessels', domain: 'Maritime' },
-  'terra-real-estate': { tenant: 'Terra', domain: 'Real Estate' },
-  'aegis-defense': { tenant: 'Aegis', domain: 'Defense' },
+  'lyte-revenue': { tenant: 'KORA', domain: 'Revenue' },
+  'vessels-maritime': { tenant: 'SEXTANT', domain: 'Maritime' },
+  'terra-real-estate': { tenant: 'DOMAINE', domain: 'Real Estate' },
+  'aegis-defense': { tenant: 'PARAGON', domain: 'Defense' },
   'prism-counsel': { tenant: 'Counsel', domain: 'Legal' },
   'carlota-jo': { tenant: 'Carlota Jo', domain: 'Advisory' },
   'alloy-core': { tenant: 'A11oy', domain: 'Platform' },

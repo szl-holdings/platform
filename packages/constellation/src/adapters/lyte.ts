@@ -8,14 +8,14 @@ const LYTE_NODE_TYPES: CstNodeTypeRegistration[] = [
     domain: 'lyte',
     typeKey: 'signal',
     displayName: 'Signal',
-    description: 'A Lyte platform signal or data point',
+    description: 'A KORA platform signal or data point',
     defaultSensitivity: 'internal',
   },
   {
     domain: 'lyte',
     typeKey: 'account',
     displayName: 'Account',
-    description: 'A Lyte account entity',
+    description: 'A KORA account entity',
     defaultSensitivity: 'confidential',
   },
   {
@@ -29,7 +29,7 @@ const LYTE_NODE_TYPES: CstNodeTypeRegistration[] = [
     domain: 'lyte',
     typeKey: 'workflow',
     displayName: 'Workflow',
-    description: 'A Lyte workflow definition',
+    description: 'A KORA workflow definition',
     defaultSensitivity: 'internal',
   },
 ];

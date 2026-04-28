@@ -98,7 +98,7 @@ export { seedSignalMesh } from './seed-signal-mesh';
 export const SIGNAL_MESH_NARRATIVES = [
   {
     id: 'vessels-port-congestion',
-    label: 'Vessels — Port Congestion + Route Exception Cluster',
+    label: 'SEXTANT — Port Congestion + Route Exception Cluster',
     domain: 'maritime',
   },
   {
@@ -114,7 +114,7 @@ export const SIGNAL_MESH_NARRATIVES = [
   },
   {
     id: 'sentra-ransomware',
-    label: 'Aegis — Ransomware-Adjacent OT Event + Recovery Posture Gap',
+    label: 'PARAGON — Ransomware-Adjacent OT Event + Recovery Posture Gap',
     domain: 'security',
   },
 ] as const;

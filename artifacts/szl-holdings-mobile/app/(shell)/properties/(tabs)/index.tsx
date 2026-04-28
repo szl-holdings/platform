@@ -247,7 +247,7 @@ export default function MapTab() {
       />
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>Terra · MAP VIEW</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>DOMAINE · MAP VIEW</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Property Intelligence</Text>
         </View>
         <Pressable

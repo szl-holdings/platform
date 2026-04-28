@@ -77,9 +77,9 @@ test.describe('Portfolio Dashboard — /portfolio', () => {
     await page.goto(url('portfolio'));
     await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => null);
 
-    // Tile names rendered in the dashboard. Note: the Aegis vertical is
+    // Tile names rendered in the dashboard. Note: the PARAGON vertical is
     // surfaced as the "Sentra" product tile in the portfolio UI.
-    const tiles = ['Lyte', 'Terra', 'Vessels', 'Aegis', 'Counsel', 'Carlota Jo'];
+    const tiles = ['KORA', 'DOMAINE', 'SEXTANT', 'PARAGON', 'Counsel', 'Carlota Jo'];
     for (const name of tiles) {
       await expect(page.locator(`:text("${name}")`).first()).toBeVisible({ timeout: 15_000 });
     }
@@ -98,7 +98,7 @@ test.describe('Portfolio Dashboard — /portfolio', () => {
     await expect(errorBanner).toBeVisible({ timeout: 15_000 });
 
     // Tiles should still render (with placeholder values) even when the API fails.
-    await expect(page.locator(':text("Lyte")').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(':text("KORA")').first()).toBeVisible({ timeout: 15_000 });
   });
 });
 

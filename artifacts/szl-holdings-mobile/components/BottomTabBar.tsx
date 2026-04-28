@@ -63,7 +63,7 @@ const TABS: TabItem[] = [
   },
   {
     id: 'properties',
-    label: 'Terra',
+    label: 'DOMAINE',
     icon: 'home',
     accent: giProductAccent.terra,
     route: '/(shell)/properties',

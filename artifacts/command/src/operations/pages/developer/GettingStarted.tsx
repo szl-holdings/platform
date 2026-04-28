@@ -83,7 +83,7 @@ export default function GettingStarted() {
             {
               icon: Shield,
               name: 'Security',
-              desc: 'Aegis — threat detection, compliance, red team simulations',
+              desc: 'PARAGON — threat detection, compliance, red team simulations',
               color: 'text-[#c45a4a] bg-[#c45a4a]/10',
             },
             {
@@ -95,7 +95,7 @@ export default function GettingStarted() {
             {
               icon: Globe,
               name: 'Maritime',
-              desc: 'Vessels — fleet tracking, voyage management, maritime intelligence',
+              desc: 'SEXTANT — fleet tracking, voyage management, maritime intelligence',
               color: 'text-cyan-400 bg-cyan-500/10',
             },
             {
@@ -107,7 +107,7 @@ export default function GettingStarted() {
             {
               icon: Globe,
               name: 'Real Estate',
-              desc: 'Terra — portfolio intelligence, climate risk, property analytics',
+              desc: 'DOMAINE — portfolio intelligence, climate risk, property analytics',
               color: 'text-[#6b8f71] bg-[#6b8f71]/10',
             },
             {

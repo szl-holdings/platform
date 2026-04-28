@@ -54,8 +54,8 @@ interface PromptEntry {
 const DEMO_PROMPTS: PromptEntry[] = [
   {
     id: 'p-aegis-threat-score',
-    name: 'Aegis Threat Scorer',
-    description: 'Scores CVE severity with CVSS weighting and asset exposure context for the Aegis domain.',
+    name: 'PARAGON Threat Scorer',
+    description: 'Scores CVE severity with CVSS weighting and asset exposure context for the PARAGON domain.',
     domain: 'aegis',
     routeClass: 'structured',
     activeVersionId: 'p-aegis-threat-score@v3',
@@ -70,7 +70,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
       {
         versionId: 'p-aegis-threat-score@v3',
         version: 3,
-        template: `You are a cyber threat scoring agent for the SZL Holdings Aegis domain.\n\nGiven a CVE and asset context, compute a weighted severity score:\n- Start with CVSS 3.1 base score\n- Multiply by 1.4× if asset is internet-facing\n- Multiply by 0.6× if asset is air-gapped\n- Cap adjusted score at 10.0\n\nOutput a JSON object: { cvss_base, exposure_multiplier, adjusted_score, severity_tier, rationale }\n\nSeverity tiers: CRITICAL (≥9.0), HIGH (7.0–8.9), MEDIUM (4.0–6.9), LOW (<4.0)\n\nContext:\n{{asset_context}}\n\nCVE: {{cve_id}}\nDescription: {{cve_description}}`,
+        template: `You are a cyber threat scoring agent for the SZL Holdings PARAGON domain.\n\nGiven a CVE and asset context, compute a weighted severity score:\n- Start with CVSS 3.1 base score\n- Multiply by 1.4× if asset is internet-facing\n- Multiply by 0.6× if asset is air-gapped\n- Cap adjusted score at 10.0\n\nOutput a JSON object: { cvss_base, exposure_multiplier, adjusted_score, severity_tier, rationale }\n\nSeverity tiers: CRITICAL (≥9.0), HIGH (7.0–8.9), MEDIUM (4.0–6.9), LOW (<4.0)\n\nContext:\n{{asset_context}}\n\nCVE: {{cve_id}}\nDescription: {{cve_description}}`,
         changelog: 'Added air-gapped multiplier (0.6×). Fixed severity tier boundary at 9.0 (was 9.1). Improved rationale field verbosity.',
         createdBy: 'praxis-agent',
         createdAt: '2026-04-22T14:30:00Z',
@@ -80,7 +80,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
       {
         versionId: 'p-aegis-threat-score@v2',
         version: 2,
-        template: `You are a cyber threat scoring agent for the SZL Holdings Aegis domain.\n\nGiven a CVE and asset context, compute a weighted severity score:\n- Start with CVSS 3.1 base score\n- Multiply by 1.4× if asset is internet-facing\n- Cap adjusted score at 10.0\n\nOutput JSON: { cvss_base, adjusted_score, severity_tier, rationale }\n\nCVE: {{cve_id}}\nDescription: {{cve_description}}`,
+        template: `You are a cyber threat scoring agent for the SZL Holdings PARAGON domain.\n\nGiven a CVE and asset context, compute a weighted severity score:\n- Start with CVSS 3.1 base score\n- Multiply by 1.4× if asset is internet-facing\n- Cap adjusted score at 10.0\n\nOutput JSON: { cvss_base, adjusted_score, severity_tier, rationale }\n\nCVE: {{cve_id}}\nDescription: {{cve_description}}`,
         changelog: 'Added internet-facing multiplier (1.4×) and asset context injection.',
         createdBy: 'r.vargas',
         createdAt: '2026-04-10T10:00:00Z',
@@ -158,7 +158,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
   },
   {
     id: 'p-terra-distress',
-    name: 'Terra Distress Scorer',
+    name: 'DOMAINE Distress Scorer',
     description: 'Scores property distress probability from tax lien, lis pendens, and pre-foreclosure signals.',
     domain: 'terra',
     routeClass: 'structured',
@@ -174,7 +174,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
       {
         versionId: 'p-terra-distress@v2',
         version: 2,
-        template: `You are a property distress scoring agent for the Terra domain.\n\nCompute distress score using:\n  distress_score = 0.6 × tax_signal + 0.3 × ownership_stress + 0.1 × market_momentum\n\nCoefficients are calibrated for NYC ZIP codes. Clamp output to [0, 1].\n\nProperty data:\n{{property_data}}\n\nPublic records (90-day window):\n- Tax liens: {{tax_liens}}\n- Lis pendens: {{lis_pendens}}\n- Pre-foreclosure: {{pre_foreclosure}}\n\nOutput JSON: { distress_score, tax_signal, ownership_stress, market_momentum, tier, rationale }`,
+        template: `You are a property distress scoring agent for the DOMAINE domain.\n\nCompute distress score using:\n  distress_score = 0.6 × tax_signal + 0.3 × ownership_stress + 0.1 × market_momentum\n\nCoefficients are calibrated for NYC ZIP codes. Clamp output to [0, 1].\n\nProperty data:\n{{property_data}}\n\nPublic records (90-day window):\n- Tax liens: {{tax_liens}}\n- Lis pendens: {{lis_pendens}}\n- Pre-foreclosure: {{pre_foreclosure}}\n\nOutput JSON: { distress_score, tax_signal, ownership_stress, market_momentum, tier, rationale }`,
         changelog: 'Added market_momentum component (0.1 weight). Calibrated coefficients against NYC regression model. Excluded short-sales from signal (separate category).',
         createdBy: 'praxis-agent',
         createdAt: '2026-04-15T16:45:00Z',
@@ -232,7 +232,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
   },
   {
     id: 'p-vessels-port-risk',
-    name: 'Vessels Port Risk Assessor',
+    name: 'SEXTANT Port Risk Assessor',
     description: 'Assesses sanctions and weather risk for upcoming vessel port calls.',
     domain: 'vessels',
     routeClass: 'structured',
@@ -248,7 +248,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
       {
         versionId: 'p-vessels-port-risk@v1',
         version: 1,
-        template: `You are a port risk assessment agent for the Vessels domain.\n\nFor each upcoming port call, compute:\n  port_risk = max(sanction_score, weather_score, congestion_score)\n\nInputs:\n- Vessel: {{vessel_id}}\n- Port calls: {{port_calls}}\n- OFAC SDN status: {{ofac_status}}\n- Weather forecast: {{weather}}\n\nOutput JSON: { port_call_id, port, sanction_score, weather_score, congestion_score, port_risk, tier, notes }[]`,
+        template: `You are a port risk assessment agent for the SEXTANT domain.\n\nFor each upcoming port call, compute:\n  port_risk = max(sanction_score, weather_score, congestion_score)\n\nInputs:\n- Vessel: {{vessel_id}}\n- Port calls: {{port_calls}}\n- OFAC SDN status: {{ofac_status}}\n- Weather forecast: {{weather}}\n\nOutput JSON: { port_call_id, port, sanction_score, weather_score, congestion_score, port_risk, tier, notes }[]`,
         changelog: 'Initial version.',
         createdBy: 'praxis-agent',
         createdAt: '2026-04-12T08:30:00Z',

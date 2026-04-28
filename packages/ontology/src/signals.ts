@@ -51,14 +51,14 @@ export type SignalSource = (typeof SIGNAL_SOURCES)[number];
 // ---------------------------------------------------------------------------
 
 export const SIGNAL_TYPES = [
-  // Maritime / Vessels
+  // Maritime / SEXTANT
   'ais_dark', // vessel went dark (AIS off)
   'ais_position', // vessel position update
   'sanctions_hit', // entity matched sanctions list
   'voyage_anomaly', // route or voyage deviation
   'port_arrival', // vessel arrived at port
   'cargo_discrepancy', // cargo manifest anomaly
-  // Real Estate / Terra
+  // Real Estate / DOMAINE
   'distress_filing', // property distress signal
   'ownership_change', // ownership graph change
   'lien_filed', // lien recorded against property

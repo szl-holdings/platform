@@ -334,7 +334,7 @@ export default function CargoTrackingPage() {
             icon: Layers,
             color: '#38bdf8',
           },
-          { label: 'Vessels Tracked', value: totalVessels, icon: Ship, color: '#60a5fa' },
+          { label: 'SEXTANT Tracked', value: totalVessels, icon: Ship, color: '#60a5fa' },
           {
             label: 'Est. Cargo Value',
             value: `$${totalValueBn}B`,
@@ -527,7 +527,7 @@ export default function CargoTrackingPage() {
                 <div className="grid grid-cols-4 gap-3">
                   {[
                     {
-                      label: 'Active Vessels',
+                      label: 'Active SEXTANT',
                       value: selectedFlow.vessels_active,
                       icon: Ship,
                       color: cfg.color,

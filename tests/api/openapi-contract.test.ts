@@ -125,9 +125,9 @@ describe('OpenAPI contract — Health endpoints', () => {
   });
 });
 
-// ── Domain: Vessels ───────────────────────────────────────────────────────────
+// ── Domain: SEXTANT ───────────────────────────────────────────────────────────
 
-describe('OpenAPI contract — Vessels domain', () => {
+describe('OpenAPI contract — SEXTANT domain', () => {
   it('defines GET /vessels fleet list endpoint', () => {
     expect(spec.paths).toHaveProperty('/vessels');
     expect(spec.paths['/vessels']).toHaveProperty('get');
@@ -152,9 +152,9 @@ describe('OpenAPI contract — Vessels domain', () => {
   });
 });
 
-// ── Domain: Aegis / Aegis (SOC) ──────────────────────────────────────────
+// ── Domain: PARAGON / PARAGON (SOC) ──────────────────────────────────────────
 
-describe('OpenAPI contract — Aegis / Aegis domain', () => {
+describe('OpenAPI contract — PARAGON / PARAGON domain', () => {
   it('defines GET /firestorm/campaigns campaigns list endpoint', () => {
     expect(spec.paths).toHaveProperty('/firestorm/campaigns');
     expect(spec.paths['/firestorm/campaigns']).toHaveProperty('get');
@@ -179,9 +179,9 @@ describe('OpenAPI contract — Aegis / Aegis domain', () => {
   });
 });
 
-// ── Domain: Lyte (AIOps) ──────────────────────────────────────────────────────
+// ── Domain: KORA (AIOps) ──────────────────────────────────────────────────────
 
-describe('OpenAPI contract — Lyte domain', () => {
+describe('OpenAPI contract — KORA domain', () => {
   it('defines GET /lyte/products products list endpoint', () => {
     expect(spec.paths).toHaveProperty('/lyte/products');
     expect(spec.paths['/lyte/products']).toHaveProperty('get');
@@ -494,9 +494,9 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('lyteWorkspaces');
   });
 
-  it('firestorm GraphQL domain defines Aegis types', () => {
+  it('firestorm GraphQL domain defines PARAGON types', () => {
     const src = readDomainTypeDefs('firestorm.ts');
-    expect(src).toContain('Aegis');
+    expect(src).toContain('PARAGON');
   });
 
   it('holdings GraphQL domain extends Query type', () => {
@@ -514,9 +514,9 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('extend type Query');
   });
 
-  it('Terra GraphQL domain defines terra-related types', () => {
+  it('DOMAINE GraphQL domain defines terra-related types', () => {
     const src = readDomainTypeDefs('terra.ts');
-    expect(src).toContain('Terra');
+    expect(src).toContain('DOMAINE');
   });
 
   it('schema.ts imports all 7 major domain type definitions', () => {

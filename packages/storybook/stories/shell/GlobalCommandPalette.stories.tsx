@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 
 const sampleItems = [
   { id: 'nav-dashboard', label: 'Go to Dashboard', section: 'Navigate', icon: <LayoutDashboard size={14} />, onSelect: () => {} },
-  { id: 'nav-aegis', label: 'Go to Aegis', description: 'Cyber Resilience Command', section: 'Navigate', icon: <Shield size={14} />, onSelect: () => {} },
+  { id: 'nav-aegis', label: 'Go to PARAGON', description: 'Cyber Resilience Command', section: 'Navigate', icon: <Shield size={14} />, onSelect: () => {} },
   { id: 'nav-counsel', label: 'Go to Counsel', description: 'Legal Matter Command', section: 'Navigate', icon: <FileText size={14} />, onSelect: () => {} },
   { id: 'nav-analytics', label: 'Go to Analytics', section: 'Navigate', icon: <BarChart3 size={14} />, onSelect: () => {} },
   { id: 'action-run', label: 'Trigger Manual Run', shortcut: '⌘R', section: 'Actions', icon: <Zap size={14} />, onSelect: () => {} },

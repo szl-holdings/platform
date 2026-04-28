@@ -639,7 +639,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     path: '/vessels/',
     icon: '⚓',
     description: 'Maritime Command Intelligence',
@@ -647,7 +647,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     path: '/terra/',
     icon: '⬢',
     description: 'Real Estate Broker Command',

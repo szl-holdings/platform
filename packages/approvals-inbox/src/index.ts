@@ -1,7 +1,7 @@
 /**
  * @workspace/approvals-inbox
  *
- * Shared approvals inbox for the Lyte platform.
+ * Shared approvals inbox for the KORA platform.
  *
  * Receives approval actions from Decision Center and other governed surfaces.
  * Each action is stored with full provenance: verdict, proof ref, simulation ID,

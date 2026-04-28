@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     title: 'Block suspicious IP range',
-    description: 'Aegis detected coordinated credential-stuffing activity from 185.220.0.0/16. Recommend blocking for 72 hours.',
+    description: 'PARAGON detected coordinated credential-stuffing activity from 185.220.0.0/16. Recommend blocking for 72 hours.',
     confidence: 92,
     onAccept: () => {},
     onDismiss: () => {},

@@ -775,7 +775,7 @@ function PrivateApp({
   setCmdOpen: (v: boolean) => void;
 }) {
   return (
-    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor={COMMAND_ACCENT}>
+    <PowerUserProvider shortcuts={lyteShortcuts} appName="KORA" accentColor={COMMAND_ACCENT}>
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav
           currentAppId="command"
@@ -793,7 +793,7 @@ function PrivateApp({
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
         commands={lyteCommands}
-        appName="Lyte"
+        appName="KORA"
         accentColor={COMMAND_ACCENT}
       />
     </PowerUserProvider>

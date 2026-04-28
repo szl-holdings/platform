@@ -57,7 +57,7 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
     notes: 'Verified in April 2026 pen test remediation.',
   },
 
-  // Lyte / szl-holdings claims
+  // KORA / szl-holdings claims
   {
     id: 'lyte-signal-detection-time',
     surface: 'szl-holdings venture card',
@@ -86,7 +86,7 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
     notes: 'No live evaluation data. Must display [Demo] until instrumented.',
   },
 
-  // Vessels claims
+  // SEXTANT claims
   {
     id: 'vessels-count',
     surface: 'szl-holdings venture card',
@@ -107,7 +107,7 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
     notes: 'Demo scenario data. No live dark fleet ML model.',
   },
 
-  // Aegis claims
+  // PARAGON claims
   {
     id: 'aegis-simulations',
     surface: 'szl-holdings, szl-demo-video',
@@ -218,7 +218,7 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
       'When live agents have not produced a brief, the renderer must label content as Synthesized so readers know it is not freshly generated.',
   },
 
-  // Terra claims
+  // DOMAINE claims
   {
     id: 'terra-portfolio-aum',
     surface: 'terra dashboard, carlota-jo case studies',

@@ -187,7 +187,7 @@ curl -X POST https://[host]/api/projects \\
         ]}
       />
 
-      <SubSectionHeader id="samples-vessels" title="Vessels" />
+      <SubSectionHeader id="samples-vessels" title="SEXTANT" />
       <LanguageTabs
         tabs={[
           {

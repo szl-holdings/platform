@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const SECTIONS = [
   {
     title: "Overview",
-    body: "This Acceptable Use Policy (\"AUP\") governs the use of Lyte, Counsel, and all associated products and services operated by SZL Holdings. By accessing or using our platforms, you agree to these terms. Violations may result in account suspension or termination.",
+    body: "This Acceptable Use Policy (\"AUP\") governs the use of KORA, Counsel, and all associated products and services operated by SZL Holdings. By accessing or using our platforms, you agree to these terms. Violations may result in account suspension or termination.",
   },
   {
     title: "Permitted use",
@@ -50,7 +50,7 @@ const SECTIONS = [
 export default function LegalAcceptableUsePage() {
   const __pageMeta = usePageMeta({
     title: "Acceptable Use Policy — Legal · SZL Holdings",
-    description: "SZL Holdings acceptable use policy for Lyte, Counsel, and all platform products and services.",
+    description: "SZL Holdings acceptable use policy for KORA, Counsel, and all platform products and services.",
     canonical: "https://szlholdings.com/legal/acceptable-use",
   });
 

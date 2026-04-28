@@ -2,10 +2,10 @@ import { summarizeContext } from './context-builder.js';
 import type { BriefGenerationContext } from './types.js';
 
 const DOMAIN_AGENT_MAP: Record<string, string> = {
-  terra: 'Terra',
+  terra: 'DOMAINE',
   vessels: 'Helmsman',
   aegis: 'Sentinel',
-  lyte: 'Lyte',
+  lyte: 'KORA',
   prism: 'Lexis',
   'szl-holdings': 'Atlas',
   carlota: 'Counsel',

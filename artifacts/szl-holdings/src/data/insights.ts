@@ -60,37 +60,37 @@ These numbers are real. They are also, frankly, the least interesting part of th
 
 **Vertical integration compounds differently than we expected.** When we wrote the original thesis, we modeled the shared infrastructure savings (unified security overhead, shared intelligence infrastructure) and the data network effects (models trained in one vertical improving adjacent predictions). What we didn't model accurately enough was the *talent* compounding. When you build six platforms under one holding structure, elite engineers and operators see a career trajectory, not a job. Our retention rate across portfolio companies is 91% — a full 23 points above comparable-stage venture-backed companies. The talent moat is real and it was underestimated.
 
-**Domain specificity is a durable moat against foundational model commoditization.** The last 18 months produced the loudest chorus yet: "foundation models will commoditize everything." And yet Vessels closed its largest enterprise contract in February — specifically because its AIS anomaly detection understands *why* a vessel deviates from its route, not just that it did. APEX's model evaluation platform expanded its enterprise footprint by 340% because it can assess model behavior on proprietary, domain-specific data distributions that general benchmarks cannot touch. The world has access to GPT-4 and Claude. It does not have access to five years of maritime routing signals, cybersecurity red team playbooks, and CRE portfolio analytics — all interconnected. That is the moat.
+**Domain specificity is a durable moat against foundational model commoditization.** The last 18 months produced the loudest chorus yet: "foundation models will commoditize everything." And yet SEXTANT closed its largest enterprise contract in February — specifically because its AIS anomaly detection understands *why* a vessel deviates from its route, not just that it did. APEX's model evaluation platform expanded its enterprise footprint by 340% because it can assess model behavior on proprietary, domain-specific data distributions that general benchmarks cannot touch. The world has access to GPT-4 and Claude. It does not have access to five years of maritime routing signals, cybersecurity red team playbooks, and CRE portfolio analytics — all interconnected. That is the moat.
 
-**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When Aegis closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When Lyte was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
+**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When PARAGON closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When KORA was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
 
 ## Where The Work Remains Harder
 
 **Ecosystem integration is a governance challenge, not a technology one.** We have the technical infrastructure to share data and models across six verticals. The harder problem is organizational: ensuring six portfolio companies with their own cultures, customers, and competitive pressures all agree that the ecosystem's long-term compounding value exceeds the short-term cost of data sharing agreements and integration work. We've made significant progress. We have not solved this.
 
-**Our go-to-market motions are not yet as coordinated as our technology.** An MSP selling Lyte Command Center's AIOps platform can, theoretically, also be selling Aegis's security simulation and AI governance tooling. In practice, portfolio cross-sell is at 12% — real, but well below what the integration architecture would support. This is the operational priority for 2026.
+**Our go-to-market motions are not yet as coordinated as our technology.** An MSP selling KORA Command Center's AIOps platform can, theoretically, also be selling PARAGON's security simulation and AI governance tooling. In practice, portfolio cross-sell is at 12% — real, but well below what the integration architecture would support. This is the operational priority for 2026.
 
-**Maritime is harder than we thought, in the right ways.** Vessels operates at the intersection of international maritime law, geopolitical intelligence, and real-time satellite data. Every one of those layers is harder than any adjacent enterprise software market. This is why the competitive moat is extraordinary — and why the sales cycle is longer than we'd like. We are building for a decade-long position in a market that will not be disrupted by a faster iteration cycle.
+**Maritime is harder than we thought, in the right ways.** SEXTANT operates at the intersection of international maritime law, geopolitical intelligence, and real-time satellite data. Every one of those layers is harder than any adjacent enterprise software market. This is why the competitive moat is extraordinary — and why the sales cycle is longer than we'd like. We are building for a decade-long position in a market that will not be disrupted by a faster iteration cycle.
 
 ## The Portfolio in Detail
 
-### Lyte Command Center — AIOps
-$4.2M ARR. 93% year-over-year growth. The AIOps market is consolidating around platforms that can close the loop from signal detection to autonomous remediation, and Lyte has staked out the most defensible position in that transition. We expect Lyte to cross $10M ARR by Q4 2026 and are evaluating a growth equity raise to accelerate enterprise sales.
+### KORA Command Center — AIOps
+$4.2M ARR. 93% year-over-year growth. The AIOps market is consolidating around platforms that can close the loop from signal detection to autonomous remediation, and KORA has staked out the most defensible position in that transition. We expect KORA to cross $10M ARR by Q4 2026 and are evaluating a growth equity raise to accelerate enterprise sales.
 
-### Aegis Security Simulation — Cybersecurity
-Three Fortune 500 clients. MITRE ATT&CK integration certified. The enterprise security simulation market was built on expensive, infrequent red team engagements. Aegis is making continuous adversarial simulation the new baseline — and the market is responding. 2026 focus: federal sector expansion.
+### PARAGON Security Simulation — Cybersecurity
+Three Fortune 500 clients. MITRE ATT&CK integration certified. The enterprise security simulation market was built on expensive, infrequent red team engagements. PARAGON is making continuous adversarial simulation the new baseline — and the market is responding. 2026 focus: federal sector expansion.
 
 ### AI Research — AI/ML
 $14M Series A closed February 2026. The LLM evaluation market is nascent and will be enormous. Every enterprise deploying AI at scale needs a rigorous way to measure model behavior, drift, and risk. SZL APEX is building the standard. The Series A funds GPU infrastructure expansion and the launch of three new evaluation workflow modules.
 
-### Vessels Maritime Intelligence — Maritime
-Vessels has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see Vessels as the eventual flagship platform of the ecosystem.
+### SEXTANT Maritime Intelligence — Maritime
+SEXTANT has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see SEXTANT as the eventual flagship platform of the ecosystem.
 
-### Lyte — Business Telemetry · OBSERVE
-$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Lyte's operational intelligence and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
+### KORA — Business Telemetry · OBSERVE
+$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. KORA's operational intelligence and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
 
 ### Counsel — Execution Fabric · ENGINE
-Counsel is the platform backbone powering Lyte, Vessels, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
+Counsel is the platform backbone powering KORA, SEXTANT, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
 
 ## The Forward Thesis
 
@@ -156,7 +156,7 @@ The breakthrough in maritime AI is not simply processing more AIS data faster. I
 
 ## The Intelligence Gap Is Closing
 
-The Vessels Maritime Intelligence platform integrates all of these signals — AIS, satellite, optical, radar, port call databases, ownership registries, flag state records, and sanctions lists — into a unified inference layer. The system does not wait for a human analyst to ask a question. It continuously monitors the fleet, surfaces anomalies in ranked order by risk severity, and provides the evidentiary chain an analyst needs to escalate with confidence.
+The SEXTANT Maritime Intelligence platform integrates all of these signals — AIS, satellite, optical, radar, port call databases, ownership registries, flag state records, and sanctions lists — into a unified inference layer. The system does not wait for a human analyst to ask a question. It continuously monitors the fleet, surfaces anomalies in ranked order by risk severity, and provides the evidentiary chain an analyst needs to escalate with confidence.
 
 This is not theoretical capability. It is operating against real fleets, in real time. The platform has identified shadow transfer events that preceded formal sanctions designations by an average of 34 days. It has flagged identity spoofing scenarios that manual AIS review missed for months.
 
@@ -193,13 +193,13 @@ The attacker does not have this problem. An adversary who has decided to target 
 
 ## What Changes With AI-Native Simulation
 
-The Aegis Security Simulation platform is built on three architectural principles that make continuous operation viable at scale.
+The PARAGON Security Simulation platform is built on three architectural principles that make continuous operation viable at scale.
 
-**Automated MITRE ATT&CK coverage.** The MITRE ATT&CK framework catalogs over 200 distinct adversary techniques across the full attack lifecycle — from initial access through lateral movement to impact. Manual red teams can cover a meaningful subset of these techniques in a typical engagement. Aegis runs automated campaigns covering the complete ATT&CK matrix against live infrastructure, on a continuous schedule, with no additional human cost per test cycle.
+**Automated MITRE ATT&CK coverage.** The MITRE ATT&CK framework catalogs over 200 distinct adversary techniques across the full attack lifecycle — from initial access through lateral movement to impact. Manual red teams can cover a meaningful subset of these techniques in a typical engagement. PARAGON runs automated campaigns covering the complete ATT&CK matrix against live infrastructure, on a continuous schedule, with no additional human cost per test cycle.
 
-**Adaptive campaign generation.** Static test scripts miss what adaptive adversaries find. Aegis's campaign engine uses reinforcement learning to adapt its attack paths based on defensive responses. If a particular technique is blocked, the system automatically attempts alternative paths — the same adaptation logic a sophisticated human attacker uses, executed at machine speed. This surfaces the second-order vulnerabilities that conventional testing misses.
+**Adaptive campaign generation.** Static test scripts miss what adaptive adversaries find. PARAGON's campaign engine uses reinforcement learning to adapt its attack paths based on defensive responses. If a particular technique is blocked, the system automatically attempts alternative paths — the same adaptation logic a sophisticated human attacker uses, executed at machine speed. This surfaces the second-order vulnerabilities that conventional testing misses.
 
-**Continuous remediation feedback.** Detection is not value. Value is confirmed remediation. Aegis closes the loop between vulnerability identification and fix verification in a single platform, giving security teams a real-time view of open exposure versus confirmed remediation — and providing the audit trail that compliance teams require.
+**Continuous remediation feedback.** Detection is not value. Value is confirmed remediation. PARAGON closes the loop between vulnerability identification and fix verification in a single platform, giving security teams a real-time view of open exposure versus confirmed remediation — and providing the audit trail that compliance teams require.
 
 ## The CISO's New Calculus
 
@@ -329,7 +329,7 @@ The commercial real estate market is not ignoring climate risk. Every major CRE 
 
 ## What AI-Native Intelligence Changes
 
-Lyte integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
+KORA integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
 
 This is not climate reporting bolted onto a separate data source. It is a unified intelligence layer where every financial metric has a climate-adjusted variant: climate-adjusted NOI, climate-adjusted cap rate, climate-adjusted LTV, insurance-adjusted free cash flow. When a portfolio manager is reviewing an acquisition model, the climate risk variables are embedded in the same interface, the same workflow, the same financial model — not in a separate PDF report from a third-party consultant.
 
@@ -439,11 +439,11 @@ Building AIOps systems that can autonomously remediate, rather than just detect 
 
 **Auditability.** In regulated environments and for post-incident review purposes, autonomous remediation actions must be auditable. The system must log what it did, why it concluded that action was appropriate, what data it used to make that conclusion, and what the outcome was. This is not just a compliance requirement — it is the feedback loop that makes the system more reliable over time.
 
-## The Lyte Architecture
+## The KORA Architecture
 
-Lyte Command Center is built on the premise that AIOps without autonomous remediation is an incomplete solution — valuable, but incomplete. The platform integrates the signal intelligence capabilities of first-generation AIOps (alert correlation, noise reduction, incident prioritization) with an autonomous remediation engine that executes against a library of validated playbooks, calibrated by confidence scoring and blast radius assessment.
+KORA Command Center is built on the premise that AIOps without autonomous remediation is an incomplete solution — valuable, but incomplete. The platform integrates the signal intelligence capabilities of first-generation AIOps (alert correlation, noise reduction, incident prioritization) with an autonomous remediation engine that executes against a library of validated playbooks, calibrated by confidence scoring and blast radius assessment.
 
-The operational result is that 68% of incidents handled by the Lyte platform are fully resolved without human intervention. Human operators see the remaining 32% with full remediation context — what was tried automatically, what the system's diagnosis is, what the recommended human actions are — rather than starting from a raw alert. Mean time to resolution across Lyte deployments is 74% lower than the baseline established at deployment. Alert fatigue, measured by operator survey, drops significantly in the first 90 days.
+The operational result is that 68% of incidents handled by the KORA platform are fully resolved without human intervention. Human operators see the remaining 32% with full remediation context — what was tried automatically, what the system's diagnosis is, what the recommended human actions are — rather than starting from a raw alert. Mean time to resolution across KORA deployments is 74% lower than the baseline established at deployment. Alert fatigue, measured by operator survey, drops significantly in the first 90 days.
 
 ## The Market Consequence
 
@@ -465,7 +465,7 @@ The operational pressure to close this gap is not going to decrease. IT team hea
     readTime: 10,
     featured: false,
     flagship: false,
-    tags: ['Business Observability', 'Lyte', 'Operations', 'Enterprise Software'],
+    tags: ['Business Observability', 'KORA', 'Operations', 'Enterprise Software'],
     excerpt:
       "Business observability is not a dashboard. It is not a reporting layer. It is the infrastructure that tells you what is stuck, what is at risk, and what will break — before anyone notices. Here's what that actually means in practice.",
     content: `# What Business Observability Actually Means — And Why It's Not Another Dashboard

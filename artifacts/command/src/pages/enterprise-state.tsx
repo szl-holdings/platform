@@ -322,10 +322,10 @@ const FG_MUT = 'var(--color-fg-muted)';
 
 // ── Domain config ──────────────────────────────────────────────────────────────
 const DOMAINS = {
-  aegis: { name: 'Aegis', color: '#6366f1' },
-  terra: { name: 'Terra', color: '#4d7c0f' },
-  vessels: { name: 'Vessels', color: '#3b82f6' },
-  lyte: { name: 'Lyte', color: '#f59e0b' },
+  aegis: { name: 'PARAGON', color: '#6366f1' },
+  terra: { name: 'DOMAINE', color: '#4d7c0f' },
+  vessels: { name: 'SEXTANT', color: '#3b82f6' },
+  lyte: { name: 'KORA', color: '#f59e0b' },
   prism: { name: 'PRAXIS', color: '#a855f7' },
   carlota: { name: 'Carlota', color: '#c2a55a' },
 } as const;
@@ -342,7 +342,7 @@ const STATE_BOARD_KPIS = [
     delta: '+3',
     trend: 'up',
     color: '#22c55e',
-    causal: 'SLA compliance improved after Lyte latency patch applied last week',
+    causal: 'SLA compliance improved after KORA latency patch applied last week',
   },
   {
     id: 'rv',
@@ -352,7 +352,7 @@ const STATE_BOARD_KPIS = [
     delta: '−$420K',
     trend: 'down',
     color: '#ef4444',
-    causal: 'Carlota pipeline outage + Lyte SLA penalties contributing',
+    causal: 'Carlota pipeline outage + KORA SLA penalties contributing',
   },
   {
     id: 'vp',
@@ -372,7 +372,7 @@ const STATE_BOARD_KPIS = [
     delta: '+34%',
     trend: 'up',
     color: '#a78bfa',
-    causal: 'Lyte AI Signal Summarizer adoption surge driving ARR uplift',
+    causal: 'KORA AI Signal Summarizer adoption surge driving ARR uplift',
   },
   {
     id: 'kc',
@@ -382,7 +382,7 @@ const STATE_BOARD_KPIS = [
     delta: '−1 SLA',
     trend: 'down',
     color: '#f59e0b',
-    causal: '5 of 8 SLAs healthy; 3 breaching across Lyte and Carlota',
+    causal: '5 of 8 SLAs healthy; 3 breaching across KORA and Carlota',
   },
   {
     id: 'aw',
@@ -423,7 +423,7 @@ const CAUSAL_EVENTS = [
     id: 'e3',
     time: '11:45',
     domain: 'aegis' as DomainKey,
-    title: 'Aegis Bundle Size Threshold Warning',
+    title: 'PARAGON Bundle Size Threshold Warning',
     description:
       'Main bundle grew 8.3% this week (1.24MB → 1.34MB). MITRE ATT&CK module loaded eagerly.',
     severity: 'medium',
@@ -445,9 +445,9 @@ const CAUSAL_EVENTS = [
     id: 'e5',
     time: '09:12',
     domain: 'terra' as DomainKey,
-    title: 'Terra Distress Engine Slowdown Reported',
+    title: 'DOMAINE Distress Engine Slowdown Reported',
     description:
-      'Users reporting slow load. Root: Lyte infrastructure latency ripple (e2) + own query issue.',
+      'Users reporting slow load. Root: KORA infrastructure latency ripple (e2) + own query issue.',
     severity: 'medium',
     causedBy: ['e2'],
     causeOf: [] as string[],
@@ -456,7 +456,7 @@ const CAUSAL_EVENTS = [
     id: 'e6',
     time: '08:55',
     domain: 'vessels' as DomainKey,
-    title: 'Vessels Fleet Uptime: 99.8% (7th day)',
+    title: 'SEXTANT Fleet Uptime: 99.8% (7th day)',
     description:
       'Fleet maintaining excellent uptime. Automated anomaly detection firing correctly.',
     severity: 'none',
@@ -484,7 +484,7 @@ const RECOMMENDATIONS = [
   {
     id: 'r2',
     rank: 2,
-    title: 'Add DB Index — Lyte Distress Engine',
+    title: 'Add DB Index — KORA Distress Engine',
     domain: 'lyte' as DomainKey,
     impact: 'high',
     effort: 'low',
@@ -495,7 +495,7 @@ const RECOMMENDATIONS = [
   {
     id: 'r3',
     rank: 3,
-    title: 'Code-Split Aegis MITRE ATT&CK Module',
+    title: 'Code-Split PARAGON MITRE ATT&CK Module',
     domain: 'aegis' as DomainKey,
     impact: 'medium',
     effort: 'medium',
@@ -532,7 +532,7 @@ const ACTIONS = [
   },
   {
     id: 'a2',
-    title: 'Lyte Distress Engine Index Migration',
+    title: 'KORA Distress Engine Index Migration',
     domain: 'lyte' as DomainKey,
     priority: 'high',
     status: 'pending',
@@ -569,7 +569,7 @@ const ACTIONS = [
   },
   {
     id: 'a5',
-    title: 'Vessels Charter Rate Benchmarks Re-activation',
+    title: 'SEXTANT Charter Rate Benchmarks Re-activation',
     domain: 'vessels' as DomainKey,
     priority: 'low',
     status: 'auto-executed',
@@ -595,7 +595,7 @@ const HEATMAP_RISKS = [
   },
   {
     id: 'hr2',
-    title: 'Lyte API SLA Breach',
+    title: 'KORA API SLA Breach',
     domain: 'lyte' as DomainKey,
     domainColor: '#f59e0b',
     probability: 0.72,
@@ -606,7 +606,7 @@ const HEATMAP_RISKS = [
   },
   {
     id: 'hr3',
-    title: 'Aegis Bundle Over-Budget',
+    title: 'PARAGON Bundle Over-Budget',
     domain: 'aegis' as DomainKey,
     domainColor: '#6366f1',
     probability: 0.6,
@@ -617,7 +617,7 @@ const HEATMAP_RISKS = [
   },
   {
     id: 'hr4',
-    title: 'Terra Ownership Graph Decline',
+    title: 'DOMAINE Ownership Graph Decline',
     domain: 'terra' as DomainKey,
     domainColor: '#4d7c0f',
     probability: 0.5,
@@ -642,7 +642,7 @@ const HEATMAP_RISKS = [
 const HEATMAP_OPPS = [
   {
     id: 'ho1',
-    title: 'Lyte Signal Summarizer Expansion',
+    title: 'KORA Signal Summarizer Expansion',
     domain: 'lyte' as DomainKey,
     domainColor: '#f59e0b',
     probability: 0.85,
@@ -653,7 +653,7 @@ const HEATMAP_OPPS = [
   },
   {
     id: 'ho2',
-    title: 'Terra Borough Filter Rollout',
+    title: 'DOMAINE Borough Filter Rollout',
     domain: 'terra' as DomainKey,
     domainColor: '#4d7c0f',
     probability: 0.82,
@@ -675,7 +675,7 @@ const HEATMAP_OPPS = [
   },
   {
     id: 'ho4',
-    title: 'Vessels Voyage Economics',
+    title: 'SEXTANT Voyage Economics',
     domain: 'vessels' as DomainKey,
     domainColor: '#3b82f6',
     probability: 0.6,
@@ -2475,8 +2475,8 @@ function ValueWidgets() {
       icon: TrendingDown,
       breakdown: [
         { label: 'Carlota data pipeline', amount: '$380K', domain: 'carlota' as DomainKey },
-        { label: 'Lyte SLA penalties', amount: '$420K', domain: 'lyte' as DomainKey },
-        { label: 'Aegis bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
+        { label: 'KORA SLA penalties', amount: '$420K', domain: 'lyte' as DomainKey },
+        { label: 'PARAGON bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
       ],
     },
     {
@@ -2486,7 +2486,7 @@ function ValueWidgets() {
       icon: Shield,
       breakdown: [
         { label: 'Automated incident response', amount: '$1.2M', domain: 'aegis' as DomainKey },
-        { label: 'AI deal pre-triage (Terra)', amount: '$340K', domain: 'terra' as DomainKey },
+        { label: 'AI deal pre-triage (DOMAINE)', amount: '$340K', domain: 'terra' as DomainKey },
       ],
     },
     {
@@ -2495,8 +2495,8 @@ function ValueWidgets() {
       color: ACCENT,
       icon: TrendingUp,
       breakdown: [
-        { label: 'Lyte Signal Summarizer ARR', amount: '$820K', domain: 'lyte' as DomainKey },
-        { label: 'Terra borough filter', amount: '$140K', domain: 'terra' as DomainKey },
+        { label: 'KORA Signal Summarizer ARR', amount: '$820K', domain: 'lyte' as DomainKey },
+        { label: 'DOMAINE borough filter', amount: '$140K', domain: 'terra' as DomainKey },
       ],
     },
   ];

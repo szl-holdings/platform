@@ -162,7 +162,7 @@ export const ANOMALY_PATTERNS: AnomalyPattern[] = [
             severity,
             title: `${threatEntity.label} sanctions exposure while ${vessel.label} routes shift + linked property stress`,
             description: `${vessel.label} (${transitCount} Red Sea transits in 30d, ${aisGap}h AIS gap) is operated by entity with ${threatEntity.domainData.threat?.ofacMatchConfidence ?? 0}% OFAC SDN match. ${linkedProperties.length > 0 ? `${linkedProperties.length} linked real estate asset(s) showing distress ≥ 60. ` : ''}Pattern is consistent with sanctioned-entity capital repatriation behavior.`,
-            domains: ['Vessels', 'Threat', ...(linkedProperties.length > 0 ? ['Property'] : [])],
+            domains: ['SEXTANT', 'Threat', ...(linkedProperties.length > 0 ? ['Property'] : [])],
             involvedEntityIds,
             involvedEdgeIds: linkedEdgeIds,
             confidence,
@@ -473,7 +473,7 @@ export const ANOMALY_PATTERNS: AnomalyPattern[] = [
         );
         const hasThreatRisk = networkEntities.some((e) => e.type === 'threat' && e.riskScore >= 70);
 
-        if (hasVesselRisk) stressedDomains.push('Vessels');
+        if (hasVesselRisk) stressedDomains.push('SEXTANT');
         if (hasLegalRisk) stressedDomains.push('Legal');
         if (hasPropertyRisk) stressedDomains.push('Property');
         if (hasFinancialRisk) stressedDomains.push('Financial');

@@ -30,7 +30,7 @@ const PRIMITIVES = [
 const DOMAIN_PACKS = [
   {
     id: 'aegis',
-    label: 'Aegis',
+    label: 'PARAGON',
     sublabel: 'Security & Defense',
     color: 'hsl(222,60%,58%)',
     bg: 'hsla(222,60%,58%,0.07)',
@@ -38,7 +38,7 @@ const DOMAIN_PACKS = [
   },
   {
     id: 'vessels',
-    label: 'Vessels',
+    label: 'SEXTANT',
     sublabel: 'Maritime Intelligence',
     color: 'hsl(205,85%,55%)',
     bg: 'hsla(205,85%,55%,0.07)',
@@ -46,7 +46,7 @@ const DOMAIN_PACKS = [
   },
   {
     id: 'terra',
-    label: 'Terra',
+    label: 'DOMAINE',
     sublabel: 'Real Estate Intelligence',
     color: 'hsl(140,52%,46%)',
     bg: 'hsla(140,52%,46%,0.07)',

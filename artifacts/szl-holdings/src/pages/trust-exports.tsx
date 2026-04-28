@@ -57,7 +57,7 @@ const WRITE_BACK_CONTROLS = [
 export default function TrustExportsPage() {
   const __pageMeta = usePageMeta({
     title: "Exports — Trust Center · SZL Holdings",
-    description: "Export model, write-back controls, proof chain, and document generation governance for Lyte + Counsel.",
+    description: "Export model, write-back controls, proof chain, and document generation governance for KORA + Counsel.",
     canonical: "https://szlholdings.com/trust/exports",
   });
 

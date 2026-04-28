@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 const NODES = [
   {
     id: 'aegis',
-    name: 'Aegis Command',
+    name: 'PARAGON Command',
     role: 'Defense & Intelligence',
     agent: 'Sentinel Engine',
     color: 'text-indigo-400',
@@ -21,7 +21,7 @@ const NODES = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     role: 'Spinal Cord',
     agent: 'Intelligence Hub',
     color: 'text-[#d4a054]',
@@ -33,7 +33,7 @@ const NODES = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     role: 'Maritime Organ',
     agent: 'Maritime Analyst',
     color: 'text-cyan-400',
@@ -45,7 +45,7 @@ const NODES = [
   },
   {
     id: 'msp',
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     color: 'text-[#c45a4a]',
@@ -57,7 +57,7 @@ const NODES = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     role: 'Real Estate Intelligence Organ',
     agent: 'Deal Scout',
     color: 'text-[#6b8f71]',
@@ -145,7 +145,7 @@ const AGENT_ACTIVITY: {
 }[] = [
   {
     time: 'now',
-    app: 'Vessels',
+    app: 'SEXTANT',
     agent: 'Maritime Analyst',
     action: 'Dark vessel alert: MV Poseidon off Strait of Malacca',
     type: 'signal',
@@ -166,14 +166,14 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '45s',
-    app: 'Aegis Operations',
+    app: 'PARAGON Operations',
     agent: 'IT Sentinel',
     action: 'Auto-remediated memory leak — TKT-4821 closed',
     type: 'reflex',
   },
   {
     time: '1m',
-    app: 'Terra',
+    app: 'DOMAINE',
     agent: 'Deal Scout',
     action: 'Off-market opportunity flagged: Brickell, Miami — $4.2M cap rate 7.1%',
     type: 'signal',
@@ -194,7 +194,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '2m 30s',
-    app: 'Aegis SOC',
+    app: 'PARAGON SOC',
     agent: 'Security Sentinel LLM',
     action: 'Blocked external write — agent action escalated for review',
     type: 'policy',

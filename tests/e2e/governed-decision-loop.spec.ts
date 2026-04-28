@@ -97,9 +97,9 @@ test.describe('Governed Decision Loop — Page shell', () => {
     await expect(heading).toBeVisible({ timeout: 15000 });
   });
 
-  test('page renders the Lyte · Governed Decision Loop label', async ({ page }) => {
+  test('page renders the KORA · Governed Decision Loop label', async ({ page }) => {
     await goToLoop(page);
-    const label = page.locator('text=Lyte · Governed Decision Loop');
+    const label = page.locator('text=KORA · Governed Decision Loop');
     await expect(label).toBeVisible({ timeout: 15000 });
   });
 
@@ -256,8 +256,8 @@ test.describe('Governed Decision Loop — Step 2: Context', () => {
     });
   });
 
-  test('Aegis cross-domain signal is displayed', async ({ page }) => {
-    await expect(page.locator('text=Aegis').first()).toBeVisible({
+  test('PARAGON cross-domain signal is displayed', async ({ page }) => {
+    await expect(page.locator('text=PARAGON').first()).toBeVisible({
       timeout: 10000,
     });
   });

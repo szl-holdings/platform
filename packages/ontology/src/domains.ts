@@ -12,7 +12,7 @@ export const DOMAINS = [
   'platform', // cross-cutting governance, identity, billing, and policy
   'vessels', // maritime intelligence — fleet, voyages, AIS, sanctions
   'terra', // real estate intelligence — property, ownership, distress
-  'security', // defense, threat intelligence, incident response (Aegis)
+  'security', // defense, threat intelligence, incident response (PARAGON)
   'counsel', // legal matter management (Counsel / prism-counsel)
   'carlota', // advisory and client portal (Carlota Jo)
   'pulse', // AI executive briefing

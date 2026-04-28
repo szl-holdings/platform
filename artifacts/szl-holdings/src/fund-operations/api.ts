@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
 export const PORTFOLIO_COMPANIES = [
-  { slug: 'vessels', name: 'Vessels', color: '#4a90b8' },
-  { slug: 'aegis', name: 'Aegis', color: '#c45a4a' },
-  { slug: 'terra', name: 'Terra', color: '#c8953c' },
+  { slug: 'vessels', name: 'SEXTANT', color: '#4a90b8' },
+  { slug: 'aegis', name: 'PARAGON', color: '#c45a4a' },
+  { slug: 'terra', name: 'DOMAINE', color: '#c8953c' },
   { slug: 'prism-counsel', name: 'Counsel', color: '#d4a054' },
   { slug: 'carlota-jo', name: 'Carlota Jo', color: '#8b7ac8' },
-  { slug: 'lyte', name: 'Lyte', color: '#6aaa72' },
+  { slug: 'lyte', name: 'KORA', color: '#6aaa72' },
 ];
 
 export function fmt(n: number, currency = true): string {

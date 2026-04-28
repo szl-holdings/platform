@@ -40,7 +40,7 @@ interface EvalSuite {
 const EVAL_SUITES: EvalSuite[] = [
   {
     id: 'aegis-threat-score-v3',
-    name: 'Aegis Threat Scorer v3',
+    name: 'PARAGON Threat Scorer v3',
     domain: 'aegis',
     description: 'Tests CVE severity scoring with CVSS weighting and asset exposure context.',
     model: 'claude-3-5-sonnet-20241022',
@@ -64,11 +64,11 @@ const EVAL_SUITES: EvalSuite[] = [
     baselinePassRate: 0.86,
     baselineScore: 85.8,
     cases: [
-      { id: 'case-101', input: '3 domain signals: Aegis CVE, Vessels port risk, Terra distress', expected: 'BLUF in ≤1 sentence, exactly 5 insights, all with confidence %', rationale: 'Output had BLUF and 5 insights. Confidence percentages present. BLUF was 2 sentences — marginal pass.' },
+      { id: 'case-101', input: '3 domain signals: PARAGON CVE, SEXTANT port risk, DOMAINE distress', expected: 'BLUF in ≤1 sentence, exactly 5 insights, all with confidence %', rationale: 'Output had BLUF and 5 insights. Confidence percentages present. BLUF was 2 sentences — marginal pass.' },
       { id: 'case-102', input: '7 domain signals across all domains', expected: 'Top 5 signals selected by urgency×novelty', rationale: 'Correctly selected top 5 from 7. Urgency ranking matches expected order.' },
       { id: 'case-103', input: '5 signals, 2 already seen in prior brief (suppression list provided)', expected: '3 new insights selected, 2 suppressed', rationale: 'Suppression logic correct. New signals ranked above retained stale ones.' },
       { id: 'case-104', input: '4 signals, 2 within last 4 hours', expected: 'Recent signals appear in top 2 positions', rationale: 'Recency boost applied correctly. Recent signals ranked 1st and 2nd.' },
-      { id: 'case-105', input: 'Single cross-domain correlation signal (Aegis+Vessels)', expected: 'Cross-domain insight highlighted with both domain labels', rationale: 'Cross-domain labeling present. Insight ranked #1 by novelty — correct.' },
+      { id: 'case-105', input: 'Single cross-domain correlation signal (PARAGON+SEXTANT)', expected: 'Cross-domain insight highlighted with both domain labels', rationale: 'Cross-domain labeling present. Insight ranked #1 by novelty — correct.' },
     ],
   },
   {
@@ -80,7 +80,7 @@ const EVAL_SUITES: EvalSuite[] = [
     baselinePassRate: 0.89,
     baselineScore: 88.9,
     cases: [
-      { id: 'case-201', input: 'Intent: "Summarize threat + fleet risk then brief exec"', expected: 'Aegis and Vessels steps parallelized, Pulse step depends on both', rationale: 'Parallel steps identified correctly. Dependency graph is acyclic. Contingency paths present.' },
+      { id: 'case-201', input: 'Intent: "Summarize threat + fleet risk then brief exec"', expected: 'PARAGON and SEXTANT steps parallelized, Pulse step depends on both', rationale: 'Parallel steps identified correctly. Dependency graph is acyclic. Contingency paths present.' },
       { id: 'case-202', input: 'Intent: "Score CVE then update asset risk register"', expected: 'Sequential: score → update (data dependency)', rationale: 'Sequential correctly chosen when data dependency exists. No unnecessary parallelism.' },
       { id: 'case-203', input: 'Intent: "Cross-correlate all domain signals"', expected: 'All domain pulls parallel, correlation step gated', rationale: 'All domain steps parallelized. Correlation step correctly depends_on all. Estimated latency within 20% of p50.' },
       { id: 'case-204', input: 'Intent requiring human approval (contract > $500k)', expected: 'Human approval flag on relevant step', rationale: 'Human approval flagged on financial authorization step. Gate inserted correctly.' },
@@ -88,7 +88,7 @@ const EVAL_SUITES: EvalSuite[] = [
   },
   {
     id: 'aegis-red-team',
-    name: 'Aegis Adversarial Red Team',
+    name: 'PARAGON Adversarial Red Team',
     domain: 'aegis',
     description: 'Red-team cases: prompt injection, data exfiltration attempts, jailbreak patterns.',
     model: 'claude-3-5-sonnet-20241022',
@@ -149,11 +149,11 @@ const SCRIPTED_ACTUAL_OUTPUTS: Record<string, { actual: string; passed: boolean;
   'case-004': { actual: '{ "adjusted_score": 6.0, "severity_tier": "MEDIUM", "exposure_multiplier": 1.4, "rationale": "CVSS 4.3 × 1.4 = 6.02, rounded to 6.0." }', passed: true, score: 88 },
   'case-005': { actual: '{ "adjusted_score": 5.5, "severity_tier": "MEDIUM", "exposure_multiplier": 0.6, "rationale": "CVSS 9.1 × 0.6 = 5.46, rounded to 5.5." }', passed: true, score: 85 },
   'case-006': { actual: '{ "adjusted_score": 2.9, "severity_tier": "LOW", "exposure_multiplier": 1.4, "rationale": "CVSS 2.1 × 1.4 = 2.94. LOW tier." }', passed: true, score: 92 },
-  'case-101': { actual: 'BLUF: Cross-domain risk elevated across Aegis, Vessels, and Terra. Insights: [1] CVE-2024-1234... [5 total]. Confidence: 91%, 87%, 83%, 79%, 74%.', passed: true, score: 84 },
+  'case-101': { actual: 'BLUF: Cross-domain risk elevated across PARAGON, SEXTANT, and DOMAINE. Insights: [1] CVE-2024-1234... [5 total]. Confidence: 91%, 87%, 83%, 79%, 74%.', passed: true, score: 84 },
   'case-102': { actual: 'Top 5 selected from 7 signals by urgency×novelty. Items 4,5 omitted (lower novelty scores). Ranking matches expected order.', passed: true, score: 90 },
   'case-103': { actual: '3 new insights selected. Suppressed: insight-id-7, insight-id-12. Ranking: new signals above retained.', passed: true, score: 92 },
-  'case-104': { actual: 'Position 1: Aegis CVE (2h old, recency-boosted). Position 2: Vessels port alert (1h old, boosted). Positions 3-5: older signals.', passed: true, score: 95 },
-  'case-105': { actual: 'Cross-domain insight: "Aegis threat actor IP matches Vessels port-call destination [Aegis+Vessels]". Ranked #1 by novelty.', passed: true, score: 97 },
+  'case-104': { actual: 'Position 1: PARAGON CVE (2h old, recency-boosted). Position 2: SEXTANT port alert (1h old, boosted). Positions 3-5: older signals.', passed: true, score: 95 },
+  'case-105': { actual: 'Cross-domain insight: "PARAGON threat actor IP matches SEXTANT port-call destination [PARAGON+SEXTANT]". Ranked #1 by novelty.', passed: true, score: 97 },
   'case-201': { actual: 'Plan: Step 1a: aegis/fetch_threat (parallel), Step 1b: vessels/query_positions (parallel), Step 2: nexus/lumina_brief (depends_on: 1a,1b). Contingency: each step has fallback to cached data.', passed: true, score: 94 },
   'case-202': { actual: 'Plan: Step 1: aegis/score_cve, Step 2: aegis/update_register (depends_on: [1]). Sequential. No parallelism possible.', passed: true, score: 96 },
   'case-203': { actual: 'Plan: Steps 1-4 parallelized (all domain pulls). Step 5: command/correlate (depends_on: [1,2,3,4]). Estimated latency: 4.8s.', passed: true, score: 91 },

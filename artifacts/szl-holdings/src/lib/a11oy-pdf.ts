@@ -337,7 +337,7 @@ function buildPhilosophyDoc(): jsPDF {
     },
     {
       num: "05", name: "Event Fabric (PRAXIS Bus)", element: "Machine Intelligence at platform scale",
-      body: "Cross-domain signal correlation that no single-domain tool can produce. A sanctions hit in Vessels can surface a legal risk flag in Counsel, triggering a policy escalation in Lyte. Each domain pack added multiplies the correlation value. The more domains, the more intelligence — unavailable anywhere else.",
+      body: "Cross-domain signal correlation that no single-domain tool can produce. A sanctions hit in SEXTANT can surface a legal risk flag in Counsel, triggering a policy escalation in KORA. Each domain pack added multiplies the correlation value. The more domains, the more intelligence — unavailable anywhere else.",
     },
     {
       num: "06", name: "Domain-Pack Architecture", element: "Structural Governance without structural tax",
@@ -774,7 +774,7 @@ function buildCompetitiveBriefDoc(): jsPDF {
     {
       num: "04",
       title: "Cross-Domain Signal Correlation",
-      body: "Intelligence that grows with each domain pack added. A sanctions hit in Vessels can surface a legal risk flag in Counsel, triggering a policy escalation in Lyte. This intelligence is unavailable in any single-domain tool, by definition.",
+      body: "Intelligence that grows with each domain pack added. A sanctions hit in SEXTANT can surface a legal risk flag in Counsel, triggering a policy escalation in KORA. This intelligence is unavailable in any single-domain tool, by definition.",
     },
     {
       num: "05",

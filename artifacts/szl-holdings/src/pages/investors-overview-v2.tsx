@@ -31,12 +31,12 @@ type OverviewContent = {
 };
 
 const platformMap = [
-  { name: "Lyte", role: "Flagship command surface — PRAXIS framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
+  { name: "KORA", role: "Flagship command surface — PRAXIS framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
   { name: "Counsel", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/continuum-fabric" },
   { name: "APEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
-  { name: "Aegis", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
-  { name: "Vessels", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
-  { name: "Terra", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
+  { name: "PARAGON", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
+  { name: "SEXTANT", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
+  { name: "DOMAINE", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
   { name: "Counsel", role: "Domain pack — Legal matter command, deadlines, proof chain, export safety", color: "#6aaa72", href: "/counsel" },
   { name: "Carlota Jo", role: "Domain pack — Premium advisory, client portal, structured delivery model", color: "#a0a0c0", href: "/carlota-jo" },
 ];
@@ -78,8 +78,8 @@ const INVESTOR_CLAIMS = [
   {
     claim: "Live threat intelligence — CISA KEV, NVD CVE, MITRE ATT&CK",
     manifestStatus: "live" as const,
-    evidence: "Aegis CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
-    capId: "Aegis",
+    evidence: "PARAGON CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
+    capId: "PARAGON",
   },
   {
     claim: "Multi-tenant RBAC with org-level data isolation",
@@ -90,8 +90,8 @@ const INVESTOR_CLAIMS = [
   {
     claim: "NYC distress property pipeline — live government data",
     manifestStatus: "live" as const,
-    evidence: "Terra CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
-    capId: "Terra",
+    evidence: "DOMAINE CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
+    capId: "DOMAINE",
   },
   {
     claim: "AI agents advisory-only — no autonomous execution",
@@ -258,8 +258,8 @@ export default function InvestorsOverviewPage() {
                   <h3 className="mt-4 text-base font-semibold text-white">Entry motion</h3>
                   <p className="mt-2 text-sm leading-6 text-white/60">
                     Design partner program — 3–6 partners per domain, co-designing the product in exchange for
-                    early access and preferred pricing. Primary domains: maritime (Vessels), security (Aegis),
-                    real estate (Terra).
+                    early access and preferred pricing. Primary domains: maritime (SEXTANT), security (PARAGON),
+                    real estate (DOMAINE).
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">

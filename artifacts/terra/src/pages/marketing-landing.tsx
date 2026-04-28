@@ -230,7 +230,7 @@ export default function TerraMarketingLanding() {
             >
               <Building2 size={13} style={{ color: GOLD_LIGHT }} />
             </div>
-            <span className="font-bold text-sm tracking-tight text-white">Terra</span>
+            <span className="font-bold text-sm tracking-tight text-white">DOMAINE</span>
             <span
               className="hidden sm:inline text-[9px] tracking-[0.14em] uppercase ml-1"
               style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}
@@ -290,7 +290,7 @@ export default function TerraMarketingLanding() {
               className="text-[17px] sm:text-[19px] leading-[1.85] max-w-[580px] mt-8 mb-12"
               style={{ color: 'rgba(255,255,255,0.5)' }}
             >
-              Terra gives investors, brokers, and portfolio teams a single operating surface
+              DOMAINE gives investors, brokers, and portfolio teams a single operating surface
               — from distressed property discovery through ownership analysis, pipeline
               management, and deal execution. NYC and NYS, live.
             </p>
@@ -386,7 +386,7 @@ export default function TerraMarketingLanding() {
                 </span>.
               </p>
               <p>
-                Terra replaces the 14 browser tabs, three paid data services, and two hours of
+                DOMAINE replaces the 14 browser tabs, three paid data services, and two hours of
                 morning research that stand between you and your first actionable lead of
                 the day.
               </p>
@@ -480,8 +480,8 @@ export default function TerraMarketingLanding() {
                 className="text-[14px] leading-[1.8] mb-6"
                 style={{ color: 'rgba(255,255,255,0.4)' }}
               >
-                Terra operates within A11oy&rsquo;s governed intelligence fabric. Maritime delays
-                from Vessels trigger logistics clause alerts. Cyber posture changes from Sentra
+                DOMAINE operates within A11oy&rsquo;s governed intelligence fabric. Maritime delays
+                from SEXTANT trigger logistics clause alerts. Cyber posture changes from Sentra
                 affect insured property values. Lease expiry clusters surface in Counsel. Every
                 lane is connected.
               </p>
@@ -505,7 +505,7 @@ export default function TerraMarketingLanding() {
           <div className="flex items-center gap-2">
             <Building2 size={12} style={{ color: GOLD_LIGHT }} />
             <span className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
-              Terra &middot; SZL Holdings
+              DOMAINE &middot; SZL Holdings
             </span>
           </div>
           <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>

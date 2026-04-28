@@ -8,7 +8,7 @@ const GOVERNANCE_CONTROLS = [
   {
     icon: Eye,
     title: "Open-source maritime data only",
-    body: "Vessels ingests from public maritime APIs — AIS transponder feeds, NWS weather data, BTS port statistics, NOAA charts. No classified, proprietary, or commercially restricted sources without explicit provenance.",
+    body: "SEXTANT ingests from public maritime APIs — AIS transponder feeds, NWS weather data, BTS port statistics, NOAA charts. No classified, proprietary, or commercially restricted sources without explicit provenance.",
   },
   {
     icon: Radio,
@@ -38,8 +38,8 @@ const DATA_SOURCES = [
 
 export default function SolutionsVesselsTrustPage() {
   const __pageMeta = usePageMeta({
-    title: "Vessels Trust & Data Governance · SZL Holdings",
-    description: "How Vessels sources, processes, and governs maritime intelligence with open-source data, signal attribution, and fleet data isolation.",
+    title: "SEXTANT Trust & Data Governance · SZL Holdings",
+    description: "How SEXTANT sources, processes, and governs maritime intelligence with open-source data, signal attribution, and fleet data isolation.",
     canonical: "https://szlholdings.com/solutions/vessels/trust",
   });
 
@@ -52,13 +52,13 @@ export default function SolutionsVesselsTrustPage() {
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
           <div className="flex items-center gap-2 mb-4">
             <Anchor className="w-5 h-5 text-[#4a90b8]" />
-            <span className="text-[11px] font-medium text-[#4a90b8] uppercase tracking-widest">Vessels · Trust</span>
+            <span className="text-[11px] font-medium text-[#4a90b8] uppercase tracking-widest">SEXTANT · Trust</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
             Open-source data. Traceable signals.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
-            Vessels provides maritime operational intelligence built on public maritime data feeds with full signal attribution. Every position, forecast, and recommendation is traceable to its source and processing pipeline.
+            SEXTANT provides maritime operational intelligence built on public maritime data feeds with full signal attribution. Every position, forecast, and recommendation is traceable to its source and processing pipeline.
           </p>
           <div className="flex items-center gap-3">
             <Link href="/solutions/vessels">
@@ -77,7 +77,7 @@ export default function SolutionsVesselsTrustPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Governance Controls</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            How Vessels ensures data provenance, fleet isolation, and operational accountability across maritime intelligence.
+            How SEXTANT ensures data provenance, fleet isolation, and operational accountability across maritime intelligence.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {GOVERNANCE_CONTROLS.map((c) => (
@@ -95,7 +95,7 @@ export default function SolutionsVesselsTrustPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Verified Data Sources</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            Vessels ingests from authoritative public maritime data feeds. Every data point includes source attribution and signal freshness metadata.
+            SEXTANT ingests from authoritative public maritime data feeds. Every data point includes source attribution and signal freshness metadata.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {DATA_SOURCES.map((s) => (
@@ -119,7 +119,7 @@ export default function SolutionsVesselsTrustPage() {
             </p>
             <Link href="/solutions/vessels">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20 hover:bg-[#4a90b8]/20 transition-colors cursor-pointer">
-                Explore Vessels <ArrowRight className="w-4 h-4" />
+                Explore SEXTANT <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
           </div>

@@ -113,7 +113,7 @@ export default function MarketingCapabilitiesPage() {
             Every intelligence layer your fleet operation needs
           </h1>
           <p className="text-sky-300/40 text-[15px] max-w-2xl leading-relaxed">
-            From AIS position tracking to voyage P&L to compliance screening — Vessels covers the
+            From AIS position tracking to voyage P&L to compliance screening — SEXTANT covers the
             full operational intelligence stack in one platform.
           </p>
         </div>

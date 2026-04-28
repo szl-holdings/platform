@@ -34,7 +34,7 @@ export function MarketingNav() {
           <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
             <Ship className="w-4 h-4 text-[#c9b787]" />
           </div>
-          <span className="font-bold text-[14px] text-[#f5f5f5] tracking-tight">Vessels</span>
+          <span className="font-bold text-[14px] text-[#f5f5f5] tracking-tight">SEXTANT</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-7">

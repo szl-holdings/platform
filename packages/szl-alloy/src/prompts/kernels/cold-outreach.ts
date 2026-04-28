@@ -52,7 +52,7 @@ Write each touch with:
         type: 'string',
         description: 'Sender company',
         required: true,
-        example: 'Terra Intelligence',
+        example: 'DOMAINE Intelligence',
       },
       {
         name: 'prospectName',
@@ -87,7 +87,7 @@ Write each touch with:
         type: 'string',
         description: 'Core value proposition to communicate',
         required: true,
-        example: 'Terra helps acquisition teams surface ESG-scored properties 3x faster',
+        example: 'DOMAINE helps acquisition teams surface ESG-scored properties 3x faster',
       },
       {
         name: 'sequenceLength',
@@ -163,12 +163,12 @@ Write each touch with:
         description: 'CRE acquisition outreach',
         input: {
           senderName: 'Alex Rivera',
-          senderCompany: 'Terra Intelligence',
+          senderCompany: 'DOMAINE Intelligence',
           prospectName: 'Marcus Webb',
           prospectCompany: 'Sunbelt Realty Group',
           prospectRole: 'Director of Acquisitions',
           prospectSignals: 'Shared ESG due diligence post on LinkedIn 3 days ago',
-          valueProp: 'Terra surfaces ESG-scored Sunbelt properties 3x faster',
+          valueProp: 'DOMAINE surfaces ESG-scored Sunbelt properties 3x faster',
           sequenceLength: 2,
           channel: 'email',
         },

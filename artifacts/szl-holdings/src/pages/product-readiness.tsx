@@ -128,10 +128,10 @@ function ProductRow({ product }: { product: ProductSummary }) {
 }
 
 const SOLUTION_BRIEFS: Array<{ slug: string; product: string; label: string; href: string }> = [
-  { slug: "lyte", product: "Lyte (Business Observability)", label: "Lyte — Decision Intelligence", href: "/briefs/lyte-solution-brief.pdf" },
-  { slug: "aegis", product: "Aegis (Defense & Intelligence)", label: "Aegis — Unified Defense", href: "/briefs/aegis-solution-brief.pdf" },
-  { slug: "vessels", product: "Vessels (Maritime Intelligence)", label: "Vessels — Maritime Intelligence", href: "/briefs/vessels-solution-brief.pdf" },
-  { slug: "terra", product: "Terra (Real Estate Intelligence)", label: "Terra — Real Estate Intelligence", href: "/briefs/terra-solution-brief.pdf" },
+  { slug: "lyte", product: "KORA (Business Observability)", label: "KORA — Decision Intelligence", href: "/briefs/lyte-solution-brief.pdf" },
+  { slug: "aegis", product: "PARAGON (Defense & Intelligence)", label: "PARAGON — Unified Defense", href: "/briefs/aegis-solution-brief.pdf" },
+  { slug: "vessels", product: "SEXTANT (Maritime Intelligence)", label: "SEXTANT — Maritime Intelligence", href: "/briefs/vessels-solution-brief.pdf" },
+  { slug: "terra", product: "DOMAINE (Real Estate Intelligence)", label: "DOMAINE — Real Estate Intelligence", href: "/briefs/terra-solution-brief.pdf" },
   { slug: "carlota-jo", product: "Carlota Jo (Private Advisory)", label: "Carlota Jo — Private Advisory", href: "/briefs/carlota-jo-solution-brief.pdf" },
 ];
 
@@ -197,14 +197,14 @@ function SolutionBriefDownloads({ products }: { products: ProductSummary[] }) {
 }
 
 const FOCUSED_PRODUCTS = [
-  "Lyte (Business Observability)",
-  "Aegis (Defense & Intelligence)",
-  "Vessels (Maritime Intelligence)",
-  "Terra (Real Estate Intelligence)",
+  "KORA (Business Observability)",
+  "PARAGON (Defense & Intelligence)",
+  "SEXTANT (Maritime Intelligence)",
+  "DOMAINE (Real Estate Intelligence)",
   "Carlota Jo (Private Advisory)",
   "API Server",
   "SZL Holdings Corporate",
-  "Aegis (Cyber Resilience)",
+  "PARAGON (Cyber Resilience)",
   "Command (Unified Command Portal)",
   "SZL Holdings Mobile",
   "Packages (Marketplace)",

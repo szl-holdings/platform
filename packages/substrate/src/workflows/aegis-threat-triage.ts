@@ -1,7 +1,7 @@
 /**
- * @szl/substrate — Aegis Vertical Pack: Threat Triage and Escalation Routing
+ * @szl/substrate — PARAGON Vertical Pack: Threat Triage and Escalation Routing
  *
- * Ingests threat signals from Aegis, performs AI-assisted triage to classify
+ * Ingests threat signals from PARAGON, performs AI-assisted triage to classify
  * severity, assigns routing targets (SOC tier, IR team, executive brief),
  * and gates any response action through an operator approval before dispatch.
  *
@@ -27,9 +27,9 @@ import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 export const aegisThreatTriageWorkflow = defineWorkflow({
   id: 'aegis-threat-triage',
-  name: 'Aegis — Threat Triage and Escalation Routing',
+  name: 'PARAGON — Threat Triage and Escalation Routing',
   description:
-    'Ingests threat signals from Aegis, classifies severity via AI-assisted triage, ' +
+    'Ingests threat signals from PARAGON, classifies severity via AI-assisted triage, ' +
     'assigns escalation routing targets, and gates response actions through operator approval.',
   version: '1.0.0',
   domain: 'aegis',
@@ -37,7 +37,7 @@ export const aegisThreatTriageWorkflow = defineWorkflow({
 
   policy: definePolicy({
     id: 'aegis-threat-triage-policy',
-    name: 'Aegis Threat Triage Policy',
+    name: 'PARAGON Threat Triage Policy',
     highRiskCategories: ['escalation', 'notification', 'write-external', 'infrastructure'],
     policyIds: ['pol-001', 'pol-002', 'pol-aegis-triage'],
     minimumApprovalTier: 'operator',
@@ -50,7 +50,7 @@ export const aegisThreatTriageWorkflow = defineWorkflow({
       id: 'retrieve-threat-signals',
       name: 'Retrieve: Threat Signal Corpus',
       description:
-        'Retrieves the latest threat signals from the Aegis signal mesh: CVEs, alert clusters, ' +
+        'Retrieves the latest threat signals from the PARAGON signal mesh: CVEs, alert clusters, ' +
         'MITRE ATT&CK hits, dark-fleet correlations, and prior IR context.',
       retrieverAdapterId: 'aegis-retriever',
       topK: 35,

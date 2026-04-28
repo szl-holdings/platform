@@ -30,7 +30,7 @@ export const WithBreadcrumbs: Story = {
   args: {
     breadcrumbs: [
       { label: 'SZL Holdings', href: '#' },
-      { label: 'Aegis', href: '#' },
+      { label: 'PARAGON', href: '#' },
       { label: 'Threat Analysis' },
     ],
     tenantLabel: 'SZL Holdings — Production',
@@ -39,7 +39,7 @@ export const WithBreadcrumbs: Story = {
 
 export const WithStatusBadge: Story = {
   args: {
-    title: 'Aegis Command',
+    title: 'PARAGON Command',
     tenantLabel: 'SZL Holdings',
     statusBadge: <StatusBadge variant="active" label="Live" showDot />,
   },

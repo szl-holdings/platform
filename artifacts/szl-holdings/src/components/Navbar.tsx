@@ -8,8 +8,8 @@ import { NotificationBell } from './NotificationBell';
 const navLinks = [
   { label: 'Ecosystem', href: '/ecosystem' },
   { label: 'Counsel', href: '/continuum', external: '/continuum/' },
-  { label: 'Lyte', href: '/lyte', external: '/command/operations/' },
-  { label: 'Vessels', href: '/vessels', external: '/vessels/' },
+  { label: 'KORA', href: '/lyte', external: '/command/operations/' },
+  { label: 'SEXTANT', href: '/vessels', external: '/vessels/' },
   { label: 'Trust', href: '/trust' },
   { label: 'Pulse', href: '/pulse' },
   { label: 'Leadership', href: '/leadership' },

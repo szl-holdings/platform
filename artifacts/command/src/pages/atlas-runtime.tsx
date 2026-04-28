@@ -62,12 +62,12 @@ interface AegisIncident {
 }
 
 const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof Globe }> = {
-  aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield },
-  terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe },
-  vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network },
+  aegis: { label: 'PARAGON — Defense', color: '#ef4444', icon: Shield },
+  terra: { label: "DOMAINE — Real Estate", color: '#10b981', icon: Globe },
+  vessels: { label: 'SEXTANT — Maritime', color: '#06b6d4', icon: Network },
   continuum: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe },
-  lyte: { label: "Lyte — AIOps", color: '#d4a054', icon: Activity },
+  lyte: { label: "KORA — AIOps", color: '#d4a054', icon: Activity },
 };
 
 const STATE_CONFIG: Record<
@@ -97,7 +97,7 @@ const STATE_CONFIG: Record<
 const SEED_TWINS: CrossDomainTwin[] = [
   {
     id: 'tw-aeg-001',
-    name: 'Aegis Posture Twin',
+    name: 'PARAGON Posture Twin',
     domain: 'aegis',
     state: 'degraded',
     driftScore: 28,
@@ -109,7 +109,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-aeg-002',
-    name: 'Aegis OT/ICS Twin',
+    name: 'PARAGON OT/ICS Twin',
     domain: 'aegis',
     state: 'awaiting_approval',
     driftScore: 18,
@@ -121,7 +121,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-terra-001',
-    name: 'Terra Property Fabric',
+    name: 'DOMAINE Property Fabric',
     domain: 'terra',
     state: 'stable',
     driftScore: 4,
@@ -133,7 +133,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-vessels-001',
-    name: 'Vessels Fleet Twin',
+    name: 'SEXTANT Fleet Twin',
     domain: 'vessels',
     state: 'stable',
     driftScore: 7,
@@ -145,7 +145,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-vessels-002',
-    name: 'Vessels Cargo Twin',
+    name: 'SEXTANT Cargo Twin',
     domain: 'vessels',
     state: 'awaiting_approval',
     driftScore: 12,
@@ -181,7 +181,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-lyte-001',
-    name: 'Lyte AIOps Twin',
+    name: 'KORA AIOps Twin',
     domain: 'lyte',
     state: 'degraded',
     driftScore: 21,
@@ -399,7 +399,7 @@ export function AtlasRuntimePage() {
       const liveState: TwinState = criticalIncidents.length >= 3 ? 'degraded' : merged.state;
       const liveSummary =
         openIncidents.length > 0 && merged.id === 'tw-aeg-001'
-          ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? 's' : ''} — ${criticalIncidents.length} critical — live from Aegis`
+          ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? 's' : ''} — ${criticalIncidents.length} critical — live from PARAGON`
           : merged.summary;
       merged = {
         ...merged,
@@ -576,7 +576,7 @@ export function AtlasRuntimePage() {
         >
           <Activity className="w-3 h-3 shrink-0" style={{ color: '#ef4444' }} />
           <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Aegis live feed:{' '}
+            PARAGON live feed:{' '}
             <span className="font-bold font-mono" style={{ color: '#ef4444' }}>
               {openIncidents.length}
             </span>{' '}
@@ -587,7 +587,7 @@ export function AtlasRuntimePage() {
             >
               {criticalIncidents.length}
             </span>{' '}
-            critical — Aegis twins updated
+            critical — PARAGON twins updated
           </span>
           <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
             {lastRefresh.toLocaleTimeString()}

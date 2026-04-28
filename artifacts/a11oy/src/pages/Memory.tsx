@@ -16,7 +16,7 @@ const BANK_MEMORIES = [
   { id: 'bm-001', key: 'cascade_delay_pattern', value: 'ETA deviation >30h triggers port standby recommendation. Historical success rate: 88%. 12 prior cases.', operator: 'Cascade Navigator', consolidatedFrom: ['sm-prev-001', 'sm-prev-012', 'sm-prev-023'], consolidatedAt: '2026-04-20T00:00:00Z', proofHash: 'sha256:bm01a1', accessCount: 47, version: 3, decayScore: 0.94, reinforcementScore: 0.91 },
   { id: 'bm-002', key: 'talbot_opposing_counsel_pattern', value: 'Opposing counsel has filed late 3 of last 5 cases. Early escalation pattern yields 40% better outcomes.', operator: 'Counsel Sentinel', consolidatedFrom: ['sm-prev-002', 'sm-prev-014'], consolidatedAt: '2026-04-18T00:00:00Z', proofHash: 'sha256:bm02b2', accessCount: 23, version: 2, decayScore: 0.88, reinforcementScore: 0.82 },
   { id: 'bm-003', key: 'tg_ember_fingerprint', value: 'TG-Ember APT: C2 on 443/8080, exfil via DNS-over-HTTPS. YARA rules v4.2 active. 24 prior incidents.', operator: 'Guardian', consolidatedFrom: ['sm-prev-003', 'sm-prev-015', 'sm-prev-027', 'sm-prev-038'], consolidatedAt: '2026-04-22T00:00:00Z', proofHash: 'sha256:bm03c3', accessCount: 92, version: 4, decayScore: 0.97, reinforcementScore: 0.96 },
-  { id: 'bm-004', key: 'plano_cap_rate_model', value: 'Cap rate +18bps over 30d (6.2%). Historical reversal threshold: 6.5%. Comparable: 5.8-6.4% in DFW metro.', operator: 'Terra Analyst', consolidatedFrom: ['sm-prev-006'], consolidatedAt: '2026-04-19T00:00:00Z', proofHash: 'sha256:bm04d4', accessCount: 15, version: 1, decayScore: 0.78, reinforcementScore: 0.68 },
+  { id: 'bm-004', key: 'plano_cap_rate_model', value: 'Cap rate +18bps over 30d (6.2%). Historical reversal threshold: 6.5%. Comparable: 5.8-6.4% in DFW metro.', operator: 'DOMAINE Analyst', consolidatedFrom: ['sm-prev-006'], consolidatedAt: '2026-04-19T00:00:00Z', proofHash: 'sha256:bm04d4', accessCount: 15, version: 1, decayScore: 0.78, reinforcementScore: 0.68 },
   { id: 'bm-005', key: 'mirror_eval_baseline', value: 'Global MirrorEval pass rate: 94.2%. Maritime: 96.1%, Legal: 97.4%, Defense: 91.8%, Revenue: 88.4%.', operator: 'Fabric Watchdog', consolidatedFrom: ['sm-prev-007', 'sm-prev-019'], consolidatedAt: '2026-04-21T00:00:00Z', proofHash: 'sha256:bm05e5', accessCount: 34, version: 5, decayScore: 0.95, reinforcementScore: 0.93 },
 ];
 
@@ -24,7 +24,7 @@ const RESTRICTED_MEMORIES = [
   { key: 'talbot_privileged_comms', restriction: 'Attorney-Client Privilege', authority: 'pol-privilege-001', operator: 'Counsel Sentinel', reason: 'Contains privileged attorney-client communications — sealed from non-legal operators' },
   { key: 'tg_ember_classified_iocs', restriction: 'Classified', authority: 'pol-classification-002', operator: 'Guardian', reason: 'IOC set sourced from classified threat feed — restricted to CISO-approved operators' },
   { key: 'hr_compensation_model', restriction: 'PII/Sensitive', authority: 'pol-pii-001', operator: 'Pipeline Oracle', reason: 'Contains individual compensation data — PII redacted before bank storage' },
-  { key: 'acquisition_target_valuation', restriction: 'Material Non-Public', authority: 'pol-mnpi-001', operator: 'Terra Analyst', reason: 'Pre-announcement acquisition valuation — MNPI wall enforced' },
+  { key: 'acquisition_target_valuation', restriction: 'Material Non-Public', authority: 'pol-mnpi-001', operator: 'DOMAINE Analyst', reason: 'Pre-announcement acquisition valuation — MNPI wall enforced' },
 ];
 
 const CONSOLIDATION_EVENTS = [

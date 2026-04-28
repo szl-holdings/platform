@@ -3,9 +3,9 @@
  * seed-atlas.ts — ATLAS Spatial Runtime Demo Seed Script
  *
  * Seeds canonical demo scenes for all four domain verticals:
- *   - Aegis: Ransomware branch comparison (INC-2026-001)
- *   - Vessels: Sanctions/weather reroute (IMO-9876543)
- *   - Terra: Property distress stress test (PROP-BK-2026-0142)
+ *   - PARAGON: Ransomware branch comparison (INC-2026-001)
+ *   - SEXTANT: Sanctions/weather reroute (IMO-9876543)
+ *   - DOMAINE: Property distress stress test (PROP-BK-2026-0142)
  *   - Prism Counsel: Matter pressure & settlement (MTR-2026-0891)
  *
  * Usage:

@@ -231,7 +231,7 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'lyte_health_check',
-    description: 'Get current system health status and alerts from Lyte',
+    description: 'Get current system health status and alerts from KORA',
     inputSchema: {
       type: 'object',
       properties: {

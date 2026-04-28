@@ -38,7 +38,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/aegis/health',
-    summary: 'Aegis platform health — all modules',
+    summary: 'PARAGON platform health — all modules',
     tag: 'Security',
     auth: false,
   },
@@ -124,7 +124,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/vessels/health',
-    summary: 'Vessels maritime platform health',
+    summary: 'SEXTANT maritime platform health',
     tag: 'Maritime',
     auth: false,
   },

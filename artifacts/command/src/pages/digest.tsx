@@ -72,7 +72,7 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       detail:
         compositeScore >= 80
           ? 'All critical systems nominal. Operational and financial dimensions are the primary drag on the overall score.'
-          : `${7 - Math.floor(compositeScore / 15)} domain${compositeScore < 70 ? 's' : ''} require attention. Lyte API latency and SZL NAV delay are the primary contributors.`,
+          : `${7 - Math.floor(compositeScore / 15)} domain${compositeScore < 70 ? 's' : ''} require attention. KORA API latency and SZL NAV delay are the primary contributors.`,
       actions: [
         { label: 'View Health Score', href: '/health' },
         { label: 'Domain Details', href: '/' },
@@ -87,10 +87,10 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       color: 'var(--color-critical)',
       headline: '2 critical, 3 high-priority alerts require action today',
       detail:
-        'AIS transponder breach attempt on Vessels OT systems (Aegis SOC responding). Force majeure clause triggered on Q3 Cargo Agreement. Miami Beach deal deadline 48h out.',
+        'AIS transponder breach attempt on SEXTANT OT systems (PARAGON SOC responding). Force majeure clause triggered on Q3 Cargo Agreement. Miami Beach deal deadline 48h out.',
       actions: [
         { label: 'Alert Inbox', href: '/alerts' },
-        { label: 'Aegis SOC', href: '/' },
+        { label: 'PARAGON SOC', href: '/' },
       ],
       relevantFor: ['executive', 'security', 'operations', 'legal'],
     },
@@ -102,9 +102,9 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       color: '#ef4444',
       headline: 'SOC posture elevated — nation-state credential attempt logged',
       detail:
-        '7 failed auth attempts from Tor exit node targeting Vessels SCADA. IP blocked, Aegis playbook activated. MTTR tracking at 11 min (target: 15 min). 3 open CVEs pending patch.',
+        '7 failed auth attempts from Tor exit node targeting SEXTANT SCADA. IP blocked, PARAGON playbook activated. MTTR tracking at 11 min (target: 15 min). 3 open CVEs pending patch.',
       actions: [
-        { label: 'View Aegis', href: '/' },
+        { label: 'View PARAGON', href: '/' },
         { label: 'SOC Dashboard', href: '/' },
       ],
       relevantFor: ['executive', 'security'],
@@ -115,12 +115,12 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       icon: CheckCircle2,
       label: 'SLA Performance',
       color: 'var(--color-high)',
-      headline: '3 SLAs breaching — Lyte API, Lyte on-time rate, SZL NAV delay',
+      headline: '3 SLAs breaching — KORA API, KORA on-time rate, SZL NAV delay',
       detail:
-        'Lyte API P95 latency at 2.4s vs 2s target (81.5% monthly compliance). Driver on-time rate 88% vs 92% target. SZL NAV computation running 15min late due to Bloomberg feed issues.',
+        'KORA API P95 latency at 2.4s vs 2s target (81.5% monthly compliance). Driver on-time rate 88% vs 92% target. SZL NAV computation running 15min late due to Bloomberg feed issues.',
       actions: [
         { label: 'SLA Dashboard', href: '/sla' },
-        { label: 'Lyte Command', href: '/' },
+        { label: 'KORA Command', href: '/' },
       ],
       relevantFor: ['executive', 'operations'],
     },
@@ -130,12 +130,12 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       icon: DollarSign,
       label: 'Cost & Budget',
       color: '#22c55e',
-      headline: 'Vessels 9% over budget MTD — API cost spike driven by AIS data feeds',
+      headline: 'SEXTANT 9% over budget MTD — API cost spike driven by AIS data feeds',
       detail:
-        'Vessels domain at $38.2k vs $35k budget (+9.1%). Cause: increased satellite AIS polling frequency post security incident. Recommend temporary polling reduction after incident resolution.',
+        'SEXTANT domain at $38.2k vs $35k budget (+9.1%). Cause: increased satellite AIS polling frequency post security incident. Recommend temporary polling reduction after incident resolution.',
       actions: [
         { label: 'Cost Analytics', href: '/costs' },
-        { label: 'Vessels Budget', href: '/costs' },
+        { label: 'SEXTANT Budget', href: '/costs' },
       ],
       relevantFor: ['executive', 'finance'],
     },
@@ -160,9 +160,9 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       icon: Zap,
       label: "Today's Opportunity",
       color: 'var(--color-low)',
-      headline: 'Lyte route optimization v2 rolling out — track adoption metrics',
+      headline: 'KORA route optimization v2 rolling out — track adoption metrics',
       detail:
-        'ML-powered scheduling live for 30% of Lyte traffic. Early indicators show 14% on-time improvement in test cohort. Full rollout expected by Apr 18 pending QA.',
+        'ML-powered scheduling live for 30% of KORA traffic. Early indicators show 14% on-time improvement in test cohort. Full rollout expected by Apr 18 pending QA.',
       actions: [{ label: 'View Changelog', href: '/changelog' }],
       relevantFor: ['executive', 'operations'],
     },

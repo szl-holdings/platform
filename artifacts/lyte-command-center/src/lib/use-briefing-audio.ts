@@ -1,7 +1,7 @@
 /**
- * Lyte — Briefing Audio Hook
+ * KORA — Briefing Audio Hook
  *
- * Wires the executive briefing audio render path for Lyte Decision Twin.
+ * Wires the executive briefing audio render path for KORA Decision Twin.
  * Routes through SpeechSpecialist.renderBriefing() with BrowserWebSpeechTTSAdapter —
  * the same abstraction layer used by the speech-specialist backbone.
  * Swap to a real NIM/ElevenLabs/Azure adapter via specialist.setAdapters() when ready.

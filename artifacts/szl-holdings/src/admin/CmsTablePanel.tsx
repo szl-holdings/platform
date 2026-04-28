@@ -658,7 +658,7 @@ function AnalyticsPanel() {
       description: 'Button and link clicks with label',
     },
     { event: 'form_submit', count: 'Form completions', description: 'All form submissions' },
-    { event: 'demo_request', count: 'Demo requests', description: 'Vessels demo form' },
+    { event: 'demo_request', count: 'Demo requests', description: 'SEXTANT demo form' },
     { event: 'access_request', count: 'Access requests', description: 'AI research access form' },
     {
       event: 'private_inquiry_submit',

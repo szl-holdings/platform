@@ -65,10 +65,10 @@ function getSeverity(score: number): "critical" | "moderate" | "ready" {
 
 function formatApp(app: string) {
   const map: Record<string, string> = {
-    "vessels": "Vessels",
-    "terra": "Terra",
-    "aegis": "Aegis",
-    "sentra": "Aegis",
+    "vessels": "SEXTANT",
+    "terra": "DOMAINE",
+    "aegis": "PARAGON",
+    "sentra": "PARAGON",
     "carlota-jo": "Carlota Jo",
     "szl-holdings": "SZL Holdings",
     "counsel": "Counsel",

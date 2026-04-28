@@ -237,7 +237,7 @@ export default function BoardViewPage() {
             with the investor call on April 20 and the data room incomplete.
           </p>
           <p className="text-amber-100/45 text-[11px]">
-            Lyte recommendation: COO to convene a 30-minute triage session today to assign single
+            KORA recommendation: COO to convene a 30-minute triage session today to assign single
             decision authority on CloudPlatform and Meridian. All other items are addressed in the
             intervention schedule below.
           </p>
@@ -431,14 +431,14 @@ export default function BoardViewPage() {
           </div>
           <div className="flex-1">
             <p className="text-xs font-semibold text-amber-100 mb-1">
-              Ready to deploy Lyte in your organisation?
+              Ready to deploy KORA in your organisation?
             </p>
             <p className="text-[11px] text-amber-100/55 mb-3">
-              Lyte onboards in 2 weeks with a read-only Counsel connector. See your first Ownership
+              KORA onboards in 2 weeks with a read-only Counsel connector. See your first Ownership
               Drift report within 48 hours.
             </p>
             <a
-              href="mailto:inquiries@szlholdings.com?subject=Lyte Pilot Programme"
+              href="mailto:inquiries@szlholdings.com?subject=KORA Pilot Programme"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-amber-500 text-amber-950 text-xs font-semibold hover:bg-amber-400 transition-colors"
             >
               Request a Pilot <ArrowRight className="w-3 h-3" />

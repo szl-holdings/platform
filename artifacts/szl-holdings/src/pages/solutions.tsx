@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const SOLUTIONS = [
   {
     icon: ShieldCheck,
-    name: "Aegis",
+    name: "PARAGON",
     slug: "aegis",
     domain: "Defense & Intelligence",
     tagline: "SOC command, XDR, and managed security operations — for high-consequence environments where observability and execution discipline are non-negotiable.",
@@ -20,7 +20,7 @@ const SOLUTIONS = [
   },
   {
     icon: Ship,
-    name: "Vessels",
+    name: "SEXTANT",
     slug: "vessels",
     domain: "Maritime Intelligence",
     tagline: "Fleet visibility, voyage performance, and operational exceptions — decision intelligence for assets underway in complex, distributed environments.",
@@ -32,7 +32,7 @@ const SOLUTIONS = [
   },
   {
     icon: Building2,
-    name: "Terra",
+    name: "DOMAINE",
     slug: "terra",
     domain: "Real Estate Intelligence",
     tagline: "Distress tracking, deal pipeline, and market signal — the governed decision system applied to a data-rich, execution-poor industry that desperately needs a Covenant Policy layer.",

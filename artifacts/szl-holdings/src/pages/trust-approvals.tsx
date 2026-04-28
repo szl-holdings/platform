@@ -98,7 +98,7 @@ const APPROVAL_PATH_STAGES = [
 export default function TrustApprovalsPage() {
   const __pageMeta = usePageMeta({
     title: "Approvals — Trust Center · SZL Holdings",
-    description: "Approval path model, tiered HITL gates, sign-off workflows, and escalation model for Lyte + Counsel.",
+    description: "Approval path model, tiered HITL gates, sign-off workflows, and escalation model for KORA + Counsel.",
     canonical: "https://szlholdings.com/trust/approvals",
   });
 
@@ -124,7 +124,7 @@ export default function TrustApprovalsPage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Approval Model</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  Every consequential action in Lyte + Counsel passes through a tiered approval path.
+                  Every consequential action in KORA + Counsel passes through a tiered approval path.
                   The gate is enforced at the workflow execution layer — bypass requires an explicit,
                   logged override. Approvers receive full context. Every decision — including overrides
                   — is permanently recorded.

@@ -72,7 +72,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'down',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     label: 'Real Estate Intelligence',
     color: '#a07848',
     status: 'healthy',
@@ -84,7 +84,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'stable',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     label: 'Fleet Command',
     color: '#38bdf8',
     status: 'degraded',
@@ -96,7 +96,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'down',
   },
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     label: 'Defense & Intelligence',
     color: '#4f6ef7',
     status: 'healthy',
@@ -111,7 +111,7 @@ const PACK_SIGNALS: PackSignal[] = [
 
 const PRESSURE_ITEMS = [
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Fleet ETA compliance gap — 3 vessels outside SLA',
     severity: 'critical',
     age: '6h',
@@ -133,7 +133,7 @@ const PRESSURE_ITEMS = [
     risk: 'Ownership Gap',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Fuel surcharge approval chain stalled',
     severity: 'high',
     age: '22h',
@@ -155,7 +155,7 @@ const PRESSURE_ITEMS = [
     risk: 'Revenue Risk',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     title: 'Lease renewal document missing signature block',
     severity: 'medium',
     age: '2d',
@@ -169,13 +169,13 @@ const PRESSURE_ITEMS = [
 
 const MOVEMENT_ITEMS = [
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     title: 'Security posture audit completed — 94% score',
     type: 'milestone',
     time: '1h ago',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     title: 'Portfolio appraisal cycle closed — 6 assets reviewed',
     type: 'completion',
     time: '3h ago',
@@ -187,13 +187,13 @@ const MOVEMENT_ITEMS = [
     time: '5h ago',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Vessel M/V Meridian departed — Cape Town bound',
     type: 'event',
     time: '7h ago',
   },
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     title: 'Threat brief updated — 3 new indicators catalogued',
     type: 'milestone',
     time: '9h ago',
@@ -229,7 +229,7 @@ const PENDING_APPROVALS = [
   },
   {
     id: 'A-1038',
-    title: 'Fuel surcharge rate increase — Vessels fleet',
+    title: 'Fuel surcharge rate increase — SEXTANT fleet',
     requestedBy: 'Fleet Ops',
     age: '22h',
     urgency: 'high',
@@ -242,7 +242,7 @@ const PENDING_APPROVALS = [
   },
   {
     id: 'A-1033',
-    title: 'Terra asset refinancing — Building 7A',
+    title: 'DOMAINE asset refinancing — Building 7A',
     requestedBy: 'Finance',
     age: '4d',
     urgency: 'medium',
@@ -250,7 +250,7 @@ const PENDING_APPROVALS = [
     confidence: 76,
     approvalChain: [
       {
-        actor: 'Terra Finance',
+        actor: 'DOMAINE Finance',
         role: 'Finance',
         action: 'submitted',
         time: '4d ago',
@@ -263,13 +263,13 @@ const PENDING_APPROVALS = [
   {
     id: 'A-1029',
     title: 'New vendor onboarding — security services',
-    requestedBy: 'Aegis',
+    requestedBy: 'PARAGON',
     age: '6d',
     urgency: 'low',
     evidence: 'Vendor SOC2 report, pricing proposal',
     confidence: 84,
     approvalChain: [
-      { actor: 'Aegis Ops', role: 'Ops', action: 'submitted', time: '6d ago', status: 'done' },
+      { actor: 'PARAGON Ops', role: 'Ops', action: 'submitted', time: '6d ago', status: 'done' },
       { actor: 'Procurement', role: 'Proc', action: 'approved', time: '5d ago', status: 'done' },
       { actor: 'Stephen Lutar', role: 'CXO', action: 'pending', time: '—', status: 'pending' },
     ],
@@ -280,9 +280,9 @@ const SERVICE_HEALTH = [
   { name: 'API Gateway', status: 'healthy', latency: '34ms', uptime: '99.97%' },
   { name: 'Auth Service', status: 'healthy', latency: '12ms', uptime: '100%' },
   { name: 'PRISM Engine', status: 'warning', latency: '218ms', uptime: '98.1%' },
-  { name: 'Vessels Feed', status: 'degraded', latency: '2.1s', uptime: '91.4%' },
-  { name: 'Terra Data', status: 'healthy', latency: '67ms', uptime: '99.88%' },
-  { name: 'Aegis Intel', status: 'healthy', latency: '44ms', uptime: '99.99%' },
+  { name: 'SEXTANT Feed', status: 'degraded', latency: '2.1s', uptime: '91.4%' },
+  { name: 'DOMAINE Data', status: 'healthy', latency: '67ms', uptime: '99.88%' },
+  { name: 'PARAGON Intel', status: 'healthy', latency: '44ms', uptime: '99.99%' },
 ];
 
 const OPERATING_LOOP = [

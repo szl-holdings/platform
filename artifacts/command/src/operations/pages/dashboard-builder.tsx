@@ -567,9 +567,9 @@ function AlertFeedWidget({ widget }: { widget: Widget }) {
 function TopologyWidget() {
   const nodes = [
     { id: 'api', label: 'API Server', x: 50, y: 40, color: '#d4a054' },
-    { id: 'lyte', label: 'Lyte', x: 20, y: 70, color: '#d4a054' },
+    { id: 'lyte', label: 'KORA', x: 20, y: 70, color: '#d4a054' },
     { id: 'continuum', label: 'Counsel', x: 50, y: 75, color: '#4B8BDB' },
-    { id: 'vessels', label: 'Vessels', x: 80, y: 70, color: '#38bdf8' },
+    { id: 'vessels', label: 'SEXTANT', x: 80, y: 70, color: '#38bdf8' },
     { id: 'db', label: 'DB', x: 35, y: 20, color: '#6b8f71' },
     { id: 'sf', label: 'Salesforce', x: 70, y: 20, color: '#6b7280' },
   ];

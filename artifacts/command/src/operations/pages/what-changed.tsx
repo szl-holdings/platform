@@ -188,12 +188,12 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-006',
     timestamp: '14:12:55',
     domain: 'vessels',
-    twinName: 'Vessels Cargo Twin',
+    twinName: 'SEXTANT Cargo Twin',
     changeType: 'approval_pending',
     summary:
       'Cargo manifest variance on VES-MV-047. Port authority confirmation pending. Worldline WL-DELTA active.',
     worldline: 'WL-DELTA',
-    actor: 'Vessels Fleet Runtime',
+    actor: 'SEXTANT Fleet Runtime',
   },
   {
     id: 'c-007',
@@ -243,11 +243,11 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-011',
     timestamp: '13:45:07',
     domain: 'terra',
-    twinName: 'Terra Property Fabric',
+    twinName: 'DOMAINE Property Fabric',
     changeType: 'twin_synced',
     summary:
       'Portfolio twin refreshed with Q2 2026 market comps. 14 properties revalued. All within ±3% of last cycle.',
-    actor: 'Terra Valuation Engine',
+    actor: 'DOMAINE Valuation Engine',
   },
   {
     id: 'c-012',
@@ -273,7 +273,7 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-014',
     timestamp: '13:22:48',
     domain: 'vessels',
-    twinName: 'Vessels Fleet Twin',
+    twinName: 'SEXTANT Fleet Twin',
     changeType: 'twin_synced',
     summary:
       'AIS data synced for all 14 vessels. All within assigned geofences. ETA updates applied to voyage P&L.',
@@ -289,7 +289,7 @@ const SEED_CHANGES: TwinChange[] = [
       'SG misconfiguration remediated post-approval. Drift score reset to Δ4%. Worldline re-merged to WL-ALPHA.',
     driftDelta: 4,
     worldline: 'WL-ALPHA',
-    actor: 'Aegis Remediation Engine',
+    actor: 'PARAGON Remediation Engine',
   },
 ];
 

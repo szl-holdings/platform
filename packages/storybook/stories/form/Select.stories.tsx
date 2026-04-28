@@ -27,10 +27,10 @@ export const Default: Story = {
         onChange={(e) => setValue(e.target.value)}
         placeholder="Select a product…"
         options={[
-          { value: 'aegis', label: 'Aegis — Cyber Resilience' },
+          { value: 'aegis', label: 'PARAGON — Cyber Resilience' },
           { value: 'counsel', label: 'Counsel — Legal Matters' },
-          { value: 'terra', label: 'Terra — Real Estate' },
-          { value: 'vessels', label: 'Vessels — Maritime' },
+          { value: 'terra', label: 'DOMAINE — Real Estate' },
+          { value: 'vessels', label: 'SEXTANT — Maritime' },
         ]}
       />
     );
@@ -45,9 +45,9 @@ export const Preselected: Story = {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         options={[
-          { value: 'aegis', label: 'Aegis' },
+          { value: 'aegis', label: 'PARAGON' },
           { value: 'counsel', label: 'Counsel' },
-          { value: 'terra', label: 'Terra' },
+          { value: 'terra', label: 'DOMAINE' },
         ]}
       />
     );

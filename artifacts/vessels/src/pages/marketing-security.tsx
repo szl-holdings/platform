@@ -41,7 +41,7 @@ export default function MarketingSecurityPage() {
           </h1>
           <p className="text-sky-300/40 text-[15px] leading-relaxed max-w-2xl">
             Maritime intelligence involves commercially sensitive voyage data, vessel positions, and
-            counterparty information. Vessels is designed with security as a baseline, not a
+            counterparty information. SEXTANT is designed with security as a baseline, not a
             feature.
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function MarketingSecurityPage() {
         <div className="border border-sky-500/10 rounded-2xl p-8 mb-14">
           <h2 className="text-[18px] font-bold text-sky-100 mb-3">Sanctions compliance</h2>
           <p className="text-sky-300/40 text-[13.5px] leading-relaxed mb-4">
-            Vessels includes real-time sanctions screening against OFAC, EU, and UN sanctions lists
+            SEXTANT includes real-time sanctions screening against OFAC, EU, and UN sanctions lists
             — matching against vessel identifiers, ownership structures, and counterparty data.
             Alerts are surfaced immediately when a match is detected.
           </p>

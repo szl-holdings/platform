@@ -63,7 +63,7 @@ async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<v
         incident,
         responseActions: [
           'Initial detection and severity triage completed.',
-          'Incident record opened in Aegis platform with full audit trail.',
+          'Incident record opened in PARAGON platform with full audit trail.',
           'Assigned analyst notified and investigation initiated.',
           'Affected systems flagged for containment evaluation.',
           'Stakeholder notification distributed per incident response protocol.',

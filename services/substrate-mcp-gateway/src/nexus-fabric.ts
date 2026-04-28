@@ -672,7 +672,7 @@ const SYNTHETIC_SIGNALS: Record<string, PRAXISDomainSignal[]> = {
       intakeScore: 0.78,
       entityResolution: 'IMO:9234567 → AURORA BOREALIS (Bulk Carrier, Marshall Islands flag)',
       policyEvaluationResult: 'allow — standard maritime monitoring protocol',
-      recommendation: 'Initiate route deviation inquiry and flag for Vessels anomaly review.',
+      recommendation: 'Initiate route deviation inquiry and flag for SEXTANT anomaly review.',
       receivedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     },
   ],
@@ -837,9 +837,9 @@ export interface PRAXISAgentEntry {
 export const PRAXIS_AGENT_REGISTRY: PRAXISAgentEntry[] = [
   {
     agentId: 'helmsman',
-    canonicalName: 'Vessels',
+    canonicalName: 'SEXTANT',
     domain: 'maritime',
-    // Canonical mapping: task designation Vessels → Vessels (brand-compliant)
+    // Canonical mapping: task designation SEXTANT → SEXTANT (brand-compliant)
     description: 'Maritime intelligence specialist. Fleet tracking, AIS anomaly detection, route risk assessment, sanctions compliance.',
     capabilities: ['fleet_position_analysis', 'route_risk_assessment', 'sanctions_screening', 'voyage_anomaly_detection'],
     confidenceProfile: {
@@ -867,9 +867,9 @@ export const PRAXIS_AGENT_REGISTRY: PRAXISAgentEntry[] = [
   },
   {
     agentId: 'terra',
-    canonicalName: 'Terra',
+    canonicalName: 'DOMAINE',
     domain: 'real_estate',
-    // Canonical mapping: task designation Terra → Terra (brand-compliant)
+    // Canonical mapping: task designation DOMAINE → DOMAINE (brand-compliant)
     description: 'Real estate intelligence. Property valuation, deal pipeline, market comps, zoning and title risk.',
     capabilities: ['property_valuation', 'deal_analysis', 'market_comps', 'zoning_risk', 'anomaly_detection'],
     confidenceProfile: {
@@ -882,9 +882,9 @@ export const PRAXIS_AGENT_REGISTRY: PRAXISAgentEntry[] = [
   },
   {
     agentId: 'beacon',
-    canonicalName: 'Lyte',
+    canonicalName: 'KORA',
     domain: 'analytics',
-    // Canonical mapping: task designation Lyte → Lyte (brand-compliant)
+    // Canonical mapping: task designation KORA → KORA (brand-compliant)
     description: 'Decision intelligence and operational analytics. Signal correlation, KPI monitoring, anomaly detection, trend analysis.',
     capabilities: ['signal_correlation', 'kpi_monitoring', 'anomaly_detection', 'trend_analysis', 'operational_intelligence'],
     confidenceProfile: {
@@ -912,9 +912,9 @@ export const PRAXIS_AGENT_REGISTRY: PRAXISAgentEntry[] = [
   },
   {
     agentId: 'sovereign',
-    canonicalName: 'Aegis',
+    canonicalName: 'PARAGON',
     domain: 'defense_intelligence',
-    // Canonical mapping: task designation ATLAS → Aegis (Defense & Intelligence Command)
+    // Canonical mapping: task designation ATLAS → PARAGON (Defense & Intelligence Command)
     description: 'Defense and intelligence operations. Threat actor attribution, OSINT synthesis, geopolitical risk assessment, adversarial simulation, classified asset protection.',
     capabilities: [
       'threat_actor_attribution',

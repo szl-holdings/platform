@@ -6,10 +6,10 @@
  * workflows, workflow_runs, approvals, actions, artifacts) and domain-
  * specific tables (lyte_signals, lyte_command_cards, etc).
  *
- * NOTE: A fifth narrative — Terra distress diligence (1847 Flatbush Ave) —
+ * NOTE: A fifth narrative — DOMAINE distress diligence (1847 Flatbush Ave) —
  * is exported from this package as `TERRA_DISTRESS_NARRATIVE` for use in the
- * Terra app's self-serve guided demo, but is not yet wired into the database
- * seed runner here. Wire it up when Terra needs server-side seeded state.
+ * DOMAINE app's self-serve guided demo, but is not yet wired into the database
+ * seed runner here. Wire it up when DOMAINE needs server-side seeded state.
  *
  * Idempotency strategy:
  * - clearDemoData() removes all demo-tagged rows before seeding (reliable reset)
@@ -145,7 +145,7 @@ async function upsertSignal(values: typeof alloySignals.$inferInsert) {
   return existing!;
 }
 
-// ─── Narrative 1: Business / RevOps / Lyte ───────────────────────────────────
+// ─── Narrative 1: Business / RevOps / KORA ───────────────────────────────────
 
 async function seedBusinessNarrative() {
 
@@ -160,7 +160,7 @@ async function seedBusinessNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-biz-001',
-    source: 'Lyte PRISM — Motion',
+    source: 'KORA PRISM — Motion',
     sourceType: 'demo',
     domain: 'lyte',
     title: 'Pipeline stall — $4.2M deal stalled 47 days without owner action',
@@ -199,7 +199,7 @@ async function seedBusinessNarrative() {
           { step: 4, name: 'Velocity monitoring restart', status: 'completed' },
         ],
         environment: 'production',
-        metadata: { demo: true, narrative: 'business-revops', agent: 'Lyte' },
+        metadata: { demo: true, narrative: 'business-revops', agent: 'KORA' },
         startedAt: hoursAgo(26),
         completedAt: hoursAgo(24),
       })
@@ -265,10 +265,10 @@ async function seedBusinessNarrative() {
         signalId: signal.id,
         type: 'notify',
         title: 'Buyer re-engagement email queued for review',
-        description: "Lyte drafted buyer re-engagement email — pending Sophia's review before send",
+        description: "KORA drafted buyer re-engagement email — pending Sophia's review before send",
         status: 'completed',
         priority: 'high',
-        payload: { demo: true, recipient: 'Buyer contact', draftedBy: 'Lyte' },
+        payload: { demo: true, recipient: 'Buyer contact', draftedBy: 'KORA' },
         completedAt: hoursAgo(24),
         metadata: { demo: true, narrative: 'business-revops' },
       },
@@ -313,7 +313,7 @@ async function seedBusinessNarrative() {
     .insert(lyteSignalsTable)
     .values({
       workspaceId: lyteWorkspaceId,
-      source: 'PRISM Motion — Lyte',
+      source: 'PRISM Motion — KORA',
       sourceType: 'monitoring',
       severity: 'high',
       title: 'Pipeline stall — Vantex Acquisition — 47 days — $4.2M at risk',
@@ -330,7 +330,7 @@ async function seedBusinessNarrative() {
         workspaceId: lyteWorkspaceId,
         title: 'Escalate Vantex Acquisition — CFO Approval Required',
         description:
-          'Deal stalled 47 days. Approval owner departed without handoff. Revenue at risk: $4.2M. Lyte recommends emergency escalation to CFO with VP BD reassignment.',
+          'Deal stalled 47 days. Approval owner departed without handoff. Revenue at risk: $4.2M. KORA recommends emergency escalation to CFO with VP BD reassignment.',
         category: 'risk',
         priority: 'critical',
         status: 'completed',
@@ -351,7 +351,7 @@ async function seedBusinessNarrative() {
         signalId: lyteSignal.id,
         title: 'Escalate deal — CFO sponsorship + VP BD reassignment + buyer re-engagement',
         description:
-          'Escalate immediately. Reassign deal ownership to VP BD (Sarah Kim). CFO to sponsor buyer call. Deal has 78% historical close rate with this intervention pattern at this stage. Lyte confidence: 87%. Historical close rate with comparable intervention: 78%.',
+          'Escalate immediately. Reassign deal ownership to VP BD (Sarah Kim). CFO to sponsor buyer call. Deal has 78% historical close rate with this intervention pattern at this stage. KORA confidence: 87%. Historical close rate with comparable intervention: 78%.',
         category: 'risk_mitigation',
         impact: 'high',
         effort: 'low',
@@ -367,7 +367,7 @@ async function seedBusinessNarrative() {
   }
 }
 
-// ─── Narrative 2: Security / SOC / Aegis ─────────────────────────────────────
+// ─── Narrative 2: Security / SOC / PARAGON ─────────────────────────────────────
 
 async function seedSecurityNarrative() {
 
@@ -389,7 +389,7 @@ async function seedSecurityNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-sec-001',
-    source: 'Aegis Sentinel — Identity Telemetry',
+    source: 'PARAGON Sentinel — Identity Telemetry',
     sourceType: 'demo',
     domain: 'aegis',
     title: 'Credential stuffing — 2,400 failed auth attempts in 3 min from 14 IPs',
@@ -494,10 +494,10 @@ async function seedSecurityNarrative() {
         type: 'remediate',
         title: '14 IPs blocked at perimeter firewall',
         description:
-          'All 14 identified botnet IPs blocked via Aegis Firewall Connector — confirmed at perimeter',
+          'All 14 identified botnet IPs blocked via PARAGON Firewall Connector — confirmed at perimeter',
         status: 'completed',
         priority: 'critical',
-        payload: { demo: true, ipCount: 14, tool: 'Aegis Firewall Connector' },
+        payload: { demo: true, ipCount: 14, tool: 'PARAGON Firewall Connector' },
         completedAt: minutesAgo(43),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -510,7 +510,7 @@ async function seedSecurityNarrative() {
         description: 'Rate limiting activated on Auth Service Cluster during patch window',
         status: 'completed',
         priority: 'critical',
-        payload: { demo: true, threshold: '5 req/min', tool: 'Aegis Auth Connector' },
+        payload: { demo: true, threshold: '5 req/min', tool: 'PARAGON Auth Connector' },
         completedAt: minutesAgo(40),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -524,7 +524,7 @@ async function seedSecurityNarrative() {
           'Precautionary rotation of 3 privileged session tokens; affected users emailed',
         status: 'completed',
         priority: 'high',
-        payload: { demo: true, tokenCount: 3, tool: 'Aegis Identity Connector' },
+        payload: { demo: true, tokenCount: 3, tool: 'PARAGON Identity Connector' },
         completedAt: minutesAgo(35),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -585,7 +585,7 @@ async function seedSecurityNarrative() {
     .onConflictDoNothing();
 }
 
-// ─── Narrative 3: Maritime / Sanctions / Vessels ──────────────────────────────
+// ─── Narrative 3: Maritime / Sanctions / SEXTANT ──────────────────────────────
 
 async function seedMaritimeNarrative() {
 
@@ -599,7 +599,7 @@ async function seedMaritimeNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-mar-001',
-    source: 'Vessels Helmsman — AIS Telemetry',
+    source: 'SEXTANT Helmsman — AIS Telemetry',
     sourceType: 'demo',
     domain: 'vessels',
     title: 'MV Soltana — AIS dark 134 min, sanctions corridor proximity detected',

@@ -11,8 +11,8 @@ const VERTICAL_COLORS: Record<string, string> = {
   'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
-  'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
-  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
+  'lyte-revenue': 'KORA Revenue', 'vessels-maritime': 'SEXTANT Maritime', 'terra-real-estate': 'DOMAINE Real Estate',
+  'aegis-defense': 'PARAGON Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 
 const LAYERS = [
@@ -84,7 +84,7 @@ const KG_ENTITIES: KGEntity[] = [
     id: 'kg-plano', label: 'Plano Office Portfolio', type: 'Property', vertical: 'terra-real-estate',
     properties: { Cap_Rate: '6.2%', Trend: '+18bps/30d', Market: 'DFW Metro', Class: 'A' },
     connections: [
-      { target: 'Terra Analyst', relation: 'MONITORED_BY', strength: 0.95 },
+      { target: 'DOMAINE Analyst', relation: 'MONITORED_BY', strength: 0.95 },
       { target: 'SZL Holdings', relation: 'OWNED_BY', strength: 1.0 },
     ],
   },

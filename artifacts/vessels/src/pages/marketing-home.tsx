@@ -195,7 +195,7 @@ function LiveFleetPanel() {
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
             <span className="text-[11px] font-medium text-[#5e5e5e] tracking-wide uppercase">
-              Live Fleet — 214 Vessels Tracked
+              Live Fleet — 214 SEXTANT Tracked
             </span>
           </div>
           <span className="text-[10px] text-[#5e5e5e] font-mono">Updated 12s ago</span>
@@ -425,7 +425,7 @@ export default function MarketingHomePage() {
       <section className="border-y border-white/[0.05] bg-[#0a0a0a]">
         <div className="max-w-6xl mx-auto px-5 sm:px-6 py-6 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { value: 214, suffix: '+', label: 'Vessels tracked' },
+            { value: 214, suffix: '+', label: 'SEXTANT tracked' },
             { value: 84, suffix: '%', label: 'On-time arrival rate' },
             { value: 47, label: 'Countries covered' },
             { value: 99, suffix: '.97%', label: 'Platform uptime' },
@@ -511,7 +511,7 @@ export default function MarketingHomePage() {
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#f5f5f5] tracking-tight">
-              Who runs on Vessels.
+              Who runs on SEXTANT.
             </h2>
           </m.div>
 
@@ -665,7 +665,7 @@ export default function MarketingHomePage() {
               Platform Walkthrough
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#f5f5f5] mb-3 tracking-tight">
-              How Vessels works in practice
+              How SEXTANT works in practice
             </h2>
             <p className="text-[#8a8a8a] text-[14px] max-w-xl mx-auto">
               From AIS connection to full fleet intelligence in under 15 minutes.
@@ -678,7 +678,7 @@ export default function MarketingHomePage() {
                 {
                   step: '01',
                   title: 'Connect your AIS feed',
-                  body: 'Vessels ingests AIS data from public feeds (Digitraffic, BarentsWatch) or your existing provider. Demo dashboards use simulated AIS data where commercial feeds are not contracted. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
+                  body: 'SEXTANT ingests AIS data from public feeds (Digitraffic, BarentsWatch) or your existing provider. Demo dashboards use simulated AIS data where commercial feeds are not contracted. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
                   tag: 'Setup',
                 },
                 {
@@ -736,7 +736,7 @@ export default function MarketingHomePage() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-[#f5f5f5] mb-4 tracking-tight">
-              See Vessels{' '}
+              See SEXTANT{' '}
               <span className="bg-gradient-to-r text-[#c9b787]">
                 in action.
               </span>
@@ -787,7 +787,7 @@ export default function MarketingHomePage() {
             Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
           </p>
           <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
-            Every decision in Vessels follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+            Every decision in SEXTANT follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
           </p>
         </div>
       </section>
@@ -799,7 +799,7 @@ export default function MarketingHomePage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="vessels"
-        subtitle="Vessels — Maritime Fleet Intelligence"
+        subtitle="SEXTANT — Maritime Fleet Intelligence"
       />
     </div>
   );

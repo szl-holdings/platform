@@ -510,7 +510,7 @@ export default function AgenticSOC() {
             {isLoading ? (
               <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
                 <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
-                Loading alerts from Aegis…
+                Loading alerts from PARAGON…
               </div>
             ) : (
               alerts.map((alert) => (

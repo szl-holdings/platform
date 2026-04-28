@@ -566,7 +566,7 @@ function SectionCard({
               >
                 Sources
               </span>
-              {['Aegis', 'Vessels', 'Terra', 'Lyte']
+              {['PARAGON', 'SEXTANT', 'DOMAINE', 'KORA']
                 .slice(0, 2 + (section.agentId.charCodeAt(0) % 3))
                 .map((src) => (
                   <span

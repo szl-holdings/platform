@@ -20,7 +20,7 @@ const ARCH_SECTIONS = [
     color: "var(--color-lyte-light)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    business: "Every operating organization loses value in the gap between what is known and what gets done. Intelligence accumulates in dashboards. Actions get routed through email. Accountability disappears in status updates. Lyte + Counsel exists to close that gap structurally — not through better tooling, but through a different architecture.",
+    business: "Every operating organization loses value in the gap between what is known and what gets done. Intelligence accumulates in dashboards. Actions get routed through email. Accountability disappears in status updates. KORA + Counsel exists to close that gap structurally — not through better tooling, but through a different architecture.",
     product: "The platform connects signal detection, context interpretation, action recommendation, human approval, execution, and audit in a single governed pipeline. Each stage is a first-class product surface with structured inputs and outputs — not a sequence of loosely connected apps.",
     trust: "The pipeline architecture means every consequential action has a complete record: where the signal came from, who interpreted it, what was recommended, who approved it, what was executed, and what the outcome was. There are no gaps in the lineage.",
     operational: "Because the pipeline stages are defined at the infrastructure level, not the application level, operational observability, retry logic, and audit logging are built-in — not bolted on. Operations teams work with structured records, not logs.",
@@ -29,15 +29,15 @@ const ARCH_SECTIONS = [
     id: "lyte",
     icon: Command,
     number: "02",
-    label: "Lyte as command layer",
+    label: "KORA as command layer",
     headline: "Signal intelligence and command surface for every pack.",
     color: "var(--color-lyte-light)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    business: "Lyte is the intelligence and command layer of the platform. It monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, threshold crossings — and translates them into structured recommendations that operators can act on immediately.",
+    business: "KORA is the intelligence and command layer of the platform. It monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, threshold crossings — and translates them into structured recommendations that operators can act on immediately.",
     product: "The PRAXIS signal engine runs continuously across tenant-configured integrations. Signals are classified by type, severity, velocity, and blast radius. The Copilot surface turns classified signals into actionable briefings. The Today view gives operators a prioritized, contextualized command surface for their operating environment.",
-    trust: "All signal classification includes confidence scoring and source attribution. Signals cannot be acted upon without going through the Counsel approval layer. Lyte surfaces intelligence — Counsel controls execution. The separation is architectural, not configurable away.",
-    operational: "Lyte's signal namespace is tenant-isolated. Signals from one tenant cannot surface in another tenant's command layer. Signal deduplication, correlation, and freshness management are handled at the platform level, not per-implementation.",
+    trust: "All signal classification includes confidence scoring and source attribution. Signals cannot be acted upon without going through the Counsel approval layer. KORA surfaces intelligence — Counsel controls execution. The separation is architectural, not configurable away.",
+    operational: "KORA's signal namespace is tenant-isolated. Signals from one tenant cannot surface in another tenant's command layer. Signal deduplication, correlation, and freshness management are handled at the platform level, not per-implementation.",
   },
   {
     id: "continuum",
@@ -48,7 +48,7 @@ const ARCH_SECTIONS = [
     color: "var(--color-continuum-light)",
     colorMuted: "var(--color-continuum-muted)",
     colorBorder: "var(--color-continuum-border)",
-    business: "Counsel is the execution layer — but execution here means structured, approved, audited action, not automation. Counsel receives interpreted signals from Lyte, generates structured action recommendations, routes them for human approval, executes on approval, and records the complete chain. The action spine connects every consequential workflow from signal to audit.",
+    business: "Counsel is the execution layer — but execution here means structured, approved, audited action, not automation. Counsel receives interpreted signals from KORA, generates structured action recommendations, routes them for human approval, executes on approval, and records the complete chain. The action spine connects every consequential workflow from signal to audit.",
     product: "Each Counsel action is structured: action type, responsible actor, routing path, SLA expectation, evidence package, and confidence basis. The recommendation is not a generic alert — it is a structured proposal with the full context an approver needs to decide. Execution is scoped to the approved parameters only.",
     trust: "The approval gate is built into the Counsel execution model at the infrastructure level. Bypassing the gate requires an explicit override record. There is no silent execution path. Every action that executes has an approval record, a named approver, and an attribution timestamp.",
     operational: "Counsel's connector model uses scoped permissions. A connector configured for task assignment cannot read financial records. Connector health is monitored continuously. Failed executions are retried with exponential backoff and surfaced for operator review.",
@@ -62,8 +62,8 @@ const ARCH_SECTIONS = [
     color: "hsl(40,90%,54%)",
     colorMuted: "hsla(40,90%,54%,0.08)",
     colorBorder: "hsla(40,90%,54%,0.22)",
-    business: "Defense operations (Aegis), maritime logistics (Vessels), real estate intelligence (Terra), and legal operations (Counsel) all have fundamentally different signal vocabularies, workflow models, and regulatory contexts. Pack-specific twins allow the platform to serve each vertical with domain-appropriate intelligence — without rebuilding the core governance model for each.",
-    product: "Each domain pack extends Lyte's signal classification with pack-specific types, enriches the Counsel recommendation model with domain context, and surfaces domain-specific workflow surfaces. The pack sits above the core platform layer — it does not replace it.",
+    business: "Defense operations (PARAGON), maritime logistics (SEXTANT), real estate intelligence (DOMAINE), and legal operations (Counsel) all have fundamentally different signal vocabularies, workflow models, and regulatory contexts. Pack-specific twins allow the platform to serve each vertical with domain-appropriate intelligence — without rebuilding the core governance model for each.",
+    product: "Each domain pack extends KORA's signal classification with pack-specific types, enriches the Counsel recommendation model with domain context, and surfaces domain-specific workflow surfaces. The pack sits above the core platform layer — it does not replace it.",
     trust: "Domain packs extend the governance model — they do not bypass it. Every signal, recommendation, approval, and action in a domain pack goes through the same core pipeline with the same approval tiers and audit requirements. Pack configuration cannot remove governance gates.",
     operational: "Pack deployments are versioned and independently updatable. A pack update does not affect core platform behavior. Pack-specific connectors are scoped to the data types required for that domain — no cross-pack permission leakage.",
   },
@@ -105,7 +105,7 @@ const ARCH_SECTIONS = [
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
     business: "Unstructured data access is the source of most governance failures in enterprise platforms — data that should be scoped leaks through undisciplined interfaces. The governance API gives the platform a typed, governed surface for all data access: every query is tenant-scoped, every mutation is permission-checked, every interface is versioned.",
-    product: "The governance API serves as the single interface layer between all platform surfaces (Lyte, Counsel, packs) and the underlying data and connector services. Frontend surfaces, mobile clients, external integrations, and the audit layer all operate through the same typed interface — no side channels.",
+    product: "The governance API serves as the single interface layer between all platform surfaces (KORA, Counsel, packs) and the underlying data and connector services. Frontend surfaces, mobile clients, external integrations, and the audit layer all operate through the same typed interface — no side channels.",
     trust: "Every resolver is tenant-scoped by middleware. Cross-tenant data access is not possible through the governance API. Every mutation goes through the permission model. Interface versioning allows governance changes to propagate uniformly across all platform surfaces.",
     operational: "The governance API is monitored for query latency, error rates, and resolver performance. Schema changes are versioned and backward-compatible by policy. Breaking changes require a migration path — not a flag day.",
   },
@@ -207,7 +207,7 @@ function SectionCard({ section, i }: { section: typeof ARCH_SECTIONS[0]; i: numb
 export default function ArchitecturePage() {
   const __pageMeta = usePageMeta({
     title: "System Architecture — SZL Holdings",
-    description: "Why this architecture exists, how Lyte, Counsel, packs, Proof Chain, external intelligence, the governance API, governed inference, and trust infrastructure work together — and why this is hard to copy.",
+    description: "Why this architecture exists, how KORA, Counsel, packs, Proof Chain, external intelligence, the governance API, governed inference, and trust infrastructure work together — and why this is hard to copy.",
     canonical: "https://szlholdings.com/architecture",
   });
 
@@ -230,7 +230,7 @@ export default function ArchitecturePage() {
                   Ten layers. One governed pipeline. Built to be defensible.
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
-                  This page explains every architectural layer of Lyte + Counsel — what it does,
+                  This page explains every architectural layer of KORA + Counsel — what it does,
                   why it exists, what it means for trust, and what it means for operations.
                   Written for technical buyers, capital partners, and enterprise diligence teams.
                 </p>

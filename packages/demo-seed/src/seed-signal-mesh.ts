@@ -2,7 +2,7 @@
  * Signal Mesh Seed Runner
  *
  * Seeds the signal mesh with believable live-ish scenarios for:
- *   - Vessels: Port Congestion + Route Exception Cluster
+ *   - SEXTANT: Port Congestion + Route Exception Cluster
  *   - Carlota Jo: Estate Readiness Gap Before VIP Arrival
  *   - SZL Holdings: Treasury Risk Cluster
  *

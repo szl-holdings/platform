@@ -17,7 +17,7 @@ const LAYERS = [
       'Form & file inputs',
       'System event streams',
     ],
-    products: ['Lyte', 'Vessels', 'Carlota Jo', 'External APIs'],
+    products: ['KORA', 'SEXTANT', 'Carlota Jo', 'External APIs'],
     accent: '#4B8BDB',
     icon: '📥',
   },
@@ -114,11 +114,11 @@ const PRODUCT_INTEGRATIONS = [
     ],
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     icon: '🚢',
     accent: '#3b82f6',
     description:
-      'Vessels provides AIS signal data, fleet status, and voyage information. Counsel interprets signals, detects deviations, and generates fleet intelligence briefings.',
+      'SEXTANT provides AIS signal data, fleet status, and voyage information. Counsel interprets signals, detects deviations, and generates fleet intelligence briefings.',
     dataIn: ['AIS position signals', 'Vessel status', 'Voyage data', 'Weather conditions'],
     dataOut: [
       'Fleet intelligence briefs',

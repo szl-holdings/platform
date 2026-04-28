@@ -42,12 +42,12 @@ function findMetric(ventureId: string, label: string): string | undefined {
   return v.metrics?.find((m) => m.label === label)?.value;
 }
 
-// ─── Lyte venture ─────────────────────────────────────────────────────────────
+// ─── KORA venture ─────────────────────────────────────────────────────────────
 
 const lyteDetection = findMetric('lyte', 'Avg. Signal Detection Time');
 const expectedLyteDetection = metricDisplay(LYTE_SIGNAL_DETECTION_TIME);
 check(
-  `Lyte "Avg. Signal Detection Time" renders from registry (expected: "${expectedLyteDetection}")`,
+  `KORA "Avg. Signal Detection Time" renders from registry (expected: "${expectedLyteDetection}")`,
   lyteDetection === expectedLyteDetection,
   `got: "${lyteDetection}"`,
 );
@@ -55,7 +55,7 @@ check(
 const lyteSignals = findMetric('lyte', 'Signals Processed / Day');
 const expectedLyteSignals = metricDisplay(LYTE_SIGNALS_PER_DAY);
 check(
-  `Lyte "Signals Processed / Day" renders from registry (expected: "${expectedLyteSignals}")`,
+  `KORA "Signals Processed / Day" renders from registry (expected: "${expectedLyteSignals}")`,
   lyteSignals === expectedLyteSignals,
   `got: "${lyteSignals}"`,
 );
@@ -63,17 +63,17 @@ check(
 const lyteFpr = findMetric('lyte', 'False Positive Rate');
 const expectedLyteFpr = metricDisplay(LYTE_FALSE_POSITIVE_RATE);
 check(
-  `Lyte "False Positive Rate" renders from registry (expected: "${expectedLyteFpr}")`,
+  `KORA "False Positive Rate" renders from registry (expected: "${expectedLyteFpr}")`,
   lyteFpr === expectedLyteFpr,
   `got: "${lyteFpr}"`,
 );
 
-// ─── Vessels venture ──────────────────────────────────────────────────────────
+// ─── SEXTANT venture ──────────────────────────────────────────────────────────
 
-const vesselsCount = findMetric('vessels', 'Vessels Monitored');
+const vesselsCount = findMetric('vessels', 'SEXTANT Monitored');
 const expectedVesselsCount = metricDisplay(VESSELS_COUNT);
 check(
-  `Vessels "Vessels Monitored" renders from registry (expected: "${expectedVesselsCount}")`,
+  `SEXTANT "SEXTANT Monitored" renders from registry (expected: "${expectedVesselsCount}")`,
   vesselsCount === expectedVesselsCount,
   `got: "${vesselsCount}"`,
 );
@@ -81,27 +81,27 @@ check(
 const vesselsDark = findMetric('vessels', 'Dark Vessel Detections (Avg Lead)');
 const expectedVesselsDark = metricDisplay(VESSELS_DARK_DETECTION_LEAD);
 check(
-  `Vessels "Dark Vessel Detections" renders from registry (expected: "${expectedVesselsDark}")`,
+  `SEXTANT "Dark Vessel Detections" renders from registry (expected: "${expectedVesselsDark}")`,
   vesselsDark === expectedVesselsDark,
   `got: "${vesselsDark}"`,
 );
 
-// ─── Aegis venture ────────────────────────────────────────────────────────────
+// ─── PARAGON venture ────────────────────────────────────────────────────────────
 
 const aegisSims = findMetric('firestorm', 'Simulations Executed');
 const expectedAegisSims = metricDisplay(AEGIS_SIMULATIONS);
 check(
-  `Aegis "Simulations Executed" renders from registry (expected: "${expectedAegisSims}")`,
+  `PARAGON "Simulations Executed" renders from registry (expected: "${expectedAegisSims}")`,
   aegisSims === expectedAegisSims,
   `got: "${aegisSims}"`,
 );
 
-// ─── Terra venture (cross-surface mirror) ─────────────────────────────────────
+// ─── DOMAINE venture (cross-surface mirror) ─────────────────────────────────────
 
 const terraAum = findMetric('terra', 'Assets Under Analysis');
 const expectedTerraAum = metricDisplay(TERRA_PORTFOLIO_AUM);
 check(
-  `Terra "Assets Under Analysis" renders from registry (expected: "${expectedTerraAum}")`,
+  `DOMAINE "Assets Under Analysis" renders from registry (expected: "${expectedTerraAum}")`,
   terraAum === expectedTerraAum,
   `got: "${terraAum}"`,
 );

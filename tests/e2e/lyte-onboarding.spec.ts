@@ -1,10 +1,10 @@
 /**
- * Lyte Command Center — Onboarding Wizard E2E Spec
+ * KORA Command Center — Onboarding Wizard E2E Spec
  *
  * Walks the new-user onboarding wizard end to end at `/onboarding`
  * (mounted at `/lyte/onboarding` when the lyte-command-center artifact
  * is served behind its default `/lyte/` base path), and asserts the
- * Lyte Overview empty-state banner is present before completion and
+ * KORA Overview empty-state banner is present before completion and
  * absent after.
  *
  * In CI this spec runs against the @workspace/lyte-command-center build
@@ -46,7 +46,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   }, ONBOARDING_STORAGE_KEY);
 });
 
-test.describe('Lyte Onboarding Wizard — End-to-End', () => {
+test.describe('KORA Onboarding Wizard — End-to-End', () => {
   test('walks the wizard and clears the Overview empty-state banner', async ({ page }) => {
     // 1. Overview shows the empty-state onboarding banner before completion.
     await page.goto(OVERVIEW_PATH);

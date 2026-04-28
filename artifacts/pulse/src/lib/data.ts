@@ -37,7 +37,7 @@ export const AGENTS: Record<string, Agent> = {
   },
   terra: {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     domain: 'real_estate',
     color: '#4eca8b',
     borderColor: 'rgba(78,202,139,0.4)',
@@ -61,7 +61,7 @@ export const AGENTS: Record<string, Agent> = {
   },
   lyte: {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     domain: 'platform',
     color: '#40c8d8',
     borderColor: 'rgba(64,200,216,0.4)',

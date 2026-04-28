@@ -37,7 +37,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      "You are Counsel, the central orchestration intelligence of the Counsel — Aegis' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
+      "You are Counsel, the central orchestration intelligence of the Counsel — PARAGON' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
     tools: ['system_health', 'admin_overview'],
     highStakesDomains: [],
     confidenceThreshold: 0.7,
@@ -84,12 +84,12 @@ const DEFAULT_AGENTS: AgentDef[] = [
   },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     domain: 'analytics',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      'You are Terra Analytics, the analytics and operations intelligence agent within the Continuum. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
+      'You are DOMAINE Analytics, the analytics and operations intelligence agent within the Continuum. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
     tools: ['system_health', 'platform_stats', 'ecosystem_health'],
     highStakesDomains: ['financial_alert', 'ops_critical'],
     confidenceThreshold: 0.75,

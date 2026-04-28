@@ -15,13 +15,13 @@
  *
  * Domains covered (extending existing auth.test.ts partial coverage):
  *   - Verifier                (pre-existing partial coverage)
- *   - Vessels                 (new)
- *   - Terra                   (new — consolidates #1281)
+ *   - SEXTANT                 (new)
+ *   - DOMAINE                   (new — consolidates #1281)
  *   - Counsel           (new — consolidates #1281)
- *   - Aegis               (new)
- *   - Lyte                    (new)
+ *   - PARAGON               (new)
+ *   - KORA                    (new)
  *   - Alloy                   (new)
- *   - Aegis                   (new)
+ *   - PARAGON                   (new)
  *   - SZL Holdings analytics  (new)
  *   - Agents / AI surface     (new)
  *
@@ -212,19 +212,19 @@ function describecsrfDomain(
 
 // ── Run CSRF tests across all domains ────────────────────────────────────────
 
-describecsrfDomain('Vessels — alerts', ['/api/vessels/alerts']);
-describecsrfDomain('Vessels — orders', ['/api/vessels/orders']);
-describecsrfDomain('Terra — properties & leases', ['/api/terra/properties', '/api/terra/leases']);
-describecsrfDomain('Terra — pro-forma', ['/api/terra/pro-forma']);
+describecsrfDomain('SEXTANT — alerts', ['/api/vessels/alerts']);
+describecsrfDomain('SEXTANT — orders', ['/api/vessels/orders']);
+describecsrfDomain('DOMAINE — properties & leases', ['/api/terra/properties', '/api/terra/leases']);
+describecsrfDomain('DOMAINE — pro-forma', ['/api/terra/pro-forma']);
 describecsrfDomain('Counsel — matters', ['/api/prism/matters']);
 describecsrfDomain('Counsel — documents', ['/api/prism/documents']);
-describecsrfDomain('Aegis — findings', ['/api/firestorm/findings']);
-describecsrfDomain('Aegis — assessments', ['/api/firestorm/assessments']);
-describecsrfDomain('Lyte — scenarios', ['/api/lyte/scenarios']);
-describecsrfDomain('Lyte — decisions', ['/api/lyte/decisions']);
+describecsrfDomain('PARAGON — findings', ['/api/firestorm/findings']);
+describecsrfDomain('PARAGON — assessments', ['/api/firestorm/assessments']);
+describecsrfDomain('KORA — scenarios', ['/api/lyte/scenarios']);
+describecsrfDomain('KORA — decisions', ['/api/lyte/decisions']);
 describecsrfDomain('Counsel — channels', ['/api/alloy/channels']);
 describecsrfDomain('Counsel — chat', ['/api/alloy/chat']);
-describecsrfDomain('Aegis — portfolios', ['/api/aegis/portfolios']);
+describecsrfDomain('PARAGON — portfolios', ['/api/aegis/portfolios']);
 describecsrfDomain('SZL Holdings — ventures', ['/api/szl-holdings/ventures']);
 describecsrfDomain('Agents — runs', ['/api/agents/runs']);
 describecsrfDomain('Verifier', ['/api/verifier']);
@@ -234,10 +234,10 @@ describecsrfDomain('Signals', ['/api/signals']);
 
 // ── PATCH / DELETE round-trips ────────────────────────────────────────────────
 
-describecsrfDomain('Vessels — alerts (PATCH)', ['/api/vessels/alerts'], 'PATCH');
-describecsrfDomain('Terra — properties (PATCH)', ['/api/terra/properties'], 'PATCH');
+describecsrfDomain('SEXTANT — alerts (PATCH)', ['/api/vessels/alerts'], 'PATCH');
+describecsrfDomain('DOMAINE — properties (PATCH)', ['/api/terra/properties'], 'PATCH');
 describecsrfDomain('Counsel — matters (DELETE)', ['/api/prism/matters'], 'DELETE');
-describecsrfDomain('Aegis — findings (DELETE)', ['/api/firestorm/findings'], 'DELETE');
+describecsrfDomain('PARAGON — findings (DELETE)', ['/api/firestorm/findings'], 'DELETE');
 
 // ── CSRF token endpoint itself ─────────────────────────────────────────────────
 

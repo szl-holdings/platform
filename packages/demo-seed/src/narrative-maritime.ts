@@ -2,7 +2,7 @@
  * Demo Narrative 3: Maritime / Sanctions / Fleet Operations Lens
  *
  * Scenario: Arcturus Shipping — MV Soltana goes dark (AIS off) for 134 minutes
- * near a sanctions-sensitive corridor. Vessels detects the anomaly, enriches
+ * near a sanctions-sensitive corridor. SEXTANT detects the anomaly, enriches
  * it with OFAC screening and weather context, generates an operator action plan,
  * Fleet Ops Director approves rerouting, and an immutable voyage record is created.
  *
@@ -66,7 +66,7 @@ export const MARITIME_NARRATIVE = {
       severity: 'critical',
       title: 'MV Soltana — AIS dark 134 min, sanctions corridor proximity',
       body: 'MV Soltana ceased AIS transmission at 2026-04-14T11:23:00Z. Reappeared 2026-04-14T13:37:00Z at a position inconsistent with expected route. Last known position: 26.4°N 56.8°E — within 18nm of Iranian territorial waters. Route deviation: 34nm eastward. OFAC screening triggered.',
-      source: 'Vessels Helmsman — AIS Telemetry',
+      source: 'SEXTANT Helmsman — AIS Telemetry',
       confidence: 0.89,
       detectedAt: '2026-04-14T13:43:00Z',
       reappearPosition: { lat: 26.4, lon: 56.8 },
@@ -133,7 +133,7 @@ export const MARITIME_NARRATIVE = {
         {
           step: 1,
           action: 'Master notified — hold at Karachi anchorage (18.8°N 67.1°E)',
-          via: 'Vessels Crew Comms Connector',
+          via: 'SEXTANT Crew Comms Connector',
         },
         {
           step: 2,
@@ -199,13 +199,13 @@ export const MARITIME_NARRATIVE = {
           timestamp: '2026-04-14T13:47:00Z',
           event: 'Action recommendation generated — hold at anchorage',
           actor: 'Helmsman Agent',
-          source: 'Vessels Recommendation Engine',
+          source: 'SEXTANT Recommendation Engine',
         },
         {
           timestamp: '2026-04-14T13:52:00Z',
           event: 'Recommendation approved — Captain James Wren',
           actor: 'James Wren',
-          source: 'Vessels Approval Gate',
+          source: 'SEXTANT Approval Gate',
         },
         {
           timestamp: '2026-04-14T14:15:00Z',
@@ -229,7 +229,7 @@ export const MARITIME_NARRATIVE = {
       step: 'Dark Event Detection',
       duration: '2 min',
       narrative:
-        'James Wren opens the Vessels fleet dashboard. Helmsman has already surfaced a critical alert: MV Soltana went dark for 134 minutes and reappeared 34nm off the declared route near Iranian waters. OFAC screening is already running.',
+        'James Wren opens the SEXTANT fleet dashboard. Helmsman has already surfaced a critical alert: MV Soltana went dark for 134 minutes and reappeared 34nm off the declared route near Iranian waters. OFAC screening is already running.',
       showIn: ['vessels/fleet/dashboard', 'vessels/incidents/soltana'],
       roleSwitch: 'fleet-operator',
     },

@@ -88,7 +88,7 @@ const DEMO_WORLD_MODEL: WorldModel = {
   nodes: [
     {
       id: 'd-vessels',
-      label: 'Vessels',
+      label: 'SEXTANT',
       type: 'domain',
       domain: 'vessels',
       confidence: 0.91,
@@ -99,7 +99,7 @@ const DEMO_WORLD_MODEL: WorldModel = {
     },
     {
       id: 'd-terra',
-      label: 'Terra',
+      label: 'DOMAINE',
       type: 'domain',
       domain: 'terra',
       confidence: 0.88,
@@ -111,7 +111,7 @@ const DEMO_WORLD_MODEL: WorldModel = {
     },
     {
       id: 'd-aegis',
-      label: "Aegis",
+      label: "PARAGON",
       type: 'domain',
       domain: 'aegis',
       confidence: 0.83,
@@ -122,7 +122,7 @@ const DEMO_WORLD_MODEL: WorldModel = {
     },
     {
       id: 'd-lyte',
-      label: 'Lyte',
+      label: 'KORA',
       type: 'domain',
       domain: 'lyte',
       confidence: 0.85,

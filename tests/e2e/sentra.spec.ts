@@ -34,7 +34,7 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('Aegis — Smoke Tests', () => {
+test.describe('PARAGON — Smoke Tests', () => {
   test('HTML title is Sentra-specific (not a generic error page)', async ({ page }) => {
     await page.goto(SENTRA_BASE || '/', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(
@@ -43,7 +43,7 @@ test.describe('Aegis — Smoke Tests', () => {
     ).catch(() => null);
     const title = await page.title();
     const content = await page.content();
-    const hasSentraBranding = /sentra/i.test(title) || content.includes('Aegis') || content.includes('Cyber Resilience');
+    const hasSentraBranding = /sentra/i.test(title) || content.includes('PARAGON') || content.includes('Cyber Resilience');
     expect(hasSentraBranding).toBe(true);
   });
 
@@ -53,7 +53,7 @@ test.describe('Aegis — Smoke Tests', () => {
 
     const pageContent = await page.content();
     const hasCyberBranding =
-      pageContent.includes('Aegis') ||
+      pageContent.includes('PARAGON') ||
       pageContent.includes('Cyber Resilience') ||
       pageContent.includes('cyber-resilience');
     expect(hasCyberBranding).toBe(true);
@@ -89,7 +89,7 @@ test.describe('Aegis — Smoke Tests', () => {
   });
 });
 
-test.describe('Aegis — Failure paths', () => {
+test.describe('PARAGON — Failure paths', () => {
   test('unknown route returns a non-5xx response', async ({ page }) => {
     const resp = await page.goto(`${SENTRA_BASE || ''}/this-route-does-not-exist-abc123`, {
       waitUntil: 'domcontentloaded',
@@ -98,7 +98,7 @@ test.describe('Aegis — Failure paths', () => {
     expect(resp?.status() ?? 200).toBeLessThan(500);
   });
 
-  test('unknown route does NOT return the Aegis app claiming it is another product', async ({
+  test('unknown route does NOT return the PARAGON app claiming it is another product', async ({
     page,
   }) => {
     await page
@@ -113,13 +113,13 @@ test.describe('Aegis — Failure paths', () => {
     // If SPA handles unknown routes (renders the shell), title must still be Sentra-branded
     // If a real 404 page is served, it should not have Sentra branding at all
     const content = await page.content();
-    const looksLikeSentra = content.includes('Aegis') || title.includes('Aegis');
+    const looksLikeSentra = content.includes('PARAGON') || title.includes('PARAGON');
     const looksLikeOtherProduct = content.includes('SZL Holdings Dashboard') && !looksLikeSentra;
     expect(looksLikeOtherProduct).toBe(false);
   });
 });
 
-test.describe('Aegis — Accessibility (axe-core)', () => {
+test.describe('PARAGON — Accessibility (axe-core)', () => {
   test('homepage has no critical/serious a11y violations', async ({ page }) => {
     await page.goto(SENTRA_BASE || '/', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -137,7 +137,7 @@ test.describe('Aegis — Accessibility (axe-core)', () => {
         .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
         .join('\n');
       expect
-        .soft(criticalOrSerious, `Aegis a11y violations:\n${summary}`)
+        .soft(criticalOrSerious, `PARAGON a11y violations:\n${summary}`)
         .toHaveLength(0);
     }
 

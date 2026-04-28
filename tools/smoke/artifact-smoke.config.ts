@@ -58,15 +58,15 @@ export const ARTIFACT_SMOKE_CONFIGS: ArtifactSmokeConfig[] = [
     timeBudgetMs: 8000,
   },
   {
-    name: 'Terra — Real Estate Intelligence',
+    name: 'DOMAINE — Real Estate Intelligence',
     path: '/terra/',
-    titleContains: 'Terra',
+    titleContains: 'DOMAINE',
     timeBudgetMs: 8000,
   },
   {
-    name: 'Vessels — Maritime Intelligence',
+    name: 'SEXTANT — Maritime Intelligence',
     path: '/vessels/',
-    titleContains: 'Vessels',
+    titleContains: 'SEXTANT',
     timeBudgetMs: 8000,
   },
   {
@@ -94,9 +94,9 @@ export const ARTIFACT_SMOKE_CONFIGS: ArtifactSmokeConfig[] = [
     timeBudgetMs: 8000,
   },
   {
-    name: 'Lyte — Decision Intelligence',
+    name: 'KORA — Decision Intelligence',
     path: '/lyte/',
-    titleContains: 'Lyte',
+    titleContains: 'KORA',
     timeBudgetMs: 8000,
   },
   {

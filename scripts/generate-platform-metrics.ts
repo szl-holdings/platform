@@ -227,10 +227,10 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Pack | Domain |
 |------|--------|
-| Lyte | Decision Intelligence command surface |
-| Vessels | Maritime fleet intelligence |
-| Terra | Real estate intelligence |
-| Aegis | Security and defense intelligence |
+| KORA | Decision Intelligence command surface |
+| SEXTANT | Maritime fleet intelligence |
+| DOMAINE | Real estate intelligence |
+| PARAGON | Security and defense intelligence |
 | PRISM | Legal matter command |
 | Carlota | Premium advisory operations |
 

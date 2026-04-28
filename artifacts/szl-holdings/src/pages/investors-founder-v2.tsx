@@ -109,14 +109,14 @@ const operatingThesis = [
 const proofObjects = [
   {
     title: "Approval latency detection",
-    platform: "Lyte",
+    platform: "KORA",
     color: "#4a90b8",
     outcome:
       "Designed and built a signal compression and prioritization layer to surface approval queue stalling that was invisible to leadership. The system ranks severity, exposes root cause context, and routes next actions to the right owner.",
   },
   {
     title: "Pre-designation behavioral fingerprinting",
-    platform: "Vessels",
+    platform: "SEXTANT",
     color: "#4a90b8",
     outcome:
       "Built an AIS anomaly detection system to identify sanctions-risk vessel behavior before formal regulatory designation — using pattern analysis across large vessel datasets to detect behavioral laundering and position manipulation.",

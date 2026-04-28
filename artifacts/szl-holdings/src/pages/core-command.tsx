@@ -111,7 +111,7 @@ const SEVERITY_BG: Record<string, string> = {
 
 const platformLinks = [
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     role: 'OBSERVE',
     subtitle: 'Property Intelligence',
     href: '/terra/',
@@ -119,7 +119,7 @@ const platformLinks = [
     color: '#4d7c0f',
   },
   {
-    name: 'Lyte',
+    name: 'KORA',
     role: 'INTERPRET',
     subtitle: 'Decision Intelligence',
     href: '/command/operations/',
@@ -143,7 +143,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     role: 'DEFEND',
     subtitle: 'Defense & Intelligence',
     href: '/aegis/',
@@ -151,7 +151,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     role: 'TRACK',
     subtitle: 'Maritime Intelligence',
     href: '/vessels/',
@@ -572,7 +572,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Distress Properties"
                   value={t?.total_distress_properties ?? '—'}
-                  sub="Terra — NYC + NY"
+                  sub="DOMAINE — NYC + NY"
                   icon={Building}
                   color="#4d8fcc"
                   loading={metricsLoading}
@@ -596,7 +596,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Open Vulnerabilities"
                   value={openVulns}
-                  sub="Aegis — Active"
+                  sub="PARAGON — Active"
                   icon={Shield}
                   color="#ef4444"
                   loading={metricsLoading}
@@ -782,13 +782,13 @@ export default function CoreCommandCenter() {
                   <div className="space-y-1">
                     {[
                       {
-                        label: 'Terra — Property Intelligence',
+                        label: 'DOMAINE — Property Intelligence',
                         href: '/terra/',
                         color: '#4d7c0f',
                         icon: Building,
                       },
                       {
-                        label: 'Aegis — Defense & Intelligence',
+                        label: 'PARAGON — Defense & Intelligence',
                         href: '/aegis/',
                         color: '#6366f1',
                         icon: Shield,
@@ -800,7 +800,7 @@ export default function CoreCommandCenter() {
                         icon: Globe,
                       },
                       {
-                        label: 'Vessels — Maritime',
+                        label: 'SEXTANT — Maritime',
                         href: '/vessels/',
                         color: '#3b82f6',
                         icon: Ship,

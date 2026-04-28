@@ -321,12 +321,12 @@ function TabLoading() {
 
 function getDomainColor(domain: string): string {
   const colors: Record<string, string> = {
-    Vessels: '#4d8fcc', vessels: '#4d8fcc',
-    Terra: '#10b981', terra: '#10b981',
-    Aegis: '#ef4444', aegis: '#ef4444',
+    SEXTANT: '#4d8fcc', vessels: '#4d8fcc',
+    DOMAINE: '#10b981', terra: '#10b981',
+    PARAGON: '#ef4444', aegis: '#ef4444',
     Counsel: '#8b5cf6', counsel: '#8b5cf6',
     Sentra: '#f59e0b', sentra: '#f59e0b',
-    Lyte: '#6366f1', lyte: '#6366f1',
+    KORA: '#6366f1', lyte: '#6366f1',
     Praxis: '#ec4899', praxis: '#ec4899',
   };
   return colors[domain] ?? '#6366f1';

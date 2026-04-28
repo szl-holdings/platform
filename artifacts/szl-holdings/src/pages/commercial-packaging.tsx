@@ -49,7 +49,7 @@ const RELIEF_TIERS = [
     icon: Zap,
     reliefStatement: "Signals are ranked by severity and routed to the right owner with context. No more triage-by-Slack.",
     what: "Signal intelligence → ownership routing.",
-    apps: ["Lyte", "Aegis", "Vessels"],
+    apps: ["KORA", "PARAGON", "SEXTANT"],
     includes: [
       "Everything in Clarity",
       "Cross-domain signal correlation (PRAXIS BUS)",
@@ -70,7 +70,7 @@ const RELIEF_TIERS = [
     icon: Shield,
     reliefStatement: "Forecast models surface what's at risk, why it's at risk, and what happens if nothing changes — explained in plain language.",
     what: "Explainable operational forecasting.",
-    apps: ["Lyte", "Terra", "Vessels", "Aegis"],
+    apps: ["KORA", "DOMAINE", "SEXTANT", "PARAGON"],
     includes: [
       "Everything in Triage",
       "PRAXIS risk scoring with source attribution",
@@ -91,7 +91,7 @@ const RELIEF_TIERS = [
     icon: GitBranch,
     reliefStatement: "Every consequential action is approved, traced, and linked to the signal that triggered it. Defensible at any audit.",
     what: "Human-in-the-loop action with full proof chain.",
-    apps: ["Lyte", "Aegis", "Vessels", "Terra", "Holdings"],
+    apps: ["KORA", "PARAGON", "SEXTANT", "DOMAINE", "Holdings"],
     includes: [
       "Everything in Readiness",
       "Counsel RUNTIME governed workflow execution",

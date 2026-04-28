@@ -89,10 +89,10 @@ const client = new SZLClient({
             code: `// ROSIE threat detection
 const threats = await client.security.getAegisThreats();
 
-// Aegis compliance
+// PARAGON compliance
 const compliance = await client.security.getAegisCompliance();
 
-// Aegis simulations
+// PARAGON simulations
 const scenarios = await client.security.getScenarios();`,
           },
           {
@@ -111,7 +111,7 @@ const alerts = await client.analytics.getCommandAlerts();`,
             name: 'Maritime',
             icon: Globe,
             color: 'text-tag-maritime',
-            code: `// Vessels fleet management
+            code: `// SEXTANT fleet management
 const fleet = await client.maritime.getFleet();
 const voyages = await client.maritime.getVoyages();
 const alerts = await client.maritime.getAlerts();`,

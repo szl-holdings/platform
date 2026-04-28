@@ -63,7 +63,7 @@ const PACKS: Pack[] = [
   },
   {
     id: "terra",
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Property intelligence and deal execution",
     description: "Real estate operators and investors finally get a command layer. Property Twin tracks every asset signal. Counsel routes action through governed workflows.",
     icon: Building2,
@@ -81,12 +81,12 @@ const PACKS: Pack[] = [
     outputs: ["Property Twin dashboard", "Distress detection feed", "Diligence readiness score", "Deal approval workflow", "LP-ready export packet"],
     signals: ["NYC PLUTO (property data)", "FEMA NFHL (flood hazard)", "US Census (demographics/economics)", "Public lien and permit records"],
     trust: ["Human approval on consequential deal decisions", "Attribution on every recommendation", "Source-grounded signals — no hallucinated data", "Audit trail for LP and compliance review"],
-    ctaLabel: "See Terra",
+    ctaLabel: "See DOMAINE",
     ctaHref: "/terra-public",
   },
   {
     id: "vessels",
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Fleet intelligence and maritime operations command",
     description: "Command-grade observability for maritime operations. Voyage and fleet twins surface risk before it becomes a commercial incident. Counsel routes action with full traceability.",
     icon: Ship,
@@ -104,12 +104,12 @@ const PACKS: Pack[] = [
     outputs: ["Fleet command dashboard", "Voyage risk feed", "Port operations checklist", "Compliance audit trail", "Commercial exception report"],
     signals: ["NWS marine forecasts", "USCG AIS (vessel tracking)", "BTS port statistics", "OFAC sanctions screening"],
     trust: ["Human approval on rerouting and compliance exceptions", "Full crew and cargo attribution", "Regulatory footprint captured automatically", "Immutable voyage audit record"],
-    ctaLabel: "See Vessels",
+    ctaLabel: "See SEXTANT",
     ctaHref: "/vessels-public",
   },
   {
     id: "aegis",
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "Threat intelligence and security operations command",
     description: "SOC command built for environments where every decision has consequence. Threat Twin tracks your exposure surface. Counsel routes response through governed playbooks.",
     icon: ShieldCheck,
@@ -127,19 +127,19 @@ const PACKS: Pack[] = [
     outputs: ["SOC command surface", "Threat exposure dashboard", "Incident response queue", "Compliance audit trail", "Vulnerability remediation tracker"],
     signals: ["CISA KEV (known exploited vulns)", "NIST NVD (vulnerability database)", "Microsoft Security feeds", "Identity and endpoint telemetry"],
     trust: ["Human-in-the-loop on all remediation actions", "Analyst attribution on every decision", "Compliance-ready audit trail (SOC 2, ISO 27001)", "No autonomous execution without approval"],
-    ctaLabel: "See Aegis",
+    ctaLabel: "See PARAGON",
     ctaHref: "/aegis-public",
   },
   {
     id: "lyte",
-    name: "Lyte",
+    name: "KORA",
     tagline: "Cross-pack executive command and portfolio intelligence",
-    description: "The executive command layer above all packs. Lyte surfaces cross-portfolio pressure, movement, blockers, and action routing — so leadership sees the whole operational picture.",
+    description: "The executive command layer above all packs. KORA surfaces cross-portfolio pressure, movement, blockers, and action routing — so leadership sees the whole operational picture.",
     icon: BarChart3,
     accentColor: "hsl(192,80%,48%)",
     accentRgb: "6,182,212",
     twin: "Portfolio Command Surface",
-    twinDescription: "A unified view across every pack — Counsel, Terra, Vessels, Aegis, Carlota Jo — showing portfolio pressure, open blockers, pending approvals, and escalation status.",
+    twinDescription: "A unified view across every pack — Counsel, DOMAINE, SEXTANT, PARAGON, Carlota Jo — showing portfolio pressure, open blockers, pending approvals, and escalation status.",
     workflow: [
       { label: "Portfolio Pressure", detail: "Cross-pack signals aggregated — what's stuck, what's at risk, what needs leadership attention" },
       { label: "Movement Tracking", detail: "Progress across all active workflows surfaced with velocity and delay scoring" },
@@ -149,7 +149,7 @@ const PACKS: Pack[] = [
     outputs: ["Executive portfolio dashboard", "Cross-pack pressure feed", "Blocker and escalation queue", "Approval pipeline view", "Portfolio health summary"],
     signals: ["All connected pack signals", "Approval queue telemetry", "Workflow velocity metrics", "Exception and escalation feeds"],
     trust: ["Role-based views by pack and permission", "No raw data exposure at executive level", "Attribution on every escalation", "Audit trail for governance review"],
-    ctaLabel: "See Lyte",
+    ctaLabel: "See KORA",
     ctaHref: "/lyte",
   },
   {
@@ -271,7 +271,7 @@ export default function DemoPage() {
 
   const __pageMeta = usePageMeta({
     title: "Demo — SZL Holdings",
-    description: "See how Lyte and Counsel work across every vertical pack. Choose a product, explore the flagship workflow, and request controlled access.",
+    description: "See how KORA and Counsel work across every vertical pack. Choose a product, explore the flagship workflow, and request controlled access.",
     canonical: "https://szlholdings.com/demo",
   });
 

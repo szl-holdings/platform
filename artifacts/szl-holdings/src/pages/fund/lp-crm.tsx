@@ -20,12 +20,12 @@ const LPS: LP[] = [
     sentiment: 9.2, reUpProb: 88, lastContact: "Apr 2, 2026", nextMeeting: "Apr 20, 2026",
     tags: ["re-up likely", "strategic value", "co-invest interest"],
     interactions: [
-      { date: "Apr 2, 2026", type: "Call", notes: "Reviewed Q1 performance. Strong positive reaction to Lyte valuation mark. Interested in co-invest on NovaStar AI." },
+      { date: "Apr 2, 2026", type: "Call", notes: "Reviewed Q1 performance. Strong positive reaction to KORA valuation mark. Interested in co-invest on NovaStar AI." },
       { date: "Mar 15, 2026", type: "Email", notes: "Sent Q4 2025 annual report. Acknowledged next day." },
       { date: "Jan 22, 2026", type: "Meeting", notes: "Annual LP meeting. Meridian rep expressed interest in Fund II at $12M." },
     ],
     talkingPoints: [
-      "Lyte's $148M Series B mark — 3.4× unrealized on their investment",
+      "KORA's $148M Series B mark — 3.4× unrealized on their investment",
       "NovaStar AI co-invest opportunity — $500K–$1M ticket available",
       "Fund II strategy: larger checks, growth stage focus",
       "Portfolio aggregate ARR up 42% since last year-end",
@@ -57,7 +57,7 @@ const LPS: LP[] = [
     talkingPoints: [
       "ESG metrics: portfolio companies avg 8.2/10 on governance score",
       "Fund II discussions — CIO has budget clarity for Sept close",
-      "Governance improvement at Aegis — new board charter ratified",
+      "Governance improvement at PARAGON — new board charter ratified",
       "TVPI of 2.1× placing fund in top 20% of vintage 2023 cohort",
     ],
   },
@@ -71,7 +71,7 @@ const LPS: LP[] = [
     ],
     talkingPoints: [
       "Re-establish contact — 45 days without engagement",
-      "Offer SPV access for upcoming Vessels bridge round",
+      "Offer SPV access for upcoming SEXTANT bridge round",
       "Net IRR of 28.4% ahead of their 20% threshold",
       "Fund II deck available if they want to review",
     ],

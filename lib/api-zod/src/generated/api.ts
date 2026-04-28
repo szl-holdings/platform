@@ -1887,7 +1887,7 @@ export const SubscribeCommandPlanResponse = zod.object({
 });
 
 /**
- * @summary List Terra real estate intelligence billing plans
+ * @summary List DOMAINE real estate intelligence billing plans
  */
 export const ListTerraBillingPlansResponseItem = zod.object({
   id: zod.number(),
@@ -1904,7 +1904,7 @@ export const ListTerraBillingPlansResponse = zod.array(
 );
 
 /**
- * @summary Subscribe to a Terra plan
+ * @summary Subscribe to a DOMAINE plan
  */
 export const SubscribeTerraplanBody = zod.object({
   planId: zod.string(),
@@ -1919,7 +1919,7 @@ export const SubscribeTerraplanResponse = zod.object({
 });
 
 /**
- * @summary Record metered API usage for Terra
+ * @summary Record metered API usage for DOMAINE
  */
 
 export const RecordTerraMeteredUsageBody = zod.object({
@@ -1929,7 +1929,7 @@ export const RecordTerraMeteredUsageBody = zod.object({
 });
 
 /**
- * @summary Submit an Aegis enterprise quote request
+ * @summary Submit an PARAGON enterprise quote request
  */
 export const RequestAegisEnterpriseQuoteBody = zod.object({
   email: zod.string().email(),
@@ -1982,7 +1982,7 @@ export const GetBillingRevenueAnalyticsResponse = zod.object({
 });
 
 /**
- * @summary Create an Aegis invoice (admin)
+ * @summary Create an PARAGON invoice (admin)
  */
 export const CreateAegisInvoiceBody = zod.object({
   customerId: zod.string(),
@@ -2232,7 +2232,7 @@ export const GetTerraCommercialCompsResponse = zod.object({
 });
 
 /**
- * @summary Get Terra enterprise feature flags
+ * @summary Get DOMAINE enterprise feature flags
  */
 export const GetTerraEnterpriseFlagsResponse = zod.record(
   zod.string(),
@@ -4471,7 +4471,7 @@ export const ExportAuditLogBody = zod.object({
 });
 
 /**
- * @summary Export Aegis security incidents
+ * @summary Export PARAGON security incidents
  */
 export const exportAegisIncidentsBodyFormatDefault = `csv`;
 
@@ -4486,7 +4486,7 @@ export const ExportAegisIncidentsBody = zod.object({
 });
 
 /**
- * @summary Export Vessels maritime data
+ * @summary Export SEXTANT maritime data
  */
 export const exportVesselsDataBodyFormatDefault = `csv`;
 
@@ -4501,7 +4501,7 @@ export const ExportVesselsDataBody = zod.object({
 });
 
 /**
- * @summary Export Terra real estate deals
+ * @summary Export DOMAINE real estate deals
  */
 export const exportTerraDealsBodyFormatDefault = `csv`;
 
@@ -4516,7 +4516,7 @@ export const ExportTerraDealsBody = zod.object({
 });
 
 /**
- * @summary Export Lyte e-commerce signals
+ * @summary Export KORA e-commerce signals
  */
 export const exportLyteSignalsBodyFormatDefault = `csv`;
 

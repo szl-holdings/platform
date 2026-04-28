@@ -554,7 +554,7 @@ function descriptionFor(name: string, category: string): string {
     'Document Engine': `${name} — Document engine surface (templates, signing, batch PDF) from lib/shared-ui/src/document-engine.`,
     'Onboarding': `${name} — Onboarding flow primitive from lib/shared-ui/src/onboarding.`,
     'Receipt Graph': `${name} — Provenance / receipt-graph component used to surface evidence and trust signals.`,
-    'Operational Primitives': `${name} — Standardized operational primitive shared across Counsel, Lyte, Terra, Aegis, and Vessels.`,
+    'Operational Primitives': `${name} — Standardized operational primitive shared across Counsel, KORA, DOMAINE, PARAGON, and SEXTANT.`,
     'APEX AI': `${name} — APEX AI conversational/agent surface.`,
     'AI Controls': `${name} — Operator control for AI-driven decisions and simulations.`,
     'Visualization': `${name} — Data visualization component (graphs, distributions, diagrams).`,

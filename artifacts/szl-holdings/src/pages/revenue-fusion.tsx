@@ -57,7 +57,7 @@ const REVENUE_STREAMS: RevenueStream[] = [
   {
     id: 'terra',
     label: 'Real Estate Yields',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     icon: '⬢',
     color: '#22c55e',
     totalRevenue: 6840000,
@@ -74,7 +74,7 @@ const REVENUE_STREAMS: RevenueStream[] = [
   {
     id: 'vessels',
     label: 'Maritime Revenue',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     icon: '⚓',
     color: '#4d8fcc',
     totalRevenue: 21400000,

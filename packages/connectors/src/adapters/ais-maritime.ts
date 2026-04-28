@@ -3,7 +3,7 @@
  *
  * Synthetic AIS vessel position feed with dark period detection and
  * sanctions corridor proximity alerts. Emits realistic maritime signals
- * for the Vessels product demo.
+ * for the SEXTANT product demo.
  */
 
 import type { Signal, SignalInput } from "@workspace/ontology/signal";

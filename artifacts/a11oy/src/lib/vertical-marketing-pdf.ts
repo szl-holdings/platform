@@ -92,14 +92,14 @@ export interface VerticalSpec {
 export const VERTICAL_SPECS: VerticalSpec[] = [
   {
     id: 'lyte',
-    name: 'Lyte',
-    fullName: 'Lyte — Decision Intelligence',
+    name: 'KORA',
+    fullName: 'KORA — Decision Intelligence',
     emoji: '◆',
     color: [201, 152, 64] as RGB,
     domain: 'Decision Intelligence',
     tagline: 'Governed multi-model routing and portfolio-wide signal observability.',
-    philosophy: 'Every enterprise generates more operational signal than human teams can process. Lyte exists to close the gap — not by replacing human judgment, but by making human judgment faster, sharper, and traceable. Through A11oy\'s governed decision loop, Lyte transforms raw operational data into classified signals, routes them through the right model at the right cost, and surfaces them to the right decision-maker at precisely the right moment. Every recommendation carries confidence intervals. Every decision carries a proof envelope.',
-    howA11oyPowers: 'A11oy\'s Signal Mesh ingests portfolio-wide data from all verticals simultaneously. The Causal Core explains the why behind every anomaly before routing it to Lyte operators. The Covenant Layer enforces policy gates on material decisions — no AI agent autonomously executes without human approval on consequential actions. The Proof Ledger creates an immutable record of every decision chain, making Lyte\'s operational intelligence auditable by design.',
+    philosophy: 'Every enterprise generates more operational signal than human teams can process. KORA exists to close the gap — not by replacing human judgment, but by making human judgment faster, sharper, and traceable. Through A11oy\'s governed decision loop, KORA transforms raw operational data into classified signals, routes them through the right model at the right cost, and surfaces them to the right decision-maker at precisely the right moment. Every recommendation carries confidence intervals. Every decision carries a proof envelope.',
+    howA11oyPowers: 'A11oy\'s Signal Mesh ingests portfolio-wide data from all verticals simultaneously. The Causal Core explains the why behind every anomaly before routing it to KORA operators. The Covenant Layer enforces policy gates on material decisions — no AI agent autonomously executes without human approval on consequential actions. The Proof Ledger creates an immutable record of every decision chain, making KORA\'s operational intelligence auditable by design.',
     architectureLayers: [
       { layer: 'Signal Mesh', desc: 'Continuous ingestion and classification of cross-vertical operational signals — revenue anomalies, resource gaps, pipeline deviations, and system health alerts.' },
       { layer: 'Causal Core', desc: 'Traces the causal chain behind every signal — surfacing root cause, downstream exposure, and confidence-weighted explanation before recommendation.' },
@@ -117,13 +117,13 @@ export const VERTICAL_SPECS: VerticalSpec[] = [
   },
   {
     id: 'aegis',
-    name: 'Aegis',
-    fullName: 'Aegis — Defense & Intelligence Command',
+    name: 'PARAGON',
+    fullName: 'PARAGON — Defense & Intelligence Command',
     emoji: '⬡',
     color: [100, 130, 220] as RGB,
     domain: 'Defense & Intelligence',
     tagline: 'Unified SOC, threat intelligence, and defense operations — governed and accountable.',
-    philosophy: 'Security operations generate the highest-stakes signals in any enterprise. A wrong call on a threat — either dismissing a real attack or acting on a false positive — carries material consequence. Aegis brings A11oy\'s governed intelligence framework to the security domain, ensuring every incident recommendation is traceable, every response action is policy-gated, and every outcome is recorded immutably. In an era of AI-assisted security operations, accountability requires proof — not just logs.',
+    philosophy: 'Security operations generate the highest-stakes signals in any enterprise. A wrong call on a threat — either dismissing a real attack or acting on a false positive — carries material consequence. PARAGON brings A11oy\'s governed intelligence framework to the security domain, ensuring every incident recommendation is traceable, every response action is policy-gated, and every outcome is recorded immutably. In an era of AI-assisted security operations, accountability requires proof — not just logs.',
     howA11oyPowers: 'A11oy\'s Signal Mesh normalizes threat intelligence from disparate sources — SIEM events, MITRE ATT&CK correlations, vulnerability feeds, and network telemetry — into a unified classified signal stream. The Causal Core traces attack chains and attribution. Covenant Policy enforces tiered response authorization — automated containment for known patterns, human escalation for novel threats. Every containment action, every escalation decision, every incident closure is Proof Ledger-attributed.',
     architectureLayers: [
       { layer: 'Threat Signal Mesh', desc: 'Normalizes SIEM events, threat feeds, MITRE ATT&CK mappings, and network telemetry into a governed signal stream with severity classification.' },
@@ -142,13 +142,13 @@ export const VERTICAL_SPECS: VerticalSpec[] = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
-    fullName: 'Vessels — Maritime Intelligence',
+    name: 'SEXTANT',
+    fullName: 'SEXTANT — Maritime Intelligence',
     emoji: '⚓',
     color: [14, 140, 210] as RGB,
     domain: 'Maritime Intelligence',
     tagline: 'Fleet command, voyage economics, and sanctions screening — governed and real-time.',
-    philosophy: 'Maritime operations produce enormous signal volume — AIS position updates, port schedules, voyage cost models, sanctions screening results, weather routing — across fleets that span multiple jurisdictions and time zones. A single rerouting decision can determine whether a voyage is profitable or a multi-million dollar loss. Vessels brings A11oy\'s governed intelligence fabric to this domain, turning raw maritime data into classified, prioritized signals that operators can act on with confidence — and with proof.',
+    philosophy: 'Maritime operations produce enormous signal volume — AIS position updates, port schedules, voyage cost models, sanctions screening results, weather routing — across fleets that span multiple jurisdictions and time zones. A single rerouting decision can determine whether a voyage is profitable or a multi-million dollar loss. SEXTANT brings A11oy\'s governed intelligence fabric to this domain, turning raw maritime data into classified, prioritized signals that operators can act on with confidence — and with proof.',
     howA11oyPowers: 'A11oy\'s Signal Mesh ingests AIS feeds, port state data, sanctions lists, voyage economics, and weather routing into a normalized signal stream. The Causal Core explains deviations — why a vessel is running behind schedule, what caused a route change, whether a cost overrun is systemic or isolated. Covenant Policy gates material decisions — rerouting approvals, sanctions escalations, commercial negotiations — ensuring every action has human authorization. The Proof Ledger creates an audit record that serves compliance, insurance, and charterer due diligence.',
     architectureLayers: [
       { layer: 'AIS Signal Mesh', desc: 'Real-time position, speed, heading, and ETA normalization across the fleet — with dark vessel detection and anomalous behavior flagging.' },
@@ -167,13 +167,13 @@ export const VERTICAL_SPECS: VerticalSpec[] = [
   },
   {
     id: 'terra',
-    name: 'Terra',
-    fullName: 'Terra — Real Estate Intelligence',
+    name: 'DOMAINE',
+    fullName: 'DOMAINE — Real Estate Intelligence',
     emoji: '▣',
     color: [64, 133, 100] as RGB,
     domain: 'Real Estate Intelligence',
     tagline: 'Distress-first property intelligence for investors, brokers, and portfolio teams.',
-    philosophy: 'Real estate intelligence is not about more data — it is about the right signal at the right time with the right context. Distressed properties surface and close before most market participants even know they exist. Terra applies A11oy\'s governed intelligence framework to NYC real estate, building a multi-factor distress scoring engine that identifies opportunity before it becomes consensus — and tracks deal pipeline with full attribution through the investment decision cycle.',
+    philosophy: 'Real estate intelligence is not about more data — it is about the right signal at the right time with the right context. Distressed properties surface and close before most market participants even know they exist. DOMAINE applies A11oy\'s governed intelligence framework to NYC real estate, building a multi-factor distress scoring engine that identifies opportunity before it becomes consensus — and tracks deal pipeline with full attribution through the investment decision cycle.',
     howA11oyPowers: 'A11oy\'s Signal Mesh ingests property records, ownership structures, tax delinquency data, mortgage status, and market comparable transactions into a normalized property signal stream. The Causal Core explains distress — tracing the chain from delinquency pattern to distress classification with confidence scoring. Covenant Policy gates investment committee decisions — ensuring material acquisitions carry documented authorization. The Proof Ledger creates an immutable record of every deal decision, from initial signal to close, for LP reporting and regulatory compliance.',
     architectureLayers: [
       { layer: 'Property Signal Mesh', desc: 'NYC tax records, mortgage data, ownership structures, and market comps normalized into a classified signal stream with distress scoring.' },
@@ -558,10 +558,10 @@ function buildVerticalDoc(spec: VerticalSpec): jsPDF {
   y += 7;
 
   const portfolio = [
-    { emoji: '◆', name: 'Lyte', desc: 'Decision Intelligence — multi-model routing and portfolio-wide signal observability', color: [201, 152, 64] as RGB },
-    { emoji: '⬡', name: 'Aegis', desc: 'Defense & Intelligence — unified SOC, threat intelligence, and compliance posture', color: [100, 130, 220] as RGB },
-    { emoji: '⚓', name: 'Vessels', desc: 'Maritime Intelligence — fleet command, voyage economics, sanctions screening', color: [14, 140, 210] as RGB },
-    { emoji: '▣', name: 'Terra', desc: 'Real Estate Intelligence — distress scoring, deal pipeline, ownership intelligence', color: [64, 133, 100] as RGB },
+    { emoji: '◆', name: 'KORA', desc: 'Decision Intelligence — multi-model routing and portfolio-wide signal observability', color: [201, 152, 64] as RGB },
+    { emoji: '⬡', name: 'PARAGON', desc: 'Defense & Intelligence — unified SOC, threat intelligence, and compliance posture', color: [100, 130, 220] as RGB },
+    { emoji: '⚓', name: 'SEXTANT', desc: 'Maritime Intelligence — fleet command, voyage economics, sanctions screening', color: [14, 140, 210] as RGB },
+    { emoji: '▣', name: 'DOMAINE', desc: 'Real Estate Intelligence — distress scoring, deal pipeline, ownership intelligence', color: [64, 133, 100] as RGB },
     { emoji: '⚖', name: 'Counsel', desc: 'Legal Matter Command — structured matter management with governed document intelligence', color: [140, 100, 210] as RGB },
     { emoji: '◎', name: 'Carlota Jo', desc: 'Private Advisory — governed advisory intelligence for principals who value precision', color: [200, 140, 100] as RGB },
     { emoji: '◈', name: 'Pulse', desc: 'Market Intelligence — executive briefings, synthesized and attributed', color: [60, 170, 155] as RGB },
@@ -671,7 +671,7 @@ function buildPlatformBriefDoc(): jsPDF {
   doc.setFont('helvetica', 'normal');
   textColor(doc, MUTED);
   const summaryLines = doc.splitTextToSize(
-    'A11oy is the governing philosophy and execution fabric behind every SZL Holdings platform. Where competitors aggregate tools, A11oy builds a unified governed intelligence loop — Signal, Structure, Recommend, Gate, Decide, Prove — across Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo, and Pulse. Every vertical shares the proof infrastructure. Every decision is traceable. Every outcome compounds.',
+    'A11oy is the governing philosophy and execution fabric behind every SZL Holdings platform. Where competitors aggregate tools, A11oy builds a unified governed intelligence loop — Signal, Structure, Recommend, Gate, Decide, Prove — across KORA, PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo, and Pulse. Every vertical shares the proof infrastructure. Every decision is traceable. Every outcome compounds.',
     cw - 20,
   );
   doc.text(summaryLines, cx + 10, 140);
@@ -825,7 +825,7 @@ function buildPlatformBriefDoc(): jsPDF {
     },
     {
       title: 'Not single-domain — compounding cross-vertical intelligence',
-      body: 'A sanctions hit on a maritime vessel can surface a legal risk flag in Counsel, triggering an executive alert in Lyte. No single-domain tool can produce this. The more verticals share the Signal Mesh, the more intelligence compounds across all of them.',
+      body: 'A sanctions hit on a maritime vessel can surface a legal risk flag in Counsel, triggering an executive alert in KORA. No single-domain tool can produce this. The more verticals share the Signal Mesh, the more intelligence compounds across all of them.',
     },
     {
       title: 'Not configuration — architecture',

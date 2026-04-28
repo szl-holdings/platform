@@ -31,16 +31,16 @@ const VENTURES_MAP: Record<
   }
 > = {
   vessels: {
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime Intelligence',
     description:
-      'A command-grade maritime intelligence platform covering global shipping routes. Vessels ingests live AIS feeds, enriches vessel and voyage data, applies sanctions screening against OFAC and UN watchlists, and surfaces operational exceptions in real time.',
+      'A command-grade maritime intelligence platform covering global shipping routes. SEXTANT ingests live AIS feeds, enriches vessel and voyage data, applies sanctions screening against OFAC and UN watchlists, and surfaces operational exceptions in real time.',
     color: '#3b82f6',
     url: 'https://vessels.szlholdings.com',
     status: 'Live',
     year: '2024',
     metrics: [
-      { label: 'Vessels tracked', value: '50K+' },
+      { label: 'SEXTANT tracked', value: '50K+' },
       { label: 'Data points/day', value: '2M+' },
       { label: 'Coverage', value: 'Global' },
       { label: 'Sanctions databases', value: 'OFAC + UN' },
@@ -55,10 +55,10 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'PostgreSQL', 'AIS Stream', 'Express'],
   },
   aegis: {
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Unified Defense & Intelligence',
     description:
-      'A unified command surface for enterprise cybersecurity converging Security Operations (Aegis), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs). Aegis brings together threat detection, incident response, and managed operations under a single enterprise-grade interface.',
+      'A unified command surface for enterprise cybersecurity converging Security Operations (PARAGON), Managed Services (PARAGON Operations), and Intelligence Engine (PARAGON Labs). PARAGON brings together threat detection, incident response, and managed operations under a single enterprise-grade interface.',
     color: '#6366f1',
     url: 'https://aegis.szlholdings.com',
     status: 'Live',
@@ -79,10 +79,10 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'WebSockets', 'PostgreSQL', 'AI/ML'],
   },
   terra: {
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Real Estate Intelligence',
     description:
-      'A distress-first real estate intelligence platform covering all five NYC boroughs. Terra surfaces pre-foreclosure signals, tax lien patterns, and ownership anomalies — giving operators a 6–18 month head start on distressed opportunity.',
+      'A distress-first real estate intelligence platform covering all five NYC boroughs. DOMAINE surfaces pre-foreclosure signals, tax lien patterns, and ownership anomalies — giving operators a 6–18 month head start on distressed opportunity.',
     color: '#10b981',
     url: 'https://terra.szlholdings.com',
     status: 'Live',
@@ -103,10 +103,10 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'PostGIS', 'Mapbox', 'PostgreSQL'],
   },
   lyte: {
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'Business Observability',
     description:
-      'A unified AI operations and business observability platform. Lyte provides cross-portfolio signal aggregation, multi-model AI routing, infrastructure health monitoring, and the PRISM framework for translating operational data into decisions.',
+      'A unified AI operations and business observability platform. KORA provides cross-portfolio signal aggregation, multi-model AI routing, infrastructure health monitoring, and the PRISM framework for translating operational data into decisions.',
     color: '#06b6d4',
     url: 'https://lyte.szlholdings.com',
     status: 'Live',

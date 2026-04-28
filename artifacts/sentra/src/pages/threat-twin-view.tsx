@@ -143,7 +143,7 @@ export default function ThreatTwinView() {
               </h3>
             </div>
             <span className="text-[10px] text-[#f5f5f5]/60 font-mono">
-              Source: Aegis Asset Inventory
+              Source: PARAGON Asset Inventory
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-4">

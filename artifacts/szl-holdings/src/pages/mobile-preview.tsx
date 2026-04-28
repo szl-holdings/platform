@@ -41,7 +41,7 @@ type ScreenId = "dashboard" | "portfolio" | "command";
 const SCREENS: Array<{ id: ScreenId; label: string; sublabel: string; icon: typeof Activity }> = [
   { id: "dashboard", label: "Command Dashboard", sublabel: "Cross-domain signal feed", icon: Activity },
   { id: "portfolio", label: "Portfolio", sublabel: "Ecosystem health & KPIs", icon: Briefcase },
-  { id: "command", label: "Operations Command", sublabel: "Lyte signal-to-action inbox", icon: Radio },
+  { id: "command", label: "Operations Command", sublabel: "KORA signal-to-action inbox", icon: Radio },
 ];
 
 function StatusBar() {
@@ -195,11 +195,11 @@ function TabBar({ tabs, active }: { tabs: Array<{ icon: typeof Activity; label: 
 
 function DashboardScreen() {
   const signals = [
-    { sev: "critical", source: "Aegis", title: "Privileged credential anomaly — finance VPC", time: "2m", color: "hsl(0,80%,62%)" },
-    { sev: "high", source: "Vessels", title: "MV Atlantic Crest deviated from filed route", time: "11m", color: "hsl(28,90%,58%)" },
-    { sev: "high", source: "Terra", title: "Distress signal: 4 properties in Zone 7 portfolio", time: "23m", color: "hsl(28,90%,58%)" },
+    { sev: "critical", source: "PARAGON", title: "Privileged credential anomaly — finance VPC", time: "2m", color: "hsl(0,80%,62%)" },
+    { sev: "high", source: "SEXTANT", title: "MV Atlantic Crest deviated from filed route", time: "11m", color: "hsl(28,90%,58%)" },
+    { sev: "high", source: "DOMAINE", title: "Distress signal: 4 properties in Zone 7 portfolio", time: "23m", color: "hsl(28,90%,58%)" },
     { sev: "medium", source: "PRAXIS", title: "Settlement band updated — Matter #4421", time: "41m", color: "hsl(48,80%,58%)" },
-    { sev: "info", source: "Lyte", title: "Approval aging crossed 7-day threshold (3 deals)", time: "1h", color: "hsl(200,70%,60%)" },
+    { sev: "info", source: "KORA", title: "Approval aging crossed 7-day threshold (3 deals)", time: "1h", color: "hsl(200,70%,60%)" },
   ];
   const domains = [
     { label: "Defense", icon: ShieldCheck, count: 7, color: "hsl(0,72%,56%)" },
@@ -279,7 +279,7 @@ function DashboardScreen() {
           <Mic size={16} color={ACCENT} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: TEXT, fontWeight: 600 }}>Hold to ask Command</div>
-            <div style={{ fontSize: 9, color: MUTED }}>"Brief me on the Aegis incident"</div>
+            <div style={{ fontSize: 9, color: MUTED }}>"Brief me on the PARAGON incident"</div>
           </div>
         </div>
       </div>
@@ -298,10 +298,10 @@ function DashboardScreen() {
 
 function PortfolioScreen() {
   const platforms = [
-    { name: "Aegis", role: "Defense", status: "online", latency: 84 },
-    { name: "Vessels", role: "Fleet", status: "online", latency: 112 },
-    { name: "Terra", role: "Real Estate", status: "degraded", latency: 248 },
-    { name: "Lyte", role: "Operations", status: "online", latency: 67 },
+    { name: "PARAGON", role: "Defense", status: "online", latency: 84 },
+    { name: "SEXTANT", role: "Fleet", status: "online", latency: 112 },
+    { name: "DOMAINE", role: "Real Estate", status: "degraded", latency: 248 },
+    { name: "KORA", role: "Operations", status: "online", latency: 67 },
     { name: "Counsel", role: "Advisory", status: "online", latency: 91 },
     { name: "APEX", role: "Intelligence", status: "online", latency: 103 },
   ];
@@ -415,7 +415,7 @@ function CommandScreen() {
     {
       sev: "critical",
       title: "Revenue stall — North America segment",
-      source: "Lyte · Pipeline",
+      source: "KORA · Pipeline",
       detail: "MoM bookings down 18%. Top 3 deals stalled at procurement gate.",
       action: "Approve outreach playbook",
       color: "hsl(0,80%,62%)",
@@ -424,7 +424,7 @@ function CommandScreen() {
     {
       sev: "high",
       title: "Approval aging — Series B SAFE conversion",
-      source: "Lyte · Ownership",
+      source: "KORA · Ownership",
       detail: "8 days in pending state. Counsel review complete, awaiting CFO sign.",
       action: "Route to CFO",
       color: "hsl(28,90%,58%)",
@@ -432,8 +432,8 @@ function CommandScreen() {
     },
     {
       sev: "high",
-      title: "Ownership drift detected — Aegis cap table",
-      source: "Lyte · Governance",
+      title: "Ownership drift detected — PARAGON cap table",
+      source: "KORA · Governance",
       detail: "Founder common dropped below 51% threshold after pool refresh.",
       action: "Open proof envelope",
       color: "hsl(28,90%,58%)",
@@ -441,8 +441,8 @@ function CommandScreen() {
     },
     {
       sev: "medium",
-      title: "KPI anomaly — Vessels utilization",
-      source: "Lyte · Fleet",
+      title: "KPI anomaly — SEXTANT utilization",
+      source: "KORA · Fleet",
       detail: "Atlantic fleet utilization down 6.4% week-over-week. Above tolerance.",
       action: "Review dashboard",
       color: "hsl(48,80%,58%)",
@@ -674,11 +674,11 @@ export default function MobilePreviewPage() {
                 {
                   icon: Briefcase,
                   title: "Live portfolio health",
-                  body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, Counsel, and APEX.",
+                  body: "Real-time KPIs and ecosystem status across PARAGON, SEXTANT, DOMAINE, KORA, Counsel, and APEX.",
                 },
                 {
                   icon: Radio,
-                  title: "Lyte command inbox",
+                  title: "KORA command inbox",
                   body: "Approvals, action drafts, and decision-ready cards governed end-to-end through the Counsel execution fabric.",
                 },
                 {

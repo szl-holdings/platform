@@ -4,7 +4,7 @@ import type { DomainProfile, DomainProfileId } from './types.js';
 /**
  * AEEP Domain Profile Registry
  *
- * Six domain profiles: Lyte, Vessels, Terra, Aegis, PRISM, Carlota
+ * Six domain profiles: KORA, SEXTANT, DOMAINE, PARAGON, PRISM, Carlota
  * Each is versioned and scopes retrieval namespaces, workflows, and policy tiers.
  *
  * Memory scopes use AEEP model: working | episodic | semantic | governance
@@ -12,7 +12,7 @@ import type { DomainProfile, DomainProfileId } from './types.js';
 export const DOMAIN_PROFILES: Record<DomainProfileId, DomainProfile> = {
   lyte: {
     profileId: 'lyte',
-    displayName: 'Lyte',
+    displayName: 'KORA',
     description:
       'Decision intelligence platform. Focuses on signal detection, cross-domain synthesis, and executive brief generation.',
     version: '1.0.0',
@@ -48,7 +48,7 @@ export const DOMAIN_PROFILES: Record<DomainProfileId, DomainProfile> = {
 
   vessels: {
     profileId: 'vessels',
-    displayName: 'Vessels',
+    displayName: 'SEXTANT',
     description:
       'Maritime intelligence platform. Port data, vessel movements, and operational digests.',
     version: '1.0.0',
@@ -92,7 +92,7 @@ export const DOMAIN_PROFILES: Record<DomainProfileId, DomainProfile> = {
 
   terra: {
     profileId: 'terra',
-    displayName: 'Terra',
+    displayName: 'DOMAINE',
     description:
       'Real estate intelligence platform. Property records, market data, comps, and risk assessment.',
     version: '1.0.0',
@@ -131,7 +131,7 @@ export const DOMAIN_PROFILES: Record<DomainProfileId, DomainProfile> = {
 
   aegis: {
     profileId: 'aegis',
-    displayName: 'Aegis',
+    displayName: 'PARAGON',
     description:
       'Investor pitch and portfolio intelligence. Risk scoring, governance tracking, and portfolio narratives.',
     version: '1.0.0',

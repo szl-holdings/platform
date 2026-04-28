@@ -175,7 +175,7 @@ Extract and return JSON with:
             noteForCrm:
               'Demo went well. Marcus engaged with analytics product. Primary objection is pricing — open to volume discount. CFO approval required before moving to Proposal. Next step: 3-way call with CFO.',
             followUpEmail: {
-              subject: 'Next Steps — Sunbelt Realty x Terra',
+              subject: 'Next Steps — Sunbelt Realty x DOMAINE',
               opener:
                 "Marcus, great connecting today — I'm putting together a volume pricing scenario and would love to get 30 minutes with you and your CFO next week.",
             },

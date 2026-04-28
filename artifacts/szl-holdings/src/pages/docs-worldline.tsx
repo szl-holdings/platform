@@ -33,7 +33,7 @@ const WORLDLINE_PROPERTIES = [
   {
     icon: BarChart3,
     name: "Aggregated timeline views",
-    desc: "Lyte's What Changed surface and Today dashboard are both derived from the governed audit timeline. The timeline is the common data layer that powers all observability surfaces — there is no separate metrics store or shadow database.",
+    desc: "KORA's What Changed surface and Today dashboard are both derived from the governed audit timeline. The timeline is the common data layer that powers all observability surfaces — there is no separate metrics store or shadow database.",
   },
 ];
 
@@ -51,7 +51,7 @@ const EVENT_TYPES = [
 export default function DocsWorldlinePage() {
   const __pageMeta = usePageMeta({
     title: "Governed Audit Timeline — Docs — SZL Holdings",
-    description: "Governed audit timeline documentation: the unified, immutable chronological event and decision record that powers all observability and audit surfaces in Lyte + Counsel.",
+    description: "Governed audit timeline documentation: the unified, immutable chronological event and decision record that powers all observability and audit surfaces in KORA + Counsel.",
     canonical: "https://szlholdings.com/docs/worldline",
   });
 
@@ -78,7 +78,7 @@ export default function DocsWorldlinePage() {
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
                 The governed audit timeline is the unified, immutable chronological record of everything that
-                happens in a Lyte + Counsel workflow — signals, Twin updates, AI recommendations, operator
+                happens in a KORA + Counsel workflow — signals, Twin updates, AI recommendations, operator
                 decisions, execution events, and escalations. It is the common data layer beneath all
                 observability surfaces and the foundation of the Proof Chain.
               </p>

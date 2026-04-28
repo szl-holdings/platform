@@ -94,13 +94,13 @@ export const PLATFORM_ENTITY_TYPES = [
  * Domain-specific entity types.
  */
 export const DOMAIN_ENTITY_TYPES = [
-  // Vessels
+  // SEXTANT
   'vessel',
   'voyage',
-  // Terra
+  // DOMAINE
   'property',
   'deal',
-  // Security (Aegis / Sentra)
+  // Security (PARAGON / Sentra)
   'incident',
   'threat',
   // Sentra-specific
@@ -110,13 +110,13 @@ export const DOMAIN_ENTITY_TYPES = [
   'matter',
   'obligation',
   'document',
-  // Aegis — Fund Management
+  // PARAGON — Fund Management
   'fund',
   // Carlota Jo
   'engagement',
   // Pulse
   'brief',
-  // Lyte — Business Observability
+  // KORA — Business Observability
   'opportunity',
   'project',
   'approval_chain',
@@ -484,7 +484,7 @@ export interface BriefEntity extends BaseEntity {
 }
 
 // ---------------------------------------------------------------------------
-// Lyte — Business Observability Entity Shapes
+// KORA — Business Observability Entity Shapes
 // ---------------------------------------------------------------------------
 
 export interface OpportunityEntity extends BaseEntity {

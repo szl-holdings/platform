@@ -14,15 +14,15 @@ export interface OmniaTopBarProps {
 const ARTIFACT_PATHS: Record<string, { name: string; path: string; accent: string }> = {
   command: { name: 'Command', path: '/command', accent: '#8b7ac8' },
   holdings: { name: 'Holdings', path: '/', accent: '#c9b787' },
-  aegis: { name: 'Aegis', path: '/aegis', accent: '#ef4444' },
+  aegis: { name: 'PARAGON', path: '/aegis', accent: '#ef4444' },
   sentra: { name: 'Sentra', path: '/sentra', accent: '#22c55e' },
-  terra: { name: 'Terra', path: '/terra', accent: '#22c55e' },
-  vessels: { name: 'Vessels', path: '/vessels', accent: '#0ea5e9' },
+  terra: { name: 'DOMAINE', path: '/terra', accent: '#22c55e' },
+  vessels: { name: 'SEXTANT', path: '/vessels', accent: '#0ea5e9' },
   counsel: { name: 'Counsel', path: '/counsel', accent: '#8b5cf6' },
   a11oy: { name: 'A11oy', path: '/a11oy', accent: '#c9b787' },
   pulse: { name: 'Pulse', path: '/pulse', accent: '#f59e0b' },
   'carlota-jo': { name: 'Carlota Jo', path: '/carlota-jo', accent: '#ec4899' },
-  lyte: { name: 'Lyte', path: '/lyte', accent: '#3b82f6' },
+  lyte: { name: 'KORA', path: '/lyte', accent: '#3b82f6' },
   praxis: { name: 'PRAXIS', path: '/nexus', accent: '#8b5cf6' },
 };
 

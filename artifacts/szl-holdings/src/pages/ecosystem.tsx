@@ -27,7 +27,7 @@ const FLAGSHIP: Platform[] = [
     capabilities: ["Workflow orchestration", "Signal ingestion", "Multi-agent execution", "Creative Workflows"],
   },
   {
-    name: "Lyte",
+    name: "KORA",
     role: "Operational Decision Intelligence",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views — before problems hit execution.",
     accent: "hsl(192,80%,48%)",
@@ -37,7 +37,7 @@ const FLAGSHIP: Platform[] = [
     capabilities: ["KPI command", "Risk observability", "Workflow telemetry", "Role-based views"],
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     role: "Maritime Command Platform",
     description: "Fleet visibility, voyage performance, and operational exception management. Connects vessel movement to operational consequence and commercial outcome.",
     accent: "hsl(210,78%,54%)",
@@ -50,7 +50,7 @@ const FLAGSHIP: Platform[] = [
 
 const OPERATIONS: Platform[] = [
   {
-    name: "Aegis",
+    name: "PARAGON",
     role: "Unified Defense & Intelligence Command",
     description: "Consolidated security, managed operations, and AI intelligence in one platform. SOC command, XDR, adversary emulation, MSP operations, client management, AI research, model registry, and agentic cortex — for operators who need everything in one place.",
     accent: "hsl(232,68%,64%)",
@@ -60,7 +60,7 @@ const OPERATIONS: Platform[] = [
     capabilities: ["SOC & XDR command", "Managed operations", "AI intelligence engine", "Agentic cortex"],
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     role: "Portfolio Intelligence",
     description: "Full-stack real estate command: distress engine, deal pipeline, market intelligence, CRM, and brokerage-level visibility across NYC's five boroughs.",
     accent: "hsl(140,56%,40%)",
@@ -200,7 +200,7 @@ export default function EcosystemPage() {
               >
                 {[
                   { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
-                  { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
+                  { label: "KORA", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
                   { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
                   { label: "Counsel", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
                   { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
@@ -230,7 +230,7 @@ export default function EcosystemPage() {
               <SectionHeader
                 label="Platform Command — Core Layer"
                 title="Flagship command surface and execution fabric"
-                description="Lyte is the flagship governed command surface — signal stream, situation board, governed action panel. Counsel is the execution fabric underneath every domain pack. Vessels is the first commercial domain pack, shown here alongside the core platform."
+                description="KORA is the flagship governed command surface — signal stream, situation board, governed action panel. Counsel is the execution fabric underneath every domain pack. SEXTANT is the first commercial domain pack, shown here alongside the core platform."
               />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {FLAGSHIP.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}

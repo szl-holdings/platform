@@ -383,7 +383,7 @@ export default function ScannerTab() {
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
           <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-            Terra · DISTRESS SCANNER
+            DOMAINE · DISTRESS SCANNER
           </Text>
           <Text style={[styles.title, { color: colors.cream }]}>Swipe to Decide</Text>
         </View>

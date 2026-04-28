@@ -137,7 +137,7 @@ export default function DevelopersPage() {
             >
               Complete API reference, integration guides, and interactive exploration tools
               for the SZL Holdings DreamStack platform. Build on top of the same APIs that
-              power Counsel, Vessels, Terra, and Aegis.
+              power Counsel, SEXTANT, DOMAINE, and PARAGON.
             </p>
   
             <div className="flex flex-wrap gap-3">

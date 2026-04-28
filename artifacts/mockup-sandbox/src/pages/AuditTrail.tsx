@@ -32,9 +32,9 @@ function seed(str: string): number {
 
 function generateAuditEntries(): AuditEntry[] {
   const agents = [
-    { slug: 'aegis', name: 'Aegis Intel Agent', actions: ['fetch_threat_feed', 'score_vulnerability', 'correlate_incidents'] },
-    { slug: 'vessels', name: 'Vessels Route Agent', actions: ['query_fleet_positions', 'assess_port_risk', 'compute_voyage_economics'] },
-    { slug: 'terra', name: 'Terra Distress Agent', actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'] },
+    { slug: 'aegis', name: 'PARAGON Intel Agent', actions: ['fetch_threat_feed', 'score_vulnerability', 'correlate_incidents'] },
+    { slug: 'vessels', name: 'SEXTANT Route Agent', actions: ['query_fleet_positions', 'assess_port_risk', 'compute_voyage_economics'] },
+    { slug: 'terra', name: 'DOMAINE Distress Agent', actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'] },
     { slug: 'pulse', name: 'Pulse Briefing Agent', actions: ['compile_executive_brief', 'rank_insights', 'schedule_delivery'] },
     { slug: 'command', name: 'Command Correlation Agent', actions: ['cross_domain_correlate', 'surface_anomalies', 'prioritize_actions'] },
     { slug: 'praxis', name: 'PRAXIS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
@@ -53,10 +53,10 @@ function generateAuditEntries(): AuditEntry[] {
     compile_executive_brief: ['Ranked insights by (urgency × novelty). Suppressed items already seen in previous 3 briefs to avoid repetition fatigue.', 'Limited brief to 5 insights. Tested 7 in user study — exec read time exceeded 3 minutes; 5 holds attention.'],
     rank_insights: ['Used preference signal from prior brief engagement (which items the user expanded). Items with 0 prior opens deprioritized.', 'Recency-boosted items from the last 4 hours by 1.5×. Older items compete on absolute urgency only.'],
     schedule_delivery: ['Scheduled for 06:45 user local time based on saved preference. Avoided 07:00 slot — congested with calendar notifications.', 'Delivery channel: push (mobile) primary, email fallback. SMS reserved for P0 alerts only.'],
-    cross_domain_correlate: ['Joined Aegis threat signals with Vessels port-risk events on (timestamp, geo_region) key. 14 correlations found, 3 above threshold.', 'Applied graph-based propagation to find second-order correlations. Direct matches are obvious; graph catches latent connections.'],
+    cross_domain_correlate: ['Joined PARAGON threat signals with SEXTANT port-risk events on (timestamp, geo_region) key. 14 correlations found, 3 above threshold.', 'Applied graph-based propagation to find second-order correlations. Direct matches are obvious; graph catches latent connections.'],
     surface_anomalies: ['Used rolling 7-day baseline per metric. Flagged deviations > 2σ. Rejected 3σ threshold — misses early-warning signals.', 'Anomaly score penalized for known maintenance windows. Prevents false alerts during scheduled downtime.'],
-    prioritize_actions: ['Ranked by (severity × asset_value × time_sensitivity). Normalized across domains so Aegis and Terra actions are comparable.', "Deprioritized actions requiring > 2 approval hops — they won't close today regardless of urgency."],
-    plan_agent_sequence: ['Analyzed intent graph to identify parallelizable steps. Aegis and Vessels runs have no data dependency — scheduled concurrently.', 'Rejected sequential execution — would add 4.2s median latency per dependent step. Parallel saves ~12s on this plan.'],
+    prioritize_actions: ['Ranked by (severity × asset_value × time_sensitivity). Normalized across domains so PARAGON and DOMAINE actions are comparable.', "Deprioritized actions requiring > 2 approval hops — they won't close today regardless of urgency."],
+    plan_agent_sequence: ['Analyzed intent graph to identify parallelizable steps. PARAGON and SEXTANT runs have no data dependency — scheduled concurrently.', 'Rejected sequential execution — would add 4.2s median latency per dependent step. Parallel saves ~12s on this plan.'],
     stitch_outputs: ['Applied semantic deduplication across agent outputs. 3 overlapping risk items merged into one with combined evidence.', 'Structured stitched output as BLUF + supporting detail per domain. Rejected flat list — execs skip to domain they own.'],
     verify_completeness: ['Checked all required fields in output schema. 2 optional fields missing (vessel_flag, property_ownership_depth) — noted in metadata.', 'Re-ran Pulse step because initial output confidence < 0.72 threshold. Second pass scored 0.84 — accepted.'],
   };
@@ -107,9 +107,9 @@ function generateAuditEntries(): AuditEntry[] {
 }
 
 const EXAMPLE_INTENTS = [
-  "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in Pulse format.",
-  'Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.',
-  'Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.',
+  "Summarize today's threat risk across PARAGON and SEXTANT, then draft an executive brief in Pulse format.",
+  'Pull the latest KPIs from SZL Holdings, DOMAINE, and SEXTANT, and compile a cross-portfolio snapshot.',
+  'Cross-reference Prism Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
 ];
 
 const ALTERNATIVES: Record<string, string[]> = {
@@ -127,11 +127,11 @@ const ALTERNATIVES: Record<string, string[]> = {
 const OUTPUT_SUMMARIES: Record<string, [string, string]> = {
   fetch_threat_feed: ['Ingested 847 KEV entries, 12 new since last run. 3 match monitored CVE watchlist.', "Ingested 1,204 AbuseIPDB entries. 7 IPs match current tenant's egress allowlist — flagged for review."],
   score_vulnerability: ['Scored 43 CVEs. 2 rated Critical (CVSS ≥ 9.0 + internet-facing). 7 rated High. Remainder Medium or below.', 'Re-scored 18 CVEs after exposure context update. 4 escalated from Medium to High.'],
-  correlate_incidents: ['Found 6 correlated incident clusters. Largest cluster: 4 incidents sharing source IP and MITRE T1059.', '3 new correlations surfaced. 1 cross-domain: Aegis threat actor IP matches Vessels port-call destination.'],
+  correlate_incidents: ['Found 6 correlated incident clusters. Largest cluster: 4 incidents sharing source IP and MITRE T1059.', '3 new correlations surfaced. 1 cross-domain: PARAGON threat actor IP matches SEXTANT port-call destination.'],
   query_fleet_positions: ['Retrieved positions for 34 active vessels. 2 in high-risk zones per sanctions overlay.', '29 vessels reporting. 5 in port, 24 underway. Average speed 12.4 kn. 1 vessel overdue check-in.'],
   assess_port_risk: ['Port risk assessed for 8 upcoming calls. 1 port flagged High (OFAC touch). 2 flagged Medium (weather).', 'All 6 planned port calls cleared. No sanctions flags. Minor weather delay risk at Rotterdam (+18hrs).'],
-  compile_executive_brief: ['Brief compiled: 5 insights across Aegis (2), Terra (1), Vessels (1), Command (1). Delivery scheduled 06:45.', 'Brief compiled: 4 insights. Top item: cross-domain correlation between Aegis threat actor and Vessels port call.'],
-  plan_agent_sequence: ['Planned 6-step sequence. Steps 1–2 parallelized (Aegis + Vessels). Step 3 gates on both. Est. total: 4.8s.', 'Planned 4-step sequence. All steps sequential due to data dependency chain. Est. total: 3.2s.'],
+  compile_executive_brief: ['Brief compiled: 5 insights across PARAGON (2), DOMAINE (1), SEXTANT (1), Command (1). Delivery scheduled 06:45.', 'Brief compiled: 4 insights. Top item: cross-domain correlation between PARAGON threat actor and SEXTANT port call.'],
+  plan_agent_sequence: ['Planned 6-step sequence. Steps 1–2 parallelized (PARAGON + SEXTANT). Step 3 gates on both. Est. total: 4.8s.', 'Planned 4-step sequence. All steps sequential due to data dependency chain. Est. total: 3.2s.'],
   stitch_outputs: ['Stitched 4 agent outputs. Deduplicated 2 overlapping risk items. Final output: BLUF + 5 domain findings.', 'Stitched 3 agent outputs. 0 overlaps. Final output: 4 findings, confidence 0.87.'],
 };
 

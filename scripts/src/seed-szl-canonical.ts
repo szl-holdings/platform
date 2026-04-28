@@ -33,14 +33,14 @@ async function seedCanonical() {
         slug: 'alloy',
         name: 'Counsel',
         description:
-          'Execution fabric and predictive intelligence engine powering Lyte and Vessels',
+          'Execution fabric and predictive intelligence engine powering KORA and SEXTANT',
         productType: 'platform',
         parentSlug: 'szl-holdings',
         isActive: true,
       },
       {
         slug: 'lyte',
-        name: 'Lyte',
+        name: 'KORA',
         description:
           'Business observability command center — signals, ownership, approvals, escalations',
         productType: 'platform',
@@ -49,15 +49,15 @@ async function seedCanonical() {
       },
       {
         slug: 'lyte-readiness',
-        name: 'Lyte Readiness',
-        description: 'First-class readiness and maturity assessment module within Lyte',
+        name: 'KORA Readiness',
+        description: 'First-class readiness and maturity assessment module within KORA',
         productType: 'module',
         parentSlug: 'lyte',
         isActive: true,
       },
       {
         slug: 'vessels',
-        name: 'Vessels',
+        name: 'SEXTANT',
         description:
           'Maritime intelligence — fleet operations, voyage economics, AIS anomaly detection',
         productType: 'vertical',
@@ -701,7 +701,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'Terra',
+        source: 'DOMAINE',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'Q1 revenue forecast drift — 8.3% below plan as of EOD',
@@ -718,7 +718,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'Terra',
+        source: 'DOMAINE',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'TechCorp account — usage down 35%, NPS drop 42 pts',
@@ -735,7 +735,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'Terra',
+        source: 'DOMAINE',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'Northgate contract approval SLA breach — 48h overdue',
@@ -752,7 +752,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        source: 'Lyte Readiness',
+        source: 'KORA Readiness',
         sourceType: 'manual',
         severity: 'medium',
         title: 'NIST CSF gap — 3 critical controls unresolved, audit in 14 days',
@@ -820,7 +820,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'Terra',
+        source: 'DOMAINE',
         sourceType: 'monitoring',
         severity: 'low',
         title: 'Apex Logistics vendor onboarding — compliance step has no owner',
@@ -871,7 +871,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'Terra',
+        source: 'DOMAINE',
         sourceType: 'monitoring',
         severity: 'low',
         title: 'Lambda cold starts +340% — order-processor post-deploy',
@@ -1113,9 +1113,9 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        title: 'Maritime Ops Deployment — Vessels V2',
+        title: 'Maritime Ops Deployment — SEXTANT V2',
         description:
-          'V2 Vessels platform deployment with real-time AIS, voyage economics, and exception alerting.',
+          'V2 SEXTANT platform deployment with real-time AIS, voyage economics, and exception alerting.',
         category: 'operational',
         status: 'on_track',
         readinessScore: '88.5',
@@ -1135,8 +1135,8 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        title: 'Operator Team Readiness — Lyte Training',
-        description: '7 operators trained on Lyte command center. 4 certified. 3 in progress.',
+        title: 'Operator Team Readiness — KORA Training',
+        description: '7 operators trained on KORA command center. 4 certified. 3 in progress.',
         category: 'people',
         status: 'on_track',
         readinessScore: '71.4',
@@ -1202,24 +1202,24 @@ async function seedCanonical() {
     .values([
       {
         key: 'lyte_readiness_enabled',
-        name: 'Lyte Readiness Module',
-        description: 'Enable the Lyte Readiness maturity assessment module',
+        name: 'KORA Readiness Module',
+        description: 'Enable the KORA Readiness maturity assessment module',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'lyte',
       },
       {
         key: 'lyte_value_at_risk_enabled',
-        name: 'Lyte Value at Risk Calculations',
-        description: 'Show value_at_risk_cents on signals and exceptions in the Lyte UI',
+        name: 'KORA Value at Risk Calculations',
+        description: 'Show value_at_risk_cents on signals and exceptions in the KORA UI',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'lyte',
       },
       {
         key: 'vessels_command_mode_enabled',
-        name: 'Vessels Command Mode',
-        description: 'Full voyage exception and escalation command mode in Vessels',
+        name: 'SEXTANT Command Mode',
+        description: 'Full voyage exception and escalation command mode in SEXTANT',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'vessels',
@@ -1242,7 +1242,7 @@ async function seedCanonical() {
       },
       {
         key: 'vessels_fuel_efficiency_scoring',
-        name: 'Vessels Fuel Efficiency Scoring',
+        name: 'SEXTANT Fuel Efficiency Scoring',
         description: 'Real-time fuel efficiency scoring per voyage',
         isEnabled: true,
         rolloutPercentage: 80,
@@ -1274,7 +1274,7 @@ async function seedCanonical() {
       },
       {
         key: 'lyte_owner_state_tracking',
-        name: 'Lyte Owner State Tracking',
+        name: 'KORA Owner State Tracking',
         description: 'Track owner_state on signals (assigned/unassigned/ambiguous/stale/escalated)',
         isEnabled: true,
         rolloutPercentage: 100,

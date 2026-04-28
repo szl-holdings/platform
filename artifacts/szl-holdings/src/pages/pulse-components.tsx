@@ -29,7 +29,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     icon: () => null,
     color: '#f59e0b',
     domain: 'observability',
@@ -39,7 +39,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     icon: Shield,
     color: '#3b82f6',
     domain: 'security',
@@ -49,7 +49,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     icon: Anchor,
     color: '#06b6d4',
     domain: 'maritime',
@@ -59,7 +59,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     icon: Globe,
     color: '#10b981',
     domain: 'real-estate',
@@ -109,7 +109,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'lyte-cc',
-    name: 'Lyte CC',
+    name: 'KORA CC',
     icon: Radio,
     color: '#f97316',
     domain: 'command',
@@ -139,7 +139,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'aegis-mobile',
-    name: 'Aegis Mobile',
+    name: 'PARAGON Mobile',
     icon: Shield,
     color: '#3b82f6',
     domain: 'mobile',
@@ -149,7 +149,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'vessels-mobile',
-    name: 'Vessels Mobile',
+    name: 'SEXTANT Mobile',
     icon: Anchor,
     color: '#06b6d4',
     domain: 'mobile',
@@ -159,7 +159,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'terra-mobile',
-    name: 'Terra Mobile',
+    name: 'DOMAINE Mobile',
     icon: Globe,
     color: '#10b981',
     domain: 'mobile',
@@ -180,10 +180,10 @@ export const PLATFORM_APPS = [
 ];
 
 export const AGENT_TYPES = [
-  { id: 'aegis-autonomous', domain: 'aegis', name: 'Aegis SOC', color: '#3b82f6' },
-  { id: 'vessels-autonomous', domain: 'vessels', name: 'Vessels Fleet', color: '#06b6d4' },
-  { id: 'terra-autonomous', domain: 'terra', name: 'Terra Analyst', color: '#10b981' },
-  { id: 'lyte-autonomous', domain: 'lyte', name: 'Lyte Ops', color: '#f59e0b' },
+  { id: 'aegis-autonomous', domain: 'aegis', name: 'PARAGON SOC', color: '#3b82f6' },
+  { id: 'vessels-autonomous', domain: 'vessels', name: 'SEXTANT Fleet', color: '#06b6d4' },
+  { id: 'terra-autonomous', domain: 'terra', name: 'DOMAINE Analyst', color: '#10b981' },
+  { id: 'lyte-autonomous', domain: 'lyte', name: 'KORA Ops', color: '#f59e0b' },
   { id: 'nexus-autonomous', domain: 'nexus', name: 'PRAXIS Fusion', color: '#ec4899' },
   { id: 'inca-autonomous', domain: 'inca', name: 'Inca Lab', color: '#8b5cf6' },
   { id: 'msp-autonomous', domain: 'msp', name: 'MSP Watchdog', color: '#64748b' },
@@ -797,10 +797,10 @@ export const AgentNeuralMesh = memo(function AgentNeuralMesh() {
 export function DomainHealthGrid() {
   const domains = [
     { name: 'SZL Holdings', load: 23, color: '#d4a054' },
-    { name: 'Lyte Platform', load: 41, color: '#f59e0b' },
-    { name: 'Aegis Defense', load: 67, color: '#3b82f6' },
-    { name: 'Vessels Maritime', load: 35, color: '#06b6d4' },
-    { name: 'Terra Real Estate', load: 28, color: '#10b981' },
+    { name: 'KORA Platform', load: 41, color: '#f59e0b' },
+    { name: 'PARAGON Defense', load: 67, color: '#3b82f6' },
+    { name: 'SEXTANT Maritime', load: 35, color: '#06b6d4' },
+    { name: 'DOMAINE Real Estate', load: 28, color: '#10b981' },
     { name: 'Carlota Jo', load: 19, color: '#c4a265' },
     { name: 'Counsel', load: 44, color: '#8b5cf6' },
     { name: 'PRAXIS Fusion', load: 52, color: '#ec4899' },
@@ -867,16 +867,16 @@ export function DomainHealthGrid() {
 
 export function CrossDomainIntelFlow() {
   const flows = [
-    { from: 'Aegis', to: 'Lyte', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
+    { from: 'PARAGON', to: 'KORA', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
     {
-      from: 'Vessels',
-      to: 'Terra',
+      from: 'SEXTANT',
+      to: 'DOMAINE',
       type: 'Port Data → Supply Chain',
       color: '#06b6d4',
       intensity: 2,
     },
     {
-      from: 'Terra',
+      from: 'DOMAINE',
       to: 'PRAXIS',
       type: 'Deal → Compliance Review',
       color: '#10b981',
@@ -890,7 +890,7 @@ export function CrossDomainIntelFlow() {
       intensity: 5,
     },
     { from: 'Counsel', to: 'All', type: 'Execution Fabric Dispatch', color: '#64748b', intensity: 3 },
-    { from: 'Lyte', to: 'Aegis', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
+    { from: 'KORA', to: 'PARAGON', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
   ];
   const [activeFlow, setActiveFlow] = useState(0);
   useEffect(() => {

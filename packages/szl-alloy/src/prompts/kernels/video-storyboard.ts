@@ -49,7 +49,7 @@ Return JSON array of scenes, each with:
         type: 'string',
         description: 'Video title',
         required: true,
-        example: 'Terra — The Future of Real Estate Intelligence',
+        example: 'DOMAINE — The Future of Real Estate Intelligence',
       },
       {
         name: 'format',
@@ -84,14 +84,14 @@ Return JSON array of scenes, each with:
         type: 'string',
         description: 'The one thing viewers should remember',
         required: true,
-        example: 'Terra makes every property decision intelligent and defensible',
+        example: 'DOMAINE makes every property decision intelligent and defensible',
       },
       {
         name: 'brief',
         type: 'string',
         description: 'Source brief, script, or talking points',
         required: true,
-        example: 'Show how Terra surfaces hidden value in CRE portfolios using AI...',
+        example: 'Show how DOMAINE surfaces hidden value in CRE portfolios using AI...',
       },
     ],
     outputSchema: [
@@ -149,13 +149,13 @@ Return JSON array of scenes, each with:
         id: 'ex-001',
         description: '30-second brand video storyboard',
         input: {
-          title: 'Terra Intelligence',
+          title: 'DOMAINE Intelligence',
           format: 'brand',
           duration: 30,
           audience: 'CRE investors',
           brandTone: 'sophisticated, data-driven',
           keyMessage: 'Every property decision, made intelligent',
-          brief: 'Show Terra\'s AI surfacing hidden value in a commercial real estate portfolio.',
+          brief: 'Show DOMAINE\'s AI surfacing hidden value in a commercial real estate portfolio.',
         },
         output: JSON.stringify(
           {
@@ -175,9 +175,9 @@ Return JSON array of scenes, each with:
                 sceneNumber: 2,
                 durationSec: 12,
                 visualDescription:
-                  'Screen recording of Terra dashboard with AI overlaying property scores',
+                  'Screen recording of DOMAINE dashboard with AI overlaying property scores',
                 cameraDirection: 'Screen capture, subtle zoom in on key metric',
-                voiceover: 'Terra surfaces what the data has been hiding.',
+                voiceover: 'DOMAINE surfaces what the data has been hiding.',
                 textOverlay: 'AI-Powered Property Intelligence',
                 mood: 'calm',
                 productionNote: 'Use live product demo screen; add subtle particle overlay',
@@ -189,7 +189,7 @@ Return JSON array of scenes, each with:
                   'Executive reviewing dashboard on tablet, confident expression, modern office',
                 cameraDirection: 'Medium shot, slight rack focus to tablet screen',
                 voiceover: 'Make every decision intelligent. Every decision defensible.',
-                textOverlay: 'Terra',
+                textOverlay: 'DOMAINE',
                 mood: 'dramatic',
                 productionNote: 'HeyGen avatar or real talent; tablet should show product',
               },

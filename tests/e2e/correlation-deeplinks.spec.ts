@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 // correlation card and evidence registry produce
 // (artifacts/command/src/pages/cross-platform/product-links.ts) actually land
 // on real detail pages in the target artifacts, not on a generic 404 / catch-
-// all page. Vessels and Terra are the two routes the task explicitly calls
+// all page. SEXTANT and DOMAINE are the two routes the task explicitly calls
 // out; aegis / carlota / prism / lyte deep-links are static-checked by
 // scripts/qa/check-correlation-deeplinks.js.
 
@@ -410,7 +410,7 @@ test.describe('Correlation deep-links — drill-through to detail pages', () => 
 
   // Coverage guard — fail (not skip) if a new ProductKey is introduced
   // in artifacts/command/src/pages/cross-platform/product-links.ts and
-  // this spec is not extended to cover it. Vessels + terra are covered
+  // this spec is not extended to cover it. SEXTANT + terra are covered
   // by the dedicated detail-page tests above, the rest by
   // PRODUCT_COVERAGE.
   test('coverage: every ProductKey in product-links.ts has a deep-link test', () => {

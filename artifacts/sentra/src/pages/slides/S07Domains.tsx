@@ -1,19 +1,19 @@
 export default function S07Domains() {
   const domains = [
     {
-      name: 'Aegis',
+      name: 'PARAGON',
       cat: 'Security & Defense',
       color: '#c9b787',
       desc: 'SOC command, threat intel, MITRE ATT&CK, governed incident response',
     },
     {
-      name: 'Vessels',
+      name: 'SEXTANT',
       cat: 'Maritime Intelligence',
       color: '#8a8a8a',
       desc: 'AIS telemetry, fleet command, sanctions screening, voyage economics',
     },
     {
-      name: 'Terra',
+      name: 'DOMAINE',
       cat: 'Real Estate Intelligence',
       color: '#c9b787',
       desc: 'Distress pipeline, ownership graph, deal flow, governed underwriting',

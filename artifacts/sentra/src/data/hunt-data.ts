@@ -470,9 +470,9 @@ export const REMEDIATION_PLANS: RemediationPlan[] = [
       {
         id: 'step-001-5',
         order: 5,
-        action: 'Notify Vessels Scheduling System',
+        action: 'Notify SEXTANT Scheduling System',
         target: 'MV Atlantic Falcon — manual scheduling mode',
-        rationale: 'OT isolation will interrupt automated scheduling feed. Vessels team must switch to manual.',
+        rationale: 'OT isolation will interrupt automated scheduling feed. SEXTANT team must switch to manual.',
         estimatedMinutes: 10,
         reversible: false,
         requiredApproval: false,

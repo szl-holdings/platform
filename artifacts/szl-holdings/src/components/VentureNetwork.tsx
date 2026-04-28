@@ -8,15 +8,15 @@ const ventures = [
     roi: '+362%',
     status: 'Outperforming',
     description:
-      'Execution fabric and predictive intelligence engine powering Lyte, Vessels, and the full SZL ecosystem. Scenario modeling, confidence scoring, and agent coordination at the platform layer.',
+      'Execution fabric and predictive intelligence engine powering KORA, SEXTANT, and the full SZL ecosystem. Scenario modeling, confidence scoring, and agent coordination at the platform layer.',
     synergies: [
-      'Prediction engine drives Lyte workflows',
-      'Confidence scores power Aegis decisions',
+      'Prediction engine drives KORA workflows',
+      'Confidence scores power PARAGON decisions',
       'Generative models feed scenario planning',
     ],
   },
   {
-    name: 'Lyte',
+    name: 'KORA',
     sector: 'Command & Orchestration · EXECUTE',
     stage: 'Scale',
     investment: '$4.8M',
@@ -27,12 +27,12 @@ const ventures = [
       'Business observability and orchestration platform interpreting signals, routing decisions, and managing escalations across the ecosystem.',
     synergies: [
       'Counsel powers prediction layer',
-      'Vessels feeds maritime signals',
-      'Terra provides property intelligence',
+      'SEXTANT feeds maritime signals',
+      'DOMAINE provides property intelligence',
     ],
   },
   {
-    name: 'Vessels Maritime Intelligence',
+    name: 'SEXTANT Maritime Intelligence',
     sector: 'Maritime / Logistics',
     stage: 'Growth',
     investment: '$4.2M',
@@ -43,12 +43,12 @@ const ventures = [
       'Governed maritime intelligence platform for fleet management, route optimization, and compliance monitoring.',
     synergies: [
       'Counsel powers route prediction',
-      'Lyte monitors infrastructure',
-      'Terra tracks portfolio economics',
+      'KORA monitors infrastructure',
+      'DOMAINE tracks portfolio economics',
     ],
   },
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     sector: 'Real Estate Intelligence · PROPERTY',
     stage: 'Early Growth',
     investment: '$2.0M',
@@ -57,10 +57,10 @@ const ventures = [
     status: 'Performing',
     description:
       'NYC real estate intelligence platform for distress property tracking, deal pipeline management, ownership entity resolution, and borough-level market intelligence.',
-    synergies: ['Counsel powers workflow routing', 'Lyte monitors deal pipeline health'],
+    synergies: ['Counsel powers workflow routing', 'KORA monitors deal pipeline health'],
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     sector: 'Defense & Intelligence · DEFEND',
     stage: 'Growth',
     investment: '$2.5M',
@@ -71,8 +71,8 @@ const ventures = [
       'Unified defense and intelligence command — three workspaces (Command, Defense, Labs) operating from one shared intelligence layer with cross-module correlations.',
     synergies: [
       'Counsel powers incident routing',
-      'Lyte surfaces operational signals',
-      'Vessels provides maritime threat context',
+      'KORA surfaces operational signals',
+      'SEXTANT provides maritime threat context',
     ],
   },
   {
