@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
-import { PRAXISHopQuery } from '@/components/PRAXISHopQuery';
+import { PRAXISHopQuery } from '@/components/NexusHopQuery';
 import { SiteNav } from '@/components/SiteNav';
 import { runAnomalyDetection } from '@/lib/nexus/anomaly-engine';
 import {

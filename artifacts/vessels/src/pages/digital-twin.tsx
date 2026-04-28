@@ -484,7 +484,7 @@ export default function DigitalTwinPage() {
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {VESSELS.map((v) => (
+        {VESSELS_DATA.map((v) => (
           <button
             key={v.id}
             onClick={() => setSelectedVessel(v)}

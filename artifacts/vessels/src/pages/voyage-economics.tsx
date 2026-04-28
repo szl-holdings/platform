@@ -353,7 +353,7 @@ export default function VoyageEconomicsPage() {
     totals: {
       revenue: totalRevenue,
       margin: totalMargin,
-      fuelCost: totalFuel,
+      fuelCost: _totalFuel,
       delayCost: totalDelay,
       avgTce: avgTCE,
       voyageCount: sorted.length,
