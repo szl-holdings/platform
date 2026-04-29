@@ -15,16 +15,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import {
-  type LoopTrace,
-  allocateDepth,
-  runLoop,
-  stringConsistency,
-} from '@workspace/ouroboros';
-import {
-  LoopGlyph,
-  OuroborosTrace,
-} from '@workspace/ouroboros/react';
+import { type LoopTrace, allocateDepth, runLoop, stringConsistency } from '@workspace/ouroboros';
+import { LoopGlyph, OuroborosTrace } from '@workspace/ouroboros/react';
 
 interface SubLoopResult {
   name: string;
@@ -55,7 +47,7 @@ function simulateSentraLoop(seed: number): SubLoopResult {
 function simulateAmaruLoop(seed: number): SubLoopResult {
   const steps = 2 + (seed % 5);
   const delta = Math.max(0, 0.38 - steps * 0.07 + (seed % 2) * 0.03);
-  const consistency = Math.min(1, 0.60 + steps * 0.07);
+  const consistency = Math.min(1, 0.6 + steps * 0.07);
   return {
     name: 'Amaru · Convergent Sync',
     convergedAtStep: steps,
@@ -73,29 +65,23 @@ function deriveCrossSignals(
   if (sentra.finalDelta > 0.15) {
     signals.push(
       `Sentra threat surface still shifting (δ=${sentra.finalDelta}). ` +
-      `Amaru should hold sync until threat model stabilizes.`,
+        `Amaru should hold sync until threat model stabilizes.`,
     );
   }
   if (amaru.finalDelta > 0.12 && sentra.finalConsistency > 0.85) {
     signals.push(
       `Amaru sync divergent but Sentra stable — investigate entity class ` +
-      `drift as candidate Sentra investigation.`,
+        `drift as candidate Sentra investigation.`,
     );
   }
-  if (
-    sentra.finalConsistency > 0.9 &&
-    amaru.finalConsistency > 0.9 &&
-    metaStep > 1
-  ) {
+  if (sentra.finalConsistency > 0.9 && amaru.finalConsistency > 0.9 && metaStep > 1) {
     signals.push(
       `Both sub-loops converged. Cross-distillation candidate: ` +
-      `Sentra vectors → A11oy red-team scenarios; Amaru audit → Sentra entity watch.`,
+        `Sentra vectors → A11oy red-team scenarios; Amaru audit → Sentra entity watch.`,
     );
   }
   if (signals.length === 0) {
-    signals.push(
-      `Meta-step ${metaStep}: sub-loops still in progress. No cross-signal yet.`,
-    );
+    signals.push(`Meta-step ${metaStep}: sub-loops still in progress. No cross-signal yet.`);
   }
   return signals;
 }
@@ -129,8 +115,7 @@ export function AndeanOrchestration() {
   const run = useCallback(async () => {
     setRunning(true);
 
-    const scenarioSeed =
-      scenario.id === 'incident' ? 7 : scenario.id === 'drift' ? 11 : 3;
+    const scenarioSeed = scenario.id === 'incident' ? 7 : scenario.id === 'drift' ? 11 : 3;
 
     const initialState: MetaState = {
       sentra: simulateSentraLoop(scenarioSeed),
@@ -157,19 +142,14 @@ export function AndeanOrchestration() {
         const sentra = simulateSentraLoop(seed);
         const amaru = simulateAmaruLoop(seed);
         const crossSignals = deriveCrossSignals(sentra, amaru, idx + 1);
-        const systemStable =
-          sentra.finalConsistency > 0.88 && amaru.finalConsistency > 0.88;
+        const systemStable = sentra.finalConsistency > 0.88 && amaru.finalConsistency > 0.88;
         const nextState: MetaState = { sentra, amaru, crossSignals, systemStable };
         const sig = `${sentra.finalDelta}|${amaru.finalDelta}`;
         return { state: nextState, output: sig };
       },
       delta: (prev, next) => {
-        const sentraDrift = Math.abs(
-          next.sentra.finalConsistency - prev.sentra.finalConsistency,
-        );
-        const amaruDrift = Math.abs(
-          next.amaru.finalConsistency - prev.amaru.finalConsistency,
-        );
+        const sentraDrift = Math.abs(next.sentra.finalConsistency - prev.sentra.finalConsistency);
+        const amaruDrift = Math.abs(next.amaru.finalConsistency - prev.amaru.finalConsistency);
         return (sentraDrift + amaruDrift) / 2;
       },
       consistency: (prevOutput, output) => {
@@ -194,8 +174,7 @@ export function AndeanOrchestration() {
         minHeight: '100vh',
         background: '#09090b',
         color: '#e4e4e7',
-        fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         padding: '40px 28px 80px',
         maxWidth: 960,
         margin: '0 auto',
@@ -222,9 +201,7 @@ export function AndeanOrchestration() {
           >
             A11oy · Andean Orchestration
           </div>
-          <h1 style={{ fontSize: 22, margin: 0, fontWeight: 500 }}>
-            Meta-Loop — Sentra × Amaru
-          </h1>
+          <h1 style={{ fontSize: 22, margin: 0, fontWeight: 500 }}>Meta-Loop — Sentra × Amaru</h1>
         </div>
       </div>
 
@@ -237,11 +214,10 @@ export function AndeanOrchestration() {
           marginBottom: 28,
         }}
       >
-        The two-headed serpent. A11oy runs Sentra's recursive threat model and
-        Amaru's convergent sync as child loops inside a single meta-pass. The
-        meta-loop exits when both sub-loops stabilize and cross-signals have
-        been extracted. This is §6 of the Ouroboros thesis — the mutually
-        distilling triad.
+        The two-headed serpent. A11oy runs Sentra's recursive threat model and Amaru's convergent
+        sync as child loops inside a single meta-pass. The meta-loop exits when both sub-loops
+        stabilize and cross-signals have been extracted. This is §6 of the Ouroboros thesis — the
+        mutually distilling triad.
       </p>
 
       {/* Scenario picker */}
@@ -259,9 +235,7 @@ export function AndeanOrchestration() {
             onClick={() => setScenario(s)}
             style={{
               background:
-                scenario.id === s.id
-                  ? 'rgba(160,196,255,0.18)'
-                  : 'rgba(255,255,255,0.04)',
+                scenario.id === s.id ? 'rgba(160,196,255,0.18)' : 'rgba(255,255,255,0.04)',
               border:
                 scenario.id === s.id
                   ? '1px solid rgba(160,196,255,0.5)'
@@ -359,9 +333,7 @@ export function AndeanOrchestration() {
                     fontSize: 11,
                     textTransform: 'uppercase',
                     letterSpacing: '0.1em',
-                    color: sub.name.startsWith('Sentra')
-                      ? '#f87171'
-                      : '#34d399',
+                    color: sub.name.startsWith('Sentra') ? '#f87171' : '#34d399',
                     marginBottom: 8,
                   }}
                 >
@@ -369,21 +341,15 @@ export function AndeanOrchestration() {
                 </div>
                 <div style={{ display: 'flex', gap: 24, fontSize: 13 }}>
                   <div>
-                    <div style={{ color: '#71717a', fontSize: 10 }}>
-                      Converged at
-                    </div>
+                    <div style={{ color: '#71717a', fontSize: 10 }}>Converged at</div>
                     <div style={{ fontWeight: 600 }}>Step {sub.convergedAtStep}</div>
                   </div>
                   <div>
-                    <div style={{ color: '#71717a', fontSize: 10 }}>
-                      Final δ
-                    </div>
+                    <div style={{ color: '#71717a', fontSize: 10 }}>Final δ</div>
                     <div style={{ fontWeight: 600 }}>{sub.finalDelta}</div>
                   </div>
                   <div>
-                    <div style={{ color: '#71717a', fontSize: 10 }}>
-                      Consistency
-                    </div>
+                    <div style={{ color: '#71717a', fontSize: 10 }}>Consistency</div>
                     <div style={{ fontWeight: 600 }}>
                       {(sub.finalConsistency * 100).toFixed(0)}%
                     </div>
@@ -492,10 +458,9 @@ export function AndeanOrchestration() {
             paddingLeft: 14,
           }}
         >
-          "A11oy's agent loop, Sentra's threat loop, and Amaru's sync loop should
-          exchange traces. A surprising convergence pattern in one is a candidate
-          teacher signal for the others. We argue the loops can form a mutually
-          distilling triad."
+          "A11oy's agent loop, Sentra's threat loop, and Amaru's sync loop should exchange traces. A
+          surprising convergence pattern in one is a candidate teacher signal for the others. We
+          argue the loops can form a mutually distilling triad."
           <div
             style={{
               marginTop: 6,
