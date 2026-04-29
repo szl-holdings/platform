@@ -13,7 +13,7 @@ export default function ConnectionsNew() {
   const validateCredentials = useValidateCredentials();
   
   const [name, setName] = React.useState('');
-  const [destination, setDestination] = React.useState(DESTINATIONS[0].id);
+  const [destination, setDestination] = React.useState<string>(DESTINATIONS[0].id);
   const [credentials, setCredentials] = React.useState<Record<string, string>>({});
   const [validationResult, setValidationResult] = React.useState<{
     success: boolean;
