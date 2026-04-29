@@ -279,6 +279,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/compliance/evidence', label: 'Evidence', icon: FileText, comp: L(() => import('@/pages/compliance-evidence')) },
       { path: '/compliance/control-graph', label: 'Control Graph', icon: GitMerge, comp: L(() => import('@/pages/control-evidence-graph')) },
       { path: '/compliance/audit-chain', label: 'Audit Chain', icon: Lock, comp: L(() => import('@/pages/audit-chain')) },
+      { path: '/replay-attestation', label: 'Replay Attestation', icon: ShieldCheck, comp: L(() => import('@/pages/replay-attestation')) },
       { path: '/compliance/zero-trust', label: 'Zero Trust', icon: KeyRound, comp: L(() => import('@/pages/zero-trust-scorecard')) },
       { path: '/compliance/vulnerabilities', label: 'Vulnerabilities', icon: Bug, comp: L(() => import('@/pages/vulnerability-dashboard')) },
       { path: '/compliance/vuln-lifecycle', label: 'Vuln Lifecycle', icon: GitBranch, comp: L(() => import('@/pages/vuln-lifecycle')) },

@@ -32,6 +32,7 @@ const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ 
 const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default: m.SignalMesh })));
 const ActionRail = lazy(() => import('./pages/ActionRail').then(m => ({ default: m.ActionRail })));
 const ProofLedger = lazy(() => import('./pages/ProofLedger').then(m => ({ default: m.ProofLedger })));
+const CodexReceipts = lazy(() => import('./pages/CodexReceipts').then(m => ({ default: m.CodexReceipts })));
 const Governance = lazy(() => import('./pages/Governance').then(m => ({ default: m.Governance })));
 const Agents = lazy(() => import('./pages/Agents').then(m => ({ default: m.Agents })));
 const Workcells = lazy(() => import('./pages/Workcells').then(m => ({ default: m.Workcells })));
@@ -185,6 +186,7 @@ export default function App() {
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
         <Route path={`${base}/proof`} component={ProofLedger} />
+        <Route path={`${base}/codex-receipts`} component={CodexReceipts} />
         <Route path={`${base}/governance`} component={Governance} />
         <Route path={`${base}/agents`} component={Agents} />
         <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />

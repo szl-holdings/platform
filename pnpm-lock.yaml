@@ -392,6 +392,9 @@ importers:
       '@workspace/a11oy-fabric':
         specifier: workspace:*
         version: link:../../lib/a11oy-fabric
+      '@workspace/codex-kernel':
+        specifier: workspace:*
+        version: link:../../packages/codex-kernel
       '@workspace/ouroboros':
         specifier: workspace:*
         version: link:../../packages/ouroboros
@@ -1321,6 +1324,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/codex-kernel':
+        specifier: workspace:*
+        version: link:../../packages/codex-kernel
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -2155,6 +2161,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/codex-kernel':
+        specifier: workspace:*
+        version: link:../../packages/codex-kernel
       framer-motion:
         specifier: 'catalog:'
         version: 12.35.1(@emotion/is-prop-valid@0.8.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -4298,6 +4307,15 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/codex-kernel:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/cognitive-observability:
     dependencies:

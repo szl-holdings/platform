@@ -1,0 +1,174 @@
+{
+  "experiment_id": "E4-codex-kernel-governed-loop-unified-replit-all-in-one",
+  "title": "Codex-Kernel Unified Loop Theory Test (Dresden + Ouroboros + Replit)",
+  "version": "1.0.0",
+  "platform": {
+    "target": "replit",
+    "runner_type": "agentic-loop-runner",
+    "runtime": "nodejs",
+    "entry_behavior": "execute_payload",
+    "mode": "final+trace",
+    "environment": {
+      "allow_file_write": true,
+      "allow_network": false,
+      "allow_external_actions": false,
+      "require_human_for_material_actions": true
+    },
+    "output_paths": {
+      "final_table_preview": "./output/final_table_preview.json",
+      "trace_jsonl": "./output/trace.jsonl",
+      "decision_receipt": "./output/decision_receipt.json",
+      "proof_ledger_jsonl": "./output/proof_ledger.jsonl",
+      "final_state": "./output/final_state.json",
+      "run_summary": "./output/run_summary.json"
+    }
+  },
+  "artifact_anchor": {
+    "name": "Dresden Codex",
+    "section_focus": "venus_table",
+    "use": "External, checkable iterative table used as benchmark for state-transition correctness",
+    "mapping_mode": "simplified_venus_cycle_emulator"
+  },
+  "thesis_anchor": {
+    "source": "Ouroboros_Thesis_arXiv_Final-1.pdf",
+    "claims": [
+      "Bounded recursive computation with measurable convergence should be treated as a reusable system primitive.",
+      "Loops with explicit state deltas, adaptive depth allocation, cross-step consistency, and durable traces provide a governance surface that one-pass pipelines do not.",
+      "Trace retention is a first-class artifact for audit, governance, and downstream learning."
+    ]
+  },
+  "pipeline": [
+    "Signal",
+    "Context",
+    "Recommendation",
+    "Simulation",
+    "Policy",
+    "Approval",
+    "Execution",
+    "Proof",
+    "Outcome"
+  ],
+  "goal": {
+    "task": "Produce a verifiable sequence of Dresden-style Venus table rows via governed iteration.",
+    "deliverables": [
+      "final_table_preview",
+      "trace.jsonl",
+      "decision_receipt.json",
+      "proof_ledger.jsonl",
+      "final_state.json",
+      "run_summary.json"
+    ],
+    "target_rows": 12,
+    "success_condition": "final_state_reproducible_from_initial_state_plus_deltas"
+  },
+  "initial_state": {
+    "codex_emulation": {
+      "epoch_label": "demo_epoch",
+      "day_index": 0,
+      "cycle_position": 0,
+      "expected_period_days": 584,
+      "drift_days": 0,
+      "table_rows_emitted": 0,
+      "row_history": []
+    },
+    "governance": {
+      "human_approval_required": true,
+      "policy_version": "covenant-v1",
+      "review_mode": "final+trace",
+      "no_bypass": true
+    },
+    "proof_ledger": {
+      "mode": "append_only",
+      "entries": 0,
+      "last_state_hash": null
+    },
+    "runner_state": {
+      "current_step": 0,
+      "validator_score": 0,
+      "stable_validator_pass_streak": 0,
+      "retries_used": 0,
+      "status": "initialized",
+      "stop_reason": null
+    }
+  },
+  "loop_policy": {
+    "max_steps": 30,
+    "adaptive_depth": {
+      "enabled": true,
+      "increase_depth_on": ["validator_soft_fail", "drift_warning", "contradiction_found"],
+      "decrease_depth_on": ["stable_validator_pass_streak"]
+    },
+    "entropy_regularized_exit": {
+      "enabled": true,
+      "exit_when": "additional_steps_do_not_improve_validator_score"
+    },
+    "stop_conditions": [
+      { "type": "convergence", "rule": "no_state_change_needed" },
+      { "type": "budget_exhausted" },
+      { "type": "human_gate_required" },
+      { "type": "validator_hard_stop" }
+    ]
+  },
+  "budgets": {
+    "time_budget_ms": 45000,
+    "token_budget": 18000,
+    "step_budget": 30,
+    "retry_budget": 2
+  },
+  "transition_model": {
+    "emulator_type": "simplified_venus_cycle_emulator",
+    "row_emission_rule": "emit_one_row_per_step",
+    "base_transition_rule": {
+      "cycle_position_increment": 1,
+      "day_index_increment": 584
+    },
+    "drift_model": {
+      "enabled": true,
+      "default_drift_increment": 0,
+      "warning_threshold": 2,
+      "hard_threshold": 5,
+      "schedule": {
+        "type": "every_n_rows",
+        "n": 5,
+        "increment": 1
+      }
+    },
+    "correction_rule": {
+      "allowed_only_when": ["drift_warning", "drift_threshold_exceeded"],
+      "requires_justification": true,
+      "requires_decision_receipt": true
+    }
+  },
+  "validators": [
+    {
+      "name": "state_transition_rule",
+      "type": "deterministic",
+      "hard_stop": true
+    },
+    {
+      "name": "drift_bounds",
+      "type": "deterministic",
+      "hard_stop": false
+    },
+    {
+      "name": "evidence_provenance",
+      "type": "governance",
+      "hard_stop": true
+    },
+    {
+      "name": "human_gate",
+      "type": "governance",
+      "hard_stop": true
+    }
+  ],
+  "approval_flow": {
+    "mode": "interrupt_and_wait",
+    "approval_required_for": [
+      "material_state_change",
+      "external_write_beyond_output_paths",
+      "network_call",
+      "execution_beyond_simulation",
+      "policy_override"
+    ]
+  }
+}
