@@ -85,7 +85,7 @@ overrides:
   '@xmldom/xmldom': ^0.9.10
   fast-xml-parser: ^5.7.2
   postcss: ^8.5.12
-  uuid: ^10.0.0
+  uuid: ^11.1.0
 
 importers:
 
@@ -16333,8 +16333,8 @@ packages:
   utrie@1.0.2:
     resolution: {integrity: sha512-1MLa5ouZiOmQzUbjbu9VmjLzn1QLXBhwpUa7kdLUQK+KQ5KA9I1vk5U4YHe/X2Ch7PYnJfWuWT+VbuxbGwljhw==}
 
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
 
   v8-to-istanbul@9.3.0:
@@ -16906,7 +16906,7 @@ snapshots:
       loglevel: 1.9.2
       lru-cache: 11.3.5
       negotiator: 1.0.0
-      uuid: 10.0.0
+      uuid: 11.1.0
       whatwg-mimetype: 4.0.0
     transitivePeerDependencies:
       - supports-color
@@ -18469,7 +18469,7 @@ snapshots:
       p-limit: 3.1.0
       retry-request: 7.0.2
       teeny-request: 9.0.0
-      uuid: 10.0.0
+      uuid: 11.1.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -21217,7 +21217,7 @@ snapshots:
       dequal: 2.0.3
       polished: 4.3.1
       storybook: 8.6.18(prettier@3.8.3)
-      uuid: 10.0.0
+      uuid: 11.1.0
 
   '@storybook/addon-backgrounds@8.6.14(storybook@8.6.18(prettier@3.8.3))':
     dependencies:
@@ -24016,7 +24016,7 @@ snapshots:
 
   expo-file-system@19.0.21(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)):
     dependencies:
-      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@16.13.2)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)
 
   expo-font@14.0.11(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):
@@ -24610,7 +24610,7 @@ snapshots:
       https-proxy-agent: 7.0.6
       is-stream: 2.0.1
       node-fetch: 2.7.0
-      uuid: 10.0.0
+      uuid: 11.1.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -28830,7 +28830,7 @@ snapshots:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
       stream-events: 1.0.5
-      uuid: 10.0.0
+      uuid: 11.1.0
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -29259,7 +29259,7 @@ snapshots:
       base64-arraybuffer: 1.0.2
     optional: true
 
-  uuid@10.0.0: {}
+  uuid@11.1.0: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:
@@ -29556,7 +29556,7 @@ snapshots:
   xcode@3.0.1:
     dependencies:
       simple-plist: 1.3.1
-      uuid: 10.0.0
+      uuid: 11.1.0
 
   xml-js@1.6.11:
     dependencies:
