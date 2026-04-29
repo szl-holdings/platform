@@ -109,7 +109,7 @@ export default function GovernedCockpit() {
     <GovernedCockpitShell
       accentColor={ACCENT}
       headerIcon={<Building2 className="w-4 h-4" style={{ color: ACCENT }} />}
-      headerTitle="DOMAINE — Governed Real Estate Intelligence"
+      headerTitle="TERRA — Governed Real Estate Intelligence"
       headerSubtitle="Every acquisition signal, valuation, and risk factor carries a full proof chain"
       liveIndicatorLabel="Property Intelligence · Deterministic Fallback (Counsel integration active)"
       defaultAutonomyMode="recommend"

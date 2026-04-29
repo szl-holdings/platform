@@ -644,7 +644,7 @@ export default function MarketIntelligence() {
                   evidence={[
                     {
                       id: `terra-opp-${selectedSubmarket.id}`,
-                      label: 'Submarket Heat Score — DOMAINE Analytics',
+                      label: 'Submarket Heat Score — TERRA Analytics',
                       type: 'model',
                       excerpt: `Heat: ${selectedSubmarket.heat}/100. Rent growth: +${selectedSubmarket.rent_growth}%. Vacancy: ${selectedSubmarket.vacancy}%. Absorption: +${(selectedSubmarket.absorption / 1000).toFixed(0)}K SF.`,
                     },
@@ -677,7 +677,7 @@ export default function MarketIntelligence() {
                   evidence={[
                     {
                       id: `terra-vac-${selectedSubmarket.id}`,
-                      label: 'Vacancy Rate Monitor — DOMAINE Analytics',
+                      label: 'Vacancy Rate Monitor — TERRA Analytics',
                       type: 'model',
                       excerpt: `Vacancy: ${selectedSubmarket.vacancy}% (threshold: 18%). Absorption: ${(selectedSubmarket.absorption / 1000).toFixed(0)}K SF (negative trajectory).`,
                     },

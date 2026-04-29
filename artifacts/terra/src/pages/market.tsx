@@ -360,7 +360,7 @@ export default function MarketPage() {
             </p>
             <p className="text-2xl font-display font-bold text-terra-text">4.5–7.5%</p>
             <p className="text-xs mt-1 text-terra-amber">Office sector distressed</p>
-            <p className="text-[10px] text-terra-text-muted mt-1">DOMAINE Analytics</p>
+            <p className="text-[10px] text-terra-text-muted mt-1">TERRA Analytics</p>
           </div>
         </div>
       </motion.div>

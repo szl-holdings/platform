@@ -94,7 +94,7 @@ export default function AgentInsightsPage() {
       <div className="flex justify-end pt-1">
         <MicroFeedbackWidget
           featureId="terra-agent-insights"
-          featureName="DOMAINE Autonomous Market Intelligence"
+          featureName="TERRA Autonomous Market Intelligence"
           app="terra"
           compact
           prompt="Were these market insights useful?"

@@ -149,7 +149,7 @@ export default function AefKnowledgeSearch() {
         <div>
           <h1 className="text-sm font-semibold text-slate-100">AEF Property Intelligence Search</h1>
           <p className="text-[10px] font-mono text-emerald-400/40">
-            Profile: {PROFILE_ID} · DOMAINE NYC Real Estate
+            Profile: {PROFILE_ID} · TERRA NYC Real Estate
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">

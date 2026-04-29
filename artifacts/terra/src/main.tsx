@@ -20,7 +20,7 @@ initAnalytics({ appSlug: 'terra' });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary appName="DOMAINE Real Estate Intelligence" accentColor="#d4a054">
+    <ErrorBoundary appName="TERRA Real Estate Intelligence" accentColor="#d4a054">
       <GraphQLProvider>
         <OmniaShellProvider config={{ artifactId: 'terra', accentColor: '#22c55e' }}>
           <App />

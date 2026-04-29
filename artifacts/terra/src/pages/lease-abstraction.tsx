@@ -307,7 +307,7 @@ function UploadZone({
         {processing ? 'Extracting lease terms…' : 'Drop lease documents here'}
       </p>
       <p className="text-xs mt-1" style={{ color: DS.text.muted }}>
-        PDF, DOCX, or TXT · DOMAINE AI Engine extracts key terms
+        PDF, DOCX, or TXT · TERRA AI Engine extracts key terms
       </p>
       <div className="flex items-center justify-center gap-2 mt-4">
         <span

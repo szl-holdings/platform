@@ -58,7 +58,6 @@
     "@szl-holdings/api-client-react": "workspace:*",
     "@workspace/aef-sdk": "workspace:*",
     "@workspace/ouroboros": "workspace:*",
-    "@workspace/cf-sdk": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*"
   }
 }

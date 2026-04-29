@@ -51,7 +51,7 @@ const tiers = [
       'Auction calendar & tax lien tracking',
       'Deal pipeline — unlimited deals',
       '90-day signal history',
-      'DOMAINE AI analyst copilot',
+      'TERRA AI analyst copilot',
       'Market comps & valuation overlays',
       '5 user seats',
       'API access',
@@ -111,7 +111,7 @@ export default function TerraPerricingPage() {
             >
               <Building2 className="w-3.5 h-3.5" style={{ color: ACCENT_LIGHT }} />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white">DOMAINE</span>
+            <span className="text-sm font-semibold tracking-tight text-white">TERRA</span>
           </a>
           <a href="/terra/" className="text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
             ← Back to Platform

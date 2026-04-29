@@ -1,7 +1,7 @@
 /**
  * Claims adapter for terra
  *
- * DOMAINE already uses the shared DataProvenance component for its dashboards.
+ * TERRA already uses the shared DataProvenance component for its dashboards.
  * This adapter exposes registry-sourced numeric claims (e.g. AUM under
  * analysis) so the same demo/projected labels appear consistently wherever
  * those numbers surface across artifacts.

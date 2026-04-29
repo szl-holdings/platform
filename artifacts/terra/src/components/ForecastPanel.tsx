@@ -115,7 +115,7 @@ export function ForecastPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Forecast Fabric — DOMAINE Heads</h2>
+          <h2 className="text-sm font-semibold text-foreground">Forecast Fabric — TERRA Heads</h2>
         </div>
         <div className="flex items-center gap-2">
           {breachedCount > 0 && (
@@ -126,7 +126,7 @@ export function ForecastPanel() {
           <span className="text-[10px] font-mono text-muted-foreground">{TERRA_FORECAST_DATA.length} heads · safe-default adapter</span>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">Calibrated forecast intervals for all DOMAINE real estate intelligence heads. Click any card to expand all horizons and view provenance.</p>
+      <p className="text-xs text-muted-foreground">Calibrated forecast intervals for all TERRA real estate intelligence heads. Click any card to expand all horizons and view provenance.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {TERRA_FORECAST_DATA.map((head) => <HeadCard key={head.headName} head={head} />)}
       </div>

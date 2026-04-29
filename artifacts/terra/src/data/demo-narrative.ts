@@ -1,5 +1,5 @@
 /**
- * DOMAINE demo narrative — surfaced in the guided walkthrough sidebar
+ * TERRA demo narrative — surfaced in the guided walkthrough sidebar
  * when the app is in demo / sandbox mode.
  *
  * The full narrative entity (signals, recommendation, approval, proof
@@ -11,13 +11,13 @@
 export const TERRA_DEMO_NARRATIVE = {
   title: '1847 Flatbush Ave — Compounded Distress',
   scenario:
-    'A 12-unit Brooklyn multifamily under active lis pendens (136 days) just took a $147K NYC tax lien. Walk through how DOMAINE surfaces the opportunity, recommends a defensive offer band, and runs the diligence file.',
+    'A 12-unit Brooklyn multifamily under active lis pendens (136 days) just took a $147K NYC tax lien. Walk through how TERRA surfaces the opportunity, recommends a defensive offer band, and runs the diligence file.',
   steps: [
     {
       step: 'Distress Signal',
       duration: '2 min',
       narrative:
-        'Open the DOMAINE dashboard. Top of the queue: 1847 Flatbush Ave is now under compounded distress — active lis pendens AND a brand-new tax lien. Detected from ACRIS and NYC DOF feeds, not from a broker email.',
+        'Open the TERRA dashboard. Top of the queue: 1847 Flatbush Ave is now under compounded distress — active lis pendens AND a brand-new tax lien. Detected from ACRIS and NYC DOF feeds, not from a broker email.',
       showIn: ['dashboard', 'distress-engine', 'distress-radar'],
     },
     {
@@ -45,7 +45,7 @@ export const TERRA_DEMO_NARRATIVE = {
       step: 'Diligence Execution',
       duration: '2 min',
       narrative:
-        "DOMAINE opens the diligence file, orders title, generates the standing offer letter, exports the comps packet, abstracts the rent roll, watchlists the LLC's other holdings, and stages the SPV — all within the same business day.",
+        "TERRA opens the diligence file, orders title, generates the standing offer letter, exports the comps packet, abstracts the rent roll, watchlists the LLC's other holdings, and stages the SPV — all within the same business day.",
       showIn: ['diligence-room', 'document-engine', 'lease-abstraction'],
     },
     {

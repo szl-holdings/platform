@@ -706,7 +706,7 @@ function exportComparisonCSV(scenarios: Scenario[]) {
   ];
   const heatMapRows = buildHeatMapCSVRows(scenarios[0].inputs, scenarios[0].name);
   const csv = [
-    ['DOMAINE — Scenario Comparison'],
+    ['TERRA — Scenario Comparison'],
     [`Export Date: ${new Date().toLocaleDateString()}`],
     [],
     header,
@@ -869,7 +869,7 @@ function exportSingleScenarioPDF(scenario: Scenario) {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>DOMAINE — Pro Forma Report: ${scenario.name}</title>
+  <title>TERRA — Pro Forma Report: ${scenario.name}</title>
   <style>
     body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
     h1{color:#b8943c;font-size:20px;margin-bottom:4px}
@@ -886,7 +886,7 @@ function exportSingleScenarioPDF(scenario: Scenario) {
   </style>
 </head>
 <body>
-  <h1>DOMAINE — Pro Forma Report</h1>
+  <h1>TERRA — Pro Forma Report</h1>
   <p>Scenario: <strong style="color:#b8943c">${scenario.name}</strong> &nbsp;·&nbsp; Exported ${new Date().toLocaleString()}</p>
 
   <h2>Key Metrics</h2>
@@ -992,7 +992,7 @@ function exportComparisonPDF(scenarios: Scenario[]) {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>DOMAINE — Scenario Comparison Report</title>
+  <title>TERRA — Scenario Comparison Report</title>
   <style>
     body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
     h1{color:#b8943c;font-size:20px;margin-bottom:4px}
@@ -1009,7 +1009,7 @@ function exportComparisonPDF(scenarios: Scenario[]) {
   </style>
 </head>
 <body>
-  <h1>DOMAINE — Scenario Comparison Report</h1>
+  <h1>TERRA — Scenario Comparison Report</h1>
   <p>Exported ${new Date().toLocaleString()} &nbsp;·&nbsp; ${results.length} scenarios &nbsp;·&nbsp; ▲ = best value</p>
 
   <h2>Key Metrics</h2>

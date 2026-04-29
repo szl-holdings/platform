@@ -1123,7 +1123,7 @@ export default function SpatialWalkthroughPage() {
             style={{ background: '#2d6a4f', color: '#fff' }}
           >
             <Zap className="w-3.5 h-3.5" />
-            {upgradeLoading ? 'Redirecting…' : 'Upgrade to DOMAINE Pro'}
+            {upgradeLoading ? 'Redirecting…' : 'Upgrade to TERRA Pro'}
             {!upgradeLoading && <ArrowRight className="w-3.5 h-3.5" />}
           </button>
         </div>

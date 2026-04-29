@@ -288,7 +288,7 @@ export default function TrustProvenancePage() {
         ) : (
           <AdminAuditTrail
             entries={auditEntries}
-            title="DOMAINE Decision Audit Trail"
+            title="TERRA Decision Audit Trail"
             accentColor={ACCENT}
             domainLabel="Real Estate Intelligence"
           />

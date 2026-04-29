@@ -75,7 +75,7 @@ const DOMAIN_LINKS = [
   },
   {
     id: 'terra',
-    label: 'DOMAINE',
+    label: 'TERRA',
     description: 'Broker Platform',
     color: '#a07848',
     href: '/terra/',
@@ -197,7 +197,7 @@ export default function UnifiedCommandDashboard() {
             Unified Command
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Cross-domain intelligence — highest priority items across KORA, SEXTANT, and DOMAINE
+            Cross-domain intelligence — highest priority items across KORA, SEXTANT, and TERRA
           </p>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-slate-500">
@@ -308,7 +308,7 @@ export default function UnifiedCommandDashboard() {
         >
           <div className="flex items-center gap-2 mb-3">
             <Navigation className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-semibold text-orange-400">DOMAINE — Broker Platform</span>
+            <span className="text-sm font-semibold text-orange-400">TERRA — Broker Platform</span>
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
@@ -439,7 +439,7 @@ export default function UnifiedCommandDashboard() {
               {[
                 { label: 'View KORA Action Queue', href: '/command/operations/action-queue' },
                 { label: 'SEXTANT Exceptions', href: '/vessels/exceptions' },
-                { label: 'DOMAINE Listings', href: '/terra/listings' },
+                { label: 'TERRA Listings', href: '/terra/listings' },
                 { label: 'Counsel Workflows', href: '/continuum/' },
               ].map(({ label, href }) => (
                 <a

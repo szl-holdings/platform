@@ -152,7 +152,7 @@ export default function BrokerOverviewPage() {
     {
       id: 'invite-team',
       label: 'Invite a broker or analyst',
-      description: 'Bring your team into DOMAINE to collaborate on deal flow',
+      description: 'Bring your team into TERRA to collaborate on deal flow',
       completed: activation.teamMemberInvited,
       href: `${BASE}/settings/team`,
     },
