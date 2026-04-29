@@ -1,7 +1,7 @@
 {
   "experiment_id": "szl-private-governed-ops-001",
   "thesis_anchor": "SZL Holdings operates governed decision infrastructure for high-consequence enterprise operations through bounded loop execution, validator gates, decision receipts, and replayable proof artifacts.",
-  "artifact_anchor": "Private A11oy and Ouroboros operating model running in Replit-safe offline emulator mode, extended with Madrid and Dresden corpus governance.",
+  "artifact_anchor": "Private A11oy and Ouroboros operating model running in Replit-safe offline emulator mode, extended with Dresden, Madrid, Paris, and Grolier corpus governance.",
   "environment": {
     "runtime": "replit",
     "repo_visibility": "private",
@@ -52,8 +52,8 @@
     }
   },
   "almanac_system": {
-    "model": "madrid-dresden-governed-multicycle",
-    "rationale": "Madrid contributes almanac-style multi-cycle structure; Dresden contributes loop-native table framing and correction/audit metaphors.",
+    "model": "madrid-dresden-paris-grolier-governed-multicycle",
+    "rationale": "Dresden contributes loop-native table framing, Madrid contributes comparative almanac structure, Paris contributes ritual and calendrical cadence, and Grolier contributes compact predetermined Venus-cycle logic.",
     "cycles": {
       "operational_cycle": {
         "unit": "step",
@@ -79,13 +79,25 @@
         "unit": "domain_rotation",
         "length": 9,
         "purpose": "cross-domain orchestration across domain packs"
+      },
+      "ritual_cycle": {
+        "unit": "ceremonial_window",
+        "length": 13,
+        "purpose": "ritual and long-cycle governance timing"
+      },
+      "venus_cycle": {
+        "unit": "predetermined_schedule",
+        "length": 5,
+        "purpose": "compact forward cycle guidance inspired by Venus-table logic"
       }
     },
     "coordination_rules": [
       "risk warnings can tighten governance cadence",
       "seasonal cycle can reprioritize workload intensity",
       "operational convergence cannot bypass human approval policy",
-      "domain participation changes are recorded as governed state context"
+      "domain participation changes are recorded as governed state context",
+      "ritual cycle may schedule review windows but cannot override policy gates",
+      "venus cycle may inform forecast cadence but cannot act as sole evidence for core loop claims"
     ]
   },
   "corpus_governance": {
@@ -99,6 +111,14 @@
       {
         "gate_id": "madrid_not_proof_for_dresden_or_ouroboros_core",
         "rule": "Claims tagged dresdencore or ouroboroscore may not rely on madridsupport sources as sole evidence"
+      },
+      {
+        "gate_id": "paris_not_proof_for_dresden_or_ouroboros_core",
+        "rule": "Claims tagged dresdencore or ouroboroscore may not rely on parissupport sources as sole evidence"
+      },
+      {
+        "gate_id": "grolier_not_proof_for_dresden_or_ouroboros_core",
+        "rule": "Claims tagged dresdencore or ouroboroscore may not rely on groliersupport sources as sole evidence"
       },
       {
         "gate_id": "no_unbound_claims",
@@ -116,6 +136,8 @@
     "claims_policy": {
       "dresden_role": "loop_native_benchmark_anchor",
       "madrid_role": "comparative_almanac_support",
+      "paris_role": "ritual_and_calendrical_support",
+      "grolier_role": "predetermined_venus_cycle_support",
       "exact_reconstruction_claims_allowed": false,
       "require_specific_pages_for_exact_citations": true
     },
@@ -132,7 +154,7 @@
     }
   },
   "governance_model": {
-    "policy_version": "1.1.0-private-szl",
+    "policy_version": "1.2.0-private-szl",
     "governance_mode": "receipt_first",
     "evidence_policy": {
       "offline_mocking_allowed": true,
@@ -172,46 +194,196 @@
       "communications"
     ]
   },
+  "codex_corpus": {
+    "version": "1.0.0",
+    "citation_bound": true,
+    "surviving_codices": [
+      {
+        "codex_id": "dresden",
+        "title": "Dresden Codex",
+        "status": "active_primary",
+        "role": "loop_native_benchmark_anchor",
+        "supports": [
+          "table_progression",
+          "validator_correction",
+          "append_only_trace",
+          "proof_ledger"
+        ],
+        "claim_scope": [
+          "dresdencore",
+          "ouroboroscore"
+        ],
+        "evidence_class": "primary_or_primary_adjacent"
+      },
+      {
+        "codex_id": "madrid",
+        "title": "Madrid Codex",
+        "status": "active_support",
+        "role": "comparative_almanac_support",
+        "supports": [
+          "multi_cycle_almanacs",
+          "calendar_coordination",
+          "domain_cycle_design"
+        ],
+        "claim_scope": [
+          "madridsupport",
+          "comparative_codex"
+        ],
+        "evidence_class": "supporting_corpus",
+        "cannot_be_sole_evidence_for": [
+          "dresdencore",
+          "ouroboroscore"
+        ]
+      },
+      {
+        "codex_id": "paris",
+        "title": "Paris Codex",
+        "status": "active_support",
+        "role": "ritual_and_katun_cycle_support",
+        "supports": [
+          "ritual_governance",
+          "year_bearer_context",
+          "katun_scale_planning",
+          "ceremonial_timing"
+        ],
+        "claim_scope": [
+          "parissupport",
+          "ritualcycle"
+        ],
+        "evidence_class": "supporting_corpus",
+        "cannot_be_sole_evidence_for": [
+          "dresdencore",
+          "ouroboroscore"
+        ]
+      },
+      {
+        "codex_id": "grolier",
+        "title": "Grolier Codex",
+        "alt_title": "Maya Codex of Mexico",
+        "status": "active_support",
+        "role": "predetermined_venus_cycle_support",
+        "supports": [
+          "venus_cycle_guidance",
+          "compact_astronomical_tables",
+          "predetermined_schedule_models"
+        ],
+        "claim_scope": [
+          "groliersupport",
+          "venuscycle"
+        ],
+        "evidence_class": "supporting_corpus",
+        "cannot_be_sole_evidence_for": [
+          "dresdencore",
+          "ouroboroscore"
+        ]
+      }
+    ],
+    "global_rules": [
+      "every codex-backed claim must include at least one source locator",
+      "illustrative images may support analogy and presentation but not exact reconstruction",
+      "madrid, paris, and grolier may support comparative design claims but cannot alone prove dresden-core or ouroboros-core claims",
+      "exact astronomical or philological claims require page-identified scholarly or primary facsimile evidence"
+    ]
+  },
+  "calendar_intelligence": {
+    "ritual_cycle_model": {
+      "enabled": true,
+      "source_codex": "paris",
+      "purpose": "model periodic governance, ceremony, and long-cycle review windows"
+    },
+    "venus_cycle_model": {
+      "enabled": true,
+      "source_codex": "grolier",
+      "mode": "predetermined_schedule",
+      "purpose": "model compact forward-looking cycle guidance"
+    }
+  },
   "source_registry": {
     "dresden_primary": [
       {
-        "source_id": "SRCDRESDENAPPENDIXBUNDLE20260429",
+        "source_id": "SRC_DRESDEN_APPENDIX_BUNDLE_20260429",
         "title": "Ouroboros Alloy Proof Bundle v2 with Dresden Codex Image Appendix",
         "type": "proof_bundle",
         "status": "ingested",
         "role": "context_and_illustrative_anchor"
+      },
+      {
+        "source_id": "SRC_DRESDEN_PRIMARY_FACSIMILE",
+        "title": "Dresden Codex primary facsimile (URL TBD)",
+        "type": "source_card",
+        "status": "planned",
+        "role": "dresden_primary"
+      },
+      {
+        "source_id": "SRC_DRESDEN_VENUS_TABLE_STUDY",
+        "title": "Venus Table scholarly study (TBD)",
+        "type": "source_card",
+        "status": "planned",
+        "role": "dresden_secondary"
+      },
+      {
+        "source_id": "SRC_DRESDEN_ECLIPSE_TABLE_STUDY",
+        "title": "Eclipse Table scholarly study (TBD)",
+        "type": "source_card",
+        "status": "planned",
+        "role": "dresden_secondary"
       }
     ],
     "madrid_support": [
       {
-        "source_id": "SRCFAMSIMADRIDES",
-        "title": "FAMSI - Códices Mayas - El Códice Madrid",
+        "source_id": "SRC_FAMSI_MADRID_ES",
+        "title": "FAMSI - Códices Mayas - El Códice Madrid (Spanish)",
         "type": "source_card",
         "status": "ingested",
         "role": "primary_hub"
       },
       {
-        "source_id": "SRCUKYMADRIDTEACHING",
-        "title": "University of Kentucky - The Madrid Codex pp. 50-51",
+        "source_id": "SRC_UKY_MADRID_TEACHING",
+        "title": "University of Kentucky - The Madrid Codex (pp. 50-51)",
         "type": "source_card",
         "status": "ingested",
         "role": "teaching_context"
+      },
+      {
+        "source_id": "SRC_IA_MANUSCRIT_TROANO",
+        "title": "Internet Archive - Manuscrit Troano (Brasseur de Bourbourg, 1869)",
+        "type": "source_card",
+        "status": "planned_extract_plates",
+        "role": "historical_facsimile"
+      },
+      {
+        "source_id": "SRC_UPCO_EXCERPT_9780870818615",
+        "title": "University Press of Colorado excerpt (9780870818615)",
+        "type": "source_card",
+        "status": "planned",
+        "role": "scholarly_excerpt"
       }
     ],
-    "dresden_support": [
+    "paris_support": [
       {
-        "source_id": "SRCOUROBOROSTHESIS2026PREPRINT",
+        "source_id": "SRC_PARIS_BRITANNICA",
+        "title": "Paris Codex | Britannica",
+        "type": "source_card",
+        "status": "ingested",
+        "role": "ritual_and_fragmentary_context"
+      }
+    ],
+    "grolier_support": [
+      {
+        "source_id": "SRC_GROLIER_BRITANNICA",
+        "title": "Grolier Codex | Britannica",
+        "type": "source_card",
+        "status": "ingested",
+        "role": "venus_calendar_context"
+      }
+    ],
+    "context_sources": [
+      {
+        "source_id": "SRC_OUROBOROS_THESIS_2026_PREPRINT",
         "title": "The Ouroboros Thesis: Looped Computation as a System Primitive for AI Systems",
         "type": "source_card",
         "status": "ingested",
         "role": "context"
-      },
-      {
-        "source_id": "SRCDRESDENPRIMARYFACSIMILE",
-        "title": "Dresden Codex primary facsimile URL TBD",
-        "type": "source_card",
-        "status": "planned",
-        "role": "dresden_primary"
       }
     ]
   },
@@ -237,7 +409,7 @@
   },
   "initial_state": {
     "governance": {
-      "policy_version": "1.1.0-private-szl",
+      "policy_version": "1.2.0-private-szl",
       "platform_name": "SZL Holdings",
       "kernel_name": "Ouroboros",
       "assistant_core": "A11oy",
@@ -284,7 +456,9 @@
       "governance_cycle_position": 0,
       "risk_cycle_position": 0,
       "seasonal_cycle_position": 0,
-      "domain_cycle_position": 0
+      "domain_cycle_position": 0,
+      "ritual_cycle_position": 0,
+      "venus_cycle_position": 0
     },
     "evidence_state": {
       "evidence_mode": "mocked_offline_with_corpus_registry",
@@ -296,13 +470,28 @@
         },
         {
           "source": "payload.artifact_anchor",
-          "detail": "Private A11oy and Ouroboros deployment modeled in Replit-safe mode with Madrid and Dresden corpus governance",
+          "detail": "Private A11oy and Ouroboros deployment modeled in Replit-safe mode with multi-codex corpus governance",
           "locator": "artifact_anchor"
         },
         {
-          "source": "SRCDRESDENAPPENDIXBUNDLE20260429",
+          "source": "SRC_DRESDEN_APPENDIX_BUNDLE_20260429",
           "detail": "Dresden Codex used as loop-native benchmark anchor; images are illustrative unless exact page citations are provided",
           "locator": "pdf-page-1"
+        },
+        {
+          "source": "SRC_FAMSI_MADRID_ES",
+          "detail": "Madrid Codex treated as comparative almanac support rather than sole proof for Dresden-core claims",
+          "locator": "manifest-sourcecard"
+        },
+        {
+          "source": "SRC_PARIS_BRITANNICA",
+          "detail": "Paris Codex supports ritual and calendrical cadence modeling",
+          "locator": "britannica-entry"
+        },
+        {
+          "source": "SRC_GROLIER_BRITANNICA",
+          "detail": "Grolier Codex supports compact predetermined Venus-cycle modeling",
+          "locator": "britannica-entry"
         }
       ]
     }

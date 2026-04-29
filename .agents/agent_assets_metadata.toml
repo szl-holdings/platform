@@ -767,3 +767,15 @@ id = "vkpEJDTAW3xAyI3nOi8rt"
 uri = "file://.local/release-pack/codex-kernel-release-v1.0.0.tar.gz"
 type = "unspecified"
 title = "codex-kernel-release-v1.0.0.tar.gz"
+
+[[outputs]]
+id = "o_RFDSmWHaF9f9JWH5bmB"
+uri = "file://.local/release-pack/codex-kernel-release-v1.0.1.zip"
+type = "unspecified"
+title = "codex-kernel-release-v1.0.1.zip"
+
+[[outputs]]
+id = "bT9KUNYvzPZpz_EURFTsy"
+uri = "file://.local/release-pack/codex-kernel-release-v1.0.1.tar.gz"
+type = "unspecified"
+title = "codex-kernel-release-v1.0.1.tar.gz"

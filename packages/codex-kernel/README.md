@@ -1,6 +1,11 @@
 # @workspace/codex-kernel
 
+[![codex-kernel-verify](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codex-kernel-verify.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codex-kernel-verify.yml)
+[![release](https://img.shields.io/github/v/release/stephenlutar2-hash/szl-holdings-platform?label=release)](https://github.com/stephenlutar2-hash/szl-holdings-platform/releases)
+
 Replay-grade governed-loop primitive. Pure TypeScript, zero runtime dependencies, browser + Node.
+
+> The CI badge above is the live, public, third-party-runnable proof that the kernel reproduces the published Dresden + SZL bundles bit-for-bit on every commit. If it goes red, the kernel is broken — and you'd see it before I do.
 
 ## What it is
 
