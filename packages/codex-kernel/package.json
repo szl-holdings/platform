@@ -55,7 +55,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "codex:run": "tsx src/cli/run.ts",
-    "codex:replay": "tsx src/cli/replay.ts"
+    "codex:replay": "tsx src/cli/replay.ts",
+    "codex:run:szl": "tsx src/cli/run.ts runner/szl-private-governed-ops-001.payload.json",
+    "codex:replay:szl": "tsx src/cli/replay.ts output/trace.jsonl output/final_state.json runner/szl-private-governed-ops-001.payload.json"
   },
   "bin": {
     "codex-run": "./src/cli/run.ts",

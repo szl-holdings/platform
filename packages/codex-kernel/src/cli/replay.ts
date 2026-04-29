@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseTraceJsonl, replay, type VenusState } from '../index.js';
 import { DRESDEN_INITIAL_STATE } from '../dresden-venus.js';
+import { normalizeRawPayload } from './normalize.js';
 import { PACKAGE_ROOT, resolveOutputRoot } from './paths.js';
 import { assertPayload, type CodexPayload } from './payload.js';
 
@@ -29,18 +30,30 @@ interface CliPaths {
 function resolvePaths(): CliPaths {
   // CLI overrides: codex:replay <trace_path> <final_state_path> <payload_path>
   // Defaults share resolveOutputRoot() with the runner so `codex:run` and
-  // `codex:replay` always agree on where the deliverables live.
+  // `codex:replay` always agree on where the deliverables live. Env-var
+  // overrides (CODEX_PAYLOAD_PATH) let scripts like `codex:replay:szl`
+  // point at a non-default payload without locking in absolute paths.
   const [t, f, p] = process.argv.slice(2);
   const output_root = resolveOutputRoot();
+  // Relative trace/state paths resolve against output_root so a user who
+  // passes "output/trace.jsonl" (the canonical bundle layout) lands on
+  // the same file the runner just wrote — regardless of cwd.
+  const resolveAgainstOutput = (arg: string): string =>
+    resolve(output_root, arg);
+  // Payload paths resolve against PACKAGE_ROOT so the npm scripts can use
+  // "runner/<name>.payload.json" verbatim.
+  const resolvePayload = (arg: string): string =>
+    resolve(PACKAGE_ROOT, arg);
+  const payload_arg = p ?? process.env.CODEX_PAYLOAD_PATH;
   return {
-    payload_path: p
-      ? resolve(process.cwd(), p)
+    payload_path: payload_arg
+      ? resolvePayload(payload_arg)
       : resolve(PACKAGE_ROOT, 'runner', 'payload.json'),
     trace_path: t
-      ? resolve(process.cwd(), t)
+      ? resolveAgainstOutput(t)
       : resolve(output_root, 'output', 'trace.jsonl'),
     final_state_path: f
-      ? resolve(process.cwd(), f)
+      ? resolveAgainstOutput(f)
       : resolve(output_root, 'output', 'final_state.json'),
   };
 }
@@ -48,8 +61,11 @@ function resolvePaths(): CliPaths {
 function loadPayload(payload_path: string): CodexPayload {
   const raw = readFileSync(payload_path, 'utf-8');
   const parsed = JSON.parse(raw) as unknown;
-  assertPayload(parsed);
-  return parsed;
+  // Match the runner: lift lean payloads (e.g. SZL) to the strict shape so
+  // run + replay always agree on what the contract says.
+  const normalized = normalizeRawPayload(parsed);
+  assertPayload(normalized);
+  return normalized;
 }
 
 function buildInitialState(p: CodexPayload): VenusState {

@@ -31,6 +31,7 @@ import {
   type VenusState,
 } from '../index.js';
 import { ProofLedger } from '../ledger.js';
+import { normalizeRawPayload } from './normalize.js';
 import { confineOutput, PACKAGE_ROOT, resolveOutputRoot } from './paths.js';
 import { assertPayload, type CodexPayload } from './payload.js';
 
@@ -41,8 +42,11 @@ function loadPayload(): { payload: CodexPayload; payload_path: string } {
     : join(PACKAGE_ROOT, 'runner', 'payload.json');
   const raw = readFileSync(payload_path, 'utf-8');
   const parsed = JSON.parse(raw) as unknown;
-  assertPayload(parsed);
-  return { payload: parsed, payload_path };
+  // Normalize lifts a lean operational payload (e.g. SZL private governed
+  // ops) into the strict E4 contract; strict payloads pass through unchanged.
+  const normalized = normalizeRawPayload(parsed);
+  assertPayload(normalized);
+  return { payload: normalized, payload_path };
 }
 
 function ensureDir(file_path: string): void {

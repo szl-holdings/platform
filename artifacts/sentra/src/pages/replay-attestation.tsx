@@ -69,6 +69,51 @@ function generateReferenceBundle(): AttestationInputs {
   };
 }
 
+/**
+ * SZL Holdings — private governed-ops bundle.
+ *
+ * Mirrors `runner/szl-private-governed-ops-001.payload.json` in the
+ * @workspace/codex-kernel package: 12 rows, drift schedule of +1d every 5
+ * rows, warning_threshold 3, hard_threshold 5, validator-triggered correction.
+ *
+ * Because the kernel is deterministic, this bundle reproduces byte-identical
+ * to what `pnpm codex:run:szl` produces from the JSON payload — same trace,
+ * same final_state_hash. Auditors can paste the CLI bundle here and get
+ * the same ATTESTED verdict.
+ */
+function generateSzlBundle(): AttestationInputs {
+  const initial: VenusState = {
+    ...DRESDEN_INITIAL_STATE,
+    epoch_label: 'private-governed-loop',
+  };
+  const result = runLoop<VenusState>({
+    experiment_id: 'szl-private-governed-ops-001',
+    initial_state: initial,
+    policy_version: '1.1.0-private-szl',
+    budgets: { time_budget_ms: 120_000, step_budget: 30, retry_budget: 2 },
+    loop_policy: {
+      max_steps: 30,
+      adaptive_depth: { enabled: true },
+      entropy_regularized_exit: { enabled: true },
+    },
+    governance_enabled: true,
+    steps: dresdenSteps({
+      cycle_days: 584,
+      drift_per_cycle: 0,
+      drift_schedule: { type: 'every_n_rows', n: 5, increment: 1 },
+      warning_threshold: 3,
+      hard_threshold: 5,
+      rows_to_emit: 12,
+      correct_when_drift_ge: 3,
+    }),
+  });
+  return {
+    initial_state_json: JSON.stringify(initial, null, 2),
+    trace_jsonl: serializeTraceJsonl(result.trace),
+    expected_final_state_hash: result.summary.final_state_hash,
+  };
+}
+
 function generateTamperedBundle(): AttestationInputs {
   const ref = generateReferenceBundle();
   const lines = ref.trace_jsonl.split('\n').filter(Boolean);
@@ -166,12 +211,18 @@ export default function ReplayAttestation() {
         </p>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         <ToolbarCard
           icon={<Sparkles className="h-4 w-4 text-emerald-400" />}
           title="Load reference bundle"
           subtitle="Dresden Venus, drift +1d/cycle, 6 rows"
           onClick={() => setInputs(generateReferenceBundle())}
+        />
+        <ToolbarCard
+          icon={<ShieldCheck className="h-4 w-4 text-cyan-400" />}
+          title="Load SZL governed-ops bundle"
+          subtitle="szl-private-governed-ops-001 · 12 rows · drift +1d/5 rows"
+          onClick={() => setInputs(generateSzlBundle())}
         />
         <ToolbarCard
           icon={<AlertTriangle className="h-4 w-4 text-rose-400" />}

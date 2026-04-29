@@ -1,0 +1,321 @@
+{
+  "experiment_id": "szl-private-governed-ops-001",
+  "thesis_anchor": "SZL Holdings operates governed decision infrastructure for high-consequence enterprise operations through bounded loop execution, validator gates, decision receipts, and replayable proof artifacts.",
+  "artifact_anchor": "Private A11oy and Ouroboros operating model running in Replit-safe offline emulator mode, extended with Madrid and Dresden corpus governance.",
+  "environment": {
+    "runtime": "replit",
+    "repo_visibility": "private",
+    "mode": "offline_emulator",
+    "network_access": "not_required",
+    "storage_mode": "filesystem_output",
+    "operator": "Stephen Lutar"
+  },
+  "goal": {
+    "target_rows": 12,
+    "target_outcome": "produce auditable governed loop outputs for private enterprise operations"
+  },
+  "loop_policy": {
+    "max_steps": 30,
+    "allow_soft_fail_progression": true,
+    "require_receipt_each_step": true,
+    "require_proof_ledger_entry_each_commit": true,
+    "stop_conditions": [
+      "convergence",
+      "budget_exhausted",
+      "validator_hard_stop"
+    ]
+  },
+  "budgets": {
+    "step_budget": 30,
+    "time_budget_ms": 120000,
+    "token_budget": 0,
+    "cost_budget_usd": 0
+  },
+  "transition_model": {
+    "base_transition_rule": {
+      "cycle_position_increment": 1,
+      "day_index_increment": 584
+    },
+    "drift_model": {
+      "warning_threshold": 3,
+      "hard_threshold": 5,
+      "schedule": {
+        "type": "every_n_rows",
+        "n": 5,
+        "increment": 1
+      }
+    },
+    "correction_policy": {
+      "enabled": true,
+      "mode": "validator_triggered",
+      "reason": "Proof bundle maps correction behavior to validator-triggered correction steps"
+    }
+  },
+  "almanac_system": {
+    "model": "madrid-dresden-governed-multicycle",
+    "rationale": "Madrid contributes almanac-style multi-cycle structure; Dresden contributes loop-native table framing and correction/audit metaphors.",
+    "cycles": {
+      "operational_cycle": {
+        "unit": "step",
+        "length": 30,
+        "purpose": "bounded execution loop"
+      },
+      "governance_cycle": {
+        "unit": "review_window",
+        "length": 5,
+        "purpose": "human review and approval cadence"
+      },
+      "risk_cycle": {
+        "unit": "threshold_band",
+        "length": 3,
+        "purpose": "warning and escalation rhythm"
+      },
+      "seasonal_cycle": {
+        "unit": "quarter",
+        "length": 4,
+        "purpose": "planning and business seasonality alignment"
+      },
+      "domain_cycle": {
+        "unit": "domain_rotation",
+        "length": 9,
+        "purpose": "cross-domain orchestration across domain packs"
+      }
+    },
+    "coordination_rules": [
+      "risk warnings can tighten governance cadence",
+      "seasonal cycle can reprioritize workload intensity",
+      "operational convergence cannot bypass human approval policy",
+      "domain participation changes are recorded as governed state context"
+    ]
+  },
+  "corpus_governance": {
+    "citation_bound": true,
+    "required_locators": true,
+    "locator_minimum": [
+      "page_or_folio",
+      "section_or_locator"
+    ],
+    "gates": [
+      {
+        "gate_id": "madrid_not_proof_for_dresden_or_ouroboros_core",
+        "rule": "Claims tagged dresdencore or ouroboroscore may not rely on madridsupport sources as sole evidence"
+      },
+      {
+        "gate_id": "no_unbound_claims",
+        "rule": "Every claim must include at least one evidence quote with a non-empty locator"
+      },
+      {
+        "gate_id": "illustrative_image_limit",
+        "rule": "Illustrative codex images may support presentation and analogy but not exact reconstruction claims unless page-identified scholarly sources are provided"
+      }
+    ]
+  },
+  "proof_bundle_policy": {
+    "bundle_version": "v2-dresden-appendix",
+    "bundle_role": "evidence_bound_proof_workflow",
+    "claims_policy": {
+      "dresden_role": "loop_native_benchmark_anchor",
+      "madrid_role": "comparative_almanac_support",
+      "exact_reconstruction_claims_allowed": false,
+      "require_specific_pages_for_exact_citations": true
+    },
+    "image_appendix_policy": {
+      "venus_images_role": "illustrative_anchor",
+      "eclipse_images_role": "illustrative_anchor",
+      "public_hosts_may_change": true,
+      "redundant_images_encouraged": true
+    },
+    "mapping": {
+      "tabular_step_progression": "governed_state_transitions",
+      "correction_behavior": "validator_triggered_correction_steps",
+      "table_auditability": "append_only_trace_plus_replay_contract_plus_proof_ledger"
+    }
+  },
+  "governance_model": {
+    "policy_version": "1.1.0-private-szl",
+    "governance_mode": "receipt_first",
+    "evidence_policy": {
+      "offline_mocking_allowed": true,
+      "minimum_evidence_items": 2,
+      "require_provenance_labels": true
+    },
+    "human_gate_policy": {
+      "required_for_material_actions": true,
+      "required_for_external_side_effects": true,
+      "required_for_fund_movement": true,
+      "required_for_legal_commitments": true,
+      "required_for_vendor_termination": true
+    },
+    "proof_policy": {
+      "hash_algorithm": "sha256",
+      "stable_json_required": true,
+      "replay_check_required": true,
+      "append_only_trace_required": true
+    }
+  },
+  "platform_context": {
+    "platform_name": "SZL Holdings",
+    "assistant_core": "A11oy",
+    "kernel": "Ouroboros",
+    "deployment_style": "private_internal_platform",
+    "proof_chain_enabled": true,
+    "domain_pack_count": 9,
+    "domain_packs": [
+      "executive_ops",
+      "real_estate",
+      "property_management",
+      "finance",
+      "compliance",
+      "legal_ops",
+      "vendor_management",
+      "capital_projects",
+      "communications"
+    ]
+  },
+  "source_registry": {
+    "dresden_primary": [
+      {
+        "source_id": "SRCDRESDENAPPENDIXBUNDLE20260429",
+        "title": "Ouroboros Alloy Proof Bundle v2 with Dresden Codex Image Appendix",
+        "type": "proof_bundle",
+        "status": "ingested",
+        "role": "context_and_illustrative_anchor"
+      }
+    ],
+    "madrid_support": [
+      {
+        "source_id": "SRCFAMSIMADRIDES",
+        "title": "FAMSI - Códices Mayas - El Códice Madrid",
+        "type": "source_card",
+        "status": "ingested",
+        "role": "primary_hub"
+      },
+      {
+        "source_id": "SRCUKYMADRIDTEACHING",
+        "title": "University of Kentucky - The Madrid Codex pp. 50-51",
+        "type": "source_card",
+        "status": "ingested",
+        "role": "teaching_context"
+      }
+    ],
+    "dresden_support": [
+      {
+        "source_id": "SRCOUROBOROSTHESIS2026PREPRINT",
+        "title": "The Ouroboros Thesis: Looped Computation as a System Primitive for AI Systems",
+        "type": "source_card",
+        "status": "ingested",
+        "role": "context"
+      },
+      {
+        "source_id": "SRCDRESDENPRIMARYFACSIMILE",
+        "title": "Dresden Codex primary facsimile URL TBD",
+        "type": "source_card",
+        "status": "planned",
+        "role": "dresden_primary"
+      }
+    ]
+  },
+  "workload": {
+    "workload_id": "private-governed-decision-001",
+    "workload_type": "high_consequence_enterprise_decision",
+    "entry_domain": "executive_ops",
+    "participating_domains": [
+      "executive_ops",
+      "finance",
+      "compliance",
+      "legal_ops"
+    ],
+    "priority": "high",
+    "material_action": false,
+    "requires_approval": false,
+    "approval_status": "not_required_for_emulation",
+    "requested_by": {
+      "type": "owner",
+      "id": "stephen-lutar",
+      "display_name": "Stephen Lutar"
+    }
+  },
+  "initial_state": {
+    "governance": {
+      "policy_version": "1.1.0-private-szl",
+      "platform_name": "SZL Holdings",
+      "kernel_name": "Ouroboros",
+      "assistant_core": "A11oy",
+      "proof_chain_enabled": true,
+      "human_approval_required_for_material_actions": true
+    },
+    "runner_state": {
+      "current_step": 0,
+      "status": "running",
+      "stop_reason": null
+    },
+    "codex_emulation": {
+      "epoch_label": "private-governed-loop",
+      "cycle_position": 0,
+      "day_index": 0,
+      "drift_days": 0,
+      "table_rows_emitted": 0,
+      "row_history": []
+    },
+    "session_context": {
+      "session_id": "sess-private-szl-001",
+      "operator_mode": "autonomous_supervised",
+      "ui_surface": "replit_runner",
+      "trace_enabled": true,
+      "ledger_enabled": true,
+      "replay_enabled": true
+    },
+    "domain_state": {
+      "executive_ops": { "status": "monitoring", "open_items": 1 },
+      "finance": { "status": "advisory", "open_items": 0 },
+      "compliance": { "status": "watching", "open_items": 0 },
+      "legal_ops": { "status": "standby", "open_items": 0 }
+    },
+    "risk_state": {
+      "risk_tier": "high",
+      "risk_score": 0.71,
+      "blocking_flags": [],
+      "warning_flags": [
+        "high_consequence_context"
+      ]
+    },
+    "calendar_state": {
+      "operational_cycle_position": 0,
+      "governance_cycle_position": 0,
+      "risk_cycle_position": 0,
+      "seasonal_cycle_position": 0,
+      "domain_cycle_position": 0
+    },
+    "evidence_state": {
+      "evidence_mode": "mocked_offline_with_corpus_registry",
+      "evidence_items": [
+        {
+          "source": "payload.thesis_anchor",
+          "detail": "Governed loop requires bounded iteration and receipts",
+          "locator": "thesis_anchor"
+        },
+        {
+          "source": "payload.artifact_anchor",
+          "detail": "Private A11oy and Ouroboros deployment modeled in Replit-safe mode with Madrid and Dresden corpus governance",
+          "locator": "artifact_anchor"
+        },
+        {
+          "source": "SRCDRESDENAPPENDIXBUNDLE20260429",
+          "detail": "Dresden Codex used as loop-native benchmark anchor; images are illustrative unless exact page citations are provided",
+          "locator": "pdf-page-1"
+        }
+      ]
+    }
+  },
+  "expected_outputs": {
+    "files": [
+      "output/final_table_preview.json",
+      "output/final_state.json",
+      "output/run_summary.json",
+      "output/decision_receipt.json",
+      "output/trace.jsonl",
+      "output/proof_ledger.jsonl"
+    ],
+    "replay_command": "npm run replay"
+  }
+}
