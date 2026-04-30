@@ -1,4 +1,11 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
+import {
+  commodityTradingFillsTable,
+  commodityTradingOrdersTable,
+  commodityTradingPositionsTable,
+  db,
+} from '@szl-holdings/db';
+import { desc } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
@@ -6,6 +13,48 @@ import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+
+function orderRowToApi(r: any) {
+  return {
+    ...r,
+    quantity: r.quantity != null ? String(r.quantity) : null,
+    limitPrice: r.limitPrice != null ? String(r.limitPrice) : null,
+    avgFillPrice: r.avgFillPrice != null ? String(r.avgFillPrice) : null,
+    filledQty: r.filledQty != null ? String(r.filledQty) : '0',
+    remainingQty: r.remainingQty != null ? String(r.remainingQty) : '0',
+    notionalValue: r.notionalValue != null ? String(r.notionalValue) : null,
+    commission: r.commission != null ? String(r.commission) : '0',
+    submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : r.submittedAt,
+    filledAt: r.filledAt instanceof Date ? r.filledAt.toISOString() : r.filledAt,
+    cancelledAt: r.cancelledAt instanceof Date ? r.cancelledAt.toISOString() : r.cancelledAt,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+  };
+}
+
+function positionRowToApi(r: any) {
+  return {
+    ...r,
+    quantity: r.quantity != null ? String(r.quantity) : '0',
+    avgEntryPrice: r.avgEntryPrice != null ? String(r.avgEntryPrice) : null,
+    currentPrice: r.currentPrice != null ? Number(r.currentPrice) : null,
+    unrealizedPnl: r.unrealizedPnl != null ? Number(r.unrealizedPnl) : 0,
+    realizedPnl: r.realizedPnl != null ? Number(r.realizedPnl) : 0,
+    totalPnl: r.totalPnl != null ? Number(r.totalPnl) : 0,
+    notionalValue: r.notionalValue != null ? Number(r.notionalValue) : 0,
+    openedAt: r.openedAt instanceof Date ? r.openedAt.toISOString() : r.openedAt,
+  };
+}
+
+function fillRowToApi(r: any) {
+  return {
+    ...r,
+    quantity: r.quantity != null ? String(r.quantity) : null,
+    price: r.price != null ? String(r.price) : null,
+    commission: r.commission != null ? String(r.commission) : '0',
+    filledAt: r.filledAt instanceof Date ? r.filledAt.toISOString() : r.filledAt,
+  };
+}
 
 const router: IRouter = Router();
 
@@ -388,6 +437,9 @@ router.get(
         instruments,
         count: instruments.length,
         exchange: 'Baltic Exchange / Platts / OTC',
+        dataSource: 'simulated',
+        dataSourceNote:
+          '[Demo Data] Prices simulated from seeded market model — live Baltic Exchange feed not yet configured',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -436,6 +488,9 @@ router.get(
       sendSuccess(res, {
         rates,
         source: 'Baltic Exchange / Platts / OTC (simulated)',
+        dataSource: 'simulated',
+        dataSourceNote:
+          '[Demo Data] Rates simulated from seeded market model — live Baltic Exchange / Platts feed not yet configured',
         asOf: new Date().toISOString(),
       });
     } catch (err) {
@@ -449,12 +504,37 @@ router.get(
   tradingLimit,
   authMiddleware({ required: false }),
   validateQuery(listQuerySchema),
-  (req, res) => {
+  async (req, res) => {
     try {
       const status = req.query.status as string;
+      const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
+
+      try {
+        const dbRows = await db
+          .select()
+          .from(commodityTradingOrdersTable)
+          .orderBy(desc(commodityTradingOrdersTable.createdAt))
+          .limit(200);
+        if (dbRows.length > 0) {
+          const filtered = status ? dbRows.filter((o) => o.status === status) : dbRows;
+          const ordersWithInst = filtered.map((o) => ({
+            ...orderRowToApi(o),
+            instrument: instruments.find((i) => i.id === o.instrumentId) ?? null,
+          }));
+          sendSuccess(res, {
+            orders: ordersWithInst,
+            count: ordersWithInst.length,
+            dataSource: 'live',
+            fetchedAt: new Date().toISOString(),
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
+
       const allOrders = [...DEMO_ORDERS, ...sessionOrders];
       const filtered = status ? allOrders.filter((o) => o.status === status) : allOrders;
-      const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
       const ordersWithInst = filtered.map((o) => ({
         ...o,
         instrument: instruments.find((i) => i.id === o.instrumentId) ?? null,
@@ -462,6 +542,7 @@ router.get(
       sendSuccess(res, {
         orders: ordersWithInst.reverse(),
         count: ordersWithInst.length,
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -484,7 +565,7 @@ router.post(
       side: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const { instrumentId, orderType, side, quantity, limitPrice, notes } = req.body;
       if (!instrumentId || !side || !quantity) {
@@ -525,6 +606,58 @@ router.post(
         instrument: inst,
       };
 
+      try {
+        const inserted = await db
+          .insert(commodityTradingOrdersTable)
+          .values({
+            instrumentId: parseInt(instrumentId, 10),
+            orderRef,
+            orderType: (orderType ?? 'market') as any,
+            side: side as any,
+            status: orderType === 'market' ? 'filled' : 'open',
+            quantity: String(qty),
+            limitPrice: limitPrice ? String(parseFloat(limitPrice)) : null,
+            avgFillPrice: orderType === 'market' ? String(fillPrice) : null,
+            filledQty: orderType === 'market' ? String(qty) : '0',
+            remainingQty: orderType === 'market' ? '0' : String(qty),
+            notionalValue: orderType === 'market' ? String(notional) : null,
+            commission: orderType === 'market' ? String(commission) : '0',
+            notes: notes ?? null,
+            submittedAt: new Date(),
+            filledAt: orderType === 'market' ? new Date() : null,
+          })
+          .returning();
+        const persistedOrder = inserted[0];
+
+        if (orderType === 'market') {
+          const fillRef = `FILL-${String(persistedOrder.id).padStart(6, '0')}`;
+          await db.insert(commodityTradingFillsTable).values({
+            orderId: persistedOrder.id,
+            instrumentId: parseInt(instrumentId, 10),
+            fillRef,
+            side: side as any,
+            quantity: String(qty),
+            price: String(fillPrice),
+            commission: String(commission),
+            executionVenue: 'SZL-DEMO',
+            filledAt: new Date(),
+          });
+        }
+
+        sendSuccess(res, {
+          order: { ...orderRowToApi(persistedOrder), instrument: inst },
+          filled: orderType === 'market',
+          dataSource: 'live',
+          message:
+            orderType === 'market'
+              ? `Order filled at ${inst.currency} ${fillPrice}`
+              : 'Limit order placed',
+        });
+        return;
+      } catch (_dbErr) {
+        // fall through to in-memory
+      }
+
       sessionOrders.push(newOrder);
 
       if (orderType === 'market') {
@@ -546,6 +679,7 @@ router.post(
       sendSuccess(res, {
         order: newOrder,
         filled: orderType === 'market',
+        dataSource: 'demo',
         message:
           orderType === 'market'
             ? `Order filled at ${inst.currency} ${fillPrice}`
@@ -602,9 +736,57 @@ router.get(
   '/vessels/trading/positions',
   tradingLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
       const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
+
+      try {
+        const dbRows = await db
+          .select()
+          .from(commodityTradingPositionsTable)
+          .orderBy(desc(commodityTradingPositionsTable.openedAt))
+          .limit(200);
+        if (dbRows.length > 0) {
+          const positions = dbRows.map((pos) => {
+            const inst = instruments.find((i) => i.id === pos.instrumentId);
+            const currentPrice = inst?.currentPrice ?? Number(pos.avgEntryPrice);
+            const qty = Number(pos.quantity);
+            const entry = Number(pos.avgEntryPrice);
+            const unrealizedPnl =
+              pos.side === 'buy'
+                ? Math.round((currentPrice - entry) * qty * 100) / 100
+                : Math.round((entry - currentPrice) * qty * 100) / 100;
+            const notional = Math.round(currentPrice * qty * 100) / 100;
+            return {
+              ...positionRowToApi(pos),
+              currentPrice,
+              unrealizedPnl,
+              realizedPnl: Number(pos.realizedPnl ?? 0),
+              totalPnl: unrealizedPnl + Number(pos.realizedPnl ?? 0),
+              notionalValue: notional,
+              instrument: inst ?? null,
+            };
+          });
+          const totalUnrealized =
+            Math.round(positions.reduce((s, p) => s + p.unrealizedPnl, 0) * 100) / 100;
+          const totalNotional =
+            Math.round(positions.reduce((s, p) => s + p.notionalValue, 0) * 100) / 100;
+          sendSuccess(res, {
+            positions,
+            summary: {
+              totalPositions: positions.length,
+              totalUnrealizedPnl: totalUnrealized,
+              totalNotionalValue: totalNotional,
+            },
+            dataSource: 'live',
+            fetchedAt: new Date().toISOString(),
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
+
       const positions = DEMO_POSITIONS.map((pos) => {
         const inst = instruments.find((i) => i.id === pos.instrumentId);
         const currentPrice = inst?.currentPrice ?? parseFloat(pos.avgEntryPrice);
@@ -638,6 +820,7 @@ router.get(
           totalUnrealizedPnl: totalUnrealized,
           totalNotionalValue: totalNotional,
         },
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -650,10 +833,34 @@ router.get(
   '/vessels/trading/fills',
   tradingLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
-      const allFills = [...DEMO_FILLS, ...sessionFills];
       const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
+
+      try {
+        const dbRows = await db
+          .select()
+          .from(commodityTradingFillsTable)
+          .orderBy(desc(commodityTradingFillsTable.filledAt))
+          .limit(200);
+        if (dbRows.length > 0) {
+          const fills = dbRows.map((f) => ({
+            ...fillRowToApi(f),
+            instrument: instruments.find((i) => i.id === f.instrumentId) ?? null,
+          }));
+          sendSuccess(res, {
+            fills,
+            count: fills.length,
+            dataSource: 'live',
+            fetchedAt: new Date().toISOString(),
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
+
+      const allFills = [...DEMO_FILLS, ...sessionFills];
       const fills = allFills.map((f) => ({
         ...f,
         instrument: instruments.find((i) => i.id === f.instrumentId) ?? null,
@@ -661,6 +868,7 @@ router.get(
       sendSuccess(res, {
         fills: fills.reverse(),
         count: fills.length,
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {

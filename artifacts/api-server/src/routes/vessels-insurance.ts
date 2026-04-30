@@ -1,10 +1,67 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
+import {
+  db,
+  marineInsuranceClaimsTable,
+  marineInsurancePoliciesTable,
+  marineInsuranceQuotesTable,
+} from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+
+function quoteRowToApi(r: any) {
+  return {
+    ...r,
+    cargoValueUsd: r.cargoValueUsd != null ? Number(r.cargoValueUsd) : null,
+    coverageLimitUsd: r.coverageLimitUsd != null ? Number(r.coverageLimitUsd) : null,
+    deductibleUsd: r.deductibleUsd != null ? Number(r.deductibleUsd) : null,
+    annualPremiumUsd: r.annualPremiumUsd != null ? Number(r.annualPremiumUsd) : null,
+    premiumUsd: r.premiumUsd != null ? Number(r.premiumUsd) : null,
+    riskScore: r.riskScore != null ? Number(r.riskScore) : null,
+    baseRatePercent: r.baseRatePercent != null ? Number(r.baseRatePercent) : null,
+    finalRatePercent: r.finalRatePercent != null ? Number(r.finalRatePercent) : null,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+    expiresAt: r.expiresAt instanceof Date ? r.expiresAt.toISOString() : r.expiresAt,
+  };
+}
+
+function policyRowToApi(r: any) {
+  return {
+    ...r,
+    coverageLimitUsd: r.coverageLimitUsd != null ? Number(r.coverageLimitUsd) : null,
+    deductibleUsd: r.deductibleUsd != null ? Number(r.deductibleUsd) : null,
+    premiumUsd: r.premiumUsd != null ? Number(r.premiumUsd) : null,
+    totalClaimsUsd: r.totalClaimsUsd != null ? Number(r.totalClaimsUsd) : 0,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+    effectiveAt: r.effectiveAt instanceof Date ? r.effectiveAt.toISOString() : r.effectiveAt,
+    expiresAt: r.expiresAt instanceof Date ? r.expiresAt.toISOString() : r.expiresAt,
+    boundAt: r.boundAt instanceof Date ? r.boundAt.toISOString() : r.boundAt,
+    cancelledAt: r.cancelledAt instanceof Date ? r.cancelledAt.toISOString() : r.cancelledAt,
+  };
+}
+
+function claimRowToApi(r: any) {
+  return {
+    ...r,
+    claimedAmountUsd: r.claimedAmountUsd != null ? Number(r.claimedAmountUsd) : null,
+    approvedAmountUsd: r.approvedAmountUsd != null ? Number(r.approvedAmountUsd) : null,
+    settledAmountUsd: r.settledAmountUsd != null ? Number(r.settledAmountUsd) : null,
+    deductibleApplied: r.deductibleApplied != null ? Number(r.deductibleApplied) : null,
+    reserveAmountUsd: r.reserveAmountUsd != null ? Number(r.reserveAmountUsd) : null,
+    createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+    incidentAt: r.incidentAt instanceof Date ? r.incidentAt.toISOString() : r.incidentAt,
+    filedAt: r.filedAt instanceof Date ? r.filedAt.toISOString() : r.filedAt,
+    settledAt: r.settledAt instanceof Date ? r.settledAt.toISOString() : r.settledAt,
+    closedAt: r.closedAt instanceof Date ? r.closedAt.toISOString() : r.closedAt,
+  };
+}
 
 const router: IRouter = Router();
 
@@ -358,12 +415,27 @@ router.get(
   '/vessels/insurance/quotes',
   insLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
+      const dbRows = await db
+        .select()
+        .from(marineInsuranceQuotesTable)
+        .orderBy(desc(marineInsuranceQuotesTable.createdAt))
+        .limit(200);
+      if (dbRows.length > 0) {
+        sendSuccess(res, {
+          quotes: dbRows.map(quoteRowToApi),
+          count: dbRows.length,
+          dataSource: 'live',
+          fetchedAt: new Date().toISOString(),
+        });
+        return;
+      }
       const all = [...demoQuotes, ...sessionQuotes];
       sendSuccess(res, {
         quotes: all.reverse(),
         count: all.length,
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -396,7 +468,7 @@ router.post(
       voyageOrigin: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const {
         vesselMmsi,
@@ -485,8 +557,51 @@ router.post(
         updatedAt: new Date().toISOString(),
       };
 
-      sessionQuotes.push(quote);
-      sendSuccess(res, { quote, riskAnalysis: riskResult, premium: premiumResult });
+      try {
+        const inserted = await db
+          .insert(marineInsuranceQuotesTable)
+          .values({
+            quoteRef,
+            vesselMmsi: quote.vesselMmsi,
+            vesselImo: quote.vesselImo,
+            vesselName: quote.vesselName,
+            vesselType: quote.vesselType,
+            vesselAge: age,
+            vesselGrossTonnage: String(grt),
+            vesselFlag: flag,
+            cargoType: quote.cargoType,
+            cargoValueUsd: quote.cargoValueUsd != null ? String(quote.cargoValueUsd) : null,
+            cargoHazardClass: hazard,
+            voyageOrigin: quote.voyageOrigin,
+            voyageDestination: quote.voyageDestination,
+            routeChokepoints: chokepoints as any,
+            coverageType: ct,
+            coverageLimitUsd: String(limit),
+            deductibleUsd: String(deductible),
+            coveragePeriodDays: periodDays,
+            riskRating: riskResult.rating,
+            riskScore: String(riskResult.score),
+            riskFactors: riskResult.factors as any,
+            baseRatePercent: String(COVERAGE_RATES[ct] ?? 0),
+            finalRatePercent: String(premiumResult.periodRate),
+            annualPremiumUsd: String(premiumResult.annualPremium),
+            premiumUsd: String(premiumResult.periodPremium),
+            premiumBreakdown: premiumResult.breakdown as any,
+            expiresAt: new Date(Date.now() + 7 * 86400000),
+            status: 'quote',
+          })
+          .returning();
+        const persisted = inserted[0];
+        sendSuccess(res, {
+          quote: quoteRowToApi(persisted),
+          riskAnalysis: riskResult,
+          premium: premiumResult,
+        });
+        return;
+      } catch (dbErr) {
+        sessionQuotes.push(quote);
+        sendSuccess(res, { quote, riskAnalysis: riskResult, premium: premiumResult });
+      }
     } catch (err) {
       handleRouteError(res, err, 'Failed to generate quote');
     }
@@ -498,7 +613,7 @@ router.post(
   insLimit,
   authMiddleware({ required: false }),
   validateBody(bodyShape({})),
-  (req, res) => {
+  async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
       const allQuotes = [...demoQuotes, ...sessionQuotes];
@@ -549,6 +664,48 @@ router.post(
         createdAt: new Date().toISOString(),
       };
 
+      try {
+        const dbQuotes = await db
+          .select()
+          .from(marineInsuranceQuotesTable)
+          .where(eq(marineInsuranceQuotesTable.id, id))
+          .limit(1);
+        if (dbQuotes.length > 0) {
+          await db
+            .update(marineInsuranceQuotesTable)
+            .set({ status: 'bound', updatedAt: new Date() })
+            .where(eq(marineInsuranceQuotesTable.id, id));
+          const inserted = await db
+            .insert(marineInsurancePoliciesTable)
+            .values({
+              quoteId: id,
+              policyNumber,
+              vesselMmsi: quote.vesselMmsi,
+              vesselImo: quote.vesselImo,
+              vesselName: quote.vesselName,
+              coverageType: quote.coverageType,
+              coverageLimitUsd: String(quote.coverageLimitUsd),
+              deductibleUsd: String(quote.deductibleUsd),
+              premiumUsd: String(quote.premiumUsd),
+              status: 'active',
+              effectiveAt: new Date(),
+              expiresAt: new Date(Date.now() + quote.coveragePeriodDays * 86400000),
+              carrier: "Lloyd's of London Syndicate 4711",
+              syndicateCode: 'SYN-4711-MAR',
+              policyTerms: policy.policyTerms as any,
+              exclusions: policy.exclusions as any,
+              boundAt: new Date(),
+            })
+            .returning();
+          sendSuccess(res, {
+            policy: policyRowToApi(inserted[0]),
+            message: `Policy ${policyNumber} bound successfully`,
+          });
+          return;
+        }
+      } catch (dbErr) {
+        // Fall through to in-memory binding for demo seeds
+      }
       quote.status = 'bound';
       sessionPolicies.push(policy);
       sendSuccess(res, { policy, message: `Policy ${policyNumber} bound successfully` });
@@ -562,12 +719,27 @@ router.get(
   '/vessels/insurance/policies',
   insLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
+      const dbRows = await db
+        .select()
+        .from(marineInsurancePoliciesTable)
+        .orderBy(desc(marineInsurancePoliciesTable.createdAt))
+        .limit(200);
+      if (dbRows.length > 0) {
+        sendSuccess(res, {
+          policies: dbRows.map(policyRowToApi),
+          count: dbRows.length,
+          dataSource: 'live',
+          fetchedAt: new Date().toISOString(),
+        });
+        return;
+      }
       const all = [...demoPolicies, ...sessionPolicies];
       sendSuccess(res, {
         policies: all.reverse(),
         count: all.length,
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -580,9 +752,31 @@ router.get(
   '/vessels/insurance/policies/:id',
   insLimit,
   authMiddleware({ required: false }),
-  (req, res) => {
+  async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
+      try {
+        const dbRows = await db
+          .select()
+          .from(marineInsurancePoliciesTable)
+          .where(eq(marineInsurancePoliciesTable.id, id))
+          .limit(1);
+        if (dbRows.length > 0) {
+          const claimRows = await db
+            .select()
+            .from(marineInsuranceClaimsTable)
+            .where(eq(marineInsuranceClaimsTable.policyId, id));
+          sendSuccess(res, {
+            policy: policyRowToApi(dbRows[0]),
+            claims: claimRows.map(claimRowToApi),
+            dataSource: 'live',
+            fetchedAt: new Date().toISOString(),
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
       const all = [...demoPolicies, ...sessionPolicies];
       const policy = all.find((p) => p.id === id);
       if (!policy) {
@@ -590,7 +784,12 @@ router.get(
         return;
       }
       const pClaims = [...demoClaims, ...sessionClaims].filter((c) => c.policyId === id);
-      sendSuccess(res, { policy, claims: pClaims, fetchedAt: new Date().toISOString() });
+      sendSuccess(res, {
+        policy,
+        claims: pClaims,
+        dataSource: 'demo',
+        fetchedAt: new Date().toISOString(),
+      });
     } catch (err) {
       handleRouteError(res, err, 'Failed to fetch policy');
     }
@@ -601,12 +800,27 @@ router.get(
   '/vessels/insurance/claims',
   insLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
+      const dbRows = await db
+        .select()
+        .from(marineInsuranceClaimsTable)
+        .orderBy(desc(marineInsuranceClaimsTable.createdAt))
+        .limit(200);
+      if (dbRows.length > 0) {
+        sendSuccess(res, {
+          claims: dbRows.map(claimRowToApi),
+          count: dbRows.length,
+          dataSource: 'live',
+          fetchedAt: new Date().toISOString(),
+        });
+        return;
+      }
       const all = [...demoClaims, ...sessionClaims];
       sendSuccess(res, {
         claims: all.reverse(),
         count: all.length,
+        dataSource: 'demo',
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -632,7 +846,7 @@ router.post(
       vesselName: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const {
         policyId,
@@ -681,6 +895,49 @@ router.post(
         filedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
+      try {
+        const policyIdNum = parseInt(policyId, 10);
+        const dbPolicies = await db
+          .select()
+          .from(marineInsurancePoliciesTable)
+          .where(eq(marineInsurancePoliciesTable.id, policyIdNum))
+          .limit(1);
+        if (dbPolicies.length > 0) {
+          const inserted = await db
+            .insert(marineInsuranceClaimsTable)
+            .values({
+              policyId: policyIdNum,
+              claimRef,
+              vesselMmsi: claim.vesselMmsi,
+              vesselName: claim.vesselName,
+              incidentType,
+              incidentDescription: claim.incidentDescription,
+              incidentAt: incidentAt ? new Date(incidentAt) : new Date(),
+              incidentLocation: claim.incidentLocation,
+              claimedAmountUsd: String(claimed),
+              deductibleApplied: String(claim.deductibleApplied),
+              status: 'filed',
+              linkedExceptionId: claim.linkedExceptionId,
+              reserveAmountUsd: String(reserve),
+              filedAt: new Date(),
+            })
+            .returning();
+          await db
+            .update(marineInsurancePoliciesTable)
+            .set({
+              claimsCount: (dbPolicies[0].claimsCount ?? 0) + 1,
+              updatedAt: new Date(),
+            })
+            .where(eq(marineInsurancePoliciesTable.id, policyIdNum));
+          sendSuccess(res, {
+            claim: claimRowToApi(inserted[0]),
+            message: `Claim ${claimRef} filed successfully. Reserve set at $${reserve.toLocaleString()}`,
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
       sessionClaims.push(claim);
       policy.claimsCount = (policy.claimsCount ?? 0) + 1;
       sendSuccess(res, {
@@ -705,10 +962,43 @@ router.put(
       status: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
       const { status, adjustorNotes, approvedAmountUsd, settledAmountUsd } = req.body;
+      try {
+        const dbRows = await db
+          .select()
+          .from(marineInsuranceClaimsTable)
+          .where(eq(marineInsuranceClaimsTable.id, id))
+          .limit(1);
+        if (dbRows.length > 0) {
+          const updated = await db
+            .update(marineInsuranceClaimsTable)
+            .set({
+              status: status ?? dbRows[0].status,
+              adjustorNotes: adjustorNotes ?? dbRows[0].adjustorNotes,
+              approvedAmountUsd: approvedAmountUsd
+                ? String(parseFloat(approvedAmountUsd))
+                : dbRows[0].approvedAmountUsd,
+              settledAmountUsd: settledAmountUsd
+                ? String(parseFloat(settledAmountUsd))
+                : dbRows[0].settledAmountUsd,
+              settledAt: status === 'settled' ? new Date() : dbRows[0].settledAt,
+              closedAt: status === 'closed' ? new Date() : dbRows[0].closedAt,
+              updatedAt: new Date(),
+            })
+            .where(eq(marineInsuranceClaimsTable.id, id))
+            .returning();
+          sendSuccess(res, {
+            claim: claimRowToApi(updated[0]),
+            message: `Claim status updated to ${status}`,
+          });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through
+      }
       const allClaims = [...demoClaims, ...sessionClaims];
       const claim = allClaims.find((c) => c.id === id);
       if (!claim) {
@@ -800,11 +1090,27 @@ router.get(
   '/vessels/insurance/portfolio-summary',
   insLimit,
   authMiddleware({ required: false }),
-  (_req, res) => {
+  async (_req, res) => {
     try {
-      const allPolicies = [...demoPolicies, ...sessionPolicies];
-      const allClaims = [...demoClaims, ...sessionClaims];
-      const allQuotes = [...demoQuotes, ...sessionQuotes];
+      let dataSource: 'live' | 'demo' = 'demo';
+      let allPolicies: any[] = [...demoPolicies, ...sessionPolicies];
+      let allClaims: any[] = [...demoClaims, ...sessionClaims];
+      let allQuotes: any[] = [...demoQuotes, ...sessionQuotes];
+      try {
+        const [dbPolicies, dbClaims, dbQuotes] = await Promise.all([
+          db.select().from(marineInsurancePoliciesTable).limit(500),
+          db.select().from(marineInsuranceClaimsTable).limit(500),
+          db.select().from(marineInsuranceQuotesTable).limit(500),
+        ]);
+        if (dbPolicies.length + dbClaims.length + dbQuotes.length > 0) {
+          dataSource = 'live';
+          allPolicies = dbPolicies.map(policyRowToApi);
+          allClaims = dbClaims.map(claimRowToApi);
+          allQuotes = dbQuotes.map(quoteRowToApi);
+        }
+      } catch (_dbErr) {
+        // use demo
+      }
       const activePolicies = allPolicies.filter((p) => p.status === 'active');
       const totalPremium = activePolicies.reduce((s, p) => s + parseFloat(p.premiumUsd ?? '0'), 0);
       const totalExposure = activePolicies.reduce(
@@ -836,6 +1142,7 @@ router.get(
         totalPaidClaims: Math.round(totalPaid * 100) / 100,
         lossRatioPercent: lossRatio,
         combinedRatio: lossRatio + 28.5,
+        dataSource,
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {

@@ -1,9 +1,9 @@
 # Mock, Stub, and Placeholder Register
 
-**Date:** April 18, 2026  
+**Date:** April 30, 2026 (updated — Task #3516 wiring)  
 **Supersedes:** `docs/audit/mock-stub-placeholder-register.md` (April 16 version)  
 **Purpose:** Canonical register of every mock, stub, placeholder, and hardcoded value — tagged by severity  
-**Severity tags:** `ship-blocker` | `demo-blocker` | `polish` | `acceptable`
+**Severity tags:** `ship-blocker` | `demo-blocker` | `polish` | `acceptable` | `resolved`
 
 ---
 
@@ -22,8 +22,8 @@
 
 | ID | Item | Artifact | Location | Severity | Notes |
 |----|------|---------|----------|---------|-------|
-| HC-001 | Autopilot header genome score | szl-holdings | Autopilot header component | `polish` | Static number; not wired to live API |
-| HC-002 | Autopilot header job count | szl-holdings | Autopilot header component | `polish` | Static number |
+| HC-001 | Autopilot header genome score | szl-holdings | Autopilot header component | `resolved` | Visible `[Demo Data]` banner now displayed at top of `/autopilot` page (April 30, 2026) |
+| HC-002 | Autopilot header job count | szl-holdings | Autopilot header component | `resolved` | Covered by HC-001 banner |
 | HC-003 | Client satisfaction scores | szl-holdings | Forge client module | `polish` | Hardcoded; needs live survey data |
 | HC-004 | Command domain health scores (Aegis 91, Vessels 87, etc.) | command | Strategy dashboard | `acceptable` | Seeded/demo values — clearly labeled |
 | HC-005 | CORTEX cross-domain badge counts | command | Command sidebar | `polish` | Not wired to live signal counts |
@@ -83,8 +83,8 @@ These items are populated via idempotent seed scripts and are by design for pre-
 |----|---------|---------|-------|---------|
 | PL-001 | CISO Executive Dashboard | aegis | 8 new security module KPIs not aggregated | `polish` |
 | PL-002 | New Aegis security modules (8) | aegis | UI complete; case management APIs not wired | `polish` |
-| PL-003 | Vessels insurance module | vessels | UI complete; DB/API not connected | `polish` |
-| PL-004 | Vessels trading module | vessels | UI complete; not connected | `polish` |
+| PL-003 | Vessels insurance module | vessels | API now wired to `marineInsuranceQuotesTable`, `marineInsurancePoliciesTable`, `marineInsuranceClaimsTable`; reads return `dataSource: 'live'` when DB has rows, `dataSource: 'demo'` otherwise; writes persist to DB. (April 30, 2026) | `resolved` |
+| PL-004 | Vessels trading module | vessels | API now wired to `commodityTradingOrdersTable`, `commodityTradingPositionsTable`, `commodityTradingFillsTable`; reads return `dataSource: 'live'` when DB has rows, `dataSource: 'demo'` otherwise; writes persist to DB. Instrument prices remain simulated (no live Baltic Exchange feed) and now expose `dataSource: 'simulated'` flag with `dataSourceNote`. (April 30, 2026) | `resolved` |
 | PL-005 | Vessels platform module | vessels | UI complete; not connected | `polish` |
 | PL-006 | Pulse morning briefing (live AI) | pulse | Static demo content; AI model not wired | `polish` |
 | PL-007 | Pulse PDF export | pulse | Not implemented | `polish` |
@@ -116,11 +116,23 @@ These items are populated via idempotent seed scripts and are by design for pre-
 
 ---
 
+## Section 7: Resolved Items (Task #3516 — April 30, 2026)
+
+| ID | What was done | Files |
+|----|---------------|-------|
+| RW-001 | Vessels insurance API wired to DB (quotes, policies, claims, portfolio summary). Reads prefer DB; demo seeds returned only when DB is empty. All POST/PUT mutations persist. `dataSource` field exposed on every response. | `artifacts/api-server/src/routes/vessels-insurance.ts` |
+| RW-002 | Vessels trading API wired to DB (orders, positions, fills). Reads prefer DB; demo seeds returned only when DB is empty. POST `/orders` persists order + fill. `dataSource` field exposed on every response. | `artifacts/api-server/src/routes/vessels-trading.ts` |
+| RW-003 | Trading instrument prices and rates endpoints now expose `dataSource: 'simulated'` with `dataSourceNote` explaining no live Baltic Exchange feed. | `artifacts/api-server/src/routes/vessels-trading.ts` |
+| RW-004 | Command `/governance` phantom route fixed — now resolves to existing `governance.tsx` page (was 404 / nav dead-link). | `artifacts/command/src/App.tsx` |
+| RW-005 | SZL Holdings `/autopilot` page now shows visible `[Demo Data]` banner at top, indicating genome scores, drift alerts, feature usage, and playbook stats are illustrative. | `artifacts/szl-holdings/src/pages/autopilot.tsx` |
+
+---
+
 ## Remediation Priorities
 
 ### Immediate (before next investor demo)
 1. **ST-003** — Configure `MAPBOX_ACCESS_TOKEN` — map views are blank
-2. **HC-001/002** — Wire Autopilot header to live API or note as "demo value"
+2. ~~**HC-001/002** — Wire Autopilot header to live API or note as "demo value"~~ — resolved (RW-005)
 
 ### Before first paying customer
 1. **ST-001** — Configure live Stripe keys
