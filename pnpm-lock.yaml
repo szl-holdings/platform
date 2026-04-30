@@ -1418,9 +1418,6 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
-      '@szl/alloy':
-        specifier: workspace:*
-        version: link:../../packages/szl-alloy
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
