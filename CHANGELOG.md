@@ -20,6 +20,14 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 ---
 
 
+
+## [0.1.3] — 2026-04-30
+
+### Other Changes
+
+- docs(security): repin pnpm/action-setup SHA — fe52bf0a was force-deleted upstream ([47f5df066](https://github.com/szl-holdings/szl-holdings-platform/commit/47f5df0661ff448ba0767f8b13efe3b39ba35d6b))
+
+---
 ## [0.1.2] — 2026-04-30
 
 ### Other Changes
