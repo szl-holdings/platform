@@ -515,6 +515,70 @@ export const TOOLS_DATA: Array<Omit<ProtocolTool, 'isCustom'>> = [
       },
       tags: ['acp', 'discovery', 'registry'],
     },
+    // HyperFrames — video.render capability
+    {
+      id: 'hf_video_render',
+      name: 'video.render',
+      description:
+        'Compose an HTML scene manifest into a rendered MP4 via HyperFrames. Accepts composition HTML, asset manifest, duration, and optional voiceover script. Returns a render job ID for async polling.',
+      protocol: 'MCP',
+      domain: 'video.render',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          composition: {
+            type: 'string',
+            description: 'HTML composition markup defining video frames and layout',
+          },
+          duration: {
+            type: 'number',
+            description: 'Total video duration in seconds (max 120)',
+          },
+          voiceover: {
+            type: 'string',
+            description: 'Optional voiceover script for TTS synthesis',
+          },
+          assets: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                url: { type: 'string' },
+                type: { type: 'string', enum: ['image', 'video', 'audio', 'font'] },
+                label: { type: 'string' },
+              },
+              required: ['url', 'type'],
+            },
+            description: 'Asset manifest for images, clips, and fonts referenced in composition',
+          },
+          seed: {
+            type: 'string',
+            description: 'Deterministic render seed — same seed + HTML produces the same output hash',
+          },
+        },
+        required: ['composition', 'duration'],
+      },
+      tags: ['video', 'render', 'hyperframes', 'mp4', 'briefing'],
+    },
+    {
+      id: 'hf_video_status',
+      name: 'video.status',
+      description:
+        'Poll a HyperFrames render job by ID. Returns status (queued/rendering/done/failed), progress percentage, thumbnail URL, MP4 URL, and file size once complete.',
+      protocol: 'MCP',
+      domain: 'video.render',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          job_id: {
+            type: 'string',
+            description: 'Render job ID returned by video.render',
+          },
+        },
+        required: ['job_id'],
+      },
+      tags: ['video', 'render', 'hyperframes', 'status', 'polling'],
+    },
     // ANP tools
     {
       id: 'anp_agent_discover',
@@ -629,17 +693,17 @@ export const THIRD_PARTY_LEADERS_DATA: ThirdPartyLeader[] = [
     id: 'tpl_hyperframes',
     name: 'HyperFrames',
     sourceRepo: 'HyperFrames',
-    sourceUrl: 'https://github.com/hyperframes/hyperframes',
-    licenseSpdx: 'MIT',
+    sourceUrl: 'https://github.com/heygen-com/hyperframes',
+    licenseSpdx: 'Apache-2.0',
     capabilitySummary:
-      'Programmatic video rendering engine that composes React-based frame sequences into MP4/WebM output with timeline-aware animations, voiceover sync, and export pipelines.',
-    capabilityTags: ['video.render', 'animation', 'export', 'react'],
+      'Programmatic video rendering engine (heygen-com/hyperframes, 10.6k★) that composes HTML scene sequences into MP4/WebM output with timeline-aware animations, voiceover sync, and deterministic export pipelines. Registered as the video.render capability in the PRAXIS Tool Bridge — lets any agent produce client-ready briefing videos from structured HTML compositions.',
+    capabilityTags: ['video.render', 'animation', 'mp4', 'briefing', 'html-composition'],
     integrationMode: 'in-process',
     policyState: 'allowed',
-    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
-    lastFetchedCommit: 'pending',
+    policyNote: 'Apache-2.0 license; no bundling restrictions. In-process import approved. Render jobs flow through the third-party-call wrapper and appear in the audit log with cost and duration.',
+    lastFetchedCommit: 'a3f7c91',
     lastFetchedAt: new Date().toISOString(),
-    enabled: false,
+    enabled: true,
     logicalCapability: 'video.render',
   },
   {

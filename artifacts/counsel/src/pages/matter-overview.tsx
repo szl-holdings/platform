@@ -5,10 +5,13 @@ import {
   AlertTriangle,
   BookOpen,
   Briefcase,
+  CheckCircle,
   Clock,
   Database,
   DollarSign,
   Eye,
+  Film,
+  Loader,
   Plus,
   Scale,
   ShieldAlert,
@@ -70,7 +73,7 @@ const STATUS_COLORS: Record<string, string> = {
 function SkeletonRow() {
   return (
     <tr>
-      <td colSpan={8} className="px-4 py-3">
+      <td colSpan={9} className="px-4 py-3">
         <div className="h-10 bg-violet-500/5 rounded animate-pulse" />
       </td>
     </tr>
@@ -286,8 +289,61 @@ function NewMatterModal({ onClose, onSuccess }: NewMatterModalProps) {
   );
 }
 
+type VideoRenderState = {
+  status: 'idle' | 'rendering' | 'done' | 'error';
+  jobId?: string;
+  mp4Url?: string;
+  auditTrace?: string;
+};
+
+interface VideoRenderResponse {
+  data: {
+    job_id: string;
+    status: string;
+    duration_s: number;
+    poll_url: string;
+    audit_trace: string;
+  };
+}
+
+interface VideoStatusResponse {
+  data: {
+    job_id: string;
+    status: string;
+    mp4_url: string | null;
+    audit_trace: string;
+  };
+}
+
+async function submitMatterVideoRender(matter: Matter): Promise<{ jobId: string; pollUrl: string; auditTrace: string }> {
+  const composition = `<section data-matter-id="${matter.id}"><h1>${matter.title}</h1><p>${matter.type} · ${matter.status}</p></section>`;
+  const payload = { composition, duration: 30, seed: `counsel-matter-${matter.id}` };
+  const res = await apiFetch<VideoRenderResponse>('/nexus/bridge/video-render', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' },
+    skipAuth: true,
+  });
+  const d = (res as unknown as { data: VideoRenderResponse['data'] }).data ?? res;
+  return { jobId: (d as VideoRenderResponse['data']).job_id, pollUrl: (d as VideoRenderResponse['data']).poll_url, auditTrace: (d as VideoRenderResponse['data']).audit_trace };
+}
+
+async function pollMatterVideoRender(jobId: string, signal?: AbortSignal): Promise<{ mp4Url: string; auditTrace: string }> {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    await new Promise((r) => setTimeout(r, 1000));
+    const res = await apiFetch<VideoStatusResponse>(`/nexus/bridge/video-render/${jobId}`, { skipAuth: true });
+    const d = (res as unknown as { data: VideoStatusResponse['data'] }).data ?? res;
+    const s = d as VideoStatusResponse['data'];
+    if (s.status === 'done' && s.mp4_url) return { mp4Url: s.mp4_url, auditTrace: s.audit_trace };
+    if (s.status === 'failed') throw new Error(`Render job ${jobId} failed`);
+  }
+  throw new Error(`Render job ${jobId} timed out`);
+}
+
 export default function MatterOverview() {
   const [showModal, setShowModal] = useState(false);
+  const [videoStates, setVideoStates] = useState<Record<string, VideoRenderState>>({});
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<MattersResponse>({
@@ -299,6 +355,19 @@ export default function MatterOverview() {
 
   const matters = data?.matters ?? [];
   const provenance = data?.provenance;
+
+  async function handleVideoRender(matter: Matter) {
+    if (videoStates[matter.id]?.status === 'rendering') return;
+    setVideoStates((prev) => ({ ...prev, [matter.id]: { status: 'rendering' } }));
+    try {
+      const { jobId, auditTrace } = await submitMatterVideoRender(matter);
+      setVideoStates((prev) => ({ ...prev, [matter.id]: { status: 'rendering', jobId, auditTrace } }));
+      const { mp4Url } = await pollMatterVideoRender(jobId);
+      setVideoStates((prev) => ({ ...prev, [matter.id]: { status: 'done', jobId, mp4Url, auditTrace } }));
+    } catch {
+      setVideoStates((prev) => ({ ...prev, [matter.id]: { status: 'error' } }));
+    }
+  }
 
   const totalExposure = matters.reduce((acc, m) => acc + (m.estimatedExposure ?? 0), 0);
   const avgExposure = matters.length > 0 ? totalExposure / matters.length : 0;
@@ -401,6 +470,9 @@ export default function MatterOverview() {
                   <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
                     Evidence
                   </th>
+                  <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
+                    Video Brief
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-violet-500/5">
@@ -412,7 +484,7 @@ export default function MatterOverview() {
                   </>
                 ) : matters.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-violet-400/40 text-sm">
+                    <td colSpan={9} className="px-4 py-12 text-center text-violet-400/40 text-sm">
                       <Briefcase className="w-6 h-6 mx-auto mb-3 opacity-30" />
                       No matters found. Create your first matter to get started.
                     </td>
@@ -473,6 +545,53 @@ export default function MatterOverview() {
                             View Evidence
                           </button>
                         </Link>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        {(() => {
+                          const vs = videoStates[m.id] ?? { status: 'idle' };
+                          if (vs.status === 'done' && vs.mp4Url) {
+                            return (
+                              <a
+                                href={vs.mp4Url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+                                title={`Job ${vs.jobId}`}
+                              >
+                                <CheckCircle className="w-3 h-3" />
+                                View MP4
+                              </a>
+                            );
+                          }
+                          if (vs.status === 'rendering') {
+                            return (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20" title={vs.jobId ? `Job ${vs.jobId}` : undefined}>
+                                <Loader className="w-3 h-3 animate-spin" />
+                                Rendering…
+                              </span>
+                            );
+                          }
+                          if (vs.status === 'error') {
+                            return (
+                              <button
+                                onClick={() => handleVideoRender(m)}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                              >
+                                Retry
+                              </button>
+                            );
+                          }
+                          return (
+                            <button
+                              data-testid={`btn-video-brief-${m.id}`}
+                              onClick={() => handleVideoRender(m)}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-violet-400 bg-violet-500/8 border border-violet-500/15 hover:bg-violet-500/18 transition-colors"
+                            >
+                              <Film className="w-3 h-3" />
+                              Render Brief
+                            </button>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))

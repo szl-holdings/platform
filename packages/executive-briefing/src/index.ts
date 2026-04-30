@@ -13,6 +13,16 @@ export {
 } from './prompts.js';
 export * from './types.js';
 export { type GateResult, gateBrief } from './verifier-gate.js';
+export {
+  SZL_DEMO_SCENES,
+  composeAndRender,
+  composeScenes,
+  renderSzlDemo,
+  type Scene,
+  type SceneAsset,
+  type VideoRenderJob,
+  type VideoRenderRequest,
+} from './video-scene-compose.js';
 
 export const EXECUTIVE_BRIEFING_VERSION = '1.0.0' as const;
 

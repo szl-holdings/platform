@@ -7,6 +7,7 @@ import {
   Cpu,
   Code2,
   Figma,
+  Film,
   Github,
   Loader,
   Network,
@@ -298,6 +299,79 @@ const TOKEN_CDN_TOOLS: DemoTool[] = [
   },
 ];
 
+const HYPERFRAMES_TOOLS: DemoTool[] = [
+  {
+    id: 'hf_video_render',
+    protocol: 'MCP',
+    adapter: 'HyperFrames',
+    name: 'video.render',
+    description: 'Compose HTML scenes into a rendered MP4 via HyperFrames. Returns a render job ID tracked in the queue.',
+    domain: 'video.render',
+    params: [
+      { name: 'composition', type: 'string (HTML)', required: true, description: 'HTML composition markup defining the video frames' },
+      { name: 'duration', type: 'number', required: true, description: 'Total video duration in seconds (max 120)' },
+      { name: 'voiceover', type: 'string', description: 'Optional voiceover script for TTS synthesis' },
+      { name: 'assets', type: 'object[]', description: 'Asset manifest: [{ url, type, label }]' },
+      { name: 'seed', type: 'string', description: 'Deterministic render seed — same seed + HTML → same output hash' },
+    ],
+    mockResponse: (args) => {
+      const jobId = 'hvj_' + Math.random().toString(36).slice(2, 10);
+      return {
+        job_id: jobId,
+        status: 'queued',
+        duration_s: (args.duration as number) || 30,
+        estimated_render_ms: ((args.duration as number) || 30) * 1200,
+        poll_url: `/nexus/bridge/video-render/${jobId}`,
+        audit_trace: 'trace_' + Math.random().toString(36).slice(2, 10),
+      };
+    },
+  },
+  {
+    id: 'hf_video_status',
+    protocol: 'MCP',
+    adapter: 'HyperFrames',
+    name: 'video.status',
+    description: 'Poll a render job by ID. Returns status, progress, thumbnail URL, and MP4 URL when complete.',
+    domain: 'video.render',
+    params: [
+      { name: 'job_id', type: 'string', required: true, description: 'Render job ID returned by video.render' },
+    ],
+    mockResponse: (args) => {
+      const jobId = (args.job_id as string) || 'hvj_demo';
+      const statuses = ['rendering', 'done'] as const;
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      return {
+        job_id: jobId,
+        status,
+        progress_pct: status === 'done' ? 100 : Math.floor(40 + Math.random() * 55),
+        thumbnail_url: status === 'done' ? `https://render.hyperframes.internal/thumb/${jobId}.jpg` : null,
+        mp4_url: status === 'done' ? `https://render.hyperframes.internal/output/${jobId}.mp4` : null,
+        file_size_mb: status === 'done' ? Number((2.4 + Math.random() * 8).toFixed(1)) : null,
+        duration_s: 30,
+        completed_at: status === 'done' ? new Date().toISOString() : null,
+      };
+    },
+  },
+  {
+    id: 'hf_video_rerun',
+    protocol: 'MCP',
+    adapter: 'HyperFrames',
+    name: 'video.rerun',
+    description: 'Re-enqueue a completed or failed render job using the original composition + seed.',
+    domain: 'video.render',
+    params: [
+      { name: 'job_id', type: 'string', required: true, description: 'Job ID to reproduce' },
+    ],
+    mockResponse: (args) => ({
+      original_job_id: (args.job_id as string) || 'hvj_original',
+      new_job_id: 'hvj_' + Math.random().toString(36).slice(2, 10),
+      status: 'queued',
+      reproducible: true,
+      note: 'Same composition + seed re-submitted. Output hash should match original when renderer is deterministic.',
+    }),
+  },
+];
+
 const EXISTING_MCP_TOOLS: DemoTool[] = [
   {
     id: 'mcp_echo',
@@ -376,6 +450,7 @@ const EXISTING_ANP_TOOLS: DemoTool[] = [
 
 const ALL_TOOLS: DemoTool[] = [
   ...EXISTING_MCP_TOOLS,
+  ...HYPERFRAMES_TOOLS,
   ...FIGMA_TOOLS,
   ...EXISTING_A2A_TOOLS,
   ...GITHUB_TOOLS,
@@ -389,6 +464,7 @@ const PROTOCOLS = ['MCP', 'A2A', 'ACP', 'ANP'] as const;
 
 const ADAPTER_META: Record<string, { color: string; isDemo: boolean }> = {
   'Core': { color: '#7c8ea4', isDemo: false },
+  'HyperFrames': { color: '#fb923c', isDemo: true },
   'Figma': { color: '#a259ff', isDemo: true },
   'GitHub': { color: '#e8f0fe', isDemo: true },
   'Linear': { color: '#5e6ad2', isDemo: true },
@@ -493,7 +569,7 @@ export default function Bridge() {
           <div>
             <h1 className="text-lg font-semibold">Universal Protocol Bridge</h1>
             <p className="text-xs text-muted-foreground">
-              MCP · A2A · ACP · ANP · Figma · GitHub · Linear · Design-Token CDN · {totalDemo} demo adapters
+              MCP · A2A · ACP · ANP · HyperFrames · Figma · GitHub · Linear · Design-Token CDN · {totalDemo} demo adapters
             </p>
           </div>
         </div>
@@ -534,6 +610,7 @@ export default function Bridge() {
                   : 'border-praxis bg-praxis-bg text-muted-foreground/60 hover:text-foreground'
               }`}
             >
+              {a === 'HyperFrames' && <Film className="w-3 h-3" />}
               {a === 'Figma' && <Figma className="w-3 h-3" />}
               {a === 'GitHub' && <Github className="w-3 h-3" />}
               {a === 'Linear' && <Zap className="w-3 h-3" />}

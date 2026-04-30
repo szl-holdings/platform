@@ -129,6 +129,69 @@ const ingestStore = new Map<string, IngestJob>();
 const leaderStore = new Map<string, ThirdPartyLeader>();
 let orchestrationsToday = 0;
 
+// ─── Video Render Job Store (HyperFrames) ─────────────────────────────────────
+
+interface VideoRenderJob {
+  jobId: string;
+  status: 'queued' | 'rendering' | 'done' | 'failed';
+  durationS: number;
+  composition: string;
+  voiceover?: string;
+  assets?: unknown[];
+  seed: string;
+  createdAt: string;
+  completedAt: string | null;
+  fileSizeMb: number | null;
+  thumbnailUrl: string | null;
+  mp4Url: string | null;
+  auditTrace: string;
+  costCents: number;
+}
+
+const videoRenderStore = new Map<string, VideoRenderJob>();
+
+function serializeVideoJob(job: VideoRenderJob) {
+  return {
+    job_id: job.jobId,
+    status: job.status,
+    duration_s: job.durationS,
+    progress_pct: job.status === 'done' ? 100 : job.status === 'rendering' ? 60 : 0,
+    thumbnail_url: job.thumbnailUrl,
+    mp4_url: job.mp4Url,
+    file_size_mb: job.fileSizeMb,
+    created_at: job.createdAt,
+    completed_at: job.completedAt,
+    audit_trace: job.auditTrace,
+    cost_cents: job.costCents,
+    seed: job.seed,
+  };
+}
+
+async function processVideoRenderJob(jobId: string): Promise<void> {
+  const job = videoRenderStore.get(jobId);
+  if (!job) return;
+  await sleep(500);
+  job.status = 'rendering';
+  const renderMs = Math.min(job.durationS * 1200, 30_000);
+  await sleep(renderMs);
+  job.status = 'done';
+  job.completedAt = new Date().toISOString();
+  job.fileSizeMb = Number((2 + job.durationS * 0.15 + Math.random() * 2).toFixed(1));
+  job.mp4Url = `https://render.hyperframes.internal/output/${jobId}.mp4`;
+  job.thumbnailUrl = `https://render.hyperframes.internal/thumb/${jobId}.jpg`;
+  void writeAuditEvent({
+    action: 'hyperframes.video.render.complete',
+    resourceType: 'video-render-job',
+    resourceId: jobId,
+    metadata: {
+      durationS: job.durationS,
+      fileSizeMb: job.fileSizeMb,
+      costCents: job.costCents,
+      auditTrace: job.auditTrace,
+    },
+  } as Parameters<typeof writeAuditEvent>[0]);
+}
+
 // Exported only for unit-test setup. Do NOT call in production code.
 export function __setLeaderForTest(leader: ThirdPartyLeader): void {
   leaderStore.set(leader.id, leader);
@@ -2145,6 +2208,43 @@ router.post(
           did: `did:nexus:${randomUUID().slice(0, 16)}`,
           networkEndpoints: 3,
         };
+      } else if (tool.id === 'hf_video_render' || tool.domain === 'video.render') {
+        const jobId = `hvj_${randomUUID().slice(0, 8)}`;
+        const durationS = (args.duration as number) || 30;
+        const job: VideoRenderJob = {
+          jobId,
+          status: 'queued',
+          durationS,
+          composition: (args.composition as string) || '',
+          voiceover: args.voiceover as string | undefined,
+          assets: args.assets as unknown[] | undefined,
+          seed: (args.seed as string) || jobId,
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+          fileSizeMb: null,
+          thumbnailUrl: null,
+          mp4Url: null,
+          auditTrace: `trace_${randomUUID().slice(0, 8)}`,
+          costCents: Math.floor(durationS * 1.5),
+        };
+        videoRenderStore.set(jobId, job);
+        processVideoRenderJob(jobId);
+        output = {
+          job_id: jobId,
+          status: 'queued',
+          duration_s: durationS,
+          estimated_render_ms: durationS * 1200,
+          poll_url: `/api/nexus/bridge/video-render/${jobId}`,
+          audit_trace: job.auditTrace,
+        };
+      } else if (tool.id === 'hf_video_status') {
+        const jobId = args.job_id as string | undefined;
+        const job = jobId ? videoRenderStore.get(jobId) : null;
+        if (!job) {
+          output = { error: 'Render job not found', job_id: jobId };
+        } else {
+          output = serializeVideoJob(job);
+        }
       } else {
         output = {
           status: 'ok',
@@ -2171,6 +2271,87 @@ router.post(
     }
   },
 );
+
+// ─── HyperFrames Video Render Routes ─────────────────────────────────────────
+
+router.post(
+  '/bridge/video-render',
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      composition: z.string().max(512_000).optional(),
+      duration: z.number().min(1).max(3600).optional(),
+      voiceover: z.string().max(10_000).optional(),
+      assets: z.array(z.object({ url: z.string().url(), type: z.string(), label: z.string() })).max(50).optional(),
+      seed: z.string().max(256).optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { composition = '', duration = 30, voiceover, assets, seed } = req.body as {
+        composition?: string;
+        duration?: number;
+        voiceover?: string;
+        assets?: unknown[];
+        seed?: string;
+      };
+      const jobId = `hvj_${randomUUID().slice(0, 8)}`;
+      const job: VideoRenderJob = {
+        jobId,
+        status: 'queued',
+        durationS: Number(duration),
+        composition: String(composition),
+        voiceover,
+        assets,
+        seed: seed ?? jobId,
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+        fileSizeMb: null,
+        thumbnailUrl: null,
+        mp4Url: null,
+        auditTrace: `trace_${randomUUID().slice(0, 8)}`,
+        costCents: Math.floor(Number(duration) * 1.5),
+      };
+      videoRenderStore.set(jobId, job);
+      processVideoRenderJob(jobId);
+      sendSuccess(res, {
+        job_id: jobId,
+        status: 'queued',
+        duration_s: job.durationS,
+        estimated_render_ms: job.durationS * 1200,
+        poll_url: `/api/nexus/bridge/video-render/${jobId}`,
+        audit_trace: job.auditTrace,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'POST /api/nexus/bridge/video-render');
+    }
+  },
+);
+
+router.get('/bridge/video-render/:jobId', async (req: Request, res: Response) => {
+  try {
+    const { jobId } = req.params;
+    const job = videoRenderStore.get(jobId);
+    if (!job) {
+      sendError(res, 'Render job not found', 404);
+      return;
+    }
+    sendSuccess(res, serializeVideoJob(job));
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/bridge/video-render/:jobId');
+  }
+});
+
+router.get('/bridge/video-render', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const jobs = Array.from(videoRenderStore.values())
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map(serializeVideoJob);
+    sendSuccess(res, { jobs, total: jobs.length });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/bridge/video-render');
+  }
+});
 
 // ─── Orchestrator Routes ──────────────────────────────────────────────────────
 

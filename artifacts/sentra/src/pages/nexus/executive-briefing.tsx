@@ -1,6 +1,11 @@
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
+  CheckCircle,
   ChevronRight,
+  ExternalLink,
   FileText,
+  Film,
+  Loader,
   Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -151,10 +156,13 @@ const BRIEFINGS: Briefing[] = [
 
 const prioColor = (p: string) => (p === 'flash' ? RED : p === 'priority' ? ACCENT : BLUE);
 
+type VideoRenderState = { status: 'idle' | 'rendering' | 'done'; jobId?: string; mp4Url?: string };
+
 export default function ExecutiveBriefingPage() {
   const [briefings, setBriefings] = useState(() => BRIEFINGS.map((b) => ({ ...b })));
   const [selectedId, setSelectedId] = useState(BRIEFINGS[0].id);
   const [expandedItem, setExpandedItem] = useState<string | null>(BRIEFINGS[0].items[0].id);
+  const [videoStates, setVideoStates] = useState<Record<string, VideoRenderState>>({});
 
   const selected = briefings.find((b) => b.id === selectedId) ?? briefings[0];
 
@@ -164,6 +172,38 @@ export default function ExecutiveBriefingPage() {
     },
     [selectedId],
   );
+
+  async function handleBriefAsVideo() {
+    if (videoStates[selectedId]?.status === 'rendering') return;
+    const brief = briefings.find((b) => b.id === selectedId);
+    setVideoStates((prev) => ({ ...prev, [selectedId]: { status: 'rendering' } }));
+    try {
+      const composition = `<section data-brief-id="${selectedId}"><h1>${brief?.classification ?? 'Executive Brief'}</h1><p>${brief?.recipientFocus ?? 'Board'}</p></section>`;
+      const submitRes = await apiFetch<{ data: { job_id: string; audit_trace: string } }>('/nexus/bridge/video-render', {
+        method: 'POST',
+        body: JSON.stringify({ composition, duration: 30, seed: `pulse-brief-${selectedId}` }),
+        headers: { 'Content-Type': 'application/json' },
+        skipAuth: true,
+      });
+      const submitted = (submitRes as unknown as { data: { job_id: string; audit_trace: string } }).data ?? submitRes;
+      const jobId = (submitted as { job_id: string }).job_id;
+      setVideoStates((prev) => ({ ...prev, [selectedId]: { status: 'rendering', jobId } }));
+      for (let i = 0; i < 30; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        const pollRes = await apiFetch<{ data: { status: string; mp4_url: string | null } }>(`/nexus/bridge/video-render/${jobId}`, { skipAuth: true });
+        const polled = (pollRes as unknown as { data: { status: string; mp4_url: string | null } }).data ?? pollRes;
+        const p = polled as { status: string; mp4_url: string | null };
+        if (p.status === 'done' && p.mp4_url) {
+          setVideoStates((prev) => ({ ...prev, [selectedId]: { status: 'done', jobId, mp4Url: p.mp4_url! } }));
+          return;
+        }
+        if (p.status === 'failed') throw new Error('Render failed');
+      }
+      throw new Error('Render timed out');
+    } catch {
+      setVideoStates((prev) => ({ ...prev, [selectedId]: { status: 'idle' } }));
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -378,6 +418,62 @@ export default function ExecutiveBriefingPage() {
                 Distributed to {selected.recipientFocus}
               </p>
             )}
+
+            {/* Brief as video — HyperFrames video.render */}
+            <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${DS.border}` }}>
+              <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: DS.text.muted }}>
+                Video Output
+              </p>
+              {(() => {
+                const vs = videoStates[selectedId] ?? { status: 'idle' };
+                if (vs.status === 'done' && vs.mp4Url) {
+                  return (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-[9px]" style={{ color: GREEN }}>
+                        <CheckCircle className="w-3 h-3" />
+                        <span>Render complete · Job {vs.jobId}</span>
+                      </div>
+                      <a
+                        href={vs.mp4Url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 w-full text-[10px] font-semibold rounded-lg py-2 transition hover:brightness-125"
+                        style={{ background: `${GREEN}20`, color: GREEN }}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Share MP4 Link
+                      </a>
+                      <button
+                        onClick={handleBriefAsVideo}
+                        className="w-full text-[9px] rounded-lg py-1.5 transition hover:brightness-125"
+                        style={{ background: 'rgba(255,255,255,0.04)', color: DS.text.muted }}
+                      >
+                        Re-render
+                      </button>
+                    </div>
+                  );
+                }
+                if (vs.status === 'rendering') {
+                  return (
+                    <div className="flex items-center gap-2 text-[10px] py-2" style={{ color: ACCENT }}>
+                      <Loader className="w-3.5 h-3.5 animate-spin" />
+                      <span>Rendering via HyperFrames…</span>
+                    </div>
+                  );
+                }
+                return (
+                  <button
+                    onClick={handleBriefAsVideo}
+                    aria-label="Render briefing as shareable MP4 video"
+                    className="flex items-center justify-center gap-1.5 w-full text-[10px] font-semibold rounded-lg py-2 transition hover:brightness-125"
+                    style={{ background: `${ACCENT}15`, color: ACCENT }}
+                  >
+                    <Film className="w-3.5 h-3.5" />
+                    Brief as Video
+                  </button>
+                );
+              })()}
+            </div>
           </div>
 
           <div
