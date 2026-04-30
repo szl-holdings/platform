@@ -200,3 +200,37 @@ export type {
   AgentRegistryEntry,
   V6ManifestSummary,
 } from './v6-payload.js';
+
+// SZL Holdings government procurement readiness (NYSTEC pre-briefing audit
+// 2026-04-30): structured platform scorecards, NIST AI RMF + DoD tenets +
+// GSAR 552.239-7001 alignment, SAM.gov + NAICS, action items.
+export {
+  PLATFORM_READINESS,
+  NIST_RMF_ALIGNMENT,
+  DOD_TENETS,
+  GSAR_552_239_7001_READINESS,
+  RECOMMENDED_NAICS_CODES,
+  SAM_GOV_REGISTRATION_STEPS,
+  NEW_YORK_STATE_REGISTRATION_STEPS,
+  PRE_MEETING_ACTION_ITEMS,
+  COMPETITIVE_POSITIONING_STATEMENT,
+  GOV_READINESS_MANIFEST,
+  getPlatformReadiness,
+  listGapsAcrossPlatforms,
+  actionItemsByGroup,
+} from './gov-readiness.js';
+export type {
+  GovPlatformId,
+  PlatformReadiness,
+  NistRmfFunction,
+  NistRmfRow,
+  DodTenet,
+  ReadinessStatus,
+  DodTenetRow,
+  GsarRow,
+  NaicsCode,
+  SamGovStep,
+  ActionGroup,
+  ActionItem,
+  GovReadinessManifest,
+} from './gov-readiness.js';

@@ -159,6 +159,32 @@ on top of v4:
 - **Agent registry**: `AGENT_REGISTRY_REQUIRED_FIELDS` (8 fields) +
   `validateAgentRegistryEntry(entry)` returning missing-fields list.
 
+## 2026-04-30 — SZL Government Procurement Readiness (NYSTEC pre-briefing)
+
+`@workspace/ouroboros` now operationalizes the April 30, 2026 NYSTEC
+pre-briefing audit (Empire APEX Accelerator, Mercy McInnis) covering
+A11oy, Sentra, and Amaru against federal and NY State AI procurement
+requirements. Source of truth:
+`docs/audit/szl-government-readiness.md`. Canonical platform scorecards
+(A11oy 72/100, Sentra 68/100, Amaru 65/100), NIST AI RMF alignment matrix
+(4 functions × 3 platforms), DoD Responsible AI Tenets (5 tenets,
+Equitable flagged as the only gap), GSAR 552.239-7001 readiness (10
+requirements: 5 covered, 5 gaps), recommended NAICS codes (5), SAM.gov
+registration steps (5), NY State registration notes, pre-meeting action
+items (5 critical + 5 for-meeting + 6 thirty-day), and the competitive
+positioning statement are exported from `@workspace/ouroboros` as
+deeply-frozen, replay-safe data plus pure helpers
+(`getPlatformReadiness`, `listGapsAcrossPlatforms`,
+`actionItemsByGroup`).
+
+Live, auth-gated endpoints on the api-server:
+`/api/ouroboros/gov-readiness/{manifest,platforms,platforms/:id,gaps,nist,
+dod,gsar,sam-registration,action-items,positioning}`. Ouroboros tests:
+**133/133 passing** (added 28 new pinning tests). Module + canonical
+markdown pushed to `szl-holdings/ouroboros`.
+
+## 2026-04-30 — Ouroboros v6 ecosystem layer continued
+
 v6 surfaces are exposed live on the api-server (auth-gated) at
 `/api/ouroboros/v6/{manifest,services,halts,routing,permissions,sandbox,
 agent-registry/schema}`, plus pure POST decision endpoints
@@ -174,3 +200,48 @@ agent-registry/schema}`, plus pure POST decision endpoints
 (both conflicted after #39 lockfile move); **#38 Governed Python
 efficiency migration** is a draft with conflicts (2599/-833 across 34
 files), needs author rebase before review — status comment posted.
+
+## 2026-04-30 — GitHub org alignment + first major releases
+
+Series-A polish pass across all 11 public org repos and the user's
+personal profile. **0 open Dependabot alerts** across the entire
+organization at completion.
+
+### READMEs upgraded (11 of 11)
+Investor-grade rewrites with NYSTEC scorecards, NIST AI RMF / DoD /
+GSAR alignment matrices, and a shared footer linking back to the
+runtime + thesis + audit doc:
+- `szl-holdings/.github` (org profile, was 71B → 6.1KB)
+- `szl-holdings/ouroboros` (v6 ecosystem layer + gov-readiness module,
+  was 2.1KB → 5.3KB, 133/133 tests called out)
+- `szl-holdings/ouroboros-thesis` (cross-link v6 contract JSON, was
+  1.6KB → 3.1KB)
+- `szl-holdings/{a11oy, sentra, amaru}` — three-platform stack with
+  per-platform readiness scorecards (72/68/65)
+- `szl-holdings/{counsel, terra, vessels, carlota-jo}` — domain
+  product surfaces with platform-inherited governance posture
+- `stephenlutar2-hash/stephenlutar2-hash` — personal profile aligned
+  with public brand (TENAX→Sentra, SEXTANT→Vessels, DOMAINE→Terra,
+  Amaru added)
+
+### Releases cut
+- **`szl-holdings/ouroboros` v6.0.0** — first major release, replaces
+  the implicit v1.0.0 status with formal v6 ecosystem layer + gov
+  readiness module manifest. URL:
+  `https://github.com/szl-holdings/ouroboros/releases/tag/v6.0.0`
+- **`szl-holdings/ouroboros-thesis` v2.0.0** — first formal release of
+  the public thesis repo, ships v2 + v6 contract JSON together. URL:
+  `https://github.com/szl-holdings/ouroboros-thesis/releases/tag/v2.0.0`
+
+### Open PRs
+- **#60** (ui-components dependabot, supersedes #59) — `@dependabot
+  rebase` comment posted; awaiting next dependabot cycle to clear the
+  `dirty` mergeable state.
+- **#38** (Governed Python efficiency migration, codex draft) —
+  unchanged; rebase request comment from prior pass still standing.
+
+### Branch hygiene
+`main` branch on `szl-holdings-platform` is divergent from default
+`master` (ahead 2, behind 2423) — left as-is, not the default branch,
+not safe to force-update without losing the two unique commits
+(security workflows PR #27 and a docs README refresh).

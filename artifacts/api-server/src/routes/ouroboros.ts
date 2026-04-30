@@ -65,6 +65,20 @@ import {
   AGENT_REGISTRY_REQUIRED_FIELDS,
   validateAgentRegistryEntry,
   V6_MANIFEST_SUMMARY,
+  // SZL Holdings government procurement readiness
+  GOV_READINESS_MANIFEST,
+  PLATFORM_READINESS,
+  NIST_RMF_ALIGNMENT,
+  DOD_TENETS,
+  GSAR_552_239_7001_READINESS,
+  RECOMMENDED_NAICS_CODES,
+  SAM_GOV_REGISTRATION_STEPS,
+  NEW_YORK_STATE_REGISTRATION_STEPS,
+  PRE_MEETING_ACTION_ITEMS,
+  COMPETITIVE_POSITIONING_STATEMENT,
+  getPlatformReadiness,
+  listGapsAcrossPlatforms,
+  actionItemsByGroup,
 } from '@workspace/ouroboros';
 import { logger } from '../lib/logger.js';
 import { authMiddleware, requireRole } from '../middlewares/auth.js';
@@ -463,6 +477,114 @@ router.post('/v6/agent-registry/check', (req, res) => {
     logger.warn({ err }, '[ouroboros] v6/agent-registry/check error');
     return res.status(500).json({ ok: false, error: 'agent-registry check failed' });
   }
+});
+
+// ===========================================================================
+// SZL Holdings Government Procurement Readiness — auth-gated
+// (Source: docs/audit/szl-government-readiness.md, NYSTEC pre-briefing audit
+//  prepared 2026-04-30 for Empire APEX Accelerator / Mercy McInnis.)
+// ---------------------------------------------------------------------------
+//   GET /gov-readiness/manifest          — overall scorecard + counts
+//   GET /gov-readiness/platforms         — list all 3 platform records
+//   GET /gov-readiness/platforms/:id     — single platform (A11oy/Sentra/Amaru)
+//   GET /gov-readiness/gaps              — flat list of all gaps × platforms
+//   GET /gov-readiness/nist              — NIST AI RMF alignment matrix
+//   GET /gov-readiness/dod               — DoD Responsible AI Tenets
+//   GET /gov-readiness/gsar              — GSAR 552.239-7001 readiness
+//   GET /gov-readiness/sam-registration  — SAM.gov + NAICS + NY state
+//   GET /gov-readiness/action-items      — pre-meeting checklists (3 groups)
+//   GET /gov-readiness/positioning       — competitive positioning statement
+// ===========================================================================
+
+router.get('/gov-readiness/manifest', (_req, res) => {
+  res.json(GOV_READINESS_MANIFEST);
+});
+
+router.get('/gov-readiness/platforms', (_req, res) => {
+  res.json({
+    platforms: Object.values(PLATFORM_READINESS),
+    count: Object.keys(PLATFORM_READINESS).length,
+  });
+});
+
+router.get('/gov-readiness/platforms/:id', (req, res) => {
+  const platform = getPlatformReadiness(req.params.id);
+  if (!platform) {
+    return res.status(404).json({
+      error: 'unknown_platform',
+      message: `Unknown platform '${req.params.id}'. Known: A11oy, Sentra, Amaru.`,
+    });
+  }
+  return res.json(platform);
+});
+
+router.get('/gov-readiness/gaps', (_req, res) => {
+  const gaps = listGapsAcrossPlatforms();
+  res.json({ gaps, count: gaps.length });
+});
+
+router.get('/gov-readiness/nist', (_req, res) => {
+  res.json({ rmf: NIST_RMF_ALIGNMENT, count: NIST_RMF_ALIGNMENT.length });
+});
+
+router.get('/gov-readiness/dod', (_req, res) => {
+  res.json({
+    tenets: DOD_TENETS,
+    count: DOD_TENETS.length,
+    coveredCount: DOD_TENETS.filter((t) => t.status === 'covered').length,
+    gapCount: DOD_TENETS.filter((t) => t.status === 'gap').length,
+  });
+});
+
+router.get('/gov-readiness/gsar', (_req, res) => {
+  res.json({
+    clause: 'GSAR 552.239-7001 (proposed)',
+    requirements: GSAR_552_239_7001_READINESS,
+    count: GSAR_552_239_7001_READINESS.length,
+    coveredCount: GSAR_552_239_7001_READINESS.filter((r) => r.status === 'covered')
+      .length,
+    gapCount: GSAR_552_239_7001_READINESS.filter((r) => r.status === 'gap').length,
+  });
+});
+
+router.get('/gov-readiness/sam-registration', (_req, res) => {
+  res.json({
+    samGovSteps: SAM_GOV_REGISTRATION_STEPS,
+    recommendedNaicsCodes: RECOMMENDED_NAICS_CODES,
+    newYorkStateRegistration: NEW_YORK_STATE_REGISTRATION_STEPS,
+    note: 'Active SAM.gov registration is the single most important prerequisite for any federal contract.',
+  });
+});
+
+router.get('/gov-readiness/action-items', (req, res) => {
+  const group = typeof req.query.group === 'string' ? req.query.group : undefined;
+  if (group) {
+    if (group !== 'critical' && group !== 'for_meeting' && group !== 'thirty_day') {
+      return res.status(400).json({
+        error: 'invalid_group',
+        message: "group must be one of: 'critical', 'for_meeting', 'thirty_day'.",
+      });
+    }
+    const items = actionItemsByGroup(group);
+    return res.json({ group, items, count: items.length });
+  }
+  return res.json({
+    items: PRE_MEETING_ACTION_ITEMS,
+    count: PRE_MEETING_ACTION_ITEMS.length,
+    byGroup: {
+      critical: actionItemsByGroup('critical').length,
+      for_meeting: actionItemsByGroup('for_meeting').length,
+      thirty_day: actionItemsByGroup('thirty_day').length,
+    },
+  });
+});
+
+router.get('/gov-readiness/positioning', (_req, res) => {
+  res.json({
+    statement: COMPETITIVE_POSITIONING_STATEMENT,
+    audience: 'Mercy McInnis, Procurement Counselor, NYSTEC',
+    purpose: 'Pre-briefing — Government Sales Readiness',
+  });
 });
 
 export default router;
