@@ -89,7 +89,7 @@ const DEMO_ORGS: DemoOrg[] = [
   { slug: 'demo-verity-solutions', name: 'Verity Solutions', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 8, canceledAfter: null },
   { slug: 'demo-atlas-consulting', name: 'Atlas Consulting', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 7, canceledAfter: 4 },
   { slug: 'demo-summit-digital', name: 'Summit Digital', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 6, canceledAfter: null },
-  { slug: 'demo-beacon-realty', name: 'Beacon Realty', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 5, canceledAfter: null },
+  { slug: 'demo-cypress-realty', name: 'Cypress Realty', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 5, canceledAfter: null },
   { slug: 'demo-quorum-tech', name: 'Quorum Tech', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 4, canceledAfter: 2 },
   { slug: 'demo-nova-intelligence', name: 'Nova Intelligence', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 3, canceledAfter: null },
   { slug: 'demo-parallax-ventures', name: 'Parallax Ventures', plan: 'professional', planSlug: 'demo-professional', monthsAgo: 2, canceledAfter: null },

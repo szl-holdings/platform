@@ -779,3 +779,69 @@ id = "bT9KUNYvzPZpz_EURFTsy"
 uri = "file://.local/release-pack/codex-kernel-release-v1.0.1.tar.gz"
 type = "unspecified"
 title = "codex-kernel-release-v1.0.1.tar.gz"
+
+[[outputs]]
+id = "hZD3ZFBHorZ01tyhdM35T"
+uri = "file://.local/posts/linkedin.md"
+type = "text"
+title = "LinkedIn — Short-Form Announcement"
+
+[[outputs]]
+id = "4hikx5ueCHdguD1ETQwsS"
+uri = "file://.local/posts/medium.md"
+type = "text"
+title = "Medium — Technical Proof Story"
+
+[[outputs]]
+id = "e9ZM-uqRCu2sSTnfekc0F"
+uri = "file://.local/posts/substack.md"
+type = "text"
+title = "Substack — Long-Form Governed-Loop Story"
+
+[[outputs]]
+id = "HXZ86276NFcilth9G_htj"
+uri = "file://.local/posts/investor-verdict.md"
+type = "text"
+title = "Investor-Readiness Verdict (honest grade)"
+
+[[outputs]]
+id = "MdJOsXgPvLim1picVV5hd"
+uri = "file://.local/screenshots/a11oy-home.jpg"
+type = "image"
+title = "A11oy — Brand Orchestration Layer"
+
+[[outputs]]
+id = "S7MDaw4rYOWIQpo6dFR3E"
+uri = "file://.local/screenshots/sentra-home.jpg"
+type = "image"
+title = "Sentra — Cyber Resilience Command"
+
+[[outputs]]
+id = "L3eWGSHzZ9H7Q1tHZPIZ7"
+uri = "file://.local/screenshots/counsel-home.jpg"
+type = "image"
+title = "Counsel — Legal Matter Command"
+
+[[outputs]]
+id = "4TEqTNEpkie-uaX8U_R2M"
+uri = "file://.local/screenshots/vessels-home.jpg"
+type = "image"
+title = "Vessels — Maritime Intelligence"
+
+[[outputs]]
+id = "UTgGQINg8PXib9Pefg--h"
+uri = "file://.local/screenshots/terra-home.jpg"
+type = "image"
+title = "Terra — Real Estate Intelligence"
+
+[[outputs]]
+id = "MMvBDeg5Uhq1Mi8XBL3c3"
+uri = "file://.local/screenshots/carlota-jo-home.jpg"
+type = "image"
+title = "Carlota Jo — Concierge Advisory"
+
+[[outputs]]
+id = "YnVmK2d0tpOTo-LfDczji"
+uri = "file://.local/screenshots/conduit-home.jpg"
+type = "image"
+title = "Amaru / Conduit — Andean Orchestration"
