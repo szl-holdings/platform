@@ -7,5 +7,5 @@ export {
   alloyActions,
   alloyArtifacts,
   alloyAuditLog,
-} from './alloy.js';
-export { alloyPolicyVersions } from './alloy_policy_versions.js';
+} from './alloy';
+export { alloyPolicyVersions } from './alloy_policy_versions';

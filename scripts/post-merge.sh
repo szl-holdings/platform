@@ -28,12 +28,23 @@ DB_MIGRATE_TIMEOUT_MS=300000 pnpm --filter @szl-holdings/db push-non-interactive
 # Trust pages, and Investors Overview all read from this path; if the audit
 # harness regenerates platform-capability-manifest.json the symlink guarantees
 # the corporate site reflects it on the next build with zero manual steps.
+# This step is best-effort and never blocks the merge: the szl-holdings artifact
+# may not be scaffolded yet, and the audit manifest may not exist on every run.
 MANIFEST_LINK="artifacts/szl-holdings/src/data/capability-manifest.json"
 MANIFEST_TARGET="../../../audit/platform-capability-manifest.json"
-if [ ! -L "$MANIFEST_LINK" ] || [ "$(readlink "$MANIFEST_LINK")" != "$MANIFEST_TARGET" ]; then
+MANIFEST_TARGET_ABS="audit/platform-capability-manifest.json"
+MANIFEST_DIR="$(dirname "$MANIFEST_LINK")"
+if [ ! -d "$MANIFEST_DIR" ]; then
+  echo "Skipping capability-manifest symlink: $MANIFEST_DIR does not exist (artifact not scaffolded)"
+elif [ ! -f "$MANIFEST_TARGET_ABS" ]; then
+  echo "Skipping capability-manifest symlink: $MANIFEST_TARGET_ABS does not exist (no audit manifest)"
+elif [ ! -L "$MANIFEST_LINK" ] || [ "$(readlink "$MANIFEST_LINK")" != "$MANIFEST_TARGET" ]; then
   rm -f "$MANIFEST_LINK"
-  ln -s "$MANIFEST_TARGET" "$MANIFEST_LINK"
-  echo "Restored capability manifest symlink: $MANIFEST_LINK -> $MANIFEST_TARGET"
+  if ln -s "$MANIFEST_TARGET" "$MANIFEST_LINK" 2>/dev/null; then
+    echo "Restored capability manifest symlink: $MANIFEST_LINK -> $MANIFEST_TARGET"
+  else
+    echo "Failed to create capability-manifest symlink (non-fatal)"
+  fi
 fi
 
 # Regenerate downloadable solution-brief PDFs from the platform capability
