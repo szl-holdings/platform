@@ -362,3 +362,42 @@ those wirings need.
 After this commit, all workflows are stopped. The platform is
 publish-ready (api-server endpoints unchanged, ouroboros + codex-kernel
 test suites green, public GitHub org reflects v3 / v6.1.0).
+
+## 2026-04-30 — CI mass-repair (post-Phase 4)
+
+### Root cause
+`pnpm/action-setup@fe52bf0a...` was force-deleted upstream on 2026-04-30,
+breaking 15 workflows on `master` at the "Set up job" step. The replacement
+SHA `b906affc` (pnpm/action-setup v4 commit, dereferenced from annotated
+tag) was already documented in `docs/github/actions-ci-audit.md` (commit
+`47f5df0`) but never applied to the YAML files.
+
+### Remote actions completed (via API, fine-grained PAT with workflow scope)
+1. **Branch `fix/ci-mass-repair-2026-04-30` pushed** to
+   `szl-holdings/szl-holdings-platform` (commit `df2e3b8b`):
+   - Repinned `pnpm/action-setup` SHA across **15 workflow files** (36 refs):
+     ci, build, e2e, lighthouse, audit-full, readme-qa, security,
+     npm-publish, api-spec-drift, commitlint, nexus-visual-regression,
+     nightly-smoke, eval-gate, a11y, post-deploy-smoke.
+   - Fail-soft `deploy-staging.yml` Replit API non-2xx (`::error::` →
+     `::warning::`) so an expired token stops blocking unrelated PRs.
+   - `uptime-monitor.yml` cron already at `*/5 * * * *` (no change needed).
+2. **Deleted stale `main` branch** (was 2423 commits behind `master` with
+   only 7 throwaway commits — "test write probe", "cleanup probe",
+   v0.1.2/v0.1.3 release commits, docs-only repin).
+3. **Deleted `azure-webapps-node.yml`** placeholder from
+   `szl-holdings/.github` repo (commit `fc2fee15`) — was a no-op echo
+   workflow generating recurring failure notifications.
+
+### Open items (require user action)
+- **Open the PR** (PAT lacks `Pull requests: Write` scope; one-click URL):
+  https://github.com/szl-holdings/szl-holdings-platform/compare/master...fix/ci-mass-repair-2026-04-30?expand=1
+- **Rotate** `REPLIT_STAGING_DEPLOY_TOKEN` in repo Settings → Environments
+  → staging (currently expired/invalid, returning 403).
+- **PR #60** (dependabot ui-components bump) — needs manual rebase to
+  resolve `pnpm-lock.yaml` + `pnpm-workspace.yaml` + 3× `package.json`
+  conflicts.
+- **PR #38** (Governed Python migration, DRAFT) — likely abandoned;
+  decide rebase-or-close.
+- **Lighthouse threshold failures** — real perf regression, not a config
+  bug; address as separate ticket once `master` CI is green again.
