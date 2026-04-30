@@ -851,3 +851,9 @@ id = "hMzZqD8h-aVam9fJ5a4Vw"
 uri = "file://.local/video/output/szl-codex-kernel-v1.0.2.mp4"
 type = "video"
 title = "SZL — Codex Kernel v1.0.2 Update Reel (1080p, with audio)"
+
+[[outputs]]
+id = "JrNxs_XCz7i3L0BSuxakg"
+uri = "file://.local/video/output/szl-codex-kernel-v1.0.2-pro.mp4"
+type = "video"
+title = "SZL — Codex Kernel v1.0.2 (PRO cut, 2:35, captions + broadcast audio)"
