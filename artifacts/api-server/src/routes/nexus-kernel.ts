@@ -26,8 +26,16 @@ import {
 } from '@szl-holdings/ai-engine';
 import type { KernelSource, KernelCategory, KernelStatus, PrecisionType } from '@szl-holdings/ai-engine';
 import { logger } from '../lib/logger.js';
+import { authMiddleware, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
+
+// All NEXUS Kernel endpoints require an authenticated session and the admin
+// role. These routes expose inference gateways, kernel routing, and audit
+// trails — they must never be reachable anonymously. Mounted as middleware
+// before any handler so the protection cannot be bypassed.
+router.use(authMiddleware());
+router.use(requireRole('admin'));
 
 router.get('/stats', (_req, res) => {
   try {

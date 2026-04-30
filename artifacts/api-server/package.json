@@ -127,6 +127,7 @@
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/nexus-mcp": "workspace:*",
     "@workspace/ontology": "workspace:*",
+    "@workspace/ouroboros": "workspace:*",
     "@workspace/planner": "workspace:*",
     "@workspace/reflection-engine": "workspace:*",
     "@workspace/run-ledger": "workspace:*",

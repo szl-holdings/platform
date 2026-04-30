@@ -392,6 +392,11 @@ router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));
 
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
+// Ouroboros v4 Runtime — A11oy control plane, Sentra/Amaru ingestion contracts,
+// validator registry, innovation engine, output paths, proof-route + pack
+// aliases. Backed by @workspace/ouroboros (pure kernel, 70+ tests).
+router.use("/ouroboros", lazyMount(() => import("./ouroboros"), "ouroboros"));
+
 // Intelligence Economics Operating System — aggregate AI fleet economics,
 // calibration observatory, compound intelligence map, trust registry,
 // learning velocity, and provenance export. Auth-gated (admin/operator/analyst).
