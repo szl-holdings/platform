@@ -79,4 +79,12 @@ export function register(router: IRouter): void {
       'alloy-research',
     ),
   );
+
+  // WorkGraph — Governed Workspace Intelligence Layer (Phase 5)
+  router.use('/alloy/workgraph', _readLimiter);
+  router.use('/alloy/workgraph/skill-runs', _writeLimiter);
+  router.use('/alloy/workgraph/answer', _writeLimiter);
+  router.use('/alloy/workgraph/search', _writeLimiter);
+  router.use('/alloy/workgraph/seed', _writeLimiter);
+  router.use(lazyMatch('/alloy', () => import('../alloy-workgraph'), 'alloy-workgraph'));
 }

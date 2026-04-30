@@ -10,6 +10,7 @@ export * from './agent_training';
 export * from './ai_evals';
 export * from './alloy';
 export * from './alloy_ai_decisions';
+export * from './alloy_workgraph';
 export * from './alloy_autonomy_modes';
 export * from './alloy_chat';
 export * from './alloy_comms';
