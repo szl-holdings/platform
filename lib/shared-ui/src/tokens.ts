@@ -225,7 +225,7 @@ export const colors = {
       muted: 'hsla(210 12% 80% / 0.10)',
       surface: 'hsla(210 12% 10% / 0.55)',
     },
-    alloy: {
+    continuum: {
       primary: 'hsl(215 35% 56%)',
       primaryLight: 'hsl(215 35% 68%)',
       primaryDark: 'hsl(215 35% 42%)',
@@ -281,7 +281,7 @@ export const colors = {
       accent: 'hsl(215 35% 58%)',
       accentMuted: 'hsla(210 8% 68% / 0.12)',
       silver: 'hsl(210 6% 74%)',
-      alloyTieIn: 'hsl(215 35% 58%)',
+      continuumTieIn: 'hsl(215 35% 58%)',
       muted: 'hsla(210 8% 68% / 0.10)',
       surface: 'hsla(210 12% 8% / 0.55)',
     },
@@ -347,7 +347,7 @@ export const colors = {
       tertiary: 'hsl(186 78% 52%)',
       muted: 'hsla(192 72% 48% / 0.10)',
     },
-    alloy: {
+    continuum: {
       primary: 'hsl(215 35% 56%)',
       secondary: 'hsl(210 45% 60%)',
       tertiary: 'hsl(212 28% 52%)',
@@ -363,6 +363,14 @@ export const colors = {
       secondary: 'hsl(262 55% 58%)',
       tertiary: 'hsl(0 62% 52%)',
       muted: 'hsla(220 72% 56% / 0.10)',
+    },
+    // A11oy lane — the unified governance accent (warm gold + navy).
+    // Mirrors `inca` for legacy callers that reference `alloy.primary`.
+    alloy: {
+      primary: 'hsl(38 38% 64%)',
+      secondary: 'hsl(34 22% 56%)',
+      tertiary: 'hsl(214 22% 38%)',
+      muted: 'hsla(38 38% 64% / 0.10)',
     },
   },
 
@@ -679,7 +687,7 @@ export const effects = {
     inset: 'inset 0 1px 0 hsla(0 0% 100% / 0.05)',
     glow: {
       szl: '0 0 32px hsla(210 15% 72% / 0.08)',
-      alloy: '0 0 32px hsla(218 50% 58% / 0.08)',
+      continuum: '0 0 32px hsla(218 50% 58% / 0.08)',
       lyte: '0 0 32px hsla(192 70% 46% / 0.10)',
       vessels: '0 0 32px hsla(208 65% 38% / 0.10)',
     },

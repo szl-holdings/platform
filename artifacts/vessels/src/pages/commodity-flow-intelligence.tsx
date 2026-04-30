@@ -328,7 +328,7 @@ export default function CommodityFlowIntelligence() {
   const BG = '#060e1a';
   const SURFACE = '#081018';
   const BORDER = 'rgba(77,143,204,0.1)';
-  const _SKY = '#4d8fcc';
+  const _SKY = 'var(--gi-accent-blue)';
 
   const { data: chokepointsData, isError: isChokepointsError } =
     useStandardQuery<ChokepointsResponse>({
@@ -767,7 +767,7 @@ export default function CommodityFlowIntelligence() {
                     fill="#f97316"
                     fillOpacity={0.8}
                   />
-                  <Bar dataKey="port" name="Port" stackId="a" fill="#4d8fcc" fillOpacity={0.8} />
+                  <Bar dataKey="port" name="Port" stackId="a" fill="var(--gi-accent-blue)" fillOpacity={0.8} />
                   <Bar
                     dataKey="canal"
                     name="Canal"
@@ -781,7 +781,7 @@ export default function CommodityFlowIntelligence() {
               <div className="flex items-center gap-4 mt-2 justify-center">
                 {[
                   ['Bunker', '#f97316'],
-                  ['Port', '#4d8fcc'],
+                  ['Port', 'var(--gi-accent-blue)'],
                   ['Canal', '#a855f7'],
                 ].map(([label, color]) => (
                   <div key={label} className="flex items-center gap-1">

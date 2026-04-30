@@ -1,6 +1,6 @@
 import { BillingAccount } from '@szl-holdings/shared-ui/billing';
 
-const ACCENT = '#4d8fcc';
+const ACCENT = 'var(--gi-accent-blue)';
 
 export default function VesselsBillingAccountPage() {
   return (

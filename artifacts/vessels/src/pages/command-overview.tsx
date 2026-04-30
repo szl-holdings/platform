@@ -1020,7 +1020,7 @@ export default function CommandOverviewPage() {
       <div className="pb-2">
         <PackBanner
           vertical="Maritime Intelligence Pack"
-          description="Vessels runs on the Lyte + Counsel core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
+          description="Vessels runs on the KORA + Counsel core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
           accentColor="#4d8fcc"
         />
       </div>

@@ -291,7 +291,7 @@ const STATUS_CONFIG = {
 const BERTH_STATUS_CONFIG = {
   occupied: { color: '#f97316', label: 'Occupied' },
   available: { color: '#22c55e', label: 'Available' },
-  maintenance: { color: '#64748b', label: 'Maintenance' },
+  maintenance: { color: 'var(--gi-text-muted)', label: 'Maintenance' },
   reserved: { color: '#a78bfa', label: 'Reserved' },
 };
 

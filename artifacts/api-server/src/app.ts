@@ -1,7 +1,7 @@
 import nodeHttp from 'node:http';
 import v8 from 'node:v8';
 import * as Sentry from '@sentry/node';
-import { resolveRuntimeMode } from '@szl-holdings/config';
+import { resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { initializeOpenTelemetry } from '@szl-holdings/observability';
 import { createAefRouter } from '@workspace/alloy-embedding-api';
 import compression from 'compression';
@@ -32,6 +32,7 @@ import { meshCallLogger } from './middlewares/mesh-call-logger';
 import { etagMiddleware } from './middlewares/optimistic-concurrency';
 import { otelSpanMiddleware } from './middlewares/otel-span';
 import { globalLimiter } from './middlewares/rate-limiters';
+import { adaptiveLoadShedder, startLoadMetricsSampling } from './middlewares/load-shedder';
 import { sessionRefreshPolicy } from './middlewares/session-policy';
 import { telemetryMiddleware } from './middlewares/telemetry';
 import { traceEmitMiddleware } from './middlewares/trace-emit';
@@ -303,9 +304,15 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));
 app.use(sessionRefreshPolicy());
+// Adaptive load shedder — runs before auth/rate-limit heavy paths so that
+// low-priority background traffic (syncs, analytics) is rejected first under
+// high event-loop lag or pool saturation, before user-facing traffic is shed.
+app.use(adaptiveLoadShedder);
 // Global rate limiter runs AFTER auth so req.user is populated and authenticated
 // traffic is keyed by user/org ID rather than falling back to IP.
 app.use(globalLimiter);
+// Start background sampling of event-loop lag and DB pool saturation for load shedder.
+startLoadMetricsSampling();
 
 app.get('/api/health', async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
@@ -397,6 +404,26 @@ app.get('/api/health/live', (_req: Request, res: Response) => {
 // paths without the /api prefix.
 app.get('/healthz', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
+});
+
+// Codex-Kernel deployment_contract endpoint. The payload v1.6.0
+// declares: { path: '/api/healthz', expected_status: 200, ...}. The
+// response includes the same version_lineage block the kernel runner
+// embeds in its run_summary so a probe can verify (a) the api-server is
+// up, (b) the deployed code matches the expected payload + repo commit.
+app.get('/api/healthz', (_req: Request, res: Response) => {
+  const repo_commit = process.env.GIT_COMMIT_SHA ?? process.env.REPL_SLUG_COMMIT ?? 'unknown';
+  res.status(200).json({
+    ok: true,
+    status: 'ok',
+    contract: 'codex-kernel-deployment-contract-v1',
+    payload_version: process.env.CODEX_PAYLOAD_VERSION ?? '1.6.0-private-szl',
+    kernel_version: 'codex-kernel-runner-1.0.0',
+    repo_commit,
+    model_provider: process.env.MODEL_PROVIDER ?? 'proxy_or_offline_emulator',
+    model_version: process.env.MODEL_VERSION ?? 'deterministic',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.get('/readyz', handleReadiness);

@@ -39,7 +39,7 @@ export default function DecisionCenterPage() {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#0c1018' }}>
+    <div className="flex flex-col h-full" style={{ background: 'var(--gi-bg-surface)' }}>
       <SourceHealthStrip sources={sources} variant={VARIANT} />
 
       <div

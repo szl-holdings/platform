@@ -306,7 +306,7 @@ export default function DarkVesselDetection() {
               platform="vessels"
               title="Dark Vessel Detection"
               content="Behavioral models flag vessels that have disabled AIS transponders, performed suspicious ship-to-ship transfers, or show IUU-fishing patterns. Each alert includes the inferred behavior class and supporting track evidence."
-              accentColor="#4d8fcc"
+              accentColor="var(--gi-accent-blue)"
               iconSize={14}
             />
             <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/8 text-amber-400/80 tracking-wider">

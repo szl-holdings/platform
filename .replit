@@ -40,10 +40,6 @@ args = "brand-strings"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/pluginmesh: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "praxis-smoke-e2e"
 
 [[workflows.workflow.tasks]]
@@ -102,18 +98,6 @@ args = "pnpm brand:strings"
 
 [workflows.workflow.metadata]
 isValidation = true
-
-[[workflows.workflow]]
-name = "artifacts/pluginmesh: web"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/pluginmesh && VITE_PORT=8099 BASE_PATH=/pluginmesh/ exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-waitForPort = 8099
 
 [[workflows.workflow]]
 name = "praxis-smoke-e2e"
@@ -209,8 +193,48 @@ OT_ICS_FEED_ENABLED = "true"
 DB_CONNECT_TIMEOUT_MS = "30000"
 
 [[ports]]
+localPort = 3002
+externalPort = 3003
+
+[[ports]]
+localPort = 3010
+externalPort = 8000
+
+[[ports]]
+localPort = 4099
+externalPort = 3002
+
+[[ports]]
+localPort = 6100
+externalPort = 6000
+
+[[ports]]
+localPort = 7099
+externalPort = 9000
+
+[[ports]]
+localPort = 8008
+externalPort = 8008
+
+[[ports]]
+localPort = 8077
+externalPort = 5173
+
+[[ports]]
 localPort = 8080
 externalPort = 80
+
+[[ports]]
+localPort = 8085
+externalPort = 8081
+
+[[ports]]
+localPort = 8097
+externalPort = 5000
+
+[[ports]]
+localPort = 8098
+externalPort = 8080
 
 [[ports]]
 localPort = 9090

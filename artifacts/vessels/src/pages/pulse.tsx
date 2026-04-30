@@ -398,7 +398,7 @@ export default function VesselsPulse() {
               { label: 'IMO Comp', value: '100%', color: '#d4a054' },
               { label: 'Crew', value: '284', color: '#8b5cf6' },
               { label: 'Weather', value: '24/7', color: '#ec4899' },
-              { label: 'Fuel', value: 'VLSFO', color: '#64748b' },
+              { label: 'Fuel', value: 'VLSFO', color: 'var(--gi-text-muted)' },
             ]}
             title="Fleet Architecture"
           />
