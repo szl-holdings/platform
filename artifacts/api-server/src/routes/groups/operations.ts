@@ -26,6 +26,7 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/observability', () => import('../observability'), 'observability'));
 
   router.use(lazyMatch('/ops', () => import('../ops-management'), 'ops-management'));
+  router.use(lazyMatch('/ops', () => import('../sre'), 'sre'));
 
   router.use('/command', _readLimiter);
   router.use('/command', _writeLimiter);

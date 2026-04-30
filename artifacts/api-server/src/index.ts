@@ -91,6 +91,7 @@ import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
 import { runPulsePushDelivery } from './jobs/pulse-push-delivery';
 import { runAlertRuleEvaluation } from './routes/ops-management';
+import { startSloComputationScheduler } from './lib/slo-engine';
 import { bootstrapChainState } from './routes/signal-chains';
 import { twinRegistry } from '@szl-holdings/ai-engine';
 
@@ -302,6 +303,11 @@ export async function bootstrap(
       });
   }, alertEvalIntervalMs);
   alertEvalInterval.unref();
+
+  // Schedule SLO compliance computation every 5 minutes (Google multi-window burn-rate alerting)
+  startSloComputationScheduler(
+    Math.max(60_000, parseInt(process.env.SLO_COMPUTE_INTERVAL_MS ?? '300000', 10) || 300_000),
+  );
 
   // Schedule background drift sampling so the Pulse Drift Trend chart grows
   // continuously even when nobody opens the System Health page. Configurable

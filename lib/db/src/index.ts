@@ -61,6 +61,64 @@ healthPool.on("error", (_err) => {
 });
 
 const _originalPoolQuery = pool.query.bind(pool);
+
+function _emitSlowQuery(durationMs: number, queryText: string | undefined, params: unknown, failed: boolean): void {
+  // Emit a structured slow-query log to stderr so all aggregators pick it up
+  // identically to a logger.warn() call without introducing a circular dep on
+  // any server-level logger package.
+  let routeContext: string | undefined;
+  try {
+    // Best-effort: pull http.route from the active OTEL span AND annotate the
+    // span so slow queries appear in traces. Requires @opentelemetry/api as a
+    // peer via the observability package; fails silently if OTEL not initialised.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const otelApi = require("@opentelemetry/api") as typeof import("@opentelemetry/api");
+    const span = otelApi.trace.getActiveSpan();
+    if (span) {
+      const attrs = (span as unknown as { attributes?: Record<string, unknown> }).attributes;
+      routeContext = (attrs?.["http.route"] ?? attrs?.["http.url"]) as string | undefined;
+
+      // Annotate the active span so the slow query is visible in OTEL traces.
+      span.setAttribute("db.slow_query", true);
+      span.setAttribute("db.query.duration_ms", durationMs);
+      span.setAttribute("db.slow_query.threshold_ms", SLOW_QUERY_THRESHOLD_MS);
+      if (failed) span.setAttribute("db.slow_query.failed", true);
+      if (routeContext) span.setAttribute("db.slow_query.route", routeContext);
+      // addEvent emits a timed annotation visible in trace waterfall views.
+      span.addEvent("db.query.slow", {
+        "db.query.duration_ms": durationMs,
+        "db.slow_query.threshold_ms": SLOW_QUERY_THRESHOLD_MS,
+        "db.query.text": queryText ? queryText.slice(0, 500) : "(unknown)",
+        "db.slow_query.failed": failed,
+        ...(routeContext ? { "http.route": routeContext } : {}),
+      });
+    }
+  } catch {
+    // OTEL not available — route context omitted
+  }
+
+  const truncatedSql = queryText ? queryText.slice(0, 2000) : undefined;
+  const truncatedParams = params
+    ? JSON.stringify(params).slice(0, 500)
+    : undefined;
+
+  process.stderr.write(
+    JSON.stringify({
+      level: "warn",
+      event: "db.query.slow",
+      obsRef: "SRE-SlowQuery",
+      durationMs,
+      thresholdMs: SLOW_QUERY_THRESHOLD_MS,
+      sql: truncatedSql,
+      params: truncatedParams,
+      routeContext,
+      failed,
+      timestamp: new Date().toISOString(),
+      message: `[db] Slow query detected: ${durationMs}ms (threshold ${SLOW_QUERY_THRESHOLD_MS}ms)${routeContext ? ` on route ${routeContext}` : ""}`,
+    }) + "\n",
+  );
+}
+
 // @ts-expect-error — overriding overloaded pool.query to intercept all queries for latency instrumentation
 pool.query = async function instrumentedQuery(...args: unknown[]) {
   const start = Date.now();
@@ -68,24 +126,32 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
     // @ts-expect-error — forwarding all overload variants
     const result = await _originalPoolQuery(...args);
     const durationMs = Date.now() - start;
+    const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
+    const queryParams = Array.isArray(args[1]) ? args[1] : (args[0] as { values?: unknown[] })?.values;
     try {
       // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
       const obs = await (new Function('m', 'return import(m)'))("@szl-holdings/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
-      const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
       obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
     } catch {
       // observability not available — not fatal
     }
+    if (durationMs >= SLOW_QUERY_THRESHOLD_MS) {
+      _emitSlowQuery(durationMs, queryText, queryParams, false);
+    }
     return result;
   } catch (err) {
     const durationMs = Date.now() - start;
+    const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
+    const queryParams = Array.isArray(args[1]) ? args[1] : (args[0] as { values?: unknown[] })?.values;
     try {
       // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
       const obs = await (new Function('m', 'return import(m)'))("@szl-holdings/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
-      const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
       obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
     } catch {
       // observability not available — not fatal
+    }
+    if (durationMs >= SLOW_QUERY_THRESHOLD_MS) {
+      _emitSlowQuery(durationMs, queryText, queryParams, true);
     }
     throw err;
   }
@@ -113,7 +179,7 @@ export const db = drizzle(pool, {
     : false,
 });
 
-void SLOW_QUERY_THRESHOLD_MS;
+// SLOW_QUERY_THRESHOLD_MS is now used by _emitSlowQuery above.
 
 // ─────────────────────────────────────────────────────────────────────────
 // OBS-007 follow-on: per-checkout leak detection + forced-release safety net.

@@ -1,5 +1,6 @@
 import * as api from '@opentelemetry/api';
 import type { NextFunction, Request, Response } from 'express';
+import { recordRequest } from '../lib/sli-collector';
 
 const SKIP_PREFIXES = ['/health', '/api/health', '/api/apm', '/api/traces', '/favicon'];
 
@@ -96,6 +97,12 @@ export function otelSpanMiddleware(req: Request, res: Response, next: NextFuncti
       span.setStatus({ code: api.SpanStatusCode.ERROR, message: `HTTP ${res.statusCode}` });
     } else {
       span.setStatus({ code: api.SpanStatusCode.OK });
+    }
+
+    try {
+      recordRequest(req.path, durationMs, res.statusCode);
+    } catch {
+      // SLI collection is non-fatal
     }
 
     span.end();
