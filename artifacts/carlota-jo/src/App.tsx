@@ -89,6 +89,8 @@ const BookingPage = lazy(() => import('@/pages/booking'));
 const ClientIntel = lazy(() => import('@/pages/client-intel'));
 const ROICalculator = lazy(() => import('@/pages/roi-calculator'));
 const BrandAudit = lazy(() => import('@/pages/brand-audit'));
+const AdsAudit = lazy(() => import('@/pages/ads-audit'));
+const SeoAudit = lazy(() => import('@/pages/seo-audit'));
 const ContentStrategy = lazy(() => import('@/pages/content-strategy'));
 const DocumentEngine = lazy(() => import('@/pages/document-engine'));
 const MethodologyPage = lazy(() => import('@/pages/methodology'));
@@ -305,6 +307,8 @@ function Router() {
         <Route path="/client-intel" component={ClientIntel} />
         <Route path="/roi-calculator" component={ROICalculator} />
         <Route path="/brand-audit" component={BrandAudit} />
+        <Route path="/ads-audit" component={AdsAudit} />
+        <Route path="/seo-audit" component={SeoAudit} />
         <Route path="/content-strategy" component={ContentStrategy} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />

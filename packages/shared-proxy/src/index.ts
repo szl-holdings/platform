@@ -27,6 +27,7 @@ export const PULSE_PORT = 5201;
 export const SZL_DEMO_VIDEO_PORT = 8765;
 export const PLUGINMESH_PORT = 8190;
 export const CONDUIT_PORT = 5300;
+export const LYTE_COMMAND_CENTER_PORT = 8097;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/a11oy/', port: A11OY_PORT },
@@ -39,6 +40,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/conduit/', port: CONDUIT_PORT },
   { prefix: '/counsel/', port: COUNSEL_PORT },
   { prefix: '/lyte/', port: LYTE_PORT },
+  { prefix: '/lyte-command-center/', port: LYTE_COMMAND_CENTER_PORT },
   { prefix: '/nexus/', port: PRAXIS_PORT },
   { prefix: '/sentra/', port: SENTRA_PORT },
   { prefix: '/terra/', port: TERRA_PORT },

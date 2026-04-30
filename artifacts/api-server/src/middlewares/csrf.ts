@@ -161,6 +161,12 @@ function isExempt(path: string): boolean {
   // No browser session, cookie, or user-state mutations involved; all inference is
   // stateless. CSRF double-submit is not applicable.
   if (path.startsWith('/api/hf-intelligence/')) return true;
+  // PRAXIS Tool Bridge — public audit execution endpoints (marketing-audit,
+  // seo-audit, finance-terminal). No per-user authenticated state is read or
+  // written; all routes are stateless audit computations. Calls originate from
+  // Carlota Jo, KORA (lyte-command-center), and the NEXUS Bridge without a
+  // browser session. CSRF double-submit is not applicable.
+  if (path.startsWith('/api/praxis-tools/') || path.startsWith('/praxis-tools/')) return true;
   return false;
 }
 

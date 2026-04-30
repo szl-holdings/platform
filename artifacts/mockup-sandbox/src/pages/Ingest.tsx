@@ -48,6 +48,38 @@ interface IngestJobLocal {
 
 const FAKE_REPOS = [
   {
+    url: 'https://github.com/AgriciDaniel/claude-ads',
+    name: 'claude-ads',
+    org: 'AgriciDaniel',
+    skills: [
+      { name: 'ads_audit_runner', category: 'Marketing', description: 'Runs the full 250+ check paid-ads audit suite against ad creative or campaign exports.' },
+      { name: 'copy_quality_scorer', category: 'Marketing', description: 'Scores ad copy quality across clarity, emotional resonance, and CTA effectiveness.' },
+      { name: 'brand_alignment_checker', category: 'Marketing', description: 'Validates ad creative against brand guidelines for voice, tone, and visual compliance.' },
+      { name: 'platform_format_validator', category: 'Marketing', description: 'Checks campaign assets against platform-specific format requirements (Google, Meta, LinkedIn, TikTok).' },
+    ],
+    memories: [
+      { id: 'mem-cads-1', type: 'pattern', content: 'claude-ads structures audit output as findings grouped by severity: critical → warning → info, each with a recommended fix and evidence snippet.', tags: ['audit', 'output-format', 'marketing'] },
+      { id: 'mem-cads-2', type: 'convention', content: 'All audit check IDs are stable and enumerable — callers can pass checkSets to run a subset of the 250+ checks.', tags: ['api-contract', 'check-sets'] },
+    ],
+    patterns: ['Severity-Grouped Findings', 'Check-Set Subsetting', 'Evidence Snippets'],
+  },
+  {
+    url: 'https://github.com/nowork-studio/toprank',
+    name: 'toprank',
+    org: 'nowork-studio',
+    skills: [
+      { name: 'seo_audit_runner', category: 'SEO', description: 'Runs a full Toprank-style SEO audit: on-page issues, keyword gaps, Core Web Vitals, and backlink scoring.' },
+      { name: 'keyword_gap_analyzer', category: 'SEO', description: 'Compares target page keyword coverage against competitors and surfaces high-opportunity gaps.' },
+      { name: 'serp_feature_detector', category: 'SEO', description: 'Detects SERP features (featured snippets, PAA, image carousels) for target queries.' },
+      { name: 'onpage_recommender', category: 'SEO', description: 'Generates prioritized on-page fix recommendations with estimated ranking impact.' },
+    ],
+    memories: [
+      { id: 'mem-tr-1', type: 'pattern', content: 'Toprank audit reports follow a structured schema: summary scores → section findings → per-issue recommendations with impact estimate.', tags: ['seo', 'output-format', 'audit'] },
+      { id: 'mem-tr-2', type: 'technique', content: 'SERP feature detection runs against multiple query variants to surface SERP volatility and opportunity windows.', tags: ['serp', 'volatility', 'seo'] },
+    ],
+    patterns: ['Structured Audit Report', 'Competitor Gap Analysis', 'Impact-Ranked Recommendations'],
+  },
+  {
     url: 'https://github.com/anthropics/claude-code',
     name: 'claude-code',
     org: 'anthropics',

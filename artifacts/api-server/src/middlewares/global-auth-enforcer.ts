@@ -248,6 +248,12 @@ const PUBLIC_PREFIXES = [
   // retained for the legacy fetch in szl-holdings/trust-center.
   // HuggingFace ML Intelligence — POST inference endpoints. All are public demo surfaces.
   "/api/hf-intelligence/",
+  // PRAXIS Tool Bridge — marketing-audit, seo-audit, and finance-terminal are
+  // public audit execution endpoints called from Carlota Jo, KORA, and the NEXUS
+  // Bridge without a browser session. No per-user authenticated state is read or
+  // written; all routes are stateless skill-pack invocations. thirdPartyCall()
+  // gates each execution through the PRAXIS policy engine.
+  "/api/praxis-tools/",
   "/api/contact/",
   // Carlota Jo inquiry submission — public POST endpoint for the contact/inquiry
   // form on the marketing site. Rate-limited (10/hour) inside the route handler.

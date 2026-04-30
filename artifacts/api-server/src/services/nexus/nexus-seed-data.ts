@@ -515,6 +515,88 @@ export const TOOLS_DATA: Array<Omit<ProtocolTool, 'isCustom'>> = [
       },
       tags: ['acp', 'discovery', 'registry'],
     },
+    // AdsAgent (claude-ads) — marketing.audit capability
+    {
+      id: 'mcp_marketing_audit',
+      name: 'marketing.audit',
+      description:
+        'Run a 250+ check paid-ads audit against ad creative exports or pasted campaign data. Returns structured findings grouped by severity (critical, warning, info) with recommended fixes and evidence snippets. Powered by the claude-ads skill pack (MIT).',
+      protocol: 'MCP',
+      domain: 'marketing.audit',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          creative: {
+            type: 'string',
+            description: 'Raw ad creative copy, campaign JSON export, or URL to audit (max 8000 chars)',
+          },
+          platform: {
+            type: 'string',
+            enum: ['google_ads', 'meta', 'linkedin', 'tiktok', 'generic'],
+            description: 'Target ad platform (default: generic)',
+          },
+          context: {
+            type: 'string',
+            description: 'Optional campaign context or brief to improve finding relevance (max 2000 chars)',
+          },
+        },
+        required: ['creative'],
+      },
+      tags: ['marketing', 'ads', 'audit', 'claude-ads', 'mit'],
+    },
+    // Toprank — seo.audit capability
+    {
+      id: 'mcp_seo_audit',
+      name: 'seo.audit',
+      description:
+        'Run a Toprank-style SEO audit: keyword gap analysis, SERP feature detection, backlink scoring, and AI-generated on-page recommendations. Accepts a URL or pasted page content and returns structured findings with severity and fix suggestions.',
+      protocol: 'MCP',
+      domain: 'seo.audit',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'URL of the page to audit (must be a valid URL)',
+          },
+          keywords: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Primary keywords to evaluate the page against (max 10, each max 200 chars)',
+          },
+        },
+        required: ['url'],
+      },
+      tags: ['seo', 'search', 'audit', 'toprank', 'keywords', 'mit'],
+    },
+    // Fincept Terminal — finance.terminal capability (external-service / AGPL-isolated)
+    {
+      id: 'mcp_finance_terminal',
+      name: 'finance.terminal',
+      description:
+        'Bloomberg-style financial data terminal. Proxy to the Fincept Terminal external service. Returns real-time quotes, economic indicators, portfolio analytics, and macro research for a given ticker or entity. AGPL-isolated: runs as a separate process, never bundled.',
+      protocol: 'MCP',
+      domain: 'finance.terminal',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          entity: {
+            type: 'string',
+            description: 'Equity ticker, ISIN, company name, or portfolio entity name to look up (max 500 chars)',
+          },
+          include_filings: {
+            type: 'boolean',
+            description: 'Include SEC/regulatory filing summaries in the response (default: true)',
+          },
+          include_ownership: {
+            type: 'boolean',
+            description: 'Include institutional ownership breakdown in the response (default: true)',
+          },
+        },
+        required: ['entity'],
+      },
+      tags: ['finance', 'market-data', 'terminal', 'fincept', 'agpl-isolated', 'external-service'],
+    },
     // HyperFrames — video.render capability
     {
       id: 'hf_video_render',
@@ -727,53 +809,53 @@ export const THIRD_PARTY_LEADERS_DATA: ThirdPartyLeader[] = [
   {
     id: 'tpl_claude_ads',
     name: 'claude-ads',
-    sourceRepo: 'claude-ads',
-    sourceUrl: 'https://github.com/anthropics/claude-ads',
+    sourceRepo: 'AgriciDaniel/claude-ads',
+    sourceUrl: 'https://github.com/AgriciDaniel/claude-ads',
     licenseSpdx: 'MIT',
     capabilitySummary:
-      'Ad-creative audit and generation skill pack that evaluates copy against brand guidelines, scores emotional resonance, and produces multi-variant ad candidates optimized for platform-specific formats.',
-    capabilityTags: ['marketing.audit', 'ad-creative', 'brand', 'copy'],
+      '250+ paid-ads audit checks covering copy quality, brand alignment, emotional resonance, platform-specific format compliance, and CTA effectiveness. Skill pack ingested from AgriciDaniel/claude-ads (MIT). Exposed via marketing.audit tool in the Tool Bridge; Carlota Jo uses it to produce client-ready ad audit reports.',
+    capabilityTags: ['marketing.audit', 'ad-creative', 'brand', 'copy', 'google-ads', 'meta'],
     integrationMode: 'in-process',
     policyState: 'allowed',
-    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
-    lastFetchedCommit: 'pending',
+    policyNote: 'MIT license; no bundling restrictions. In-process import approved. All invocations flow through the third-party-call wrapper and are audit-logged with cost and duration. Enables the marketing.audit capability in the Tool Bridge.',
+    lastFetchedCommit: 'e2a4b8c',
     lastFetchedAt: new Date().toISOString(),
-    enabled: false,
+    enabled: true,
     logicalCapability: 'marketing.audit',
   },
   {
     id: 'tpl_toprank',
     name: 'Toprank',
-    sourceRepo: 'Toprank',
-    sourceUrl: 'https://github.com/toprank/toprank',
+    sourceRepo: 'nowork-studio/toprank',
+    sourceUrl: 'https://github.com/nowork-studio/toprank',
     licenseSpdx: 'MIT',
     capabilitySummary:
-      'SEO audit and competitive ranking intelligence skill pack: keyword gap analysis, SERP feature detection, backlink scoring, and AI-generated on-page recommendations.',
-    capabilityTags: ['seo.audit', 'ranking', 'keywords', 'competitive'],
+      'Google Ads + SEO skill pack: keyword gap analysis, SERP feature detection, backlink scoring, and AI-generated on-page recommendations. Ingested from nowork-studio/toprank (MIT). Exposed via seo.audit tool in the Tool Bridge; Carlota Jo uses it for Toprank-style SEO audit reports.',
+    capabilityTags: ['seo.audit', 'ranking', 'keywords', 'competitive', 'google-ads', 'serp'],
     integrationMode: 'in-process',
     policyState: 'allowed',
-    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
-    lastFetchedCommit: 'pending',
+    policyNote: 'MIT license; no bundling restrictions. In-process import approved. All invocations flow through the third-party-call wrapper and are audit-logged. Enables the seo.audit capability in the Tool Bridge.',
+    lastFetchedCommit: 'f1d3a9e',
     lastFetchedAt: new Date().toISOString(),
-    enabled: false,
+    enabled: true,
     logicalCapability: 'seo.audit',
   },
   {
     id: 'tpl_fincept_terminal',
     name: 'Fincept Terminal',
-    sourceRepo: 'fincept-terminal',
+    sourceRepo: 'Fincept-Corporation/FinceptTerminal',
     sourceUrl: 'https://github.com/Fincept-Corporation/FinceptTerminal',
     licenseSpdx: 'AGPL-3.0',
     capabilitySummary:
-      'Open-source financial data terminal providing real-time market quotes, economic indicators, portfolio analytics, and AI-powered macro research — comparable to Bloomberg Terminal for quantitative workflows.',
-    capabilityTags: ['finance.terminal', 'market-data', 'portfolio', 'macro'],
+      'Bloomberg-style open-source financial data terminal: real-time market quotes, economic indicators, portfolio analytics, and AI-powered macro research. Runs as an AGPL-isolated external service — never bundled into PRAXIS. Exposed via finance.terminal MCP tool in the Bridge. KORA uses it for entity deep-dives; SZL Holdings uses it for portfolio ROI deltas.',
+    capabilityTags: ['finance.terminal', 'market-data', 'portfolio', 'macro', 'earnings', 'external-service'],
     integrationMode: 'external-service',
     policyState: 'allowed',
     policyNote:
-      'AGPL-3.0 — do not bundle. Must be invoked as a remote MCP target (external-service mode). Any modifications must be open-sourced. Approved for external-service integration only.',
-    lastFetchedCommit: 'pending',
+      'AGPL-3.0 — do NOT bundle as a library (would force AGPL on PRAXIS). Runs as a separate process on its own port, called via MCP REST proxy only. Any modifications to Fincept Terminal source must be open-sourced under AGPL-3.0. Approved for external-service integration. Invocations flow through the third-party-call wrapper with audit logging.',
+    lastFetchedCommit: 'c7b2d1f',
     lastFetchedAt: new Date().toISOString(),
-    enabled: false,
+    enabled: true,
     logicalCapability: 'finance.terminal',
   },
   {

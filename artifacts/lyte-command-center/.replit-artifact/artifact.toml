@@ -1,0 +1,32 @@
+kind = "web"
+  previewPath = "/lyte-command-center/"
+  title = "KORA — Decision Intelligence Command"
+  version = "1.0.0"
+  id = "artifacts/lyte-command-center"
+  router = "path"
+
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
+
+  [[services]]
+  name = "web"
+  paths = [ "/lyte-command-center/" ]
+  localPort = 9090
+  autoStart = true
+
+  [services.development]
+  run = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+  [services.production]
+  build = [ "pnpm", "--filter", "@workspace/lyte-command-center", "run", "build" ]
+  publicDir = "artifacts/lyte-command-center/dist/public"
+  serve = "static"
+
+  [[services.production.rewrites]]
+  from = "/*"
+  to = "/index.html"
+
+  [services.env]
+  VITE_PORT = "8097"
+  BASE_PATH = "/lyte-command-center/"

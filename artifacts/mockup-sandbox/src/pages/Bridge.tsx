@@ -299,6 +299,121 @@ const TOKEN_CDN_TOOLS: DemoTool[] = [
   },
 ];
 
+const ADSAGENT_TOOLS: DemoTool[] = [
+  {
+    id: 'marketing_audit',
+    protocol: 'MCP',
+    adapter: 'AdsAgent',
+    name: 'marketing.audit',
+    description: 'Run a 250+ check paid-ads audit via the claude-ads skill pack. Returns findings grouped by severity with recommended fixes and evidence snippets.',
+    domain: 'marketing.audit',
+    params: [
+      { name: 'creative', type: 'string', required: true, description: 'Ad creative copy, campaign JSON export, or URL to audit (max 8000 chars)' },
+      { name: 'platform', type: 'string', description: '"google_ads" | "meta" | "linkedin" | "tiktok" | "generic"' },
+      { name: 'context', type: 'string', description: 'Optional campaign context or brief to improve finding relevance (max 2000 chars)' },
+    ],
+    mockResponse: (args) => ({
+      audit_id: 'aud_' + Math.random().toString(36).slice(2, 10),
+      platform: (args.platform as string) || 'generic',
+      total_checks: 254,
+      checks_run: 254,
+      summary: { critical: 3, warning: 11, info: 7, passed: 233 },
+      findings: [
+        { check_id: 'CTA-001', severity: 'critical', category: 'CTA Effectiveness', issue: 'Primary CTA "Learn More" is generic — click-through rate typically 40% below action-specific alternatives.', recommendation: 'Replace with outcome-specific CTA such as "Get Your Free Audit" or "Start Saving Today".', evidence: (args.creative as string)?.slice(0, 80) || 'Ad creative excerpt' },
+        { check_id: 'EMO-003', severity: 'critical', category: 'Emotional Resonance', issue: 'No loss-aversion framing detected. Prospect motivation research shows loss framing outperforms gain framing by 2.1x in B2B.', recommendation: 'Add a consequence statement: "Stop losing 23% of your ad budget to unoptimized creative."', evidence: 'No loss-framing language detected in copy.' },
+        { check_id: 'BRD-007', severity: 'critical', category: 'Brand Alignment', issue: 'Tone score: 0.34 (threshold: 0.65). Copy reads formal/corporate; brand voice guidelines require conversational-expert.', recommendation: 'Rewrite using second-person active voice with concrete specifics.', evidence: 'Flagged sentences: "Our solutions provide comprehensive value…"' },
+        { check_id: 'FMT-012', severity: 'warning', category: 'Platform Format', issue: 'Headline length 47 chars exceeds Google Ads recommended 30-char limit for mobile display.', recommendation: 'Shorten to ≤30 chars or split into responsive search ad variants.', evidence: 'Headline: "Comprehensive Marketing Solutions for Growing Teams"' },
+        { check_id: 'SOC-002', severity: 'warning', category: 'Social Proof', issue: 'No social proof elements (testimonials, stats, case study references) in primary copy.', recommendation: 'Add a credibility stat: "Trusted by 500+ marketing teams" or a named client win.', evidence: 'No social proof detected in current creative.' },
+      ],
+      skill_pack: 'AgriciDaniel/claude-ads@e2a4b8c',
+      audit_trace: 'trace_' + Math.random().toString(36).slice(2, 10),
+      duration_ms: Math.floor(820 + Math.random() * 480),
+    }),
+  },
+  {
+    id: 'seo_audit',
+    protocol: 'MCP',
+    adapter: 'Toprank',
+    name: 'seo.audit',
+    description: 'Run a Toprank-style SEO audit: keyword gaps, SERP features, backlink scoring, and AI on-page recommendations. Returns structured findings with impact estimates.',
+    domain: 'seo.audit',
+    params: [
+      { name: 'url', type: 'string', required: true, description: 'URL of the page to audit (must be a valid URL)' },
+      { name: 'keywords', type: 'string[]', description: 'Primary keywords to evaluate against (max 10, each max 200 chars)' },
+    ],
+    mockResponse: (args) => ({
+      audit_id: 'seo_' + Math.random().toString(36).slice(2, 10),
+      url: (args.url as string) || 'https://example.com',
+      overall_score: 61,
+      sections: {
+        on_page: { score: 58, findings: [
+          { issue: 'Title tag 74 chars — truncated in SERP at 60 chars', severity: 'warning', fix: 'Shorten to ≤60 chars with primary keyword near the front' },
+          { issue: 'H1 missing primary keyword "marketing consulting"', severity: 'critical', fix: 'Include exact-match keyword in H1 within first 5 words' },
+          { issue: 'Meta description 210 chars — exceeds 155-char SERP display limit', severity: 'warning', fix: 'Trim to ≤155 chars; front-load the value proposition' },
+        ]},
+        keyword_coverage: { score: 52, top_gaps: [
+          { keyword: 'b2b marketing consultant', volume: 2400, difficulty: 42, current_rank: null, opportunity: 'high' },
+          { keyword: 'fractional cmo services', volume: 1800, difficulty: 38, current_rank: 14, opportunity: 'high' },
+          { keyword: 'marketing strategy agency', volume: 4100, difficulty: 67, current_rank: null, opportunity: 'medium' },
+        ]},
+        backlinks: { score: 71, domain_authority: 34, referring_domains: 128, top_anchors: ['marketing consulting', 'brand strategy', 'carlota jo'] },
+        serp_features: { score: 44, opportunities: ['featured_snippet', 'people_also_ask', 'local_pack'] },
+        core_web_vitals: { score: 82, lcp_ms: 1840, fid_ms: 12, cls: 0.04, status: 'good' },
+      },
+      recommendations: [
+        { priority: 1, impact: 'high', action: 'Add primary keyword to H1 and first 100 words of body copy' },
+        { priority: 2, impact: 'high', action: 'Target "fractional cmo services" with a dedicated landing page — currently ranking 14, easily top-5 with on-page optimization' },
+        { priority: 3, impact: 'medium', action: 'Add FAQ schema targeting 3 People Also Ask opportunities detected' },
+      ],
+      skill_pack: 'nowork-studio/toprank@f1d3a9e',
+      audit_trace: 'trace_' + Math.random().toString(36).slice(2, 10),
+      duration_ms: Math.floor(1100 + Math.random() * 600),
+    }),
+  },
+];
+
+const FINCEPT_TOOLS: DemoTool[] = [
+  {
+    id: 'finance_terminal',
+    protocol: 'MCP',
+    adapter: 'Fincept Terminal',
+    name: 'finance.terminal',
+    description: 'Bloomberg-style financial data terminal (AGPL-isolated external service). Returns quotes, fundamentals, earnings, macro indicators, and analyst ratings for a ticker or entity.',
+    domain: 'finance.terminal',
+    params: [
+      { name: 'entity', type: 'string', required: true, description: 'Equity ticker, ISIN, company name, or portfolio entity name (max 500 chars)' },
+      { name: 'include_filings', type: 'boolean', description: 'Include SEC/regulatory filing summaries (default: true)' },
+      { name: 'include_ownership', type: 'boolean', description: 'Include institutional ownership breakdown (default: true)' },
+    ],
+    mockResponse: (args) => {
+      const ticker = ((args.entity as string) || 'AAPL').toUpperCase();
+      const prices: Record<string, { price: number; change: number; pct: number }> = {
+        AAPL: { price: 189.42, change: 2.14, pct: 1.14 },
+        GOOGL: { price: 167.88, change: -1.23, pct: -0.73 },
+        MSFT: { price: 415.60, change: 3.87, pct: 0.94 },
+        NVDA: { price: 875.39, change: 18.42, pct: 2.15 },
+        DEFAULT: { price: 142.50, change: 0.87, pct: 0.61 },
+      };
+      const q = prices[ticker] ?? prices.DEFAULT;
+      return {
+        ticker,
+        source: 'Fincept Terminal',
+        integration_mode: 'external-service',
+        license_boundary: 'AGPL-3.0 — proxied via MCP, never bundled',
+        quote: { price: q.price, change_1d: q.change, change_pct_1d: q.pct, open: q.price - q.change * 0.4, high: q.price + 0.8, low: q.price - 1.2, volume: 42_813_000, market_cap_bn: +(q.price * 15.6).toFixed(1), as_of: new Date().toISOString() },
+        fundamentals: { pe_ratio: 28.4, forward_pe: 24.1, ps_ratio: 7.2, revenue_ttm_bn: 394.3, gross_margin_pct: 44.1, ebitda_margin_pct: 32.8, debt_to_equity: 0.18, roe_pct: 21.4, beta: 1.12 },
+        earnings: { last_eps_actual: 2.18, last_eps_estimate: 2.10, surprise_pct: 3.8, next_report_date: '2026-07-28', revenue_guidance_bn: 102.5 },
+        analyst_ratings: { buy: 31, hold: 11, sell: 2, consensus: 'Overweight', avg_target: 212.50, upside_pct: 12.2 },
+        macro_context: { sector: 'Technology', industry: 'Consumer Electronics', beta_sector: 0.94, correlation_sp500_90d: 0.87 },
+        deltas: { today: q.pct, week: +3.8, mtd: +6.2 },
+        audit_trace: 'trace_' + Math.random().toString(36).slice(2, 10),
+        service_health: 'healthy',
+        duration_ms: Math.floor(380 + Math.random() * 280),
+      };
+    },
+  },
+];
+
 const HYPERFRAMES_TOOLS: DemoTool[] = [
   {
     id: 'hf_video_render',
@@ -450,6 +565,8 @@ const EXISTING_ANP_TOOLS: DemoTool[] = [
 
 const ALL_TOOLS: DemoTool[] = [
   ...EXISTING_MCP_TOOLS,
+  ...ADSAGENT_TOOLS,
+  ...FINCEPT_TOOLS,
   ...HYPERFRAMES_TOOLS,
   ...FIGMA_TOOLS,
   ...EXISTING_A2A_TOOLS,
@@ -464,6 +581,9 @@ const PROTOCOLS = ['MCP', 'A2A', 'ACP', 'ANP'] as const;
 
 const ADAPTER_META: Record<string, { color: string; isDemo: boolean }> = {
   'Core': { color: '#7c8ea4', isDemo: false },
+  'AdsAgent': { color: '#f59e0b', isDemo: true },
+  'Toprank': { color: '#5baa8a', isDemo: true },
+  'Fincept Terminal': { color: '#4d8fcc', isDemo: true },
   'HyperFrames': { color: '#fb923c', isDemo: true },
   'Figma': { color: '#a259ff', isDemo: true },
   'GitHub': { color: '#e8f0fe', isDemo: true },
@@ -569,7 +689,7 @@ export default function Bridge() {
           <div>
             <h1 className="text-lg font-semibold">Universal Protocol Bridge</h1>
             <p className="text-xs text-muted-foreground">
-              MCP · A2A · ACP · ANP · HyperFrames · Figma · GitHub · Linear · Design-Token CDN · {totalDemo} demo adapters
+              MCP · A2A · ACP · ANP · AdsAgent · Toprank · Fincept Terminal · HyperFrames · Figma · GitHub · Linear · Design-Token CDN · {totalDemo} demo adapters
             </p>
           </div>
         </div>
