@@ -164,3 +164,39 @@ export type {
 
 export { OUTPUT_PATHS, resolveOutputPath } from './output-paths.js';
 export type { OutputPathKey } from './output-paths.js';
+
+// v6 ecosystem layer (a11oy_ultimate_replit_payload).
+// Adds shared runtime services list, halt-condition vocabulary, extended
+// task routing, tool permission matrix, secrets-broker spec, sandbox
+// execution classes, and the agent registry contract.
+export {
+  SHARED_RUNTIME_SERVICES_V6,
+  V6_HALT_CONDITIONS,
+  V6_NEW_HALT_CONDITIONS,
+  TASK_TO_PACK_V6,
+  TOOL_PERMISSION_MATRIX,
+  checkToolPermission,
+  SECRETS_BROKER_SPEC,
+  SANDBOX_POLICY,
+  AGENT_REGISTRY_REQUIRED_FIELDS,
+  validateAgentRegistryEntry,
+  V6_MANIFEST_SUMMARY,
+} from './v6-payload.js';
+export type {
+  SharedRuntimeServiceV6,
+  HaltConditionV6,
+  RoutingTaskTypeV6,
+  PermittedToolV6,
+  ToolPermissionEntry,
+  RiskTierOverride,
+  ToolPermissionMatrix,
+  PermissionDenyReason,
+  PermissionDecision,
+  SecretsBrokerSpec,
+  SandboxExecutionClassId,
+  SandboxExecutionClass,
+  SandboxPolicy,
+  AgentRegistryRequiredField,
+  AgentRegistryEntry,
+  V6ManifestSummary,
+} from './v6-payload.js';

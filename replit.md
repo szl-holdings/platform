@@ -129,3 +129,48 @@ All modules are pure (no I/O, frozen Object.freeze data) and exported
 from `@workspace/ouroboros`. 59/59 tests pass (was 41 in v3). v4 contract
 JSON published to `szl-holdings/ouroboros-thesis`; code pushed to
 `szl-holdings/ouroboros`.
+
+## 2026-04-30 — Ouroboros v6 ecosystem layer (a11oy_ultimate_replit_payload)
+
+`@workspace/ouroboros` now operationalizes `a11oy_ultimate_replit_payload`
+v6.0.0 (`docs/research/a11oy-ultimate-replit-payload.v6.json`). Layer adds
+on top of v4:
+
+- **Shared runtime services**: `SHARED_RUNTIME_SERVICES_V6` — 16 capabilities
+  (adds `retrieval_runtime`, `citation_runtime`, `primary_source_runtime`,
+  `permission_runtime`, `sandbox_runtime`, `secrets_broker`,
+  `evaluation_runtime`, `agent_registry`).
+- **Halt vocabulary**: `V6_HALT_CONDITIONS` (10) with `V6_NEW_HALT_CONDITIONS`
+  (`primary_source_required_but_unavailable`, `permission_denied`,
+  `sandbox_policy_violation`).
+- **Routing**: `TASK_TO_PACK_V6` extends v4 with `regulated_monitoring →
+  Sentra_pack`, `record_reconciliation → Amaru_pack`, `filings → finance_ops`,
+  `regulatory → legal_ops`, `government_data → government_workflows`.
+- **Tool permission matrix**: `TOOL_PERMISSION_MATRIX` (deny-by-default,
+  per-pack allow-lists for A11oy_core, Sentra_pack, Amaru_pack, research_ops)
+  + `checkToolPermission(packId, tool, riskTier, mutating, approved)` with
+  R3-mutating-needs-approval and R4-read-only-until-approved overrides.
+- **Secrets broker**: `SECRETS_BROKER_SPEC` (runtime injection + scoped
+  brokerage; managed list: KATZILLA_API_KEY, OPENAI_API_KEY, DATABASE_URL,
+  NEON_DATABASE_URL).
+- **Sandbox policy**: `SANDBOX_POLICY` with three execution classes
+  (`trusted_internal`, `bounded_code_exec`, `external_network_access`);
+  `violationsHaltRun = true`.
+- **Agent registry**: `AGENT_REGISTRY_REQUIRED_FIELDS` (8 fields) +
+  `validateAgentRegistryEntry(entry)` returning missing-fields list.
+
+v6 surfaces are exposed live on the api-server (auth-gated) at
+`/api/ouroboros/v6/{manifest,services,halts,routing,permissions,sandbox,
+agent-registry/schema}`, plus pure POST decision endpoints
+`/v6/permissions/check` and `/v6/agent-registry/check`. Ouroboros tests:
+**104/104 passing** (was 70 at v4). v6 module + canonical JSON pushed to
+`szl-holdings/ouroboros`.
+
+### GitHub org status (audit pass)
+
+11 public repos under `szl-holdings`. Open PRs on
+`szl-holdings-platform`: **#39 react-ecosystem dependabot — merged**;
+**#40 vite-build** + **#59 ui-components** dependabot rebase requested
+(both conflicted after #39 lockfile move); **#38 Governed Python
+efficiency migration** is a draft with conflicts (2599/-833 across 34
+files), needs author rebase before review — status comment posted.

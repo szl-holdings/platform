@@ -53,6 +53,18 @@ import {
   V3_CYCLES,
   V4_CYCLES,
   CYCLE_ID_V4_ALIASES,
+  // v6 ecosystem layer
+  SHARED_RUNTIME_SERVICES_V6,
+  V6_HALT_CONDITIONS,
+  V6_NEW_HALT_CONDITIONS,
+  TASK_TO_PACK_V6,
+  TOOL_PERMISSION_MATRIX,
+  checkToolPermission,
+  SECRETS_BROKER_SPEC,
+  SANDBOX_POLICY,
+  AGENT_REGISTRY_REQUIRED_FIELDS,
+  validateAgentRegistryEntry,
+  V6_MANIFEST_SUMMARY,
 } from '@workspace/ouroboros';
 import { logger } from '../lib/logger.js';
 import { authMiddleware, requireRole } from '../middlewares/auth.js';
@@ -305,6 +317,152 @@ router.get('/cycles', (_req, res) => {
       v4_aliases: CYCLE_ID_V4_ALIASES,
     },
   });
+});
+
+// ---------------------------------------------------------------------------
+// v6 ecosystem layer — `a11oy_ultimate_replit_payload` v6.0.0.
+//
+//   GET  /v6/manifest             — v6 summary (counts, control plane, version)
+//   GET  /v6/services             — shared runtime services list (16)
+//   GET  /v6/halts                — full halt-condition vocabulary (10) + new (3)
+//   GET  /v6/routing              — TASK_TO_PACK_V6 routing map
+//   GET  /v6/permissions          — full tool permission matrix
+//   POST /v6/permissions/check    — pure permission decision for (pack, tool, tier)
+//   GET  /v6/secrets              — secrets-broker spec (managed list + rules)
+//   GET  /v6/sandbox              — sandbox execution classes
+//   GET  /v6/agent-registry/schema— agent-registry required-fields contract
+//   POST /v6/agent-registry/check — list missing required fields for an entry
+// ---------------------------------------------------------------------------
+
+router.get('/v6/manifest', (_req, res) => {
+  res.json({ ok: true, data: V6_MANIFEST_SUMMARY });
+});
+
+router.get('/v6/services', (_req, res) => {
+  res.json({
+    ok: true,
+    data: {
+      shared_runtime_services: SHARED_RUNTIME_SERVICES_V6,
+      count: SHARED_RUNTIME_SERVICES_V6.length,
+    },
+  });
+});
+
+router.get('/v6/halts', (_req, res) => {
+  res.json({
+    ok: true,
+    data: {
+      conditions: V6_HALT_CONDITIONS,
+      new_in_v6: V6_NEW_HALT_CONDITIONS,
+    },
+  });
+});
+
+router.get('/v6/routing', (_req, res) => {
+  res.json({
+    ok: true,
+    data: {
+      task_to_pack_v6: TASK_TO_PACK_V6,
+      count: Object.keys(TASK_TO_PACK_V6).length,
+    },
+  });
+});
+
+router.get('/v6/permissions', (_req, res) => {
+  res.json({ ok: true, data: TOOL_PERMISSION_MATRIX });
+});
+
+const permissionCheckSchema = z.object({
+  pack_id: z.string().min(1).max(64),
+  tool: z.string().min(1).max(64),
+  risk_tier: z.enum(['R1_low', 'R2_moderate', 'R3_high', 'R4_critical']).optional(),
+  mutating: z.boolean().optional(),
+  approved: z.boolean().optional(),
+});
+
+router.post('/v6/permissions/check', (req, res) => {
+  const parsed = permissionCheckSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+  }
+  try {
+    const decision = checkToolPermission({
+      packId: parsed.data.pack_id,
+      tool: parsed.data.tool,
+      riskTier: parsed.data.risk_tier,
+      mutating: parsed.data.mutating,
+      approved: parsed.data.approved,
+    });
+    return res.json({ ok: true, data: decision });
+  } catch (err) {
+    logger.warn({ err }, '[ouroboros] v6/permissions/check error');
+    return res.status(500).json({ ok: false, error: 'permission check failed' });
+  }
+});
+
+router.get('/v6/secrets', (_req, res) => {
+  res.json({
+    ok: true,
+    data: {
+      enabled: SECRETS_BROKER_SPEC.enabled,
+      mode: SECRETS_BROKER_SPEC.mode,
+      purpose: SECRETS_BROKER_SPEC.purpose,
+      rules: SECRETS_BROKER_SPEC.rules,
+      managed_secrets: SECRETS_BROKER_SPEC.managedSecrets,
+    },
+  });
+});
+
+router.get('/v6/sandbox', (_req, res) => {
+  // Wire-format follows the canonical v6 JSON contract, which uses `"class"`
+  // for the execution-class identifier (not the TS-internal `classId`).
+  res.json({
+    ok: true,
+    data: {
+      enabled: SANDBOX_POLICY.enabled,
+      purpose: SANDBOX_POLICY.purpose,
+      violations_halt_run: SANDBOX_POLICY.violationsHaltRun,
+      classes: SANDBOX_POLICY.classes.map((c) => ({
+        class: c.classId,
+        allowed: c.allowed,
+        ...(c.restrictions ? { restrictions: c.restrictions } : {}),
+      })),
+    },
+  });
+});
+
+router.get('/v6/agent-registry/schema', (_req, res) => {
+  res.json({
+    ok: true,
+    data: {
+      required_fields: AGENT_REGISTRY_REQUIRED_FIELDS,
+      count: AGENT_REGISTRY_REQUIRED_FIELDS.length,
+    },
+  });
+});
+
+const agentRegistryCheckSchema = z
+  .object({})
+  .passthrough(); // accept any object payload, validator only inspects field presence
+
+router.post('/v6/agent-registry/check', (req, res) => {
+  const parsed = agentRegistryCheckSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+  }
+  try {
+    const missing = validateAgentRegistryEntry(parsed.data);
+    return res.json({
+      ok: true,
+      data: {
+        admissible: missing.length === 0,
+        missing_fields: missing,
+      },
+    });
+  } catch (err) {
+    logger.warn({ err }, '[ouroboros] v6/agent-registry/check error');
+    return res.status(500).json({ ok: false, error: 'agent-registry check failed' });
+  }
 });
 
 export default router;
