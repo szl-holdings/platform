@@ -40,10 +40,6 @@ args = "brand-strings"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/pluginmesh: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "praxis-smoke-e2e"
 
 [[workflows.workflow.tasks]]
@@ -102,18 +98,6 @@ args = "pnpm brand:strings"
 
 [workflows.workflow.metadata]
 isValidation = true
-
-[[workflows.workflow]]
-name = "artifacts/pluginmesh: web"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/pluginmesh && VITE_PORT=8099 BASE_PATH=/pluginmesh/ exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-waitForPort = 8099
 
 [[workflows.workflow]]
 name = "praxis-smoke-e2e"

@@ -76,3 +76,21 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 - **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+## 2026-04-29 — Portfolio consolidation pass
+
+Live SZL surface narrowed to 7 products + shared backend + canvas tool:
+- conduit (Amaru), a11oy, sentra, counsel, terra, carlota-jo, vessels
+- api-server (kept; live frontends depend on /api/)
+- mockup-sandbox (kept; canvas workspace tool)
+
+Archived to `.archived/artifacts/`:
+- szl-holdings, szl-holdings-mobile, command, pulse, lyte-command-center,
+  szl-demo-video, pluginmesh, aegis, helios
+
+Consolidated into a11oy: 0 (by deliberate restraint — each archive candidate
+was already covered by a canonical kernel-bound surface in the live trio).
+The consolidation registry is exposed in-app at A11oy → Portfolio Archive
+(`/a11oy/portfolio-archive`) and documented in `.archived/README.md`.
+
+Workflows for archived slugs cannot be deleted directly (PROHIBITED_ACTION,
+artifact-owned); they are dead since their directories no longer exist.

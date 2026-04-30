@@ -89,7 +89,7 @@ function generateSzlBundle(): AttestationInputs {
   const result = runLoop<VenusState>({
     experiment_id: 'szl-private-governed-ops-001',
     initial_state: initial,
-    policy_version: '1.2.0-private-szl',
+    policy_version: '1.3.0-private-szl',
     budgets: { time_budget_ms: 120_000, step_budget: 30, retry_budget: 2 },
     loop_policy: {
       max_steps: 30,

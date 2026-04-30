@@ -482,7 +482,7 @@ export default function DisruptionForecast() {
             color: 'text-orange-400',
           },
           {
-            label: 'SEXTANT at Risk',
+            label: 'Vessels at Risk',
             value: totalAtRisk,
             sub: 'in 72h window',
             icon: Navigation,

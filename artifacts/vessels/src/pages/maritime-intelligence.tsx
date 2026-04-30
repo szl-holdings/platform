@@ -241,7 +241,7 @@ export default function MaritimeIntelligence() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                  SEXTANT Tracked
+                  Vessels Tracked
                 </p>
                 <p className="text-2xl font-bold font-display mt-1">
                   <AnimatedCounter value={aisVessels.length} />
@@ -347,7 +347,7 @@ export default function MaritimeIntelligence() {
                   <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
                     <div>
                       <span className="block text-muted-foreground/60 font-mono text-[9px]">
-                        SEXTANT
+                        Vessels
                       </span>
                       <span className="font-semibold text-foreground">{cp.vesselCount}</span>
                     </div>

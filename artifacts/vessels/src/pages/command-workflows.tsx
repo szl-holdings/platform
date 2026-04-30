@@ -290,7 +290,7 @@ export default function CommandWorkflowsPage() {
         </Card>
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-4">
-            <div className="text-xs text-blue-400 font-medium mb-1">Monitored SEXTANT</div>
+            <div className="text-xs text-blue-400 font-medium mb-1">Monitored Vessels</div>
             <div className="text-3xl font-bold text-blue-400">{FALLBACK_VESSELS.length}</div>
           </CardContent>
         </Card>
@@ -302,7 +302,7 @@ export default function CommandWorkflowsPage() {
             <SelectValue placeholder="Vessel" />
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-700">
-            <SelectItem value="all">All SEXTANT</SelectItem>
+            <SelectItem value="all">All Vessels</SelectItem>
             {FALLBACK_VESSELS.map((v) => (
               <SelectItem key={v.id} value={String(v.id)}>
                 {v.name}

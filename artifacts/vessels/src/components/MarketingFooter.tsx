@@ -30,7 +30,7 @@ export function MarketingFooter() {
               <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center">
                 <Ship className="w-4 h-4 text-[#c9b787]" />
               </div>
-              <span className="font-bold text-[14px] text-[#f5f5f5]">SEXTANT</span>
+              <span className="font-bold text-[14px] text-[#f5f5f5]">Vessels</span>
             </div>
             <p className="text-[#8a8a8a]/80 text-[13px] leading-relaxed max-w-xs mb-3">
               {aboutSzlParagraph()}

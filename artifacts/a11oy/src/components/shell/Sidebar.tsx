@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity } from 'lucide-react';
+import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -12,6 +12,7 @@ const navItems = [
   { id: 'releases', name: 'Releases', icon: Rocket, path: '/releases' },
   { id: 'audit', name: 'Audit', icon: ShieldCheck, path: '/audit' },
   { id: 'andean', name: 'Andean Loop', icon: Infinity, path: '/andean-orchestration' },
+  { id: 'archive', name: 'Portfolio Archive', icon: Archive, path: '/portfolio-archive' },
 ];
 
 export function Sidebar() {

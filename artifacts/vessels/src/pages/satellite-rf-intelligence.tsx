@@ -429,7 +429,7 @@ export default function SatelliteRfIntelligence() {
             icon={meta.activeAnomalies > 0 ? ShieldAlert : Shield}
           />
           <KpiCard
-            label="Dark SEXTANT"
+            label="Dark Vessels"
             value={meta.darkVessels}
             sub="AIS gap ≥ 8h"
             color={meta.darkVessels > 0 ? '#6b7280' : '#4ade80'}

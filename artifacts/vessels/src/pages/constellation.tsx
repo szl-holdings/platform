@@ -10,7 +10,7 @@ export default function ConstellationPage() {
           Constellation
         </h1>
         <p style={{ fontSize: '0.85rem', color: '#7dd3fc', marginTop: 4 }}>
-          SEXTANT, ports, charterers, and cases in SEXTANT — with cross-domain links into DOMAINE,
+          Vessels, ports, charterers, and cases in Vessels — with cross-domain links into DOMAINE,
           PARAGON, Prism, and KORA highlighted in amber.
         </p>
       </div>

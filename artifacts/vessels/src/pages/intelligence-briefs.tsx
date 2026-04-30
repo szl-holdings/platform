@@ -396,7 +396,7 @@ export default function IntelligenceBriefs() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `Generate a structured maritime intelligence brief for: ${selectedTopic}. Include: situation summary, affected parties, dollar impact estimate, and 3 recommended actions. Format as an executive intelligence brief.`,
-          context: 'SEXTANT maritime intelligence platform — predictive trade disruption analysis',
+          context: 'Vessels maritime intelligence platform — predictive trade disruption analysis',
         }),
       });
       if (!res.ok) throw new Error('Failed to generate brief');

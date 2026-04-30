@@ -103,7 +103,7 @@ export default function AgentInsightsPage() {
       <div className="flex justify-end pt-1">
         <MicroFeedbackWidget
           featureId="vessels-agent-insights"
-          featureName="SEXTANT Autonomous Fleet Intelligence"
+          featureName="Vessels Autonomous Fleet Intelligence"
           app="vessels"
           compact
           prompt="Were these fleet insights useful?"

@@ -144,7 +144,7 @@ export default function FleetAPMPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                  Active SEXTANT
+                  Active Vessels
                 </p>
                 <p className="text-2xl font-bold font-display mt-1">
                   {activeVessels.length}/{vessels.length}

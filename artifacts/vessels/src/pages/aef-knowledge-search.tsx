@@ -147,7 +147,7 @@ export default function AefKnowledgeSearch() {
         <div>
           <h1 className="text-sm font-semibold text-slate-100">AEF Maritime Intelligence Search</h1>
           <p className="text-[10px] font-mono text-sky-400/40">
-            Profile: {PROFILE_ID} · SEXTANT Maritime Risk
+            Profile: {PROFILE_ID} · Vessels Maritime Risk
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">

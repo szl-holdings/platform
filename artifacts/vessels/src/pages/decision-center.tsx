@@ -66,7 +66,7 @@ export default function DecisionCenterPage() {
       <div className="flex-1 overflow-hidden">
         {tab === 'decisions' && (
           <DecisionCenter
-            variant="SEXTANT"
+            variant="Vessels"
             recommendations={recs}
             onAction={handleAction}
             onRefresh={() => setRecs(VARIANT_RECOMMENDATIONS[VARIANT] ?? [])}
@@ -76,7 +76,7 @@ export default function DecisionCenterPage() {
         )}
         {tab === 'runs' && (
           <RunConsole
-            variant="SEXTANT"
+            variant="Vessels"
             runs={runs}
             evalResults={SHARED_EVAL_RESULTS}
             onRefresh={() => {}}

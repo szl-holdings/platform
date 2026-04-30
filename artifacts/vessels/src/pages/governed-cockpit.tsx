@@ -109,12 +109,12 @@ export default function GovernedCockpit() {
     <GovernedCockpitShell
       accentColor={ACCENT}
       headerIcon={<Ship className="w-4 h-4" style={{ color: ACCENT }} />}
-      headerTitle="SEXTANT — Governed Maritime Intelligence"
+      headerTitle="Vessels — Governed Maritime Intelligence"
       headerSubtitle="Every routing decision, risk flag, and alert carries a full proof chain"
       liveIndicatorLabel="Fleet Intelligence · Deterministic Fallback (Counsel integration active)"
       defaultAutonomyMode="ask-to-act"
       kpiCards={[
-        { label: 'SEXTANT at Sea', value: '47', icon: Ship, color: ACCENT },
+        { label: 'Vessels at Sea', value: '47', icon: Ship, color: ACCENT },
         { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: color.accent.red },
         { label: 'Routes Optimised', value: '12', icon: Navigation, color: color.accent.green },
         { label: 'In Port', value: '8', icon: Anchor, color: color.accent.amber },

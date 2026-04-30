@@ -15,12 +15,12 @@ export default function LegalTermsPage() {
         </div>
         <div className="space-y-6 text-[14px] text-sky-300/50 leading-relaxed">
           <p>
-            By accessing SEXTANT, you agree to these terms. The platform is provided for operational
+            By accessing Vessels, you agree to these terms. The platform is provided for operational
             and informational use by authorised fleet operators.
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Acceptable use</h2>
           <p>
-            SEXTANT may not be used for unlawful purposes, to circumvent sanctions compliance
+            Vessels may not be used for unlawful purposes, to circumvent sanctions compliance
             requirements, or in any manner that impairs the platform's operation for other users.
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Intellectual property</h2>
@@ -31,7 +31,7 @@ export default function LegalTermsPage() {
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Limitation of liability</h2>
           <p>
-            SEXTANT intelligence outputs are provided for decision-support purposes. We do not
+            Vessels intelligence outputs are provided for decision-support purposes. We do not
             guarantee the accuracy of third-party AIS data or regulatory data sources.
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Contact</h2>

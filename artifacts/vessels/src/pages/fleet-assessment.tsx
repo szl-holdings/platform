@@ -134,7 +134,7 @@ const ROLE_VIEWS = [
     label: 'Compliance',
     icon: ShieldAlert,
     headline: 'Regulatory readiness is built into the operation.',
-    body: 'Every SEXTANT action passes through Covenant Policy and lands in the Proof Chain. When a regulatory inquiry arrives, the audit trail is complete — from signal to approval to execution to outcome — without manual reconstruction.',
+    body: 'Every Vessels action passes through Covenant Policy and lands in the Proof Chain. When a regulatory inquiry arrives, the audit trail is complete — from signal to approval to execution to outcome — without manual reconstruction.',
     outcomes: [
       'Immutable Proof Chain on every sanctions check and exception response',
       'Full actor attribution — who approved what, when, with what evidence',
@@ -255,7 +255,7 @@ const RESULTS = [
     label: 'Partial Coverage',
     severity: 'moderate' as const,
     desc: 'You have some tools in place but significant workflow gaps remain. Exception responses are manual, audit trails are incomplete, and cross-domain correlation depends on individual coordination.',
-    cta: 'See a SEXTANT Demo',
+    cta: 'See a Vessels Demo',
   },
   {
     min: 10,
@@ -458,7 +458,7 @@ function RoleViews() {
             className="text-3xl sm:text-4xl font-bold tracking-tight mb-4"
             style={{ color: TEXT }}
           >
-            Who SEXTANT serves.
+            Who Vessels serves.
           </h2>
           <p className="text-base max-w-xl mx-auto" style={{ color: TEXT_SEC }}>
             The same governed loop — different signal surfaces for different roles.
@@ -860,7 +860,7 @@ export default function FleetAssessmentPage() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border hover:bg-white/5"
                 style={{ borderColor: `${ACCENT}30`, color: TEXT }}
               >
-                See SEXTANT Demo <Ship className="w-4 h-4" style={{ color: ACCENT }} />
+                See Vessels Demo <Ship className="w-4 h-4" style={{ color: ACCENT }} />
               </button>
             </Link>
           </motion.div>

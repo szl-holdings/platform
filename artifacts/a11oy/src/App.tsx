@@ -33,6 +33,7 @@ const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default:
 const ActionRail = lazy(() => import('./pages/ActionRail').then(m => ({ default: m.ActionRail })));
 const ProofLedger = lazy(() => import('./pages/ProofLedger').then(m => ({ default: m.ProofLedger })));
 const CodexReceipts = lazy(() => import('./pages/CodexReceipts').then(m => ({ default: m.CodexReceipts })));
+const PortfolioArchive = lazy(() => import('./pages/PortfolioArchive').then(m => ({ default: m.PortfolioArchive })));
 const Governance = lazy(() => import('./pages/Governance').then(m => ({ default: m.Governance })));
 const Agents = lazy(() => import('./pages/Agents').then(m => ({ default: m.Agents })));
 const Workcells = lazy(() => import('./pages/Workcells').then(m => ({ default: m.Workcells })));
@@ -178,7 +179,9 @@ export default function App() {
       <Switch>
         <Route path={`${base}/`} component={HomePage} />
         <Route path={`${base}`} component={HomePage} />
-        <Route path={`${base}/loop-reasoner`} component={LoopReasoner} />
+        <Route path={`${base}/loop-reasoner`}>
+          <WithShell><LoopReasoner /></WithShell>
+        </Route>
         <Route path={`${base}/now`} component={NowBoard} />
         <Route path={`${base}/recommendations`} component={Recommendations} />
         <Route path={`${base}/brief`} component={ExecutiveBrief} />
@@ -186,7 +189,12 @@ export default function App() {
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
         <Route path={`${base}/proof`} component={ProofLedger} />
-        <Route path={`${base}/codex-receipts`} component={CodexReceipts} />
+        <Route path={`${base}/codex-receipts`}>
+          <WithShell><CodexReceipts /></WithShell>
+        </Route>
+        <Route path={`${base}/portfolio-archive`}>
+          <WithShell><PortfolioArchive /></WithShell>
+        </Route>
         <Route path={`${base}/governance`} component={Governance} />
         <Route path={`${base}/agents`} component={Agents} />
         <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />
@@ -206,7 +214,9 @@ export default function App() {
         <Route path={`${base}/sovereign`} component={Sovereign} />
         <Route path={`${base}/boardroom`} component={BoardroomMode} />
         <Route path={`${base}/investor-demo`} component={InvestorDemo} />
-        <Route path={`${base}/flexcache`} component={FlexCacheRuntime} />
+        <Route path={`${base}/flexcache`}>
+          <WithShell><FlexCacheRuntime /></WithShell>
+        </Route>
         <Route path={`${base}/terminal`} component={Terminal} />
         <Route path={`${base}/nexus`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
@@ -229,13 +239,23 @@ export default function App() {
         <Route path={`${base}/orchestration`} component={AgentOrchestration} />
         <Route path={`${base}/agent-viz`} component={AgentViz} />
         <Route path={`${base}/sdk`} component={DevPlatform} />
-        <Route path={`${base}/a11oy-code`} component={A11oyCode} />
+        <Route path={`${base}/a11oy-code`}>
+          <WithShell><A11oyCode /></WithShell>
+        </Route>
         <Route path={`${base}/agent-mesh`} component={AgentMesh} />
-        <Route path={`${base}/plugins`} component={PluginHub} />
-        <Route path={`${base}/deep-research`} component={DeepResearch} />
-        <Route path={`${base}/action`} component={CiAction} />
+        <Route path={`${base}/plugins`}>
+          <WithShell><PluginHub /></WithShell>
+        </Route>
+        <Route path={`${base}/deep-research`}>
+          <WithShell><DeepResearch /></WithShell>
+        </Route>
+        <Route path={`${base}/action`}>
+          <WithShell><CiAction /></WithShell>
+        </Route>
         <Route path={`${base}/convergence`} component={AgiConvergence} />
-        <Route path={`${base}/solutions`} component={Solutions} />
+        <Route path={`${base}/solutions`}>
+          <WithShell><Solutions /></WithShell>
+        </Route>
         <Route path={`${base}/about`} component={About} />
         <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
         <Route path={`${base}/applications`} component={ApplicationsCatalog} />
@@ -303,16 +323,36 @@ export default function App() {
         <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
         <Route path={`${base}/self-optimization`} component={SelfOptimization} />
         <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
-        <Route path={`${base}/karpathy-evolution`} component={KarpathyEvolution} />
-        <Route path={`${base}/substrate-compute`} component={SubstrateCompute} />
-        <Route path={`${base}/toto-forecaster`} component={TotoForecaster} />
-        <Route path={`${base}/causal-rca`} component={CausalRCA} />
-        <Route path={`${base}/synthetic-metrics`} component={SyntheticMetrics} />
-        <Route path={`${base}/self-healing`} component={SelfHealingEngine} />
-        <Route path={`${base}/observability-as-code`} component={ObservabilityAsCode} />
-        <Route path={`${base}/alert-triage`} component={AlertTriage} />
-        <Route path={`${base}/cost-monitoring`} component={CostAwareMonitoring} />
-        <Route path={`${base}/andean-orchestration`} component={AndeanOrchestration} />
+        <Route path={`${base}/karpathy-evolution`}>
+          <WithShell><KarpathyEvolution /></WithShell>
+        </Route>
+        <Route path={`${base}/substrate-compute`}>
+          <WithShell><SubstrateCompute /></WithShell>
+        </Route>
+        <Route path={`${base}/toto-forecaster`}>
+          <WithShell><TotoForecaster /></WithShell>
+        </Route>
+        <Route path={`${base}/causal-rca`}>
+          <WithShell><CausalRCA /></WithShell>
+        </Route>
+        <Route path={`${base}/synthetic-metrics`}>
+          <WithShell><SyntheticMetrics /></WithShell>
+        </Route>
+        <Route path={`${base}/self-healing`}>
+          <WithShell><SelfHealingEngine /></WithShell>
+        </Route>
+        <Route path={`${base}/observability-as-code`}>
+          <WithShell><ObservabilityAsCode /></WithShell>
+        </Route>
+        <Route path={`${base}/alert-triage`}>
+          <WithShell><AlertTriage /></WithShell>
+        </Route>
+        <Route path={`${base}/cost-monitoring`}>
+          <WithShell><CostAwareMonitoring /></WithShell>
+        </Route>
+        <Route path={`${base}/andean-orchestration`}>
+          <WithShell><AndeanOrchestration /></WithShell>
+        </Route>
 
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>

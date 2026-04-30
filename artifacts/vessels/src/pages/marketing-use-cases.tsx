@@ -9,7 +9,7 @@ const useCases = [
     role: 'Fleet Executives',
     headline: 'Strategic confidence, not status updates.',
     description:
-      'Fleet executives need portfolio-level visibility without wading through operational noise. SEXTANT gives you fleet utilization, TCE trends, margin exposure, and exception severity — at a glance, updated in real time.',
+      'Fleet executives need portfolio-level visibility without wading through operational noise. Vessels gives you fleet utilization, TCE trends, margin exposure, and exception severity — at a glance, updated in real time.',
     points: [
       'Fleet utilization and TCE at a glance',
       'Voyage P&L and margin by charter type',
@@ -23,7 +23,7 @@ const useCases = [
     role: 'Fleet Operations Teams',
     headline: 'See the exceptions that matter. Act before they escalate.',
     description:
-      'Operations teams deal with a high volume of signals. SEXTANT filters to the exceptions that have real business impact — and surfaces them with the context needed to make a decision, not just a notification.',
+      'Operations teams deal with a high volume of signals. Vessels filters to the exceptions that have real business impact — and surfaces them with the context needed to make a decision, not just a notification.',
     points: [
       'Prioritized exception queue by severity and business impact',
       'Vessel status and ETA deviation in real time',
@@ -37,7 +37,7 @@ const useCases = [
     role: 'Commercial Teams',
     headline: 'Voyage economics, not just vessel positions.',
     description:
-      'Commercial teams need to understand charter performance, voyage margins, and delay exposure — not just where vessels are on a map. SEXTANT surfaces the financial context behind every voyage.',
+      'Commercial teams need to understand charter performance, voyage margins, and delay exposure — not just where vessels are on a map. Vessels surfaces the financial context behind every voyage.',
     points: [
       'Revenue, cost, and margin per voyage',
       'Charter performance vs budget',
@@ -59,7 +59,7 @@ export default function MarketingUseCasesPage() {
             Use Cases
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-sky-50 mb-4">
-            Who SEXTANT is built for
+            Who Vessels is built for
           </h1>
           <p className="text-sky-300/40 text-[15px] leading-relaxed max-w-xl">
             Three distinct operational personas. One platform that serves them all without

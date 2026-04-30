@@ -31,22 +31,48 @@ import {
   type VenusState,
 } from '../index.js';
 import { ProofLedger } from '../ledger.js';
+import {
+  assertTraceIdentity,
+  auditSecrets,
+  buildRunIdentityManifest,
+  computeTraceIdentity,
+  extractRawContracts,
+  resolveDeploymentContract,
+  resolveVersionLineage,
+  type RawContractsBlock,
+} from './contracts.js';
 import { normalizeRawPayload } from './normalize.js';
 import { confineOutput, PACKAGE_ROOT, resolveOutputRoot } from './paths.js';
 import { assertPayload, type CodexPayload } from './payload.js';
 
-function loadPayload(): { payload: CodexPayload; payload_path: string } {
+function loadPayload(): {
+  payload: CodexPayload;
+  payload_path: string;
+  raw_contracts: RawContractsBlock;
+  raw_payload_version: string;
+} {
   const cliPath = process.argv[2];
   const payload_path = cliPath
     ? resolve(process.cwd(), cliPath)
     : join(PACKAGE_ROOT, 'runner', 'payload.json');
   const raw = readFileSync(payload_path, 'utf-8');
   const parsed = JSON.parse(raw) as unknown;
+  // Pull the four operational contracts off the raw lean payload BEFORE
+  // normalization — normalize.ts maps to the strict E4 shape and drops
+  // unknown top-level fields. Defaults apply when blocks are absent so a
+  // pre-v1.6 payload still runs.
+  const raw_contracts = extractRawContracts(parsed);
+  const raw_payload_version =
+    parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? ((parsed as Record<string, unknown>).payload_version as string | undefined) ??
+        ((parsed as Record<string, unknown>).version as string | undefined) ??
+        'unknown'
+      : 'unknown';
   // Normalize lifts a lean operational payload (e.g. SZL private governed
   // ops) into the strict E4 contract; strict payloads pass through unchanged.
   const normalized = normalizeRawPayload(parsed);
   assertPayload(normalized);
-  return { payload: normalized, payload_path };
+  return { payload: normalized, payload_path, raw_contracts, raw_payload_version };
 }
 
 function ensureDir(file_path: string): void {
@@ -98,9 +124,34 @@ function writeText(file_path: string, value: string): void {
 }
 
 async function main(): Promise<void> {
-  const { payload, payload_path } = loadPayload();
+  const { payload, payload_path, raw_contracts, raw_payload_version } = loadPayload();
   const output_root = resolveOutputRoot();
   const out = (rel: string): string => confineOutput(output_root, rel);
+
+  // ────────────────────────────────────────────────────────────────────
+  // Operational contracts (real, not just declared in the payload).
+  // Computed BEFORE the loop so they bind to the run that produced the
+  // outputs. Hash-stable: none of these mutate state or trace events.
+  // ────────────────────────────────────────────────────────────────────
+  const resolved_at = new Date().toISOString();
+  const payload_hash_for_identity = hashJson(
+    payload as unknown as import('../types.js').Json,
+  );
+  const trace_identity = computeTraceIdentity(
+    payload.experiment_id,
+    payload_hash_for_identity,
+    payload.budgets.step_budget,
+    raw_contracts.trace_identity,
+  );
+  // secrets_audit throws if a required secret is missing — that is an
+  // intentional do-not-boot. Optional misses recorded as degraded.
+  const secrets_audit = auditSecrets(raw_contracts.secrets_contract, resolved_at);
+  const version_lineage = resolveVersionLineage({
+    payload_version: raw_payload_version,
+    resolved_at,
+    declared: raw_contracts.version_lineage,
+  });
+  const deployment_contract = resolveDeploymentContract(raw_contracts.deployment_contract);
 
   const dresdenCfg = payloadConfigToDresden(payload);
   const initial_state: VenusState = {
@@ -138,6 +189,10 @@ async function main(): Promise<void> {
   const ledger = new ProofLedger();
   for (const e of result.ledger) ledger.append(e);
 
+  // Validate trace_identity contract against the actual loop output —
+  // require_span_id_per_step is only checked AFTER we know steps_executed.
+  assertTraceIdentity(trace_identity, result.summary.steps_executed);
+
   // 1. Trace JSONL — one event per line, append-only.
   writeText(out(payload.platform.output_paths.trace_jsonl), serializeTraceJsonl(result.trace));
 
@@ -151,7 +206,9 @@ async function main(): Promise<void> {
     ledger_digest: ledger.digest(),
   });
 
-  // 4. Run summary.
+  // 4. Run summary — bound to the four operational contracts so any
+  // consumer can verify trace identity, version lineage, secrets posture,
+  // and deployment expectations from a single document.
   writeJson(out(payload.platform.output_paths.run_summary), {
     ...result.summary,
     payload_path,
@@ -161,6 +218,19 @@ async function main(): Promise<void> {
     approvals_recorded: result.approvals.length,
     ledger_size: result.ledger.length,
     ledger_digest: ledger.digest(),
+    trace_identity: {
+      run_id: trace_identity.run_id,
+      trace_id: trace_identity.trace_id,
+      span_count: result.summary.steps_executed,
+    },
+    version_lineage,
+    secrets_status: {
+      degraded: secrets_audit.degraded,
+      missing_required: secrets_audit.missing_required,
+      missing_optional: secrets_audit.missing_optional,
+      behavior: secrets_audit.contract.missing_secret_behavior,
+    },
+    deployment_contract,
   });
 
   // 5. Last decision receipt (full set is embedded in trace.jsonl).
@@ -207,6 +277,30 @@ async function main(): Promise<void> {
     rel: f.rel,
     sha: hashString(readFileSync(f.abs, 'utf-8')),
   }));
+  // Sidecar artifacts for the four operational contracts. These are
+  // independently consumable: an auditor can hash the trace, hash the
+  // identity manifest, and re-derive the binding from (experiment_id +
+  // payload_hash) using the same deterministic seed the runner uses.
+  const run_identity_manifest = buildRunIdentityManifest(
+    payload.experiment_id,
+    payload_hash_for_identity,
+    trace_identity,
+    result.summary.steps_executed,
+  );
+  writeJson(out('output/run_identity.json'), run_identity_manifest);
+  writeJson(out('output/version_lineage.json'), version_lineage);
+  writeJson(out('output/secrets_status.json'), secrets_audit);
+  writeJson(out('output/deployment_contract.json'), {
+    ...deployment_contract,
+    healthcheck_payload: {
+      ok: true,
+      payload_version: version_lineage.payload_version,
+      kernel_version: version_lineage.kernel_version,
+      repo_commit: version_lineage.repo_commit,
+      run_id: trace_identity.run_id,
+    },
+  });
+
   writeJson(out('output/run_manifest.json'), {
     experiment_id: payload.experiment_id,
     payload_version: payload.version,
@@ -215,6 +309,25 @@ async function main(): Promise<void> {
     final_state_hash: result.summary.final_state_hash,
     ledger_digest: ledger.digest(),
     deliverables,
+    // Bind the four operational contracts to this manifest so a single
+    // hash check verifies (a) the bytes, (b) the identity, (c) the lineage,
+    // (d) the secrets posture, (e) the deployment expectation.
+    trace_identity: {
+      run_id: trace_identity.run_id,
+      trace_id: trace_identity.trace_id,
+      manifest_hash: run_identity_manifest.manifest_hash,
+    },
+    version_lineage,
+    secrets_status: {
+      degraded: secrets_audit.degraded,
+      missing_required_count: secrets_audit.missing_required.length,
+      missing_optional_count: secrets_audit.missing_optional.length,
+    },
+    deployment_contract: {
+      platform: deployment_contract.platform,
+      healthcheck_path: deployment_contract.healthcheck.path,
+      expected_status: deployment_contract.healthcheck.expected_status,
+    },
   });
 
   // Console summary so the run is legible at a glance.

@@ -364,6 +364,14 @@ export const colors = {
       tertiary: 'hsl(0 62% 52%)',
       muted: 'hsla(220 72% 56% / 0.10)',
     },
+    // A11oy lane — the unified governance accent (warm gold + navy).
+    // Mirrors `inca` for legacy callers that reference `alloy.primary`.
+    alloy: {
+      primary: 'hsl(38 38% 64%)',
+      secondary: 'hsl(34 22% 56%)',
+      tertiary: 'hsl(214 22% 38%)',
+      muted: 'hsla(38 38% 64% / 0.10)',
+    },
   },
 
   border: {

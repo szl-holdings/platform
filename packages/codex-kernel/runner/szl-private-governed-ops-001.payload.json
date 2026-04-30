@@ -51,6 +51,129 @@
       "reason": "Proof bundle maps correction behavior to validator-triggered correction steps"
     }
   },
+  "runtime_validators": {
+    "enabled": true,
+    "execution_mode": "payload_declared",
+    "validators": [
+      {
+        "name": "state_transition_rule",
+        "type": "deterministic",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "delta.patch.cycle_position_increment must equal transition_model.base_transition_rule.cycle_position_increment and delta.patch.day_index_increment must equal transition_model.base_transition_rule.day_index_increment",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "drift_bounds",
+        "type": "deterministic",
+        "hard_stop": false,
+        "enabled": true,
+        "rule": "codex_emulation.drift_days below warning_threshold is pass; at or above warning_threshold is soft_fail; correction expected by hard_threshold",
+        "on_warn_level": "soft_fail",
+        "on_fail_level": "soft_fail"
+      },
+      {
+        "name": "evidence_provenance",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "offline mocked evidence is allowed only when governance_model.evidence_policy.offline_mocking_allowed is true and evidence_state.evidence_items length is at least governance_model.evidence_policy.minimum_evidence_items",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "locator_required",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "every evidence item used for claims tagged dresdencore, ouroboroscore, madridsupport, parissupport, or groliersupport must include a non-empty locator",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "no_unbound_claims",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "every claim object must contain at least one evidence reference",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "madrid_gate",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "claims tagged dresdencore or ouroboroscore may not rely on madridsupport as sole evidence",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "paris_gate",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "claims tagged dresdencore or ouroboroscore may not rely on parissupport as sole evidence",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "grolier_gate",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "claims tagged dresdencore or ouroboroscore may not rely on groliersupport as sole evidence",
+        "on_fail_level": "hard_fail"
+      },
+      {
+        "name": "human_gate",
+        "type": "governance",
+        "hard_stop": true,
+        "enabled": true,
+        "rule": "if workload.material_action is true, approval_status must be approved before execution",
+        "on_fail_level": "hard_fail"
+      }
+    ]
+  },
+  "runtime_receipt_contract": {
+    "enabled": true,
+    "required_fields": [
+      "receipt_id",
+      "step",
+      "decision_type",
+      "summary",
+      "assumptions",
+      "evidence",
+      "policy_version",
+      "approval_status",
+      "mocked",
+      "timestamp"
+    ],
+    "required_evidence_sources": [
+      "payload.thesis_anchor",
+      "payload.artifact_anchor"
+    ],
+    "receipt_policy": {
+      "must_reference_policy_version": true,
+      "must_include_evidence_array": true,
+      "must_include_mocked_flag": true
+    }
+  },
+  "runtime_trace_contract": {
+    "enabled": true,
+    "required_event_fields": [
+      "ts",
+      "step",
+      "pipeline_stage",
+      "state_prev_hash",
+      "proposed_delta",
+      "validator_results",
+      "decision_receipt",
+      "state_next_hash",
+      "stop_reason"
+    ],
+    "ledger_policy": {
+      "append_only": true,
+      "hash_algorithm": "sha256",
+      "require_delta_hash": true,
+      "require_receipt_link": true
+    }
+  },
   "almanac_system": {
     "model": "madrid-dresden-paris-grolier-governed-multicycle",
     "rationale": "Dresden contributes loop-native table framing, Madrid contributes comparative almanac structure, Paris contributes ritual and calendrical cadence, and Grolier contributes compact predetermined Venus-cycle logic.",
@@ -154,7 +277,7 @@
     }
   },
   "governance_model": {
-    "policy_version": "1.2.0-private-szl",
+    "policy_version": "1.3.0-private-szl",
     "governance_mode": "receipt_first",
     "evidence_policy": {
       "offline_mocking_allowed": true,
@@ -285,6 +408,71 @@
       "exact astronomical or philological claims require page-identified scholarly or primary facsimile evidence"
     ]
   },
+  "claims_registry": [
+    {
+      "claim_id": "CLAIM_DRESDEN_LOOP_ANCHOR",
+      "claim_text": "Dresden functions as the primary codex anchor for loop-native, externally checkable governed iteration in this payload design.",
+      "tags": [
+        "dresdencore",
+        "ouroboroscore"
+      ],
+      "status": "supported",
+      "evidence": [
+        {
+          "source_id": "SRC_DRESDEN_APPENDIX_BUNDLE_20260429",
+          "locator": "pdf-page-1"
+        }
+      ]
+    },
+    {
+      "claim_id": "CLAIM_MADRID_COMPARATIVE_SUPPORT",
+      "claim_text": "Madrid contributes comparative almanac structure and may not serve as sole proof for Dresden-core or Ouroboros-core claims.",
+      "tags": [
+        "madridsupport"
+      ],
+      "status": "supported",
+      "evidence": [
+        {
+          "source_id": "SRC_FAMSI_MADRID_ES",
+          "locator": "manifest-sourcecard"
+        },
+        {
+          "source_id": "SRC_UKY_MADRID_TEACHING",
+          "locator": "manifest-sourcecard"
+        }
+      ]
+    },
+    {
+      "claim_id": "CLAIM_PARIS_RITUAL_SUPPORT",
+      "claim_text": "Paris contributes ritual and calendrical cadence support within the governed payload.",
+      "tags": [
+        "parissupport",
+        "ritualcycle"
+      ],
+      "status": "supported",
+      "evidence": [
+        {
+          "source_id": "SRC_PARIS_BRITANNICA",
+          "locator": "britannica-entry"
+        }
+      ]
+    },
+    {
+      "claim_id": "CLAIM_GROLIER_VENUS_SUPPORT",
+      "claim_text": "Grolier contributes compact predetermined Venus-cycle support within the governed payload.",
+      "tags": [
+        "groliersupport",
+        "venuscycle"
+      ],
+      "status": "supported",
+      "evidence": [
+        {
+          "source_id": "SRC_GROLIER_BRITANNICA",
+          "locator": "britannica-entry"
+        }
+      ]
+    }
+  ],
   "calendar_intelligence": {
     "ritual_cycle_model": {
       "enabled": true,
@@ -332,31 +520,35 @@
     "madrid_support": [
       {
         "source_id": "SRC_FAMSI_MADRID_ES",
-        "title": "FAMSI - Códices Mayas - El Códice Madrid (Spanish)",
+        "title": "FAMSI - C\u00f3dices Mayas - El C\u00f3dice Madrid (Spanish)",
         "type": "source_card",
         "status": "ingested",
-        "role": "primary_hub"
+        "role": "primary_hub",
+        "corpus_tag": "madrid_support"
       },
       {
         "source_id": "SRC_UKY_MADRID_TEACHING",
         "title": "University of Kentucky - The Madrid Codex (pp. 50-51)",
         "type": "source_card",
         "status": "ingested",
-        "role": "teaching_context"
+        "role": "teaching_context",
+        "corpus_tag": "madrid_support"
       },
       {
         "source_id": "SRC_IA_MANUSCRIT_TROANO",
         "title": "Internet Archive - Manuscrit Troano (Brasseur de Bourbourg, 1869)",
         "type": "source_card",
         "status": "planned_extract_plates",
-        "role": "historical_facsimile"
+        "role": "historical_facsimile",
+        "corpus_tag": "madrid_support"
       },
       {
         "source_id": "SRC_UPCO_EXCERPT_9780870818615",
         "title": "University Press of Colorado excerpt (9780870818615)",
         "type": "source_card",
         "status": "planned",
-        "role": "scholarly_excerpt"
+        "role": "scholarly_excerpt",
+        "corpus_tag": "madrid_support"
       }
     ],
     "paris_support": [
@@ -365,7 +557,8 @@
         "title": "Paris Codex | Britannica",
         "type": "source_card",
         "status": "ingested",
-        "role": "ritual_and_fragmentary_context"
+        "role": "ritual_and_fragmentary_context",
+        "corpus_tag": "paris_support"
       }
     ],
     "grolier_support": [
@@ -374,7 +567,8 @@
         "title": "Grolier Codex | Britannica",
         "type": "source_card",
         "status": "ingested",
-        "role": "venus_calendar_context"
+        "role": "venus_calendar_context",
+        "corpus_tag": "grolier_support"
       }
     ],
     "context_sources": [
@@ -400,7 +594,7 @@
     "priority": "high",
     "material_action": false,
     "requires_approval": false,
-    "approval_status": "not_required_for_emulation",
+    "approval_status": "not_required",
     "requested_by": {
       "type": "owner",
       "id": "stephen-lutar",
@@ -409,7 +603,7 @@
   },
   "initial_state": {
     "governance": {
-      "policy_version": "1.2.0-private-szl",
+      "policy_version": "1.3.0-private-szl",
       "platform_name": "SZL Holdings",
       "kernel_name": "Ouroboros",
       "assistant_core": "A11oy",
@@ -438,10 +632,22 @@
       "replay_enabled": true
     },
     "domain_state": {
-      "executive_ops": { "status": "monitoring", "open_items": 1 },
-      "finance": { "status": "advisory", "open_items": 0 },
-      "compliance": { "status": "watching", "open_items": 0 },
-      "legal_ops": { "status": "standby", "open_items": 0 }
+      "executive_ops": {
+        "status": "monitoring",
+        "open_items": 1
+      },
+      "finance": {
+        "status": "advisory",
+        "open_items": 0
+      },
+      "compliance": {
+        "status": "watching",
+        "open_items": 0
+      },
+      "legal_ops": {
+        "status": "standby",
+        "open_items": 0
+      }
     },
     "risk_state": {
       "risk_tier": "high",
@@ -506,5 +712,43 @@
       "output/proof_ledger.jsonl"
     ],
     "replay_command": "npm run replay"
+  },
+  "payload_version": "1.6.0-private-szl",
+  "deployment_contract": {
+    "platform": "replit",
+    "healthcheck": {
+      "enabled": true,
+      "path": "/api/healthz",
+      "expected_status": 200,
+      "startup_timeout_seconds": 60
+    },
+    "logging": {
+      "json_logs": true,
+      "retain_local_artifacts": true,
+      "write_run_logs_to_output": true
+    }
+  },
+  "trace_identity": {
+    "enabled": true,
+    "trace_id_prefix": "trace",
+    "span_id_prefix": "span",
+    "run_id_prefix": "run",
+    "require_trace_id_per_run": true,
+    "require_span_id_per_step": true
+  },
+  "secrets_contract": {
+    "required_secrets": [],
+    "optional_secrets": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "missing_secret_behavior": "degrade_gracefully"
+  },
+  "version_lineage": {
+    "payload_version": "1.6.0-private-szl",
+    "kernel_version": "codex-kernel-runner-1.0.0",
+    "model_provider": "proxy_or_offline_emulator",
+    "model_version": "deterministic"
   }
 }

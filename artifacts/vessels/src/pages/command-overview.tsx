@@ -597,7 +597,7 @@ const SAVED_VIEWS = [
   {
     id: 'port-approach',
     label: 'Port Approach',
-    description: 'SEXTANT within 50nm of major ports',
+    description: 'Vessels within 50nm of major ports',
   },
 ];
 
@@ -825,7 +825,7 @@ export default function CommandOverviewPage() {
           <div className="flex items-center gap-2 mb-1">
             <Ship className="w-3.5 h-3.5 text-sky-400/70" />
             <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-sky-400/70">
-              SEXTANT · Fleet Command
+              Vessels · Fleet Command
             </span>
           </div>
           <h1 className="font-display text-xl font-bold text-sky-50 tracking-tight">
@@ -1020,7 +1020,7 @@ export default function CommandOverviewPage() {
       <div className="pb-2">
         <PackBanner
           vertical="Maritime Intelligence Pack"
-          description="SEXTANT runs on the KORA + Counsel core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
+          description="Vessels runs on the KORA + Counsel core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
           accentColor="#4d8fcc"
         />
       </div>
@@ -1079,7 +1079,7 @@ function CommercialAndCompliancePanels() {
       ring: 'border-amber-500/20',
     },
     {
-      label: 'High-Risk PSC SEXTANT',
+      label: 'High-Risk PSC Vessels',
       value: 2,
       sub: 'detentions or ≥5 deficiencies (90d)',
       href: '/psc-inspector',
@@ -1324,7 +1324,7 @@ function MaritimeIntelligencePanels() {
               className="text-[9px] font-mono uppercase tracking-wider mb-3"
               style={{ color: 'rgba(255,255,255,0.2)' }}
             >
-              AIS Blackout Detection — SEXTANT with signal gaps in risk corridors
+              AIS Blackout Detection — Vessels with signal gaps in risk corridors
             </p>
             {DARK_VESSEL_DETECTIONS.map((d, i) => {
               const rc = riskColors[d.risk];

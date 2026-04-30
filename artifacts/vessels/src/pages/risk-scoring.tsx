@@ -139,8 +139,8 @@ export default function RiskScoringPage() {
 
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Critical Risk SEXTANT', value: '1', color: 'text-red-400' },
-          { label: 'High Risk SEXTANT', value: '1', color: 'text-orange-400' },
+          { label: 'Critical Risk Vessels', value: '1', color: 'text-red-400' },
+          { label: 'High Risk Vessels', value: '1', color: 'text-orange-400' },
           { label: 'Avg Fleet Risk Score', value: '65.5', color: 'text-amber-400' },
           { label: 'Anomalies Detected (30d)', value: '247', color: 'text-sky-400' },
         ].map(({ label, value, color }) => (

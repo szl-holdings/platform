@@ -306,7 +306,7 @@ export default function TrustProvenancePage() {
         ) : (
           <AdminAuditTrail
             entries={auditEntries}
-            title="SEXTANT Decision Audit Trail"
+            title="Vessels Decision Audit Trail"
             accentColor={ACCENT}
             domainLabel="Maritime Intelligence"
           />

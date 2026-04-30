@@ -406,6 +406,26 @@ app.get('/healthz', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Codex-Kernel deployment_contract endpoint. The payload v1.6.0
+// declares: { path: '/api/healthz', expected_status: 200, ...}. The
+// response includes the same version_lineage block the kernel runner
+// embeds in its run_summary so a probe can verify (a) the api-server is
+// up, (b) the deployed code matches the expected payload + repo commit.
+app.get('/api/healthz', (_req: Request, res: Response) => {
+  const repo_commit = process.env.GIT_COMMIT_SHA ?? process.env.REPL_SLUG_COMMIT ?? 'unknown';
+  res.status(200).json({
+    ok: true,
+    status: 'ok',
+    contract: 'codex-kernel-deployment-contract-v1',
+    payload_version: process.env.CODEX_PAYLOAD_VERSION ?? '1.6.0-private-szl',
+    kernel_version: 'codex-kernel-runner-1.0.0',
+    repo_commit,
+    model_provider: process.env.MODEL_PROVIDER ?? 'proxy_or_offline_emulator',
+    model_version: process.env.MODEL_VERSION ?? 'deterministic',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/readyz', handleReadiness);
 
 async function handleReadiness(_req: Request, res: Response) {
