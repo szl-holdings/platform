@@ -13,8 +13,8 @@
 SZL Holdings has built a production-grade, enterprise-ready governed decision infrastructure platform. As of April 2026:
 
 - **Full-stack TypeScript monorepo** — 40+ packages, single API server, unified design system
-- **2,331 API endpoints** across 172 route files with deny-by-default global auth enforcement
-- **700+ database tables** in PostgreSQL 16 with org-scoped tenant isolation on every query
+- **2,816 API endpoints** across 357 route files with deny-by-default global auth enforcement
+- **798 database tables** in PostgreSQL 16 with org-scoped tenant isolation on every query
 - **11-role RBAC** with OIDC/PKCE authentication, SCIM 2.0, and Azure AD SSO
 - **Six governance primitives** (Proof Chain, Covenant Policy, Outcome Graph, Monte Carlo, Workflow Engine, Event Fabric) shared across all domain packs
 - **All P0 security gaps resolved** in the April 2026 hardening sprint; Phase 2–3 audit found 3 new P1 and 7 new P2 gaps, all tracked with Sprint 3 remediation owners
@@ -49,16 +49,16 @@ This loop is not replicated per domain — it is implemented once in shared infr
 │  EXECUTION FABRIC                                                │
 │  Alloy — Workflow orchestration · Approval gates · Audit trail   │
 ├──────────────────────────────────────────────────────────────────┤
-│  DOMAIN PACKS                                                    │
-│  Aegis (Security)  Vessels (Maritime)  Terra (Real Estate)       │
-│  PRISM Counsel (Legal)  Carlota Jo (Advisory)  IMPERIUM (Cloud)  │
+│  DOMAIN PACKS (6)                                                │
+│  Aegis (Security)  Sentra (Cyber)   Vessels (Maritime)           │
+│  Terra (Real Estate)  Counsel (Legal)  Carlota Jo (Advisory)     │
 ├──────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE PRIMITIVES (shared by every surface)                 │
 │  Outcome Graph · Proof Chain · Covenant Policy                   │
 │  Decision Simulation · Workflow Engine · Event Fabric            │
 ├──────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                      │
-│  PostgreSQL 16 (Drizzle ORM) · 700+ tables · 116 schema files   │
+│  PostgreSQL 16 (Drizzle ORM) · 798 tables · 170 schema files    │
 │  External: AIS, STIX/TAXII, sanctions, court records             │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -75,7 +75,7 @@ Mobile Clients (Expo/RN)    →  artifacts/api-server
                          ▼                       ▼
                PostgreSQL 16             External Services
                (Drizzle ORM)            OpenAI / Anthropic / Gemini
-               700+ tables              Stripe · Resend · Mapbox
+               798 tables               Stripe · Resend · Mapbox
                org-scoped               AIS · STIX · CourtListener
 ```
 
@@ -86,15 +86,15 @@ Mobile Clients (Expo/RN)    →  artifacts/api-server
 ├── artifacts/          # 14 deployable applications (web + mobile)
 │   ├── api-server/     # Single Express backend for all surfaces
 │   ├── szl-holdings/   # Corporate + investor portal
-│   ├── command/        # Unified ops command (absorbs Lyte + IMPERIUM)
+│   ├── command/        # Unified ops command (absorbs Lyte + Alloy signals)
 │   ├── aegis/          # Aegis — Security & Defense Intelligence
 │   ├── vessels/        # Vessels — Maritime Intelligence
 │   ├── terra/          # Terra — Real Estate Intelligence
 │   ├── carlota-jo/     # Carlota Jo — Premium Advisory
 │   └── szl-holdings-mobile/  # CORTEX — Unified Mobile Command
 │
-├── lib/                # 37 shared TypeScript packages
-│   ├── db/             # Drizzle schema + migrations (700+ tables)
+├── lib/                # 40 shared TypeScript packages
+│   ├── db/             # Drizzle schema + migrations (798 tables)
 │   ├── shared-ui/      # Cross-app React component library
 │   ├── auth/           # OIDC auth + session management
 │   ├── workflow-engine/# Alloy execution fabric
@@ -509,11 +509,11 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 
 | Metric | Value |
 |--------|-------|
-| API Endpoints | 2,331 |
-| Route Files | 172 |
-| Database Tables | 700+ |
-| Schema Files | 116 |
-| Shared Libraries | 37 packages |
+| API Endpoints | 2,816 |
+| Route Files | 357 |
+| Database Tables | 798 |
+| Schema Files | 170 |
+| Shared Libraries | 40 packages |
 | Source Files | 1,620 TypeScript files |
 | Lines of Code | 450,000+ |
 | UI Components | 252 web + 116 mobile screens |

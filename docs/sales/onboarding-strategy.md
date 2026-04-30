@@ -33,7 +33,7 @@ The platform is built for operators who make high-stakes decisions. Onboarding m
 | CISO / SOC Lead | Aegis | Design partner guided | < 1 hour |
 | Maritime Fleet Executive | Vessels | Sales-assisted | < 2 hours |
 | NYC Real Estate Broker | Terra | Self-service SaaS | < 20 minutes |
-| Legal Partner | PRISM Counsel | Sales-assisted | < 2 hours |
+| Legal Partner | Counsel | Sales-assisted | < 2 hours |
 | Carlota Jo Client | Carlota Jo | White-glove | Intake call |
 | Enterprise (multi-domain) | Command | Sales-assisted | Dedicated success |
 

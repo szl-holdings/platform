@@ -66,7 +66,7 @@ The Sunday post intentionally pulls from multiple domain artifacts to prove the 
 **Page:** Cross-domain feed or domain switcher
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** A view that shows signals from multiple domains (Vessels + Aegis + PRISM Counsel) in one feed — illustrating cross-domain correlation. If unavailable, capture the multi-domain KPI tiles.
+**What to show:** A view that shows signals from multiple domains (Vessels + Aegis + Counsel) in one feed — illustrating cross-domain correlation. If unavailable, capture the multi-domain KPI tiles.
 
 ---
 
@@ -80,5 +80,5 @@ The Sunday post intentionally pulls from multiple domain artifacts to prove the 
 ---
 
 ## Notes
-- The post calls out Aegis, Vessels, Terra, and PRISM Counsel by name for each primitive. If you have time, a Terra screenshot at the underwriting panel and a PRISM Counsel matter triage screenshot make excellent in-line additions — feel free to add them as `09-terra-underwriting.png` and `10-prism-matter-triage.png` and reference inline.
+- The post calls out Aegis, Vessels, Terra, and Counsel by name for each primitive. If you have time, a Terra screenshot at the underwriting panel and a Counsel matter triage screenshot make excellent in-line additions — feel free to add them as `09-terra-underwriting.png` and `10-prism-matter-triage.png` and reference inline.
 - Filenames are case-sensitive — use exactly as listed.

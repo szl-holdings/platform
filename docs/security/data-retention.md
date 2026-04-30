@@ -63,7 +63,7 @@ Data retention is enforced at the application level via scheduled jobs and at th
 | Vessels | AIS position data | 1 year | IMO data retention requirement |
 | Vessels | Sanctions check records | 7 years | OFAC/regulatory requirement |
 | Vessels | Voyage P&L records | 5 years | Commercial requirement |
-| PRISM Counsel | Legal matter records | Per matter configuration | Client-controlled retention |
+| Counsel | Legal matter records | Per matter configuration | Client-controlled retention |
 | Lyte | Financial analysis records | 5 years | Regulatory requirement |
 | Carlota Jo | Client communication records | 3 years | Standard consulting retention |
 

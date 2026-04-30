@@ -32,7 +32,7 @@ Every web artifact in the SZL ecosystem, with per-route current-state classifica
 | `/solutions/aegis` | Sentra Security | ✅ LIVE | |
 | `/solutions/vessels` | Vessels Maritime | ✅ LIVE | |
 | `/solutions/terra` | Terra Real Estate | ✅ LIVE | |
-| `/solutions/prism-counsel` | PRISM Counsel | ✅ LIVE | |
+| `/solutions/prism-counsel` | Counsel | ✅ LIVE | |
 | `/solutions/lyte` | Lyte Decision | ✅ LIVE | |
 | `/solutions/aegis-trust` | Trust/Aegis | ✅ LIVE | |
 | `/solutions/vessels-trust` | Trust/Vessels | ✅ LIVE | |
@@ -187,7 +187,7 @@ Every web artifact in the SZL ecosystem, with per-route current-state classifica
 
 ---
 
-## 5. PRISM Counsel — Legal Command (`/prism-counsel/`)
+## 5. Counsel — Legal Command (`/prism-counsel/`)
 
 **Purpose:** Advanced legal intelligence — obligation graph, privilege controls, proof chain.
 **Audience:** Senior legal, compliance, external counsel.
@@ -423,7 +423,7 @@ Every web artifact in the SZL ecosystem, with per-route current-state classifica
 | Sentra | Shared Shell ✅ | 13 | 100% live | Low |
 | Aegis | Bespoke ⚠️ | ~150 | 90% live | HIGH |
 | Counsel | Shared Shell ✅ | 11 | 100% live | Low |
-| PRISM Counsel | Unknown ⚠️ | 9 | 100% live | Medium |
+| Counsel | Unknown ⚠️ | 9 | 100% live | Medium |
 | Vessels | Shared Shell ✅ | ~80 | 95% live | Low |
 | Terra | Shared Shell ✅ | ~80 | 95% live | Low |
 | Lyte | Unknown ⚠️ | 16 | 100% live | Medium |

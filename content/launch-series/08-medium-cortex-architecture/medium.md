@@ -35,7 +35,7 @@ An operator waking up at 6am sees:
 - Aegis: 2 active alerts requiring attention
 - Vessels: 1 voyage exception with estimated cost impact >$40k
 - Terra: 3 distress leads scored above acquisition threshold
-- PRISM Counsel: 1 document requiring review authorization
+- Counsel: 1 document requiring review authorization
 
 These are not push notifications. They are structured exception aggregates, pulled from the Event Fabric in real time, ranked by a cross-domain urgency model that understands the operator's role permissions, the organizational risk posture defined in Covenant Policy, and the historical priority patterns recorded in the Outcome Graph.
 

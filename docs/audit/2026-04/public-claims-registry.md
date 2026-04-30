@@ -48,7 +48,7 @@
 | **Pulse** | Active — domain pack | AI executive briefing |
 | **Command** | Active — platform surface | Unified operational command (Lyte + Imperium merged) |
 | **Firestorm** | **Archived** — still referenced in api-server route family `/api/firestorm/` | Backend still live; UI archived |
-| **Prism Counsel** | **Archived** — deregistered | Backend data retained; referenced in api-server |
+| **Counsel** | **Archived** — deregistered | Backend data retained; referenced in api-server |
 | **Imperium** | **Archived** — merged into Command | Do not use in marketing |
 | **NEXUS** | Internal prototype | `mockup-sandbox`; not a customer-facing product |
 | **ATLAS** | Active — internal | Spatial engine runtime; referenced across terra/vessels/aegis |

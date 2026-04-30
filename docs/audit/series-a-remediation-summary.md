@@ -73,7 +73,7 @@ This document summarizes every category of work completed during the Series A au
 | `vessels` | `marketing-demo.tsx` — form placeholders | Quarantined: marketing demo page; not user-facing core app |
 | `carlota-jo` | `Inquiries.tsx`, `BookingFlow.tsx` — input placeholder text | Accepted: standard form input hint text; not placeholder content |
 | `szl-holdings` | `capital-arsenal.ts` — cap table placeholder with attorney-review notice | Quarantined: internal data structure; protected by OIDC auth; flagged for attorney review before use |
-| `prism-counsel` API | `prism-counsel-court.ts` — `[ATTORNEY REVIEW REQUIRED]` / `[ATTORNEY TO COMPLETE]` stubs | Quarantined: Prism Counsel is archived/deregistered; API returns 404 for deregistered paths |
+| `prism-counsel` API | `prism-counsel-court.ts` — `[ATTORNEY REVIEW REQUIRED]` / `[ATTORNEY TO COMPLETE]` stubs | Quarantined: Counsel is archived/deregistered; API returns 404 for deregistered paths |
 | `aegis` | Mock seed data backing several complex visualizations | Accepted: demo-mode behavior; documented in app maturity matrix |
 
 ---

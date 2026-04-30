@@ -146,7 +146,7 @@ Same structure as named, but:
 ## Pilot Results — Q[X] 2026
 
 Design partner pilot completed [month] [year].
-Domain: [Lyte / Terra / Vessels / Aegis / PRISM Counsel / Carlota Jo]
+Domain: [Lyte / Terra / Vessels / Aegis / Counsel / Carlota Jo]
 Engagement duration: [X] weeks
 
 Key outcomes:

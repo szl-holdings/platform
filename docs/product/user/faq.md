@@ -14,7 +14,7 @@ SZL Holdings builds governed decision infrastructure — the structural layer be
 Functional alpha across all products, approaching design-partner beta. All domain packs are deployed and operational with real or seeded data integrations. Commercially, the platform is in the design partner phase — building alongside early enterprise customers in security, maritime, real estate, and legal.
 
 **What is the product hierarchy?**  
-SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM).
+SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → 6 domain packs (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo). The platform has 8 domain verticals in total: the 6 domain packs plus Lyte and Alloy as platform layers.
 
 **Can I use just one domain pack (e.g., only Vessels)?**  
 Yes. Each domain pack is designed to work independently. However, domain packs benefit from the shared Alloy execution fabric and cross-domain Event Fabric signal correlation.
@@ -41,14 +41,11 @@ Vessels is the maritime domain pack. It provides fleet command, live AIS telemet
 **What is Terra?**  
 Terra is the real estate domain pack. It provides NYC distress pipeline detection, ownership graph analysis, AI-powered underwriting, deal workflow management, and portfolio tracking.
 
-**What is PRISM Counsel?**  
-PRISM Counsel is the legal domain pack, currently integrated into Aegis. It provides matter management, AI-assisted triage with approval gates, Proof Chain audit trails for legal actions, and court filing integration.
+**What is Counsel?**  
+Counsel is the legal domain pack. It provides matter management, AI-assisted triage with approval gates, Proof Chain audit trails for legal actions, and court filing integration.
 
 **What is Carlota Jo?**  
 Carlota Jo is the advisory domain pack — a client portal, service catalog, booking system, and secure document delivery for high-net-worth advisory clients.
-
-**What is IMPERIUM?**  
-IMPERIUM is the cloud sovereignty domain pack. It provides multi-cloud governance, policy enforcement, and cloud estate visibility. Currently in development, with core functionality integrated into the Command Portal.
 
 ---
 
@@ -58,7 +55,7 @@ IMPERIUM is the cloud sovereignty domain pack. It provides multi-cloud governanc
 TypeScript throughout. React 19 + Vite for web, Expo for mobile, Node.js + Express 5 for API, PostgreSQL 16 for database, Drizzle ORM for queries, Azure for infrastructure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN), Azure Bicep for IaC.
 
 **How many API endpoints and database tables exist?**  
-As of April 2026: 2,331 API endpoints across 172 route files; 700+ database tables across 116 schema files.
+As of April 2026: 2,816 API endpoints across 357 route files; 798 database tables across 170 schema files.
 
 **What AI models does SZL use?**  
 The platform supports multi-provider AI with fallback: OpenAI, Anthropic, and Gemini. All AI recommendations are evidence-backed using hybrid retrieval (semantic + keyword), and all outputs operate in "advisory-only" mode — no consequential action executes without human approval.

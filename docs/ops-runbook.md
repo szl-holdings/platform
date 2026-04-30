@@ -40,7 +40,7 @@ SZL Holdings is a pnpm monorepo containing a unified ecosystem of command-grade 
 |-------|-----------|
 | Observe / Decide / Act | Lyte, Aegis, Terra, Vessels |
 | Execute | Alloy (embedded in API server) |
-| Advise | Carlota Jo, PRISM Counsel |
+| Advise | Carlota Jo, Counsel |
 | Strategic Command | Imperium, Command Portal |
 | Corporate / Personal | SZL Holdings, Stephen Lutar |
 
@@ -252,9 +252,9 @@ All shared packages live in `lib/` and are scoped to `@szl-holdings/*` or `@work
 | `@szl-holdings/prism-bus` | Event bus for intra-platform communication. Exports: `.`, `./context`, `./connectors`, `./bus`, `./hooks` |
 | `@szl-holdings/worldline` | Timeline and event sequencing engine (Vessels, Terra) |
 | `@szl-holdings/proof-chain` | Verifiable, immutable audit trail generation |
-| `@szl-holdings/receipt-graph` | Graph-based receipt and evidence tracking (PRISM Counsel) |
+| `@szl-holdings/receipt-graph` | Graph-based receipt and evidence tracking (Counsel) |
 | `@szl-holdings/monte-carlo` | Probabilistic simulation and risk analysis (Terra) |
-| `@szl-holdings/covenant-policy` | Policy rules and enforcement engine (PRISM Counsel) |
+| `@szl-holdings/covenant-policy` | Policy rules and enforcement engine (Counsel) |
 | `@szl-holdings/outcome-graph` | Outcome dependency graph and impact modeling |
 | `@szl-holdings/intelligence-feeds` | External data source adapters: AIS, STIX/TAXII, legal records |
 | `@szl-holdings/offline-engine` | Offline support for mobile: storage, command queue, delta sync |

@@ -10,7 +10,7 @@ export default function ConstellationPage() {
           Constellation
         </h1>
         <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: 4 }}>
-          Live view of cases, threats, persons, and organizations across PARAGON and Prism Counsel —
+          Live view of cases, threats, persons, and organizations across PARAGON and Counsel —
           and how they connect to the rest of the SZL ecosystem.
         </p>
       </div>

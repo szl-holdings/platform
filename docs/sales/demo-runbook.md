@@ -54,7 +54,7 @@ GET /api/health/detailed → authenticated detailed diagnostics
 | Aegis                 | `/aegis/`         | Domain pack     | Defense & intelligence               |
 | Terra                 | `/terra/`         | Domain pack     | Real estate intelligence             |
 | Vessels               | `/vessels/`       | Domain pack     | Maritime intelligence                |
-| PRISM Counsel         | `/prism-counsel/` | Domain pack     | Legal governance                     |
+| Counsel         | `/prism-counsel/` | Domain pack     | Legal governance                     |
 | Carlota Jo            | `/carlota-jo/`    | Domain pack     | Advisory consulting                  |
 | Firestorm             | `/firestorm/`     | Domain pack     | Cybersecurity operations             |
 | Stephen Site          | `/stephen-site/`  | Supporting      | Founder portfolio site               |
@@ -86,7 +86,7 @@ Walk through each domain pack to demonstrate the breadth of the platform:
 - **Aegis** (`/aegis/`): Defense signals, threat assessment, covenant policies, OSINT feeds
 - **Vessels** (`/vessels/`): Fleet tracking, voyage management, maritime corridors, exception management
 - **Terra** (`/terra/`): Property analysis, market intelligence, deal pipeline
-- **PRISM Counsel** (`/prism-counsel/`): Legal matters, compliance tracking, risk assessment
+- **Counsel** (`/prism-counsel/`): Legal matters, compliance tracking, risk assessment
 - **Carlota Jo** (`/carlota-jo/`): Advisory service packages, client engagement
 
 ### 5. Canonical Decision Loop (2 minutes)

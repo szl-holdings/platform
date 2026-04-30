@@ -127,7 +127,7 @@ Show only the relevant narrative. Use the full 12-minute script with role switch
 
 ### For Technical Evaluators (CTO, Platform Architects)
 
-**Lead with:** The shared architecture — monorepo, shared event model, A11oy workflow engine.  
+**Lead with:** The shared architecture — monorepo, shared event model, Alloy workflow engine.  
 **Emphasize:** TypeScript end-to-end, OpenAPI codegen, Drizzle ORM, RBAC with organization scoping.  
 **Allow:** Deeper dives into any layer — have the codebase ready to show.  
 **Best question to ask:** "What's your current approach to workflow orchestration and audit trail?"

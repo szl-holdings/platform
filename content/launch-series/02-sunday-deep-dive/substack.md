@@ -37,11 +37,11 @@ SZL Holdings is built on six. Here is what each one does — and concretely, how
 
 ---
 
-**Event Fabric** — Cross-domain signal backbone. Normalizes and routes signals from maritime, security, real estate, and legal. A sanctions hit in Vessels surfaces a legal risk flag in PRISM Counsel automatically. One signal. Cross-domain consequence.
+**Event Fabric** — Cross-domain signal backbone. Normalizes and routes signals from maritime, security, real estate, and legal. A sanctions hit in Vessels surfaces a legal risk flag in Counsel automatically. One signal. Cross-domain consequence.
 
 ---
 
-The same six primitives power a SOC alert in Aegis, a voyage P&L call in Vessels, a listing decision in Terra, and a matter triage in PRISM Counsel. Different domains, same spine. That is what the one-platform claim actually means at the code level.
+The same six primitives power a SOC alert in Aegis, a voyage P&L call in Vessels, a listing decision in Terra, and a matter triage in Counsel. Different domains, same spine. That is what the one-platform claim actually means at the code level.
 
 ---
 

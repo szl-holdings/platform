@@ -73,7 +73,7 @@ All web apps are React + Vite SPA artifacts.
 | Carlota Jo | `/carlota-jo/` | `dist/` | API Server required |
 | Command | `/command/` | `dist/` | API Server required |
 | ~~Firestorm~~ | ~~`/firestorm/`~~ | — | **Archived** — superseded by Aegis |
-| ~~Prism Counsel~~ | ~~`/prism-counsel/`~~ | — | **Deprecated** — consolidated into Aegis |
+| ~~Counsel~~ | ~~`/prism-counsel/`~~ | — | **Deprecated** — consolidated into Aegis |
 | ~~Stephen Site~~ | ~~`/stephen/`~~ | — | **Deprecated** — consolidated into szl-holdings |
 
 ### API Server

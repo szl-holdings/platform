@@ -27,7 +27,7 @@ Faster time-from-signal-to-action when the action is the right one.
 | Aegis | Mean time-to-decision on classified incidents |
 | Vessels | Vessels screened per operator-day |
 | Terra | Deals advanced per week |
-| PRISM Counsel | Matters intake-to-disposition time |
+| Counsel | Matters intake-to-disposition time |
 
 Value formula: `(time saved per decision) × (decisions per period) × (loaded operator hourly cost)`
 
@@ -40,7 +40,7 @@ Better decisions, measured by avoided loss or captured upside.
 | Aegis | Avoided incident loss (probability × impact) |
 | Vessels | Avoided sanctions exposure cost |
 | Terra | Increased deal IRR through better selection |
-| PRISM Counsel | Improved settlement positioning |
+| Counsel | Improved settlement positioning |
 
 Value formula: `(probability of error reduced) × (cost of error) × (decisions per period)`
 

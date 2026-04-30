@@ -125,7 +125,7 @@ A representative cross-section of the live product surfaces:
 | Metric | Current Value |
 |--------|--------------|
 | Active artifacts | 14 |
-| Database tables | 798 across 131 schema files (per-domain namespaced, all org-scoped) |
+| Database tables | 798 across 170 schema files (per-domain namespaced, all org-scoped) |
 | Shared TypeScript packages | 40 in pnpm monorepo |
 | Platform primitives | 6 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) |
 | AI decision types (schema-validated) | 9 |

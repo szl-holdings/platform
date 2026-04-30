@@ -39,7 +39,7 @@ This document defines the trust classification for every product surface in the 
 |---------|------|-----------------|
 | **API Server** | `/api/` | REST (all domains), GraphQL, WebSocket, health checks, 155/170 routes auth-enforced, Drizzle ORM, job queue, SSE |
 | **SZL Holdings Site** | `/` | Marketing, investor hub, trust center, Decision Theater, legal pages, contact form routing |
-| **Unified Command** | `/command/` | Cross-domain ops, strategy dashboard, ATLAS signals, IMPERIUM-equivalent governance |
+| **Unified Command** | `/command/` | Cross-domain ops, strategy dashboard, ATLAS signals, infrastructure governance |
 | **Aegis** | `/aegis/` | Security intelligence, threat feeds, SOC workflows, structured incident data |
 | **Vessels** | `/vessels/` | Maritime fleet tracking, voyage management, cargo operations, structured fleet data |
 | **Terra** | `/terra/` | Real estate intelligence, NYC Open Data pipeline, property analysis, distress signals |

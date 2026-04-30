@@ -236,7 +236,7 @@ Enterprise customers receive:
 
 ## Special Considerations
 
-### Government / GovTech (IMPERIUM roadmap)
+### Government / GovTech (Sentra — infrastructure governance)
 
 Government deals require additional considerations:
 

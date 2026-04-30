@@ -104,9 +104,9 @@ SZL Holdings (governed decision infrastructure)
         ├── Aegis — Security & Defense Intelligence
         ├── Vessels — Maritime Intelligence
         ├── Terra — Real Estate Intelligence
-        ├── PRISM Counsel — Legal Matter Command
+        ├── Counsel — Legal Matter Command
         ├── Carlota Jo — Premium Advisory
-        └── IMPERIUM — Cloud Sovereignty (in development)
+        └── Sentra — Cyber Resilience Command
 ```
 
 Every surface shares six governance primitives:
@@ -140,11 +140,11 @@ For auditors and compliance reviewers, this turns five years of decisions into a
 
 The domain-pack extensibility model is the primary growth mechanic:
 
-**Land:** A customer enters through one domain pack — typically their highest-pain operational area. A maritime company enters through Vessels. A CISO enters through Aegis. A legal team enters through PRISM Counsel.
+**Land:** A customer enters through one domain pack — typically their highest-pain operational area. A maritime company enters through Vessels. A CISO enters through Aegis. A legal team enters through Counsel.
 
 **Expand:** Once the governance infrastructure is in place, adding a second domain pack is a fraction of the procurement effort — the trust review is done, the RBAC is configured, the audit trail is running. The conversation shifts from "can we trust this platform?" to "which other operational areas do we want to govern?"
 
-**Cross-domain intelligence:** The more domain packs an organization runs, the more cross-domain correlation intelligence they receive. A maritime company that adds PRISM Counsel gets sanctions intelligence that automatically triggers legal case checks — intelligence that a maritime-only tool cannot provide.
+**Cross-domain intelligence:** The more domain packs an organization runs, the more cross-domain correlation intelligence they receive. A maritime company that adds Counsel gets sanctions intelligence that automatically triggers legal case checks — intelligence that a maritime-only tool cannot provide.
 
 **Network value:** Each domain pack adds signal sources to the shared Event Fabric. A new domain pack makes all existing domain packs smarter by adding correlated signals.
 
@@ -197,7 +197,7 @@ The platform is built on a production-grade, enterprise-ready technical foundati
 | Dimension | Detail |
 |-----------|--------|
 | Architecture | pnpm monorepo, single Express 5 API server, 40+ shared packages |
-| Scale | 2,331 API endpoints, 700+ database tables, 1,620 TypeScript files, 450,000+ lines |
+| Scale | 2,816 API endpoints, 798 database tables, 1,620 TypeScript files, 450,000+ lines |
 | Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
 | Security | Deny-by-default API enforcer, org-scoped multi-tenant isolation, immutable audit trail |
 | AI | Multi-provider (OpenAI, Anthropic, Gemini) with failover, 9 schema-validated decision types |
@@ -218,7 +218,7 @@ See [TECHNICAL_DILIGENCE_PACKET.md](technical-diligence-packet.md) for the full 
 
 **3. The domain-pack model scales efficiently.** Governance infrastructure is amortized across all domain packs. Each new domain pack expands ACV per customer, reduces procurement friction (trust review already done), and adds cross-domain signal value to all existing domain packs.
 
-**4. The technical foundation is production-grade.** 450,000+ lines of TypeScript, 2,331 endpoints, 700+ database tables, 37 shared packages, multi-tenant isolation, OIDC auth, SCIM 2.0, Azure Bicep IaC. This is not a prototype — it is an enterprise platform at Functional Alpha.
+**4. The technical foundation is production-grade.** 450,000+ lines of TypeScript, 2,816 endpoints, 798 database tables, 40 shared packages, multi-tenant isolation, OIDC auth, SCIM 2.0, Azure Bicep IaC. This is not a prototype — it is an enterprise platform at Functional Alpha.
 
 **5. The timing is right.** AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision infrastructure is being created now.
 

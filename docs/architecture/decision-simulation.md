@@ -116,7 +116,7 @@ Models expected ROI on a distressed property acquisition with uncertainty in ren
 
 ---
 
-### PRISM Counsel: Settlement Range
+### Counsel: Settlement Range
 
 **Scenario:** `PRISM_SETTLEMENT_RANGE`
 
@@ -132,7 +132,7 @@ Models likely settlement range for a legal matter given case strength, jurisdict
 
 **Output:** Expected settlement, P10/P90 range, probability of exceeding demand, sensitivity to case strength.
 
-**Where it surfaces:** PRISM Counsel matter detail, forecast page, Lyte action queue (when evaluating settlement offers).
+**Where it surfaces:** Counsel matter detail, forecast page, Lyte action queue (when evaluating settlement offers).
 
 ---
 

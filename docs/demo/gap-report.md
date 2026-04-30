@@ -50,7 +50,7 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 
 ### Platform-Wide
 - Demo data banners and data state badges (all platforms)
-- A11oy execution fabric: workflow routing with approval gates
+- Alloy execution fabric: workflow routing with approval gates
 - Full audit trail with actor attribution on all consequential actions
 - Demo reset scripts (`scripts/demo-reset/`)
 - Role-based persona switching (executive, operator, analyst, auditor)
@@ -75,7 +75,7 @@ These capabilities are functional but require verbal caveats during demo present
 ### CRM Data Integration (KORA)
 - **Current state:** Pipeline signals in KORA are seeded. CRM connectors (Salesforce, HubSpot) are in the connector registry but require tenant OAuth provisioning.
 - **Demo caveat:** "This pipeline data represents a typical RevOps setup. For your organization, we'd connect directly to your CRM."
-- **Remaining work:** Complete the Salesforce and HubSpot OAuth connector flows in A11oy.
+- **Remaining work:** Complete the Salesforce and HubSpot OAuth connector flows in Alloy.
 
 ### Medicare Lien Data (Counsel)
 - **Current state:** The CMS MSPRP integration is modeled but the live query endpoint requires a registered CMS provider account.

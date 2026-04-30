@@ -12,8 +12,8 @@ The SZL Holdings platform exposes a single centralized API server (`artifacts/ap
 
 | Metric | Value |
 |--------|-------|
-| Total endpoints | ~2,300+ (across all route files; exact count varies with schema generation) |
-| Route files | 140+ TypeScript route files in `artifacts/api-server/src/routes/` |
+| Total endpoints | 2,816 (across 357 route files) |
+| Route files | 357 total across repo (140+ in `artifacts/api-server/src/routes/`; remainder across other artifact route modules) |
 | Spec format | OpenAPI 3.1 (served at `/api/docs`) |
 | JSON spec | `/api/docs.json` |
 | Endpoint catalogue | [`API-CATALOGUE.md`](api-catalogue.md) (auto-generated from spec) |
@@ -166,9 +166,9 @@ Routes retain the `/api/firestorm` prefix for backward compatibility; the fronte
 
 ---
 
-### PRISM Counsel — Legal (`/api/prism-counsel`) [DEPRECATED]
+### Counsel — Legal (`/api/prism-counsel`) [DEPRECATED]
 
-PRISM Counsel frontend is deprecated (task #579). API routes remain for data access but are no longer actively developed.
+Counsel frontend is deprecated (task #579). API routes remain for data access but are no longer actively developed.
 
 | Endpoint Group | Auth | Description |
 |---------------|------|-------------|

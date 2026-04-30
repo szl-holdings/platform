@@ -30,7 +30,7 @@
 |----------|------|------|-------------|
 | Cortex Mobile (legacy) | `artifacts/cortex-mobile` | 260K | **Archive** — superseded by `szl-holdings-mobile` |
 | Imperium | `artifacts/imperium` | 7.5M | **Archive** — cloud sovereignty, archived per Task #920 |
-| PRISM Counsel (legacy) | `artifacts/prism-counsel` | 9.2M | **Archive** — superseded by `counsel`; legacy API routes retained in api-server |
+| Counsel (legacy) | `artifacts/prism-counsel` | 9.2M | **Archive** — superseded by `counsel`; legacy API routes retained in api-server |
 
 ## 3. Shared Libraries (`lib/`)
 

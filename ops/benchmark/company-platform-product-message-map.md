@@ -17,9 +17,9 @@ SZL Holdings (Company)
               ├── Aegis (Defense & Intelligence)
               ├── Vessels (Maritime Intelligence)
               ├── Terra (Real Estate Intelligence)
-              ├── PRISM Counsel (Legal & Compliance)
+              ├── Counsel (Legal & Compliance)
               ├── Carlota Jo (Advisory Consulting)
-              └── IMPERIUM (Infrastructure Governance)
+              └── Sentra (Cyber Resilience)
 ```
 
 ---
@@ -36,9 +36,9 @@ SZL Holdings (Company)
 | Domain | Aegis | Security teams | "Defense intelligence on governed infrastructure" | SIEM + ICS/OT + threat intel on shared platform primitives |
 | Domain | Vessels | Maritime operators | "Maritime intelligence with decision governance" | AIS tracking + sanctions + voyage economics on shared primitives |
 | Domain | Terra | Real estate analysts | "Distress intelligence with simulation-backed decisions" | Property pipeline + ownership graph + Monte Carlo valuations |
-| Domain | PRISM Counsel | Legal/compliance | "Legal intelligence with audit-ready governance" | Case management + regulatory tracking on Proof Chain |
+| Domain | Counsel | Legal/compliance | "Legal intelligence with audit-ready governance" | Case management + regulatory tracking on Proof Chain |
 | Domain | Carlota Jo | Advisory teams | "Client advisory with governed AI recommendations" | Client management + document delivery on shared primitives |
-| Domain | IMPERIUM | Infrastructure admins | "Infrastructure governance with policy enforcement" | Infrastructure monitoring on Covenant Policy |
+| Domain | Sentra | Cyber resilience leads | "Cyber resilience governance with proof-chain audit" | Threat detection and incident response on Covenant Policy |
 
 ---
 

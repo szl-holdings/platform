@@ -1,4 +1,4 @@
-# KORA + A11oy — Canonical Demo Flow
+# KORA + Alloy — Canonical Demo Flow
 
 **Duration**: 8–12 minutes  
 **Audience**: Investors, enterprise buyers, design partners, lenders  
@@ -11,9 +11,9 @@
 
 **Surface routing policy:** This buyer-facing demo uses the `/command/` portal (FORGE Command artifact). Internal operator access to KORA functionality also uses `/lyte/` within `artifacts/szl-holdings` — see `docs/internal/demo/demo-runbook.md`. Both surfaces expose the same underlying KORA workspace; `/command/` is the canonical path for all buyer-facing and investor demos.
 
-This is the single canonical demo flow for KORA + A11oy. It walks through the complete operating loop:
+This is the single canonical demo flow for KORA + Alloy. It walks through the complete operating loop:
 
-> Signal enters KORA → PRISM scores and correlates it → A11oy retrieves evidence → A11oy produces a structured decision object → Approval gate assessed → Human approves or revises → Action created and routed → Audit trail closes the loop → Dashboard reflects resolution
+> Signal enters KORA → PRISM scores and correlates it → Alloy retrieves evidence → Alloy produces a structured decision object → Approval gate assessed → Human approves or revises → Action created and routed → Audit trail closes the loop → Dashboard reflects resolution
 
 Every step is reproducible using the seeded demo dataset. Every screen exists in the live application.
 
@@ -90,10 +90,10 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/alloy/intelligence` → Retrieval tab
 
-**Narration**: *"Before A11oy makes any recommendation, it retrieves evidence. It searches your organization's actual knowledge — prior incidents, approval policies, owner metadata, connector context. Not generic AI. Your data."*
+**Narration**: *"Before Alloy makes any recommendation, it retrieves evidence. It searches your organization's actual knowledge — prior incidents, approval policies, owner metadata, connector context. Not generic AI. Your data."*
 
 **Show**:
-1. Navigate to A11oy Intelligence → Retrieval tab
+1. Navigate to Alloy Intelligence → Retrieval tab
 2. Show the knowledge base query issued against the signal
 3. Walk through retrieved evidence:
    - Prior similar payment stall (resolved in 4h, 3 months ago — Stripe config change)
@@ -113,7 +113,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/alloy/intelligence` → Triage Engine
 
-**Narration**: *"A11oy doesn't give you a paragraph of AI text. It produces a structured decision object — validated against a schema, with typed fields, confidence scores, evidence references, and a clear recommended action."*
+**Narration**: *"Alloy doesn't give you a paragraph of AI text. It produces a structured decision object — validated against a schema, with typed fields, confidence scores, evidence references, and a clear recommended action."*
 
 **Show**:
 1. Enter the signal into the Triage Engine (or show pre-populated result)
@@ -132,13 +132,13 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
    - **Risk Level**: High
    - **Rationale**: Payment revenue impact $2.3M, prior incident resolved with processor scale
    - **Alternatives**: Two other approaches shown at lower confidence
-6. Say: *"Schema-validated decisions, not freeform text. Every field is typed. Every recommendation is sourced. The alternatives panel means humans can override with context A11oy doesn't have."*
+6. Say: *"Schema-validated decisions, not freeform text. Every field is typed. Every recommendation is sourced. The alternatives panel means humans can override with context Alloy doesn't have."*
 
 **Key messages**:
 - Decision object is machine-readable JSON — not a prose summary
 - Every field is typed and validated against a schema
 - Alternatives shown so humans can make an informed override
-- This is the core A11oy IP — structured intelligence, not chat output
+- This is the core Alloy IP — structured intelligence, not chat output
 
 ---
 
@@ -146,7 +146,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/approvals`
 
-**Narration**: *"This is a P1 action with $2.3M at stake. A11oy requires explicit human approval before anything executes. The approval gate is structural — enforced at the workflow layer, not just in the UI. It cannot be bypassed in code."*
+**Narration**: *"This is a P1 action with $2.3M at stake. Alloy requires explicit human approval before anything executes. The approval gate is structural — enforced at the workflow layer, not just in the UI. It cannot be bypassed in code."*
 
 **Show**:
 1. Open Approvals Center
@@ -171,7 +171,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/actions`
 
-**Narration**: *"Once approved, A11oy creates the action item, routes it to the right owner, and attaches the full decision context. No copy-paste. No re-explanation. The owner gets everything they need to act."*
+**Narration**: *"Once approved, Alloy creates the action item, routes it to the right owner, and attaches the full decision context. No copy-paste. No re-explanation. The owner gets everything they need to act."*
 
 **Show**:
 1. Navigate to Action Center
@@ -226,7 +226,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 3. Show the value at risk counter updated (action in progress reduces exposure)
 4. Optional: brief pan across Readiness Module if time permits
 
-**Closing line**: *"Signal in → Evidence retrieved → Decision produced → Human approved → Action routed → Audit written. That's the KORA + A11oy operating loop."*
+**Closing line**: *"Signal in → Evidence retrieved → Decision produced → Human approved → Action routed → Audit written. That's the KORA + Alloy operating loop."*
 
 ---
 

@@ -119,7 +119,7 @@ pnpm seed:demo
 
 | ID | Issue | Severity | Notes |
 |----|-------|---------|-------|
-| DB-001 | `seed-prism-counsel.ts` recovery tables broken | LOW | PRISM Counsel is deprecated; not critical |
+| DB-001 | `seed-prism-counsel.ts` recovery tables broken | LOW | Counsel is deprecated; not critical |
 | DB-002 | No rollback migration scripts | MEDIUM | Schema-push approach; mitigate with pre-push backups |
 | DB-003 | No formal DB indexes audit | MEDIUM | 569 tables; index coverage not fully audited |
 | DB-004 | ORM↔schema drift possible without CI check | MEDIUM | `pnpm typecheck` catches most; recommend `db:check` in CI |

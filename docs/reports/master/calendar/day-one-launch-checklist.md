@@ -60,7 +60,7 @@
 |---|------|--------|
 | 1 | SZL Holdings — Enterprise Platform | ✅ In link-in-bio |
 | 2 | Latest Insights & Analysis | ✅ In link-in-bio |
-| 3 | PRISM Counsel — Legal Intelligence | ✅ In link-in-bio |
+| 3 | Counsel — Legal Matter Command | ✅ In link-in-bio |
 | 4 | Vessels — Maritime Intelligence | ✅ In link-in-bio |
 | 5 | Terra — Real Estate Intelligence | ✅ In link-in-bio |
 | 6 | Aegis — Unified Defense & SOC | ✅ In link-in-bio |

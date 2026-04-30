@@ -202,7 +202,7 @@ The loop is not aspirational — it is implemented and exercised in production p
 | ACT      | `durableJobQueue.register(ALLOY_JOB_TYPES.RUN_WORKFLOW)` — `alloy-orchestration.ts:586` |
 | PROVE    | `routes/audit-chain.ts:POST /events`, `proof-chain.tagAIContent()`                 |
 
-Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) are implementations of this loop bound to a specific signal source and action vocabulary. None of them implement governance independently.
+Domain packs (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo) are implementations of this loop bound to a specific signal source and action vocabulary. None of them implement governance independently.
 
 ---
 

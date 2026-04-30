@@ -60,7 +60,7 @@ A governed mesh requires five structural properties that distinguish it from a p
 
 SZL Holdings is built as a governed mesh from the ground up. The six platform primitives — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric — are not features of a domain product. They are the shared governance protocol that every domain pack runs on.
 
-The Event Fabric is the mesh's signal layer. It ingests continuous signals from all six domains — voyage anomalies from Vessels, threat classifications from Paragon, property distress scores from Domaine, agent execution events from PRISM Counsel, executive briefing triggers from LUMINA, and TENAX cyber posture events — and maintains a live, cross-domain signal state that every domain pack can read and write.
+The Event Fabric is the mesh's signal layer. It ingests continuous signals from all six domains — voyage anomalies from Vessels, threat classifications from Paragon, property distress scores from Domaine, agent execution events from Counsel, executive briefing triggers from LUMINA, and TENAX cyber posture events — and maintains a live, cross-domain signal state that every domain pack can read and write.
 
 The Covenant Policy engine is the mesh's governance protocol. Every action recommendation — regardless of which domain generated it, which agent produced it, or which interface the operator is using — passes through a Covenant Policy evaluation before it reaches the human decision queue. The policy is organizational — it encodes the specific authorization thresholds, escalation requirements, and role-action mappings that reflect the organization's governance posture. It cannot be bypassed by an agent, a workflow, or an interface layer.
 

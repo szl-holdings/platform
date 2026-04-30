@@ -241,7 +241,7 @@ For any investor, technical advisor, or new executive joining the team, review d
 | Billing flow end-to-end test (TG-001) | Write test for billing event flows | Engineering | P1 |
 | Add guardrail cross-reference to AI_GOVERNANCE.md (RT-003) | Editorial addition linking to SECURITY-CHECKLIST.md | Engineering | P2 |
 | Update PRODUCT-SURFACES.md — fix domain-specific mobile status (RT-010 / TD-006) | ✅ Resolved Apr-2026 — PRODUCT-SURFACES.md § "Domain-Specific Mobile Apps" relabeled "Roadmap (Not Yet Built)"; each unregistered app annotated as "Roadmap — not yet built" with planned artifact path marked "(not registered)" and an earliest build window. Live mobile coverage today is delivered via CORTEX (`artifacts/szl-holdings-mobile`). | Engineering | ✅ Done |
-| Align PRISM Counsel status across all docs (RT-009 / RT-017) | Clarify PRISM Counsel status in DEMO_GUIDE.md and SALES_NARRATIVE.md | Engineering | P2 — before legal-buyer demos |
+| Align Counsel status across all docs (RT-009 / RT-017) | Clarify Counsel status in DEMO_GUIDE.md and SALES_NARRATIVE.md | Engineering | P2 — before legal-buyer demos |
 
 ---
 
@@ -307,7 +307,7 @@ For any investor, technical advisor, or new executive joining the team, review d
 | PROOF_OF_VALUE_PLAYBOOK.md | ✅ Pass — POV success metrics tied to real platform capabilities |
 | DESIGN_PARTNER_PROGRAM.md | ✅ Pass — program terms are honest and actionable |
 
-**One commercial inconsistency to resolve before legal-buyer demos:** PRISM Counsel deprecation status differs between DEMO_GUIDE.md ("deprecated") and SALES_NARRATIVE.md (still listed as active domain pack). Resolve in Day-7 plan.
+**One commercial inconsistency to resolve before legal-buyer demos:** Counsel deprecation status differs between DEMO_GUIDE.md ("deprecated") and SALES_NARRATIVE.md (still listed as active domain pack). Resolve in Day-7 plan.
 
 ---
 
@@ -322,7 +322,7 @@ For any investor, technical advisor, or new executive joining the team, review d
 | Series A Investor | No signed design partners — biggest pre-Series A risk | NOT PASS for Series A — commercial proof required |
 | Future VP Engineering | Zero production observability instrumentation | CONDITIONAL PASS — Day-0 plan resolves blockers |
 | Future VP Product | Domain-specific mobile apps listed as live but do not exist (TD-006) | CONDITIONAL PASS — fix PRODUCT-SURFACES.md immediately |
-| Future VP Sales | PRISM Counsel status inconsistency across docs | CONDITIONAL PASS — resolve before legal-buyer sales cycle |
+| Future VP Sales | Counsel status inconsistency across docs | CONDITIONAL PASS — resolve before legal-buyer sales cycle |
 | Skeptical SRE (Day-0 production incident) | No OTEL, Sentry, or uptime monitoring | NOT PASS for production — Day-0 plan resolves all three |
 
 **Red-team overall verdict:** Three perspectives are NOT PASS for their specific scenario (security pen test, Series A, SRE production incident). All three are known, scoped, and have active remediation plans. No surprises or previously unknown structural risks were found.

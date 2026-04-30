@@ -14,7 +14,7 @@ All releases follow a structured governance model:
 ### v0.9.0 — Distribution OS (April 3, 2026)
 **Highlights**: Full content publishing platform with social distribution
 - 22 new database tables
-- 1,618 API endpoints (up from 1,166)
+- 2,816 API endpoints
 - Admin panel with articles CMS, newsletters, carousels, X studio, campaigns, leads, calendar, analytics, automations, settings
 - Public pages: link-in-bio, newsletter subscription
 - Social profiles: X (@szlholdings), Medium (@stephen_38454), Substack (szlholdings.substack.com), Linktree (linktr.ee/szlholdings)

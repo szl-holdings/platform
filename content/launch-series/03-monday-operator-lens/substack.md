@@ -23,11 +23,11 @@ Here is what happens at each step.
 
 ---
 
-**2. Context.** An AI agent activates. It retrieves the vessel's 12-month AIS history, beneficial owner exposure, comparable dark events in the same corridor, and any prior matters in PRISM Counsel involving this counterparty. Citations attached. Confidence: 0.84. *Recorded: a context enrichment event with retrieval provenance.*
+**2. Context.** An AI agent activates. It retrieves the vessel's 12-month AIS history, beneficial owner exposure, comparable dark events in the same corridor, and any prior matters in Counsel involving this counterparty. Citations attached. Confidence: 0.84. *Recorded: a context enrichment event with retrieval provenance.*
 
 ---
 
-**3. Recommendation.** The agent produces a structured recommendation: escalate to compliance, open a PRISM Counsel matter for legal chain-of-custody, notify the charter party operator. The recommendation surfaces in the Lyte action queue with all context attached. *Recorded: a recommendation event with model identity and confidence.*
+**3. Recommendation.** The agent produces a structured recommendation: escalate to compliance, open a Counsel matter for legal chain-of-custody, notify the charter party operator. The recommendation surfaces in the Lyte action queue with all context attached. *Recorded: a recommendation event with model identity and confidence.*
 
 ---
 
@@ -39,7 +39,7 @@ Here is what happens at each step.
 
 ---
 
-**6. Execution.** The compliance officer reviews in Lyte and approves. The Workflow Engine initiates a multi-step, multi-party, durable process: flag the voyage in Vessels, open a matter in PRISM Counsel pre-populated with the AI context, notify the attorney of record, notify the charter party operator, arm a 4-hour AIS re-acquisition watchdog. *Recorded: a workflow event for each step, with actor attribution.*
+**6. Execution.** The compliance officer reviews in Lyte and approves. The Workflow Engine initiates a multi-step, multi-party, durable process: flag the voyage in Vessels, open a matter in Counsel pre-populated with the AI context, notify the attorney of record, notify the charter party operator, arm a 4-hour AIS re-acquisition watchdog. *Recorded: a workflow event for each step, with actor attribution.*
 
 ---
 
@@ -47,7 +47,7 @@ Here is what happens at each step.
 
 ---
 
-**8. Outcome.** The vessel re-acquires AIS at T+00:38, within the watchdog window. The voyage flag is updated. The PRISM Counsel matter is updated with the resolution. The Outcome Graph records the complete loop: signal → decision → outcome. *Recorded: an outcome event linked to the originating signal and the decision.*
+**8. Outcome.** The vessel re-acquires AIS at T+00:38, within the watchdog window. The voyage flag is updated. The Counsel matter is updated with the resolution. The Outcome Graph records the complete loop: signal → decision → outcome. *Recorded: an outcome event linked to the originating signal and the decision.*
 
 ---
 
@@ -59,7 +59,7 @@ Here is what happens at each step.
 
 Nine steps. Two AI agent invocations. One human approval. Five downstream actions across three domains. One closed loop. One verifiable Proof Chain.
 
-No silent decisions. No unattributed actions. No AI execution without human gating. No domain siloing — the maritime signal and the PRISM Counsel matter are linked structurally, not by someone forwarding an email.
+No silent decisions. No unattributed actions. No AI execution without human gating. No domain siloing — the maritime signal and the Counsel matter are linked structurally, not by someone forwarding an email.
 
 This is what every consequential decision should look like in an AI-assisted enterprise environment.
 

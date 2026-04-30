@@ -89,9 +89,9 @@
 | Aegis (Security & Defense) | Add-on ($499/mo) | Add-on ($899/mo) | Bundled | ✅ Included |
 | Vessels (Maritime Intelligence) | Add-on ($599/mo) | Add-on ($1,099/mo) | Bundled | ✅ Included |
 | Terra (Real Estate Intelligence) | Add-on ($299/mo) | Add-on ($499/mo) | Bundled | ✅ Included |
-| PRISM Counsel (Legal) | Add-on ($499/mo) | Add-on ($899/mo) | Bundled | ✅ Included |
+| Counsel (Legal) | Add-on ($499/mo) | Add-on ($899/mo) | Bundled | ✅ Included |
 | Carlota Jo (Advisory) | ❌ | ❌ | By engagement | By engagement |
-| IMPERIUM (Cloud Sovereignty) | ❌ | ❌ | By arrangement | ✅ Included |
+| Sentra (Cyber Resilience) | Add-on ($499/mo) | Add-on ($899/mo) | Bundled | ✅ Included |
 
 ---
 

@@ -62,11 +62,11 @@
 
 ---
 
-### Risk 6: Prism Counsel Recovery Table Seed Script Broken
+### Risk 6: Counsel Recovery Table Seed Script Broken
 
 **Classification:** Product / Demo
 **Severity:** Low-Medium
-**Description:** Seed scripts for Prism Counsel recovery tables are broken. Recovery module not usable without seed repair.
+**Description:** Seed scripts for Counsel recovery tables are broken. Recovery module not usable without seed repair.
 **Mitigation:** Fix seed script. Existing task in backlog.
 **Owner:** Engineering
 **Timeline:** Next sprint
@@ -150,12 +150,12 @@ Listed in priority order — highest impact per unit of effort first.
 
 ---
 
-### Priority 4: Fix Prism Counsel Recovery Table Seed Script
+### Priority 4: Fix Counsel Recovery Table Seed Script
 
 **Why:** Relatively small effort; blocks a meaningful demo surface.
 **Effort:** 2–4 hours
 **Owner:** Engineering
-**Files:** Prism Counsel seed scripts
+**Files:** Counsel seed scripts
 
 ---
 
@@ -222,7 +222,7 @@ Listed in priority order — highest impact per unit of effort first.
 | Configure CORS_ORIGINS | Blocking | Hours | P1 |
 | Configure Sentry | High | Hours | P1 |
 | Stripe live mode | Revenue | Hours | P1 |
-| Prism Counsel seed fix | Medium | Hours | P2 |
+| Counsel seed fix | Medium | Hours | P2 |
 | Vessels commercial modules | Medium | Days | P2 |
 | CORTEX splash/icon | Low | Day | P2 |
 | CORTEX deep linking | Medium | Days | P2 |

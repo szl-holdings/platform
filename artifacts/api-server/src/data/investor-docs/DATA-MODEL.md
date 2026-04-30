@@ -1,7 +1,7 @@
 # Data Model — SZL Holdings Platform
 
 **Version:** 1.0 · **Last updated:** April 2026
-**Source:** `lib/db/src/schema/` (112 schema files, 685 tables total)
+**Source:** `lib/db/src/schema/` (170 schema files, 798 tables live)
 
 > The source of truth for the database schema is the Drizzle ORM schema files in `lib/db/src/schema/`. This document describes domain groupings, key tables, relationships, and conventions. For migration history see `lib/db/drizzle/`.
 
@@ -12,7 +12,7 @@
 **Engine:** PostgreSQL 16
 **ORM:** Drizzle ORM (`@szl-holdings/db`)
 **Migration strategy:** Drizzle migrations (`lib/db/drizzle/`)
-**Table count:** 685 `pgTable` declarations across 112 schema files (verified by `grep -rc "= pgTable" lib/db/src/schema/`)
+**Table count:** 798 live database tables across 170 schema files (verified by `bash scripts/audit/db/inventory-schema.sh`, 2026-04-28)
 
 **Connection exports from `@szl-holdings/db`:**
 - `.` — db client + pool (default export)
@@ -336,7 +336,7 @@ See `docs/disaster-recovery.md` for the full restore playbook and `BACKUP_AND_RE
 
 ## Overview
 
-The SZL Holdings platform uses a single **PostgreSQL 16+** database managed via **Drizzle ORM**. The schema contains 644 tables organized into 10 domain namespaces. Each domain prefix provides logical isolation; all tables live in a single PostgreSQL database (not separate databases or schemas).
+The SZL Holdings platform uses a single **PostgreSQL 16+** database managed via **Drizzle ORM**. The schema contains 798 live tables organized into 10 domain namespaces. Each domain prefix provides logical isolation; all tables live in a single PostgreSQL database (not separate databases or schemas).
 
 Schema source of truth: `lib/db/` — Drizzle schema files, migrations, and seed data.
 
@@ -598,7 +598,7 @@ All domain entities reference `org_id` (integer FK) for tenant isolation. Signif
 - **Audit immutability:** Audit log tables are append-only. No `UPDATE` or `DELETE` operations are issued on these tables from the application layer.
 - **Session integrity:** Sessions expire at `expires_at`. The `authMiddleware` rejects requests with expired sessions before route handlers run.
 - **Referential integrity:** Foreign keys are enforced at the database level (Drizzle ORM generates `REFERENCES` constraints with `ON DELETE CASCADE` or `ON DELETE SET NULL` as appropriate per entity).
-- **Note on soft deletes:** Some domain tables include `deleted_at` nullable timestamps for soft deletion; this is not universal across all 644 tables. Verify per-table patterns in `lib/db/src/schema/` before relying on soft-delete semantics.
+- **Note on soft deletes:** Some domain tables include `deleted_at` nullable timestamps for soft deletion; this is not universal across all 798 tables. Verify per-table patterns in `lib/db/src/schema/` before relying on soft-delete semantics.
 
 ---
 

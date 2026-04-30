@@ -28,7 +28,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 | Lines of code | 82,610+ |
 | Classification | CANONICAL |
 | Functionality | REST + GraphQL + WebSocket; full platform backend |
-| Estimated endpoints | ~1,800–2,000 (README claims 2,331 — unverified) |
+| Estimated endpoints | 2,816 |
 | Auth coverage | RBAC 11-role, session-based, bearer tokens |
 | Real data surfaces | Health, billing, auth, integrations, AI, most domain routes |
 | Mock/stub surfaces | Some intelligence feed ingestion; some STIX/TAXII routes in demo mode |

@@ -31,7 +31,7 @@ A persistent trust strip appears directly below the hero, surfacing:
 New three-tier architecture section:
 - **Command Surfaces** (Lyte, CORTEX, Command Portal)
 - **Execution Fabric** (Alloy, Outcome Graph, Proof Chain)
-- **Domain Packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo)
+- **Domain Packs** (Aegis, Vessels, Terra, Counsel, Carlota Jo)
 
 Each tier shows its products as tagged chips with one-line descriptions.
 

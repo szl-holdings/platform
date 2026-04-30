@@ -50,7 +50,7 @@ Every decision recorded in the Outcome Graph is linked to its originating signal
 
 **In Terra (real estate):** An AI underwriting recommendation — pursue or pass on an asset — is linked to the deal outcome. Win rates by asset class and recommendation confidence level are tracked automatically over time.
 
-**In PRISM Counsel (legal):** A matter triage recommendation — recommended counsel assignment, urgency tier, jurisdictional considerations — is linked to the eventual matter resolution. Triage accuracy is tracked over time and surfaces in the Outcome Graph as a calibration signal for similar matter types.
+**In Counsel (legal):** A matter triage recommendation — recommended counsel assignment, urgency tier, jurisdictional considerations — is linked to the eventual matter resolution. Triage accuracy is tracked over time and surfaces in the Outcome Graph as a calibration signal for similar matter types.
 
 One primitive. Four domains. The calibration compounding is the structural moat.
 
@@ -72,7 +72,7 @@ The Proof Chain is append-only. Every entry carries: actor identity (human or AI
 
 **In Terra:** An AI underwriting output — a deal score with sourced comparable transactions — is recorded in the Proof Chain with the model identity, the data sources cited, and the confidence score at the time of the recommendation. If the deal later produces a loss, the chain shows exactly what the AI said, what it cited, and what the human decided.
 
-**In PRISM Counsel:** Every AI-assisted matter triage, draft pleading, or court filing recommendation is recorded in the Proof Chain with model identity, citations to relevant case law and authorities, and the attorney of record who approved or modified the output. Discovery requests and bar inquiries can reconstruct the AI's role in any matter.
+**In Counsel:** Every AI-assisted matter triage, draft pleading, or court filing recommendation is recorded in the Proof Chain with model identity, citations to relevant case law and authorities, and the attorney of record who approved or modified the output. Discovery requests and bar inquiries can reconstruct the AI's role in any matter.
 
 ---
 
@@ -92,7 +92,7 @@ Policy definitions are structured: action type, required role for approval, appr
 
 **In Terra:** AI underwriting recommendations require a senior analyst review before advancing to the LOI stage. The Covenant Policy gate ensures no deal moves forward on AI recommendation alone.
 
-**In PRISM Counsel:** Court filings, settlement authorizations above a defined threshold, and external counsel engagements all carry attorney-of-record approval requirements. The Covenant Policy enforces unauthorized practice of law boundaries — AI cannot file, sign, or commit on behalf of an attorney structurally.
+**In Counsel:** Court filings, settlement authorizations above a defined threshold, and external counsel engagements all carry attorney-of-record approval requirements. The Covenant Policy enforces unauthorized practice of law boundaries — AI cannot file, sign, or commit on behalf of an attorney structurally.
 
 ---
 
@@ -112,7 +112,7 @@ This is not a simple expected-value calculator. It runs Monte Carlo simulation a
 
 **In Terra:** Before bidding on a distressed asset, Decision Simulation models IRR distributions across renovation cost scenarios and exit cap rate ranges. The operator sees not just "expected return" but "return range at the 10th and 90th percentile."
 
-**In PRISM Counsel:** Before authorizing a settlement or litigation strategy, Decision Simulation models the probability distribution of outcomes — settlement ranges, expected legal spend, and time-to-resolution under different strategy choices. The matter lead sees the risk landscape before committing to a path.
+**In Counsel:** Before authorizing a settlement or litigation strategy, Decision Simulation models the probability distribution of outcomes — settlement ranges, expected legal spend, and time-to-resolution under different strategy choices. The matter lead sees the risk landscape before committing to a path.
 
 ---
 
@@ -132,7 +132,7 @@ Each workflow is defined declaratively: steps, actors, conditions, timeouts, and
 
 **In Terra:** A deal workflow spans AI underwriting, senior analyst review, LOI drafting, counterparty negotiation, due diligence package assembly, and closing. Each stage has defined approval requirements and produces Proof Chain entries.
 
-**In PRISM Counsel:** A matter workflow spans intake, conflict check, triage, AI-assisted research, attorney review, drafting, opposing counsel exchange, court filing, and resolution. Each step is tracked, attributed, and recoverable. AI handoffs to attorneys are first-class workflow events.
+**In Counsel:** A matter workflow spans intake, conflict check, triage, AI-assisted research, attorney review, drafting, opposing counsel exchange, court filing, and resolution. Each step is tracked, attributed, and recoverable. AI handoffs to attorneys are first-class workflow events.
 
 ---
 
@@ -146,7 +146,7 @@ Each workflow is defined declaratively: steps, actors, conditions, timeouts, and
 
 Signals from every domain are normalized to a common schema and published to the Event Fabric. Subscriptions across domains can route events to correlated intelligence workstreams. AI agents can subscribe to cross-domain signal combinations.
 
-**Example:** A vessel flagged in Vessels for dark AIS behavior — potential sanctions exposure — publishes an event to the Event Fabric. PRISM Counsel subscribes to sanctions-related vessel events. A matter is automatically opened in PRISM Counsel for legal chain-of-custody review. The maritime operator and the legal team both see the event, linked, in their respective surfaces.
+**Example:** A vessel flagged in Vessels for dark AIS behavior — potential sanctions exposure — publishes an event to the Event Fabric. Counsel subscribes to sanctions-related vessel events. A matter is automatically opened in Counsel for legal chain-of-custody review. The maritime operator and the legal team both see the event, linked, in their respective surfaces.
 
 **Example:** A SOC alert in Aegis about a credential breach involving a counterparty — publishes to the Event Fabric. Terra subscribes to counterparty security events for deals in due diligence. The real estate deal team sees a risk flag on their active deal automatically, without anyone manually forwarding an email.
 

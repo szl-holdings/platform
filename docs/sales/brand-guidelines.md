@@ -15,7 +15,7 @@
 
 The platform hierarchy is strict. Use this order when describing the system:
 
-**SZL Holdings** (platform) → **Lyte** (flagship command) → **Alloy** (execution fabric) → **CORTEX** (mobile command) → **Domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM)
+**SZL Holdings** (platform) → **Lyte** (flagship command) → **Alloy** (execution fabric) → **CORTEX** (mobile command) → **Domain packs** (Aegis, Vessels, Terra, Counsel, Carlota Jo, Sentra)
 
 Product names:
 - **Lyte** — the flagship operator command surface (not LYTE, not "Command Portal")
@@ -25,9 +25,9 @@ Product names:
 - **Aegis** — security & defense domain pack (not AEGIS)
 - **Vessels** — maritime domain pack (not VESSELS)
 - **Terra** — real estate domain pack (not TERRA)
-- **PRISM Counsel** — legal domain pack (PRISM is an acronym — always all-caps)
+- **Counsel** — legal domain pack (PRISM is an acronym — always all-caps)
 - **Carlota Jo** — advisory domain pack (two words, capital J)
-- **IMPERIUM** — cloud sovereignty domain pack (all caps; functionality currently integrated into Command Portal)
+- **Sentra** — cloud sovereignty domain pack (all caps; functionality currently integrated into Command Portal)
 
 ---
 

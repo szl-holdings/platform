@@ -170,7 +170,7 @@ Map every concept that appears in 2+ artifacts today, then assign a consolidatio
 |---------|------|---------|
 | Vessels | `pages/evidence.tsx` | MERGE |
 | Terra | `pages/evidence.tsx` | MERGE |
-| PRISM Counsel | `pages/evidence.tsx` | MERGE |
+| Counsel | `pages/evidence.tsx` | MERGE |
 | Lyte | `pages/evidence-explorer.tsx` | MERGE |
 | Command | `pages/evidence-explorer.tsx` | MERGE |
 | shared-ui | `evidence-explorer.tsx` | **KEEP-SHARED** |
@@ -297,7 +297,7 @@ Map every concept that appears in 2+ artifacts today, then assign a consolidatio
 | shared-ui | `command-palette.tsx` | KEEP-SHARED |
 | All other surfaces | Not wired | PROMOTE |
 
-**Action:** Wire `CommandPalette` from shared-ui into Aegis, Sentra, Counsel, PRISM Counsel, Terra, Lyte, Pulse, Command, SZL Holdings.
+**Action:** Wire `CommandPalette` from shared-ui into Aegis, Sentra, Counsel, Terra, Lyte, Pulse, Command, SZL Holdings.
 
 ---
 

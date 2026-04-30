@@ -37,7 +37,7 @@ This table contains every repository found on the account. No repos are deferred
 
 ### Repo 1: `szl-holdings/szl-holdings-platform` — Transfer Complete ✅
 
-**Current state:** Public, active, not archived. Now live at `szl-holdings/szl-holdings-platform`. Contains the full SZL Holdings monorepo (15 registered artifacts, 798 tables, full CI/CD, CodeQL, release pipeline).
+**Current state:** Public, active, not archived. Now live at `szl-holdings/szl-holdings-platform`. Contains the full SZL Holdings monorepo (14 registered artifacts, 798 tables, full CI/CD, CodeQL, release pipeline).
 
 **Disposition:** ✅ Transfer complete. No further action required.
 

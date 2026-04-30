@@ -15,7 +15,7 @@ The platform had:
 - System overview documentation (SYSTEM-OVERVIEW.md)
 - Decision Theater demo in the Lyte/Command surface
 - Incomplete competitive context — no analysis against named peers
-- Stale artifacts (Firestorm, IMPERIUM, Lyte, Prism Counsel, Stephen Site) alongside active ones
+- Stale artifacts (Firestorm, IMPERIUM, Lyte, Counsel, Stephen Site) alongside active ones
 - No market benchmark research
 - No structured investor documentation
 
@@ -83,7 +83,7 @@ The platform lacked:
 | Dimension | Before | After |
 |-----------|--------|-------|
 | Active artifacts | 7 canonical + 5 stale coexisting | 7 canonical + 5 cleanly archived with DEPRECATED.md/ARCHIVED.md markers |
-| Deprecated apps | Mixed in with live apps; confusing | Firestorm, IMPERIUM, Lyte, Prism Counsel, Stephen Site all have deprecation markers and README redirects |
+| Deprecated apps | Mixed in with live apps; confusing | Firestorm, IMPERIUM, Lyte, Counsel, Stephen Site all have deprecation markers and README redirects |
 | README accuracy | Partially stale claims | Products table updated; deprecated apps marked; accuracy gaps documented with actual counts |
 | Canonical source map | No single source of truth for docs | canonical-source-map.md maps every topic to authoritative location |
 | Disposition matrix | Not documented | Full artifact disposition matrix verified against live repo |

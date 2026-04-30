@@ -53,7 +53,7 @@ Walk the architecture diagram from [architecture.md](../architecture/architectur
 - The six primitives: Event Fabric (Prism Bus), Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine
 - The two execution surfaces: Lyte (operator), CORTEX (mobile)
 - Alloy as the workflow runtime
-- Domain packs as entitlements (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo)
+- Domain packs as entitlements (Aegis, Vessels, Terra, Counsel, Carlota Jo)
 - The API server and the shared PostgreSQL layer
 - Authentication: OIDC primary, password fallback
 - Tenant isolation: query-layer `org_id` scoping; bypass requires `super_admin` role with audit logging

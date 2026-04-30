@@ -176,7 +176,7 @@ CVE IDs, incident IDs, MITRE ATT&CK technique IDs (e.g., T1078), control IDs, CM
 
 ## prism_legal_matter v1.0.0
 
-**Platform**: PRISM Counsel — Legal Matter Command  
+**Platform**: Counsel — Legal Matter Command  
 **Privacy Level**: privileged  
 **Reranking**: enabled  
 **Top-K**: 10  
@@ -184,7 +184,7 @@ CVE IDs, incident IDs, MITRE ATT&CK technique IDs (e.g., T1078), control IDs, CM
 
 ### Purpose
 
-The PRISM Counsel legal matter profile retrieves matter briefs, filing obligation timelines, discovery logs, contract clauses, regulatory compliance filings, and court docket entries. Docket IDs and case numbers receive a 1.9× boost. Citation codes and regulation references receive a 1.7× boost.
+The Counsel legal matter profile retrieves matter briefs, filing obligation timelines, discovery logs, contract clauses, regulatory compliance filings, and court docket entries. Docket IDs and case numbers receive a 1.9× boost. Citation codes and regulation references receive a 1.7× boost.
 
 All retrieval operations under this profile are subject to attorney-client privilege handling. The policy guard enforces strict matter-boundary isolation: queries may only retrieve chunks tagged to the requesting tenant's own matters.
 

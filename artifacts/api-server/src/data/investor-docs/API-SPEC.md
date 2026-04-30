@@ -12,8 +12,8 @@ The SZL Holdings platform exposes a single centralized API server (`artifacts/ap
 
 | Metric | Value |
 |--------|-------|
-| Total endpoints | ~2,300+ (across all route files; exact count varies with schema generation) |
-| Route files | 140+ TypeScript route files in `artifacts/api-server/src/routes/` |
+| Total endpoints | 2,816 (verified 2026-04-28 via `grep -rh 'router\.\(get\|post\|put\|patch\|delete\|use\)' artifacts/api-server/src/routes`) |
+| Route files | 357 TypeScript route files in `artifacts/api-server/src/routes/` |
 | Spec format | OpenAPI 3.1 (served at `/api/docs`) |
 | JSON spec | `/api/docs.json` |
 | GraphQL | Apollo Server at `/api/graphql` |

@@ -73,7 +73,7 @@
 | `.github/workflows/security.yml` | Security scanning | Active |
 | `.github/workflows/lighthouse.yml` | Lighthouse performance/accessibility audit | Active |
 | `.github/workflows/e2e.yml` | End-to-end test runner | Defined — no active E2E suite yet |
-| `.github/workflows/prism-counsel-ci.yml` | Prism Counsel CI (artifact deprecated — workflow may be removed) | Inactive |
+| `.github/workflows/prism-counsel-ci.yml` | Counsel CI (artifact deprecated — workflow may be removed) | Inactive |
 
 ### 2.3 Publishing Workflows (Placeholder / Scaffolded)
 

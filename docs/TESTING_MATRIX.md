@@ -89,7 +89,7 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
 | `governed-decision-loop.spec.ts` | Governed Decision Loop (within Command at `/operations/governed-decision-loop`) | `@workspace/command` | 3005 |
 | `imperium.spec.ts` | IMPERIUM Infrastructure Map (within Command at `/infrastructure/imperium-map`) | `@workspace/command` | 3005 |
-| `prism-counsel.spec.ts` | PRISM Counsel — Legal Command | `@workspace/prism-counsel` | 3006 |
+| `prism-counsel.spec.ts` | Counsel — Legal Command | `@workspace/prism-counsel` | 3006 |
 | `stephen-site.spec.ts` | Stephen Lutar personal site (within SZL Holdings at `/stephen`) | `@workspace/szl-holdings` | 3000 |
 | `auth.spec.ts` | SZL Holdings (session-level auth flow) | `@workspace/szl-holdings` | 3000 |
 | `a11y.spec.ts` | SZL Holdings (accessibility) | `@workspace/szl-holdings` | 3000 |

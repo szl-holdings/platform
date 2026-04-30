@@ -107,7 +107,7 @@ Note: Per-surface `graphql-data-panel` and `atlas-scene-panel` adapters are inte
 | Terra | 7.5 | 7.5 | Duplicate cleanup |
 | Sentra | 7.0 | 7.5 | ⌘K CommandPalette wired |
 | Counsel | 7.0 | 7.5 | ⌘K CommandPalette wired |
-| PRISM Counsel | 6.5 | 6.5 | No regressions |
+| Counsel | 6.5 | 6.5 | No regressions |
 | Lyte | 6.5 | 6.5 | No regressions |
 | Command | 6.5 | 6.5 | No regressions |
 | Pulse | 6.0 | 6.0 | No regressions |
@@ -127,4 +127,4 @@ See `05-consolidation-plan.md` Phase 2 and Phase 3 for the full roadmap. Key ite
 2. **Lyte / Pulse / Command ⌘K wiring** — Three surfaces still missing CommandPalette.
 3. **SentientLayer adoption** — Wire `SentientLayer` (⌘J) into at least Lyte and Sentra as the primary intelligence rail demo.
 4. **Pulse investor narrative** — Pulse's AI briefing UX is strong but lacks the proof-chain framing the investors want. Needs Governed Decision Loop callouts.
-5. **PRISM Counsel → Counsel unification** — Two separate Legal surfaces; consolidation plan calls for Counsel absorbing PRISM's advanced features.
+5. **Counsel → Counsel unification** — Two separate Legal surfaces; consolidation plan calls for Counsel absorbing PRISM's advanced features.

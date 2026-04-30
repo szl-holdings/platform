@@ -15,7 +15,7 @@ Say: "This is the executive command plane. Every signal is prioritized, evidence
 
 ### Domain Depth (1.5 min)
 Show: Any product detail (Terra property, Vessel detail, Aegis incident)
-Say: "Each domain has real operational depth — [442] database tables, [1,618] API endpoints. This isn't a prototype."
+Say: "Each domain has real operational depth — [798] database tables, [2,816] API endpoints. This isn't a prototype."
 
 ### Trust & Governance (1 min)
 Show: Trust center, audit trail

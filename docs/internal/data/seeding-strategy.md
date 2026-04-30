@@ -106,7 +106,7 @@ Domain packs were added in April 2026 to cover product domains that had schema c
 
 | Pack | Script | Command | Tables Covered |
 |---|---|---|---|
-| PRISM Counsel | `seed-prism-counsel.ts` | `seed:prism-counsel` | `pc_matters`, `pc_parties`, `pc_claims`, `pc_offers`, `pc_medical_events`, `pc_damages`, `pc_liens`, `pc_deadlines`, `pc_discovery`, `pc_depositions`, `pc_forecasts`, `pc_readiness_scores`, `pc_communications`, `pc_ai_recommendations`, `pc_witnesses`, `pc_document_chunks`, `pc_playbooks`, `pc_connector_accounts`, `pc_ny_rule_profiles`, `pc_matter_clocks`, `pc_clock_events`, `pc_no_fault_claims`, `pc_disclaimers`, `pc_coverage_positions`, `pc_medical_bill_cycles`, `pc_verification_requests`, `pc_denials`, `pc_offer_movements` |
+| Counsel | `seed-prism-counsel.ts` | `seed:prism-counsel` | `pc_matters`, `pc_parties`, `pc_claims`, `pc_offers`, `pc_medical_events`, `pc_damages`, `pc_liens`, `pc_deadlines`, `pc_discovery`, `pc_depositions`, `pc_forecasts`, `pc_readiness_scores`, `pc_communications`, `pc_ai_recommendations`, `pc_witnesses`, `pc_document_chunks`, `pc_playbooks`, `pc_connector_accounts`, `pc_ny_rule_profiles`, `pc_matter_clocks`, `pc_clock_events`, `pc_no_fault_claims`, `pc_disclaimers`, `pc_coverage_positions`, `pc_medical_bill_cycles`, `pc_verification_requests`, `pc_denials`, `pc_offer_movements` |
 | Holdings & Fund Ops | `seed-holdings-fundops.ts` | `seed:holdings-fundops` | `holdings_ventures`, `holdings_milestones`, `holdings_metrics`, `holdings_leadership`, `holdings_inquiries`, `fund_portfolio_financials`, `fund_portfolio_kpis`, `capital_artifacts`, `lender_packets`, `lender_packet_deliverables`, `investor_packets`, `investor_packet_deliverables`, `fundraising_milestones`, `financial_models`, `use_of_funds_versions`, `diligence_checklists`, `diligence_checklist_items`, `cap_table_placeholders` |
 | Carlota Jo Clients | `seed-carlota-clients.ts` | `seed:carlota-clients` | `carlota_services`, `carlota_client_profiles`, `carlota_inquiries`, `carlota_reservations`, `client_accounts`, `client_documents`, `client_updates`, `client_messages` |
 | Governance & Compliance | `seed-governance.ts` | `seed:governance` | `alloy_policies`, `model_routing_policies`, `cost_budgets`, `cost_events`, `governance_incidents`, `compliance_suitability`, `compliance_archival`, `compliance_supervision_queue`, `compliance_calendar`, `compliance_risk_scores` |
@@ -196,7 +196,7 @@ pnpm --filter @workspace/scripts run seed
 ### Running individual domain packs
 
 ```bash
-# PRISM Counsel — legal matters, parties, AI forecasts
+# Counsel — legal matters, parties, AI forecasts
 pnpm --filter @workspace/scripts run seed:prism-counsel
 
 # Holdings ventures & fund financial reporting

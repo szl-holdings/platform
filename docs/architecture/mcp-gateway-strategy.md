@@ -299,7 +299,7 @@ To add a new tool to the MCP gateway:
 | Response format | JSON (tool result) | JSON (REST response) |
 | Approval flow | Built-in `pending_approval` status | External |
 | Tenant scope | Automatically injected | Caller-provided |
-| Tool count | ~25 curated tools | 2,300+ endpoints |
+| Tool count | ~25 curated tools | 2,816 endpoints |
 | Schema discovery | `tools/list` method | OpenAPI 3.1 |
 | Auth | Session cookie or Bearer | Session cookie or Bearer |
 

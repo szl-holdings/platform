@@ -44,7 +44,7 @@ The status page will display the health of these components:
 | Aegis | Aegis app response | HTTP check |
 | Vessels | Vessels app response | HTTP check |
 | Terra | Terra app response | HTTP check |
-| PRISM Counsel | PRISM app response | HTTP check |
+| Counsel | Counsel app response | HTTP check |
 | Command Portal | Command portal response | HTTP check |
 | Database | Backend health check that probes DB | HTTP check on `/api/health/db` |
 | AI Services | Backend health check for AI provider connectivity | HTTP check on `/api/health/ai` |

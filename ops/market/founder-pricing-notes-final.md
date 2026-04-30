@@ -35,7 +35,7 @@ For each domain pack, estimate the value case:
 - Missed deal signals cost 10x a platform subscription in lost transaction fees
 - Value anchor: $30K–$150K/year depending on transaction volume
 
-**PRISM Counsel (legal):**
+**Counsel (legal):**
 - A litigation firm handling 200+ active matters that reduces per-matter attorney time by 2 hours/week saves ~$500K/year in realized capacity
 - The compliance risk of unaudited AI outputs in legal is regulatory and reputational, not just operational
 - Value anchor: $40K–$200K/year depending on firm size and matter volume

@@ -47,7 +47,7 @@ Nothing is opaque. Nothing executes without attribution. The platform engineerin
 **Purpose:** Give every engineer a single pane of glass for discovering, scaffolding, and owning services.
 
 ### Current State (2026-04-28)
-- 103 packages, 15 artifacts, 8 services, 4 apps, 5 workers — no machine-readable catalog
+- 103 packages, 14 artifacts, 8 services, 4 apps, 5 workers — no machine-readable catalog
 - No Backstage instance, no Score manifests, no `catalog-info.yaml` files
 - No golden-path templates; each new surface bootstrapped ad hoc
 
@@ -284,7 +284,7 @@ Nothing is opaque. Nothing executes without attribution. The platform engineerin
 | Alloy fabric API | `services/alloy-fabric-api` | Stay in `services/`; add catalog + Score |
 | Alloy fabric ingest control | `services/alloy-fabric-ingest-control` | Stay in `services/`; add catalog + Score |
 | Alloy workers (embed, rank, rerank, vector) | `workers/alloy-*` | Stay in `workers/`; add catalog + Score |
-| A11oy brand orchestration layer | `artifacts/a11oy` | Stay in `artifacts/`; product surface |
+| Alloy brand orchestration layer | `artifacts/a11oy` | Stay in `artifacts/`; product surface |
 | AEF contracts / packages | `packages/aef-*`, `packages/agents-*` | Stay in `packages/`; add catalog |
 | Proof chain | `lib/proof-chain` | Stay; formalize in catalog |
 
@@ -342,7 +342,7 @@ Domain packs are self-contained product surfaces. They consume shared substrate 
 | `lib/ontology` | Deprecated (superseded by `packages/ontology`) | 3 vs 36 consumers | Migrate 3 consumers; archive |
 | `artifacts/imperium/` | Archived | Merged into Command | Verify no active routes; clean up dir |
 | `artifacts/firestorm/` | Archived | Aegis defense UI; routes still live | Triage API routes; clean up dir |
-| `artifacts/prism-counsel/` | Archived | PRISM Counsel UI; routes still live | Triage API routes; clean up dir |
+| `artifacts/prism-counsel/` | Archived | Counsel UI; routes still live | Triage API routes; clean up dir |
 | `lib/` duplicates of `packages/` equivalents | Under review | Tracked in CONSOLIDATION_DECISIONS.md | Resolve in Backstage catalog phase |
 
 ---

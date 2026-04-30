@@ -53,7 +53,7 @@ const AGENTS = [
   {
     id: 'op-counsel',
     name: 'Counsel Sentinel',
-    role: 'Domain Specialist — Prism Counsel',
+    role: 'Domain Specialist — Counsel',
     vertical: 'prism-counsel',
     type: 'domain-specialist',
     status: 'active',

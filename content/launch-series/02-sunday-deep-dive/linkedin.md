@@ -14,9 +14,9 @@ Those enforcements are six primitives. Not features. The architectural spine.
 
 • Workflow Engine — durable multi-step orchestration with checkpoint recovery and AI/human handoffs as first-class events.
 
-• Event Fabric — cross-domain signal backbone. A sanctions hit in Vessels surfaces a legal flag in PRISM Counsel automatically.
+• Event Fabric — cross-domain signal backbone. A sanctions hit in Vessels surfaces a legal flag in Counsel automatically.
 
-The same six primitives power a SOC alert in Aegis, a voyage P&L call in Vessels, a listing decision in Terra, and a matter triage in PRISM Counsel. Different domains, same spine. That's what the one-platform claim actually means at the code level.
+The same six primitives power a SOC alert in Aegis, a voyage P&L call in Vessels, a listing decision in Terra, and a matter triage in Counsel. Different domains, same spine. That's what the one-platform claim actually means at the code level.
 
 Thursday's intro framed the thesis. Monday's post walks one governed decision — start to finish, no abstraction.
 

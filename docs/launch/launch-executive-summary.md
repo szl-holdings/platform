@@ -29,7 +29,7 @@ SZL Holdings has completed all documentation, go-to-market strategy, and pre-lau
 | Sales readiness | ✅ Green | Sales handoff guide, CS playbook, ROI model, deal design complete |
 | Enterprise buyer readiness | ⚠️ Conditional | No external customer references; SOC 2 targeted Q3–Q4 2026 |
 | Operator usability | ✅ Green | Design-partner ready with CS-assisted onboarding |
-| Technical credibility | ✅ Green | 2,331 endpoints, 700+ tables, all P0 security gaps resolved |
+| Technical credibility | ✅ Green | 2,816 endpoints, 798 tables, all P0 security gaps resolved |
 | Investor narrative | ✅ Green | Series A thesis complete; pre-revenue is expected at this stage |
 | Engineering scalability | ✅ Green | Strong foundation; test coverage and schema governance are VP Engineering priorities |
 

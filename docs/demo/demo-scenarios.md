@@ -35,7 +35,7 @@ A $4.2M pipeline deal has stalled for 47 days without escalation. The approval o
 | **2. Context** | 6 signals assembled across Motion, Risk, Intelligence, Pulse — close probability dropped from 84% to 31% | KORA / PRISM Framework |
 | **3. Recommendation** | Beacon recommends emergency escalation — CFO sponsorship, VP BD reassignment, buyer re-engagement. Confidence: 87% | KORA / Command Inbox detail |
 | **4. Approval** | Marcus reviews the recommendation, adds a note ("I'll join the buyer call myself"), approves in 49 minutes | KORA / Approval Gate |
-| **5. Execution** | A11oy routes: ownership reassigned, buyer email queued, CFO calendar block created, monitoring reactivated | KORA / Execution Record |
+| **5. Execution** | Alloy routes: ownership reassigned, buyer email queued, CFO calendar block created, monitoring reactivated | KORA / Execution Record |
 | **6. Outcome** | Buyer responds in 4 hours. Close probability: 74%. Deal reactivated in one business day | KORA / Outcome |
 | **7. Summary** | Executive summary auto-generated: "$4.2M deal reactivated in 25 hours" | KORA / Executive Summary |
 | **8. Proof Chain** | Decision Ledger shows every step — signal, context, recommendation, approval, execution | KORA / Decision Ledger |
@@ -113,7 +113,7 @@ MV Soltana (a product tanker carrying $3.2M of refined petroleum cargo) goes dar
 | **1. Signal** | Critical AIS dark event: 134-min blackout, position inconsistency, OFAC corridor proximity | SEXTANT / Fleet Dashboard |
 | **2. Context** | Voyage Twin assembled — 7 signals: AIS track, OFAC screening, weather (rules out technical cause), P&L exposure | SEXTANT / Voyage Twin |
 | **3. Recommendation** | Helmsman recommends hold at Karachi anchorage, file voyage incident report, notify P&I Club. Confidence: 91% | SEXTANT / Recommendation |
-| **4. Approval** | James approves in 5 minutes — notes he's calling P&I directly. All steps routed through A11oy | SEXTANT / Approval Gate |
+| **4. Approval** | James approves in 5 minutes — notes he's calling P&I directly. All steps routed through Alloy | SEXTANT / Approval Gate |
 | **5. Execution** | Master notified, incident report filed (INC-2026-0414-001), P&I notified, charterer ETA revised | SEXTANT / Execution |
 | **6. Outcome** | OFAC clears vessel in 4.5 hours. Voyage resumes. Demurrage $112K recoverable from charterer | SEXTANT / Outcome |
 | **7. Auditor View** | Switch to Robert Tanner — sees full voyage audit trail. Exports compliance package for flag state | SEXTANT / Audit Trail |
@@ -218,9 +218,9 @@ These apply regardless of which narrative you're showing:
 
 2. **"AI recommends. Humans confirm."** Every consequential action requires human approval. This is enforced at the workflow engine level — not just in the UI.
 
-3. **"A11oy is the execution fabric."** Every approval routes through A11oy. Every execution step is logged with actor attribution. This is what makes the proof chain complete.
+3. **"Alloy is the execution fabric."** Every approval routes through Alloy. Every execution step is logged with actor attribution. This is what makes the proof chain complete.
 
-4. **"The architecture compounds."** One investment in A11oy, the shared design system, and the entity model serves every vertical. Adding a new domain pack means building an Observe layer — the rest is shared.
+4. **"The architecture compounds."** One investment in Alloy, the shared design system, and the entity model serves every vertical. Adding a new domain pack means building an Observe layer — the rest is shared.
 
 5. **"The proof chain is structural."** The audit trail isn't generated after the fact. Every signal, recommendation, approval, and action writes to the Decision Ledger in real time.
 

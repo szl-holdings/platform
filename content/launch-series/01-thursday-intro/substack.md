@@ -39,7 +39,7 @@ Every step is instrumented. Every AI recommendation carries source citations and
 
 **CORTEX** is unified mobile command — all domain workspaces in one iOS/Android app with biometric auth and cross-domain badge counts.
 
-**Domain packs** extend the same governance infrastructure into six verticals: Aegis (security & defense), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory), and IMPERIUM (cloud sovereignty).
+**Domain packs** extend the same governance infrastructure into six verticals: Aegis (security & defense), Sentra (cyber resilience), Vessels (maritime), Terra (real estate), Counsel (legal), and Carlota Jo (advisory).
 
 ---
 

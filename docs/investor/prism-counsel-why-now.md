@@ -1,4 +1,4 @@
-# PRISM Counsel — Why Now
+# Counsel — Why Now
 
 **For:** Series A investors and strategic evaluators
 **Date:** April 2026
@@ -14,9 +14,9 @@ The legal-operations category has reached the point where the same three forces 
 2. **Regulatory pressure on AI in consequential decisions is accelerating** — and legal is the function that has to defend the decision.
 3. **The point-tool stack has hit its ceiling** — every in-house legal team has e-discovery, CLM, and matter management; none of them produces an audit-grade proof chain.
 
-PRISM Counsel is the legal-operations expression of the platform thesis. The reason the timing is right is not generic — it is specific to the workflows legal teams run today.
+Counsel is the legal-operations expression of the platform thesis. The reason the timing is right is not generic — it is specific to the workflows legal teams run today.
 
-![PRISM Counsel — legal command surface entering the market at the regulatory inflection point](../../assets/readme/products/prism-counsel-command.jpg)
+![Counsel — legal command surface entering the market at the regulatory inflection point](../../assets/readme/products/prism-counsel-command.jpg)
 
 ---
 
@@ -26,8 +26,8 @@ Through 2023, AI in legal meant Harvey-style drafting copilots and Casetext-styl
 
 Two consequences matter:
 
-- **Triage and obligation extraction can be automated** with confidence levels that legal teams will trust under governance. PRISM Counsel runs this with Proof Chain attribution on every recommendation — model identity, source citations, confidence score.
-- **Privilege and disclosure risk is the new bottleneck.** As soon as AI is operationalized, the question shifts from "is the output any good?" to "can we defend the output at audit, and prove it never crossed a privilege boundary?" That question is unanswerable inside the existing legal stack. It is the question PRISM Counsel was designed to answer.
+- **Triage and obligation extraction can be automated** with confidence levels that legal teams will trust under governance. Counsel runs this with Proof Chain attribution on every recommendation — model identity, source citations, confidence score.
+- **Privilege and disclosure risk is the new bottleneck.** As soon as AI is operationalized, the question shifts from "is the output any good?" to "can we defend the output at audit, and prove it never crossed a privilege boundary?" That question is unanswerable inside the existing legal stack. It is the question Counsel was designed to answer.
 
 ---
 
@@ -42,9 +42,9 @@ The regulatory environment around AI-assisted decisions is moving faster in lega
 
 The defensible record is no longer optional. It is the difference between an audit closing cleanly and an audit becoming an investigation.
 
-PRISM Counsel was built with this requirement as an architectural constraint. The Proof Chain is not a feature; it is the spine. Every matter object, every obligation update, every AI recommendation, every approval is written immutably and is queryable as a coherent decision chain.
+Counsel was built with this requirement as an architectural constraint. The Proof Chain is not a feature; it is the spine. Every matter object, every obligation update, every AI recommendation, every approval is written immutably and is queryable as a coherent decision chain.
 
-![PRISM Counsel obligation timeline — defensible decision chain across every governed obligation](../../assets/readme/products/prism-counsel-obligation-timeline.jpg)
+![Counsel obligation timeline — defensible decision chain across every governed obligation](../../assets/readme/products/prism-counsel-obligation-timeline.jpg)
 
 ---
 
@@ -54,7 +54,7 @@ Every meaningful in-house legal team has the same stack: a matter management too
 
 None of these tools produces a unified, queryable, audit-defensible record of legal decisions. The seams between them are where missed deadlines, privilege breaches, and reconstruction-after-the-fact audit failures actually live.
 
-The category is mature enough that buyers no longer need to be educated on the gap — they have lived inside it for years. What they need is a platform that closes the seam without forcing them to rip out the tools that already work. PRISM Counsel does this by sitting on top as the governance and decision layer, not by competing as a replacement matter management or e-discovery system.
+The category is mature enough that buyers no longer need to be educated on the gap — they have lived inside it for years. What they need is a platform that closes the seam without forcing them to rip out the tools that already work. Counsel does this by sitting on top as the governance and decision layer, not by competing as a replacement matter management or e-discovery system.
 
 ---
 
@@ -64,10 +64,10 @@ Three things had to be true simultaneously, and now they are:
 
 1. **AI is operational enough** that triage, obligation extraction, and drafting can run inside a governed workflow with confidence the legal team will accept.
 2. **Audit and regulatory pressure** has forced legal teams to find a way to produce a defensible decision chain — and the existing stack cannot.
-3. **The platform substrate exists** in PRISM Counsel today: matter twins, obligation graph, Proof Chain, Covenant Policy, sandbox demo seeded with a realistic walkthrough.
+3. **The platform substrate exists** in Counsel today: matter twins, obligation graph, Proof Chain, Covenant Policy, sandbox demo seeded with a realistic walkthrough.
 
 The buyers exist. The pain exists. The regulatory tailwind exists. The platform exists. This is the window.
 
 ---
 
-*See also: [Why Now](why-now.md) · [PRISM Counsel — Platform Story](prism-counsel-platform-story.md) · [PRISM Counsel — Wedge Expansion](prism-counsel-wedge-expansion.md) · [Problem & Opportunity](problem-opportunity.md)*
+*See also: [Why Now](why-now.md) · [Counsel — Platform Story](prism-counsel-platform-story.md) · [Counsel — Wedge Expansion](prism-counsel-wedge-expansion.md) · [Problem & Opportunity](problem-opportunity.md)*

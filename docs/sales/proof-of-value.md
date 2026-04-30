@@ -122,7 +122,7 @@ We do not invent every PoV from scratch. Three templates cover most cases.
 | Surfaces used | `/terra`, Lyte action queue, CORTEX deal view |
 | Roles in scope | analyst, operator, sales_delivery_user |
 
-(Templates D and E for PRISM Counsel and Carlota Jo follow the same pattern.)
+(Templates D and E for Counsel and Carlota Jo follow the same pattern.)
 
 ---
 

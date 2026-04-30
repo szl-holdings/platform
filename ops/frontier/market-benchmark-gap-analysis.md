@@ -109,7 +109,7 @@ Terra has a solid data model and functional UI for a real estate intelligence pl
 
 ---
 
-## PRISM Counsel — Legal Matter Command
+## Counsel — Legal Matter Command
 
 **Status: DEPRECATED** — Marked for archive in task #579. Not evaluated against market benchmarks as it is no longer a target product. Code has been preserved but the product is not being developed.
 

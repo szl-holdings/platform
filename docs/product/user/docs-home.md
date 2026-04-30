@@ -63,7 +63,7 @@ The platform is organized as:
 | Flagship command | Lyte | Operator command surface |
 | Execution fabric | Alloy | Governance backbone |
 | Mobile command | CORTEX | iOS + Android unified command |
-| Domain packs | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo | Domain intelligence |
+| Domain packs | Aegis, Vessels, Terra, Counsel, Carlota Jo | Domain intelligence |
 
 The governed decision loop runs across all products:
 ```

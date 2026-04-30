@@ -35,19 +35,19 @@
 
 | Source | Value | Notes |
 |--------|-------|-------|
-| `README.md` "Platform Scale" (prior) | 14 | Stale — **fixed to 15 in this audit** |
-| `docs/platform-facts.md` | 15 registered / 20 total | Includes archived |
+| `README.md` "Platform Scale" (prior) | 14 | Stale — **since updated to 14 registered artifacts (canonical)** |
+| `docs/platform-facts.md` | 14 registered / 20 total | Includes archived |
 | `generated/platform-metrics.json` (2026-04-27T03:50:50Z) | **19** artifact directories on disk | Includes 4 unregistered |
 | Workflow manager | 17 artifact workflows | 2 (conduit, pluginmesh) not in formal registry snapshot |
-| Workspace artifact registry snapshot | **15 registered** | Canonical for deployment purposes |
+| Workspace artifact registry snapshot | **14 registered** | Canonical for deployment purposes |
 
-**Action required:** Unregistered directories (conduit, pluginmesh, helios, and `artifacts/audit` — an evidence directory mistakenly counted as an artifact by the metrics script) should be formally registered or removed. README now correctly says 15 registered artifacts.
+**Action required:** Unregistered directories (conduit, pluginmesh, helios, and `artifacts/audit` — an evidence directory mistakenly counted as an artifact by the metrics script) should be formally registered or removed. README now correctly says 14 registered artifacts.
 
 ---
 
 ## 3. Unregistered On-Disk Artifact Directories
 
-These directories exist under `artifacts/` but are not in the canonical artifact registry snapshot (15 registered artifacts):
+These directories exist under `artifacts/` but are not in the canonical artifact registry snapshot (14 registered artifacts):
 
 | Directory | Package Name | Kind | Workflow? | Build Status | Disposition Recommendation |
 |-----------|-------------|------|-----------|--------------|---------------------------|

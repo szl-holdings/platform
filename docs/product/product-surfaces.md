@@ -19,7 +19,7 @@ Understanding what each type of surface is — and is not — is essential to un
 | **Execution fabric** | The governance backbone — workflows, approvals, audit trail — shared by all surfaces | Alloy |
 | **Mobile command layer** | Unified mobile access to all domain workspaces and the governance layer | CORTEX |
 | **Ecosystem hub** | Cross-domain real-time overview for platform administrators and ecosystem operators | Command Portal |
-| **Domain pack** | Domain-specific intelligence extension built on the shared governance infrastructure | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM |
+| **Domain pack** | Domain-specific intelligence extension built on the shared governance infrastructure | Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo |
 | **Corporate platform** | Investor portal, trust center, and ecosystem overview — not an operator tool | SZL Holdings (web) |
 | **Platform primitive** | A structural abstraction shared by all surfaces — not a product | Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
 
@@ -42,10 +42,10 @@ A domain pack is not a standalone product. It contributes domain-specific signal
 │  Alloy — Workflow orchestration · Approval gates · Audit trail  │
 ├─────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                   │
-│  Aegis         Vessels       Terra        PRISM Counsel        │
+│  Aegis         Vessels       Terra        Counsel        │
 │  Security &    Maritime      Real Estate  Legal Matter         │
 │  Defense       Intelligence  Intelligence Command              │
-│  Carlota Jo — Premium Advisory   IMPERIUM — Cloud Sovereignty  │
+│  Carlota Jo — Premium Advisory   Sentra — Cyber Resilience     │
 ├─────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE (shared by all surfaces)            │
 │  Outcome Graph · Proof Chain · Covenant Policy                 │
@@ -157,7 +157,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](../a
 
 ---
 
-### PRISM Counsel — Legal Matter Command *(Archived)*
+### Counsel — Legal Matter Command *(Archived)*
 
 | Attribute | Detail |
 |-----------|--------|
@@ -223,8 +223,8 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](../a
 | **Status** | Public Beta Candidate |
 | **Audience** | Investors, fund managers, venture partners, design partners, enterprise evaluators, strategic partners |
 | **Problem Solved** | The ecosystem needs a coherent corporate presence presenting the platform hierarchy, trust posture, and investor narrative |
-| **Core Capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal, PRISM Counsel integration, Alloy workflow surface |
-| **Key Modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, PRISM Counsel integration, Alloy workflow integration |
+| **Core Capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal, Counsel integration, Alloy workflow surface |
+| **Key Modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, Counsel integration, Alloy workflow integration |
 | **Stack** | React 19, Vite, Tailwind CSS, `@szl-holdings/shared-ui`, `@szl-holdings/db`, `@szl-holdings/api-zod`, `@szl-holdings/prism-bus` |
 | **Strategic Role** | Top of the brand hierarchy. Primary destination for investor and enterprise evaluation |
 
@@ -272,7 +272,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](../a
 | **Platform** | iOS + Android (Expo / React Native) |
 | **Audience** | Executives, investors, SZL ecosystem operators, all platform users requiring mobile access |
 | **Core Capability** | All 8 domain workspaces in one Expo/React Native app — biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive AI copilot, SpotlightFab quick actions |
-| **Domains** | Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM, Command, SZL Holdings |
+| **Domains** | Lyte, Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo, Command, SZL Holdings |
 | **Stack** | Expo, React Native, NativeWind, `@szl-holdings/mobile-shared`, `@szl-holdings/shared-ui`, `@szl-holdings/ai-engine`, `@szl-holdings/offline-engine` |
 | **Screens** | 116 mobile screens |
 | **API** | `EXPO_PUBLIC_API_URL` (points to `/api/`) |

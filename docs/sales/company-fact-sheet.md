@@ -41,7 +41,7 @@ The platform is not a dashboard. Not an AI copilot. Not a workflow tool. It is t
 | Layer | Product | Role |
 |-------|---------|------|
 | **Platform** | SZL Holdings | Governed decision layer — shared governance infrastructure |
-| **Execution fabric** | A11oy | Governance backbone — workflow orchestration, approval gates, proof ledger |
+| **Execution fabric** | Alloy | Governance backbone — workflow orchestration, approval gates, proof ledger |
 | **Decision intelligence** | KORA | Cross-domain operator command surface — PRISM framework, signal-to-action |
 | **Mobile command** | APEX | Unified mobile command — all domains, iOS and Android |
 | **Domain packs** | TENAX, PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo | Domain-specific intelligence on shared governance infrastructure |
@@ -141,9 +141,9 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 
 | Item | Status |
 |------|--------|
-| A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
-| A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
-| A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
+| Alloy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
+| Alloy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
+| Alloy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
 | APEX mobile (unified iOS + Android command) | 🔜 Planned |
 | SOC 2 Type II audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |

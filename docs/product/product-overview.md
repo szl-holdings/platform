@@ -60,7 +60,7 @@ The human operator's role: step 6 — approve or reject. Everything else is infr
 | **Flagship command** | Lyte | The operator command surface — PRISM framework, signal-to-action |
 | **Execution fabric** | Alloy | The governance backbone — workflow orchestration, approval gates, audit trail |
 | **Mobile command** | CORTEX | Unified mobile command — all domains, iOS and Android |
-| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
+| **Domain packs** | Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo | Domain-specific intelligence on shared governance infrastructure |
 
 ### The Six Platform Primitives
 
@@ -105,10 +105,10 @@ NYC distress pipeline detection, ownership graph analysis, AI-powered underwriti
 **Status:** Functional alpha  
 **Target buyer:** Real estate operators, distress investors, asset managers
 
-### PRISM Counsel — Legal Matter Command
+### Counsel — Legal Matter Command
 Matter management, AI-assisted triage with approval gates, Proof Chain audit trail for legal actions, court filing integration.
 
-**Status:** Integrated into Aegis (alpha)  
+**Status:** Functional alpha  
 **Target buyer:** Law firms, in-house legal teams, compliance officers
 
 ### Carlota Jo — Premium Advisory
@@ -117,20 +117,14 @@ Client portal, service catalog, booking system, and secure document delivery for
 **Status:** Live  
 **Target buyer:** Premium advisory clients
 
-### IMPERIUM — Cloud Sovereignty
-Multi-cloud governance, policy enforcement, and cloud estate visibility.
-
-**Status:** In development  
-**Target buyer:** CIOs, cloud operations teams
-
 ---
 
 ## Platform Scale (April 2026)
 
-- **2,331 API endpoints** across 172 route files with deny-by-default global auth enforcement
-- **700+ database tables** in PostgreSQL 16 with org-scoped tenant isolation
+- **2,816 API endpoints** across 357 route files with deny-by-default global auth enforcement
+- **798 database tables** in PostgreSQL 16 with org-scoped tenant isolation
 - **11-role RBAC** with OIDC/PKCE, SCIM 2.0, and Azure AD SSO
-- **10 canonical artifacts** (web domain apps + API + mobile)
+- **14 registered artifacts** (web domain apps + API + mobile + design sandbox)
 - **40+ shared packages** in a pnpm monorepo
 - **6 platform primitives** shared across all domain packs
 - **9 schema-validated AI decision types**

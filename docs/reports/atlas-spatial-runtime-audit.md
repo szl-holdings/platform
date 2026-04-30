@@ -40,7 +40,7 @@ A new shared TypeScript package providing typed, contract-driven export adapters
 | `src/adapters/branch-package.ts` | `BranchPackageAdapter` — Branch package with comparison summary and risk level inference |
 | `src/adapters/proof-bundle.ts` | `ProofBundleAdapter` — Proof bundle with integrity summary and approval chain |
 | `src/adapters/openusd-manifest.ts` | `OpenUSDManifestAdapter` — OpenUSD manifest stub with USDA text generation and integration roadmap documentation |
-| `src/demo-serializer.ts` | `serializeDemoScene()` + four canonical demo scene builders for Aegis, Vessels, Terra, Prism Counsel |
+| `src/demo-serializer.ts` | `serializeDemoScene()` + four canonical demo scene builders for Aegis, Vessels, Terra, Counsel |
 | `src/index.ts` | Package entry point |
 | `package.json` | Package manifest |
 | `tsconfig.json` | TypeScript project references |
@@ -122,7 +122,7 @@ Run with: `pnpm test:atlas`
 | (domain flag) | `pnpm seed:atlas:aegis` | Aegis ransomware scene only |
 | (domain flag) | `pnpm seed:atlas:vessels` | Vessels sanctions scene only |
 | (domain flag) | `pnpm seed:atlas:terra` | Terra distress scene only |
-| (domain flag) | `pnpm seed:atlas:counsel` | Prism Counsel matter scene only |
+| (domain flag) | `pnpm seed:atlas:counsel | Counsel matter scene only |
 
 ### Canonical Demo Paths
 
@@ -131,7 +131,7 @@ Run with: `pnpm test:atlas`
 | Aegis (security) | Ransomware Branch Comparison | INC-2026-001 | LockBit 3.0, 2.4TB encrypted, isolation vs. monitor branch |
 | Vessels (maritime) | Sanctions & Weather Reroute | IMO-9876543 — MV Pacific Horizon | OFAC SDN flag, Cape of Good Hope reroute |
 | Terra (real_estate) | Property Distress Stress Test | PROP-BK-2026-0142 | Pre-foreclosure, 3-scenario IRR projection |
-| Prism Counsel (general) | Matter Pressure & Settlement | MTR-2026-0891 | Holloway v. Meridian, accelerated settlement path |
+| Counsel (general) | Matter Pressure & Settlement | MTR-2026-0891 | Holloway v. Meridian, accelerated settlement path |
 
 ### QA Validation
 

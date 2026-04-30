@@ -104,7 +104,7 @@ Priority order:
 **Goal:** README and all docs accurately reflect reality.
 
 1. Update README badges: apps=8, endpoints=verified-count, DB-tables=561, Node=24
-2. Remove PRISM Counsel and Stephen Site from Products table
+2. Remove Counsel and Stephen Site from Products table
 3. Add honest "not yet in app stores" note for CORTEX
 4. Verify all architecture diagram references are accurate
 5. Archive or remove stale ops docs that contradict current state

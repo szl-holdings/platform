@@ -47,7 +47,7 @@ This document is the single source of truth for:
 |-------------|-------------|--------|
 | Firestorm / Aegis (security) | `artifacts/firestorm` | Archived — marker file only |
 | IMPERIUM | (merged into command) | Archived — no running workflow |
-| PRISM Counsel | `artifacts/prism-counsel` | Deprecated — frontend removed |
+| Counsel | `artifacts/prism-counsel` | Deprecated — frontend removed |
 | Stephen Site | `artifacts/stephen-site` | Deprecated — source removed |
 
 ---

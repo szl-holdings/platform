@@ -101,8 +101,8 @@ Every consequential action in every domain follows this loop. The domain determi
 │   ├── constellation/      # World-model graph (entity/concept/causal nodes)
 │   └── ...                 # (see packages/ for full list)
 │
-├── lib/                    # Shared TypeScript libraries (37 packages)
-│   ├── db/                 # Drizzle schema (799+ tables, 132 schema files)
+├── lib/                    # Shared TypeScript libraries (40 packages)
+│   ├── db/                 # Drizzle schema (798 tables, 170 schema files)
 │   ├── shared-ui/          # Cross-app React component library + OS layer
 │   ├── auth/               # OIDC/PKCE authentication, session management
 │   ├── workflow-engine/    # Alloy execution fabric (wraps forge-runtime)

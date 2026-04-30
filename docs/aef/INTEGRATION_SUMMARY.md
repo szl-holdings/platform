@@ -36,7 +36,7 @@ Each of the six SZL product surfaces received one new retrieval page wired to it
 | Vessels Maritime Intelligence | `/vessels/aef-search` | `vessels_maritime_risk` |
 | Terra — Real Estate Intelligence | `/terra/aef-search` | `terra_real_estate_intel` |
 | Aegis — Cyber Resilience Command | `/aegis/aef-search` | `aegis_security_incident` |
-| PRISM Counsel — Legal Command | `/prism-counsel/aef-search` | `prism_legal_matter` |
+| Counsel — Legal Command | `/prism-counsel/aef-search` | `prism_legal_matter` |
 | Carlota Jo Consulting | `/carlota-jo/aef-search` | `carlota_private_advisory` |
 
 Every result card exposes the full evidence breakdown — dense vector score, BM25 keyword score, reciprocal-rank fusion score, cross-encoder reranker score (when enabled), and final score — alongside the retrieval pathway used (e.g. `dense+keyword → fusion → rerank`) and any rationale text produced by the profile's query prompt template. Trace IDs and evidence IDs are displayed for every hit, making every retrieval event auditable to its ledger entry.
@@ -97,7 +97,7 @@ Terra uses AEF to retrieve property ownership records, tax lien filings, distres
 
 Aegis uses AEF to retrieve incident investigation timelines, threat indicator records, CVE advisories, MITRE ATT&CK technique mappings, MSP operational alerts, and cyber-asset exposure reports. CVE identifiers and incident IDs receive a 2× boost. The retrieval surface is at `/aegis/aef-search`. Reranking is enabled.
 
-### PRISM Counsel — Legal Command (`prism_legal_matter`)
+### Counsel — Legal Command (`prism_legal_matter`)
 
 PRISM uses AEF to retrieve matter briefs, filing obligation timelines, discovery logs, contract clauses, and court docket entries. Docket IDs and case numbers receive a 1.9× boost. All retrieval is subject to attorney-client privilege handling — the profile explicitly prohibits cross-matter boundary document exposure. The retrieval surface is at `/prism-counsel/aef-search`. Reranking is enabled.
 

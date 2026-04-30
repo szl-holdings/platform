@@ -25,7 +25,7 @@ A partner without a current scorecard is a partner we are not actually managing.
 |-------|-------|
 | Partner | [Customer name] |
 | Cohort | [Cohort 1 / 2 / 3] |
-| Domain | [Aegis / Vessels / Terra / PRISM Counsel / Carlota Jo] |
+| Domain | [Aegis / Vessels / Terra / Counsel / Carlota Jo] |
 | Pilot start | [Date] |
 | Pilot end (planned) | [Date] |
 | Sponsor | [Name + title] |

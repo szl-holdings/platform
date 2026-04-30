@@ -26,7 +26,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Active registered artifacts | 15 registered across both systems (2 in `.replit [[artifacts]]`; 15 in workspace registry; none currently running — B-01) |
+| Active registered artifacts | 14 registered (workspace registry; canonical) |
 | Total artifacts (including archived) | 20 |
 | Domain packs | 6 |
 | Standalone applications | 3 |

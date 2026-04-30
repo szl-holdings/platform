@@ -28,7 +28,7 @@ A design partner profile:
 |-------|----------------|
 | Operator-led decision | The user (not procurement) is the champion |
 | 50–500-person organization | Small enough to move fast; large enough to matter |
-| One clear domain pain | Aegis, Vessels, Terra, PRISM Counsel, or Carlota Jo as primary |
+| One clear domain pain | Aegis, Vessels, Terra, Counsel, or Carlota Jo as primary |
 | At least one regulated decision type | Audit and governance are real requirements, not "nice-to-have" |
 | Willing to share a case study (anonymized OK) | Without this, they are a customer, not a partner |
 | Willing to take a reference call (≤ 4 per year) | The currency we are buying with the discount |
@@ -49,7 +49,7 @@ We hold the program to a small, named cohort to keep relationships dense and fee
 
 | Cohort | Slots | Domain mix | Status |
 |--------|-------|-----------|--------|
-| Cohort 1 (Q2 2026) | 6 | 2 Aegis · 2 Vessels · 1 Terra · 1 PRISM Counsel | Open |
+| Cohort 1 (Q2 2026) | 6 | 2 Aegis · 2 Vessels · 1 Terra · 1 Counsel | Open |
 | Cohort 2 (Q4 2026) | 6 | TBD based on Cohort 1 outcomes | Closed |
 | Cohort 3 (Q2 2027) | 6 | TBD | Closed |
 

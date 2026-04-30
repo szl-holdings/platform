@@ -53,8 +53,8 @@ The following canonical documents were created or significantly updated across t
 | `PROOF_AND_POLICY_MODEL.md` | Complete | Proof Chain + Covenant Policy specification |
 | `DECISION_SIMULATION.md` | Complete | Monte Carlo engine specification |
 | `ACCESS-CONTROL-MATRIX.md` | Complete | 11-role RBAC mapped to implementation |
-| `API-SPEC.md` | Complete | 2,331 endpoints catalogued with auth model |
-| `DATA-MODEL.md` | Complete | 700+ table schema documented |
+| `API-SPEC.md` | Complete | 2,816 endpoints catalogued with auth model |
+| `DATA-MODEL.md` | Complete | 798 table schema documented |
 | `MCP_GATEWAY_STRATEGY.md` | Complete | Model Context Protocol integration specification |
 | `CHANGELOG.md` | Complete | Release history maintained |
 | `docs/investor/` | Complete | Platform thesis, GTM, product readiness, team |
@@ -91,9 +91,9 @@ SZL Holdings (governed decision infrastructure platform)
 │   ├── Aegis — security & defense intelligence
 │   ├── Vessels — maritime intelligence
 │   ├── Terra — real estate intelligence
-│   ├── PRISM Counsel — legal matter command
+│   ├── Counsel — legal matter command
 │   ├── Carlota Jo — premium advisory (Live)
-│   └── IMPERIUM — cloud sovereignty (in development)
+│   └── Sentra — cyber resilience command
 │
 └── Supporting Surfaces
     ├── Command Portal — ecosystem overview hub

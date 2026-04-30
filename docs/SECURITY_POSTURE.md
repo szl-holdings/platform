@@ -55,6 +55,6 @@ See `SECURITY.md` for responsible disclosure process.
 
 Critical security incidents trigger the `security-legal` signal chain:
 1. Aegis classifies and scopes the incident
-2. Legal hold initiated automatically via PRISM Counsel
+2. Legal hold initiated automatically via Counsel
 3. Executive risk score updated in portfolio dashboard
 4. Full incident timeline captured in proof chain for replay

@@ -56,7 +56,7 @@ across domain packs located in `artifacts/api-server/src/graphql/domains/`.
 | Aegis / Security | `/api/aegis` | Threat detection, SOC operations, SOAR |
 | Vessels / Maritime | `/api/vessels` | Fleet telemetry, voyage economics, sanctions |
 | Terra / Real Estate | `/api/terra` | Distress data, ownership graph, deal pipeline |
-| PRISM Counsel | `/api/prism-counsel` | Legal matter management, court filing |
+| Counsel | `/api/prism-counsel` | Legal matter management, court filing |
 | IMPERIUM | `/api/imperium` | Cloud sovereignty, infrastructure governance |
 | Carlota Jo | `/api/carlota-jo` | Advisory operations, client portal |
 | Command | `/api/command` | Ecosystem hub, cross-domain health |
@@ -96,8 +96,8 @@ Representative paths drawn from the route-group table above. `check-docs-claims.
 | Command | `/alerts` | `artifacts/api-server/src/routes/command.ts` |
 | Pulse | `/today` | `artifacts/api-server/src/routes/pulse.ts` |
 | Pulse | `/briefings` | `artifacts/api-server/src/routes/pulse.ts` |
-| PRISM Counsel | `/prism-counsel/matters` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
-| PRISM Counsel | `/prism-counsel/health` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
+| Counsel | `/prism-counsel/matters` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
+| Counsel | `/prism-counsel/health` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
 | IMPERIUM | `/imperium/cloud/resources` | `artifacts/api-server/src/routes/imperium.ts` |
 | IMPERIUM | `/imperium/senate/proposals` | `artifacts/api-server/src/routes/imperium.ts` |
 | Carlota Jo | `/booking/inquiries` | `artifacts/api-server/src/routes/carlota-jo.ts` |

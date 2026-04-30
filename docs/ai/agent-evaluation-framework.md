@@ -2,7 +2,7 @@
 
 ## Overview
 
-The SZL Holdings Agent Evaluation Framework provides a structured, measurable, and reproducible approach to benchmarking AI agent behavior across all platform domains (Aegis, Vessels, Terra, Prism Counsel, and cross-domain). It encompasses three interlinked capabilities:
+The SZL Holdings Agent Evaluation Framework provides a structured, measurable, and reproducible approach to benchmarking AI agent behavior across all platform domains (Aegis, Vessels, Terra, Counsel, and cross-domain). It encompasses three interlinked capabilities:
 
 1. **Replay Lab** — captures real incidents and agent flows into sanitized, replayable datasets
 2. **Eval Lab** — benchmarks agent strategies with precision, recall, usefulness, policy compliance, cost, latency, and operator override rate

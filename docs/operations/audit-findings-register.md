@@ -226,7 +226,7 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | AF-F002 | Live billing integration not fully wired for all billing flows | P1 | ⚠️ Open (FLOW-002) |
 | AF-F003 | No SLA enforcement automation in support intake | P2 | ⚠️ Open (FLOW-003) |
 | AF-F004 | No escalation path for timed-out approvals | P2 | ⚠️ Open (FLOW-004) |
-| AF-F005 | PRISM Counsel seed scripts broken (recovery tables) | Medium | ⚠️ Open (TD-002) |
+| AF-F005 | Counsel seed scripts broken (recovery tables) | Medium | ⚠️ Open (TD-002) |
 | AF-F006 | Some domain packs use mock/demo data in UI | Medium | ⚠️ Open |
 
 ---
@@ -547,7 +547,7 @@ Priority order for remediation:
 
 | ID | Category | Severity | Finding | Status |
 |----|----------|----------|---------|--------|
-| RT-009 | Commercial / Demo | P2 | DEMO_GUIDE.md references PRISM Counsel (`/prism-counsel/`) as "deprecated (task #579)" — if PRISM Counsel is still being shown to legal buyers, this discrepancy will confuse sales | ⚠️ Open — clarify PRISM Counsel status in all commercial docs before legal-buyer demos |
+| RT-009 | Commercial / Demo | P2 | DEMO_GUIDE.md references Counsel (`/prism-counsel/`) as "deprecated (task #579)" — if Counsel is still being shown to legal buyers, this discrepancy will confuse sales | ⚠️ Open — clarify Counsel status in all commercial docs before legal-buyer demos |
 | RT-010 | Commercial / Demo | P2 | Domain-specific mobile apps listed in PRODUCT-SURFACES.md (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) are described as "Functional Alpha" but are not registered artifacts — a buyer who asks for a demo of aegis-mobile will find it does not exist | ✅ Resolved Apr-2026 — TD-006 / DOC-002. PRODUCT-SURFACES.md § "Domain-Specific Mobile Apps — Roadmap (Not Yet Built)" now annotates each domain-specific mobile app (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile, carlota-jo-mobile) as "Roadmap — not yet built" with planned artifact path marked "(not registered)" and earliest build window contingent on customer/design-partner demand. Live mobile coverage today is delivered via CORTEX (`artifacts/szl-holdings-mobile`). |
 
 ---
@@ -592,7 +592,7 @@ Priority order for remediation:
 **8 — Future VP Sales**
 - **Concern:** "What is the ICP and how do I close a deal?" → GO_TO_MARKET_MOTION.md, SALES_NARRATIVE.md, OBJECTION_HANDLING.md, and DESIGN_PARTNER_PROGRAM.md are complete, internally consistent, and tied to platform reality.
 - **Concern:** "What demos can I give?" → DEMO_STRATEGY.md, EXECUTIVE_DEMO.md, OPERATOR_DEMO.md, TECHNICAL_DEMO.md all exist and are coherent with the live product.
-- **Finding RT-017:** PRISM Counsel deprecation (../sales/demo-guide.md) vs. legal-buyer sales materials (SALES_NARRATIVE.md which still includes PRISM Counsel as a domain pack) creates a potential inconsistency. Needs alignment before the first legal-buyer sales cycle.
+- **Finding RT-017:** Counsel deprecation (../sales/demo-guide.md) vs. legal-buyer sales materials (SALES_NARRATIVE.md which still includes Counsel as a domain pack) creates a potential inconsistency. Needs alignment before the first legal-buyer sales cycle.
 
 **9 — Skeptical SRE (Day 0 of Production Incident)**
 - **Concern:** "The site is down. What do I do?" → INCIDENT_RESPONSE.md, DEPLOYMENT-GUIDE.md, and OPERATIONS-RUNBOOK.md exist.
@@ -613,7 +613,7 @@ Priority order for remediation:
 | RT-006 | P3 | FAQ.md missing AI autonomy question (highest-stakes buyer concern) | ⚠️ Open — Sprint 3 |
 | RT-007 | P3 | END_USER_GUIDE.md text-only for visual workflows | ⚠️ Open — low priority |
 | RT-008 | P3 | CONTRIBUTING.md references non-existent CODEOWNERS | ⚠️ Open — resolves with KG013 |
-| RT-009 | P2 | PRISM Counsel deprecation inconsistency across sales vs. demo docs | ⚠️ Open — before legal-buyer demos |
+| RT-009 | P2 | Counsel deprecation inconsistency across sales vs. demo docs | ⚠️ Open — before legal-buyer demos |
 | RT-010 | P2 | Domain-specific mobile apps listed as "Functional Alpha" — do not exist as artifacts | ✅ Resolved Apr-2026 — TD-006 / DOC-002 |
 | RT-011 | P2 | No `/.well-known/security.txt` published | ⚠️ Open — VD1 |
 | RT-012 | P1 (existing) | Of three P1 gaps from Phase 2–3, AF-001 and AF-003/007 are now resolved (Tasks #2693, #1048); SEC-007 (SSRF on webhooks) remains open | ⚠️ Partial — SEC-007 only |
@@ -621,7 +621,7 @@ Priority order for remediation:
 | RT-014 | INFO | TECHNICAL_DILIGENCE_PACKET.md passes diligence honesty test | INFO — pass |
 | RT-015 | STRATEGIC | No signed design partners — highest pre-Series A risk (non-technical) | ⚠️ Open — founder action |
 | RT-016 | P1 (existing) | New VP Eng will find zero operational instrumentation in production | ⚠️ Open — LB-002/003/006 |
-| RT-017 | P2 | PRISM Counsel deprecation inconsistency — sales vs. demo docs misaligned | ⚠️ Open — before legal-buyer sales |
+| RT-017 | P2 | Counsel deprecation inconsistency — sales vs. demo docs misaligned | ⚠️ Open — before legal-buyer sales |
 | RT-018 | P1 (existing) | SRE day-0 is blind — no OTEL, Sentry, or uptime monitoring | ⚠️ Open — LB-002/003/006 |
 
 **New findings this phase: 10 (RT-001 through RT-010, excluding duplicates of existing P1s)**  

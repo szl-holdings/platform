@@ -27,7 +27,7 @@ And the compound effect that emerges from running that infrastructure continuous
 
 ## The Domain Pack Architecture
 
-Every domain that runs on the SZL Holdings platform — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM — is a domain pack: a configuration layer that adapts the shared governance infrastructure to a specific vertical's data sources, decision types, terminology, and workflow patterns.
+Every domain that runs on the SZL Holdings platform — Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo — is a domain pack: a configuration layer that adapts the shared governance infrastructure to a specific vertical's data sources, decision types, terminology, and workflow patterns.
 
 Domain packs do not duplicate the governance primitives. They configure them. The Proof Chain for an Aegis SOC alert and the Proof Chain for a Vessels voyage exception are the same structural primitive, producing records in the same format, queryable through the same interface, linkable in the same cross-domain Outcome Graph.
 

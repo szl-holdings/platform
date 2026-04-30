@@ -68,7 +68,7 @@ All event names are:
 - `aegis` — Aegis / Firestorm
 - `vessels` — Vessels Maritime
 - `terra` — Terra Real Estate
-- `prism_counsel` — PRISM Counsel
+- `prism_counsel` — Counsel
 - `carlota_jo` — Carlota Jo Advisory
 
 ---

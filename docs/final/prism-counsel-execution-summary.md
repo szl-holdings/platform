@@ -1,4 +1,4 @@
-# Prism Counsel — Final Execution Summary
+# Counsel — Final Execution Summary
 
 **Version:** 1.0  
 **Date:** April 2026  
@@ -8,7 +8,7 @@
 
 ## What Was Done
 
-This document captures the complete documentation and architectural specification package produced for Prism Counsel, as well as what remains to be done and the top 5 next actions.
+This document captures the complete documentation and architectural specification package produced for Counsel, as well as what remains to be done and the top 5 next actions.
 
 ---
 
@@ -16,7 +16,7 @@ This document captures the complete documentation and architectural specificatio
 
 ### Core Platform (Running)
 
-The Prism Counsel platform is implemented and operational. The following services exist and are functional:
+The Counsel platform is implemented and operational. The following services exist and are functional:
 
 | Service | Status | Notes |
 |---------|--------|-------|
@@ -135,14 +135,14 @@ The Prism Counsel platform is implemented and operational. The following service
 
 | Area | State |
 |------|-------|
-| Alloy's role in Prism Counsel | Undefined in docs — engineering knew, documentation did not exist |
+| Alloy's role in Counsel | Undefined in docs — engineering knew, documentation did not exist |
 | M365 integration path | Code existed; no architectural documentation or scaffold files |
 | Model routing strategy | Code existed; no documentation of task-to-model matrix or advisory-only boundaries |
 | Matter Twin specification | Implemented; no specification document |
 | Proof Chain specification | Implemented; no specification document |
-| Trust posture | No Prism Counsel-specific trust documentation |
-| Buyer materials | No Prism Counsel-specific executive, solution, or use case docs |
-| Investor materials | No Prism Counsel-specific investment thesis docs |
+| Trust posture | No Counsel-specific trust documentation |
+| Buyer materials | No Counsel-specific executive, solution, or use case docs |
+| Investor materials | No Counsel-specific investment thesis docs |
 | Mobile strategy | No documented mobile plan |
 
 ### After This Documentation Sprint
@@ -205,4 +205,4 @@ The Worldline engine is fully built. 7 public sources are configured for NY. The
 
 ---
 
-*This document was generated as part of the Prism Counsel architecture and strategy documentation sprint (Task #320).*
+*This document was generated as part of the Counsel architecture and strategy documentation sprint (Task #320).*

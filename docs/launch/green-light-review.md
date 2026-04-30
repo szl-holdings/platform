@@ -105,9 +105,9 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 ### What passes the bar
 
-**Architecture coherence:** Full-stack TypeScript monorepo (pnpm workspace with 40+ packages). React 19 + Vite frontends. Express 5 API server. PostgreSQL 16 + Drizzle ORM. Expo mobile. Azure IaC via Bicep. The stack is modern, coherent, and defensible.
+**Architecture coherence:** Full-stack TypeScript monorepo (pnpm workspace with 40 packages). React 19 + Vite frontends. Express 5 API server. PostgreSQL 16 + Drizzle ORM. Expo mobile. Azure IaC via Bicep. The stack is modern, coherent, and defensible.
 
-**Scale:** 2,331 API endpoints across 172 route files. 700+ database tables across 116 schema files. This is a substantial platform with the architectural footprint to support the full product vision.
+**Scale:** 2,816 API endpoints across 357 route files. 798 database tables across 170 schema files. This is a substantial platform with the architectural footprint to support the full product vision.
 
 **Type safety:** TypeScript throughout. Schema-validated AI decision types. Drizzle ORM for type-safe DB queries.
 
@@ -129,7 +129,7 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 **No load testing:** API behavior under concurrent production load is untested.
 
-**Prisma → Drizzle migration completeness:** All tables are on Drizzle ORM, but schema sprawl (700+ tables across 116 schema files) increases the maintenance burden for future engineers. A schema rationalization pass should be scoped.
+**Prisma → Drizzle migration completeness:** All tables are on Drizzle ORM, but schema sprawl (798 tables across 170 schema files) increases the maintenance burden for future engineers. A schema rationalization pass should be scoped.
 
 **Technical reviewer verdict:** Production-grade architecture for a functional-alpha product. The technical foundation is credible and extensible. The open items (error tracking, OTEL exporter, SSRF, pentest) are well-scoped and resolvable before GA.
 
@@ -145,7 +145,7 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 **Platform thesis:** The six primitives + domain-pack extensibility model is intellectually sound. Each new domain pack is additive, not dilutive. The Outcome Graph creates a data flywheel that compounds with usage — a structural moat argument.
 
-**Technical depth:** 2,331 endpoints, 700+ tables, 40+ packages, full CI/CD, multi-provider AI with governance. This is not a demo — it is a working platform with architectural credibility.
+**Technical depth:** 2,816 endpoints, 798 tables, 40 packages, full CI/CD, multi-provider AI with governance. This is not a demo — it is a working platform with architectural credibility.
 
 **Team signal:** Founder-built to this scale is a signal of execution capability. The codebase quality, documentation depth, and governance architecture reflect serious product thinking.
 
@@ -185,11 +185,11 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 **Bus factor:** The codebase was built primarily by one person. There are no onboarded engineers. The first hire needs to be a senior engineer who can absorb the full architecture.
 
-**Schema sprawl:** 700+ tables across 116 schema files is a maintenance challenge. A future VP will want a rationalization pass and a schema governance policy.
+**Schema sprawl:** 798 tables across 170 schema files is a maintenance challenge. A future VP will want a rationalization pass and a schema governance policy.
 
 **Test coverage:** Unit and integration test coverage is not complete. The QA strategy relies heavily on smoke tests and manual validation. A VP Engineering will want to invest in test automation before scaling the team.
 
-**Route inventory:** 2,331 endpoints is impressive but also creates surface area risk. The future VP will need the ACCESS-CONTROL-MATRIX.md and the route security matrix to ensure no routes are missed in security reviews.
+**Route inventory:** 2,816 endpoints is impressive but also creates surface area risk. The future VP will need the ACCESS-CONTROL-MATRIX.md and the route security matrix to ensure no routes are missed in security reviews.
 
 **Documentation maintenance burden:** The documentation corpus is extensive and valuable but will require active maintenance as the product evolves. A documentation-as-code strategy should be established.
 

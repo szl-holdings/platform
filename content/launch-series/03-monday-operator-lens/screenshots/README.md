@@ -1,7 +1,7 @@
 # Screenshot Shot List — Post 03: Monday Operator Lens
 
 Drop PNG files into this folder using the exact filenames listed below.
-The Monday post walks one decision through nine steps. Each step gets a screenshot — primarily from Vessels and PRISM Counsel (as part of Aegis), with Lyte and the Proof Chain as the connective tissue.
+The Monday post walks one decision through nine steps. Each step gets a screenshot — primarily from Vessels and Counsel (as part of Aegis), with Lyte and the Proof Chain as the connective tissue.
 
 ---
 
@@ -58,12 +58,12 @@ The Monday post walks one decision through nine steps. Each step gets a screensh
 **Page:** Multi-step workflow execution view
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** Multi-step workflow with parallel actors and step states — flag voyage, open PRISM Counsel matter, notify operator, arm watchdog. Step 6: Execution.
+**What to show:** Multi-step workflow with parallel actors and step states — flag voyage, open Counsel matter, notify operator, arm watchdog. Step 6: Execution.
 
 ---
 
 ### 07-proof-chain-trail.png
-**Artifact:** Aegis (`/aegis/`) — chosen for the strongest audit trail visualization, or PRISM Counsel matter timeline
+**Artifact:** Aegis (`/aegis/`) — chosen for the strongest audit trail visualization, or Counsel matter timeline
 **Page:** Audit trail / Proof Chain view
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
@@ -72,18 +72,18 @@ The Monday post walks one decision through nine steps. Each step gets a screensh
 ---
 
 ### 08-outcome-resolution.png
-**Artifact:** Vessels (`/vessels/`) or PRISM Counsel matter view (within Aegis)
+**Artifact:** Vessels (`/vessels/`) or Counsel matter view (within Aegis)
 **Page:** Resolved matter or voyage status with AIS re-acquired
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** The matter resolution panel — vessel re-acquired AIS, voyage flag updated, PRISM Counsel matter closed informational. Step 8: Outcome. Pair this with `02-signal-detection.png` as a before/after comparison in the post.
+**What to show:** The matter resolution panel — vessel re-acquired AIS, voyage flag updated, Counsel matter closed informational. Step 8: Outcome. Pair this with `02-signal-detection.png` as a before/after comparison in the post.
 
 ---
 
 ## Optional / Supporting Shots
 
 ### 09-prism-counsel-matter.png
-**Artifact:** Aegis (`/aegis/`) — PRISM Counsel matter detail view
+**Artifact:** Aegis (`/aegis/`) — Counsel matter detail view
 **Page:** Newly opened matter, pre-populated with AI context
 **Viewport:** 1440 × 900
 **Mode:** Dark mode

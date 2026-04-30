@@ -34,7 +34,7 @@
 **Remaining gaps:**
 - Some CORTEX mobile screens not yet wired to live data (Beta-appropriate; labeled)
 - Vessels commercial modules pending live DB connection
-- Prism Counsel recovery table seed broken
+- Counsel recovery table seed broken
 
 **Target for GA:** 5
 
@@ -171,7 +171,7 @@ To achieve overall GA readiness (score ≥ 4.5):
 | P1 | Implement OTel instrumentation on API + Alloy | Observability | Weeks |
 | P1 | Build eval infrastructure and replay runner | Agent Trust | Weeks |
 | P1 | Configure Sentry error monitoring | Security, Release | Hours |
-| P2 | Fix Prism Counsel seed script | Runtime Coherence | Hours |
+| P2 | Fix Counsel seed script | Runtime Coherence | Hours |
 | P2 | Wire Vessels commercial modules to live DB | Runtime Coherence | Days |
 | P2 | Finalize CORTEX splash screen and icon | Product Clarity | Days |
 | P3 | SOC 2 Type II readiness track | Security | Months |

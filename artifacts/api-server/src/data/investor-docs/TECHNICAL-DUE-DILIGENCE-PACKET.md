@@ -41,7 +41,7 @@ SZL Holdings (corporate surface)
 │   ├── Vessels (/vessels/)
 │   ├── Terra (/terra/)
 │   ├── Carlota Jo (/carlota-jo/)
-│   ├── Prism Counsel (/prism-counsel/)
+│   ├── Counsel (/prism-counsel/)
 │   └── Command Portal (/command/)
 │
 ├── Mobile Application (Expo / React Native)

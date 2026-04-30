@@ -24,7 +24,7 @@ The company was founded by **Stephen Lutar** and is currently in the design part
 
 5. **"Six primitives, not features."** The platform is structurally different — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric are architectural primitives that run across every domain pack, not add-on features.
 
-6. **"One platform. Every high-consequence domain."** The hierarchy is: SZL Holdings → A11oy (execution fabric) → KORA (decision intelligence) → APEX (mobile) → Domain packs. Not a portfolio of startups — a governed platform with domain extensions.
+6. **"One platform. Every high-consequence domain."** The hierarchy is: SZL Holdings → Alloy (execution fabric) → KORA (decision intelligence) → APEX (mobile) → Domain packs. Not a portfolio of startups — a governed platform with domain extensions.
 
 ---
 
@@ -44,7 +44,7 @@ Building governed decision infrastructure for enterprise operators. Background i
 | Layer | Product | Role |
 |-------|---------|------|
 | Platform | SZL Holdings | Governed decision layer |
-| Execution fabric | A11oy | Governance backbone — workflow engine, approval gates, proof ledger |
+| Execution fabric | Alloy | Governance backbone — workflow engine, approval gates, proof ledger |
 | Decision intelligence | KORA | Cross-domain operator command surface |
 | Mobile command | APEX | iOS + Android unified command |
 | Domain packs | TENAX, PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo | Domain-specific intelligence |
@@ -57,7 +57,7 @@ Building governed decision infrastructure for enterprise operators. Background i
 
 The PRISM framework (Pulse, Risk, Intelligence, Signals, Motion) in a single command surface. Signal timeline, priority action queue, Monte Carlo simulation results, and execution accountability. The primary entry point to the SZL governance infrastructure.
 
-### A11oy — Execution Fabric
+### Alloy — Execution Fabric
 
 Workflow orchestration, approval gates, and immutable audit trail. The governance layer that enforces the governed decision loop — connecting every signal to an accountable action with full attribution.
 
@@ -98,12 +98,12 @@ All domain workspaces in one iOS/Android app. Biometric authentication, workspac
 ## Boilerplate
 
 **Short (50 words):**
-SZL Holdings builds governed decision infrastructure for enterprise operators. The A11oy execution fabric and KORA decision intelligence surface connect business signals to accountable action — with human approval gates, AI attribution, and an immutable Proof Chain. Domain packs extend governance into cybersecurity, maritime, real estate, legal, and advisory.
+SZL Holdings builds governed decision infrastructure for enterprise operators. The Alloy execution fabric and KORA decision intelligence surface connect business signals to accountable action — with human approval gates, AI attribution, and an immutable Proof Chain. Domain packs extend governance into cybersecurity, maritime, real estate, legal, and advisory.
 
 **Long (150 words):**
 SZL Holdings builds the governed decision infrastructure that enterprise operators have been missing. As AI tools flood the market with recommendations, the accountability gap grows: decisions made without attribution, AI outputs without governance, signals without routes to action.
 
-SZL Holdings addresses this with one canonical loop — Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning — powered by six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. A11oy is the execution fabric that enforces governance on every step. KORA is the flagship decision intelligence command surface where operators observe, decide, and act. APEX delivers this command layer on iOS and Android.
+SZL Holdings addresses this with one canonical loop — Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning — powered by six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. Alloy is the execution fabric that enforces governance on every step. KORA is the flagship decision intelligence command surface where operators observe, decide, and act. APEX delivers this command layer on iOS and Android.
 
 Domain packs extend the same governance infrastructure into domain-specific intelligence: TENAX for cybersecurity, PARAGON for defense, SEXTANT for maritime, DOMAINE for real estate, Counsel for legal, and Carlota Jo for premium advisory. Founded by Stephen Lutar, SZL Holdings is currently in the design partner phase.
 
@@ -148,9 +148,9 @@ See [COMPANY_FACT_SHEET.md](company-fact-sheet.md) for a complete quick-referenc
 
 ## Recent News & Milestones
 
-- **2026-04-26:** Alpha runtime verified — all 13 web surfaces load, no artifacts broken
+- **2026-04-26:** Alpha runtime verified — all 14 registered artifacts load, no artifacts broken
 - **2026 Q1:** Design partner program launched across security, maritime, and real estate verticals
-- **2026 Q2 (in progress):** A11oy Phase 2 workcell engine, Azure production deployment, enterprise SSO
+- **2026 Q2 (in progress):** Alloy Phase 2 workcell engine, Azure production deployment, enterprise SSO
 
 ---
 

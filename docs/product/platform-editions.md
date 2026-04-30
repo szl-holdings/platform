@@ -88,7 +88,7 @@ The SZL Holdings platform is sold in three editions: **Starter**, **Pro**, and *
 **Included:**
 
 - Everything in Pro
-- All available domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo)
+- All available domain packs (Aegis, Vessels, Terra, Counsel, Carlota Jo)
 - Multi-tenancy with org-scoped administration
 - Unlimited seats
 - 7-year audit retention (configurable)

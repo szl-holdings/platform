@@ -16,7 +16,7 @@ Palantir's Foundry modules (defense, healthcare, supply chain) all build on the 
 Rippling's HR, IT, Finance, and Benefits apps all share an employee record as the system of record. Platform capabilities (identity, permissions, workflows) are shared; domain logic is modular.
 
 ### SZL Pattern
-SZL's domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) all build on six shared primitives. The governance infrastructure is shared; the domain intelligence is modular.
+SZL's domain packs (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo) all build on six shared primitives. The governance infrastructure is shared; the domain intelligence is modular.
 
 ---
 
@@ -53,7 +53,7 @@ The structural advantage of shared primitives: any signal from any domain can co
 | Correlation | Example | Value |
 |-------------|---------|-------|
 | Aegis + Vessels | Cyber intrusion at port + vessel AIS anomaly | Detects coordinated maritime-cyber threats |
-| Terra + PRISM Counsel | Property filing + regulatory change | Identifies compliance-sensitive acquisitions |
+| Terra + Counsel | Property filing + regulatory change | Identifies compliance-sensitive acquisitions |
 | Vessels + Terra | Port congestion + waterfront property value | Reveals maritime-driven real estate opportunities |
 | Aegis + IMPERIUM | Security event + infrastructure anomaly | Distinguishes attack from system failure |
 

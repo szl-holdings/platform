@@ -213,11 +213,11 @@
 | P2-017 | Advanced property insights — mock data mode | CAP-050 | partial | Property data enrichment API |
 | P2-018 | CoStar MLS integration | CAP-051 | stub | COSTAR_API_KEY, CoStar data subscription |
 
-### Domain: Counsel / PRISM Counsel
+### Domain: Counsel
 
 | Gap ID | Capability | Manifest ID | Status | Blocking Dependencies |
 |---|---|---|---|---|
-| P2-019 | PRISM Counsel seed script — broken | CAP-062 | broken | Fix seed script for PRISM recovery DB tables |
+| P2-019 | Counsel seed script — broken | CAP-062 | broken | Fix seed script for PRISM recovery DB tables |
 
 ### Domain: Command / CORTEX
 

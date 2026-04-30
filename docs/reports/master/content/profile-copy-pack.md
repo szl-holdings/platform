@@ -27,7 +27,7 @@ SZL Holdings is the parent company behind six vertical platforms:
 
 Every platform shares a common spine: evidence-backed AI, policy-gated execution, immutable audit trails, and human-in-the-loop approval flows. We don't build AI that replaces operators — we build AI that makes operators dangerous.
 
-The stack: TypeScript monorepo, 442 PostgreSQL tables, 1,618 API endpoints, 16 deployed applications (web + mobile), full CI/CD with GitHub Actions.
+The stack: TypeScript monorepo, 798 PostgreSQL tables, 2,816 API endpoints, 14 registered artifacts (web + mobile), full CI/CD with GitHub Actions.
 
 Previously: [Add background]
 
@@ -59,7 +59,7 @@ SZL Holdings builds AI-powered operating intelligence for real estate, maritime,
 
 ### Medium (100 words)
 ```
-SZL Holdings is an AI-powered enterprise intelligence company operating six vertical platforms: Lyte (business observability), Alloy (execution fabric), Terra (real estate intelligence), Vessels (maritime command), Aegis (defense & SOC operations), and Carlota Jo (premium advisory). Every platform shares a common architecture: evidence-backed retrieval, policy-gated execution, immutable audit trails, and human-in-the-loop governance. Built on a TypeScript monorepo with 442 PostgreSQL tables, 1,618 API endpoints, and 16 deployed applications across web and mobile. SZL doesn't build AI that replaces operators — we build intelligence that makes operators decisive.
+SZL Holdings is an AI-powered enterprise intelligence company operating six vertical platforms: Lyte (business observability), Alloy (execution fabric), Terra (real estate intelligence), Vessels (maritime command), Aegis (defense & SOC operations), and Carlota Jo (premium advisory). Every platform shares a common architecture: evidence-backed retrieval, policy-gated execution, immutable audit trails, and human-in-the-loop governance. Built on a TypeScript monorepo with 798 PostgreSQL tables, 2,816 API endpoints, and 14 registered artifacts across web and mobile. SZL doesn't build AI that replaces operators — we build intelligence that makes operators decisive.
 ```
 
 ### Tagline Options

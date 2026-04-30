@@ -135,7 +135,7 @@
 
 ### PLT-016 — Archived artifact dirs with live API routes
 **Severity:** MEDIUM | **Plane:** Developer Control  
-**Description:** `artifacts/firestorm/`, `artifacts/imperium/`, and `artifacts/prism-counsel/` are not registered as artifacts but their corresponding API routes remain active in api-server (`routes/guardian.ts` 3,973 LOC; PRISM Counsel routes). This creates confusion: are these services still supported?  
+**Description:** `artifacts/firestorm/`, `artifacts/imperium/`, and `artifacts/prism-counsel/` are not registered as artifacts but their corresponding API routes remain active in api-server (`routes/guardian.ts` 3,973 LOC; Counsel routes). This creates confusion: are these services still supported?  
 **Remediation Phase:** Phase 3 — triage; either re-register as internal tools or deprecate routes.  
 **Affected Entities:** `artifacts/firestorm/`, `artifacts/prism-counsel/`, corresponding api-server routes.
 

@@ -62,13 +62,13 @@ The same list is rendered live inside the platform at `/admin/pipeline-command` 
 
 ---
 
-## Legal · PRISM Counsel
+## Legal · Counsel
 
 | Account | Find | Why fit | Hook |
 |---|---|---|---|
-| **Axiom Law** | Chief Legal Operations Officer, Head of Practice Technology | Alt-legal at scale; matter-management consistency across distributed lawyers a known pain. | Distributed-lawyer model lives or dies by consistent matter governance. PRISM Counsel is the standard. |
-| **UnitedLex** | Chief Strategy Officer, VP Legal Operations | Legal-services-as-platform; tech-forward GC clients pulling them toward governed AI. | Their GC clients are asking for governed AI evidence. PRISM Counsel is the answer they can resell. |
-| **Elevate Services** | Chief Operating Officer, VP Managed Services | Law company; managed services for in-house teams; matter-flow governance is core to their value. | Matter-flow governance is what they sell. PRISM Counsel makes it provable. |
+| **Axiom Law** | Chief Legal Operations Officer, Head of Practice Technology | Alt-legal at scale; matter-management consistency across distributed lawyers a known pain. | Distributed-lawyer model lives or dies by consistent matter governance. Counsel is the standard. |
+| **UnitedLex** | Chief Strategy Officer, VP Legal Operations | Legal-services-as-platform; tech-forward GC clients pulling them toward governed AI. | Their GC clients are asking for governed AI evidence. Counsel is the answer they can resell. |
+| **Elevate Services** | Chief Operating Officer, VP Managed Services | Law company; managed services for in-house teams; matter-flow governance is core to their value. | Matter-flow governance is what they sell. Counsel makes it provable. |
 
 ---
 
@@ -88,7 +88,7 @@ The same list is rendered live inside the platform at `/admin/pipeline-command` 
 | Security (Aegis) | 2 | open |
 | Maritime (Vessels) | 2 | open |
 | Real Estate (Terra) | 1 | open |
-| Legal (PRISM Counsel) | 1 | open |
+| Legal (Counsel) | 1 | open |
 | **Total** | **6** | **0 signed** |
 
 When signed, update [DESIGN_PARTNER_PROGRAM.md](design-partner-program.md) Cohort 1 status table.

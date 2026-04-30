@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Sovereign Execution Substrate is the unified execution runtime for all SZL workflows. Every product surface (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo) calls the substrate the same way: `runtime.start(workflow, input, { mode })`.
+The Sovereign Execution Substrate is the unified execution runtime for all SZL workflows. Every product surface (Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo) calls the substrate the same way: `runtime.start(workflow, input, { mode })`.
 
 The substrate is architecturally distinctive against Temporal, LangGraph, Restate, and Inngest by combining four ideas that none of them ship together:
 

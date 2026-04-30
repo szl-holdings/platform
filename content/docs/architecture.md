@@ -3,26 +3,26 @@
 ## System Layers
 
 ### Client Layer
-- 8 React/Vite web applications with TypeScript
-- 8 Expo (React Native) mobile applications
+- 11 React/Vite web applications with TypeScript
+- 1 Expo (React Native) mobile application (iOS + Android)
 - Shared UI component library (@szl-holdings/shared-ui)
 - Tailwind CSS for styling with premium dark theme
 
 ### API Layer
 - Express.js server with TypeScript
-- 1,618 RESTful endpoints across 100+ route files
+- 2,816 RESTful endpoints across 357 route files
 - Auth middleware on all admin/write operations
 - Structured error responses
 - Health/readiness endpoints
 
 ### Data Layer
 - PostgreSQL with Drizzle ORM
-- 442 tables across all domains
+- 798 database tables across all domains
 - Connection pooling
 - Structured schema with foreign key relationships
 
 ### AI Layer
-- HuggingFace Inference for AI decisions
+- Multi-provider AI routing (OpenAI, Anthropic, Gemini)
 - BGE embeddings for hybrid search
 - 9 validated tool schemas
 - Propose-only mode with human approval
@@ -30,7 +30,7 @@
 
 ### Infrastructure Layer
 - Replit managed hosting
-- GitHub Actions CI/CD (14 workflows)
+- GitHub Actions CI/CD (23 workflows)
 - pnpm monorepo workspace
 - Environment-based configuration
 
@@ -38,7 +38,8 @@
 
 Each product domain owns its schema prefix:
 - `alloy_*` — Alloy execution fabric
-- `firestorm_*` — Aegis defense/SOC
+- `firestorm_*` / `aegis_*` — Aegis defense/SOC
+- `tenax_*` / `sentra_*` — Sentra cyber resilience
 - `terra_*` — Real estate intelligence
 - `vessels_*` — Maritime command
 - `carlota_*` — Advisory services

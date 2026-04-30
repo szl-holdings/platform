@@ -65,7 +65,7 @@ The research identified actionable patterns from the highest-signal companies in
 
 ### Repo and Architecture
 
-**Before:** Multiple stale artifacts, duplicate apps (Firestorm, IMPERIUM, Lyte, Prism Counsel, Stephen Site), no canonical source map, README with inaccurate claims.
+**Before:** Multiple stale artifacts, duplicate apps (Firestorm, IMPERIUM, Lyte, Counsel, Stephen Site), no canonical source map, README with inaccurate claims.
 
 **After:** 5 artifacts archived with DEPRECATED.md/ARCHIVED.md markers. Canonical source map written. README Products table updated with deprecated apps marked. Disposition matrix written and verified. Repository now has clean delineation between canonical artifacts (7 active) and archived/internal ones.
 

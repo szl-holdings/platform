@@ -16,7 +16,7 @@ This is the canonical source. Sales decks, pricing pages, MSAs, and order forms 
 
 ## Packaging Principles
 
-1. **Platform first, packs second.** Every customer buys the SZL platform (the six primitives + Alloy + Lyte + CORTEX). Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) are entitlements layered on top.
+1. **Platform first, packs second.** Every customer buys the SZL platform (the six primitives + Alloy + Lyte + CORTEX). Domain packs (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo) are entitlements layered on top. A sovereign/GovTech tier (IMPERIUM) is on the FY27 roadmap.
 2. **Outcomes over modules.** SKUs reflect what the customer can decide and prove, not which screens they can open.
 3. **One platform, three motions.** Self-serve (small teams), guided pilot (mid-market), enterprise (regulated, multi-tenant).
 4. **Governance is not optional.** Every edition includes Proof Chain, Covenant Policy, and Outcome Graph. We do not sell a "lite" governance tier — that would defeat the category claim.
@@ -29,8 +29,8 @@ This is the canonical source. Sales decks, pricing pages, MSAs, and order forms 
 ```
 ┌────────────────────────────────────────────────────────┐
 │  LAYER 3 — Domain Packs (entitlement-gated)            │
-│  Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo │
-│  IMPERIUM (later)                                      │
+│  Aegis · Vessels · Terra · Counsel · Carlota Jo │
+│  IMPERIUM (roadmap, FY27)                              │
 └────────────────────────────────────────────────────────┘
 ┌────────────────────────────────────────────────────────┐
 │  LAYER 2 — Platform Surfaces (included in all editions)│
@@ -103,7 +103,7 @@ Each domain pack is itself a defined bundle. From [DOMAIN_PACK_CATALOG.md](domai
 | Aegis | STIX/TAXII, EDR, SIEM | Triage, contain, escalate, dismiss | `/aegis`, Command Portal Aegis tile |
 | Vessels | AIS, sanctions lists, port data | Sanction-screen, route-flag, hold, release | `/vessels`, CORTEX maritime view |
 | Terra | Property records, ownership graphs, liens | Pursue, qualify, walk, close | `/terra`, CORTEX deal view |
-| PRISM Counsel | Court records, document review pipeline | File, settle, escalate, recover | `/prism-counsel` |
+| Counsel | Court records, document review pipeline | File, settle, escalate, recover | `/prism-counsel` |
 | Carlota Jo | Bookings, advisory engagements | Schedule, deliver, invoice | `/carlota-jo` |
 | IMPERIUM (roadmap) | TBD — sovereign sources | TBD | TBD |
 

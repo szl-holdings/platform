@@ -110,7 +110,7 @@ Success metrics are defined before the pilot starts. Generic metrics are insuffi
 | Aegis (security) | Time from threat detection to approved response action |
 | Vessels (maritime) | Percentage of voyage P&L exceptions reviewed vs. missed |
 | Terra (real estate) | Deal evaluation cycle time (signal to approval) |
-| PRISM Counsel (legal) | Matter review time per attorney per week |
+| Counsel (legal) | Matter review time per attorney per week |
 | General | Decision audit completeness (% of consequential decisions with full attribution) |
 
 **What to avoid:**

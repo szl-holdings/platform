@@ -51,7 +51,7 @@ Dashboards and AI copilots make governance optional. SZL Holdings makes it manda
 - Covenant Policy evaluates every action before execution — operators cannot skip the gate
 - The Proof Chain is append-only — records cannot be edited or deleted after sealing
 - Decision Simulation runs before every approval request — operators always see the risk range
-- Six primitives shared across Aegis, Vessels, Terra, Lyte — same governance, domain-specific intelligence
+- Six primitives shared across Aegis, Vessels, Terra, Lyte, Sentra, Counsel — same governance, domain-specific intelligence
 
 ---
 
@@ -63,7 +63,7 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 **Key message:** Each new domain pack makes the platform more valuable, not more complex.
 
 **Proof points:**
-- Six domain packs operational on shared governance infrastructure
+- Eight domain verticals operational on shared governance infrastructure (six domain extension packs plus Lyte and Alloy as platform layers)
 - Event Fabric enables cross-domain correlation — an AIS anomaly can trigger a security investigation
 - Domain packs contribute signals, analysis models, and UI surfaces — governance is inherited
 - The same Covenant Policy engine governs maritime rerouting decisions and cybersecurity response actions
@@ -73,8 +73,8 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 ## Proof Points (by Theme)
 
 ### Architecture credibility
-- 2,331 API endpoints across 172 route files with deny-by-default global auth
-- 700+ database tables with org-scoped tenant isolation on every query
+- 2,816 API endpoints across 357 route files with deny-by-default global auth
+- 798 database tables with org-scoped tenant isolation on every query
 - 11-role RBAC with OIDC/PKCE, SCIM 2.0, and Azure AD SSO
 - All P0 security gaps resolved in April 2026 hardening sprint
 - Full-stack TypeScript: React 19, Node.js, PostgreSQL 16, Drizzle ORM, Expo
@@ -102,7 +102,7 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 |---|---|
 | "We already have a SIEM/dashboard/copilot" | Those tools solve the visibility problem. This platform solves the accountability problem — who decided what, based on what, and what happened. |
 | "We're not ready for AI governance" | Covenant Policy is designed so you can start with soft gates (human-advisory) and tighten to hard gates (mandatory approval) as you build trust. |
-| "It's in alpha — we need production-ready" | Functional alpha means all workflows are operational with seeded data. The architecture is production-grade — 2,331 endpoints, 700+ tables, full CI/CD. The design partner program is designed for exactly this phase. |
+| "It's in alpha — we need production-ready" | Functional alpha means all workflows are operational with seeded data. The architecture is production-grade — 2,816 endpoints, 798 tables, full CI/CD. The design partner program is designed for exactly this phase. |
 | "It's too expensive" | The ROI model shows break-even at preventing 1–2 compliance incidents per year. See [ROI_MODEL.md](roi-model.md). |
 | "We need SOC 2" | SOC 2 Type II is targeted for Q3–Q4 2026. The architecture is built to SOC 2 controls. We can provide the security questionnaire pack for early-stage review. |
 | "We want to see real customers" | We are in the design partner phase — co-building alongside early customers. The design partner program offers preferred pricing and direct product influence. |

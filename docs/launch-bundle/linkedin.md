@@ -18,8 +18,8 @@ Today we're shipping the next wave across the portfolio.
 - **Aegis** — Unified Defense & Intelligence Command. CISO Executive Board view, XDR Incident Workbench with cross-domain entity graph, the merged Legal Workspace (matter overview, deadline risk queue, AI settlement forecasts), and the Atlas Spatial Runtime now showing OT/ICS posture twins with live incident theater.
 - **CORTEX (mobile)** — unified Command on iOS/Android with a custom unified-brand splash and icon, deep-link push notifications routing into the right workspace, and live cross-domain badge counts off real API signals.
 - **Vessels** — commercial modules wired to live database + API, surfaced on the Command Overview KPIs, with freight rate benchmarking now embedded in the Voyage P&L.
-- **Forge / Autopilot / Prism Counsel** — Client Satisfaction connected to real survey data, Autopilot header stats wired to live API (genome score + job count), Prism Counsel recovery seeds fixed and Zod validation extended to high-traffic routes.
-- **IMPERIUM + Unified Command Portal** — investor narrative refreshed to cover CORTEX, Command Portal, and IMPERIUM end-to-end.
+- **Forge / Autopilot / Counsel** — Client Satisfaction connected to real survey data, Autopilot header stats wired to live API (genome score + job count), Counsel recovery seeds fixed and Zod validation extended to high-traffic routes.
+- **Unified Command Portal** — investor narrative refreshed to cover CORTEX and Command Portal end-to-end.
 - **Security platform** — eight new security modules connected to live API and case management, OT/ICS module now ships a real-time protocol decoder + network traffic replay, and a unified CISO Executive Dashboard aggregates the new module KPIs.
 
 **Per-product, what we operate today**

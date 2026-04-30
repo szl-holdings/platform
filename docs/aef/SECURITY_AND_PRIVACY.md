@@ -16,7 +16,7 @@ AEF enforces five privacy levels. Each level corresponds to specific handling re
 
 ### Privileged Content Handling
 
-Documents indexed under `privileged` profiles (PRISM Counsel, Carlota Jo) are subject to the following additional controls:
+Documents indexed under `privileged` profiles (Counsel, Carlota Jo) are subject to the following additional controls:
 
 1. **Strict tenant boundary enforcement** — privileged chunks are tagged with a `tenantId` at indexing time. The policy guard rejects any retrieval request from a different `tenantId`, even if the request otherwise passes all other checks.
 

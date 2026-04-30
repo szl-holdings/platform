@@ -43,7 +43,7 @@
 | Aegis — Security & Defense | `aegis*.ts` | security_incidents, threat_actors, soar_playbooks |
 | Vessels — Maritime | `vessels*.ts` | vessels, voyages, vessel_anomalies, sanctions_checks |
 | Terra — Real Estate | `terra*.ts` | properties, distress_scores, ownership_entities |
-| PRISM Counsel — Legal | `counsel*.ts` | matters, documents, court_filings, recovery_ops |
+| Counsel — Legal | `counsel*.ts` | matters, documents, court_filings, recovery_ops |
 | IMPERIUM — Cloud | `imperium*.ts` | cloud_resources, governance_policies, cost_allocations |
 | Carlota Jo — Advisory | `carlota_jo*.ts` | clients, bookings, service_catalog, inquiries |
 | Pulse — Briefing | `pulse*.ts` | briefings, signal_summaries, executive_digests |

@@ -9,7 +9,7 @@
 
 ## 1. Registered Artifacts (Product Surfaces)
 
-All artifacts live under `artifacts/`. Registered = has `.replit-artifact/artifact.toml` and appears in workspace registry.
+All artifacts live under `artifacts/`. Registered = has `.replit-artifact/artifact.toml` and appears in workspace registry. **Canonical count: 14 registered artifacts** (rows 1–14 below; Pulse is prototype/not yet in registry — see On-Disk section).
 
 | # | Name | Slug | Kind | Runtime | Preview Path | Domain | Owner Placeholder | Envs | Secrets Used | Health Endpoint | Telemetry | Deployment | Risk | Mod Priority |
 |---|------|------|------|---------|-------------|--------|-------------------|------|-------------|----------------|-----------|-----------|------|--------------|
@@ -19,15 +19,14 @@ All artifacts live under `artifacts/`. Registered = has `.replit-artifact/artifa
 | 4 | Terra — Real Estate Intelligence | `terra` | web | React 19 + Vite 7 | `/terra/` | Real Estate (domain pack) | domain-terra | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P3 |
 | 5 | Vessels — Maritime Intelligence | `vessels` | web | React 19 + Vite 7 | `/vessels/` | Maritime (domain pack) | domain-vessels | all | VITE_APP_URL, MARINE_TRAFFIC_API_KEY | None (SPA) | None | Replit workflow → Vite dev | LOW | P3 |
 | 6 | Carlota Jo Consulting | `carlota-jo` | web | React 19 + Vite 7, i18next | `/carlota-jo/` | Advisory (domain pack) | domain-carlota | all | VITE_APP_URL, Stripe keys | None (SPA) | None | Replit workflow → Vite dev | LOW | P3 |
-| 7 | Pulse — AI Executive Briefing | `pulse` | web | React 19 + Vite 7 | `/pulse/` | AI Briefing | platform-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
-| 8 | Sentra — Cyber Resilience Command | `sentra` | web | React 19 + Vite 7 | `/sentra/` | Cyber (domain pack) | domain-sentra | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
-| 9 | Counsel — Legal Matter Command | `counsel` | web | React 19 + Vite 7 | `/counsel/` | Legal (domain pack) | domain-counsel | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
-| 10 | Lyte — Decision Intelligence | `lyte-command-center` | web | React 19 + Vite 7 | `/lyte/` | Observability / Intelligence | lyte-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | MEDIUM | P1 |
-| 11 | A11oy — Brand Orchestration Layer | `a11oy` | web | React 19 + Vite 7 | `/a11oy/` | Brand / Platform Substrate | platform-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | MEDIUM | P1 |
-| 12 | Conduit — Reverse ETL | `conduit` | web | React 19 + Vite 7 | `/conduit/` | Data / Integration | platform-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
-| 13 | SZL Holdings — Mobile Command (APEX) | `szl-holdings-mobile` | mobile | Expo 53 / React Native | `/szl-holdings-mobile/` | Mobile | mobile-team | all | EXPO_PUBLIC_DOMAIN, EXPO_PUBLIC_REPL_ID, Firebase credentials via EAS | None | None | EAS Build → Expo Go / standalone | MEDIUM | P2 |
-| 14 | SZL Holdings — Governed Autonomy Demo | `szl-demo-video` | video | React Three Fiber + Lottie | `/szl-demo-video/` | Marketing | marketing-team | all | None | None | None | Replit workflow → Vite dev | LOW | P4 |
-| 15 | PRAXIS — Unified Agentic AI Layer | `mockup-sandbox` | design | React 19 + Vite 7, Radix UI | `/nexus/` | Design / Internal | platform-team | dev | None | None | None | Replit workflow → Vite dev | LOW | P4 |
+| 7 | Sentra — Cyber Resilience Command | `sentra` | web | React 19 + Vite 7 | `/sentra/` | Cyber (domain pack) | domain-sentra | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
+| 8 | Counsel — Legal Matter Command | `counsel` | web | React 19 + Vite 7 | `/counsel/` | Legal (domain pack) | domain-counsel | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
+| 9 | Lyte — Decision Intelligence | `lyte-command-center` | web | React 19 + Vite 7 | `/lyte/` | Observability / Intelligence | lyte-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | MEDIUM | P1 |
+| 10 | Alloy — Brand Orchestration Layer | `a11oy` | web | React 19 + Vite 7 | `/a11oy/` | Brand / Platform Substrate | platform-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | MEDIUM | P1 |
+| 11 | Conduit — Reverse ETL | `conduit` | web | React 19 + Vite 7 | `/conduit/` | Data / Integration | platform-team | all | VITE_APP_URL | None (SPA) | None | Replit workflow → Vite dev | LOW | P2 |
+| 12 | SZL Holdings — Mobile Command (APEX) | `szl-holdings-mobile` | mobile | Expo 53 / React Native | `/szl-holdings-mobile/` | Mobile | mobile-team | all | EXPO_PUBLIC_DOMAIN, EXPO_PUBLIC_REPL_ID, Firebase credentials via EAS | None | None | EAS Build → Expo Go / standalone | MEDIUM | P2 |
+| 13 | SZL Holdings — Governed Autonomy Demo | `szl-demo-video` | video | React Three Fiber + Lottie | `/szl-demo-video/` | Marketing | marketing-team | all | None | None | None | Replit workflow → Vite dev | LOW | P4 |
+| 14 | PRAXIS — Unified Agentic AI Layer | `mockup-sandbox` | design | React 19 + Vite 7, Radix UI | `/nexus/` | Design / Internal | platform-team | dev | None | None | None | Replit workflow → Vite dev | LOW | P4 |
 
 ### On-Disk Artifacts (Not Currently Registered)
 
@@ -38,7 +37,8 @@ All artifacts live under `artifacts/`. Registered = has `.replit-artifact/artifa
 | `artifacts/pluginmesh/` | Plugin mesh surface; registered in workflow but not in current artifact.toml registry |
 | `artifacts/imperium/` | Archived (merged into Command); no artifact.toml |
 | `artifacts/firestorm/` | Archived (security defense UI); API routes live under `/api/firestorm` |
-| `artifacts/prism-counsel/` | Archived; PRISM Counsel UI; API routes still live |
+| `artifacts/prism-counsel/` | Archived; Counsel UI; API routes still live |
+| `artifacts/pulse/` | Prototype (AI Executive Briefing); not yet in canonical registry |
 | `artifacts/cortex-mobile/` | Concept only; no active development |
 | `artifacts/internal-audit/` | Internal audit tooling; not a product |
 
@@ -189,7 +189,7 @@ Key `lib/` packages that predate or duplicate `packages/` entries:
 |---------|------|---------|-----------------|
 | `lib/db` | `@szl-holdings/db` | Central PostgreSQL client (Drizzle ORM, 730 tables, 170 schema files) | None — canonical |
 | `lib/ai-engine` | `@szl-holdings/ai-engine` | AI model router, control plane, provider adapters | May overlap `packages/ai-control-plane` |
-| `lib/a11oy-fabric` | `@szl-holdings/a11oy-fabric` | A11oy brand orchestration runtime | None |
+| `lib/a11oy-fabric` | `@szl-holdings/a11oy-fabric` | Alloy brand orchestration runtime | None |
 | `lib/audit` | `@szl-holdings/audit` | Audit log utilities, IP hash | None |
 | `lib/auth` | `@szl-holdings/auth` | Auth utilities | May overlap `packages/auth-shared` |
 | `lib/config` | `@szl-holdings/config` | Config primitives | May overlap `packages/config` |

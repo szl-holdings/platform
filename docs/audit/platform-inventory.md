@@ -146,7 +146,7 @@ find artifacts/api-server/src/routes -name "*.ts" | wc -l                   # 21
 | Aegis / Security | `firestorm.ts`, `a2a.ts`, `agent-autonomy.ts`, `ai-safety.ts`, `agent-federation.ts`, `agent-os.ts`, `agent-training.ts`, `ai-engine.ts` |
 | Vessels / Maritime | `vessels.ts`, `vessels-extended.ts`, `vessels-insurance.ts`, `vessels-live.ts`, `vessels-platform.ts`, `vessels-trading.ts` |
 | Terra / Real Estate | `terra.ts`, `terra-broker.ts`, `terra-crm.ts`, `terra-distress.ts`, `terra-live.ts` |
-| Prism Counsel | `prism-counsel-core.ts`, `prism-counsel-court.ts`, `prism-counsel-ny.ts`, `prism-counsel-ops.ts`, `prism-counsel-purview.ts` |
+| Counsel | `prism-counsel-core.ts`, `prism-counsel-court.ts`, `prism-counsel-ny.ts`, `prism-counsel-ops.ts`, `prism-counsel-purview.ts` |
 | Analytics / Observability | `analytics.ts`, `analytics-engine.ts`, `apm.ts`, `telemetry.ts`, `usage.ts` |
 | Auth / Identity | `auth.ts`, `scim.ts`, `invitations.ts` |
 | Admin / Platform | `admin.ts`, `backup.ts`, `support.ts`, `webhooks.ts`, `tenant-provisioning.ts`, `tenant-health.ts` |
@@ -178,7 +178,7 @@ See `docs/audit/env-canonical-map.md` for the full canonical map.
 | `artifacts/command: web` | Command | Active |
 | `artifacts/firestorm: web` | Firestorm | Active |
 | `artifacts/mockup-sandbox: Component Preview Server` | Mockup Sandbox | Internal only |
-| `artifacts/prism-counsel: web` | Prism Counsel | Active |
+| `artifacts/prism-counsel: web` | Counsel | Active |
 | `artifacts/stephen-site: web` | Stephen Site | **Registered but deprecated** — should be stopped and deregistered in Phase 2 |
 | `artifacts/szl-holdings-mobile: expo` | Mobile | Active |
 | `artifacts/szl-holdings: web` | SZL Holdings | Active |

@@ -25,7 +25,7 @@ Each dimension is scored on a 5-point scale:
 
 | Criterion | Status |
 |---|---|
-| All domain packs functional | ✓ Functional alpha across Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo |
+| All domain packs functional | ✓ Functional alpha across Aegis, Vessels, Terra, Counsel, Carlota Jo |
 | Proof Chain and governance primitives working | ✓ Built and functional |
 | RBAC and multi-tenancy | ✓ Architectural, org-scoped |
 | API documented | ✓ Swagger UI + OpenAPI spec |

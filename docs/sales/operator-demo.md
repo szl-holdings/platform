@@ -28,7 +28,7 @@ They will click. They will ask "what happens if I don't approve?" They will want
 
 ## Pre-Demo Setup
 
-The operator demo is **always domain-specific**. Pick the operator's primary domain (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo) and rehearse with that domain pack as the lead.
+The operator demo is **always domain-specific**. Pick the operator's primary domain (Aegis, Vessels, Terra, Counsel, Carlota Jo) and rehearse with that domain pack as the lead.
 
 | Tab | URL | State |
 |-----|-----|-------|

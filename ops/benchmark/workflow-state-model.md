@@ -179,7 +179,7 @@ Domain packs may extend the templates with domain-specific steps, but they MUST 
 - **Aegis (security investigation):** `intake → enrich (MITRE ATT&CK) → correlate → recommendation → simulation → policy → execution → proof → outcome → learning`
 - **Vessels (sanctions screening):** `intake → AIS-resolve → sanctions-check → recommendation → simulation → policy → execution → proof → outcome → learning`
 - **Terra (distress deal):** `intake → ownership-resolve → market-comp → recommendation → simulation → policy → execution → proof → outcome → learning`
-- **PRISM Counsel (matter intake):** `intake → conflicts-check → categorize → recommendation → simulation → policy → execution → proof → outcome → learning`
+- **Counsel (matter intake):** `intake → conflicts-check → categorize → recommendation → simulation → policy → execution → proof → outcome → learning`
 
 Each domain pack's workflow template is documented in its own pack spec; this document defines only the platform-layer state machine they must conform to.
 

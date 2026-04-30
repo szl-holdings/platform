@@ -204,9 +204,9 @@ The plan is most sensitive to conversion rate (driven by GTM motion quality) and
 | Aegis | 28% |
 | Vessels | 22% |
 | Terra | 18% |
-| PRISM Counsel | 17% |
+| Counsel | 17% |
 | Carlota Jo | 8% |
-| IMPERIUM (FY27 launch) | 7% |
+| Sentra | 7% |
 
 This is a planning estimate; actual mix will reflect demand by domain. We do not concentrate engineering on the top pack at the expense of breadth — breadth is the moat.
 

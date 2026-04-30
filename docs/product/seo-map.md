@@ -18,7 +18,7 @@
 | `/solutions/aegis` | Aegis — Security & Defense Intelligence | SOC command, MITRE ATT&CK mapping, SOAR playbooks, AI triage with human approval gates. | `og-aegis.jpg` |
 | `/solutions/vessels` | Vessels — Maritime Intelligence | Fleet command, AIS telemetry, sanctions screening, dark vessel detection, exception-based workflows. | `og-vessels.jpg` |
 | `/solutions/terra` | Terra — Real Estate Intelligence | NYC distress property pipeline, ownership entity graph, deal pipeline, broker workflow. | `og-terra.jpg` |
-| `/solutions/prism-counsel` | PRISM Counsel — Legal Intelligence | AI-assisted legal operations with approval gates, proof chain, and immutable audit trail. | `og-prism-counsel.jpg` |
+| `/solutions/prism-counsel` | Counsel — Legal Intelligence | AI-assisted legal operations with approval gates, proof chain, and immutable audit trail. | `og-prism-counsel.jpg` |
 | `/pricing` | Pricing — SZL Holdings | Transparent pricing for Lyte, Alloy, and domain pack products. Design partner pricing available. | `og-pricing.jpg` |
 | `/contact` | Contact — SZL Holdings | Enterprise inquiries, design partner opportunities, and investment conversations. | `og-contact.jpg` |
 | `/design-partners` | Design Partners — SZL Holdings | Join the SZL Holdings design partner program. Shape the governed intelligence platform alongside the founding team. | `og-design-partners.jpg` |

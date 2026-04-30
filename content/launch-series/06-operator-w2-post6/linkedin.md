@@ -15,7 +15,7 @@ The moat is the governance infrastructure — six load-bearing primitives runnin
 
 Here's how it compounds:
 
-**The domain pack architecture**: Every domain on the platform (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo) is a configuration layer, not a new stack. Domain packs configure the shared governance infrastructure. A competitor building separate governed AI tools for maritime and for real estate is building two complete stacks — two Proof Chains with incompatible schemas, two Outcome Graphs with no cross-domain learning surface. Every new vertical requires rebuilding governance from scratch.
+**The domain pack architecture**: Every domain on the platform (Aegis, Vessels, Terra, Counsel, Carlota Jo) is a configuration layer, not a new stack. Domain packs configure the shared governance infrastructure. A competitor building separate governed AI tools for maritime and for real estate is building two complete stacks — two Proof Chains with incompatible schemas, two Outcome Graphs with no cross-domain learning surface. Every new vertical requires rebuilding governance from scratch.
 
 **The learning flywheel**: More decisions → richer Outcome Graph → better-calibrated confidence scores → higher operator trust → more authorized decisions → more decisions. But the compound effect isn't primarily volume — it's cross-domain signal density. A pattern in Vessels that predicts voyage delays, correlated against Terra data that predicts counterparty liquidity stress, surfaces a risk signal that no single-vertical tool can see.
 

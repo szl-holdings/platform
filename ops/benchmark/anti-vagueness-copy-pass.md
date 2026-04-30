@@ -28,7 +28,7 @@ Every public-facing page was audited against the governed decision infrastructur
 
 2. **platform.tsx HOW_IT_WORKS**: Three generic steps replaced with the nine-step loop organized as three phases: Signal→Context→Recommendation, Simulation→Policy→Execution, Proof→Outcome→Learning.
 
-3. **platform.tsx EXPANSION_VERTICALS**: Four verticals → six domain packs (added PRISM Counsel and IMPERIUM). Grid changed from 4-col to 3-col to accommodate.
+3. **platform.tsx EXPANSION_VERTICALS**: Four verticals → six domain packs (added Counsel and IMPERIUM). Grid changed from 4-col to 3-col to accommodate.
 
 4. **company.tsx PRODUCT_HIERARCHY**: "Lyte" → "Command + Lyte" with governed decision language. Alloy description updated to mention Proof Chain, Monte Carlo, and Covenant Policy by name.
 

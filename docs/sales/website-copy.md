@@ -83,7 +83,7 @@ All copy below reflects the canonical messaging from [LAUNCH_MESSAGE_HOUSE.md](m
 
 **Domain packs card:**
 > **Domain Packs — Governed by Design**  
-> Aegis (security), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory). Domain-specific intelligence on shared governance infrastructure.
+> Aegis (security), Vessels (maritime), Terra (real estate), Counsel (legal), Carlota Jo (advisory). Domain-specific intelligence on shared governance infrastructure.
 
 ---
 

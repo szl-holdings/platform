@@ -18,7 +18,7 @@ SZL Holdings (the company / the platform)
 │   └── Connector Mesh
 └── Lyte (operator command layer / commercial wedge)
     └── Domain Packs (governed vertical extensions)
-        ├── PRISM Counsel — Legal Observability
+        ├── Counsel — Legal Observability
         ├── Vessels — Maritime Intelligence
         ├── Aegis — Security & Defense
         ├── Terra — Real Estate Intelligence

@@ -1102,7 +1102,7 @@ Routes are organized by domain prefix. `GET`, `POST`, `PATCH`, `PUT`, `DELETE` m
 **Partner Portal**  
 `GET /partner/accounts` | `POST /partner/accounts` | `GET/PATCH /partner/accounts/:id` | `POST /partner/accounts/:id/tenants` | `POST /partner/accounts/:id/tenants/assign` | `DELETE /partner/accounts/:id/tenants/:orgId` | `GET /partner/accounts/:id/usage` | `GET /partner/me` | `GET/POST /portal/documents` | `GET/POST /portal/messages` | `GET /portal/my-account` | `GET /portal/updates`
 
-**Prism Counsel (Legal Platform)**  
+**Counsel (Legal Platform)**  
 `GET/POST /prism-counsel/matters` | `GET/PATCH /prism-counsel/matters/:id` | `GET /prism-counsel/matters/:id/audit-packets` | `GET /prism-counsel/matters/:id/contradictions` | `GET /prism-counsel/matters/:id/copilot-drafts` | `GET /prism-counsel/matters/:id/forecast-diffs` | `GET /prism-counsel/matters/:id/pressure` | `GET /prism-counsel/matters/:id/proof-chain` | `GET /prism-counsel/matters/:id/twin` | Full CRUD for NY-specific subresources (clocks, appeals, no-fault-claims, demand-packets, offers, forecasts, mediations, denials, verifications, medical-bills, AI-reviews) | `GET /prism-counsel/dashboard` | `GET /prism-counsel/health` | `GET/POST /prism-counsel/approvals` | `GET /prism-counsel/ny/dashboard` | `GET /prism-counsel/ny/matters` + related | `GET /prism-counsel/signal-forge/runs` | `GET /prism-counsel/worldline/signals`
 
 **Public / Status**  
@@ -1178,13 +1178,13 @@ Each of the six archived artifact directories has been individually inspected.
 
 ---
 
-### Archived App D: Prism Counsel
+### Archived App D: Counsel
 **Directory:** `artifacts/prism-counsel`  
 **Disposition:** DEPRECATED — merged into Aegis compliance module  
 **Source code (`src/`):** Not present  
 **Contents:** `dist/` (compiled bundle, read-only), `DEPRECATED.md`  
 **Active workflows:** None  
-**API routes serving it:** `artifacts/api-server/src/routes/prism-counsel-*.ts` (still active, serving Aegis and any Prism Counsel embeds in SZL Holdings)  
+**API routes serving it:** `artifacts/api-server/src/routes/prism-counsel-*.ts` (still active, serving Aegis and any Counsel embeds in SZL Holdings)  
 **Action required:** None — correctly retired; SZL Holdings `/prism-counsel` route redirects correctly
 
 ---

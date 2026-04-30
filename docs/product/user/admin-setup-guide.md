@@ -186,7 +186,7 @@ Signal sources feed operational data into the platform. Connect sources relevant
 | Security (Aegis) | SIEM connector, STIX/TAXII feed, Splunk |
 | Maritime (Vessels) | AIS feed (MarineTraffic API), Port authority feeds |
 | Real Estate (Terra) | NYC public records (auto-configured), MLS feed |
-| Legal (PRISM Counsel) | Court filing APIs, document management system |
+| Legal (Counsel) | Court filing APIs, document management system |
 
 ### 4.2 Integration Health
 

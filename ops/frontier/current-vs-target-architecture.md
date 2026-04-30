@@ -108,7 +108,7 @@ Generated: 2026-04-16 (updated)
 | OAUTH_STATE_SECRET hardcoded in .replit | P0 | This task (Phase 1) |
 | VAPID_PRIVATE_KEY hardcoded in .replit | P0 | This task (Phase 1) |
 | Mobile Firebase configs need .gitignore protection | P0 | This task (Phase 1) |
-| README claims outdated (22 apps, 2331 endpoints, 644 tables, Node 20) | P1 | Product topology task |
+| README claims outdated (22 apps, 2,816 endpoints, 644 tables, Node 20) | P1 | Product topology task |
 | Legacy CI workflow archived | P2 — RESOLVED | CI/CD cleanup task |
 | api-spec and approvals lib packages are empty shells | P2 | Lib cleanup task |
 | CORTEX mobile not yet in app stores | P1 | Mobile task |

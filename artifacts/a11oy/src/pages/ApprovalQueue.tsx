@@ -42,7 +42,7 @@ const PENDING_ACTIONS = [
     title: 'Talbot matter — escalate discovery to lead counsel and external co-counsel',
     domain: 'Legal',
     agent: 'Counsel Sentinel',
-    agentRole: 'Domain Specialist — Prism Counsel',
+    agentRole: 'Domain Specialist — Counsel',
     risk: 'Critical',
     urgency: 'T-48h court deadline',
     requestedAt: '2026-04-26T08:00:00Z',

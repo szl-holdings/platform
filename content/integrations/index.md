@@ -15,7 +15,7 @@ SZL Holdings integrates with key services across authentication, data, distribut
 |-------------|--------|--------|-------------|
 | GitHub | Engineering | ✅ Live | CI/CD, code scanning, dependency review, CODEOWNERS |
 | Replit Auth | Authentication | ✅ Live | OpenID Connect with PKCE |
-| PostgreSQL | Database | ✅ Live | Primary data store (442 tables) |
+| PostgreSQL | Database | ✅ Live | Primary data store (798 tables) |
 | HuggingFace | AI/ML | ✅ Live | Inference API, BGE embeddings |
 | Census.gov | Data (Terra) | ✅ Live | Housing, demographic, economic data |
 | HUD | Data (Terra) | ✅ Live | Fair market rents, housing data |

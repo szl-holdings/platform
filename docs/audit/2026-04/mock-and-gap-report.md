@@ -151,7 +151,7 @@
 **Issue:** No email subscription flow for daily briefings.  
 **Remediation:** Existing open task ("Let users subscribe to daily Pulse briefing emails").
 
-### P3-005: Prism Counsel settlement forecasting uses heuristic stub
+### P3-005: Counsel settlement forecasting uses heuristic stub
 **Artifact:** `api-server/src/lib/domain-services/`  
 **Issue:** Settlement forecasting uses rule-based heuristics, labeled as "smart stub for future ML models."  
 **Remediation:** Label in UI as "Estimated" and note methodology.

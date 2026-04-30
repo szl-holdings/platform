@@ -84,7 +84,7 @@ Every founder-led conversation, sales call, demo, deck, and public surface draws
 >
 > **5. Trust built into workflow.** Trust surfaces are operator pages used during the workday, not compliance pages used before an audit. Proof Chain runs on every recommendation.
 >
-> **6. Domain pack extensibility.** Six domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM — ride one shared governance substrate. New domain packs ship with governance on day one.
+> **6. Domain pack extensibility.** Six domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM — ride one shared governance substrate. New domain packs ship with governance on day one.
 
 (Full discussion in `moat-definition.md`.)
 
@@ -101,7 +101,7 @@ Every founder-led conversation, sales call, demo, deck, and public surface draws
 | CISO | "Aegis Defense workspace, with every SOC decision attributed and audit-ready. Add Aegis Command for managed-services. Add Aegis Intelligence for AI governance. Same governance substrate, three workspaces." |
 | Fleet executive | "Vessels Command surface with AIS, sanctions screening, voyage simulation, and dark vessel detection — every commercial decision routed through governance, every approval attributed, every outcome closed." |
 | NYC broker / investor | "Terra command surface with NYC distress pipeline, ownership graph, and deal flow — every pursue / pass decision recorded with evidence, every learning fed back into the recommendation engine." |
-| Managing partner / counsel | "PRISM Counsel with matter triage, conflict checks, and retainer decisions — every judgment call attributed to the partner, every output evidence-backed, every audit-ready." |
+| Managing partner / counsel | "Counsel with matter triage, conflict checks, and retainer decisions — every judgment call attributed to the partner, every output evidence-backed, every audit-ready." |
 | CEO / COO | "Lyte command surface with PRISM framework, command inbox, action queue, approvals center — one operating loop across the org, one audit trail, one closed-loop learning system." |
 
 ---

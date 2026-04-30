@@ -29,7 +29,7 @@ All public site colors must use the CSS custom properties defined in `index.css`
 | Aegis | `var(--color-aegis)` | `hsl(222,60%,58%)` |
 | Vessels | `var(--color-vessels)` | `hsl(206,72%,52%)` |
 | Terra | `var(--color-terra)` | `hsl(140,52%,46%)` |
-| PRISM Counsel | `var(--color-prism)` | `hsl(260,60%,65%)` |
+| Counsel | `var(--color-prism)` | `hsl(260,60%,65%)` |
 | Carlota Jo | `var(--color-carlota)` | `hsl(36,48%,58%)` |
 | SZL / Lyte | `var(--color-szl-accent)` | `hsl(192,72%,48%)` |
 

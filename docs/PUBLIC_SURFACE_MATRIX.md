@@ -29,7 +29,7 @@
 | Contradiction | Location | Resolution |
 |---------------|----------|------------|
 | README says "15 registered artifacts" but 14 are registered + 3 dead dirs | README + artifact system | Update to 14 active; note 3 archived |
-| `prism-counsel-ci.yml` references archived PRISM Counsel | `.github/workflows/` | Remove workflow |
+| `prism-counsel-ci.yml` references archived Counsel artifact | `.github/workflows/` | Remove workflow |
 | Platform table says "PARAGON" but artifact is "Aegis" | README portfolio table | Verify brand mapping is intentional (PARAGON = public brand, Aegis = artifact slug) |
 | Schema definitions (1,084) exceed live tables (732) | `lib/db/schema` vs `pg_tables` | 352 definitions not materialized — includes relations, views, and orphans |
 

@@ -117,7 +117,7 @@ For each SZL surface, identify the 2–3 strongest in-market comparables. Extrac
 
 ---
 
-## 6. Counsel / PRISM Counsel — Legal Intelligence
+## 6. Counsel — Legal Intelligence
 
 ### Comparables
 | Reference | Why it benchmarks |

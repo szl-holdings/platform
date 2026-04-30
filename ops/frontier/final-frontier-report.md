@@ -196,7 +196,7 @@ State machine-enforced workflow progression where each transition:
 
 ### 5.4 Cross-Domain Entity Graph Overlays
 
-Visualize connections between entities across domains: a vessel connected to a deal in S&P connected to a legal matter in Prism Counsel connected to a real estate asset in Terra.
+Visualize connections between entities across domains: a vessel connected to a deal in S&P connected to a legal matter in Counsel connected to a real estate asset in Terra.
 
 **Implementation path**: Build a graph database model (or simulate with join tables) for cross-domain entity relationships. Render with a force-directed graph using D3 or React Force Graph. Surface as a "Connections" panel on any entity detail view.
 
@@ -252,7 +252,7 @@ These are tracked as separate tasks and are not blocked by this document:
 | Connect Forge Client Satisfaction to real survey data | Data |
 | Wire live API data to Autopilot header stats | Data |
 | Add new apps to CI build checks | CI |
-| Fix broken seed scripts for Prism Counsel recovery tables | Data |
+| Fix broken seed scripts for Counsel recovery tables | Data |
 | Add Zod validation to remaining high-traffic routes | API |
 | Build automated route security matrix | Security |
 | Keep smoke tests clean (remove test records after each run) | QA |

@@ -2,7 +2,7 @@
 
 ## Company Architecture
 
-SZL Holdings is the parent company operating six vertical platforms sharing a common operating spine.
+SZL Holdings is the parent company operating eight domain vertical platforms sharing a common operating spine.
 
 ### Product Family
 
@@ -11,8 +11,10 @@ SZL Holdings is the parent company operating six vertical platforms sharing a co
 | **Lyte** | Business Observability | Executive command plane — see everything, decide fast |
 | **Alloy** | Execution Fabric | Workflow orchestration with human-in-the-loop governance |
 | **Aegis** | Defense & Intelligence | SOC operations, threat intel, incident response |
+| **Sentra** | Cyber Resilience | Cyber posture management, recovery readiness, incident command |
 | **Terra** | Real Estate | Portfolio intelligence, distress detection, deal tracking |
 | **Vessels** | Maritime | Fleet command, voyage economics, compliance monitoring |
+| **Counsel** | Legal Matter Command | Matter tracking, obligation mapping, legal exposure management |
 | **Carlota Jo** | Advisory | Premium advisory services for high-net-worth clients |
 
 ### Shared Operating Spine
@@ -32,14 +34,14 @@ The SZL Holdings platform includes a built-in content publishing and distributio
 - Public link-in-bio and newsletter subscription pages
 
 ## Technical Foundation
-- **442 PostgreSQL tables** across all domains
-- **1,618 API endpoints** with auth middleware
-- **16 deployed applications** (8 web + 8 mobile)
-- **14 GitHub CI/CD workflows** with security scanning
+- **798 database tables** across all domains
+- **2,816 API endpoints** with auth middleware
+- **14 registered artifacts** (11 web + 1 mobile + 1 video + 1 design)
+- **23 GitHub CI/CD workflows** with security scanning
 - **TypeScript throughout** — full type safety
 
 ## Surface Map
-- **Web apps**: szl-holdings, lyte-command-center, firestorm (Aegis), terra, vessels, carlota-jo, stephen-site
-- **Mobile apps**: Matching Expo apps for each product
+- **Web apps**: szl-holdings, lyte-command-center, sentra, aegis, terra, vessels, carlota-jo, counsel, pulse, command, api-server
+- **Mobile**: szl-holdings-mobile (Expo / React Native — iOS + Android)
 - **Admin**: /admin/* for platform administration
 - **Public**: /insights, /link-in-bio, /newsletter, /trust, /docs

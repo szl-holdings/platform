@@ -237,7 +237,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
     id: 'security-legal',
     name: 'Security Incident → Legal Review',
     description:
-      'When a critical cyber incident is detected in PARAGON, automatically trigger a legal hold review in PRISM Counsel and update executive risk score.',
+      'When a critical cyber incident is detected in PARAGON, automatically trigger a legal hold review in Counsel and update executive risk score.',
     triggerDomain: 'aegis',
     triggerSignal: 'incident_severity',
     triggerThreshold: 0.8,

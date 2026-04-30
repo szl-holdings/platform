@@ -28,7 +28,7 @@ All three pieces carry the same thesis at different lengths and registers:
 All screenshots captured from the live platform and saved to `screenshots/`:
 
 - [x] **`screenshots/command-dashboard.jpg`** — Unified Command surface showing the cross-domain intelligence sidebar (Signal Correlation, Evidence Explorer, Evidence Registry, Outcome Graph, Simulation) and the Governed Decision Loop view. Use as primary Medium header image and LinkedIn attachment 1.
-- [x] **`screenshots/szl-holdings-dashboard.jpg`** — SZL Holdings homepage: "The governed infrastructure for high-consequence decisions" with the ecosystem domain pills (Counsel, Lyte, Aegis, Vessels, Terra, CJ, IMPERIUM). Use as Medium inline image and LinkedIn attachment 2.
+- [x] **`screenshots/szl-holdings-dashboard.jpg`** — SZL Holdings homepage: "The governed infrastructure for high-consequence decisions" with the ecosystem domain pills (Counsel, Lyte, Aegis, Sentra, Vessels, Terra, CJ). Use as Medium inline image and LinkedIn attachment 2.
 - [x] **`screenshots/signal-correlation.jpg`** — Command surface navigated to Signal Correlation, showing the Cross-Platform Intelligence section of the nav. Use as LinkedIn attachment 3.
 
 **Note:** The NEXUS/PRAXIS (mockup-sandbox) surface was not capturable at time of writing due to a startup issue in this environment. The `command-dashboard.jpg` screenshot shows the equivalent cross-domain intelligence structure and serves the same narrative purpose. If the NEXUS surface needs to be captured separately, it is available at the `/nexus/` preview path when the mockup-sandbox workflow is healthy.

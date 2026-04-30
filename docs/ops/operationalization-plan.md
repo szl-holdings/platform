@@ -418,11 +418,11 @@ CREATE TABLE mfa_secrets (
 | P2-017 Property insights | `lib/domain-services/terra/index.ts` | Integrate property data enrichment API; remove dataMode: 'mock' gate; return real data for any address | `PROPERTY_DATA_API_KEY` | Attom Data or similar | Climate risk score returned for a non-seed property address |
 | P2-018 CoStar | `routes/terra.ts` (market data section) | Implement CoStar API client; wire to market comps and listing data endpoints | `COSTAR_API_KEY` | CoStar Group (subscription) | Market comps page shows real CoStar listing data |
 
-### Counsel / PRISM Counsel
+### Counsel
 
 | Gap | Module | Steps | Env Vars | External Service | Acceptance Test |
 |---|---|---|---|---|---|
-| P2-019 PRISM Counsel seed | `scripts/seed-prism-counsel.ts` | Fix broken migration for recovery tables; run `pnpm db:push`; verify seed completes | `DATABASE_URL` | None | `node scripts/seed-prism-counsel.ts` exits 0; PRISM Counsel dashboard renders matter data |
+| P2-019 Counsel seed | `scripts/seed-prism-counsel.ts` | Fix broken migration for recovery tables; run `pnpm db:push`; verify seed completes | `DATABASE_URL` | None | `node scripts/seed-prism-counsel.ts` exits 0; Counsel dashboard renders matter data |
 
 ### Command / CORTEX
 

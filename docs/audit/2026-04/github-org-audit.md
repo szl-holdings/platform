@@ -105,7 +105,7 @@ Fresh screenshots were captured for all active web artifacts and uploaded to the
 
 ### scripts/portfolio.config.json
 - Moved `artifacts/sentra` and `artifacts/counsel` from `excludeArtifacts` to `domainPacks`
-- Updated PRISM Counsel status from "Archived (Task #634)" to "Superseded by Counsel (Active)"
+- Updated Counsel status from "Archived (Task #634)" to "Superseded by Counsel (Active)"
 
 ### szl-holdings/.github org profile README
 - Added **Sentra** product gallery section with screenshots and description

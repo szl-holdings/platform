@@ -131,7 +131,7 @@ Each role inherits all permissions of lower roles. See `ops/backend/authz-matrix
 ## Integration Patterns
 
 **High-priority integrations already in scope:**
-- Microsoft 365 (SharePoint, Outlook, Teams) — for PRISM Counsel
+- Microsoft 365 (SharePoint, Outlook, Teams) — for Counsel
 - AIS data feeds — for Vessels maritime intelligence
 - STIX/TAXII threat intelligence — for Aegis security
 

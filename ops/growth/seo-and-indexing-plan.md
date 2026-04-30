@@ -45,7 +45,7 @@ Last updated: 2026-04-16
 - "AI governance platform enterprise"
 
 ### Secondary
-- "legal matter intelligence software" (PRISM Counsel)
+- "legal matter intelligence software" (Counsel)
 - "maritime fleet intelligence platform" (Vessels)
 - "real estate portfolio intelligence" (Terra)
 - "SOC command platform" (Aegis)

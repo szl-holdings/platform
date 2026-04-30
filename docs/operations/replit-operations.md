@@ -223,7 +223,7 @@ pnpm seed:atlas              # Seed all 4 canonical demo scenes
 pnpm seed:atlas:aegis        # Aegis ransomware scene only
 pnpm seed:atlas:vessels      # Vessels sanctions scene only
 pnpm seed:atlas:terra        # Terra distress scene only
-pnpm seed:atlas:counsel      # Prism Counsel matter scene only
+pnpm seed:atlas:counsel      # Counsel matter scene only
 pnpm qa:atlas                # Verify seed completeness (requires DATABASE_URL)
 pnpm test:atlas              # Run all ATLAS unit and integration tests
 ```

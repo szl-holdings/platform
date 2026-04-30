@@ -120,13 +120,13 @@ calls from `127.0.0.1` so dev runs work without a key.
 | `stageKind` (or `stageType`)        | Handler module          | Used by             |
 |--------------------------------------|-------------------------|---------------------|
 | `retrieval`, `retrieve`              | `stages/retrieval.py`   | Lyte, Pulse         |
-| `ocr`, `doc-chunking`, `clause-extraction` | `stages/ocr.py`  | PRISM Counsel (incl. scanned PDFs via pdfminer / tesseract) |
+| `ocr`, `doc-chunking`, `clause-extraction` | `stages/ocr.py`  | Counsel (incl. scanned PDFs via pdfminer / tesseract) |
 | `geospatial`, `geo`, `intersection`, `anomaly-detection` | `stages/geospatial.py` | Vessels, Terra |
 | `eval_grading`, `eval-grading`, `grading`, `scoring` | `stages/eval_grading.py` | Eval Console |
 
 ---
 
-### OCR engine selection (PRISM Counsel)
+### OCR engine selection (Counsel)
 
 The OCR stage handles three flavors of input on each document:
 

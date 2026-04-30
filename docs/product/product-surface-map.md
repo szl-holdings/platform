@@ -193,7 +193,7 @@ See `ops/frontier/disposition-matrix.md` for full disposition decisions.
 
 | Surface | Notes | Task |
 |---------|-------|------|
-| PRISM Counsel | `/prism-counsel/*` API routes still live on the API server | Task #634 |
+| Counsel | `/prism-counsel/*` API routes still live on the API server | Task #634 |
 | Stephen Site | Content moved to `/founder` route in SZL Holdings | Task #634 |
 
 ---

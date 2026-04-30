@@ -143,7 +143,7 @@ These surfaces had registered artifacts that have since been removed from disk. 
 
 | Surface | Former Artifact | Notes |
 |---------|----------------|-------|
-| PRISM Counsel | `artifacts/prism-counsel` | Superseded by Counsel; legacy `/api/prism-counsel/*` routes retained |
+| Counsel | `artifacts/prism-counsel` | Superseded by Counsel; legacy `/api/prism-counsel/*` routes retained |
 | IMPERIUM — Cloud Sovereignty | `artifacts/imperium` | Merged into Command Portal; governance routes active |
 
 ---

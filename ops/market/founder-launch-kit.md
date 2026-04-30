@@ -35,7 +35,7 @@ Five checklists:
 - [ ] Secondary screen or tablet if doing live mobile demo
 
 **Buyer prep:**
-- [ ] Confirmed domain of interest (Aegis / Vessels / Terra / PRISM Counsel / General)
+- [ ] Confirmed domain of interest (Aegis / Vessels / Terra / Counsel / General)
 - [ ] Confirmed who will be on the call (titles, decision roles)
 - [ ] Reviewed any prior conversation notes
 - [ ] Prepared 1–2 specific questions to ask during the demo

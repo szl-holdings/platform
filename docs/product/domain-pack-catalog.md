@@ -25,7 +25,7 @@ See [PLATFORM_PRIMITIVES.md](../architecture/platform-primitives.md) for the pri
 | Aegis — Defense & Intelligence | Beta | `/aegis` + Command Portal | All editions (entitlement) |
 | Vessels — Maritime Intelligence | Beta | `/vessels` + CORTEX maritime | All editions |
 | Terra — Real Estate Intelligence | Beta | `/terra` + CORTEX deal view | All editions |
-| PRISM Counsel — Legal Matter | Beta | `/prism-counsel` | All editions |
+| Counsel — Legal Matter | Beta | `/prism-counsel` | All editions |
 | Carlota Jo — Advisory & Client Portal | Beta | `/carlota-jo` | All editions |
 | IMPERIUM — Sovereign / GovTech | Roadmap (FY27) | TBD | Enterprise + bespoke |
 
@@ -108,7 +108,7 @@ Every pack contributes the following components:
 
 ---
 
-## PRISM Counsel — Legal Matter Command
+## Counsel — Legal Matter Command
 
 **Tagline:** Matter management with structural recovery operations and proof-chain-backed approvals.
 
@@ -169,8 +169,8 @@ Every pack contributes the following components:
 | Mid-market security operator | Aegis (primary) |
 | Maritime operator with sanctions exposure | Vessels (primary) + Aegis (optional) |
 | Real estate investor with distressed pipeline | Terra (primary) |
-| Law firm or in-house counsel | PRISM Counsel (primary) + Carlota Jo (optional) |
-| Professional services firm | Carlota Jo (primary) + PRISM Counsel (optional) |
+| Law firm or in-house counsel | Counsel (primary) + Carlota Jo (optional) |
+| Professional services firm | Carlota Jo (primary) + Counsel (optional) |
 | Multi-domain holding | Pro edition with 3 packs; Enterprise if regulated |
 
 ---

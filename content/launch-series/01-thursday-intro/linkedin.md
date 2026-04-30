@@ -17,7 +17,7 @@ The hierarchy:
 • Lyte — flagship governed command surface
 • Alloy — execution fabric with approval gates and immutable audit
 • CORTEX — unified mobile command across all domains
-• Domain packs — Aegis (security), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory), Pulse (executive briefing), IMPERIUM (cloud sovereignty)
+• Domain packs — Aegis (security), Sentra (cyber resilience), Vessels (maritime), Terra (real estate), Counsel (legal), Carlota Jo (advisory)
 
 The structural difference isn't the AI. It's what happens after the AI makes a recommendation. Six platform primitives — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric — run underneath every surface. Sunday's post goes deep on each one. Monday's post walks one governed decision end-to-end.
 

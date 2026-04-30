@@ -108,7 +108,7 @@ Evidence ledger entries are subject to per-profile retention rules. The `evidenc
 
 When a retrieval evidence report is required for legal or audit purposes, export the relevant entries using the query interface and present the chain of `entryId` → `previousEntryHash` relationships. This chain demonstrates that the records have not been modified since they were written.
 
-For PRISM Counsel matters, evidence ledger exports can be included as exhibits in discovery production under the e-discovery protocol agreed with opposing counsel.
+For Counsel matters, evidence ledger exports can be included as exhibits in discovery production under the e-discovery protocol agreed with opposing counsel.
 
 ## Evidence Ledger and the Proof Chain
 

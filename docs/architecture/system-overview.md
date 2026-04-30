@@ -230,6 +230,6 @@ ATLAS canonical demo paths are seeded for all four domain verticals:
 - **Aegis (security):** Ransomware branch comparison — isolation vs. monitor-contain
 - **Vessels (maritime):** Sanctions/weather reroute — Cape of Good Hope alternative
 - **Terra (real_estate):** Property distress stress test — 3-scenario IRR projection
-- **Prism Counsel (general):** Matter pressure & settlement — accelerated settlement path
+- **Counsel (general):** Matter pressure & settlement — accelerated settlement path
 
 *See [ATLAS Architecture](atlas-spatial-runtime.md) for the full system design.*

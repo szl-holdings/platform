@@ -75,8 +75,8 @@ The cross-domain command surface that ties Aegis, Vessels, Terra, and the legal 
 
 ---
 
-**11/ Forge / Autopilot / Prism Counsel**
-Forge Client Satisfaction now reads real survey data. Autopilot header stats (genome score, job count) wired to live API. Prism Counsel recovery seeds fixed; Zod validation extended to high-traffic routes; CI now runs integration tests on every merge.
+**11/ Forge / Autopilot / Counsel**
+Forge Client Satisfaction now reads real survey data. Autopilot header stats (genome score, job count) wired to live API. Counsel recovery seeds fixed; Zod validation extended to high-traffic routes; CI now runs integration tests on every merge.
 
 ---
 

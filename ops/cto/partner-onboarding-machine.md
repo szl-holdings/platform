@@ -156,7 +156,7 @@ See `weekly-partner-review-system.md` for the review format.
 **Date:** YYYY-MM-DD  
 **Partner contact:** Name, Title, Email  
 **Internal champion:** Name, Title  
-**Domain pack:** [Prism Counsel / Vessels / Aegis / Terra / Core Lyte]
+**Domain pack:** [Counsel / Vessels / Aegis / Terra / Core Lyte]
 
 ## Problem Statement
 [2–4 sentences describing the operational problem in plain language]

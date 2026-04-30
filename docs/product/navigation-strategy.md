@@ -134,7 +134,7 @@ The following surfaces are archived (app source removed — no pages/components/
 | Lyte Command Center | Merged into Command | `/command/` |
 | Firestorm | Superseded by Aegis | `/aegis/` |
 | IMPERIUM | Merged into Command | `/command/` (infrastructure mode) |
-| PRISM Counsel | Deprecated (task #579) | — |
+| Counsel | Deprecated (task #579) | — |
 | Stephen Site | Content moved | `/founder` in SZL Holdings |
 
 ---

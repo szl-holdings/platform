@@ -11,7 +11,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 |----------|---------|-----------------|---------|
 | Web Applications | 22 | 15 artifact dirs (7 canonical web, 1 internal, 5 archived, 1 shell, 1 mobile) | INFLATED |
 | Shared Libraries | 37 | 34 packages in `lib/` (2 are empty shells: api-spec, approvals) | CLOSE (README outdated) |
-| API Endpoints | 2,331 | 395 api-server src files, ~1,800–2,000 endpoints estimated | ASPIRATIONAL |
+| API Endpoints | 2,816 | 357 route files, canonical verified count | VERIFIED |
 | Database Tables | 644→561 | 569 (verified via `information_schema`) | README OUTDATED |
 | Schema Files | 112 | 116 (verified via `lib/db/src/schema/*.ts`) | CLOSE |
 | Source Files | 1,620 TypeScript files | ~1,588 verified (sum across artifacts + lib) | PLAUSIBLE |
@@ -119,7 +119,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 | "112 schema files" | README | CLOSE | 116 schema files verified via `lib/db/src/schema/*.ts` |
 | "51 packages" | README Monorepo section | CLOSE | 34 lib + 15 artifacts = 49 package dirs; 2 lib packages are minimal shells |
 | "CORTEX Mobile: Alpha prep" | README Products table | MISLEADING | cortex-mobile has only 2 ts files — essentially a shell, not alpha |
-| "PRISM Counsel: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated |
+| "Counsel: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated |
 | "IMPERIUM: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated (merged into Command) |
 | "Lyte: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated (merged into Command) |
 | Node version | .replit | ACCURATE | `modules = ["nodejs-24"]` matches current runtime |

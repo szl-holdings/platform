@@ -58,7 +58,7 @@ Domain packs sit on top of Continuum. Each pack is a vertical configuration of t
 | **Aegis** | Defense and security operations | Beta |
 | **Vessels** | Maritime intelligence and fleet command | Beta |
 | **Terra** | Real estate intelligence and underwriting | Beta |
-| **PRISM Counsel** | Legal operations and matter intelligence | Beta |
+| **Counsel** | Legal operations and matter intelligence | Beta |
 | **Carlota Jo** | Private advisory and wealth operations | Beta |
 | **IMPERIUM** | Sovereign and intelligence-grade operations | Roadmap |
 

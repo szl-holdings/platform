@@ -18,7 +18,7 @@ The locked go-forward specification for the SZL platform consolidation. Every im
 | **Sentra** | Security operations — CISO / SOC / security engineers |
 | **Aegis** | Investor pitch deck + deep security analytics — separate from Sentra's ops focus |
 | **Counsel** | Legal operations — general counsel, compliance |
-| **PRISM Counsel** | Advanced legal intelligence — senior legal, external counsel |
+| **Counsel** | Advanced legal intelligence — senior legal, external counsel |
 | **Vessels** | Maritime operations — fleet operators, trading desks |
 | **Terra** | Real estate intelligence — investors, fund managers, brokers |
 | **Lyte** | Decision intelligence layer — platform operators |
@@ -103,7 +103,7 @@ color.text.muted    = #4a6070
 | Sentra | `#ef4444` | `--accent: 0 84% 60%` |
 | Aegis | `#a855f7` | `--accent: 270 95% 65%` |
 | Counsel | `#8b5cf6` | `--accent: 258 90% 66%` |
-| PRISM Counsel | `#8b5cf6` | `--accent: 258 90% 66%` |
+| Counsel | `#8b5cf6` | `--accent: 258 90% 66%` |
 | Vessels | `#0ea5e9` | `--accent: 199 89% 48%` |
 | Terra | `#10b981` | `--accent: 160 84% 39%` |
 | Lyte | `#06b6d4` | `--accent: 192 91% 43%` |
@@ -203,7 +203,7 @@ The portfolio-wide ⌘K palette searches across all surfaces from a single regis
 
 | Group | Examples |
 |-------|---------|
-| **Navigate** | "Go to Fleet Map", "Open PRISM Counsel", "Decision Center" |
+| **Navigate** | "Go to Fleet Map", "Open Counsel", "Decision Center" |
 | **Switch App** | All 10 platform surfaces with direct links |
 | **Search** | Global entity search — vessel names, property addresses, matter titles |
 | **Actions** | "Create new decision", "Request approval", "Export audit log" |
@@ -324,7 +324,7 @@ The task is complete when:
 - [ ] `AgentRunCard` shared module exists in shared-ui
 - [ ] `IncidentCommander` shared module exists in shared-ui
 - [ ] `ScenarioBranchesPanel` shared module exists in shared-ui
-- [ ] `CommandPalette` wired in Sentra, Counsel, PRISM Counsel (3 surfaces that were missing it)
+- [ ] `CommandPalette` wired in Sentra, Counsel (2 surfaces that were missing it)
 - [ ] Per-artifact duplicate component files deleted (12 files)
 - [ ] Orphaned route pages converted to redirects (8 routes)
 - [ ] SZL Holdings landing page updated with consolidated platform story

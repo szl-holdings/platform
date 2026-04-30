@@ -40,7 +40,7 @@
 | task-518 | Nuro Forge — Self-Evolving Model Arena, Autonomous Composition & Intelligence Fabric | **still-needed** | eval-forge/evals-core packages are stubs; valid platform evolution task |
 | task-519 | SZL Holdings — Fund operations, real financials & SEC-compliant reporting | **still-needed** | Fund ops are seeded; no real financial data pipeline confirmed |
 | task-522 | Terra — Spatial Intelligence, Computer Vision & Generative Property Analysis | **still-needed** | Mapbox maps are blank (P1-001); spatial walkthrough is a stub |
-| task-523 | PRISM — Agentic Legal Operations, Computational Law & Autonomous E-Discovery | **still-needed** | Prism Counsel backend exists; deregistered UI needs decision on revival vs. archive |
+| task-523 | PRISM — Agentic Legal Operations, Computational Law & Autonomous E-Discovery | **still-needed** | Counsel backend exists; deregistered UI needs decision on revival vs. archive |
 | task-528 | Nexus — Geopolitical AI Fusion, Predictive War-Gaming & Cross-Domain Correlation | **still-needed** | mockup-sandbox is an internal prototype; this describes a future product direction |
 | task-529 | Mobile fleet — Fix crashes, offline mode, push notifications, deep linking, biometrics & app store readiness | **still-needed** | Confirmed: mobile push deep linking is stub (P2-011); app store not started |
 | task-530 | Platform — CI/CD pipelines, automated testing, APM, disaster recovery, feature flags & rate limiting | **still-needed** | Integration tests not in CI (scorecard: Release Discipline C); APM stub; DR runbook exists but not tested |
@@ -61,7 +61,7 @@
 | task-830 | Send real email and SMS alerts when users get notifications | **still-needed** | Twilio/SendGrid are stubs; not confirmed live |
 | task-847 | Consolidate invitation flows and protect usage-event writes | **still-needed** | Auth/invitation flows not confirmed in audit |
 | task-852 | Show API clients how close they are to rate limits on every response | **still-needed** | No rate limiting confirmed in system inventory |
-| task-862 | Restore the firestorm, prism-counsel, and stephen-site apps so they run correctly | **obsolete** | These are deliberately archived; restoring conflicts with APP_STATUS.md deregistration decision. Firestorm backend is retained in api-server; Prism Counsel UI revival is a separate decision. |
+| task-862 | Restore the firestorm, prism-counsel, and stephen-site apps so they run correctly | **obsolete** | These are deliberately archived; restoring conflicts with APP_STATUS.md deregistration decision. Firestorm backend is retained in api-server; Counsel UI revival is a separate decision. |
 | task-863 | Add E2E coverage for the remaining platform apps (Aegis, Vessels, Terra, Carlota Jo) | **still-needed** | No E2E tests exist; integration tests not in CI (P0-002) |
 | task-864 | Wire onboarding analytics into domain pack tours (Aegis, Vessels, Terra) | **still-needed** | Analytics events not confirmed flowing (P2-005) |
 | task-865 | Add contextual HelpTip tooltips to key platform features | **still-needed** | No contextual help system confirmed |

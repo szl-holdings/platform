@@ -102,7 +102,7 @@ szl-holdings-platform/
                     │         API Server               │
                     │   :8080 → externalPort 80        │
                     │   Express 5 + Apollo GraphQL      │
-                    │   172 route files                 │
+                    │   357 route files                 │
                     └───────────────┬─────────────────┘
                                     │
            ┌────────────────────────┼────────────────────────┐

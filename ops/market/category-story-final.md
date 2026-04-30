@@ -71,7 +71,7 @@ These primitives are shared infrastructure. A new domain pack inherits all six w
 | **Flagship command surface** | Lyte | Where operators observe, evaluate, and act — PRISM framework |
 | **Execution fabric** | Continuum | Approval gates, workflow orchestration, audit trail |
 | **Mobile command** | CORTEX | Unified mobile access to all domain workspaces |
-| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
+| **Domain packs** | Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo | Domain-specific intelligence on shared governance infrastructure |
 
 Domain packs are not separate products. They are governed extensions — domain-specific signals, agents, and actions running on shared governance primitives.
 

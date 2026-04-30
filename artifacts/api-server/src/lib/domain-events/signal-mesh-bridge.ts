@@ -2,7 +2,7 @@
  * Domain Event → Signal Mesh Bridge
  *
  * Subscribes to all per-product `domainEventBus` events (SEXTANT, DOMAINE,
- * KORA, PRISM Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
+ * KORA, Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
  * as `Signal` objects onto the global `defaultSignalBus`.
  *
  * This is the single piece of plumbing that makes the Global Operations

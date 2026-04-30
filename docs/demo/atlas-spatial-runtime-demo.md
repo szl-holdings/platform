@@ -114,7 +114,7 @@ Point out the Monte Carlo confidence intervals on each projection. The IRR range
 
 ---
 
-## Demo Path 4: Prism Counsel Matter Pressure & Settlement
+## Demo Path 4: Counsel Matter Pressure & Settlement
 
 **Message:** *"Legal matter management is one of the highest-stakes, least-governed decision spaces in any organization. ATLAS brings the same governance discipline to matters that it brings to security and maritime."*
 

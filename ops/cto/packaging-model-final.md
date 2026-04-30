@@ -29,7 +29,7 @@ The SZL platform is not a SaaS app with a pricing table. It is an operational in
 |-----------|--------|
 | Lyte core | Signal ingestion, visibility surface, explainable forecast |
 | Alloy connector mesh | Up to 3 integration connectors |
-| 1 domain pack | Prism Counsel, Vessels, Aegis, or Terra |
+| 1 domain pack | Counsel, Vessels, Aegis, or Terra |
 | Seats | Up to 10 named users |
 | Proof chain | Full audit trail, standard retention |
 | Weekly review | Async support; no dedicated CSM |
@@ -85,7 +85,7 @@ Domain packs are sold as add-ons to the core platform tiers. Each pack includes:
 
 | Pack | Domain | Core Capabilities |
 |------|--------|-------------------|
-| Prism Counsel | Legal ops | Matter twins, deadline tracking, demand workflow governance |
+| Counsel | Legal ops | Matter twins, deadline tracking, demand workflow governance |
 | Vessels | Maritime | Voyage twins, fleet risk surface, port ops routing |
 | Aegis | Security & defense | Threat twins, SOC command, policy-gated action |
 | Terra | Real estate | Property twins, distress signals, underwriting flow governance |

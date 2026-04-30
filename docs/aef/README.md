@@ -1,6 +1,6 @@
 # Alloy Embedding Fabric (AEF)
 
-The Alloy Embedding Fabric (AEF) is the retrieval intelligence layer of the SZL Holdings platform. It provides every product in the portfolio — Lyte, Vessels, Terra, Aegis, PRISM Counsel, and Carlota Jo — with governed, domain-aware document retrieval backed by dense embedding, hybrid search, reciprocal rank fusion, and multi-stage reranking.
+The Alloy Embedding Fabric (AEF) is the retrieval intelligence layer of the SZL Holdings platform. It provides every product in the portfolio — Lyte, Vessels, Terra, Aegis, Counsel, and Carlota Jo — with governed, domain-aware document retrieval backed by dense embedding, hybrid search, reciprocal rank fusion, and multi-stage reranking.
 
 AEF is not a generic RAG pipeline. Every retrieval operation runs under a named domain profile that specifies chunking parameters, query and document prompt templates, exact-match boost rules, score thresholds, privacy controls, and retention obligations. Profiles are versioned, tenant-scoped, and rotatable through the orchestrator without a service restart.
 
@@ -100,7 +100,7 @@ scripts/aef/
 | `lyte_governance_ops` | Lyte Decision Intelligence | regulation_code, control_id, audit_finding_id |
 | `terra_real_estate_intel` | Terra Real Estate Intelligence | parcel_id, APN, lease_id, permit_number |
 | `aegis_security_incident` | Aegis Cyber/Security | CVE_id, incident_id, MITRE_technique, endpoint_id |
-| `prism_legal_matter` | PRISM Counsel | docket_number, matter_id, statute_citation, contract_id |
+| `prism_legal_matter` | Counsel | docket_number, matter_id, statute_citation, contract_id |
 | `carlota_private_advisory` | Carlota Jo Consulting | engagement_id, vendor_id, deliverable_id |
 
 ---

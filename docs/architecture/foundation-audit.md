@@ -154,7 +154,7 @@ The monorepo contains **19 packages** under `packages/`, **40 lib packages** und
 | `artifacts/firestorm` | Firestorm | — | **No** | **ARCHIVED** — `ARCHIVED.md` present | 12ccda0b — Series A Cleanup Phase 2 | — |
 | `artifacts/imperium` | Imperium | — | **No** | **ARCHIVED + DEPRECATED** | 4f477e48 — feat(ops): Mobile, infrastructure | — |
 | `artifacts/lyte-command-center` | Lyte Command Center | — | **No** | **ARCHIVED + DEPRECATED** | 4f477e48 — feat(ops): Mobile, infrastructure | — |
-| `artifacts/prism-counsel` | Prism Counsel | — | **No** | **DEPRECATED** | 12ccda0b — Series A Cleanup Phase 2 | — |
+| `artifacts/prism-counsel` | Counsel | — | **No** | **DEPRECATED** | 12ccda0b — Series A Cleanup Phase 2 | — |
 | `artifacts/stephen-site` | Stephen Site | — | **No** | **DEPRECATED** — replaced by `career` slug in `lib/config` | 12ccda0b — Series A Cleanup Phase 2 | — |
 
 ---
@@ -253,18 +253,18 @@ No schema file is tagged deprecate or merge-into-X at the DB layer. The DB layer
 | `platform_events.ts` | Platform-wide event stream | 6c3e02ec — feat: complete doctrine rebrand | **keep** |
 | `platform_ops.ts` | Platform operational metadata | d1a0526c — feat: Platform services | **keep** |
 | `platform_status.ts` | Platform status and health | 79b45b46 — feat(szl-holdings): operational visibility | **keep** |
-| `prism_counsel_ny.ts` | Prism Counsel NY jurisdiction | 936a33db — feat(prism-counsel-ny): Task #283 | **keep-legacy-data** (artifact deprecated; DB layer active) |
-| `prism_counsel_omega.ts` | Prism Counsel Omega stream | 883bbc78 — feat(prism-counsel): Legal Business Observability | **keep-legacy-data** |
-| `prism_counsel_ops.ts` | Prism Counsel operations | fc264c4d — Add infrastructure for legal platform | **keep-legacy-data** |
-| `prism_counsel_p2_graphql_subgraph.ts` | Prism Counsel P2 GraphQL subgraph | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
-| `prism_counsel_p2.ts` | Prism Counsel Pilot 2 | 77ada9fe — feat(prism-counsel): Pilot Two | **keep-legacy-data** |
-| `prism_counsel_pilot_one.ts` | Prism Counsel Pilot 1 | 37994566 — feat(prism-counsel): PRISM Counsel Pilot One | **keep-legacy-data** |
-| `prism_counsel_pilot.ts` | Prism Counsel Pilot 0 | fa7cc009 — Add new navigation and features Pilot Zero | **keep-legacy-data** |
-| `prism_counsel_purview.ts` | Prism Counsel Purview | d5c1331b — feat(prism-counsel): Pilot Two Purview | **keep-legacy-data** |
-| `prism_counsel_recovery.ts` | Prism Counsel recovery tables | 1ac5da8c — feat(prism-counsel): Pilot Two Recovery | **keep-legacy-data** |
-| `prism_counsel_review.ts` | Prism Counsel review queue | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
-| `prism_counsel_s31.ts` | Prism Counsel S31 | 26a186b1 — Add new sections for advanced platform | **keep-legacy-data** |
-| `prism_counsel.ts` | Prism Counsel core | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
+| `prism_counsel_ny.ts` | Counsel NY jurisdiction | 936a33db — feat(prism-counsel-ny): Task #283 | **keep-legacy-data** (artifact deprecated; DB layer active) |
+| `prism_counsel_omega.ts` | Counsel Omega stream | 883bbc78 — feat(prism-counsel): Legal Business Observability | **keep-legacy-data** |
+| `prism_counsel_ops.ts` | Counsel operations | fc264c4d — Add infrastructure for legal platform | **keep-legacy-data** |
+| `prism_counsel_p2_graphql_subgraph.ts` | Counsel P2 GraphQL subgraph | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
+| `prism_counsel_p2.ts` | Counsel Pilot 2 | 77ada9fe — feat(prism-counsel): Pilot Two | **keep-legacy-data** |
+| `prism_counsel_pilot_one.ts` | Counsel Pilot 1 | 37994566 — feat(prism-counsel): Counsel Pilot One | **keep-legacy-data** |
+| `prism_counsel_pilot.ts` | Counsel Pilot 0 | fa7cc009 — Add new navigation and features Pilot Zero | **keep-legacy-data** |
+| `prism_counsel_purview.ts` | Counsel Purview | d5c1331b — feat(prism-counsel): Pilot Two Purview | **keep-legacy-data** |
+| `prism_counsel_recovery.ts` | Counsel recovery tables | 1ac5da8c — feat(prism-counsel): Pilot Two Recovery | **keep-legacy-data** |
+| `prism_counsel_review.ts` | Counsel review queue | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
+| `prism_counsel_s31.ts` | Counsel S31 | 26a186b1 — Add new sections for advanced platform | **keep-legacy-data** |
+| `prism_counsel.ts` | Counsel core | 45191ead — Restored to 70cafc8ad | **keep-legacy-data** |
 | `projects.ts` | Platform project records | 03a245cf — Add a project list feature | **keep** |
 | `proof_chain.ts` | Cryptographic proof chain entries | e8b96a9d — feat(omega-phase-1): backend primitives | **keep** |
 | `push_infra.ts` | Push notification infrastructure | 90a1afe7 — fix(push-infra): add pageSize lower bound | **keep** |

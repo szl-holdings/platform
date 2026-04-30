@@ -18,7 +18,7 @@ These terms are locked. Use exactly as specified. Do not improvise equivalents.
 | governed decision loop | pipeline, workflow, process |
 | Lyte | LYTE, lyte |
 | Alloy | ALLOY, alloy |
-| PRISM Counsel | Prism Counsel, prism counsel |
+| Counsel | Prism Counsel, prism counsel |
 | Proof Chain | proof chain, ProofChain |
 | Covenant Policy | covenant policy |
 | Outcome Graph | outcome graph |
@@ -59,7 +59,7 @@ Use the format: `[Domain Pack] is the [domain] domain pack — [what it does for
 - "Aegis is the security & defense domain pack — SOC command, XDR, and AI triage for high-consequence environments."
 - "Vessels is the maritime domain pack — fleet command, AIS telemetry, and voyage economics for fleet operators."
 - "Terra is the real estate intelligence domain pack — distress signals, deal pipeline, and ownership graph for NYC operators."
-- "PRISM Counsel is the legal intelligence domain pack — matter command, deadline tracking, and governed demand for litigation teams."
+- "Counsel is the legal intelligence domain pack — matter command, deadline tracking, and governed demand for litigation teams."
 
 ---
 

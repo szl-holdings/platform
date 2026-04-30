@@ -19,7 +19,7 @@ Every entitlement falls into one of four dimensions:
 |-----------|-------------|---------|
 | **Feature access** | Binary — feature is on or off | AI recommendations, Monte Carlo simulation |
 | **Usage limits** | Numeric cap per billing period | Seats, workflow executions, AI agent calls |
-| **Domain pack access** | Binary per pack | Aegis, Vessels, Terra, PRISM Counsel included or not |
+| **Domain pack access** | Binary per pack | Aegis, Vessels, Terra, Counsel included or not |
 | **Governance controls** | Depth of governance features | Proof Chain retention, Covenant Policy complexity, audit export |
 
 ---
@@ -77,7 +77,7 @@ The platform has four commercial tiers plus a free trial:
 | Aegis (Security & Defense) | ✅ | Add-on | Add-on | Add-on / Bundled | ✅ |
 | Vessels (Maritime) | ✅ | Add-on | Add-on | Add-on / Bundled | ✅ |
 | Terra (Real Estate) | ✅ | Add-on | Add-on | Add-on / Bundled | ✅ |
-| PRISM Counsel (Legal) | ✅ | Add-on | Add-on | Add-on / Bundled | ✅ |
+| Counsel (Legal) | ✅ | Add-on | Add-on | Add-on / Bundled | ✅ |
 | Carlota Jo (Advisory) | ✅ | ❌ | ❌ | By engagement | By engagement |
 | IMPERIUM (Cloud Sovereignty) | ✅ | ❌ | ❌ | By arrangement | ✅ |
 

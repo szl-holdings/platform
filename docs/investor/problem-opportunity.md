@@ -47,13 +47,13 @@ This is not a data problem. Organizations have more data than they can use. It i
 - By the time they identify an opportunity, three other brokers have already called
 - Ownership structures are deliberately obfuscated through LLCs — tracing beneficial ownership is a research project, not a workflow
 
-### Legal Operations (PRISM Counsel)
+### Legal Operations (Counsel)
 
 - General counsel teams triage inbound matters in shared inboxes, with conflict checks, privilege scoping, and recovery analytics living in separate spreadsheets
 - AI-assisted legal tools surface citations without a verifiable provenance chain — privilege risk is real, and outputs cannot be defended at audit
 - Matter accountability and proof of decision are critical, but no platform connects matter signal → governed approval → outcome with an immutable audit trail
 
-### Cloud Sovereignty (IMPERIUM)
+### Cloud Sovereignty (Sentra)
 
 - Regulated and sovereignty-bound enterprises run multi-cloud (Azure / AWS / GCP) without a single governance plane for data residency, jurisdiction tagging, or change-approval enforcement
 - Compliance posture is reconstructed for each audit instead of continuously attested

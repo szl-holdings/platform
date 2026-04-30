@@ -105,7 +105,7 @@
 |---|---|---|
 | GA | 2 | Carlota Jo, API Server |
 | Beta | 5 | SZL Holdings, Aegis, Firestorm, Terra, SZL Holdings Mobile |
-| Partial | 3 | Vessels, Prism Counsel, Command |
+| Partial | 3 | Vessels, Counsel, Command |
 | Internal-only | 1 | Mockup Sandbox |
 | Deprecated | 2 | Stephen Site, Lyte Command Center |
 | Skeleton / Concept | 2 | Cortex Mobile, Imperium |

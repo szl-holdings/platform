@@ -45,7 +45,7 @@ An AI agent subscribed to dark vessel events in this corridor activates. It pull
 - The vessel's prior 12 months of AIS history
 - The registered beneficial owner and any sanctions exposure
 - Comparable dark events in the same corridor over the prior 90 days
-- Prior matters in PRISM Counsel involving the same counterparty
+- Prior matters in Counsel involving the same counterparty
 - Any active charters or contracts involving this vessel
 
 Each piece of context is attached to the event with a source citation. The agent computes a confidence score for its forthcoming recommendation: 0.84.
@@ -58,7 +58,7 @@ Each piece of context is attached to the event with a source citation. The agent
 
 The agent produces a structured recommendation:
 
-> Escalate to compliance officer for sanctions screening review. Open a PRISM Counsel matter for legal chain-of-custody. Notify the charter party operator of potential voyage disruption. Recommended urgency: P1 (action within 60 minutes).
+> Escalate to compliance officer for sanctions screening review. Open a Counsel matter for legal chain-of-custody. Notify the charter party operator of potential voyage disruption. Recommended urgency: P1 (action within 60 minutes).
 
 The recommendation surfaces in the Lyte action queue with all attached context: the originating signal, the enriched context, the citations, the confidence score, and the recommended workflow path.
 
@@ -72,7 +72,7 @@ The recommendation surfaces in the Lyte action queue with all attached context: 
 
 Before the recommendation is presented for action, the Decision Simulation engine models two paths:
 
-- **Path A:** Escalate now and open PRISM Counsel matter
+- **Path A:** Escalate now and open Counsel matter
 - **Path B:** Hold for additional AIS confirmation (typically 30–60 minutes)
 
 For each path, the simulation produces probability-weighted outcome ranges for: time-to-resolution, regulatory exposure cost, charter disruption cost, and reputation impact. The operator will see the distributions side-by-side, not a single number.
@@ -104,14 +104,14 @@ The compliance officer reviews in Lyte. She sees: the original signal, the enric
 The Workflow Engine initiates the governed process — multi-step, multi-party, durable:
 
 1. Flag the voyage as under sanctions review in Vessels
-2. Open a matter in PRISM Counsel for legal chain-of-custody, pre-populated with the AI context and citations
+2. Open a matter in Counsel for legal chain-of-custody, pre-populated with the AI context and citations
 3. Notify the assigned attorney of record
 4. Notify the charter party operator with a templated communication
 5. Set a 4-hour AIS re-acquisition watchdog with auto-escalation if the dark state persists
 
 Each step is tracked. Each handoff is attributed. If any step fails — for example, the templated notification cannot reach the operator — the workflow checkpoint allows recovery from the last verified step.
 
-**What the platform records:** A workflow execution event for each step, with the actor (human or AI), the step result, and the timestamp. Cross-domain side effects (the PRISM Counsel matter creation, the Vessels voyage flag) are linked back to the originating decision via the Outcome Graph.
+**What the platform records:** A workflow execution event for each step, with the actor (human or AI), the step result, and the timestamp. Cross-domain side effects (the Counsel matter creation, the Vessels voyage flag) are linked back to the originating decision via the Outcome Graph.
 
 ---
 
@@ -130,7 +130,7 @@ T+00:04  Policy gate evaluated   — compliance officer approval required
 T+00:08  Approval recorded       — actor: compliance officer, decision: Path A
 T+00:09  Workflow initiated      — 5 steps queued
 T+00:10  Voyage flagged          — Vessels
-T+00:11  Matter opened           — PRISM Counsel, attorney_id [...]
+T+00:11  Matter opened           — Counsel, attorney_id [...]
 T+00:11  Notification sent       — charter party operator
 T+00:12  Watchdog armed          — 4-hour AIS re-acquisition
 ```
@@ -147,7 +147,7 @@ A regulator, an internal auditor, or a court of inquiry can reconstruct this dec
 
 [IMAGE: 08-outcome-resolution.png — Outcome panel showing AIS reacquisition and matter closure, 1440×900, dark mode]
 
-The vessel re-establishes AIS signal at T+00:38 — within the watchdog window. The voyage flag is updated. The PRISM Counsel matter is updated with the resolution event. The Outcome Graph records:
+The vessel re-establishes AIS signal at T+00:38 — within the watchdog window. The voyage flag is updated. The Counsel matter is updated with the resolution event. The Outcome Graph records:
 
 - **Originating signal:** dark AIS event at corridor X
 - **Decision made:** Path A (escalate, open matter)
@@ -169,7 +169,7 @@ The agent updates its priors for dark AIS events in this corridor — specifical
 
 ## What Just Happened, Structurally
 
-Nine steps. Two AI agent invocations. One human approval. Five downstream actions across three domains (Vessels, PRISM Counsel, Lyte). One closed loop in the Outcome Graph. One verifiable Proof Chain entry per significant event.
+Nine steps. Two AI agent invocations. One human approval. Five downstream actions across three domains (Vessels, Counsel, Lyte). One closed loop in the Outcome Graph. One verifiable Proof Chain entry per significant event.
 
 No silent decisions. No unattributed actions. No AI execution without human gating. No domain siloing — the maritime signal and the legal matter are linked structurally, not by manual forwarding.
 

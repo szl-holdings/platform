@@ -108,7 +108,7 @@ Each surface is scored 0–10 on 8 dimensions. Scores are based on a cold-load r
 
 ---
 
-### PRISM Counsel (`/prism-counsel/`)
+### Counsel (`/prism-counsel/`)
 
 | Dimension | Score | Rationale |
 |-----------|-------|-----------|

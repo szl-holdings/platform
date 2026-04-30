@@ -55,7 +55,7 @@ These artifacts are either already fully deprecated or are thin redirect wrapper
 | DEPRECATED.md | Exists (task #579) |
 | Blocks | CI pipeline (`prism-counsel-ci.yml`) |
 
-**Why archive:** PRISM Counsel was deprecated in task #579. It has a `DEPRECATED.md` file. However, the artifact remains registered and the CI pipeline `prism-counsel-ci.yml` continues to run against deprecated code. The README and `COMPANY_FACT_SHEET.md` still list it as "Functional alpha" — a misleading representation.
+**Why archive:** Counsel was deprecated in task #579. It has a `DEPRECATED.md` file. However, the artifact remains registered and the CI pipeline `prism-counsel-ci.yml` continues to run against deprecated code. The README and `COMPANY_FACT_SHEET.md` still list it as "Functional alpha" — a misleading representation.
 
 **Migration instructions:**
 1. Deregister the `prism-counsel` artifact in `artifact.toml`
@@ -64,10 +64,10 @@ These artifacts are either already fully deprecated or are thin redirect wrapper
 4. Remove from `COMPANY_FACT_SHEET.md` Domain Packs table
 5. Remove from `docs/PRODUCT_MATRIX.md` Active Platforms section
 6. Add to "Deprecated" or "Archived" note in all public documentation, OR omit entirely
-7. Do NOT delete the code directory — substantial codebase (138 files); archive if PRISM Counsel is ever revived
+7. Do NOT delete the code directory — substantial codebase (138 files); archive if Counsel is ever revived
 8. Stop running the workflow — do not restart `prism-counsel-ci.yml`
 
-**Revival path:** If a legal vertical design partner is found, PRISM Counsel can be re-entered at Stage 1 with a fresh assessment. See `ops/portfolio/domain-pack-strategy.md` for revival criteria.
+**Revival path:** If a legal vertical design partner is found, Counsel can be re-entered at Stage 1 with a fresh assessment. See `ops/portfolio/domain-pack-strategy.md` for revival criteria.
 
 **User impact:** The surface was not publicly promoted. Any internal users should be migrated to `command` for workflow management.
 
@@ -164,7 +164,7 @@ These are accuracy corrections to existing public documents that must happen bef
 |-------|---------------|------------|---------|
 | Apps badge | 22 | 8 canonical web + 2 mobile = 10 (or remove badge) | P1 |
 | DB tables badge | 685 | 561 (per truth audit) | P1 |
-| Products table includes PRISM Counsel | "Functional alpha" | Remove — deprecated | P1 |
+| Products table includes Counsel | "Functional alpha" | Remove — deprecated | P1 |
 | Products table includes Stephen Site | "Live" | Remove — deprecated | P1 |
 | Shared libraries | 37 or 51 | 33 active packages (2 empty shells) | P2 |
 | Node badge | 20.x | 24 | P2 |
@@ -177,7 +177,7 @@ These are accuracy corrections to existing public documents that must happen bef
 | Claim | Currently Says | Should Say |
 |-------|---------------|------------|
 | Active artifacts | "15 active artifacts" | "10 canonical artifacts (8 web, 2 mobile) + 1 API + 1 internal" |
-| PRISM Counsel in domain packs table | "Functional alpha" | Remove |
+| Counsel in domain packs table | "Functional alpha" | Remove |
 | IMPERIUM in domain packs table | "Functional alpha" | Note as merged into Command |
 | DB tables badge | 685 | 561 |
 | Shared packages | 51 | 48 |
@@ -187,7 +187,7 @@ These are accuracy corrections to existing public documents that must happen bef
 | Section | Action |
 |---------|--------|
 | Stephen Lutar — Founder Authority Site | Remove entirely — deprecated |
-| PRISM Counsel as active platform | Remove entirely — deprecated |
+| Counsel as active platform | Remove entirely — deprecated |
 | Add Command as canonical operator surface | Add entry for `command` |
 | Update all "Live" status claims | Verify against truth audit before next external share |
 
@@ -222,7 +222,7 @@ Two shared libraries have no source files and should be evaluated for deletion:
 | **Now (Phase 2-3)** | Document plan (this file). Correct documentation accuracy (README, COMPANY_FACT_SHEET, PRODUCT_MATRIX). |
 | **Phase 4** | Execute deregistrations. Add 301 redirects. Delete `prism-counsel-ci.yml`. Update `e2e.yml`. |
 | **Phase 5** | Review `deploy.yml` and `npm-publish.yml`. Evaluate `lib/api-spec` and `lib/approvals` for deletion. |
-| **Phase 6+** | Evaluate PRISM Counsel revival with a design partner. Extend CI build matrix to all canonical apps. |
+| **Phase 6+** | Evaluate Counsel revival with a design partner. Extend CI build matrix to all canonical apps. |
 
 ---
 

@@ -123,7 +123,7 @@ SZL Holdings does not inflate its current state to improve how it presents to in
 
 **Current state:** 21 route files use Zod helpers (including `auth.ts`, `comments.ts`, `contact.ts`, `demo-requests.ts`, `feedback.ts`, `gdpr.ts`, `invitations.ts`, `partner-portal.ts`, and 13 others). All other routes parse `req.body` fields directly. `lib/validation.ts` and `lib/api-zod/` exist — the infrastructure is built; systematic application is the gap.
 
-**Path to close:** Systematic Zod expansion to high-traffic POST/PUT/PATCH routes. Active remediation task in progress: "Add Zod validation to the remaining high-traffic API routes outside Prism Counsel." See `docs/known-gaps.md §4`.
+**Path to close:** Systematic Zod expansion to high-traffic POST/PUT/PATCH routes. Active remediation task in progress: "Add Zod validation to the remaining high-traffic API routes outside Counsel." See `docs/known-gaps.md §4`.
 
 **Risk level:** High (coverage gap). SQL injection is mitigated universally by the ORM. Risk is malformed data, type coercion errors, and missing field validation in business logic.
 

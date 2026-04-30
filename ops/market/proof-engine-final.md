@@ -35,7 +35,7 @@ Capture for each pilot:
 **Template fields:**
 ```
 Organization: [name or code if confidential]
-Domain: [Aegis / Vessels / Terra / PRISM Counsel / other]
+Domain: [Aegis / Vessels / Terra / Counsel / other]
 Baseline date: [date]
 Current decision process: [description]
 Key metrics:

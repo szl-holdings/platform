@@ -216,7 +216,7 @@ We always confirm who is in each role on the first call. Misnaming the persona c
 | Executive | Founder / Managing Partner | Often the same person as operator |
 | Technical | Sometimes none; small firms | Surfaces only if cyber insurance asks |
 
-### Legal / Matter Management (PRISM Counsel primary)
+### Legal / Matter Management (Counsel primary)
 
 | Persona | Common title | What's different |
 |---------|--------------|------------------|

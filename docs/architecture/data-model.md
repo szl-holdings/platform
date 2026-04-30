@@ -1,7 +1,7 @@
 # Data Model — SZL Holdings Platform
 
 **Version:** 1.0 · **Last updated:** April 2026
-**Source:** `lib/db/src/schema/` (132 schema files, 799 tables total)
+**Source:** `lib/db/src/schema/` (170 schema files, 798 tables total)
 
 > The source of truth for the database schema is the Drizzle ORM schema files in `lib/db/src/schema/`. This document describes domain groupings, key tables, relationships, and conventions. For migration history see `lib/db/drizzle/`.
 
@@ -12,7 +12,7 @@
 **Engine:** PostgreSQL 16
 **ORM:** Drizzle ORM (`@szl-holdings/db`)
 **Migration strategy:** Drizzle migrations (`lib/db/drizzle/`)
-**Table count:** 799 `pgTable` declarations across 132 schema files
+**Table count:** 798 `pgTable` declarations across 170 schema files
 **Counting method:** `grep -rc "= pgTable" lib/db/src/schema/ | awk -F: '{sum += $2} END {print sum}'`
 
 **Connection exports from `@szl-holdings/db`:**
@@ -176,7 +176,7 @@
 
 ---
 
-### PRISM Counsel — Legal Matter Command
+### Counsel — Legal Matter Command
 
 **Schema files:** `prism_counsel` (120+ tables across 10 schema modules)
 

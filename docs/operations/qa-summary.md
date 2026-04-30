@@ -206,7 +206,7 @@ The platform has a fully operational Playwright E2E test suite with 12 spec file
 - `command.spec.ts` — Unified Command
 - `imperium.spec.ts` — IMPERIUM (self-skips if artifact not running)
 - `lyte.spec.ts` — Lyte Command Center (self-skips if artifact not running)
-- `prism-counsel.spec.ts` — PRISM Counsel (self-skips if artifact not running)
+- `prism-counsel.spec.ts` — Counsel (self-skips if artifact not running)
 - `stephen-site.spec.ts` — Stephen Lutar site (self-skips if artifact not running)
 - `a11y.spec.ts` — Accessibility (axe-core, SZL Holdings)
 

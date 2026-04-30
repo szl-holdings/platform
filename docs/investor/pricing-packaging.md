@@ -40,9 +40,9 @@ Enterprise pricing is built up from the modular components below — not a singl
 | Aegis | $48,000 | First pack with Starter; up to 3 with Pro |
 | Vessels | $60,000 | Same |
 | Terra | $48,000 | Same |
-| PRISM Counsel | $48,000 | Same |
+| Counsel | $48,000 | Same |
 | Carlota Jo | $24,000 | Same |
-| IMPERIUM (roadmap) | TBD | — |
+| Sentra | $48,000 | Same |
 
 ### Seat Expansion
 

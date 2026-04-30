@@ -234,7 +234,7 @@ The following sections describe the A11oy product runtime as built in Phase 1. T
 | `vessels-maritime` | SEXTANT Maritime | Fleet and voyage management |
 | `terra-real-estate` | DOMAINE Real Estate | Portfolio and asset management |
 | `aegis-defense` | PARAGON Defense | Defense and intelligence operations |
-| `prism-counsel` | PRISM Counsel | Legal matter and contract management |
+| `prism-counsel` | Counsel | Legal matter and contract management |
 | `carlota-jo` | Carlota Jo | Professional services consulting |
 | `alloy-core` | Alloy Core | Platform health and fabric operations |
 

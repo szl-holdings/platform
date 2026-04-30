@@ -68,7 +68,7 @@ Flaky test isolation: no known flaky tests at time of writing. Tests run determi
 | `tests/e2e/command.spec.ts` | Command Portal | Unified command dashboard | ✅ Running |
 | `tests/e2e/lyte.spec.ts` | Lyte | Business observability | ✅ Running |
 | `tests/e2e/forge.spec.ts` | Forge | Deal management | ✅ Running |
-| `tests/e2e/prism-counsel.spec.ts` | Prism Counsel | Legal intelligence | ✅ Running |
+| `tests/e2e/prism-counsel.spec.ts` | Counsel | Legal intelligence | ✅ Running |
 | `tests/e2e/stephen-site.spec.ts` | Stephen Site | Personal/portfolio site | ✅ Running |
 | `tests/e2e/imperium.spec.ts` | IMPERIUM | Enterprise management | ✅ Running |
 | `tests/e2e/a11y.spec.ts` | SZL Holdings (public routes) | WCAG 2.0/2.1 A/AA axe-core checks | ✅ Running |

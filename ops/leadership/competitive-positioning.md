@@ -159,8 +159,8 @@ Ask: *"When Copilot makes a recommendation that turns into a $2M action, who app
 - Acquisitions integrate badly — the brand may unify, but the data model does not
 
 **Where SZL continues:**
-- Six domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) on one shared governance substrate
-- Event Fabric correlates signals across domains — a Vessels sanctions hit becomes a PRISM Counsel matter; a Terra distress signal becomes an Aegis financial-crime case
+- Six domain packs (Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM) on one shared governance substrate
+- Event Fabric correlates signals across domains — a Vessels sanctions hit becomes a Counsel matter; a Terra distress signal becomes an Aegis financial-crime case
 - Every new domain pack ships with governance, simulation, proof, and outcome on day one
 - Unified mobile command (CORTEX) reflects every domain through the same loop
 

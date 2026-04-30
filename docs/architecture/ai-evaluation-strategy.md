@@ -252,7 +252,7 @@ The `runLearningCalibration()` function (`lib/outcome-graph/src/index.ts`) analy
 - P&L forecast error margin
 - Cargo classification accuracy
 
-### PRISM Counsel (Legal)
+### Counsel (Legal)
 - Recovery outcome prediction accuracy
 - Filing deadline risk precision
 - Entity extraction recall

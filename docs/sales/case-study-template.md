@@ -45,7 +45,7 @@ Total typical time: 8–10 weeks from proposal to publication.
 Headline:               [One-line that captures the outcome]
 Customer name:          [Named customer or "A 200-person maritime operator"]
 Industry / domain:      [E.g., "Maritime ops" / "Distressed real estate"]
-Domain pack(s):         [Aegis / Vessels / Terra / PRISM Counsel / Carlota Jo]
+Domain pack(s):         [Aegis / Vessels / Terra / Counsel / Carlota Jo]
 Edition:                [Starter / Pro / Enterprise]
 Length of relationship: [E.g., "6 months", "1 year"]
 Geography:              [Customer region — at the customer's discretion]
@@ -166,7 +166,7 @@ about why this changes their work going forward.]"
 
 > SZL Holdings builds **governed decision infrastructure** — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 >
-> Six platform primitives — Event Fabric, Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo simulation, Workflow Engine — power a single canonical loop across five domain packs: Aegis (defense / intel), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), and Carlota Jo (advisory).
+> Six platform primitives — Event Fabric, Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo simulation, Workflow Engine — power a single canonical loop across five domain packs: Aegis (defense / intel), Vessels (maritime), Terra (real estate), Counsel (legal), and Carlota Jo (advisory).
 >
 > The platform is operator-tier, designed for mid-market and enterprise organizations in regulated industries. Learn more at the SZL Holdings site or read the platform Trust Center.
 

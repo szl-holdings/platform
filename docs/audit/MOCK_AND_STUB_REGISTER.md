@@ -96,7 +96,7 @@ These items are populated via idempotent seed scripts and are by design for pre-
 
 | ID | Item | Location | Severity | Notes |
 |----|------|---------|---------|-------|
-| BK-001 | `seed-prism-counsel.ts` recovery tables | `scripts/` | `acceptable` | Broken seed script for deprecated PRISM Counsel |
+| BK-001 | `seed-prism-counsel.ts` recovery tables | `scripts/` | `acceptable` | Broken seed script for deprecated Counsel |
 | BK-002 | ALLOY_INTERNAL_TOKEN — super_admin scope | API server | `ship-blocker` | Token grants full super_admin; no granular scoping |
 | BK-003 | In-process background jobs (no queue) | API server | `ship-blocker` | Tasks lost on server restart (AI inference, notifications) |
 | BK-004 | No persistent message queue (Redis/RabbitMQ) | API server | `ship-blocker` | Single process; no horizontal scaling for jobs |

@@ -24,8 +24,8 @@ Series A materials, diligence packets, business model, and commercial readiness.
 | [readiness-gaps.md](readiness-gaps.md) | Honest gap register from investor perspective |
 | [data-room-index.md](data-room-index.md) | Data room index: all materials available for diligence |
 | [funding-use-outline.md](funding-use-outline.md) | Use of proceeds: how Series A capital will be deployed |
-| [prism-counsel-platform-story.md](prism-counsel-platform-story.md) | PRISM Counsel platform story (archived product) |
-| [prism-counsel-wedge-expansion.md](prism-counsel-wedge-expansion.md) | PRISM Counsel wedge and expansion thesis |
-| [prism-counsel-why-now.md](prism-counsel-why-now.md) | PRISM Counsel why-now rationale |
+| [prism-counsel-platform-story.md](prism-counsel-platform-story.md) | Counsel platform story |
+| [prism-counsel-wedge-expansion.md](prism-counsel-wedge-expansion.md) | Counsel wedge and expansion thesis |
+| [prism-counsel-why-now.md](prism-counsel-why-now.md) | Counsel why-now rationale |
 
 *Last reviewed: 2026-04-20*

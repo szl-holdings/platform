@@ -79,7 +79,7 @@ These capabilities are fully functional and investor-presentable but run on seed
 | Alloy factory floor | SZL Holdings | Seeded workflow data | Yes — E2E tested |
 | CORTEX Command portal | Command | Seeded data | Yes |
 | Legal matter tracking | Counsel | Seeded matters | Yes |
-| PRISM Counsel obligation graph | PRISM Counsel | Demo data | Yes |
+| Counsel obligation graph | Counsel | Demo data | Yes |
 | Consulting OS (Carlota Jo — 16 modules) | Carlota Jo | Local operational data | Yes |
 | Tenant provisioning wizard | API Server | Demo tenant | Yes |
 | PDF generation templates | API Server | Works with any data | Yes |
@@ -171,7 +171,7 @@ These features require a commercial agreement or paid API subscription to activa
 | Carlota Jo (Advisory) | GA/Beta | Yes | Near | Email key needed; consulting OS is local data |
 | Command (CORTEX) | Partial | Yes | No | Badge counts not wired |
 | Counsel (Legal) | Working Demo | Yes | No | No live legal data source |
-| PRISM Counsel (Legal) | Working Demo | Yes | No | Seed script broken |
+| Counsel (Legal) | Working Demo | Yes | No | Seed script broken |
 | Pulse (AI Briefing) | Partial | Yes | No | AI not wired; no email subscription |
 | API Server | GA | N/A | Near | Stripe live key; email key; OTEL |
 | SZL Holdings Mobile | Beta | Yes | No | AIS simulated; maps blank |

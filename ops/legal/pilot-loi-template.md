@@ -22,7 +22,7 @@ This Letter of Intent ("**LOI**") records the Parties' good-faith intent to proc
 
 ## 2. Scope of the Pilot
 
-- **Domain pack(s):** [DOMAIN PACK — e.g., Aegis, Vessels, Terra, PRISM Counsel]
+- **Domain pack(s):** [DOMAIN PACK — e.g., Aegis, Vessels, Terra, Counsel]
 - **Users in scope:** Up to [NUMBER] users at Partner
 - **Pilot start date:** [START DATE]
 - **Pilot duration:** [60 / 90] days from start date

@@ -31,7 +31,7 @@ const EXAMPLE_INTENTS = [
   {
     label: 'Compliance Check',
     intent:
-      'Cross-reference Prism Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
+      'Cross-reference Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
   },
 ];
 
@@ -134,7 +134,7 @@ const STEP_EXPLANATIONS: Record<
     confidence: 0.82,
   },
   'prism-counsel': {
-    why: 'Prism Counsel legal matters were included because the compliance check intent requires open matter cross-reference.',
+    why: 'Counsel legal matters were included because the compliance check intent requires open matter cross-reference.',
     how: 'Called `GET /api/prism/matters?status=open` returning matter IDs, risk classifications, and associated entities.',
     alternatives: [
       'Use matter summary only (rejected — entity list needed for cross-reference)',

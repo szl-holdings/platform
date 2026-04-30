@@ -11,7 +11,7 @@
 
 SZL Holdings builds the governed decision infrastructure layer for enterprise operators — connecting what is observable to what is executable, under governance, with full attribution.
 
-The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → APEX (mobile command) → Domain packs (Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM).
+The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → APEX (mobile command) → 6 domain extension packs (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo). The platform has **8 domain verticals** in total: the 6 domain packs plus Lyte and Alloy as platform layers.
 
 The defining characteristic of the platform is **architectural unity**. Every domain pack shares one governance infrastructure, one design system, one authentication model, and one data layer. This is not a portfolio of separate startups — it is a compounding system where shared investment in governance multiplies in value with each new domain added.
 
@@ -53,11 +53,11 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 │  Operator command   Ecosystem overview          All domains, one app     │
 │  surface            8-domain dashboard          Biometric auth           │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  DOMAIN PACKS                                                            │
+│  DOMAIN PACKS (6)                                                        │
 │                                                                          │
-│  Aegis     Vessels    Terra    Counsel  Carlota Jo   IMPERIUM     │
-│  Security &     Maritime       Real Estate   Legal Matter    Premium    │
-│  Defense        Intelligence   Intelligence  Command         Advisory   │
+│  Aegis     Sentra     Vessels    Terra    Counsel  Carlota Jo   │
+│  Security &  Cyber      Maritime   Real Estate  Legal Matter  Premium    │
+│  Defense     Resilience Intelligence Intelligence Command      Advisory  │
 │  Intelligence                                                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE (shared by all domains)                      │
@@ -72,7 +72,7 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                              │
 │                                                                          │
-│  PostgreSQL 16 (Drizzle ORM)  │  700+ tables  │  116 schema files       │
+│  PostgreSQL 16 (Drizzle ORM)  │  798 tables   │  170 schema files       │
 │  External feeds (AIS, STIX, sanctions, court records, market data)      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -127,7 +127,7 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 | **Terra** | Domain pack | NYC property intelligence — distressed asset detection, ownership mapping, deal pipeline | Brokers, investors, portfolio teams |
 | **Counsel** | Domain pack (legal module integrated into Aegis) | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
 | **Carlota Jo** | Domain pack | Premium advisory platform — client portal, service delivery, advisory engagement | Founders, executives, UHNW clients |
-| **IMPERIUM** | Domain pack (in dev) | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | CIOs, infrastructure leads, cloud governance teams |
+| **Sentra** | Domain pack | Cyber resilience — posture management, incident command, recovery readiness | CISOs, security ops leads |
 | **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard — 8-domain SSE, executive briefing, global command bar | Platform admin, ecosystem operators |
 | **SZL Holdings** | Corporate platform | Investor portal, trust center, ecosystem overview | Investors, enterprise evaluators |
 
@@ -214,16 +214,15 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
 │  Web Apps (React + Vite)              Mobile (Expo / React Native)   │
 │  szl-holdings  lyte-command-center    szl-holdings-mobile (APEX)   │
 │  aegis         terra                  cortex-mobile                  │
-│  vessels       prism-counsel                                         │
+│  vessels       counsel                                               │
 │  carlota-jo    command                                               │
-│  imperium                                                            │
 └────────────────────┬──────────────────┬──────────────────────────────┘
                      │  HTTPS           │  HTTPS
                      ▼                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │  API SERVER  (artifacts/api-server)                                    │
 │                                                                       │
-│  Express 5  ·  172 route files  ·  2,331 endpoints                   │
+│  Express 5  ·  357 route files  ·  2,816 endpoints                   │
 │  Global auth enforcer (deny-by-default on /api/*)                    │
 │  REST + GraphQL (Apollo) + WebSocket + MCP                           │
 │                                                                       │
@@ -235,9 +234,9 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
                      ▼                  ▼
 ┌─────────────────────────┐  ┌─────────────────────────────────────────┐
 │  PostgreSQL 16           │  │  External Services                      │
-│  700+ tables (Drizzle)    │  │  AI: OpenAI, Anthropic, Gemini          │
+│  798 tables (Drizzle)    │  │  AI: OpenAI, Anthropic, Gemini          │
 │  Org-scoped isolation    │  │  Payments: Stripe                       │
-│  116 schema files        │  │  Email: Resend / SendGrid / SMTP        │
+│  170 schema files        │  │  Email: Resend / SendGrid / SMTP        │
 │                          │  │  Intel: AIS, STIX/TAXII, sanctions      │
 │                          │  │  Maps: Mapbox, Google Maps              │
 │                          │  │  Legal: CourtListener                   │
@@ -303,11 +302,11 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 
 | Metric | Value |
 |--------|-------|
-| Production Web Applications | 10 |
-| Native Mobile Apps | APEX (unified) + 5 domain-specific |
-| Shared Libraries | 37 packages |
-| API Endpoints | 2,331 |
-| Database Tables | 700+ |
+| Registered Artifacts | 14 |
+| Native Mobile Apps | APEX (unified) |
+| Shared Libraries | 40 packages |
+| API Endpoints | 2,816 |
+| Database Tables | 798 |
 | Source Files | 1,620 TypeScript files |
 | Lines of Code | 450,000+ |
 | UI Components | 252 web + 116 mobile screens |

@@ -89,7 +89,7 @@ The journey is designed to be largely self-serve through the first three stages.
 
 **Demo request form should capture:**
 - Name, title, organization
-- Domain of primary interest (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, General)
+- Domain of primary interest (Aegis, Vessels, Terra, Counsel, Carlota Jo, General)
 - Primary problem they are trying to solve (short answer)
 - Current stage: exploring / active evaluation / have budget / ready to pilot
 

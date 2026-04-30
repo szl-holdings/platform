@@ -9,13 +9,13 @@
 
 ## 1. Executive Summary
 
-The SZL platform has 15 registered artifacts (14 web/mobile/video + 1 internal mockup sandbox) plus 5 archived directories still on disk and 1 unscaffolded concept (`cortex-mobile`). Of the active set: 2 are GA (Carlota Jo, API Server), 4 Beta (SZL Holdings, Aegis, Terra, SZL Holdings Mobile), 2 Partial (Vessels, Command), and several artifacts (Pulse, Lyte, Sentra, Counsel, PRISM Counsel, SZL Demo Video) are functional but were not yet captured in the prior `docs/APP_STATUS.md` revision and need their status formalised.
+The SZL platform has 14 registered artifacts plus 5 archived directories still on disk and 1 unscaffolded concept (`cortex-mobile`). Of the active set: 2 are GA (Carlota Jo, API Server), 4 Beta (SZL Holdings, Aegis, Terra, SZL Holdings Mobile), 2 Partial (Vessels, Command), and several artifacts (Pulse, Lyte, Sentra, Counsel, SZL Demo Video) are functional but were not yet captured in the prior `docs/APP_STATUS.md` revision and need their status formalised.
 
 The codebase shows three structural drifts that matter for any platform-registry migration:
 
 1. **No single artifact registry of record.** Live state is spread across `.replit`, the workspace registration system, `docs/APP_STATUS.md`, `launch/01_ability_matrix.json`, and several `*capability-manifest*.json` files. They disagree.
 2. **API surface is centralised but un-scoped per artifact.** All 256 route files live in `artifacts/api-server`. There is no machine-readable mapping from artifact → owned routes → claimed capabilities, which makes per-artifact health, RBAC, and observability decisions impossible to enforce automatically.
-3. **Auth / data-source posture is inconsistent.** Some artifacts use the shared `@szl-holdings/replit-auth-web` (Carlota Jo, PRISM Counsel), some hand-roll a local `useAuth` (Pulse), and one (SZL Holdings) installs a redirect helper directly. Live-vs-mock data status is documented per artifact in prose but not asserted in CI for most surfaces.
+3. **Auth / data-source posture is inconsistent.** Some artifacts use the shared `@szl-holdings/replit-auth-web` (Carlota Jo, Counsel), some hand-roll a local `useAuth` (Pulse), and one (SZL Holdings) installs a redirect helper directly. Live-vs-mock data status is documented per artifact in prose but not asserted in CI for most surfaces.
 
 Most of these gaps are **already covered by in-flight tasks** (#2068 Series A launch readiness, #2306 codebase consolidation, #2307 exhaustive consolidation sweep, #2302 operational audit, #2308 platform cohesion). The genuinely uncovered gaps are: a typed artifact registry, per-artifact route ownership, and CI-enforced lifecycle status. The recommended #1 proof-point migration is **Pulse**, with **Counsel** and **Sentra** as #2 and #3 — small enough to migrate end-to-end in one task, representative enough to surface every required pattern, and currently healthy.
 
@@ -36,7 +36,7 @@ Sources reconciled: `.replit`, registered-artifact list (workspace registry), `d
 | 7 | `artifacts/pulse` | web | AI Executive Briefing | `/pulse/` | Beta (status not in APP_STATUS) | React + Vite, 23 src files | Local `useAuth()` hook | Live AI generation via gateway (#1023); mock fallback | None (no e2e file) |
 | 8 | `artifacts/sentra` | web | Cyber Resilience Command (Agent Mesh Defense) | `/sentra/` | Beta (new — Task #2299) | React + Vite, 22 src files | Replit OIDC | Seeded mesh data; intended live agent telemetry (proposed #2309) | None |
 | 9 | `artifacts/counsel` | web | Legal Matter Command | `/counsel/` | Concept/Skeleton | React + Vite, 14 src files | Replit OIDC | None — placeholder | None |
-| 10 | `artifacts/prism-counsel` | web | PRISM Counsel | `/prism-counsel/` | Listed Archived in APP_STATUS but **still registered + running** | React + Vite, 16 src files | `@szl-holdings/replit-auth-web` | None | None |
+| 10 | `artifacts/prism-counsel` | web | Counsel | `/prism-counsel/` | Listed Archived in APP_STATUS but **still registered + running** | React + Vite, 16 src files | `@szl-holdings/replit-auth-web` | None | None |
 | 11 | `artifacts/lyte-command-center` | web | Lyte Decision Intelligence | `/lyte/` | Listed Archived in APP_STATUS but **still registered + running**; live data wired (#1040 merged) | React + Vite, 23 src files | Replit OIDC | Live overlay endpoints `/api/lyte/*` (#1040) | None |
 | 12 | `artifacts/szl-demo-video` | video | SZL Holdings — Governed Autonomy Demo | `/szl-demo-video/` | Beta | React + Vite (video runtime), 14 src files | None (public demo) | Static script | None |
 | 13 | `artifacts/szl-holdings-mobile` | mobile | SZL Holdings Mobile Command | Expo dev domain | Beta | Expo / React Native | Replit OIDC | Re-uses API server | `__tests__/` Jest suite present |
@@ -61,14 +61,14 @@ Grouped by theme. Each finding is a fact about the current tree, not a proposed 
 
 ### Theme A — Registry inconsistencies
 
-- **A1.** The live workspace registry lists 15 artifacts but `docs/APP_STATUS.md` says "Total 15" while marking PRISM Counsel and Lyte Command Center as Archived — both are still registered, have running workflows, and (in Lyte's case) just had live API data wired in (Task #1040 merged). The doc and reality have drifted in opposite directions.
+- **A1.** The live workspace registry lists 15 artifacts but `docs/APP_STATUS.md` says "Total 15" while marking Counsel and Lyte Command Center as Archived — both are still registered, have running workflows, and (in Lyte's case) just had live API data wired in (Task #1040 merged). The doc and reality have drifted in opposite directions.
 - **A2.** `launch/01_ability_matrix.json` lists 33 capabilities across 9 products but every entry's `live_state`/`health` field is `undefined` in the parsed output — the file was extended without populating the lifecycle column.
 - **A3.** `.replit` only references `api-server` and `mockup-sandbox` under `[[artifacts]]` — the other 13 artifacts are managed via the workspace registry, which is invisible to anyone reading `.replit`. There is no single file a new contributor can read to learn what artifacts exist.
 - **A4.** Three competing capability files coexist: `artifacts/audit/platform-capability-manifest.json`, `artifacts/internal-audit/capability-manifest.json`, `docs/audit/capability-inventory.json`. None are referenced by CI.
 
 ### Theme B — Auth posture inconsistency
 
-- **B1.** Carlota Jo and PRISM Counsel use the shared `@szl-holdings/replit-auth-web` hook (the canonical pattern).
+- **B1.** Carlota Jo and Counsel use the shared `@szl-holdings/replit-auth-web` hook (the canonical pattern).
 - **B2.** Pulse hand-rolls a local `useAuth()` hook in `App.tsx` with a `DEMO_USER` fallback path.
 - **B3.** SZL Holdings calls `installAuthClearedRedirect("/api/login")` in `main.tsx` — a different shared helper.
 - **B4.** Result: three different "what does logged-out look like?" experiences across the suite. There is no shared `RequireAuth` primitive in use across all artifacts.
@@ -81,7 +81,7 @@ Grouped by theme. Each finding is a fact about the current tree, not a proposed 
 
 ### Theme D — Data-source posture is documented only in prose
 
-- **D1.** Only Aegis, Terra, Vessels, and Carlota Jo have explicit "live data sources" lists in APP_STATUS. Pulse, Sentra, Lyte, Command, Counsel, PRISM Counsel are silent.
+- **D1.** Only Aegis, Terra, Vessels, and Carlota Jo have explicit "live data sources" lists in APP_STATUS. Pulse, Sentra, Lyte, Command, Counsel are silent.
 - **D2.** The `verify:claims` script exists (`scripts/qa/verify-claims.js`) and is now strict-gated (Task #2068) but the underlying claims file (`launch/01_ability_matrix.json`) is sparsely populated.
 - **D3.** No artifact emits a per-route "is this live or mocked?" telemetry signal that the dashboard can consume.
 
@@ -177,7 +177,7 @@ Each item is a one-line title + short rationale, grouped by theme. Items are che
 
 ### CI
 
-- **NEW — CI gate: every registered artifact must have a passing E2E spec.** Pulse, Sentra, Counsel, PRISM Counsel, Lyte Command Center, Mockup Sandbox currently have none. Would have caught the Pulse local-`useAuth` divergence at PR time.
+- **NEW — CI gate: every registered artifact must have a passing E2E spec.** Pulse, Sentra, Counsel, Lyte Command Center, Mockup Sandbox currently have none. Would have caught the Pulse local-`useAuth` divergence at PR time.
 - **EXTENDS #2068 — Add `audit:artifact-status` CI gate** that diff-checks the registry against `docs/APP_STATUS.md` (closes the "Lyte / PRISM marked archived but live" drift in A1).
 
 ### Docs

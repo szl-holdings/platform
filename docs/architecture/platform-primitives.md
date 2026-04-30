@@ -9,7 +9,7 @@
 
 The SZL Holdings platform is built on six core primitives. These are not features — they are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools.
 
-Every product surface in the ecosystem (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command Portal, CORTEX) is built on top of these same six primitives. Domain packs add domain-specific intelligence; the primitives provide the governance infrastructure.
+Every product surface in the ecosystem (Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo, Command Portal, CORTEX) is built on top of these same six primitives. Domain packs add domain-specific intelligence; the primitives provide the governance infrastructure.
 
 ```
 Signal arrives (via Event Fabric)
@@ -135,7 +135,7 @@ Every piece of content is classified by origin:
 
 - Referenced by `outcome-graph` entries as evidence for recommendations
 - Enforced by `covenant-policy` before document generation or client-facing actions
-- Surfaced in PRISM Counsel's proof chain viewer and Alloy's governance audit
+- Surfaced in Counsel's proof chain viewer and Alloy's governance audit
 - Attached to all AI copilot outputs across every domain pack
 
 ---
@@ -237,7 +237,7 @@ Supports: Normal, LogNormal, Uniform, Triangular, PERT, Discrete, Custom empiric
 | Aegis | `AEGIS_CYBER_RISK` | Expected loss from security incident given current controls |
 | Vessels | `VESSELS_VOYAGE_COST` | Total voyage cost with fuel, port, and charter rate uncertainty |
 | Terra | `TERRA_DEAL_RETURN` | Expected ROI on distressed property acquisition |
-| PRISM Counsel | `PRISM_SETTLEMENT_RANGE` | Likely settlement range given case strength and jurisdiction |
+| Counsel | `PRISM_SETTLEMENT_RANGE` | Likely settlement range given case strength and jurisdiction |
 
 ### How It Connects
 
@@ -303,7 +303,7 @@ The Event Fabric is the cross-domain signal backbone of the platform. PRISM Bus 
 
 ### Why It Matters
 
-Enterprise operations generate signals across disconnected silos. Without a shared event fabric, a sanctions hit in Vessels cannot surface as a legal risk flag in PRISM Counsel. A CVE alert in Aegis cannot trigger a vendor review in Lyte.
+Enterprise operations generate signals across disconnected silos. Without a shared event fabric, a sanctions hit in Vessels cannot surface as a legal risk flag in Counsel. A CVE alert in Aegis cannot trigger a vendor review in Lyte.
 
 The Event Fabric makes the platform's cross-domain intelligence possible. Domain packs are not isolated — they share a common signal layer that enables correlation, routing, and unified response.
 

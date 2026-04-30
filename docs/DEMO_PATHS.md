@@ -118,7 +118,7 @@ These demo narratives are grounded in what the current codebase can actually sup
 
 1. **Health Overview** — Start at `/api/health`. Show 8+ platform apps, database latency (<20ms), service status. Every service is instrumented with OpenTelemetry.
 
-2. **Platform Metrics** — Show `generated/platform-metrics.json` with code-derived counts: 15 registered artifacts, 123 packages, 6,235+ TS/TSX files, 1,047 DB tables, 12/12 primitives implemented. Emphasize: "These are not hand-maintained numbers. They're generated from the codebase on every CI run."
+2. **Platform Metrics** — Show `generated/platform-metrics.json` with code-derived counts: 14 registered artifacts, 123 packages, 6,235+ TS/TSX files, 798 DB tables, 12/12 primitives implemented. Emphasize: "These are not hand-maintained numbers. They're generated from the codebase on every CI run."
 
 3. **Command Arena** — Run `npx tsx scripts/evals/run-arena.ts`. Walk through the multi-dimensional scoring: correctness, evidence completeness, approval compliance, replay integrity, policy adherence. Show the policy gate compliance rate.
 

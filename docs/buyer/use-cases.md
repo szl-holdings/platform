@@ -10,7 +10,7 @@
 
 **Scenario:** A growing operations team has a budget approval sitting unreviewed for 6 days. Nobody notices until the project is delayed and the client is unhappy.
 
-**How KORA solves it:** Approval latency is tracked by the Approvals Center from the moment an approval is requested. KORA surfaces stalled approvals in the Risk dimension of the PRISM dashboard, ranked by business impact. A11oy routes an escalation to the responsible owner's inbox before the delay compounds.
+**How KORA solves it:** Approval latency is tracked by the Approvals Center from the moment an approval is requested. KORA surfaces stalled approvals in the Risk dimension of the PRISM dashboard, ranked by business impact. Alloy routes an escalation to the responsible owner's inbox before the delay compounds.
 
 **Outcome:** Approval resolved in 24 hours. Client timeline preserved. Escalation chain documented in audit trail.
 
@@ -64,7 +64,7 @@
 
 **Scenario:** A SOC analyst receives 2,000 alerts per day. 95% are noise. The 5% that matter are buried in the queue.
 
-**How PARAGON solves it:** PARAGON Defense workspace normalizes alerts from connected SIEM sources, maps them to MITRE ATT&CK, and prioritizes them using the Sentinel AI agent. The agent provides triage recommendations with reasoning — not just scores. The analyst reviews recommendations, confirms the most significant findings, and triggers SOAR playbooks via A11oy.
+**How PARAGON solves it:** PARAGON Defense workspace normalizes alerts from connected SIEM sources, maps them to MITRE ATT&CK, and prioritizes them using the Sentinel AI agent. The agent provides triage recommendations with reasoning — not just scores. The analyst reviews recommendations, confirms the most significant findings, and triggers SOAR playbooks via Alloy.
 
 **Outcome:** Alert triage time reduced. Mean time to respond improved. False positive rate tracked and used to refine the Sentinel model.
 
@@ -88,7 +88,7 @@
 
 **How DOMAINE solves it:** DOMAINE aggregates distress signals from NYC HPD (housing violations), DOF (tax liens), DOB (building violations), ACRIS (deed transfers and mortgage filings), and ECB (environmental violations). Properties are scored by distress signal intensity and displayed on an interactive map. Ownership structures — including LLC chains — are traced to reveal beneficial ownership.
 
-**Outcome:** Investor identifies distressed opportunities 30–60 days before they reach brokers. Deal pipeline managed via A11oy.
+**Outcome:** Investor identifies distressed opportunities 30–60 days before they reach brokers. Deal pipeline managed via Alloy.
 
 ---
 

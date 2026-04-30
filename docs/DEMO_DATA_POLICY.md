@@ -100,7 +100,7 @@ Refer to `docs/audit/mock-stub-placeholder-register.md` for the full inventory. 
 | Terra | Seeded | CoStar integration (live when key configured) |
 | Vessels | Seeded | AIS feed (live when key configured) |
 | Forge | Seeded | None (CRM is fully demo) |
-| PRISM Counsel | Seeded | None (legal module is fully demo) |
+| Counsel | Seeded | None (legal module is fully demo) |
 | CORTEX | Seeded | None (agent OS is demo state) |
 | Command Portal | Seeded | Aggregates from above |
 

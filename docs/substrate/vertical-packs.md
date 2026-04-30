@@ -164,7 +164,7 @@ These four workflows are domain-agnostic composition kernels that vertical packs
 
 ---
 
-### PRISM Counsel — Matter Evidence Packaging and Deadline Escalation
+### Counsel — Matter Evidence Packaging and Deadline Escalation
 
 | Property | Value |
 |---|---|
@@ -175,7 +175,7 @@ These four workflows are domain-agnostic composition kernels that vertical packs
 | Approval threshold | Operator (supervising attorney / legal ops) |
 | Evidence sources | `counsel-retriever` — matter files, document bundles, obligation timelines, privilege designations |
 | Inbox pattern | `prism-counsel-evidence-packaging` |
-| UI entry point | PRISM Counsel → Audit Trail → "Evidence Packaging" |
+| UI entry point | Counsel → Audit Trail → "Evidence Packaging" |
 
 **What it produces**: Structured `EvidencePackage[]` per matter with privilege-reviewed document bundles + `MatterDeadline[]` with urgency scores.
 

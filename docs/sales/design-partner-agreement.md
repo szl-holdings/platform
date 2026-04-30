@@ -29,7 +29,7 @@ This Agreement begins on the Effective Date and continues for **twelve (12) mont
 
 | Item | Detail |
 |---|---|
-| Domain pack(s) in scope | **[Aegis / Vessels / Terra / PRISM Counsel — list specific packs]** |
+| Domain pack(s) in scope | **[Aegis / Vessels / Terra / Counsel — list specific packs]** |
 | Tenant tier | **[Per [TENANT_TIERS.md](../product/tenant-tiers.md)]** |
 | Permitted users | Up to **[N]** named users on Partner's side |
 | Production deployment | Required (not a sandbox) |

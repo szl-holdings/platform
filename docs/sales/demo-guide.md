@@ -32,7 +32,7 @@
 | Terra Real Estate | `/terra/` | Yes (demo org) |
 | Carlota Jo | `/carlota-jo/` | No (public) |
 
-> **Deprecated:** Lyte Command Center (`/lyte-command-center/`) is archived — use `/command/operations` instead. Firestorm (`/firestorm/`) is superseded by Aegis. PRISM Counsel (`/prism-counsel/`) is deprecated (task #579).
+> **Deprecated:** Lyte Command Center (`/lyte-command-center/`) is archived — use `/command/operations` instead. Firestorm (`/firestorm/`) is superseded by Aegis. Counsel (`/prism-counsel/`) is deprecated (task #579).
 
 ---
 
@@ -50,7 +50,7 @@
 - Fleet positions and vessel data in Vessels
 - Real estate deals and distress signals in Terra
 - SOAR playbook executions in Aegis
-- Law firm matters and forecasts in Aegis legal workspace (formerly PRISM Counsel)
+- Law firm matters and forecasts in Aegis legal workspace (formerly Counsel)
 - Workflow execution history in Alloy
 
 Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthetic data.
@@ -112,7 +112,7 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 **Goal:** Demonstrate operational fit for their domain, show trust and compliance posture.
 
-**For legal/professional services buyers (Aegis legal workspace — formerly PRISM Counsel):**
+**For legal/professional services buyers (Aegis legal workspace — formerly Counsel):**
 1. Landing `/solutions/aegis` (2 min)
 2. Aegis legal workspace — matter list, deadlines, forecast (5 min)
 3. Copilot workbench — AI with approval gate (5 min)

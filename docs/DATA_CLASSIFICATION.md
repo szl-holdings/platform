@@ -70,7 +70,7 @@
 - Session signing secrets
 - Encryption keys
 - Customer PII (names, emails, addresses)
-- Legal privileged communications (PRISM Counsel)
+- Legal privileged communications (Counsel)
 - Maritime vessel positions with commercial sensitivity (Vessels)
 - Real estate deal details with NDA requirements (Terra)
 
@@ -95,7 +95,7 @@
 | Aegis | Threat intelligence, security alerts, SOAR playbooks | Tier 4 |
 | Vessels | Fleet positions, voyage data, sanctions flags | Tier 3–4 |
 | Terra | Property ownership data, deal pipeline | Tier 3–4 |
-| PRISM Counsel | Legal matter details, client communications | Tier 4 (legal privilege) |
+| Counsel | Legal matter details, client communications | Tier 4 (legal privilege) |
 | Carlota Jo | UHNW client intake, advisory communications | Tier 4 |
 
 ---

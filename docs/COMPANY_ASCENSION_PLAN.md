@@ -131,7 +131,7 @@ SZL Holdings is the only company with a governed decision operating system that 
 | 6 domain packs running | 6 registered artifacts, all in Beta |
 | 6 governance primitives implemented | `docs/CORE_PLATFORM_PRIMITIVES.md` |
 | 347 API route files | Verified in `audit/source-of-truth.json` |
-| 1,047 database tables | Live PostgreSQL count |
+| 798 database tables | Live PostgreSQL count |
 | 22 CI/CD workflows | GitHub Actions |
 | Deny-by-default auth | Global auth enforcer |
 | Immutable audit trail | `lib/proof-chain` |

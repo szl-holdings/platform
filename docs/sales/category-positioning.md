@@ -36,7 +36,7 @@ The platform is organized in a clear hierarchy:
 | **Flagship command** | Lyte | The operator command surface — PRISM framework, signal-to-action |
 | **Execution fabric** | Alloy | The governance backbone — workflow orchestration, approval gates, audit trail |
 | **Mobile command** | CORTEX | Unified mobile command — all domains, one app |
-| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
+| **Domain packs** | Aegis, Vessels, Terra, Counsel, Carlota Jo, Sentra | Domain-specific intelligence on shared governance infrastructure |
 
 ---
 
@@ -100,7 +100,7 @@ This means a new domain pack can be stood up without rebuilding governance. The 
 | Audit trail | Immutable proof chain | Log retention | None | Execution logs |
 | AI governance | Policy-gated, advisory-only | Not applicable | None | None |
 | Outcome tracking | Closed-loop (recommendation → decision → outcome) | None | None | None |
-| Cross-domain intelligence | 6 domain packs on shared governance infrastructure (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) | Per-domain | Single conversation | Per-workflow |
+| Cross-domain intelligence | 6 domain packs on shared governance infrastructure (Aegis, Vessels, Terra, Counsel, Carlota Jo, Sentra) | Per-domain | Single conversation | Per-workflow |
 | Simulation | Monte Carlo with sensitivity analysis | None | None | None |
 
 ---

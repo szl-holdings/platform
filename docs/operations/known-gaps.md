@@ -125,7 +125,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | VD1 | No `security.txt` | Compliance | No disclosure channel | ✅ Resolved Apr-2026 — Static file `artifacts/szl-holdings/public/.well-known/security.txt` published (RFC 9116 compliant). API server also serves it via `GET /.well-known/security.txt` in `routes/a2a.ts` (same pattern as `agent-card.json`). Contact: `security@szlholdings.com`. SECURITY.md updated with machine-readable link. |
 | GAP-004 | No `.env.example` in all artifacts | Ops | Dev friction | ✅ Resolved Apr-2026 — `.env.example` expanded to 175 variables covering all documented env vars in `ENVIRONMENT_VARIABLES.md` |
 | TD-001 | PRISM framework naming inconsistency | Tech Debt | Internal confusion | Pulse/Risk/Intel vs People/Revenue/Infra |
-| TD-002 | Broken seed scripts (PRISM Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
+| TD-002 | Broken seed scripts (Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
 | TD-003 | DEMO_GUIDE.md said "five primitives" throughout | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to six primitives (Event Fabric is the 6th) |
 | TD-004 | TRUST_CENTER_INDEX.md cited HuggingFace/Qwen3-8B as AI model | Doc Accuracy | ✅ Resolved Apr-2026 (Phase 10–13) | TRUST_CENTER_INDEX.md § Model Transparency corrected: HuggingFace/Qwen3-8B reference removed; multi-provider stack (OpenAI, Anthropic, Gemini) documented. See Phase 10–13 audit note and incident log entry for evidence. |
 | TD-005 | SECURITY.md role list showed 6 of 11 platform roles | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to full 11-role hierarchy with reference to ACCESS-CONTROL-MATRIX.md |

@@ -36,7 +36,7 @@ The hierarchy is:
 ↓ **Lyte** (flagship command surface)
 ↓ **Alloy** (execution fabric)
 ↓ **CORTEX** (unified mobile command)
-↓ **Domain Packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM)
+↓ **Domain Packs** (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo)
 
 This is not a portfolio of separate products. It is a governed platform with domain extensions — all running on the same six primitives, all enforcing the same governance loop.
 
@@ -96,7 +96,7 @@ The same governance infrastructure that powers Lyte runs across every domain pac
 
 [IMAGE: 03-aegis-soc-command.png — Aegis SOC command with threat intelligence and MITRE ATT&CK panel, 1440×900, dark mode]
 
-Aegis is the security domain pack. It provides SOC command, MITRE ATT&CK mapping, SOAR playbook orchestration, XDR, threat intelligence feeds, and dark web monitoring — all routed through the same governed decision loop. PRISM Counsel, the legal matter command module, is integrated into Aegis for organizations that need legal chain-of-custody alongside security incident response.
+Aegis is the security domain pack. It provides SOC command, MITRE ATT&CK mapping, SOAR playbook orchestration, XDR, threat intelligence feeds, and dark web monitoring — all routed through the same governed decision loop. Counsel, the legal matter command module, is integrated into Aegis for organizations that need legal chain-of-custody alongside security incident response.
 
 ---
 
@@ -104,7 +104,7 @@ Aegis is the security domain pack. It provides SOC command, MITRE ATT&CK mapping
 
 [IMAGE: 04-vessels-fleet-command.png — Vessels fleet command with AIS tracking and voyage P&L, 1440×900, dark mode]
 
-Vessels is the maritime domain pack. Fleet command, AIS telemetry, dark vessel detection, sanctions screening, demurrage tracking, freight rate benchmarking, and voyage P&L — unified under the same governance infrastructure. A sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel automatically through the Event Fabric.
+Vessels is the maritime domain pack. Fleet command, AIS telemetry, dark vessel detection, sanctions screening, demurrage tracking, freight rate benchmarking, and voyage P&L — unified under the same governance infrastructure. A sanctions hit in Vessels can surface a legal risk flag in Counsel automatically through the Event Fabric.
 
 ---
 
@@ -124,23 +124,15 @@ Carlota Jo is the advisory domain pack, purpose-built for premium advisory opera
 
 ---
 
-### Pulse — AI Executive Briefing
+### Counsel — Legal Matter Command
 
-[IMAGE: 08-pulse-executive-briefing.png — Pulse AI-generated executive briefing surface, 1440×900, dark mode]
-
-Pulse is the executive briefing domain pack. It synthesizes signals across every other domain into a daily AI-generated brief — what changed, what matters, and what is queued for decision. Executives see the cross-domain picture without having to navigate every workspace individually.
+Counsel is the legal domain pack, integrated into Aegis. It handles matter management, AI triage with approval gates, proof chain audit trail, and court filing integration. Every AI-generated legal recommendation is tagged with source citations and confidence scores. No consequential legal action bypasses the human approval gate.
 
 ---
 
-### PRISM Counsel — Legal Matter Command
+### Sentra — Cyber Resilience Command
 
-PRISM Counsel is the legal domain pack, integrated into Aegis. It handles matter management, AI triage with approval gates, proof chain audit trail, and court filing integration. Every AI-generated legal recommendation is tagged with source citations and confidence scores. No consequential legal action bypasses the human approval gate.
-
----
-
-### IMPERIUM — Cloud Sovereignty
-
-IMPERIUM is the cloud sovereignty domain pack. Multi-cloud governance, policy enforcement, and cloud estate visibility — with the same governed decision loop applied to infrastructure change management.
+Sentra is the cyber resilience domain pack. It provides threat detection, incident response orchestration, and compliance posture management — with the same governed decision loop applied to security operations.
 
 ---
 
@@ -151,9 +143,9 @@ IMPERIUM is the cloud sovereignty domain pack. Multi-cloud governance, policy en
 The Unified Command Portal provides a real-time cross-domain view across all domain packs. Executive briefing, 8-domain SSE, and KPI aggregation — a single surface for operators who need visibility across the entire governance estate.
 
 As of April 2026:
-- 10 canonical artifacts across web and mobile
-- 700+ database tables across 116 schema files
-- 40+ shared packages in a pnpm monorepo
+- 14 registered artifacts across web and mobile
+- 798 database tables across 170 schema files
+- 40 shared packages in a pnpm monorepo
 - 11-role RBAC with org-scoped tenant isolation
 - 9 schema-validated AI decision types
 - Immutable audit trail via Proof Chain across all surfaces

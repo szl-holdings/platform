@@ -96,7 +96,7 @@ Trust is not a tab. It is the fabric of how work happens.
 
 ### Pillar 6 — Domain Pack Extensibility on Shared Infrastructure
 
-Every domain pack — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM — is built on the same six platform primitives:
+Every domain pack — Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo — is built on the same six platform primitives:
 
 | Primitive | Library |
 |-----------|---------|

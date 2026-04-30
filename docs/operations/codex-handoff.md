@@ -23,7 +23,7 @@
 ### Monorepo
 - **pnpm 10.x** workspace with `packages/`, `lib/`, `artifacts/`, `scripts/`.
 - **TypeScript 5.x** across all packages. `tsconfig.base.json` sets `noImplicitAny`, `strictNullChecks`, `alwaysStrict`.
-- **PostgreSQL 16** via Drizzle ORM 0.45.x. 799+ tables across 132 schema files in `lib/db/src/schema/`.
+- **PostgreSQL 16** via Drizzle ORM 0.45.x. 798 tables across 170 schema files in `lib/db/src/schema/`.
 - **One API server** (`artifacts/api-server`) — Express 5, serves all domain pack routes plus GraphQL, MCP gateway, and NEXUS static build.
 - **Shared proxy** on port 9090 — all sub-path apps (terra, vessels, carlota-jo, command, pulse) share it via `reusePort: true`.
 

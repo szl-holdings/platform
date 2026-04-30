@@ -158,7 +158,7 @@ These are not committed roadmap items — they are directional hypotheses for bo
 
 | Vertical | Domain Pack Name | Signal Rationale |
 |----------|-----------------|-----------------|
-| Legal matter command | PRISM Counsel (deprecated) | High-stakes decisions; existing codebase; needs revival with design partner |
+| Legal matter command | Counsel (deprecated) | High-stakes decisions; existing codebase; needs revival with design partner |
 | Healthcare operations | (TBD) | Regulatory risk, decision accountability requirements |
 | Financial services risk | (TBD) | Trade-off decisions with measurable compliance risk |
 | Government / defense | Aegis extension | FedRAMP track already referenced; high barrier, high value |
@@ -195,13 +195,13 @@ CORTEX does not replace domain pack web apps. It surfaces the most time-sensitiv
 
 The legal matter command domain pack was deprecated in task #579 and has a `DEPRECATED.md` marker. The code remains in the repository as an archival reference.
 
-**If PRISM Counsel is to be revived as a domain pack:**
+**If Counsel is to be revived as a domain pack:**
 1. A design partner in the legal vertical must be identified first
 2. The codebase requires a fresh assessment — it was substantial (138 src files, 128 pages) but is now stale
 3. The seed script issues documented in existing tasks must be resolved
 4. It should be re-entered into the portfolio at Stage 1 (Design Partner Alpha) with a new timeline
 
-**Until that work is scoped, PRISM Counsel does not appear in investor materials or public documentation.**
+**Until that work is scoped, Counsel does not appear in investor materials or public documentation.**
 
 ---
 

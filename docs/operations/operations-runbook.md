@@ -581,10 +581,10 @@ The eight canonical reference docs listed below are point-in-time snapshots deri
 
 **Source verification commands:**
 ```bash
-# Count pgTable declarations (current: 799 tables)
+# Count pgTable declarations (current: 798 tables)
 grep -rc "= pgTable" lib/db/src/schema/ | awk -F: '{sum += $2} END {print sum}'
 
-# Count schema files (current: 132)
+# Count schema files (current: 170)
 ls lib/db/src/schema/*.ts | wc -l
 
 # Count API route files including subdirectories (current: ~258 .ts files)
@@ -599,8 +599,8 @@ cat artifact.toml  # or check .replit artifact registrations
 | Document | Source of Truth | Last Verified | Drift Risk | Re-verify When |
 |----------|----------------|---------------|------------|----------------|
 | [architecture.md](../architecture/architecture.md) | `artifacts/`, `lib/`, `artifacts/api-server/src/` | 2026-04-17 | Medium — monorepo structure and table counts drift with every schema/artifact change | New artifact added/archived; significant schema growth |
-| [API-SPEC.md](../architecture/api-spec.md) | `artifacts/api-server/src/routes/`, `lib/api-spec/openapi.yaml` | 2026-04-16 | High — ~140 route files; new route groups added frequently | Any new route group or auth model change |
-| [DATA-MODEL.md](../architecture/data-model.md) | `lib/db/src/schema/` (132 files, 799 tables) | 2026-04-17 | High — 799 tables across 132 schema files; changes with every schema migration | Any `pnpm --filter db push` in dev or `db:migrate` in prod |
+| [API-SPEC.md](../architecture/api-spec.md) | `artifacts/api-server/src/routes/`, `lib/api-spec/openapi.yaml` | 2026-04-16 | High — 357 route files; new route groups added frequently | Any new route group or auth model change |
+| [DATA-MODEL.md](../architecture/data-model.md) | `lib/db/src/schema/` (170 files, 798 tables) | 2026-04-17 | High — 798 tables across 170 schema files; changes with every schema migration | Any `pnpm --filter db push` in dev or `db:migrate` in prod |
 | [PRODUCT-SURFACES.md](../product/product-surfaces.md) | `artifacts/` directory + registered artifact list | 2026-04-17 | Medium — artifact status, component counts, and deprecated surfaces drift | New artifact registered, archived, or status-changed |
 | [OPERATIONS-RUNBOOK.md](operations-runbook.md) (this document) | `artifacts/api-server/`, `lib/`, Replit workflows | 2026-04-17 | Low — operational procedures are stable; env vars and health endpoints change occasionally | New env var added; health endpoint changed; workflow topology changes |
 | [DEPLOYMENT-GUIDE.md](deployment-guide.md) | `infra/`, `scripts/`, `.github/workflows/` | 2026-04-16 | Low — infrastructure and CI/CD procedures are stable | IaC changes; new GitHub Actions workflow added |

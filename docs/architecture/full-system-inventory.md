@@ -71,7 +71,7 @@ This is the canonical exhaustive inventory of the entire SZL Holdings monorepo. 
 | `lib/covenant-policy` | `@szl-holdings/covenant-policy` | Policy enforcement and compliance rules | |
 | `lib/crdt-sync` | `@szl-holdings/crdt-sync` | CRDT-based real-time sync primitives | |
 | `lib/data-connectors` | `@szl-holdings/data-connectors` | External data source connector framework | |
-| `lib/db` | `@szl-holdings/db` | Drizzle ORM schema, migrations, PostgreSQL client | 700+ tables, 10 schema domains |
+| `lib/db` | `@szl-holdings/db` | Drizzle ORM schema, migrations, PostgreSQL client | 798 tables, 10 schema domains |
 | `lib/decision-engine` | `@szl-holdings/decision-engine` | Decision scoring and recommendation engine | |
 | `lib/decision-fabric` | `@szl-holdings/decision-fabric` | Decision trace and audit fabric | |
 | `lib/forge-runtime` | `@szl-holdings/forge-runtime` | Alloy workflow execution engine internals | Durable job queue, agent execution |
@@ -203,7 +203,7 @@ The database uses Drizzle ORM with PostgreSQL 16+. Tables are organized into 10 
 | `consciousness.ts`, `decision_fabric.ts`, `covenant_sim.ts` | AI governance | ~10 |
 | `analytics.ts`, `telemetry.ts` | Analytics / observability | ~8 |
 | `notifications.ts`, `push_*.ts` | Notification channels | ~8 |
-| (+ many more across 150+ schema files) | All domains | **700+ tables total** |
+| (+ many more across 170 schema files) | All domains | **798 tables total** |
 
 ### 5.1 Database Migrations
 
@@ -250,7 +250,7 @@ The database uses Drizzle ORM with PostgreSQL 16+. Tables are organized into 10 
 | `release.yml` | Release workflow | Active |
 | `npm-publish.yml` | npm package publish | Active |
 | `container-publish.yml` | Docker container publish | Active — `lyte-command-center` entry removed |
-| `prism-counsel-ci.yml` | PRISM Counsel-specific CI | Active |
+| `prism-counsel-ci.yml` | Counsel-specific CI | Active |
 
 **Note:** All 13 workflows are fully pinned to commit SHAs (verified April 2026). All workflow permissions are least-privilege. See `docs/audit/series-a-gap-register.md` for CI gap details.
 

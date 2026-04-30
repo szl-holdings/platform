@@ -6,7 +6,7 @@
 
 ## Portfolio Overview
 
-SZL Holdings operates a governed decision infrastructure with **three command surfaces** (Lyte, CORTEX, Command Portal), one execution fabric (Alloy), and **six domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) — all sharing one governance infrastructure, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
+SZL Holdings operates a governed decision infrastructure with **three command surfaces** (Lyte, CORTEX, Command Portal), one execution fabric (Alloy), and **six domain packs** (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo) — all sharing one governance infrastructure, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
 
 ![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
 
@@ -138,7 +138,7 @@ Fleet command for maritime operators.
 
 ---
 
-## PRISM Counsel — Legal Matter Command
+## Counsel — Legal Matter Command
 
 **Category:** Legal Operations & Matter Intelligence  
 **Layer:** Observe / Advise / Resolve  
@@ -154,25 +154,6 @@ Matter management and legal intelligence for in-house counsel and litigation tea
 - Immutable audit trail across the entire matter lifecycle (Proof Chain)
 
 **Strategic position:** Legal domain pack. Buyer is GC / Head of Litigation / Head of Compliance. Trust requirements (privilege, audit) make Covenant Policy + Proof Chain a structural fit, not a feature.
-
----
-
-## IMPERIUM — Cloud Sovereignty
-
-**Category:** Infrastructure Governance & Cloud Compliance  
-**Layer:** Govern / Enforce  
-**Readiness:** Functional Alpha  
-
-Cloud sovereignty and infrastructure governance for regulated and sovereignty-sensitive enterprises.
-
-**Capability highlights:**
-- Cloud posture and compliance scoring across Azure / AWS / GCP
-- Sovereignty controls (data residency, jurisdiction tagging, transfer audit)
-- Covenant Policy enforcement on infrastructure change requests
-- Proof Chain attribution for every infrastructure decision
-- Integrates with Aegis CSPM and the Command Portal CISO surface
-
-**Strategic position:** Cloud domain pack. Sells into the same CISO / VP Infrastructure buyer that buys Aegis, but addresses infrastructure governance rather than threat operations. Together with Aegis, completes the security + infrastructure governance pairing required for FedRAMP and sovereignty-bound enterprises.
 
 ---
 
@@ -221,7 +202,7 @@ A single iOS/Android app that consolidates every domain pack — Lyte, Aegis, Ve
 **Layer:** Observe (cross-domain)  
 **Readiness:** Functional Alpha  
 
-The web ecosystem hub for executives who need a single pane covering every domain pack signal at once — without bouncing between Lyte, Aegis, Vessels, Terra, PRISM Counsel, and IMPERIUM.
+The web ecosystem hub for executives who need a single pane covering every domain pack signal at once — without bouncing between Lyte, Aegis, Vessels, Terra, Counsel, and Sentra.
 
 **Capability highlights:**
 - Cross-domain signal aggregation and portfolio health monitoring

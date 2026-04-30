@@ -15,6 +15,6 @@
   <text x="640" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a78bfa" text-anchor="middle">Founder &amp; CEO — SZL Holdings</text>
   <line x1="540" y1="320" x2="740" y2="320" stroke="#8b5cf6" stroke-width="2" opacity="0.5" />
   <text x="640" y="380" font-family="system-ui, sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle">Building governed operational intelligence platforms</text>
-  <text x="640" y="420" font-family="system-ui, sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle">22 production apps · 8 industry verticals · Full TypeScript monorepo</text>
+  <text x="640" y="420" font-family="system-ui, sans-serif" font-size="20" fill="#94a3b8" text-anchor="middle">14 registered artifacts · 8 domain verticals · Full TypeScript monorepo</text>
   <text x="640" y="520" font-family="system-ui, sans-serif" font-size="20" fill="#e2e8f0" text-anchor="middle">szlholdings.com</text>
 </svg>

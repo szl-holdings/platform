@@ -151,7 +151,7 @@ The platform uses the **double-submit cookie** pattern:
 ### CSRF test coverage
 
 CSRF round-trip tests are in `tests/api/csrf-roundtrip.test.ts` and cover:
-- Vessels, Terra, PRISM Counsel, Firestorm, Lyte, Alloy, Aegis, SZL Holdings, Agents, Verifier, Audit, Approvals, Signals
+- Vessels, Terra, Counsel, Firestorm, Lyte, Alloy, Aegis, SZL Holdings, Agents, Verifier, Audit, Approvals, Signals
 - `POST`, `PATCH`, and `DELETE` verbs
 - Valid token → pass; missing token → 403; mismatched token → 403; Bearer bypass → pass
 

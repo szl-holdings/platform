@@ -10,7 +10,7 @@
 SZL Holdings operates a fully functional TypeScript monorepo with:
 - **16 deployed artifacts** (8 web applications + 8 mobile applications)
 - **442 PostgreSQL tables** powering all domains
-- **1,618 API endpoints** across 100+ route files
+- **2,816 API endpoints** across 100+ route files
 - **464+ client-side routes** across all web surfaces
 - **14 GitHub CI/CD workflows** with security scanning
 - **Full Distribution OS** — 22-table content publishing platform with admin panel
@@ -27,7 +27,7 @@ SZL Holdings operates a fully functional TypeScript monorepo with:
 | Vessels | Web + Mobile | 54 | vessels_* | ✅ Operational |
 | Carlota Jo | Web + Mobile | 33 | carlota_* | ✅ Operational |
 | Stephen Site | Web + Mobile | 18 | — | ✅ Operational |
-| API Server | Backend | 1,618 endpoints | All 442 | ✅ Operational |
+| API Server | Backend | 2,816 endpoints | All 442 | ✅ Operational |
 | Distribution OS | Embedded in SZL | 11 admin pages | 22 dos_* | ✅ Operational |
 
 ## Key Findings
@@ -35,7 +35,7 @@ SZL Holdings operates a fully functional TypeScript monorepo with:
 ### Strengths
 1. **All 16 apps build and serve** — zero broken builds
 2. **AI engine is genuine** — 9 validated decision schemas, evidence-backed retrieval, policy-gated execution
-3. **Comprehensive API layer** — 1,618 endpoints with auth coverage (grew from 1,166)
+3. **Comprehensive API layer** — 2,816 endpoints with auth coverage (grew from 1,166)
 4. **Premium design language** — consistent dark theme, CrowdStrike/Palantir-inspired aesthetics
 5. **Strong monorepo architecture** — well-organized pnpm workspace with shared packages
 6. **Real data integrations** — Census, HUD, FEMA, NYC open data feeds
@@ -108,7 +108,7 @@ SZL Holdings operates a fully functional TypeScript monorepo with:
 |------------|--------|
 | Product web applications (all 8) | ✅ Live |
 | Mobile applications (all 8) | ✅ Live |
-| API server (1,618 endpoints) | ✅ Live |
+| API server (2,816 endpoints) | ✅ Live |
 | Database (442 tables) | ✅ Live |
 | Auth/session management | ✅ Live |
 | Distribution OS (content publishing) | ✅ Live |
@@ -138,7 +138,7 @@ SZL Holdings operates a fully functional TypeScript monorepo with:
 ## Why SZL Is More Credible Now
 
 1. **442 tables** is not decorative — it's a real operational model across 6 domains
-2. **1,618 API endpoints** with auth middleware — enterprise-grade backend
+2. **2,816 API endpoints** with auth middleware — enterprise-grade backend
 3. **14 GitHub workflows** — professional engineering discipline
 4. **Distribution OS** — real content publishing engine, not just a website
 5. **Social proof infrastructure** — profiles connected, calendars planned, campaign system ready

@@ -146,7 +146,7 @@
 | `/api/carlota-live/*` | `carlota-live.ts` | WIRED | Live World Bank/BLS feeds |
 | `/api/booking/*` | `booking.ts` | WIRED | Booking flow + intake |
 
-### Prism Counsel (Legal)
+### Counsel (Legal)
 
 | Route Path | File | Class | Notes |
 |------------|------|-------|-------|

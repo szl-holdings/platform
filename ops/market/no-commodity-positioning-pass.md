@@ -99,7 +99,7 @@ The platform hierarchy must be stated consistently. These are the canonical desc
 | **Aegis** | Security and defense intelligence on governed infrastructure |
 | **Vessels** | Maritime intelligence on governed infrastructure |
 | **Terra** | Real estate intelligence on governed infrastructure |
-| **PRISM Counsel** | Legal matter intelligence on governed infrastructure |
+| **Counsel** | Legal matter intelligence on governed infrastructure |
 | **Carlota Jo** | Premium advisory — human-led, platform-supported |
 | **IMPERIUM** | Cloud sovereignty intelligence on governed infrastructure |
 

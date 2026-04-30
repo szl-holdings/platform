@@ -283,7 +283,7 @@ This document is the complete feature map across all SZL Holdings platform surfa
 | Vessels fleet command | Alpha | AIS integration pending production config |
 | Terra distress pipeline | Alpha | NYC public records data |
 | Carlota Jo portal | Live | Production-ready |
-| PRISM Counsel | Integrated (Aegis) | Matter management |
+| Counsel | Integrated (Aegis) | Matter management |
 | IMPERIUM | In development | — |
 
 Legend: **Live** = production-ready with real data. **Alpha** = functional with seeded/demo data. **In development** = not yet available.

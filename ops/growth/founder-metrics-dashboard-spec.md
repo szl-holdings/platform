@@ -25,7 +25,7 @@ A single-screen dashboard the founder reviews daily to understand web conversion
 ├──────────────────────────────┬──────────────────────────────┤
 │    DEMO REQUESTS THIS WEEK   │     WEB VITALS (p75)         │
 │  ┌────────────────────────┐  │  LCP:  1.8s  ✓              │
-│  │ PRISM Counsel    6     │  │  INP:  140ms ✓              │
+│  │ Counsel    6     │  │  INP:  140ms ✓              │
 │  │ Vessels          4     │  │  CLS:  0.08  ✓              │
 │  │ Terra            3     │  │  TTI:  2.1s  ✓              │
 │  │ Aegis            3     │  │                             │

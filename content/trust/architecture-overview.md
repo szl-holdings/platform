@@ -5,18 +5,18 @@
 ```
 ┌─────────────────────────────────────────────────┐
 │                  Client Layer                    │
-│  8 Web Apps (React/Vite) + 8 Mobile (Expo/RN)  │
+│  11 Web Apps (React/Vite) + 1 Mobile (Expo/RN) │
 └──────────────────────┬──────────────────────────┘
                        │ HTTPS
 ┌──────────────────────▼──────────────────────────┐
 │              API Server (Express)                │
-│         1,618 endpoints / 100+ route files       │
+│         2,816 endpoints / 357 route files        │
 │      Auth Middleware │ Rate Limiting │ CORS      │
 └──────────────────────┬──────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────┐
 │           PostgreSQL Database                    │
-│              442 tables                          │
+│              798 database tables                 │
 │    Drizzle ORM │ Connection Pooling             │
 └──────────────────────┬──────────────────────────┘
                        │
@@ -35,23 +35,24 @@
 | Mobile | Expo (React Native), TypeScript |
 | Backend | Node.js (Express), TypeScript |
 | Database | PostgreSQL (Drizzle ORM) |
-| AI/ML | HuggingFace Inference, BGE Embeddings |
-| CI/CD | GitHub Actions (14 workflows) |
+| AI/ML | Multi-provider (OpenAI, Anthropic, Gemini), BGE Embeddings |
+| CI/CD | GitHub Actions (23 workflows) |
 | Hosting | Replit managed infrastructure |
 | Monorepo | pnpm workspaces |
 
 ## Domain Architecture
 
-| Domain | Web App | Mobile App | API Routes | DB Tables |
-|--------|---------|-----------|------------|-----------|
-| SZL Holdings | szl-holdings | szl-holdings-mobile | holdings, admin | Core tables |
-| Lyte | lyte-command-center | lyte-mobile | lyte-*, alloy-* | alloy_*, lyte_* |
-| Aegis | firestorm | aegis-mobile | firestorm-* | firestorm_* |
-| Terra | terra | terra-mobile | terra-* | terra_* |
-| Vessels | vessels | vessels-mobile | vessels-* | vessels_* |
-| Carlota Jo | carlota-jo | carlota-jo-mobile | carlota-*, booking | carlota_* |
-| Founder | stephen-site | stephen-mobile | stephen | — |
-| Distribution | (embedded in SZL) | — | distribution-os | dos_* |
+| Domain | Web App | API Routes | DB Tables |
+|--------|---------|------------|-----------|
+| SZL Holdings | szl-holdings | holdings, admin | Core tables |
+| Lyte | lyte-command-center | lyte-*, alloy-* | alloy_*, lyte_* |
+| Aegis | aegis | firestorm-* | firestorm_* |
+| Sentra | sentra | sentra-* | tenax_* |
+| Terra | terra | terra-* | terra_* |
+| Vessels | vessels | vessels-* | vessels_* |
+| Counsel | counsel | counsel-* | counsel_* |
+| Carlota Jo | carlota-jo | carlota-*, booking | carlota_* |
+| Distribution | (embedded in SZL) | distribution-os | dos_* |
 
 ## Security Architecture
 - Auth middleware on all admin/write endpoints
@@ -68,4 +69,4 @@
 5. Response returned with structured error contracts
 6. AI operations: evidence retrieval → policy check → propose → HITL approval → execute → audit log
 
-*Last updated: April 3, 2026*
+*Last updated: April 2026*

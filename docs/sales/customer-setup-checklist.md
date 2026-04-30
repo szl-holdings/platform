@@ -95,9 +95,9 @@
 - [ ] Ownership entity graph explored for at least one property
 - [ ] Market signals feed active
 
-### PRISM Counsel (Legal Matter Command)
+### Counsel (Legal Matter Command)
 
-- [ ] PRISM Counsel pack activated
+- [ ] Counsel pack activated
 - [ ] First matter created and team assigned
 - [ ] Document upload tested
 - [ ] Approval chain configured for matter review

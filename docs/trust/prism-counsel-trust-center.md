@@ -1,4 +1,4 @@
-# Prism Counsel — Trust Center
+# Counsel — Trust Center
 
 **Version:** 1.0  
 **Date:** April 2026  
@@ -8,11 +8,11 @@
 
 ## Overview
 
-Prism Counsel is a legal matter intelligence platform designed for plaintiff-side NY insurance litigation teams. It processes legal documents, attorney-client communications, medical records, and matter strategy — some of the most sensitive materials in any legal practice.
+Counsel is a legal matter intelligence platform designed for plaintiff-side NY insurance litigation teams. It processes legal documents, attorney-client communications, medical records, and matter strategy — some of the most sensitive materials in any legal practice.
 
-This document describes how Prism Counsel handles that data responsibly: what permissions exist, how tenant data is isolated, what AI outputs go through before they can be relied upon, how the audit trail works, and what human oversight is built into the system at the architectural level.
+This document describes how Counsel handles that data responsibly: what permissions exist, how tenant data is isolated, what AI outputs go through before they can be relied upon, how the audit trail works, and what human oversight is built into the system at the architectural level.
 
-This is not a compliance certification document. Prism Counsel does not currently hold SOC 2, ISO 27001, or any formal third-party security certification. This document describes actual practices as they exist today.
+This is not a compliance certification document. Counsel does not currently hold SOC 2, ISO 27001, or any formal third-party security certification. This document describes actual practices as they exist today.
 
 ---
 
@@ -20,7 +20,7 @@ This is not a compliance certification document. Prism Counsel does not currentl
 
 ### Role Hierarchy
 
-Every user in Prism Counsel is assigned one or more roles. Roles determine what data can be accessed, what actions can be taken, and what AI outputs can be reviewed or approved.
+Every user in Counsel is assigned one or more roles. Roles determine what data can be accessed, what actions can be taken, and what AI outputs can be reviewed or approved.
 
 | Role | Access Level | Key Capabilities |
 |------|-------------|-----------------|
@@ -37,7 +37,7 @@ Role assignments are logged. A user cannot elevate their own role. Role changes 
 
 ### Privilege State
 
-Every document, communication, and AI-generated output in Prism Counsel carries a privilege state:
+Every document, communication, and AI-generated output in Counsel carries a privilege state:
 
 | State | Meaning | Access |
 |-------|---------|--------|
@@ -54,7 +54,7 @@ Privilege state is set at the document level (by classification or attorney assi
 
 ## Tenant Boundaries
 
-Prism Counsel is a multi-tenant platform. Each law firm or legal department is an isolated tenant (identified by `orgId`).
+Counsel is a multi-tenant platform. Each law firm or legal department is an isolated tenant (identified by `orgId`).
 
 **Isolation guarantees:**
 - Every database query includes `orgId` as a required filter
@@ -72,7 +72,7 @@ Prism Counsel is a multi-tenant platform. Each law firm or legal department is a
 
 ## Review and Sign-off Expectations
 
-Every AI output in Prism Counsel goes through a defined review workflow before it can be used in external-facing materials.
+Every AI output in Counsel goes through a defined review workflow before it can be used in external-facing materials.
 
 ### Review States
 
@@ -100,7 +100,7 @@ This gate is enforced at the API level. The export pipeline checks `exportSafe` 
 
 ### Advisory-Only Output
 
-Prism Counsel AI produces advisory outputs only. It does not:
+Counsel AI produces advisory outputs only. It does not:
 - File documents on behalf of users
 - Send communications without explicit human authorization
 - Modify settlement authority or negotiation position autonomously
@@ -129,7 +129,7 @@ This enables full traceability of which model version produced any given output.
 
 ## Data Handling
 
-### What Prism Counsel Stores
+### What Counsel Stores
 
 | Data Category | Stored | Notes |
 |--------------|--------|-------|
@@ -142,7 +142,7 @@ This enables full traceability of which model version produced any given output.
 | User session tokens | YES | Short-lived, encrypted |
 | M365 refresh tokens | YES | Encrypted at rest, never logged |
 
-### What Prism Counsel Does Not Do
+### What Counsel Does Not Do
 
 - Does not sell or share matter data with third parties
 - Does not use matter data to train AI models
@@ -164,7 +164,7 @@ This enables full traceability of which model version produced any given output.
 
 ## Retrieval Boundaries
 
-Retrieval in Prism Counsel is not a single shared search index. It is a permission-aware retrieval system with the following controls:
+Retrieval in Counsel is not a single shared search index. It is a permission-aware retrieval system with the following controls:
 
 1. **Org boundary** — All queries filter by `orgId`. No cross-org retrieval is possible.
 2. **Matter access** — Users can only retrieve content from matters they have explicit access to.
@@ -178,7 +178,7 @@ ACL metadata is attached to documents at index time and re-evaluated on each syn
 
 ## Audit and Event Logging
 
-Every significant action in Prism Counsel generates an immutable audit event.
+Every significant action in Counsel generates an immutable audit event.
 
 **What is logged:**
 
@@ -228,7 +228,7 @@ See full specification: [Proof Chain Specification](../architecture/prism-counse
 
 ## M365 Deployment Considerations
 
-When Prism Counsel is connected to a Microsoft 365 tenant:
+When Counsel is connected to a Microsoft 365 tenant:
 
 - App-only permissions are requested at the minimum necessary scope
 - No write permissions to M365 are requested or used
@@ -243,7 +243,7 @@ See: [M365 Integration Strategy](../architecture/prism-counsel-m365-integration.
 
 ## Honesty Notice
 
-Prism Counsel does not currently hold SOC 2, ISO 27001, or any third-party compliance certification. The practices described in this document are real and currently implemented. We maintain a known-gap register for areas where our practices do not yet meet the standard we are working toward.
+Counsel does not currently hold SOC 2, ISO 27001, or any third-party compliance certification. The practices described in this document are real and currently implemented. We maintain a known-gap register for areas where our practices do not yet meet the standard we are working toward.
 
 Claims we do NOT make:
 - "HIPAA compliant" — we store medical record content but have not completed a formal HIPAA assessment

@@ -198,7 +198,7 @@ Solution-specific trust pages (public):
 | Aegis Trust | `/solutions/aegis/trust` |
 | Vessels Trust | `/solutions/vessels/trust` |
 | Terra Trust | `/solutions/terra/trust` |
-| PRISM Counsel Trust | `/solutions/prism-counsel/trust` |
+| Counsel Trust | `/solutions/prism-counsel/trust` |
 | Lyte Trust | `/solutions/lyte/trust` |
 
 ### Shared Trust UI Components

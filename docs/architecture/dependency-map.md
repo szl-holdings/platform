@@ -175,7 +175,7 @@ These packages have **no internal dependencies** on other `@szl-holdings/` packa
 | Issue | Detail | Status |
 |-------|--------|--------|
 | `vessels.ts` vs `maritime.ts` schema | Two parallel vessel data schemas exist: `lib/db/src/schema/vessels.ts` and `lib/db/src/schema/maritime.ts`. The original `vessels.ts` schema now declares `org_id` on `vessels_fleets`, `vessels`, and `vessels_alert_rules` (migration `0076_vessels_org_id.sql`); routes in `routes/vessels.ts` enforce tenant scoping via `tenantScope()`. | ✅ Resolved Apr-2026 (Task #1048, AF-007) |
-| PRISM framework naming | `PRISM` refers to both the Lyte business observability framework (Pulse/Risk/Intelligence/Signals/Motion) and PRISM Counsel (legal matter management). Confusing in docs and codebase. | ⚠️ Open — tracked as TD-001 in KNOWN-GAPS.md |
+| PRISM framework naming | `PRISM` refers to both the Lyte business observability framework (Pulse/Risk/Intelligence/Signals/Motion) and Counsel (legal matter management). Confusing in docs and codebase. | ⚠️ Open — tracked as TD-001 in KNOWN-GAPS.md |
 | `authMiddleware.ts` vs `auth.ts` (routes/middlewares) | Two files named similarly: `middlewares/authMiddleware.ts` (session hydrator, global) and `middlewares/auth.ts` (route-level enforcer with `requireRole`). Should be renamed for clarity. | ⚠️ Open — low priority |
 | `lyte-command-center` vs `command` | ARCHITECTURE.md references `lyte-command-center/` but the actual registered artifact is `command/`. | ✅ Noted — docs updated |
 

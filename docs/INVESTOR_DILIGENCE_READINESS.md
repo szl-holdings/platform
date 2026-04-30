@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-SZL Holdings operates a TypeScript monorepo containing 15 registered product artifacts, 152 packages, 6,235 TypeScript/TSX source files, and 1,047 database table definitions. The platform concept — governed agentic decision infrastructure — is architecturally differentiated and implemented in code. However, the current engineering pipeline has active failures (typecheck, lint, build) that must be disclosed and resolved before any claim of "release ready" or "production ready" can be made to investors.
+SZL Holdings operates a TypeScript monorepo containing 14 registered product artifacts, 152 packages, 6,235 TypeScript/TSX source files, and 798 database tables. The platform concept — governed agentic decision infrastructure — is architecturally differentiated and implemented in code. However, the current engineering pipeline has active failures (typecheck, lint, build) that must be disclosed and resolved before any claim of "release ready" or "production ready" can be made to investors.
 
 **Bottom line:** The platform has genuine technical depth and a real implementation. It is not a mockup. It is also not production-ready. Honest framing for investor conversations: early-alpha infrastructure with a functioning demo tier.
 
@@ -20,9 +20,9 @@ SZL Holdings operates a TypeScript monorepo containing 15 registered product art
 | Claim | Evidence | Status |
 |-------|----------|--------|
 | TypeScript pnpm monorepo | 6,235 TS/TSX files (3,801 TS + 2,434 TSX); pnpm-lock.yaml present | ✅ verified |
-| 15 registered product artifacts | workspace artifact registry; artifact directories present | ✅ verified |
+| 14 registered product artifacts | workspace artifact registry; artifact directories present | ✅ verified |
 | 152 shared packages | `generated/platform-metrics.json` lib:51 + standalone:101 | ✅ verified |
-| 1,047 database table definitions | `lib/db/src/schema`; Drizzle pgTable grep count via `generated/platform-metrics.json` | ✅ verified |
+| 798 database tables | `lib/db/src/schema`; Drizzle pgTable grep count via `generated/platform-metrics.json` | ✅ verified |
 | 59 SQL migrations | `generated/platform-metrics.json` `migrations: 59` | ✅ verified |
 | 180 API route files; 6,063 route handlers | `generated/platform-metrics.json` route handler grep count | ✅ verified |
 | 12/12 platform primitives declared | packages present on disk (outcome-graph, proof-chain, replay-core, trace-graph, covenant-policy, guardian, signal-mesh, prism-bus, monte-carlo, forge-runtime, skill-library, shared-ui) | ✅ verified |
@@ -85,7 +85,7 @@ SZL Holdings operates a TypeScript monorepo containing 15 registered product art
 | "Production-ready" or "GA" | Build fails; no production customers; no SOC 2 |
 | "All CI checks pass" | Typecheck, lint, and build all fail as of 2026-04-27 |
 | "Real-time AIS data" | AIS is simulated in the demo environment |
-| "100 packages" or "14 artifacts" | Stale numbers; use 15 registered artifacts, 152 packages |
+| "100 packages" or "15 artifacts" | Stale numbers; use 14 registered artifacts, 40 shared packages |
 | "Strict TypeScript throughout" | TypeScript is used everywhere but typecheck does not pass cleanly |
 | Screenshots as "live platform captures" | No screenshots in git index; provenance unverifiable from code |
 
@@ -95,7 +95,7 @@ SZL Holdings operates a TypeScript monorepo containing 15 registered product art
 
 **What to say:**
 
-> SZL Holdings has built a governed agentic decision infrastructure platform — a real TypeScript codebase with 6,235 source files, 15 product surfaces, 152 packages, and 1,047 database table definitions. The core primitives — proof chain, policy engine, signal mesh, Monte Carlo simulation, decision replay — are implemented in code, not described in a deck. Seven product surfaces are functional in alpha. The platform is at early-alpha stage: demo-ready for investor walkthroughs, not yet production-deployed with live customers. We have identified active build failures in the engineering pipeline that we are resolving as a priority before our next release milestone.
+> SZL Holdings has built a governed agentic decision infrastructure platform — a real TypeScript codebase with 6,235 source files, 14 product surfaces, 152 packages, and 798 database tables. The core primitives — proof chain, policy engine, signal mesh, Monte Carlo simulation, decision replay — are implemented in code, not described in a deck. Seven product surfaces are functional in alpha. The platform is at early-alpha stage: demo-ready for investor walkthroughs, not yet production-deployed with live customers. We have identified active build failures in the engineering pipeline that we are resolving as a priority before our next release milestone.
 
 ---
 

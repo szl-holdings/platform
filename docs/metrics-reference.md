@@ -25,13 +25,13 @@ Update this file whenever a structural change affects a tracked metric. All othe
 | **Registered artifacts** | 14 | 11 web, 1 mobile, 1 video, 1 design |
 | **Web applications** | 11 | aegis, api-server, carlota-jo, command, counsel, lyte-command-center, pulse, sentra, szl-holdings, terra, vessels |
 | **Mobile applications** | 1 | szl-holdings-mobile (Expo / React Native — iOS + Android) |
-| **Database tables** | 798 | pgTable definitions across 131 schema files, org-scoped |
+| **Database tables** | 798 | pgTable definitions across 170 schema files, org-scoped |
 | **Shared TypeScript packages** | 40 | In `lib/` monorepo |
 | **API routes** | 2,816 | Measured from api-server route definitions |
-| **Domain packs** | 6 | Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo |
+| **Domain verticals** | 8 | Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo, Lyte, Alloy |
 | **Platform primitives** | 6 | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric |
 | **RBAC roles** | 11 | anonymous_visitor through pilot_customer_user |
-| **Schema files** | 131 | Under `lib/db/src/schema/` |
+| **Schema files** | 170 | Under `lib/db/src/schema/` |
 
 ---
 

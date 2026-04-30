@@ -299,7 +299,7 @@ All scripts are available via `pnpm` from the workspace root:
 - Firestorm security scenarios — real structured data, real scoring
 - Vessels fleet intelligence — real structured data (simulated positions)
 - Alloy workflow engine — real durable execution, real audit trail
-- PRISM Counsel matter management — real data structure, real search
+- Counsel matter management — real data structure, real search
 - Job queue — real background job execution
 - Audit logging — real immutable event trail
 - Feature flags — real runtime flag system

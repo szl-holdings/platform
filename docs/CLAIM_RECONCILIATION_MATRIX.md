@@ -71,7 +71,7 @@ All "unverified" claims originally found in in-scope documents were either corre
 | 22 | "SZL Holdings Corporate Platform — Status: Public Beta Candidate" | PRODUCT-SURFACES.md | `docs/APP_STATUS.md` classifies as Beta; not yet publicly released | **partial** — "Public Beta Candidate" is aspirational; current status is Beta/alpha |
 | 23 | "API Server — Status: Live (internal service)" | PRODUCT-SURFACES.md | API server health returns HTTP 200 per FIX_LOG; `alpha working` per README | **verified** |
 | 24 | "APEX — Status: Functional alpha" | PRODUCT-SURFACES.md | Build fails for `szl-holdings-mobile`; Expo scaffold present | **partial** — scaffold present; not fully functional in current build |
-| 25 | "PRISM Counsel — Archived, legacy API routes retained" | PRODUCT-SURFACES.md | `prism-counsel` listed in metrics as on-disk artifact; legacy routes documented | **verified** |
+| 25 | "Counsel — Archived, legacy API routes retained" | PRODUCT-SURFACES.md | `prism-counsel` listed in metrics as on-disk artifact; legacy routes documented | **verified** |
 | 26 | "IMPERIUM — Merged into Command Portal; governance routes active" | PRODUCT-SURFACES.md | `imperium` directory exists on disk per metrics artifact list | **partial** — directory exists but classified as archived in OPERABILITY_MATRIX |
 | 27 | "Version 4.1 — April 2026" | PRODUCT-SURFACES.md header | Document not updated since April 25 audit; some surface statuses are now outdated | **partial** — version header stale relative to current build state |
 

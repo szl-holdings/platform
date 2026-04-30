@@ -16,7 +16,7 @@ Where traditional tools show you what happened, ATLAS shows you:
 - **What could happen next**, through scenario branches with probability-weighted outcomes
 - **What happened before**, through precise replay of any past operational state
 
-ATLAS is not a new product. It is the spatial memory layer that every SZL platform already uses — Aegis for security operations, Vessels for maritime fleet management, Terra for real estate intelligence, and Prism Counsel for matter management.
+ATLAS is not a new product. It is the spatial memory layer that every SZL platform already uses — Aegis for security operations, Vessels for maritime fleet management, Terra for real estate intelligence, and Counsel for matter management.
 
 ---
 
@@ -70,7 +70,7 @@ Every ATLAS output carries provenance: what model generated it, what data it was
 
 **Demo scenario:** Pre-foreclosure acquisition — direct acquisition vs. wait, with three-scenario IRR projection.
 
-### Prism Counsel — Matter Management
+### Counsel — Matter Management
 
 **Without ATLAS:** Matter status is tracked in spreadsheets or basic matter management tools. Settlement vs. trial decisions are made without structured outcome modeling.
 

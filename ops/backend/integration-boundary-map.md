@@ -79,7 +79,7 @@ Lyte cross-domain signals are aggregated from domain APIs via the PRISM bus:
 Aegis API       ──┐
 Vessels API     ──┤
 Terra API       ──┤  →  PRISM Bus  →  Lyte Signals Feed
-PRISM Counsel   ──┤
+Counsel   ──┤
 Carlota Jo      ──┘
 ```
 

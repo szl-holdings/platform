@@ -59,7 +59,7 @@ Domain packs extend the platform into specific operational domains. Each is pric
 | Aegis | Security & Defense | Functional alpha — available for design partners |
 | Vessels | Maritime Intelligence | Functional alpha — available for design partners |
 | Terra | Real Estate Intelligence | Functional alpha — available for design partners |
-| PRISM Counsel | Legal Matter Command | Functional alpha — available for design partners |
+| Counsel | Legal Matter Command | Functional alpha — available for design partners |
 | Carlota Jo | Premium Advisory | Available — advisory retainer model |
 | IMPERIUM | Cloud Sovereignty | In development — not yet available for pilots |
 

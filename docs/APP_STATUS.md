@@ -193,9 +193,9 @@ No archived artifact should be deployed, registered, or referenced as an active 
 | Beta | 4 | SZL Holdings, Aegis, Terra, SZL Holdings Mobile |
 | Partial | 2 | Vessels, Command |
 | Internal | 1 | Mockup Sandbox |
-| Archived | 5 | Firestorm, Prism Counsel, Stephen Site, Lyte Command Center, Imperium |
-| Concept / Skeleton | 1 | Cortex Mobile |
-| **Total** | **15** | |
+| Archived | 5 | Firestorm, prism-counsel, Stephen Site, Lyte Command Center, Imperium |
+| **Registered total** | **14** | GA + Beta + Partial + Internal + Archived |
+| Concept / Skeleton (unregistered) | 1 | Cortex Mobile |
 
 ---
 

@@ -18,7 +18,7 @@ This document explains how each SZL Holdings vertical integrates with the Alloy 
 
 ---
 
-## PRISM Counsel — Legal Matter Command
+## Counsel — Legal Matter Command
 
 **Profile:** `prism_legal_matter`
 **Service:** `artifacts/prism-counsel`

@@ -194,7 +194,7 @@
 | `release.yml` | Push to main / manual | Semantic versioning + GitHub Release creation | ✅ Active |
 | `npm-publish.yml` | Release published + tags | Publish lib packages to GitHub Packages | ✅ Active — intentional |
 | `container-publish.yml` | Release published + tags | Build and push container images to GHCR | ⚠️ Active — matrix includes `lyte-command-center` (archived; no Dockerfile; will fail for that entry) |
-| `prism-counsel-ci.yml` | Manual (`workflow_dispatch`) only | ARCHIVED — PRISM Counsel CI/CD | 🗄️ Archived — disabled from automatic triggers; runs archived-notice job only |
+| `prism-counsel-ci.yml` | Manual (`workflow_dispatch`) only | ARCHIVED — Counsel CI/CD | 🗄️ Archived — disabled from automatic triggers; runs archived-notice job only |
 
 **Notes:**
 - All 13 workflows have third-party actions pinned to immutable commit SHAs.

@@ -60,7 +60,7 @@ Consider the following scenario:
 
 **In Terra:** A commercial property deal in progress has a counterparty entity linked to the same beneficial owner through two corporate registration degrees of separation. Confidence: 0.72.
 
-**In PRISM Counsel:** A legal document review flagged a contract counterparty using a corporate structure pattern consistent with jurisdiction-hopping. The entity name matches neither the Vessels nor the Terra counterparty directly, but the registration pattern matches.
+**In Counsel:** A legal document review flagged a contract counterparty using a corporate structure pattern consistent with jurisdiction-hopping. The entity name matches neither the Vessels nor the Terra counterparty directly, but the registration pattern matches.
 
 In three separate specialized tools, these are three independent alerts. Each one is interesting in its own domain. Combined, they are a structured cross-domain risk pattern — the same beneficial owner using multiple corporate structures to maintain simultaneous exposure across maritime, real estate, and legal domains.
 

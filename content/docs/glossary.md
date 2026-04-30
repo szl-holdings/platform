@@ -15,7 +15,7 @@
 | **Lyte** | SZL's business observability command plane |
 | **Operator** | A user with domain expertise who uses the platform daily |
 | **Policy Gate** | A rule that must pass before an AI action is allowed to proceed |
-| **PRISM Counsel** | SZL's legal intelligence product |
+| **Counsel** | SZL's legal intelligence product |
 | **Propose-Only Mode** | AI suggests actions but does not execute without human approval |
 | **RBAC** | Role-Based Access Control — permissions based on user roles |
 | **SCIM** | System for Cross-domain Identity Management — enterprise user provisioning |

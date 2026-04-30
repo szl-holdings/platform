@@ -62,7 +62,7 @@ Verify each frontend artifact renders without fatal errors.
 | Vessels | `/vessels` | Title set, no error boundary | `vessels.spec.ts` |
 | Carlota Jo | `/carlota-jo` | Title set, content loads | `carlota-jo.spec.ts` |
 | Command | `/command` | Title set, nav visible | `command.spec.ts` |
-| PRISM Counsel | `/prism-counsel` | Title set | `prism-counsel.spec.ts` |
+| Counsel | `/prism-counsel` | Title set | `prism-counsel.spec.ts` |
 | Lyte | `/lyte-command-center` | Title set | `lyte.spec.ts` |
 | Imperium | `/imperium` | Title set | `imperium.spec.ts` |
 

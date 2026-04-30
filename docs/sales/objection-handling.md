@@ -61,7 +61,7 @@
 ### "We need on-prem."
 
 > Acknowledge: "We do not have a fully managed on-prem option today."
-> Reframe: "At Enterprise we host in the Azure region of your choice. Our IMPERIUM / Sovereign tier — customer-controlled environment, including air-gapped — is on the FY27 roadmap."
+> Reframe: "At Enterprise we host in the Azure region of your choice. Our Sovereign tier — customer-controlled environment, including air-gapped — is on the FY27 roadmap."
 > Concrete: "If on-prem is hard-required for the next 12 months, we can have a different conversation about scoping a sovereign engagement now, with the understanding that we will be partly co-developing the deployment."
 
 ### "We need MFA."
@@ -116,7 +116,7 @@
 
 > Acknowledge: "Fair question."
 > Reframe: "We are not enterprise-priced relative to nation-state platforms. We are operator-tier. The category gap we fill is at mid-market, not at three-letter agencies."
-> Concrete: "Sovereign-tier and air-gapped engagements at IMPERIUM (FY27) are a different cost structure. If that's where you are, we should scope that separately."
+> Concrete: "Sovereign-tier and air-gapped engagements (FY27 roadmap) are a different cost structure. If that's where you are, we should scope that separately."
 
 ### "We need a 90-day free trial."
 

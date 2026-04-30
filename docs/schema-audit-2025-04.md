@@ -111,7 +111,7 @@ within the api-server package. Tables may still be referenced in:
 ### Organizations
 - `organizationMembershipsTable`
 
-### PRISM Counsel (Pilot / Extended)
+### Counsel (Pilot / Extended)
 - `pcApprovalEvidenceTable`
 - `pcApprovalStepsTable`
 - `pcExportReadinessSnapshotsTable`
@@ -183,7 +183,7 @@ within the api-server package. Tables may still be referenced in:
 ## Recommendation
 
 1. **Do not delete** any tables in this list without a full cross-package search
-2. Many `pc*` tables (PRISM Counsel) are likely used via the GraphQL subgraph or pilot API layers
+2. Many `pc*` tables (Counsel) are likely used via the GraphQL subgraph or pilot API layers
 3. `szl*` canonical tables may be used by the platform monitoring layer
 4. The `a2a*` tables are newly added (post-merge) and will be populated by the A2A protocol routes
 5. Schedule a follow-up task to: (a) verify frontend usage, (b) check lib package usage, (c) delete truly dead tables with migration rollback plan

@@ -81,7 +81,7 @@ Testing at SZL Holdings follows three principles:
 - `tests/e2e/forge.spec.ts` — Forge runtime / Nuro Forge
 - `tests/e2e/imperium.spec.ts` — Imperium
 - `tests/e2e/lyte.spec.ts` — Lyte
-- `tests/e2e/prism-counsel.spec.ts` — PRISM Counsel
+- `tests/e2e/prism-counsel.spec.ts` — Counsel
 - `tests/e2e/pulse.spec.ts` — Pulse AI executive briefing *(added Phase 3)*
 - `tests/e2e/sentra.spec.ts` — Sentra cyber resilience command *(added Phase 3)*
 - `tests/e2e/stephen-site.spec.ts` — Stephen site

@@ -9,7 +9,7 @@
 | Platform | Problem Solved | Primary Buyer | Key Differentiator |
 |----------|--------------|--------------|-------------------|
 | **KORA** | Operational signal fragmentation — no real-time business view | COO, VP Ops, PMO | PRISM framework: 5 analytical dimensions, signal-to-action lifecycle |
-| **A11oy** | Unaccountable workflow execution — actions without audit trail | Operations, Compliance | Human-in-the-loop gates enforced at engine level |
+| **Alloy** | Unaccountable workflow execution — actions without audit trail | Operations, Compliance | Human-in-the-loop gates enforced at engine level |
 | **PARAGON** | Security operations fragmented across disconnected tools | CISO, SOC, MSP | Three workspaces in one context — Defense, Command, Intelligence |
 | **SEXTANT** | Fleet risk invisible until it is expensive | Fleet Exec, Commercial Dir | AIS + economics + compliance in one command surface |
 | **DOMAINE** | Distress opportunities lost to manual research delays | NYC Broker, Investor | Live NYC public data pipeline + ownership structure tracking |
@@ -42,7 +42,7 @@ KORA delivers **Decision Intelligence** — the capability to see across an orga
 
 **Approvals Center:** Every approval that's waiting, who it's waiting on, and how long it's been sitting.
 
-**A11oy Integration:** Every signal can become a workflow. Every action is approved, logged, and attributed.
+**Alloy Integration:** Every signal can become a workflow. Every action is approved, logged, and attributed.
 
 ### Use Cases
 

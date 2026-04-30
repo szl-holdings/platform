@@ -1,9 +1,9 @@
 /**
- * Prism Counsel Path Parameter Validation Tests
+ * Counsel Path Parameter Validation Tests
  *
  * Verifies that invalid (non-numeric, non-positive) path params like :id,
  * :matterId, and :userId are rejected with HTTP 400 before the request
- * reaches the database — across all three Prism Counsel route files.
+ * reaches the database — across all three Counsel route files.
  *
  * Approach:
  *  - authMiddleware and tenantScope are stubbed so every request appears

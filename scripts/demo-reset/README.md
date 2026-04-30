@@ -31,7 +31,7 @@ Scripts for resetting and restoring the SZL Holdings demo environment to a clean
 | `business`, `business-revops`, `lyte` | Business Observability / RevOps / CFO | Lyte |
 | `security`, `soc`, `aegis` | Security / SOC / Risk | Aegis |
 | `maritime`, `vessels` | Maritime / Sanctions / Fleet Operations | Vessels |
-| `legal`, `prism`, `prism-counsel` | Legal / Compliance / Matter Command | PRISM Counsel |
+| `legal`, `prism`, `prism-counsel` | Legal / Compliance / Matter Command | Counsel |
 
 ## What Reset Does
 

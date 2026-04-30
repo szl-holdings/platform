@@ -20,7 +20,7 @@ Integrations are prioritized by:
 
 ### Microsoft 365 (SharePoint, Outlook, Teams)
 
-**Value:** Document and communication signals for PRISM Counsel legal intelligence.
+**Value:** Document and communication signals for Counsel legal intelligence.
 
 **What it enables:**
 - SharePoint: matter document sync, brief and filing access
@@ -35,7 +35,7 @@ Integrations are prioritized by:
 
 **Effort estimate:** 2–3 weeks for basic read integration, 4–6 weeks for bi-directional with webhook triggers.
 
-**Who needs it:** PRISM Counsel design partners, any legal firm on Microsoft stack.
+**Who needs it:** Counsel design partners, any legal firm on Microsoft stack.
 
 ---
 
@@ -157,10 +157,10 @@ Integrations are prioritized by:
 | Integration | Domain | Value | Trigger for Priority Increase |
 |---|---|---|---|
 | Jira / Linear | All | Work item signal integration with Continuum workflows | Design partner with engineering workflow use case |
-| Court records APIs | PRISM Counsel | External legal docket signals | Jurisdiction-specific PRISM partner |
-| Weather APIs | Vessels, Terra | Environmental signal enrichment | Worldline integration for PRISM Counsel |
+| Court records APIs | Counsel | External legal docket signals | Jurisdiction-specific PRISM partner |
+| Weather APIs | Vessels, Terra | Environmental signal enrichment | Worldline integration for Counsel |
 | Bloomberg / Refinitiv | Vessels, Carlota Jo | Market signal enrichment | Financial services design partner |
-| Google Workspace | PRISM Counsel | Document signals for non-Microsoft firms | Design partner not on Microsoft stack |
+| Google Workspace | Counsel | Document signals for non-Microsoft firms | Design partner not on Microsoft stack |
 | ERP systems (SAP, Oracle) | Vessels, Terra | Operational data signals | Enterprise design partner with ERP dependency |
 
 ---

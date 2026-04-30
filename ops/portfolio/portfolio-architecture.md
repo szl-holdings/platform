@@ -77,9 +77,9 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 | Attribute | Value |
 |-----------|-------|
 | Source files | 351 ts/tsx |
-| Route files | 172 |
+| Route files | 357 |
 | Lines of code | ~82,610 |
-| Estimated endpoints | ~1,800–2,000 |
+| Estimated endpoints | 2,816 |
 | Auth | RBAC 11-role, session, bearer tokens |
 | Real-time | WebSocket (HMAC tickets), SSE |
 
@@ -91,7 +91,7 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 - RBAC enforcement for all 11 roles
 - Audit logging, rate limiting, Zod validation, structured errors
 
-**Important:** The README claims 2,331 endpoints; the verified count is ~1,800–2,000. This claim should not be used in investor materials until re-verified.
+**Endpoint count:** 2,816 across 357 route files (canonical verified count — see `docs/metrics-reference.md`).
 
 ---
 
@@ -108,7 +108,7 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 
 **Designation Rationale:**
 `command` is the canonical operator command surface — the place where platform operators observe signals, review recommendations, manage approvals, and execute decisions. It is the correct designation because:
-- It is the largest and most feature-complete operator surface (213 files, 172 routes)
+- It is the largest and most feature-complete operator surface (213 files, 357 routes)
 - It has absorbed the functionality of two previously separate operator surfaces (both merged)
 - It is backed by live SSE streams, signal timelines, and approval queues from `api-server`
 - It maps cleanly to the "governed decision loop": Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning

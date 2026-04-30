@@ -46,7 +46,7 @@ We build the third category. Governed decision infrastructure. The structural la
 
 "Every decision on our platform follows the same nine steps. Signal arrives on the Event Fabric. Cross-domain context is enriched. An AI agent generates a recommendation, captured in the Outcome Graph. A Monte Carlo simulation models possible outcomes. The Covenant Policy engine enforces approval requirements. A human approves or denies. The Workflow Engine executes. The Proof Chain records every step. The actual outcome is recorded. The Outcome Graph feeds back into agent calibration.
 
-The same nine steps run for a security incident in Aegis, a sanctions screen in Vessels, a distressed property in Terra, a matter in PRISM Counsel, an advisory engagement in Carlota Jo. Same primitives. Same loop. Different domain."
+The same nine steps run for a security incident in Aegis, a sanctions screen in Vessels, a distressed property in Terra, a matter in Counsel, an advisory engagement in Carlota Jo. Same primitives. Same loop. Different domain."
 
 ### Close with the proof (1 minute)
 
@@ -74,7 +74,7 @@ Six primitives, defined and live: Event Fabric (Prism Bus), Outcome Graph, Proof
 
 ### The domain proof
 
-Five domain packs running the same primitives: Aegis (defense / intel), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory). One platform, five vocabularies.
+Five domain packs running the same primitives: Aegis (defense / intel), Vessels (maritime), Terra (real estate), Counsel (legal), Carlota Jo (advisory). One platform, five vocabularies.
 
 ### The governance proof
 

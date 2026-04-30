@@ -20,8 +20,8 @@ SZL Holdings builds that system.
 **KORA — Decision Intelligence**  
 The cross-domain decision command surface for executives, operations leads, and PMOs. KORA makes every operational surface visible, contextual, and actionable through the PRISM framework (Pulse, Risk, Intelligence, Signals, Motion). Command inbox. Action queue. Approval latency detection. Readiness scoring. All in one surface, with full audit trail.
 
-**A11oy — Execution Fabric**  
-The system that closes the loop. When KORA surfaces a signal, A11oy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail. Every consequential action is confirmed by a person and recorded permanently.
+**Alloy — Execution Fabric**  
+The system that closes the loop. When KORA surfaces a signal, Alloy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail. Every consequential action is confirmed by a person and recorded permanently.
 
 **PARAGON — Defense & Intelligence**  
 For organizations that need unified visibility across security operations, managed services, and AI research. Three workspaces, one context: Defense (SOC), Command (managed services), Intelligence (AI governance).

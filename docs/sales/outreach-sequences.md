@@ -103,7 +103,7 @@ SZL Holdings
 
 ---
 
-## Email #1 — Legal (PRISM Counsel)
+## Email #1 — Legal (Counsel)
 
 **Subject:** Matter-decision proof for [Company] — design partner slot
 
@@ -115,7 +115,7 @@ settlement, advice. The trail of *why* a particular call was made lives in email
 in matter notes, and in the lawyer's head. When a regulator, the client, or your
 own QA team asks for that trail, reconstructing it is hours of work.
 
-PRISM Counsel makes the matter-decision trail first-class: signal (matter event,
+Counsel makes the matter-decision trail first-class: signal (matter event,
 deadline, conflict) → context → recommendation → policy gate (ethical walls,
 conflicts) → approver → proof.
 

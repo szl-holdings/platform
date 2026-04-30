@@ -29,7 +29,7 @@ The canonical loop, displayed beneath the hero in monospace as a category signat
 
 The platform hierarchy is read in one glance:
 
-> **Lyte** (flagship command) → **Continuum** (execution fabric) → **CORTEX** (mobile command) → **Domain Packs** (Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · IMPERIUM)
+> **Lyte** (flagship command) → **Continuum** (execution fabric) → **CORTEX** (mobile command) → **Domain Packs** (Aegis · Vessels · Terra · Counsel · Carlota Jo · IMPERIUM)
 
 ## 3. What changed in this pass
 

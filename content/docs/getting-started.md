@@ -1,7 +1,7 @@
 # Getting Started with SZL Holdings Platform
 
 ## Overview
-SZL Holdings is an AI-powered enterprise intelligence platform with six vertical operating systems. This guide covers initial setup, navigation, and key workflows.
+SZL Holdings is a governed decision infrastructure platform with eight domain vertical operating systems. This guide covers initial setup, navigation, and key workflows.
 
 ## Quick Start
 
@@ -12,8 +12,10 @@ Navigate to your product URL and sign in via the authentication provider. Your a
 Each product has a command dashboard as its landing page:
 - **Lyte**: Executive Command at `/`
 - **Aegis**: Command Home at `/command-home`
+- **Sentra**: Cyber Resilience at `/sentra/`
 - **Terra**: Dashboard at `/dashboard`
 - **Vessels**: Command Overview at `/dashboard`
+- **Counsel**: Matter Command at `/counsel/`
 - **Carlota Jo**: Home at `/`
 
 ### 3. Key Workflows
@@ -24,7 +26,7 @@ Each product has a command dashboard as its landing page:
 3. Assign owner or escalate
 4. Track resolution
 
-#### Investigate Incidents (Aegis)
+#### Investigate Incidents (Aegis / Sentra)
 1. Open Investigations Board
 2. Select incident
 3. Review timeline and evidence
@@ -43,10 +45,10 @@ Each product has a command dashboard as its landing page:
 4. Track voyage economics
 
 ## Architecture
-- **Web apps**: React + Vite + TypeScript
-- **Mobile apps**: Expo (React Native) + TypeScript
-- **API**: Express + TypeScript (1,618 endpoints)
-- **Database**: PostgreSQL (442 tables)
+- **Web apps**: React + Vite + TypeScript (11 web applications)
+- **Mobile app**: Expo (React Native) + TypeScript (iOS + Android)
+- **API**: Express + TypeScript (2,816 endpoints)
+- **Database**: PostgreSQL (798 database tables)
 
 ## Need Help?
 - Docs: /docs

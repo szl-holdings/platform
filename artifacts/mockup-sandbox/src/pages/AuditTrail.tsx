@@ -109,7 +109,7 @@ function generateAuditEntries(): AuditEntry[] {
 const EXAMPLE_INTENTS = [
   "Summarize today's threat risk across PARAGON and SEXTANT, then draft an executive brief in Pulse format.",
   'Pull the latest KPIs from SZL Holdings, DOMAINE, and SEXTANT, and compile a cross-portfolio snapshot.',
-  'Cross-reference Prism Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
+  'Cross-reference Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
 ];
 
 const ALTERNATIVES: Record<string, string[]> = {

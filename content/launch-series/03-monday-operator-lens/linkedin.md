@@ -6,15 +6,15 @@ Scenario: a bulk carrier registered to a counterparty has gone dark on AIS while
 
 Signal. The Event Fabric detects the AIS gap and normalizes it.
 
-Context. An AI agent retrieves vessel history, owner exposure, comparable events, prior PRISM Counsel matters. Citations attached. Confidence: 0.84.
+Context. An AI agent retrieves vessel history, owner exposure, comparable events, prior Counsel matters. Citations attached. Confidence: 0.84.
 
-Recommendation. Escalate to compliance. Open a PRISM Counsel matter. Notify the charter party.
+Recommendation. Escalate to compliance. Open a Counsel matter. Notify the charter party.
 
 Simulation. Decision Simulation models escalate-now vs. hold — probability-weighted outcome distributions.
 
 Policy. Covenant Policy routes to the on-call compliance officer. AI cannot proceed autonomously.
 
-Execution. The officer approves in Lyte. The Workflow Engine flags the voyage, opens the PRISM Counsel matter pre-populated with AI context, notifies the operator, arms a 4-hour AIS watchdog.
+Execution. The officer approves in Lyte. The Workflow Engine flags the voyage, opens the Counsel matter pre-populated with AI context, notifies the operator, arms a 4-hour AIS watchdog.
 
 Proof. The Proof Chain records every event with actor attribution and timestamps. A regulator can reconstruct the full decision.
 

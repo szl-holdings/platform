@@ -35,7 +35,7 @@ Design partners are not beta customers. They are operators who have a live probl
 ## What Partners Receive
 
 ### Platform Access
-- Full access to the relevant domain pack (Lyte + Alloy + domain layer: Prism Counsel, Vessels, Aegis, or Terra) for the duration of the pilot
+- Full access to the relevant domain pack (Lyte + Alloy + domain layer: Counsel, Vessels, Aegis, or Terra) for the duration of the pilot
 - Direct configuration support from the founding team — not a support queue
 - Weekly 45-minute working session with a founder or senior team member
 - Access to the product roadmap and the ability to influence prioritization

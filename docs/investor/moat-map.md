@@ -72,7 +72,7 @@ In regulated industries (finance, maritime, legal, defense), an unbroken audit c
 - `isExportSafe()` — guard used before all client-facing document generation
 - Source classification: `llm_generated`, `human_authored`, `system_computed`, `external_ingested`, `hybrid`
 - Export safety states: `safe`, `restricted`, `pending_review`, `blocked`
-- Surfaced in PRISM Counsel proof chain viewer, Alloy governance audit, all domain pack trust pages
+- Surfaced in Counsel proof chain viewer, Alloy governance audit, all domain pack trust pages
 
 ### Replication Cost
 
@@ -147,13 +147,13 @@ A competitor can implement a Monte Carlo engine. They cannot replicate the domai
 
 ### What It Is
 
-The Event Fabric (PRISM Bus, `@szl-holdings/prism-bus`) is the cross-domain signal backbone. It normalizes events from all domain sources into a common format and enables cross-domain correlation — a sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel, which can trigger a policy escalation in Lyte, which appears as an approval request in CORTEX.
+The Event Fabric (PRISM Bus, `@szl-holdings/prism-bus`) is the cross-domain signal backbone. It normalizes events from all domain sources into a common format and enables cross-domain correlation — a sanctions hit in Vessels can surface a legal risk flag in Counsel, which can trigger a policy escalation in Lyte, which appears as an approval request in CORTEX.
 
 ### Why It Compounds
 
 **Network of signals:** Each domain pack added to the platform adds a new signal source to the event fabric. The correlation value grows nonlinearly with the number of domains. With six domain packs, the platform can surface intelligence that no single-domain tool can produce.
 
-**Cross-domain context:** A maritime operator who uses both Vessels and PRISM Counsel gets intelligence (sanctions hit → legal risk) that a maritime-only tool cannot provide. This cross-domain value is only available to customers who are invested in multiple domain packs.
+**Cross-domain context:** A maritime operator who uses both Vessels and Counsel gets intelligence (sanctions hit → legal risk) that a maritime-only tool cannot provide. This cross-domain value is only available to customers who are invested in multiple domain packs.
 
 **Signal history:** Cross-domain correlation is more powerful when the platform has a history of correlated signals. A new event is understood in the context of past events — patterns that took months to accumulate cannot be bootstrapped.
 
@@ -163,7 +163,7 @@ The Event Fabric (PRISM Bus, `@szl-holdings/prism-bus`) is the cross-domain sign
 - `publish()`, `subscribe()`, `publishAndWait()` — event operations
 - Event types: `domain_signal`, `cross_domain_correlation`, `workflow_triggered`, `approval_requested`, `policy_decision`, `execution_started`, `execution_completed`
 - Command Portal 8-domain SSE dashboard surfaces cross-domain signals in real-time
-- PRISM Bus enables: Vessels sanctions → PRISM Counsel case check → Lyte risk flag
+- PRISM Bus enables: Vessels sanctions → Counsel case check → Lyte risk flag
 
 ### Replication Cost
 
@@ -214,17 +214,17 @@ A domain pack is not a separate product — it is a governed extension of the sh
 
 **Marginal cost of new domains decreases over time:** Each domain pack added to the platform requires less governance engineering because the infrastructure is already built and proven. The marginal cost of Domain Pack 7 is significantly lower than Domain Pack 1.
 
-**Cross-domain compounding:** Each new domain pack adds signal sources and correlation opportunities for all existing domain packs. Adding IMPERIUM (cloud) creates new signals that Aegis (security) and Lyte (operations) can consume.
+**Cross-domain compounding:** Each new domain pack adds signal sources and correlation opportunities for all existing domain packs. Adding Sentra (cyber resilience) creates new signals that Aegis (security) and Lyte (operations) can consume.
 
-**Customer land-and-expand:** A customer who enters through Vessels (maritime) and discovers that PRISM Counsel adds legal intelligence to their sanctions workflow is a natural expansion target. The governance infrastructure is already in place — the conversation is about adding signal sources, not rebuilding systems.
+**Customer land-and-expand:** A customer who enters through Vessels (maritime) and discovers that Counsel adds legal intelligence to their sanctions workflow is a natural expansion target. The governance infrastructure is already in place — the conversation is about adding signal sources, not rebuilding systems.
 
 ### Evidence in Codebase
 
 - Domain pack structure: signal source integration → domain agent → domain UI surface → shared primitive inheritance
-- Current domain packs: Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM (in dev)
+- Current domain packs: Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo
 - Shared from platform: `@szl-holdings/shared-ui`, `@szl-holdings/db`, `@szl-holdings/auth`, `@szl-holdings/workflow-engine`, `@szl-holdings/audit`, `@szl-holdings/ai-engine`
-- Domain packs in `artifacts/`: `aegis/`, `vessels/`, `terra/`, `carlota-jo/`
-- 37 shared packages that every domain pack inherits
+- Domain packs in `artifacts/`: `aegis/`, `sentra/`, `vessels/`, `terra/`, `counsel/`, `carlota-jo/`
+- 40 shared packages that every domain pack inherits
 
 ### Replication Cost
 

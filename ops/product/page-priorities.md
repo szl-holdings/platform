@@ -122,4 +122,4 @@ Security and compliance reviewers will deep-dive these pages. Must be accurate, 
 - OG images: `og/` directory is referenced but images not yet generated — use placeholder until Phase 7
 - Sitemap.xml: referenced in robots.txt but not yet auto-generated — create static sitemap or add build step
 - `/pricing` page: copy needs audit against current commercial packaging
-- Domain pack pages (Aegis, Vessels, Terra, PRISM Counsel): would benefit from Phase 7 use-case lane expansion
+- Domain pack pages (Aegis, Vessels, Terra, Counsel): would benefit from Phase 7 use-case lane expansion

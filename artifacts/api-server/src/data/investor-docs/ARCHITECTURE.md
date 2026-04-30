@@ -33,12 +33,13 @@ The defining architectural commitment: **governed decision execution as a platfo
 │  Alloy — Workflow orchestration · Approval gates · Audit trail   │
 │  Human-in-the-loop enforcement for all consequential actions     │
 ├──────────────────────────────────────────────────────────────────┤
-│  DOMAIN PACKS                                                    │
-│  Aegis       Vessels        Terra           Counsel        │
-│  Security &  Maritime       Real Estate     Legal Matter         │
-│  Defense     Intelligence   Intelligence    Command              │
+│  DOMAIN PACKS (6)                                                │
+│  Aegis       Sentra         Vessels         Terra                │
+│  Security &  Cyber          Maritime        Real Estate          │
+│  Defense     Resilience     Intelligence    Intelligence         │
 │                                                                  │
-│  Carlota Jo — Premium Advisory   IMPERIUM — Cloud Sovereignty    │
+│  Counsel               Carlota Jo                                │
+│  Legal Matter Command  Premium Advisory Services                 │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -95,7 +96,7 @@ Additional supporting surfaces: **Command Portal** (ecosystem hub), **SZL Holdin
 ┌──────────────────────┐    ┌────────────────────────────────────┐
 │  PostgreSQL 16+      │    │  External Services                 │
 │  Drizzle ORM         │    │  • OpenAI / Anthropic / Gemini     │
-│  644 tables          │    │    (via Replit AI proxy)           │
+│  798 tables          │    │    (via Replit AI proxy)           │
 │  10 schema domains   │    │  • Stripe (billing)                │
 │                      │    │  • Resend / SMTP (email)           │
 │  Domain isolation:   │    │  • AIS feeds (maritime)            │
@@ -162,14 +163,14 @@ Confirmed Action + Full Audit Trail
 │   ├── vessels/            # Vessels — Maritime Intelligence
 │   ├── carlota-jo/         # Carlota Jo — Advisory
 │   ├── command/            # Command Portal — Ecosystem Hub
-│   ├── imperium/           # IMPERIUM — Cloud Sovereignty (in development)
+│   ├── lyte-command-center/# Lyte — Decision Intelligence
 │   ├── szl-holdings-mobile/# APEX — Unified Mobile Command
 │   ├── prism-counsel/      # Counsel — Legal Command
 │   ├── stephen-site/       # Stephen Lutar — Founder site
 │   └── mockup-sandbox/     # Component design preview (internal)
 │
-├── lib/                    # 37 shared TypeScript packages
-│   ├── db/                 # Drizzle schema (700+ tables), migrations, seed
+├── lib/                    # 40 shared TypeScript packages
+│   ├── db/                 # Drizzle schema (798 tables), migrations, seed
 │   ├── shared-ui/          # Cross-app React component library
 │   ├── auth/               # OIDC authentication, session management
 │   ├── services/           # Business logic adapters

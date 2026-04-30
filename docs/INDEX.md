@@ -16,7 +16,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [architecture/platform-primitives.md](architecture/platform-primitives.md) | Six core abstractions: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric | 2026-04 |
 | [architecture/api-spec.md](architecture/api-spec.md) | API surface: route inventory, authentication model, rate limiting, versioning | 2026-04 |
 | [architecture/api-catalogue.md](architecture/api-catalogue.md) | Full API catalogue across all domain packs | 2026-04 |
-| [architecture/data-model.md](architecture/data-model.md) | Entity-relationship overview of the core PostgreSQL schema (700+ tables) | 2026-04 |
+| [architecture/data-model.md](architecture/data-model.md) | Entity-relationship overview of the core PostgreSQL schema (798 tables) | 2026-04 |
 | [architecture/system-overview.md](architecture/system-overview.md) | System architecture overview v3.0 — technical audience | 2026-04 |
 | [architecture/system-overview-executive.md](architecture/system-overview-executive.md) | System overview for non-technical stakeholders and investors | 2026-04 |
 | [architecture/full-system-inventory.md](architecture/full-system-inventory.md) | Complete inventory of all system components, services, and artifacts | 2026-04 |
@@ -35,7 +35,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [architecture/event-taxonomy.md](architecture/event-taxonomy.md) | Event types, schemas, routing taxonomy, and Event Fabric design | 2026-04 |
 | [architecture/analytics-events.md](architecture/analytics-events.md) | Analytics event specifications: canonical names, schemas, properties | 2026-04 |
 | [architecture/telemetry-model.md](architecture/telemetry-model.md) | Telemetry model: metric definitions, aggregation, retention | 2026-04 |
-| [architecture/route-inventory.md](architecture/route-inventory.md) | Complete API route inventory: all 2,331 endpoints with auth requirements | 2026-04 |
+| [architecture/route-inventory.md](architecture/route-inventory.md) | Complete API route inventory: all 2,816 endpoints with auth requirements | 2026-04 |
 | [architecture/dependency-map.md](architecture/dependency-map.md) | Service and package dependency map: internal and third-party | 2026-04 |
 | [architecture/integrations.md](architecture/integrations.md) | Third-party integrations: AI providers, monitoring, auth, payments | 2026-04 |
 | [architecture/agents.md](architecture/agents.md) | AI agents architecture: agent types, coordination, governance model | 2026-04 |

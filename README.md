@@ -6,7 +6,7 @@
 
 > Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single platform.
 
-**What this is in 30 seconds:** SZL Holdings is a TypeScript monorepo containing 14 deployable artifacts — a governed AI decision platform across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. Every product shares one API backend, one authentication model, one design system, and one audit infrastructure. The defining capability is **A11oy**: a seven-layer fabric that connects live signals to human-confirmed actions with cryptographic proof at every step. No action executes autonomously — governance is structural, not advisory.
+**What this is in 30 seconds:** SZL Holdings is a TypeScript monorepo containing 14 deployable artifacts — a governed AI decision platform across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. Every product shares one API backend, one authentication model, one design system, and one audit infrastructure. The defining capability is **Alloy**: a seven-layer fabric that connects live signals to human-confirmed actions with cryptographic proof at every step. No action executes autonomously — governance is structural, not advisory.
 
 ---
 
@@ -22,7 +22,7 @@ AI tools compound the problem: they add recommendation volume without governance
 
 ## What SZL Holdings Builds
 
-**A11oy** is the governed agentic execution layer that sits between enterprise data and enterprise decisions. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all SZL verticals.
+**Alloy** is the governed agentic execution layer that sits between enterprise data and enterprise decisions. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all SZL verticals.
 
 Every step in the pipeline has a traceable owner, a policy constraint, and an immutable record.
 
@@ -48,11 +48,11 @@ Screenshots depict the alpha demo state of the platform (development environment
 
 *Parent company dashboard — governed infrastructure for high-consequence decisions across eight enterprise verticals.*
 
-### A11oy — Live Enterprise Execution Fabric
+### Alloy — Live Enterprise Execution Fabric
 
-![A11oy — Execution Fabric](.github/assets/screenshots/a11oy-hero.jpg)
+![Alloy — Execution Fabric](.github/assets/screenshots/a11oy-hero.jpg)
 
-*A11oy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
+*Alloy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
 
 ### Unified Command — Operations Surface
 
@@ -86,7 +86,7 @@ Screenshots depict the alpha demo state of the platform (development environment
 
 ### SZL Holdings — Governed Autonomy Platform Demo
 
-> Full platform walkthrough: A11oy execution fabric, domain packs, governed decision loop, and cryptographic proof chain.
+> Full platform walkthrough: Alloy execution fabric, domain packs, governed decision loop, and cryptographic proof chain.
 
 **[Watch on szlholdings.com →](https://szlholdings.com/szl-demo-video/)**
 
@@ -104,7 +104,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 | Product | Domain | What It Does |
 |---------|--------|--------------|
-| **A11oy** | Execution Fabric | Governed agentic layer — signal mesh, proof ledger, covenant policies, operator surfaces |
+| **Alloy** | Execution Fabric | Governed agentic layer — signal mesh, proof ledger, covenant policies, operator surfaces |
 | **Sentra** | Cybersecurity | Cyber posture management, recovery readiness, incident command |
 | **Terra** | Real Estate | Deal pipeline intelligence, portfolio analytics, market signals |
 | **Vessels** | Maritime | Fleet command, route optimization, compliance tracking |
@@ -117,13 +117,43 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 ---
 
+## Core Fabric — Lyte + Alloy
+
+The platform's observability and execution layers are distinct but inseparable.
+
+### Lyte — Operational Intelligence Layer
+
+Lyte is the observe-and-understand surface. It continuously ingests signals from connected systems, correlates them across the PRISM framework (People, Revenue, Infrastructure, Security, Market), scores them by urgency and impact, and surfaces the prioritized picture of operational drift to operators.
+
+**What Lyte does:**
+- Aggregates live signals from every connected domain (security events, fleet exceptions, deal movements, legal deadlines, revenue anomalies)
+- Scores and ranks signals against historical baselines and policy thresholds
+- Presents the governed decision queue — the prioritized set of situations that require operator attention
+- Tracks decision quality over time via the Outcome Graph, closing the learning loop
+
+Lyte does not act. It observes, understands, and presents.
+
+### Alloy — Governed Execution Fabric
+
+Alloy is the govern-and-act layer. Once an operator is ready to respond to a signal surfaced by Lyte, Alloy takes over — routing the recommended action through policy gates, collecting required approvals, executing the confirmed action as a durable workflow, and sealing a cryptographic proof record.
+
+**What Alloy does:**
+- Routes every recommended action through Covenant Policy before execution — AI cannot bypass the gate
+- Manages approval queues: who must approve, in what order, under what conditions
+- Executes confirmed actions as audited, durable workflows with failure recovery
+- Writes an immutable Proof Chain entry linking signal → recommendation → approval → execution → outcome
+- Exposes 2,816 governed API endpoints across all domain verticals
+
+**Together:** Lyte tells operators what is happening and what matters. Alloy ensures that what happens next is governed, auditable, and human-confirmed. The seven-layer fabric — Sense → Structure → Correlate → Explain → Recommend → Approve → Execute — runs across every domain pack from a single shared infrastructure.
+
+---
+
 ## Platform Scale
 
 | Metric | Count |
 |--------|-------|
-| Deployable artifacts | 15 |
-| Packages | 152 |
-| Shared libraries | 51 |
+| Deployable artifacts | 14 |
+| Shared packages | 40 |
 | Operator products | 8 |
 
 ---
@@ -157,9 +187,9 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 | Item | Status |
 |------|--------|
-| A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
-| A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
-| A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
+| Alloy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
+| Alloy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
+| Alloy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
 | Mobile Command (unified iOS + Android command) | 🔜 Planned |
 | SOC 2 Type 1 audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |
@@ -174,12 +204,12 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 |---|---|
 | `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse (5) |
 | `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
-| `build failing` | A11oy, SZL Demo Video (2) — cascaded from SDK dependency |
+| `build failing` | Alloy, SZL Demo Video (2) — cascaded from SDK dependency |
 | `not started` | Mobile Command — scaffold complete, workflow not active |
 | `demo-only` | SZL Demo Video (1) |
 | `internal only` | Mockup Sandbox (1) |
 
-- A11oy Phase 1: code present; Phase 2 workcell engine in progress; artifact build currently fails
+- Alloy Phase 1: code present; Phase 2 workcell engine in progress; artifact build currently fails
 - Six domain pack verticals serve in development; all use seeded/demo data; see matrix for live data gaps
 - AI recommendations: multi-provider routing with governed policy constraints — live
 - Authentication: OIDC/PKCE with multi-role RBAC — auth gates in place
@@ -188,9 +218,9 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 ---
 
-## A11oy Doctrine
+## Alloy Doctrine
 
-The A11oy Doctrine is the permanent governance framework that defines how all AI agents, contributors, and automated systems operate inside this codebase. Every agent and contributor must read the applicable doctrine before making changes.
+The Alloy Doctrine is the permanent governance framework that defines how all AI agents, contributors, and automated systems operate inside this codebase. Every agent and contributor must read the applicable doctrine before making changes.
 
 | Document | Purpose |
 |----------|---------|
@@ -230,7 +260,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | Path | Contents |
 |------|----------|
 | `artifacts/` | All deployable web and mobile applications |
-| `artifacts/a11oy/` | A11oy — Live Enterprise Execution Fabric |
+| `artifacts/a11oy/` | Alloy — Live Enterprise Execution Fabric |
 | `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
 | `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
 | `services/` | Platform services: Command fabric, Lyte metrics engine, Substrate MCP gateway |
@@ -250,7 +280,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | Artifact | Kind | Preview | Runtime Status |
 |----------|------|---------|----------------|
 | SZL Holdings Dashboard | web | `/` | `alpha working` — all routes live, KPIs seeded |
-| A11oy — Governed Agentic Execution Fabric | web | `/a11oy/` | `build failing` — Phase 1 complete, Phase 2 in progress; SDK dep build issue |
+| Alloy — Governed Agentic Execution Fabric | web | `/a11oy/` | `build failing` — Phase 1 complete, Phase 2 in progress; SDK dep build issue |
 | API Server | web | `/api/` | `alpha working` — demo mode; auth-gated routes correct |
 | Command — Unified Command Portal | web | `/command/` | `alpha partial` — CORTEX badge counts not wired to live API |
 | Sentra — Cyber Resilience Command | web | `/sentra/` | `alpha partial` — UI complete; `/api/sentra/risks` route missing |
@@ -281,4 +311,4 @@ Copyright (c) 2024-2026 SZL Holdings. All rights reserved.
 
 This repository and all contents — including source code, architecture, documentation, and brand assets — are the sole and exclusive property of SZL Holdings. No license, right, or interest is granted by virtue of access. See [LICENSE](./LICENSE).
 
-SZL Holdings, A11oy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings. Certain methods and architectures may be the subject of pending or future patent applications.
+SZL Holdings, Alloy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings. Certain methods and architectures may be the subject of pending or future patent applications.

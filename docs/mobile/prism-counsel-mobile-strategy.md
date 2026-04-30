@@ -1,4 +1,4 @@
-# Prism Counsel — Mobile Strategy
+# Counsel — Mobile Strategy
 
 **Version:** 1.0  
 **Date:** April 2026  
@@ -8,7 +8,7 @@
 
 ## Strategic Context
 
-The primary Prism Counsel experience is desktop — attorneys and paralegals doing deep matter work benefit from a full-screen interface with rich context, structured views, and the ability to work through complex analysis. The desktop interface is where the full Matter Twin, Pressure Graph, Copilot Workbench, and document review live.
+The primary Counsel experience is desktop — attorneys and paralegals doing deep matter work benefit from a full-screen interface with rich context, structured views, and the ability to work through complex analysis. The desktop interface is where the full Matter Twin, Pressure Graph, Copilot Workbench, and document review live.
 
 Mobile is not a replacement for the desktop interface. It is the right tool for a specific set of high-value moments: when an attorney is away from their desk and needs to check something quickly, act on an approval, triage an alert, or review a summary before a call.
 
@@ -141,7 +141,7 @@ These exclusions are not permanent — they represent Phase 2 scope. Later mobil
 
 **Offline behavior:** Matter list and last Matter Twin snapshot cached locally. Approvals queue with local state and sync-on-reconnect. No offline AI generation.
 
-**Design:** Consistent with the dark, premium aesthetic of the existing Prism Counsel desktop interface. Compact matter cards. Clean list views. No decorative complexity.
+**Design:** Consistent with the dark, premium aesthetic of the existing Counsel desktop interface. Compact matter cards. Clean list views. No decorative complexity.
 
 ---
 

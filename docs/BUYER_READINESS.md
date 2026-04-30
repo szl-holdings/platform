@@ -66,7 +66,7 @@ Each domain pack extends the shared governance primitives into industry-specific
 | Claim | Status | Evidence Source |
 |-------|--------|----------------|
 | 347 API route files, 12 top-level route groups | **Verified** | `audit/source-of-truth.json` |
-| 1,047 database tables | **Verified** | Live PostgreSQL count |
+| 798 database tables | **Verified** | Live PostgreSQL count |
 | 123 shared packages (82 domain + 41 lib) | **Verified** | `audit/source-of-truth.json` |
 | Deny-by-default auth on all routes | **Verified** | Global auth enforcer with documented public allowlist |
 | Human-in-the-loop enforcement | **Verified** | Covenant Policy enforced at workflow layer, not UI-only |
@@ -140,7 +140,7 @@ Every approval decision is recorded in the Proof Chain with actor, timestamp, ra
 |-------------|---------------|-------|
 | Development | Replit workspace | Full stack, instant iteration |
 | Production | Replit Deployments | Auto-scaling, TLS, health checks |
-| Database | PostgreSQL 16 (Replit managed) | 1,047 tables, 165 schema files, 139 tracked migrations |
+| Database | PostgreSQL 16 (Replit managed) | 798 tables, 170 schema files, 139 tracked migrations |
 | Mobile | Expo / React Native | iOS + Android |
 | CI/CD | GitHub Actions | 22 workflows, pinned action SHAs |
 | Enterprise option | Azure IaC available | For on-premises or cloud-isolated deployment |

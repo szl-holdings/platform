@@ -46,7 +46,7 @@ The workspace runs on Replit and is the primary source of truth during active de
 - `/admin` — internal CMS admin (PIN-gated)
 - `/ops/*` — internal ops dashboard (internal only)
 - `/alloy/*` — Alloy workflow engine app (demo only)
-- `/prism-counsel/*` — PRISM Counsel law tech app (demo only)
+- `/prism-counsel/*` — Counsel legal matter command app (demo only)
 - `/kpi-dashboard` — internal KPI tracking
 - `/investors/*` — investor data room (private)
 - All Expo mobile apps — demo only, not yet publicly distributed

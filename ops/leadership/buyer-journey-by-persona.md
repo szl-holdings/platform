@@ -32,7 +32,7 @@ This is a *map*, not a script. Personas overlap in real engagements. But each su
 1. Homepage hero → category clarity in one screen
 2. "Where do you start?" → "Executive buyer" → `/platform`
 3. Platform overview → reads the loop, sees the platform hierarchy, sees domain pack relevance
-4. One of: `/lyte`, `/continuum-fabric`, or a domain pack page (Aegis, Vessels, Terra, PRISM Counsel) depending on their workflow
+4. One of: `/lyte`, `/continuum-fabric`, or a domain pack page (Aegis, Vessels, Terra, Counsel) depending on their workflow
 5. `/case-studies` for shape-matching to their context
 6. CTA: `/demo` or `/design-partner`
 

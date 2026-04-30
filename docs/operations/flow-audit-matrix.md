@@ -89,7 +89,7 @@ This matrix documents every significant user and admin flow across the SZL Holdi
 | Fleet tracking | Operations | ✅ | — |
 | Commercial contracts | Commercial Manager | ⚠️ | Live DB connection for commercial modules (separate task) |
 
-### PRISM Counsel (Legal / Advisory)
+### Counsel (Legal / Advisory)
 
 | Flow | User Role | Happy Path | Gaps |
 |------|-----------|------------|------|
@@ -147,7 +147,7 @@ This matrix documents every significant user and admin flow across the SZL Holdi
 | Billing | Live billing integration incomplete | FLOW-002 |
 | Support | No SLA enforcement automation | FLOW-003 |
 | Mobile | Push notification deep linking missing | Separate task queued |
-| Seed / Dev | Broken PRISM Counsel seed scripts | TD-002 |
+| Seed / Dev | Broken Counsel seed scripts | TD-002 |
 | Webhook | SSRF validation on URLs | KG020b |
 | Approvals | No escalation for timed-out approvals | FLOW-004 |
 

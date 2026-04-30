@@ -21,7 +21,7 @@ All platforms are at **Functional Alpha** — full feature sets with seeded/demo
 | Vessels | Functional Alpha | Fleet, S&P, demurrage, freight, voyage P&L |
 | Terra | Functional Alpha | Distress pipeline, ownership graph, deal workflow |
 | Carlota Jo | Live | Client portal, advisory ops — paying-client capable |
-| PRISM Counsel | Integrated | Legal modules integrated into Aegis |
+| Counsel | Integrated | Legal modules integrated into Aegis |
 | IMPERIUM | In Development | Cloud sovereignty — not yet functional |
 | Command Portal | Functional Alpha | 8-domain SSE dashboard, executive briefing |
 
@@ -152,7 +152,7 @@ The absence of automated E2E testing (KG010) is the highest-priority quality gap
 - Framework: Playwright (web) + Detox (mobile)
 
 **M3-B: API integration tests**
-- POST/mutation path coverage for all domain packs (Vessels, Aegis, Terra, PRISM Counsel)
+- POST/mutation path coverage for all domain packs (Vessels, Aegis, Terra, Counsel)
 - Test multi-tenant isolation: confirm org-scoped queries return no cross-org data
 - Add to CI gate: block merges on E2E failures
 

@@ -32,7 +32,7 @@ Last updated: 2026-04-16
 | `/solutions/aegis` | Aegis — Security & Defense | PUBLIC | Vertical page |
 | `/solutions/vessels` | Vessels — Maritime Intelligence | PUBLIC | Vertical page |
 | `/solutions/terra` | Terra — Real Estate Intelligence | PUBLIC | Vertical page |
-| `/solutions/prism-counsel` | PRISM Counsel | PUBLIC | Vertical page — **DEPRECATED** (consolidated into Aegis legal workspace) |
+| `/solutions/prism-counsel` | Counsel | PUBLIC | Vertical page — **DEPRECATED** (consolidated into Aegis legal workspace) |
 | `/design-partners` | Design Partners | PUBLIC | Partner program |
 | `/contact` | Contact | PUBLIC | Contact form |
 | `/pricing` | Pricing | PUBLIC | Pricing page |
@@ -78,7 +78,7 @@ Last updated: 2026-04-16
 
 | Route | Title | Flag | Notes |
 |-------|-------|------|-------|
-| `/prism-counsel-public` | PRISM Counsel | PUBLIC | **DEPRECATED** — use `/solutions/aegis` |
+| `/prism-counsel-public` | Counsel | PUBLIC | **DEPRECATED** — use `/solutions/aegis` |
 | `/terra-public` | Terra | PUBLIC | |
 | `/vessels-public` | Vessels | PUBLIC | |
 | `/aegis-public` | Aegis | PUBLIC | |
@@ -90,7 +90,7 @@ Last updated: 2026-04-16
 |-------|-------|------|-------|
 | `/demo` | Demo | DEMO | Demo request / live demo |
 | `/lyte/demo` | Lyte Demo | DEMO | Demo entry |
-| `/pilot/prism-counsel` | PRISM Counsel Pilot | DEMO | **DEPRECATED** — use `/pilot/aegis` |
+| `/pilot/prism-counsel` | Counsel Pilot | DEMO | **DEPRECATED** — use `/pilot/aegis` |
 | `/pilot/terra` | Terra Pilot | DEMO | Pilot flow |
 | `/pilot/vessels` | Vessels Pilot | DEMO | Pilot flow |
 | `/pilot/aegis` | Aegis Pilot | DEMO | Pilot flow |
@@ -392,5 +392,5 @@ The following artifacts have been archived (app source removed — no pages/comp
 | Lyte Command Center | `/lyte-command-center/` | Merged into Command (`/command/`) |
 | Firestorm | `/firestorm/` | Superseded by Aegis (`/aegis/`) |
 | IMPERIUM | `/imperium/` | Merged into Command (`/command/`) |
-| PRISM Counsel | `/prism-counsel/` | Deprecated (task #579) |
+| Counsel | `/prism-counsel/` | Deprecated (task #579) |
 | Stephen Site | `/stephen/` | Content moved to `/founder` in SZL Holdings |

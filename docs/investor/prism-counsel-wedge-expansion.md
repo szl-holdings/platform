@@ -1,4 +1,4 @@
-# PRISM Counsel — Wedge & Expansion
+# Counsel — Wedge & Expansion
 
 **For:** Series A investors and strategic evaluators
 **Date:** April 2026
@@ -8,11 +8,11 @@
 
 ## The Wedge
 
-PRISM Counsel enters the legal-operations market through a single, sharply defined wedge: **deadline and obligation enforcement for in-house legal teams that operate under audit pressure.**
+Counsel enters the legal-operations market through a single, sharply defined wedge: **deadline and obligation enforcement for in-house legal teams that operate under audit pressure.**
 
 This is not the broadest entry point. It is the most defensible one. It plays directly to the platform's structural advantages — Proof Chain provenance, Covenant Policy approval gates, an obligation graph with dependency-aware alerting — and avoids the categories where incumbents already dominate (e-discovery, contract lifecycle management, billing).
 
-![PRISM Counsel matter board — wedge surface where matter signal becomes a governed decision](../../assets/readme/products/prism-counsel-matter-board.jpg)
+![Counsel matter board — wedge surface where matter signal becomes a governed decision](../../assets/readme/products/prism-counsel-matter-board.jpg)
 
 ### Initial Buyer Profile
 
@@ -23,7 +23,7 @@ This is not the broadest entry point. It is the most defensible one. It plays di
 
 ### Why This Wedge Lands
 
-For the wedge buyer, the pain is concrete: a missed Reg 68 acknowledgment, a DOL filing slipped past the window, a litigation hold notification that didn't reach the right custodian. PRISM Counsel does not have to teach the buyer that the problem exists — they already lived through it. What we have to demonstrate is that the obligation graph plus governed approval flow would have caught it.
+For the wedge buyer, the pain is concrete: a missed Reg 68 acknowledgment, a DOL filing slipped past the window, a litigation hold notification that didn't reach the right custodian. Counsel does not have to teach the buyer that the problem exists — they already lived through it. What we have to demonstrate is that the obligation graph plus governed approval flow would have caught it.
 
 That demonstration is the seeded narrative inside the platform itself: the Rivera v. Apex insurer-clock-violation walkthrough is the wedge demo, end-to-end, in the operator's own surface.
 
@@ -33,7 +33,7 @@ That demonstration is the seeded narrative inside the platform itself: the River
 
 The wedge surface — matter board, obligation timeline, deadline heatmap, proof-chain export — is the foothold. The expansion path moves outward through capabilities the same buyer already needs but is currently buying piecemeal:
 
-![PRISM Counsel obligation timeline — governance surface that anchors the expansion path](../../assets/readme/products/prism-counsel-obligation-timeline.jpg)
+![Counsel obligation timeline — governance surface that anchors the expansion path](../../assets/readme/products/prism-counsel-obligation-timeline.jpg)
 
 ### Stage 1 — Matter & Obligation Command (Wedge)
 
@@ -45,11 +45,11 @@ Add privilege-aware redaction, disclosure approval flow, and audit-grade access 
 
 ### Stage 3 — Counsel Intelligence
 
-Outside-counsel performance, recovery analytics, settlement-band intelligence, and conflict checks — all running on the same matter twin substrate. This is the layer that converts PRISM Counsel from a workflow surface into a decision-support surface.
+Outside-counsel performance, recovery analytics, settlement-band intelligence, and conflict checks — all running on the same matter twin substrate. This is the layer that converts Counsel from a workflow surface into a decision-support surface.
 
 ### Stage 4 — Cross-Surface Integration
 
-Bind PRISM Counsel matters to Aegis security incidents (regulatory disclosure obligations following a breach), Vessels sanctions exposure (legal review of restricted-party screening), and Terra transaction risk (closing-condition obligations). This is where the platform compounding shows up: the legal team's tooling is the same platform the security, maritime, and real-estate teams already operate on.
+Bind Counsel matters to Aegis security incidents (regulatory disclosure obligations following a breach), Vessels sanctions exposure (legal review of restricted-party screening), and Terra transaction risk (closing-condition obligations). This is where the platform compounding shows up: the legal team's tooling is the same platform the security, maritime, and real-estate teams already operate on.
 
 ### Stage 5 — Outside Counsel Network
 
@@ -65,4 +65,4 @@ The competitive risk at each stage is a point-tool incumbent — but no point to
 
 ---
 
-*See also: [Platform Portfolio](platform-portfolio.md) · [PRISM Counsel — Platform Story](prism-counsel-platform-story.md) · [PRISM Counsel — Why Now](prism-counsel-why-now.md) · [Go-To-Market](go-to-market.md)*
+*See also: [Platform Portfolio](platform-portfolio.md) · [Counsel — Platform Story](prism-counsel-platform-story.md) · [Counsel — Why Now](prism-counsel-why-now.md) · [Go-To-Market](go-to-market.md)*
