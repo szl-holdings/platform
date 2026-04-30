@@ -224,7 +224,11 @@ function liftLeanToStrict(o: Record<string, unknown>): CodexPayload {
     loop_policy: {
       max_steps: (lp.max_steps as number | undefined) ?? 30,
       adaptive_depth: {
-        enabled: true,
+        // v3 EntropyDepthAllocator (§3.2) is opt-in: enabling it here would
+        // make the canonical CLI runner exit early on entropy settling and
+        // break the documented row-count baseline. Callers wanting adaptive
+        // depth set this to true in their own payload.
+        enabled: false,
         increase_depth_on: ['validator_soft_fail', 'drift_warning', 'contradiction_found'],
         decrease_depth_on: ['stable_validator_pass_streak'],
       },

@@ -80,6 +80,10 @@ export type StopReason =
   | 'validator_hard_stop'
   | 'no_state_change_needed'
   | 'manual_stop'
+  /** Ouroboros-Thesis-v3 — Δ-witness ≤ ε_Δ for W_Δ steps (adaptive-depth on only). */
+  | 'adaptive_depth_converged'
+  /** Ouroboros-Thesis-v3 — validator entropy ≤ ε_H for W_H steps (adaptive-depth on only). */
+  | 'adaptive_depth_entropy_settled'
   | null;
 
 export interface TraceEvent {
@@ -93,6 +97,20 @@ export interface TraceEvent {
   decision_receipt: DecisionReceipt | null;
   state_next_hash: Hex;
   stop_reason: StopReason;
+  /**
+   * Optional Ouroboros-Thesis-v3 EntropyDepthAllocator verdict for this step.
+   * Recorded only when `loop_policy.adaptive_depth.enabled === true`. The
+   * field is additive and never affects the chain hash, so traces from
+   * adaptive-disabled runs replay bit-identically to pre-v3 traces.
+   */
+  adaptive_depth_verdict?: {
+    verdict: 'continue' | 'early_exit_converged' | 'early_exit_entropy' | 'extend';
+    reason: string;
+    delta_witness?: number;
+    entropy?: number;
+    soft_fail_rate?: number;
+    extended_max_steps?: number;
+  };
 }
 
 export interface ProofLedgerEntry {
@@ -127,6 +145,12 @@ export interface RunSummary {
   stop_reason: StopReason;
   replay_status: 'verified' | 'failed' | 'not_run';
   final_state_hash: Hex;
+  /** v3 — true when adaptive-depth was enabled for this run. */
+  adaptive_depth_used?: boolean;
+  /** v3 — number of times the allocator extended the step ceiling. */
+  adaptive_depth_extensions?: number;
+  /** v3 — final effective step ceiling (after any extensions). */
+  adaptive_depth_effective_max_steps?: number;
 }
 
 /**
@@ -174,6 +198,12 @@ export interface KernelConfig<S extends Json = Json> {
   resolveApproval?: (ctx: ValidationContext<S>) => ApprovalEvent | null;
   /** Clock injection for deterministic tests. */
   now?: () => ISO8601;
+  /**
+   * Optional EntropyDepthAllocator config (v3 §3.2). Only consulted when
+   * `loop_policy.adaptive_depth.enabled === true`. When omitted, defaults
+   * from `DEFAULT_DEPTH_ALLOCATOR_CONFIG` are used.
+   */
+  depth_allocator_config?: import('./depth-allocator.js').DepthAllocatorConfig;
 }
 
 export interface KernelRunResult<S extends Json = Json> {

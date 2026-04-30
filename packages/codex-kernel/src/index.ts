@@ -47,3 +47,15 @@ export {
   type VenusRow,
   type VenusState,
 } from './dresden-venus.js';
+export {
+  DEFAULT_DEPTH_ALLOCATOR_CONFIG,
+  decideDepth,
+  deltaHammingWitness,
+  rollingSoftFailRate,
+  severityEntropyBits,
+  type AllocatorStepRecord,
+  type DepthAllocatorConfig,
+  type DepthAllocatorContext,
+  type DepthAllocatorResult,
+  type DepthVerdict,
+} from './depth-allocator.js';

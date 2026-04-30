@@ -94,7 +94,8 @@
   "loop_policy": {
     "max_steps": 30,
     "adaptive_depth": {
-      "enabled": true,
+      "_comment": "v3 EntropyDepthAllocator is opt-in. The canonical CLI runner targets a fixed row count, so the allocator is disabled here; production callers can enable it per-config.",
+      "enabled": false,
       "increase_depth_on": ["validator_soft_fail", "drift_warning", "contradiction_found"],
       "decrease_depth_on": ["stable_validator_pass_streak"]
     },

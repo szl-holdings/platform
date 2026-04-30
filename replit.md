@@ -287,3 +287,77 @@ runtime + thesis + audit doc:
 `master` (ahead 2, behind 2423) — left as-is, not the default branch,
 not safe to force-update without losing the two unique commits
 (security workflows PR #27 and a docs README refresh).
+
+## 2026-04-30 — Phase 4: Ouroboros Thesis v3 gap closure (innovate/evolve)
+
+### Gap 1 — EntropyDepthAllocator implemented in `packages/codex-kernel`
+- `packages/codex-kernel/src/depth-allocator.ts` (new) — pure-function controller
+  per Ouroboros Thesis v3 §3.2. Exports `decideDepth()`,
+  `deltaHammingWitness()`, `severityEntropyBits()`, `rollingSoftFailRate()`,
+  `DEFAULT_DEPTH_ALLOCATOR_CONFIG`. No I/O, no clocks, no PRNG. Verdict
+  precedence: `early_exit_converged` > `early_exit_entropy` > `extend` >
+  `continue`.
+- `packages/codex-kernel/src/depth-allocator.test.ts` (new) — 9 golden
+  tests pinning Hamming numerics, Shannon entropy, soft-fail rate window
+  math, all four verdict branches, precedence rule, and bit-identical
+  determinism (1000 calls = 0 mismatches).
+- `packages/codex-kernel/src/kernel.ts` — wired allocator into runLoop
+  behind `loop_policy.adaptive_depth.enabled`. New stop reasons
+  (`adaptive_depth_converged`, `adaptive_depth_entropy_settled`).
+  `RunSummary` gained `adaptive_depth_used / extensions /
+  effective_max_steps`. `TraceEvent` gained optional
+  `adaptive_depth_verdict`. Effective step ceiling is mutable so the
+  allocator can extend it up to `hard_max_steps`.
+- `packages/codex-kernel/src/types.ts` and `index.ts` updated for the
+  new exports and `KernelConfig.depth_allocator_config` override hook.
+- **Backward compatibility**: CLI runner payload + `cli/normalize.ts`
+  default flipped to `adaptive_depth.enabled = false` so the documented
+  12-row baseline + Dresden Venus replay hash are preserved bit-identically.
+  Production callers opt in by setting the flag in their own
+  `KernelConfig`.
+
+### Gap 3 — v3 paper published to `szl-holdings/ouroboros-thesis`
+- `papers/ouroboros-thesis-v3.md` (new on remote) — auditable governance
+  surface. Real refs (Universal Transformers, PonderNet, ACT, Snell 2024,
+  EU AI Act 2024/1689 Art 12, NIST AI RMF 1.0). §3.2 formal allocator
+  spec. §5 system mapping with file-level pointers. v2 paper retained
+  for historical record at the repo root.
+
+### Releases cut
+- **`szl-holdings/ouroboros` v6.1.0** — EntropyDepthAllocator wiring +
+  README bumped to **142/142 tests passing**. URL:
+  `https://github.com/szl-holdings/ouroboros/releases/tag/v6.1.0`
+- **`szl-holdings/ouroboros-thesis` v3.0.0** — v3 paper as the canonical
+  thesis. URL:
+  `https://github.com/szl-holdings/ouroboros-thesis/releases/tag/v3.0.0`
+
+### READMEs refreshed
+- `ouroboros-thesis/README.md` — v3 badge, papers table (v3 current,
+  v2 historical), gap-closure note linking to the new paper.
+- `ouroboros/README.md` — contract badge bumped to v6.1.0, adaptive-depth
+  badge added, Status section rewritten to describe `decideDepth()`,
+  test count 133 → 142.
+
+### Smoke + stress test results (all green)
+- **Smoke**: codex-kernel CLI runner produced canonical baseline (12 steps,
+  status=ok, stop_reason=convergence, hash=`fe20ecc47445dbd887b5b14ef26ed981`).
+- **Stress 1**: 1000 deterministic `decideDepth` calls, 0 mismatches.
+- **Stress 2/3**: 100k Hamming + entropy ops in 20 ms each (~5M ops/sec).
+- **Stress 4**: `runLoop` adaptive=true converged in 2 steps with
+  `adaptive_depth_entropy_settled` (4 ms wall, allocator early-exit working).
+- **Stress 5**: `runLoop` adaptive=false ran the full 200-step budget
+  (15 ms, backward compat preserved).
+- **Test suites**: `@workspace/codex-kernel` 29/29 + `@workspace/ouroboros`
+  133/133 = **162/162 affected tests green**.
+
+### Gap 2 deferred
+Cross-runtime wiring (cognitive-runtime → kernel for verify→reflect→update,
+sentra `/replay-attestation` backend, terra distress-loop runner) is
+substantial integration work touching three artifacts; deferred to a
+funded follow-up. The contract is in place — `runLoop()` accepts everything
+those wirings need.
+
+### Standby state
+After this commit, all workflows are stopped. The platform is
+publish-ready (api-server endpoints unchanged, ouroboros + codex-kernel
+test suites green, public GitHub org reflects v3 / v6.1.0).

@@ -17,6 +17,12 @@
  *  - This is the A/B test surface: same loop, governance off vs. on.
  */
 
+import {
+  DEFAULT_DEPTH_ALLOCATOR_CONFIG,
+  decideDepth,
+  type AllocatorStepRecord,
+  type DepthAllocatorResult,
+} from './depth-allocator.js';
 import { canonicalize, chainHash, hashJson } from './hash.js';
 import { ProofLedger } from './ledger.js';
 import { finalizeReceipt } from './receipts.js';
@@ -98,8 +104,18 @@ export function runLoop<S extends Json>(cfg: KernelConfig<S>): KernelRunResult<S
   let stop_reason: StopReason = null;
   let step = 0;
 
+  // v3 §3.2 — EntropyDepthAllocator state. Only consulted when
+  // `loop_policy.adaptive_depth.enabled === true`. Keeping this allocated
+  // unconditionally (but only *consulted* when enabled) makes the with/
+  // without paths share the same control flow.
+  const adaptive_enabled = cfg.loop_policy.adaptive_depth.enabled === true;
+  const allocator_cfg = cfg.depth_allocator_config ?? DEFAULT_DEPTH_ALLOCATOR_CONFIG;
+  const allocator_history: AllocatorStepRecord[] = [];
+  let effective_step_ceiling = cfg.budgets.step_budget;
+  let adaptive_extensions = 0;
+
   while (true) {
-    if (step >= cfg.budgets.step_budget) {
+    if (step >= effective_step_ceiling) {
       stop_reason = 'budget_exhausted';
       break;
     }
@@ -252,7 +268,26 @@ export function runLoop<S extends Json>(cfg: KernelConfig<S>): KernelRunResult<S
       approval_ref,
     };
     ledger.append(ledgerEntry);
-    trace.push({
+
+    // 6a. v3 EntropyDepthAllocator — pure-function controller, opt-in.
+    let adaptive_verdict: DepthAllocatorResult | null = null;
+    if (adaptive_enabled) {
+      allocator_history.push({
+        step,
+        state_hash: next_hash,
+        validator_severities: effective.map((r) => r.severity),
+      });
+      adaptive_verdict = decideDepth(
+        { history: allocator_history, current_max_steps: effective_step_ceiling },
+        allocator_cfg,
+      );
+      if (adaptive_verdict.verdict === 'extend' && adaptive_verdict.details.extended_max_steps) {
+        effective_step_ceiling = adaptive_verdict.details.extended_max_steps;
+        adaptive_extensions += 1;
+      }
+    }
+
+    const baseEvent: TraceEvent = {
       ts: now(),
       step,
       pipeline_stage: proposal.pipeline_stage,
@@ -263,10 +298,38 @@ export function runLoop<S extends Json>(cfg: KernelConfig<S>): KernelRunResult<S
       decision_receipt: receipt,
       state_next_hash: next_hash,
       stop_reason: null,
-    });
+    };
+    if (adaptive_verdict) {
+      baseEvent.adaptive_depth_verdict = {
+        verdict: adaptive_verdict.verdict,
+        reason: adaptive_verdict.reason,
+        delta_witness: adaptive_verdict.details.delta_witness,
+        entropy: adaptive_verdict.details.entropy,
+        soft_fail_rate: adaptive_verdict.details.soft_fail_rate,
+        extended_max_steps: adaptive_verdict.details.extended_max_steps,
+      };
+    }
 
     state = next_state;
     prev_hash = next_hash;
+
+    // 6b. Honour an early-exit verdict from the allocator. Stamp the stop
+    // reason on the trace event we just pushed so the proof shape stays:
+    //   "the step that triggered the stop carries the stop_reason".
+    if (
+      adaptive_verdict &&
+      (adaptive_verdict.verdict === 'early_exit_converged' ||
+        adaptive_verdict.verdict === 'early_exit_entropy')
+    ) {
+      stop_reason =
+        adaptive_verdict.verdict === 'early_exit_converged'
+          ? 'adaptive_depth_converged'
+          : 'adaptive_depth_entropy_settled';
+      baseEvent.stop_reason = stop_reason;
+      trace.push(baseEvent);
+      break;
+    }
+    trace.push(baseEvent);
   }
 
   if (!stop_reason) stop_reason = 'convergence';
@@ -285,6 +348,9 @@ export function runLoop<S extends Json>(cfg: KernelConfig<S>): KernelRunResult<S
     stop_reason,
     replay_status: 'not_run',
     final_state_hash: prev_hash,
+    adaptive_depth_used: adaptive_enabled,
+    adaptive_depth_extensions: adaptive_extensions,
+    adaptive_depth_effective_max_steps: effective_step_ceiling,
   };
 
   return {
