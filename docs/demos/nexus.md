@@ -1,3 +1,5 @@
+> **Source of truth for what NEXUS is and isn't:** [docs/demos/nexus-scope.md](./nexus-scope.md). Enforced by `pnpm check:nexus-scope`.
+
 # NEXUS — Unified Agentic AI Layer (Mockup Sandbox): Scope Document
 
 **Status:** Internal engineering tool — NOT a customer-facing product  

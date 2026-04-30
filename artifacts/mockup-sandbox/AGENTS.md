@@ -1,5 +1,7 @@
 # AGENTS — artifacts/mockup-sandbox (NEXUS)
 
+> **Source of truth for what NEXUS is and isn't:** [docs/demos/nexus-scope.md](../../docs/demos/nexus-scope.md). Enforced by `pnpm check:nexus-scope`. If you need to relax a rule, open a Project Task — do not silently bypass.
+
 **Scope:** Narrows [root AGENTS.md](../../AGENTS.md) for the NEXUS agentic AI layer artifact.
 
 ## What This Is

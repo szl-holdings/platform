@@ -10,6 +10,7 @@
     "lint:ci": "oxlint . && biome lint --reporter=github . && pnpm run check:env-coverage",
     "check:env-coverage": "tsx scripts/check-env-coverage.ts",
     "check:env-coverage:strict": "tsx scripts/check-env-coverage.ts --strict",
+    "check:nexus-scope": "tsx scripts/check-nexus-scope.ts",
     "lint:copy": "bash scripts/lint-copy.sh",
     "format": "biome format --write .",
     "format:check": "biome format .",
@@ -200,7 +201,7 @@
       "@xmldom/xmldom": "^0.9.10",
       "fast-xml-parser": "^5.7.2",
       "postcss": "^8.5.12",
-      "uuid": "^11.1.0"
+      "uuid": "^14.0.0"
     }
   }
 }

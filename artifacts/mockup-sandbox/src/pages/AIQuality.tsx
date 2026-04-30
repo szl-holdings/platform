@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from 'react';
 const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
+  // nexus-scope-allow: transitional — AIQuality calls /api/ai/ops/* (see docs/demos/nexus-scope.md)
   const r = await fetch(`${API}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...opts,
