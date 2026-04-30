@@ -845,3 +845,9 @@ id = "YnVmK2d0tpOTo-LfDczji"
 uri = "file://.local/screenshots/conduit-home.jpg"
 type = "image"
 title = "Amaru / Conduit — Andean Orchestration"
+
+[[outputs]]
+id = "hMzZqD8h-aVam9fJ5a4Vw"
+uri = "file://.local/video/output/szl-codex-kernel-v1.0.2.mp4"
+type = "video"
+title = "SZL — Codex Kernel v1.0.2 Update Reel (1080p, with audio)"
