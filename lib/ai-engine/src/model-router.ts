@@ -157,6 +157,12 @@ export interface ModelRouterTelemetry {
   tenantId?: number | string;
   packSlug?: string;
   taskId?: string;
+  kernelId?: string;
+  kernelSource?: string;
+  kernelCategory?: string;
+  kernelStrategy?: string;
+  kernelLatencyMs?: number;
+  kernelMemoryMB?: number;
 }
 
 export type TelemetryHandler = (telemetry: ModelRouterTelemetry) => void | Promise<void>;

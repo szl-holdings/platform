@@ -3,6 +3,7 @@ import {
   BarChart2,
   BookOpen,
   Brain,
+  Cpu,
   Database,
   Download,
   FlaskConical,
@@ -80,6 +81,13 @@ const NAV_ITEMS: Array<{
     label: 'Open Evals',
     icon: BarChart2,
     description: 'Open Evaluation Layer — Leaderboards',
+    group: 'control',
+  },
+  {
+    id: 'kernel',
+    label: 'Kernel',
+    icon: Cpu,
+    description: 'NEXUS Kernel — Unified AI Compute Layer',
     group: 'control',
   },
 ];

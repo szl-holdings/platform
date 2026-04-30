@@ -581,6 +581,45 @@ export {
   verifyAuditChainIntegrity,
 } from './kernel/agent-kernel.js';
 export {
+  kernelRegistry,
+  type KernelEntry,
+  type KernelSource,
+  type KernelCategory,
+  type KernelStatus,
+  type PrecisionType,
+  type HardwareSM,
+  type KernelBenchmark,
+  type KernelStrategy,
+  type KernelRecommendation,
+  type KernelRegistryStats,
+} from './kernel/kernel-registry.js';
+export {
+  routeKernel,
+  simulateWorkload,
+  type ComputeProfile,
+  type KernelWorkloadProfile,
+  type KernelRouteDecision,
+  type KernelAwareRouteResult,
+  type WorkloadSimulationInput,
+  type WorkloadSimulationResult,
+} from './kernel/kernel-router.js';
+export {
+  runInference,
+  getKernelBenchmark,
+  compareKernels,
+  getGatewayHealth,
+  getKernelAuditLog,
+  getInferenceLog,
+  type InferenceRequest,
+  type InferenceTelemetry,
+  type InferenceResult,
+  type KernelBenchmarkRequest,
+  type KernelBenchmarkResult,
+  type KernelCompareRequest,
+  type KernelCompareResult,
+  type GatewayHealth,
+} from './kernel/inference-gateway.js';
+export {
   type ApprovalFormConfig,
   buildApprovalFormComponent,
   buildChartComponent,

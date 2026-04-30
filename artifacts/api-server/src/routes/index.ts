@@ -382,6 +382,10 @@ router.use("/provenance", lazyMount(() => import("./provenance"), "provenance"))
 // Mounted BEFORE the legacy /nexus router so v1 paths take precedence.
 router.use(lazyMatch(["/nexus/v1"], () => import("./nexus-v1"), "nexus-v1"));
 
+// NEXUS Kernel — Unified AI Compute Kernel orchestration layer (SGLang + HuggingFace Kernel Hub).
+// Owns /nexus/kernels, /nexus/infer, /nexus/compare, /nexus/simulate, /nexus/health, /nexus/audit, /nexus/stats
+router.use(lazyMatch("/nexus", () => import("./nexus-kernel"), "nexus-kernel"));
+
 // NEXUS MCP Fabric — bidirectional governed MCP control plane.
 // Handles external server registry, session tracking, anomaly detection, and governed workflows.
 router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));

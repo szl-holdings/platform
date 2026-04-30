@@ -18,6 +18,7 @@ import PromptRegistry from './pages/PromptRegistry';
 import Research from './pages/Research';
 import Skills from './pages/Skills';
 import TokensGovernance from './pages/TokensGovernance';
+import KernelDashboard from './pages/KernelDashboard';
 
 const VALID_PAGES: Page[] = [
   'home',
@@ -35,6 +36,7 @@ const VALID_PAGES: Page[] = [
   'eval-console',
   'audit',
   'marketplace',
+  'kernel',
 ];
 
 function getInitialPage(): Page {
@@ -80,6 +82,7 @@ function AppInner() {
       {page === 'eval-console' && <EvalConsole />}
       {page === 'eval-layer' && <EvalLayer />}
       {page === 'audit' && <AuditTrail />}
+      {page === 'kernel' && <KernelDashboard />}
     </Layout>
   );
 }

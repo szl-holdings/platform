@@ -14,7 +14,8 @@ export type Page =
   | 'eval-console'
   | 'audit'
   | 'marketplace'
-  | 'eval-layer';
+  | 'eval-layer'
+  | 'kernel';
 
 export interface PraxisStatus {
   activeSwarms: number;
