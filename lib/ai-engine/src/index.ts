@@ -10,6 +10,23 @@ export {
   type TriageResult,
 } from './gateway-adapter.js';
 export {
+  AlloyModelGateway,
+  type AlloyModelGatewayOptions,
+  type AlloyModelRequest,
+  type AlloyModelResponse,
+  type AlloyModelTask,
+  type AlloyOutcome,
+  type AlloyVertical,
+  type ApprovalContext as AlloyApprovalContext,
+  type ApprovalVerifier as AlloyApprovalVerifier,
+  type AuditEvent as AlloyAuditEvent,
+  type AuditEventEmitter as AlloyAuditEventEmitter,
+  type BudgetStore as AlloyBudgetStore,
+  createAlloyModelGateway,
+  getDefaultAlloyModelGateway,
+  signAlloyApprovalToken,
+} from './alloy-model-gateway.js';
+export {
   type DelegationRequest,
   type DelegationResult,
   type DelegationStatus,

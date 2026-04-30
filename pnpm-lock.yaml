@@ -1965,6 +1965,9 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
+      '@szl-holdings/shared-contracts':
+        specifier: workspace:*
+        version: link:../../packages/shared-contracts
       '@szl-holdings/substrate-adapters':
         specifier: workspace:*
         version: link:../../packages/substrate-adapters

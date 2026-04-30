@@ -65,6 +65,48 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 - **Shared Reverse Proxy (`packages/shared-proxy`) & Security Headers (`@szl-holdings/security-headers`):** Ensures consistent platform routing and security policies.
 - **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs in a dedicated database table.
 
+## Canonical Identity & Source of Truth
+The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`. Any document, slide, or README that cites a count (artifacts, DB tables, API endpoints, verticals, packages, etc.) must draw the number from `SOURCE_OF_TRUTH.md` and re-run the verification command listed there before publishing. Naming conventions: display names use the canonical name (TENAX, SEXTANT, DOMAINE, Counsel, LUMINA, PARAGON, KORA, Carlota Jo, Continuum, Amaru, APEX, PRAXIS); slugs and API paths are stable and do not change on rebrand. The eight production verticals are TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, LUMINA (Pulse), PARAGON (Aegis), KORA (Lyte), and Carlota Jo. Counsel is the canonical legal vertical; the older "PRISM Counsel" name is archived. "Alloy" is retained as the name of the AI execution plane (Alloy Model Gateway, Alloy Endpoint Plane, Alloy Embedding Fabric); the broader Business Observability Fabric is now called Continuum.
+
+## Technology Preferences
+- TypeScript 5.9 / Node 20+ / pnpm workspaces
+- React 19 + Vite for web artifacts; Expo for mobile
+- Drizzle ORM on PostgreSQL (Neon-compatible)
+- Hugging Face Inference Endpoints for governed LLM serving (Qwen 3.6-27B as the primary reasoning model)
+- Shared design system (`@szl-holdings/design-system`) — pure dark theme, single warm accent
+- Cloudflare for edge / DNS / WAF; Vercel and Replit for app hosting
+- GitHub for VCS; CI via GitHub Actions
+
+## AI Governance Rules
+1. Every AI call must produce a `ProvenanceEnvelope` (model, prompt hash, tokens, cost, latency, governance verdict).
+2. Every AI call must emit at minimum the `alloy.model_request_sent` and `alloy.model_response_received` audit events; blocks, retries, redactions, and budget events emit additional events listed in `ecosystem-plugin-registry.json` → `required_audit_events`.
+3. PII (SSN, credit card, email, private key, AWS secret, etc.) must be redacted before any input leaves the platform — the gateway enforces this and is the only sanctioned path to the Qwen endpoint.
+4. Hidden reasoning ("thinking" content) must be stripped from any output returned to callers and from any log line. Only a boolean `thinkingPresent` flag may be persisted in evidence metadata.
+5. High-risk actions (`purge_data`, `external_transfer`, `modify_policy`, `force_approve`, `delete_tenant`, `export_all`) require a human-in-the-loop approval token before the gateway will dispatch the request.
+6. Per-request and daily budget caps are enforced with hard cutoff — new requests are rejected, never queued silently.
+7. No model weights are hosted in this repo. All inference is remote and routes through the Alloy Endpoint Plane.
+8. No secrets are committed. All credentials flow through environment variables documented in the relevant profile.
+
+## Model & Endpoint Policy
+- **Primary governed model:** Qwen 3.6-27B Reasoning (`Qwen/Qwen3-27B`). Profile: `model-profiles/qwen3_6_27b_szl_profile.json`. License: Qwen Research License (commercial use requires written approval from Alibaba Cloud).
+- **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport. Profile: `endpoint-profiles/alloy_endpoint_plane.json`. Autoscale 0–4 replicas; 15-min idle scale-down; expected cold start ~120s.
+- **Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts` (`AlloyModelGateway`). The single sanctioned path from any vertical to the Qwen endpoint. Validates vertical + task, redacts PII, strips thinking content, attaches evidence, emits audit events, enforces approval gates, retries 503 cold-starts (3× with 2s/5s/10s backoff), and enforces budgets.
+- **Vertical contract:** `AlloyVertical`, `AlloyModelTask`, `AlloyModelRequest` are the canonical types; vertical apps use the gateway via `getDefaultAlloyModelGateway()`.
+- **Required env vars (documented, never hard-coded):** `QWEN36_BASE_URL`, `QWEN36_API_KEY`, `QWEN36_MODEL`, `HF_TOKEN`, `HF_ENDPOINT_NAMESPACE`. The gateway returns `outcome: 'error'` when these are missing — there is no silent fallback to a different model.
+- **Plugin registry:** `ecosystem-plugin-registry.json` enumerates the eight verticals, their allowed tasks, approval gates, shared plugins (GitHub, HuggingFace, Vercel, Neon, Cloudflare), and domain-specific plugins.
+
+## External Research Policy
+- All external research, threat intel, and market data flow through the per-vertical plugins listed in `ecosystem-plugin-registry.json`. Direct fetches that bypass the registry are prohibited.
+- Public-source citations (CISA KEV, NVD, MITRE ATT&CK, SEC EDGAR, CourtListener, OFAC SDN, etc.) are recorded as `SourceCitation` entries on the evidence envelope.
+- Provider rate limits and cost meters are honored by the adapter framework; circuit breaker opens on repeated failures.
+
+## Verification Checklist (run before publishing claims)
+1. Re-run the verification commands in `SOURCE_OF_TRUTH.md` and confirm every quoted number matches.
+2. Confirm `model-profiles/qwen3_6_27b_szl_profile.json` and `endpoint-profiles/alloy_endpoint_plane.json` reference only env vars (no inline secrets).
+3. Confirm `ecosystem-plugin-registry.json` lists all 8 verticals and the 5 shared plugins.
+4. Confirm any new vertical wiring uses `AlloyModelGateway` and not direct provider SDK calls.
+5. Confirm no thinking content, secrets, or customer data appear in committed JSON, MD, or TS files.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

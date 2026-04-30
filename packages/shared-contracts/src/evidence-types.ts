@@ -76,6 +76,13 @@ export interface ProvenanceEnvelope {
   toolCalls: ToolCallRecord[];
   governanceVerdict: 'allowed' | 'blocked';
   generatedAt: string;
+  /**
+   * Optional structured evidence metadata. Used by adapters to attach
+   * non-PII signals such as thinking-content presence, retries, profile id,
+   * endpoint id, and redaction stats. Must never contain raw prompts,
+   * responses, or hidden reasoning.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProvenanceLineage {

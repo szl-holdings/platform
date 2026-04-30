@@ -1,9 +1,39 @@
 {
   "meta": {
-    "generated": "2026-04-25",
+    "generated": "2026-04-28",
     "track": "Moonshot Phase 1 — Truth & Audit",
-    "version": "1.3.0",
-    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Database table count uses raw grep (= pgTable) — see track4_db_verification for canonical Drizzle count from live DB (730 provisioned tables)."
+    "version": "1.4.0",
+    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Live DB table count is 798 (re-verified 2026-04-28 via scripts/audit/db/inventory-schema.sh; up from 730 on 2026-04-21). Active verticals raised to 8 with KORA (Decision Intelligence, slug /lyte/) reactivated. Mirrors the human-readable SOURCE_OF_TRUTH.md at repo root."
+  },
+  "canonical_metrics": {
+    "source_document": "SOURCE_OF_TRUTH.md",
+    "last_verified": "2026-04-28",
+    "metrics": {
+      "registered_artifacts": 14,
+      "db_tables_live": 798,
+      "api_endpoints": 2816,
+      "verticals": 8,
+      "monorepo_packages": 126,
+      "db_schema_files": 170,
+      "ci_workflows": 23,
+      "declared_env_vars": 213,
+      "platform_primitives": 6,
+      "rbac_roles": 11
+    },
+    "verticals_active": [
+      "TENAX",
+      "SEXTANT",
+      "DOMAINE",
+      "Counsel",
+      "LUMINA",
+      "PARAGON",
+      "KORA",
+      "Carlota Jo"
+    ],
+    "model_profile": "model-profiles/qwen3_6_27b_szl_profile.json",
+    "endpoint_profile": "endpoint-profiles/alloy_endpoint_plane.json",
+    "plugin_registry": "ecosystem-plugin-registry.json",
+    "gateway_adapter": "lib/ai-engine/src/alloy-model-gateway.ts"
   },
   "artifacts": {
     "registered": {
@@ -109,6 +139,12 @@
     }
   },
   "api": {
+    "endpoints_total": {
+      "count": 2816,
+      "command": "grep -rh 'router\\.\\(get\\|post\\|put\\|patch\\|delete\\|use\\)' artifacts/api-server/src/routes --include='*.ts' | wc -l",
+      "computed": "2026-04-28",
+      "note": "Canonical API endpoint count surfaced in SOURCE_OF_TRUTH.md."
+    },
     "route_files": {
       "count": 357,
       "command": "find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' | wc -l",
@@ -168,10 +204,10 @@
     }
   },
   "domain_packs": {
-    "count": 7,
-    "active": ["TENAX (Sentra)", "SEXTANT (Vessels)", "DOMAINE (Terra)", "Counsel", "Carlota Jo", "LUMINA (Pulse)", "PARAGON (Aegis)"],
+    "count": 8,
+    "active": ["TENAX (Sentra)", "SEXTANT (Vessels)", "DOMAINE (Terra)", "Counsel", "Carlota Jo", "LUMINA (Pulse)", "PARAGON (Aegis)", "KORA (Lyte)"],
     "archived": ["IMPERIUM", "PRISM Counsel"],
-    "note": "Canonical display names per ORIGINALITY_REPORT.md. PARAGON supersedes Aegis (security/defense). TENAX supersedes Sentra in display; slug /sentra/ retained. LUMINA supersedes Pulse in display; slug /pulse/ retained. Archived packs have API routes and schemas retained but no registered artifact."
+    "note": "Canonical display names per SOURCE_OF_TRUTH.md and ORIGINALITY_REPORT.md. KORA (Decision Intelligence; slug /lyte/) is active as of 2026-04-28 — registered artifact lyte-command-center. PARAGON supersedes Aegis (security/defense). TENAX supersedes Sentra in display; slug /sentra/ retained. LUMINA supersedes Pulse in display; slug /pulse/ retained. Archived packs have API routes and schemas retained but no registered artifact."
   },
   "platform_primitives": {
     "count": 6,
@@ -183,9 +219,12 @@
     "live_db": {
       "engine": "PostgreSQL 16.10",
       "live_table_count": {
-        "count": 730,
+        "count": 798,
         "command": "bash scripts/audit/db/inventory-schema.sh",
-        "note": "Schema applied via drizzle push (no __drizzle_migrations table); 730 is the final count after rollback test (dropped 6 tables) and forward-migration restore (+6) plus supplemental migration (+2 indexes, no new tables)"
+        "note": "Re-verified 2026-04-28 against live PostgreSQL — 798 provisioned tables (up from 730 on 2026-04-21 due to additional schema applied via drizzle push). Schema is applied via drizzle push (no __drizzle_migrations table). Canonical value mirrored in SOURCE_OF_TRUTH.md.",
+        "previous_snapshots": [
+          { "count": 730, "verified": "2026-04-21" }
+        ]
       },
       "drizzle_migrations_tracker": "ABSENT — schema was applied via drizzle push, not drizzle migrate",
       "indexes": {

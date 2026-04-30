@@ -44,9 +44,11 @@ export function buildEnvelope(params: {
   confidence: number;
   latencyMs: number;
   governanceVerdict: 'allowed' | 'blocked';
+  runId?: string;
+  metadata?: Record<string, unknown>;
 }): ProvenanceEnvelope {
   return {
-    runId: generateRunId(),
+    runId: params.runId ?? generateRunId(),
     agentId: params.agentId,
     domain: params.domain,
     model: params.model,
@@ -62,6 +64,7 @@ export function buildEnvelope(params: {
     toolCalls: [],
     governanceVerdict: params.governanceVerdict,
     generatedAt: new Date().toISOString(),
+    ...(params.metadata !== undefined ? { metadata: params.metadata } : {}),
   };
 }
 

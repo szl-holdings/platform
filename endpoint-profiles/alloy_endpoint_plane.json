@@ -1,0 +1,65 @@
+{
+  "id": "alloy_endpoint_plane",
+  "display_name": "Alloy Endpoint Plane — Hugging Face Inference Endpoint",
+  "version": "1.0.0",
+  "profile_created": "2026-04-28",
+  "provider": "Hugging Face Inference Endpoints",
+  "transport": "openai-compatible",
+  "base_url_env": "QWEN36_BASE_URL",
+  "api_key_env": "QWEN36_API_KEY",
+  "model_env": "QWEN36_MODEL",
+  "hf_token_env": "HF_TOKEN",
+  "hf_endpoint_namespace_env": "HF_ENDPOINT_NAMESPACE",
+  "engines": {
+    "primary": {
+      "model_profile_ref": "qwen3_6_27b_szl",
+      "task_classes": ["text-generation", "reasoning", "planning", "tool-calling", "triage", "summarization"]
+    },
+    "fallback": {
+      "model": "Qwen/Qwen3-8B",
+      "task_classes": ["classification", "background-batch"],
+      "note": "Falls back to shared HF Inference API (HUGGINGFACE_API_KEY) when primary endpoint is unavailable"
+    }
+  },
+  "autoscaling_policy": {
+    "min_replicas": 0,
+    "max_replicas": 4,
+    "scale_up_threshold_rps": 10,
+    "scale_down_idle_minutes": 15,
+    "cold_start_expected_seconds": 120,
+    "warm_instance_guarantee": false
+  },
+  "retry_policy": {
+    "max_retries": 3,
+    "retryable_status_codes": [503, 429, 504],
+    "backoff_ms": [2000, 5000, 10000],
+    "circuit_breaker_enabled": true,
+    "circuit_open_threshold_failures": 5,
+    "circuit_reset_seconds": 60
+  },
+  "observability": {
+    "emit_audit_event_on_every_call": true,
+    "log_request_hash": true,
+    "log_response_latency": true,
+    "log_token_counts": true,
+    "log_cost_estimate": true,
+    "strip_thinking_content_from_logs": true,
+    "metrics_prefix": "alloy_model_gateway"
+  },
+  "governance": {
+    "require_approval_gate_for_high_risk": true,
+    "high_risk_actions": ["purge_data", "external_transfer", "modify_policy", "force_approve", "delete_tenant", "export_all"],
+    "deny_on_pii_detection_failure": true,
+    "max_parallel_requests_per_tenant": 10,
+    "require_provenance_envelope": true
+  },
+  "budgets": {
+    "max_cost_usd_per_request": 0.25,
+    "daily_budget_usd": 50.0,
+    "monthly_budget_usd": 1000.0,
+    "alert_threshold_pct": 80,
+    "hard_cutoff": true,
+    "budget_enforcement": "reject_new_requests"
+  },
+  "deployment_notes": "Deployment of the Hugging Face Inference Endpoint requires human approval. Set QWEN36_BASE_URL to the provisioned endpoint URL before enabling live routing. Without QWEN36_BASE_URL the gateway falls back to the shared HF Inference API (HUGGINGFACE_API_KEY). Do not hard-code credentials — all secrets are injected via environment variables documented above."
+}
