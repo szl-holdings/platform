@@ -439,6 +439,13 @@ router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "m
 // drift, promotion, rollback, audit, and diagnostics.
 router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
 
+// A11oy Forge — Governed Self-Evolution Runtime for agent scaffold evolution
+// (prompt strategies, tool selection, routing weights, autonomy levels, policy
+// boundaries). Distinct from PER which governs model weight training.
+// Owns /alloy-forge/* endpoints: status, evolution-rounds, arena, proof-ledger,
+// cross-domain proposals, drift-alerts, timeline, and approve/reject lifecycle.
+router.use(lazyMatch("/alloy-forge", () => import("./alloy-forge"), "alloy-forge"));
+
 // Unified Auth Mesh — API key CRUD and OAuth client_credentials endpoints
 router.use(apiKeysRouter);
 router.use(oauthRouter);
