@@ -19,6 +19,15 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+
+## [0.1.2] — 2026-04-30
+
+### Other Changes
+
+- cleanup probe ([0bce3ed23](https://github.com/szl-holdings/szl-holdings-platform/commit/0bce3ed2341c1793404b5ecb2377af17266f7f73))
+- test write probe (will be deleted) ([2c7031f51](https://github.com/szl-holdings/szl-holdings-platform/commit/2c7031f51a1de1f6ab5c8129ba5d84a7760df4a7))
+
+---
 ## [0.1.1] — 2026-04-03
 
 ### Workspace Professionalization & Ops Discipline
