@@ -39,7 +39,7 @@
 
 **Affected:** All workflows using `pnpm/action-setup@v2`  
 **Risk:** `pnpm/action-setup` is a third-party action — tag-pinning creates supply chain risk  
-**Fix applied:** All instances upgraded from `@v2` to SHA-pinned `@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d` (pnpm/action-setup v4.0.0). See pinning registry.
+**Fix applied:** All instances upgraded from `@v2` to SHA-pinned `@b906affcce14559ad1aafd4ab0e942779e9f58b1 # repinned 2026-04-30: previous fe52bf0a force-deleted upstream` (pnpm/action-setup v4.0.0). See pinning registry.
 
 ### Finding 4: `deploy.yml` Too Minimal — RESOLVED
 
@@ -246,7 +246,7 @@ SHA → version mapping for all third-party actions. Update this table whenever 
 | `actions/upload-artifact` | `v4` | Tag only (GitHub-owned — acceptable) | Multiple workflows | April 2026 |
 | `github/codeql-action/*` | `v3` | Tag only (GitHub-owned — acceptable) | `codeql.yml` | April 2026 |
 | `actions/dependency-review-action` | `v4` | Tag only (GitHub-owned — acceptable) | `dependency-review.yml` | April 2026 |
-| `pnpm/action-setup` | `v4` | `fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d` | All workflows | April 2026 |
+| `pnpm/action-setup` | `v4` | `b906affcce14559ad1aafd4ab0e942779e9f58b1 # repinned 2026-04-30: previous fe52bf0a force-deleted upstream` | All workflows | April 2026 |
 | `softprops/action-gh-release` | `v2` | `c062e08bd532815e2082a7e09ce9571a6d1f0e80` | `release.yml` | April 2026 |
 | `treosh/lighthouse-ci-action` | `v11` | `1b0e7c33270fbba31a18a0fca0bc3d8ea4ae3e79` | `lighthouse.yml` | April 2026 |
 | `azure/login` | `v2` | `a65d910e8af852a8061c627c456678983e180302` | `prism-counsel-ci.yml` | April 2026 |
