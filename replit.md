@@ -94,3 +94,38 @@ The consolidation registry is exposed in-app at A11oy → Portfolio Archive
 
 Workflows for archived slugs cannot be deleted directly (PROHIBITED_ACTION,
 artifact-owned); they are dead since their directories no longer exist.
+
+## 2026-04-30 — Ouroboros runtime contract: v3 + v4 ingestion
+
+`@workspace/ouroboros` now operationalizes the full v4 ecosystem layer
+(`docs/research/ouroboros-runtime-contract.v4.json`,
+"replit_innovate_full_payload"). Layer added on top of the v3 structural
+runtime (PRF_OPERATIONAL_ACTION, PRF_SECURITY_ACTION, PRF_DATA_CONVERGENCE,
+domain-pack router, operator-approval, evidence-pack, operational-modes,
+review_cycle):
+
+- `validator-registry.ts` — frozen registry of all 9 validator IDs
+  (VAL_BUDGET_ENFORCER, VAL_NO_SILENT_MUTATION, VAL_PROOF_REQUIRED,
+  VAL_RISK_ESCALATION, VAL_APPROVAL_FOR_CRITICAL_ACTION,
+  VAL_SECURITY_PROOF_REQUIRED, VAL_SOURCE_PRIORITY_REQUIRED,
+  VAL_MERGE_SAFETY, VAL_CONSISTENCY_BEFORE_COMMIT) with severity + rule
+  text and `summarizeValidators()` for halt-or-continue decisions.
+- `ingestion-contract.ts` — Sentra (`security_recursive_review`) and
+  Amaru (`convergent_data_runtime`) ingestion contracts powered by
+  A11oy_core, with `validateIngestion()` enforcing required validators
+  and required output artifacts.
+- `innovation-engine.ts` — six feedback loops (runtime_feedback,
+  golden_run_regression, receipt_quality, security_review_improvement,
+  data_convergence_improvement, economic_efficiency) with declared
+  source artifact + output deliverable per loop.
+- `output-paths.ts` — canonical `output/` paths for trace.jsonl,
+  decision_receipt, proof_ledger, final_state, run_summary,
+  golden_run_report, sentra_risk_summary, amaru_consistency_report.
+- `almanac.ts` — `V4_CYCLES` + `CYCLE_ID_V4_ALIASES` accept
+  `paris_cadence_cycle` as alias for `paris_long_cycle` (v4 rename;
+  cycle interval unchanged).
+
+All modules are pure (no I/O, frozen Object.freeze data) and exported
+from `@workspace/ouroboros`. 59/59 tests pass (was 41 in v3). v4 contract
+JSON published to `szl-holdings/ouroboros-thesis`; code pushed to
+`szl-holdings/ouroboros`.
