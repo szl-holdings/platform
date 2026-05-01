@@ -27,6 +27,32 @@ export const ALLOY_JOB_TYPES = {
   RETRY_WORKFLOW: 'alloy:retry_workflow',
 } as const;
 
+// ─── Workflow Payload Enrichment ──────────────────────────────────────────────
+
+const ORCHESTRATION_ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  draft: ['pending'],
+  pending: ['running', 'cancelled'],
+  running: ['completed', 'failed', 'cancelled'],
+  completed: [],
+  failed: ['pending'],
+  cancelled: [],
+};
+
+function buildEnrichedWorkflow(wf: Record<string, unknown>) {
+  const status = String(wf.status ?? 'pending');
+  const allowed = ORCHESTRATION_ALLOWED_TRANSITIONS[status] ?? [];
+  return {
+    ...wf,
+    canRun: allowed.includes('running'),
+    canCancel: allowed.includes('cancelled'),
+    canRetry: status === 'failed',
+    allowedNextStates: allowed,
+    steps: Array.isArray(wf.steps) ? wf.steps : [],
+    requiresApproval: wf.requiresApproval ?? false,
+    approvalState: wf.approvalState ?? 'none',
+  };
+}
+
 // ─── Retry Policy ─────────────────────────────────────────────────────────────
 
 const MAX_RETRIES = 3;
@@ -291,7 +317,7 @@ export async function startWorkflowRun(
     })
     .returning();
 
-  await db
+  const [updatedWorkflow] = await db
     .update(alloyWorkflows)
     .set({
       status: 'running',
@@ -300,7 +326,8 @@ export async function startWorkflowRun(
       steps: updatedSteps as unknown as Record<string, unknown>[],
       currentStep: updatedSteps[0]?.step ?? 1,
     })
-    .where(eq(alloyWorkflows.id, workflowId));
+    .where(eq(alloyWorkflows.id, workflowId))
+    .returning();
 
   await writeAuditLog({
     entityType: 'workflow',
@@ -316,6 +343,15 @@ export async function startWorkflowRun(
     },
     correlationId: options.correlationId,
   });
+
+  void import('./pubsub-bridge.js').then(({ pubsub, ALLOY_EVENTS }) => {
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
+      alloyWorkflowStatusChanged: buildEnrichedWorkflow(
+        (updatedWorkflow ?? { id: workflowId, status: 'running' }) as unknown as Record<string, unknown>,
+      ),
+    });
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+  }).catch(() => {});
 
   return run;
 }
@@ -490,6 +526,22 @@ export async function completeWorkflowRun(
     notes: options.errorMessage,
     correlationId: options.correlationId,
   });
+
+  void import('./pubsub-bridge.js').then(async ({ pubsub, ALLOY_EVENTS }) => {
+    const [latestWorkflow] = await db
+      .select()
+      .from(alloyWorkflows)
+      .where(eq(alloyWorkflows.id, run.workflowId))
+      .limit(1);
+    if (latestWorkflow) {
+      void pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
+        alloyWorkflowStatusChanged: buildEnrichedWorkflow(latestWorkflow as unknown as Record<string, unknown>),
+      });
+    }
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, {
+      alloyWorkflowRunUpdated: { ...run, status, completedAt: now, durationMs, errorMessage: options.errorMessage ?? null },
+    });
+  }).catch(() => {});
 }
 
 // ─── Approval Management ─────────────────────────────────────────────────────

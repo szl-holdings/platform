@@ -55,8 +55,19 @@ export const vesselsTypeDefs = `#graphql
     vesselEvents(vesselId: ID, severity: String, limit: Int, offset: Int): [VesselEvent!]!
   }
 
+  type VesselSanctionsHit {
+    vesselId: ID!
+    vesselName: String
+    imo: String
+    matchedLists: [String!]!
+    severity: String!
+    detectedAt: String!
+    notes: String
+  }
+
   extend type Subscription {
     vesselPositionUpdated(vesselId: ID): VesselPosition!
+    vesselSanctionsHit(vesselId: ID): VesselSanctionsHit!
   }
 `;
 
@@ -190,6 +201,18 @@ export const vesselsResolvers = {
         ) => {
           if (!variables.vesselId) return true;
           return payload.vesselPositionUpdated.vesselId === variables.vesselId;
+        },
+      ),
+    },
+    vesselSanctionsHit: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(VESSELS_EVENTS.SANCTIONS_HIT),
+        (
+          payload: { vesselSanctionsHit: { vesselId: string } },
+          variables: { vesselId?: string },
+        ) => {
+          if (!variables.vesselId) return true;
+          return String(payload.vesselSanctionsHit.vesselId) === String(variables.vesselId);
         },
       ),
     },

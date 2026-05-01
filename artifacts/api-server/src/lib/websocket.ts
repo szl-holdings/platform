@@ -967,6 +967,7 @@ export const WS_CHANNELS = {
   JOB_QUEUE: 'job-queue',
   WORKFLOW_RUNS: 'workflow-runs',
   VESSEL_POSITIONS: 'vessel-positions',
+  VESSEL_SANCTIONS: 'vessel-sanctions',
   VESSELS_FLEET_POSITIONS: 'vessels:fleet-positions',
   TERRA_SIGNALS: 'terra-signals',
   LYTE_METRICS: 'lyte-metrics',

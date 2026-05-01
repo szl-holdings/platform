@@ -62,6 +62,23 @@ function autonomyModeToGateLevel(mode: AutonomyMode): DomainAutonomyLevel {
   }
 }
 
+/**
+ * Maps a platform workflow run row (alloyWorkflowRunsTable, uses `state`) to the
+ * shape expected by the GraphQL `AlloyWorkflowRun` type (uses `status`).
+ * Keeps all original fields so subscribers can access platform-specific data too.
+ */
+function platformRunToGqlRun(run: Record<string, unknown>): Record<string, unknown> {
+  const stateToStatus: Record<string, string> = {
+    queued: 'pending',
+    running: 'started',
+    completed: 'completed',
+    failed: 'failed',
+    canceled: 'cancelled',
+  };
+  const state = String(run.state ?? '');
+  return { ...run, status: stateToStatus[state] ?? state };
+}
+
 const upsertFeatureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
   name: z.string().min(1).max(200).trim(),
@@ -445,7 +462,7 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowR
           if (artifactCount >= ORG_ARTIFACT_QUOTA) {
             logger.warn({ workflowId: id, orgId: workflow.orgId, artifactCount }, "Org artifact storage quota exceeded — failing run");
             const failedAt = new Date();
-            await db.update(alloyWorkflowRunsTable).set({
+            const [quotaFailedRun] = await db.update(alloyWorkflowRunsTable).set({
               state: "failed",
               completedAt: failedAt,
               errorMessage: `Org artifact quota of ${ORG_ARTIFACT_QUOTA} exceeded`,
@@ -454,8 +471,9 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowR
                 { state: "running", at: now.toISOString(), by: "system" },
                 { state: "failed", at: failedAt.toISOString(), by: "system", reason: "artifact_quota_exceeded" },
               ],
-            }).where(eq(alloyWorkflowRunsTable.id, run.id));
+            }).where(eq(alloyWorkflowRunsTable.id, run.id)).returning();
             broadcastWs("workflow-runs", "run-updated", { id: run.id, workflowId: id, state: "failed" });
+            void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun((quotaFailedRun ?? run) as unknown as Record<string, unknown>) });
             void notifyRunFailure(run.id, "failed").catch((err) =>
               logger.warn({ err, runId: run.id }, "notifyRunFailure (artifact_quota_exceeded) threw"),
             );
@@ -496,7 +514,7 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowR
           ],
         }).where(eq(alloyWorkflowRunsTable.id, run.id)).returning();
         broadcastWs("workflow-runs", "run-updated", { id: finalRun.id, workflowId: id, state: finalRun.state });
-        void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: finalRun });
+        void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun(finalRun as unknown as Record<string, unknown>) });
       } catch (err) {
         logger.error({ err, runId: run.id }, "Failed to execute workflow run");
         await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Execution error" }).where(eq(alloyWorkflowRunsTable.id, run.id));
@@ -557,7 +575,7 @@ router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin"
       completedAt: null,
     }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
     broadcastWs("workflow-runs", "run-updated", { id: updated.id, workflowId: updated.workflowId, state: "queued" });
-    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: updated });
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun(updated as unknown as Record<string, unknown>) });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to retry run");
@@ -579,7 +597,7 @@ router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin
     if (!check.valid) { sendBadRequest(res, check.message ?? "Cannot cancel run in current state"); return; }
     const [updated] = await db.update(alloyWorkflowRunsTable).set({ state: "canceled" }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
     broadcastWs("workflow-runs", "run-updated", { id: updated.id, workflowId: updated.workflowId, state: "canceled" });
-    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: updated });
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun(updated as unknown as Record<string, unknown>) });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to cancel run");
@@ -642,7 +660,11 @@ router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super
         decisionBy: req.user?.id ?? null,
         decisionAt: new Date(),
       }).where(eq(alloyApprovalsTable.workflowRunId, updated.workflowRunId));
-      await db.update(alloyWorkflowRunsTable).set({ state: "completed", completedAt: new Date() }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId));
+      const [approvedRun] = await db.update(alloyWorkflowRunsTable).set({ state: "completed", completedAt: new Date() }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId)).returning();
+      if (approvedRun) {
+        broadcastWs("workflow-runs", "run-updated", { id: approvedRun.id, workflowId: approvedRun.workflowId, state: "completed" });
+        void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun(approvedRun as unknown as Record<string, unknown>) });
+      }
     }
     await writeAudit({ userId: req.user?.id, action: "approve_artifact", resourceType: "alloy_artifact", resourceId: String(id) });
     sendSuccess(res, updated);
@@ -674,7 +696,11 @@ router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_
         decisionBy: req.user?.id ?? null,
         decisionAt: new Date(),
       }).where(eq(alloyApprovalsTable.workflowRunId, updated.workflowRunId));
-      await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Artifact rejected by reviewer" }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId));
+      const [rejectedRun] = await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Artifact rejected by reviewer" }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId)).returning();
+      if (rejectedRun) {
+        broadcastWs("workflow-runs", "run-updated", { id: rejectedRun.id, workflowId: rejectedRun.workflowId, state: "failed" });
+        void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: platformRunToGqlRun(rejectedRun as unknown as Record<string, unknown>) });
+      }
       void notifyRunFailure(updated.workflowRunId, "failed").catch((err) =>
         logger.warn({ err, runId: updated.workflowRunId }, "notifyRunFailure (artifact_rejected) threw"),
       );

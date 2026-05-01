@@ -288,6 +288,29 @@ router.post(
         return;
       }
       const [event] = await db.insert(vesselsEventsTable).values(data).returning();
+      const isSanctionsHit =
+        typeof event.eventType === 'string' &&
+        /sanction/i.test(event.eventType);
+      if (isSanctionsHit) {
+        const sanctionedVessel = await getVesselInOrg(event.vesselId, req.tenantOrgId);
+        void pubsub.publish(VESSELS_EVENTS.SANCTIONS_HIT, {
+          vesselSanctionsHit: {
+            vesselId: String(event.vesselId),
+            vesselName: sanctionedVessel?.name ?? null,
+            imo: sanctionedVessel?.imo ?? null,
+            matchedLists: ['OFAC SDN'],
+            severity: event.severity ?? 'high',
+            detectedAt: (event.occurredAt ?? new Date()).toISOString(),
+            notes: event.description ?? null,
+          },
+        });
+        broadcastWs('vessel-sanctions', 'sanctions-hit', {
+          vesselId: event.vesselId,
+          eventType: event.eventType,
+          severity: event.severity,
+          occurredAt: event.occurredAt,
+        });
+      }
       sendCreated(res, event);
     } catch (err) {
       handleRouteError(res, err, 'Failed to create vessel event');

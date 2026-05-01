@@ -42,6 +42,7 @@ const WS_CHANNEL_FOR_DOMAIN = {
   'terra-signals': WS_CHANNELS.TERRA_SIGNALS,
   bookings: WS_CHANNELS.BOOKINGS,
   'vessel-positions': WS_CHANNELS.VESSEL_POSITIONS,
+  'vessel-sanctions': WS_CHANNELS.VESSEL_SANCTIONS,
   'lyte-metrics': WS_CHANNELS.LYTE_METRICS,
 } as const;
 

@@ -226,6 +226,21 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
       actionId: input.actionId,
       tier: policyEval.approvalTier ?? 'operator',
     });
+    // Publish approval-required event so the Control Tower receives it in real time.
+    // Fire-and-forget: import is async to avoid circular-dependency issues.
+    import('../../../lib/pubsub-bridge.js').then(({ pubsub, ALLOY_EVENTS }) => {
+      void pubsub.publish(ALLOY_EVENTS.APPROVAL_REQUIRED, {
+        alloyApprovalRequired: {
+          id: approval.approvalId,
+          workflowId: input.actionId,
+          status: 'pending',
+          reviewerUserId: null,
+          reason: `PCE gate: approval required (tier: ${policyEval.approvalTier ?? 'operator'})`,
+          requiredRoles: [policyEval.approvalTier ?? 'operator'],
+          createdAt: approval.createdAt,
+        },
+      });
+    }).catch(() => {/* ignore publish errors — gate decision is independent */});
     return {
       allowed: false,
       blockedReason: `Approval required (tier: ${policyEval.approvalTier ?? 'operator'})`,

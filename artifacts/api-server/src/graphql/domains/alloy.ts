@@ -795,6 +795,9 @@ export const alloyResolvers = {
           actorType: 'user',
           newState: { status: 'draft', name: args.name },
         });
+        pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
+          alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+        });
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
         throw new Error(`Failed to create workflow: ${err}`);
@@ -838,6 +841,19 @@ export const alloyResolvers = {
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
         });
+        const { alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
+        const { desc: descFn } = await import('drizzle-orm');
+        const latestRuns = await db
+          .select()
+          .from(alloyWorkflowRuns)
+          .where(eq(alloyWorkflowRuns.workflowId, id))
+          .orderBy(descFn(alloyWorkflowRuns.runNumber))
+          .limit(1);
+        if (latestRuns[0]) {
+          pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, {
+            alloyWorkflowRunUpdated: latestRuns[0],
+          });
+        }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
         throw new Error(`Failed to submit workflow: ${err}`);
@@ -847,8 +863,8 @@ export const alloyResolvers = {
     cancelAlloyWorkflow: async (_: unknown, args: { id: string; reason?: string }) => {
       try {
         const { db } = await import('@szl-holdings/db');
-        const { alloyWorkflows } = await import('@szl-holdings/db/schema');
-        const { eq } = await import('drizzle-orm');
+        const { alloyWorkflows, alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
+        const { and, eq } = await import('drizzle-orm');
         const id = parseIntId(args.id);
         const [existing] = await db
           .select({ status: alloyWorkflows.status })
@@ -877,6 +893,14 @@ export const alloyResolvers = {
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
         });
+        const cancelledRuns = await db
+          .update(alloyWorkflowRuns)
+          .set({ status: 'cancelled', completedAt: new Date() })
+          .where(and(eq(alloyWorkflowRuns.workflowId, id), eq(alloyWorkflowRuns.status, 'started')))
+          .returning();
+        for (const run of cancelledRuns) {
+          pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
         throw new Error(`Failed to cancel workflow: ${err}`);
@@ -886,8 +910,8 @@ export const alloyResolvers = {
     retryAlloyWorkflow: async (_: unknown, args: { id: string }) => {
       try {
         const { db } = await import('@szl-holdings/db');
-        const { alloyWorkflows } = await import('@szl-holdings/db/schema');
-        const { eq } = await import('drizzle-orm');
+        const { alloyWorkflows, alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
+        const { and, desc, eq } = await import('drizzle-orm');
         const id = parseIntId(args.id);
         const [existing] = await db
           .select({ status: alloyWorkflows.status })
@@ -917,6 +941,30 @@ export const alloyResolvers = {
           previousState: { status: existing.status },
           newState: { status: 'pending' },
         });
+        pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
+          alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+        });
+        const [latestFailedRun] = await db
+          .select()
+          .from(alloyWorkflowRuns)
+          .where(and(eq(alloyWorkflowRuns.workflowId, id), eq(alloyWorkflowRuns.status, 'failed')))
+          .orderBy(desc(alloyWorkflowRuns.startedAt))
+          .limit(1);
+        if (latestFailedRun) {
+          const [retriedRun] = await db
+            .update(alloyWorkflowRuns)
+            .set({
+              status: 'started',
+              completedAt: null,
+              errorMessage: null,
+              retryCount: (latestFailedRun.retryCount ?? 0) + 1,
+            })
+            .where(eq(alloyWorkflowRuns.id, latestFailedRun.id))
+            .returning();
+          if (retriedRun) {
+            pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: retriedRun });
+          }
+        }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
         throw new Error(`Failed to retry workflow: ${err}`);
@@ -1144,6 +1192,11 @@ export const alloyResolvers = {
           });
         }
 
+        if (workflow) {
+          pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
+            alloyWorkflowStatusChanged: enrichWorkflow(workflow as unknown as Record<string, unknown>),
+          });
+        }
         return workflow ? enrichWorkflow(workflow as unknown as Record<string, unknown>) : null;
       } catch (err) {
         throw new Error(`Failed to create signal workflow: ${err}`);

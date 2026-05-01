@@ -344,6 +344,21 @@ router.get('/sanctions/score/:vesselId', authMiddleware(), tenantScope({ require
     }
 
     const tier = computeTier(score);
+    if (tier === 'high' || tier === 'critical') {
+      const triggeredLists = [...new Set(rules.filter((r) => r.triggered).map((r) => r.list))];
+      void pubsub.publish(VESSELS_EVENTS.SANCTIONS_HIT, {
+        vesselSanctionsHit: {
+          vesselId: String(vesselId),
+          vesselName: vessel?.name ?? null,
+          imo: (vessel as VesselRow | null)?.imoNumber ?? null,
+          matchedLists: triggeredLists.length > 0 ? triggeredLists : ['OFAC SDN'],
+          severity: tier,
+          detectedAt: new Date().toISOString(),
+          notes: summary,
+        },
+      });
+      broadcastWs('vessel-sanctions', 'sanctions-hit', { vesselId, tier, score, detectedAt: new Date().toISOString() });
+    }
     return sendSuccess(res, {
       vesselId,
       score,
