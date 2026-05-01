@@ -1,0 +1,180 @@
+name: Nightly Smoke — DOMAINE Diligence Lifecycle
+
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-smoke-domaine
+  cancel-in-progress: true
+
+jobs:
+  domaine-diligence-lifecycle:
+    name: DOMAINE Diligence Lifecycle Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      smoke_output: ${{ steps.smoke.outputs.output }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: szl_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4 — repinned 2026-04-30 (fe52bf0a force-deleted upstream)
+        with: { version: 10 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24', cache: 'pnpm' }
+      - name: Cache node_modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      - run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run database migrations
+        run: pnpm migrate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+
+      - name: Build API server
+        run: pnpm --filter @workspace/api-server exec node ./build.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+          SESSION_SECRET: ci-test-session-secret-not-for-production
+          NODE_ENV: test
+
+      - name: Start API server in background
+        run: |
+          pnpm --filter @workspace/api-server run start > /tmp/api-server.log 2>&1 &
+          echo $! > /tmp/api-server.pid
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+          SESSION_SECRET: ci-test-session-secret-not-for-production
+          NODE_ENV: test
+          PORT: 5000
+          INTERNAL_SERVICE_TOKENS: >-
+            [{"name":"nightly-terra-smoke","token":"${{ secrets.INTEGRATION_TEST_TOKEN }}","scopes":["agent:read","agent:write"],"pathPrefixes":["/api/terra/"]}]
+
+      - name: Wait for API server to be healthy
+        run: |
+          echo "Waiting for API server on port 5000..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5000/api/health > /dev/null 2>&1; then
+              echo "API server is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "=== API server log (last 50 lines) ==="
+          tail -n 50 /tmp/api-server.log 2>/dev/null || true
+          echo "API server did not become healthy within 30s"
+          exit 1
+
+      - name: Run DOMAINE diligence lifecycle smoke test
+        id: smoke
+        run: |
+          set +e
+          OUTPUT=$(pnpm --filter @workspace/api-server run smoke:domaine-diligence-lifecycle 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          TAIL=$(echo "$OUTPUT" | tail -n 30)
+          {
+            echo "output<<SMOKE_EOF"
+            echo "$TAIL"
+            echo "SMOKE_EOF"
+          } >> "$GITHUB_OUTPUT"
+          exit $EXIT_CODE
+        env:
+          PORT: 5000
+          ALLOY_INTERNAL_TOKEN: ${{ secrets.INTEGRATION_TEST_TOKEN }}
+          CI: true
+
+      - name: Stop API server and dump logs on failure
+        if: always()
+        run: |
+          if [ -f /tmp/api-server.pid ]; then
+            PID=$(cat /tmp/api-server.pid)
+            echo "Sending SIGTERM to API server (PID $PID)..."
+            kill "$PID" 2>/dev/null || true
+            sleep 2
+            kill -0 "$PID" 2>/dev/null && kill -9 "$PID" 2>/dev/null || true
+          fi
+          if [ -f /tmp/api-server.log ]; then
+            echo "=== API server output (last 100 lines) ==="
+            tail -n 100 /tmp/api-server.log
+          fi
+
+      - name: Upload smoke output on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: domaine-diligence-smoke-output
+          path: /tmp/api-server.log
+          retention-days: 7
+
+  notify-failure:
+    name: Notify on failure
+    runs-on: ubuntu-latest
+    needs: domaine-diligence-lifecycle
+    if: failure()
+    steps:
+      - name: Post Slack alert with script output
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SMOKE_OUTPUT: ${{ needs.domaine-diligence-lifecycle.outputs.smoke_output || 'No output captured — check the Actions run for details.' }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "⚠️  SLACK_WEBHOOK_URL not set — Slack alerts inactive"
+            echo "    Smoke test FAILED — check the run at:"
+            echo "    $RUN_URL"
+            echo ""
+            echo "=== Smoke output ==="
+            echo "$SMOKE_OUTPUT"
+            exit 0
+          fi
+
+          ESCAPED_OUTPUT=$(echo "$SMOKE_OUTPUT" | head -n 20 | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+
+          PAYLOAD=$(cat <<EOF
+          {
+            "text": "🔴 *Nightly Smoke Failed — DOMAINE Diligence Lifecycle*",
+            "attachments": [
+              {
+                "color": "danger",
+                "fields": [
+                  { "title": "Workflow", "value": "DOMAINE Diligence Lifecycle Smoke", "short": true },
+                  { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
+                  { "title": "Script Output (last 20 lines)", "value": "\\u0060\\u0060\\u0060\n${ESCAPED_OUTPUT}\n\\u0060\\u0060\\u0060", "short": false },
+                  { "title": "Action", "value": "Review smoke output and fix regressions", "short": false }
+                ],
+                "footer": "<$RUN_URL|View GitHub Actions run>"
+              }
+            ]
+          }
+          EOF
+          )
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$PAYLOAD" \
+            && echo "Slack alert sent" \
+            || echo "Slack post failed — check SLACK_WEBHOOK_URL"
