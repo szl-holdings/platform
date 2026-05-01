@@ -193,23 +193,41 @@ export type CognitiveHealthScore = z.infer<typeof CognitiveHealthScoreSchema>;
 // ---------- Helpers ----------
 
 /**
- * Classify a strategy into a Guardian tier given its class and confidence.
- * Advisory class always lands in 'advisory'. Hard constraints require human
- * approval at higher confidence demands.
+ * Classify a strategy into a Guardian tier from its class.
+ *
+ * The mapping is intentionally class-driven (not confidence-driven) so it
+ * mirrors the documented governance contract used by the Guardian engine:
+ *
+ *   advisory             (T0)  — auto-applies, audit-only.
+ *                                  router.advisory, memory.consolidation-hint
+ *
+ *   operator-approved    (T2)  — single human approves before activation.
+ *                                  router.constraint, router.retrieval-bias,
+ *                                  sync.retry-policy
+ *
+ *   dual-approved        (T3)  — two-person rule before activation.
+ *                                  detection.confidence-floor (changing a
+ *                                  detection threshold is high-stakes; it
+ *                                  changes what the SOC sees).
+ *
+ * `confidence` is no longer an input: a low-confidence strategy proposal
+ * still needs the same governance gate as a high-confidence one — operator
+ * judgment is the gate, not engine self-confidence. Confidence is still
+ * surfaced on the strategy for operator visibility.
  */
-export function classifyTier(
-  klass: StrategyClass,
-  confidence: number,
-): StrategyTier {
-  if (klass === 'router.advisory' || klass === 'memory.consolidation-hint') {
-    return 'advisory';
+export function classifyTier(klass: StrategyClass, _confidence?: number): StrategyTier {
+  switch (klass) {
+    case 'router.advisory':
+    case 'memory.consolidation-hint':
+      return 'advisory';
+    case 'router.constraint':
+    case 'router.retrieval-bias':
+    case 'sync.retry-policy':
+      return 'operator-approved';
+    case 'detection.confidence-floor':
+      return 'dual-approved';
+    default:
+      // Unknown class — be conservative.
+      return 'operator-approved';
   }
-  if (klass === 'detection.confidence-floor' || klass === 'sync.retry-policy') {
-    return confidence >= 0.85 ? 'supervised' : 'operator-approved';
-  }
-  if (klass === 'router.retrieval-bias') {
-    return confidence >= 0.8 ? 'advisory' : 'supervised';
-  }
-  // router.constraint — high impact, never auto-apply
-  return confidence >= 0.9 ? 'operator-approved' : 'dual-approved';
 }

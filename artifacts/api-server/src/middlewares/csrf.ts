@@ -120,6 +120,11 @@ function isExempt(path: string): boolean {
   // A2A federation endpoints — machine-to-machine; authenticated via Bearer token
   // (API key or OAuth JWT), not browser cookies. CSRF double-submit not applicable.
   if (path.startsWith('/api/federation/')) return true;
+  // Ouroboros integration adapters — pure-functional, stateless except for
+  // the in-memory Sentra accumulator (process-local). All inputs strictly
+  // Zod-validated. Public in demo mode so the three artifact frontends can
+  // POST without a browser CSRF token; rate-limited by route group.
+  if (path.startsWith('/api/ouroboros/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

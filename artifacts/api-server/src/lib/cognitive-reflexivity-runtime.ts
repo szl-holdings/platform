@@ -25,12 +25,15 @@ import {
   computeHealthScore,
   runConsolidationCycle,
   InMemoryConsolidationStore,
+  PostgresConsolidationStore,
   applyStrategiesToDecision,
   type CognitiveHealthScore,
+  type MemoryStoreLike,
   type ReflexiveStrategy,
   type MonologueAdapter,
   type ApprovalGate,
 } from '@workspace/cognitive-reflexivity';
+import { defaultMemoryStore } from '@workspace/memory-fabric';
 import type { Signal } from '@workspace/ontology/signal';
 import { pool } from '@szl-holdings/db';
 import { registerRouterStrategyHook } from '@szl-holdings/ai-engine';
@@ -40,7 +43,18 @@ import { logger } from './logger';
 interface ReflexivityRuntime {
   engine: CognitiveReflexivityEngine;
   registry: typeof defaultStrategyRegistry;
-  consolidationStore: InMemoryConsolidationStore;
+  /**
+   * The store the consolidation cycle drives. In production this is a
+   * {@link PostgresConsolidationStore} adapter on top of the
+   * `defaultMemoryStore` that persistence-init wires to PostgresMemoryStore.
+   * If memory-fabric isn't ready yet we fall back to the in-memory store
+   * so engine bootstrap never blocks on the database.
+   */
+  consolidationStore: MemoryStoreLike;
+  /** True when the consolidation store is the persistent (Postgres-backed) one. */
+  consolidationPersistent: boolean;
+  /** Cumulative consolidation cycle counters for the health score. */
+  consolidationCycles: { ok: number; fail: number };
   recentSignals(): Signal[];
   computeHealth(): CognitiveHealthScore;
   shutdown(): void;
@@ -205,9 +219,44 @@ export function getReflexivityRuntime(): ReflexivityRuntime {
   });
   engine.start();
 
-  const consolidationStore = new InMemoryConsolidationStore();
+  // ── Memory consolidation: persistent by default ──────────────────────
+  // `defaultMemoryStore` is a MutableMemoryStore — persistence-init swaps
+  // its backend to PostgresMemoryStore at boot. The PostgresConsolidationStore
+  // adapter wraps it so the consolidation cycle drives Postgres rows
+  // (working → episodic → semantic) directly, satisfying the durability
+  // contract documented in #4571. We still keep an InMemory fallback path
+  // so unit tests / cold boots before persistence-init runs do not crash.
+  let consolidationStore: MemoryStoreLike;
+  let consolidationPersistent: boolean;
+  try {
+    consolidationStore = new PostgresConsolidationStore(
+      defaultMemoryStore as unknown as ConstructorParameters<
+        typeof PostgresConsolidationStore
+      >[0],
+    );
+    consolidationPersistent = true;
+  } catch (err) {
+    logger.warn(
+      { err: (err as Error).message },
+      'cognitive-reflexivity: PostgresConsolidationStore unavailable; falling back to in-memory store',
+    );
+    consolidationStore = new InMemoryConsolidationStore();
+    consolidationPersistent = false;
+  }
+
+  const cycles = { ok: 0, fail: 0 };
   const consolidationTimer = setInterval(() => {
-    void runConsolidationCycle(consolidationStore).catch(() => {});
+    void runConsolidationCycle(consolidationStore)
+      .then(() => {
+        cycles.ok++;
+      })
+      .catch((err: unknown) => {
+        cycles.fail++;
+        logger.warn(
+          { err: (err as Error).message },
+          'cognitive-reflexivity: consolidation cycle failed',
+        );
+      });
   }, CONSOLIDATION_INTERVAL_MS);
   if (typeof consolidationTimer.unref === 'function') consolidationTimer.unref();
 
@@ -215,6 +264,8 @@ export function getReflexivityRuntime(): ReflexivityRuntime {
     engine,
     registry: defaultStrategyRegistry,
     consolidationStore,
+    consolidationPersistent,
+    consolidationCycles: cycles,
     recentSignals: () => [...recent].reverse(),
     computeHealth: () => {
       const m = engine.metrics();
@@ -223,7 +274,7 @@ export function getReflexivityRuntime(): ReflexivityRuntime {
           signalsObserved: m.signalsObserved,
           signalsActedOn: m.signalsActedOn,
           dialecticInvocations: m.dialecticInvocations,
-          consolidationCycles: { ok: 0, fail: 0 },
+          consolidationCycles: { ok: cycles.ok, fail: cycles.fail },
         },
         defaultStrategyRegistry,
       );

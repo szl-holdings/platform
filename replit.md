@@ -672,3 +672,33 @@ in api-server logs. `run-migrations.ts` auto-applies it on boot.
   (`detection.confidence-floor`, `sync.retry-policy`,
   `memory.consolidation-hint`) are persisted with provenance but await
   dedicated downstream consumers.
+
+## Ouroboros integrations (#4570 follow-on)
+
+Three Egyptian-mathematics primitives lifted into A11oy / Amaru / Sentra:
+
+### Packages
+- `packages/reconciliation` — pure functional primitives:
+  - `frustum.ts` — 3-witness reconciliation (RECONCILED / DIVERGENT verdict)
+  - `seked.ts` — bounded-saturation slope auditor (RMP 56–60)
+  - `unit-fractions.ts` — Sylvester decomposition with **bigint internals**
+    capped at `MAX_DENOMINATOR = 1_000_000`. Refuses (returns `exact:false`)
+    when the next greedy term would exceed `Number.MAX_SAFE_INTEGER`.
+  - `doubling.ts` — Egyptian shift-and-add multiplication with audit trace
+- `packages/ouroboros-integrations` — A11oy / Amaru / Sentra adapters that
+  apply the primitives to handoff reconciliation, fleet seked auditing,
+  and HSM governance accumulator anchoring.
+
+### API surface — `/api/ouroboros/*` (10 endpoints, public in demo mode)
+Allowlisted in `global-auth-enforcer.ts` and `csrf.ts`. Mounted at
+`routes/index.ts` after cognitive-reflexivity.
+
+Schema bounds (architect-required, post-fix):
+- `ThresholdSchema.{p,q}` capped at 1e6 to stay below MAX_DENOMINATOR.
+- `LeafHashSchema` capped at 66 chars (256-bit hex with `0x` prefix).
+- `verify-trace` step bigint strings capped at 80 decimal digits.
+
+### Frontend
+- `artifacts/a11oy/src/pages/Ouroboros.tsx` — frustum scenarios picker
+- `artifacts/conduit/src/pages/ouroboros.tsx` — seked + unit-fraction
+- `artifacts/sentra/src/pages/ouroboros.tsx` — HSM doubling anchor

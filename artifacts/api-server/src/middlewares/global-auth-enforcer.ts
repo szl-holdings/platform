@@ -465,6 +465,15 @@ const PUBLIC_PREFIXES = [
   // explicitly inside the route handler so any operator approval is bound
   // to a real authenticated identity, never a body-supplied string.
   "/api/cognitive-reflexivity/",
+  // Ouroboros integrations (#4570 follow-on) — pure-functional adapters that
+  // lift Egyptian-mathematics primitives (frustum / seked / unit-fractions /
+  // doubling) into A11oy / Amaru / Sentra. The adapters are stateless except
+  // for the in-memory Sentra accumulator (process-local). All inputs are
+  // strictly Zod-validated. Public so the three artifact frontends can
+  // render the live Ouroboros panels without an authenticated session in
+  // demo mode. Mutating routes are still rate-limited by the route group's
+  // perUserWriteSlidingLimiter and CSRF-double-submit on writes.
+  "/api/ouroboros/",
 ];
 
 /**

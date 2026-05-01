@@ -1,589 +1,301 @@
 /**
- * Ouroboros v4 Runtime Routes
+ * Ouroboros API
+ * ----------------------------------------------------------------------------
+ * HTTP surface for the @workspace/ouroboros-integrations adapters that
+ * lift the Egyptian-mathematics primitives (frustum / seked /
+ * unit-fractions / doubling) into the three deployable products in this
+ * monorepo:
  *
- * Exposes the operational surface of replit_innovate_full_payload v4.0.0:
- * the A11oy control plane, Sentra/Amaru ingestion contracts, validator
- * registry, innovation engine, output paths, and v4 proof-route + domain
- * pack aliases. Backed by the pure @workspace/ouroboros runtime kernel.
+ *   POST /api/ouroboros/a11oy/reconcile-handoff      — MMP-14 frustum
+ *   POST /api/ouroboros/a11oy/audit-fleet            — fleet audit
+ *   POST /api/ouroboros/amaru/observe-metric         — RMP seked sample
+ *   POST /api/ouroboros/amaru/audit-threshold        — unit-fraction audit
+ *   POST /api/ouroboros/sentra/anchor-event          — doubling append
+ *   POST /api/ouroboros/sentra/anchor-batch          — bulk append
+ *   POST /api/ouroboros/sentra/verify-trace          — verify doubling
+ *   GET  /api/ouroboros/sentra/anchor-state          — current accumulator
  *
- * Mounting (see routes/index.ts):
- *   /api/ouroboros/manifest          — payload version, control plane, packs, cycles
- *   /api/ouroboros/validators        — validator registry
- *   /api/ouroboros/validators/check  — POST: classify validator results, return halt
- *   /api/ouroboros/packs             — domain pack registry (12 packs incl Sentra/Amaru)
- *   /api/ouroboros/route             — POST: route a task to a pack via TASK_TO_PACK_V4
- *   /api/ouroboros/proof-routes      — proof-route catalog with v4 aliases
- *   /api/ouroboros/innovation        — innovation engine loops + validation status
- *   /api/ouroboros/output-paths      — canonical output/* path constants
- *   /api/ouroboros/ingest/sentra     — POST: validate a Sentra ingestion payload
- *   /api/ouroboros/ingest/amaru      — POST: validate an Amaru ingestion payload
- *   /api/ouroboros/cycles            — almanac cycles (v3 + v4 aliases)
+ * SECURITY POSTURE
+ *   All routes require an authenticated session (authMiddleware mounted
+ *   on the route group). The integrations are pure-functional with no
+ *   I/O except the in-memory Sentra accumulator (process-local, scoped
+ *   per server instance — replace with HSM in production).
  *
- * All endpoints require an authenticated session. Mutating ingestion
- * endpoints additionally require the `admin` role since they exercise
- * runtime validators that drive halt/escalate decisions.
+ * The integration adapters are pure functions; this route file is just
+ * an HTTP transport. All input is validated with Zod.
  */
 
-import { type IRouter, Router } from 'express';
+import { Router, type IRouter, type Request, type Response } from 'express';
 import { z } from 'zod';
 import {
-  // validator runtime
-  VALIDATOR_REGISTRY,
-  summarizeValidators,
-  // domain packs
-  DOMAIN_PACKS,
-  TASK_TO_PACK,
-  TASK_TO_PACK_V4,
-  // proof routes
-  PROOF_ROUTES,
-  ROUTE_ID_V2_ALIASES,
-  ROUTE_ID_V4_ALIASES,
-  resolveV4ProofRouteId,
-  // ingestion contracts
-  INGESTION_CONTRACTS,
-  validateIngestion,
-  // innovation engine
-  INNOVATION_LOOPS,
-  INNOVATION_ENGINE_DEFAULT,
-  validateInnovationEngine,
-  // output paths
-  OUTPUT_PATHS,
-  resolveOutputPath,
-  // almanac
-  V3_CYCLES,
-  V4_CYCLES,
-  CYCLE_ID_V4_ALIASES,
-  // v6 ecosystem layer
-  SHARED_RUNTIME_SERVICES_V6,
-  V6_HALT_CONDITIONS,
-  V6_NEW_HALT_CONDITIONS,
-  TASK_TO_PACK_V6,
-  TOOL_PERMISSION_MATRIX,
-  checkToolPermission,
-  SECRETS_BROKER_SPEC,
-  SANDBOX_POLICY,
-  AGENT_REGISTRY_REQUIRED_FIELDS,
-  validateAgentRegistryEntry,
-  V6_MANIFEST_SUMMARY,
-  // SZL Holdings government procurement readiness
-  GOV_READINESS_MANIFEST,
-  PLATFORM_READINESS,
-  NIST_RMF_ALIGNMENT,
-  DOD_TENETS,
-  GSAR_552_239_7001_READINESS,
-  RECOMMENDED_NAICS_CODES,
-  SAM_GOV_REGISTRATION_STEPS,
-  NEW_YORK_STATE_REGISTRATION_STEPS,
-  PRE_MEETING_ACTION_ITEMS,
-  COMPETITIVE_POSITIONING_STATEMENT,
-  getPlatformReadiness,
-  listGapsAcrossPlatforms,
-  actionItemsByGroup,
-} from '@workspace/ouroboros';
-import { logger } from '../lib/logger.js';
-import { authMiddleware, requireRole } from '../middlewares/auth.js';
+  a11oy as a11oyAdapter,
+  amaru as amaruAdapter,
+  sentra as sentraAdapter,
+} from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
 
-// All ouroboros runtime endpoints require an authenticated session.
-router.use(authMiddleware());
+// ---------------------------------------------------------------------------
+// Process-local Sentra HSM stand-in.
+// In production this would be backed by a real HSM; for the integration
+// surface we keep an in-memory accumulator scoped per server instance.
+// ---------------------------------------------------------------------------
+const sentraAnchor = new sentraAdapter.SentraHSMAnchor();
+
+// Track Amaru fleet monitor per metricId (process-local).
+const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
 
 // ---------------------------------------------------------------------------
-// GET /manifest — top-level v4 contract overview
+// Schema
 // ---------------------------------------------------------------------------
-router.get('/manifest', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      payload_version: '4.0.0',
-      payload_name: 'replit_innovate_full_payload',
-      control_plane: 'A11oy_core',
-      ecosystem_runtimes: {
-        A11oy: 'online',
-        Sentra: 'ingest_ready',
-        Amaru: 'ingest_ready',
-      },
-      counts: {
-        validators: Object.keys(VALIDATOR_REGISTRY).length,
-        domain_packs: Object.keys(DOMAIN_PACKS).length,
-        proof_routes: PROOF_ROUTES.length,
-        innovation_loops: INNOVATION_LOOPS.length,
-        output_paths: Object.keys(OUTPUT_PATHS).length,
-        v3_cycles: V3_CYCLES.length,
-        v4_cycles: V4_CYCLES.length,
-      },
-    },
-  });
+const HandoffSchema = z.object({
+  handoffId: z.string().min(1).max(256),
+  fromAgent: z.string().min(1).max(128),
+  toAgent: z.string().min(1).max(128),
+  observerAgent: z.string().min(1).max(128),
+  fromLeaves: z.array(z.string().min(1).max(256)).max(2048),
+  toLeaves: z.array(z.string().min(1).max(256)).max(2048),
+  observerLeaves: z.array(z.string().min(1).max(256)).max(2048),
+  timestamp: z.number().int().nonnegative().optional(),
+});
+
+const FleetAuditSchema = z.object({
+  events: z.array(HandoffSchema).max(512),
+});
+
+const MetricSampleSchema = z.object({
+  metricId: z.string().min(1).max(128),
+  horizontal: z.number().finite(),
+  vertical: z.number().finite(),
+  timestamp: z.number().int().nonnegative().optional(),
+});
+
+// Bounded by reconciliation/unit-fractions MAX_DENOMINATOR (1e6). Beyond
+// that the greedy decomposition produces intermediate denominators that
+// exceed Number.MAX_SAFE_INTEGER and the unit-fraction primitive refuses.
+const ThresholdSchema = z.object({
+  p: z.number().int().positive().max(1_000_000),
+  q: z.number().int().positive().max(1_000_000),
+  maxTerms: z.number().int().min(1).max(16).optional(),
+});
+
+// 80 decimal digits is enough to represent a 256-bit integer; we cap leaf
+// hashes there to keep the doubling trace bounded (one row per bit).
+const LEAF_HASH_MAX_DECIMAL = 80;
+const LEAF_HASH_MAX_HEX = 66; // "0x" + 64 hex digits
+
+const LeafHashSchema = z.union([
+  z.string().min(1).max(LEAF_HASH_MAX_HEX),
+  z.number().int().nonnegative(),
+]);
+
+const GovernanceEventSchema = z.object({
+  eventId: z.string().min(1).max(256),
+  // Accept leafHash as either decimal string, hex string, or number.
+  leafHash: LeafHashSchema,
+  timestamp: z.number().int().nonnegative().optional(),
+});
+
+const GovernanceBatchSchema = z.object({
+  events: z.array(GovernanceEventSchema).max(1024),
 });
 
 // ---------------------------------------------------------------------------
-// GET /validators
+// Utilities
 // ---------------------------------------------------------------------------
-router.get('/validators', (_req, res) => {
-  res.json({ ok: true, data: VALIDATOR_REGISTRY });
-});
+function now(): number {
+  return Date.now();
+}
 
-// POST /validators/check — classify validator results, return halt summary
-const validatorCheckSchema = z.object({
-  results: z
-    .array(
-      z.object({
-        validator_id: z.string().min(1),
-        passed: z.boolean(),
-        message: z.string().optional(),
-      })
-    )
-    .max(64),
-});
+function toBigInt(v: string | number): bigint {
+  if (typeof v === 'number') return BigInt(Math.trunc(v));
+  const trimmed = v.trim();
+  if (/^0x[0-9a-fA-F]+$/.test(trimmed)) return BigInt(trimmed);
+  if (/^[0-9]+$/.test(trimmed)) return BigInt(trimmed);
+  throw new Error(`Invalid bigint string: ${v}`);
+}
 
-router.post('/validators/check', (req, res) => {
-  const parsed = validatorCheckSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
-  }
-  try {
-    const summary = summarizeValidators(parsed.data.results);
-    return res.json({ ok: true, data: summary });
-  } catch (err) {
-    logger.warn({ err }, '[ouroboros] validators/check error');
-    return res.status(500).json({ ok: false, error: 'validator summary failed' });
-  }
-});
+function bigintToString(v: bigint): string {
+  return v.toString();
+}
 
-// ---------------------------------------------------------------------------
-// GET /packs — domain pack registry
-// ---------------------------------------------------------------------------
-router.get('/packs', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      packs: DOMAIN_PACKS,
-      task_to_pack_v3: TASK_TO_PACK,
-      task_to_pack_v4: TASK_TO_PACK_V4,
-    },
-  });
-});
-
-// POST /route — route a task to a domain pack (prefer v4 routing)
-const routeSchema = z.object({
-  task_type: z.string().min(1).max(64),
-  prefer: z.enum(['v3', 'v4']).default('v4'),
-});
-
-router.post('/route', (req, res) => {
-  const parsed = routeSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
-  }
-  const { task_type, prefer } = parsed.data;
-  const v4 = (TASK_TO_PACK_V4 as Record<string, string | undefined>)[task_type];
-  const v3 = (TASK_TO_PACK as Record<string, string | undefined>)[task_type];
-  const pack_id = (prefer === 'v4' ? v4 ?? v3 : v3 ?? v4) ?? 'A11oy_core';
-  return res.json({
-    ok: true,
-    data: {
-      task_type,
-      pack_id,
-      pack: DOMAIN_PACKS[pack_id as keyof typeof DOMAIN_PACKS] ?? null,
-      via: v4 && prefer === 'v4' ? 'TASK_TO_PACK_V4' : 'TASK_TO_PACK',
-    },
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /proof-routes
-// ---------------------------------------------------------------------------
-router.get('/proof-routes', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      routes: PROOF_ROUTES,
-      v2_aliases: ROUTE_ID_V2_ALIASES,
-      v4_aliases: ROUTE_ID_V4_ALIASES,
-    },
-  });
-});
-
-router.get('/proof-routes/resolve/:label', (req, res) => {
-  const resolved = resolveV4ProofRouteId(req.params.label);
-  if (!resolved) {
-    return res.status(404).json({ ok: false, error: `unknown proof route '${req.params.label}'` });
-  }
-  return res.json({ ok: true, data: { input: req.params.label, route_id: resolved } });
-});
-
-// ---------------------------------------------------------------------------
-// GET /innovation
-// ---------------------------------------------------------------------------
-router.get('/innovation', (_req, res) => {
-  const missing = validateInnovationEngine(INNOVATION_ENGINE_DEFAULT);
-  res.json({
-    ok: true,
-    data: {
-      loops: INNOVATION_LOOPS,
-      enabled: INNOVATION_ENGINE_DEFAULT.enabled,
-      missingLoops: missing,
-      complete: missing.length === 0,
-    },
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /output-paths
-// ---------------------------------------------------------------------------
-router.get('/output-paths', (_req, res) => {
-  res.json({ ok: true, data: OUTPUT_PATHS });
-});
-
-router.get('/output-paths/:key', (req, res) => {
-  const path = resolveOutputPath(req.params.key);
-  if (!path) {
-    return res.status(404).json({ ok: false, error: `unknown output path key '${req.params.key}'` });
-  }
-  return res.json({ ok: true, data: { key: req.params.key, path } });
-});
-
-// ---------------------------------------------------------------------------
-// POST /ingest/sentra — Sentra ingestion contract validation
-// POST /ingest/amaru  — Amaru  ingestion contract validation
-// Admin-only: these mutate runtime trust by exercising validators.
-// ---------------------------------------------------------------------------
-const ingestSchema = z.object({
-  ingest_type: z.string().min(1).max(64),
-  validator_results: z
-    .array(
-      z.object({
-        validator_id: z.string().min(1),
-        passed: z.boolean(),
-        message: z.string().optional(),
-      })
-    )
-    .max(64),
-  outputs: z.array(z.string().min(1).max(64)).max(32),
-});
-
-function runIngestion(target: 'Sentra' | 'Amaru', body: unknown) {
-  const parsed = ingestSchema.safeParse(body);
-  if (!parsed.success) {
-    return { status: 400 as const, payload: { ok: false, error: parsed.error.flatten() } };
-  }
-  const passedValidators = new Set(
-    parsed.data.validator_results.filter((v) => v.passed).map((v) => v.validator_id),
-  );
-  const presentOutputs = new Set(parsed.data.outputs);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors = validateIngestion({
-    target,
-    ingestType: parsed.data.ingest_type,
-    presentOutputs: presentOutputs as any,
-    passedValidators: passedValidators as any,
-  });
-  const validatorSummary = summarizeValidators(parsed.data.validator_results);
+function serializeDoublingTrace(trace: { steps: ReadonlyArray<{ multiplier: bigint; doubled: bigint; selected: boolean }>; product: bigint }) {
   return {
-    status: 200 as const,
-    payload: {
-      ok: true,
-      data: {
-        target,
-        ingestType: parsed.data.ingest_type,
-        admissible: errors.length === 0 && !validatorSummary.halt,
-        contractErrors: errors,
-        validatorSummary,
-      },
-    },
+    product: bigintToString(trace.product),
+    steps: trace.steps.map((s, i) => ({
+      index: i,
+      multiplier: bigintToString(s.multiplier),
+      doubled: bigintToString(s.doubled),
+      selected: s.selected,
+    })),
   };
 }
 
-router.post('/ingest/sentra', requireRole('admin'), (req, res) => {
-  try {
-    const out = runIngestion('Sentra', req.body);
-    return res.status(out.status).json(out.payload);
-  } catch (err) {
-    logger.warn({ err }, '[ouroboros] ingest/sentra error');
-    return res.status(500).json({ ok: false, error: 'ingestion validation failed' });
-  }
-});
-
-router.post('/ingest/amaru', requireRole('admin'), (req, res) => {
-  try {
-    const out = runIngestion('Amaru', req.body);
-    return res.status(out.status).json(out.payload);
-  } catch (err) {
-    logger.warn({ err }, '[ouroboros] ingest/amaru error');
-    return res.status(500).json({ ok: false, error: 'ingestion validation failed' });
-  }
-});
-
-// Read-only ingestion contract definitions
-router.get('/ingest/contracts', (_req, res) => {
-  res.json({ ok: true, data: INGESTION_CONTRACTS });
-});
+function jsonError(res: Response, status: number, code: string, message: string, details?: unknown) {
+  return res.status(status).json({ code, message, details: details ?? null });
+}
 
 // ---------------------------------------------------------------------------
-// GET /cycles — almanac cycles + v4 aliases
+// A11oy — frustum reconciliation
 // ---------------------------------------------------------------------------
-router.get('/cycles', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      v3: V3_CYCLES,
-      v4: V4_CYCLES,
-      v4_aliases: CYCLE_ID_V4_ALIASES,
-    },
-  });
-});
-
-// ---------------------------------------------------------------------------
-// v6 ecosystem layer — `a11oy_ultimate_replit_payload` v6.0.0.
-//
-//   GET  /v6/manifest             — v6 summary (counts, control plane, version)
-//   GET  /v6/services             — shared runtime services list (16)
-//   GET  /v6/halts                — full halt-condition vocabulary (10) + new (3)
-//   GET  /v6/routing              — TASK_TO_PACK_V6 routing map
-//   GET  /v6/permissions          — full tool permission matrix
-//   POST /v6/permissions/check    — pure permission decision for (pack, tool, tier)
-//   GET  /v6/secrets              — secrets-broker spec (managed list + rules)
-//   GET  /v6/sandbox              — sandbox execution classes
-//   GET  /v6/agent-registry/schema— agent-registry required-fields contract
-//   POST /v6/agent-registry/check — list missing required fields for an entry
-// ---------------------------------------------------------------------------
-
-router.get('/v6/manifest', (_req, res) => {
-  res.json({ ok: true, data: V6_MANIFEST_SUMMARY });
-});
-
-router.get('/v6/services', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      shared_runtime_services: SHARED_RUNTIME_SERVICES_V6,
-      count: SHARED_RUNTIME_SERVICES_V6.length,
-    },
-  });
-});
-
-router.get('/v6/halts', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      conditions: V6_HALT_CONDITIONS,
-      new_in_v6: V6_NEW_HALT_CONDITIONS,
-    },
-  });
-});
-
-router.get('/v6/routing', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      task_to_pack_v6: TASK_TO_PACK_V6,
-      count: Object.keys(TASK_TO_PACK_V6).length,
-    },
-  });
-});
-
-router.get('/v6/permissions', (_req, res) => {
-  res.json({ ok: true, data: TOOL_PERMISSION_MATRIX });
-});
-
-const permissionCheckSchema = z.object({
-  pack_id: z.string().min(1).max(64),
-  tool: z.string().min(1).max(64),
-  risk_tier: z.enum(['R1_low', 'R2_moderate', 'R3_high', 'R4_critical']).optional(),
-  mutating: z.boolean().optional(),
-  approved: z.boolean().optional(),
-});
-
-router.post('/v6/permissions/check', (req, res) => {
-  const parsed = permissionCheckSchema.safeParse(req.body);
+router.post('/a11oy/reconcile-handoff', (req: Request, res: Response) => {
+  const parsed = HandoffSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+    return jsonError(res, 400, 'INVALID_HANDOFF', parsed.error.message, parsed.error.flatten());
   }
-  try {
-    const decision = checkToolPermission({
-      packId: parsed.data.pack_id,
-      tool: parsed.data.tool,
-      riskTier: parsed.data.risk_tier,
-      mutating: parsed.data.mutating,
-      approved: parsed.data.approved,
-    });
-    return res.json({ ok: true, data: decision });
-  } catch (err) {
-    logger.warn({ err }, '[ouroboros] v6/permissions/check error');
-    return res.status(500).json({ ok: false, error: 'permission check failed' });
-  }
+  const event = { ...parsed.data, timestamp: parsed.data.timestamp ?? now() };
+  const verdict = a11oyAdapter.reconcileHandoff(event);
+  return res.json(verdict);
 });
 
-router.get('/v6/secrets', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      enabled: SECRETS_BROKER_SPEC.enabled,
-      mode: SECRETS_BROKER_SPEC.mode,
-      purpose: SECRETS_BROKER_SPEC.purpose,
-      rules: SECRETS_BROKER_SPEC.rules,
-      managed_secrets: SECRETS_BROKER_SPEC.managedSecrets,
-    },
-  });
-});
-
-router.get('/v6/sandbox', (_req, res) => {
-  // Wire-format follows the canonical v6 JSON contract, which uses `"class"`
-  // for the execution-class identifier (not the TS-internal `classId`).
-  res.json({
-    ok: true,
-    data: {
-      enabled: SANDBOX_POLICY.enabled,
-      purpose: SANDBOX_POLICY.purpose,
-      violations_halt_run: SANDBOX_POLICY.violationsHaltRun,
-      classes: SANDBOX_POLICY.classes.map((c) => ({
-        class: c.classId,
-        allowed: c.allowed,
-        ...(c.restrictions ? { restrictions: c.restrictions } : {}),
-      })),
-    },
-  });
-});
-
-router.get('/v6/agent-registry/schema', (_req, res) => {
-  res.json({
-    ok: true,
-    data: {
-      required_fields: AGENT_REGISTRY_REQUIRED_FIELDS,
-      count: AGENT_REGISTRY_REQUIRED_FIELDS.length,
-    },
-  });
-});
-
-const agentRegistryCheckSchema = z
-  .object({})
-  .passthrough(); // accept any object payload, validator only inspects field presence
-
-router.post('/v6/agent-registry/check', (req, res) => {
-  const parsed = agentRegistryCheckSchema.safeParse(req.body);
+router.post('/a11oy/audit-fleet', (req: Request, res: Response) => {
+  const parsed = FleetAuditSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+    return jsonError(res, 400, 'INVALID_FLEET_AUDIT', parsed.error.message, parsed.error.flatten());
   }
-  try {
-    const missing = validateAgentRegistryEntry(parsed.data);
-    return res.json({
-      ok: true,
-      data: {
-        admissible: missing.length === 0,
-        missing_fields: missing,
-      },
-    });
-  } catch (err) {
-    logger.warn({ err }, '[ouroboros] v6/agent-registry/check error');
-    return res.status(500).json({ ok: false, error: 'agent-registry check failed' });
-  }
+  const events = parsed.data.events.map((e) => ({ ...e, timestamp: e.timestamp ?? now() }));
+  const result = a11oyAdapter.auditFleetHandoffs(events);
+  return res.json(result);
 });
 
-// ===========================================================================
-// SZL Holdings Government Procurement Readiness — auth-gated
-// (Source: docs/audit/szl-government-readiness.md, NYSTEC pre-briefing audit
-//  prepared 2026-04-30 for Empire APEX Accelerator / Mercy McInnis.)
 // ---------------------------------------------------------------------------
-//   GET /gov-readiness/manifest          — overall scorecard + counts
-//   GET /gov-readiness/platforms         — list all 3 platform records
-//   GET /gov-readiness/platforms/:id     — single platform (A11oy/Sentra/Amaru)
-//   GET /gov-readiness/gaps              — flat list of all gaps × platforms
-//   GET /gov-readiness/nist              — NIST AI RMF alignment matrix
-//   GET /gov-readiness/dod               — DoD Responsible AI Tenets
-//   GET /gov-readiness/gsar              — GSAR 552.239-7001 readiness
-//   GET /gov-readiness/sam-registration  — SAM.gov + NAICS + NY state
-//   GET /gov-readiness/action-items      — pre-meeting checklists (3 groups)
-//   GET /gov-readiness/positioning       — competitive positioning statement
-// ===========================================================================
-
-router.get('/gov-readiness/manifest', (_req, res) => {
-  res.json(GOV_READINESS_MANIFEST);
-});
-
-router.get('/gov-readiness/platforms', (_req, res) => {
-  res.json({
-    platforms: Object.values(PLATFORM_READINESS),
-    count: Object.keys(PLATFORM_READINESS).length,
-  });
-});
-
-router.get('/gov-readiness/platforms/:id', (req, res) => {
-  const platform = getPlatformReadiness(req.params.id);
-  if (!platform) {
-    return res.status(404).json({
-      error: 'unknown_platform',
-      message: `Unknown platform '${req.params.id}'. Known: A11oy, Sentra, Amaru.`,
-    });
+// Amaru — seked + unit-fraction inspection
+// ---------------------------------------------------------------------------
+router.post('/amaru/observe-metric', (req: Request, res: Response) => {
+  const parsed = MetricSampleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_METRIC', parsed.error.message, parsed.error.flatten());
   }
-  return res.json(platform);
+  const sample = { ...parsed.data, timestamp: parsed.data.timestamp ?? now() };
+  const signal = amaruMonitor.observe(sample);
+  return res.json(signal);
 });
 
-router.get('/gov-readiness/gaps', (_req, res) => {
-  const gaps = listGapsAcrossPlatforms();
-  res.json({ gaps, count: gaps.length });
+router.post('/amaru/audit-threshold', (req: Request, res: Response) => {
+  const parsed = ThresholdSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_THRESHOLD', parsed.error.message, parsed.error.flatten());
+  }
+  const { p, q, maxTerms } = parsed.data;
+  const audit = amaruAdapter.auditThreshold(p, q, maxTerms);
+  return res.json(audit);
 });
 
-router.get('/gov-readiness/nist', (_req, res) => {
-  res.json({ rmf: NIST_RMF_ALIGNMENT, count: NIST_RMF_ALIGNMENT.length });
-});
-
-router.get('/gov-readiness/dod', (_req, res) => {
-  res.json({
-    tenets: DOD_TENETS,
-    count: DOD_TENETS.length,
-    coveredCount: DOD_TENETS.filter((t) => t.status === 'covered').length,
-    gapCount: DOD_TENETS.filter((t) => t.status === 'gap').length,
+// ---------------------------------------------------------------------------
+// Sentra — doubling-anchor governance accumulator
+// ---------------------------------------------------------------------------
+router.post('/sentra/anchor-event', (req: Request, res: Response) => {
+  const parsed = GovernanceEventSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_EVENT', parsed.error.message, parsed.error.flatten());
+  }
+  let leafHash: bigint;
+  try {
+    leafHash = toBigInt(parsed.data.leafHash);
+  } catch (e) {
+    return jsonError(res, 400, 'INVALID_LEAF_HASH', (e as Error).message);
+  }
+  const event = {
+    eventId: parsed.data.eventId,
+    leafHash,
+    timestamp: parsed.data.timestamp ?? now(),
+  };
+  const { state, trace } = sentraAnchor.append(event);
+  return res.json({
+    state: {
+      accumulator: bigintToString(state.accumulator),
+      eventCount: state.eventCount,
+      lastUpdate: state.lastUpdate,
+      prime: bigintToString(state.prime),
+    },
+    trace: serializeDoublingTrace(trace),
   });
 });
 
-router.get('/gov-readiness/gsar', (_req, res) => {
-  res.json({
-    clause: 'GSAR 552.239-7001 (proposed)',
-    requirements: GSAR_552_239_7001_READINESS,
-    count: GSAR_552_239_7001_READINESS.length,
-    coveredCount: GSAR_552_239_7001_READINESS.filter((r) => r.status === 'covered')
-      .length,
-    gapCount: GSAR_552_239_7001_READINESS.filter((r) => r.status === 'gap').length,
-  });
-});
-
-router.get('/gov-readiness/sam-registration', (_req, res) => {
-  res.json({
-    samGovSteps: SAM_GOV_REGISTRATION_STEPS,
-    recommendedNaicsCodes: RECOMMENDED_NAICS_CODES,
-    newYorkStateRegistration: NEW_YORK_STATE_REGISTRATION_STEPS,
-    note: 'Active SAM.gov registration is the single most important prerequisite for any federal contract.',
-  });
-});
-
-router.get('/gov-readiness/action-items', (req, res) => {
-  const group = typeof req.query.group === 'string' ? req.query.group : undefined;
-  if (group) {
-    if (group !== 'critical' && group !== 'for_meeting' && group !== 'thirty_day') {
-      return res.status(400).json({
-        error: 'invalid_group',
-        message: "group must be one of: 'critical', 'for_meeting', 'thirty_day'.",
+router.post('/sentra/anchor-batch', (req: Request, res: Response) => {
+  const parsed = GovernanceBatchSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_BATCH', parsed.error.message, parsed.error.flatten());
+  }
+  const events: { eventId: string; leafHash: bigint; timestamp: number }[] = [];
+  try {
+    for (const e of parsed.data.events) {
+      events.push({
+        eventId: e.eventId,
+        leafHash: toBigInt(e.leafHash),
+        timestamp: e.timestamp ?? now(),
       });
     }
-    const items = actionItemsByGroup(group);
-    return res.json({ group, items, count: items.length });
+  } catch (e) {
+    return jsonError(res, 400, 'INVALID_LEAF_HASH', (e as Error).message);
   }
+  const state = sentraAnchor.appendBatch(events);
   return res.json({
-    items: PRE_MEETING_ACTION_ITEMS,
-    count: PRE_MEETING_ACTION_ITEMS.length,
-    byGroup: {
-      critical: actionItemsByGroup('critical').length,
-      for_meeting: actionItemsByGroup('for_meeting').length,
-      thirty_day: actionItemsByGroup('thirty_day').length,
+    state: {
+      accumulator: bigintToString(state.accumulator),
+      eventCount: state.eventCount,
+      lastUpdate: state.lastUpdate,
+      prime: bigintToString(state.prime),
     },
   });
 });
 
-router.get('/gov-readiness/positioning', (_req, res) => {
-  res.json({
-    statement: COMPETITIVE_POSITIONING_STATEMENT,
-    audience: 'Mercy McInnis, Procurement Counselor, NYSTEC',
-    purpose: 'Pre-briefing — Government Sales Readiness',
+router.post('/sentra/verify-trace', (req: Request, res: Response) => {
+  // Accept the trace shape we serialize above (string bigints) and rebuild.
+  // Cap step bigint string lengths to LEAF_HASH_MAX_DECIMAL (80) — enough for
+  // a 256-bit accumulator. Without this an attacker could submit thousands
+  // of multi-megabyte decimal strings and force quadratic BigInt parses.
+  const TraceSchema = z.object({
+    product: z.string().min(1).max(LEAF_HASH_MAX_DECIMAL),
+    steps: z
+      .array(
+        z.object({
+          index: z.number().int().nonnegative().optional(),
+          multiplier: z.string().min(1).max(LEAF_HASH_MAX_DECIMAL),
+          doubled: z.string().min(1).max(LEAF_HASH_MAX_DECIMAL),
+          selected: z.boolean(),
+        }),
+      )
+      .max(2048),
+  });
+  const parsed = TraceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_TRACE', parsed.error.message, parsed.error.flatten());
+  }
+  let trace: { product: bigint; steps: ReadonlyArray<{ multiplier: bigint; doubled: bigint; selected: boolean }> };
+  try {
+    trace = {
+      product: BigInt(parsed.data.product),
+      steps: parsed.data.steps.map((s) => ({
+        multiplier: BigInt(s.multiplier),
+        doubled: BigInt(s.doubled),
+        selected: s.selected,
+      })),
+    };
+  } catch (e) {
+    return jsonError(res, 400, 'INVALID_TRACE_BIGINT', (e as Error).message);
+  }
+  const valid = sentraAdapter.verifyHSMTrace(trace as any);
+  return res.json({ valid });
+});
+
+router.get('/sentra/anchor-state', (_req: Request, res: Response) => {
+  const state = sentraAnchor.snapshot();
+  return res.json({
+    accumulator: bigintToString(state.accumulator),
+    eventCount: state.eventCount,
+    lastUpdate: state.lastUpdate,
+    prime: bigintToString(state.prime),
+  });
+});
+
+// Public health: verifies the routes are wired and the prime is loaded.
+router.get('/health', (_req: Request, res: Response) => {
+  return res.json({
+    ok: true,
+    sentraPrime: bigintToString(sentraAdapter.SHIFT_ADD_PRIME),
+    eventsAnchored: sentraAnchor.snapshot().eventCount,
+    asOf: new Date().toISOString(),
   });
 });
 

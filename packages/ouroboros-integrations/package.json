@@ -1,0 +1,23 @@
+{
+  "name": "@workspace/ouroboros-integrations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
+    "./a11oy": { "types": "./src/a11oy.ts", "default": "./src/a11oy.ts" },
+    "./amaru": { "types": "./src/amaru.ts", "default": "./src/amaru.ts" },
+    "./sentra": { "types": "./src/sentra.ts", "default": "./src/sentra.ts" }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@workspace/reconciliation": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

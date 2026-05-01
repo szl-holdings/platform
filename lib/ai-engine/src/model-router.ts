@@ -167,6 +167,23 @@ export interface ModelRouterTelemetry {
   reflexiveStrategyIds?: string[];
   /** Dimensions modified by the strategies (lane / model / etc.). */
   reflexiveInfluencedDimensions?: string[];
+  /**
+   * Effective lane after reflexive strategy reassignment. Differs from
+   * `routeClass` only when a strategy successfully re-routed the call to a
+   * different lane (e.g. `triage` → `reasoning`). Recorded so audits can
+   * answer "what lane did this run actually use?".
+   */
+  effectiveLane?: string;
+  /** Reflexive retrieval-depth bias the strategy applied (delta or absolute). */
+  reflexiveRetrievalDepth?: number;
+  /** Reflexive minimum confidence floor the strategy required. */
+  reflexiveMinConfidence?: number;
+  /**
+   * True when the completion's reported confidence (if any) was below the
+   * reflexive minConfidence floor. Surfaced for downstream gating without
+   * forcing the router to throw — callers decide what to do.
+   */
+  reflexiveConfidenceBelowFloor?: boolean;
 }
 
 export type TelemetryHandler = (telemetry: ModelRouterTelemetry) => void | Promise<void>;
@@ -219,6 +236,18 @@ function estimateCost(model: string, totalTokens: number): number {
   const ratePerToken = COST_PER_TOKEN_USD[model] ?? COST_PER_TOKEN_USD.default!;
   return ratePerToken * totalTokens;
 }
+
+const KNOWN_ROUTE_CLASSES = new Set<RouteClass>([
+  'classification',
+  'triage',
+  'reasoning',
+  'planning',
+  'tool_calling',
+  'vision_understanding',
+  'background_batch',
+  'extraction',
+  'summarization',
+]);
 
 const _telemetryHandlers: TelemetryHandler[] = [];
 
@@ -378,9 +407,22 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   // overrides (overrideModel, fine-tuned resolution) take precedence over
   // strategy suggestions — the engine only fills in gaps where the
   // operator has not pinned a value.
+  //
+  // Strategies can adapt FOUR dimensions and the router consumes ALL of
+  // them (not just `model`):
+  //   1. lane              → re-route via routeModel(decision.lane)
+  //   2. model             → override the model on the resolved route
+  //   3. retrievalDepth    → surfaced on telemetry for retrieval consumers
+  //   4. minConfidence     → enforced post-dispatch via a soft warning
+  //                          (callers escalate; the router never throws on
+  //                          a low-confidence completion to avoid silently
+  //                          dropping a useful response).
   let strategyOverride: { lane?: string; model?: string } = {};
   let appliedStrategyIds: string[] = [];
   let influencedDimensions: string[] = [];
+  let strategyRetrievalDepth: number | undefined;
+  let strategyMinConfidence: number | undefined;
+  let effectiveLane: string = routeClass;
   try {
     const hook = _strategyHook;
     if (hook) {
@@ -395,6 +437,18 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
       if (decision) {
         appliedStrategyIds = decision.appliedStrategyIds ?? [];
         influencedDimensions = decision.influencedDimensions ?? [];
+        // (1) Lane reassignment. Only adopt the suggested lane when it is a
+        // recognised RouteClass — defensive guard against an upstream typo
+        // re-routing every call into 'background_batch' or similar.
+        if (
+          decision.lane &&
+          decision.lane !== routeClass &&
+          KNOWN_ROUTE_CLASSES.has(decision.lane as RouteClass)
+        ) {
+          strategyOverride.lane = decision.lane;
+          effectiveLane = decision.lane;
+        }
+        // (2) Model override.
         if (
           decision.model &&
           !overrideModel &&
@@ -403,16 +457,31 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
         ) {
           strategyOverride.model = decision.model;
         }
+        // (3) Retrieval depth — clamp into a sane band; callers may treat
+        // this as "depth delta" or "absolute depth" depending on context.
+        if (typeof decision.retrievalDepth === 'number' && Number.isFinite(decision.retrievalDepth)) {
+          strategyRetrievalDepth = Math.max(-5, Math.min(20, decision.retrievalDepth));
+        }
+        // (4) Minimum confidence floor — clamp into [0, 1].
+        if (typeof decision.minConfidence === 'number' && Number.isFinite(decision.minConfidence)) {
+          strategyMinConfidence = Math.max(0, Math.min(1, decision.minConfidence));
+        }
       }
     }
   } catch {
     // Strategy hook MUST NOT break routing; swallow and proceed.
   }
 
-  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? strategyOverride.model ?? tenantToggles?.overrideModel?.[routeClass];
+  // Effective route class drives the lane (and therefore the default model
+  // pool, max tokens, temperature). When a strategy reassigned the lane the
+  // route is re-resolved against the new lane so all downstream defaults
+  // line up. Falls back to the original routeClass on any guard failure.
+  const effectiveRouteClass = (strategyOverride.lane ?? routeClass) as RouteClass;
+
+  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? strategyOverride.model ?? tenantToggles?.overrideModel?.[effectiveRouteClass] ?? tenantToggles?.overrideModel?.[routeClass];
 
   const route = {
-    ...routeModel(routeClass, {
+    ...routeModel(effectiveRouteClass, {
       ...(modelOverride !== undefined ? { model: modelOverride } : {}),
       ...(overrideMaxTokens !== undefined ? { maxTokens: overrideMaxTokens } : {}),
       ...(overrideTemperature !== undefined ? { temperature: overrideTemperature } : {}),
@@ -481,6 +550,29 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     );
   }
 
+  // ── Post-dispatch reflexive confidence floor check ────────────────────
+  // The router NEVER throws on a low-confidence completion — that would
+  // silently discard a useful response. We surface the breach on telemetry
+  // so callers (and the Cognitive Reflexivity Engine itself, via the
+  // signal mesh) can react: re-route, escalate, or annotate the trace.
+  let confidenceBelowFloor: boolean | undefined;
+  if (typeof strategyMinConfidence === 'number') {
+    const completionConfidence = extractCompletionConfidence(completion);
+    if (completionConfidence !== null && completionConfidence < strategyMinConfidence) {
+      confidenceBelowFloor = true;
+      // Best-effort warn so the breach is visible in logs even before the
+      // signal-mesh telemetry consumer wires up.
+      try {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[model-router] reflexive minConfidence breached: completion=${completionConfidence.toFixed(
+            3,
+          )} floor=${strategyMinConfidence.toFixed(3)} routeClass=${routeClass} model=${route.model}`,
+        );
+      } catch {}
+    }
+  }
+
   const telemetry: ModelRouterTelemetry = {
     routeClass,
     model: route.model,
@@ -499,11 +591,52 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     ...(influencedDimensions.length > 0
       ? { reflexiveInfluencedDimensions: influencedDimensions }
       : {}),
+    ...(effectiveLane !== routeClass ? { effectiveLane } : {}),
+    ...(strategyRetrievalDepth !== undefined ? { reflexiveRetrievalDepth: strategyRetrievalDepth } : {}),
+    ...(strategyMinConfidence !== undefined ? { reflexiveMinConfidence: strategyMinConfidence } : {}),
+    ...(confidenceBelowFloor ? { reflexiveConfidenceBelowFloor: true } : {}),
   };
 
   void emitTelemetry(telemetry);
 
   return { completion, route, telemetry };
+}
+
+/**
+ * Best-effort extraction of a confidence-like signal from a completion.
+ * HF/OpenAI completions don't carry a first-class confidence field, so we
+ * probe the common shapes used by our adapters: explicit `confidence`,
+ * logprobs averages, or a JSON body whose top-level has `confidence`.
+ * Returns null when no signal is available — caller should not treat that
+ * as a breach.
+ */
+function extractCompletionConfidence(c: HFCompletionResult): number | null {
+  // Direct confidence field on the result (some providers populate this).
+  const direct = (c as unknown as { confidence?: unknown }).confidence;
+  if (typeof direct === 'number' && Number.isFinite(direct)) {
+    return clamp01(direct);
+  }
+  // logprobs.avg (substrate / oLLM)
+  const lp = (c.raw as { logprobs?: { avg?: unknown } } | undefined)?.logprobs?.avg;
+  if (typeof lp === 'number' && Number.isFinite(lp)) {
+    // logprob is non-positive; map exp(avg) into a probability proxy.
+    return clamp01(Math.exp(lp));
+  }
+  // JSON body with a top-level confidence (common for our planners).
+  const txt = (c.content ?? '').trim();
+  if (txt.startsWith('{')) {
+    try {
+      const obj = JSON.parse(txt) as { confidence?: unknown };
+      if (typeof obj.confidence === 'number' && Number.isFinite(obj.confidence)) {
+        return clamp01(obj.confidence);
+      }
+    } catch {}
+  }
+  return null;
+}
+
+function clamp01(x: number): number {
+  return Math.max(0, Math.min(1, x));
 }
 
 export interface RouterConfig {

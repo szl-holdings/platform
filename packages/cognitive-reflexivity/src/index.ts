@@ -33,9 +33,11 @@ export { computeHealthScore, type HealthInputs } from './health';
 export {
   runConsolidationCycle,
   InMemoryConsolidationStore,
+  PostgresConsolidationStore,
   DEFAULT_CONSOLIDATION,
   type MemoryEntryLike,
   type MemoryStoreLike,
+  type MemoryFabricStoreLike,
   type ConsolidationConfig,
   type ConsolidationResult,
 } from './consolidation';

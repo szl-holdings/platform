@@ -117,6 +117,7 @@ const CyberResilience = lazy(() => import('./pages/CyberResilience').then(m => (
 const SimGovernance = lazy(() => import('./pages/SimGovernance').then(m => ({ default: m.SimGovernance })));
 const ApprovalQueue = lazy(() => import('./pages/ApprovalQueue').then(m => ({ default: m.ApprovalQueue })));
 const CognitiveReflexivity = lazy(() => import('./pages/CognitiveReflexivity'));
+const Ouroboros = lazy(() => import('./pages/Ouroboros'));
 const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ default: m.VerifierAgent })));
 const AtlasSection = lazy(() => import('./pages/AtlasSection').then(m => ({ default: m.AtlasSection })));
 const TokensSection = lazy(() => import('./pages/TokensSection').then(m => ({ default: m.TokensSection })));
@@ -285,6 +286,7 @@ export default function App() {
         <Route path={`${base}/quantum`} component={QuantumIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
         <Route path={`${base}/cognitive-reflexivity`} component={CognitiveReflexivity} />
+        <Route path={`${base}/ouroboros`} component={Ouroboros} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />
         <Route path={`${base}/risk-reports`} component={RiskReports} />
