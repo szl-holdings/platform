@@ -361,10 +361,14 @@ router.get(
     try {
       const limit = Math.min(Number(req.query.limit ?? 50), 500);
       const domain = req.query.domain as string | undefined;
+      const eventClass = req.query.eventClass as string | undefined;
 
       const conditions = [eq(analyticsEventsTable.sourceApp, SOURCE_APP)];
       if (domain) {
         conditions.push(eq(analyticsEventsTable.domain, domain));
+      }
+      if (eventClass) {
+        conditions.push(eq(analyticsEventsTable.eventName, eventClass));
       }
 
       const rows = await db

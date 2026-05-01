@@ -34,7 +34,7 @@ A $4.2M pipeline deal has stalled for 47 days without escalation. The approval o
 | **1. Signal** | PRISM Motion dimension surfaces a 47-day pipeline stall — deal velocity collapsed to zero | KORA / Command Inbox |
 | **2. Context** | 6 signals assembled across Motion, Risk, Intelligence, Pulse — close probability dropped from 84% to 31% | KORA / PRISM Framework |
 | **3. Recommendation** | Beacon recommends emergency escalation — CFO sponsorship, VP BD reassignment, buyer re-engagement. Confidence: 87% | KORA / Command Inbox detail |
-| **4. Approval** | Marcus reviews the recommendation, adds a note ("I'll join the buyer call myself"), approves in 49 minutes | KORA / Approval Gate |
+| **4. Policy / Approval Gate** | Marcus reviews the recommendation, adds a note ("I'll join the buyer call myself"), approves in 49 minutes | KORA / Approval Gate |
 | **5. Execution** | Alloy routes: ownership reassigned, buyer email queued, CFO calendar block created, monitoring reactivated | KORA / Execution Record |
 | **6. Outcome** | Buyer responds in 4 hours. Close probability: 74%. Deal reactivated in one business day | KORA / Outcome |
 | **7. Summary** | Executive summary auto-generated: "$4.2M deal reactivated in 25 hours" | KORA / Executive Summary |
@@ -72,7 +72,7 @@ A coordinated credential stuffing attack hits the Auth Service. 2,400 failed log
 | **1. Signal** | Critical alert: 2,400 failed auth attempts in 3 min — CISA KEV match, MITRE T1110.004 | PARAGON / SOC Dashboard |
 | **2. Context** | Threat Twin assembled — 8 signals: identity, CVE, CISA KEV, MITRE, endpoint, network, business impact | PARAGON / Threat Twin |
 | **3. Recommendation** | Sentinel recommends 4-step containment playbook: IP block, rate limit, session rotation, patch. Confidence: 94% | PARAGON / Playbook P-001 |
-| **4. Approval** | Diana approves in 96 seconds. Note: escalate patch to P0, notify legal for GDPR window | PARAGON / Approval Gate |
+| **4. Policy / Approval Gate** | Diana approves in 96 seconds. Note: escalate patch to P0, notify legal for GDPR window | PARAGON / Approval Gate |
 | **5. Execution** | Priya executes: 14 IPs blocked, rate limiting enabled, 3 session tokens rotated, patch scheduled | PARAGON / Execution |
 | **6. Outcome** | Attack contained in 23 minutes. 0 accounts compromised. No data exfiltration. GDPR notification filed | PARAGON / Outcome |
 | **7. Evidence** | Evidence package assembled: firewall logs, attestations, GDPR filing, CVE remediation proof | PARAGON / Evidence Package |
@@ -113,7 +113,7 @@ MV Soltana (a product tanker carrying $3.2M of refined petroleum cargo) goes dar
 | **1. Signal** | Critical AIS dark event: 134-min blackout, position inconsistency, OFAC corridor proximity | SEXTANT / Fleet Dashboard |
 | **2. Context** | Voyage Twin assembled — 7 signals: AIS track, OFAC screening, weather (rules out technical cause), P&L exposure | SEXTANT / Voyage Twin |
 | **3. Recommendation** | Helmsman recommends hold at Karachi anchorage, file voyage incident report, notify P&I Club. Confidence: 91% | SEXTANT / Recommendation |
-| **4. Approval** | James approves in 5 minutes — notes he's calling P&I directly. All steps routed through Alloy | SEXTANT / Approval Gate |
+| **4. Policy / Approval Gate** | James approves in 5 minutes — notes he's calling P&I directly. All steps routed through Alloy | SEXTANT / Approval Gate |
 | **5. Execution** | Master notified, incident report filed (INC-2026-0414-001), P&I notified, charterer ETA revised | SEXTANT / Execution |
 | **6. Outcome** | OFAC clears vessel in 4.5 hours. Voyage resumes. Demurrage $112K recoverable from charterer | SEXTANT / Outcome |
 | **7. Auditor View** | Switch to Robert Tanner — sees full voyage audit trail. Exports compliance package for flag state | SEXTANT / Audit Trail |
@@ -151,7 +151,7 @@ Rivera v. Apex Mobility Group — a personal injury matter with an estimated val
 | **1. Signal** | Clock violation detected — insurer acknowledgement window exceeded by 12 days. NY DFS Reg 68 §216.6 | Counsel / Matter Twin |
 | **2. Context** | 9 signals assembled: deadline status, insurer behavior profile (3 prior violations), demand readiness (91%), settlement band ($418K median), Medicare lien status | Counsel / Context |
 | **3. Recommendation** | Issue formal Reg 68 violation notice with demand packet. Confidence: 93%. Marked attorney work product | Counsel / Recommendation |
-| **4. Approval** | Sophia reviews, adds note about citing prior violations, approves in 44 minutes | Counsel / Approval Gate |
+| **4. Policy / Approval Gate** | Sophia reviews, adds note about citing prior violations, approves in 44 minutes | Counsel / Approval Gate |
 | **5. Execution** | Notice drafted, demand exported to Word with citations, letter transmitted, client notified, 7-day escalation deadline set | Counsel / Execution |
 | **6. Outcome** | Insurer responds in 5 days. Settlement conference scheduled. Pre-conference offer: $395K (vs. median $418K) | Counsel / Outcome |
 | **7. Proof Chain** | Complete, privilege-protected audit trail — every signal, AI action, human approval, document | Counsel / Proof Chain |
@@ -189,7 +189,7 @@ Rivera v. Apex Mobility Group — a personal injury matter with an estimated val
 | **1. Signal** | Compounded distress detected — active lis pendens (136 days) plus newly filed $147K tax lien | DOMAINE / Distress Engine |
 | **2. Context** | Property Twin assembled — 11 signals: title, tax, ownership graph (LLC's other 4 holdings), lender posture, 90-day comps, rent roll, climate band, zoning, permits, owner outreach, auction window | DOMAINE / Property Twin |
 | **3. Recommendation** | Underwriting Copilot recommends defensive offer band $1.95M – $2.10M with $3.45M ARV reserve. Confidence: 91% | DOMAINE / Underwriting Copilot |
-| **4. Approval** | Marcus reviews, approves in 2.5 hours, notes to pull fresh title abstract and watchlist the LLC's other properties | DOMAINE / Approval Review |
+| **4. Policy / Approval Gate** | Marcus reviews, approves in 2.5 hours, notes to pull fresh title abstract and watchlist the LLC's other properties | DOMAINE / Approval Review |
 | **5. Execution** | Diligence file opened, title ordered, offer letter generated, comps exported, rent roll abstracted, watchlist created, SPV staged | DOMAINE / Diligence Room |
 | **6. Outcome** | Owner counters at $2.18M in 6 days. LOI signed at $2.05M. Closing scheduled 2026-06-12 | DOMAINE / Pipeline |
 | **7. Proof Chain** | Every signal, every AI action, every approval, every diligence step logged with actor attribution | DOMAINE / Trust & Provenance |

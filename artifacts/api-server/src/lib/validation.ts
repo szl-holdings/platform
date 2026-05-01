@@ -977,6 +977,7 @@ export const listQuerySchema = z.object({
   status: z.string().max(100).optional(),
   type: z.string().max(100).optional(),
   domain: z.string().max(100).optional(),
+  eventClass: z.string().max(150).optional(),
   orgId: z.coerce.number().int().positive().optional(),
   sort: z.string().max(100).optional(),
   order: z.enum(["asc", "desc"]).optional(),
