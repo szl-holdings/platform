@@ -9,7 +9,8 @@
     "start": "node --enable-source-maps dist/server.js",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --config vitest.config.ts",
+    "smoke:lanes": "tsx scripts/smoke-lanes.ts"
   },
   "dependencies": {
     "@szl-holdings/workflow-runtime": "workspace:*",
@@ -18,12 +19,18 @@
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/policy-guard": "workspace:*",
+    "@workspace/aef-evals": "workspace:*",
+    "@workspace/aef-retrieval-core": "workspace:*",
+    "@workspace/alloy-embed-worker": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
     "express": "^5",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "catalog:",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.2.2",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

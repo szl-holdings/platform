@@ -26,14 +26,15 @@
  *
  *   POST   /v1/search/hybrid           — hybrid semantic + keyword search
  *
- *   POST   /v1/embed                   — generate dense embeddings
- *   POST   /v1/rerank                  — cross-encoder passage reranking
- *   POST   /v1/openai/embeddings       — OpenAI-compatible embedding shim
+ *   POST   /v1/embed                   — generate dense embeddings (DevHashEmbeddingBackend)
+ *   POST   /v1/rerank                  — cross-encoder passage reranking (term-overlap)
+ *   POST   /v1/openai/embeddings       — OpenAI-compatible embedding shim (real vectors)
  *
  *   POST   /v1/index/rebuild           — trigger full index rebuild
  *   GET    /v1/index/verify            — verify index integrity + shard health
  *
- *   POST   /v1/evals/run               — run an evaluation suite
+ *   POST   /v1/evals/run               — run an evaluation suite (sync or async)
+ *   GET    /v1/evals/:evalRunId        — fetch status + results of a persisted eval run
  */
 import { Router } from 'express';
 import { apiKeyGuard } from './middleware/auth.js';
@@ -59,7 +60,7 @@ const V1_ENDPOINTS = {
   search: ['POST /v1/search/hybrid'],
   embeddings: ['POST /v1/embed', 'POST /v1/rerank', 'POST /v1/openai/embeddings'],
   index: ['POST /v1/index/rebuild', 'GET /v1/index/verify'],
-  evals: ['POST /v1/evals/run'],
+  evals: ['POST /v1/evals/run', 'GET /v1/evals/:evalRunId'],
 };
 
 const ALL_V1_ENDPOINTS = Object.values(V1_ENDPOINTS).flat();

@@ -343,6 +343,18 @@ importers:
       '@szl-holdings/workflow-runtime':
         specifier: workspace:*
         version: link:../../packages/workflow-runtime
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/aef-domain-profiles
+      '@workspace/aef-evals':
+        specifier: workspace:*
+        version: link:../../packages/aef-evals
+      '@workspace/aef-retrieval-core':
+        specifier: workspace:*
+        version: link:../../packages/aef-retrieval-core
+      '@workspace/alloy-embed-worker':
+        specifier: workspace:*
+        version: link:../../workers/alloy-embed-worker
       express:
         specifier: ^5
         version: 5.2.1
@@ -356,6 +368,12 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      '@types/supertest':
+        specifier: ^6.0.2
+        version: 6.0.3
+      supertest:
+        specifier: ^7.2.2
+        version: 7.2.2
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
@@ -8883,6 +8901,9 @@ packages:
 
   '@types/supercluster@7.1.3':
     resolution: {integrity: sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA==}
+
+  '@types/supertest@6.0.3':
+    resolution: {integrity: sha512-8WzXq62EXFhJ7QsH3Ocb/iKQ/Ty9ZVWnVzoTKc9tyyFRRF3a74Tk2+TLFgaFFw364Ere+npzHKEJ6ga2LzIL7w==}
 
   '@types/supertest@7.2.0':
     resolution: {integrity: sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw==}
@@ -19058,6 +19079,11 @@ snapshots:
   '@types/supercluster@7.1.3':
     dependencies:
       '@types/geojson': 7946.0.16
+
+  '@types/supertest@6.0.3':
+    dependencies:
+      '@types/methods': 1.1.4
+      '@types/superagent': 8.1.9
 
   '@types/supertest@7.2.0':
     dependencies:

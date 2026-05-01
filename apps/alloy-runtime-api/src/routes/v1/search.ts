@@ -17,56 +17,26 @@
 import { randomUUID } from 'node:crypto';
 import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { buildBM25Doc, runBM25Query } from '../../bm25.js';
 import { runStore } from '../../store.js';
 
+/**
+ * Shared search-lane callable — builds BM25 docs from a raw corpus and runs
+ * the keyword query. Exported so the evals lane can exercise the exact same
+ * retrieval path over its fixture corpus rather than calling the BM25
+ * primitives directly.
+ */
+export function buildAndSearchCorpus(
+  corpus: Array<{ id: string; parts: string[]; metadata: Record<string, unknown> }>,
+  query: string,
+  topK: number,
+  minScore = 0,
+): Array<{ id: string; score: number; metadata: Record<string, unknown> }> {
+  const docs = corpus.map(({ id, parts, metadata }) => buildBM25Doc(id, parts.filter(Boolean), metadata));
+  return runBM25Query(docs, query, topK, minScore);
+}
+
 const router: IRouter = Router();
-
-// ─── BM25 implementation ───────────────────────────────────────────────────────
-
-const BM25_K1 = 1.5;
-const BM25_B = 0.75;
-
-function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, ' ')
-    .split(/\s+/)
-    .filter((t) => t.length > 1);
-}
-
-interface BM25Doc {
-  id: string;
-  text: string;
-  tokens: string[];
-  tf: Map<string, number>;
-  metadata: Record<string, unknown>;
-}
-
-function buildDoc(id: string, parts: string[], metadata: Record<string, unknown>): BM25Doc {
-  const text = parts.join(' ');
-  const tokens = tokenize(text);
-  const tf = new Map<string, number>();
-  for (const t of tokens) tf.set(t, (tf.get(t) ?? 0) + 1);
-  return { id, text, tokens, tf, metadata };
-}
-
-function bm25Score(
-  doc: BM25Doc,
-  queryTokens: string[],
-  idf: Map<string, number>,
-  avgDocLen: number,
-): number {
-  let score = 0;
-  for (const term of queryTokens) {
-    const tf = doc.tf.get(term) ?? 0;
-    if (tf === 0) continue;
-    const termIdf = idf.get(term) ?? 0;
-    const numerator = tf * (BM25_K1 + 1);
-    const denominator = tf + BM25_K1 * (1 - BM25_B + BM25_B * (doc.tokens.length / avgDocLen));
-    score += termIdf * (numerator / denominator);
-  }
-  return score;
-}
 
 // ─── Request schema ────────────────────────────────────────────────────────────
 // Accepts the full AEF HybridSearchRequest shape; fields not used by the
@@ -117,7 +87,7 @@ router.post('/hybrid', (req: Request, res: Response): void => {
   const runs = runStore.list(tenantId);
 
   // 2. Build BM25 documents from run metadata
-  const docs: BM25Doc[] = runs.map((run) => {
+  const docs = runs.map((run) => {
     const parts: string[] = [
       run.runId,
       run.state ?? '',
@@ -132,7 +102,7 @@ router.post('/hybrid', (req: Request, res: Response): void => {
     for (const [k, v] of Object.entries(meta)) {
       if (typeof v === 'string' && v.length < 500) parts.push(`${k}: ${v}`);
     }
-    return buildDoc(run.runId, parts.filter(Boolean), {
+    return buildBM25Doc(run.runId, parts.filter(Boolean), {
       runId: run.runId,
       status: run.state,
       tenantId,
@@ -150,55 +120,34 @@ router.post('/hybrid', (req: Request, res: Response): void => {
     );
   }
 
-  // 4. BM25 scoring
-  const queryTokens = tokenize(query);
-  const scored: Array<{ doc: BM25Doc; score: number }> = [];
-
-  if (queryTokens.length > 0 && candidates.length > 0) {
-    const avgDocLen =
-      candidates.reduce((s, d) => s + d.tokens.length, 0) / candidates.length;
-
-    // IDF per query token
-    const idf = new Map<string, number>();
-    for (const term of queryTokens) {
-      const df = candidates.filter((d) => d.tf.has(term)).length;
-      idf.set(term, Math.log((candidates.length - df + 0.5) / (df + 0.5) + 1));
-    }
-
-    for (const doc of candidates) {
-      const score = bm25Score(doc, queryTokens, idf, avgDocLen);
-      if (score > 0) scored.push({ doc, score });
-    }
-    scored.sort((a, b) => b.score - a.score);
-  }
-
-  // 5. Score threshold filter and top-K selection
+  // 4. BM25 scoring via shared helper
   const minScore = scoreThreshold ?? 0;
-  const hits = scored
-    .filter((r) => r.score >= minScore)
-    .slice(0, topK)
-    .map(({ doc, score }) => {
-      const keywordScore = Math.round(score * 1000) / 1000;
-      return {
-        // AEF SearchHit required fields
-        chunkId: doc.id,
-        sourceId: doc.id,
-        text: doc.text.slice(0, 500),
-        keywordScore,
-        fusedScore: keywordScore,
-        finalScore: keywordScore,
-        boostApplied: false,
-        metadata: doc.metadata,
-        // Provenance fields
-        traceId,
-        retrievalPath: [...KEYWORD_RETRIEVAL_PATH],
-        sourceType: 'workflow_run',
-      };
-    });
+  const scored = runBM25Query(candidates, query, topK, minScore);
+
+  const hits = scored.map(({ id, score, metadata }) => {
+    const keywordScore = Math.round(score * 1000) / 1000;
+    const statusPart = metadata['status'] ? ` — status: ${String(metadata['status'])}` : '';
+    const textSnippet = `run: ${String(metadata['runId'] ?? id)}${statusPart}`;
+    return {
+      // AEF SearchHit required fields
+      chunkId: id,
+      sourceId: id,
+      text: textSnippet,
+      keywordScore,
+      fusedScore: keywordScore,
+      finalScore: keywordScore,
+      boostApplied: false,
+      metadata,
+      // Provenance fields
+      traceId,
+      retrievalPath: [...KEYWORD_RETRIEVAL_PATH],
+      sourceType: 'workflow_run',
+    };
+  });
 
   const processingMs = Date.now() - t0;
 
-  // 6. AEF HybridSearchResponse envelope
+  // 5. AEF HybridSearchResponse envelope
   res.status(200).json({
     requestId,
     tenantId,
