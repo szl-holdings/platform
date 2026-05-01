@@ -226,6 +226,12 @@ const PUBLIC_PREFIXES = [
   // demo UI in A11oy/Sentra/Amaru calls these endpoints from the browser
   // before any session exists. Compute-only; no data is read or written.
   "/api/sigil/",
+  // Ouroboros · Gauß axis ONLY — operationalised v5 primitives 17 + 20.
+  // Same compute-only posture as /api/sigil/ (stateless, Zod-validated, no
+  // PII). The broader /api/ouroboros/ tree includes stateful routes
+  // (anchor append/batch, fleet audit, reconcile-handoff) that MUST keep
+  // their normal auth posture, so this allowlist is narrowed to gauss.
+  "/api/ouroboros/gauss/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",

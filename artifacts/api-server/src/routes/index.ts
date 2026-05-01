@@ -540,4 +540,16 @@ router.use(lazyMatch("/eval-registry", () => import("./eval-registry"), "eval-re
 // POST /sigil/saturation
 router.use(lazyRegisterMatch(["/sigil"], () => import("./sigil"), "sigil"));
 
+// Ouroboros · Gauß axis — operational port of v5 primitives 17 + 20
+// GET  /ouroboros/gauss/health
+// POST /ouroboros/gauss/fit
+// POST /ouroboros/gauss/residuals
+router.use(
+  lazyRegisterMatch(
+    ["/ouroboros/gauss"],
+    () => import("./ouroboros-gauss"),
+    "ouroboros-gauss",
+  ),
+);
+
 export default router;

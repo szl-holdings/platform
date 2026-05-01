@@ -43,7 +43,7 @@ export type GenAIOperationName =
 const HORIZON_NS = "ouroboros.horizon";
 
 export interface BridgeConfig {
-  /** Tracer name; defaults to "@workspace/horizon". */
+  /** Tracer name; defaults to "@workspace/ouroboros-horizon". */
   readonly tracerName?: string;
   /** Tracer version; defaults to package version. */
   readonly tracerVersion?: string;
@@ -57,7 +57,7 @@ export class HorizonOtelBridge {
 
   constructor(cfg: BridgeConfig = {}) {
     this.tracer = trace.getTracer(
-      cfg.tracerName ?? "@workspace/horizon",
+      cfg.tracerName ?? "@workspace/ouroboros-horizon",
       cfg.tracerVersion ?? "0.1.0",
     );
   }

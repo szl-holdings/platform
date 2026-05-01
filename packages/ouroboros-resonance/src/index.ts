@@ -1,5 +1,5 @@
 /**
- * @workspace/resonance — Tesla-physics-derived primitives for inter-loop
+ * @workspace/ouroboros-resonance — Tesla-physics-derived primitives for inter-loop
  * coupling.
  *
  * Five primitives:
@@ -9,7 +9,7 @@
  *   - Kuramoto (multi-agent phase coherence)    dθ/dt = ω + (K/N)Σ sin(θj−θi)
  *   - Peak-vs-RMS (alerting correctness)        E_rms = 0.7071·E_peak
  *
- * Companion to @workspace/horizon (black-hole-physics primitives).
+ * Companion to @workspace/ouroboros-horizon (black-hole-physics primitives).
  * Together they govern the loop's lifetime AND the loop-to-loop handoff.
  */
 

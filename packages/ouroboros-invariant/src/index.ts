@@ -1,5 +1,5 @@
 /**
- * @workspace/invariant — the Lutar Invariant.
+ * @workspace/ouroboros-invariant — the Lutar Invariant.
  *
  * The single closed-form scalar Λ ∈ [0,1] that compounds Cleanliness,
  * Horizon, Resonance, and Frustum into one runtime-trust number, with

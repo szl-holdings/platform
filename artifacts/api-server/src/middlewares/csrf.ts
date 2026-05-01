@@ -131,6 +131,11 @@ function isExempt(path: string): boolean {
   // payloads from the browser before a session exists. Rate-limited
   // by the global limiter; no CSRF risk surface.
   if (path.startsWith('/api/sigil/')) return true;
+  // Ouroboros · Gauß axis ONLY — operationalised v5 primitives 17 + 20.
+  // Pure compute, Zod-validated, no PII or session. Other /api/ouroboros/*
+  // routes (anchor append/batch, fleet audit, etc.) are stateful and MUST
+  // continue to require CSRF, so we narrow this exemption to the gauss path.
+  if (path.startsWith('/api/ouroboros/gauss/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

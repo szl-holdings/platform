@@ -908,3 +908,50 @@ parameter, Egyptian doubling) are public-domain. SZL's contribution
 is the four-axis choice tailored to the A11oy/Sentra/Amaru platform
 surface, the rational-weight gate at every composition boundary, the
 calibrated thresholds, and the SZL-original framework name and API.
+
+## Ouroboros v5 ingestion — 24 packages, 95 src + 98 tests + 10 examples (2026-05-01)
+
+The "Ouroboros Unified Payload v5" was ingested operationally from
+`/tmp/ouroboros-payload-v5`. Twenty-four TypeScript packages live under
+`packages/ouroboros-*` (one Python runtime parked at `vendor/ouroboros-py/`
+to keep it out of the pnpm workspace), the `thales.ts` primitive was
+merged into `packages/reconciliation/src/`, and 24 specification
+markdown files landed under `docs/ouroboros-v5/`.
+
+  packages/ouroboros-{adapters, alloy, anchor, anduril, aristotle, bench,
+                     blanca, davinci, emerald, flashforge, fractional,
+                     gauss, horizon, integrations, invariant, jung,
+                     lara, newton, oppenheimer, resonance, socrates,
+                     theosophy, trithemius, verifier}
+
+Aristotle alone ships twelve named logic-gate primitives, each paired
+with its own vitest file (apagoge, aphairesis, axiom-posit-separator,
+hoti-dioti, kath-hauto, koinai-archai, metabasis-prohibition,
+pnc-bedrock-axiom-guard, potential-infinite-only, qua-realism,
+subalternation-license, sunecheia-whole-priority).
+
+To prove the payload is operational and not just scaffolded, the Gauß
+axis (Primitives 17 + 20 — least-squares network adjustment + Jarque–Bera
+residual fit) was ported into the api-server and exposed publicly:
+
+  Lib:   artifacts/api-server/src/lib/ouroboros-gauss/{index,least-squares,residual-fit}.ts
+  Tests: artifacts/api-server/src/lib/ouroboros-gauss/__tests__/least-squares.test.ts (6 passing)
+  API:   /api/ouroboros/gauss/{health,fit,residuals} (public, Zod-validated, stateless)
+
+The closure axis G = exp(−‖r‖²₂ / (m·σ²)) ∈ (0,1] is designed to drop
+straight into the SIGIL envelope as an additional convergence-style
+input. CSRF and the global auth enforcer treat `/api/ouroboros/gauss/`
+*only* with the same compute-only posture as `/api/sigil/` — the broader
+`/api/ouroboros/` tree contains stateful routes (anchor append/batch,
+fleet audit, reconcile-handoff) that intentionally retain their normal
+auth + CSRF posture.
+
+The mathematics is public-domain Gauß (Theoria combinationis 1823 /
+Theoria motus 1809, sourced from Cod. Ms. Gauß at SUB Göttingen,
+Kalliope DE-611-BF-61709). The SZL contribution is the operational
+endpoint, the closure-axis mapping, the Zod surface, and the framework
+naming and code organisation.
+
+The remaining twenty-three packages are scaffolded with sources, tests,
+and examples in place; further axes will be promoted into api-server
+endpoints incrementally as they are operationalised.

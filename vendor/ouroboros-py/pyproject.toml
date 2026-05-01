@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ouroboros"
+version = "4.3.0"
+description = "Ouroboros runtime trust envelope — Python SDK. Cleanliness, Horizon, Resonance, Reconciliation, compounded by the Lutar Invariant Λ."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "BUSL-1.1" }
+authors = [
+  { name = "Stephen P. Lutar", email = "rosalutar@gmail.com" },
+]
+keywords = ["ai-safety", "runtime-trust", "lutar-invariant", "page-curve", "egyptian-mathematics", "nist-ai-rmf"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Security :: Cryptography",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.6"]
+
+[project.urls]
+Homepage = "https://github.com/szl-holdings/ouroboros"
+Repository = "https://github.com/szl-holdings/ouroboros"
+Documentation = "https://github.com/szl-holdings/ouroboros#readme"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ouroboros*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

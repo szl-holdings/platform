@@ -1,5 +1,5 @@
 /**
- * @workspace/horizon — public API surface.
+ * @workspace/ouroboros-horizon — public API surface.
  *
  * Five primitives, one bridge:
  *   - PageCurveTracker          : information conservation across a loop's lifetime
@@ -15,7 +15,7 @@
  *     PageCurveTracker, computeNoHair, WitnessChain, verifyDualWitness,
  *     buildEntanglementGraph, computeCapacityHorizon,
  *     HorizonOtelBridge, attachAllHorizon, asLoopId,
- *   } from "@workspace/horizon";
+ *   } from "@workspace/ouroboros-horizon";
  */
 
 export type {
