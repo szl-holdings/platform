@@ -745,3 +745,137 @@ Schema bounds (architect-required, post-fix):
 - `artifacts/a11oy/src/pages/Ouroboros.tsx` — frustum scenarios picker
 - `artifacts/conduit/src/pages/ouroboros.tsx` — seked + unit-fraction
 - `artifacts/sentra/src/pages/ouroboros.tsx` — HSM doubling anchor
+
+## 2026-05-01 — Debug, stress & infrastructure audit (post Cog-Reflex)
+
+Comprehensive end-to-end debug pass on Amaru, A11oy and Sentra after the
+Cognitive Reflexivity Engine landed (#4570–#4572). Goal: find every real
+runtime defect, fix the cheap ones, document the rest. **No frontend
+polish in this pass — that is its own track.**
+
+### Real bugs found and fixed
+
+1. **`sentra_incidents` / `sentra_alerts` tables missing in production.**
+   Schema existed at `lib/db/src/schema/sentra.ts` but no migration was
+   ever generated, so `/api/sentra/{incidents,alerts,summary}` returned
+   500. Fixed via new idempotent migration
+   `lib/db/drizzle/0152_sentra_tables.sql` (CREATE TABLE IF NOT EXISTS,
+   safe to replay) + a 4-incident / 5-alert seed. All three endpoints
+   now return 200.
+
+2. **`a11oy_defense_payloads` table missing.** Same pattern — schema at
+   `lib/db/src/schema/a11oy_defense.ts`, no migration. All six
+   `/api/internal/a11oy/defense/<slug>` endpoints (precision-ai,
+   weaponized-intel, agent-zero-trust, atlas-shield, swarm-orchestrator,
+   playbook-engine) returned 500 on first hit (their auto-seed-on-read
+   INSERT failed). Fixed via `lib/db/drizzle/0153_a11oy_defense_payloads.sql`.
+   All six slugs now return 200 with seeded baseline payloads (5–10 KB).
+
+### Stress / load tests passed
+
+- **50 parallel reads** across `/api/sentra/{incidents,alerts,summary}`,
+  `/api/conduit/{stats,connections,syncs,templates}`,
+  `/api/cognitive-reflexivity/health`, `/api/health`: 0/30 failures,
+  all p95 < 5.2 s.
+- **20 sequential POSTs** to `/api/sentra/incidents` (with CSRF):
+  20/20 succeeded, total 2.0 s, accumulator now at 24 incidents.
+- **20 sequential POSTs** to `/api/ouroboros/amaru/observe-metric`
+  (correct schema: `metricId` + `horizontal` + `vertical` per Egyptian
+  seked geometry): 20/20 succeeded, total 2.3 s.
+- **20 sequential POSTs** to `/api/ouroboros/sentra/anchor-event`
+  (correct schema: `eventId` + `leafHash`): 20/20 succeeded, total 2.3 s.
+  Anchor accumulator advanced to eventCount=20 with prime modulus
+  preserved.
+
+### Frontend smoke (page-load only, anonymous viewer)
+
+| App     | Routes hit                                       | Result |
+|---------|--------------------------------------------------|--------|
+| A11oy   | `/`, `/platform`, `/architecture`                | 200 ×3, root-mount present |
+| Amaru   | `/`, `/dashboard`, `/syncs`, `/templates`        | 200 ×4, `/syncs` shows clean empty-state |
+| Sentra  | `/`, `/slides`, `/marketing`                     | 200 ×3 |
+
+### Pre-existing UX gap (not regressing — flagging for a later pass)
+
+- **Sentra `/incidents` and other `/aegis/*`-backed pages spin forever
+  for anonymous viewers.** Page calls `/api/aegis/incidents` via
+  `useStandardQuery`; that endpoint is auth-gated by design and returns
+  401. The page swallows the 401 and stays on `<Loader2 spinner />`.
+  Correct fix is `isError` / `unauthorized` state handling in
+  `artifacts/sentra/src/pages/incidents-page.tsx` (and sister pages).
+  **Out of scope for this debug pass; tracked for the FE polish phase.**
+
+### Triaged false positives (looked like bugs, were by-design)
+
+- `/api/cognitive-reflexivity/*` (strategies, traces, recent-signals,
+  observations, telemetry, strategies/:id/{approve,reject}) returning
+  401 to anonymous: route-level `authMiddleware()` + `requireRole()` is
+  intentional even though `/api/cognitive-reflexivity/` is in
+  `PUBLIC_PREFIXES`. The prefix is only for path-level lookup; the
+  routes still apply per-handler auth. The single fully-anonymous
+  endpoint is `/api/cognitive-reflexivity/health`. Earlier replit.md
+  notes describing the prefix as fully-public were too broad —
+  corrected here.
+- `/api/a11oy/health` 404: no FE actually calls it; the dashboard uses
+  `/api/health` (200) and `/api/cognitive-reflexivity/health` (200).
+- `/sentra/aegis` 404: `/aegis` is not a registered FE route; the
+  Investor Deck page is at `/sentra/slides` and resolves correctly.
+
+### Ouroboros API contract clarification (saved to avoid future
+churn)
+
+- `POST /api/ouroboros/amaru/observe-metric` requires
+  `{ metricId, horizontal, vertical }` (frustum geometry) — not
+  `{ connector, metric, value, thresholdLow, thresholdHigh }`.
+- `POST /api/ouroboros/sentra/anchor-event` requires
+  `{ eventId, leafHash }` at the top level (not wrapped in `{ event: ... }`).
+  `leafHash` accepts decimal/hex string ≤ 80 chars or non-negative int.
+
+### Database schema state (post-pass)
+
+```
+a11oy_defense_payloads               (NEW — 0153)
+cognitive_reflexive_decision_traces  (0151)
+cognitive_reflexive_strategies       (0151)
+conduit_connections, conduit_syncs,
+conduit_sync_runs, conduit_sync_run_rows,
+conduit_sync_mappings, conduit_templates  (pre-existing)
+sentra_alerts, sentra_incidents      (NEW — 0152)
+```
+
+### Open observations (not bugs)
+
+- `vite-plugin-dev-banner` MIME-type warning in browser logs is a known
+  Replit dev-server cosmetic issue, not affecting runtime.
+- `WebSocket connection to ws://localhost:443/...` errors in the iframe
+  are HMR sockets that the dev proxy does not pipe — irrelevant to the
+  app, refresh still works.
+
+### Files added/touched in this pass
+
+- NEW `lib/db/drizzle/0152_sentra_tables.sql`
+- NEW `lib/db/drizzle/0153_a11oy_defense_payloads.sql`
+- NEW screenshots: `screenshots/{a11oy,amaru,sentra}_before.jpg`,
+  `screenshots/amaru_syncs.jpg`, `screenshots/sentra_aegis.jpg`,
+  `screenshots/sentra_incidents.jpg`
+- NEW reference shots: `attached_assets/screenshots/{anthropic_com,lambda_ai}.png`
+
+### Migration-flow note (architect feedback)
+
+Production migrate workflow uses `lib/db/scripts/non-interactive-migrate.mjs`
+which wraps `drizzle-kit push --force`. That command derives the target
+schema from `lib/db/src/schema/index.ts` (which re-exports both
+`./sentra` and `./a11oy_defense`), so a fresh deploy creates these
+tables automatically from the TypeScript schema definitions — the
+hand-written SQL in `lib/db/drizzle/0152_*.sql` and `0153_*.sql` are
+explicit, idempotent safety-nets that match the TS definitions and were
+applied directly here because this dev DB had never been re-pushed
+since those schema files landed.
+
+The `lib/db/drizzle/meta/_journal.json` only goes through `0147` —
+entries `0148–0153` are intentionally absent because the codebase has
+not yet reconciled the journal with the SQL file tree. This is a
+pre-existing parked task explicitly called out in the
+`non-interactive-migrate.mjs` docstring, NOT something this pass
+introduced. Future task: regenerate the journal and switch the workflow
+to `drizzle-kit migrate` for full reproducibility.
