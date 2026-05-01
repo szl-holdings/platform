@@ -21,9 +21,17 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-let _selectQueue: unknown[][] = [];
+type SelectResult = unknown[] | Error;
+let _selectQueue: SelectResult[] = [];
 let _updateSetArgs: unknown[] = [];
 let _updateReturnQueue: unknown[][] = [];
+
+class InvalidIdError extends Error {
+  constructor() {
+    super('Invalid ID parameter');
+    this.name = 'InvalidIdError';
+  }
+}
 
 vi.mock('@szl-holdings/db', () => {
   const lyteActionsTable = {
@@ -39,16 +47,18 @@ vi.mock('@szl-holdings/db', () => {
   } as Record<string, unknown>;
 
   function makeSelectChain() {
-    const result = (_selectQueue.shift() ?? []) as unknown[];
+    const result = _selectQueue.shift() ?? [];
+    const finalize = () =>
+      result instanceof Error ? Promise.reject(result) : Promise.resolve(result);
     const chain: Record<string, unknown> = {};
     chain.from = () => chain;
     chain.where = () => chain;
     chain.orderBy = () => chain;
     chain.limit = () => chain;
-    chain.offset = () => Promise.resolve(result);
+    chain.offset = () => finalize();
     chain.then = (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-      Promise.resolve(result).then(resolve, reject);
-    chain.catch = (rej: (e: unknown) => unknown) => Promise.resolve(result).catch(rej);
+      finalize().then(resolve, reject);
+    chain.catch = (rej: (e: unknown) => unknown) => finalize().catch(rej);
     return chain;
   }
 
@@ -107,25 +117,24 @@ vi.mock('drizzle-orm', () => ({
   }),
 }));
 
-vi.mock('../../middlewares/auth', () => ({
+const _authMockExports = {
   authMiddleware: () => (_req: unknown, _res: unknown, next: () => void) => next(),
   denyIfReadOnly: () => (_req: unknown, _res: unknown, next: () => void) => next(),
   requireRole:
     (..._roles: string[]) =>
     (_req: unknown, _res: unknown, next: () => void) =>
       next(),
-  parseIdParam: (id: string) => parseInt(id, 10),
-}));
+  parseIdParam: (raw: string | string[]) => {
+    const str = Array.isArray(raw) ? raw[0]! : raw;
+    const id = parseInt(str, 10);
+    if (Number.isNaN(id) || id < 1) throw new InvalidIdError();
+    return id;
+  },
+  InvalidIdError,
+};
 
-vi.mock('../../middlewares/auth.js', () => ({
-  authMiddleware: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-  denyIfReadOnly: () => (_req: unknown, _res: unknown, next: () => void) => next(),
-  requireRole:
-    (..._roles: string[]) =>
-    (_req: unknown, _res: unknown, next: () => void) =>
-      next(),
-  parseIdParam: (id: string) => parseInt(id, 10),
-}));
+vi.mock('../../middlewares/auth', () => _authMockExports);
+vi.mock('../../middlewares/auth.js', () => _authMockExports);
 
 vi.mock('../../lib/pubsub-bridge.js', () => ({
   broadcastWs: vi.fn(),
@@ -480,5 +489,86 @@ describe('PATCH /lyte/actions/:id — state transition and stateHistory', () => 
     expect(row.evidence[0].label).toBe('Risk Score');
     expect(Array.isArray(row.auditHistory)).toBe(true);
     expect(row.auditHistory[0].action).toBe('Transitioned to assigned');
+  });
+});
+
+describe('Action queue error paths — invalid input and DB failures', () => {
+  beforeEach(() => {
+    _selectQueue = [];
+    _updateSetArgs = [];
+    _updateReturnQueue = [];
+  });
+
+  it('PATCH /lyte/actions/abc rejects non-numeric ID with a structured 400 error', async () => {
+    const app = await buildApp({ displayName: 'Operator' });
+    const res = await request(app)
+      .patch('/lyte/actions/abc')
+      .set('Content-Type', 'application/json')
+      .send({ state: 'acknowledged' });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+    expect(typeof res.body.error).toBe('string');
+    expect(res.body.error).toMatch(/invalid id/i);
+    expect(res.body.code).toBe('BAD_REQUEST');
+    // No DB lookup or update should have run for an invalid ID.
+    expect(_updateSetArgs.length).toBe(0);
+  });
+
+  it('PATCH /lyte/actions/:id with an empty body returns 200 (no required fields)', async () => {
+    const app = await buildApp({ displayName: 'Operator' });
+    const current = makeActionRow({ id: 50, state: 'new', stateHistory: [] });
+    // Update returns the row unchanged — only stateHistory + updatedAt are set.
+    _selectQueue = [[current]];
+    _updateReturnQueue = [[current]];
+    const res = await request(app)
+      .patch('/lyte/actions/50')
+      .set('Content-Type', 'application/json')
+      .send({});
+    expect(res.status).toBe(200);
+    const row = res.body.data ?? res.body;
+    expect(row.id).toBe(50);
+    expect(_updateSetArgs.length).toBe(1);
+    const setArg = _updateSetArgs[0] as Record<string, unknown>;
+    // No state was supplied, so no state-transition fields should be set.
+    expect(setArg).not.toHaveProperty('state');
+    expect(setArg).not.toHaveProperty('resolvedAt');
+    expect(setArg).toHaveProperty('updatedAt');
+    // stateHistory is still rewritten to its existing value (no new entry).
+    const history = setArg.stateHistory as unknown[];
+    expect(Array.isArray(history)).toBe(true);
+    expect(history.length).toBe(0);
+  });
+
+  it('PATCH /lyte/actions/:id rejects an unknown state value with 400 before any DB write', async () => {
+    const app = await buildApp({ displayName: 'Operator' });
+    // No select queue entries — the route should NEVER reach the DB lookup,
+    // because state validation runs before the select.
+    const res = await request(app)
+      .patch('/lyte/actions/55')
+      .set('Content-Type', 'application/json')
+      .send({ state: 'frobnicated' });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+    expect(typeof res.body.error).toBe('string');
+    expect(res.body.error).toMatch(/invalid state/i);
+    expect(res.body.error).toMatch(/frobnicated/);
+    expect(res.body.code).toBe('BAD_REQUEST');
+    // No update should have run.
+    expect(_updateSetArgs.length).toBe(0);
+  });
+
+  it('GET /lyte/actions returns a structured 500 when the DB throws unexpectedly', async () => {
+    const app = await buildApp();
+    // Both parallel select chains reject — Promise.all rejects on the first.
+    const dbErr = new Error('connection terminated unexpectedly');
+    _selectQueue = [dbErr, dbErr];
+    const res = await request(app).get('/lyte/actions');
+    expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty('error');
+    expect(typeof res.body.error).toBe('string');
+    expect(res.body.error).toMatch(/failed to list actions/i);
+    expect(res.body.code).toBe('INTERNAL_ERROR');
+    expect(res.body).toHaveProperty('requestId');
+    expect(res.body).toHaveProperty('correlationId');
   });
 });

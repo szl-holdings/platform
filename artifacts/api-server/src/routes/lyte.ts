@@ -34,6 +34,7 @@ import type { z } from 'zod';
 import {
   handleRouteError,
   parsePagination,
+  sendBadRequest,
   sendError,
   sendNotFound,
   sendSuccess,
@@ -778,6 +779,16 @@ router.post(
   },
 );
 
+const ALLOWED_ACTION_STATES = [
+  'new',
+  'acknowledged',
+  'assigned',
+  'escalated',
+  'resolved',
+  'dismissed',
+] as const;
+type ActionState = (typeof ALLOWED_ACTION_STATES)[number];
+
 router.patch(
   '/lyte/actions/:id',
   authMiddleware(),
@@ -786,6 +797,21 @@ router.patch(
   async (req, res) => {
     try {
       const id = parseIdParam(req.params.id);
+
+      const { state, assignedTo, notes } = req.body as {
+        state?: string;
+        assignedTo?: string;
+        notes?: string;
+      };
+
+      if (state !== undefined && !ALLOWED_ACTION_STATES.includes(state as ActionState)) {
+        sendBadRequest(
+          res,
+          `Invalid state value '${state}'. Allowed: ${ALLOWED_ACTION_STATES.join(', ')}`,
+        );
+        return;
+      }
+
       const current = await db
         .select()
         .from(lyteActionsTable)
@@ -795,12 +821,6 @@ router.patch(
         sendNotFound(res, 'Action');
         return;
       }
-
-      const { state, assignedTo, notes } = req.body as {
-        state?: string;
-        assignedTo?: string;
-        notes?: string;
-      };
       const actor = req.user?.displayName ?? 'operator';
 
       type AuditEntry = {
