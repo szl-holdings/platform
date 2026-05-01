@@ -355,6 +355,14 @@ export async function deletePin(id: string): Promise<boolean> {
   return true;
 }
 
+// ─── Test helper ──────────────────────────────────────────────────────────────
+
+export function _resetForTest(): void {
+  geoPinStore.clear();
+  hydrated = false;
+  hydratePromise = null;
+}
+
 // ─── Bootstrap: hydrate on module load ────────────────────────────────────────
 //
 // Mirrors the rf-intel-store pattern. The promise is awaited lazily on the
