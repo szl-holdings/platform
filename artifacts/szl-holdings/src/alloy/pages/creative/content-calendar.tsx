@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Briefcase, Calendar, Linkedin, Loader2, type LucideProps, Twitter } from 'lucide-react';
+import { Briefcase, Calendar, Users as Linkedin, Loader2, type LucideProps, MessageCircle as Twitter } from 'lucide-react';
 import type * as React from 'react';
 import { useState } from 'react';
 import { useCampaigns } from '@/alloy/hooks/use-campaigns';
