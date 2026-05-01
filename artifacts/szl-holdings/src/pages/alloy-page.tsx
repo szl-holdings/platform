@@ -16,7 +16,7 @@ const OPERATING_LOOP = [
     phase: "Ingestion",
     step: "01",
     icon: Database,
-    description: "Counsel receives structured signal feeds from all connected packs and integrations — Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+    description: "Counsel receives structured signal feeds from all connected packs and integrations — Counsel, DOMAINE, SEXTANT, PARAGON, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
   },
   {
     phase: "Normalization",
@@ -34,7 +34,7 @@ const OPERATING_LOOP = [
     phase: "Recommendation",
     step: "04",
     icon: Layers,
-    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and cross-domain impact. The action queue updates continuously as new signals arrive and conditions change.",
+    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and cross-domain impact. The Approval Queue updates continuously as new signals arrive and conditions change.",
   },
   {
     phase: "Routing",
@@ -97,7 +97,7 @@ const CAPABILITIES = [
   {
     icon: Layers,
     title: "Signal Normalization",
-    body: "Counsel normalizes signals from Lyte and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
+    body: "Counsel normalizes signals from KORA and connected systems into a structured Approval Queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
   },
   {
     icon: Workflow,
@@ -107,7 +107,7 @@ const CAPABILITIES = [
   {
     icon: RefreshCw,
     title: "Cross-Pack Orchestration",
-    body: "A single Counsel action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A Counsel approval can gate a Vessels cargo clearance. Counsel orchestrates across the platform.",
+    body: "A single Counsel action can span multiple domain packs. An PARAGON incident can trigger a DOMAINE diligence hold. A Counsel approval can gate a SEXTANT cargo clearance. Counsel orchestrates across the platform.",
   },
   {
     icon: Zap,
@@ -142,11 +142,11 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Lyte", desc: "The governed command surface routes signals from all domain packs into Counsel for cross-domain governed action." },
+  { name: "KORA", desc: "The governed Operator Workspace routes signals from all domain packs into Counsel for cross-domain governed action." },
   { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Counsel approval gates." },
-  { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
-  { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
-  { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
+  { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
+  { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
+  { name: "PARAGON", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
   { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Counsel." },
 ];
 
@@ -154,8 +154,8 @@ export default function AlloyPage() {
   const __pageMeta = usePageMeta({
     title: "Counsel — Execution Fabric & Action Spine | SZL Holdings",
     description: "Counsel is the execution Primitive beneath every SZL Holdings domain pack. Governed workflow orchestration, Covenant Policy enforcement, Proof Chain recording, and Outcome Graph tracking — from signal ingestion to verified execution.",
-    canonical: "https://szlholdings.com/platform/alloy",
-    ogImage: "https://szlholdings.com/og/og-alloy.jpg",
+    canonical: "https://szlholdings.com/platform/continuum",
+    ogImage: "https://szlholdings.com/og/og-continuum.jpg",
   });
 
   return (
@@ -167,7 +167,7 @@ export default function AlloyPage() {
   
           {/* Hero */}
           <section
-            className="szl-grid-texture szl-depth-glow-alloy"
+            className="szl-grid-texture szl-depth-glow-continuum"
             style={{
               paddingTop: "var(--space-hero-pt)",
               paddingBottom: "clamp(5rem,9vw,7rem)",
@@ -176,7 +176,7 @@ export default function AlloyPage() {
           >
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                <span className="szl-badge-alloy" style={{ borderRadius: "9999px", marginBottom: "1.75rem", display: "inline-block" }}>
+                <span className="szl-badge-continuum" style={{ borderRadius: "9999px", marginBottom: "1.75rem", display: "inline-block" }}>
                   Counsel · Execution Fabric & Action Spine
                 </span>
               </m.div>
@@ -204,7 +204,7 @@ export default function AlloyPage() {
                       marginBottom: "0.875rem",
                     }}
                   >
-                    Counsel is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from Lyte, from any domain pack, or from any integration — enters Counsel's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
+                    Counsel is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from KORA, from any domain pack, or from any integration — enters Counsel's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
                   </p>
                   <p
                     style={{
@@ -231,7 +231,7 @@ export default function AlloyPage() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.55, delay: 0.15 }}
-                  className="szl-alloy-card"
+                  className="szl-continuum-card"
                   style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)" }}
                 >
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
@@ -239,11 +239,11 @@ export default function AlloyPage() {
                   </p>
                   {PIPELINE_STEPS.map((item, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: i < PIPELINE_STEPS.length - 1 ? "0.5rem" : 0 }}>
-                      <div style={{ width: "20px", height: "20px", borderRadius: "50%", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.55rem", fontWeight: 700, color: "var(--color-alloy-light)" }}>{i + 1}</span>
+                      <div style={{ width: "20px", height: "20px", borderRadius: "50%", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.55rem", fontWeight: 700, color: "var(--color-continuum-light)" }}>{i + 1}</span>
                       </div>
                       <div>
-                        <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "-0.01em" }}>{item.step}</span>
+                        <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-continuum-light)", letterSpacing: "-0.01em" }}>{item.step}</span>
                         <span style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-muted)", marginLeft: "0.5rem" }}>{item.desc}</span>
                       </div>
                     </div>
@@ -257,7 +257,7 @@ export default function AlloyPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   The Operating Loop
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "1.25rem" }}>
@@ -277,7 +277,7 @@ export default function AlloyPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   Each Phase
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
@@ -298,11 +298,11 @@ export default function AlloyPage() {
                       style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                        <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
-                          <Icon size={14} color="var(--color-alloy-light)" />
+                        <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "6px", flexShrink: 0 }}>
+                          <Icon size={14} color="var(--color-continuum-light)" />
                         </div>
                         <div>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{phase.step}</div>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-continuum-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{phase.step}</div>
                           <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{phase.phase}</h3>
                         </div>
                       </div>
@@ -314,11 +314,11 @@ export default function AlloyPage() {
             </div>
           </section>
   
-          {/* Relationship to Lyte and expansion lanes */}
+          {/* Relationship to KORA and expansion lanes */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   Counsel Across the Platform
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
@@ -338,7 +338,7 @@ export default function AlloyPage() {
                     transition={{ duration: 0.36, delay: i * 0.06 }}
                     style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
                   >
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "110px", paddingTop: "1px" }}>{lane.name}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-continuum-light)", minWidth: "110px", paddingTop: "1px" }}>{lane.name}</span>
                     <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{lane.desc}</p>
                   </m.div>
                 ))}
@@ -350,7 +350,7 @@ export default function AlloyPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   Capabilities
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
@@ -370,8 +370,8 @@ export default function AlloyPage() {
                       className="szl-card"
                       style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
                     >
-                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
-                        <Icon size={16} color="var(--color-alloy-light)" />
+                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
+                        <Icon size={16} color="var(--color-continuum-light)" />
                       </div>
                       <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
                       <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
@@ -387,7 +387,7 @@ export default function AlloyPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "center" }} className="lg:grid-cols-2">
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                     Audit-grade execution
                   </p>
                   <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "1.25rem" }}>
@@ -405,7 +405,7 @@ export default function AlloyPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: 0.10 }}
-                  className="szl-alloy-card"
+                  className="szl-continuum-card"
                   style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}
                 >
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1.25rem" }}>
@@ -414,7 +414,7 @@ export default function AlloyPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
                     {AUDIT_FIELDS.map((field) => (
                       <div key={field} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                        <Shield size={12} color="var(--color-alloy-light)" style={{ marginTop: "3px", flexShrink: 0, opacity: 0.7 }} />
+                        <Shield size={12} color="var(--color-continuum-light)" style={{ marginTop: "3px", flexShrink: 0, opacity: 0.7 }} />
                         <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,68%)" }}>{field}</span>
                       </div>
                     ))}
@@ -428,7 +428,7 @@ export default function AlloyPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   Controlled Outputs
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.5rem" }}>
@@ -455,8 +455,8 @@ export default function AlloyPage() {
                       className="szl-card"
                       style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
                     >
-                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
-                        <Icon size={16} color="var(--color-alloy-light)" />
+                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
+                        <Icon size={16} color="var(--color-continuum-light)" />
                       </div>
                       <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{item.title}</h3>
                       <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
@@ -471,7 +471,7 @@ export default function AlloyPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
                   Governed Execution Layer
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
@@ -538,16 +538,16 @@ export default function AlloyPage() {
                       style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                        <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
-                          <Icon size={14} color="var(--color-alloy-light)" />
+                        <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "6px", flexShrink: 0 }}>
+                          <Icon size={14} color="var(--color-continuum-light)" />
                         </div>
                         <div>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{cap.tag}</div>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-continuum-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{cap.tag}</div>
                           <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)", marginTop: "1px" }}>{cap.title}</h3>
                         </div>
                       </div>
                       <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.875rem" }}>{cap.body}</p>
-                      <span style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "4px", padding: "2px 8px" }}>
+                      <span style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-continuum-light)", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "4px", padding: "2px 8px" }}>
                         {cap.badge}
                       </span>
                     </m.div>
@@ -557,6 +557,106 @@ export default function AlloyPage() {
             </div>
           </section>
   
+          {/* WorkGraph: Semantic Layer for Enterprise Execution */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "1rem" }}>
+                  WorkGraph · Workspace Intelligence Layer
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "36ch", marginBottom: "1.25rem" }}>
+                  The Semantic Layer for Enterprise Execution
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "3rem" }}>
+                  Alloy WorkGraph turns fragmented signals from emails, documents, chats, meetings, and approvals into one governed semantic execution layer — so Alloy understands what work means, who owns it, what outcome it affects, what action is safe, and where the proof belongs.
+                </p>
+              </m.div>
+              <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2 xl:grid-cols-4">
+                {[
+                  {
+                    icon: Network,
+                    tag: "Workspace-aware Context",
+                    title: "One semantic graph across all sources",
+                    body: "Every email, doc, chat, meeting, task, and approval normalized into a single WorkGraph — with typed edges, ownership, data class, and permission state.",
+                  },
+                  {
+                    icon: Layers,
+                    tag: "Project Memory",
+                    title: "Project-level context that persists",
+                    body: "WorkGraph builds persistent project memory from signals: open commitments, unresolved decisions, pending approvals, proof coverage, and recommended next action.",
+                  },
+                  {
+                    icon: GitBranch,
+                    tag: "Meeting-to-Execution",
+                    title: "Meeting summaries become governed Workcells",
+                    body: "Alloy extracts commitments, decisions, and blockers from meeting notes — creates Workcells, Action Briefs, and Proof Packets with human approval gates.",
+                  },
+                  {
+                    icon: CheckSquare,
+                    tag: "Approval Chase",
+                    title: "Stuck approvals surfaced and resolved",
+                    body: "WorkGraph detects stalled approvals, calculates decision latency vs SLA, generates chase drafts, and escalates automatically — all with proof coverage.",
+                  },
+                  {
+                    icon: Puzzle,
+                    tag: "Skills Studio",
+                    title: "Recurring SOPs as governed Skills",
+                    body: "Ten seed Skills convert recurring workflows into approved, evaluated, reusable execution patterns — with MirrorEval scoring and approval gates on every run.",
+                  },
+                  {
+                    icon: Lock,
+                    tag: "Permission-aware Answers",
+                    title: "Answers scoped to your access level",
+                    body: "The Answer Engine returns results scoped to the requesting user. Restricted sources return proof references only. Every answer includes permission notes.",
+                  },
+                  {
+                    icon: Shield,
+                    tag: "Proof-ready Recommendations",
+                    title: "Every recommendation has a proof trail",
+                    body: "All WorkGraph outputs are proof-ready: SHA-256 hashed evidence, DLP-scoped, audit-exportable — wired into the existing Proof Ledger and Covenant Guard.",
+                  },
+                  {
+                    icon: Network,
+                    tag: "Cross-vendor Execution",
+                    title: "Vendor-agnostic workspace intelligence",
+                    body: "WorkGraph is built for any workspace — not tied to a single vendor. The same governed layer works across email, docs, chat, meetings, CRM, ERP, and legal systems.",
+                  },
+                ].map((cap, i) => {
+                  const Icon = cap.icon;
+                  return (
+                    <m.div
+                      key={cap.title}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: (i % 4) * 0.06 }}
+                      className="szl-card"
+                      style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                    >
+                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-continuum-muted)", border: "1px solid var(--color-continuum-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
+                        <Icon size={16} color="var(--color-continuum-light)" />
+                      </div>
+                      <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-continuum-light)", marginBottom: "0.5rem" }}>{cap.tag}</p>
+                      <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
+                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
+                    </m.div>
+                  );
+                })}
+              </div>
+              <m.div
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                style={{ marginTop: "2.5rem" }}
+              >
+                <Link href="/alloy/workspace" className="szl-btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                  Explore WorkGraph <ArrowRight size={14} />
+                </Link>
+              </m.div>
+            </div>
+          </section>
+
           {/* CTA */}
           <section style={{ padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -573,7 +673,7 @@ export default function AlloyPage() {
                     Ready to add execution accountability to your workflows?
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                    Talk to us about applying Counsel to one critical workflow — with Lyte for cross-domain signal observability and Counsel for governed, auditable execution.
+                    Talk to us about applying Counsel to one critical workflow — with KORA for cross-domain signal observability and Counsel for governed, auditable execution.
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>

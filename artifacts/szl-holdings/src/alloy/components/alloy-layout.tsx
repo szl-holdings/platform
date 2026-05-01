@@ -28,12 +28,14 @@ import {
   BarChart3,
   Bell,
   BookOpen,
-  Brain,
+  Workflow,
   Calendar,
+  CheckSquare,
   ChevronRight,
   Code2,
   Cpu,
   DollarSign,
+  FileCheck,
   FileText,
   Film,
   GitBranch,
@@ -52,8 +54,10 @@ import {
   Radio,
   Settings,
   Shield,
+  Sparkles,
   Star,
   Store,
+  Video,
   Wand2,
   X,
   Zap,
@@ -117,7 +121,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'ecosystem',
       title: 'Cross-Domain Navigation',
       description:
-        'Switch between domain packs (Terra, Vessels, Aegis) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
+        'Switch between domain packs (DOMAINE, SEXTANT, PARAGON) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
       placement: 'center',
       icon: Globe,
     },
@@ -146,13 +150,13 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
     {
       id: 'visit-domain',
       label: 'Visit a Domain Pack',
-      description: 'Navigate to Terra, Vessels, or Aegis',
+      description: 'Navigate to DOMAINE, SEXTANT, or PARAGON',
     },
   ],
 };
 
 const COMMAND_LOOP = [
-  { phase: 'DETECT', color: '#4d8fcc', active: false },
+  { phase: 'DETECT', color: 'var(--gi-accent-blue)', active: false },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
   { phase: 'DECIDE', color: '#8b5cf6', active: false },
   { phase: 'EXECUTE', color: '#4B8BDB', active: true },
@@ -177,7 +181,7 @@ const ATLAS_NAV = [
 ];
 
 const COMMAND_NAV = [
-  { href: '/alloy/decisions', label: 'Decision Objects', icon: Brain, badge: 'New' },
+  { href: '/alloy/decisions', label: 'Decision Objects', icon: Workflow, badge: 'New' },
   { href: '/alloy/skills', label: 'Capability Library', icon: Layers, badge: 'New' },
   { href: '/alloy/operator', label: 'Agent Control', icon: Shield, badge: 'New' },
 ];
@@ -186,7 +190,7 @@ const CREATIVE_NAV = [
   { href: '/alloy/creative', label: 'Campaign Hub', icon: Film },
   { href: '/alloy/creative/brand-voice', label: 'Brand Voice', icon: Mic },
   { href: '/alloy/creative/content-calendar', label: 'Content Calendar', icon: Calendar },
-  { href: '/alloy/creative/ai-studio', label: 'AI Studio', icon: Wand2 },
+  { href: '/alloy/creative/ai-studio', label: 'Content Studio', icon: Wand2 },
 ];
 
 const DOCS_NAV = [{ href: '/alloy/documents', label: 'Document Engine', icon: FileText }];
@@ -214,7 +218,7 @@ const NURO_FORGE_NAV = [
   { href: '/nuro-forge/arena', label: 'Model Benchmarks', icon: Zap },
   { href: '/nuro-forge/composition', label: 'Model Composition', icon: GitBranch },
   { href: '/nuro-forge/governance', label: 'Governance & Safety', icon: Shield },
-  { href: '/nuro-forge/fine-tuning', label: 'Fine-Tuning Engine', icon: Brain },
+  { href: '/nuro-forge/fine-tuning', label: 'Fine-Tuning Engine', icon: Workflow },
   { href: '/nuro-forge/cost', label: 'Cost Intelligence', icon: DollarSign },
   { href: '/nuro-forge/multimodal', label: 'Multimodal Hub', icon: Image },
   { href: '/nuro-forge/prompts', label: 'Prompt Studio', icon: Wand2 },
@@ -231,6 +235,18 @@ const MCP_NAV = [
 const PLATFORM_ADMIN_NAV = [
   { href: '/admin/platform-settings', label: 'Platform Settings', icon: Settings },
   { href: '/admin/tenant-health', label: 'Tenant Health', icon: HeartPulse },
+];
+
+const WORKGRAPH_NAV = [
+  { href: '/alloy/workgraph', label: 'WorkGraph Explorer', icon: Network, badge: 'New' },
+  { href: '/alloy/workspace', label: 'Workspace Home', icon: Layers, exact: true, badge: 'New' },
+  { href: '/alloy/workspace/signals', label: 'Event Stream', icon: Activity, badge: 'New' },
+  { href: '/alloy/workspace/skills', label: 'Skills Studio', icon: Sparkles, badge: 'New' },
+  { href: '/alloy/workspace/projects', label: 'Project Memory', icon: BookOpen, badge: 'New' },
+  { href: '/alloy/workspace/meetings', label: 'Meeting → Execution', icon: Video, badge: 'New' },
+  { href: '/alloy/workspace/approvals', label: 'Approval Chase', icon: CheckSquare, badge: 'New' },
+  { href: '/alloy/workspace/proof', label: 'Proof Packets', icon: FileCheck, badge: 'New' },
+  { href: '/alloy/workspace/admin', label: 'WG Admin Center', icon: Settings, badge: 'New' },
 ];
 
 function NavItem({
@@ -324,6 +340,7 @@ const ALL_NAV_SECTIONS = [
   { items: INTELLIGENCE_NAV, group: 'Navigate' },
   { items: NURO_FORGE_NAV, group: 'Navigate' },
   { items: PRAXIS_EXCHANGE_NAV, group: 'Navigate' },
+  { items: WORKGRAPH_NAV, group: 'WorkGraph' },
   { items: ENTERPRISE_NAV, group: 'Actions' },
   { items: MCP_NAV, group: 'Actions' },
 ];
@@ -737,6 +754,16 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
 
             <div
               className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium"
+              style={{ color: 'rgba(75,139,219,0.8)' }}
+            >
+              WorkGraph · Workspace AI
+            </div>
+            {WORKGRAPH_NAV.map((item) => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div
+              className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium"
               style={{ color: 'rgba(139,92,246,0.6)' }}
             >
               Enterprise Governance
@@ -868,7 +895,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(77,124,15,0.2)',
               }}
             >
-              Terra
+              DOMAINE
             </a>
             <a
               href="/command/operations/"
@@ -879,7 +906,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245,158,11,0.2)',
               }}
             >
-              Lyte
+              KORA
             </a>
             <a
               href="/vessels/"
@@ -890,7 +917,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(56,189,248,0.2)',
               }}
             >
-              Vessels
+              SEXTANT
             </a>
           </div>
         </div>
@@ -974,7 +1001,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
+        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: 'var(--gi-bg-base)' }}>
           <SectionErrorBoundary sectionName="Counsel">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />
