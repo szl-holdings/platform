@@ -47,6 +47,13 @@ const Constitution = lazy(() => import('./pages/Constitution').then(m => ({ defa
 const SecurityCompliance = lazy(() => import('./pages/SecurityCompliance').then(m => ({ default: m.SecurityCompliance })));
 const RightToAudit = lazy(() => import('./pages/RightToAudit').then(m => ({ default: m.RightToAudit })));
 const ModelRouter = lazy(() => import('./pages/ModelRouter').then(m => ({ default: m.ModelRouter })));
+const IntelligenceCommand = lazy(() => import('./pages/intelligence/IntelligenceCommand').then(m => ({ default: m.IntelligenceCommand })));
+const IntelligenceDeepDive = lazy(() => import('./pages/intelligence/IntelligenceDeepDive').then(m => ({ default: m.IntelligenceDeepDive })));
+const IntelligenceRoiLens = lazy(() => import('./pages/intelligence/IntelligenceRoiLens').then(m => ({ default: m.IntelligenceRoiLens })));
+const Lab = lazy(() => import('./pages/lab/Lab').then(m => ({ default: m.Lab })));
+const PatternAtlasNative = lazy(() => import('./pages/lab/PatternAtlasNative').then(m => ({ default: m.PatternAtlasNative })));
+const PromptRegistryNative = lazy(() => import('./pages/lab/PromptRegistryNative').then(m => ({ default: m.PromptRegistryNative })));
+const EvalConsoleNative = lazy(() => import('./pages/lab/EvalConsoleNative').then(m => ({ default: m.EvalConsoleNative })));
 const AiGateway = lazy(() => import('./pages/AiGateway').then(m => ({ default: m.AiGateway })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
 const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
@@ -379,6 +386,29 @@ export default function App() {
         <Route path={`${base}/account/billing`}>
           <WithShell><A11oyBillingPage /></WithShell>
         </Route>
+
+        <Route path={`${base}/intelligence/deep-dive`}>
+          <WithShell><IntelligenceDeepDive /></WithShell>
+        </Route>
+        <Route path={`${base}/intelligence/roi-lens`}>
+          <WithShell><IntelligenceRoiLens /></WithShell>
+        </Route>
+        <Route path={`${base}/intelligence`}>
+          <WithShell><IntelligenceCommand /></WithShell>
+        </Route>
+        <Route path={`${base}/lab/patterns`}>
+          <WithShell><PatternAtlasNative /></WithShell>
+        </Route>
+        <Route path={`${base}/lab/prompts`}>
+          <WithShell><PromptRegistryNative /></WithShell>
+        </Route>
+        <Route path={`${base}/lab/evals`}>
+          <WithShell><EvalConsoleNative /></WithShell>
+        </Route>
+        <Route path={`${base}/lab`}>
+          <WithShell><Lab /></WithShell>
+        </Route>
+
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">

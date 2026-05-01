@@ -80,6 +80,7 @@ import {
   Users,
   Workflow,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import {
   type ComponentType,
@@ -414,6 +415,12 @@ function buildSidebarSections(): SidebarNavSection[] {
     items: [
       { id: '/', label: 'Home', href: '/', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
       { id: SLIDES_NAV.path, label: SLIDES_NAV.label, href: SLIDES_NAV.path, icon: renderIcon(SLIDES_NAV.icon) },
+      {
+        id: 'a11oy-intelligence',
+        label: 'A11oy Intelligence',
+        href: '/a11oy/intelligence/',
+        icon: <Sparkles className="w-3.5 h-3.5" />,
+      },
     ],
   };
   const sections: SidebarNavSection[] = VISIBLE_NAV_SECTIONS.map((sec) => ({
@@ -501,7 +508,13 @@ function SentraSidebarContent({
       accentColor={accent}
       collapsed={!expanded}
       onNavigate={(item) => {
-        if (item.href) navigate(item.href);
+        if (item.href) {
+          if (item.href.startsWith('/a11oy/') || /^https?:\/\//.test(item.href)) {
+            window.open(item.href, '_blank', 'noopener,noreferrer');
+          } else {
+            navigate(item.href);
+          }
+        }
         onMobileClose?.();
       }}
       header={

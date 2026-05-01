@@ -10,6 +10,8 @@ import {
   LayoutTemplate,
   Settings,
   Menu,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 
 const navItems = [
@@ -20,6 +22,10 @@ const navItems = [
   { name: 'Runs', href: '/runs', icon: History },
   { name: 'Templates', href: '/templates', icon: LayoutTemplate },
   { name: 'Settings', href: '/settings', icon: Settings },
+];
+
+const externalNavItems = [
+  { name: 'A11oy Advisor', href: '/a11oy/intelligence/', icon: Sparkles },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -75,6 +81,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          {isSidebarOpen && (
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                Cross-app
+              </p>
+            </div>
+          )}
+          {externalNavItems.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={!isSidebarOpen ? item.name : undefined}
+              className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <item.icon className="w-5 h-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+              {isSidebarOpen && (
+                <span className="flex-1 flex items-center justify-between">
+                  {item.name}
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </span>
+              )}
+            </a>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-border">

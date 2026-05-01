@@ -534,3 +534,36 @@ ledger; must NEVER be committed.
 - Latest master CI runs: 4/5 success (only failure is unrelated dependency-graph upload).
 - 9 platform branches; 2 open PRs (#60 dependabot, #38 codex draft).
 - Branches awaiting PR creation by owner: `fix/ci-mass-repair-2026-04-30` (df2e3b8b), `ops/operational-payload-2026-04-30` (10c9bc3b).
+
+### Consolidation: KORA + Praxis → A11oy (2026-05-01)
+A11oy now hosts both decision intelligence and the agentic AI lab.
+
+**KORA → A11oy `/intelligence/*`**
+- Ported `lyte-command-center` Dashboard / DeepDive / RoiLens into
+  `artifacts/a11oy/src/pages/intelligence/{Command,DeepDive,RoiLens}.tsx`,
+  re-skinned to A11oy navy + gold (`#0a0a0a` / `#c9b787`).
+- Backend unchanged: still calls `POST /api/praxis-tools/finance-terminal`.
+- `lyte-command-center` artifact retained for backwards-compat URLs but
+  considered superseded by `/a11oy/intelligence/*`.
+
+**Praxis → A11oy `/lab/*`**
+- New A11oy Lab landing at `/a11oy/lab` with 6 capability cards (patterns,
+  prompt-registry, eval-console, skills, memory, research). Each card
+  surfaces both an A11oy-native view (where ported) and an "Open in
+  Praxis" link to the deep `/nexus/#…` console.
+- Native ports: `/a11oy/lab/patterns` (`GET /api/nexus/patterns`),
+  `/a11oy/lab/prompts` (`GET /api/ai/prompts`, auth-gated, graceful 401
+  empty state), `/a11oy/lab/evals` (`GET /api/pulse-evals/regression-dashboard`,
+  admin/operator gated).
+- `mockup-sandbox` artifact retained as the deep tooling console under
+  `/nexus/`; A11oy is the user-facing portal.
+
+**Cross-app links**
+- Sentra sidebar adds `A11oy Intelligence` (opens `/a11oy/intelligence/`
+  in a new tab via the `onNavigate` external-href guard).
+- Conduit/Amaru sidebar adds `A11oy Advisor` under a new "Cross-app"
+  divider (raw `<a target="_blank">`).
+
+**PluginHub**
+- `a11oy Native` category (`artifacts/a11oy/src/data/pluginHubData.ts`)
+  gained two new core entries: `A11oy Intelligence` and `A11oy Lab`.
