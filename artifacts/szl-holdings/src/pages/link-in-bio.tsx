@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { m } from "framer-motion";
-import { ExternalLink, ArrowRight, Globe, Briefcase, FileText, Mail, Shield, Anchor, Building2, Cpu, Twitter, BookOpen, Link2, Zap, Users, BarChart3 } from "lucide-react";
+import { ExternalLink, ArrowRight, Globe, Briefcase, FileText, Mail, Shield, Anchor, Building2, Cpu, MessageCircle as Twitter, BookOpen, Link2, Zap, Users, BarChart3 } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const API = import.meta.env.VITE_API_URL || "";

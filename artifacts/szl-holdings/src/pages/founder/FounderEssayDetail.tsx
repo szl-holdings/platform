@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { ArrowLeft, Check, Clock, Link2, Linkedin, Twitter } from 'lucide-react';
+import { ArrowLeft, Check, Clock, Link2, Briefcase as Linkedin, MessageCircle as Twitter } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'wouter';
 import { ESSAYS, type Essay, getEssay } from '@/content/essays';

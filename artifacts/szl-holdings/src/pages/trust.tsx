@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink, FileText, Cookie, Accessibility, Scale, Shield, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Calendar, Key, FileOutput, GitBranch, ExternalLink, FileText, Cookie, Accessibility, Scale, Shield, AlertTriangle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -861,7 +861,7 @@ export default function TrustPage() {
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                             <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(258,55%,68%,0.08)", border: "1px solid hsla(258,55%,68%,0.20)", borderRadius: "0.375rem" }}>
-                              <Github size={14} color="hsl(258,55%,68%)" />
+                              <Code2 size={14} color="hsl(258,55%,68%)" />
                             </div>
                             <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(258,55%,68%)" }}>szl-holdings/{lib.slug}</span>
                           </div>
@@ -888,7 +888,7 @@ export default function TrustPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
                 >
-                  <Github size={14} />
+                  <Code2 size={14} />
                   View all SZL open-source on GitHub
                   <ExternalLink size={11} />
                 </a>

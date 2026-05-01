@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
-  type Building2, Target, Mail, Linkedin, FileText, Handshake, ClipboardCheck,
+  type Building2, Target, Mail, Users as Linkedin, FileText, Handshake, ClipboardCheck,
   Plus, Trash2, ChevronDown, ChevronRight, Copy, CheckCircle2, AlertCircle,
   Briefcase, Anchor, ShieldCheck, Home, Scale, RefreshCw, History, Loader2,
 } from "lucide-react";
