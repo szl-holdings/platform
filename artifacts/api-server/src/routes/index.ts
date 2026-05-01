@@ -22,6 +22,8 @@ import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
 import * as continuumRuntime from "./groups/continuum-runtime-group";
 import * as selfModel from "./groups/self-model";
+import * as cognitiveReflexivity from "./groups/cognitive-reflexivity";
+import * as ouroboros from "./groups/ouroboros";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
@@ -351,6 +353,7 @@ router.use(
 router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
 router.use(lazyMatch("/tool-mesh", () => import("./tool-mesh"), "tool-mesh"));
 router.use(lazyMatch("/praxis-tools", () => import("./praxis-tools"), "praxis-tools"));
+router.use(lazyMatch("/ai-gateway", () => import("./ai-gateway"), "ai-gateway"));
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
@@ -378,6 +381,8 @@ graph.register(router);
 guardian.register(router);
 continuumRuntime.register(router);
 selfModel.register(router);
+cognitiveReflexivity.register(router);
+ouroboros.register(router);
 verifier.register(router);
 skillLibrary.register(router);
 
@@ -526,5 +531,39 @@ router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"),
 // PATCH /eval-registry/submissions/:id/accept
 // PATCH /eval-registry/submissions/:id/reject
 router.use(lazyMatch("/eval-registry", () => import("./eval-registry"), "eval-registry"));
+
+// SIGIL — SZL Integrated Governance & Invariant Layer
+// GET  /sigil/health
+// POST /sigil/compose
+// POST /sigil/witness
+// POST /sigil/coherence
+// POST /sigil/saturation
+router.use(lazyRegisterMatch(["/sigil"], () => import("./sigil"), "sigil"));
+
+// Ouroboros · Gauß axis — operational port of v5 primitives 17 + 20
+// GET  /ouroboros/gauss/health
+// POST /ouroboros/gauss/fit
+// POST /ouroboros/gauss/residuals
+router.use(
+  lazyRegisterMatch(
+    ["/ouroboros/gauss"],
+    () => import("./ouroboros-gauss"),
+    "ouroboros-gauss",
+  ),
+);
+
+// Ouroboros · Guardrails axis — operational port of v6 SKU
+// (NeMo-Guardrails-compatible config surface + Λ scalar + tamper-evident
+// hash-chained receipts). Backed by @workspace/ouroboros-guardrails.
+// GET  /ouroboros/guardrails/health
+// POST /ouroboros/guardrails/evaluate
+// POST /ouroboros/guardrails/verify-receipt
+router.use(
+  lazyRegisterMatch(
+    ["/ouroboros/guardrails"],
+    () => import("./ouroboros-guardrails"),
+    "ouroboros-guardrails",
+  ),
+);
 
 export default router;

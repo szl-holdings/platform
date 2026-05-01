@@ -114,11 +114,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // via requireAuth in the route handler (action-store.ts).
   "/api/action-store",
   "/api/action-store/stream",
-  // Alloy Policy Authoring Studio — read-only state endpoint for the demo
+  // Continuum Policy Authoring Studio — read-only state endpoint for the demo
   // surface (lets the studio render its initial state without a session).
   // Mutating routes (POST/DELETE on /versions, /versions/:id/sign,
   // /test-cases) are NOT whitelisted and enforce auth via authMiddleware.
-  "/api/alloy/policy-compiler/state",
+  "/api/continuum/policy-compiler/state",
   // Shared risk evidence store — backs the Save-run-as-evidence button on
   // Terra/Vessels Risk Simulation panels so cited Monte Carlo runs are
   // visible to external reviewers and lender briefings (instead of being
@@ -207,6 +207,13 @@ const PUBLIC_EXACT_PATHS = new Set([
   // { unreadCount: 0 } when no session is present. Exact-path entry ensures
   // only the bare /count URL is public; sub-paths remain protected.
   "/api/notifications/count",
+  // SZL Holdings public attestation surface (Track C-02). Both endpoints MUST
+  // be reachable without a session: the public Ed25519 key publication is the
+  // root of trust for independent verifiers, and /governance/stats backs the
+  // public /governance ledger header. POST /api/v1/replay-attestation is
+  // already covered by the /api/v1/ prefix entry below.
+  "/api/.well-known/szl-attestation-keys.json",
+  "/api/governance/stats",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -214,6 +221,24 @@ const PUBLIC_PREFIXES = [
   "/api/auth/",
   "/api/oidc/",
   "/api/public/",
+  // SIGIL — SZL Integrated Governance & Invariant Layer.
+  // Pure-functional, stateless, validated by Zod, no PII. The framework's
+  // demo UI in A11oy/Sentra/Amaru calls these endpoints from the browser
+  // before any session exists. Compute-only; no data is read or written.
+  "/api/sigil/",
+  // Ouroboros · Gauß axis ONLY — operationalised v5 primitives 17 + 20.
+  // Same compute-only posture as /api/sigil/ (stateless, Zod-validated, no
+  // PII). The broader /api/ouroboros/ tree includes stateful routes
+  // (anchor append/batch, fleet audit, reconcile-handoff) that MUST keep
+  // their normal auth posture, so this allowlist is narrowed to gauss.
+  "/api/ouroboros/gauss/",
+  // Ouroboros · Guardrails axis ONLY — operationalised v6 SKU
+  // (@workspace/ouroboros-guardrails). Same compute-only posture as gauss:
+  // stateless, Zod-validated, no PII, no session, no server-side
+  // persistence — each evaluate() call uses a fresh Guardrails instance,
+  // so no tenant state leaks across requests. The broader /api/ouroboros/
+  // tree retains its default auth, so this exemption stays narrowed.
+  "/api/ouroboros/guardrails/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",
@@ -248,6 +273,12 @@ const PUBLIC_PREFIXES = [
   // retained for the legacy fetch in szl-holdings/trust-center.
   // HuggingFace ML Intelligence — POST inference endpoints. All are public demo surfaces.
   "/api/hf-intelligence/",
+  // PRAXIS Tool Bridge — marketing-audit, seo-audit, and finance-terminal are
+  // public audit execution endpoints called from Carlota Jo, KORA, and the NEXUS
+  // Bridge without a browser session. No per-user authenticated state is read or
+  // written; all routes are stateless skill-pack invocations. thirdPartyCall()
+  // gates each execution through the PRAXIS policy engine.
+  "/api/praxis-tools/",
   "/api/contact/",
   // Carlota Jo inquiry submission — public POST endpoint for the contact/inquiry
   // form on the marketing site. Rate-limited (10/hour) inside the route handler.
@@ -311,7 +342,7 @@ const PUBLIC_PREFIXES = [
   // in the route handler. Global enforcer passes all stress-drill paths through;
   // individual protected routes re-apply authentication themselves.
   "/api/stress-drill/",
-  // Alloy Meridian — cognitive observability OS read-only surfaces: model router
+  // Continuum Meridian — cognitive observability OS read-only surfaces: model router
   // status, agent constellation health, forecast council results, signal graph,
   // Decision Weather, Counterfactual Ledger, Flight Recorder, MCP registry, and
   // Founder Intent doctrine. All read-only. Governance mutation routes
@@ -444,6 +475,23 @@ const PUBLIC_PREFIXES = [
   // and PlaybookEngine screens. No tenant PII; static educational/threat-model
   // payloads. Public in demo mode so the a11oy frontend can render without auth.
   "/api/internal/a11oy/defense/",
+  // Cognitive Reflexivity Engine (#4570–#4572) — observability + operator
+  // approval surface. The broad prefix lets the A11oy reflexivity dashboard
+  // read strategies / traces / health / recent-signals without a session.
+  // Mutating routes (approve / reject / observations) are NOT relying on
+  // this allowlist — they enforce `authMiddleware()` + `requireRole(...)`
+  // explicitly inside the route handler so any operator approval is bound
+  // to a real authenticated identity, never a body-supplied string.
+  "/api/cognitive-reflexivity/",
+  // Ouroboros integrations (#4570 follow-on) — pure-functional adapters that
+  // lift Egyptian-mathematics primitives (frustum / seked / unit-fractions /
+  // doubling) into A11oy / Amaru / Sentra. The adapters are stateless except
+  // for the in-memory Sentra accumulator (process-local). All inputs are
+  // strictly Zod-validated. Public so the three artifact frontends can
+  // render the live Ouroboros panels without an authenticated session in
+  // demo mode. Mutating routes are still rate-limited by the route group's
+  // perUserWriteSlidingLimiter and CSRF-double-submit on writes.
+  "/api/ouroboros/",
 ];
 
 /**
@@ -624,7 +672,7 @@ export function globalAuthEnforcer(
     // /api/vessels/live/* which are gated by tenantScope at the group mount).
     req.user = {
       id: 0,
-      displayName: "PRAXIS Orchestrator (loopback)",
+      displayName: "NEXUS Orchestrator (loopback)",
       email: null,
       roles: ["ops"],
       orgs: [],

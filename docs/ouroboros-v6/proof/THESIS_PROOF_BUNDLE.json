@@ -1,0 +1,66 @@
+{
+  "schema": "ouroboros.thesis.proof/v1",
+  "captured_at": "2026-05-01T08:50:00Z",
+  "captured_by": "stephenlutar2-hash",
+  "orcid": "0009-0001-0110-4173",
+  "publications": {
+    "v1_position_paper": {
+      "doi": "10.5281/zenodo.19867281",
+      "zenodo_url": "https://zenodo.org/records/19867281",
+      "date": "2026-04-28",
+      "license": "CC-BY-4.0"
+    },
+    "v2_empirical_companion": {
+      "doi": "10.5281/zenodo.19934129",
+      "zenodo_url": "https://zenodo.org/records/19934129",
+      "date": "2026-04-30",
+      "license": "CC-BY-4.0"
+    }
+  },
+  "release_anchors": {
+    "ouroboros_v6_1_0": {
+      "repo": "szl-holdings/ouroboros",
+      "tag": "v6.1.0",
+      "commit_sha": "e9fc4b86eae18bb7401b14cb0e53900ba8e47ad8",
+      "released_at": "2026-04-30T20:22:28Z",
+      "message": "docs(ouroboros): v6.1.0 — EntropyDepthAllocator (v3 §3.2), 142/142 tests"
+    },
+    "thesis_paper_v2": {
+      "repo": "szl-holdings/ouroboros-thesis",
+      "tag": "paper-v2-empirical-1.0.0",
+      "annotated_tag_sha": "2dba310254e11a237a6ff380678921ae148f3c9b",
+      "commit_sha": "598c7aff03564f3f238d5db1a0029bb3f330a491",
+      "released_at": "2026-05-01T00:58:41Z",
+      "tagger_date": "2026-05-01T00:56:56Z"
+    }
+  },
+  "test_surface": {
+    "typescript_tests": 925,
+    "python_tests": 447,
+    "total_tests": 1372,
+    "release_anchor_tests": 142
+  },
+  "platform_mass": {
+    "packages": 24,
+    "primitives": 91,
+    "lambda_axes": 9,
+    "public_repos": 11,
+    "open_security_alerts": 0
+  },
+  "governance_posture_post_audit": {
+    "secret_scanning_repos": 10,
+    "push_protection_repos": 10,
+    "dependabot_alerts_repos": 10,
+    "dependabot_security_updates_repos": 10,
+    "branch_protection_repos": 10,
+    "org_defaults_for_new_repos": true,
+    "personal_2fa_enabled": true
+  },
+  "standards_coverage": {
+    "nist_ai_rmf": "full",
+    "dod_rai_tenets": "4_of_5",
+    "gsar_552_239_7001": "5_of_10",
+    "naics": ["541511", "541512", "541519", "541690", "541715"],
+    "psc": ["DA01", "DA10", "DJ10"]
+  }
+}

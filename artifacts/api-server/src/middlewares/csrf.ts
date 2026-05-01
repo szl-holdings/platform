@@ -58,6 +58,12 @@ const EXEMPT_PATHS = new Set([
   // Anonymous page-view tracking — called from any page (including pre-login) without a
   // browser session/cookie, so CSRF double-submit is not applicable.
   '/api/track/page-view',
+  // SZL Holdings public replay-attestation (Track C-02). Stateless POST that
+  // accepts only { run_id }, returns an Ed25519-signed envelope. No cookies,
+  // no session, no per-user mutation — CSRF double-submit is not applicable.
+  // Anyone in the world (including curl + the standalone CLI verifier) must
+  // be able to call this endpoint without first fetching a CSRF token.
+  '/api/v1/replay-attestation',
   // Newsletter subscription — public anonymous marketing form embedded across portfolio
   // sites; no session or user state is modified, CSRF double-submit not applicable.
   '/api/newsletter/subscribe',
@@ -114,6 +120,30 @@ function isExempt(path: string): boolean {
   // A2A federation endpoints — machine-to-machine; authenticated via Bearer token
   // (API key or OAuth JWT), not browser cookies. CSRF double-submit not applicable.
   if (path.startsWith('/api/federation/')) return true;
+  // Ouroboros integration adapters — pure-functional, stateless except for
+  // the in-memory Sentra accumulator (process-local). All inputs strictly
+  // Zod-validated. Public in demo mode so the three artifact frontends can
+  // POST without a browser CSRF token; rate-limited by route group.
+  if (path.startsWith('/api/ouroboros/')) return true;
+  // SIGIL — SZL Integrated Governance & Invariant Layer.
+  // Pure-functional, stateless, all inputs strictly Zod-validated, no
+  // session or PII involved. The demo UI in A11oy/Sentra/Amaru POSTs
+  // payloads from the browser before a session exists. Rate-limited
+  // by the global limiter; no CSRF risk surface.
+  if (path.startsWith('/api/sigil/')) return true;
+  // Ouroboros · Gauß axis ONLY — operationalised v5 primitives 17 + 20.
+  // Pure compute, Zod-validated, no PII or session. Other /api/ouroboros/*
+  // routes (anchor append/batch, fleet audit, etc.) are stateful and MUST
+  // continue to require CSRF, so we narrow this exemption to the gauss path.
+  if (path.startsWith('/api/ouroboros/gauss/')) return true;
+  // Ouroboros · Guardrails axis ONLY — operationalised v6 SKU
+  // (@workspace/ouroboros-guardrails). Same compute-only posture as gauss:
+  // every endpoint is stateless, Zod-validated, no PII, no session, no
+  // server-side persistence (receipts are returned to the caller; tenants
+  // who need an append-only log persist them themselves). Stateful
+  // /api/ouroboros/* routes (anchor, fleet audit, reconcile-handoff)
+  // continue to require CSRF — this exemption stays narrowed to guardrails.
+  if (path.startsWith('/api/ouroboros/guardrails/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;
@@ -161,6 +191,12 @@ function isExempt(path: string): boolean {
   // No browser session, cookie, or user-state mutations involved; all inference is
   // stateless. CSRF double-submit is not applicable.
   if (path.startsWith('/api/hf-intelligence/')) return true;
+  // PRAXIS Tool Bridge — public audit execution endpoints (marketing-audit,
+  // seo-audit, finance-terminal). No per-user authenticated state is read or
+  // written; all routes are stateless audit computations. Calls originate from
+  // Carlota Jo, KORA (lyte-command-center), and the NEXUS Bridge without a
+  // browser session. CSRF double-submit is not applicable.
+  if (path.startsWith('/api/praxis-tools/') || path.startsWith('/praxis-tools/')) return true;
   return false;
 }
 
