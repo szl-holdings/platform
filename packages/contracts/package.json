@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Zod request/response contracts for internal APIs and webhooks. TS types are inferred from schemas — never hand-written in parallel.",
+  "description": "Zod request/response contracts for internal APIs and webhooks. TS types are inferred from schemas \u2014 never hand-written in parallel.",
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/auth.ts",
@@ -13,7 +13,8 @@
     "./webhooks": "./src/webhooks.ts",
     "./admin": "./src/admin.ts",
     "./common": "./src/common.ts",
-    "./governance": "./src/governance.ts"
+    "./governance": "./src/governance.ts",
+    "./agentic-rag": "./src/agentic-rag.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

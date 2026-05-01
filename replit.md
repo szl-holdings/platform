@@ -31,11 +31,12 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
-- **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuous agent policy evolution.
-- **PRAXIS – Unified Agentic AI Layer:** An internal sandbox for AI agent research, memory management, and skill registry.
-- **Continuum – Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolving into a Proof-Carrying Agentic Execution Platform with an Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, and Self-Optimization Engine.
-- **Continuum Conversational AI Interface:** Provides Claude-style governed AI chat, an MCP Hub, and Agentic RAG with a multi-step retrieval pipeline.
-- **AI Provenance & Explainability Contract:** Ensures every AI-generated output includes a `ProvenanceEnvelope` with essential metadata.
+- **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
+- **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
+- **Continuum — Business Observability Fabric (formerly Alloy):** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents. A continuous, governed view of every signal and decision flowing through the business.
+- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline and knowledge collections.
+- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer wired across all SZL products (Sentra, Counsel, Pulse, Command, Lyte, Terra, Vessels, and mobile). Key capabilities: dual planner modes (ReAct, CoT-decompose), three MCP server classes (LocalData, SearchEngine, CloudEngine), three specialist agents (knowledge, web-research, cloud-ops), two-tier memory (short-term + long-term), Reciprocal Rank Fusion + cross-encoder evidence merging, and full AggregatorTrace instrumentation. API routes at `/alloy/agentic-rag` (POST /run, GET /runs/:id, GET /runs/:id/trace, POST /run/stream, GET /specialists, GET /mcp-classes). Central SDK re-export via `@szl-holdings/alloy-client`. 46 vitest tests. Research dossier at `docs/alloy-agentic-rag/RESEARCH.md`; architecture at `docs/alloy-agentic-rag/ARCHITECTURE.md`.
+- **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
 
 **Key Technical Implementations:**
 - **Red-Team Game Day Engine:** For live competitive crisis simulations.

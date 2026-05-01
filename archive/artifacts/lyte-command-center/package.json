@@ -33,5 +33,17 @@
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "wouter": "^3.3.5"
+  },
+  "dependencies": {
+    "@szl/alloy": "workspace:*",
+    "@szl-holdings/brand-registry": "workspace:*",
+    "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
+    "@workspace/simulation": "workspace:*",
+    "@workspace/approvals-inbox": "workspace:*",
+    "@szl-holdings/speech-specialist": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*",
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/alloy-client": "workspace:*"
   }
 }

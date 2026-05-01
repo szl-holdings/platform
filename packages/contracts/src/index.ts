@@ -10,6 +10,7 @@
  */
 
 export * from './admin';
+export * from './agentic-rag';
 export * from './ai';
 export * from './continuum';
 export * from './auth';

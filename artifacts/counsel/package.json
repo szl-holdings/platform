@@ -56,6 +56,7 @@
     "@workspace/aef-contracts": "workspace:*",
     "@szl-holdings/document-intelligence": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/alloy-client": "workspace:*"
   }
 }

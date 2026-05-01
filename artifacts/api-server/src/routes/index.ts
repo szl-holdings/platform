@@ -517,6 +517,15 @@ router.use(
 // Feature flag evaluation — POST /flags/evaluate, GET /flags/:key
 router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"), "feature-flags-public"));
 
+// Alloy Agentic RAG — unified Agentic RAG platform layer
+// POST   /alloy/agentic-rag/run           — full agentic RAG loop (auth + rate-limit + policy-guard)
+// GET    /alloy/agentic-rag/runs/:id       — retrieve run result
+// GET    /alloy/agentic-rag/runs/:id/trace — retrieve full trace
+// POST   /alloy/agentic-rag/run/stream     — SSE streaming run
+// GET    /alloy/agentic-rag/specialists    — list available specialist agents
+// GET    /alloy/agentic-rag/mcp-classes    — list MCP server class capability descriptors
+router.use(lazyMatch("/alloy/agentic-rag", () => import("./alloy-agentic-rag"), "alloy-agentic-rag"));
+
 // Open Evaluation Layer — benchmark registry, leaderboards, result submission & verification
 // GET  /eval-registry/benchmarks
 // GET  /eval-registry/benchmarks/:benchmarkId

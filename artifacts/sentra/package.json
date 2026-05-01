@@ -59,6 +59,7 @@
     "@szl-holdings/api-client-react": "workspace:*",
     "@workspace/aef-sdk": "workspace:*",
     "@workspace/ouroboros": "workspace:*",
-    "@szl-holdings/platform-registry": "workspace:*"
+    "@szl-holdings/platform-registry": "workspace:*",
+    "@szl-holdings/alloy-client": "workspace:*"
   }
 }

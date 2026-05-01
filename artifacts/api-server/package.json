@@ -99,6 +99,7 @@
     "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",
     "@szl/alloy": "workspace:*",
+    "@szl/alloy-agentic-rag": "workspace:*",
     "@szl/substrate": "workspace:*",
     "@types/archiver": "^7.0.0",
     "@types/graphql-depth-limit": "^1.1.6",

@@ -190,6 +190,71 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
       }),
     ],
   },
+  'szl-alloy-agentic-rag': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'alloy_agentic_rag_run',
+        name: 'alloy_agentic_rag_run',
+        description:
+          'Execute a full Alloy Agentic RAG loop: planner → specialist agents → MCP class fan-out → ' +
+          'evidence merge → generation. Returns the runId, evidence bundle, and generation result.',
+        domainTags: ['analytics', 'documents'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 60000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Natural-language query to retrieve evidence for' },
+            policy: {
+              type: 'object',
+              description: 'Optional governance policy overrides (tenantId, classification, redactionLevel)',
+            },
+            plannerMode: {
+              type: 'string',
+              enum: ['fast', 'deep', 'auto'],
+              description: 'Planner depth. auto picks based on query complexity. Default: auto',
+            },
+          },
+          required: ['query'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'alloy_agentic_rag_get_run',
+        name: 'alloy_agentic_rag_get_run',
+        description:
+          'Retrieve a previously executed Alloy Agentic RAG run by ID. ' +
+          'Tenant-scoped: returns only runs owned by the calling user.',
+        domainTags: ['analytics', 'documents'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 5000,
+        inputSchema: {
+          type: 'object',
+          properties: { runId: { type: 'string', description: 'UUID returned by alloy_agentic_rag_run' } },
+          required: ['runId'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'alloy_agentic_rag_list_specialists',
+        name: 'alloy_agentic_rag_list_specialists',
+        description:
+          'List the specialist agents registered in the Alloy Agentic RAG platform with their domain tags and capabilities.',
+        domainTags: ['analytics'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 2000,
+        inputSchema: { type: 'object', properties: {} },
+      }),
+      ToolManifestSchema.parse({
+        id: 'alloy_agentic_rag_list_mcp_classes',
+        name: 'alloy_agentic_rag_list_mcp_classes',
+        description:
+          'List the MCP class descriptors (LocalData, SearchEngine, CloudEngine) used by Alloy specialists for evidence retrieval.',
+        domainTags: ['analytics', 'infrastructure'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 2000,
+        inputSchema: { type: 'object', properties: {} },
+      }),
+    ],
+  },
 };
 
 /** Register tool manifests for an internal server on connect (discoverable, not yet callable). */
@@ -364,6 +429,15 @@ serverRegistry.register({
   description: 'Trace graph, metrics collection, run ledger, and agent reliability observability tools.',
   capabilitiesSummary: 'analytics, infrastructure, observability, tracing, metrics',
   endpoint: 'internal://cognitive-observability',
+});
+
+serverRegistry.register({
+  serverId: 'szl-alloy-agentic-rag',
+  name: 'Alloy Agentic RAG MCP',
+  description:
+    'Unified Agentic RAG platform: planner, specialist agent registry, MCP class fan-out (LocalData / SearchEngine / CloudEngine), evidence merge, and generation.',
+  capabilitiesSummary: 'analytics, documents, retrieval, agentic-rag, evidence',
+  endpoint: 'internal://alloy-agentic-rag',
 });
 
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────

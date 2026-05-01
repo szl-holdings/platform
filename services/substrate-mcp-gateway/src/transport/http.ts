@@ -917,15 +917,11 @@ export function createDiscoveryHandler(): express.RequestHandler {
         revoke: '/mcp/revoke',
         enterpriseIdps: '/mcp/enterprise/idps',
         metadata: '/.well-known/oauth-authorization-server',
-        nexusVerify: '/mcp/nexus/verify',
-        nexusProofs: '/mcp/nexus/proofs',
       },
       nexus: {
         version: '1.0',
         discovery: 'enabled',
         consciousness: 'active',
-      },
-      nexus: {
         description: 'PRAXIS Intelligence Fabric — every tool response includes x-nexus-consciousness and x-nexus-proof envelopes',
         features: [
           'consciousness_envelope',

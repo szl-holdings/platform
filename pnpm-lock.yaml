@@ -690,6 +690,9 @@ importers:
       '@szl/alloy':
         specifier: workspace:*
         version: link:../../packages/szl-alloy
+      '@szl/alloy-agentic-rag':
+        specifier: workspace:*
+        version: link:../../packages/alloy-agentic-rag
       '@szl/substrate':
         specifier: workspace:*
         version: link:../../packages/substrate
@@ -1221,6 +1224,9 @@ importers:
 
   artifacts/counsel:
     dependencies:
+      '@szl-holdings/alloy-client':
+        specifier: workspace:*
+        version: link:../../lib/alloy-client
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
@@ -1553,6 +1559,9 @@ importers:
 
   artifacts/sentra:
     dependencies:
+      '@szl-holdings/alloy-client':
+        specifier: workspace:*
+        version: link:../../lib/alloy-client
       '@szl-holdings/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -1689,6 +1698,9 @@ importers:
 
   artifacts/terra:
     dependencies:
+      '@szl-holdings/alloy-client':
+        specifier: workspace:*
+        version: link:../../lib/alloy-client
       '@szl-holdings/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -1825,6 +1837,9 @@ importers:
 
   artifacts/vessels:
     dependencies:
+      '@szl-holdings/alloy-client':
+        specifier: workspace:*
+        version: link:../../lib/alloy-client
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
@@ -2029,6 +2044,22 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  lib/alloy-client:
+    dependencies:
+      '@szl-holdings/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@szl/alloy-agentic-rag':
+        specifier: workspace:*
+        version: link:../../packages/alloy-agentic-rag
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   lib/analytics:
     devDependencies:
@@ -3223,6 +3254,52 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/alloy-agentic-rag:
+    dependencies:
+      '@szl-holdings/ai-control-plane':
+        specifier: workspace:*
+        version: link:../ai-control-plane
+      '@szl-holdings/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@szl-holdings/evidence-ledger':
+        specifier: workspace:*
+        version: link:../evidence-ledger
+      '@szl-holdings/retrieval-core':
+        specifier: workspace:*
+        version: link:../retrieval-core
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../szl-alloy
+      '@workspace/agents-core':
+        specifier: workspace:*
+        version: link:../agents-core
+      '@workspace/cognitive-runtime':
+        specifier: workspace:*
+        version: link:../cognitive-runtime
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../memory-fabric
+      '@workspace/planner':
+        specifier: workspace:*
+        version: link:../planner
+      '@workspace/trace-graph':
+        specifier: workspace:*
+        version: link:../trace-graph
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/alloy-crew:
     dependencies:

@@ -1,0 +1,41 @@
+{
+  "name": "@szl/alloy-agentic-rag",
+  "version": "1.0.0",
+  "description": "Alloy Agentic RAG — unified Aggregator Agent, dual planner modes, tiered memory, MCP server classes, specialist agents, RRF+cross-encoder merging, and AI Control Plane generation.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./aggregator": "./src/aggregator.ts",
+    "./planner-modes": "./src/planner-modes.ts",
+    "./memory-tiers": "./src/memory-tiers.ts",
+    "./evidence-merger": "./src/evidence-merger.ts",
+    "./specialists/registry": "./src/specialists/registry.ts",
+    "./mcp-classes": "./src/mcp-classes/index.ts",
+    "./specialists": "./src/specialists/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src"
+  },
+  "dependencies": {
+    "@szl-holdings/ai-control-plane": "workspace:*",
+    "@szl-holdings/contracts": "workspace:*",
+    "@szl-holdings/evidence-ledger": "workspace:*",
+    "@szl-holdings/retrieval-core": "workspace:*",
+    "@szl/alloy": "workspace:*",
+    "@workspace/agents-core": "workspace:*",
+    "@workspace/cognitive-runtime": "workspace:*",
+    "@workspace/memory-fabric": "workspace:*",
+    "@workspace/planner": "workspace:*",
+    "@workspace/trace-graph": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

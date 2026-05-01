@@ -1,0 +1,21 @@
+{
+  "name": "@szl-holdings/alloy-client",
+  "version": "1.0.0",
+  "description": "Alloy client — re-exports the @szl/alloy-agentic-rag SDK for convenient consumption by all product artifacts.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./agentic-rag": "./src/agentic-rag.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@szl-holdings/contracts": "workspace:*",
+    "@szl/alloy-agentic-rag": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

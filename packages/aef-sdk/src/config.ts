@@ -17,7 +17,7 @@ function getEnv(key: string): string {
     const val = process.env[key];
     if (val) return val;
   }
-  const viteEnv = import.meta.env;
+  const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env;
   if (viteEnv) {
     const viteKey = `VITE_${key}`;
     return viteEnv[viteKey] ?? viteEnv[key] ?? '';
