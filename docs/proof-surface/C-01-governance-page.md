@@ -27,7 +27,7 @@ The default vendor pattern is "trust us; the details are in the data room." Gove
 **CTAs:**
 - Replay an attestation (deep link to `/replay-attestation`)
 - Watch the 90-second demo (deep link to `/demo`)
-- Email procurement (mailto: `inquiries@szlholdings.com`)
+- Email procurement (mailto: `stephen@szlholdings.com`)
 
 ### 2.2 Live evidence-ledger header
 
@@ -118,7 +118,7 @@ A small block linking to:
 
 ### 2.10 Contact
 
-`inquiries@szlholdings.com` — procurement and partnerships
+`stephen@szlholdings.com` — procurement and partnerships
 `security@szlholdings.com` — security disclosure
 `privacy@szlholdings.com` — privacy and data subject rights
 SZL Holdings · United States

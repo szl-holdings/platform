@@ -384,7 +384,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               Sign in to Platform
             </button>
             <a
-              href="mailto:inquiries@szlholdings.com"
+              href="mailto:stephen@szlholdings.com"
               style={{
                 padding: '12px 28px',
                 borderRadius: '6px',
@@ -1210,7 +1210,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               <ArrowRight size={14} />
             </button>
             <a
-              href="mailto:inquiries@szlholdings.com"
+              href="mailto:stephen@szlholdings.com"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1404,7 +1404,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               © {new Date().getFullYear()} SZL Holdings. All rights reserved.
             </p>
             <p style={{ fontSize: '11px', color: '#1e293b', fontFamily: 'monospace' }}>
-              inquiries@szlholdings.com
+              stephen@szlholdings.com
             </p>
           </div>
         </div>

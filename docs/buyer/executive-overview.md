@@ -63,4 +63,4 @@ Property intelligence for NYC brokers and investors. Live distress data pipeline
 3. **Design partner program** — 90-day pilot with direct founder access and customization collaboration
 4. **Commercial deployment** — Full enterprise contract, SLA, support, and onboarding
 
-**Start here:** [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+**Start here:** [stephen@szlholdings.com](mailto:stephen@szlholdings.com)

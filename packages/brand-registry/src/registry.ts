@@ -10,7 +10,7 @@ export const registry: BrandRegistry = {
     founded: '2021',
     foundedQuarter: 'Q2 2021',
     headquarters: ['Washington, D.C.', 'London', 'Singapore'],
-    email: 'inquiries@szlholdings.com',
+    email: 'stephen@szlholdings.com',
     privacyEmail: 'privacy@szlholdings.com',
     website: 'https://szlholdings.com',
   },
@@ -232,7 +232,7 @@ export const registry: BrandRegistry = {
     copyrightHolder: 'SZL Holdings',
     privacyController: 'SZL Holdings Ltd',
     privacyEmail: 'privacy@szlholdings.com',
-    termsContact: 'inquiries@szlholdings.com',
+    termsContact: 'stephen@szlholdings.com',
   },
 
   deprecatedStrings: [

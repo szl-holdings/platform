@@ -31,7 +31,7 @@ If you are an enterprise customer or design partner with a support agreement:
 
 For technical questions during an evaluation or due diligence process:
 
-**Email:** `inquiries@szlholdings.com`
+**Email:** `stephen@szlholdings.com`
 
 ---
 
@@ -39,7 +39,7 @@ For technical questions during an evaluation or due diligence process:
 
 For general questions about the platform, partnership opportunities, or investment:
 
-**Email:** `inquiries@szlholdings.com`
+**Email:** `stephen@szlholdings.com`
 **Website:** [szlholdings.com](https://szlholdings.com)
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
 

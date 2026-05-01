@@ -180,7 +180,7 @@ export function ContactCTA() {
                   General inquiries
                 </p>
                 <p style={{ fontSize: '13px', color: 'hsl(210,5%,62%)' }}>
-                  inquiries@szlholdings.com
+                  stephen@szlholdings.com
                 </p>
               </div>
               <div>

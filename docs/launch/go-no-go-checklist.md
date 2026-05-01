@@ -127,7 +127,7 @@ This checklist is the final gate before any external user accesses the SZL Holdi
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| O1 | `inquiries@szlholdings.com` monitored and staffed | ☐ | |
+| O1 | `stephen@szlholdings.com` monitored and staffed | ☐ | |
 | O2 | On-call owner designated for first 72 hours post-launch | ☐ | |
 | O3 | INCIDENT_RESPONSE.md reviewed by on-call team | ☐ | |
 | O4 | SEV1 escalation contact confirmed (stephen@szlholdings.com) | ☐ | |

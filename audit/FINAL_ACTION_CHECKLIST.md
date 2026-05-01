@@ -84,7 +84,7 @@ This is the consolidated master checklist of every action that cannot be enforce
 - [ ] CI, CodeQL, and Security badges show current status (green)
 - [ ] No stale numeric claims (removed in Phase D)
 - [ ] PRISM Counsel and IMPERIUM are clearly marked as archived
-- [ ] Contact information is accurate (`stephen@szlholdings.com`, `inquiries@szlholdings.com`)
+- [ ] Contact information is accurate (`stephen@szlholdings.com`, `stephen@szlholdings.com`)
 
 **Note:** Phase D pushed the updated org profile README (commit `5ea21216`). Verify it renders as intended.
 

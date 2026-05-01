@@ -63,7 +63,7 @@ As of April 2026: 10 deployed artifacts, 700+ database tables, 11-role RBAC, 9 s
 
 ## One CTA
 
-If your organization is navigating the accountability gap in security, maritime, real estate, legal, or advisory operations — and you'd like to talk about co-designing the platform as a design partner — reply to this email or write to **inquiries@szlholdings.com**.
+If your organization is navigating the accountability gap in security, maritime, real estate, legal, or advisory operations — and you'd like to talk about co-designing the platform as a design partner — reply to this email or write to **stephen@szlholdings.com**.
 
 That's the ask.
 

@@ -115,4 +115,4 @@ Enterprise buyers requiring:
 - Compliance documentation — available for enterprise contracts under NDA
 - Custom security review — available by arrangement for qualified enterprise prospects
 
-Contact: [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+Contact: [stephen@szlholdings.com](mailto:stephen@szlholdings.com)

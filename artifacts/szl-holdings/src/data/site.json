@@ -5,7 +5,7 @@
     "description": "A growing portfolio of platforms, advisory capabilities, and operating ideas designed for clarity, scale, and long-term value.",
     "founded": "2021",
     "headquarters": "Washington, D.C. · London · Singapore",
-    "email": "inquiries@szlholdings.com"
+    "email": "stephen@szlholdings.com"
   },
   "nav": {
     "links": [
@@ -143,7 +143,7 @@
     "submitLabel": "Start a strategic conversation",
     "submittingLabel": "Sending...",
     "successMessage": "Your inquiry has been received. We will follow up soon.",
-    "errorMessage": "Something went wrong. Please try again or email us directly at inquiries@szlholdings.com."
+    "errorMessage": "Something went wrong. Please try again or email us directly at stephen@szlholdings.com."
   },
   "footer": {
     "sections": {

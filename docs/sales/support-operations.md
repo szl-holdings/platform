@@ -41,7 +41,7 @@ No response time commitment. No ticket generated.
 
 ### Tier 1 — General Inquiries
 
-**Intake:** `/contact` web form → `inquiries@szlholdings.com`
+**Intake:** `/contact` web form → `stephen@szlholdings.com`
 
 **Scope:**
 - General product questions
