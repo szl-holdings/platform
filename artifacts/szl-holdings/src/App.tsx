@@ -19,6 +19,7 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
+import { ContinuumLayout } from "@/continuum/components/alloy-layout";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { DesignSystemProvider } from "@szl-holdings/design-system";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
@@ -39,6 +40,8 @@ const InvestorStoryPage = lazy(() => import("@/pages/investor-story"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
 const TrustPage = lazy(() => import("@/pages/trust"));
+const GovernancePublicPage = lazy(() => import("@/pages/governance"));
+const ReplayAttestationPage = lazy(() => import("@/pages/replay-attestation"));
 const TrustSecurityPage = lazy(() => import("@/pages/trust-security"));
 const TrustGovernancePage = lazy(() => import("@/pages/trust-governance"));
 const TrustArchitecturePage = lazy(() => import("@/pages/trust-architecture"));
@@ -71,7 +74,7 @@ const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
-const APEXIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
+const APEXIntelligenceHubPage = lazy(() => import("@/pages/Workflow-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
@@ -107,6 +110,7 @@ const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 const DemoPage = lazy(() => import("@/pages/demo"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
 const SZLBillingPage = lazy(() => import("@/pages/billing-account"));
+const EvidenceScoresPage = lazy(() => import("@/pages/evidence-scores"));
 const AdminBillingPage = lazy(() => import("@/pages/admin-billing"));
 const AdminAiUsagePage = lazy(() => import("@/pages/admin-ai-usage"));
 const StablecoinTreasuryPage = lazy(() => import("@/pages/treasury"));
@@ -133,7 +137,7 @@ const SignalFusionPage = lazy(() => import("@/pages/signal-fusion"));
 const HealthFreshnessPage = lazy(() => import("@/pages/health-freshness"));
 const DecisionSchemaLibraryPage = lazy(() => import("@/pages/decision-schema-library"));
 const GovernancePosturePage = lazy(() => import("@/pages/governance-posture"));
-const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
+const ContinuumPublicPage = lazy(() => import("@/pages/continuum-page"));
 const A11oyPhilosophyPage = lazy(() => import("@/pages/a11oy-philosophy"));
 const SolutionsPage = lazy(() => import("@/pages/solutions"));
 const SolutionsAegisPage = lazy(() => import("@/pages/solutions-aegis"));
@@ -172,7 +176,7 @@ const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const ForgotPasswordPage = lazy(() => import("@/pages/forgot-password"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
-const AutopilotPage = lazy(() => import("@/pages/autopilot"));
+const AutopilotPage = lazy(() => import("@/pages/Supervised Automation"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const OrgSettingsPage = lazy(() => import("@/pages/org-settings"));
@@ -293,40 +297,40 @@ const VentureIntelSynergyMapPage = lazy(() => import("@/pages/venture-intel/syne
 const VentureIntelLpPortalPage = lazy(() => import("@/pages/venture-intel/lp-portal"));
 const VentureIntelMarketSignalsPage = lazy(() => import("@/pages/venture-intel/market-signals"));
 const VentureIntelExitModelerPage = lazy(() => import("@/pages/venture-intel/exit-modeler"));
-const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
-const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
-const AlloyRunDetail = lazy(() => import("@/alloy/pages/run-detail"));
-const AlloySignalFeed = lazy(() => import("@/alloy/pages/signal-feed"));
-const AlloyWorkflowOrchestration = lazy(() => import("@/alloy/pages/workflow-orchestration"));
-const AlloyConnectorMesh = lazy(() => import("@/alloy/pages/connector-mesh"));
-const AlloyGovernanceAudit = lazy(() => import("@/alloy/pages/governance-audit"));
-const AlloyEnterpriseGovernance = lazy(() => import("@/alloy/pages/enterprise-governance"));
+const ContinuumFactoryFloor = lazy(() => import("@/continuum/pages/factory-floor"));
+const ContinuumExecutionHistory = lazy(() => import("@/continuum/pages/execution-history"));
+const ContinuumRunDetail = lazy(() => import("@/continuum/pages/run-detail"));
+const ContinuumSignalFeed = lazy(() => import("@/continuum/pages/signal-feed"));
+const ContinuumWorkflowOrchestration = lazy(() => import("@/continuum/pages/workflow-orchestration"));
+const ContinuumConnectorMesh = lazy(() => import("@/continuum/pages/connector-mesh"));
+const ContinuumGovernanceAudit = lazy(() => import("@/continuum/pages/governance-audit"));
+const ContinuumEnterpriseGovernance = lazy(() => import("@/continuum/pages/enterprise-governance"));
 const DesignTokenGovernancePage = lazy(() => import("@/pages/design-token-governance"));
-const AlloyAtlasApprovals = lazy(() => import("@/alloy/pages/atlas-approvals"));
-const AlloyOperatorApprovals = lazy(() => import("@/alloy/pages/operator-approvals"));
-const AlloyAutomationAnalytics = lazy(() => import("@/alloy/pages/automation-analytics"));
-const AlloyConsolePage = lazy(() => import("@/alloy/pages/ConsolePage"));
-const AlloyDagView = lazy(() => import("@/alloy/pages/dag-view"));
-const AlloyCampaignHub = lazy(() => import("@/alloy/pages/creative/campaign-hub").then(m => ({ default: m.CampaignHub })));
-const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-detail").then(m => ({ default: m.CampaignDetail })));
-const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
-const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
-const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
-const AlloyDocumentEngine = lazy(() => import("@/alloy/pages/document-engine"));
-const AlloyWorkspaceHome = lazy(() => import("@/alloy/pages/workspace-home"));
-const AlloyDecisionObjects = lazy(() => import("@/alloy/pages/decision-objects"));
-const AlloySkillRegistry = lazy(() => import("@/alloy/pages/skill-registry"));
-const AlloyOperatorControl = lazy(() => import("@/alloy/pages/operator-control-center"));
-const AlloyResearchMode = lazy(() => import("@/alloy/pages/research-mode"));
-const AlloyArtifactStudio = lazy(() => import("@/alloy/pages/artifact-studio"));
-const AlloyBrowserOperator = lazy(() => import("@/alloy/pages/browser-operator"));
-const AlloyPolicyManager = lazy(() => import("@/alloy/pages/policy-manager"));
-const AlloyAdminAnalytics = lazy(() => import("@/alloy/pages/admin-analytics"));
-const AlloyUsageMetering = lazy(() => import("@/alloy/pages/usage-metering"));
-const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
-const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
-const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
-const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
+const ContinuumAtlasApprovals = lazy(() => import("@/continuum/pages/atlas-approvals"));
+const ContinuumOperatorApprovals = lazy(() => import("@/continuum/pages/operator-approvals"));
+const ContinuumAutomationAnalytics = lazy(() => import("@/continuum/pages/automation-analytics"));
+const ContinuumConsolePage = lazy(() => import("@/continuum/pages/ConsolePage"));
+const ContinuumDagView = lazy(() => import("@/continuum/pages/dag-view"));
+const ContinuumCampaignHub = lazy(() => import("@/continuum/pages/creative/campaign-hub").then(m => ({ default: m.CampaignHub })));
+const ContinuumCampaignDetail = lazy(() => import("@/continuum/pages/creative/campaign-detail").then(m => ({ default: m.CampaignDetail })));
+const ContinuumBrandVoice = lazy(() => import("@/continuum/pages/creative/brand-voice"));
+const ContinuumContentCalendar = lazy(() => import("@/continuum/pages/creative/content-calendar"));
+const ContinuumAIStudio = lazy(() => import("@/continuum/pages/creative/ai-studio"));
+const ContinuumDocumentEngine = lazy(() => import("@/continuum/pages/document-engine"));
+const ContinuumWorkspaceHome = lazy(() => import("@/continuum/pages/workspace-home"));
+const ContinuumDecisionObjects = lazy(() => import("@/continuum/pages/decision-objects"));
+const ContinuumSkillRegistry = lazy(() => import("@/continuum/pages/skill-registry"));
+const ContinuumOperatorControl = lazy(() => import("@/continuum/pages/operator-control-center"));
+const ContinuumResearchMode = lazy(() => import("@/continuum/pages/research-mode"));
+const ContinuumArtifactStudio = lazy(() => import("@/continuum/pages/artifact-studio"));
+const ContinuumBrowserOperator = lazy(() => import("@/continuum/pages/browser-operator"));
+const ContinuumPolicyManager = lazy(() => import("@/continuum/pages/policy-manager"));
+const ContinuumAdminAnalytics = lazy(() => import("@/continuum/pages/admin-analytics"));
+const ContinuumUsageMetering = lazy(() => import("@/continuum/pages/usage-metering"));
+const ContinuumCanonicalDemos = lazy(() => import("@/continuum/pages/canonical-demos"));
+const ContinuumPilotOnboarding = lazy(() => import("@/continuum/pages/pilot-onboarding"));
+const ContinuumMcpStore = lazy(() => import("@/continuum/pages/mcp-store"));
+const ContinuumMcpToolCreator = lazy(() => import("@/continuum/pages/mcp-tool-creator"));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
@@ -432,20 +436,40 @@ function ExternalRedirect({ to }: { to: string }) {
   return <PageLoader />;
 }
 
-function AlloyRunDetailRoute({ params }: { params: { id: string } }) {
+function ContinuumRunDetailRoute({ params }: { params: { id: string } }) {
   const id = parseInt(params.id ?? "0", 10);
-  return <AlloyRunDetail id={id} />;
+  return <ContinuumRunDetail id={id} />;
+}
+
+function ContinuumAppPage({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "var(--gi-bg-base)" }}>
+      <div className="flex-1 overflow-hidden">
+        <ContinuumLayout>{children}</ContinuumLayout>
+      </div>
+    </div>
+  );
 }
 
 function AlloyAppPage({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
+    <div className="flex flex-col h-screen" style={{ background: "var(--gi-bg-base)" }}>
       <div className="flex-1 overflow-hidden">
         <AlloyLayout>{children}</AlloyLayout>
       </div>
     </div>
   );
 }
+
+const WorkGraphExplorer = lazy(() => import("@/alloy/pages/workgraph/workgraph-explorer"));
+const WorkspaceIntelligence = lazy(() => import("@/alloy/pages/workgraph/workspace-intelligence"));
+const WorkspaceEventStream = lazy(() => import("@/alloy/pages/workgraph/event-stream"));
+const WorkspaceSkillsStudio = lazy(() => import("@/alloy/pages/workgraph/skills-studio"));
+const WorkspaceProjectMemory = lazy(() => import("@/alloy/pages/workgraph/project-memory"));
+const WorkspaceMeetingExecution = lazy(() => import("@/alloy/pages/workgraph/meeting-execution"));
+const WorkspaceApprovalChase = lazy(() => import("@/alloy/pages/workgraph/approval-chase"));
+const WorkspaceProofPackets = lazy(() => import("@/alloy/pages/workgraph/proof-packets"));
+const WorkspaceAdmin = lazy(() => import("@/alloy/pages/workgraph/workgraph-admin"));
 
 
 function PageLoader() {
@@ -624,7 +648,7 @@ function App() {
               <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>
             </Route>
 
-            {/* ── Product pages — Lyte and Counsel (public marketing) ── */}
+            {/* ── Product pages — KORA and Counsel (public marketing) ── */}
             <Route path="/products/lyte">
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
             </Route>
@@ -667,11 +691,11 @@ function App() {
             <Route path="/a11oy-philosophy">
               <Suspense fallback={<PageLoader />}><A11oyPhilosophyPage /></Suspense>
             </Route>
-            <Route path="/platform/alloy">
-              <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>
+            <Route path="/platform/continuum">
+              <Suspense fallback={<PageLoader />}><ContinuumPublicPage /></Suspense>
             </Route>
-            <Route path="/alloy-fabric">
-              <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>
+            <Route path="/continuum-fabric">
+              <Suspense fallback={<PageLoader />}><ContinuumPublicPage /></Suspense>
             </Route>
 
             {/* ── Solutions hub and verticals ── */}
@@ -737,7 +761,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
-            {/* ── Counsel — merged into Aegis Legal workspace ── */}
+            {/* ── Counsel — merged into PARAGON Legal workspace ── */}
             <Route path="/prism-counsel/:rest*">
               {() => { window.location.href = "/aegis/legal"; return null; }}
             </Route>
@@ -790,6 +814,13 @@ function App() {
             </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
+            </Route>
+            {/* Public proof surface (Track C-01) — must remain unauthenticated. */}
+            <Route path="/governance">
+              <Suspense fallback={<PageLoader />}><GovernancePublicPage /></Suspense>
+            </Route>
+            <Route path="/replay-attestation">
+              <Suspense fallback={<PageLoader />}><ReplayAttestationPage /></Suspense>
             </Route>
             <Route path="/product-readiness">
               <Suspense fallback={<PageLoader />}><ProductReadinessPage /></Suspense>
@@ -954,6 +985,9 @@ function App() {
             <Route path="/pricing">
               <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>
             </Route>
+            <Route path="/evidence-scores">
+              <Suspense fallback={<PageLoader />}><EvidenceScoresPage /></Suspense>
+            </Route>
             <Route path="/account/billing">
               <Suspense fallback={<PageLoader />}><SZLBillingPage /></Suspense>
             </Route>
@@ -968,111 +1002,111 @@ function App() {
             </Route>
 
             {/* ── Counsel app routes (internal, not public nav) ── */}
-            <Route path="/alloy">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyFactoryFloor /></AlloyAppPage></Suspense>
+            <Route path="/continuum">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumFactoryFloor /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/runs">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyExecutionHistory /></AlloyAppPage></Suspense>
+            <Route path="/continuum/runs">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumExecutionHistory /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/runs/:id">
-              {(params) => <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyRunDetailRoute params={params} /></AlloyAppPage></Suspense>}
+            <Route path="/continuum/runs/:id">
+              {(params) => <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumRunDetailRoute params={params} /></ContinuumAppPage></Suspense>}
             </Route>
-            <Route path="/alloy/signals">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySignalFeed /></AlloyAppPage></Suspense>
+            <Route path="/continuum/signals">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumSignalFeed /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/workflows">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyWorkflowOrchestration /></AlloyAppPage></Suspense>
+            <Route path="/continuum/workflows">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumWorkflowOrchestration /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/connectors">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyConnectorMesh /></AlloyAppPage></Suspense>
+            <Route path="/continuum/connectors">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumConnectorMesh /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/governance">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyGovernanceAudit /></AlloyAppPage></Suspense>
+            <Route path="/continuum/governance">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumGovernanceAudit /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/atlas-approvals">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAtlasApprovals /></AlloyAppPage></Suspense>
+            <Route path="/continuum/atlas-approvals">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumAtlasApprovals /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/operator-approvals">
-              <Suspense fallback={<PageLoader />}><RequireAuth><AlloyAppPage><AlloyOperatorApprovals /></AlloyAppPage></RequireAuth></Suspense>
+            <Route path="/continuum/operator-approvals">
+              <Suspense fallback={<PageLoader />}><RequireAuth><ContinuumAppPage><ContinuumOperatorApprovals /></ContinuumAppPage></RequireAuth></Suspense>
             </Route>
-            <Route path="/alloy/enterprise-governance">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEnterpriseGovernance /></AlloyAppPage></Suspense>
+            <Route path="/continuum/enterprise-governance">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumEnterpriseGovernance /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/analytics">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAutomationAnalytics /></AlloyAppPage></Suspense>
+            <Route path="/continuum/analytics">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumAutomationAnalytics /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/console">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyConsolePage /></AlloyAppPage></Suspense>
+            <Route path="/continuum/console">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumConsolePage /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/dag">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDagView /></AlloyAppPage></Suspense>
+            <Route path="/continuum/dag">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumDagView /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyCampaignHub /></AlloyAppPage></Suspense>
+            <Route path="/continuum/creative">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumCampaignHub /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative/campaigns/:id">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyCampaignDetail /></AlloyAppPage></Suspense>
+            <Route path="/continuum/creative/campaigns/:id">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumCampaignDetail /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative/brand-voice">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyBrandVoice /></AlloyAppPage></Suspense>
+            <Route path="/continuum/creative/brand-voice">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumBrandVoice /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative/content-calendar">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyContentCalendar /></AlloyAppPage></Suspense>
+            <Route path="/continuum/creative/content-calendar">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumContentCalendar /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative/ai-studio">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAIStudio /></AlloyAppPage></Suspense>
+            <Route path="/continuum/creative/ai-studio">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumAIStudio /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/documents">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDocumentEngine /></AlloyAppPage></Suspense>
+            <Route path="/continuum/documents">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumDocumentEngine /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/documents/:sub">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDocumentEngine /></AlloyAppPage></Suspense>
+            <Route path="/continuum/documents/:sub">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumDocumentEngine /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/home">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyWorkspaceHome /></AlloyAppPage></Suspense>
+            <Route path="/continuum/home">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumWorkspaceHome /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/decisions">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDecisionObjects /></AlloyAppPage></Suspense>
+            <Route path="/continuum/decisions">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumDecisionObjects /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/skills">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySkillRegistry /></AlloyAppPage></Suspense>
+            <Route path="/continuum/skills">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumSkillRegistry /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/operator">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyOperatorControl /></AlloyAppPage></Suspense>
+            <Route path="/continuum/operator">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumOperatorControl /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/research">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyResearchMode /></AlloyAppPage></Suspense>
+            <Route path="/continuum/research">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumResearchMode /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/artifacts">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyArtifactStudio /></AlloyAppPage></Suspense>
+            <Route path="/continuum/artifacts">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumArtifactStudio /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/browser">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyBrowserOperator /></AlloyAppPage></Suspense>
+            <Route path="/continuum/browser">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumBrowserOperator /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/policies">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPolicyManager /></AlloyAppPage></Suspense>
+            <Route path="/continuum/policies">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumPolicyManager /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/admin-analytics">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAdminAnalytics /></AlloyAppPage></Suspense>
+            <Route path="/continuum/admin-analytics">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumAdminAnalytics /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/usage">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyUsageMetering /></AlloyAppPage></Suspense>
+            <Route path="/continuum/usage">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumUsageMetering /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/demos">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyCanonicalDemos /></AlloyAppPage></Suspense>
+            <Route path="/continuum/demos">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumCanonicalDemos /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/pilot">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPilotOnboarding /></AlloyAppPage></Suspense>
+            <Route path="/continuum/pilot">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumPilotOnboarding /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/mcp-store">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpStore /></AlloyAppPage></Suspense>
+            <Route path="/continuum/mcp-store">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumMcpStore /></ContinuumAppPage></Suspense>
             </Route>
-            <Route path="/alloy/mcp-tools">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpToolCreator /></AlloyAppPage></Suspense>
+            <Route path="/continuum/mcp-tools">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><ContinuumMcpToolCreator /></ContinuumAppPage></Suspense>
             </Route>
 
-            <Route path="/alloy/intelligence-exchange">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><IntelligenceExchangePage /></AlloyAppPage></Suspense>
+            <Route path="/continuum/intelligence-exchange">
+              <Suspense fallback={<PageLoader />}><ContinuumAppPage><IntelligenceExchangePage /></ContinuumAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}
@@ -1163,7 +1197,7 @@ function App() {
             </Route>
 
             {/* ── Intelligence Fabric ── */}
-            <Route path="/intelligence/cortex">
+            <Route path="/intelligence/Workflow">
               <RequireAuth><Suspense fallback={<PageLoader />}><APEXIntelligenceHubPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/intelligence/fabric">
@@ -1452,7 +1486,7 @@ function App() {
             <Route path="/ecosystem">
               <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
             </Route>
-            <Route path="/autopilot">
+            <Route path="/Supervised Automation">
               <Suspense fallback={<PageLoader />}><AutopilotPage /></Suspense>
             </Route>
             <Route path="/business-state">
@@ -1654,6 +1688,35 @@ function App() {
             {/* Design Token Governance Dashboard */}
             <Route path="/design-token-governance">
               <Suspense fallback={<PageLoader />}><DesignTokenGovernancePage /></Suspense>
+            </Route>
+
+            {/* ── Alloy WorkGraph — Workspace Intelligence Layer ── */}
+            <Route path="/alloy/workgraph">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkGraphExplorer /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/signals">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceEventStream /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/skills">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceSkillsStudio /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/projects">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceProjectMemory /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/meetings">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceMeetingExecution /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/approvals">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceApprovalChase /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/proof">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceProofPackets /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace/admin">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceAdmin /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/workspace">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><WorkspaceIntelligence /></AlloyAppPage></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}

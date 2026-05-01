@@ -9,7 +9,7 @@ import * as vessels from "./groups/vessels";
 import * as security from "./groups/security";
 import * as lyte from "./groups/lyte";
 import * as terra from "./groups/terra";
-import * as alloy from "./groups/alloy";
+import * as continuum from "./groups/continuum";
 import * as platform from "./groups/platform";
 import * as ai from "./groups/ai";
 import * as operations from "./groups/operations";
@@ -20,7 +20,7 @@ import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
-import * as alloyRuntime from "./groups/alloy-runtime-group";
+import * as continuumRuntime from "./groups/continuum-runtime-group";
 import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
@@ -56,6 +56,10 @@ router.use(lazyMatch("/analytics-engine", () => import("./analytics-engine-publi
 
 // Newsletter subscribe proxy — public, unauthenticated.
 router.use(lazyMatch("/newsletter", () => import("./newsletter"), "newsletter"));
+
+// Public replay-attestation + governance stats + .well-known attestation keys (Track C-02).
+// Owns POST /v1/replay-attestation, GET /governance/stats, GET /.well-known/szl-attestation-keys.json.
+router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-known/szl-attestation-keys.json"], () => import("./replay-attestation"), "replay-attestation"));
 
 // Email provider webhooks (bounces, complaints) + unsubscribe handler — public, unauthenticated.
 router.use(emailWebhooksRouter);
@@ -142,10 +146,10 @@ router.use(lazyMatch("/narratives", () => import("./narratives"), "narratives"))
 // Shared action store — public, unauthenticated.
 router.use(lazyMatch("/action-store", () => import("./action-store"), "action-store"));
 
-// Alloy Policy Authoring Studio — public persistence for compiled policies,
+// Continuum Policy Authoring Studio — public persistence for compiled policies,
 // version history, and per-studio test cases. Demo surface, same model as
 // /api/action-store.
-router.use(lazyMatch("/alloy/policy-compiler", () => import("./alloy-policy-compiler"), "alloy-policy-compiler"));
+router.use(lazyMatch("/continuum/policy-compiler", () => import("./continuum-policy-compiler"), "continuum-policy-compiler"));
 
 // Competitive Intel monitor — public Atlas demo surface.
 router.use("/competitive-intel", lazyMount(() => import("./competitive-intel"), "competitive-intel"));
@@ -250,7 +254,7 @@ router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
 // Mounted BEFORE guardianPolicyCheck so unauthenticated views can hydrate.
 router.use("/helios", lazyMount(() => import("./helios/index"), "helios"));
 
-// Alloy Meridian — Cognitive observability OS with model router, agent
+// Continuum Meridian — Cognitive observability OS with model router, agent
 // constellation, forecast council, signal graph, decision weather,
 // counterfactual ledger, flight recorder, founder intent, and MCP governance.
 // Owns /meridian/* endpoints. Mounted BEFORE guardianPolicyCheck so
@@ -346,6 +350,7 @@ router.use(
 );
 router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
 router.use(lazyMatch("/tool-mesh", () => import("./tool-mesh"), "tool-mesh"));
+router.use(lazyMatch("/praxis-tools", () => import("./praxis-tools"), "praxis-tools"));
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
@@ -360,7 +365,7 @@ vessels.register(router);
 security.register(router);
 lyte.register(router);
 terra.register(router);
-alloy.register(router);
+continuum.register(router);
 platform.register(router);
 ai.register(router);
 operations.register(router);
@@ -371,7 +376,7 @@ decisions.register(router);
 domainAtlas.register(router);
 graph.register(router);
 guardian.register(router);
-alloyRuntime.register(router);
+continuumRuntime.register(router);
 selfModel.register(router);
 verifier.register(router);
 skillLibrary.register(router);
@@ -382,11 +387,20 @@ router.use("/provenance", lazyMount(() => import("./provenance"), "provenance"))
 // Mounted BEFORE the legacy /nexus router so v1 paths take precedence.
 router.use(lazyMatch(["/nexus/v1"], () => import("./nexus-v1"), "nexus-v1"));
 
+// NEXUS Kernel — Unified AI Compute Kernel orchestration layer (SGLang + HuggingFace Kernel Hub).
+// Owns /nexus/kernels, /nexus/infer, /nexus/compare, /nexus/simulate, /nexus/health, /nexus/audit, /nexus/stats
+router.use(lazyMatch("/nexus", () => import("./nexus-kernel"), "nexus-kernel"));
+
 // NEXUS MCP Fabric — bidirectional governed MCP control plane.
 // Handles external server registry, session tracking, anomaly detection, and governed workflows.
 router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));
 
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
+
+// Ouroboros v4 Runtime — A11oy control plane, Sentra/Amaru ingestion contracts,
+// validator registry, innovation engine, output paths, proof-route + pack
+// aliases. Backed by @workspace/ouroboros (pure kernel, 70+ tests).
+router.use("/ouroboros", lazyMount(() => import("./ouroboros"), "ouroboros"));
 
 // Intelligence Economics Operating System — aggregate AI fleet economics,
 // calibration observatory, compound intelligence map, trust registry,
@@ -438,6 +452,13 @@ router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "m
 // Owns /evolution/* endpoints: candidates, evaluation, calibration, scoring,
 // drift, promotion, rollback, audit, and diagnostics.
 router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
+
+// A11oy Forge — Governed Self-Evolution Runtime for agent scaffold evolution
+// (prompt strategies, tool selection, routing weights, autonomy levels, policy
+// boundaries). Distinct from PER which governs model weight training.
+// Owns /alloy-forge/* endpoints: status, evolution-rounds, arena, proof-ledger,
+// cross-domain proposals, drift-alerts, timeline, and approve/reject lifecycle.
+router.use(lazyMatch("/alloy-forge", () => import("./alloy-forge"), "alloy-forge"));
 
 // Unified Auth Mesh — API key CRUD and OAuth client_credentials endpoints
 router.use(apiKeysRouter);
