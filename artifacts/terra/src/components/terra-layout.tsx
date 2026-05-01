@@ -570,17 +570,22 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     });
   }, [setPreference]);
 
-  const { data: apiHealth, isError: apiDown } = useQuery({
-    queryKey: ['terra-api-health'],
+  const { data: sourceHealth, isError: apiDown } = useQuery({
+    queryKey: ['terra-source-health'],
     queryFn: () =>
-      fetch(`${API}/terra/pipeline/deals?limit=1`)
+      fetch(`${API}/terra/live/source-health`)
         .then((r) => r.json())
         .then((d) => d.data ?? d),
     staleTime: 60000,
     retry: 1,
+    refetchInterval: 5 * 60 * 1000,
   });
-  const sidebarDataMode = !apiDown && apiHealth?.dataMode === 'live' ? 'Live' : 'Demo';
-  const sidebarModeColor = sidebarDataMode === 'Live' ? accent : colors.semantic.warning;
+
+  const overallMode = !apiDown && sourceHealth?.overallMode;
+  const liveCount = sourceHealth?.liveSourceCount ?? 0;
+  const totalSources = sourceHealth?.totalSources ?? 0;
+  const sidebarDataMode = overallMode === 'live' ? 'Live' : overallMode === 'partial' ? 'Partial' : 'Demo';
+  const sidebarModeColor = sidebarDataMode === 'Live' ? accent : sidebarDataMode === 'Partial' ? colors.semantic.warning : colors.text.subtle;
 
   const sidebarHeader = (
     <div className="h-14 flex items-center px-2">
@@ -640,6 +645,19 @@ export function TerraLayout({ children }: { children: ReactNode }) {
             {sidebarDataMode}
           </span>
         </div>
+        {totalSources > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-[10px]" style={{ color: colors.text.subtle }}>
+              Live sources
+            </span>
+            <span
+              className="text-[9px] font-mono font-semibold"
+              style={{ color: liveCount >= 4 ? accent : liveCount >= 2 ? colors.semantic.warning : colors.text.subtle }}
+            >
+              {liveCount}/{totalSources}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-[10px]" style={{ color: colors.text.subtle }}>
             Distress signals

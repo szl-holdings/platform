@@ -95,6 +95,44 @@ function runModelInference(
       confidence: 1 - Math.abs(prob - 0.5),
     };
   }
+  if (domain === 'terra' && modelType === 'distress_propagation') {
+    const f = features as Record<string, number>;
+    const base = (f['triggerDistressScore'] ?? avg) * 0.45;
+    const conc = 1 + ((f['ownerLlcConcentration'] ?? 3) / 10) * 0.6;
+    const cross = 1 + ((f['crossCollateralLoanCount'] ?? 2) / 6) * 0.4;
+    const lender = 1 + (f['lenderConcentrationScore'] ?? 0.5) * 0.35;
+    const dscrPenalty = (f['dscr'] ?? 1.0) < 1.0 ? 0.25 : (f['dscr'] ?? 1.0) < 1.2 ? 0.10 : 0;
+    const liq = (f['marketLiquidityIndex'] ?? 0.3) * 0.2;
+    const cascadeProb = Math.min(0.95, base * conc * cross * lender + dscrPenalty - liq);
+    return {
+      prediction: { cascadeProb: parseFloat(cascadeProb.toFixed(4)), assetsAtRisk: Math.round((f['ownerLlcConcentration'] ?? 3) * cascadeProb) },
+      confidence: parseFloat((0.68 + (1 - Math.abs(cascadeProb - 0.5)) * 0.15).toFixed(4)),
+    };
+  }
+  if (domain === 'terra' && modelType === 'climate_adjusted_cap_rate') {
+    const f = features as Record<string, number>;
+    const nri = ((f['femaNriScore'] ?? 50) / 100) * 0.008;
+    const temp = Math.max(0, f['noaaTempDrift5yr'] ?? 0.8) * 0.0015;
+    const ins = (f['insuranceLossRatioEscalation'] ?? 0.06) * 0.5 * 0.01;
+    const adj = nri + temp + ins;
+    const adjustedCapRate = parseFloat(((f['baseCapRate'] ?? 0.056) + adj).toFixed(5));
+    return {
+      prediction: { adjustedCapRate, climateAdj: parseFloat(adj.toFixed(5)), baseCapRate: f['baseCapRate'] ?? 0.056 },
+      confidence: parseFloat((0.78 + (1 - adj * 5) * 0.07).toFixed(4)),
+    };
+  }
+  if (domain === 'terra' && modelType === 'owner_intent') {
+    const f = features as Record<string, number>;
+    const nodSignal = Math.min(1, (f['nodFilingCount12m'] ?? 1) * 0.25);
+    const maturitySignal = (f['loanMaturityMonths'] ?? 8) <= 6 ? 0.3 : (f['loanMaturityMonths'] ?? 8) <= 12 ? 0.15 : 0;
+    const dscrSignal = (f['dscrBelow1'] ?? 0) ? 0.2 : 0;
+    const vacSignal = (f['vacancyRateSubmarket'] ?? 0.1) > 0.1 ? 0.1 : 0;
+    const intentProb = Math.min(0.92, nodSignal + maturitySignal + dscrSignal + vacSignal + 0.12);
+    return {
+      prediction: { intentProb: parseFloat(intentProb.toFixed(4)), dominantSignal: nodSignal > dscrSignal ? 'nod_filings' : 'dscr_distress' },
+      confidence: parseFloat((0.72 + (1 - Math.abs(intentProb - 0.5)) * 0.12).toFixed(4)),
+    };
+  }
   if (domain === 'aegis' && modelType === 'threat_severity_scorer') {
     return {
       prediction: Math.round(Math.min(100, avg * 150)),

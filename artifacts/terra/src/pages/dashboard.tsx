@@ -26,6 +26,7 @@ import {
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { A11oySignalMesh } from '@/components/a11oy-signal-mesh';
+import { TerraSiblingMeshPanel } from '@/components/sibling-mesh';
 import { AgentAvatar, RiskBadge, StageBadge } from '@/components/brokerage-ui';
 import { agents } from '@/data/brokerage';
 import { properties } from '@/data/portfolio';
@@ -1252,6 +1253,8 @@ export default function TerraIntelligence() {
           </div>
         )}
       </div>
+
+      <TerraSiblingMeshPanel scenario="sunbelt-multifamily-2026" />
 
       <A11oySignalMesh />
 

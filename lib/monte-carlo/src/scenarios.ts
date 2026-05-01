@@ -741,9 +741,305 @@ function computeIRR(cashFlows: number[], guess = 0.1): number {
   return rate;
 }
 
+export const TERRA_DISTRESS_PROPAGATION: ScenarioDefinition = {
+  id: 'terra/distress-propagation',
+  version: '1.0.0',
+  title: 'Distress Cascade Propagation Model',
+  description:
+    'Simulates the probability and severity of distress cascading from a trigger asset across its ownership network and cross-collateral loan pool within 90 days.',
+  domain: 'terra',
+  tags: ['distress', 'cascade', 'real-estate', 'credit-risk'],
+  inputs: [
+    {
+      id: 'triggerDistressScore',
+      label: 'Trigger Asset Distress Score (0–1)',
+      distribution: { type: 'beta', alpha: 6, beta: 4, min: 0.5, max: 1.0 },
+      unit: 'score',
+      format: 'percentage',
+    },
+    {
+      id: 'ownerLlcConcentration',
+      label: 'Owner LLC Asset Concentration (# linked assets)',
+      distribution: { type: 'poisson', lambda: 4.5 },
+      unit: 'assets',
+      format: 'number',
+    },
+    {
+      id: 'crossCollateralLoanCount',
+      label: 'Cross-Collateral Loan Count',
+      distribution: { type: 'poisson', lambda: 2.2 },
+      unit: 'loans',
+      format: 'number',
+    },
+    {
+      id: 'lenderConcentrationScore',
+      label: 'Lender Concentration Score (0–1)',
+      distribution: { type: 'beta', alpha: 3, beta: 5, min: 0, max: 1 },
+      unit: 'score',
+      format: 'percentage',
+    },
+    {
+      id: 'dscr',
+      label: 'Portfolio Average DSCR',
+      distribution: { type: 'normal', mean: 1.05, stdDev: 0.18 },
+      unit: 'x',
+      format: 'number',
+    },
+    {
+      id: 'marketLiquidityIndex',
+      label: 'Submarket Liquidity Index (0–1)',
+      distribution: { type: 'beta', alpha: 4, beta: 4, min: 0.1, max: 0.9 },
+      unit: 'score',
+      format: 'percentage',
+    },
+  ],
+  calculate: (inputs) => {
+    const basePropRate = inputs.triggerDistressScore! * 0.45;
+    const concentrationMultiplier = 1 + (inputs.ownerLlcConcentration! / 10) * 0.6;
+    const crossColMultiplier = 1 + (inputs.crossCollateralLoanCount! / 6) * 0.4;
+    const lenderMultiplier = 1 + inputs.lenderConcentrationScore! * 0.35;
+    const dscrPenalty = inputs.dscr! < 1.0 ? 0.25 : inputs.dscr! < 1.2 ? 0.10 : 0;
+    const liquidityBuffer = inputs.marketLiquidityIndex! * 0.2;
+
+    const cascadeProb = Math.min(
+      0.95,
+      basePropRate * concentrationMultiplier * crossColMultiplier * lenderMultiplier +
+        dscrPenalty -
+        liquidityBuffer,
+    );
+
+    const assetsAtRisk = Math.round(inputs.ownerLlcConcentration! * cascadeProb);
+    const portfolioImpactBps = Math.round(cascadeProb * 120);
+    const recoveryTimeMonths = cascadeProb > 0.7 ? 18 : cascadeProb > 0.4 ? 10 : 5;
+
+    return {
+      cascadeProbability: cascadeProb * 100,
+      assetsAtRisk,
+      portfolioImpactBps,
+      recoveryTimeMonths,
+    };
+  },
+  outputs: [
+    {
+      id: 'cascadeProbability',
+      label: 'Cascade Probability (%)',
+      format: 'percentage',
+      higherIsBetter: false,
+      thresholds: { excellent: 15, good: 35, poor: 60 },
+    },
+    { id: 'assetsAtRisk', label: 'Assets at Risk (#)', format: 'number', higherIsBetter: false },
+    {
+      id: 'portfolioImpactBps',
+      label: 'Portfolio NOI Impact (bps)',
+      format: 'number',
+      higherIsBetter: false,
+    },
+    {
+      id: 'recoveryTimeMonths',
+      label: 'Recovery Time (months)',
+      format: 'number',
+      higherIsBetter: false,
+    },
+  ],
+};
+
+export const TERRA_CLIMATE_CAP_RATE: ScenarioDefinition = {
+  id: 'terra/climate-adjusted-cap-rate',
+  version: '1.0.0',
+  title: 'Climate-Adjusted 5-Year Cap Rate Forecast',
+  description:
+    'Models the forward cap-rate adjustment over a 5-year horizon incorporating FEMA flood risk premiums, NOAA climate drift, and insurance loss escalation for CRE assets.',
+  domain: 'terra',
+  tags: ['climate', 'cap-rate', 'real-estate', 'fema', 'noaa'],
+  inputs: [
+    {
+      id: 'baseCapRate',
+      label: 'Current Cap Rate (%)',
+      distribution: { type: 'normal', mean: 0.055, stdDev: 0.008 },
+      unit: '%',
+      format: 'percentage',
+    },
+    {
+      id: 'femaNriScore',
+      label: 'FEMA NRI Composite Hazard Score (0–100)',
+      distribution: { type: 'triangular', min: 10, mode: 35, max: 75 },
+      unit: 'score',
+      format: 'number',
+    },
+    {
+      id: 'noaaTempDrift5yr',
+      label: 'NOAA 5-yr Temperature Drift (°C above 30-yr normal)',
+      distribution: { type: 'normal', mean: 0.6, stdDev: 0.3 },
+      unit: '°C',
+      format: 'number',
+    },
+    {
+      id: 'noaaPrecipDrift5yr',
+      label: 'NOAA 5-yr Precipitation Drift (mm/yr above 30-yr normal)',
+      distribution: { type: 'normal', mean: 20, stdDev: 30 },
+      unit: 'mm/yr',
+      format: 'number',
+    },
+    {
+      id: 'insuranceLossRatioEscalation',
+      label: 'Annual Insurance Loss Ratio Escalation (%)',
+      distribution: { type: 'triangular', min: 0.02, mode: 0.06, max: 0.15 },
+      unit: '%',
+      format: 'percentage',
+    },
+    {
+      id: 'floodZoneFlag',
+      label: 'FEMA SFHA Flood Zone (0=No, 1=Yes)',
+      distribution: { type: 'bernoulli', p: 0.22 },
+      unit: 'binary',
+      format: 'number',
+    },
+  ],
+  calculate: (inputs) => {
+    const nriPremium = (inputs.femaNriScore! / 100) * 0.0080;
+    const tempDriftPremium = Math.max(0, inputs.noaaTempDrift5yr!) * 0.0015;
+    const precipDriftPremium = Math.abs(inputs.noaaPrecipDrift5yr! > 0 ? inputs.noaaPrecipDrift5yr! / 1000 * 0.008 : 0);
+    const insurancePremium = inputs.insuranceLossRatioEscalation! * 0.5 * 0.01;
+    const floodZonePremium = inputs.floodZoneFlag! > 0.5 ? 0.0045 : 0;
+
+    const totalAdjustmentBps = Math.round(
+      (nriPremium + tempDriftPremium + precipDriftPremium + insurancePremium + floodZonePremium) *
+        10000,
+    );
+    const adjustedCapRate = inputs.baseCapRate! + (totalAdjustmentBps / 10000);
+    const valuationHaircut = -(totalAdjustmentBps / 10000) / adjustedCapRate;
+    const annualInsuranceCostEscalation = inputs.insuranceLossRatioEscalation! * 100;
+
+    return {
+      climateAdjustedCapRate: adjustedCapRate * 100,
+      totalAdjustmentBps,
+      valuationHaircutPct: valuationHaircut * 100,
+      annualInsuranceCostEscalation,
+    };
+  },
+  outputs: [
+    {
+      id: 'climateAdjustedCapRate',
+      label: 'Climate-Adjusted Cap Rate (%)',
+      format: 'percentage',
+      higherIsBetter: false,
+    },
+    {
+      id: 'totalAdjustmentBps',
+      label: 'Total Climate Adjustment (bps)',
+      format: 'number',
+      higherIsBetter: false,
+      thresholds: { excellent: 20, good: 50, poor: 100 },
+    },
+    {
+      id: 'valuationHaircutPct',
+      label: 'Implied Valuation Haircut (%)',
+      format: 'percentage',
+      higherIsBetter: false,
+    },
+    {
+      id: 'annualInsuranceCostEscalation',
+      label: 'Insurance Cost Escalation (%/yr)',
+      format: 'percentage',
+      higherIsBetter: false,
+    },
+  ],
+};
+
+export const TERRA_OWNER_INTENT: ScenarioDefinition = {
+  id: 'terra/owner-intent-12m',
+  version: '1.0.0',
+  title: '12-Month Owner Sale/Refi Intent Probability',
+  description:
+    'Estimates the probability that a distressed CRE owner will list, sell, or refinance within 12 months based on NOD filings, loan maturity, DSCR, deed history, and submarket vacancy.',
+  domain: 'terra',
+  tags: ['owner', 'intent', 'distress', 'disposition', 'sale'],
+  inputs: [
+    {
+      id: 'nodFilingCount12m',
+      label: 'NOD Filings in Last 12 Months',
+      distribution: { type: 'triangular', min: 0, mode: 1.5, max: 6 },
+      unit: 'count',
+      format: 'number',
+    },
+    {
+      id: 'loanMaturityMonths',
+      label: 'Months Until Loan Maturity',
+      distribution: { type: 'triangular', min: 0, mode: 8, max: 36 },
+      unit: 'months',
+      format: 'number',
+    },
+    {
+      id: 'dscrBelow1',
+      label: 'DSCR Below 1.0 (0=No, 1=Yes)',
+      distribution: { type: 'bernoulli', p: 0.42 },
+      unit: 'binary',
+      format: 'number',
+    },
+    {
+      id: 'vacancyRateSubmarket',
+      label: 'Submarket Vacancy Rate (0–1)',
+      distribution: { type: 'beta', alpha: 2.5, beta: 12 },
+      unit: 'rate',
+      format: 'number',
+    },
+    {
+      id: 'deedTransferCount36m',
+      label: 'Deed Transfers in Last 36 Months',
+      distribution: { type: 'triangular', min: 0, mode: 0, max: 3 },
+      unit: 'count',
+      format: 'number',
+    },
+    {
+      id: 'daysSinceLastSale',
+      label: 'Days Since Last Sale',
+      distribution: { type: 'normal', mean: 1825, stdDev: 600 },
+      unit: 'days',
+      format: 'number',
+    },
+  ],
+  calculate: (inputs) => {
+    const nodSignal = Math.min(1, (inputs.nodFilingCount12m! / 5) * 0.35);
+    const maturitySignal =
+      inputs.loanMaturityMonths! <= 6 ? 0.30 : inputs.loanMaturityMonths! <= 12 ? 0.18 : inputs.loanMaturityMonths! <= 24 ? 0.08 : 0;
+    const dscrSignal = inputs.dscrBelow1! > 0.5 ? 0.20 : 0;
+    const vacancySignal = Math.min(0.10, inputs.vacancyRateSubmarket! * 0.7);
+    const deedBoost = inputs.deedTransferCount36m! >= 1 ? 0.05 : 0;
+    const recencyPenalty = inputs.daysSinceLastSale! > 3650 ? 0.04 : 0;
+    const baseIntent = 0.10;
+
+    const intentProb = Math.min(0.97, baseIntent + nodSignal + maturitySignal + dscrSignal + vacancySignal + deedBoost + recencyPenalty);
+    const confidenceProxy = 1 - Math.abs(intentProb - 0.5) * 0.3;
+
+    return {
+      intentProb12m: parseFloat((intentProb * 100).toFixed(2)),
+      primaryDriver: nodSignal > maturitySignal && nodSignal > dscrSignal ? 'nod_filing' : maturitySignal >= dscrSignal ? 'loan_maturity' : 'dscr_stress',
+      confidenceProxy: parseFloat((confidenceProxy * 100).toFixed(2)),
+    };
+  },
+  outputs: [
+    {
+      id: 'intentProb12m',
+      label: '12-Month Sale/Refi Intent Probability (%)',
+      format: 'percentage',
+      higherIsBetter: false,
+      thresholds: { excellent: 30, good: 50, poor: 70 },
+    },
+    {
+      id: 'confidenceProxy',
+      label: 'Model Confidence Proxy (%)',
+      format: 'percentage',
+      higherIsBetter: true,
+    },
+  ],
+};
+
 export const DOMAIN_SCENARIO_LIBRARY: Record<string, ScenarioDefinition> = {
   [VESSELS_VOYAGE_COST.id]: VESSELS_VOYAGE_COST,
   [TERRA_PROPERTY_RETURNS.id]: TERRA_PROPERTY_RETURNS,
+  [TERRA_DISTRESS_PROPAGATION.id]: TERRA_DISTRESS_PROPAGATION,
+  [TERRA_CLIMATE_CAP_RATE.id]: TERRA_CLIMATE_CAP_RATE,
+  [TERRA_OWNER_INTENT.id]: TERRA_OWNER_INTENT,
   [SZL_FUND_EXIT.id]: SZL_FUND_EXIT,
   [PRISM_LITIGATION_OUTCOME.id]: PRISM_LITIGATION_OUTCOME,
   [AEGIS_CYBER_RISK.id]: AEGIS_CYBER_RISK,

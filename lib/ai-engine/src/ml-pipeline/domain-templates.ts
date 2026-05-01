@@ -157,6 +157,90 @@ export const DOMAIN_MODEL_TEMPLATES: Record<string, DomainModelTemplate[]> = {
       ],
       notes: 'High precision preferred over recall — alert fatigue in the workflow',
     },
+    {
+      modelType: 'distress_propagation',
+      description:
+        'Forecasts probability that distress in a given asset cascades to linked assets (same ownership LLC chain or cross-collateral lender) within 90 days',
+      task: 'forecasting',
+      algorithmFamily: 'xgboost_classifier',
+      targetColumn: 'cascade_prob_90d',
+      primaryMetric: 'auc',
+      defaultHyperparameters: {
+        n_estimators: 400,
+        max_depth: 5,
+        learning_rate: 0.04,
+        scale_pos_weight: 12,
+        subsample: 0.85,
+        colsample_bytree: 0.8,
+      },
+      featureGroups: [
+        'terra.days_on_market',
+        'terra.price_reduction_count',
+        'terra.owner_entity_distress_count',
+        'terra.cross_collateral_loan_count',
+        'terra.lender_concentration_score',
+        'terra.dscr',
+        'terra.loan_maturity_months',
+      ],
+      notes:
+        'Graph-based entity linking required before inference — owner LLC network is the primary propagation channel. Monte Carlo intervals produced per asset.',
+    },
+    {
+      modelType: 'climate_adjusted_cap_rate',
+      description:
+        '5-year forward cap-rate forecast adjusted for FEMA flood risk premium and NOAA climate drift signal; output is a basis-point adjustment on base cap rate',
+      task: 'forecasting',
+      algorithmFamily: 'gradient_boosted_regression',
+      targetColumn: 'climate_adjusted_cap_rate_5yr_bps',
+      primaryMetric: 'rmse',
+      defaultHyperparameters: {
+        n_estimators: 350,
+        max_depth: 4,
+        learning_rate: 0.05,
+        min_child_weight: 3,
+        reg_lambda: 1.2,
+      },
+      featureGroups: [
+        'terra.base_cap_rate',
+        'terra.fema_nri_score',
+        'terra.fema_flood_zone',
+        'terra.noaa_temp_drift_5yr_c',
+        'terra.noaa_precip_drift_5yr_mm',
+        'terra.insurance_loss_ratio_submarket',
+        'terra.coastal_distance_km',
+        'terra.elevation_m',
+      ],
+      notes:
+        'Climate drift signal is NOAA 30-yr normal minus 5-yr recent average. Positive temp drift amplifies cap-rate premium for heat/flood risk markets (Phoenix, Miami).',
+    },
+    {
+      modelType: 'owner_intent',
+      description:
+        '12-month probability of voluntary sale or refinance inferred from public-record signals: NOD filings, deed velocity, corporate entity events, and dark-pool vacancy signals',
+      task: 'classification',
+      algorithmFamily: 'xgboost_classifier',
+      targetColumn: 'intent_sale_or_refi_12m',
+      primaryMetric: 'auc',
+      defaultHyperparameters: {
+        n_estimators: 300,
+        max_depth: 4,
+        learning_rate: 0.05,
+        scale_pos_weight: 7,
+        subsample: 0.8,
+      },
+      featureGroups: [
+        'terra.nod_filing_count_12m',
+        'terra.deed_transfer_count_36m',
+        'terra.owner_entity_age_months',
+        'terra.corporate_event_flags',
+        'terra.vacancy_rate_submarket',
+        'terra.loan_maturity_months',
+        'terra.days_since_last_sale',
+        'terra.price_per_sqft_vs_submarket_median',
+      ],
+      notes:
+        'Recalibrate quarterly using resolved outcomes (actual sales within 12m). SHAP attribution shown in owner-intent UI panel.',
+    },
   ],
 
   // ── PRISM ─────────────────────────────────────────────────────────────────
