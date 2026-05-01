@@ -197,7 +197,7 @@ export function useLiveStream<T = unknown>(
         if (!mountedRef.current) return;
         try {
           const data = JSON.parse((e as MessageEvent).data) as SseEvent<T>;
-          const parsed: SseEvent<T> = { event: eventName, ...data };
+          const parsed: SseEvent<T> = { ...data, event: eventName };
           setLastEvent(parsed);
           setEventCount((c) => c + 1);
           onEvent?.(parsed);
