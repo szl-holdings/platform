@@ -44,9 +44,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run database migrations
