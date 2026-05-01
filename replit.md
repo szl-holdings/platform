@@ -955,3 +955,124 @@ naming and code organisation.
 The remaining twenty-three packages are scaffolded with sources, tests,
 and examples in place; further axes will be promoted into api-server
 endpoints incrementally as they are operationalised.
+
+## Ouroboros v6 ingestion (2026-05-01) — Guardrails SKU operational
+
+The v6 "Evolution Payload" extends v5 with a new shippable SKU and
+roughly 376 KB of evolution documentation that closes the eight gaps
+identified in the zoom-out analysis against NVIDIA NeMo Guardrails,
+Google DeepMind Frontier Safety Framework v3, and IBM watsonx.governance.
+
+The new SKU lives at `packages/ouroboros-guardrails/`
+(`@workspace/ouroboros-guardrails` v0.1.0) — a drop-in NeMo Guardrails
+replacement with NeMo-Colang-compatible config (input / output / dialog
+/ retrieval / execution rails) but two differentiators NeMo does not
+have: every decision emits a closed-form Λ scalar (geometric mean of
+per-axis scores in [0,1]), and every decision emits a tamper-evident
+hash-chained receipt (SHA-256 content hash + tenant-key seal). 14
+named rails, 54 vitests, all green. Self-contained — no cross-package
+imports despite the ouroboros-* lineage.
+
+The SKU is operationalised in api-server alongside the Gauß axis port:
+
+  Lib:    artifacts/api-server/src/lib/ouroboros-guardrails/index.ts
+          (stateless one-shot wrapper — fresh Guardrails instance per
+           request so no tenant state leaks across calls)
+  Route:  artifacts/api-server/src/routes/ouroboros-guardrails.ts
+  Tests:  artifacts/api-server/src/lib/ouroboros-guardrails/__tests__/evaluate.test.ts
+          (7 passing — clean PROCEED, jailbreak ABORT, PII ABORT,
+           destructive-tool ABORT, receipt verifies under correct key,
+           wrong-key fails with seal-mismatch, body tamper fails with
+           content-hash-mismatch)
+  API:    /api/ouroboros/guardrails/{health,evaluate,verify-receipt}
+          (public, Zod-validated, stateless, no server-side persistence)
+
+The CSRF and global auth allowlists narrow `/api/ouroboros/guardrails/`
+specifically to the same compute-only posture as `/api/ouroboros/gauss/`
+and `/api/sigil/`. The broader `/api/ouroboros/` tree continues to
+carry its existing posture.
+
+Evolution documentation lives under `docs/ouroboros-v6/`:
+
+  compliance/      — COMPLIANCE_PLAYBOOK.md (553 lines), EXECUTABLE_ROADMAP.md
+  standards/       — REGULATORY_MAPPING.md, NIST_COMMENT_SUBMISSION.md,
+                     STANDARDS_POSTURE_BRIEF.md, CLOSED_FORM_DEFENSE.md (3,499 words)
+  vendors/         — INTEGRATION_TARGETS.md (15 profiles), OUTREACH_DRAFTS.md
+  verticals/       — federal_onepager.md, healthcare_onepager.md, finance_onepager.md
+  marketplace/     — AWS_MARKETPLACE_KIT.md (Phase 1→3 plan)
+  lighthouse/      — FEDERAL_LIGHTHOUSE_TEMPLATE.md (90-day pilot template)
+  platform-spec/   — LAMBDA_AS_A_SERVICE.md (REST + gRPC + dashboard spec)
+  research/        — COMPETITOR_STACKS.md (NeMo / DeepMind / watsonx baseline)
+  business/        — tier3-push press kit (announcements, outreach, playbook)
+
+Combined v5 + v6 footprint: 25 ouroboros-* packages, 91 primitives, 9 Λ
+axes, 1,372 tests across the package tree (TS + Python). Two operational
+endpoints (Gauß + Guardrails) live in api-server with paired security
+narrowing and live curl proofs.
+
+## Ouroboros v6+v7 push (2026-05-01) — proof bundle + audit anchor
+
+The v7 increment is a small focused delta on top of v6 — three new artifacts
+under `docs/ouroboros-v6/`:
+
+  proof/THESIS_PROOF_BUNDLE.md    — human-readable proof anchor
+  proof/THESIS_PROOF_BUNDLE.json  — machine-readable schema ouroboros.thesis.proof/v1
+  GITHUB_AUDIT_REPORT.md          — 2026-05-01 audit sweep result
+
+Plus the v7 founder/business pack landed under `docs/ouroboros-v6/founder/`:
+CHANGELOG_V4_6, GOVERNMENT_CONTRACTOR_PATH, IP_ROADMAP, IP_ATTORNEY_BRIEF,
+LETTER_TO_MOM, MERCY_DECK, MERCY_CHECKLIST.
+
+The proof bundle anchors:
+  - Zenodo DOIs:
+      v1 position paper      10.5281/zenodo.19867281 (2026-04-28, CC-BY-4.0)
+      v2 empirical companion 10.5281/zenodo.19934129 (2026-04-30, CC-BY-4.0)
+  - Release SHAs:
+      ouroboros v6.1.0       e9fc4b86eae18bb7401b14cb0e53900ba8e47ad8
+      thesis paper-v2        598c7aff03564f3f238d5db1a0029bb3f330a491
+      annotated-tag SHA      2dba310254e11a237a6ff380678921ae148f3c9b
+  - Test surface: 925 TypeScript + 447 Python = 1,372 total
+  - Platform mass: 24 packages, 91 primitives, 9 Λ axes
+  - Governance posture (post-audit): secret scanning, push protection,
+    Dependabot alerts, Dependabot security updates, branch protection —
+    enabled on 10/10 active repos; org defaults set so new repos inherit
+    the same posture automatically.
+
+The `szl-holdings/szl-holdings-platform` master is now branch-protected
+(no force-push, no delete; PRs required). The 2026-05-01 audit sweep
+also squash-merged PR #66 on master (29-file email sweep:
+inquiries@ → stephen@). This Replit environment has not yet refetched
+that change, so this push goes to a dedicated feature branch
+(`replit-sync/ouroboros-v6-v7-2026-05-01`) and a follow-up PR will
+absorb the master delta when fetch is re-enabled.
+
+### Architect review pass on the Guardrails port (2026-05-01)
+
+A code-review subagent was dispatched against the Guardrails surface
+(`packages/ouroboros-guardrails/`, the api-server lib + route, and the
+narrow CSRF / global-auth allowlist additions). Verdict:
+
+  HIGH — `toolCall.args` was unbounded (`z.record(z.unknown())`), giving
+         an attacker a DoS vector via large/nested JSON that bypasses the
+         already-tight prompt/response/ctx caps. **Fixed:** added two Zod
+         refinements — max 32 keys, and JSON-stringified payload ≤ 8000
+         bytes — with a defensive try/catch around stringify for any
+         circular-structure edge case. Verified live with curl: 10KB
+         args → 400 VALIDATION_ERROR; 33 keys → 400; 32 keys → 200; the
+         clean / jailbreak / receipt paths all unchanged.
+
+  MED  — regex catastrophic-backtracking risk in `JAILBREAK_PATTERNS` /
+         `PII_PATTERNS`. Patterns are non-pathological (no nested
+         repetitions, no ambiguous quantifiers); inputs are also capped
+         at 16KB / 32KB / 8KB upstream. Accepted as-is.
+
+  LOW  — stateless wrapper instantiates a fresh Guardrails per request,
+         so prevHash / receiptBuffer cannot bleed across requests
+         (verified by code inspection of `index.ts`).
+
+  LOW  — `tenantKeyId = sha256("tenant:" + tenantId).slice(0,16)` is an
+         intentional design property (any verifier in possession of the
+         tenantId can verify a receipt). Already documented as such.
+
+  LOW  — Zod + try/catch around `evaluate()` correctly rejects malformed
+         input without crashing the runtime.

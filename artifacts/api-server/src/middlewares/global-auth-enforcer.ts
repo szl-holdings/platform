@@ -232,6 +232,13 @@ const PUBLIC_PREFIXES = [
   // (anchor append/batch, fleet audit, reconcile-handoff) that MUST keep
   // their normal auth posture, so this allowlist is narrowed to gauss.
   "/api/ouroboros/gauss/",
+  // Ouroboros · Guardrails axis ONLY — operationalised v6 SKU
+  // (@workspace/ouroboros-guardrails). Same compute-only posture as gauss:
+  // stateless, Zod-validated, no PII, no session, no server-side
+  // persistence — each evaluate() call uses a fresh Guardrails instance,
+  // so no tenant state leaks across requests. The broader /api/ouroboros/
+  // tree retains its default auth, so this exemption stays narrowed.
+  "/api/ouroboros/guardrails/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",

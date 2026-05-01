@@ -136,6 +136,14 @@ function isExempt(path: string): boolean {
   // routes (anchor append/batch, fleet audit, etc.) are stateful and MUST
   // continue to require CSRF, so we narrow this exemption to the gauss path.
   if (path.startsWith('/api/ouroboros/gauss/')) return true;
+  // Ouroboros · Guardrails axis ONLY — operationalised v6 SKU
+  // (@workspace/ouroboros-guardrails). Same compute-only posture as gauss:
+  // every endpoint is stateless, Zod-validated, no PII, no session, no
+  // server-side persistence (receipts are returned to the caller; tenants
+  // who need an append-only log persist them themselves). Stateful
+  // /api/ouroboros/* routes (anchor, fleet audit, reconcile-handoff)
+  // continue to require CSRF — this exemption stays narrowed to guardrails.
+  if (path.startsWith('/api/ouroboros/guardrails/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

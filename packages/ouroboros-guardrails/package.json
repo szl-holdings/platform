@@ -1,0 +1,15 @@
+{
+  "name": "@workspace/ouroboros-guardrails",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "description": "SZL Guardrails — drop-in LLM safety SKU. NeMo-Guardrails-compatible config surface, closed-form Λ scoring, tamper-evident hash-chained receipts. Part of Ouroboros v6 (primitives 81–91).",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.9"
+  }
+}

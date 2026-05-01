@@ -552,4 +552,18 @@ router.use(
   ),
 );
 
+// Ouroboros · Guardrails axis — operational port of v6 SKU
+// (NeMo-Guardrails-compatible config surface + Λ scalar + tamper-evident
+// hash-chained receipts). Backed by @workspace/ouroboros-guardrails.
+// GET  /ouroboros/guardrails/health
+// POST /ouroboros/guardrails/evaluate
+// POST /ouroboros/guardrails/verify-receipt
+router.use(
+  lazyRegisterMatch(
+    ["/ouroboros/guardrails"],
+    () => import("./ouroboros-guardrails"),
+    "ouroboros-guardrails",
+  ),
+);
+
 export default router;
