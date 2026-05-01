@@ -1,0 +1,57 @@
+# Score Example: Internal Domain UI (SPA)
+# Workload archetype: React SPA served as a static website
+# Real-world instance: artifacts/lyte-command-center
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: example-internal-ui
+
+service:
+  ports:
+    http:
+      port: 80
+      targetPort: 5173
+      protocol: TCP
+
+containers:
+  ui:
+    image: .
+    # SPA is served by a lightweight Node/Nginx static server
+    command: ["node", "server.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      PORT: "5173"
+      # VITE_ prefixed vars are baked in at build time
+      # Do not inject runtime VITE_ vars here — they don't work in SPAs
+
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 5173
+      initialDelaySeconds: 3
+      periodSeconds: 10
+
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "250m"
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+
+# SPAs have no resource dependencies at runtime.
+# Build-time dependencies (API URL, auth domain) are baked in via VITE_ env vars.
+resources: {}
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: website
+# szl.io/domain: lyte
+# szl.io/system: lyte-command
+# szl.io/owner: lyte-team
+# szl.io/lifecycle: production
+# szl.io/criticality: standard
+# szl.io/observability-tier: browser-otel
+# szl.io/policy-labels: [authenticated, spa]
+# szl.io/deployment-target: azure-static-web-apps
+# szl.io/cdn: azure-front-door
+# szl.io/preview-path: /lyte/

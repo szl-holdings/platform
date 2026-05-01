@@ -1,0 +1,52 @@
+apiVersion: szl.io/v1
+kind: ServiceLevelObjective
+metadata:
+  name: ${{ values.domainSlug }}-api-slos
+  service: ${{ values.domainSlug }}-api
+  domain: ${{ values.domainSlug }}
+  owner: ${{ values.ownerGroup }}
+
+objectives:
+  availability:
+    target: 99.5
+    window: 30d
+    indicator:
+      type: request-success-rate
+      filter:
+        path_prefix: /${{ values.domainSlug }}/
+      good: http_status < 500
+      total: all_requests
+
+  latency:
+    target: 95
+    window: 30d
+    indicator:
+      type: request-latency
+      filter:
+        path_prefix: /${{ values.domainSlug }}/
+      threshold_ms: 1000
+
+  error_budget:
+    window: 30d
+    burn_rate_alert:
+      fast:
+        window: 1h
+        threshold: 14
+      slow:
+        window: 6h
+        threshold: 6
+
+alerts:
+  - name: error-budget-burned-fast
+    condition: burn_rate > 14
+    window: 1h
+    severity: P1
+    notify:
+      - slack: "#${{ values.domainSlug }}-alerts"
+      - pagerduty: true
+  - name: error-budget-burned-slow
+    condition: burn_rate > 6
+    window: 6h
+    severity: P2
+    notify:
+      - slack: "#${{ values.domainSlug }}-alerts"

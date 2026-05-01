@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.domainSlug }}
+  title: ${{ values.domainName }} — ${{ values.subtitle }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/golden-path: new-domain-ui@1.0
+    szl.io/golden-path-deviation: "SPA — no server-side health endpoint; OTel browser instrumentation included"
+  tags:
+    - typescript
+    - react
+    - vite
+    - website
+spec:
+  type: website
+  lifecycle: ${{ values.lifecycle }}
+  owner: group:${{ values.ownerGroup }}
+  system: system:${{ values.system }}
+  domain: domain:${{ values.domain }}
+  dependsOn:
+    - component:api-server
+  consumesApis:
+    - api:szl-rest-v1

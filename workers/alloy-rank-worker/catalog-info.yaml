@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-rank-worker
+  title: Alloy Rank Worker
+  description: Async ranking worker — reranks candidate documents from vector search results using cross-encoder models and writes ranked results.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/golden-path-deviation: "Async worker — no HTTP health endpoint required; uses queue trigger"
+    szl.io/runbook: infra/runbooks/alloy-rank-worker.md
+  tags:
+    - alloy
+    - ranking
+    - worker
+    - typescript
+spec:
+  type: worker
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-runtime
+  domain: domain:alloy
+  dependsOn:
+    - component:alloy-runtime-api
+    - resource:azure-service-bus
+  consumesApis:
+    - api:alloy-runtime-v1

@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: command
+  title: Unified Command
+  description: Unified operational command center SPA — consolidates cross-domain operational intelligence into a single interface.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.4'
+    szl.io/golden-path-deviation: "SPA — no server-side health endpoint; OTel dependency present but not configured"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/command.md
+  tags:
+    - operations
+    - typescript
+    - react
+    - vite
+spec:
+  type: website
+  lifecycle: production
+  owner: group:platform-team
+  system: system:command
+  domain: domain:operations
+  dependsOn:
+    - component:api-server
+    - resource:mapbox
+  consumesApis:
+    - api:szl-rest-v1
+    - api:alloy-runtime-v1

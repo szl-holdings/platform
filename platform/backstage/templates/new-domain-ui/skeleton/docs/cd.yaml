@@ -1,0 +1,37 @@
+apiVersion: szl.io/v1
+kind: ContinuousDelivery
+metadata:
+  name: ${{ values.domainSlug }}-ui-cd
+  service: ${{ values.domainSlug }}-ui
+  domain: ${{ values.domainSlug }}
+
+strategy:
+  type: static-swap
+  cdn_cache_invalidation: true
+  rollback_on_error_rate: 5
+
+environments:
+  - name: dev
+    auto_deploy: true
+    branch: main
+    approval_required: false
+    preview_url: https://dev.szl.io/${{ values.domainSlug }}/
+  - name: staging
+    auto_deploy: true
+    branch: main
+    approval_required: false
+    preview_url: https://staging.szl.io/${{ values.domainSlug }}/
+  - name: production
+    auto_deploy: false
+    branch: main
+    approval_required: true
+    approvers: [${{ values.ownerGroup }}, platform-team]
+    preview_url: https://app.szl.io/${{ values.domainSlug }}/
+
+artifacts:
+  type: static-bundle
+  source_path: dist/
+  cdn: azure-static-web-apps
+
+notifications:
+  slack: "#${{ values.domainSlug }}-deployments"

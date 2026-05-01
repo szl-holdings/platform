@@ -1,0 +1,59 @@
+name: CI — ${{ values.domainSlug }}-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/${{ values.domainSlug }}-api/**'
+  pull_request:
+    paths:
+      - 'services/${{ values.domainSlug }}-api/**'
+
+jobs:
+  build:
+    name: Build & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.domainSlug }}-api typecheck
+      - run: pnpm --filter @workspace/${{ values.domainSlug }}-api build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.domainSlug }}-api lint
+
+  health:
+    name: Health Endpoint Smoke Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Build before smoke test
+        run: pnpm --filter @workspace/${{ values.domainSlug }}-api build
+      - name: Start service and smoke test
+        run: |
+          pnpm --filter @workspace/${{ values.domainSlug }}-api start &
+          sleep 3
+          curl -f http://localhost:${PORT:-3000}/health | grep '"status":"ok"'
+          curl -f http://localhost:${PORT:-3000}/ready | grep '"ready":true'

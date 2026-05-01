@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-policy-guard
+  title: "@workspace/policy-guard — Policy Guard Middleware"
+  description: Express/Hono middleware for policy enforcement — wraps routes with policy evaluation and blocks unauthorized actions. Mandatory in all new services (golden path).
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/policy-guard.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/policy-guard.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/policy-guard/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - aegis
+    - typescript
+    - library
+    - policy
+    - middleware
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:aegis-team
+  system: system:policy-engine
+  domain: domain:aegis
+  dependsOn:
+    - component:pkg-policy-engine

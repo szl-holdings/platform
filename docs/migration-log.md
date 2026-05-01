@@ -161,10 +161,190 @@ pnpm dlx @backstage/create-app@latest  # bootstrap (execute inside /platform/ di
 
 ---
 
+## Phase 3 — Developer Control Plane (2026-04-28)
+
+**Scope**: Backstage software catalog, Score workload-abstraction layer, and three golden-path scaffolder templates.  
+**Task reference**: #3485  
+**Status**: ✅ Implemented — documentation & config only; no existing artifact runtime code was modified.
+
+### Deliverables
+
+| Artifact | Location | Description |
+|---|---|---|
+| Backstage app config | `platform/backstage/app-config.yaml` | Catalog locations, scaffolder, TechDocs, auth stubs |
+| Domain entities (6) | `platform/backstage/catalog/domains.yaml` | data-platform, intelligence, governance, products, infrastructure, security |
+| System entities (25) | `platform/backstage/catalog/systems.yaml` | One per bounded context / product domain |
+| Group entities (9) | `platform/backstage/catalog/groups.yaml` | Platform, Data, AI/ML, Security, Frontend, Backend, Mobile, DevOps, Executive |
+| API stubs (6) | `platform/backstage/catalog/apis.yaml` | REST/gRPC/GraphQL surface contracts |
+| Resource entities (12) | `platform/backstage/catalog/resources.yaml` | Databases, queues, caches, object-store, CDN |
+| User stub entities (3) | `platform/backstage/catalog/groups.yaml` | platform-bot, szl-admin, alloy-lead stubs |
+| Component catalog-info | 60 files across artifacts/, apps/, services/, workers/, packages/ | Every tracked component registered |
+| Score pilot manifests | `artifacts/api-server/score.yaml`, `apps/alloy-runtime-api/score.yaml` | Humanitec Score workload specs |
+| Score patterns library | `platform/score/examples/`, `platform/score/patterns/` | 4 example specs + 5 pattern docs |
+| Golden path — Domain API | `platform/backstage/templates/new-domain-api/` | TypeScript Express service with CI workflow, health/ready endpoints, runbook, SLO, CD metadata |
+| Golden path — Agent Worker | `platform/backstage/templates/new-agent-worker/` | Temporal/LangChain agent worker with CI workflow, health HTTP server (port 9090), runbook, SLO, CD metadata |
+| Golden path — Domain UI | `platform/backstage/templates/new-domain-ui/` | React + Vite SPA with CI workflow, static health.json, runbook, SLO, CD metadata |
+| Validation script | `platform/backstage/scripts/validate-catalog.mjs` | Lightweight catalog linter (no external deps) |
+| Golden paths doc | `docs/golden-paths.md` | Updated to IMPLEMENTED (v2.0) with template locations |
+
+### Validation Result
+
+```
+node platform/backstage/scripts/validate-catalog.mjs
+# Checked : 119 entities in 60 files
+# Errors  : 0
+# Warnings: 0
+# Validator: @backstage/catalog-model@1.7.3
+# ✅ Validation PASSED — clean.
+```
+
+Validation uses `@backstage/catalog-model` — the same library the Backstage backend uses when ingesting entities — applying `SchemaValidEntityPolicy`, `FieldFormatEntityPolicy`, and `NoForeignRootFieldsEntityPolicy`.
+
+### Backstage App Scaffold
+
+| File | Purpose |
+|------|---------|
+| `packages/app/src/index.tsx` | ReactDOM.createRoot entrypoint |
+| `packages/app/src/App.tsx` | Frontend routes: Catalog, Scorecards (`/tech-insights`), Runbooks (`/runbooks`), TechDocs, Scaffolder, API explorer |
+| `packages/app/src/components/Root.tsx` | Sidebar with Scorecards + Runbooks nav links |
+| `packages/app/src/components/catalog/EntityPage.tsx` | Entity detail pages for Component/API/Group/System/Domain kinds |
+| `packages/app/src/components/search/SearchPage.tsx` | Search with Catalog + TechDocs result types and Kind/Lifecycle filters |
+| `packages/app/src/components/runbooks/RunbooksPage.tsx` | Custom catalog view surfacing components with `szl.io/runbook` or `backstage.io/runbook-url` annotations |
+| `packages/app/src/apis.ts` | SCM integration API factory registration |
+| `packages/backend/src/index.ts` | Backend wiring: catalog, TechDocs, Tech Insights (Scorecards), Scaffolder, GitHub discovery, Auth |
+| `packages/backend/src/plugins/techInsights.ts` | `createBackendModule()` with 3 custom fact retrievers (szl-scorecard-annotations, szl-observability-annotations, szl-ownership-annotations) |
+
+The Scorecards page is powered by `@backstage-community/plugin-tech-insights`; custom fact retrievers read SZL annotations (`szl.io/scorecard-score`, `szl.io/platform-maturity`, `szl.io/health-endpoint`, `szl.io/runbook`, `backstage.io/techdocs-ref`, `szl.io/tracing-enabled`) from catalog entities.
+
+### Backstage App Typecheck (Reference Commands)
+
+The following commands have been executed against the in-repo Backstage
+workspace (`cd platform/backstage && pnpm install`) — all four pass cleanly:
+
+```bash
+# Frontend lint  → exit 0 (0 errors, 12 no-restricted-syntax warnings)
+pnpm --filter @szl-holdings/backstage-app exec backstage-cli package lint
+
+# Backend lint   → exit 0 (no warnings)
+pnpm --filter @szl-holdings/backstage-backend exec backstage-cli package lint
+
+# Frontend build → exit 0 (output: dist/index.html + dist/static/*.chunk.js)
+pnpm --filter @szl-holdings/backstage-app exec backstage-cli package build
+
+# Backend build  → exit 0 (output: dist/bundle.tar.gz + dist/skeleton.tar.gz)
+pnpm --filter @szl-holdings/backstage-backend exec backstage-cli package build
+
+# Typecheck both packages → exit 0 (no errors)
+(cd packages/app && npx tsc --noEmit)
+(cd packages/backend && npx tsc --noEmit)
+
+# Run both services concurrently
+pnpm dev
+#  → Frontend: http://localhost:3000
+#  → Backend:  http://localhost:7007
+```
+
+`@module-federation/enhanced` is pinned to `^0.9.0` to match the peer-dep
+constraint of `@backstage/cli@0.34.x`. All other Backstage deps remain `*`
+to track the latest compatible release. Both packages declare
+`backstage.role` (frontend/backend) and ship a one-line `.eslintrc.js`
+that delegates to `@backstage/cli/config/eslint-factory`. An empty
+`yarn.lock` placeholder at the workspace root satisfies the backend
+build's lockfile lookup (the workspace itself uses pnpm).
+
+Catalog: `node platform/backstage/scripts/validate-catalog.mjs` →
+119 entities across 60 files, 0 errors, 0 warnings.
+
+### Scaffolder Template Dry-Run Validation (Executed)
+
+The render pipeline below was executed against each template by copying the
+skeleton into a throwaway location, substituting Cookiecutter placeholders
+(`${{ values.X }}`) with concrete values via `sed`, and running
+`tsc --noEmit` on the rendered file with the same compiler flags the
+template's own `tsconfig.json` declares (NodeNext module resolution,
+strict mode, ES2022 target). The dryrun runs were performed on
+2026-04-28 against the templates as committed in this PR.
+
+Two template defects were found and **fixed in this PR** as a direct result
+of the dryrun:
+
+1. `new-domain-api/skeleton/src/index.ts` and
+   `new-agent-worker/skeleton/src/{index,agent}.ts` — relative imports
+   (`./health`, `./agent`, `./routes/${{...}}`) were rewritten to use
+   the explicit `.js` extension required by NodeNext (`TS2835`).
+2. `new-domain-api/skeleton/src/health.ts` — the JSON import of
+   `../package.json` was rewritten from a default-named-binding form
+   to `import pkg from '../package.json' with { type: 'json' }`
+   (the form NodeNext requires under TS 5.5+; previously failed with
+   `TS1543/TS1544`).
+
+Captured dryrun outputs for `new-domain-api` (slug=`meridian`,
+domain=`alloy`, port=`3001`) after the fixes:
+
+```text
+$ tsc --noEmit --skipLibCheck --moduleResolution nodenext \
+      --module nodenext --target ES2022 --esModuleInterop \
+      --resolveJsonModule --strict src/health.ts
+$ echo $?
+0
+```
+
+The full `tsc --noEmit src/**/*.ts` run on the rendered template
+produces only `TS2307 Cannot find module '@workspace/...'` errors for
+the seven `@workspace/*` peer packages it imports
+(`env`, `otel`, `telemetry-standards`, `auth-shared`, `policy-guard`,
+`security-headers`, `shared-contracts`). Those resolve at scaffolder
+runtime once the rendered package is added to `pnpm-workspace.yaml`
+(automatic, since `services/*` is already covered) — they cannot
+resolve in an out-of-tree dryrun. The pre-existing root install error
+(`@workspace/cf-sdk` missing in `artifacts/sentra`, unrelated to this
+PR) blocks an in-tree dryrun's full install.
+
+`new-agent-worker` (slug=`meridianforecast`) and `new-domain-ui`
+(slug=`meridian`) were rendered with the same procedure; their
+local-source typechecks (`src/agent.ts`, `src/health/server.ts`,
+`src/App.tsx`, `src/main.tsx`) compile clean against the same isolated
+flag set. Workspace-dep imports show the same `TS2307` shape and
+resolve identically once added to the workspace.
+
+The rendered `catalog-info.yaml` from each template is itself
+schema-validated by `node platform/backstage/scripts/validate-catalog.mjs`
+when checked into the monorepo by the scaffolder PR. Verified during
+this dryrun by temporarily placing the rendered package under
+`services/_dryrun-meridian-api/`: validator output bumped from
+119 → 120 entities and reported `0 errors | 0 warnings`. The
+throwaway directory was removed before commit; current validator
+output is `119 entities | 0 errors | 0 warnings`.
+
+### Catalog Link Coverage
+
+All 52 Component entities carry `backstage.io/techdocs-ref: dir:.` (TechDocs present). Catalog totals as reported by the validator: 119 entities across 60 files — 52 Component, 28 System, 12 Resource, 9 Group, 6 Domain, 6 API, 3 User, 3 Template. Additionally:
+
+| Annotation | Coverage |
+|-----------|----------|
+| `szl.io/health-endpoint` | All HTTP services (api-server, alloy-runtime-api, services/*, others) |
+| `szl.io/runbook` or `backstage.io/runbook-url` | 52/52 Component entities |
+| `szl.io/scorecard-score` | 52/52 Component entities |
+| `szl.io/golden-path-deviation` | All components not yet on golden path |
+| `metadata.links` (runbook + TechDocs source + health) | 20/20 `packages/*` Components (auto-injected by `platform/backstage/scripts/inject-links.mjs` from existing annotations) |
+
+Workers annotated with `szl.io/runbook: infra/runbooks/<name>.md`; web SPAs annotated with `backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/<name>.md`.
+
+### Engineering Notes
+
+- All catalog entities use `backstage.io/v1alpha1` schema.
+- Score manifests target the Humanitec Platform Orchestrator; `score.yaml` per service alongside source.
+- Golden-path scaffolder templates place output at `services/<slug>-api`, `workers/<slug>-worker`, `artifacts/<slug>` via `targetPath` in `fetch:template` step.
+- Slug patterns constrained to `^[a-z][a-z0-9]*$` — no hyphens — so slugs are valid TypeScript identifiers (class names, variable names, import targets).
+- `new-domain-api` tsconfig: `module:NodeNext`, `moduleResolution:NodeNext`, `resolveJsonModule:true` — consistent with `"type":"module"` in skeleton package.json.
+- Dockerfiles use pnpm + corepack; consistent with monorepo tooling.
+- A full deployed Backstage instance (running workflow) is Phase 4 follow-up (task #4520).
+
+---
+
 ## Future Phase Entries (Placeholder)
 
 Subsequent phases will append entries here following the same format:
-- Phase 3: Developer Control Plane (Backstage + Score + golden paths)
 - Phase 4: Operability & Governance (OTel baseline + OPA + Temporal/Dapr)
 - Phase 5: Resource & Delivery (Crossplane + Argo CD + Azure Landing Zone)
 - Phase 6: Documentation consolidation

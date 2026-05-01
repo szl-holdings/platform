@@ -1,0 +1,30 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-embedding-api
+  title: Alloy Embedding API
+  description: AEF REST gateway for vector embedding generation. Accepts text documents and returns embedding vectors for semantic search and retrieval.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/alloy-embedding-api.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - embedding
+    - typescript
+    - api
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-embedding
+  domain: domain:alloy
+  dependsOn:
+    - resource:openai
+    - resource:anthropic
+    - resource:postgresql-dev
+  providesApis:
+    - api:alloy-embed-v1
+  consumesApis: []

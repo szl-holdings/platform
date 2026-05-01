@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-holdings-mobile
+  title: SZL Holdings — Mobile Command
+  description: Expo React Native mobile command application for iOS and Android. Provides mobile access to the SZL Holdings operational platform.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.3'
+    szl.io/golden-path-deviation: "Expo React Native mobile app — uses EAS Build instead of Vite; no server-side health endpoint"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/szl-holdings-mobile.md
+  tags:
+    - corporate
+    - mobile
+    - typescript
+    - expo
+    - react-native
+spec:
+  type: mobile
+  lifecycle: production
+  owner: group:mobile-team
+  system: system:mobile
+  domain: domain:corporate
+  dependsOn:
+    - component:api-server
+  consumesApis:
+    - api:szl-rest-v1

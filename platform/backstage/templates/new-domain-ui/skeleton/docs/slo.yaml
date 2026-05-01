@@ -1,0 +1,44 @@
+apiVersion: szl.io/v1
+kind: ServiceLevelObjective
+metadata:
+  name: ${{ values.domainSlug }}-ui-slos
+  service: ${{ values.domainSlug }}-ui
+  domain: ${{ values.domainSlug }}
+  owner: ${{ values.ownerGroup }}
+
+objectives:
+  availability:
+    target: 99.9
+    window: 30d
+    indicator:
+      type: synthetic-uptime
+      url: https://app.szl.io/${{ values.domainSlug }}/
+      good: http_status == 200
+      total: all_checks
+
+  core_web_vitals:
+    target: 90
+    window: 7d
+    indicator:
+      type: crux
+      url: https://app.szl.io/${{ values.domainSlug }}/
+      metric: LCP
+      threshold_ms: 2500
+
+  error_budget:
+    window: 30d
+    burn_rate_alert:
+      fast:
+        window: 1h
+        threshold: 14
+      slow:
+        window: 6h
+        threshold: 6
+
+alerts:
+  - name: ui-availability-degraded
+    condition: availability < 99.0
+    window: 5m
+    severity: P2
+    notify:
+      - slack: "#${{ values.domainSlug }}-alerts"

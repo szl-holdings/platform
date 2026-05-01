@@ -1,0 +1,181 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: new-agent-worker
+  title: New Agent Worker
+  description: Scaffold a new AI agent worker or async background worker (TypeScript). Produces a worker skeleton with agent runtime, proof chain emission, OTel, structured logging, AEF policy guard, Score manifest, and Backstage catalog entry.
+  tags:
+    - platform
+    - alloy
+    - typescript
+    - golden-path
+    - worker
+    - ai-agent
+  annotations:
+    szl.io/golden-path: "true"
+    szl.io/golden-path-version: "1.0"
+spec:
+  owner: group:alloy-team
+  type: worker
+
+  parameters:
+    - title: Agent Identity
+      required:
+        - agentName
+        - agentSlug
+        - description
+      properties:
+        agentName:
+          title: Agent Name
+          type: string
+          description: Human-readable agent name (e.g. "Meridian Forecast Agent")
+          ui:autofocus: true
+        agentSlug:
+          title: Agent Slug
+          type: string
+          description: Identifier slug — lowercase letters and digits only, no hyphens (e.g. "meridianforecast"). Used as a TypeScript identifier prefix, file name, and directory name.
+          pattern: '^[a-z][a-z0-9]*$'
+        description:
+          title: Description
+          type: string
+          description: One-line description of what this agent/worker does.
+
+    - title: Ownership & Classification
+      required:
+        - ownerGroup
+        - system
+        - lifecycle
+      properties:
+        ownerGroup:
+          title: Owner Group
+          type: string
+          description: Team that owns this worker.
+          enum:
+            - platform-team
+            - alloy-team
+            - lyte-team
+            - aegis-team
+          enumNames:
+            - Platform Engineering
+            - Alloy AI Fabric
+            - Lyte Intelligence
+            - Aegis Governance
+        system:
+          title: Backstage System
+          type: string
+          enum:
+            - aef-runtime
+            - aef-embedding
+            - aef-ingestion
+            - substrate-inference
+            - agent-fabric
+            - lyte-command
+          enumNames:
+            - AEF Runtime
+            - AEF Embedding
+            - AEF Ingestion
+            - Substrate Inference
+            - Agent Fabric
+            - Lyte Command
+        domain:
+          title: Domain
+          type: string
+          description: SZL platform domain this worker belongs to.
+          enum: [platform, alloy, lyte, aegis, operations, corporate]
+          enumNames:
+            - Platform
+            - Alloy AI
+            - Lyte Intelligence
+            - Aegis Governance
+            - Operations
+            - Corporate
+          default: alloy
+        lifecycle:
+          title: Lifecycle
+          type: string
+          enum: [experimental, production]
+          default: experimental
+
+    - title: Worker Configuration
+      required:
+        - triggerType
+      properties:
+        triggerType:
+          title: Trigger Type
+          type: string
+          description: How this worker is triggered.
+          enum: [queue, cron, event, http]
+          enumNames:
+            - Queue message (Azure Service Bus / SQS)
+            - Cron schedule
+            - Event bus event
+            - HTTP (long-running worker with health endpoint)
+          default: queue
+        emitsProof:
+          title: Emits Proof Chain
+          type: boolean
+          description: Wire lib/proof-chain — required for any agent that makes consequential decisions.
+          default: true
+        needsDatabase:
+          title: Needs Database Access
+          type: boolean
+          description: Wire up @szl-holdings/db database client.
+          default: false
+        needsAlloyRuntime:
+          title: Needs Alloy Runtime
+          type: boolean
+          description: Wire up alloy-runtime-api client for inference.
+          default: true
+
+  steps:
+    - id: fetch-template
+      name: Fetch Template Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: workers/${{ parameters.agentSlug }}-worker
+        values:
+          agentName: ${{ parameters.agentName }}
+          agentSlug: ${{ parameters.agentSlug }}
+          description: ${{ parameters.description }}
+          ownerGroup: ${{ parameters.ownerGroup }}
+          system: ${{ parameters.system }}
+          domain: ${{ parameters.domain }}
+          lifecycle: ${{ parameters.lifecycle }}
+          triggerType: ${{ parameters.triggerType }}
+          emitsProof: ${{ parameters.emitsProof }}
+          needsDatabase: ${{ parameters.needsDatabase }}
+          needsAlloyRuntime: ${{ parameters.needsAlloyRuntime }}
+
+    - id: publish
+      name: Open Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=monorepo&owner=szl-holdings
+        title: "feat: scaffold ${{ parameters.agentSlug }}-worker via golden path"
+        branchName: "scaffold/${{ parameters.agentSlug }}-worker"
+        description: |
+          ## New Agent Worker — ${{ parameters.agentName }}
+
+          Scaffolded from the `new-agent-worker` golden path template.
+
+          ### What's included
+          - Agent runtime (packages/agents-core)
+          - Prompt definitions (packages/agents-prompts)
+          - Tool adapters (packages/agents-tools)
+          - AEF policy guard (packages/aef-policy-guard)
+          - Cognitive observability / AI trace (packages/cognitive-observability)
+          - OTel instrumentation (packages/otel)
+          - Structured logging (packages/telemetry-standards)
+          - Proof chain emission (lib/proof-chain) — if emitsProof=true
+          - score.yaml workload manifest (type: worker)
+          - catalog-info.yaml Backstage entry
+          - Dockerfile (node:22-alpine)
+          - .env.example
+
+  output:
+    links:
+      - title: Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Backstage Catalog Entry
+        url: /catalog/default/component/${{ parameters.agentSlug }}-worker

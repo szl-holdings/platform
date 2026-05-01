@@ -1,0 +1,59 @@
+# Score Resolver Pattern: Deployment Target Matrix
+# Owner: platform-team
+# This file is the machine-readable companion to resolver-patterns.md §1.
+# The Resource & Delivery task (Phase 5) implements the actual resolver.
+
+deployment_targets:
+
+  azure_container_apps:
+    description: Azure Container Apps — managed serverless container runtime
+    bicep_module: infra/modules/containerApp.bicep
+    supported_workload_types:
+      - api-service
+      - event-consumer
+      - worker
+    environments:
+      - staging
+      - production
+    ingress:
+      internal_only: true   # Domain APIs never get public ingress directly
+      public_via_front_door: false   # Front Door routes to api-server only
+
+  azure_container_apps_jobs:
+    description: Azure Container Apps Jobs — queue/cron triggered container execution
+    bicep_module: infra/modules/containerAppJob.bicep
+    supported_workload_types:
+      - worker
+    trigger_types:
+      - queue
+      - cron
+      - event
+    scale_to_zero: true
+
+  azure_static_web_apps:
+    description: Azure Static Web Apps — CDN-served SPA hosting
+    bicep_module: infra/modules/staticWebApp.bicep
+    supported_workload_types:
+      - website
+    cdn: azure-front-door
+    build_command: "pnpm --filter @workspace/{slug} build"
+    output_dir: dist
+
+  docker_compose_local:
+    description: Local Docker Compose — used by humctl for local development
+    humctl_command: "humctl compose --score score.yaml"
+    supported_workload_types:
+      - api-service
+      - worker
+      - event-consumer
+    environments:
+      - development
+
+  replit_managed:
+    description: Replit managed runtime — current dev environment
+    supported_workload_types:
+      - api-service
+      - website
+    environments:
+      - development
+    notes: All workloads currently run here; Score manifests document intent for Azure migration

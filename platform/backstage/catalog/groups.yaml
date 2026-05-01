@@ -1,0 +1,193 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: szl-groups
+  description: All SZL Holdings ownership group and user stub entities
+spec:
+  targets: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-team
+  title: Platform Engineering
+  description: Owns shared substrate, api-server, infra, CI/CD, and Backstage
+  annotations:
+    szl.io/slack-channel: '#platform-engineering'
+spec:
+  type: team
+  profile:
+    displayName: Platform Engineering
+    email: platform@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: alloy-team
+  title: Alloy AI Fabric
+  description: Owns all Alloy apps, services, workers, AEF packages, and proof chain
+  annotations:
+    szl.io/slack-channel: '#alloy-ai'
+spec:
+  type: team
+  profile:
+    displayName: Alloy AI Fabric
+    email: alloy@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: lyte-team
+  title: Lyte Intelligence
+  description: Owns lyte-command-center, lyte-metrics-store, and observability packages
+  annotations:
+    szl.io/slack-channel: '#lyte-intelligence'
+spec:
+  type: team
+  profile:
+    displayName: Lyte Intelligence
+    email: lyte@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: aegis-team
+  title: Aegis Governance
+  description: Owns aegis artifact, policy packages, and audit chain
+  annotations:
+    szl.io/slack-channel: '#aegis-governance'
+spec:
+  type: team
+  profile:
+    displayName: Aegis Governance
+    email: aegis@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: domain-vessels
+  title: Vessels Domain
+  description: Owns artifacts/vessels and its associated API routes
+  annotations:
+    szl.io/slack-channel: '#domain-vessels'
+spec:
+  type: team
+  profile:
+    displayName: Vessels Domain
+    email: vessels@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: domain-terra
+  title: Terra Domain
+  description: Owns artifacts/terra and its associated API routes
+  annotations:
+    szl.io/slack-channel: '#domain-terra'
+spec:
+  type: team
+  profile:
+    displayName: Terra Domain
+    email: terra@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: domain-counsel
+  title: Counsel Domain
+  description: Owns artifacts/counsel and its associated API routes
+  annotations:
+    szl.io/slack-channel: '#domain-counsel'
+spec:
+  type: team
+  profile:
+    displayName: Counsel Domain
+    email: counsel@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: domain-carlota
+  title: Carlota Jo Domain
+  description: Owns artifacts/carlota-jo and its associated API routes
+  annotations:
+    szl.io/slack-channel: '#domain-carlota'
+spec:
+  type: team
+  profile:
+    displayName: Carlota Jo Domain
+    email: carlota@szl-holdings.com
+  children: []
+  members: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: mobile-team
+  title: Mobile
+  description: Owns artifacts/szl-holdings-mobile
+  annotations:
+    szl.io/slack-channel: '#mobile'
+spec:
+  type: team
+  profile:
+    displayName: Mobile
+    email: mobile@szl-holdings.com
+  children: []
+  members: [default/platform-bot]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: platform-bot
+  title: Platform Bot
+  description: CI/automation service account for platform tooling
+  annotations:
+    szl.io/user-type: service-account
+spec:
+  profile:
+    displayName: Platform Bot
+    email: platform-bot@szl-holdings.com
+  memberOf: [platform-team, mobile-team]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: szl-admin
+  title: SZL Admin
+  description: Principal platform engineer — stub user for catalog ownership
+  annotations:
+    szl.io/user-type: engineer
+spec:
+  profile:
+    displayName: SZL Admin
+    email: admin@szl-holdings.com
+  memberOf: [platform-team]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: alloy-lead
+  title: Alloy Tech Lead
+  description: Tech lead for the Alloy AI Fabric domain — stub user
+  annotations:
+    szl.io/user-type: engineer
+spec:
+  profile:
+    displayName: Alloy Lead
+    email: alloy-lead@szl-holdings.com
+  memberOf: [alloy-team]

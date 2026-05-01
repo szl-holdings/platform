@@ -1,0 +1,59 @@
+name: CI — ${{ values.agentSlug }}-worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/${{ values.agentSlug }}-worker/**'
+  pull_request:
+    paths:
+      - 'workers/${{ values.agentSlug }}-worker/**'
+
+jobs:
+  build:
+    name: Build & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.agentSlug }}-worker typecheck
+      - run: pnpm --filter @workspace/${{ values.agentSlug }}-worker build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.agentSlug }}-worker lint
+
+  health:
+    name: Health Probe Smoke Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Build before probe
+        run: pnpm --filter @workspace/${{ values.agentSlug }}-worker build
+      - name: Start worker and probe health
+        run: |
+          pnpm --filter @workspace/${{ values.agentSlug }}-worker start &
+          sleep 5
+          curl -f http://localhost:9090/health | grep '"status":"ok"'
+          curl -f http://localhost:9090/ready | grep '"ready":true'

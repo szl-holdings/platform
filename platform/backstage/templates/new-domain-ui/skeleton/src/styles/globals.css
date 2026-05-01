@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* SZL Holdings Design Token Overrides */
+:root {
+  --szl-bg-primary: #0a0a0a;
+  --szl-text-primary: #ffffff;
+  --szl-accent: #3b82f6;
+}
+
+body {
+  background-color: var(--szl-bg-primary);
+  color: var(--szl-text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

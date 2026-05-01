@@ -1,0 +1,34 @@
+{
+  "name": "@workspace/${{ values.agentSlug }}-worker",
+  "version": "1.0.0",
+  "description": "${{ values.description }}",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/"
+  },
+  "dependencies": {
+    "@szl-holdings/proof-chain": "workspace:*",
+    "@workspace/aef-policy-guard": "workspace:*",
+    "@workspace/agents-core": "workspace:*",
+    "@workspace/agents-prompts": "workspace:*",
+    "@workspace/agents-tools": "workspace:*",
+    "@workspace/cognitive-observability": "workspace:*",
+    "@workspace/env": "workspace:*",
+    "@workspace/otel": "workspace:*",
+    "@workspace/telemetry-standards": "workspace:*",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

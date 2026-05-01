@@ -1,0 +1,24 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.domainSlug }}-api
+  title: ${{ values.domainName }} API
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/health-endpoint: /health
+    szl.io/golden-path: new-domain-api@1.0
+  tags:
+    - typescript
+    - express
+    - api
+spec:
+  type: service
+  lifecycle: ${{ values.lifecycle }}
+  owner: group:${{ values.ownerGroup }}
+  system: system:${{ values.system }}
+  domain: domain:${{ values.domain }}
+  dependsOn:
+    - resource:postgresql-dev
+  consumesApis: []

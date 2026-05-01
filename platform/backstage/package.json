@@ -1,0 +1,25 @@
+{
+  "name": "@szl-holdings/backstage-root",
+  "version": "1.0.0",
+  "description": "SZL Holdings Developer Portal — Backstage IDP root workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @szl-holdings/backstage-backend start\" \"pnpm --filter @szl-holdings/backstage-app start\"",
+    "build": "pnpm --filter @szl-holdings/backstage-app build && pnpm --filter @szl-holdings/backstage-backend build",
+    "catalog:validate": "node scripts/validate-catalog.mjs",
+    "lint": "pnpm --filter \"@szl-holdings/backstage-*\" lint"
+  },
+  "devDependencies": {
+    "@backstage/catalog-model": "1.7.3",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.1.2",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

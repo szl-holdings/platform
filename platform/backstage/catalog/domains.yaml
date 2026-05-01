@@ -1,0 +1,94 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: szl-domains
+  description: All SZL Holdings domain entities
+spec:
+  targets: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: platform
+  title: Platform
+  description: Shared substrate — API server, database, auth, CI/CD, packaging, developer portal
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - platform
+    - substrate
+spec:
+  owner: group:platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: alloy
+  title: Alloy AI Fabric
+  description: AI orchestration, embedding, ingestion, proof chain, and agent runtime
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - alloy
+    - ai
+    - orchestration
+spec:
+  owner: group:alloy-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: lyte
+  title: Lyte Intelligence
+  description: Operational intelligence, observability, decision analytics
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - lyte
+    - observability
+    - intelligence
+spec:
+  owner: group:lyte-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: aegis
+  title: Aegis Governance
+  description: Trust, policy, compliance, vulnerability, and audit chain
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - aegis
+    - governance
+    - security
+spec:
+  owner: group:aegis-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: operations
+  title: Operations
+  description: Unified command, maritime, real estate, legal, advisory, cyber, briefing, reverse ETL domain packs
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - operations
+    - domain-packs
+spec:
+  owner: group:platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: corporate
+  title: Corporate
+  description: Investor-facing, marketing, mobile command, brand orchestration
+  annotations:
+    backstage.io/techdocs-ref: dir:../../../docs
+  tags:
+    - corporate
+    - brand
+spec:
+  owner: group:platform-team

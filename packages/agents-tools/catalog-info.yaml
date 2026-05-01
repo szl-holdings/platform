@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-agents-tools
+  title: "@workspace/agents-tools — Agent Tool Definitions"
+  description: Shared tool definitions for AI agents — web search, code execution, data retrieval, and domain-specific tool adapters.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/agents-tools.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/agents-tools.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/agents-tools/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - alloy
+    - typescript
+    - library
+    - tools
+    - ai
+spec:
+  type: library
+  lifecycle: production
+  owner: group:alloy-team
+  system: system:agent-fabric
+  domain: domain:alloy
+  dependsOn:
+    - component:pkg-agents-core

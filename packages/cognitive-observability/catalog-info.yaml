@@ -1,0 +1,35 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-cognitive-observability
+  title: "@workspace/cognitive-observability — AI Trace Observability"
+  description: AI decision trace telemetry — records model inputs, outputs, quality scores, and reasoning chains for all AI agent decisions.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/cognitive-observability.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/cognitive-observability.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/cognitive-observability/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - lyte
+    - alloy
+    - typescript
+    - library
+    - ai-trace
+    - observability
+spec:
+  type: library
+  lifecycle: production
+  owner: group:lyte-team
+  system: system:observability
+  domain: domain:lyte
+  dependsOn:
+    - component:pkg-otel
+    - component:pkg-telemetry-standards

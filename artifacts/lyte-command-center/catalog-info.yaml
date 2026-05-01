@@ -1,0 +1,30 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: lyte-command-center
+  title: Lyte — Decision Intelligence
+  description: Operational intelligence command center — AI decision traces, quality metrics, observability dashboards, and alert monitoring.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.3'
+    szl.io/golden-path-deviation: "SPA — no server-side health endpoint; OTel instrumentation pending"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/lyte-command-center.md
+  tags:
+    - lyte
+    - typescript
+    - react
+    - vite
+    - observability
+spec:
+  type: website
+  lifecycle: production
+  owner: group:lyte-team
+  system: system:lyte-command
+  domain: domain:lyte
+  dependsOn:
+    - component:api-server
+    - component:lyte-metrics-store
+  consumesApis:
+    - api:szl-rest-v1
+    - api:lyte-metrics

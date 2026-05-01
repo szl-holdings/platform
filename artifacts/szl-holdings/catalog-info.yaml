@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-holdings
+  title: SZL Holdings Dashboard
+  description: Investor-facing corporate dashboard SPA. Displays portfolio metrics, Mapbox geography, and platform status.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.3'
+    szl.io/golden-path-deviation: "SPA — no server-side health endpoint; OTel browser instrumentation pending"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/szl-holdings.md
+  tags:
+    - corporate
+    - typescript
+    - react
+    - vite
+spec:
+  type: website
+  lifecycle: production
+  owner: group:platform-team
+  system: system:szl-holdings
+  domain: domain:corporate
+  dependsOn:
+    - component:api-server
+    - resource:mapbox
+    - resource:plausible
+  consumesApis:
+    - api:szl-rest-v1

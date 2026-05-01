@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-fabric-api
+  title: Alloy Fabric API
+  description: Internal Alloy fabric service layer — manages AEF workflow state, routing tables, and fabric coordination between embedding and runtime APIs.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/alloy-fabric-api.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - fabric
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-runtime
+  domain: domain:alloy
+  dependsOn:
+    - resource:postgresql-dev
+    - resource:azure-service-bus
+  consumesApis:
+    - api:alloy-embed-v1
+    - api:alloy-runtime-v1

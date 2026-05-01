@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: aegis
+  title: Aegis — Trust & Governance Surface
+  description: Investor and compliance trust surface SPA — governance dashboards, audit chain visualization, policy compliance status, and vulnerability reporting.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.3'
+    szl.io/golden-path-deviation: "SPA — no server-side health endpoint; OTel instrumentation pending"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/aegis.md
+  tags:
+    - aegis
+    - governance
+    - security
+    - typescript
+    - react
+    - vite
+spec:
+  type: website
+  lifecycle: production
+  owner: group:aegis-team
+  system: system:aegis-trust
+  domain: domain:aegis
+  dependsOn:
+    - component:api-server
+  consumesApis:
+    - api:szl-rest-v1

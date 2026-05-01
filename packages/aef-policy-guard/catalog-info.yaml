@@ -1,0 +1,35 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-aef-policy-guard
+  title: "@workspace/aef-policy-guard — AEF Policy Guard"
+  description: AEF-specific policy guard — enforces policy rules for all AI agent decisions in the Alloy fabric, including prompt injection prevention and output validation.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/aef-policy-guard.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/aef-policy-guard.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/aef-policy-guard/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - alloy
+    - aegis
+    - typescript
+    - library
+    - policy
+    - ai-safety
+spec:
+  type: library
+  lifecycle: production
+  owner: group:aegis-team
+  system: system:policy-engine
+  domain: domain:aegis
+  dependsOn:
+    - component:pkg-policy-guard
+    - component:pkg-cognitive-observability

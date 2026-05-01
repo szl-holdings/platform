@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: meridian-forecast-lab
+  title: Meridian Forecast Lab
+  description: Meridian forecasting laboratory — experimental signal processing and predictive analytics for the Meridian domain.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.1'
+    szl.io/runbook: infra/runbooks/meridian-forecast-lab.md
+    szl.io/health-endpoint: /health
+  tags:
+    - platform
+    - meridian
+    - forecast
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:platform-team
+  system: system:api-gateway
+  domain: domain:platform
+  dependsOn:
+    - resource:postgresql-dev
+  consumesApis:
+    - api:szl-rest-v1

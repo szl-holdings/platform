@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-policy-engine
+  title: "@workspace/policy-engine — Policy Engine"
+  description: TypeScript policy evaluation runtime — evaluates policy rules, manages policy versions, and provides policy decision APIs.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/policy-engine.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/policy-engine.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/policy-engine/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - aegis
+    - typescript
+    - library
+    - policy
+    - governance
+spec:
+  type: library
+  lifecycle: production
+  owner: group:aegis-team
+  system: system:policy-engine
+  domain: domain:aegis
+  dependsOn:
+    - component:pkg-env

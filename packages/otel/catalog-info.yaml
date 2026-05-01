@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-otel
+  title: "@workspace/otel — OpenTelemetry SDK"
+  description: OpenTelemetry SDK wrapper — auto-instruments Express/Hono routes and provides browser trace instrumentation. Mandatory for all new services (golden path).
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/otel.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/otel.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/otel/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - lyte
+    - typescript
+    - library
+    - otel
+    - observability
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:lyte-team
+  system: system:observability
+  domain: domain:lyte
+  dependsOn:
+    - component:pkg-env

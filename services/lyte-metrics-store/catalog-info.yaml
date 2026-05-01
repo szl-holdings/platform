@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: lyte-metrics-store
+  title: Lyte Metrics Store
+  description: Operational metrics persistence service — stores platform health metrics, AI decision scores, and DORA metrics for the Lyte command center.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/lyte-metrics-store.md
+    szl.io/health-endpoint: /health
+  tags:
+    - lyte
+    - metrics
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:lyte-team
+  system: system:lyte-command
+  domain: domain:lyte
+  dependsOn:
+    - resource:postgresql-dev
+  providesApis:
+    - api:lyte-metrics
+  consumesApis: []

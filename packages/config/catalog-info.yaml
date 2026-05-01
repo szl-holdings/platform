@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-config
+  title: "@workspace/config — Shared Configuration"
+  description: Shared configuration primitives — runtime config resolution, feature flags, and environment-aware config loading utilities.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/config.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/config.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/config/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - config
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:config-env
+  domain: domain:platform
+  dependsOn:
+    - component:pkg-env

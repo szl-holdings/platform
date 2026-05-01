@@ -1,0 +1,321 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: szl-systems
+  description: All SZL Holdings system entities
+spec:
+  targets: []
+---
+# ── PLATFORM DOMAIN SYSTEMS ──────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: api-gateway
+  title: API Gateway
+  description: The central REST API gateway — api-server, spec, client, validation
+  tags: [platform, api]
+spec:
+  owner: group:platform-team
+  domain: domain:platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: data-layer
+  title: Data Layer
+  description: Database client, schema, repository, and migrations
+  tags: [platform, database]
+spec:
+  owner: group:platform-team
+  domain: domain:platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: config-env
+  title: Config & Env
+  description: Zod-validated environment contracts, shared config, and shared contracts
+  tags: [platform, config]
+spec:
+  owner: group:platform-team
+  domain: domain:platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: auth
+  title: Auth
+  description: Authentication and session management primitives
+  tags: [platform, auth]
+spec:
+  owner: group:platform-team
+  domain: domain:platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: developer-portal
+  title: Developer Portal
+  description: Backstage IDP — catalog, TechDocs, golden-path templates, scorecards
+  tags: [platform, backstage, idp]
+spec:
+  owner: group:platform-team
+  domain: domain:platform
+---
+# ── ALLOY DOMAIN SYSTEMS ─────────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: aef-embedding
+  title: AEF Embedding
+  description: Alloy embedding API, embed worker, and rerank worker
+  tags: [alloy, embedding, ai]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: aef-ingestion
+  title: AEF Ingestion
+  description: Alloy ingestion orchestrator and fabric ingest control
+  tags: [alloy, ingestion, ai]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: aef-runtime
+  title: AEF Runtime
+  description: Alloy runtime API, fabric API, rank worker, and vector worker
+  tags: [alloy, runtime, ai]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: substrate-inference
+  title: Substrate Inference
+  description: Substrate inference service, Python workers, and MCP gateway
+  tags: [alloy, substrate, inference]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: proof-chain
+  title: Proof Chain
+  description: Cryptographic proof chain, evidence ledger, evidence graph, run ledger
+  tags: [alloy, governance, proof]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: agent-fabric
+  title: Agent Fabric
+  description: Agent runtime core, SDK bridge, prompt registry, and tool definitions
+  tags: [alloy, agents, ai]
+spec:
+  owner: group:alloy-team
+  domain: domain:alloy
+---
+# ── LYTE DOMAIN SYSTEMS ──────────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: lyte-command
+  title: Lyte Command Center
+  description: Operational intelligence UI and metrics persistence service
+  tags: [lyte, observability, ui]
+spec:
+  owner: group:lyte-team
+  domain: domain:lyte
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: observability
+  title: Platform Observability
+  description: OTel SDK, cognitive observability, telemetry standards, and observability core
+  tags: [lyte, otel, observability]
+spec:
+  owner: group:lyte-team
+  domain: domain:lyte
+---
+# ── AEGIS DOMAIN SYSTEMS ─────────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: aegis-trust
+  title: Aegis Trust Surface
+  description: Investor and compliance trust surface UI
+  tags: [aegis, governance, ui]
+spec:
+  owner: group:aegis-team
+  domain: domain:aegis
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: policy-engine
+  title: Policy Engine
+  description: TypeScript policy engine, policy guard middleware, AEF policy guard
+  tags: [aegis, policy, governance]
+spec:
+  owner: group:aegis-team
+  domain: domain:aegis
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: audit-chain
+  title: Audit Chain
+  description: Audit utilities, outcome graph, and receipt graph
+  tags: [aegis, audit, governance]
+spec:
+  owner: group:aegis-team
+  domain: domain:aegis
+---
+# ── OPERATIONS DOMAIN SYSTEMS ─────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: command
+  title: Unified Command
+  description: Unified operational command center surface
+  tags: [operations, ui]
+spec:
+  owner: group:platform-team
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: vessels
+  title: Maritime Intelligence
+  description: Maritime domain — AIS/vessel tracking and analytics
+  tags: [operations, maritime, ui]
+spec:
+  owner: group:domain-vessels
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: terra
+  title: Real Estate Intelligence
+  description: Real estate domain — property analytics and intelligence
+  tags: [operations, real-estate, ui]
+spec:
+  owner: group:domain-terra
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: counsel
+  title: Legal Command
+  description: Legal matter management and analytics surface
+  tags: [operations, legal, ui]
+spec:
+  owner: group:domain-counsel
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: carlota
+  title: Advisory Platform
+  description: Carlota Jo advisory consulting surface with i18n
+  tags: [operations, advisory, ui]
+spec:
+  owner: group:domain-carlota
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: sentra
+  title: Cyber Resilience
+  description: Cyber resilience command and threat monitoring
+  tags: [operations, cyber, ui]
+spec:
+  owner: group:platform-team
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: pulse
+  title: AI Briefing
+  description: AI executive briefing surface
+  tags: [operations, ai-briefing, ui]
+spec:
+  owner: group:platform-team
+  domain: domain:operations
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: conduit
+  title: Reverse ETL
+  description: Data pipeline and reverse ETL platform
+  tags: [operations, data, etl]
+spec:
+  owner: group:platform-team
+  domain: domain:operations
+---
+# ── CORPORATE DOMAIN SYSTEMS ──────────────────────────────────────────────────
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: szl-holdings
+  title: Corporate Dashboard
+  description: SZL Holdings investor-facing corporate dashboard
+  tags: [corporate, ui]
+spec:
+  owner: group:platform-team
+  domain: domain:corporate
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mobile
+  title: Mobile Command
+  description: SZL Holdings mobile command application (Expo)
+  tags: [corporate, mobile]
+spec:
+  owner: group:mobile-team
+  domain: domain:corporate
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: a11oy
+  title: Brand Orchestration
+  description: A11oy brand orchestration layer and design system
+  tags: [corporate, brand, ui]
+spec:
+  owner: group:platform-team
+  domain: domain:corporate
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: demo
+  title: Demo Media
+  description: SZL Holdings governed autonomy demo video asset
+  tags: [corporate, media]
+spec:
+  owner: group:platform-team
+  domain: domain:corporate

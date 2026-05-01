@@ -1,0 +1,68 @@
+# Score Example: Event-Driven Consumer
+# Workload archetype: Event bus subscriber (domain event consumer)
+# Real-world instance: services/alloy-fabric-ingest-control
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: example-event-consumer
+
+containers:
+  event-consumer:
+    image: .
+    command: ["node", "dist/index.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      OTEL_SERVICE_NAME: "example-event-consumer"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      EVENT_BUS_CONNECTION_STRING: "${EVENT_BUS_CONNECTION_STRING}"
+      EVENT_TOPIC: "domain-events"
+      EVENT_SUBSCRIPTION: "example-consumer-sub"
+      DATABASE_URL: "${DATABASE_URL}"
+
+    # Optional health endpoint for long-running consumers
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 15
+
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+
+resources:
+  # Event bus subscription — resolves to Azure Service Bus topic subscription (prod)
+  event-subscription:
+    type: topic-subscription
+    class: azure-service-bus
+    metadata:
+      annotations:
+        szl.io/topic-name: domain-events
+        szl.io/subscription-name: example-consumer-sub
+        szl.io/environment-secret: EVENT_BUS_CONNECTION_STRING
+        szl.io/filter-expression: "domain = 'ingest'"
+
+  db:
+    type: postgres
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: DATABASE_URL
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: event-consumer
+# szl.io/trigger: event
+# szl.io/domain: alloy
+# szl.io/system: aef-ingestion
+# szl.io/owner: alloy-team
+# szl.io/lifecycle: experimental
+# szl.io/criticality: high
+# szl.io/observability-tier: full
+# szl.io/policy-labels: [policy-gated, audit-logged]
+# szl.io/deployment-target: azure-container-apps
+# szl.io/scaling: event-driven

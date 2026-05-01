@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-agents-prompts
+  title: "@workspace/agents-prompts — Prompt Registry"
+  description: Versioned prompt registry for all AI agents — stores, versions, and retrieves prompts with A/B testing and evaluation hooks.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/agents-prompts.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/agents-prompts.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/agents-prompts/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - alloy
+    - typescript
+    - library
+    - prompts
+    - ai
+spec:
+  type: library
+  lifecycle: production
+  owner: group:alloy-team
+  system: system:agent-fabric
+  domain: domain:alloy
+  dependsOn:
+    - component:pkg-agents-core

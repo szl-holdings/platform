@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-ingestion-orchestrator
+  title: Alloy Ingestion Orchestrator
+  description: Orchestrates document ingestion pipelines — chunking, embedding dispatch, indexing, and ingest-state tracking.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/alloy-ingestion-orchestrator.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - ingestion
+    - orchestration
+    - typescript
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-ingestion
+  domain: domain:alloy
+  dependsOn:
+    - component:alloy-embedding-api
+    - component:alloy-fabric-ingest-control
+    - resource:postgresql-dev
+  consumesApis:
+    - api:alloy-embed-v1

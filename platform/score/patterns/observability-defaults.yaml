@@ -1,0 +1,65 @@
+# Score Resolver Pattern: Observability Defaults
+# Owner: platform-team (lyte-team co-owns)
+# Defines what observability config is auto-injected per workload type.
+# Developers may not disable these; they may extend them.
+
+observability_defaults:
+
+  full:
+    description: Full observability stack — all backend services and workers
+    applies_to:
+      - api-service
+      - worker
+      - event-consumer
+    injected_env_vars:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.szl-platform.svc:4318"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+      OTEL_TRACES_SAMPLER: "traceidratio"
+      OTEL_TRACES_SAMPLER_ARG: "1.0"  # 100% sampling; reduce in production after load test
+      OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=${DEPLOYMENT_ENVIRONMENT},service.team=${OWNER_GROUP}"
+    sidecar:
+      image: otel/opentelemetry-collector-contrib:latest
+      config: platform/observability/collector-config.yaml
+    log_forwarding:
+      destination: Azure Monitor Logs
+      schema: packages/telemetry-standards log envelope
+    health_scrape:
+      path: /health
+      interval: 30s
+      alert_on_failure: true
+
+  browser_otel:
+    description: Browser OTel instrumentation — SPAs only
+    applies_to:
+      - website
+    build_time_vars:
+      VITE_OTEL_ENDPOINT: "${PUBLIC_OTEL_ENDPOINT}"
+      VITE_OTEL_SERVICE_NAME: "{slug}"
+    notes: OTel SDK is bundled by packages/otel browser variant; endpoint must be public-accessible CORS endpoint
+
+  minimal:
+    description: Minimal observability — deprecated or design artifacts
+    applies_to:
+      - deprecated
+      - design
+    log_forwarding:
+      destination: Azure Monitor Logs
+      schema: free-form (best effort)
+    notes: No OTel injection; log forwarding only
+
+# Lyte metrics integration
+lyte_integration:
+  description: All workloads automatically emit platform metrics to Lyte metrics store
+  endpoint: services/lyte-metrics-store
+  metrics:
+    - name: szl_request_duration_seconds
+      type: histogram
+    - name: szl_request_total
+      type: counter
+    - name: szl_health_check_status
+      type: gauge
+    - name: szl_worker_job_duration_seconds
+      type: histogram
+    - name: szl_ai_decision_quality_score
+      type: gauge
+      applies_to: [worker, event-consumer]  # when emits-proof=true

@@ -1,0 +1,66 @@
+# Score Resolver Pattern: Resource Type Bindings
+# Owner: platform-team
+# Maps Score resource types to Azure service instances and local dev equivalents.
+
+resource_bindings:
+
+  postgres:
+    production:
+      azure_service: Azure Database for PostgreSQL Flexible Server
+      bicep_module: infra/modules/postgres.bicep
+      connection_env: DATABASE_URL
+      secret_ref_pattern: "szl-{service}-database-url"
+      managed_identity: true
+    development:
+      service: Replit PostgreSQL
+      connection_env: DATABASE_URL
+      notes: Replit provides the PostgreSQL instance automatically
+
+  redis:
+    production:
+      azure_service: Azure Cache for Redis (Standard C1)
+      bicep_module: infra/modules/redis.bicep
+      connection_env: REDIS_URL
+      secret_ref_pattern: "szl-{service}-redis-url"
+    development:
+      service: Docker redis:alpine
+      connection_env: REDIS_URL
+      notes: Add to docker-compose.dev.yml
+
+  queue:
+    production:
+      azure_service: Azure Service Bus (Standard tier)
+      bicep_module: infra/modules/serviceBus.bicep
+      connection_env: QUEUE_CONNECTION_STRING
+      secret_ref_pattern: "szl-{service}-queue-connection"
+      dead_letter_queue: true
+    development:
+      service: Azure Service Bus Emulator (local)
+      notes: https://github.com/Azure/azure-service-bus-emulator-installer
+
+  topic_subscription:
+    production:
+      azure_service: Azure Service Bus Topic + Subscription
+      bicep_module: infra/modules/serviceBus.bicep
+      connection_env: EVENT_BUS_CONNECTION_STRING
+    development:
+      service: Azure Service Bus Emulator
+
+  secret_store:
+    production:
+      azure_service: Azure Key Vault (Standard tier)
+      bicep_module: infra/modules/keyvault.bicep
+      access_model: Managed Identity + RBAC
+      notes: All production secrets stored here; no secrets in env files or containers
+    development:
+      service: Replit Secrets
+      notes: Set via Replit Secrets UI or pnpm env:set
+
+  container_registry:
+    production:
+      azure_service: Azure Container Registry (Basic tier)
+      bicep_module: infra/modules/containerRegistry.bicep
+      auth: Managed Identity
+    development:
+      service: Local Docker daemon
+      notes: Images built locally, pushed to ACR via CI (container-publish.yml)

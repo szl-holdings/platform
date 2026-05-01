@@ -1,0 +1,197 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: szl-resources
+  description: All SZL Holdings external resource entities
+spec:
+  targets: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: postgresql-dev
+  title: PostgreSQL Dev (Replit)
+  description: Development PostgreSQL 16 instance managed by Replit. All services use this in local/dev environment.
+  annotations:
+    szl.io/provider: replit
+    szl.io/environment: development
+  tags: [database, postgresql, dev]
+spec:
+  type: database
+  owner: group:platform-team
+  system: system:data-layer
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: postgresql-prod
+  title: PostgreSQL Prod (Azure)
+  description: Production Azure Database for PostgreSQL — target state; not yet deployed.
+  annotations:
+    szl.io/provider: azure
+    szl.io/environment: production
+    szl.io/status: not-deployed
+    szl.io/bicep-module: infra/modules/postgres.bicep
+  tags: [database, postgresql, azure, prod]
+spec:
+  type: database
+  owner: group:platform-team
+  system: system:data-layer
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: azure-key-vault
+  title: Azure Key Vault
+  description: Production secret store — target state; not yet deployed. All production secrets will be stored here.
+  annotations:
+    szl.io/provider: azure
+    szl.io/environment: production
+    szl.io/status: not-deployed
+    szl.io/bicep-module: infra/modules/keyvault.bicep
+  tags: [secret-store, azure, prod]
+spec:
+  type: secret-store
+  owner: group:platform-team
+  system: system:config-env
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: azure-acr
+  title: Azure Container Registry
+  description: Container image registry for all production container builds.
+  annotations:
+    szl.io/provider: azure
+    szl.io/environment: production
+    szl.io/status: not-deployed
+    szl.io/bicep-module: infra/modules/containerRegistry.bicep
+  tags: [container-registry, azure, prod]
+spec:
+  type: container-registry
+  owner: group:platform-team
+  system: system:developer-portal
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: azure-service-bus
+  title: Azure Service Bus
+  description: Managed message queue for async worker communication — target state; not yet deployed.
+  annotations:
+    szl.io/provider: azure
+    szl.io/environment: production
+    szl.io/status: not-deployed
+    szl.io/bicep-module: infra/modules/serviceBus.bicep
+  tags: [message-queue, azure, prod]
+spec:
+  type: message-queue
+  owner: group:platform-team
+  system: system:aef-runtime
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: azure-redis
+  title: Azure Cache for Redis
+  description: Managed Redis cache for session and hot-path caching — target state; not yet deployed.
+  annotations:
+    szl.io/provider: azure
+    szl.io/environment: production
+    szl.io/status: not-deployed
+    szl.io/bicep-module: infra/modules/redis.bicep
+  tags: [cache, redis, azure, prod]
+spec:
+  type: cache
+  owner: group:platform-team
+  system: system:api-gateway
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: openai
+  title: OpenAI API
+  description: OpenAI API used for language model inference. Secret ref — OPENAI_API_KEY.
+  annotations:
+    szl.io/provider: openai
+    szl.io/secret-ref: OPENAI_API_KEY
+  tags: [external-api, ai, openai]
+spec:
+  type: external-api
+  owner: group:alloy-team
+  system: system:aef-runtime
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: anthropic
+  title: Anthropic API
+  description: Anthropic Claude API used across the Alloy stack. Secret ref — ANTHROPIC_API_KEY.
+  annotations:
+    szl.io/provider: anthropic
+    szl.io/secret-ref: ANTHROPIC_API_KEY
+  tags: [external-api, ai, anthropic]
+spec:
+  type: external-api
+  owner: group:alloy-team
+  system: system:aef-runtime
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mapbox
+  title: Mapbox API
+  description: Mapbox maps and geocoding API used by SZL Holdings dashboard and Command. Secret ref — VITE_MAPBOX_TOKEN.
+  annotations:
+    szl.io/provider: mapbox
+    szl.io/secret-ref: VITE_MAPBOX_TOKEN
+  tags: [external-api, maps, mapbox]
+spec:
+  type: external-api
+  owner: group:platform-team
+  system: system:szl-holdings
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: marine-traffic
+  title: Marine Traffic API
+  description: Marine Traffic AIS data API used by Vessels domain. Secret ref — MARINE_TRAFFIC_API_KEY.
+  annotations:
+    szl.io/provider: marine-traffic
+    szl.io/secret-ref: MARINE_TRAFFIC_API_KEY
+  tags: [external-api, maritime, ais]
+spec:
+  type: external-api
+  owner: group:domain-vessels
+  system: system:vessels
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: stripe
+  title: Stripe
+  description: Stripe payments API used by api-server and carlota-jo. Secret ref — STRIPE_SECRET_KEY.
+  annotations:
+    szl.io/provider: stripe
+    szl.io/secret-ref: STRIPE_SECRET_KEY
+  tags: [external-api, payments, stripe]
+spec:
+  type: external-api
+  owner: group:platform-team
+  system: system:api-gateway
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: plausible
+  title: Plausible Analytics
+  description: Privacy-first analytics used by SZL Holdings public surface. Secret ref — PLAUSIBLE_SITE_ID.
+  annotations:
+    szl.io/provider: plausible
+    szl.io/secret-ref: PLAUSIBLE_SITE_ID
+  tags: [analytics, privacy, plausible]
+spec:
+  type: analytics
+  owner: group:platform-team
+  system: system:szl-holdings

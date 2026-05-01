@@ -1,0 +1,71 @@
+# Score Resolver Pattern: Policy Label Matrix
+# Owner: platform-team (aegis-team co-owns)
+# Mandatory policy labels injected by resolver per workload type.
+# OPA/Gatekeeper will enforce these in Phase 4.
+
+policy_labels:
+
+  definitions:
+    authenticated:
+      description: All requests must carry a valid session/JWT token
+      enforced_by: packages/auth-shared middleware
+      exceptions: [/health, /ready, /api/health]
+
+    policy_gated:
+      description: All consequential actions evaluated against policy-engine before execution
+      enforced_by: packages/policy-guard middleware
+      mode: audit  # → enforce in Phase 4
+
+    audit_logged:
+      description: All actions emitted to lib/audit with IP hash, user, action, outcome
+      enforced_by: api-server audit middleware + lib/audit
+      retention: 90 days
+
+    rate_limited:
+      description: Per-user and per-IP rate limiting enforced at API gateway
+      enforced_by: api-server rate-limiter middleware
+      defaults:
+        per_user_per_minute: 100
+        per_ip_per_minute: 200
+        burst: 50
+
+    proof_emitting:
+      description: Agent emits cryptographic proof after every consequential decision
+      enforced_by: lib/proof-chain
+      applies_to: [worker, event-consumer]
+
+    spa:
+      description: Static client-side application; no server-side session enforcement
+      note: Auth enforced client-side via packages/auth-shared; token validated by api-server on API calls
+
+  mandatory_by_workload_type:
+    api_service:
+      - authenticated
+      - policy_gated
+      - audit_logged
+      - rate_limited
+
+    website:
+      - authenticated
+      - spa
+
+    worker:
+      - policy_gated
+      - audit_logged
+
+    worker_with_proof:  # when emits-proof: true
+      - policy_gated
+      - proof_emitting
+      - audit_logged
+
+    event_consumer:
+      - policy_gated
+      - audit_logged
+
+  domain_overrides:
+    aegis:
+      additional_labels: [compliance_scoped, evidence_required]
+    alloy:
+      additional_labels: [ai_safety_validated]
+    platform:
+      additional_labels: [rate_limited]  # redundant for api-server; included for clarity

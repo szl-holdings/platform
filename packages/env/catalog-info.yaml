@@ -1,0 +1,32 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-env
+  title: "@workspace/env — Environment Contract"
+  description: Canonical Zod-validated environment contract library. All services must load env through this package — no direct process.env access.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/env.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/env.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/env/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - env
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:config-env
+  domain: domain:platform
+  dependsOn: []

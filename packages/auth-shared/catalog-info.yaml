@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-auth-shared
+  title: "@workspace/auth-shared — Auth Primitives"
+  description: Shared authentication and session management primitives — JWT verification, session middleware, and auth state hooks for all services and SPAs.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/auth-shared.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/auth-shared.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/auth-shared/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - auth
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:auth
+  domain: domain:platform
+  dependsOn:
+    - component:pkg-env

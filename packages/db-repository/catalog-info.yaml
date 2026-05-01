@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-db-repository
+  title: "@workspace/db-repository — Repository Pattern"
+  description: Repository pattern implementations for data access — typed query builders, pagination helpers, and domain repository base classes.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/db-repository.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/db-repository.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/db-repository/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - database
+    - repository
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:data-layer
+  domain: domain:platform
+  dependsOn:
+    - component:pkg-db-schema

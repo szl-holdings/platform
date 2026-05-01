@@ -1,0 +1,180 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: new-domain-ui
+  title: New Domain UI
+  description: Scaffold a new domain-specific React SPA artifact (Vite + React 19 + Tailwind 4). Produces a production-ready SPA skeleton with routing, API client, auth hooks, OTel browser instrumentation, Score manifest, and Backstage catalog entry. Register the artifact in Replit after merging.
+  tags:
+    - platform
+    - typescript
+    - react
+    - vite
+    - golden-path
+    - website
+  annotations:
+    szl.io/golden-path: "true"
+    szl.io/golden-path-version: "1.0"
+spec:
+  owner: group:platform-team
+  type: website
+
+  parameters:
+    - title: UI Identity
+      required:
+        - domainName
+        - domainSlug
+        - subtitle
+        - description
+      properties:
+        domainName:
+          title: Domain Name
+          type: string
+          description: Human-readable domain name (e.g. "Meridian")
+          ui:autofocus: true
+        domainSlug:
+          title: Domain Slug
+          type: string
+          description: Identifier slug — lowercase letters and digits only, no hyphens (e.g. "meridian"). Used as artifact directory, preview path, package name, and TypeScript identifier prefix.
+          pattern: '^[a-z][a-z0-9]*$'
+        subtitle:
+          title: Subtitle
+          type: string
+          description: Short subtitle for the artifact title (e.g. "Market Intelligence")
+        description:
+          title: Description
+          type: string
+          description: One-line description of what this UI does.
+
+    - title: Ownership & Classification
+      required:
+        - ownerGroup
+        - system
+        - lifecycle
+      properties:
+        ownerGroup:
+          title: Owner Group
+          type: string
+          enum:
+            - platform-team
+            - alloy-team
+            - lyte-team
+            - aegis-team
+            - domain-vessels
+            - domain-terra
+            - domain-counsel
+            - domain-carlota
+            - mobile-team
+        system:
+          title: Backstage System
+          type: string
+          enum:
+            - command
+            - vessels
+            - terra
+            - counsel
+            - carlota
+            - sentra
+            - pulse
+            - conduit
+            - szl-holdings
+            - lyte-command
+            - aegis-trust
+          enumNames:
+            - Unified Command
+            - Maritime Intelligence
+            - Real Estate Intelligence
+            - Legal Command
+            - Advisory Platform
+            - Cyber Resilience
+            - AI Briefing
+            - Reverse ETL
+            - Corporate Dashboard
+            - Lyte Command
+            - Aegis Trust Surface
+        domain:
+          title: Domain
+          type: string
+          enum: [operations, corporate, lyte, aegis]
+          default: operations
+        lifecycle:
+          title: Lifecycle
+          type: string
+          enum: [experimental, production]
+          default: experimental
+
+    - title: Technical Options
+      properties:
+        hasStripe:
+          title: Include Stripe Integration
+          type: boolean
+          description: Add Stripe client setup and payment hooks.
+          default: false
+        hasI18n:
+          title: Include i18n (i18next)
+          type: boolean
+          description: Add i18next internationalization (like carlota-jo).
+          default: false
+        hasMapbox:
+          title: Include Mapbox
+          type: boolean
+          description: Add Mapbox GL JS for geographic visualizations.
+          default: false
+
+  steps:
+    - id: fetch-template
+      name: Fetch Template Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: artifacts/${{ parameters.domainSlug }}
+        values:
+          domainName: ${{ parameters.domainName }}
+          domainSlug: ${{ parameters.domainSlug }}
+          subtitle: ${{ parameters.subtitle }}
+          description: ${{ parameters.description }}
+          ownerGroup: ${{ parameters.ownerGroup }}
+          system: ${{ parameters.system }}
+          domain: ${{ parameters.domain }}
+          lifecycle: ${{ parameters.lifecycle }}
+          hasStripe: ${{ parameters.hasStripe }}
+          hasI18n: ${{ parameters.hasI18n }}
+          hasMapbox: ${{ parameters.hasMapbox }}
+
+    - id: publish
+      name: Open Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=monorepo&owner=szl-holdings
+        title: "feat: scaffold ${{ parameters.domainSlug }} UI via golden path"
+        branchName: "scaffold/${{ parameters.domainSlug }}-ui"
+        description: |
+          ## New Domain UI — ${{ parameters.domainName }}
+
+          Scaffolded from the `new-domain-ui` golden path template.
+
+          ### What's included
+          - React 19 + Vite 7 + Tailwind 4 SPA
+          - TanStack Query + API client (@szl-holdings/api-client-react)
+          - Auth hooks (packages/auth-shared)
+          - OTel browser instrumentation (packages/otel)
+          - Design system tokens (@szl-holdings/design-system)
+          - Replit Vite plugins (cartographer, dev-banner, runtime-error-modal)
+          - score.yaml workload manifest (type: website)
+          - catalog-info.yaml Backstage entry
+          - tsconfig.json + vite.config.ts
+          - .env.example
+
+          ### Next steps
+          1. Review and merge this PR
+          2. Register artifact in Replit workspace (via Replit artifact tools — set preview path to /${{ parameters.domainSlug }}/)
+          3. Add to pnpm-workspace.yaml artifacts list
+          4. Verify CI build passes
+
+  output:
+    links:
+      - title: Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Preview Path
+        url: /${{ parameters.domainSlug }}/
+      - title: Backstage Catalog Entry
+        url: /catalog/default/component/${{ parameters.domainSlug }}

@@ -1,0 +1,112 @@
+# Score Workload Manifest — API Server
+# Pilot workload: validates the Score format against the real central API gateway.
+# Platform team owns resolver patterns; this file is authored by platform-team.
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: api-server
+
+service:
+  ports:
+    http:
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+
+containers:
+  api-server:
+    image: .
+    command: ["node", "dist/index.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      PORT: "3000"
+      DATABASE_URL: "${DATABASE_URL}"
+      SESSION_SECRET: "${SESSION_SECRET}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      OTEL_SERVICE_NAME: "api-server"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      POLICY_ENFORCEMENT_MODE: "${POLICY_ENFORCEMENT_MODE}"
+
+    readinessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 15
+      periodSeconds: 30
+
+    resources:
+      limits:
+        memory: "1Gi"
+        cpu: "2000m"
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+
+resources:
+  db:
+    type: postgres
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: DATABASE_URL
+        szl.io/backup-enabled: "true"
+        szl.io/connection-pool-size: "20"
+
+  cache:
+    type: redis
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: REDIS_URL
+
+  secrets:
+    type: secret-store
+    class: azure-key-vault
+    metadata:
+      annotations:
+        szl.io/vault-name: szl-platform-kv
+
+  openai:
+    type: external-api
+    class: openai
+    metadata:
+      annotations:
+        szl.io/environment-secret: OPENAI_API_KEY
+
+  anthropic:
+    type: external-api
+    class: anthropic
+    metadata:
+      annotations:
+        szl.io/environment-secret: ANTHROPIC_API_KEY
+
+  stripe:
+    type: external-api
+    class: stripe
+    metadata:
+      annotations:
+        szl.io/environment-secret: STRIPE_SECRET_KEY
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: api-service
+# szl.io/domain: platform
+# szl.io/system: api-gateway
+# szl.io/owner: platform-team
+# szl.io/lifecycle: production
+# szl.io/criticality: critical
+# szl.io/observability-tier: full
+# szl.io/policy-labels: [authenticated, policy-gated, audit-logged, rate-limited]
+# szl.io/deployment-target: azure-container-apps
+# szl.io/ingress: azure-front-door
+# szl.io/min-instances: 2
+# szl.io/scale-to-zero: false

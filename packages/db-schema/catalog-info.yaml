@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-db-schema
+  title: "@workspace/db-schema — Database Schema"
+  description: Drizzle schema definitions — canonical table and relation definitions for all domain data models. All services import from here.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/db-schema.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/db-schema.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/db-schema/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - database
+    - schema
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:data-layer
+  domain: domain:platform
+  dependsOn:
+    - component:pkg-db

@@ -1,0 +1,34 @@
+{
+  "name": "@szl-holdings/backstage-backend",
+  "version": "0.0.1",
+  "description": "SZL Holdings Backstage backend — catalog, TechDocs, Tech Insights (Scorecards) fact retrievers",
+  "private": true,
+  "backstage": {
+    "role": "backend"
+  },
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "clean": "backstage-cli package clean",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test"
+  },
+  "dependencies": {
+    "@backstage/backend-defaults": "*",
+    "@backstage/backend-plugin-api": "*",
+    "@backstage/catalog-model": "*",
+    "@backstage/cli": "*",
+    "@backstage/plugin-auth-backend": "*",
+    "@backstage/plugin-auth-backend-module-guest-provider": "*",
+    "@backstage/plugin-catalog-backend": "*",
+    "@backstage/plugin-catalog-backend-module-github": "*",
+    "@backstage/plugin-scaffolder-backend": "*",
+    "@backstage/plugin-scaffolder-backend-module-github": "*",
+    "@backstage/plugin-search-backend": "*",
+    "@backstage/plugin-search-backend-module-catalog": "*",
+    "@backstage/plugin-techdocs-backend": "*",
+    "@backstage-community/plugin-tech-insights-backend": "*",
+    "@backstage-community/plugin-tech-insights-node": "*",
+    "node-fetch": "^2.7.0"
+  }
+}

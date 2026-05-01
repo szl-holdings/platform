@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-security-headers
+  title: "@workspace/security-headers — HTTP Security Headers"
+  description: HTTP security headers middleware — CSP, HSTS, X-Frame-Options, and other security headers. Mandatory for all new API services.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/security-headers.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/security-headers.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/security-headers/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - aegis
+    - platform
+    - typescript
+    - library
+    - security
+    - middleware
+spec:
+  type: library
+  lifecycle: production
+  owner: group:aegis-team
+  system: system:policy-engine
+  domain: domain:aegis
+  dependsOn: []

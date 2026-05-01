@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.agentSlug }}-worker
+  title: ${{ values.agentName }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/golden-path: new-agent-worker@1.0
+    szl.io/trigger-type: ${{ values.triggerType }}
+    szl.io/emits-proof: "${{ values.emitsProof }}"
+  tags:
+    - typescript
+    - worker
+    - agent
+    - alloy
+spec:
+  type: worker
+  lifecycle: ${{ values.lifecycle }}
+  owner: group:${{ values.ownerGroup }}
+  system: system:${{ values.system }}
+  domain: domain:${{ values.domain }}
+  dependsOn: []
+  consumesApis: []

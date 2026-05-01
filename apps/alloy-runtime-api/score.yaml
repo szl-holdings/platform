@@ -1,0 +1,96 @@
+# Score Workload Manifest — Alloy Runtime API
+# Pilot workload: validates Score format for an internal AI runtime service.
+# Owner: alloy-team
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: alloy-runtime-api
+
+service:
+  ports:
+    http:
+      port: 80
+      targetPort: 4000
+      protocol: TCP
+
+containers:
+  alloy-runtime-api:
+    image: .
+    command: ["node", "dist/index.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      PORT: "4000"
+      DATABASE_URL: "${DATABASE_URL}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      EMBEDDING_API_URL: "${EMBEDDING_API_URL}"
+      SUBSTRATE_INFERENCE_URL: "${SUBSTRATE_INFERENCE_URL}"
+      QUEUE_CONNECTION_STRING: "${QUEUE_CONNECTION_STRING}"
+      OTEL_SERVICE_NAME: "alloy-runtime-api"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 4000
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 3
+
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 4000
+      initialDelaySeconds: 20
+      periodSeconds: 30
+
+    resources:
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+
+resources:
+  db:
+    type: postgres
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: DATABASE_URL
+
+  queue:
+    type: queue
+    class: azure-service-bus
+    metadata:
+      annotations:
+        szl.io/queue-name: alloy-runtime-work
+        szl.io/environment-secret: QUEUE_CONNECTION_STRING
+
+  openai:
+    type: external-api
+    class: openai
+    metadata:
+      annotations:
+        szl.io/environment-secret: OPENAI_API_KEY
+
+  anthropic:
+    type: external-api
+    class: anthropic
+    metadata:
+      annotations:
+        szl.io/environment-secret: ANTHROPIC_API_KEY
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: api-service
+# szl.io/domain: alloy
+# szl.io/system: aef-runtime
+# szl.io/owner: alloy-team
+# szl.io/lifecycle: experimental
+# szl.io/criticality: high
+# szl.io/observability-tier: full
+# szl.io/policy-labels: [authenticated, policy-gated, audit-logged]
+# szl.io/deployment-target: azure-container-apps
+# szl.io/ingress: internal-only
+# szl.io/scale-to-zero: true

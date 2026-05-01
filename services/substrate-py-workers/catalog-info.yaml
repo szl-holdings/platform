@@ -1,0 +1,30 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: substrate-py-workers
+  title: Substrate Python Workers
+  description: Python worker pool for the Substrate inference layer — handles GPU compute tasks, model loading, and batch inference jobs.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/golden-path-deviation: "Python service — uses structlog + opentelemetry-sdk-python instead of TypeScript stack"
+    szl.io/runbook: infra/runbooks/substrate-py-workers.md
+  tags:
+    - alloy
+    - substrate
+    - python
+    - worker
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  domain: domain:alloy
+  dependsOn:
+    - component:substrate-inference
+    - resource:openai
+    - resource:anthropic
+  consumesApis:
+    - api:substrate-inference-v1

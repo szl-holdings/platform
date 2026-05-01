@@ -1,0 +1,32 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-shared-contracts
+  title: "@workspace/shared-contracts — API Contracts"
+  description: Shared API error envelope, response shapes, and contract types — all services must use the canonical error envelope { error, code, details }.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/shared-contracts.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/shared-contracts.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/shared-contracts/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - contracts
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:api-gateway
+  domain: domain:platform
+  dependsOn: []

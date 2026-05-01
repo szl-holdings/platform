@@ -1,0 +1,36 @@
+apiVersion: szl.io/v1
+kind: ContinuousDelivery
+metadata:
+  name: ${{ values.domainSlug }}-api-cd
+  service: ${{ values.domainSlug }}-api
+  domain: ${{ values.domainSlug }}
+
+strategy:
+  type: blue-green
+  canary_percentage: 20
+  auto_promote: false
+  rollback_on_error_rate: 5
+
+environments:
+  - name: dev
+    auto_deploy: true
+    branch: main
+    approval_required: false
+  - name: staging
+    auto_deploy: true
+    branch: main
+    approval_required: false
+    smoke_test: true
+  - name: production
+    auto_deploy: false
+    branch: main
+    approval_required: true
+    approvers: [${{ values.ownerGroup }}, platform-team]
+    smoke_test: true
+
+artifacts:
+  image: ghcr.io/szl-holdings/${{ values.domainSlug }}-api
+  tag_strategy: git-sha-short
+
+notifications:
+  slack: "#${{ values.domainSlug }}-deployments"

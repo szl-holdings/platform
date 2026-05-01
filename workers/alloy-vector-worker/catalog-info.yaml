@@ -1,0 +1,27 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-vector-worker
+  title: Alloy Vector Worker
+  description: Async vector indexing worker — writes embedding vectors into the vector store, manages index updates, and handles vector store evictions.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/golden-path-deviation: "Async worker — no HTTP health endpoint required; uses queue trigger"
+    szl.io/runbook: infra/runbooks/alloy-vector-worker.md
+  tags:
+    - alloy
+    - vectors
+    - worker
+    - typescript
+spec:
+  type: worker
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-runtime
+  domain: domain:alloy
+  dependsOn:
+    - resource:postgresql-dev
+    - resource:azure-service-bus
+  consumesApis: []

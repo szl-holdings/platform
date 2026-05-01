@@ -1,0 +1,54 @@
+name: CI — ${{ values.domainSlug }}-ui
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artifacts/${{ values.domainSlug }}/**'
+  pull_request:
+    paths:
+      - 'artifacts/${{ values.domainSlug }}/**'
+
+jobs:
+  build:
+    name: Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.domainSlug }} typecheck
+      - run: pnpm --filter @workspace/${{ values.domainSlug }} build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.domainSlug }} lint
+
+  health:
+    name: Static Health Endpoint Check
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/${{ values.domainSlug }} build
+      - name: Check health.json exists in dist
+        run: test -f artifacts/${{ values.domainSlug }}/dist/health.json

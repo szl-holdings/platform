@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-db
+  title: "@szl-holdings/db — Database Client"
+  description: Drizzle ORM database client — provides the singleton DB connection pool, query builder, and transaction utilities for all services.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/db.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/db.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/db/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - platform
+    - typescript
+    - library
+    - database
+    - drizzle
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform-team
+  system: system:data-layer
+  domain: domain:platform
+  dependsOn:
+    - resource:postgresql-dev
+    - component:pkg-env

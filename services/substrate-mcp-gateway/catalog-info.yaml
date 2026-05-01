@@ -1,0 +1,32 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: substrate-mcp-gateway
+  title: Substrate MCP Gateway
+  description: Model Context Protocol gateway — exposes Substrate inference and Alloy runtime capabilities to MCP-compatible clients and agent frameworks.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/substrate-mcp-gateway.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - substrate
+    - mcp
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  domain: domain:alloy
+  dependsOn:
+    - component:substrate-inference
+    - component:alloy-runtime-api
+  providesApis:
+    - api:substrate-mcp
+  consumesApis:
+    - api:substrate-inference-v1
+    - api:alloy-runtime-v1

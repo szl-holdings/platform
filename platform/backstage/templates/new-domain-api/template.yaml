@@ -1,0 +1,193 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: new-domain-api
+  title: New Domain API Service
+  description: Scaffold a new domain-specific REST API service (TypeScript/Express). Produces a production-ready service skeleton with health endpoint, OTel, structured logging, auth, policy guard, Score manifest, and Backstage catalog entry.
+  tags:
+    - platform
+    - typescript
+    - express
+    - golden-path
+    - api
+  annotations:
+    szl.io/golden-path: "true"
+    szl.io/golden-path-version: "1.0"
+spec:
+  owner: group:platform-team
+  type: service
+
+  parameters:
+    - title: Service Identity
+      required:
+        - domainName
+        - domainSlug
+        - description
+      properties:
+        domainName:
+          title: Domain Name
+          type: string
+          description: Human-readable domain name (e.g. "Meridian")
+          ui:autofocus: true
+        domainSlug:
+          title: Domain Slug
+          type: string
+          description: Identifier slug — lowercase letters and digits only, no hyphens (e.g. "meridian"). Used as a TypeScript identifier prefix and directory name.
+          pattern: '^[a-z][a-z0-9]*$'
+        description:
+          title: Description
+          type: string
+          description: One-line description of what this API service does.
+
+    - title: Ownership & Classification
+      required:
+        - ownerGroup
+        - system
+        - lifecycle
+      properties:
+        ownerGroup:
+          title: Owner Group
+          type: string
+          description: Team that owns this service.
+          enum:
+            - platform-team
+            - alloy-team
+            - lyte-team
+            - aegis-team
+            - domain-vessels
+            - domain-terra
+            - domain-counsel
+            - domain-carlota
+            - mobile-team
+          enumNames:
+            - Platform Engineering
+            - Alloy AI Fabric
+            - Lyte Intelligence
+            - Aegis Governance
+            - Vessels Domain
+            - Terra Domain
+            - Counsel Domain
+            - Carlota Jo Domain
+            - Mobile Team
+        system:
+          title: Backstage System
+          type: string
+          description: Which Backstage system this service belongs to.
+          enum:
+            - api-gateway
+            - aef-runtime
+            - aef-embedding
+            - aef-ingestion
+            - substrate-inference
+            - agent-fabric
+            - lyte-command
+            - observability
+            - aegis-trust
+            - policy-engine
+            - audit-chain
+          enumNames:
+            - API Gateway (platform)
+            - AEF Runtime (alloy)
+            - AEF Embedding (alloy)
+            - AEF Ingestion (alloy)
+            - Substrate Inference (alloy)
+            - Agent Fabric (alloy)
+            - Lyte Command (lyte)
+            - Platform Observability (lyte)
+            - Aegis Trust Surface (aegis)
+            - Policy Engine (aegis)
+            - Audit Chain (aegis)
+        domain:
+          title: Domain
+          type: string
+          description: SZL platform domain this service belongs to.
+          enum: [platform, alloy, lyte, aegis, operations, corporate]
+          enumNames:
+            - Platform
+            - Alloy AI
+            - Lyte Intelligence
+            - Aegis Governance
+            - Operations
+            - Corporate
+          default: platform
+        lifecycle:
+          title: Lifecycle
+          type: string
+          enum: [experimental, production]
+          default: experimental
+
+    - title: Technical Configuration
+      required:
+        - port
+      properties:
+        port:
+          title: Default Port
+          type: number
+          description: Default listen port (will be overridden by PORT env var at runtime).
+          default: 3100
+        needsDatabase:
+          title: Needs Database Access
+          type: boolean
+          description: Wire up @szl-holdings/db database client.
+          default: false
+        needsAlloy:
+          title: Needs Alloy AI Runtime
+          type: boolean
+          description: Wire up alloy-runtime-api client for AI capabilities.
+          default: false
+
+  steps:
+    - id: fetch-template
+      name: Fetch Template Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: services/${{ parameters.domainSlug }}-api
+        values:
+          domainName: ${{ parameters.domainName }}
+          domainSlug: ${{ parameters.domainSlug }}
+          description: ${{ parameters.description }}
+          ownerGroup: ${{ parameters.ownerGroup }}
+          system: ${{ parameters.system }}
+          domain: ${{ parameters.domain }}
+          lifecycle: ${{ parameters.lifecycle }}
+          port: ${{ parameters.port }}
+          needsDatabase: ${{ parameters.needsDatabase }}
+          needsAlloy: ${{ parameters.needsAlloy }}
+
+    - id: publish
+      name: Open Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=monorepo&owner=szl-holdings
+        title: "feat: scaffold ${{ parameters.domainSlug }}-api via golden path"
+        branchName: "scaffold/${{ parameters.domainSlug }}-api"
+        description: |
+          ## New Domain API — ${{ parameters.domainName }}
+
+          Scaffolded from the `new-domain-api` golden path template.
+
+          ### What's included
+          - Express API with health + ready endpoints
+          - OTel instrumentation (packages/otel)
+          - Structured logging (packages/telemetry-standards)
+          - Auth middleware (packages/auth-shared)
+          - Policy guard (packages/policy-guard)
+          - Zod env contract (packages/env)
+          - score.yaml workload manifest
+          - catalog-info.yaml Backstage entry
+          - Dockerfile (multi-stage, node:22-alpine)
+          - .env.example
+
+          ### Next steps
+          1. Review and merge this PR
+          2. Add service to turbo.json pipeline
+          3. Add service to pnpm-workspace.yaml
+          4. Verify CI passes
+
+  output:
+    links:
+      - title: Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Backstage Catalog Entry
+        url: /catalog/default/component/${{ parameters.domainSlug }}-api

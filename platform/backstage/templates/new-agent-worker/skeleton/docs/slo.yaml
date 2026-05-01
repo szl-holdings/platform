@@ -1,0 +1,45 @@
+apiVersion: szl.io/v1
+kind: ServiceLevelObjective
+metadata:
+  name: ${{ values.agentSlug }}-worker-slos
+  service: ${{ values.agentSlug }}-worker
+  domain: ${{ values.domain }}
+  owner: ${{ values.ownerGroup }}
+
+objectives:
+  task_success_rate:
+    target: 98.0
+    window: 30d
+    indicator:
+      type: workflow-success-rate
+      temporal_namespace: default
+      workflow_type: ${{ values.agentSlug }}
+      good: workflow_status == "COMPLETED"
+      total: all_workflows
+
+  task_latency:
+    target: 90
+    window: 30d
+    indicator:
+      type: workflow-duration
+      workflow_type: ${{ values.agentSlug }}
+      threshold_seconds: 30
+
+  error_budget:
+    window: 30d
+    burn_rate_alert:
+      fast:
+        window: 1h
+        threshold: 14
+      slow:
+        window: 6h
+        threshold: 6
+
+alerts:
+  - name: workflow-failure-spike
+    condition: burn_rate > 14
+    window: 1h
+    severity: P1
+    notify:
+      - slack: "#${{ values.domain }}-alerts"
+      - pagerduty: true

@@ -1,0 +1,81 @@
+# Score Example: AI Agent Worker
+# Workload archetype: Async queue-triggered AI agent worker
+# Real-world instance: workers/alloy-embed-worker
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: example-agent-worker
+
+containers:
+  agent-worker:
+    image: .
+    command: ["node", "dist/index.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      OTEL_SERVICE_NAME: "example-agent-worker"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      QUEUE_CONNECTION_STRING: "${QUEUE_CONNECTION_STRING}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      DATABASE_URL: "${DATABASE_URL}"
+
+    # Workers do not expose HTTP by default (queue-triggered).
+    # If triggerType=http, add a readinessProbe block here.
+    # Liveness via queue heartbeat metric (monitored by Lyte).
+
+    resources:
+      limits:
+        memory: "1Gi"
+        cpu: "2000m"
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+
+resources:
+  # Message queue — resolves to Azure Service Bus (prod) or in-memory queue (dev)
+  queue:
+    type: queue
+    class: azure-service-bus
+    metadata:
+      annotations:
+        szl.io/queue-name: agent-work-queue
+        szl.io/environment-secret: QUEUE_CONNECTION_STRING
+        szl.io/dead-letter-queue: agent-dlq
+        szl.io/max-delivery-count: "3"
+
+  # Database for state persistence (if needsDatabase=true)
+  db:
+    type: postgres
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: DATABASE_URL
+
+  # External AI APIs
+  openai:
+    type: external-api
+    class: openai
+    metadata:
+      annotations:
+        szl.io/environment-secret: OPENAI_API_KEY
+
+  anthropic:
+    type: external-api
+    class: anthropic
+    metadata:
+      annotations:
+        szl.io/environment-secret: ANTHROPIC_API_KEY
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: worker
+# szl.io/trigger: queue
+# szl.io/emits-proof: true
+# szl.io/domain: alloy
+# szl.io/system: aef-embedding
+# szl.io/owner: alloy-team
+# szl.io/lifecycle: experimental
+# szl.io/criticality: high
+# szl.io/observability-tier: full
+# szl.io/policy-labels: [policy-gated, proof-emitting, audit-logged]
+# szl.io/deployment-target: azure-container-apps-jobs
+# szl.io/scaling: queue-depth

@@ -1,9 +1,34 @@
 # SZL Holdings — Golden Path Catalog
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** 2026-04-28  
-**Purpose:** Define the three canonical golden paths that the Developer Control Plane task will implement as Backstage Software Templates. These are the blessed patterns for creating new workloads; any new service/agent/UI that does not follow a golden path must explain why in its `catalog-info.yaml`.  
-**Audience:** Platform engineers, Developer Control Plane task executor, all domain engineers
+**Status:** ✅ IMPLEMENTED — Phase 3 (Developer Control Plane)  
+**Purpose:** The three canonical golden paths are implemented as Backstage Software Templates. Each template is live under `/platform/backstage/templates/`. Any new service/agent/UI that does not follow a golden path must explain why in its `catalog-info.yaml`.  
+**Audience:** Platform engineers, all domain engineers
+
+## Template Locations
+
+| Template | Path | Template ID |
+|----------|------|-------------|
+| New Domain API | `platform/backstage/templates/new-domain-api/` | `template:new-domain-api` |
+| New Agent Worker | `platform/backstage/templates/new-agent-worker/` | `template:new-agent-worker` |
+| New Domain UI | `platform/backstage/templates/new-domain-ui/` | `template:new-domain-ui` |
+
+## Usage (via Backstage Scaffolder)
+
+1. Start Backstage locally (see `platform/backstage/README.md`)
+2. Navigate to **Create → Choose Template**
+3. Select the appropriate golden path
+4. Fill in parameters and confirm
+5. Backstage opens a Pull Request with the scaffolded skeleton
+
+## Usage (manual — until Backstage is live)
+
+```bash
+# Copy the template skeleton manually and fill in the Nunjucks variables
+cp -r platform/backstage/templates/new-domain-api/skeleton services/<your-slug>
+# Replace ${{ values.* }} placeholders with your values
+```
 
 ---
 

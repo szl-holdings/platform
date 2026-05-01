@@ -1,0 +1,175 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: szl-apis
+  description: All SZL Holdings API entity stubs
+spec:
+  targets: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: szl-rest-v1
+  title: SZL REST API v1
+  description: Central REST API gateway — OpenAPI 3.1 spec in lib/api-spec. Consumed by all frontend SPAs and mobile app.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:../../../lib/api-spec
+    szl.io/runbook: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/api-server.md
+    szl.io/openapi-spec: lib/api-spec/openapi.yaml
+  tags:
+    - rest
+    - openapi
+    - platform
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:platform-team
+  system: system:api-gateway
+  definition: |
+    openapi: "3.1.0"
+    info:
+      title: SZL REST API v1
+      version: "1.0.0"
+      description: "See lib/api-spec for full OpenAPI definition. This stub registers the API in Backstage."
+    paths: {}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: alloy-embed-v1
+  title: Alloy Embedding API v1
+  description: AEF REST embedding endpoint — accepts text and returns vector embeddings. OpenAPI spec to be authored in apps/alloy-embedding-api.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    szl.io/status: spec-pending
+  tags:
+    - rest
+    - openapi
+    - alloy
+    - embedding
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-embedding
+  definition: |
+    openapi: "3.1.0"
+    info:
+      title: Alloy Embedding API v1
+      version: "1.0.0"
+      description: "OpenAPI spec pending. See apps/alloy-embedding-api for implementation."
+    paths: {}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: alloy-runtime-v1
+  title: Alloy Runtime API v1
+  description: AEF runtime gateway — orchestrates embedding retrieval, ranking, and inference routing. OpenAPI spec to be authored in apps/alloy-runtime-api.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    szl.io/status: spec-pending
+  tags:
+    - rest
+    - openapi
+    - alloy
+    - runtime
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-runtime
+  definition: |
+    openapi: "3.1.0"
+    info:
+      title: Alloy Runtime API v1
+      version: "1.0.0"
+      description: "OpenAPI spec pending. See apps/alloy-runtime-api for implementation."
+    paths: {}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: substrate-inference-v1
+  title: Substrate Inference API v1
+  description: FastAPI-powered inference service for Python ML models. Auto-generated OpenAPI from FastAPI.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    szl.io/health-endpoint: /v1/health
+  tags:
+    - rest
+    - openapi
+    - substrate
+    - python
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  definition: |
+    openapi: "3.1.0"
+    info:
+      title: Substrate Inference API v1
+      version: "1.0.0"
+      description: "FastAPI auto-generates the full OpenAPI spec at /openapi.json. See apps/substrate-inference."
+    paths:
+      /v1/health:
+        get:
+          summary: Health check
+          responses:
+            "200":
+              description: Service healthy
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: substrate-mcp
+  title: Substrate MCP Gateway
+  description: Model Context Protocol (MCP) async gateway — connects MCP clients to Substrate inference and Alloy runtime.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    szl.io/status: spec-pending
+  tags:
+    - asyncapi
+    - mcp
+    - substrate
+spec:
+  type: asyncapi
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  definition: |
+    asyncapi: "2.6.0"
+    info:
+      title: Substrate MCP Gateway
+      version: "1.0.0"
+      description: "AsyncAPI spec pending. See services/substrate-mcp-gateway for implementation."
+    channels: {}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: lyte-metrics
+  title: Lyte Metrics API
+  description: Lyte metrics store REST API — stores and retrieves platform operational metrics. OpenAPI spec to be authored in services/lyte-metrics-store.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    szl.io/status: spec-pending
+  tags:
+    - rest
+    - openapi
+    - lyte
+    - metrics
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: group:lyte-team
+  system: system:lyte-command
+  definition: |
+    openapi: "3.1.0"
+    info:
+      title: Lyte Metrics API
+      version: "1.0.0"
+      description: "OpenAPI spec pending. See services/lyte-metrics-store for implementation."
+    paths: {}

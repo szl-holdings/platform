@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: substrate-python
+  title: Substrate Python Worker
+  description: Python async worker for Substrate inference — processes long-running ML inference tasks, model evaluation, and batch prediction jobs.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/golden-path-deviation: "Python worker — uses structlog + opentelemetry-sdk-python; no HTTP health endpoint required"
+    szl.io/runbook: infra/runbooks/substrate-python.md
+  tags:
+    - alloy
+    - substrate
+    - python
+    - worker
+spec:
+  type: worker
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  domain: domain:alloy
+  dependsOn:
+    - component:substrate-inference
+    - resource:openai
+    - resource:anthropic
+  consumesApis:
+    - api:substrate-inference-v1

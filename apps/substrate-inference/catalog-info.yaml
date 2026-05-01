@@ -1,0 +1,31 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: substrate-inference
+  title: Substrate Inference
+  description: FastAPI Python inference service — hosts local ML models, handles GPU-accelerated inference, and routes to OpenAI/Anthropic as fallback.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.4'
+    szl.io/health-endpoint: /v1/health
+    szl.io/golden-path-deviation: "Python service — uses FastAPI + structlog + opentelemetry-sdk-python instead of TypeScript stack"
+    szl.io/runbook: infra/runbooks/substrate-inference.md
+  tags:
+    - alloy
+    - substrate
+    - python
+    - fastapi
+    - inference
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:substrate-inference
+  domain: domain:alloy
+  dependsOn:
+    - resource:openai
+    - resource:anthropic
+  providesApis:
+    - api:substrate-inference-v1
+  consumesApis: []

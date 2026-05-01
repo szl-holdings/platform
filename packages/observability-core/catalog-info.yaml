@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pkg-observability-core
+  title: "@workspace/observability-core — Observability Core"
+  description: Health pool management, slow-query detection, and observability helper utilities. Used by api-server and all new services via golden path.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/platform-tier: P1-critical
+    szl.io/runbook: infra/runbooks/observability-core.md
+    szl.io/scorecard-score: '1.0'
+  links:
+    - url: https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/observability-core.md
+      title: Runbook
+      icon: docs
+    - url: https://github.com/szl-holdings/monorepo/tree/main/packages/observability-core/docs
+      title: TechDocs Source
+      icon: techdocs
+  tags:
+    - lyte
+    - typescript
+    - library
+    - health
+    - observability
+    - substrate
+spec:
+  type: library
+  lifecycle: production
+  owner: group:lyte-team
+  system: system:observability
+  domain: domain:lyte
+  dependsOn:
+    - component:pkg-otel

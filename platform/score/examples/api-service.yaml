@@ -1,0 +1,88 @@
+# Score Example: REST API Service
+# Workload archetype: HTTP service with database and caching
+# Real-world instance: artifacts/api-server
+
+apiVersion: score.dev/v1b1
+metadata:
+  name: example-api-service
+
+service:
+  ports:
+    http:
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+
+containers:
+  api:
+    image: .
+    command: ["node", "dist/index.js"]
+    variables:
+      NODE_ENV: "${NODE_ENV}"
+      PORT: "3000"
+      DATABASE_URL: "${DATABASE_URL}"
+      REDIS_URL: "${REDIS_URL}"
+      SESSION_SECRET: "${SESSION_SECRET}"
+      OTEL_SERVICE_NAME: "example-api-service"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+
+    readinessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+
+    livenessProbe:
+      httpGet:
+        path: /api/health
+        port: 3000
+      initialDelaySeconds: 15
+      periodSeconds: 30
+
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "1000m"
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+
+resources:
+  # Database — resolves to Azure Database for PostgreSQL (prod) or Replit PostgreSQL (dev)
+  db:
+    type: postgres
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: DATABASE_URL
+        szl.io/backup-enabled: "true"
+
+  # Cache — resolves to Azure Cache for Redis (prod) or local Redis (dev)
+  cache:
+    type: redis
+    class: default
+    metadata:
+      annotations:
+        szl.io/environment-secret: REDIS_URL
+
+  # Secret store — resolves to Azure Key Vault (prod) or Replit Secrets (dev)
+  secrets:
+    type: secret-store
+    class: azure-key-vault
+    metadata:
+      annotations:
+        szl.io/vault-name: szl-platform-kv
+
+# ── Platform annotations (written by resolver — do not edit) ──────────────────
+# szl.io/workload-type: api-service
+# szl.io/domain: platform
+# szl.io/system: api-gateway
+# szl.io/owner: platform-team
+# szl.io/lifecycle: production
+# szl.io/criticality: critical
+# szl.io/observability-tier: full
+# szl.io/policy-labels: [authenticated, policy-gated, audit-logged, rate-limited]
+# szl.io/deployment-target: azure-container-apps
+# szl.io/ingress: azure-front-door

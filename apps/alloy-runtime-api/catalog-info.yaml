@@ -1,0 +1,35 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-runtime-api
+  title: Alloy Runtime API
+  description: AEF runtime gateway — routes inference requests, orchestrates retrieval-augmented generation, and manages Alloy run lifecycle.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/alloy-runtime-api.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - runtime
+    - typescript
+    - api
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-runtime
+  domain: domain:alloy
+  dependsOn:
+    - component:alloy-embedding-api
+    - component:alloy-fabric-api
+    - component:substrate-inference
+    - resource:openai
+    - resource:anthropic
+    - resource:postgresql-dev
+  providesApis:
+    - api:alloy-runtime-v1
+  consumesApis:
+    - api:alloy-embed-v1
+    - api:substrate-inference-v1

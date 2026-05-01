@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-fabric-ingest-control
+  title: Alloy Fabric Ingest Control
+  description: Controls the ingestion pipeline flow — manages ingest job queuing, rate limiting, retry logic, and ingest state tracking.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/runbook: infra/runbooks/alloy-fabric-ingest-control.md
+    szl.io/health-endpoint: /health
+  tags:
+    - alloy
+    - ingestion
+    - fabric
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-ingestion
+  domain: domain:alloy
+  dependsOn:
+    - resource:postgresql-dev
+    - resource:azure-service-bus
+  consumesApis: []

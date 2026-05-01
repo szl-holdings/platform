@@ -1,0 +1,223 @@
+app:
+  title: SZL Holdings Developer Portal
+  # Frontend dev server — backstage-cli package start defaults to port 3000.
+  baseUrl: http://localhost:3000
+
+organization:
+  name: SZL Holdings
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+    host: 0.0.0.0
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+  cors:
+    # Allow the Backstage frontend (port 3000) to reach the backend (port 7007).
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
+
+integrations:
+  github:
+    - host: github.com
+      # PLACEHOLDER: Set GITHUB_TOKEN env var for local dev.
+      # For production, configure a GitHub App (see docs below).
+      token: ${GITHUB_TOKEN}
+
+    # GitHub App configuration (required for production).
+    # Create a GitHub App at https://github.com/organizations/szl-holdings/settings/apps
+    # and set the following environment variables:
+    #   GITHUB_APP_ID, GITHUB_APP_WEBHOOK_SECRET,
+    #   GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET,
+    #   GITHUB_APP_PRIVATE_KEY_PATH
+    #
+    # apps:
+    #   - appId: ${GITHUB_APP_ID}
+    #     webhookSecret: ${GITHUB_APP_WEBHOOK_SECRET}
+    #     clientId: ${GITHUB_APP_CLIENT_ID}
+    #     clientSecret: ${GITHUB_APP_CLIENT_SECRET}
+    #     privateKey:
+    #       $file: ${GITHUB_APP_PRIVATE_KEY_PATH}
+
+proxy:
+  endpoints:
+    '/test':
+      target: 'https://example.com'
+
+techdocs:
+  builder: local
+  generator:
+    runIn: local
+  publisher:
+    type: local
+
+auth:
+  # PLACEHOLDER: For production, configure an identity provider.
+  # Supported providers: GitHub, Google, Okta, Azure AD, etc.
+  # See: https://backstage.io/docs/auth/
+  environment: development
+  providers:
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+
+scaffolder:
+  defaultAuthor:
+    name: SZL Platform Team
+    email: platform@szl-holdings.com
+  defaultCommitMessage: "feat: scaffold from golden path template"
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location, Template, Group, User, Domain]
+  locations:
+    # Backstage's own catalog entities (domains, systems, groups, APIs, resources)
+    - type: file
+      target: ../../platform/backstage/catalog/domains.yaml
+    - type: file
+      target: ../../platform/backstage/catalog/systems.yaml
+    - type: file
+      target: ../../platform/backstage/catalog/groups.yaml
+    - type: file
+      target: ../../platform/backstage/catalog/apis.yaml
+    - type: file
+      target: ../../platform/backstage/catalog/resources.yaml
+
+    # Golden-path software templates
+    - type: file
+      target: ../../platform/backstage/templates/new-domain-api/template.yaml
+    - type: file
+      target: ../../platform/backstage/templates/new-agent-worker/template.yaml
+    - type: file
+      target: ../../platform/backstage/templates/new-domain-ui/template.yaml
+
+    # Artifact catalog entries
+    - type: file
+      target: ../../artifacts/api-server/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/szl-holdings/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/command/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/lyte-command-center/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/a11oy/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/vessels/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/terra/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/counsel/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/carlota-jo/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/sentra/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/pulse/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/conduit/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/szl-holdings-mobile/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/szl-demo-video/catalog-info.yaml
+    - type: file
+      target: ../../artifacts/aegis/catalog-info.yaml
+
+    # App catalog entries
+    - type: file
+      target: ../../apps/alloy-embedding-api/catalog-info.yaml
+    - type: file
+      target: ../../apps/alloy-ingestion-orchestrator/catalog-info.yaml
+    - type: file
+      target: ../../apps/alloy-runtime-api/catalog-info.yaml
+    - type: file
+      target: ../../apps/substrate-inference/catalog-info.yaml
+
+    # Service catalog entries
+    - type: file
+      target: ../../services/alloy-fabric-api/catalog-info.yaml
+    - type: file
+      target: ../../services/alloy-fabric-ingest-control/catalog-info.yaml
+    - type: file
+      target: ../../services/lyte-metrics-store/catalog-info.yaml
+    - type: file
+      target: ../../services/substrate-mcp-gateway/catalog-info.yaml
+    - type: file
+      target: ../../services/substrate-py-workers/catalog-info.yaml
+    - type: file
+      target: ../../services/meridian_control_plane/catalog-info.yaml
+    - type: file
+      target: ../../services/meridian_forecast_lab/catalog-info.yaml
+    - type: file
+      target: ../../services/verticals/catalog-info.yaml
+
+    # Worker catalog entries
+    - type: file
+      target: ../../workers/alloy-embed-worker/catalog-info.yaml
+    - type: file
+      target: ../../workers/alloy-rank-worker/catalog-info.yaml
+    - type: file
+      target: ../../workers/alloy-rerank-worker/catalog-info.yaml
+    - type: file
+      target: ../../workers/alloy-vector-worker/catalog-info.yaml
+    - type: file
+      target: ../../workers/substrate-python/catalog-info.yaml
+
+    # Priority package catalog entries (P1 shared substrate)
+    - type: file
+      target: ../../packages/env/catalog-info.yaml
+    - type: file
+      target: ../../packages/auth-shared/catalog-info.yaml
+    - type: file
+      target: ../../packages/otel/catalog-info.yaml
+    - type: file
+      target: ../../packages/observability-core/catalog-info.yaml
+    - type: file
+      target: ../../packages/cognitive-observability/catalog-info.yaml
+    - type: file
+      target: ../../packages/telemetry-standards/catalog-info.yaml
+    - type: file
+      target: ../../packages/policy-engine/catalog-info.yaml
+    - type: file
+      target: ../../packages/policy-guard/catalog-info.yaml
+    - type: file
+      target: ../../packages/aef-policy-guard/catalog-info.yaml
+    - type: file
+      target: ../../packages/shared-contracts/catalog-info.yaml
+    - type: file
+      target: ../../packages/agents-core/catalog-info.yaml
+    - type: file
+      target: ../../packages/agents-prompts/catalog-info.yaml
+    - type: file
+      target: ../../packages/agents-tools/catalog-info.yaml
+    - type: file
+      target: ../../packages/agents-sdk-bridge/catalog-info.yaml
+    - type: file
+      target: ../../packages/db/catalog-info.yaml
+    - type: file
+      target: ../../packages/db-schema/catalog-info.yaml
+    - type: file
+      target: ../../packages/db-repository/catalog-info.yaml
+    - type: file
+      target: ../../packages/db-migrations/catalog-info.yaml
+    - type: file
+      target: ../../packages/security-headers/catalog-info.yaml
+    - type: file
+      target: ../../packages/config/catalog-info.yaml
+
+    # GitHub discovery — active. The discovery target is read from
+    # GITHUB_DISCOVERY_TARGET (defaults to the szl-holdings/monorepo blob path
+    # for catalog-info.yaml at any depth). Backstage degrades gracefully when
+    # GITHUB_TOKEN is absent: the github-discovery processor logs a warning and
+    # the file-based locations above keep the catalog populated.
+    - type: url
+      target: ${GITHUB_DISCOVERY_TARGET:-https://github.com/szl-holdings/monorepo/blob/main/catalog-info.yaml}
+      rules:
+        - allow: [Component, System, API, Resource, Domain, Group, User, Location]

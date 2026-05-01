@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: api-server
+  title: API Server
+  description: Central Express/Node.js REST API gateway for the SZL Holdings platform. Handles auth, routing, GraphQL, AI traces, and all domain API routes.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/health-endpoint: /api/health
+    szl.io/runbook: infra/runbooks/api-server.md
+    szl.io/scorecard-score: '2.3'
+    szl.io/platform-maturity: managed
+  tags:
+    - platform
+    - typescript
+    - express
+    - api
+    - graphql
+spec:
+  type: service
+  lifecycle: production
+  owner: group:platform-team
+  system: system:api-gateway
+  domain: domain:platform
+  dependsOn:
+    - resource:postgresql-dev
+    - resource:openai
+    - resource:anthropic
+    - resource:stripe
+  providesApis:
+    - api:szl-rest-v1
+  consumesApis: []

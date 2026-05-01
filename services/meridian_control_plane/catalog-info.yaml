@@ -1,0 +1,27 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: meridian-control-plane
+  title: Meridian Control Plane
+  description: Meridian domain control plane — orchestrates Meridian domain services and manages control-loop state.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.1'
+    szl.io/runbook: infra/runbooks/meridian-control-plane.md
+    szl.io/health-endpoint: /health
+  tags:
+    - platform
+    - meridian
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:platform-team
+  system: system:api-gateway
+  domain: domain:platform
+  dependsOn:
+    - resource:postgresql-dev
+  consumesApis:
+    - api:szl-rest-v1

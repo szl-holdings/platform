@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: alloy-rerank-worker
+  title: Alloy Rerank Worker
+  description: Async reranking worker — applies secondary reranking pass with specialized models to refine ranked candidate sets from the rank worker.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.2'
+    szl.io/golden-path-deviation: "Async worker — no HTTP health endpoint required; uses queue trigger"
+    szl.io/runbook: infra/runbooks/alloy-rerank-worker.md
+  tags:
+    - alloy
+    - reranking
+    - worker
+    - typescript
+spec:
+  type: worker
+  lifecycle: experimental
+  owner: group:alloy-team
+  system: system:aef-embedding
+  domain: domain:alloy
+  dependsOn:
+    - component:alloy-embedding-api
+    - resource:azure-service-bus
+  consumesApis:
+    - api:alloy-embed-v1

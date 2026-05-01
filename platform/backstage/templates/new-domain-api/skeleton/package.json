@@ -1,0 +1,36 @@
+{
+  "name": "@workspace/${{ values.domainSlug }}-api",
+  "version": "1.0.0",
+  "description": "${{ values.description }}",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "health:check": "curl -sf http://localhost:${PORT:-${{ values.port }}}/health | jq ."
+  },
+  "dependencies": {
+    "@workspace/auth-shared": "workspace:*",
+    "@workspace/env": "workspace:*",
+    "@workspace/observability-core": "workspace:*",
+    "@workspace/otel": "workspace:*",
+    "@workspace/policy-guard": "workspace:*",
+    "@workspace/security-headers": "workspace:*",
+    "@workspace/shared-contracts": "workspace:*",
+    "@workspace/telemetry-standards": "workspace:*",
+    "dotenv": "^16.0.0",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

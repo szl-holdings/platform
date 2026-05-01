@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: verticals
+  title: Verticals Service
+  description: Cross-vertical shared service layer — provides shared business logic and data access patterns for domain-pack verticals (vessels, terra, counsel, etc.).
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/scorecard-score: '1.1'
+    szl.io/runbook: infra/runbooks/verticals.md
+    szl.io/health-endpoint: /health
+  tags:
+    - platform
+    - verticals
+    - typescript
+    - service
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:platform-team
+  system: system:api-gateway
+  domain: domain:platform
+  dependsOn:
+    - component:api-server
+    - resource:postgresql-dev
+  consumesApis:
+    - api:szl-rest-v1

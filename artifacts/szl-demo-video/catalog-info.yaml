@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-demo-video
+  title: SZL Holdings — Governed Autonomy Demo
+  description: Animated demo video artifact showcasing the SZL Holdings governed autonomy platform narrative. Built with React/Remotion.
+  annotations:
+    github.com/project-slug: szl-holdings/monorepo
+    backstage.io/techdocs-ref: dir:.
+    szl.io/golden-path-deviation: "Video/animation artifact — no auth, no health endpoint, no OTel required per golden-path deviations"
+    backstage.io/runbook-url: https://github.com/szl-holdings/monorepo/blob/main/docs/runbooks/szl-demo-video.md
+  tags:
+    - corporate
+    - media
+    - video
+    - typescript
+    - react
+spec:
+  type: video
+  lifecycle: production
+  owner: group:platform-team
+  system: system:demo
+  domain: domain:corporate
+  dependsOn: []
+  consumesApis: []
