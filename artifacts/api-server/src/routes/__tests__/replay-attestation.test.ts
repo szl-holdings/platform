@@ -36,16 +36,27 @@ describe("replay-attestation route (Track C-02)", () => {
     });
 
     it("rate-limits after 5 requests in 1 minute", async () => {
-      const a = app();
-      const ip = "203.0.113.42";
-      for (let i = 0; i < 5; i++) {
-        const r = await request(a).post("/api/v1/replay-attestation").set("X-Forwarded-For", ip).send({ run_id: `r${i}` });
-        expect(r.status).toBe(200);
+      // NODE_ENV=test enables the X-Test-Client-Id key path so we can isolate
+      // this test from other suites. We do NOT trust X-Forwarded-For in prod.
+      const prevEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "test";
+      try {
+        const a = app();
+        const id = "test-client-A";
+        for (let i = 0; i < 5; i++) {
+          const r = await request(a).post("/api/v1/replay-attestation").set("X-Test-Client-Id", id).send({ run_id: `r${i}` });
+          expect(r.status).toBe(200);
+          expect(r.headers["x-ratelimit-limit"]).toBe("5");
+          expect(Number(r.headers["x-ratelimit-remaining"])).toBe(4 - i);
+        }
+        const blocked = await request(a).post("/api/v1/replay-attestation").set("X-Test-Client-Id", id).send({ run_id: "r6" });
+        expect(blocked.status).toBe(429);
+        expect(blocked.body.error).toBe("rate_limited");
+        expect(blocked.body.retry_after).toBeGreaterThan(0);
+        expect(blocked.headers["retry-after"]).toBeDefined();
+      } finally {
+        process.env.NODE_ENV = prevEnv;
       }
-      const blocked = await request(a).post("/api/v1/replay-attestation").set("X-Forwarded-For", ip).send({ run_id: "r6" });
-      expect(blocked.status).toBe(429);
-      expect(blocked.body.error).toBe("rate_limited");
-      expect(blocked.body.retry_after).toBeGreaterThan(0);
     });
   });
 

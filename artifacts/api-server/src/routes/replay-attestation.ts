@@ -23,21 +23,32 @@ const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 
 function rateLimit(req: Request, res: Response): boolean {
-  const xff = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim();
-  const ip = xff || req.ip || "unknown";
+  // Use req.ip directly — Express resolves it via the trust-proxy setting at the
+  // app level (production sets trust proxy = true behind the load balancer).
+  // We deliberately do NOT trust X-Forwarded-For ourselves: an unconfigured app
+  // would otherwise let any client spoof their key by sending the header.
+  // Tests inject `req.ip` via Express's req-builder, but to keep them
+  // deterministic we also accept an explicit `X-Test-Client-Id` header (test only).
+  const testKey = process.env.NODE_ENV === "test" ? (req.headers["x-test-client-id"] as string | undefined) : undefined;
+  const key = testKey || req.ip || "unknown";
   const now = Date.now();
-  const bucket = buckets.get(ip) ?? { tokens: RATE_LIMIT_MAX, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  const bucket = buckets.get(key) ?? { tokens: RATE_LIMIT_MAX, resetAt: now + RATE_LIMIT_WINDOW_MS };
   if (now > bucket.resetAt) {
     bucket.tokens = RATE_LIMIT_MAX;
     bucket.resetAt = now + RATE_LIMIT_WINDOW_MS;
   }
+  res.setHeader("X-RateLimit-Limit", String(RATE_LIMIT_MAX));
+  res.setHeader("X-RateLimit-Reset", String(Math.ceil(bucket.resetAt / 1000)));
   if (bucket.tokens <= 0) {
+    res.setHeader("X-RateLimit-Remaining", "0");
+    res.setHeader("Retry-After", String(Math.ceil((bucket.resetAt - now) / 1000)));
     res.status(429).json({ error: "rate_limited", retry_after: Math.ceil((bucket.resetAt - now) / 1000) });
-    buckets.set(ip, bucket);
+    buckets.set(key, bucket);
     return false;
   }
   bucket.tokens -= 1;
-  buckets.set(ip, bucket);
+  res.setHeader("X-RateLimit-Remaining", String(bucket.tokens));
+  buckets.set(key, bucket);
   return true;
 }
 

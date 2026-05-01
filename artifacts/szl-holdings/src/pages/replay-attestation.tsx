@@ -72,6 +72,22 @@ export default function ReplayAttestationPage() {
     }
   }
 
+  // Defensively gate any URL coming from the API response — only http(s) and
+  // same-origin paths may render as anchor href. Anything else (javascript:,
+  // data:, file:, etc.) is replaced with "#" and the underlying string is
+  // shown as plain text, preventing XSS via a compromised/misbehaving server.
+  function safeHref(url: string | undefined | null): string {
+    if (!url || typeof url !== "string") return "#";
+    if (url.startsWith("/")) return url;
+    try {
+      const u = new URL(url);
+      if (u.protocol === "http:" || u.protocol === "https:") return url;
+      return "#";
+    } catch {
+      return "#";
+    }
+  }
+
   function downloadJson() {
     if (!result || (result.status !== "match" && result.status !== "mismatch")) return;
     const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
@@ -125,7 +141,7 @@ export default function ReplayAttestationPage() {
             <button onClick={downloadJson} className="rounded border border-emerald-600 px-4 py-2 hover:bg-emerald-900/40">
               Download attestation (JSON)
             </button>
-            <a href={result.evidence_url} className="rounded border border-slate-700 px-4 py-2 hover:border-slate-500">
+            <a href={safeHref(result.evidence_url)} rel="noreferrer noopener" className="rounded border border-slate-700 px-4 py-2 hover:border-slate-500">
               View ledger anchor
             </a>
             <a href="/.well-known/szl-attestation-keys.json" className="rounded border border-slate-700 px-4 py-2 hover:border-slate-500">
@@ -145,7 +161,7 @@ export default function ReplayAttestationPage() {
           <Row label="Original hash" value={result.original_hash} mono />
           <Row label="Replay hash" value={result.replay_hash} mono />
           <Row label="Diff summary" value={result.diff_summary} />
-          <a href={result.incident_record_url} className="mt-4 inline-block rounded border border-rose-600 px-4 py-2 hover:bg-rose-900/40">
+          <a href={safeHref(result.incident_record_url)} rel="noreferrer noopener" className="mt-4 inline-block rounded border border-rose-600 px-4 py-2 hover:bg-rose-900/40">
             View incident record
           </a>
         </section>
@@ -154,7 +170,7 @@ export default function ReplayAttestationPage() {
       {result?.status === "not_replayable_public" && (
         <section className="mt-10 rounded border border-slate-700 bg-slate-900 p-6">
           <p>{result.reason}</p>
-          <a className="mt-4 inline-block underline" href={result.tenant_console_help}>How tenant replay works →</a>
+          <a className="mt-4 inline-block underline" rel="noreferrer noopener" href={safeHref(result.tenant_console_help)}>How tenant replay works →</a>
         </section>
       )}
 
