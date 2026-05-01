@@ -1,0 +1,115 @@
+---
+# XInternalUI — Composite Resource Definition
+# Archetype : React SPA served as Azure Static Web App
+# Resolves  : Score workload type "website"
+# Owner     : platform-team
+# Governed by: /platform/policy/ (OPA gate — Phase 4)
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xinternaluis.szl.io
+  annotations:
+    szl.io/plane: "resource"
+    szl.io/workload-archetype: "website"
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  group: szl.io
+  names:
+    kind: XInternalUI
+    plural: xinternaluis
+  claimNames:
+    kind: InternalUI
+    plural: internaluis
+  defaultCompositionRef:
+    name: xinternalui-azure-swa
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - environment
+                - domain
+                - criticality
+                - costCenter
+                - owner
+                - networkExposure
+                - secretSourceMode
+                - observabilityTier
+                - backupProfile
+              properties:
+                # ── Governance metadata ───────────────────────────────────────
+                environment:
+                  type: string
+                  enum: [dev, stage, prod]
+                domain:
+                  type: string
+                  pattern: '^[a-z][a-z0-9-]{0,30}$'
+                criticality:
+                  type: string
+                  enum: [critical, high, standard, low]
+                costCenter:
+                  type: string
+                  pattern: '^[A-Z0-9-]{2,20}$'
+                owner:
+                  type: string
+                networkExposure:
+                  type: string
+                  description: "public = internet-accessible; internal = Azure AD-gated; private = VNet-only"
+                  enum: [public, internal, private]
+                secretSourceMode:
+                  type: string
+                  description: "SPAs cannot access Key Vault at runtime; use build-time injection or replit-secrets for dev"
+                  enum: [key-vault, workload-identity, replit-secrets]
+                observabilityTier:
+                  type: string
+                  enum: [full, standard, minimal]
+                backupProfile:
+                  type: string
+                  description: "SPAs are stateless; 'none' is acceptable unless custom domain config must be preserved"
+                  enum: [daily-30d, daily-7d, none]
+                # ── SPA-specific shape ────────────────────────────────────────
+                previewPath:
+                  type: string
+                  description: "Base path for Replit dev preview (e.g. /vessels/)"
+                  pattern: '^/[a-z][a-z0-9-]*/.*$'
+                buildOutputPath:
+                  type: string
+                  description: "Relative path to Vite dist output"
+                  default: "dist"
+                apiBackendUrl:
+                  type: string
+                  description: "Backend API base URL (injected at deploy time via VITE_ prefix)"
+                cdnEnabled:
+                  type: boolean
+                  description: "Route through Azure Front Door CDN"
+                  default: true
+                authProvider:
+                  type: string
+                  description: "Authentication mode for the SPA"
+                  enum: [azure-ad, replit-auth, none]
+                  default: none
+                policyLabels:
+                  type: array
+                  items:
+                    type: string
+            status:
+              type: object
+              properties:
+                staticWebAppUrl:
+                  type: string
+                  description: "Azure Static Web Apps default hostname"
+                frontDoorUrl:
+                  type: string
+                  description: "Front Door endpoint URL (populated when cdnEnabled=true)"
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true

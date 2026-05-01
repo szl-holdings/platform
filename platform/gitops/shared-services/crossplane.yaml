@@ -1,0 +1,100 @@
+---
+# Shared Service: Crossplane — Resource Control Plane
+# Managed by: szl-platform project
+# Promotion: platform-team only; requires review of composition changes before sync
+#
+# Source layout:
+#   Source 1: Crossplane Helm chart (upstream)
+#   Source 2: providers/ — ProviderConfig, Provider packages (azure + kubernetes)
+#   Source 3: functions/ — Crossplane pipeline functions
+#   Source 4: xrds/     — XRD definitions
+#   Source 5: compositions/ — Composition implementations
+#
+# examples/ is intentionally EXCLUDED from all sources.
+# examples/ contains documentation claims only and must not be synced by Argo CD.
+# They are reference material for platform engineers (see platform/crossplane/README.md).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-system
+  namespace: argocd
+  annotations:
+    szl.io/layer: "shared-service"
+    szl.io/component: "crossplane"
+spec:
+  project: szl-platform
+  sources:
+    # Source 1: Crossplane Helm chart (upstream)
+    - repoURL: https://charts.crossplane.io/stable
+      chart: crossplane
+      targetRevision: "1.17.2"
+      helm:
+        releaseName: crossplane
+        values: |
+          provider:
+            packages:
+              - xpkg.upbound.io/upbound/provider-family-azure:v1.4.0
+          args:
+            - --debug=false
+            - --enable-environment-configs
+          metrics:
+            enabled: true
+
+    # Source 2: Provider packages and ProviderConfigs
+    - repoURL: https://github.com/szl-holdings/monorepo
+      targetRevision: main
+      path: platform/crossplane/providers
+      directory:
+        recurse: false
+        include: "*.yaml"
+
+    # Source 3: Crossplane pipeline functions (function-go-templating, function-auto-ready)
+    - repoURL: https://github.com/szl-holdings/monorepo
+      targetRevision: main
+      path: platform/crossplane/functions
+      directory:
+        recurse: false
+        include: "*.yaml"
+
+    # Source 4: Composite Resource Definitions (XRDs)
+    - repoURL: https://github.com/szl-holdings/monorepo
+      targetRevision: main
+      path: platform/crossplane/xrds
+      directory:
+        recurse: false
+        include: "*.yaml"
+
+    # Source 5: Compositions (pipeline-mode, go-templating)
+    - repoURL: https://github.com/szl-holdings/monorepo
+      targetRevision: main
+      path: platform/crossplane/compositions
+      directory:
+        recurse: false
+        include: "*.yaml"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  ignoreDifferences:
+    - group: apiextensions.crossplane.io
+      kind: CompositeResourceDefinition
+      jsonPointers:
+        - /status
+    - group: pkg.crossplane.io
+      kind: Provider
+      jsonPointers:
+        - /status

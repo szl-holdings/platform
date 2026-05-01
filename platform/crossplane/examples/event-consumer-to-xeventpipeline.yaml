@@ -1,0 +1,119 @@
+---
+# Score → Crossplane Resolution: event-consumer → XEventPipeline + XDomainService
+# ──────────────────────────────────────────────────────────────────────────────
+# Source Score spec : platform/score/examples/event-consumer.yaml
+# Workload          : services/alloy-fabric-ingest-control (event-driven consumer)
+# Composite selected: XEventPipeline (topic + subscription) + XDomainService (the consumer service)
+#
+# Resolution logic:
+#   Score resource "event-subscription" (class: azure-service-bus, type: topic-subscription)
+#     → XEventPipeline: create topic "domain-events", subscription "example-consumer-sub"
+#   Score resource "db" (type: postgres)
+#     → XDomainService.database.enabled=true (on the consumer service)
+#   Score annotation szl.io/trigger=event           → XEventPipeline + XDomainService (event-triggered)
+#   Score annotation szl.io/domain=alloy            → domain=alloy on both composites
+#   Score annotation szl.io/deployment-target=azure-container-apps → XDomainService for the runtime
+#
+# Note: An event-driven consumer resolves into TWO composites:
+#   1. XEventPipeline  — the infrastructure (topic, subscription, DLQ)
+#   2. XDomainService  — the consuming service runtime (Container App)
+# The XEventPipeline.subscriptions[0].consumerWorkload references the XDomainService claim.
+---
+# ── Composite 1: XEventPipeline (topic + subscription) ───────────────────────
+apiVersion: szl.io/v1alpha1
+kind: EventPipeline                       # Claim (namespace-scoped)
+metadata:
+  name: domain-events-alloy
+  namespace: szl-alloy-stage
+  annotations:
+    szl.io/score-source: "platform/score/examples/event-consumer.yaml"
+    szl.io/resolved-by: "humctl + platform resolver"
+    szl.io/resolution-date: "2026-05-01"
+spec:
+  # ── Governance metadata (required) ──────────────────────────────────────────
+  environment: stage
+  domain: alloy
+  criticality: high
+  costCenter: AEF-003
+  owner: alloy-team
+  networkExposure: private
+  secretSourceMode: key-vault
+  observabilityTier: full
+  backupProfile: daily-30d              # 30-day DLQ retention for high-criticality events
+  # ── Pipeline shape ───────────────────────────────────────────────────────
+  topicName: domain-events
+  messageTtlHours: 24
+  deadLetterEnabled: true
+  subscriptions:
+    - name: ingest-control-sub
+      consumerWorkload: alloy-ingest-control    # → references XDomainService claim below
+      filterExpression: "domain = 'ingest'"
+      maxDeliveryCount: 3
+      lockDurationSeconds: 60
+    - name: fabric-api-sub
+      consumerWorkload: alloy-fabric-api
+      filterExpression: ""                      # no filter — receives all domain events
+      maxDeliveryCount: 5
+      lockDurationSeconds: 120
+  keyVaultName: szlholdings-kv-stage
+  # ── Policy labels (populated by OPA gate — Phase 4) ──────────────────────
+  # policyLabels: [policy-gated, audit-logged]
+---
+# ── Composite 2: XDomainService (consuming service runtime) ──────────────────
+apiVersion: szl.io/v1alpha1
+kind: DomainService                       # Claim (namespace-scoped)
+metadata:
+  name: alloy-ingest-control
+  namespace: szl-alloy-stage
+  annotations:
+    szl.io/score-source: "platform/score/examples/event-consumer.yaml"
+    szl.io/resolved-by: "humctl + platform resolver"
+    szl.io/resolution-date: "2026-05-01"
+    szl.io/event-pipeline: "domain-events-alloy"  # links to the XEventPipeline above
+spec:
+  # ── Governance metadata (required) ──────────────────────────────────────────
+  environment: stage
+  domain: alloy
+  criticality: high
+  costCenter: AEF-003
+  owner: alloy-team
+  networkExposure: private
+  secretSourceMode: key-vault
+  observabilityTier: full
+  backupProfile: daily-7d
+  # ── Workload shape ────────────────────────────────────────────────────────
+  containerImage: szlholdingsacr.azurecr.io/alloy-fabric-ingest-control
+  containerPort: 8080                    # health endpoint only (not ingress-exposed)
+  minReplicas: 1                         # event consumer must always be available
+  maxReplicas: 5
+  # ── Resource bindings ─────────────────────────────────────────────────────
+  database:
+    enabled: true
+    skuTier: Burstable
+    storageGB: 32
+  keyVaultName: szlholdings-kv-stage
+  # ── Policy labels (populated by OPA gate — Phase 4) ──────────────────────
+  # policyLabels: [policy-gated, audit-logged]
+---
+# Resolution diagram:
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │ XEventPipeline: domain-events-alloy                                          │
+# │  ├── ServiceBusTopic: domain-events                                         │
+# │  │     └── Subscription: ingest-control-sub (filter: domain='ingest')       │
+# │  │           └── DLQ: ingest-control-sub/$deadLetterQueue                   │
+# │  ├── Subscription: fabric-api-sub (filter: none)                            │
+# │  │         └── DLQ: fabric-api-sub/$deadLetterQueue                        │
+# │  └── KV connection secret ref: sb-conn-domain-events-stage                 │
+# └───────────────────────────────────┬─────────────────────────────────────────┘
+#                                     │ subscription binds to →
+# ┌───────────────────────────────────▼─────────────────────────────────────────┐
+# │ XDomainService: alloy-ingest-control                                         │
+# │  ├── ContainerApp: szl-alloy-stage-ingest-control                           │
+# │  │     identity: SystemAssigned                                             │
+# │  │     env.EVENT_BUS_CONNECTION_STRING: (from KV: sb-conn-domain-events)    │
+# │  │     env.DATABASE_URL: (from KV: pg-conn-alloy-stage)                    │
+# │  │     containerPort: 8080 (health endpoint; not internet-exposed)          │
+# │  ├── FlexibleServer: szl-alloy-stage-pg                                     │
+# │  │     sku: B_Standard_B1ms / 32 GB                                        │
+# │  └── KV AccessPolicy: ingest-control MI → Secret: Get, List                │
+# └─────────────────────────────────────────────────────────────────────────────┘

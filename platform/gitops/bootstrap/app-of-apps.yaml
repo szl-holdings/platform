@@ -1,0 +1,47 @@
+---
+# SZL Holdings — Argo CD Bootstrap: App-of-Apps Root
+# This is the single Application that Argo CD watches first.
+# It manages all other Applications and AppProjects across all domains and environments.
+#
+# Apply once per cluster to bootstrap the entire GitOps tree:
+#   kubectl apply -n argocd -f platform/gitops/bootstrap/app-of-apps.yaml
+#
+# After this apply, Argo CD will self-manage all downstream apps from Git.
+# No further manual kubectl applies should be required.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: szl-bootstrap
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    szl.io/plane: "resource"
+    szl.io/managed-by: "argocd"
+    szl.io/docs: "platform/gitops/README.md"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/bootstrap
+    directory:
+      recurse: true
+      include: "*.yaml"
+      exclude: "app-of-apps.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false        # Never auto-prune AppProjects or bootstrap apps
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

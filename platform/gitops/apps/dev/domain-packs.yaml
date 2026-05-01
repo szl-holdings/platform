@@ -1,0 +1,149 @@
+---
+# Dev Environment — Domain Pack Applications
+# Domains: vessels, terra, counsel, carlota, aegis/sentra, lyte
+# Source: monorepo main branch (continuous delivery from main)
+# Gate: None — dev auto-syncs on every main commit
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vessels-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "vessels"
+spec:
+  project: szl-vessels
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-vessels-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: terra-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "terra"
+spec:
+  project: szl-terra
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/terra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-terra-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: counsel-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "counsel"
+spec:
+  project: szl-counsel
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/counsel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-counsel-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: carlota-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "carlota"
+spec:
+  project: szl-carlota
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/carlota
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-carlota-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sentra-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "aegis"
+spec:
+  project: szl-aegis
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/sentra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-aegis-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lyte-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "lyte"
+spec:
+  project: szl-lyte
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/lyte
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-lyte-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

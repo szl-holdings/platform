@@ -1,0 +1,303 @@
+---
+# Composition: XAgentWorker → Azure Container Apps Jobs
+# Provisions: Container App Job (always), Azure Key Vault AccessPolicy (always),
+#             Service Bus Queue (queue.enabled=true),
+#             PostgreSQL Flexible Server (database.enabled=true),
+#             Proof-chain ConfigMap (emitsProof=true),
+#             Private Endpoint on Container App Environment (networkExposure=private)
+#
+# Resource naming convention: szl-{domain}-{environment}-{component}
+# Resource group: selected via szl.io/resource: "platform-compute-rg" label
+#
+# Two-reconciliation pattern for Key Vault AccessPolicy (same as xdomainservice):
+# objectId is patched from ContainerAppJob identity status on 2nd+ reconciliation.
+#
+# Private networking: attaches PrivateEndpoint to shared Container App Environment.
+# Container App Jobs share the ACA managed environment's private-link endpoint.
+#
+# OPA gate hook: policyLabels populated by admission controller (Phase 4).
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xagentworker-azure-aca-job
+  labels:
+    szl.io/provider: azure
+    szl.io/runtime: container-apps-jobs
+    szl.io/composite: XAgentWorker
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  compositeTypeRef:
+    apiVersion: szl.io/v1alpha1
+    kind: XAgentWorker
+  mode: Pipeline
+  pipeline:
+    # ── Step 0: Load EnvironmentConfig (platform-wide values) ─────────────────
+    - step: load-environment-config
+      functionRef:
+        name: function-environment-configs
+      input:
+        apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          environmentConfigs:
+            - type: Reference
+              ref:
+                name: szl-platform-config
+
+    # ── Step 1: Container App Job (always) ────────────────────────────────────
+    - step: resolve-container-app-job
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            ---
+            apiVersion: app.azure.upbound.io/v1beta1
+            kind: ContainerAppJob
+            metadata:
+              labels:
+                szl.io/composition-component: container-app-job
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: container-app-job
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-job
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                containerAppEnvironmentIdSelector:
+                  matchLabels:
+                    szl.io/resource: "container-app-environment"
+                replicaTimeoutInSeconds: 300
+                replicaRetryLimit: 3
+                triggerType: {{ if or (eq .observed.composite.resource.spec.triggerType "queue") (eq .observed.composite.resource.spec.triggerType "event") }}Event{{ else if eq .observed.composite.resource.spec.triggerType "cron" }}Schedule{{ else }}Manual{{ end }}
+                {{ if eq .observed.composite.resource.spec.triggerType "cron" }}
+                scheduleTriggerConfig:
+                  - cronExpression: {{ .observed.composite.resource.spec.cronSchedule | default "0 */6 * * *" }}
+                    parallelism: {{ .observed.composite.resource.spec.maxConcurrentExecutions | default 1 }}
+                {{ end }}
+                template:
+                  - container:
+                      - image: {{ .observed.composite.resource.spec.containerImage | default "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest" }}
+                        name: worker
+                        cpu: "0.5"
+                        memory: "1Gi"
+                identity:
+                  - type: SystemAssigned
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-criticality: {{ .observed.composite.resource.spec.criticality }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+                  szl-owner: {{ .observed.composite.resource.spec.owner }}
+                  szl-emits-proof: "{{ .observed.composite.resource.spec.emitsProof | default false }}"
+
+    # ── Step 2: Key Vault AccessPolicy (always) ───────────────────────────────
+    # Grants the job's system-assigned managed identity read access to Key Vault.
+    # objectId patched from ContainerAppJob status.atProvider.identity[0].principalId
+    # on second+ reconciliations (same two-reconciliation pattern as xdomainservice).
+    - step: resolve-kv-access
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{- $principalId := "" }}
+            {{- if .observed.resources }}
+              {{- $jobRes := index .observed.resources "container-app-job" }}
+              {{- if $jobRes }}
+                {{- if $jobRes.resource.status.atProvider }}
+                  {{- $identities := $jobRes.resource.status.atProvider.identity }}
+                  {{- if $identities }}
+                    {{- $principalId = (index $identities 0).principalId | default "" }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+            ---
+            apiVersion: keyvault.azure.upbound.io/v1beta1
+            kind: AccessPolicy
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: kv-access-policy
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                keyVaultIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-key-vault"
+                tenantId: {{ (index .context "apiextensions.crossplane.io/environment").azureTenantId }}
+                objectId: {{ if $principalId }}{{ $principalId }}{{ else }}pending-identity-provisioning{{ end }}
+                secretPermissions:
+                  - Get
+                  - List
+                keyPermissions: []
+                certificatePermissions: []
+
+    # ── Step 3: Service Bus Queue (conditional: queue.enabled=true) ────────────
+    - step: resolve-queue
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.queue.enabled }}
+            ---
+            apiVersion: servicebus.azure.upbound.io/v1beta2
+            kind: Queue
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: service-bus-queue
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: {{ .observed.composite.resource.spec.queue.queueName | default "agent-work-queue" }}
+                namespaceIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-service-bus-namespace"
+                maxDeliveryCount: {{ .observed.composite.resource.spec.queue.maxDeliveryCount | default 3 }}
+                lockDuration: PT1M
+                deadLetteringOnMessageExpiration: true
+                requiresDuplicateDetection: false
+            {{ end }}
+
+    # ── Step 4: PostgreSQL (conditional: database.enabled=true) ───────────────
+    - step: resolve-database
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.database.enabled }}
+            ---
+            apiVersion: dbforpostgresql.azure.upbound.io/v1beta2
+            kind: FlexibleServer
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: postgresql-server
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-pg
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                administratorLogin: szladmin
+                administratorPasswordSecretRef:
+                  namespace: crossplane-system
+                  name: szl-pg-admin-secret
+                  key: password
+                skuName: {{ if eq .observed.composite.resource.spec.database.skuTier "GeneralPurpose" }}GP_Standard_D2s_v3{{ else if eq .observed.composite.resource.spec.database.skuTier "MemoryOptimized" }}MO_Standard_E2s_v3{{ else }}B_Standard_B1ms{{ end }}
+                storageMb: {{ mul (.observed.composite.resource.spec.database.storageGB | default 32) 1024 }}
+                version: "16"
+                backup:
+                  - backupRetentionDays: 7
+                    geoRedundantBackup: Disabled
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+            {{ end }}
+
+    # ── Step 5: Proof-chain ConfigMap (conditional: emitsProof=true) ──────────
+    - step: resolve-proof-chain
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.emitsProof }}
+            ---
+            apiVersion: kubernetes.crossplane.io/v1alpha2
+            kind: Object
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: proof-chain-configmap
+            spec:
+              providerConfigRef:
+                name: kubernetes-provider-config
+              forProvider:
+                manifest:
+                  apiVersion: v1
+                  kind: ConfigMap
+                  metadata:
+                    name: proof-chain-config-{{ .observed.composite.resource.metadata.name }}
+                    namespace: szl-platform
+                  data:
+                    PROOF_CHAIN_ENABLED: "true"
+                    PROOF_CHAIN_KV_SECRET_NAME: "proof-chain-endpoint"
+            {{ end }}
+
+    # ── Step 6: Private Endpoint (conditional: networkExposure=private) ───────
+    # Attaches to the shared Container App Environment (ACA private-link pattern).
+    - step: resolve-private-endpoint
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.networkExposure "private" }}
+            ---
+            apiVersion: network.azure.upbound.io/v1beta1
+            kind: PrivateEndpoint
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-endpoint
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-job-pe
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                subnetIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-private-endpoint-subnet"
+                privateServiceConnection:
+                  - isManualConnection: false
+                    name: pe-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-job-conn
+                    privateConnectionResourceIdSelector:
+                      matchLabels:
+                        szl.io/resource: "container-app-environment"
+                    subresourceNames:
+                      - managedEnvironments
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+            {{ end }}
+
+    # ── Step 7: Mark composite ready ─────────────────────────────────────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready
+
+  writeConnectionSecretsToNamespace: crossplane-system

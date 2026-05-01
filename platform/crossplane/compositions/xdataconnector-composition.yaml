@@ -1,0 +1,270 @@
+---
+# Composition: XDataConnector → Azure Blob Storage | External API (APIM) | Document Intelligence
+# Provisions vary by connectorType:
+#   blob-storage:           Blob container + lifecycle policy (always for this type)
+#   external-api-proxy:     APIM backend (always for this type)
+#   document-intelligence:  Document Intelligence account (always for this type)
+# Key Vault access policy: always (all connector types need credential retrieval)
+# Private Endpoint:        conditional (networkExposure=private)
+#
+# Composition function pipeline:
+#   Step 1: resolve-blob-storage    — Blob container (conditional: connectorType=blob-storage)
+#   Step 2: resolve-external-api    — APIM backend (conditional: connectorType=external-api-proxy)
+#   Step 3: resolve-doc-intelligence — Doc Intelligence (conditional: connectorType=document-intelligence)
+#   Step 4: resolve-kv-access       — Key Vault access policy (always)
+#   Step 5: resolve-network         — Private Endpoint (conditional: networkExposure=private)
+#   Step 6: auto-ready              — composite ready signal
+#
+# OPA gate hook: policyLabels populated by admission controller (Phase 4).
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xdataconnector-azure-blob-apim
+  labels:
+    szl.io/provider: azure
+    szl.io/runtime: storage-apim-docintell
+    szl.io/composite: XDataConnector
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  compositeTypeRef:
+    apiVersion: szl.io/v1alpha1
+    kind: XDataConnector
+  mode: Pipeline
+  pipeline:
+    # ── Step 0: Load EnvironmentConfig (platform-wide values) ─────────────────
+    - step: load-environment-config
+      functionRef:
+        name: function-environment-configs
+      input:
+        apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          environmentConfigs:
+            - type: Reference
+              ref:
+                name: szl-platform-config
+
+    # ── Step 1: Blob Storage container (conditional: connectorType=blob-storage) ──
+    - step: resolve-blob-storage
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.connectorType "blob-storage" }}
+            ---
+            apiVersion: storage.azure.upbound.io/v1beta1
+            kind: Container
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: blob-container
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                storageAccountNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-storage-account"
+                name: {{ .observed.composite.resource.spec.blobStorage.containerName | default "data" }}
+                containerAccessType: {{ if eq (.observed.composite.resource.spec.blobStorage.publicAccess | default "None") "None" }}private{{ else if eq .observed.composite.resource.spec.blobStorage.publicAccess "Blob" }}blob{{ else }}container{{ end }}
+            ---
+            apiVersion: storage.azure.upbound.io/v1beta1
+            kind: ManagementPolicy
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: blob-lifecycle
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                storageAccountIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-storage-account"
+                rule:
+                  - name: retention-rule
+                    enabled: true
+                    filters:
+                      - blobTypes:
+                          - blockBlob
+                    actions:
+                      - baseBlob:
+                          - deleteAfterDaysSinceModificationGreaterThan: {{ .observed.composite.resource.spec.blobStorage.retentionDays | default 30 }}
+            {{ end }}
+
+    # ── Step 2: External API proxy via APIM (conditional: connectorType=external-api-proxy) ──
+    # API key is stored in Key Vault by the platform-team; APIM retrieves it as a named value.
+    # No API key value is written here.
+    - step: resolve-external-api
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.connectorType "external-api-proxy" }}
+            ---
+            apiVersion: apimanagement.azure.upbound.io/v1beta1
+            kind: APIManagementBackend
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: apim-backend
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                apiManagementNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-apim"
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-shared-rg"
+                name: ext-api-{{ .observed.composite.resource.spec.domain }}
+                protocol: http
+                url: {{ .observed.composite.resource.spec.externalApi.upstreamBaseUrl | default "https://placeholder.example.com" }}
+                description: External API backend for {{ .observed.composite.resource.spec.domain }} domain
+            {{ end }}
+
+    # ── Step 3: Document Intelligence (conditional: connectorType=document-intelligence) ──
+    - step: resolve-doc-intelligence
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.connectorType "document-intelligence" }}
+            ---
+            apiVersion: cognitiveservices.azure.upbound.io/v1beta1
+            kind: Account
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: doc-intelligence
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                location: westeurope
+                kind: FormRecognizer
+                skuName: S0
+                name: szl-docintell-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-data-rg"
+                identity:
+                  - type: SystemAssigned
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+                  szl-owner: {{ .observed.composite.resource.spec.owner }}
+            {{ end }}
+
+    # ── Step 4: Key Vault access policy (conditional: workloadIdentityPrincipalId set) ──
+    # Grants the consuming workload's managed identity read access to Key Vault secrets.
+    # CONDITIONAL: only emitted when spec.workloadIdentityPrincipalId is provided.
+    # This avoids perpetual reconcile failures for claims that don't yet have a
+    # managed identity provisioned. Callers add this field after identity creation.
+    # tenantId is resolved from the szl-platform-config EnvironmentConfig (loaded in Step 0).
+    # Actual secret values are stored by infra/modules/keyvault.bicep, not by this composition.
+    - step: resolve-kv-access
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.workloadIdentityPrincipalId }}
+            ---
+            apiVersion: keyvault.azure.upbound.io/v1beta1
+            kind: AccessPolicy
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: kv-access-policy
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                keyVaultIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-key-vault"
+                tenantId: {{ (index .context "apiextensions.crossplane.io/environment").azureTenantId }}
+                objectId: {{ .observed.composite.resource.spec.workloadIdentityPrincipalId }}
+                secretPermissions:
+                  - Get
+                  - List
+                keyPermissions: []
+                certificatePermissions: []
+            {{ end }}
+
+    # ── Step 5: Private Endpoint (conditional: networkExposure=private) ───────
+    - step: resolve-private-endpoint
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.networkExposure "private" }}
+            ---
+            apiVersion: network.azure.upbound.io/v1beta1
+            kind: PrivateEndpoint
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-endpoint
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-connector-pe
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-shared-rg"
+                subnetIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-private-endpoint-subnet"
+                privateServiceConnection:
+                  - isManualConnection: false
+                    name: pe-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-connector-conn
+                    {{ if eq .observed.composite.resource.spec.connectorType "blob-storage" }}
+                    privateConnectionResourceIdSelector:
+                      matchLabels:
+                        szl.io/resource: "platform-storage-account"
+                    subresourceNames:
+                      - blob
+                    {{ else if eq .observed.composite.resource.spec.connectorType "document-intelligence" }}
+                    privateConnectionResourceIdSelector:
+                      matchControllerRef: true
+                    subresourceNames:
+                      - account
+                    {{ else if eq .observed.composite.resource.spec.connectorType "external-api-proxy" }}
+                    privateConnectionResourceIdSelector:
+                      matchLabels:
+                        szl.io/resource: "platform-apim"
+                    subresourceNames:
+                      - Gateway
+                    {{ end }}
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+            {{ end }}
+
+    # ── Step 6: Mark composite ready ─────────────────────────────────────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready
+
+  writeConnectionSecretsToNamespace: crossplane-system

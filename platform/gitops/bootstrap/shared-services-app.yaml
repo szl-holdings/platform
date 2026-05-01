@@ -1,0 +1,39 @@
+---
+# Bootstrap: Shared Services Application
+# This Application is managed by szl-bootstrap (app-of-apps root).
+# It deploys all shared platform services: Crossplane, OTel (Phase 4), Gatekeeper (Phase 4).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: szl-shared-services
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    szl.io/layer: "shared-services"
+    szl.io/managed-by: "szl-bootstrap"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/shared-services
+    directory:
+      recurse: false
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m

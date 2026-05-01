@@ -1,0 +1,74 @@
+---
+# Score → Crossplane Resolution: internal-ui → XInternalUI
+# ──────────────────────────────────────────────────────────
+# Source Score spec : platform/score/examples/internal-ui.yaml
+# Workload          : artifacts/lyte-command-center (React SPA, Azure Static Web Apps)
+# Composite selected: XInternalUI (szl.io/v1alpha1)
+#
+# Resolution logic:
+#   Score resources: {}                  → no server-side resource bindings
+#   Score annotation szl.io/deployment-target=azure-static-web-apps → XInternalUI
+#   Score annotation szl.io/cdn=azure-front-door         → cdnEnabled=true
+#   Score annotation szl.io/observability-tier=browser-otel → observabilityTier=standard (browser OTel = standard)
+#   Score annotation szl.io/domain=lyte                  → domain=lyte
+#   Score annotation szl.io/preview-path=/lyte/          → previewPath=/lyte/
+#   Score annotation szl.io/criticality=standard         → criticality=standard
+#
+# What Crossplane provisions from this claim:
+#   1. Azure Static Web App (Standard tier)
+#   2. Front Door route attachment (when cdnEnabled=true)
+#   3. Tags: szl-domain=lyte, szl-environment=prod, szl-criticality=standard
+#
+# What is NOT provisioned (SPA is stateless):
+#   - No PostgreSQL, Redis, Service Bus — SPAs have no server-side resource dependencies
+#   - Build-time VITE_ environment variables are injected during CI, not by Crossplane
+#   - Auth (if needed) is configured as a Static Web App custom auth provider separately
+apiVersion: szl.io/v1alpha1
+kind: InternalUI                          # Claim (namespace-scoped)
+metadata:
+  name: lyte-command-center
+  namespace: szl-lyte-prod
+  annotations:
+    szl.io/score-source: "platform/score/examples/internal-ui.yaml"
+    szl.io/resolved-by: "humctl + platform resolver"
+    szl.io/resolution-date: "2026-05-01"
+spec:
+  # ── Governance metadata (required) ──────────────────────────────────────────
+  environment: prod
+  domain: lyte
+  criticality: standard
+  costCenter: LYT-001
+  owner: lyte-team
+  networkExposure: public                # SPA is publicly accessible (authenticated via Azure AD)
+  secretSourceMode: replit-secrets       # Build-time only; no runtime secrets
+  observabilityTier: standard            # Browser OTel = standard tier
+  backupProfile: none                    # Static SPA — no stateful data to back up
+  # ── SPA-specific shape ────────────────────────────────────────────────────
+  previewPath: /lyte/
+  buildOutputPath: dist
+  apiBackendUrl: https://szlholdings.com/api
+  cdnEnabled: true
+  authProvider: azure-ad
+  # ── Policy labels (populated by OPA gate — Phase 4) ──────────────────────
+  # policyLabels: [authenticated, spa]
+---
+# Composed resources that Crossplane creates from this claim:
+# ┌────────────────────────────────────────────────────────────────┐
+# │ StaticSite           szl-lyte-prod-swa                         │
+# │   sku:               Standard                                  │
+# │   defaultHostName:   → status.staticWebAppUrl                  │
+# │   deployToken:       → crossplane-system/swa-deployment-token  │
+# ├────────────────────────────────────────────────────────────────┤
+# │ FrontdoorOrigin      szl-lyte-prod-fd-origin                   │
+# │   hostName:          {staticWebAppUrl}                         │
+# │   cdnOriginGroup:    platform-front-door-origin-group          │
+# ├────────────────────────────────────────────────────────────────┤
+# │ ConfigMap            szl-platform/swa-auth-placeholder         │
+# │   authProvider:      azure-ad                                  │
+# │   note:              Requires manual AAD app registration      │
+# └────────────────────────────────────────────────────────────────┘
+#
+# CI wiring (out of scope for Crossplane — handled by GitHub Actions):
+#   - GitHub Actions reads swa-deployment-token from crossplane-system secret
+#   - Injects VITE_API_URL={apiBackendUrl} at build time
+#   - Deploys dist/ to the Static Web App using azure/static-web-apps-deploy action

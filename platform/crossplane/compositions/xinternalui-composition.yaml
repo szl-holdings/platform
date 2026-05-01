@@ -1,0 +1,153 @@
+---
+# Composition: XInternalUI → Azure Static Web Apps + Front Door
+# Provisions: Static Web App (always), Front Door route (when cdnEnabled=true),
+#             Auth config placeholder (when authProvider != none)
+#
+# Composition function pipeline:
+#   Step 1: resolve-mandatory  — Static Web App (always)
+#   Step 2: resolve-cdn        — Front Door origin (conditional: cdnEnabled=true)
+#   Step 3: resolve-auth       — Auth ConfigMap placeholder (conditional: authProvider != none)
+#   Step 4: auto-ready         — composite ready signal
+#
+# OPA gate hook: policyLabels populated by admission controller (Phase 4).
+# Note: SPAs are stateless — no PostgreSQL, Redis, Service Bus bindings.
+# Build-time VITE_ secrets are injected by CI (GitHub Actions), not by this composition.
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xinternalui-azure-swa
+  labels:
+    szl.io/provider: azure
+    szl.io/runtime: static-web-apps
+    szl.io/composite: XInternalUI
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  compositeTypeRef:
+    apiVersion: szl.io/v1alpha1
+    kind: XInternalUI
+  mode: Pipeline
+  pipeline:
+    # ── Step 1: Static Web App (always provisioned) ───────────────────────────
+    - step: resolve-mandatory
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            ---
+            apiVersion: web.azure.upbound.io/v1beta1
+            kind: StaticSite
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: static-web-app
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                location: westeurope
+                skuSize: Standard
+                skuTier: Standard
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-swa
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-criticality: {{ .observed.composite.resource.spec.criticality }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+                  szl-owner: {{ .observed.composite.resource.spec.owner }}
+              writeConnectionSecretToRef:
+                namespace: crossplane-system
+                name: swa-deploy-token-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}
+
+    # ── Step 2: Front Door CDN route (conditional: cdnEnabled=true) ───────────
+    # Attaches the SWA origin to the platform-shared Front Door instance.
+    # hostName is resolved from the SWA's atProvider status on second+ reconciliations
+    # (first reconciliation: SWA not yet provisioned; Crossplane retries automatically).
+    - step: resolve-cdn
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.cdnEnabled }}
+            {{- $swaHostname := "" }}
+            {{- if .observed.resources }}
+              {{- $swaRes := index .observed.resources "static-web-app" }}
+              {{- if $swaRes }}
+                {{- if $swaRes.resource.status.atProvider }}
+                  {{- $swaHostname = $swaRes.resource.status.atProvider.defaultHostName | default "" }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+            ---
+            apiVersion: cdn.azure.upbound.io/v1beta1
+            kind: FrontdoorOrigin
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: frontdoor-origin
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                cdnFrontdoorOriginGroupIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-front-door-origin-group"
+                enabled: true
+                hostName: {{ if $swaHostname }}{{ $swaHostname }}{{ else }}pending-swa-provisioning.azurestaticapps.net{{ end }}
+                originHostHeader: {{ if $swaHostname }}{{ $swaHostname }}{{ else }}pending-swa-provisioning.azurestaticapps.net{{ end }}
+                certificateNameCheckEnabled: true
+                httpPort: 80
+                httpsPort: 443
+            {{ end }}
+
+    # ── Step 3: Auth config placeholder (conditional: authProvider != none) ───
+    # Records the auth provider so platform-team can complete the AAD app registration.
+    # No AAD app registration is created automatically — that requires manual setup.
+    - step: resolve-auth
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if ne (.observed.composite.resource.spec.authProvider | default "none") "none" }}
+            ---
+            apiVersion: kubernetes.crossplane.io/v1alpha2
+            kind: Object
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: auth-config-placeholder
+            spec:
+              providerConfigRef:
+                name: kubernetes-provider-config
+              forProvider:
+                manifest:
+                  apiVersion: v1
+                  kind: ConfigMap
+                  metadata:
+                    name: swa-auth-config-{{ .observed.composite.resource.spec.domain }}
+                    namespace: szl-platform
+                  data:
+                    authProvider: {{ .observed.composite.resource.spec.authProvider }}
+                    domain: {{ .observed.composite.resource.spec.domain }}
+                    note: "AAD app registration required — see infra/runbooks/ for procedure"
+            {{ end }}
+
+    # ── Step 4: Mark composite ready ─────────────────────────────────────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready
+
+  writeConnectionSecretsToNamespace: crossplane-system

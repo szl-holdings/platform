@@ -1,0 +1,26 @@
+---
+# Crossplane EnvironmentConfig — Platform-wide shared values
+# Injected into all compositions via function-environment-configs.
+# This is the canonical Crossplane pattern for cluster-level configuration
+# that is needed across multiple composites without requiring per-claim input.
+#
+# IMPORTANT: Set azureTenantId before applying any XR claims.
+# How to set: replace REPLACE_WITH_AZURE_TENANT_ID with the actual tenant UUID.
+# The value must match the Azure AD tenant where Key Vault is provisioned.
+# Command: kubectl patch environmentconfig szl-platform-config
+#           --type merge -p '{"data":{"azureTenantId":"<your-tenant-uuid>"}}'
+apiVersion: apiextensions.crossplane.io/v1alpha1
+kind: EnvironmentConfig
+metadata:
+  name: szl-platform-config
+  annotations:
+    szl.io/managed-by: "platform-team"
+    szl.io/purpose: "cluster-wide platform configuration for Crossplane compositions"
+data:
+  azureTenantId: "REPLACE_WITH_AZURE_TENANT_ID"
+  location: "westeurope"
+  platformComputeRgLabel: "platform-compute-rg"
+  platformSharedRgLabel: "platform-shared-rg"
+  containerAppEnvironmentLabel: "container-app-environment"
+  keyVaultLabel: "platform-key-vault"
+  privateEndpointSubnetLabel: "platform-private-endpoint-subnet"

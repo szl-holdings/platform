@@ -1,0 +1,80 @@
+---
+# Dev Environment — Platform Substrate Applications
+# Source: monorepo main branch (continuous delivery from main)
+# Destination: szl-platform-dev namespace
+# Gate: None — dev auto-syncs on every main commit
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-server-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "platform"
+    szl.io/composite: "DomainService"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/api-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-platform-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy-runtime-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "alloy"
+    szl.io/composite: "DomainService"
+spec:
+  project: szl-alloy
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/alloy-runtime
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-alloy-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy-embed-worker-dev
+  namespace: argocd
+  annotations:
+    szl.io/environment: "dev"
+    szl.io/domain: "alloy"
+    szl.io/composite: "AgentWorker"
+spec:
+  project: szl-alloy
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev/manifests/alloy-embed-worker
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-alloy-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

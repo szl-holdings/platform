@@ -1,0 +1,142 @@
+---
+# Production Environment — Domain Pack Applications
+# Gate: stage-healthy-30m + manual approval + OPA gate (Phase 4) + Temporal approval (Phase 4)
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vessels-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "vessels"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-vessels
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-vessels-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: terra-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "terra"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-terra
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/terra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-terra-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: counsel-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "counsel"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-counsel
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/counsel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-counsel-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: carlota-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "carlota"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-carlota
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/carlota
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-carlota-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sentra-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "aegis"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-aegis
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/sentra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-aegis-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lyte-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "lyte"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+spec:
+  project: szl-lyte
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/lyte
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-lyte-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

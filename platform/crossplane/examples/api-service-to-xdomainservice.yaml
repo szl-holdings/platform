@@ -1,0 +1,95 @@
+---
+# Score → Crossplane Resolution: api-service → XDomainService
+# ─────────────────────────────────────────────────────────────
+# Source Score spec : platform/score/examples/api-service.yaml
+# Workload          : artifacts/api-server (REST API, database, cache, secrets)
+# Composite selected: XDomainService (szl.io/v1alpha1)
+#
+# Resolution logic:
+#   Score resource "db" (type: postgres)        → XDomainService.spec.database.enabled=true
+#   Score resource "cache" (type: redis)        → XDomainService.spec.cache.enabled=true
+#   Score resource "secrets" (class: azure-key-vault) → secretSourceMode=key-vault
+#   Score annotation szl.io/criticality=critical → criticality=critical
+#   Score annotation szl.io/observability-tier=full → observabilityTier=full
+#   Score annotation szl.io/domain=platform     → domain=platform
+#   Score annotation szl.io/deployment-target=azure-container-apps → XDomainService
+#
+# What Crossplane provisions from this claim:
+#   1. Azure Container App (szl-platform-prod) with system-assigned managed identity
+#   2. Azure PostgreSQL Flexible Server (GeneralPurpose, 128 GB)
+#   3. Azure Redis Cache (Standard)
+#   4. Key Vault access policy for the Container App managed identity
+#   5. Tags: szl-environment=prod, szl-domain=platform, szl-criticality=critical,
+#            szl-cost-center=PLT-001, szl-owner=platform-team
+#
+# What is NOT provisioned by this claim (pre-existing platform resources):
+#   - Container Apps Environment (provisioned by infra/modules/containerapp.bicep)
+#   - Key Vault itself (provisioned by infra/modules/keyvault.bicep)
+#   - Front Door (provisioned by infra/modules/frontdoor.bicep)
+#   - Log Analytics workspace (provisioned by infra/main.bicep)
+apiVersion: szl.io/v1alpha1
+kind: DomainService                       # Claim (namespace-scoped)
+metadata:
+  name: api-server
+  namespace: szl-platform-prod
+  annotations:
+    szl.io/score-source: "platform/score/examples/api-service.yaml"
+    szl.io/resolved-by: "humctl + platform resolver"
+    szl.io/resolution-date: "2026-05-01"
+spec:
+  # ── Governance metadata (required) ──────────────────────────────────────────
+  environment: prod
+  domain: platform
+  criticality: critical
+  costCenter: PLT-001
+  owner: platform-team
+  networkExposure: internal          # api-server is internal (Front Door terminates TLS)
+                                     # Renders: ingress[0].externalEnabled=false (ACA vnet ingress only)
+                                     # networkExposure tri-state: public→externalEnabled:true,
+                                     #   internal→externalEnabled:false, private→externalEnabled:false+PE
+  secretSourceMode: key-vault
+  observabilityTier: full
+  backupProfile: daily-30d
+  # ── Workload shape ────────────────────────────────────────────────────────
+  containerImage: szlholdingsacr.azurecr.io/api-server
+  containerPort: 3000
+  minReplicas: 1                     # critical service — never scale to zero in prod
+  maxReplicas: 10
+  # ── Resource bindings ─────────────────────────────────────────────────────
+  database:
+    enabled: true
+    skuTier: GeneralPurpose
+    storageGB: 128
+  cache:
+    enabled: true
+    skuName: Standard
+  keyVaultName: szlholdings-kv-prod
+  # ── Policy labels (populated by OPA gate — Phase 4) ──────────────────────
+  # policyLabels: [authenticated, policy-gated, audit-logged, rate-limited]
+  # (uncomment when OPA gate is live — Phase 4)
+---
+# Expected Argo CD Application path:
+#   platform/gitops/apps/prod/manifests/api-server/claim.yaml
+#
+# Expected Argo CD Application:
+#   name: api-server-prod (see platform/gitops/apps/prod/platform-substrate.yaml)
+#
+# Composed resources that Crossplane creates from this claim:
+# ┌────────────────────────────────────────────────────────────────┐
+# │ ContainerApp         szl-platform-prod-api-server              │
+# │   image:             szlholdingsacr.azurecr.io/api-server:TAG  │
+# │   identity:          SystemAssigned                            │
+# │   env.DATABASE_URL:  (from KV secret szl-db-conn-platform)    │
+# │   env.REDIS_URL:     (from KV secret szl-redis-conn-platform)  │
+# ├────────────────────────────────────────────────────────────────┤
+# │ FlexibleServer       szl-platform-prod-pg                      │
+# │   sku:               GP_Standard_D2s_v3 / 128 GB              │
+# │   version:           16                                        │
+# │   backup:            30 days                                   │
+# ├────────────────────────────────────────────────────────────────┤
+# │ RedisCache           szl-platform-prod-redis                   │
+# │   sku:               Standard / C1                            │
+# ├────────────────────────────────────────────────────────────────┤
+# │ KV AccessPolicy      principal=api-server MI                   │
+# │   permissions:       Secret: Get, List                        │
+# └────────────────────────────────────────────────────────────────┘

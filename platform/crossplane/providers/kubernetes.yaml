@@ -1,0 +1,49 @@
+---
+# Crossplane provider-kubernetes
+# Required by: xagentworker (proof-chain ConfigMap), xinternalui (auth ConfigMap),
+#              xeventpipeline (connection-secret-ref ConfigMap)
+# The Object resources created by these compositions are informational placeholders;
+# they do NOT contain secret values.
+#
+# In-cluster permissions: The provider-kubernetes service account is bound to a
+# minimal ClusterRole that can manage ConfigMaps and Secrets in szl-platform namespace only.
+# This ClusterRole is applied by the Crossplane bootstrap Helm chart (shared-services/crossplane.yaml).
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-kubernetes
+  annotations:
+    szl.io/managed-by: "crossplane-bootstrap"
+    szl.io/docs: "platform/crossplane/README.md#providers"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v0.14.1
+  runtimeConfigRef:
+    name: provider-kubernetes-runtime
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: provider-kubernetes-runtime
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          serviceAccountName: provider-kubernetes
+          containers:
+            - name: package-runtime
+              args:
+                - "--debug"
+---
+# ProviderConfig: in-cluster access (uses provider pod's ServiceAccount identity)
+# No kubeconfig secret needed — the provider runs inside the same cluster.
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: kubernetes-provider-config
+  annotations:
+    szl.io/managed-by: "crossplane-bootstrap"
+spec:
+  credentials:
+    source: InjectedIdentity

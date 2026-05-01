@@ -1,0 +1,71 @@
+---
+# Production Environment — Platform Substrate Applications
+# Source: monorepo main branch (image digest pinned via image updater)
+# Gate: Promotion from stage requires:
+#   1. Stage Synced+Healthy for >= 30 minutes
+#   2. Zero error-rate anomaly on lyte-command-center dashboard (stage)
+#   3. Platform-team lead explicit sync approval (manual argocd app sync)
+#   4. Temporal approval workflow completed (Phase 4 — hook declared here)
+#   5. OPA promotion gate policy passes (Phase 4 — hook declared here)
+# Rollback: See platform/gitops/README.md §Rollback (argocd app rollback command)
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-server-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "platform"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+    szl.io/temporal-hook: "pending-phase-4"
+    szl.io/opa-gate: "pending-phase-4"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/api-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-platform-prod
+  syncPolicy:
+    # No automated sync in prod. Sync is triggered manually by platform-team lead
+    # after all gates pass. This is intentional and must not be changed to automated.
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+    retry:
+      limit: 2
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy-runtime-prod
+  namespace: argocd
+  annotations:
+    szl.io/environment: "prod"
+    szl.io/domain: "alloy"
+    szl.io/promotion-gate: "stage-healthy-30m + manual-approval"
+    szl.io/temporal-hook: "pending-phase-4"
+    szl.io/opa-gate: "pending-phase-4"
+spec:
+  project: szl-alloy
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod/manifests/alloy-runtime
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-alloy-prod
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

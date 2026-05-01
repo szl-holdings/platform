@@ -1,0 +1,8 @@
+# Stub manifests directory — populated during Phase 5 cluster bootstrap.
+# This kustomization is intentionally empty until the api-server workload's
+# Helm chart / resource manifests are finalized and committed.
+# Argo CD will sync to an empty state (no resources created) until
+# this directory is populated.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: []

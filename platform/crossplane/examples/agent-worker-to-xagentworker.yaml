@@ -1,0 +1,90 @@
+---
+# Score → Crossplane Resolution: agent-worker → XAgentWorker
+# ────────────────────────────────────────────────────────────
+# Source Score spec : platform/score/examples/agent-worker.yaml
+# Workload          : workers/alloy-embed-worker (AI embedding worker, queue-triggered)
+# Composite selected: XAgentWorker (szl.io/v1alpha1)
+#
+# Resolution logic:
+#   Score resource "queue" (class: azure-service-bus)     → queue.enabled=true
+#   Score resource "db" (type: postgres)                  → database.enabled=true
+#   Score resource "openai" (class: openai)               → externalApis=[openai]
+#   Score resource "anthropic" (class: anthropic)         → externalApis=[openai, anthropic]
+#   Score annotation szl.io/trigger=queue                 → triggerType=queue
+#   Score annotation szl.io/emits-proof=true              → emitsProof=true
+#   Score annotation szl.io/domain=alloy                  → domain=alloy
+#   Score annotation szl.io/criticality=high              → criticality=high
+#   Score annotation szl.io/deployment-target=azure-container-apps-jobs → XAgentWorker
+#
+# What Crossplane provisions from this claim:
+#   1. Azure Container App Job (queue-triggered, KEDA scaler)
+#   2. Azure Service Bus Queue (agent-work-queue) + dead-letter queue
+#   3. Azure PostgreSQL Flexible Server (Burstable)
+#   4. Key Vault access policy for the job managed identity (AI API keys)
+#   5. proof-chain ConfigMap (PROOF_CHAIN_ENABLED=true)
+#   6. Tags: szl-domain=alloy, szl-environment=stage, szl-criticality=high,
+#            szl-emits-proof=true, szl-cost-center=AEF-002, szl-owner=alloy-team
+apiVersion: szl.io/v1alpha1
+kind: AgentWorker                         # Claim (namespace-scoped)
+metadata:
+  name: alloy-embed-worker
+  namespace: szl-alloy-stage
+  annotations:
+    szl.io/score-source: "platform/score/examples/agent-worker.yaml"
+    szl.io/resolved-by: "humctl + platform resolver"
+    szl.io/resolution-date: "2026-05-01"
+spec:
+  # ── Governance metadata (required) ──────────────────────────────────────────
+  environment: stage
+  domain: alloy
+  criticality: high
+  costCenter: AEF-002
+  owner: alloy-team
+  networkExposure: private               # AI workers access no public internet (secure by default)
+  secretSourceMode: key-vault            # AI API keys retrieved from Key Vault at runtime
+  observabilityTier: full
+  backupProfile: daily-7d
+  # ── Worker-specific shape ─────────────────────────────────────────────────
+  triggerType: queue
+  containerImage: szlholdingsacr.azurecr.io/alloy-embed-worker
+  maxConcurrentExecutions: 3
+  emitsProof: true
+  # ── Resource bindings ─────────────────────────────────────────────────────
+  queue:
+    enabled: true
+    queueName: agent-work-queue
+    deadLetterQueueName: agent-dlq
+    maxDeliveryCount: 3
+  database:
+    enabled: true
+    skuTier: Burstable
+    storageGB: 32
+  keyVaultName: szlholdings-kv-stage
+  externalApis:
+    - openai
+    - anthropic
+  # ── Policy labels (populated by OPA gate — Phase 4) ──────────────────────
+  # policyLabels: [policy-gated, proof-emitting, audit-logged]
+---
+# Composed resources that Crossplane creates from this claim:
+# ┌────────────────────────────────────────────────────────────────┐
+# │ ContainerAppJob      szl-alloy-stage-embed-worker              │
+# │   triggerType:       Event (KEDA Service Bus scaler)           │
+# │   identity:          SystemAssigned                            │
+# │   maxConcurrent:     3                                        │
+# ├────────────────────────────────────────────────────────────────┤
+# │ ServiceBusQueue      agent-work-queue                          │
+# │   maxDelivery:       3                                        │
+# │   DLQ:               agent-dlq                                │
+# ├────────────────────────────────────────────────────────────────┤
+# │ FlexibleServer       szl-alloy-stage-pg                        │
+# │   sku:               B_Standard_B1ms / 32 GB                  │
+# ├────────────────────────────────────────────────────────────────┤
+# │ KV AccessPolicy      principal=embed-worker MI                 │
+# │   permissions:       Secret: Get, List                        │
+# │   (retrieves openai-api-key, anthropic-api-key from KV)       │
+# ├────────────────────────────────────────────────────────────────┤
+# │ ConfigMap            szl-alloy-stage/proof-chain-config        │
+# │   PROOF_CHAIN_ENABLED: true                                   │
+# │   PROOF_CHAIN_ENDPOINT: $(PROOF_CHAIN_KV_SECRET)              │
+# └────────────────────────────────────────────────────────────────┘

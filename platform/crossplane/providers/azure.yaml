@@ -1,0 +1,169 @@
+---
+# Crossplane Azure Provider Configuration
+# Provider: upbound/provider-azure (family)
+# This file declares the provider and provider config needed to apply the SZL composites.
+# Authentication: Workload Identity (preferred) or Service Principal (fallback — see blocker below)
+#
+# BLOCKER: Managed Identity cannot yet replace static credentials for development environments
+# (Replit runs outside Azure). Service Principal credentials are used for dev/CI;
+# managed identity is the target for stage and prod.
+# Remediation owner: platform-team
+# Tracked: infra/landing-zone-plan.md §6 (Identity Blockers)
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "platform/crossplane/README.md"
+spec:
+  package: xpkg.upbound.io/upbound/provider-family-azure:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 2
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-app
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-app:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-dbforpostgresql
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-dbforpostgresql:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-cache
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-cache:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-keyvault
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-keyvault:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-network
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-network:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-servicebus
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-servicebus:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-storage
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-storage:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-web
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-web:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-cdn
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-cdn:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-apimanagement
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-apimanagement:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-azure-cognitiveservices
+spec:
+  package: xpkg.upbound.io/upbound/provider-azure-cognitiveservices:v1.4.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+# ── Provider Config: Workload Identity (stage + prod) ────────────────────────
+# Uses Azure AD Workload Identity federated with the Kubernetes service account.
+# No client secrets are stored in this file — credential binding happens via
+# the azure-workload-identity webhook (mutating admission controller).
+apiVersion: azure.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: azure-provider-config
+  annotations:
+    szl.io/auth-mode: "workload-identity"
+    szl.io/secret-mode: "none-embedded"
+spec:
+  credentials:
+    source: OIDCTokenFile
+    env:
+      name: AZURE_FEDERATED_TOKEN_FILE
+  clientID:
+    env:
+      name: AZURE_CLIENT_ID
+  tenantID:
+    env:
+      name: AZURE_TENANT_ID
+  subscriptionID:
+    env:
+      name: AZURE_SUBSCRIPTION_ID
+---
+# ── Provider Config: Service Principal (dev + CI — BLOCKER) ──────────────────
+# Used only in dev/CI where workload identity is unavailable.
+# Credentials are sourced from a Kubernetes Secret (populated from Key Vault in CI,
+# from Replit Secrets in local dev — never committed to this repo).
+# Replace with workload-identity config as managed identity is extended to lower envs.
+apiVersion: azure.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: azure-provider-config-dev
+  annotations:
+    szl.io/auth-mode: "service-principal"
+    szl.io/blocker: "replace-with-workload-identity"
+    szl.io/remediation-owner: "platform-team"
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: azure-sp-credentials
+      key: credentials

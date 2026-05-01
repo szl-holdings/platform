@@ -1,0 +1,122 @@
+---
+# Bootstrap: Environment-Level Application Sets
+# These Applications are managed by szl-bootstrap (app-of-apps root).
+# Each points to an environment tier directory; those directories contain
+# the actual domain Applications (platform-substrate.yaml + domain-packs.yaml).
+---
+# ── Dev environment app set ────────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: szl-apps-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    szl.io/layer: "env-app-set"
+    szl.io/environment: "dev"
+    szl.io/managed-by: "szl-bootstrap"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/dev
+    directory:
+      recurse: false
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+# ── Stage environment app set ──────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: szl-apps-stage
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    szl.io/layer: "env-app-set"
+    szl.io/environment: "stage"
+    szl.io/managed-by: "szl-bootstrap"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage
+    directory:
+      recurse: false
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false        # Stage: no auto-prune
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+---
+# ── Prod environment app set ──────────────────────────────────────────────────
+# Manages the set of prod Application manifests, NOT the prod workloads directly.
+# Each prod Application inside apps/prod/ has automated: {} (no auto-sync).
+# This parent Application only manages the Application objects, not the workloads.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: szl-apps-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    szl.io/layer: "env-app-set"
+    szl.io/environment: "prod"
+    szl.io/managed-by: "szl-bootstrap"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/prod
+    directory:
+      recurse: false
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false        # Prod: no auto-prune; manual review of removed Applications
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 2
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

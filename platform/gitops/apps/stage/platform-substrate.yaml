@@ -1,0 +1,59 @@
+---
+# Stage Environment — Platform Substrate Applications
+# Source: monorepo main branch (same source as dev; environment separation via namespace)
+# Gate: Promotion from dev requires:
+#   1. All dev Applications in Synced+Healthy state for >= 10 minutes
+#   2. No open CRITICAL or HIGH severity issues in lyte-command-center dashboard
+#   3. Platform-team LGTM on the PR (or automated approval via Temporal workflow — Phase 4)
+# Rollback: See platform/gitops/README.md §Rollback
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-server-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "platform"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-platform
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/api-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-platform-stage
+  syncPolicy:
+    automated:
+      prune: false     # Stage: no auto-prune; manual prune after review
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy-runtime-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "alloy"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-alloy
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/alloy-runtime
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-alloy-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

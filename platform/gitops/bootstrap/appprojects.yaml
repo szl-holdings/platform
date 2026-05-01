@@ -1,0 +1,504 @@
+---
+# SZL Holdings — Argo CD AppProjects
+# One project per domain + one platform project for shared substrate.
+#
+# RBAC design:
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ Role          │ Dev         │ Stage       │ Prod                        │
+# ├───────────────┼─────────────┼─────────────┼─────────────────────────────┤
+# │ domain-admin  │ full sync   │ full sync   │ get only (no sync/override) │
+# │ platform-team │ full sync   │ full sync   │ full sync (gate for prod)   │
+# │ szl-engineers │ get only    │ get only    │ get only                    │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# Prod promotions MUST go through platform-team. This is enforced by:
+#   1. Argo CD AppProject RBAC (below) — deny sync/override for domain roles on prod apps
+#   2. Argo CD Application syncPolicy for prod apps uses automated: {} (manual sync)
+#   3. GitHub CODEOWNERS + branch protection for main → requires platform-team review
+#
+# Domains: vessels, terra, counsel, carlota, aegis, lyte, alloy, platform
+---
+# ── Platform project (shared substrate) ─────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-platform
+  namespace: argocd
+  annotations:
+    szl.io/domain: "platform"
+    szl.io/owns: "crossplane, argocd-config, observability, api-server, alloy-apps"
+spec:
+  description: "SZL Platform shared substrate — Crossplane, Argo CD config, observability, API server, Alloy fabric"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+    - https://charts.crossplane.io/stable
+    - https://argoproj.github.io/argo-helm
+    - https://grafana.github.io/helm-charts
+  destinations:
+    - namespace: crossplane-system
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-prod
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "apiextensions.crossplane.io"
+      kind: CompositeResourceDefinition
+    - group: "apiextensions.crossplane.io"
+      kind: Composition
+    - group: "apiextensions.crossplane.io"
+      kind: EnvironmentConfig
+    - group: "pkg.crossplane.io"
+      kind: Provider
+    - group: "pkg.crossplane.io"
+      kind: Function
+    - group: "pkg.crossplane.io"
+      kind: DeploymentRuntimeConfig
+    - group: "kubernetes.crossplane.io"
+      kind: ProviderConfig
+    - group: "azure.upbound.io"
+      kind: ProviderConfig
+    - group: "argoproj.io"
+      kind: AppProject
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRole
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  roles:
+    - name: platform-admin
+      description: "Full sync access for platform-team (all environments)"
+      policies:
+        - p, proj:szl-platform:platform-admin, applications, *, szl-platform/*, allow
+        - p, proj:szl-platform:platform-admin, repositories, *, *, allow
+      groups:
+        - platform-team
+    - name: platform-readonly
+      description: "Read-only access for all engineers"
+      policies:
+        - p, proj:szl-platform:platform-readonly, applications, get, szl-platform/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Vessels project (Maritime Intelligence) ───────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-vessels
+  namespace: argocd
+  annotations:
+    szl.io/domain: "vessels"
+    szl.io/owner: "domain-vessels"
+spec:
+  description: "Vessels — Maritime Intelligence domain pack"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-vessels-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-vessels-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-vessels-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "szl.io"
+      kind: EventPipeline
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+  roles:
+    # domain-vessels: dev+stage full sync; prod read-only (sync denied explicitly)
+    - name: vessels-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-vessels:vessels-admin, applications, *, szl-vessels/*-dev, allow
+        - p, proj:szl-vessels:vessels-admin, applications, *, szl-vessels/*-stage, allow
+        - p, proj:szl-vessels:vessels-admin, applications, get, szl-vessels/*-prod, allow
+        - p, proj:szl-vessels:vessels-admin, applications, sync, szl-vessels/*-prod, deny
+        - p, proj:szl-vessels:vessels-admin, applications, override, szl-vessels/*-prod, deny
+        - p, proj:szl-vessels:vessels-admin, applications, action, szl-vessels/*-prod, deny
+      groups:
+        - domain-vessels
+    # platform-team: full sync for all environments including prod
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-vessels:platform-admin, applications, *, szl-vessels/*, allow
+      groups:
+        - platform-team
+    - name: vessels-readonly
+      policies:
+        - p, proj:szl-vessels:vessels-readonly, applications, get, szl-vessels/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Terra project (Real Estate Intelligence) ──────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-terra
+  namespace: argocd
+  annotations:
+    szl.io/domain: "terra"
+    szl.io/owner: "domain-terra"
+spec:
+  description: "Terra — Real Estate Intelligence domain pack"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-terra-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-terra-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-terra-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+  roles:
+    - name: terra-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-terra:terra-admin, applications, *, szl-terra/*-dev, allow
+        - p, proj:szl-terra:terra-admin, applications, *, szl-terra/*-stage, allow
+        - p, proj:szl-terra:terra-admin, applications, get, szl-terra/*-prod, allow
+        - p, proj:szl-terra:terra-admin, applications, sync, szl-terra/*-prod, deny
+        - p, proj:szl-terra:terra-admin, applications, override, szl-terra/*-prod, deny
+        - p, proj:szl-terra:terra-admin, applications, action, szl-terra/*-prod, deny
+      groups:
+        - domain-terra
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-terra:platform-admin, applications, *, szl-terra/*, allow
+      groups:
+        - platform-team
+    - name: terra-readonly
+      policies:
+        - p, proj:szl-terra:terra-readonly, applications, get, szl-terra/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Counsel project (Legal Matter Command) ───────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-counsel
+  namespace: argocd
+  annotations:
+    szl.io/domain: "counsel"
+    szl.io/owner: "domain-counsel"
+spec:
+  description: "Counsel — Legal Matter Command domain pack"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-counsel-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-counsel-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-counsel-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+  roles:
+    - name: counsel-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-counsel:counsel-admin, applications, *, szl-counsel/*-dev, allow
+        - p, proj:szl-counsel:counsel-admin, applications, *, szl-counsel/*-stage, allow
+        - p, proj:szl-counsel:counsel-admin, applications, get, szl-counsel/*-prod, allow
+        - p, proj:szl-counsel:counsel-admin, applications, sync, szl-counsel/*-prod, deny
+        - p, proj:szl-counsel:counsel-admin, applications, override, szl-counsel/*-prod, deny
+        - p, proj:szl-counsel:counsel-admin, applications, action, szl-counsel/*-prod, deny
+      groups:
+        - domain-counsel
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-counsel:platform-admin, applications, *, szl-counsel/*, allow
+      groups:
+        - platform-team
+    - name: counsel-readonly
+      policies:
+        - p, proj:szl-counsel:counsel-readonly, applications, get, szl-counsel/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Carlota project (Advisory Platform) ─────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-carlota
+  namespace: argocd
+  annotations:
+    szl.io/domain: "carlota"
+    szl.io/owner: "domain-carlota"
+spec:
+  description: "Carlota Jo — Advisory Platform domain pack"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-carlota-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-carlota-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-carlota-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+  roles:
+    - name: carlota-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-carlota:carlota-admin, applications, *, szl-carlota/*-dev, allow
+        - p, proj:szl-carlota:carlota-admin, applications, *, szl-carlota/*-stage, allow
+        - p, proj:szl-carlota:carlota-admin, applications, get, szl-carlota/*-prod, allow
+        - p, proj:szl-carlota:carlota-admin, applications, sync, szl-carlota/*-prod, deny
+        - p, proj:szl-carlota:carlota-admin, applications, override, szl-carlota/*-prod, deny
+        - p, proj:szl-carlota:carlota-admin, applications, action, szl-carlota/*-prod, deny
+      groups:
+        - domain-carlota
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-carlota:platform-admin, applications, *, szl-carlota/*, allow
+      groups:
+        - platform-team
+    - name: carlota-readonly
+      policies:
+        - p, proj:szl-carlota:carlota-readonly, applications, get, szl-carlota/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Aegis project (Cyber Resilience + Governance) ────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-aegis
+  namespace: argocd
+  annotations:
+    szl.io/domain: "aegis"
+    szl.io/owner: "aegis-team"
+spec:
+  description: "Aegis — Cyber Resilience & Governance (Sentra + OPA policies)"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-aegis-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-aegis-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-aegis-prod
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-platform-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "constraints.gatekeeper.sh"
+      kind: "*"
+    - group: "templates.gatekeeper.sh"
+      kind: ConstraintTemplate
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+  roles:
+    # Aegis governs security posture — prod changes are especially sensitive
+    - name: aegis-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-aegis:aegis-admin, applications, *, szl-aegis/*-dev, allow
+        - p, proj:szl-aegis:aegis-admin, applications, *, szl-aegis/*-stage, allow
+        - p, proj:szl-aegis:aegis-admin, applications, get, szl-aegis/*-prod, allow
+        - p, proj:szl-aegis:aegis-admin, applications, sync, szl-aegis/*-prod, deny
+        - p, proj:szl-aegis:aegis-admin, applications, override, szl-aegis/*-prod, deny
+        - p, proj:szl-aegis:aegis-admin, applications, action, szl-aegis/*-prod, deny
+      groups:
+        - aegis-team
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-aegis:platform-admin, applications, *, szl-aegis/*, allow
+      groups:
+        - platform-team
+    - name: aegis-readonly
+      policies:
+        - p, proj:szl-aegis:aegis-readonly, applications, get, szl-aegis/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Lyte project (Decision Intelligence) ─────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-lyte
+  namespace: argocd
+  annotations:
+    szl.io/domain: "lyte"
+    szl.io/owner: "lyte-team"
+spec:
+  description: "Lyte — Decision Intelligence & Observability"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-lyte-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-lyte-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-lyte-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: InternalUI
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+  roles:
+    - name: lyte-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-lyte:lyte-admin, applications, *, szl-lyte/*-dev, allow
+        - p, proj:szl-lyte:lyte-admin, applications, *, szl-lyte/*-stage, allow
+        - p, proj:szl-lyte:lyte-admin, applications, get, szl-lyte/*-prod, allow
+        - p, proj:szl-lyte:lyte-admin, applications, sync, szl-lyte/*-prod, deny
+        - p, proj:szl-lyte:lyte-admin, applications, override, szl-lyte/*-prod, deny
+        - p, proj:szl-lyte:lyte-admin, applications, action, szl-lyte/*-prod, deny
+      groups:
+        - lyte-team
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-lyte:platform-admin, applications, *, szl-lyte/*, allow
+      groups:
+        - platform-team
+    - name: lyte-readonly
+      policies:
+        - p, proj:szl-lyte:lyte-readonly, applications, get, szl-lyte/*, allow
+      groups:
+        - szl-engineers
+---
+# ── Alloy project (AI Fabric) ─────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: szl-alloy
+  namespace: argocd
+  annotations:
+    szl.io/domain: "alloy"
+    szl.io/owner: "alloy-team"
+spec:
+  description: "Alloy — AI Embedding, Ingestion, Runtime, Proof Chain fabric"
+  sourceRepos:
+    - https://github.com/szl-holdings/monorepo
+  destinations:
+    - namespace: szl-alloy-dev
+      server: https://kubernetes.default.svc
+    - namespace: szl-alloy-stage
+      server: https://kubernetes.default.svc
+    - namespace: szl-alloy-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "szl.io"
+      kind: DomainService
+    - group: "szl.io"
+      kind: AgentWorker
+    - group: "szl.io"
+      kind: EventPipeline
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: "batch"
+      kind: Job
+    - group: "batch"
+      kind: CronJob
+  roles:
+    - name: alloy-admin
+      description: "Full sync for dev/stage; read-only for prod. Use platform-admin role for prod sync."
+      policies:
+        - p, proj:szl-alloy:alloy-admin, applications, *, szl-alloy/*-dev, allow
+        - p, proj:szl-alloy:alloy-admin, applications, *, szl-alloy/*-stage, allow
+        - p, proj:szl-alloy:alloy-admin, applications, get, szl-alloy/*-prod, allow
+        - p, proj:szl-alloy:alloy-admin, applications, sync, szl-alloy/*-prod, deny
+        - p, proj:szl-alloy:alloy-admin, applications, override, szl-alloy/*-prod, deny
+        - p, proj:szl-alloy:alloy-admin, applications, action, szl-alloy/*-prod, deny
+      groups:
+        - alloy-team
+    - name: platform-admin
+      description: "Full sync for all environments — used for prod promotions"
+      policies:
+        - p, proj:szl-alloy:platform-admin, applications, *, szl-alloy/*, allow
+      groups:
+        - platform-team
+    - name: alloy-readonly
+      policies:
+        - p, proj:szl-alloy:alloy-readonly, applications, get, szl-alloy/*, allow
+      groups:
+        - szl-engineers

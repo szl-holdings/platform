@@ -1,0 +1,54 @@
+---
+# Crossplane Composition Functions
+# These functions power the Pipeline mode compositions.
+# All functions referenced by the five SZL composites are declared here.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+  annotations:
+    szl.io/managed-by: "crossplane"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-patch-and-transform:v0.8.2
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-go-templating
+  annotations:
+    szl.io/managed-by: "crossplane"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.7.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+# function-auto-ready marks composite resources as Ready when all composed
+# resources are synced and ready. Used as final step in all compositions.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-auto-ready
+  annotations:
+    szl.io/managed-by: "crossplane"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.2.1
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic
+---
+# function-environment-configs injects EnvironmentConfig data (cluster-level
+# platform values like azureTenantId) into the composition context.
+# Values are accessible in go-templating via:
+#   .context["apiextensions.crossplane.io/environment"].azureTenantId
+# Composition step: add a step referencing this function BEFORE any KV access steps.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-environment-configs
+  annotations:
+    szl.io/managed-by: "crossplane"
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-environment-configs:v0.3.0
+  packagePullPolicy: IfNotPresent
+  revisionActivationPolicy: Automatic

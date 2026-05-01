@@ -1,0 +1,293 @@
+---
+# Composition: XDomainService → Azure Container Apps
+# Provisions: Container App (always), Azure Key Vault AccessPolicy (always),
+#             PostgreSQL Flexible Server (database.enabled=true),
+#             Redis Cache (cache.enabled=true),
+#             Private Endpoint on Container App Environment (networkExposure=private)
+#
+# Resource naming convention: szl-{domain}-{environment}-{component}
+# Resource group: selected via szl.io/resource: "platform-compute-rg" label
+#
+# Two-reconciliation pattern:
+#   - Reconcile 1: Container App created; identity not yet available
+#   - Reconcile 2: identity.principalId available in status.atProvider;
+#     Key Vault AccessPolicy gets objectId from observed ContainerApp status
+#     (Crossplane retries automatically on missing status fields)
+#
+# Private networking: attaches a PrivateEndpoint to the shared Container App Environment
+# (managed env) rather than individual apps — correct ACA private-link pattern.
+# Uses subresource "managedEnvironments" per Azure ACA private-link documentation.
+#
+# OPA gate hook: policyLabels populated by admission controller (Phase 4).
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xdomainservice-azure-aca
+  labels:
+    szl.io/provider: azure
+    szl.io/runtime: container-apps
+    szl.io/composite: XDomainService
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  compositeTypeRef:
+    apiVersion: szl.io/v1alpha1
+    kind: XDomainService
+  mode: Pipeline
+  pipeline:
+    # ── Step 0: Load EnvironmentConfig (platform-wide values) ─────────────────
+    # Injects szl-platform-config EnvironmentConfig into the pipeline context.
+    # Values accessible as: .context["apiextensions.crossplane.io/environment"].<key>
+    # Used by: resolve-kv-access (tenantId)
+    - step: load-environment-config
+      functionRef:
+        name: function-environment-configs
+      input:
+        apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+        kind: Input
+        spec:
+          environmentConfigs:
+            - type: Reference
+              ref:
+                name: szl-platform-config
+
+    # ── Step 1: Container App (always) ────────────────────────────────────────
+    - step: resolve-container-app
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            ---
+            apiVersion: app.azure.upbound.io/v1beta2
+            kind: ContainerApp
+            metadata:
+              labels:
+                szl.io/composition-component: container-app
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: container-app
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-app
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                containerAppEnvironmentIdSelector:
+                  matchLabels:
+                    szl.io/resource: "container-app-environment"
+                revisionMode: Single
+                ingress:
+                  - externalEnabled: {{ eq .observed.composite.resource.spec.networkExposure "public" }}
+                    targetPort: {{ .observed.composite.resource.spec.containerPort | default 3000 }}
+                    trafficWeight:
+                      - latestRevision: true
+                        percentage: 100
+                template:
+                  - container:
+                      - image: {{ .observed.composite.resource.spec.containerImage | default "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest" }}
+                        name: app
+                        cpu: "0.25"
+                        memory: "0.5Gi"
+                    scale:
+                      - minReplicas: {{ .observed.composite.resource.spec.minReplicas | default 0 }}
+                        maxReplicas: {{ .observed.composite.resource.spec.maxReplicas | default 5 }}
+                identity:
+                  - type: SystemAssigned
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-criticality: {{ .observed.composite.resource.spec.criticality }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+                  szl-owner: {{ .observed.composite.resource.spec.owner }}
+                  szl-secret-source: {{ .observed.composite.resource.spec.secretSourceMode }}
+                  szl-observability-tier: {{ .observed.composite.resource.spec.observabilityTier }}
+
+    # ── Step 2: Key Vault AccessPolicy (always) ───────────────────────────────
+    # Grants this app's system-assigned managed identity read access to Key Vault.
+    # objectId is patched from the ContainerApp's status.atProvider.identity[0].principalId
+    # on second+ reconciliations. First reconciliation: ContainerApp identity not yet provisioned;
+    # Crossplane retries automatically when objectId is empty or status is missing.
+    - step: resolve-kv-access
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{- $principalId := "" }}
+            {{- if .observed.resources }}
+              {{- $appRes := index .observed.resources "container-app" }}
+              {{- if $appRes }}
+                {{- if $appRes.resource.status.atProvider }}
+                  {{- $identities := $appRes.resource.status.atProvider.identity }}
+                  {{- if $identities }}
+                    {{- $principalId = (index $identities 0).principalId | default "" }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+            ---
+            apiVersion: keyvault.azure.upbound.io/v1beta1
+            kind: AccessPolicy
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: kv-access-policy
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                keyVaultIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-key-vault"
+                tenantId: {{ (index .context "apiextensions.crossplane.io/environment").azureTenantId }}
+                objectId: {{ if $principalId }}{{ $principalId }}{{ else }}pending-identity-provisioning{{ end }}
+                secretPermissions:
+                  - Get
+                  - List
+                keyPermissions: []
+                certificatePermissions: []
+
+    # ── Step 3: PostgreSQL (conditional: database.enabled=true) ───────────────
+    - step: resolve-database
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.database.enabled }}
+            ---
+            apiVersion: dbforpostgresql.azure.upbound.io/v1beta2
+            kind: FlexibleServer
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: postgresql-server
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-pg
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                administratorLogin: szladmin
+                administratorPasswordSecretRef:
+                  namespace: crossplane-system
+                  name: szl-pg-admin-secret
+                  key: password
+                skuName: {{ if eq .observed.composite.resource.spec.database.skuTier "GeneralPurpose" }}GP_Standard_D2s_v3{{ else if eq .observed.composite.resource.spec.database.skuTier "MemoryOptimized" }}MO_Standard_E2s_v3{{ else }}B_Standard_B1ms{{ end }}
+                storageMb: {{ mul (.observed.composite.resource.spec.database.storageGB | default 32) 1024 }}
+                version: "16"
+                highAvailability:
+                  - mode: Disabled
+                backup:
+                  - backupRetentionDays: {{ if eq .observed.composite.resource.spec.backupProfile "daily-30d" }}30{{ else }}7{{ end }}
+                    geoRedundantBackup: Disabled
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+            {{ end }}
+
+    # ── Step 4: Redis Cache (conditional: cache.enabled=true) ────────────────
+    - step: resolve-cache
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if .observed.composite.resource.spec.cache.enabled }}
+            ---
+            apiVersion: cache.azure.upbound.io/v1beta1
+            kind: RedisCache
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: redis-cache
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-redis
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                capacity: 1
+                family: C
+                skuName: {{ .observed.composite.resource.spec.cache.skuName | default "Basic" }}
+                enableNonSslPort: false
+                minimumTlsVersion: "1.2"
+                redisConfiguration:
+                  - maxmemoryPolicy: allkeys-lru
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+                  szl-cost-center: {{ .observed.composite.resource.spec.costCenter }}
+            {{ end }}
+
+    # ── Step 5: Private Endpoint (conditional: networkExposure=private) ───────
+    # Attaches a PrivateEndpoint to the shared Container App Environment (not individual app).
+    # Azure Container Apps private link applies at the managed environment level.
+    # Subresource: managedEnvironments (Azure ACA private-link resource type).
+    - step: resolve-private-endpoint
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.networkExposure "private" }}
+            ---
+            apiVersion: network.azure.upbound.io/v1beta1
+            kind: PrivateEndpoint
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-endpoint
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-pe
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-compute-rg"
+                subnetIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-private-endpoint-subnet"
+                privateServiceConnection:
+                  - isManualConnection: false
+                    name: pe-{{ .observed.composite.resource.spec.domain }}-{{ .observed.composite.resource.spec.environment }}-conn
+                    privateConnectionResourceIdSelector:
+                      matchLabels:
+                        szl.io/resource: "container-app-environment"
+                    subresourceNames:
+                      - managedEnvironments
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+            {{ end }}
+
+    # ── Step 6: Mark composite ready ─────────────────────────────────────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready
+
+  writeConnectionSecretsToNamespace: crossplane-system

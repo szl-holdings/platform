@@ -1,0 +1,153 @@
+---
+# Stage Environment — Domain Pack Applications
+# Gate: dev-healthy-10m + platform-team LGTM
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vessels-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "vessels"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-vessels
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-vessels-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: terra-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "terra"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-terra
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/terra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-terra-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: counsel-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "counsel"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-counsel
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/counsel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-counsel-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: carlota-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "carlota"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-carlota
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/carlota
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-carlota-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sentra-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "aegis"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-aegis
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/sentra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-aegis-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lyte-stage
+  namespace: argocd
+  annotations:
+    szl.io/environment: "stage"
+    szl.io/domain: "lyte"
+    szl.io/promotion-gate: "dev-healthy-10m"
+spec:
+  project: szl-lyte
+  source:
+    repoURL: https://github.com/szl-holdings/monorepo
+    targetRevision: main
+    path: platform/gitops/apps/stage/manifests/lyte
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: szl-lyte-stage
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

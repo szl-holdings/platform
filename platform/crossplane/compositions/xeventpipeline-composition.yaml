@@ -1,0 +1,181 @@
+---
+# Composition: XEventPipeline → Azure Service Bus (topic + subscriptions)
+# Provisions: Service Bus Topic (always), one Subscription per spec.subscriptions entry,
+#             Connection string secret reference ConfigMap (always),
+#             Private Endpoint (conditional: networkExposure=private)
+#
+# Composition function pipeline:
+#   Step 1: resolve-topic         — Service Bus Topic (always)
+#   Step 2: resolve-subscriptions — Subscriptions via for-each go-template (always, >= 1)
+#   Step 3: resolve-secret-ref    — Connection string pointer ConfigMap (always)
+#   Step 4: resolve-network       — Private Endpoint (conditional: networkExposure=private)
+#   Step 5: auto-ready            — composite ready signal
+#
+# XEventPipeline subscription wiring:
+# The topic is labeled with szl.io/pipeline-topic: {topicName} so subscriptions can
+# select it via topicIdSelector. Both resources are created in the same pipeline run
+# and share the label via the selector pattern.
+#
+# OPA gate hook: policyLabels populated by admission controller (Phase 4).
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xeventpipeline-azure-servicebus
+  labels:
+    szl.io/provider: azure
+    szl.io/runtime: service-bus
+    szl.io/composite: XEventPipeline
+  annotations:
+    szl.io/managed-by: "crossplane"
+    szl.io/docs: "docs/reference-architecture-szl.md#plane-3--resource"
+spec:
+  compositeTypeRef:
+    apiVersion: szl.io/v1alpha1
+    kind: XEventPipeline
+  mode: Pipeline
+  pipeline:
+    # ── Step 1: Service Bus Topic (always) ────────────────────────────────────
+    - step: resolve-topic
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            ---
+            apiVersion: servicebus.azure.upbound.io/v1beta2
+            kind: Topic
+            metadata:
+              labels:
+                szl.io/pipeline-topic: {{ .observed.composite.resource.spec.topicName }}
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: service-bus-topic
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: {{ .observed.composite.resource.spec.topicName }}
+                namespaceIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-service-bus-namespace"
+                enablePartitioning: false
+                requiresDuplicateDetection: false
+                defaultMessageTtl: PT{{ .observed.composite.resource.spec.messageTtlHours | default 24 }}H
+                maxSizeInMegabytes: 1024
+
+    # ── Step 2: Subscriptions (one per spec.subscriptions entry) ─────────────
+    # Each subscription selects the topic by its szl.io/pipeline-topic label,
+    # which is set on the Topic resource in Step 1 above.
+    - step: resolve-subscriptions
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ range $i, $sub := .observed.composite.resource.spec.subscriptions }}
+            ---
+            apiVersion: servicebus.azure.upbound.io/v1beta2
+            kind: Subscription
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: subscription-{{ $i }}
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: {{ $sub.name }}
+                topicIdSelector:
+                  matchLabels:
+                    szl.io/pipeline-topic: {{ $.observed.composite.resource.spec.topicName }}
+                maxDeliveryCount: {{ $sub.maxDeliveryCount | default 3 }}
+                lockDuration: PT{{ $sub.lockDurationSeconds | default 60 }}S
+                deadLetteringOnMessageExpiration: {{ $.observed.composite.resource.spec.deadLetterEnabled | default true }}
+                defaultMessageTimeToLive: PT{{ $.observed.composite.resource.spec.messageTtlHours | default 24 }}H
+            {{ end }}
+
+    # ── Step 3: Connection string secret reference (always) ───────────────────
+    # Records the Key Vault secret name for the namespace connection string.
+    # The actual secret value is written to Key Vault by infra/modules/servicebus.bicep.
+    # This step only creates a pointer ConfigMap — no credentials are embedded.
+    - step: resolve-secret-ref
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            ---
+            apiVersion: kubernetes.crossplane.io/v1alpha2
+            kind: Object
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: connection-secret-ref
+            spec:
+              providerConfigRef:
+                name: kubernetes-provider-config
+              forProvider:
+                manifest:
+                  apiVersion: v1
+                  kind: ConfigMap
+                  metadata:
+                    name: sb-conn-ref-{{ .observed.composite.resource.spec.topicName }}-{{ .observed.composite.resource.spec.environment }}
+                    namespace: szl-platform
+                  data:
+                    kvSecretName: sb-conn-{{ .observed.composite.resource.spec.topicName }}-{{ .observed.composite.resource.spec.environment }}
+                    note: "Connection string stored in Key Vault. Retrieve at runtime via managed identity — never distribute."
+
+    # ── Step 4: Private Endpoint (conditional: networkExposure=private) ───────
+    - step: resolve-private-endpoint
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{ if eq .observed.composite.resource.spec.networkExposure "private" }}
+            ---
+            apiVersion: network.azure.upbound.io/v1beta1
+            kind: PrivateEndpoint
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-endpoint
+            spec:
+              providerConfigRef:
+                name: azure-provider-config
+              forProvider:
+                name: szl-{{ .observed.composite.resource.spec.topicName }}-{{ .observed.composite.resource.spec.environment }}-pe
+                location: westeurope
+                resourceGroupNameSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-shared-rg"
+                subnetIdSelector:
+                  matchLabels:
+                    szl.io/resource: "platform-private-endpoint-subnet"
+                privateServiceConnection:
+                  - isManualConnection: false
+                    name: pe-sb-{{ .observed.composite.resource.spec.topicName }}-{{ .observed.composite.resource.spec.environment }}-conn
+                    privateConnectionResourceIdSelector:
+                      matchLabels:
+                        szl.io/resource: "platform-service-bus-namespace"
+                    subresourceNames:
+                      - namespace
+                tags:
+                  szl-environment: {{ .observed.composite.resource.spec.environment }}
+                  szl-domain: {{ .observed.composite.resource.spec.domain }}
+            {{ end }}
+
+    # ── Step 5: Mark composite ready ─────────────────────────────────────────
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready
+
+  writeConnectionSecretsToNamespace: crossplane-system
