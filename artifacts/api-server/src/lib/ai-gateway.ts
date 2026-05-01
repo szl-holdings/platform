@@ -23,7 +23,9 @@ export interface GatewayRequest {
   maxTokens?: number;
   agentId?: string;
   domain?: string;
+  orgId?: string;
   preferredProvider?: InferenceProvider;
+  allowedProviders?: InferenceProvider[];
   strategy?: RoutingStrategy;
   timeoutMs?: number;
   maxRetries?: number;
@@ -313,7 +315,8 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
 
   if (strategy === 'preferred' && request.preferredProvider) {
     const preferred = request.preferredProvider;
-    if (isProviderAvailable(preferred)) {
+    const providerAllowed = !request.allowedProviders || request.allowedProviders.length === 0 || request.allowedProviders.includes(preferred);
+    if (isProviderAvailable(preferred) && providerAllowed) {
       const preferredEntry = modelList.find((e) => e.provider === preferred);
       const model = request.model ?? preferredEntry?.model ?? modelList[0]?.model ?? 'gpt-5.2';
       const health = providerHealth.getStatus(preferred);
@@ -332,6 +335,7 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
   for (const { provider, model } of modelList) {
     if (candidates.some((c) => c.provider === provider)) continue;
     if (!isProviderAvailable(provider)) continue;
+    if (request.allowedProviders && request.allowedProviders.length > 0 && !request.allowedProviders.includes(provider)) continue;
 
     const health = providerHealth.getStatus(provider);
     if (health.status === 'down') continue;
@@ -546,6 +550,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
   const timeoutMs = request.timeoutMs ?? 30000;
   const agentId = request.agentId ?? 'anonymous';
   const domain = request.domain ?? 'general';
+  const orgId = request.orgId;
 
   const candidates = selectCandidates(request);
   if (candidates.length === 0) {
@@ -614,6 +619,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           model: result.model,
           agentId,
           domain,
+          orgId,
           latencyMs,
           promptTokens: result.usage.promptTokens,
           completionTokens: result.usage.completionTokens,
@@ -664,6 +670,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           model: candidate.model,
           agentId,
           domain,
+          orgId,
           latencyMs,
           promptTokens: 0,
           completionTokens: 0,

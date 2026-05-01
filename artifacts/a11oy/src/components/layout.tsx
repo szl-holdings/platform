@@ -131,6 +131,7 @@ const NAV_GROUPS = [
       { href: '/tools',        label: 'Tools' },
       { href: '/skills',       label: 'Skills' },
       { href: '/model-router', label: 'Model Router' },
+      { href: '/ai-gateway',   label: 'AI Gateway' },
       { href: '/connectors',   label: 'Agent Gateway' },
       { href: '/twins',        label: 'Twin Foundry' },
       { href: '/terminal',     label: 'Terminal' },

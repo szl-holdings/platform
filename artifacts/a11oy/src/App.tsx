@@ -47,6 +47,7 @@ const Constitution = lazy(() => import('./pages/Constitution').then(m => ({ defa
 const SecurityCompliance = lazy(() => import('./pages/SecurityCompliance').then(m => ({ default: m.SecurityCompliance })));
 const RightToAudit = lazy(() => import('./pages/RightToAudit').then(m => ({ default: m.RightToAudit })));
 const ModelRouter = lazy(() => import('./pages/ModelRouter').then(m => ({ default: m.ModelRouter })));
+const AiGateway = lazy(() => import('./pages/AiGateway').then(m => ({ default: m.AiGateway })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
 const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
 const SovereignReplayDetail = lazy(() => import('./pages/SovereignReplayDetail').then(m => ({ default: m.SovereignReplayDetail })));
@@ -205,6 +206,7 @@ export default function App() {
         <Route path={`${base}/connectors`} component={ConnectorFirewall} />
         <Route path={`${base}/twins`} component={TwinFoundry} />
         <Route path={`${base}/model-router`} component={ModelRouter} />
+        <Route path={`${base}/ai-gateway`} component={AiGateway} />
         <Route path={`${base}/skills`} component={SkillsLibrary} />
         <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
         <Route path={`${base}/replay`} component={WorkcellReplay} />

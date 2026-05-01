@@ -16,6 +16,7 @@ export interface InferenceRecord {
   model: string;
   agentId: string;
   domain: string;
+  orgId?: string;
   latencyMs: number;
   promptTokens: number;
   completionTokens: number;
@@ -152,6 +153,7 @@ class InferenceTelemetryStore {
       provider?: InferenceProvider;
       agentId?: string;
       model?: string;
+      orgId?: string;
       limit?: number;
     } = {},
   ): InferenceRecord[] {
@@ -161,12 +163,14 @@ class InferenceTelemetryStore {
     if (options.provider) results = results.filter((r) => r.provider === options.provider);
     if (options.agentId) results = results.filter((r) => r.agentId === options.agentId);
     if (options.model) results = results.filter((r) => r.model === options.model);
+    if (options.orgId) results = results.filter((r) => r.orgId === options.orgId);
     return results.slice(0, options.limit ?? 200);
   }
 
-  getProviderStats(windowMs = DEFAULT_WINDOW_MS): ProviderStats[] {
+  getProviderStats(windowMs = DEFAULT_WINDOW_MS, orgId?: string): ProviderStats[] {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter((r) => r.timestamp >= cutoff);
+    let recent = this.records.filter((r) => r.timestamp >= cutoff);
+    if (orgId) recent = recent.filter((r) => r.orgId === orgId);
     const byProvider = new Map<InferenceProvider, InferenceRecord[]>();
 
     for (const r of recent) {
@@ -207,9 +211,10 @@ class InferenceTelemetryStore {
     return stats.sort((a, b) => b.totalRequests - a.totalRequests);
   }
 
-  getModelStats(windowMs = DEFAULT_WINDOW_MS): ModelStats[] {
+  getModelStats(windowMs = DEFAULT_WINDOW_MS, orgId?: string): ModelStats[] {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter((r) => r.timestamp >= cutoff);
+    let recent = this.records.filter((r) => r.timestamp >= cutoff);
+    if (orgId) recent = recent.filter((r) => r.orgId === orgId);
     const byModel = new Map<string, InferenceRecord[]>();
 
     for (const r of recent) {
@@ -242,9 +247,10 @@ class InferenceTelemetryStore {
     return stats.sort((a, b) => b.totalRequests - a.totalRequests);
   }
 
-  getSummary(windowMs = DEFAULT_WINDOW_MS): TelemetrySummary {
+  getSummary(windowMs = DEFAULT_WINDOW_MS, orgId?: string): TelemetrySummary {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter((r) => r.timestamp >= cutoff);
+    let recent = this.records.filter((r) => r.timestamp >= cutoff);
+    if (orgId) recent = recent.filter((r) => r.orgId === orgId);
     const successes = recent.filter((r) => r.success);
     const latencies = successes.map((r) => r.latencyMs);
     const totalTokens = recent.reduce((s, r) => s + r.totalTokens, 0);
@@ -307,8 +313,8 @@ class InferenceTelemetryStore {
           : 0,
       successRate:
         recent.length > 0 ? parseFloat((successes.length / recent.length).toFixed(4)) : 1,
-      providerBreakdown: this.getProviderStats(windowMs),
-      modelBreakdown: this.getModelStats(windowMs),
+      providerBreakdown: this.getProviderStats(windowMs, orgId),
+      modelBreakdown: this.getModelStats(windowMs, orgId),
       topAgents,
       recentErrors,
       throughputPerMinute,

@@ -351,6 +351,7 @@ router.use(
 router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
 router.use(lazyMatch("/tool-mesh", () => import("./tool-mesh"), "tool-mesh"));
 router.use(lazyMatch("/praxis-tools", () => import("./praxis-tools"), "praxis-tools"));
+router.use(lazyMatch("/ai-gateway", () => import("./ai-gateway"), "ai-gateway"));
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
