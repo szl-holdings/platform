@@ -62,7 +62,10 @@ test.describe('PRAXIS pattern atlas', () => {
 
   test('clicking a component shows its props and code snippet', async ({ page }) => {
     await page.goto(`${PRAXIS}#patterns`);
-    await page.getByRole('button', { name: /AuthGate/ }).first().click();
+    await page
+      .getByRole('button', { name: /AuthGate/ })
+      .first()
+      .click();
     await expect(page.getByText('Usage')).toBeVisible();
     await expect(page.getByText('Props')).toBeVisible();
     await expect(page.getByText('lib/shared-ui/src/AuthGate.tsx')).toBeVisible();
@@ -86,8 +89,14 @@ test.describe('PRAXIS pattern atlas', () => {
 
   test('boolean prop control updates code snippet', async ({ page }) => {
     await page.goto(`${PRAXIS}#patterns`);
-    await page.getByRole('button', { name: /AutonomyDial/ }).first().click();
-    const disabledControl = page.locator('label').filter({ hasText: /false|true/ }).first();
+    await page
+      .getByRole('button', { name: /AutonomyDial/ })
+      .first()
+      .click();
+    const disabledControl = page
+      .locator('label')
+      .filter({ hasText: /false|true/ })
+      .first();
     await expect(disabledControl).toBeVisible();
   });
 
@@ -102,7 +111,12 @@ test.describe('PRAXIS pattern atlas', () => {
     // Component buttons render the component name + category badge concatenated
     // in their inner text (e.g. "AuthGateAuth●"), so match with a prefix
     // anchor only.
-    await expect(page.locator('button').filter({ hasText: /^AuthGate/ }).first()).toBeVisible();
+    await expect(
+      page
+        .locator('button')
+        .filter({ hasText: /^AuthGate/ })
+        .first(),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: /^AuthGateProps\b/ })).toHaveCount(0);
   });
 });
@@ -248,7 +262,9 @@ test.describe('PRAXIS prompt registry', () => {
     // 'Prompts' appears in the sidebar nav and on the metric card. Pin to
     // the metric label by scoping to its sibling counter.
     await expect(page.getByText('Prompts').first()).toBeVisible();
-    await expect(page.locator('.text-praxis-cyan').filter({ hasText: /^1$/ }).first()).toBeVisible();
+    await expect(
+      page.locator('.text-praxis-cyan').filter({ hasText: /^1$/ }).first(),
+    ).toBeVisible();
   });
 
   test('lists prompts with name and status', async ({ page }) => {
@@ -439,7 +455,10 @@ test.describe('PRAXIS third-party leaders registry', () => {
     },
   ];
 
-  function mockLeaders(page: import('@playwright/test').Page, overrides?: Partial<typeof SIX_LEADERS[number]>[]) {
+  function mockLeaders(
+    page: import('@playwright/test').Page,
+    overrides?: Partial<(typeof SIX_LEADERS)[number]>[],
+  ) {
     const leaders = SIX_LEADERS.map((l, i) => ({
       ...l,
       licenseSpdx: l.license,
@@ -451,8 +470,15 @@ test.describe('PRAXIS third-party leaders registry', () => {
       lastFetchedCommit: 'abc123f',
       lastFetchedAt: new Date().toISOString(),
       enabled: false,
-      logicalCapability: ['video.render', 'web.stealth', 'marketing.audit', 'seo.audit', 'finance.terminal', undefined][i],
-      ...(overrides?.[i] ?? {}),
+      logicalCapability: [
+        'video.render',
+        'web.stealth',
+        'marketing.audit',
+        'seo.audit',
+        'finance.terminal',
+        undefined,
+      ][i],
+      ...overrides?.[i],
     }));
     return page.route('**/api/nexus/leaders', (route) =>
       route.fulfill({
@@ -549,7 +575,9 @@ test.describe('PRAXIS third-party leaders registry', () => {
     });
 
     // The leaders list renders toggle buttons; click the first one (HyperFrames)
-    const toggleButtons = page.locator('[data-testid="leaders-list"] button').filter({ hasText: '' });
+    const toggleButtons = page
+      .locator('[data-testid="leaders-list"] button')
+      .filter({ hasText: '' });
     // Find the toggle for HyperFrames by looking for the ToggleLeft inside its card
     const firstLeaderCard = page.locator('[data-testid="leaders-list"] > div').first();
     const toggleBtn = firstLeaderCard.locator('button').last();

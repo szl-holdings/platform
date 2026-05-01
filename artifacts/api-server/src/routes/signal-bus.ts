@@ -9,7 +9,12 @@ import {
   signalBusDeadLettersTable,
 } from '@szl-holdings/db';
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
-import { createSignal, type Signal, type SignalDomain, type SignalType } from '@workspace/ontology/signal';
+import {
+  createSignal,
+  type Signal,
+  type SignalDomain,
+  type SignalType,
+} from '@workspace/ontology/signal';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { handleRouteError } from '../lib/api-response.js';
@@ -33,8 +38,8 @@ router.use(SIGNAL_BUS_OWNED_PREFIXES, authMiddleware());
 const SEVERITY_ORDER = ['info', 'low', 'medium', 'high', 'critical'] as const;
 
 function severityMet(signalSev: string | undefined, minSev: string): boolean {
-  const sigIdx = SEVERITY_ORDER.indexOf((signalSev ?? 'info') as typeof SEVERITY_ORDER[number]);
-  const minIdx = SEVERITY_ORDER.indexOf(minSev as typeof SEVERITY_ORDER[number]);
+  const sigIdx = SEVERITY_ORDER.indexOf((signalSev ?? 'info') as (typeof SEVERITY_ORDER)[number]);
+  const minIdx = SEVERITY_ORDER.indexOf(minSev as (typeof SEVERITY_ORDER)[number]);
   return sigIdx >= minIdx;
 }
 
@@ -96,7 +101,9 @@ async function executeAction(
     case 'notify_channel': {
       const channel = (config.channel as OutboundChannel) ?? 'webhook';
       const title = (config.titleTemplate as string) ?? signal.rawPayload?.title ?? signal.type;
-      const message = (config.messageTemplate as string) ?? `Signal from ${signal.domain}: ${signal.rawPayload?.title ?? signal.type}`;
+      const message =
+        (config.messageTemplate as string) ??
+        `Signal from ${signal.domain}: ${signal.rawPayload?.title ?? signal.type}`;
       const channelConfig = (config.channelConfig as Record<string, unknown>) ?? {};
 
       try {
@@ -212,7 +219,15 @@ async function evaluateRulesForSignal(signal: Signal): Promise<void> {
           })
           .where(eq(signalBusRulesTable.ruleId, rule.ruleId));
 
-        logger.info({ ruleId: rule.ruleId, ruleName: rule.name, signalId: signal.signalId, action: result.action }, '[signal-bus] rule fired');
+        logger.info(
+          {
+            ruleId: rule.ruleId,
+            ruleName: rule.name,
+            signalId: signal.signalId,
+            action: result.action,
+          },
+          '[signal-bus] rule fired',
+        );
       } catch (actionErr) {
         const errMsg = actionErr instanceof Error ? actionErr.message : 'Action execution failed';
         await db.insert(signalBusDeadLettersTable).values({
@@ -222,10 +237,16 @@ async function evaluateRulesForSignal(signal: Signal): Promise<void> {
           sourceDomain: signal.domain,
           sourceType: signal.type,
           errorMessage: errMsg,
-          payload: { signal: signal.rawPayload, rule: { name: rule.name, actionType: rule.actionType } },
+          payload: {
+            signal: signal.rawPayload,
+            rule: { name: rule.name, actionType: rule.actionType },
+          },
           orgId: rule.orgId,
         });
-        logger.warn({ ruleId: rule.ruleId, err: errMsg }, '[signal-bus] action failed, dead-lettered');
+        logger.warn(
+          { ruleId: rule.ruleId, err: errMsg },
+          '[signal-bus] action failed, dead-lettered',
+        );
       }
     }
   } catch (err) {
@@ -256,7 +277,8 @@ router.get('/rules', async (req: Request, res: Response) => {
       res.json({ rules: [] });
       return;
     }
-    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
+    const orgFilter =
+      orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
     const rules = await db
       .select()
       .from(signalBusRulesTable)
@@ -270,9 +292,21 @@ router.get('/rules', async (req: Request, res: Response) => {
 
 router.post('/rules', async (req: Request, res: Response) => {
   try {
-    const { name, description, sourceDomain, sourceType, minSeverity, conditions, actionType, actionConfig, targetDomain } = req.body;
+    const {
+      name,
+      description,
+      sourceDomain,
+      sourceType,
+      minSeverity,
+      conditions,
+      actionType,
+      actionConfig,
+      targetDomain,
+    } = req.body;
     if (!name || !sourceDomain || !sourceType || !actionType || !actionConfig) {
-      res.status(400).json({ error: 'Missing required fields: name, sourceDomain, sourceType, actionType, actionConfig' });
+      res.status(400).json({
+        error: 'Missing required fields: name, sourceDomain, sourceType, actionType, actionConfig',
+      });
       return;
     }
     const rule = {
@@ -304,8 +338,20 @@ router.put('/rules/:ruleId', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'Rule not found' });
       return;
     }
-    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
-    const { name, description, enabled, sourceDomain, sourceType, minSeverity, conditions, actionType, actionConfig, targetDomain } = req.body;
+    const orgFilter =
+      orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
+    const {
+      name,
+      description,
+      enabled,
+      sourceDomain,
+      sourceType,
+      minSeverity,
+      conditions,
+      actionType,
+      actionConfig,
+      targetDomain,
+    } = req.body;
     const updated = await db
       .update(signalBusRulesTable)
       .set({
@@ -341,7 +387,8 @@ router.delete('/rules/:ruleId', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'Rule not found' });
       return;
     }
-    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
+    const orgFilter =
+      orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
     const deleted = await db
       .delete(signalBusRulesTable)
       .where(and(eq(signalBusRulesTable.ruleId, ruleId!), orgFilter))
@@ -363,7 +410,10 @@ router.get('/events', async (req: Request, res: Response) => {
       res.json({ events: [], total: 0 });
       return;
     }
-    const orgFilter = orgIds !== null ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String)) : undefined;
+    const orgFilter =
+      orgIds !== null
+        ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String))
+        : undefined;
     const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10) || 100, 500);
     const events = await db
       .select()
@@ -384,7 +434,10 @@ router.get('/dead-letters', async (req: Request, res: Response) => {
       res.json({ deadLetters: [], total: 0 });
       return;
     }
-    const orgFilter = orgIds !== null ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String)) : undefined;
+    const orgFilter =
+      orgIds !== null
+        ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String))
+        : undefined;
     const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10) || 50, 200);
     const letters = await db
       .select()
@@ -411,14 +464,33 @@ router.get('/stats', async (req: Request, res: Response) => {
       });
       return;
     }
-    const ruleOrgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
-    const eventOrgFilter = orgIds !== null ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String)) : undefined;
-    const dlOrgFilter = orgIds !== null ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String)) : undefined;
+    const ruleOrgFilter =
+      orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
+    const eventOrgFilter =
+      orgIds !== null
+        ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String))
+        : undefined;
+    const dlOrgFilter =
+      orgIds !== null
+        ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String))
+        : undefined;
 
-    const [ruleCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable).where(ruleOrgFilter);
-    const [enabledCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable).where(and(eq(signalBusRulesTable.enabled, 'true'), ruleOrgFilter));
-    const [eventCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRoutedEventsTable).where(eventOrgFilter);
-    const [deadLetterCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusDeadLettersTable).where(dlOrgFilter);
+    const [ruleCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(signalBusRulesTable)
+      .where(ruleOrgFilter);
+    const [enabledCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(signalBusRulesTable)
+      .where(and(eq(signalBusRulesTable.enabled, 'true'), ruleOrgFilter));
+    const [eventCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(signalBusRoutedEventsTable)
+      .where(eventOrgFilter);
+    const [deadLetterCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(signalBusDeadLettersTable)
+      .where(dlOrgFilter);
     const recentEvents = await db
       .select({
         actionType: signalBusRoutedEventsTable.actionType,
@@ -455,9 +527,11 @@ router.post('/publish', async (req: Request, res: Response) => {
       freshness: 1,
       confidence: 0.95,
       severity: severity ?? 'medium',
-      entityRefs: entityId ? [{ entityId, entityType: entityType ?? 'unknown', displayName: title }] : [],
+      entityRefs: entityId
+        ? [{ entityId, entityType: entityType ?? 'unknown', displayName: title }]
+        : [],
       tenantId: (req as unknown as { tenantOrgId?: string }).tenantOrgId ?? undefined,
-      rawPayload: { title, ...(payload ?? {}) },
+      rawPayload: { title, ...payload },
       tags: ['manual-publish'],
       provenance: { sourceService: 'signal-bus-api' },
     });
@@ -481,8 +555,16 @@ router.post('/test-fire', async (req: Request, res: Response) => {
           freshness: 1,
           confidence: 0.97,
           severity: 'critical',
-          entityRefs: [{ entityId: 'vessel-mv-aurora', entityType: 'vessel', displayName: 'MV Aurora' }],
-          rawPayload: { title: 'OFAC SDN match — MV Aurora', sanctionsList: 'OFAC SDN', matchScore: 0.97, vesselName: 'MV Aurora', imo: '9876543' },
+          entityRefs: [
+            { entityId: 'vessel-mv-aurora', entityType: 'vessel', displayName: 'MV Aurora' },
+          ],
+          rawPayload: {
+            title: 'OFAC SDN match — MV Aurora',
+            sanctionsList: 'OFAC SDN',
+            matchScore: 0.97,
+            vesselName: 'MV Aurora',
+            imo: '9876543',
+          },
           tags: ['demo', 'sanctions'],
           provenance: { sourceService: 'vessels-sanctions-scanner' },
         }),
@@ -495,8 +577,15 @@ router.post('/test-fire', async (req: Request, res: Response) => {
           freshness: 1,
           confidence: 0.92,
           severity: 'high',
-          entityRefs: [{ entityId: 'host-dc-prod-07', entityType: 'host', displayName: 'DC-PROD-07' }],
-          rawPayload: { title: 'Lateral movement detected — DC-PROD-07', attackPattern: 'T1021.002', attackerIp: '10.0.5.42', affectedAssets: 3 },
+          entityRefs: [
+            { entityId: 'host-dc-prod-07', entityType: 'host', displayName: 'DC-PROD-07' },
+          ],
+          rawPayload: {
+            title: 'Lateral movement detected — DC-PROD-07',
+            attackPattern: 'T1021.002',
+            attackerIp: '10.0.5.42',
+            affectedAssets: 3,
+          },
           tags: ['demo', 'threat'],
           provenance: { sourceService: 'sentra-threat-hunter' },
         }),
@@ -509,196 +598,249 @@ router.post('/test-fire', async (req: Request, res: Response) => {
           freshness: 1,
           confidence: 1.0,
           severity: 'medium',
-          entityRefs: [{ entityId: 'property-88-wooster', entityType: 'property', displayName: '88 Wooster St, SoHo' }],
-          rawPayload: { title: 'Lease renewal due in 45 days — 88 Wooster St', daysUntilExpiry: 45, monthlyRent: 42000, tenant: 'Apex Holdings LLC' },
+          entityRefs: [
+            {
+              entityId: 'property-88-wooster',
+              entityType: 'property',
+              displayName: '88 Wooster St, SoHo',
+            },
+          ],
+          rawPayload: {
+            title: 'Lease renewal due in 45 days — 88 Wooster St',
+            daysUntilExpiry: 45,
+            monthlyRent: 42000,
+            tenant: 'Apex Holdings LLC',
+          },
           tags: ['demo', 'lease'],
           provenance: { sourceService: 'terra-lease-monitor' },
         }),
     };
     const factory = scenarios[scenario as string];
     if (!factory) {
-      res.status(400).json({ error: `Unknown scenario. Available: ${Object.keys(scenarios).join(', ')}` });
+      res
+        .status(400)
+        .json({ error: `Unknown scenario. Available: ${Object.keys(scenarios).join(', ')}` });
       return;
     }
     const signal = factory();
     defaultSignalBus.publish(signal);
-    res.json({ signalId: signal.signalId, scenario, message: `Demo signal "${scenario}" published — rules will evaluate` });
+    res.json({
+      signalId: signal.signalId,
+      scenario,
+      message: `Demo signal "${scenario}" published — rules will evaluate`,
+    });
   } catch (err) {
     handleRouteError(res, err, 'Failed to fire test scenario');
   }
 });
 
-router.post('/backfill', requireRole('admin', 'ops', 'super_admin'), async (req: Request, res: Response) => {
-  try {
-    const { startDate, endDate, domain, type, dryRun } = req.body;
-    if (!startDate || !endDate) {
-      res.status(400).json({ error: 'Missing required fields: startDate, endDate (ISO 8601)' });
-      return;
-    }
+router.post(
+  '/backfill',
+  requireRole('admin', 'ops', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const { startDate, endDate, domain, type, dryRun } = req.body;
+      if (!startDate || !endDate) {
+        res.status(400).json({ error: 'Missing required fields: startDate, endDate (ISO 8601)' });
+        return;
+      }
 
-    const start = new Date(startDate as string);
-    const end = new Date(endDate as string);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      res.status(400).json({ error: 'Invalid date format. Use ISO 8601 (e.g. 2026-01-01T00:00:00Z)' });
-      return;
-    }
-    if (end <= start) {
-      res.status(400).json({ error: 'endDate must be after startDate' });
-      return;
-    }
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        res
+          .status(400)
+          .json({ error: 'Invalid date format. Use ISO 8601 (e.g. 2026-01-01T00:00:00Z)' });
+        return;
+      }
+      if (end <= start) {
+        res.status(400).json({ error: 'endDate must be after startDate' });
+        return;
+      }
 
-    const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
-    if (end.getTime() - start.getTime() > maxRangeMs) {
-      res.status(400).json({ error: 'Date range cannot exceed 90 days' });
-      return;
-    }
+      const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
+      if (end.getTime() - start.getTime() > maxRangeMs) {
+        res.status(400).json({ error: 'Date range cannot exceed 90 days' });
+        return;
+      }
 
-    const orgIds = getUserOrgIds(req.user!);
+      const orgIds = getUserOrgIds(req.user!);
 
-    const ruleConditions = [eq(signalBusRulesTable.enabled, 'true')];
-    if (orgIds !== null) {
-      const orgStringIds = [...orgIds].map(String);
-      ruleConditions.push(inArray(signalBusRulesTable.orgId, orgStringIds));
-    }
+      const ruleConditions = [eq(signalBusRulesTable.enabled, 'true')];
+      if (orgIds !== null) {
+        const orgStringIds = [...orgIds].map(String);
+        ruleConditions.push(inArray(signalBusRulesTable.orgId, orgStringIds));
+      }
 
-    const rules = await db
-      .select()
-      .from(signalBusRulesTable)
-      .where(and(...ruleConditions));
+      const rules = await db
+        .select()
+        .from(signalBusRulesTable)
+        .where(and(...ruleConditions));
 
-    if (rules.length === 0) {
-      res.json({ backfilled: 0, matched: 0, message: 'No enabled rules to evaluate' });
-      return;
-    }
+      if (rules.length === 0) {
+        res.json({ backfilled: 0, matched: 0, message: 'No enabled rules to evaluate' });
+        return;
+      }
 
-    const signalConditions = [
-      gte(meshSignalsTable.occurredAt, start),
-      lte(meshSignalsTable.occurredAt, end),
-    ];
-    if (domain) signalConditions.push(eq(meshSignalsTable.domain, domain as string));
-    if (type) signalConditions.push(eq(meshSignalsTable.type, type as string));
-    if (orgIds !== null) {
-      const orgStringIds = [...orgIds].map(String);
-      signalConditions.push(inArray(meshSignalsTable.tenantId, orgStringIds));
-    }
+      const signalConditions = [
+        gte(meshSignalsTable.occurredAt, start),
+        lte(meshSignalsTable.occurredAt, end),
+      ];
+      if (domain) signalConditions.push(eq(meshSignalsTable.domain, domain as string));
+      if (type) signalConditions.push(eq(meshSignalsTable.type, type as string));
+      if (orgIds !== null) {
+        const orgStringIds = [...orgIds].map(String);
+        signalConditions.push(inArray(meshSignalsTable.tenantId, orgStringIds));
+      }
 
-    const historicalRows = await db
-      .select()
-      .from(meshSignalsTable)
-      .where(and(...signalConditions))
-      .orderBy(meshSignalsTable.occurredAt);
+      const historicalRows = await db
+        .select()
+        .from(meshSignalsTable)
+        .where(and(...signalConditions))
+        .orderBy(meshSignalsTable.occurredAt);
 
-    if (historicalRows.length === 0) {
-      res.json({
-        backfilled: 0,
-        matched: 0,
-        dryRun: !!dryRun,
-        dateRange: { start: start.toISOString(), end: end.toISOString() },
-        rulesEvaluated: rules.length,
-        message: 'No historical signals found in the specified date range',
+      if (historicalRows.length === 0) {
+        res.json({
+          backfilled: 0,
+          matched: 0,
+          dryRun: !!dryRun,
+          dateRange: { start: start.toISOString(), end: end.toISOString() },
+          rulesEvaluated: rules.length,
+          message: 'No historical signals found in the specified date range',
+        });
+        return;
+      }
+
+      const replayedSignals: Signal[] = historicalRows.map((row) => {
+        const storedPayload = row.payload as { signal?: unknown } | unknown;
+        const rawPayload =
+          typeof storedPayload === 'object' &&
+          storedPayload !== null &&
+          'signal' in (storedPayload as Record<string, unknown>)
+            ? (storedPayload as { signal: unknown }).signal
+            : storedPayload;
+
+        return createSignal({
+          source: row.source,
+          type: row.type as SignalType,
+          domain: row.domain as SignalDomain,
+          occurredAt: row.occurredAt.toISOString(),
+          freshness: row.freshness,
+          confidence: row.confidence,
+          severity: (row.severity ?? 'medium') as Signal['severity'],
+          tenantId: row.tenantId ?? undefined,
+          entityRefs: [],
+          rawPayload: rawPayload as Record<string, unknown>,
+          tags: ['backfill-replay'],
+          provenance: {
+            sourceService: 'signal-bus-backfill',
+            correlationId: `backfill-replay-${start.toISOString()}-${end.toISOString()}`,
+            originalSignalId: row.signalId,
+          },
+        });
       });
-      return;
-    }
 
-    const replayedSignals: Signal[] = historicalRows.map((row) => {
-      const storedPayload = row.payload as { signal?: unknown } | unknown;
-      const rawPayload = typeof storedPayload === 'object' && storedPayload !== null && 'signal' in (storedPayload as Record<string, unknown>)
-        ? (storedPayload as { signal: unknown }).signal
-        : storedPayload;
+      let matched = 0;
+      const matchDetails: Array<{
+        signalId: string;
+        domain: string;
+        type: string;
+        rulesMatched: string[];
+      }> = [];
 
-      return createSignal({
-        source: row.source,
-        type: row.type as SignalType,
-        domain: row.domain as SignalDomain,
-        occurredAt: row.occurredAt.toISOString(),
-        freshness: row.freshness,
-        confidence: row.confidence,
-        severity: (row.severity ?? 'medium') as Signal['severity'],
-        tenantId: row.tenantId ?? undefined,
-        entityRefs: [],
-        rawPayload: rawPayload as Record<string, unknown>,
-        tags: ['backfill-replay'],
-        provenance: {
-          sourceService: 'signal-bus-backfill',
-          correlationId: `backfill-replay-${start.toISOString()}-${end.toISOString()}`,
-          originalSignalId: row.signalId,
-        },
-      });
-    });
+      for (const signal of replayedSignals) {
+        const rulesMatched: string[] = [];
+        for (const rule of rules) {
+          if (rule.sourceDomain !== '*' && rule.sourceDomain !== signal.domain) continue;
+          if (rule.sourceType !== '*' && rule.sourceType !== signal.type) continue;
+          if (!severityMet(signal.severity, rule.minSeverity)) continue;
+          if (!evaluateConditions(signal, rule.conditions as Record<string, unknown>)) continue;
+          rulesMatched.push(rule.name);
 
-    let matched = 0;
-    const matchDetails: Array<{ signalId: string; domain: string; type: string; rulesMatched: string[] }> = [];
-
-    for (const signal of replayedSignals) {
-      const rulesMatched: string[] = [];
-      for (const rule of rules) {
-        if (rule.sourceDomain !== '*' && rule.sourceDomain !== signal.domain) continue;
-        if (rule.sourceType !== '*' && rule.sourceType !== signal.type) continue;
-        if (!severityMet(signal.severity, rule.minSeverity)) continue;
-        if (!evaluateConditions(signal, rule.conditions as Record<string, unknown>)) continue;
-        rulesMatched.push(rule.name);
-
-        if (!dryRun) {
-          try {
-            const result = await executeAction(rule, signal);
-            await db.insert(signalBusRoutedEventsTable).values({
-              eventId: randomUUID(),
-              ruleId: rule.ruleId,
-              ruleName: rule.name,
-              sourceSignalId: signal.signalId,
-              sourceDomain: signal.domain,
-              sourceType: signal.type,
-              actionType: rule.actionType,
-              actionResult: { ...result, isBackfill: true },
-              status: 'success',
-              orgId: rule.orgId,
-            });
-          } catch (actionErr) {
-            const errMsg = actionErr instanceof Error ? actionErr.message : 'Backfill action failed';
-            await db.insert(signalBusDeadLettersTable).values({
-              deadLetterId: randomUUID(),
-              ruleId: rule.ruleId,
-              sourceSignalId: signal.signalId,
-              sourceDomain: signal.domain,
-              sourceType: signal.type,
-              errorMessage: errMsg,
-              payload: { signal: signal.rawPayload, rule: { name: rule.name, actionType: rule.actionType }, isBackfill: true },
-              orgId: rule.orgId,
+          if (!dryRun) {
+            try {
+              const result = await executeAction(rule, signal);
+              await db.insert(signalBusRoutedEventsTable).values({
+                eventId: randomUUID(),
+                ruleId: rule.ruleId,
+                ruleName: rule.name,
+                sourceSignalId: signal.signalId,
+                sourceDomain: signal.domain,
+                sourceType: signal.type,
+                actionType: rule.actionType,
+                actionResult: { ...result, isBackfill: true },
+                status: 'success',
+                orgId: rule.orgId,
+              });
+            } catch (actionErr) {
+              const errMsg =
+                actionErr instanceof Error ? actionErr.message : 'Backfill action failed';
+              await db.insert(signalBusDeadLettersTable).values({
+                deadLetterId: randomUUID(),
+                ruleId: rule.ruleId,
+                sourceSignalId: signal.signalId,
+                sourceDomain: signal.domain,
+                sourceType: signal.type,
+                errorMessage: errMsg,
+                payload: {
+                  signal: signal.rawPayload,
+                  rule: { name: rule.name, actionType: rule.actionType },
+                  isBackfill: true,
+                },
+                orgId: rule.orgId,
+              });
+            }
+          }
+        }
+        if (rulesMatched.length > 0) {
+          matched++;
+          if (matchDetails.length < 50) {
+            matchDetails.push({
+              signalId: signal.signalId,
+              domain: signal.domain,
+              type: signal.type,
+              rulesMatched,
             });
           }
         }
       }
-      if (rulesMatched.length > 0) {
-        matched++;
-        if (matchDetails.length < 50) {
-          matchDetails.push({ signalId: signal.signalId, domain: signal.domain, type: signal.type, rulesMatched });
-        }
-      }
+
+      const actor = {
+        userId: req.user!.id,
+        displayName: req.user!.displayName,
+        roles: req.user!.roles,
+      };
+
+      logger.info(
+        {
+          startDate,
+          endDate,
+          domain,
+          signalCount: replayedSignals.length,
+          matched,
+          dryRun: !!dryRun,
+          actor,
+        },
+        '[signal-bus] backfill replay completed',
+      );
+
+      res.json({
+        backfilled: replayedSignals.length,
+        matched,
+        dryRun: !!dryRun,
+        dateRange: { start: start.toISOString(), end: end.toISOString() },
+        rulesEvaluated: rules.length,
+        matchDetails: dryRun ? matchDetails : undefined,
+        actor: { userId: actor.userId, displayName: actor.displayName },
+        message: dryRun
+          ? `Dry run: ${replayedSignals.length} historical signals replayed, ${matched} would match current rules`
+          : `Backfilled ${replayedSignals.length} historical signals, ${matched} matched active rules`,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to backfill signals');
     }
-
-    const actor = { userId: req.user!.id, displayName: req.user!.displayName, roles: req.user!.roles };
-
-    logger.info(
-      { startDate, endDate, domain, signalCount: replayedSignals.length, matched, dryRun: !!dryRun, actor },
-      '[signal-bus] backfill replay completed',
-    );
-
-    res.json({
-      backfilled: replayedSignals.length,
-      matched,
-      dryRun: !!dryRun,
-      dateRange: { start: start.toISOString(), end: end.toISOString() },
-      rulesEvaluated: rules.length,
-      matchDetails: dryRun ? matchDetails : undefined,
-      actor: { userId: actor.userId, displayName: actor.displayName },
-      message: dryRun
-        ? `Dry run: ${replayedSignals.length} historical signals replayed, ${matched} would match current rules`
-        : `Backfilled ${replayedSignals.length} historical signals, ${matched} matched active rules`,
-    });
-  } catch (err) {
-    handleRouteError(res, err, 'Failed to backfill signals');
-  }
-});
+  },
+);
 
 router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
   try {
@@ -706,19 +848,25 @@ router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
       {
         ruleId: randomUUID(),
         name: 'Sanctions Hit → Open Legal Matter',
-        description: 'When a vessel triggers a sanctions match, automatically open a Counsel legal matter for compliance review.',
+        description:
+          'When a vessel triggers a sanctions match, automatically open a Counsel legal matter for compliance review.',
         sourceDomain: 'maritime',
         sourceType: 'sanctions-match',
         minSeverity: 'high',
         conditions: {},
         actionType: 'open_matter',
-        actionConfig: { titleTemplate: 'Sanctions compliance review — {{entityName}}', matterType: 'sanctions_review', priority: 'urgent' },
+        actionConfig: {
+          titleTemplate: 'Sanctions compliance review — {{entityName}}',
+          matterType: 'sanctions_review',
+          priority: 'urgent',
+        },
         targetDomain: 'legal',
       },
       {
         ruleId: randomUUID(),
         name: 'Security Threat → Executive Briefing',
-        description: 'When Sentra detects a high-severity threat, add a line to the next Pulse executive briefing.',
+        description:
+          'When Sentra detects a high-severity threat, add a line to the next Pulse executive briefing.',
         sourceDomain: 'security',
         sourceType: 'anomaly',
         minSeverity: 'high',
@@ -730,7 +878,8 @@ router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
       {
         ruleId: randomUUID(),
         name: 'Lease Renewal → Portfolio Alert',
-        description: 'When a lease renewal deadline approaches, raise a portfolio-level exposure alert for the holdings dashboard.',
+        description:
+          'When a lease renewal deadline approaches, raise a portfolio-level exposure alert for the holdings dashboard.',
         sourceDomain: 'real-estate',
         sourceType: 'deadline',
         minSeverity: 'medium',
@@ -742,7 +891,8 @@ router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
       {
         ruleId: randomUUID(),
         name: 'Critical Maritime Risk → Threat Escalation',
-        description: 'When vessel risk score triggers critical, escalate to Sentra for cross-domain threat analysis.',
+        description:
+          'When vessel risk score triggers critical, escalate to Sentra for cross-domain threat analysis.',
         sourceDomain: 'maritime',
         sourceType: 'risk',
         minSeverity: 'critical',
@@ -754,7 +904,8 @@ router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
       {
         ruleId: randomUUID(),
         name: 'Property Distress → Cross-Domain Signal',
-        description: 'When Terra detects a distressed property opportunity, publish a cross-domain signal for portfolio awareness.',
+        description:
+          'When Terra detects a distressed property opportunity, publish a cross-domain signal for portfolio awareness.',
         sourceDomain: 'real-estate',
         sourceType: 'opportunity',
         minSeverity: 'medium',
@@ -769,7 +920,10 @@ router.post('/seed-demo-rules', async (_req: Request, res: Response) => {
       await db.insert(signalBusRulesTable).values(rule).onConflictDoNothing();
     }
 
-    res.json({ seeded: demoRules.length, rules: demoRules.map((r) => ({ ruleId: r.ruleId, name: r.name })) });
+    res.json({
+      seeded: demoRules.length,
+      rules: demoRules.map((r) => ({ ruleId: r.ruleId, name: r.name })),
+    });
   } catch (err) {
     handleRouteError(res, err, 'Failed to seed demo rules');
   }

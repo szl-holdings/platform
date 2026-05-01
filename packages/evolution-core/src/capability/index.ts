@@ -30,10 +30,11 @@ export async function detectCapabilities(): Promise<CapabilitySnapshot> {
   const cudaAvailable = await checkCudaAvailable();
   const bf16Supported = cudaAvailable && (await checkBf16Supported());
   const fp8Supported = cudaAvailable && bf16Supported && (await checkFp8Supported());
-  const remoteConfigured = INFERENCE_BACKEND === 'remote_accelerated' || INFERENCE_BACKEND === 'nvidia_nim';
+  const remoteConfigured =
+    INFERENCE_BACKEND === 'remote_accelerated' || INFERENCE_BACKEND === 'nvidia_nim';
   const remoteHealthy = remoteConfigured ? await checkRemoteBackendHealth() : false;
 
-  let profile = resolveProfile({
+  const profile = resolveProfile({
     override: PRECISION_PROFILE_OVERRIDE,
     cudaAvailable,
     bf16Supported,
@@ -67,7 +68,8 @@ function resolveProfile(opts: {
   remoteConfigured: boolean;
   remoteHealthy: boolean;
 }): PrecisionProfile {
-  const { override, cudaAvailable, bf16Supported, fp8Supported, remoteConfigured, remoteHealthy } = opts;
+  const { override, cudaAvailable, bf16Supported, fp8Supported, remoteConfigured, remoteHealthy } =
+    opts;
 
   if (override) {
     const cudaProfiles: PrecisionProfile[] = [
@@ -80,7 +82,12 @@ function resolveProfile(opts: {
       if (!cudaAvailable) {
         return 'cpu_safe';
       }
-      if ((override === 'cuda_fp8_linear' || override === 'cuda_fp8_linear_kv' || override === 'future_blackwell_path') && !fp8Supported) {
+      if (
+        (override === 'cuda_fp8_linear' ||
+          override === 'cuda_fp8_linear_kv' ||
+          override === 'future_blackwell_path') &&
+        !fp8Supported
+      ) {
         return bf16Supported ? 'cuda_bf16' : 'cpu_safe';
       }
     }
@@ -171,8 +178,10 @@ export function describeProfile(profile: PrecisionProfile): string {
     cuda_bf16: 'CUDA BF16 execution. Requires NVIDIA GPU with Ampere or later architecture.',
     cuda_fp8_linear: 'CUDA FP8 linear execution. Requires NVIDIA Hopper (H100) or later.',
     cuda_fp8_linear_kv: 'CUDA FP8 + KV-cache quantisation. Requires NVIDIA Hopper (H100) or later.',
-    remote_accelerated: 'Remote accelerated backend (NIM / remote GPU). Requires REMOTE_INFERENCE_HEALTH_URL.',
-    future_blackwell_path: 'Reserved for NVIDIA Blackwell (B100/B200) FP8 tensor-parallel execution. Not yet available.',
+    remote_accelerated:
+      'Remote accelerated backend (NIM / remote GPU). Requires REMOTE_INFERENCE_HEALTH_URL.',
+    future_blackwell_path:
+      'Reserved for NVIDIA Blackwell (B100/B200) FP8 tensor-parallel execution. Not yet available.',
   };
   return descriptions[profile];
 }

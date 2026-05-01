@@ -10,6 +10,7 @@ export interface PaginationOptions {
   limit?: number;
   offset?: number;
   page?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface PaginatedResponse<T> {

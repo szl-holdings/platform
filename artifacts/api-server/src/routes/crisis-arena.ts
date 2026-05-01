@@ -20,9 +20,8 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { type IRouter, type Request, type Response, Router } from 'express';
+import { type IRouter, type Request, type Response, Router, type RequestHandler } from 'express';
 import rateLimit from 'express-rate-limit';
-import { type RequestHandler } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -77,7 +76,14 @@ const publicLimiter = rateLimit({
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
-const archetypeEnum = z.enum(['ransomware', 'insider', 'supply_chain', 'regulatory', 'cascade', 'black_swan']);
+const archetypeEnum = z.enum([
+  'ransomware',
+  'insider',
+  'supply_chain',
+  'regulatory',
+  'cascade',
+  'black_swan',
+]);
 
 const createEngagementSchema = z.object({
   title: z.string().min(3).max(200),
@@ -214,36 +220,41 @@ router.get('/crisis-arena/leaderboard', publicLimiter, async (_req: Request, res
 });
 
 // GET /crisis-arena/architects/:id/public — no auth, rate-limited
-router.get('/crisis-arena/architects/:id/public', publicLimiter, async (req: Request, res: Response) => {
-  try {
-    const profile = await getArchitectProfile(req.params.id as string);
-    if (!profile || !profile.isPublic) {
-      sendNotFound(res, 'Architect profile');
-      return;
+router.get(
+  '/crisis-arena/architects/:id/public',
+  publicLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const profile = await getArchitectProfile(req.params.id as string);
+      if (!profile || !profile.isPublic) {
+        sendNotFound(res, 'Architect profile');
+        return;
+      }
+
+      const mySubmissions = (await listSubmissionsByArchitect(profile.id)).filter((s) =>
+        ['accepted', 'graduated'].includes(s.status),
+      );
+
+      const sanitizedHighlights = mySubmissions
+        .sort((a, b) => b.businessImpactScore - a.businessImpactScore)
+        .slice(0, 5)
+        .map((s) => ({
+          title: s.title,
+          archetype: s.archetype,
+          businessImpactScore: s.businessImpactScore,
+          blastRadius: s.impactEstimate.blastRadiusDomains,
+          acceptedAt: s.updatedAt,
+        }));
+
+      sendSuccess(res, {
+        ...profile,
+        highlightedSubmissions: sanitizedHighlights,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load architect profile');
     }
-
-    const mySubmissions = (await listSubmissionsByArchitect(profile.id))
-      .filter((s) => ['accepted', 'graduated'].includes(s.status));
-
-    const sanitizedHighlights = mySubmissions
-      .sort((a, b) => b.businessImpactScore - a.businessImpactScore)
-      .slice(0, 5)
-      .map((s) => ({
-        title: s.title,
-        archetype: s.archetype,
-        businessImpactScore: s.businessImpactScore,
-        blastRadius: s.impactEstimate.blastRadiusDomains,
-        acceptedAt: s.updatedAt,
-      }));
-
-    sendSuccess(res, {
-      ...profile,
-      highlightedSubmissions: sanitizedHighlights,
-    });
-  } catch (err) {
-    handleRouteError(res, err, 'Failed to load architect profile');
-  }
-});
+  },
+);
 
 // ─── Engagement endpoints ──────────────────────────────────────────────────────
 
@@ -336,7 +347,10 @@ router.get(
       // Tenant scoping: caller must belong to the engagement's tenant or be owner
       const userTenant = callerTenantId(req);
       const userId = callerUserId(req);
-      const isAdmin = (req.user as { roles?: string[] } | undefined)?.roles?.some((r) => ['admin', 'super_admin'].includes(r)) ?? false;
+      const isAdmin =
+        (req.user as { roles?: string[] } | undefined)?.roles?.some((r) =>
+          ['admin', 'super_admin'].includes(r),
+        ) ?? false;
       if (!isAdmin && eng.tenantId !== userTenant && eng.ownerId !== userId) {
         sendForbidden(res, 'You do not have access to this engagement');
         return;
@@ -375,7 +389,10 @@ router.post(
       const id = `sub-${randomUUID().slice(0, 8)}`;
       const now = new Date().toISOString();
 
-      const score = computeBusinessImpactScore(body.impactEstimate, body.archetype as ThreatArchetype);
+      const score = computeBusinessImpactScore(
+        body.impactEstimate,
+        body.archetype as ThreatArchetype,
+      );
 
       const submission: Submission = {
         id,
@@ -452,7 +469,10 @@ router.get(
       }
       const userTenant = callerTenantId(req);
       const userId = callerUserId(req);
-      const isAdmin = (req.user as { roles?: string[] } | undefined)?.roles?.some((r) => ['admin', 'super_admin'].includes(r)) ?? false;
+      const isAdmin =
+        (req.user as { roles?: string[] } | undefined)?.roles?.some((r) =>
+          ['admin', 'super_admin'].includes(r),
+        ) ?? false;
       if (!isAdmin && eng.tenantId !== userTenant && eng.ownerId !== userId) {
         sendForbidden(res, 'You do not have access to this engagement');
         return;
@@ -526,7 +546,7 @@ router.post(
       };
       const newStatus = statusMap[body.action] as Submission['status'];
 
-      let reputationDelta = computeReputationDelta(sub.businessImpactScore, body.action);
+      const reputationDelta = computeReputationDelta(sub.businessImpactScore, body.action);
       await updateSubmission(sub.id, {
         status: newStatus,
         triageJustification: body.justification,
@@ -690,7 +710,12 @@ router.post(
           id: incidentId,
           title: `[Crisis Arena] ${sub.title}`,
           description: `${sub.narrative}\n\n--- Kill Chain ---\n${sub.killChain.map((s) => `${s.phase}: ${s.technique} — ${s.description}`).join('\n')}`,
-          severity: sub.businessImpactScore >= 80 ? 'critical' : sub.businessImpactScore >= 60 ? 'high' : 'medium',
+          severity:
+            sub.businessImpactScore >= 80
+              ? 'critical'
+              : sub.businessImpactScore >= 60
+                ? 'high'
+                : 'medium',
           status: 'open',
           mitreStage: sub.killChain[0]?.phase ?? 'Initial Access',
           detectedAt: nowDate,
@@ -709,7 +734,11 @@ router.post(
         })
         .onConflictDoNothing();
 
-      await updateSubmission(sub.id, { status: 'graduated', graduatedIncidentId: incidentId, updatedAt: now });
+      await updateSubmission(sub.id, {
+        status: 'graduated',
+        graduatedIncidentId: incidentId,
+        updatedAt: now,
+      });
       await insertTriageEvent({
         id: randomUUID(),
         submissionId: sub.id,
@@ -729,7 +758,10 @@ router.post(
       });
 
       logger.info({ id: sub.id, incidentId }, '[crisis-arena] submission graduated to tabletop');
-      sendSuccess(res, { submission: { ...sub, status: 'graduated', graduatedIncidentId: incidentId }, incidentId });
+      sendSuccess(res, {
+        submission: { ...sub, status: 'graduated', graduatedIncidentId: incidentId },
+        incidentId,
+      });
     } catch (err) {
       handleRouteError(res, err, 'Failed to graduate submission');
     }
@@ -746,13 +778,19 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const body = req.body as z.infer<typeof scoreSchema>;
-      const score = computeBusinessImpactScore(body.impactEstimate, body.archetype as ThreatArchetype);
+      const score = computeBusinessImpactScore(
+        body.impactEstimate,
+        body.archetype as ThreatArchetype,
+      );
 
       const breakdown = {
         revenueComponent: Math.min(40, (body.impactEstimate.revenueAtRiskUsd / 1_000_000) * 4),
         rtoComponent: Math.min(20, (body.impactEstimate.rtoBreach / 60) * 2),
         rpoComponent: Math.min(15, (body.impactEstimate.rpoBreach / 60) * 1.5),
-        regulatoryComponent: Math.min(15, (body.impactEstimate.regulatoryExposureUsd / 500_000) * 3.75),
+        regulatoryComponent: Math.min(
+          15,
+          (body.impactEstimate.regulatoryExposureUsd / 500_000) * 3.75,
+        ),
         blastRadiusComponent: Math.min(10, body.impactEstimate.blastRadiusDomains.length * 2.5),
       };
 
@@ -762,7 +800,12 @@ router.post(
         entityId: `score-${Date.now()}`,
         entityType: 'arena_bis_score',
         actor: callerEmail(req) ?? 'anonymous',
-        payload: { score, archetype: body.archetype, breakdown, impactEstimate: body.impactEstimate },
+        payload: {
+          score,
+          archetype: body.archetype,
+          breakdown,
+          impactEstimate: body.impactEstimate,
+        },
       });
 
       sendSuccess(res, {

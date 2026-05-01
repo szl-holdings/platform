@@ -186,16 +186,12 @@ export async function ssrfSafeFetch(
 
   const { address: pinnedIp, family } = resolved[0];
 
-  const port = url.port
-    ? parseInt(url.port, 10)
-    : url.protocol === 'https:'
-      ? 443
-      : 80;
+  const port = url.port ? parseInt(url.port, 10) : url.protocol === 'https:' ? 443 : 80;
 
   const requestPath = (url.pathname || '/') + (url.search || '');
 
   const requestHeaders: Record<string, string> = {
-    ...(init.headers ?? {}),
+    ...init.headers,
     Host: url.hostname,
   };
 

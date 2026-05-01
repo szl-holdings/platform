@@ -6,8 +6,7 @@
  *
  * Call initFusionPersistence() once at server startup.
  */
-import { fusionCortex } from '@szl-holdings/ai-engine';
-import { type FusionAlert } from '@szl-holdings/ai-engine';
+import { fusionCortex, type FusionAlert } from '@szl-holdings/ai-engine';
 import { db, fusionCortexAlertsTable } from '@szl-holdings/db';
 import { and, desc, eq, gt, inArray, sql } from 'drizzle-orm';
 import { logger } from './logger';
@@ -54,11 +53,21 @@ async function ensureFusionTable(): Promise<void> {
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_alert_id_idx ON fusion_cortex_alerts (alert_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_status_idx ON fusion_cortex_alerts (status)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_severity_idx ON fusion_cortex_alerts (severity)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_generated_at_idx ON fusion_cortex_alerts (generated_at)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_expires_at_idx ON fusion_cortex_alerts (expires_at)`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_alert_id_idx ON fusion_cortex_alerts (alert_id)`,
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_status_idx ON fusion_cortex_alerts (status)`,
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_severity_idx ON fusion_cortex_alerts (severity)`,
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_generated_at_idx ON fusion_cortex_alerts (generated_at)`,
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_expires_at_idx ON fusion_cortex_alerts (expires_at)`,
+    );
   } catch (err) {
     logger.warn({ err }, '[fusion-persistence] ensureFusionTable failed — table may already exist');
   }

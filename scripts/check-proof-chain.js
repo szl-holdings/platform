@@ -86,28 +86,34 @@ const TS_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.mjs']);
 // ---------------------------------------------------------------------------
 
 /**
- * Recursively collect all .ts/.tsx/.js files under a directory.
+ * Iteratively collect all .ts/.tsx/.js files under a directory.
+ * Iterative implementation avoids stack overflow on deeply-nested
+ * monorepo trees (RangeError observed in CI on previous recursive version).
  */
-function collectFiles(dir) {
+function collectFiles(rootDir) {
   const results = [];
-  let entries;
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return results;
-  }
-  for (const entry of entries) {
-    const full = join(dir, entry);
-    let stat;
+  const stack = [rootDir];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    let entries;
     try {
-      stat = statSync(full);
+      entries = readdirSync(dir);
     } catch {
       continue;
     }
-    if (stat.isDirectory()) {
-      results.push(...collectFiles(full));
-    } else if (TS_EXTENSIONS.has(extname(full))) {
-      results.push(full);
+    for (const entry of entries) {
+      const full = join(dir, entry);
+      let stat;
+      try {
+        stat = statSync(full);
+      } catch {
+        continue;
+      }
+      if (stat.isDirectory()) {
+        stack.push(full);
+      } else if (TS_EXTENSIONS.has(extname(full))) {
+        results.push(full);
+      }
     }
   }
   return results;

@@ -1,8 +1,15 @@
 import { useParams, Link } from 'wouter';
 import { useSyncRun, useRetrySyncRunRow } from '@/lib/api-hooks';
-import { Badge } from '@/components/ui';
-import { Button } from '@/components/ui';
-import { CheckCircle2, XCircle, AlertCircle, RefreshCw, ArrowLeft, Clock, Rows } from 'lucide-react';
+import { Badge, Button } from '@/components/ui';
+import {
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  ArrowLeft,
+  Clock,
+  Rows,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +22,13 @@ function formatDuration(ms: number | null): string {
 
 function formatTime(iso: string | null): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return new Date(iso).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 }
 
 function runStatusBadgeVariant(status: string) {
@@ -41,10 +54,16 @@ export default function RunsDetail() {
   const retryRow = useRetrySyncRunRow();
 
   const handleRetry = (rowId: string) => {
-    retryRow.mutate({ runId: id, rowId }, {
-      onSuccess: () => { toast.success('Row queued for retry'); refetch(); },
-      onError: () => toast.error('Failed to retry row'),
-    });
+    retryRow.mutate(
+      { runId: id, rowId },
+      {
+        onSuccess: () => {
+          toast.success('Row queued for retry');
+          refetch();
+        },
+        onError: () => toast.error('Failed to retry row'),
+      },
+    );
   };
 
   if (isLoading) {
@@ -61,7 +80,11 @@ export default function RunsDetail() {
     return (
       <div className="conduit-card p-12 text-center">
         <p className="text-muted-foreground">Run not found.</p>
-        <Link href="/runs"><Button variant="outline" size="sm" className="mt-4">Back to Runs</Button></Link>
+        <Link href="/runs">
+          <Button variant="outline" size="sm" className="mt-4">
+            Back to Runs
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -94,7 +117,7 @@ export default function RunsDetail() {
           disabled={isFetching}
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-border bg-card hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
-          <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
+          <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
           Refresh
         </button>
       </div>
@@ -103,12 +126,22 @@ export default function RunsDetail() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Rows Read', value: run.rowsRead.toLocaleString(), color: 'text-foreground' },
-          { label: 'Rows Written', value: run.rowsWritten.toLocaleString(), color: 'text-green-400' },
-          { label: 'Rows Failed', value: run.rowsFailed.toLocaleString(), color: run.rowsFailed > 0 ? 'text-rose-400' : 'text-muted-foreground' },
+          {
+            label: 'Rows Written',
+            value: run.rowsWritten.toLocaleString(),
+            color: 'text-green-400',
+          },
+          {
+            label: 'Rows Failed',
+            value: run.rowsFailed.toLocaleString(),
+            color: run.rowsFailed > 0 ? 'text-rose-400' : 'text-muted-foreground',
+          },
           { label: 'Duration', value: formatDuration(run.durationMs), color: 'text-foreground' },
         ].map((stat) => (
           <div key={stat.label} className="conduit-stat p-4">
-            <div className={cn("text-2xl font-display font-bold tracking-tight", stat.color)}>{stat.value}</div>
+            <div className={cn('text-2xl font-display font-bold tracking-tight', stat.color)}>
+              {stat.value}
+            </div>
             <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
           </div>
         ))}
@@ -124,7 +157,15 @@ export default function RunsDetail() {
           <dd className="font-mono text-xs">{formatTime(run.finishedAt)}</dd>
           <dt className="text-muted-foreground">Success rate</dt>
           <dd className="font-mono">
-            <span className={cn(successRate >= 95 ? 'text-green-400' : successRate >= 80 ? 'text-yellow-400' : 'text-rose-400')}>
+            <span
+              className={cn(
+                successRate >= 95
+                  ? 'text-green-400'
+                  : successRate >= 80
+                    ? 'text-yellow-400'
+                    : 'text-rose-400',
+              )}
+            >
               {successRate}%
             </span>
           </dd>
@@ -149,17 +190,29 @@ export default function RunsDetail() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">Row</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">Source Data</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">Error</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">Status</th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">Action</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                    Row
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                    Source Data
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                    Error
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                    Status
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {run.sampleErrors.map((row) => (
                   <tr key={row.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{row.rowIndex}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                      {row.rowIndex}
+                    </td>
                     <td className="px-4 py-2 max-w-xs">
                       <code className="text-xs font-mono text-muted-foreground truncate block">
                         {JSON.stringify(row.sourceData).slice(0, 80)}…

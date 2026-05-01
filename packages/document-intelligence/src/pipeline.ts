@@ -7,14 +7,12 @@
  * the proof-chain viewer (Phase 4).
  */
 
-import type {
-  ChartExtractionAdapter,
-  LayoutAdapter,
-  OCRAdapter,
-  QAAdapter,
-  TableExtractionAdapter,
-} from './adapters.js';
 import {
+  type ChartExtractionAdapter,
+  type LayoutAdapter,
+  type OCRAdapter,
+  type QAAdapter,
+  type TableExtractionAdapter,
   NoOpChartExtractionAdapter,
   NoOpLayoutAdapter,
   NoOpOCRAdapter,
@@ -57,7 +55,16 @@ function stageEntry(
   notes?: string,
 ): StageProvenanceEntry {
   const durationMs = new Date(completedAt).getTime() - new Date(startedAt).getTime();
-  return { stage, startedAt, completedAt, durationMs, adapterProvider, chunkCount, errorCount, notes };
+  return {
+    stage,
+    startedAt,
+    completedAt,
+    durationMs,
+    adapterProvider,
+    chunkCount,
+    errorCount,
+    notes,
+  };
 }
 
 /**
@@ -128,7 +135,8 @@ export async function runLayoutStage(
       section: block.section,
       text: block.text,
       confidence: block.confidence,
-      contentType: block.type === 'heading' ? 'header' : block.type === 'footer' ? 'footer' : 'text',
+      contentType:
+        block.type === 'heading' ? 'header' : block.type === 'footer' ? 'footer' : 'text',
       evidenceRef: {
         documentId: req.documentId,
         chunkId,
@@ -161,7 +169,11 @@ export async function runTableStage(
   ocrResult: OCRResult,
   layoutResult: LayoutResult,
   adapter: TableExtractionAdapter,
-): Promise<{ result: TableExtractionResult; chunks: DocumentChunk[]; entry: StageProvenanceEntry }> {
+): Promise<{
+  result: TableExtractionResult;
+  chunks: DocumentChunk[];
+  entry: StageProvenanceEntry;
+}> {
   const startedAt = now();
   const result = await adapter.run(req, ocrResult, layoutResult);
   const completedAt = now();
@@ -215,7 +227,11 @@ export async function runChartStage(
   ocrResult: OCRResult,
   layoutResult: LayoutResult,
   adapter: ChartExtractionAdapter,
-): Promise<{ result: ChartExtractionResult; chunks: DocumentChunk[]; entry: StageProvenanceEntry }> {
+): Promise<{
+  result: ChartExtractionResult;
+  chunks: DocumentChunk[];
+  entry: StageProvenanceEntry;
+}> {
   const startedAt = now();
   const result = await adapter.run(req, ocrResult, layoutResult);
   const completedAt = now();
@@ -265,7 +281,11 @@ export async function runQAStage(
   allPriorChunks: DocumentChunk[],
   adapter: QAAdapter,
   questions?: string[],
-): Promise<{ result: CitationPreservingQAResult; chunks: DocumentChunk[]; entry: StageProvenanceEntry }> {
+): Promise<{
+  result: CitationPreservingQAResult;
+  chunks: DocumentChunk[];
+  entry: StageProvenanceEntry;
+}> {
   const startedAt = now();
   const result = await adapter.run(req, allPriorChunks, questions);
   const completedAt = now();

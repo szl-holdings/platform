@@ -231,15 +231,9 @@ export async function hydrateFromDb(): Promise<void> {
         geoPinStore.set(pin.id, pin);
       }
       hydrated = true;
-      logger.info(
-        { pinsLoaded: geoPinStore.size },
-        '[geo-intel] Hydrated mutable pins from DB',
-      );
+      logger.info({ pinsLoaded: geoPinStore.size }, '[geo-intel] Hydrated mutable pins from DB');
     } catch (err) {
-      logger.warn(
-        { err },
-        '[geo-intel] DB hydration failed — falling back to in-memory BASE_PINS',
-      );
+      logger.warn({ err }, '[geo-intel] DB hydration failed — falling back to in-memory BASE_PINS');
       geoPinStore.clear();
       for (const pin of BASE_PINS) geoPinStore.set(pin.id, pin);
       hydrated = true;
@@ -308,10 +302,7 @@ export interface PinUpdate {
   detail?: Partial<GeoPin['detail']>;
 }
 
-export async function updatePin(
-  id: string,
-  patch: PinUpdate,
-): Promise<GeoPin | undefined> {
+export async function updatePin(id: string, patch: PinUpdate): Promise<GeoPin | undefined> {
   await ensureHydrated();
   const current = geoPinStore.get(id);
   if (!current) return undefined;
@@ -319,7 +310,7 @@ export async function updatePin(
   const next: GeoPin = {
     ...current,
     ...patch,
-    detail: { ...current.detail, ...(patch.detail ?? {}) },
+    detail: { ...current.detail, ...patch.detail },
     updatedAt: new Date().toISOString(),
   };
 

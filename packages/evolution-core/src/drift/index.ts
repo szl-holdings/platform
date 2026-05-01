@@ -6,16 +6,24 @@
  * Reuses drift_snapshots pattern; writes to per_drift_reports.
  */
 
-import type { DriftMetrics, DriftReport, EvaluationRunSummary } from '../types.js';
-import { DRIFT_THRESHOLDS } from '../types.js';
+import {
+  type DriftMetrics,
+  type DriftReport,
+  type EvaluationRunSummary,
+  DRIFT_THRESHOLDS,
+} from '../types.js';
 import { randomUUID } from 'node:crypto';
 
 export function measureDrift(
   baseline: EvaluationRunSummary,
   candidate: EvaluationRunSummary,
 ): DriftReport {
-  const rewardDelta = Math.abs((candidate.avgScoreTotal - baseline.avgScoreTotal) / Math.max(baseline.avgScoreTotal, 0.01));
-  const passRateDelta = Math.abs((candidate.passRate - baseline.passRate) / Math.max(baseline.passRate, 0.01));
+  const rewardDelta = Math.abs(
+    (candidate.avgScoreTotal - baseline.avgScoreTotal) / Math.max(baseline.avgScoreTotal, 0.01),
+  );
+  const passRateDelta = Math.abs(
+    (candidate.passRate - baseline.passRate) / Math.max(baseline.passRate, 0.01),
+  );
   const candidateFailRate = candidate.failed / Math.max(candidate.totalCases, 1);
   const baselineFailRate = baseline.failed / Math.max(baseline.totalCases, 1);
   const failRateDelta = Math.abs(candidateFailRate - baselineFailRate);
@@ -25,7 +33,9 @@ export function measureDrift(
     reward: rewardDelta,
     citation: rewardDelta * 0.6,
     structuredOutput: passRateDelta * 0.5,
-    latency: Math.abs((candidate.avgLatencyMs - baseline.avgLatencyMs) / Math.max(baseline.avgLatencyMs, 1)),
+    latency: Math.abs(
+      (candidate.avgLatencyMs - baseline.avgLatencyMs) / Math.max(baseline.avgLatencyMs, 1),
+    ),
     cost: 0,
     length: passRateDelta * 0.4,
     failureRate: failRateDelta,
@@ -34,13 +44,10 @@ export function measureDrift(
 
   const overallDriftScore = computeOverallDrift(metrics);
   const breached = getBreachedMetrics(metrics);
-  const safeFallbackTriggered = breached.length > 0 && overallDriftScore > 0.20;
+  const safeFallbackTriggered = breached.length > 0 && overallDriftScore > 0.2;
 
-  const status = overallDriftScore < 0.10
-    ? 'healthy'
-    : overallDriftScore < 0.20
-      ? 'degraded'
-      : 'critical';
+  const status =
+    overallDriftScore < 0.1 ? 'healthy' : overallDriftScore < 0.2 ? 'degraded' : 'critical';
 
   return {
     reportId: `drift-${randomUUID()}`,
@@ -70,15 +77,16 @@ function getBreachedMetrics(metrics: DriftMetrics): string[] {
 
 export function buildSimulatedDriftReport(candidateId: string): DriftReport {
   const overallDriftScore = 0.05 + Math.random() * 0.18;
-  const status = overallDriftScore < 0.10 ? 'healthy' : overallDriftScore < 0.20 ? 'degraded' : 'critical';
+  const status =
+    overallDriftScore < 0.1 ? 'healthy' : overallDriftScore < 0.2 ? 'degraded' : 'critical';
 
   const metrics: DriftMetrics = {
     response: Math.random() * 0.12,
     reward: Math.random() * 0.08,
     citation: Math.random() * 0.06,
     structuredOutput: Math.random() * 0.05,
-    latency: Math.random() * 0.20,
-    cost: Math.random() * 0.10,
+    latency: Math.random() * 0.2,
+    cost: Math.random() * 0.1,
     length: Math.random() * 0.08,
     failureRate: Math.random() * 0.06,
     approvalRejection: Math.random() * 0.04,

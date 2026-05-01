@@ -65,7 +65,7 @@ const PII_PATTERNS: ReadonlyArray<{ pattern: RegExp; replacement: string }> = [
   },
   // Generic email addresses appearing in shell I/O
   {
-    pattern: /\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b/g,
+    pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
     replacement: '[REDACTED:EMAIL]',
   },
   // Bearer tokens / API keys: long (≥32 char) hex or base64 strings
@@ -190,7 +190,13 @@ export class ShellCapability implements SandboxCapability {
         timedOut: false,
         command,
       };
-      await this.onExec?.({ command, result, cwd, workspaceRoot: this.workspaceRoot, policyAllowed: false });
+      await this.onExec?.({
+        command,
+        result,
+        cwd,
+        workspaceRoot: this.workspaceRoot,
+        policyAllowed: false,
+      });
       return result;
     }
 
@@ -207,7 +213,13 @@ export class ShellCapability implements SandboxCapability {
         timedOut: false,
         command,
       };
-      await this.onExec?.({ command, result, cwd, workspaceRoot: this.workspaceRoot, policyAllowed: false });
+      await this.onExec?.({
+        command,
+        result,
+        cwd,
+        workspaceRoot: this.workspaceRoot,
+        policyAllowed: false,
+      });
       return result;
     }
 
@@ -216,7 +228,7 @@ export class ShellCapability implements SandboxCapability {
     const env = {
       ...process.env,
       SANDBOX_WORKSPACE: this.workspaceRoot,
-      ...(options.env ?? {}),
+      ...options.env,
     };
 
     const result = await new Promise<ShellExecResult>((resolve_) => {
@@ -277,7 +289,13 @@ export class ShellCapability implements SandboxCapability {
     // ── Step D: Emit audit event (Tool Mesh invocation log) ───────────────────
     // The onExec hook is provided by SandboxAgent to emit step-log events for
     // every shell command, fulfilling the guardrail chain observability requirement.
-    await this.onExec?.({ command, result, cwd, workspaceRoot: this.workspaceRoot, policyAllowed: true });
+    await this.onExec?.({
+      command,
+      result,
+      cwd,
+      workspaceRoot: this.workspaceRoot,
+      policyAllowed: true,
+    });
     return result;
   }
 }

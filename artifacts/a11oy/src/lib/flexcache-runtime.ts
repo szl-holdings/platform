@@ -8,8 +8,7 @@
  * hot (RAM) tier.
  */
 
-import { FlexCacheManager } from '@szl-holdings/flexcache';
-import type { FlexCacheConfig } from '@szl-holdings/flexcache';
+import { FlexCacheManager, type FlexCacheConfig } from '@szl-holdings/flexcache';
 
 const A11OY_CONFIG: Partial<FlexCacheConfig> = {
   enabled: true,
@@ -57,10 +56,7 @@ export function getFlexCache(): FlexCacheManager {
       const persist = () => {
         try {
           if (!_manager) return;
-          localStorage.setItem(
-            'a11oy:flexcache:profile',
-            JSON.stringify(_manager.exportProfile()),
-          );
+          localStorage.setItem('a11oy:flexcache:profile', JSON.stringify(_manager.exportProfile()));
         } catch {
           /* noop */
         }

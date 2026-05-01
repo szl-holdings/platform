@@ -21,10 +21,12 @@
  *     refuses to generate proofs without it.
  */
 
-import { evalRegistryRepository } from '@szl-holdings/db-repository/eval-registry';
+import {
+  evalRegistryRepository,
+  type EvalResultRow,
+} from '@szl-holdings/db-repository/eval-registry';
 import { createHmac } from 'node:crypto';
 import { logger } from './logger';
-import type { EvalResultRow } from '@szl-holdings/db-repository/eval-registry';
 
 const DEFAULT_RELATIVE_TOLERANCE = 0.02;
 
@@ -52,10 +54,10 @@ export async function runEvalVerification(input: VerificationJobInput): Promise<
     return;
   }
 
-  let tokenRow = verifyTokenId
-    ? await evalRegistryRepository.findVerificationToken(resultId).then((r) =>
-        r?.id === verifyTokenId ? r : null,
-      )
+  const tokenRow = verifyTokenId
+    ? await evalRegistryRepository
+        .findVerificationToken(resultId)
+        .then((r) => (r?.id === verifyTokenId ? r : null))
     : await evalRegistryRepository.findVerificationToken(resultId);
 
   if (!tokenRow) {
@@ -98,8 +100,7 @@ export async function runEvalVerification(input: VerificationJobInput): Promise<
       await evalRegistryRepository.updateVerificationToken(tokenRow.id, {
         status: 'passed',
         proof: proofWithPrefix,
-        rerunNumericValue:
-          typeof output.rerunValue === 'number' ? String(output.rerunValue) : null,
+        rerunNumericValue: typeof output.rerunValue === 'number' ? String(output.rerunValue) : null,
         delta: output.delta !== undefined ? String(output.delta) : null,
         verifiedBy: 'sandbox',
         verifiedAt: new Date(),
@@ -116,8 +117,7 @@ export async function runEvalVerification(input: VerificationJobInput): Promise<
     } else {
       await evalRegistryRepository.updateVerificationToken(tokenRow.id, {
         status: 'failed',
-        rerunNumericValue:
-          typeof output.rerunValue === 'number' ? String(output.rerunValue) : null,
+        rerunNumericValue: typeof output.rerunValue === 'number' ? String(output.rerunValue) : null,
         delta: output.delta !== undefined ? String(output.delta) : null,
         verifiedBy: 'sandbox',
         verifiedAt: new Date(),

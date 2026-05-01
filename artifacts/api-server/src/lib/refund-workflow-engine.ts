@@ -38,7 +38,12 @@ import {
 } from '@szl-holdings/db';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { writeBillingAudit } from './billing-audit';
-import { buildRefundApprovedEmail, buildRefundCompletedEmail, buildRefundDeniedEmail, sendEmail } from './email';
+import {
+  buildRefundApprovedEmail,
+  buildRefundCompletedEmail,
+  buildRefundDeniedEmail,
+  sendEmail,
+} from './email';
 import { logger } from './logger';
 import { refundPayment } from './payment-rail-adapter';
 import { services } from '@szl-holdings/services';
@@ -166,7 +171,10 @@ export async function getApprovalThresholds(): Promise<ApprovalThreshold[]> {
       }
     }
   } catch (err) {
-    logger.warn({ err }, '[refund-workflow] Failed to load approval rules from flag — using defaults');
+    logger.warn(
+      { err },
+      '[refund-workflow] Failed to load approval rules from flag — using defaults',
+    );
   }
   return DEFAULT_APPROVAL_THRESHOLDS;
 }
@@ -223,10 +231,7 @@ function workflowStateToDbStatus(
   }
 }
 
-function dbStatusToWorkflowState(
-  status: string,
-  metaState: string | undefined,
-): WorkflowState {
+function dbStatusToWorkflowState(status: string, metaState: string | undefined): WorkflowState {
   if (metaState) return metaState as WorkflowState;
   switch (status) {
     case 'pending':
@@ -276,7 +281,7 @@ export async function validateChargeOwnership(
     throw Object.assign(
       new Error(
         `Organization ${orgId} has no Stripe billing customer. ` +
-        'Complete billing setup before submitting charge-linked refund requests.',
+          'Complete billing setup before submitting charge-linked refund requests.',
       ),
       { code: 'ORG_NO_STRIPE_CUSTOMER' },
     );
@@ -286,7 +291,7 @@ export async function validateChargeOwnership(
     throw Object.assign(
       new Error(
         'The provided charge/paymentIntent does not belong to your organization. ' +
-        'Verify the payment reference and try again.',
+          'Verify the payment reference and try again.',
       ),
       { code: 'CHARGE_ORG_MISMATCH' },
     );
@@ -322,7 +327,9 @@ export async function createRefundRequest(
         .from(invoicesTable)
         .where(eq(invoicesTable.id, params.invoiceId));
       if (!inv) {
-        throw Object.assign(new Error(`Invoice ${params.invoiceId} not found`), { code: 'INVOICE_NOT_FOUND' });
+        throw Object.assign(new Error(`Invoice ${params.invoiceId} not found`), {
+          code: 'INVOICE_NOT_FOUND',
+        });
       }
       if (inv.orgId !== params.orgId) {
         throw Object.assign(
@@ -338,11 +345,15 @@ export async function createRefundRequest(
         .from(net30InvoicesTable)
         .where(eq(net30InvoicesTable.id, params.net30InvoiceId));
       if (!n30) {
-        throw Object.assign(new Error(`Net30 invoice ${params.net30InvoiceId} not found`), { code: 'INVOICE_NOT_FOUND' });
+        throw Object.assign(new Error(`Net30 invoice ${params.net30InvoiceId} not found`), {
+          code: 'INVOICE_NOT_FOUND',
+        });
       }
       if (n30.orgId !== params.orgId) {
         throw Object.assign(
-          new Error(`Net30 invoice ${params.net30InvoiceId} does not belong to org ${params.orgId}`),
+          new Error(
+            `Net30 invoice ${params.net30InvoiceId} does not belong to org ${params.orgId}`,
+          ),
           { code: 'INVOICE_ORG_MISMATCH' },
         );
       }
@@ -379,7 +390,9 @@ export async function createRefundRequest(
       .from(invoicesTable)
       .where(eq(invoicesTable.id, params.invoiceId));
     if (!inv) {
-      throw Object.assign(new Error(`Invoice ${params.invoiceId} not found`), { code: 'INVOICE_NOT_FOUND' });
+      throw Object.assign(new Error(`Invoice ${params.invoiceId} not found`), {
+        code: 'INVOICE_NOT_FOUND',
+      });
     }
     if (inv.orgId !== params.orgId) {
       throw Object.assign(
@@ -395,7 +408,9 @@ export async function createRefundRequest(
       .from(net30InvoicesTable)
       .where(eq(net30InvoicesTable.id, params.net30InvoiceId));
     if (!n30) {
-      throw Object.assign(new Error(`Net30 invoice ${params.net30InvoiceId} not found`), { code: 'INVOICE_NOT_FOUND' });
+      throw Object.assign(new Error(`Net30 invoice ${params.net30InvoiceId} not found`), {
+        code: 'INVOICE_NOT_FOUND',
+      });
     }
     if (n30.orgId !== params.orgId) {
       throw Object.assign(
@@ -474,7 +489,7 @@ export async function createRefundRequest(
       // The key exists but belongs to a different org — do not reveal its data.
       throw new Error(
         'Idempotency key conflict: this key has already been used by another organization. ' +
-        'Provide a unique idempotency key for each request.',
+          'Provide a unique idempotency key for each request.',
       );
     }
     return existing;
@@ -504,7 +519,10 @@ export async function createRefundRequest(
     );
     // Notify customer that the request was approved (non-fatal)
     void sendRefundApprovedEmail(row, wfMeta).catch((err) =>
-      logger.warn({ err, requestId: row.id }, '[refund-workflow] Self-serve approval email failed (non-fatal)'),
+      logger.warn(
+        { err, requestId: row.id },
+        '[refund-workflow] Self-serve approval email failed (non-fatal)',
+      ),
     );
   }
 
@@ -529,7 +547,8 @@ export async function transitionState(
   if (!current) throw new Error(`Refund request ${requestId} not found`);
 
   const currentMeta = (current.metadata ?? {}) as RefundWorkflowMetadata;
-  const currentState = currentMeta.workflowState ?? dbStatusToWorkflowState(current.status, undefined);
+  const currentState =
+    currentMeta.workflowState ?? dbStatusToWorkflowState(current.status, undefined);
 
   validateTransition(currentState, newState);
 
@@ -547,7 +566,9 @@ export async function transitionState(
     .set({
       status: newDbStatus,
       metadata: updatedMeta as unknown as Record<string, unknown>,
-      processedAt: ['completed', 'failed', 'denied', 'cancelled'].includes(newState) ? now : current.processedAt,
+      processedAt: ['completed', 'failed', 'denied', 'cancelled'].includes(newState)
+        ? now
+        : current.processedAt,
       updatedAt: now,
     })
     .where(eq(billingRefundRequestsTable.id, requestId))
@@ -644,7 +665,9 @@ export async function recordApprovalDecision(
     ? 'denied'
     : satisfied
       ? 'approved'
-      : (currentState === 'requested' ? 'under_review' : currentState);
+      : currentState === 'requested'
+        ? 'under_review'
+        : currentState;
 
   const updatedMeta: RefundWorkflowMetadata = {
     ...meta,
@@ -753,7 +776,11 @@ export async function executeRefund(
     const hintedRail = meta.railType as string | null | undefined;
     const isAchRail = hintedRail === 'ach';
     const isCryptoRail = hintedRail === 'crypto' || hintedRail === 'coinbase';
-    const resolvedRail: 'card' | 'ach' | 'crypto' = isCryptoRail ? 'crypto' : isAchRail ? 'ach' : 'card';
+    const resolvedRail: 'card' | 'ach' | 'crypto' = isCryptoRail
+      ? 'crypto'
+      : isAchRail
+        ? 'ach'
+        : 'card';
 
     // ─── Invoice-to-rail reference resolution ──────────────────────────────
     // When a refund request was submitted with only an invoiceId (no direct
@@ -762,7 +789,7 @@ export async function executeRefund(
     // stripeInvoiceId and fetch its payment_intent via the Stripe Invoices API.
     // In demo mode services.stripe.getInvoicePaymentIntent() returns null,
     // which is fine because refundPayment() in demo mode skips the ref check.
-    let resolvedChargeId: string | null = current.stripeChargeId;
+    const resolvedChargeId: string | null = current.stripeChargeId;
     let resolvedPaymentIntentId: string | null = current.stripePaymentIntentId;
 
     if (!resolvedChargeId && !resolvedPaymentIntentId && meta.invoiceId) {
@@ -773,11 +800,18 @@ export async function executeRefund(
           .where(eq(invoicesTable.id, meta.invoiceId));
 
         if (inv?.stripeInvoiceId) {
-          const paymentIntentId = await services.stripe.getInvoicePaymentIntent(inv.stripeInvoiceId);
+          const paymentIntentId = await services.stripe.getInvoicePaymentIntent(
+            inv.stripeInvoiceId,
+          );
           if (paymentIntentId) {
             resolvedPaymentIntentId = paymentIntentId;
             logger.info(
-              { requestId, invoiceId: meta.invoiceId, stripeInvoiceId: inv.stripeInvoiceId, paymentIntentId },
+              {
+                requestId,
+                invoiceId: meta.invoiceId,
+                stripeInvoiceId: inv.stripeInvoiceId,
+                paymentIntentId,
+              },
               '[refund-workflow] Resolved payment intent from invoice for refund execution',
             );
           }
@@ -802,10 +836,9 @@ export async function executeRefund(
     });
 
     if (!railResult.success) {
-      throw Object.assign(
-        new Error(railResult.error ?? 'Rail refund failed'),
-        { code: railResult.errorCode ?? 'RAIL_REFUND_FAILED' },
-      );
+      throw Object.assign(new Error(railResult.error ?? 'Rail refund failed'), {
+        code: railResult.errorCode ?? 'RAIL_REFUND_FAILED',
+      });
     }
 
     refundId = railResult.data?.refundId ?? `re_demo_${resolvedRail}_${requestId}`;
@@ -858,7 +891,13 @@ export async function executeRefund(
         resource: 'refund_request',
         resourceId: String(requestId),
         before: { state: 'executing' },
-        after: { state: 'under_review', refundId, refundStatus, railType, reason: 'crypto_pending_manual_disbursement' },
+        after: {
+          state: 'under_review',
+          refundId,
+          refundStatus,
+          railType,
+          reason: 'crypto_pending_manual_disbursement',
+        },
       });
 
       logger.warn(
@@ -924,8 +963,10 @@ export async function executeRefund(
 
         const invoiceAmount = inv ? parseFloat(String(inv.amount)) : null;
         const refundAmount = current.amount ? parseFloat(String(current.amount)) : null;
-        const isFullRefund = invoiceAmount !== null && refundAmount !== null
-          && Math.abs(refundAmount - invoiceAmount) < 0.01;
+        const isFullRefund =
+          invoiceAmount !== null &&
+          refundAmount !== null &&
+          Math.abs(refundAmount - invoiceAmount) < 0.01;
 
         if (isFullRefund) {
           // Full refund: void the invoice so no further collection attempts occur
@@ -1032,7 +1073,7 @@ export async function executeRefund(
     const [reverted] = await db
       .update(billingRefundRequestsTable)
       .set({
-        status: 'pending',   // under_review maps to DB status 'pending'
+        status: 'pending', // under_review maps to DB status 'pending'
         metadata: retriedMeta as unknown as Record<string, unknown>,
         updatedAt: new Date(),
       })
@@ -1099,7 +1140,7 @@ export async function retryRefund(
   if (!isRetryable) {
     throw new Error(
       `Cannot retry refund in state: ${meta.workflowState} (railRetries=${meta.railRetries ?? 0}). ` +
-      `Only failed or under_review requests with prior execution failures can be retried.`,
+        `Only failed or under_review requests with prior execution failures can be retried.`,
     );
   }
 
@@ -1151,10 +1192,15 @@ export async function createCreditMemoForRefund(
   const [invoice] = await db
     .select()
     .from(net30InvoicesTable)
-    .where(and(eq(net30InvoicesTable.id, net30InvoiceId), eq(net30InvoicesTable.orgId, request.orgId)));
+    .where(
+      and(eq(net30InvoicesTable.id, net30InvoiceId), eq(net30InvoicesTable.orgId, request.orgId)),
+    );
 
   if (!invoice) {
-    logger.warn({ net30InvoiceId, requestId: request.id }, '[refund-workflow] NET-30 invoice not found for credit memo');
+    logger.warn(
+      { net30InvoiceId, requestId: request.id },
+      '[refund-workflow] NET-30 invoice not found for credit memo',
+    );
     return;
   }
 
@@ -1183,7 +1229,8 @@ export async function createCreditMemoForRefund(
       amount: String(refundAmount),
       currency: request.currency ?? 'usd',
       reason: creditMemoReason,
-      description: `Refund credit memo — Request #${request.id}. Reason: ${meta.reasonCode}. ${meta.customerFacingNote ?? ''}`.trim(),
+      description:
+        `Refund credit memo — Request #${request.id}. Reason: ${meta.reasonCode}. ${meta.customerFacingNote ?? ''}`.trim(),
       createdBy,
       metadata: { refundRequestId: request.id, stripeRefundId: request.stripeRefundId },
     })
@@ -1223,7 +1270,10 @@ export async function createCreditMemoForRefund(
       },
     });
 
-    logger.info({ memoId: memo.id, memoNumber, requestId: request.id }, '[refund-workflow] Credit memo created');
+    logger.info(
+      { memoId: memo.id, memoNumber, requestId: request.id },
+      '[refund-workflow] Credit memo created',
+    );
   }
 }
 
@@ -1235,7 +1285,8 @@ export async function sendRefundApprovedEmail(
 ): Promise<void> {
   if (meta.suppressCustomerEmail) return;
 
-  const customerEmail = meta.customerEmail ?? await resolveCustomerEmail(request.orgId, request.requestedBy);
+  const customerEmail =
+    meta.customerEmail ?? (await resolveCustomerEmail(request.orgId, request.requestedBy));
   if (!customerEmail) return;
 
   const { subject, html, text } = buildRefundApprovedEmail({
@@ -1255,7 +1306,8 @@ export async function sendRefundCompletedEmail(
 ): Promise<void> {
   if (meta.suppressCustomerEmail) return;
 
-  const customerEmail = meta.customerEmail ?? await resolveCustomerEmail(request.orgId, request.requestedBy);
+  const customerEmail =
+    meta.customerEmail ?? (await resolveCustomerEmail(request.orgId, request.requestedBy));
   if (!customerEmail) return;
 
   const { subject, html, text } = buildRefundCompletedEmail({
@@ -1277,7 +1329,8 @@ export async function sendRefundDeniedEmail(
 ): Promise<void> {
   if (meta.suppressCustomerEmail) return;
 
-  const customerEmail = meta.customerEmail ?? await resolveCustomerEmail(request.orgId, request.requestedBy);
+  const customerEmail =
+    meta.customerEmail ?? (await resolveCustomerEmail(request.orgId, request.requestedBy));
   if (!customerEmail) return;
 
   const { subject, html, text } = buildRefundDeniedEmail({
@@ -1290,7 +1343,10 @@ export async function sendRefundDeniedEmail(
   await sendEmail({ to: customerEmail, subject, html, text });
 }
 
-async function resolveCustomerEmail(orgId: number, requestedBy?: number | null): Promise<string | null> {
+async function resolveCustomerEmail(
+  orgId: number,
+  requestedBy?: number | null,
+): Promise<string | null> {
   // Suppress unused-var lint — orgId retained for future billing-contact lookup
   void orgId;
   try {
@@ -1364,7 +1420,11 @@ export function buildDemoRefundQueue(): Array<Record<string, unknown>> {
         internalNote: 'Two charges found on invoice INV-2026-0420.',
         suppressCustomerEmail: false,
         approvals: [],
-        requiredApprovals: { roles: ['manager'], minApprovers: 1, thresholdLabel: 'manager_approval' },
+        requiredApprovals: {
+          roles: ['manager'],
+          minApprovers: 1,
+          thresholdLabel: 'manager_approval',
+        },
         railType: null,
         railErrorCode: null,
         railRetries: 0,
@@ -1408,7 +1468,11 @@ export function buildDemoRefundQueue(): Array<Record<string, unknown>> {
             timestamp: daysAgo(5),
           },
         ],
-        requiredApprovals: { roles: ['finance', 'executive'], minApprovers: 2, thresholdLabel: 'dual_approval' },
+        requiredApprovals: {
+          roles: ['finance', 'executive'],
+          minApprovers: 2,
+          thresholdLabel: 'dual_approval',
+        },
         railType: 'card',
         railErrorCode: null,
         railRetries: 0,
@@ -1446,7 +1510,11 @@ export function buildDemoRefundQueue(): Array<Record<string, unknown>> {
             note: 'Delay was within SLA. Not eligible for goodwill refund.',
           },
         ],
-        requiredApprovals: { roles: ['manager'], minApprovers: 1, thresholdLabel: 'manager_approval' },
+        requiredApprovals: {
+          roles: ['manager'],
+          minApprovers: 1,
+          thresholdLabel: 'manager_approval',
+        },
         railType: null,
         railErrorCode: null,
         railRetries: 0,

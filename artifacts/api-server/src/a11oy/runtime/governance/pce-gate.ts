@@ -1,9 +1,17 @@
-import type { PCEContract, ApprovalRecord, PolicyEvaluation, ProofPacketRecord } from '../types.js';
-import type { MirrorEvalResult } from '../types.js';
-import { randomUUID } from 'node:crypto';
-import { createHash } from 'node:crypto';
+import {
+  type PCEContract,
+  type ApprovalRecord,
+  type PolicyEvaluation,
+  type ProofPacketRecord,
+  type MirrorEvalResult,
+} from '../types.js';
+import { randomUUID, createHash } from 'node:crypto';
 import { runMirrorEval, storeEval } from '../evals/mirror-eval.js';
-import { buildContextPack, checkEvidenceRequirement, computeCoverage } from '../context/deep-context.js';
+import {
+  buildContextPack,
+  checkEvidenceRequirement,
+  computeCoverage,
+} from '../context/deep-context.js';
 
 export type RiskClass =
   | 'financial'
@@ -91,10 +99,7 @@ export function evaluatePolicies(opts: {
   return result;
 }
 
-export function createApprovalRecord(opts: {
-  actionId: string;
-  tier: string;
-}): ApprovalRecord {
+export function createApprovalRecord(opts: { actionId: string; tier: string }): ApprovalRecord {
   const record: ApprovalRecord = {
     approvalId: `apr-${randomUUID().slice(0, 8)}`,
     actionId: opts.actionId,
@@ -169,7 +174,9 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
   const contextPack = buildContextPack({
     signalIds: input.originSignalIds,
     vertical: input.vertical,
-    signals: input.signals ?? input.originSignalIds.map((id) => ({ id, type: 'signal', source: 'runtime', freshness: 1 })),
+    signals:
+      input.signals ??
+      input.originSignalIds.map((id) => ({ id, type: 'signal', source: 'runtime', freshness: 1 })),
   });
 
   const evidenceCheck = checkEvidenceRequirement(contextPack);
@@ -183,20 +190,22 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
 
   const coverage = computeCoverage(contextPack);
 
-  const mirrorEval = input.mirrorEvalResult ?? runMirrorEval({
-    targetId: input.actionId,
-    targetType: 'pce',
-    evidenceRefs: input.originSignalIds,
-    sourceCoverage: coverage,
-    hasPriorApproval: !!input.approvalRecordId,
-    isDestructive: input.isDestructive,
-    isDemoMode: demo,
-    policyViolations: input.policyViolations,
-    contextFreshness: 0.9,
-    approvalTier: input.riskLevel === 'critical' ? 'executive' : 'operator',
-    riskLevel: input.riskLevel,
-    actionDescription: input.actionDescription,
-  });
+  const mirrorEval =
+    input.mirrorEvalResult ??
+    runMirrorEval({
+      targetId: input.actionId,
+      targetType: 'pce',
+      evidenceRefs: input.originSignalIds,
+      sourceCoverage: coverage,
+      hasPriorApproval: !!input.approvalRecordId,
+      isDestructive: input.isDestructive,
+      isDemoMode: demo,
+      policyViolations: input.policyViolations,
+      contextFreshness: 0.9,
+      approvalTier: input.riskLevel === 'critical' ? 'executive' : 'operator',
+      riskLevel: input.riskLevel,
+      actionDescription: input.actionDescription,
+    });
 
   storeEval(mirrorEval);
 
@@ -266,7 +275,9 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
   return { allowed: true, contract };
 }
 
-export async function verifyPCEContract(contractId: string): Promise<{ verified: boolean; reason?: string }> {
+export async function verifyPCEContract(
+  contractId: string,
+): Promise<{ verified: boolean; reason?: string }> {
   const contract = pceContracts.get(contractId);
   if (!contract) return { verified: false, reason: 'Contract not found.' };
 

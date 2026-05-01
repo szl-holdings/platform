@@ -60,7 +60,7 @@ interface N8nNotConfiguredResponse {
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
     credentials: 'include',
   });
   const json = await res.json();
@@ -164,7 +164,15 @@ function NotConfiguredState() {
           width: '100%',
         }}
       >
-        <div style={{ fontSize: '11px', fontWeight: 700, color: '#8b7ac8', marginBottom: '10px', letterSpacing: '0.08em' }}>
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: 700,
+            color: '#8b7ac8',
+            marginBottom: '10px',
+            letterSpacing: '0.08em',
+          }}
+        >
           SETUP
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -279,9 +287,18 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+          }}
+        >
           <div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#e2e8f0' }}>{workflow.name}</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#e2e8f0' }}>
+              {workflow.name}
+            </div>
             <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>
               Trigger with optional input data
             </div>
@@ -302,7 +319,15 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
         </div>
 
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: '#8b7ac8', marginBottom: '8px', letterSpacing: '0.06em' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: '#8b7ac8',
+              marginBottom: '8px',
+              letterSpacing: '0.06em',
+            }}
+          >
             INPUT DATA (optional)
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -340,7 +365,13 @@ function RunForm({ workflow, onClose, onRun, isRunning, initialValues }: RunForm
                 />
                 <button
                   onClick={() => removeField(idx)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px' }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#6b7280',
+                    padding: '4px',
+                  }}
                 >
                   <XCircle size={14} />
                 </button>
@@ -460,7 +491,8 @@ export default function AutomationsPage() {
     (healthQ.data as N8nHealthResponse).reachable === false;
 
   const workflows: N8nWorkflow[] = (workflowsQ.data as N8nListResponse<N8nWorkflow>)?.data ?? [];
-  const executions: N8nExecution[] = (executionsQ.data as N8nListResponse<N8nExecution>)?.data ?? [];
+  const executions: N8nExecution[] =
+    (executionsQ.data as N8nListResponse<N8nExecution>)?.data ?? [];
 
   const accentColor = '#8b7ac8';
 
@@ -479,7 +511,14 @@ export default function AutomationsPage() {
       )}
 
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '24px',
+          }}
+        >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Workflow size={20} color={accentColor} />
@@ -532,7 +571,15 @@ export default function AutomationsPage() {
         </div>
 
         {healthQ.isLoading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#718096', padding: '40px 0' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              color: '#718096',
+              padding: '40px 0',
+            }}
+          >
             <Loader2 size={16} className="animate-spin" />
             <span style={{ fontSize: '13px' }}>Checking n8n connection…</span>
           </div>
@@ -633,7 +680,14 @@ export default function AutomationsPage() {
 
         {!notConfigured && !healthQ.isLoading && !healthQ.isError && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px',
+                marginBottom: '24px',
+              }}
+            >
               <div
                 style={{
                   background: 'rgba(15,20,30,0.8)',
@@ -663,7 +717,9 @@ export default function AutomationsPage() {
                   <div style={{ fontSize: '22px', fontWeight: 700, lineHeight: 1 }}>
                     {workflowsQ.isLoading ? '—' : workflows.length}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>Workflows</div>
+                  <div style={{ fontSize: '11px', color: '#718096', marginTop: '2px' }}>
+                    Workflows
+                  </div>
                 </div>
               </div>
               <div
@@ -723,14 +779,29 @@ export default function AutomationsPage() {
               </div>
 
               {workflowsQ.isLoading && (
-                <div style={{ padding: '32px', display: 'flex', alignItems: 'center', gap: '10px', color: '#718096' }}>
+                <div
+                  style={{
+                    padding: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    color: '#718096',
+                  }}
+                >
                   <Loader2 size={14} className="animate-spin" />
                   <span style={{ fontSize: '13px' }}>Loading workflows from n8n…</span>
                 </div>
               )}
 
               {!workflowsQ.isLoading && workflows.length === 0 && (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#718096', fontSize: '13px' }}>
+                <div
+                  style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#718096',
+                    fontSize: '13px',
+                  }}
+                >
                   No workflows found. Create workflows in your n8n instance to see them here.
                 </div>
               )}
@@ -751,9 +822,7 @@ export default function AutomationsPage() {
                       gap: '12px',
                       cursor: 'pointer',
                     }}
-                    onClick={() =>
-                      setExpandedId(expandedId === wf.id ? null : wf.id)
-                    }
+                    onClick={() => setExpandedId(expandedId === wf.id ? null : wf.id)}
                   >
                     <div
                       style={{
@@ -827,11 +896,28 @@ export default function AutomationsPage() {
                         background: 'rgba(0,0,0,0.2)',
                       }}
                     >
-                      <div style={{ padding: '12px 0 8px', fontSize: '11px', fontWeight: 600, color: '#8b7ac8', letterSpacing: '0.08em' }}>
+                      <div
+                        style={{
+                          padding: '12px 0 8px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          color: '#8b7ac8',
+                          letterSpacing: '0.08em',
+                        }}
+                      >
                         RUN HISTORY
                       </div>
                       {executionsQ.isLoading && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#718096', fontSize: '12px', padding: '8px 0' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            color: '#718096',
+                            fontSize: '12px',
+                            padding: '8px 0',
+                          }}
+                        >
                           <Loader2 size={12} className="animate-spin" />
                           Loading executions…
                         </div>
@@ -891,13 +977,27 @@ export default function AutomationsPage() {
                   onClick={() => {
                     queryClient.invalidateQueries({ queryKey: ['n8n-executions-recent'] });
                   }}
-                  style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#8b7ac8', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{
+                    marginLeft: 'auto',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#8b7ac8',
+                    fontSize: '11px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
                 >
                   <RefreshCw size={10} />
                   Refresh
                 </button>
               </div>
-              <RecentExecutions onRefresh={() => queryClient.invalidateQueries({ queryKey: ['n8n-executions-recent'] })} />
+              <RecentExecutions
+                onRefresh={() =>
+                  queryClient.invalidateQueries({ queryKey: ['n8n-executions-recent'] })
+                }
+              />
             </div>
           </>
         )}
@@ -918,7 +1018,15 @@ function RecentExecutions({ onRefresh }: { onRefresh: () => void }) {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '10px', color: '#718096' }}>
+      <div
+        style={{
+          padding: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          color: '#718096',
+        }}
+      >
         <Loader2 size={14} className="animate-spin" />
         <span style={{ fontSize: '12px' }}>Loading recent executions…</span>
       </div>
@@ -948,7 +1056,16 @@ function RecentExecutions({ onRefresh }: { onRefresh: () => void }) {
         >
           {statusBadge(ex.status)}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#cbd5e1',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {ex.workflowData?.name ?? `Workflow ${ex.workflowId}`}
             </div>
             <div style={{ fontSize: '11px', color: '#4b5563' }}>
@@ -963,4 +1080,3 @@ function RecentExecutions({ onRefresh }: { onRefresh: () => void }) {
     </div>
   );
 }
-

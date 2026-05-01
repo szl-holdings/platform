@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from 'express';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
-import { db } from '@szl-holdings/db';
 import {
+  db,
   conduitConnectionsTable,
   conduitSyncMappingsTable,
   conduitSyncRunRowsTable,
@@ -15,8 +15,19 @@ import { logActivityFromRequest } from '@szl-holdings/audit';
 const router: IRouter = Router();
 
 const CONDUIT_DESTINATIONS = [
-  'salesforce', 'hubspot', 'slack', 'google_sheets', 'notion', 'airtable',
-  'zendesk', 'marketo', 'intercom', 'pipedrive', 'mailchimp', 'segment', 'webhook',
+  'salesforce',
+  'hubspot',
+  'slack',
+  'google_sheets',
+  'notion',
+  'airtable',
+  'zendesk',
+  'marketo',
+  'intercom',
+  'pipedrive',
+  'mailchimp',
+  'segment',
+  'webhook',
 ];
 
 const BUILTIN_TEMPLATES = [
@@ -25,16 +36,47 @@ const BUILTIN_TEMPLATES = [
     name: 'Terra Deals → Salesforce Opportunities',
     sourceType: 'api_resource',
     destination: 'salesforce',
-    description: 'Sync Terra investment deals to Salesforce Opportunity records, mapping deal stage and financials.',
+    description:
+      'Sync Terra investment deals to Salesforce Opportunity records, mapping deal stage and financials.',
     category: 'CRM',
     icon: 'building',
     mappingCount: 8,
     mappings: [
-      { sourceField: 'name', destinationField: 'Name', transform: null, transformConfig: {}, sortOrder: 0 },
-      { sourceField: 'stage', destinationField: 'StageName', transform: null, transformConfig: {}, sortOrder: 1 },
-      { sourceField: 'dealValue', destinationField: 'Amount', transform: null, transformConfig: {}, sortOrder: 2 },
-      { sourceField: 'closeDate', destinationField: 'CloseDate', transform: 'format_date', transformConfig: { format: 'YYYY-MM-DD' }, sortOrder: 3 },
-      { sourceField: 'propertyAddress', destinationField: 'Description', transform: null, transformConfig: {}, sortOrder: 4 },
+      {
+        sourceField: 'name',
+        destinationField: 'Name',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 0,
+      },
+      {
+        sourceField: 'stage',
+        destinationField: 'StageName',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 1,
+      },
+      {
+        sourceField: 'dealValue',
+        destinationField: 'Amount',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 2,
+      },
+      {
+        sourceField: 'closeDate',
+        destinationField: 'CloseDate',
+        transform: 'format_date',
+        transformConfig: { format: 'YYYY-MM-DD' },
+        sortOrder: 3,
+      },
+      {
+        sourceField: 'propertyAddress',
+        destinationField: 'Description',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 4,
+      },
     ],
   },
   {
@@ -42,14 +84,33 @@ const BUILTIN_TEMPLATES = [
     name: 'Vessels Alerts → Slack Channel',
     sourceType: 'api_resource',
     destination: 'slack',
-    description: 'Push Vessels port state control and sanction alerts to a Slack channel for real-time monitoring.',
+    description:
+      'Push Vessels port state control and sanction alerts to a Slack channel for real-time monitoring.',
     category: 'Notifications',
     icon: 'anchor',
     mappingCount: 4,
     mappings: [
-      { sourceField: 'vesselName', destinationField: 'text', transform: null, transformConfig: {}, sortOrder: 0 },
-      { sourceField: 'alertType', destinationField: 'username', transform: 'uppercase', transformConfig: {}, sortOrder: 1 },
-      { sourceField: 'severity', destinationField: 'icon_emoji', transform: null, transformConfig: {}, sortOrder: 2 },
+      {
+        sourceField: 'vesselName',
+        destinationField: 'text',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 0,
+      },
+      {
+        sourceField: 'alertType',
+        destinationField: 'username',
+        transform: 'uppercase',
+        transformConfig: {},
+        sortOrder: 1,
+      },
+      {
+        sourceField: 'severity',
+        destinationField: 'icon_emoji',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 2,
+      },
     ],
   },
   {
@@ -57,15 +118,40 @@ const BUILTIN_TEMPLATES = [
     name: 'PRISM Matters → Notion Database',
     sourceType: 'api_resource',
     destination: 'notion',
-    description: 'Mirror PRISM legal matters to a Notion database for team collaboration and external reporting.',
+    description:
+      'Mirror PRISM legal matters to a Notion database for team collaboration and external reporting.',
     category: 'Productivity',
     icon: 'scale',
     mappingCount: 7,
     mappings: [
-      { sourceField: 'name', destinationField: 'Name', transform: null, transformConfig: {}, sortOrder: 0 },
-      { sourceField: 'matterNumber', destinationField: 'Matter Number', transform: null, transformConfig: {}, sortOrder: 1 },
-      { sourceField: 'status', destinationField: 'Status', transform: null, transformConfig: {}, sortOrder: 2 },
-      { sourceField: 'leadCounsel', destinationField: 'Lead Counsel', transform: null, transformConfig: {}, sortOrder: 3 },
+      {
+        sourceField: 'name',
+        destinationField: 'Name',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 0,
+      },
+      {
+        sourceField: 'matterNumber',
+        destinationField: 'Matter Number',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 1,
+      },
+      {
+        sourceField: 'status',
+        destinationField: 'Status',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 2,
+      },
+      {
+        sourceField: 'leadCounsel',
+        destinationField: 'Lead Counsel',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 3,
+      },
     ],
   },
   {
@@ -73,14 +159,33 @@ const BUILTIN_TEMPLATES = [
     name: 'SZL Holdings Ventures → HubSpot Deals',
     sourceType: 'api_resource',
     destination: 'hubspot',
-    description: 'Sync SZL portfolio ventures to HubSpot deals for investor relationship management.',
+    description:
+      'Sync SZL portfolio ventures to HubSpot deals for investor relationship management.',
     category: 'CRM',
     icon: 'briefcase',
     mappingCount: 5,
     mappings: [
-      { sourceField: 'name', destinationField: 'dealname', transform: null, transformConfig: {}, sortOrder: 0 },
-      { sourceField: 'sector', destinationField: 'industry', transform: null, transformConfig: {}, sortOrder: 1 },
-      { sourceField: 'stage', destinationField: 'dealstage', transform: null, transformConfig: {}, sortOrder: 2 },
+      {
+        sourceField: 'name',
+        destinationField: 'dealname',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 0,
+      },
+      {
+        sourceField: 'sector',
+        destinationField: 'industry',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 1,
+      },
+      {
+        sourceField: 'stage',
+        destinationField: 'dealstage',
+        transform: null,
+        transformConfig: {},
+        sortOrder: 2,
+      },
     ],
   },
 ];
@@ -89,22 +194,27 @@ const BUILTIN_TEMPLATES = [
 router.get('/conduit/stats', async (req: Request, res: Response): Promise<void> => {
   try {
     const [[syncsAgg], [runsAgg], recentRuns] = await Promise.all([
-      db.select({
-        totalSyncs: count(),
-        activeSyncs: sql<number>`count(*) filter (where status = 'active')`,
-      }).from(conduitSyncsTable),
-      db.select({
-        totalRuns: count(),
-        successfulRuns: sql<number>`count(*) filter (where status = 'success')`,
-        failedRuns: sql<number>`count(*) filter (where status = 'failed' or status = 'partial')`,
-        totalRowsWritten: sql<number>`coalesce(sum(rows_written), 0)`,
-      }).from(conduitSyncRunsTable),
+      db
+        .select({
+          totalSyncs: count(),
+          activeSyncs: sql<number>`count(*) filter (where status = 'active')`,
+        })
+        .from(conduitSyncsTable),
+      db
+        .select({
+          totalRuns: count(),
+          successfulRuns: sql<number>`count(*) filter (where status = 'success')`,
+          failedRuns: sql<number>`count(*) filter (where status = 'failed' or status = 'partial')`,
+          totalRowsWritten: sql<number>`coalesce(sum(rows_written), 0)`,
+        })
+        .from(conduitSyncRunsTable),
       db.select().from(conduitSyncRunsTable).orderBy(desc(conduitSyncRunsTable.startedAt)).limit(5),
     ]);
 
-    const successRate = syncsAgg.totalSyncs > 0 && runsAgg.totalRuns > 0
-      ? Math.round((Number(runsAgg.successfulRuns) / Number(runsAgg.totalRuns)) * 100)
-      : 0;
+    const successRate =
+      syncsAgg.totalSyncs > 0 && runsAgg.totalRuns > 0
+        ? Math.round((Number(runsAgg.successfulRuns) / Number(runsAgg.totalRuns)) * 100)
+        : 0;
 
     res.json({
       totalSyncs: Number(syncsAgg.totalSyncs),
@@ -125,7 +235,10 @@ router.get('/conduit/stats', async (req: Request, res: Response): Promise<void> 
 // ─── Connections ──────────────────────────────────────────────────────────────
 router.get('/conduit/connections', async (req: Request, res: Response): Promise<void> => {
   try {
-    const connections = await db.select().from(conduitConnectionsTable).orderBy(desc(conduitConnectionsTable.createdAt));
+    const connections = await db
+      .select()
+      .from(conduitConnectionsTable)
+      .orderBy(desc(conduitConnectionsTable.createdAt));
     res.json(connections);
   } catch (err) {
     req.log.error({ err }, 'Failed to list connections');
@@ -134,7 +247,11 @@ router.get('/conduit/connections', async (req: Request, res: Response): Promise<
 });
 
 router.post('/conduit/connections', async (req: Request, res: Response): Promise<void> => {
-  const { name, destination, credentials } = req.body as { name?: string; destination?: string; credentials?: Record<string, unknown> };
+  const { name, destination, credentials } = req.body as {
+    name?: string;
+    destination?: string;
+    credentials?: Record<string, unknown>;
+  };
   if (!name || !destination) {
     res.status(400).json({ error: 'name and destination are required' });
     return;
@@ -144,14 +261,26 @@ router.post('/conduit/connections', async (req: Request, res: Response): Promise
     return;
   }
   try {
-    const credentialMeta = credentials ? Object.fromEntries(Object.keys(credentials).map(k => [k, '***'])) : {};
-    const [connection] = await db.insert(conduitConnectionsTable).values({
-      name,
-      destination,
-      credentialMeta,
-      status: 'untested',
-    }).returning();
-    await logActivityFromRequest(req, 'conduit.connection.create', 'conduit_connection', connection.id, undefined, { name, destination });
+    const credentialMeta = credentials
+      ? Object.fromEntries(Object.keys(credentials).map((k) => [k, '***']))
+      : {};
+    const [connection] = await db
+      .insert(conduitConnectionsTable)
+      .values({
+        name,
+        destination,
+        credentialMeta,
+        status: 'untested',
+      })
+      .returning();
+    await logActivityFromRequest(
+      req,
+      'conduit.connection.create',
+      'conduit_connection',
+      connection.id,
+      undefined,
+      { name, destination },
+    );
     res.status(201).json(connection);
   } catch (err) {
     req.log.error({ err }, 'Failed to create connection');
@@ -162,8 +291,14 @@ router.post('/conduit/connections', async (req: Request, res: Response): Promise
 router.get('/conduit/connections/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [connection] = await db.select().from(conduitConnectionsTable).where(eq(conduitConnectionsTable.id, id));
-    if (!connection) { res.status(404).json({ error: 'Connection not found' }); return; }
+    const [connection] = await db
+      .select()
+      .from(conduitConnectionsTable)
+      .where(eq(conduitConnectionsTable.id, id));
+    if (!connection) {
+      res.status(404).json({ error: 'Connection not found' });
+      return;
+    }
     res.json(connection);
   } catch (err) {
     req.log.error({ err }, 'Failed to get connection');
@@ -173,13 +308,24 @@ router.get('/conduit/connections/:id', async (req: Request, res: Response): Prom
 
 router.patch('/conduit/connections/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const { name, credentials } = req.body as { name?: string; credentials?: Record<string, unknown> };
+  const { name, credentials } = req.body as {
+    name?: string;
+    credentials?: Record<string, unknown>;
+  };
   try {
     const updates: Partial<typeof conduitConnectionsTable.$inferInsert> = {};
     if (name) updates.name = name;
-    if (credentials) updates.credentialMeta = Object.fromEntries(Object.keys(credentials).map(k => [k, '***']));
-    const [connection] = await db.update(conduitConnectionsTable).set(updates).where(eq(conduitConnectionsTable.id, id)).returning();
-    if (!connection) { res.status(404).json({ error: 'Connection not found' }); return; }
+    if (credentials)
+      updates.credentialMeta = Object.fromEntries(Object.keys(credentials).map((k) => [k, '***']));
+    const [connection] = await db
+      .update(conduitConnectionsTable)
+      .set(updates)
+      .where(eq(conduitConnectionsTable.id, id))
+      .returning();
+    if (!connection) {
+      res.status(404).json({ error: 'Connection not found' });
+      return;
+    }
     await logActivityFromRequest(req, 'conduit.connection.update', 'conduit_connection', id);
     res.json(connection);
   } catch (err) {
@@ -191,8 +337,14 @@ router.patch('/conduit/connections/:id', async (req: Request, res: Response): Pr
 router.delete('/conduit/connections/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [connection] = await db.delete(conduitConnectionsTable).where(eq(conduitConnectionsTable.id, id)).returning();
-    if (!connection) { res.status(404).json({ error: 'Connection not found' }); return; }
+    const [connection] = await db
+      .delete(conduitConnectionsTable)
+      .where(eq(conduitConnectionsTable.id, id))
+      .returning();
+    if (!connection) {
+      res.status(404).json({ error: 'Connection not found' });
+      return;
+    }
     await logActivityFromRequest(req, 'conduit.connection.delete', 'conduit_connection', id);
     res.sendStatus(204);
   } catch (err) {
@@ -204,18 +356,31 @@ router.delete('/conduit/connections/:id', async (req: Request, res: Response): P
 router.post('/conduit/connections/:id/test', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [connection] = await db.select().from(conduitConnectionsTable).where(eq(conduitConnectionsTable.id, id));
-    if (!connection) { res.status(404).json({ error: 'Connection not found' }); return; }
+    const [connection] = await db
+      .select()
+      .from(conduitConnectionsTable)
+      .where(eq(conduitConnectionsTable.id, id));
+    if (!connection) {
+      res.status(404).json({ error: 'Connection not found' });
+      return;
+    }
     const start = Date.now();
     // Simulate connection test (real implementation would call the destination API)
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+    await new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 300));
     const latencyMs = Date.now() - start;
     const success = Math.random() > 0.1; // 90% success rate in mock
-    await db.update(conduitConnectionsTable).set({
-      status: success ? 'active' : 'error',
-      testedAt: new Date(),
-    }).where(eq(conduitConnectionsTable.id, id));
-    res.json({ success, message: success ? 'Connection successful' : 'Connection refused: check credentials', latencyMs });
+    await db
+      .update(conduitConnectionsTable)
+      .set({
+        status: success ? 'active' : 'error',
+        testedAt: new Date(),
+      })
+      .where(eq(conduitConnectionsTable.id, id));
+    res.json({
+      success,
+      message: success ? 'Connection successful' : 'Connection refused: check credentials',
+      latencyMs,
+    });
   } catch (err) {
     req.log.error({ err }, 'Failed to test connection');
     res.status(500).json({ error: 'Internal server error' });
@@ -225,20 +390,26 @@ router.post('/conduit/connections/:id/test', async (req: Request, res: Response)
 // ─── Syncs ────────────────────────────────────────────────────────────────────
 router.get('/conduit/syncs', async (req: Request, res: Response): Promise<void> => {
   try {
-    const syncs = await db.select({
-      sync: conduitSyncsTable,
-      connection: conduitConnectionsTable,
-      mappingCount: sql<number>`(select count(*) from conduit_sync_mappings where sync_id = conduit_syncs.id)`,
-    })
+    const syncs = await db
+      .select({
+        sync: conduitSyncsTable,
+        connection: conduitConnectionsTable,
+        mappingCount: sql<number>`(select count(*) from conduit_sync_mappings where sync_id = conduit_syncs.id)`,
+      })
       .from(conduitSyncsTable)
-      .leftJoin(conduitConnectionsTable, eq(conduitSyncsTable.connectionId, conduitConnectionsTable.id))
+      .leftJoin(
+        conduitConnectionsTable,
+        eq(conduitSyncsTable.connectionId, conduitConnectionsTable.id),
+      )
       .orderBy(desc(conduitSyncsTable.createdAt));
 
-    res.json(syncs.map(row => ({
-      ...row.sync,
-      connection: row.connection,
-      mappingCount: Number(row.mappingCount),
-    })));
+    res.json(
+      syncs.map((row) => ({
+        ...row.sync,
+        connection: row.connection,
+        mappingCount: Number(row.mappingCount),
+      })),
+    );
   } catch (err) {
     req.log.error({ err }, 'Failed to list syncs');
     res.status(500).json({ error: 'Internal server error' });
@@ -246,25 +417,44 @@ router.get('/conduit/syncs', async (req: Request, res: Response): Promise<void> 
 });
 
 router.post('/conduit/syncs', async (req: Request, res: Response): Promise<void> => {
-  const { name, sourceType, sourceMeta, connectionId, objectType, runMode, scheduleExpr, semantics, upsertKey } = req.body as Record<string, unknown>;
+  const {
+    name,
+    sourceType,
+    sourceMeta,
+    connectionId,
+    objectType,
+    runMode,
+    scheduleExpr,
+    semantics,
+    upsertKey,
+  } = req.body as Record<string, unknown>;
   if (!name || !connectionId || !objectType || !runMode || !semantics) {
-    res.status(400).json({ error: 'name, connectionId, objectType, runMode, and semantics are required' });
+    res
+      .status(400)
+      .json({ error: 'name, connectionId, objectType, runMode, and semantics are required' });
     return;
   }
   try {
-    const [sync] = await db.insert(conduitSyncsTable).values({
-      name: name as string,
-      sourceType: (sourceType as string) || 'postgres',
-      sourceMeta: (sourceMeta as Record<string, unknown>) || {},
-      connectionId: connectionId as string,
-      objectType: objectType as string,
-      runMode: (runMode as 'manual' | 'scheduled' | 'on_change') || 'manual',
-      scheduleExpr: scheduleExpr as string | undefined,
-      semantics: (semantics as 'insert' | 'upsert' | 'mirror') || 'upsert',
-      upsertKey: upsertKey as string | undefined,
-      status: 'draft',
-    }).returning();
-    await logActivityFromRequest(req, 'conduit.sync.create', 'conduit_sync', sync.id, undefined, { name, connectionId, objectType });
+    const [sync] = await db
+      .insert(conduitSyncsTable)
+      .values({
+        name: name as string,
+        sourceType: (sourceType as string) || 'postgres',
+        sourceMeta: (sourceMeta as Record<string, unknown>) || {},
+        connectionId: connectionId as string,
+        objectType: objectType as string,
+        runMode: (runMode as 'manual' | 'scheduled' | 'on_change') || 'manual',
+        scheduleExpr: scheduleExpr as string | undefined,
+        semantics: (semantics as 'insert' | 'upsert' | 'mirror') || 'upsert',
+        upsertKey: upsertKey as string | undefined,
+        status: 'draft',
+      })
+      .returning();
+    await logActivityFromRequest(req, 'conduit.sync.create', 'conduit_sync', sync.id, undefined, {
+      name,
+      connectionId,
+      objectType,
+    });
     res.status(201).json(sync);
   } catch (err) {
     req.log.error({ err }, 'Failed to create sync');
@@ -275,16 +465,23 @@ router.post('/conduit/syncs', async (req: Request, res: Response): Promise<void>
 router.get('/conduit/syncs/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [row] = await db.select({
-      sync: conduitSyncsTable,
-      connection: conduitConnectionsTable,
-      mappingCount: sql<number>`(select count(*) from conduit_sync_mappings where sync_id = conduit_syncs.id)`,
-    })
+    const [row] = await db
+      .select({
+        sync: conduitSyncsTable,
+        connection: conduitConnectionsTable,
+        mappingCount: sql<number>`(select count(*) from conduit_sync_mappings where sync_id = conduit_syncs.id)`,
+      })
       .from(conduitSyncsTable)
-      .leftJoin(conduitConnectionsTable, eq(conduitSyncsTable.connectionId, conduitConnectionsTable.id))
+      .leftJoin(
+        conduitConnectionsTable,
+        eq(conduitSyncsTable.connectionId, conduitConnectionsTable.id),
+      )
       .where(eq(conduitSyncsTable.id, id));
 
-    if (!row) { res.status(404).json({ error: 'Sync not found' }); return; }
+    if (!row) {
+      res.status(404).json({ error: 'Sync not found' });
+      return;
+    }
     res.json({ ...row.sync, connection: row.connection, mappingCount: Number(row.mappingCount) });
   } catch (err) {
     req.log.error({ err }, 'Failed to get sync');
@@ -296,10 +493,30 @@ router.patch('/conduit/syncs/:id', async (req: Request, res: Response): Promise<
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const updates = req.body as Record<string, unknown>;
   try {
-    const allowed = ['name', 'sourceType', 'sourceMeta', 'connectionId', 'objectType', 'runMode', 'scheduleExpr', 'semantics', 'upsertKey', 'status'];
-    const filtered = Object.fromEntries(Object.entries(updates).filter(([k]) => allowed.includes(k)));
-    const [sync] = await db.update(conduitSyncsTable).set(filtered as Partial<typeof conduitSyncsTable.$inferInsert>).where(eq(conduitSyncsTable.id, id)).returning();
-    if (!sync) { res.status(404).json({ error: 'Sync not found' }); return; }
+    const allowed = [
+      'name',
+      'sourceType',
+      'sourceMeta',
+      'connectionId',
+      'objectType',
+      'runMode',
+      'scheduleExpr',
+      'semantics',
+      'upsertKey',
+      'status',
+    ];
+    const filtered = Object.fromEntries(
+      Object.entries(updates).filter(([k]) => allowed.includes(k)),
+    );
+    const [sync] = await db
+      .update(conduitSyncsTable)
+      .set(filtered as Partial<typeof conduitSyncsTable.$inferInsert>)
+      .where(eq(conduitSyncsTable.id, id))
+      .returning();
+    if (!sync) {
+      res.status(404).json({ error: 'Sync not found' });
+      return;
+    }
     await logActivityFromRequest(req, 'conduit.sync.update', 'conduit_sync', id);
     res.json(sync);
   } catch (err) {
@@ -311,8 +528,14 @@ router.patch('/conduit/syncs/:id', async (req: Request, res: Response): Promise<
 router.delete('/conduit/syncs/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [sync] = await db.delete(conduitSyncsTable).where(eq(conduitSyncsTable.id, id)).returning();
-    if (!sync) { res.status(404).json({ error: 'Sync not found' }); return; }
+    const [sync] = await db
+      .delete(conduitSyncsTable)
+      .where(eq(conduitSyncsTable.id, id))
+      .returning();
+    if (!sync) {
+      res.status(404).json({ error: 'Sync not found' });
+      return;
+    }
     await logActivityFromRequest(req, 'conduit.sync.delete', 'conduit_sync', id);
     res.sendStatus(204);
   } catch (err) {
@@ -326,18 +549,28 @@ router.post('/conduit/syncs/:id/run', async (req: Request, res: Response): Promi
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const [sync] = await db.select().from(conduitSyncsTable).where(eq(conduitSyncsTable.id, id));
-    if (!sync) { res.status(404).json({ error: 'Sync not found' }); return; }
+    if (!sync) {
+      res.status(404).json({ error: 'Sync not found' });
+      return;
+    }
 
-    const [run] = await db.insert(conduitSyncRunsTable).values({
-      syncId: id,
-      status: 'running',
-      triggeredBy: 'manual',
-    }).returning();
+    const [run] = await db
+      .insert(conduitSyncRunsTable)
+      .values({
+        syncId: id,
+        status: 'running',
+        triggeredBy: 'manual',
+      })
+      .returning();
 
-    await logActivityFromRequest(req, 'conduit.sync.run', 'conduit_sync', id, undefined, { runId: run.id });
+    await logActivityFromRequest(req, 'conduit.sync.run', 'conduit_sync', id, undefined, {
+      runId: run.id,
+    });
 
     // Simulate async execution
-    simulateSyncExecution(run.id, id).catch(err => logger.error({ err, runId: run.id }, 'Sync execution error'));
+    simulateSyncExecution(run.id, id).catch((err) =>
+      logger.error({ err, runId: run.id }, 'Sync execution error'),
+    );
 
     res.status(202).json(run);
   } catch (err) {
@@ -348,27 +581,33 @@ router.post('/conduit/syncs/:id/run', async (req: Request, res: Response): Promi
 
 async function simulateSyncExecution(runId: string, syncId: string): Promise<void> {
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 5000));
+    await new Promise((resolve) => setTimeout(resolve, 2000 + Math.random() * 5000));
     const rowsRead = Math.floor(Math.random() * 1000) + 50;
     const rowsFailed = Math.floor(Math.random() * 5);
     const rowsWritten = rowsRead - rowsFailed;
     const status = rowsFailed === 0 ? 'success' : 'partial';
     const durationMs = 2000 + Math.floor(Math.random() * 5000);
 
-    await db.update(conduitSyncRunsTable).set({
-      status,
-      rowsRead,
-      rowsWritten,
-      rowsFailed,
-      durationMs,
-      finishedAt: new Date(),
-    }).where(eq(conduitSyncRunsTable.id, runId));
+    await db
+      .update(conduitSyncRunsTable)
+      .set({
+        status,
+        rowsRead,
+        rowsWritten,
+        rowsFailed,
+        durationMs,
+        finishedAt: new Date(),
+      })
+      .where(eq(conduitSyncRunsTable.id, runId));
 
-    await db.update(conduitSyncsTable).set({
-      lastRunId: runId,
-      lastRunAt: new Date(),
-      lastRunStatus: status,
-    }).where(eq(conduitSyncsTable.id, syncId));
+    await db
+      .update(conduitSyncsTable)
+      .set({
+        lastRunId: runId,
+        lastRunAt: new Date(),
+        lastRunStatus: status,
+      })
+      .where(eq(conduitSyncsTable.id, syncId));
 
     if (rowsFailed > 0) {
       const failedRows = Array.from({ length: rowsFailed }, (_, i) => ({
@@ -381,11 +620,14 @@ async function simulateSyncExecution(runId: string, syncId: string): Promise<voi
     }
   } catch (err) {
     logger.error({ err, runId }, 'Failed to complete sync execution');
-    await db.update(conduitSyncRunsTable).set({
-      status: 'failed',
-      errorMessage: 'Execution failed unexpectedly',
-      finishedAt: new Date(),
-    }).where(eq(conduitSyncRunsTable.id, runId));
+    await db
+      .update(conduitSyncRunsTable)
+      .set({
+        status: 'failed',
+        errorMessage: 'Execution failed unexpectedly',
+        finishedAt: new Date(),
+      })
+      .where(eq(conduitSyncRunsTable.id, runId));
   }
 }
 
@@ -393,7 +635,9 @@ async function simulateSyncExecution(runId: string, syncId: string): Promise<voi
 router.get('/conduit/syncs/:id/mappings', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const mappings = await db.select().from(conduitSyncMappingsTable)
+    const mappings = await db
+      .select()
+      .from(conduitSyncMappingsTable)
       .where(eq(conduitSyncMappingsTable.syncId, id))
       .orderBy(conduitSyncMappingsTable.sortOrder);
     res.json(mappings);
@@ -406,22 +650,36 @@ router.get('/conduit/syncs/:id/mappings', async (req: Request, res: Response): P
 router.put('/conduit/syncs/:id/mappings', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const { mappings } = req.body as { mappings?: Array<Record<string, unknown>> };
-  if (!Array.isArray(mappings)) { res.status(400).json({ error: 'mappings array required' }); return; }
+  if (!Array.isArray(mappings)) {
+    res.status(400).json({ error: 'mappings array required' });
+    return;
+  }
   try {
     await db.delete(conduitSyncMappingsTable).where(eq(conduitSyncMappingsTable.syncId, id));
-    const inserted = mappings.length > 0
-      ? await db.insert(conduitSyncMappingsTable).values(
-          mappings.map((m, i) => ({
-            syncId: id,
-            sourceField: m.sourceField as string,
-            destinationField: m.destinationField as string,
-            transform: m.transform as string | undefined,
-            transformConfig: (m.transformConfig as Record<string, unknown>) || {},
-            sortOrder: typeof m.sortOrder === 'number' ? m.sortOrder : i,
-          }))
-        ).returning()
-      : [];
-    await logActivityFromRequest(req, 'conduit.sync.mappings.update', 'conduit_sync', id, undefined, { mappingCount: mappings.length });
+    const inserted =
+      mappings.length > 0
+        ? await db
+            .insert(conduitSyncMappingsTable)
+            .values(
+              mappings.map((m, i) => ({
+                syncId: id,
+                sourceField: m.sourceField as string,
+                destinationField: m.destinationField as string,
+                transform: m.transform as string | undefined,
+                transformConfig: (m.transformConfig as Record<string, unknown>) || {},
+                sortOrder: typeof m.sortOrder === 'number' ? m.sortOrder : i,
+              })),
+            )
+            .returning()
+        : [];
+    await logActivityFromRequest(
+      req,
+      'conduit.sync.mappings.update',
+      'conduit_sync',
+      id,
+      undefined,
+      { mappingCount: mappings.length },
+    );
     res.json(inserted);
   } catch (err) {
     req.log.error({ err }, 'Failed to update sync mappings');
@@ -435,26 +693,31 @@ router.get('/conduit/sync-runs', async (req: Request, res: Response): Promise<vo
   try {
     const conditions = [];
     if (syncId) conditions.push(eq(conduitSyncRunsTable.syncId, syncId));
-    if (status) conditions.push(eq(conduitSyncRunsTable.status, status as 'running' | 'success' | 'failed' | 'partial'));
+    if (status)
+      conditions.push(
+        eq(conduitSyncRunsTable.status, status as 'running' | 'success' | 'failed' | 'partial'),
+      );
 
     const [runs, [{ total }]] = await Promise.all([
-      db.select({
-        run: conduitSyncRunsTable,
-        syncName: conduitSyncsTable.name,
-      })
+      db
+        .select({
+          run: conduitSyncRunsTable,
+          syncName: conduitSyncsTable.name,
+        })
         .from(conduitSyncRunsTable)
         .leftJoin(conduitSyncsTable, eq(conduitSyncRunsTable.syncId, conduitSyncsTable.id))
         .where(conditions.length ? and(...conditions) : undefined)
         .orderBy(desc(conduitSyncRunsTable.startedAt))
         .limit(parseInt(limit))
         .offset(parseInt(offset)),
-      db.select({ total: count() })
+      db
+        .select({ total: count() })
         .from(conduitSyncRunsTable)
         .where(conditions.length ? and(...conditions) : undefined),
     ]);
 
     res.json({
-      data: runs.map(r => ({ ...r.run, syncName: r.syncName })),
+      data: runs.map((r) => ({ ...r.run, syncName: r.syncName })),
       total: Number(total),
     });
   } catch (err) {
@@ -466,13 +729,20 @@ router.get('/conduit/sync-runs', async (req: Request, res: Response): Promise<vo
 router.get('/conduit/sync-runs/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
-    const [row] = await db.select({ run: conduitSyncRunsTable, sync: conduitSyncsTable })
+    const [row] = await db
+      .select({ run: conduitSyncRunsTable, sync: conduitSyncsTable })
       .from(conduitSyncRunsTable)
       .leftJoin(conduitSyncsTable, eq(conduitSyncRunsTable.syncId, conduitSyncsTable.id))
       .where(eq(conduitSyncRunsTable.id, id));
-    if (!row) { res.status(404).json({ error: 'Sync run not found' }); return; }
-    const sampleErrors = await db.select().from(conduitSyncRunRowsTable)
-      .where(eq(conduitSyncRunRowsTable.runId, id)).limit(20);
+    if (!row) {
+      res.status(404).json({ error: 'Sync run not found' });
+      return;
+    }
+    const sampleErrors = await db
+      .select()
+      .from(conduitSyncRunRowsTable)
+      .where(eq(conduitSyncRunRowsTable.runId, id))
+      .limit(20);
     res.json({ ...row.run, sync: row.sync, sampleErrors });
   } catch (err) {
     req.log.error({ err }, 'Failed to get sync run');
@@ -484,7 +754,9 @@ router.get('/conduit/sync-runs/:id/rows', async (req: Request, res: Response): P
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const { limit = '100', offset = '0' } = req.query as Record<string, string>;
   try {
-    const rows = await db.select().from(conduitSyncRunRowsTable)
+    const rows = await db
+      .select()
+      .from(conduitSyncRunRowsTable)
       .where(eq(conduitSyncRunRowsTable.runId, id))
       .limit(parseInt(limit))
       .offset(parseInt(offset));
@@ -495,16 +767,22 @@ router.get('/conduit/sync-runs/:id/rows', async (req: Request, res: Response): P
   }
 });
 
-router.post('/conduit/sync-runs/:id/rows/:rowId/retry', async (req: Request, res: Response): Promise<void> => {
-  const rowId = Array.isArray(req.params.rowId) ? req.params.rowId[0] : req.params.rowId;
-  try {
-    await db.update(conduitSyncRunRowsTable).set({ retried: true, retriedAt: new Date() }).where(eq(conduitSyncRunRowsTable.id, rowId));
-    res.sendStatus(202);
-  } catch (err) {
-    req.log.error({ err }, 'Failed to retry row');
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.post(
+  '/conduit/sync-runs/:id/rows/:rowId/retry',
+  async (req: Request, res: Response): Promise<void> => {
+    const rowId = Array.isArray(req.params.rowId) ? req.params.rowId[0] : req.params.rowId;
+    try {
+      await db
+        .update(conduitSyncRunRowsTable)
+        .set({ retried: true, retriedAt: new Date() })
+        .where(eq(conduitSyncRunRowsTable.id, rowId));
+      res.sendStatus(202);
+    } catch (err) {
+      req.log.error({ err }, 'Failed to retry row');
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+);
 
 // ─── Templates ────────────────────────────────────────────────────────────────
 router.get('/conduit/templates', async (_req: Request, res: Response): Promise<void> => {
@@ -513,27 +791,39 @@ router.get('/conduit/templates', async (_req: Request, res: Response): Promise<v
 
 router.get('/conduit/templates/:id', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const template = BUILTIN_TEMPLATES.find(t => t.id === id);
-  if (!template) { res.status(404).json({ error: 'Template not found' }); return; }
+  const template = BUILTIN_TEMPLATES.find((t) => t.id === id);
+  if (!template) {
+    res.status(404).json({ error: 'Template not found' });
+    return;
+  }
   res.json(template);
 });
 
 router.post('/conduit/templates/:id/apply', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const template = BUILTIN_TEMPLATES.find(t => t.id === id);
-  if (!template) { res.status(404).json({ error: 'Template not found' }); return; }
+  const template = BUILTIN_TEMPLATES.find((t) => t.id === id);
+  if (!template) {
+    res.status(404).json({ error: 'Template not found' });
+    return;
+  }
   const { connectionId, name } = req.body as { connectionId?: string; name?: string };
-  if (!connectionId) { res.status(400).json({ error: 'connectionId is required' }); return; }
+  if (!connectionId) {
+    res.status(400).json({ error: 'connectionId is required' });
+    return;
+  }
   try {
-    const [sync] = await db.insert(conduitSyncsTable).values({
-      name: name || template.name,
-      sourceType: template.sourceType,
-      connectionId,
-      objectType: template.destination,
-      runMode: 'manual',
-      semantics: 'upsert',
-      status: 'draft',
-    }).returning();
+    const [sync] = await db
+      .insert(conduitSyncsTable)
+      .values({
+        name: name || template.name,
+        sourceType: template.sourceType,
+        connectionId,
+        objectType: template.destination,
+        runMode: 'manual',
+        semantics: 'upsert',
+        status: 'draft',
+      })
+      .returning();
     if (template.mappings.length > 0) {
       await db.insert(conduitSyncMappingsTable).values(
         template.mappings.map((m, i) => ({
@@ -543,10 +833,17 @@ router.post('/conduit/templates/:id/apply', async (req: Request, res: Response):
           transform: m.transform as 'uppercase' | 'lowercase' | null,
           transformConfig: (m.transformConfig as Record<string, unknown>) || {},
           sortOrder: i,
-        }))
+        })),
       );
     }
-    await logActivityFromRequest(req, 'conduit.template.apply', 'conduit_sync', sync.id, undefined, { templateId: id, templateName: template.name });
+    await logActivityFromRequest(
+      req,
+      'conduit.template.apply',
+      'conduit_sync',
+      sync.id,
+      undefined,
+      { templateId: id, templateName: template.name },
+    );
     res.status(201).json(sync);
   } catch (err) {
     req.log.error({ err }, 'Failed to apply template');
@@ -556,30 +853,49 @@ router.post('/conduit/templates/:id/apply', async (req: Request, res: Response):
 
 // ─── Source Preview ───────────────────────────────────────────────────────────
 router.post('/conduit/sources/preview', async (req: Request, res: Response): Promise<void> => {
-  const { sourceType, mappings } = req.body as { sourceType?: string; sourceMeta?: Record<string, unknown>; mappings?: Array<Record<string, unknown>> };
+  const { sourceType, mappings } = req.body as {
+    sourceType?: string;
+    sourceMeta?: Record<string, unknown>;
+    mappings?: Array<Record<string, unknown>>;
+  };
   try {
     // Mock preview based on source type
-    const MOCK_SOURCES: Record<string, { fields: string[]; rows: Array<Record<string, unknown>> }> = {
-      postgres: {
-        fields: ['id', 'name', 'email', 'created_at', 'status', 'value'],
-        rows: Array.from({ length: 10 }, (_, i) => ({
-          id: `row_${i + 1}`, name: `Record ${i + 1}`, email: `user${i + 1}@example.com`,
-          created_at: new Date(Date.now() - i * 86400000).toISOString(), status: i % 3 === 0 ? 'active' : 'inactive', value: Math.floor(Math.random() * 10000),
-        })),
-      },
-      api_resource: {
-        fields: ['id', 'name', 'stage', 'value', 'address', 'lat', 'lng', 'updatedAt'],
-        rows: Array.from({ length: 10 }, (_, i) => ({
-          id: `deal_${i + 1}`, name: `Asset ${i + 1}`, stage: ['sourcing', 'diligence', 'offer', 'closed'][i % 4],
-          value: (i + 1) * 250000, address: `${100 + i} Main St, New York, NY`, lat: 40.7 + i * 0.01, lng: -74.0 + i * 0.01,
-          updatedAt: new Date(Date.now() - i * 3600000).toISOString(),
-        })),
-      },
-      csv: {
-        fields: ['col_a', 'col_b', 'col_c', 'col_d'],
-        rows: Array.from({ length: 10 }, (_, i) => ({ col_a: `val_a_${i}`, col_b: `val_b_${i}`, col_c: i * 10, col_d: i % 2 === 0 })),
-      },
-    };
+    const MOCK_SOURCES: Record<string, { fields: string[]; rows: Array<Record<string, unknown>> }> =
+      {
+        postgres: {
+          fields: ['id', 'name', 'email', 'created_at', 'status', 'value'],
+          rows: Array.from({ length: 10 }, (_, i) => ({
+            id: `row_${i + 1}`,
+            name: `Record ${i + 1}`,
+            email: `user${i + 1}@example.com`,
+            created_at: new Date(Date.now() - i * 86400000).toISOString(),
+            status: i % 3 === 0 ? 'active' : 'inactive',
+            value: Math.floor(Math.random() * 10000),
+          })),
+        },
+        api_resource: {
+          fields: ['id', 'name', 'stage', 'value', 'address', 'lat', 'lng', 'updatedAt'],
+          rows: Array.from({ length: 10 }, (_, i) => ({
+            id: `deal_${i + 1}`,
+            name: `Asset ${i + 1}`,
+            stage: ['sourcing', 'diligence', 'offer', 'closed'][i % 4],
+            value: (i + 1) * 250000,
+            address: `${100 + i} Main St, New York, NY`,
+            lat: 40.7 + i * 0.01,
+            lng: -74.0 + i * 0.01,
+            updatedAt: new Date(Date.now() - i * 3600000).toISOString(),
+          })),
+        },
+        csv: {
+          fields: ['col_a', 'col_b', 'col_c', 'col_d'],
+          rows: Array.from({ length: 10 }, (_, i) => ({
+            col_a: `val_a_${i}`,
+            col_b: `val_b_${i}`,
+            col_c: i * 10,
+            col_d: i % 2 === 0,
+          })),
+        },
+      };
     const mock = MOCK_SOURCES[sourceType || 'postgres'] || MOCK_SOURCES.postgres;
     res.json({ fields: mock.fields, rows: mock.rows.slice(0, 10), totalRows: mock.rows.length });
   } catch (err) {
@@ -589,13 +905,20 @@ router.post('/conduit/sources/preview', async (req: Request, res: Response): Pro
 });
 
 // ─── Destination metadata ─────────────────────────────────────────────────────
-const DESTINATION_OBJECTS: Record<string, Array<{ name: string; label: string; description: string }>> = {
+const DESTINATION_OBJECTS: Record<
+  string,
+  Array<{ name: string; label: string; description: string }>
+> = {
   salesforce: [
     { name: 'Contact', label: 'Contact', description: 'A person in Salesforce' },
     { name: 'Lead', label: 'Lead', description: 'A potential customer' },
     { name: 'Account', label: 'Account', description: 'An organization' },
     { name: 'Opportunity', label: 'Opportunity', description: 'A sales opportunity' },
-    { name: 'CustomObject__c', label: 'Custom Object', description: 'Your custom Salesforce object' },
+    {
+      name: 'CustomObject__c',
+      label: 'Custom Object',
+      description: 'Your custom Salesforce object',
+    },
   ],
   hubspot: [
     { name: 'contacts', label: 'Contact', description: 'HubSpot contact record' },
@@ -603,24 +926,35 @@ const DESTINATION_OBJECTS: Record<string, Array<{ name: string; label: string; d
     { name: 'deals', label: 'Deal', description: 'HubSpot deal record' },
     { name: 'tickets', label: 'Ticket', description: 'HubSpot support ticket' },
   ],
-  slack: [
-    { name: 'message', label: 'Message', description: 'Send a message to a channel' },
-  ],
+  slack: [{ name: 'message', label: 'Message', description: 'Send a message to a channel' }],
   notion: [
-    { name: 'database_row', label: 'Database Row', description: 'Add or update a Notion database row' },
+    {
+      name: 'database_row',
+      label: 'Database Row',
+      description: 'Add or update a Notion database row',
+    },
   ],
   google_sheets: [
-    { name: 'spreadsheet_row', label: 'Spreadsheet Row', description: 'Append or upsert a row in a Google Sheet' },
+    {
+      name: 'spreadsheet_row',
+      label: 'Spreadsheet Row',
+      description: 'Append or upsert a row in a Google Sheet',
+    },
   ],
-  airtable: [
-    { name: 'record', label: 'Record', description: 'Airtable base record' },
-  ],
+  airtable: [{ name: 'record', label: 'Record', description: 'Airtable base record' }],
   webhook: [
-    { name: 'payload', label: 'Webhook Payload', description: 'HTTP POST payload to your webhook URL' },
+    {
+      name: 'payload',
+      label: 'Webhook Payload',
+      description: 'HTTP POST payload to your webhook URL',
+    },
   ],
 };
 
-const DESTINATION_FIELDS: Record<string, Array<{ name: string; label: string; type: string; required?: boolean; updateable?: boolean }>> = {
+const DESTINATION_FIELDS: Record<
+  string,
+  Array<{ name: string; label: string; type: string; required?: boolean; updateable?: boolean }>
+> = {
   'salesforce:Contact': [
     { name: 'FirstName', label: 'First Name', type: 'string', required: false, updateable: true },
     { name: 'LastName', label: 'Last Name', type: 'string', required: true, updateable: true },
@@ -633,7 +967,13 @@ const DESTINATION_FIELDS: Record<string, Array<{ name: string; label: string; ty
     { name: 'StageName', label: 'Stage', type: 'picklist', required: true, updateable: true },
     { name: 'Amount', label: 'Amount', type: 'currency', required: false, updateable: true },
     { name: 'CloseDate', label: 'Close Date', type: 'date', required: true, updateable: true },
-    { name: 'Description', label: 'Description', type: 'textarea', required: false, updateable: true },
+    {
+      name: 'Description',
+      label: 'Description',
+      type: 'textarea',
+      required: false,
+      updateable: true,
+    },
   ],
   'hubspot:contacts': [
     { name: 'email', label: 'Email', type: 'string', required: true, updateable: true },
@@ -650,22 +990,34 @@ const DESTINATION_FIELDS: Record<string, Array<{ name: string; label: string; ty
   ],
 };
 
-router.get('/conduit/destinations/:destination/objects', async (req: Request, res: Response): Promise<void> => {
-  const destination = Array.isArray(req.params.destination) ? req.params.destination[0] : req.params.destination;
-  const objects = DESTINATION_OBJECTS[destination] || [];
-  res.json(objects);
-});
+router.get(
+  '/conduit/destinations/:destination/objects',
+  async (req: Request, res: Response): Promise<void> => {
+    const destination = Array.isArray(req.params.destination)
+      ? req.params.destination[0]
+      : req.params.destination;
+    const objects = DESTINATION_OBJECTS[destination] || [];
+    res.json(objects);
+  },
+);
 
-router.get('/conduit/destinations/:destination/objects/:objectType/fields', async (req: Request, res: Response): Promise<void> => {
-  const destination = Array.isArray(req.params.destination) ? req.params.destination[0] : req.params.destination;
-  const objectType = Array.isArray(req.params.objectType) ? req.params.objectType[0] : req.params.objectType;
-  const key = `${destination}:${objectType}`;
-  const fields = DESTINATION_FIELDS[key] || [
-    { name: 'field_1', label: 'Field 1', type: 'string', required: false, updateable: true },
-    { name: 'field_2', label: 'Field 2', type: 'string', required: false, updateable: true },
-    { name: 'field_3', label: 'Field 3', type: 'number', required: false, updateable: true },
-  ];
-  res.json(fields);
-});
+router.get(
+  '/conduit/destinations/:destination/objects/:objectType/fields',
+  async (req: Request, res: Response): Promise<void> => {
+    const destination = Array.isArray(req.params.destination)
+      ? req.params.destination[0]
+      : req.params.destination;
+    const objectType = Array.isArray(req.params.objectType)
+      ? req.params.objectType[0]
+      : req.params.objectType;
+    const key = `${destination}:${objectType}`;
+    const fields = DESTINATION_FIELDS[key] || [
+      { name: 'field_1', label: 'Field 1', type: 'string', required: false, updateable: true },
+      { name: 'field_2', label: 'Field 2', type: 'string', required: false, updateable: true },
+      { name: 'field_3', label: 'Field 3', type: 'number', required: false, updateable: true },
+    ];
+    res.json(fields);
+  },
+);
 
 export default router;

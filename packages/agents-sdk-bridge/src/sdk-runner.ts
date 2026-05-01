@@ -12,10 +12,11 @@
  */
 
 import { Runner } from '@openai/agents';
-import type { AgentDefinitionLike } from './agent-adapter.js';
-import { SzlAgentAdapter } from './agent-adapter.js';
-import { registerSzlTracingProcessor } from './tracing-processor.js';
-import type { SzlTracingProcessorOptions } from './tracing-processor.js';
+import { type AgentDefinitionLike, SzlAgentAdapter } from './agent-adapter.js';
+import {
+  registerSzlTracingProcessor,
+  type SzlTracingProcessorOptions,
+} from './tracing-processor.js';
 import { defaultGateway } from '@workspace/tool-mesh';
 
 export interface SdkRunnerOptions {

@@ -102,21 +102,73 @@ vi.mock('@szl-holdings/db', () => {
       },
       execute: () => Promise.resolve(),
     },
-    costBudgetsTable: { orgId: col('org_id'), isActive: col('is_active'), id: col('id'), createdAt: col('created_at') },
-    costEventsTable: { orgId: col('org_id'), eventType: col('event_type'), createdAt: col('created_at'), costUsd: col('cost_usd'), tokensIn: col('tokens_in'), tokensOut: col('tokens_out') },
-    alloyLegacyPoliciesTable: { orgId: col('org_id'), id: col('id'), policyType: col('policy_type'), isActive: col('is_active'), createdAt: col('created_at'), updatedAt: col('updated_at') },
-    modelRoutingPoliciesTable: { orgId: col('org_id'), id: col('id'), isActive: col('is_active'), createdAt: col('created_at'), updatedAt: col('updated_at') },
-    governanceIncidentsTable: { orgId: col('org_id'), id: col('id'), severity: col('severity'), incidentType: col('incident_type'), createdAt: col('created_at') },
+    costBudgetsTable: {
+      orgId: col('org_id'),
+      isActive: col('is_active'),
+      id: col('id'),
+      createdAt: col('created_at'),
+    },
+    costEventsTable: {
+      orgId: col('org_id'),
+      eventType: col('event_type'),
+      createdAt: col('created_at'),
+      costUsd: col('cost_usd'),
+      tokensIn: col('tokens_in'),
+      tokensOut: col('tokens_out'),
+    },
+    alloyLegacyPoliciesTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      policyType: col('policy_type'),
+      isActive: col('is_active'),
+      createdAt: col('created_at'),
+      updatedAt: col('updated_at'),
+    },
+    modelRoutingPoliciesTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      isActive: col('is_active'),
+      createdAt: col('created_at'),
+      updatedAt: col('updated_at'),
+    },
+    governanceIncidentsTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      severity: col('severity'),
+      incidentType: col('incident_type'),
+      createdAt: col('created_at'),
+    },
     auditEventsTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
     atlasExportJobsTable: { id: col('id'), orgId: col('org_id') },
-    signalBusRulesTable: { orgId: col('org_id'), ruleId: col('rule_id'), enabled: col('enabled'), createdAt: col('created_at'), sourceDomain: col('source_domain'), sourceType: col('source_type'), name: col('name') },
+    signalBusRulesTable: {
+      orgId: col('org_id'),
+      ruleId: col('rule_id'),
+      enabled: col('enabled'),
+      createdAt: col('created_at'),
+      sourceDomain: col('source_domain'),
+      sourceType: col('source_type'),
+      name: col('name'),
+    },
     signalBusRoutedEventsTable: { orgId: col('org_id'), routedAt: col('routed_at') },
     signalBusDeadLettersTable: { orgId: col('org_id'), createdAt: col('created_at') },
     vesselsTable: { orgId: col('org_id'), id: col('id'), updatedAt: col('updated_at') },
     pcPurviewCaseLinksTable: { orgId: col('org_id'), createdAt: col('created_at') },
-    pcPurviewHoldAwarenessTable: { orgId: col('org_id'), createdAt: col('created_at'), holdStatus: col('hold_status') },
-    pcPurviewExportHandoffsTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at'), exportStatus: col('export_status') },
-    pcPurviewScopeLinksTable: { orgId: col('org_id'), createdAt: col('created_at'), matterId: col('matter_id') },
+    pcPurviewHoldAwarenessTable: {
+      orgId: col('org_id'),
+      createdAt: col('created_at'),
+      holdStatus: col('hold_status'),
+    },
+    pcPurviewExportHandoffsTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      createdAt: col('created_at'),
+      exportStatus: col('export_status'),
+    },
+    pcPurviewScopeLinksTable: {
+      orgId: col('org_id'),
+      createdAt: col('created_at'),
+      matterId: col('matter_id'),
+    },
     pcPurviewDiagnosticsTable: { orgId: col('org_id'), checkedAt: col('checked_at') },
     pcAuditEventsTable: { orgId: col('org_id') },
     filesTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
@@ -124,13 +176,32 @@ vi.mock('@szl-holdings/db', () => {
     invoicesTable: { orgId: col('org_id'), id: col('id'), issuedAt: col('issued_at') },
     fulfillmentsTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
     entitlementOverridesTable: { orgId: col('org_id'), id: col('id') },
-    complianceSuitabilityTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
+    complianceSuitabilityTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      createdAt: col('created_at'),
+    },
     complianceArchivalTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
-    complianceSupervisionQueueTable: { orgId: col('org_id'), id: col('id'), createdAt: col('created_at') },
+    complianceSupervisionQueueTable: {
+      orgId: col('org_id'),
+      id: col('id'),
+      createdAt: col('created_at'),
+    },
     complianceCalendarTable: { orgId: col('org_id'), id: col('id'), dueDate: col('due_date') },
     complianceRiskScoreTable: { orgId: col('org_id') },
-    commandSessionsTable: { id: col('id'), orgId: col('org_id'), sessionId: col('session_id'), isActive: col('is_active'), appId: col('app_id'), lastActivityAt: col('last_activity_at') },
-    commandSessionCommentsTable: { id: col('id'), sessionId: col('session_id'), createdAt: col('created_at') },
+    commandSessionsTable: {
+      id: col('id'),
+      orgId: col('org_id'),
+      sessionId: col('session_id'),
+      isActive: col('is_active'),
+      appId: col('app_id'),
+      lastActivityAt: col('last_activity_at'),
+    },
+    commandSessionCommentsTable: {
+      id: col('id'),
+      sessionId: col('session_id'),
+      createdAt: col('created_at'),
+    },
     organizationsTable: { id: col('id'), slug: col('slug'), name: col('name') },
     orgMembersTable: { orgId: col('org_id'), userId: col('user_id') },
   };
@@ -167,12 +238,10 @@ vi.mock('@szl-holdings/observability', () => ({
 }));
 
 vi.mock('../../middlewares/auth', () => ({
-  authMiddleware:
-    () =>
-    (req: Request, _res: Response, next: NextFunction) => {
-      (req as any).user = _currentUser;
-      next();
-    },
+  authMiddleware: () => (req: Request, _res: Response, next: NextFunction) => {
+    (req as any).user = _currentUser;
+    next();
+  },
   requireRole:
     (..._roles: string[]) =>
     (_req: Request, _res: Response, next: NextFunction) => {
@@ -185,7 +254,7 @@ vi.mock('../../lib/api-response', () => ({
     _res.status(500).json({ error: msg });
   },
   sendSuccess: (res: Response, data: unknown, status = 200, meta?: unknown) => {
-    res.status(status).json({ success: true, data, ...(meta ?? {}) });
+    res.status(status).json({ success: true, data, ...meta });
   },
   sendCreated: (res: Response, data: unknown) => {
     res.status(201).json({ success: true, data });
@@ -223,7 +292,7 @@ vi.mock('@szl-holdings/signal-mesh', () => ({
 }));
 
 vi.mock('@workspace/ontology/signal', () => ({
-  createSignal: (s: unknown) => ({ signalId: 'sig-1', ...s as any }),
+  createSignal: (s: unknown) => ({ signalId: 'sig-1', ...(s as any) }),
 }));
 
 let _getArtifactByIdResult: unknown = undefined;
@@ -238,7 +307,9 @@ vi.mock('@szl-holdings/atlas-artifacts', () => ({
   generateArtifact: vi.fn().mockResolvedValue({ id: 1 }),
   getArtifactById: vi.fn().mockImplementation(() => Promise.resolve(_getArtifactByIdResult)),
   getArtifactByShareToken: vi.fn(),
-  getArtifactVersionHistory: vi.fn().mockImplementation(() => Promise.resolve(_getArtifactVersionHistoryResult)),
+  getArtifactVersionHistory: vi
+    .fn()
+    .mockImplementation(() => Promise.resolve(_getArtifactVersionHistoryResult)),
   listArtifacts: vi.fn().mockResolvedValue([]),
   regenerateArtifact: vi.fn().mockResolvedValue({ id: 1 }),
 }));
@@ -276,9 +347,7 @@ describe('prism-counsel-purview: IDOR prevention', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([]);
 
-    const res = await request(app)
-      .get('/prism-counsel/purview/case-links?orgId=999')
-      .expect(200);
+    const res = await request(app).get('/prism-counsel/purview/case-links?orgId=999').expect(200);
 
     expect(res.body.success).toBe(true);
 
@@ -302,9 +371,7 @@ describe('prism-counsel-purview: IDOR prevention', () => {
     _currentUser = makeOrg2User();
     _selectQueue.push([]);
 
-    const res = await request(app)
-      .get('/prism-counsel/purview/hold-awareness')
-      .expect(200);
+    const res = await request(app).get('/prism-counsel/purview/hold-awareness').expect(200);
 
     expect(res.body.success).toBe(true);
   });
@@ -320,15 +387,13 @@ describe('governance: cross-tenant budget mutation prevention', () => {
 
     _currentUser = makeOrg1User();
 
-    const res = await request(app)
-      .post('/governance/cost-events')
-      .send({
-        eventType: 'inference',
-        resourceId: 'r1',
-        resourceName: 'Test',
-        costUsd: 0.5,
-        budgetId: 42,
-      });
+    const res = await request(app).post('/governance/cost-events').send({
+      eventType: 'inference',
+      resourceId: 'r1',
+      resourceName: 'Test',
+      costUsd: 0.5,
+      budgetId: 42,
+    });
 
     expect([200, 201]).toContain(res.status);
   });
@@ -345,9 +410,7 @@ describe('signal-bus: org-scoped queries', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([]);
 
-    await request(app)
-      .get('/signal-bus/rules')
-      .expect(200);
+    await request(app).get('/signal-bus/rules').expect(200);
 
     const w = _capturedSelectWheres[0] as any;
     expect(w).toBeDefined();
@@ -366,9 +429,7 @@ describe('signal-bus: org-scoped queries', () => {
     _currentUser = makeOrg2User();
     _selectQueue.push([]);
 
-    await request(app)
-      .get('/signal-bus/events')
-      .expect(200);
+    await request(app).get('/signal-bus/events').expect(200);
 
     const w = _capturedSelectWheres.find((c: any) => c?.op === 'inArray') as any;
     expect(w).toBeDefined();
@@ -389,9 +450,7 @@ describe('atlas-artifacts: assertTenantAccess on export job detail', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([{ id: 1, orgId: 999 }]);
 
-    const res = await request(app)
-      .get('/atlas/export-jobs/1')
-      .expect(403);
+    const res = await request(app).get('/atlas/export-jobs/1').expect(403);
 
     expect(res.body.error).toMatch(/cross-tenant|forbidden|denied/i);
   });
@@ -406,9 +465,7 @@ describe('atlas-artifacts: assertTenantAccess on export job detail', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([{ id: 1, orgId: 1 }]);
 
-    const res = await request(app)
-      .get('/atlas/export-jobs/1')
-      .expect(200);
+    const res = await request(app).get('/atlas/export-jobs/1').expect(200);
 
     expect(res.body.success).toBe(true);
   });
@@ -425,9 +482,7 @@ describe('vessels-cognitive: owner-graph org scoping', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([]);
 
-    await request(app)
-      .get('/vessels/cognitive/owner-graph')
-      .expect(200);
+    await request(app).get('/vessels/cognitive/owner-graph').expect(200);
 
     const w = _capturedSelectWheres[0] as any;
     if (w?.op === 'inArray') {
@@ -447,9 +502,7 @@ describe('multiplayer-sessions: tenant isolation', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([{ id: 1, orgId: 999, sessionId: 'cmd-abc' }]);
 
-    const res = await request(app)
-      .get('/sessions/command/cmd-abc')
-      .expect(403);
+    const res = await request(app).get('/sessions/command/cmd-abc').expect(403);
 
     expect(res.body.error).toMatch(/cross-tenant|forbidden|denied/i);
   });
@@ -464,9 +517,7 @@ describe('multiplayer-sessions: tenant isolation', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([{ id: 1, orgId: 1, sessionId: 'cmd-abc' }]);
 
-    const res = await request(app)
-      .get('/sessions/command/cmd-abc')
-      .expect(200);
+    const res = await request(app).get('/sessions/command/cmd-abc').expect(200);
 
     expect(res.body.success).toBe(true);
   });
@@ -481,9 +532,7 @@ describe('multiplayer-sessions: tenant isolation', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([{ orgId: 999 }]);
 
-    const res = await request(app)
-      .get('/sessions/command/cmd-abc/comments')
-      .expect(403);
+    const res = await request(app).get('/sessions/command/cmd-abc/comments').expect(403);
 
     expect(res.body.error).toMatch(/cross-tenant|forbidden|denied/i);
   });
@@ -534,9 +583,7 @@ describe('multiplayer-sessions: tenant isolation', () => {
     _currentUser = makeOrg1User();
     _selectQueue.push([]);
 
-    await request(app)
-      .get('/sessions/command')
-      .expect(200);
+    await request(app).get('/sessions/command').expect(200);
 
     const w = _capturedSelectWheres[0] as any;
     expect(w).toBeDefined();
@@ -558,12 +605,11 @@ describe('signal-bus: stats endpoint org scoping', () => {
     _selectQueue.push([{ count: 2 }]);
     _selectQueue.push([]);
 
-    await request(app)
-      .get('/signal-bus/stats')
-      .expect(200);
+    await request(app).get('/signal-bus/stats').expect(200);
 
     const orgWheres = (_capturedSelectWheres as any[]).filter(
-      (w) => w?.op === 'inArray' || (w?.op === 'and' && w?.conds?.some((c: any) => c?.op === 'inArray')),
+      (w) =>
+        w?.op === 'inArray' || (w?.op === 'and' && w?.conds?.some((c: any) => c?.op === 'inArray')),
     );
     expect(orgWheres.length).toBeGreaterThanOrEqual(3);
   });
@@ -580,9 +626,7 @@ describe('atlas-artifacts: cross-tenant access prevention', () => {
     _currentUser = makeOrg1User();
     _getArtifactByIdResult = { id: 1, orgId: 999, title: 'Secret' };
 
-    const res = await request(app)
-      .get('/atlas/artifacts/1')
-      .expect(403);
+    const res = await request(app).get('/atlas/artifacts/1').expect(403);
 
     expect(res.body.error).toMatch(/cross-tenant|forbidden|denied/i);
   });
@@ -633,10 +677,7 @@ describe('atlas-artifacts: cross-tenant access prevention', () => {
     _currentUser = makeOrg1User();
     _getArtifactByIdResult = { id: 1, orgId: 999, title: 'Secret' };
 
-    const res = await request(app)
-      .post('/atlas/artifacts/1/regenerate')
-      .send({})
-      .expect(403);
+    const res = await request(app).post('/atlas/artifacts/1/regenerate').send({}).expect(403);
 
     expect(res.body.error).toMatch(/cross-tenant|forbidden|denied/i);
   });
@@ -651,9 +692,7 @@ describe('atlas-artifacts: cross-tenant access prevention', () => {
     _currentUser = makeOrg1User();
     _getArtifactByIdResult = { id: 1, orgId: 1, title: 'My Artifact' };
 
-    const res = await request(app)
-      .get('/atlas/artifacts/1')
-      .expect(200);
+    const res = await request(app).get('/atlas/artifacts/1').expect(200);
 
     expect(res.body.success).toBe(true);
   });
@@ -669,9 +708,7 @@ describe('prism-counsel-purview: no-org user denial', () => {
 
     _currentUser = makeNoOrgUser();
 
-    const res = await request(app)
-      .get('/prism-counsel/purview/case-links')
-      .expect(200);
+    const res = await request(app).get('/prism-counsel/purview/case-links').expect(200);
 
     expect(res.body.data.caseLinks).toEqual([]);
     expect(res.body.data.count).toBe(0);
@@ -705,9 +742,7 @@ describe('cross-tenant denial: no-org user', () => {
 
     _currentUser = makeNoOrgUser();
 
-    const res = await request(app)
-      .get('/governance/budgets')
-      .expect(200);
+    const res = await request(app).get('/governance/budgets').expect(200);
 
     expect(res.body.data).toEqual([]);
   });

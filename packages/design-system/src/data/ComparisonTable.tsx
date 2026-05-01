@@ -47,11 +47,23 @@ export interface ComparisonTableProps {
 }
 
 const BADGE_CONFIG: Record<RecommendationBadge, { label: string; bg: string; text: string }> = {
-  recommended:    { label: 'Recommended', bg: semanticColors.success.bg,  text: semanticColors.success.text },
-  'best-value':   { label: 'Best Value',  bg: semanticColors.info.bg,     text: semanticColors.info.text },
-  'highest-risk': { label: 'Highest Risk',bg: semanticColors.error.bg,    text: semanticColors.error.text },
-  'lowest-risk':  { label: 'Lowest Risk', bg: semanticColors.success.bg,  text: semanticColors.success.text },
-  optimal:        { label: 'Optimal',     bg: semanticColors.neutral.bg,  text: color.accent.violet },
+  recommended: {
+    label: 'Recommended',
+    bg: semanticColors.success.bg,
+    text: semanticColors.success.text,
+  },
+  'best-value': { label: 'Best Value', bg: semanticColors.info.bg, text: semanticColors.info.text },
+  'highest-risk': {
+    label: 'Highest Risk',
+    bg: semanticColors.error.bg,
+    text: semanticColors.error.text,
+  },
+  'lowest-risk': {
+    label: 'Lowest Risk',
+    bg: semanticColors.success.bg,
+    text: semanticColors.success.text,
+  },
+  optimal: { label: 'Optimal', bg: semanticColors.neutral.bg, text: color.accent.violet },
 };
 
 function ScoreBar({ score, barColor }: { score: number; barColor: string }) {
@@ -67,10 +79,7 @@ function ScoreBar({ score, barColor }: { score: number; barColor: string }) {
         aria-valuemax={100}
         aria-label={`Score: ${Math.round(pct)}`}
       >
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${pct}%`, background: barColor }}
-        />
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
       </div>
       <span style={{ fontSize: '11px', color: barColor, fontWeight: 600, minWidth: '22px' }}>
         {Math.round(pct)}
@@ -81,7 +90,10 @@ function ScoreBar({ score, barColor }: { score: number; barColor: string }) {
 
 function cellsAreDifferent(values: ComparisonCellValue[]): boolean {
   const primitives = values.filter(
-    (v) => v !== null && v !== undefined && (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'),
+    (v) =>
+      v !== null &&
+      v !== undefined &&
+      (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'),
   ) as (string | number | boolean)[];
   if (primitives.length < 2) return false;
   return new Set(primitives.map(String)).size > 1;
@@ -178,7 +190,9 @@ export function ComparisonTable({
                   {field.label}
                 </span>
                 {field.description && density !== 'dense' && (
-                  <span style={{ fontSize: '10px', color: color.text.muted }}>{field.description}</span>
+                  <span style={{ fontSize: '10px', color: color.text.muted }}>
+                    {field.description}
+                  </span>
                 )}
               </div>
               {isDiff && (
@@ -241,7 +255,6 @@ export function ComparisonTable({
         <table
           className="w-full border-collapse"
           style={{ tableLayout: 'fixed' }}
-          role="table"
           aria-label="Comparison table"
         >
           <thead

@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
-import { handleRouteError, sendNotFound, sendSuccess } from './api-response';
-import { parsePagination } from './api-response';
+import { handleRouteError, sendNotFound, sendSuccess, parsePagination } from './api-response';
 
 export type DbTable = Record<string, unknown>;
 

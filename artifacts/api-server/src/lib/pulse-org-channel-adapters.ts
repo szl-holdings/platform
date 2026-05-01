@@ -1,7 +1,6 @@
 import { logger } from './logger';
 import { sendEmail } from './email';
-import { sendPushToUser } from './expo-push';
-import type { PushMessagePayload } from './expo-push';
+import { sendPushToUser, type PushMessagePayload } from './expo-push';
 
 export type OrgChannel = 'in_app' | 'push' | 'email' | 'sms' | 'slack' | 'teams' | 'webhook';
 
@@ -52,7 +51,10 @@ function riskColor(risk: string): string {
   return '#4eca8b';
 }
 
-function buildBriefingEmail(payload: BriefingPayload, recipientEmail: string): { html: string; text: string; subject: string } {
+function buildBriefingEmail(
+  payload: BriefingPayload,
+  recipientEmail: string,
+): { html: string; text: string; subject: string } {
   const subject = `[Pulse Org Briefing] ${payload.headline}`;
   const riskHex = riskColor(payload.overallRisk);
 
@@ -169,11 +171,17 @@ export class SmsAdapter {
   readonly channel = 'sms' as const;
 
   isConfigured(_config: ChannelConfig): boolean {
-    return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) ||
-      !!(process.env.VONAGE_API_KEY && process.env.VONAGE_API_SECRET);
+    return (
+      !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) ||
+      !!(process.env.VONAGE_API_KEY && process.env.VONAGE_API_SECRET)
+    );
   }
 
-  async deliver(payload: BriefingPayload, recipient: RecipientContext, config?: ChannelConfig): Promise<AdapterResult> {
+  async deliver(
+    payload: BriefingPayload,
+    recipient: RecipientContext,
+    config?: ChannelConfig,
+  ): Promise<AdapterResult> {
     if (recipient.smsOptOut) {
       return { status: 'suppressed', suppressReason: 'user_opt_out' };
     }
@@ -211,10 +219,18 @@ export class SlackAdapter {
   readonly channel = 'slack' as const;
 
   isConfigured(config: ChannelConfig): boolean {
-    return !!(config.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL || process.env.SLACK_BOT_TOKEN);
+    return !!(
+      config.slackWebhookUrl ||
+      process.env.SLACK_WEBHOOK_URL ||
+      process.env.SLACK_BOT_TOKEN
+    );
   }
 
-  async deliver(payload: BriefingPayload, _recipient: RecipientContext, config?: ChannelConfig): Promise<AdapterResult> {
+  async deliver(
+    payload: BriefingPayload,
+    _recipient: RecipientContext,
+    config?: ChannelConfig,
+  ): Promise<AdapterResult> {
     const webhookUrl = config?.slackWebhookUrl ?? process.env.SLACK_WEBHOOK_URL;
     if (!this.isConfigured(config ?? {})) {
       return { status: 'suppressed', suppressReason: 'channel_not_configured' };
@@ -269,7 +285,11 @@ export class SlackAdapter {
       });
       if (!resp.ok) {
         const body = await resp.text().catch(() => '');
-        return { status: 'failed', error: `Slack returned ${resp.status}: ${body}`, retryable: resp.status >= 500 };
+        return {
+          status: 'failed',
+          error: `Slack returned ${resp.status}: ${body}`,
+          retryable: resp.status >= 500,
+        };
       }
       return { status: 'delivered', providerMessageId: `slack-${Date.now()}` };
     } catch (err) {
@@ -285,7 +305,11 @@ export class TeamsAdapter {
     return !!(config.teamsWebhookUrl || process.env.TEAMS_WEBHOOK_URL);
   }
 
-  async deliver(payload: BriefingPayload, _recipient: RecipientContext, config?: ChannelConfig): Promise<AdapterResult> {
+  async deliver(
+    payload: BriefingPayload,
+    _recipient: RecipientContext,
+    config?: ChannelConfig,
+  ): Promise<AdapterResult> {
     const webhookUrl = config?.teamsWebhookUrl ?? process.env.TEAMS_WEBHOOK_URL;
     if (!this.isConfigured(config ?? {})) {
       return { status: 'suppressed', suppressReason: 'channel_not_configured' };
@@ -351,7 +375,11 @@ export class TeamsAdapter {
       });
       if (!resp.ok) {
         const body = await resp.text().catch(() => '');
-        return { status: 'failed', error: `Teams returned ${resp.status}: ${body}`, retryable: resp.status >= 500 };
+        return {
+          status: 'failed',
+          error: `Teams returned ${resp.status}: ${body}`,
+          retryable: resp.status >= 500,
+        };
       }
       return { status: 'delivered', providerMessageId: `teams-${Date.now()}` };
     } catch (err) {
@@ -367,7 +395,11 @@ export class WebhookAdapter {
     return !!(config.outboundWebhookUrl || process.env.PULSE_ORG_WEBHOOK_URL);
   }
 
-  async deliver(payload: BriefingPayload, recipient: RecipientContext, config?: ChannelConfig): Promise<AdapterResult> {
+  async deliver(
+    payload: BriefingPayload,
+    recipient: RecipientContext,
+    config?: ChannelConfig,
+  ): Promise<AdapterResult> {
     const webhookUrl = config?.outboundWebhookUrl ?? process.env.PULSE_ORG_WEBHOOK_URL;
     if (!this.isConfigured(config ?? {})) {
       return { status: 'suppressed', suppressReason: 'channel_not_configured' };
@@ -395,13 +427,18 @@ export class WebhookAdapter {
       };
       if (secret) {
         const { createHmac } = await import('node:crypto');
-        headers['X-Pulse-Signature'] = `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`;
+        headers['X-Pulse-Signature'] =
+          `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`;
       }
 
       const resp = await fetch(webhookUrl, { method: 'POST', headers, body });
       if (!resp.ok) {
         const rbody = await resp.text().catch(() => '');
-        return { status: 'failed', error: `Webhook returned ${resp.status}: ${rbody}`, retryable: resp.status >= 500 };
+        return {
+          status: 'failed',
+          error: `Webhook returned ${resp.status}: ${rbody}`,
+          retryable: resp.status >= 500,
+        };
       }
       return { status: 'delivered', providerMessageId: `webhook-${Date.now()}` };
     } catch (err) {
@@ -421,7 +458,12 @@ export const ADAPTER_REGISTRY = {
 } as const;
 
 export function getConfiguredChannels(config: ChannelConfig): OrgChannel[] {
-  return (Object.entries(ADAPTER_REGISTRY) as [OrgChannel, { isConfigured: (c: ChannelConfig) => boolean }][])
+  return (
+    Object.entries(ADAPTER_REGISTRY) as [
+      OrgChannel,
+      { isConfigured: (c: ChannelConfig) => boolean },
+    ][]
+  )
     .filter(([_ch, adapter]) => adapter.isConfigured(config))
     .map(([ch]) => ch);
 }
@@ -440,8 +482,15 @@ export async function deliverToChannel(
     return { status: 'suppressed', suppressReason: 'channel_not_configured' };
   }
   if ('deliver' in adapter) {
-    return (adapter as { deliver: (p: BriefingPayload, r: RecipientContext, c?: ChannelConfig) => Promise<AdapterResult> })
-      .deliver(payload, recipient, config);
+    return (
+      adapter as {
+        deliver: (
+          p: BriefingPayload,
+          r: RecipientContext,
+          c?: ChannelConfig,
+        ) => Promise<AdapterResult>;
+      }
+    ).deliver(payload, recipient, config);
   }
   return { status: 'suppressed', suppressReason: 'adapter_no_deliver' };
 }

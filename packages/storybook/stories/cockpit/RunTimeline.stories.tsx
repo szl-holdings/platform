@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { RunTimeline } from '@szl-holdings/design-system';
-import type { RunSpan } from '@szl-holdings/design-system';
+import { RunTimeline, type RunSpan } from '@szl-holdings/design-system';
 
 const spans: RunSpan[] = [
   { id: 's1', label: 'Trigger', startMs: 0, durationMs: 12, status: 'success' },
@@ -16,7 +15,14 @@ const failedSpans: RunSpan[] = [
   { id: 's1', label: 'Trigger', startMs: 0, durationMs: 12, status: 'success' },
   { id: 's2', label: 'Evidence Retrieval', startMs: 12, durationMs: 340, status: 'success' },
   { id: 's3', label: 'Policy Evaluation', startMs: 352, durationMs: 88, status: 'success' },
-  { id: 's4', label: 'Confidence Scoring', startMs: 440, durationMs: 56, status: 'error', errorMessage: 'Confidence below minimum threshold (45% < 80%)' },
+  {
+    id: 's4',
+    label: 'Confidence Scoring',
+    startMs: 440,
+    durationMs: 56,
+    status: 'error',
+    errorMessage: 'Confidence below minimum threshold (45% < 80%)',
+  },
 ];
 
 const meta = {
@@ -25,7 +31,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Horizontal Gantt-style timeline of agent run spans with status indicators and duration tooltips.',
+        component:
+          'Horizontal Gantt-style timeline of agent run spans with status indicators and duration tooltips.',
       },
     },
   },

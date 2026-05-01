@@ -6,6 +6,7 @@ import {
   leadStatusTable,
   supportEmailLogTable,
   supportKnowledgeArticlesTable,
+  pool,
 } from '@szl-holdings/db';
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { IRouter } from 'express';
@@ -26,8 +27,6 @@ import {
   validateBody,
   validateQuery,
 } from '../../lib/validation.js';
-import { pool } from '@szl-holdings/db';
-
 const SUPPORT_NOTIFICATIONS_ENABLED = process.env.SUPPORT_EMAIL_NOTIFICATIONS !== 'false';
 
 pool
@@ -83,7 +82,10 @@ async function persistEmailLog(opts: {
       error: opts.error ?? null,
     });
   } catch (err) {
-    logger.warn({ err, ticketId: opts.contactSubmissionId }, '[support] Failed to persist email log');
+    logger.warn(
+      { err, ticketId: opts.contactSubmissionId },
+      '[support] Failed to persist email log',
+    );
   }
 }
 
@@ -183,7 +185,8 @@ export function register(router: IRouter): void {
       const search = req.query.search as string | undefined;
       const statusFilter = req.query.status as string | undefined;
       const limitParam = parseInt((req.query.limit as string) ?? '100', 10);
-      const limit = format === 'csv' ? 5000 : Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
+      const limit =
+        format === 'csv' ? 5000 : Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
 
       const conditions = [];
       if (!includeResolved) conditions.push(eq(contactSubmissionsTable.status, 'open'));
@@ -234,7 +237,8 @@ export function register(router: IRouter): void {
 
       // Fetch extra columns added by migration (not yet in Drizzle schema)
       const ids = rows.map((r) => r.id);
-      const extraRows: Map<number, { emailOptOut: boolean; notificationSentAt: string | null }> = new Map();
+      const extraRows: Map<number, { emailOptOut: boolean; notificationSentAt: string | null }> =
+        new Map();
       if (ids.length > 0) {
         try {
           const extraResult = await pool.query(
@@ -571,12 +575,20 @@ export function register(router: IRouter): void {
       const emailOptOut = submission.emailOptOut === true;
 
       if (emailOptOut) {
-        res.json({ success: false, sent: false, error: 'Contact has opted out of email notifications' });
+        res.json({
+          success: false,
+          sent: false,
+          error: 'Contact has opted out of email notifications',
+        });
         return;
       }
 
       const unsubToken = generateUnsubscribeToken(submission.email);
-      const { subject: emailSubject, html: emailHtml, text: emailText } = buildAgentTicketReplyEmail({
+      const {
+        subject: emailSubject,
+        html: emailHtml,
+        text: emailText,
+      } = buildAgentTicketReplyEmail({
         name: submission.fullName,
         agentReply: body,
         ticketId: id,
@@ -647,7 +659,12 @@ export function register(router: IRouter): void {
 
       if (!emailResult.success) {
         logger.warn({ id, error: emailResult.error }, '[admin/support-queue] Reply email failed');
-        res.json({ success: false, sent: false, error: emailResult.error, reply: updatedReply ?? savedReply });
+        res.json({
+          success: false,
+          sent: false,
+          error: emailResult.error,
+          reply: updatedReply ?? savedReply,
+        });
         return;
       }
 
@@ -731,7 +748,10 @@ export function register(router: IRouter): void {
   router.post('/admin/support-queue/:id/opt-out', async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ticket ID'); return; }
+      if (Number.isNaN(id)) {
+        sendBadRequest(res, 'Invalid ticket ID');
+        return;
+      }
       const body = req.body as { optOut?: boolean };
       const optOut = body.optOut !== false;
       const result = await pool.query(
@@ -755,7 +775,12 @@ export function register(router: IRouter): void {
       const result = await pool.query(
         `SELECT * FROM support_notification_settings ORDER BY updated_at DESC LIMIT 1`,
       );
-      sendSuccess(res, result.rows[0] ?? { notification_email: process.env.SZL_INTERNAL_EMAIL || 'team@szlholdings.com' });
+      sendSuccess(
+        res,
+        result.rows[0] ?? {
+          notification_email: process.env.SZL_INTERNAL_EMAIL || 'team@szlholdings.com',
+        },
+      );
     } catch (err) {
       logger.error({ err }, '[admin/notification-settings] GET failed');
       sendError(res, 'Failed to fetch notification settings', 500, 'INTERNAL_ERROR');
@@ -765,9 +790,15 @@ export function register(router: IRouter): void {
   router.put('/admin/notification-settings', async (req, res) => {
     try {
       const body = req.body as { notificationEmail?: string; updatedBy?: string };
-      if (!body.notificationEmail) { sendBadRequest(res, 'notificationEmail is required'); return; }
+      if (!body.notificationEmail) {
+        sendBadRequest(res, 'notificationEmail is required');
+        return;
+      }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(body.notificationEmail)) { sendBadRequest(res, 'Invalid email address'); return; }
+      if (!emailRegex.test(body.notificationEmail)) {
+        sendBadRequest(res, 'Invalid email address');
+        return;
+      }
       // Singleton upsert: the migration seeds id=1; always update that row.
       // If the seed somehow didn't run, insert a new row.
       await pool.query(
@@ -793,12 +824,20 @@ export function register(router: IRouter): void {
       const recipient = req.query.recipient as string | undefined;
       let q = `SELECT * FROM notification_audit_log WHERE 1=1`;
       const params: unknown[] = [];
-      if (template) { params.push(template); q += ` AND template = $${params.length}`; }
-      if (recipient) { params.push(`%${recipient}%`); q += ` AND recipient ILIKE $${params.length}`; }
+      if (template) {
+        params.push(template);
+        q += ` AND template = $${params.length}`;
+      }
+      if (recipient) {
+        params.push(`%${recipient}%`);
+        q += ` AND recipient ILIKE $${params.length}`;
+      }
       params.push(limit);
       q += ` ORDER BY sent_at DESC LIMIT $${params.length}`;
       const result = await pool.query(q, params);
-      const [{ total }] = (await pool.query(`SELECT COUNT(*)::int as total FROM notification_audit_log`)).rows;
+      const [{ total }] = (
+        await pool.query(`SELECT COUNT(*)::int as total FROM notification_audit_log`)
+      ).rows;
       sendSuccess(res, { logs: result.rows, total });
     } catch (err) {
       logger.error({ err }, '[admin/notification-audit-log] GET failed');
@@ -842,7 +881,8 @@ export function register(router: IRouter): void {
       const recipient = req.query.recipient as string | undefined;
 
       const conditions = [];
-      if (status) conditions.push(eq(emailSendLogTable.status, status as 'sent' | 'failed' | 'bounced'));
+      if (status)
+        conditions.push(eq(emailSendLogTable.status, status as 'sent' | 'failed' | 'bounced'));
       if (recipient) conditions.push(ilike(emailSendLogTable.recipient, `%${recipient}%`));
 
       const logs = await db
@@ -987,53 +1027,90 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post('/admin/support/canned-responses', validateBody(cannedResponseSchema), async (req, res) => {
-    try {
-      const { title, category, body, tags } = req.body as z.infer<typeof cannedResponseSchema>;
-      const userId = (req as any).user?.id ?? null;
-      const result = await pool.query(
-        `INSERT INTO support_canned_responses (title, category, body, tags, created_by_id)
+  router.post(
+    '/admin/support/canned-responses',
+    validateBody(cannedResponseSchema),
+    async (req, res) => {
+      try {
+        const { title, category, body, tags } = req.body as z.infer<typeof cannedResponseSchema>;
+        const userId = (req as any).user?.id ?? null;
+        const result = await pool.query(
+          `INSERT INTO support_canned_responses (title, category, body, tags, created_by_id)
          VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [title, category, body, tags, userId],
-      );
-      logger.info({ id: result.rows[0].id }, '[admin/support/canned-responses] Created');
-      res.status(201).json({ response: result.rows[0] });
-    } catch (err) {
-      logger.error({ err }, '[admin/support/canned-responses] POST failed');
-      sendError(res, 'Failed to create canned response', 500, 'INTERNAL_ERROR');
-    }
-  });
+          [title, category, body, tags, userId],
+        );
+        logger.info({ id: result.rows[0].id }, '[admin/support/canned-responses] Created');
+        res.status(201).json({ response: result.rows[0] });
+      } catch (err) {
+        logger.error({ err }, '[admin/support/canned-responses] POST failed');
+        sendError(res, 'Failed to create canned response', 500, 'INTERNAL_ERROR');
+      }
+    },
+  );
 
-  router.patch('/admin/support/canned-responses/:id', validateBody(cannedResponseSchema.partial()), async (req, res) => {
-    try {
-      const id = parseInt(req.params.id as string, 10);
-      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
-      const { title, category, body, tags } = req.body as Partial<z.infer<typeof cannedResponseSchema>>;
-      const sets: string[] = ['updated_at = NOW()'];
-      const params: unknown[] = [id];
-      if (title !== undefined) { params.push(title); sets.push(`title = $${params.length}`); }
-      if (category !== undefined) { params.push(category); sets.push(`category = $${params.length}`); }
-      if (body !== undefined) { params.push(body); sets.push(`body = $${params.length}`); }
-      if (tags !== undefined) { params.push(tags); sets.push(`tags = $${params.length}`); }
-      if (sets.length === 1) { sendBadRequest(res, 'No fields to update'); return; }
-      const result = await pool.query(
-        `UPDATE support_canned_responses SET ${sets.join(', ')} WHERE id = $1 RETURNING *`,
-        params,
-      );
-      if ((result.rowCount ?? 0) === 0) { sendNotFound(res, 'Canned response'); return; }
-      res.json({ response: result.rows[0] });
-    } catch (err) {
-      logger.error({ err }, '[admin/support/canned-responses] PATCH failed');
-      sendError(res, 'Failed to update canned response', 500, 'INTERNAL_ERROR');
-    }
-  });
+  router.patch(
+    '/admin/support/canned-responses/:id',
+    validateBody(cannedResponseSchema.partial()),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id as string, 10);
+        if (Number.isNaN(id)) {
+          sendBadRequest(res, 'Invalid ID');
+          return;
+        }
+        const { title, category, body, tags } = req.body as Partial<
+          z.infer<typeof cannedResponseSchema>
+        >;
+        const sets: string[] = ['updated_at = NOW()'];
+        const params: unknown[] = [id];
+        if (title !== undefined) {
+          params.push(title);
+          sets.push(`title = $${params.length}`);
+        }
+        if (category !== undefined) {
+          params.push(category);
+          sets.push(`category = $${params.length}`);
+        }
+        if (body !== undefined) {
+          params.push(body);
+          sets.push(`body = $${params.length}`);
+        }
+        if (tags !== undefined) {
+          params.push(tags);
+          sets.push(`tags = $${params.length}`);
+        }
+        if (sets.length === 1) {
+          sendBadRequest(res, 'No fields to update');
+          return;
+        }
+        const result = await pool.query(
+          `UPDATE support_canned_responses SET ${sets.join(', ')} WHERE id = $1 RETURNING *`,
+          params,
+        );
+        if ((result.rowCount ?? 0) === 0) {
+          sendNotFound(res, 'Canned response');
+          return;
+        }
+        res.json({ response: result.rows[0] });
+      } catch (err) {
+        logger.error({ err }, '[admin/support/canned-responses] PATCH failed');
+        sendError(res, 'Failed to update canned response', 500, 'INTERNAL_ERROR');
+      }
+    },
+  );
 
   router.delete('/admin/support/canned-responses/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
+      if (Number.isNaN(id)) {
+        sendBadRequest(res, 'Invalid ID');
+        return;
+      }
       const result = await pool.query(`DELETE FROM support_canned_responses WHERE id = $1`, [id]);
-      if ((result.rowCount ?? 0) === 0) { sendNotFound(res, 'Canned response'); return; }
+      if ((result.rowCount ?? 0) === 0) {
+        sendNotFound(res, 'Canned response');
+        return;
+      }
       res.json({ success: true });
     } catch (err) {
       logger.error({ err }, '[admin/support/canned-responses] DELETE failed');
@@ -1044,8 +1121,14 @@ export function register(router: IRouter): void {
   router.post('/admin/support/canned-responses/:id/use', async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
-      await pool.query(`UPDATE support_canned_responses SET usage_count = usage_count + 1 WHERE id = $1`, [id]);
+      if (Number.isNaN(id)) {
+        sendBadRequest(res, 'Invalid ID');
+        return;
+      }
+      await pool.query(
+        `UPDATE support_canned_responses SET usage_count = usage_count + 1 WHERE id = $1`,
+        [id],
+      );
       res.json({ success: true });
     } catch (err) {
       logger.error({ err }, '[admin/support/canned-responses] USE failed');
@@ -1078,8 +1161,14 @@ export function register(router: IRouter): void {
         [targetId],
       );
       const target = targetResult.rows[0];
-      if (!source) { sendNotFound(res, 'Source ticket'); return; }
-      if (!target) { sendNotFound(res, 'Target ticket'); return; }
+      if (!source) {
+        sendNotFound(res, 'Source ticket');
+        return;
+      }
+      if (!target) {
+        sendNotFound(res, 'Target ticket');
+        return;
+      }
 
       await pool.query(
         `UPDATE support_tickets SET merged_into_id = $1, merged_at = NOW(), status = 'closed', closed_at = NOW() WHERE id = $2`,
@@ -1122,13 +1211,34 @@ export function register(router: IRouter): void {
       const conditions: string[] = [];
       const params: unknown[] = [];
 
-      if (status) { params.push(status); conditions.push(`status = $${params.length}`); }
-      if (priority) { params.push(priority); conditions.push(`priority = $${params.length}`); }
-      if (category) { params.push(category); conditions.push(`category = $${params.length}`); }
-      if (assignedTo) { params.push(assignedTo); conditions.push(`assigned_to_name ILIKE $${params.length}`); }
-      if (search) { params.push(`%${search}%`); conditions.push(`(subject ILIKE $${params.length} OR submitter_name ILIKE $${params.length} OR submitter_email ILIKE $${params.length} OR ticket_ref ILIKE $${params.length})`); }
-      if (slaBreached) { conditions.push(`(sla_response_breached = TRUE OR sla_resolution_breached = TRUE)`); }
-      if (unassigned) { conditions.push(`assigned_to_id IS NULL`); }
+      if (status) {
+        params.push(status);
+        conditions.push(`status = $${params.length}`);
+      }
+      if (priority) {
+        params.push(priority);
+        conditions.push(`priority = $${params.length}`);
+      }
+      if (category) {
+        params.push(category);
+        conditions.push(`category = $${params.length}`);
+      }
+      if (assignedTo) {
+        params.push(assignedTo);
+        conditions.push(`assigned_to_name ILIKE $${params.length}`);
+      }
+      if (search) {
+        params.push(`%${search}%`);
+        conditions.push(
+          `(subject ILIKE $${params.length} OR submitter_name ILIKE $${params.length} OR submitter_email ILIKE $${params.length} OR ticket_ref ILIKE $${params.length})`,
+        );
+      }
+      if (slaBreached) {
+        conditions.push(`(sla_response_breached = TRUE OR sla_resolution_breached = TRUE)`);
+      }
+      if (unassigned) {
+        conditions.push(`assigned_to_id IS NULL`);
+      }
       conditions.push(`merged_into_id IS NULL`);
 
       const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -1162,8 +1272,9 @@ export function register(router: IRouter): void {
       const days = parseInt((req.query.days as string) ?? '30', 10);
       const since = new Date(Date.now() - days * 24 * 3600 * 1000);
 
-      const [overview] = (await pool.query(
-        `SELECT
+      const [overview] = (
+        await pool.query(
+          `SELECT
            COUNT(*)::int AS total_tickets,
            COUNT(*) FILTER (WHERE status IN ('open', 'in_progress'))::int AS open_tickets,
            COUNT(*) FILTER (WHERE status IN ('resolved', 'closed'))::int AS resolved_tickets,
@@ -1174,44 +1285,54 @@ export function register(router: IRouter): void {
            ROUND(EXTRACT(EPOCH FROM AVG(CASE WHEN first_response_at IS NOT NULL THEN first_response_at - created_at END)) / 3600, 2) AS avg_first_response_hrs,
            ROUND(EXTRACT(EPOCH FROM AVG(CASE WHEN resolved_at IS NOT NULL THEN resolved_at - created_at END)) / 3600, 2) AS avg_resolution_hrs
          FROM support_tickets WHERE created_at >= $1`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
-      const csatDistribution = (await pool.query(
-        `SELECT csat_rating AS rating, COUNT(*)::int AS count
+      const csatDistribution = (
+        await pool.query(
+          `SELECT csat_rating AS rating, COUNT(*)::int AS count
          FROM support_tickets WHERE csat_rating IS NOT NULL AND created_at >= $1
          GROUP BY csat_rating ORDER BY csat_rating`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
-      const volumeByDay = (await pool.query(
-        `SELECT DATE_TRUNC('day', created_at) AS day, COUNT(*)::int AS count
+      const volumeByDay = (
+        await pool.query(
+          `SELECT DATE_TRUNC('day', created_at) AS day, COUNT(*)::int AS count
          FROM support_tickets WHERE created_at >= $1
          GROUP BY day ORDER BY day`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
-      const byCategory = (await pool.query(
-        `SELECT category,
+      const byCategory = (
+        await pool.query(
+          `SELECT category,
            COUNT(*)::int AS total,
            COUNT(*) FILTER (WHERE status IN ('open','in_progress'))::int AS open,
            ROUND(AVG(csat_rating)::numeric, 2) AS avg_csat
          FROM support_tickets WHERE created_at >= $1
          GROUP BY category ORDER BY total DESC`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
-      const byPriority = (await pool.query(
-        `SELECT priority,
+      const byPriority = (
+        await pool.query(
+          `SELECT priority,
            COUNT(*)::int AS total,
            COUNT(*) FILTER (WHERE sla_response_breached = TRUE OR sla_resolution_breached = TRUE)::int AS breached
          FROM support_tickets WHERE created_at >= $1
          GROUP BY priority ORDER BY total DESC`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
-      const agentLeaderboard = (await pool.query(
-        `SELECT
+      const agentLeaderboard = (
+        await pool.query(
+          `SELECT
            COALESCE(assigned_to_name, 'Unassigned') AS agent,
            COUNT(*)::int AS total,
            COUNT(*) FILTER (WHERE status IN ('open','in_progress'))::int AS open,
@@ -1221,8 +1342,9 @@ export function register(router: IRouter): void {
          FROM support_tickets WHERE created_at >= $1
          GROUP BY assigned_to_name
          ORDER BY resolved DESC LIMIT 20`,
-        [since],
-      )).rows;
+          [since],
+        )
+      ).rows;
 
       const slaComplianceRate =
         overview.total_tickets > 0
@@ -1237,10 +1359,12 @@ export function register(router: IRouter): void {
             )
           : 100;
 
-      const deflectionStats = (await pool.query(
-        `SELECT SUM(deflection_count)::int AS total_deflections, COUNT(*)::int AS articles
+      const deflectionStats = (
+        await pool.query(
+          `SELECT SUM(deflection_count)::int AS total_deflections, COUNT(*)::int AS articles
          FROM support_knowledge_articles WHERE deflection_count > 0`,
-      )).rows[0];
+        )
+      ).rows[0];
 
       res.json({
         period: { days, from: since.toISOString(), to: new Date().toISOString() },

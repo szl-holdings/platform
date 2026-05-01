@@ -1,10 +1,10 @@
-import type {
-  AnomalyDetectionResult,
-  AnomalyEvent,
-  BatchDetectionInput,
+import {
+  type AnomalyDetectionResult,
+  type AnomalyEvent,
+  type BatchDetectionInput,
+  AnomalyDetectionResultSchema,
+  AnomalyEventSchema,
 } from './types.js';
-import { AnomalyDetectionResultSchema, AnomalyEventSchema } from './types.js';
-
 function generateId(): string {
   return `anom-batch-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -44,9 +44,7 @@ function buildHistogram(values: number[], buckets = 10): number[] {
   return hist.map((c) => c / values.length);
 }
 
-export async function detectBatch(
-  input: BatchDetectionInput,
-): Promise<AnomalyDetectionResult> {
+export async function detectBatch(input: BatchDetectionInput): Promise<AnomalyDetectionResult> {
   const start = Date.now();
   const { points, lane, jobId, sensitivitySigma, distributionShiftThreshold } = input;
 
@@ -139,7 +137,9 @@ export async function detectBatch(
     }
   }
 
-  const uniqueAnomalyPoints = new Set(anomalies.map((a) => a.metricName + '|' + (a.detectedAt ?? '')));
+  const uniqueAnomalyPoints = new Set(
+    anomalies.map((a) => a.metricName + '|' + (a.detectedAt ?? '')),
+  );
   return AnomalyDetectionResultSchema.parse({
     anomalies,
     processedCount: points.length,

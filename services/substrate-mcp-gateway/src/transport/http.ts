@@ -103,7 +103,10 @@ function corsMiddleware(req: Request, res: Response, next: NextFunction): void {
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, MCP-Session-Id, Last-Event-ID, Accept');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, MCP-Session-Id, Last-Event-ID, Accept',
+    );
     res.setHeader('Access-Control-Expose-Headers', 'MCP-Session-Id');
   }
   if (req.method === 'OPTIONS') {
@@ -131,7 +134,10 @@ function originValidation(req: Request, res: Response, next: NextFunction): void
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = parseInt(process.env.MCP_RATE_LIMIT ?? '200', 10);
 
-interface RateLimitEntry { count: number; windowStart: number }
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
+}
 const rateLimitMap = new Map<string, RateLimitEntry>();
 
 function rateLimiter(req: Request, res: Response, next: NextFunction): void {
@@ -146,7 +152,9 @@ function rateLimiter(req: Request, res: Response, next: NextFunction): void {
   entry.count++;
   if (entry.count > RATE_LIMIT_MAX) {
     res.setHeader('Retry-After', '60');
-    res.status(429).json({ error: 'RATE_LIMITED', reason: 'Too many requests. Retry after 60 seconds.' });
+    res
+      .status(429)
+      .json({ error: 'RATE_LIMITED', reason: 'Too many requests. Retry after 60 seconds.' });
     return;
   }
   next();
@@ -154,7 +162,10 @@ function rateLimiter(req: Request, res: Response, next: NextFunction): void {
 
 // ─── Extension Negotiation ────────────────────────────────────────────────────
 
-const SERVER_EXTENSIONS = (CAPABILITIES as unknown as Record<string, unknown>).extensions as Record<string, unknown>;
+const SERVER_EXTENSIONS = (CAPABILITIES as unknown as Record<string, unknown>).extensions as Record<
+  string,
+  unknown
+>;
 
 function negotiateExtensions(clientExtensions: unknown): Record<string, unknown> {
   if (!clientExtensions || typeof clientExtensions !== 'object') return {};
@@ -400,24 +411,43 @@ export function createHttpTransport(): express.Router {
           res.status(403).json({
             jsonrpc: '2.0',
             id: null,
-            error: { code: -32000, message: 'FORBIDDEN', data: { reason: 'Enterprise token scope does not permit MCP access. Minimum scope required: mcp:read' } },
+            error: {
+              code: -32000,
+              message: 'FORBIDDEN',
+              data: {
+                reason:
+                  'Enterprise token scope does not permit MCP access. Minimum scope required: mcp:read',
+              },
+            },
           });
           return;
         }
         // Write operations require mcp:write or mcp:admin
-        const isWriteMethod = requestedMethod === 'tools/call' &&
-          typeof mcpBody?.params === 'object' && mcpBody.params !== null &&
+        const isWriteMethod =
+          requestedMethod === 'tools/call' &&
+          typeof mcpBody?.params === 'object' &&
+          mcpBody.params !== null &&
           typeof (mcpBody.params as Record<string, unknown>).name === 'string' &&
           /^(alloy_|lyte_|alloy_launch|alloy_decision|alloy_approve|alloy_veto)/.test(
             (mcpBody.params as Record<string, unknown>).name as string,
           );
         if (isWriteMethod) {
-          const hasWrite = scope.includes('mcp:write') || scope.includes('mcp:approve') || scope.includes('mcp:admin');
+          const hasWrite =
+            scope.includes('mcp:write') ||
+            scope.includes('mcp:approve') ||
+            scope.includes('mcp:admin');
           if (!hasWrite) {
             res.status(403).json({
               jsonrpc: '2.0',
               id: null,
-              error: { code: -32000, message: 'FORBIDDEN', data: { reason: 'Enterprise token scope does not permit write/mutate operations. Minimum scope required: mcp:write' } },
+              error: {
+                code: -32000,
+                message: 'FORBIDDEN',
+                data: {
+                  reason:
+                    'Enterprise token scope does not permit write/mutate operations. Minimum scope required: mcp:write',
+                },
+              },
             });
             return;
           }
@@ -471,12 +501,16 @@ export function createHttpTransport(): express.Router {
   router.delete('/', (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
     if (!sessionId) {
-      res.status(400).json({ error: 'INVALID_REQUEST', reason: 'MCP-Session-Id header required for DELETE' });
+      res
+        .status(400)
+        .json({ error: 'INVALID_REQUEST', reason: 'MCP-Session-Id header required for DELETE' });
       return;
     }
     const transport = streamableSessions.get(sessionId);
     if (!transport) {
-      res.status(404).json({ error: 'SESSION_NOT_FOUND', reason: `Session '${sessionId}' not found` });
+      res
+        .status(404)
+        .json({ error: 'SESSION_NOT_FOUND', reason: `Session '${sessionId}' not found` });
       return;
     }
     streamableSessions.delete(sessionId);
@@ -502,7 +536,8 @@ export function createHttpTransport(): express.Router {
     if (!client_id || !redirect_uri || response_type !== 'code' || !code_challenge) {
       res.status(400).json({
         error: 'invalid_request',
-        error_description: 'Missing required parameters: client_id, redirect_uri, response_type=code, code_challenge',
+        error_description:
+          'Missing required parameters: client_id, redirect_uri, response_type=code, code_challenge',
       });
       return;
     }
@@ -515,7 +550,9 @@ export function createHttpTransport(): express.Router {
 
     const redirectUriStr = String(redirect_uri);
     if (!client.redirectUris.includes(redirectUriStr)) {
-      res.status(400).json({ error: 'invalid_request', error_description: 'redirect_uri mismatch' });
+      res
+        .status(400)
+        .json({ error: 'invalid_request', error_description: 'redirect_uri mismatch' });
       return;
     }
 
@@ -616,7 +653,10 @@ export function createHttpTransport(): express.Router {
 
     const authCode = authCodes.get(String(code ?? ''));
     if (!authCode || authCode.used || Date.now() > authCode.expiresAt) {
-      res.status(400).json({ error: 'invalid_grant', error_description: 'Authorization code invalid or expired' });
+      res.status(400).json({
+        error: 'invalid_grant',
+        error_description: 'Authorization code invalid or expired',
+      });
       return;
     }
 
@@ -633,7 +673,9 @@ export function createHttpTransport(): express.Router {
     if (authCode.codeChallengeMethod === 'S256') {
       const computed = sha256Base64Url(String(code_verifier ?? ''));
       if (computed !== authCode.codeChallenge) {
-        res.status(400).json({ error: 'invalid_grant', error_description: 'code_verifier mismatch' });
+        res
+          .status(400)
+          .json({ error: 'invalid_grant', error_description: 'code_verifier mismatch' });
         return;
       }
     }
@@ -667,20 +709,25 @@ export function createHttpTransport(): express.Router {
     if (!secret) {
       res.status(503).json({
         error: 'revocation_disabled',
-        error_description: 'MCP_REVOCATION_WEBHOOK_SECRET is not configured — revocation webhook is disabled',
+        error_description:
+          'MCP_REVOCATION_WEBHOOK_SECRET is not configured — revocation webhook is disabled',
       });
       return;
     }
     const providedSecret = req.headers['x-revocation-secret'] as string | undefined;
     if (!providedSecret) {
-      res.status(401).json({ error: 'unauthorized', error_description: 'x-revocation-secret header required' });
+      res
+        .status(401)
+        .json({ error: 'unauthorized', error_description: 'x-revocation-secret header required' });
       return;
     }
     const { timingSafeEqual, createHash: ch } = await import('node:crypto');
     const expected = ch('sha256').update(secret).digest();
     const provided = ch('sha256').update(providedSecret).digest();
     if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
-      res.status(401).json({ error: 'unauthorized', error_description: 'Invalid revocation secret' });
+      res
+        .status(401)
+        .json({ error: 'unauthorized', error_description: 'Invalid revocation secret' });
       return;
     }
 
@@ -694,11 +741,21 @@ export function createHttpTransport(): express.Router {
     }
 
     const result = await handleRevocationWebhook(
-      { issuer: body.issuer, subject: body.subject, reason: body.reason, revokedBy: body.revokedBy },
+      {
+        issuer: body.issuer,
+        subject: body.subject,
+        reason: body.reason,
+        revokedBy: body.revokedBy,
+      },
       req.ip ?? undefined,
     );
 
-    res.json({ ok: true, tokensRevoked: result.revoked, issuer: body.issuer, subject: body.subject });
+    res.json({
+      ok: true,
+      tokensRevoked: result.revoked,
+      issuer: body.issuer,
+      subject: body.subject,
+    });
   });
 
   // GET /mcp/enterprise/idps — List registered enterprise IdP configurations
@@ -707,7 +764,10 @@ export function createHttpTransport(): express.Router {
   router.get('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
     if (!ctx.authenticated || ctx.enterprise) {
-      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required for admin IdP management' });
+      res.status(401).json({
+        error: 'unauthorized',
+        error_description: 'Gateway API key required for admin IdP management',
+      });
       return;
     }
 
@@ -733,7 +793,10 @@ export function createHttpTransport(): express.Router {
   router.post('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
     if (!ctx.authenticated || ctx.enterprise) {
-      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required for admin IdP management' });
+      res.status(401).json({
+        error: 'unauthorized',
+        error_description: 'Gateway API key required for admin IdP management',
+      });
       return;
     }
 
@@ -764,7 +827,10 @@ export function createHttpTransport(): express.Router {
     };
 
     registerEnterpriseIdp(idpConfig);
-    res.status(201).json({ ok: true, idp: { id: idpConfig.id, name: idpConfig.name, issuerUrl: idpConfig.issuerUrl } });
+    res.status(201).json({
+      ok: true,
+      idp: { id: idpConfig.id, name: idpConfig.name, issuerUrl: idpConfig.issuerUrl },
+    });
   });
 
   // DELETE /mcp/enterprise/idps — Unregister an enterprise IdP from the gateway in-memory registry.
@@ -774,13 +840,17 @@ export function createHttpTransport(): express.Router {
   router.delete('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
     if (!ctx.authenticated || ctx.enterprise) {
-      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required' });
+      res
+        .status(401)
+        .json({ error: 'unauthorized', error_description: 'Gateway API key required' });
       return;
     }
     const body = req.body as Record<string, unknown>;
     const issuerUrl = body.issuerUrl as string | undefined;
     if (!issuerUrl) {
-      res.status(400).json({ error: 'invalid_request', error_description: 'issuerUrl is required' });
+      res
+        .status(400)
+        .json({ error: 'invalid_request', error_description: 'issuerUrl is required' });
       return;
     }
     unregisterEnterpriseIdp(issuerUrl);
@@ -790,13 +860,7 @@ export function createHttpTransport(): express.Router {
   // POST /mcp/register — RFC 7591 dynamic client registration
   router.post('/register', (req: Request, res: Response) => {
     const body = req.body as Record<string, unknown>;
-    const {
-      client_name,
-      redirect_uris,
-      grant_types,
-      response_types,
-      scope,
-    } = body;
+    const { client_name, redirect_uris, grant_types, response_types, scope } = body;
 
     if (!Array.isArray(redirect_uris) || redirect_uris.length === 0) {
       res.status(400).json({
@@ -813,8 +877,12 @@ export function createHttpTransport(): express.Router {
       clientId,
       clientSecret,
       redirectUris: (redirect_uris as string[]).map(String),
-      grantTypes: Array.isArray(grant_types) ? (grant_types as string[]).map(String) : ['authorization_code'],
-      responseTypes: Array.isArray(response_types) ? (response_types as string[]).map(String) : ['code'],
+      grantTypes: Array.isArray(grant_types)
+        ? (grant_types as string[]).map(String)
+        : ['authorization_code'],
+      responseTypes: Array.isArray(response_types)
+        ? (response_types as string[]).map(String)
+        : ['code'],
       clientName: client_name ? String(client_name) : undefined,
       scope: scope ? String(scope) : 'mcp',
       registeredAt: Date.now(),
@@ -873,7 +941,8 @@ export function createHttpTransport(): express.Router {
       covenantReason: record.covenantReason,
       responseDigest: record.responseDigest,
       verifiedAt: new Date().toISOString(),
-      _nexusNote: 'This proof was generated by the PRAXIS Intelligence Fabric and is cryptographically bound to the tool response content. The responseDigest is the SHA-256 hex (first 16 chars) of the full response payload.',
+      _nexusNote:
+        'This proof was generated by the PRAXIS Intelligence Fabric and is cryptographically bound to the tool response content. The responseDigest is the SHA-256 hex (first 16 chars) of the full response payload.',
     });
   });
 
@@ -917,16 +986,13 @@ export function createDiscoveryHandler(): express.RequestHandler {
         revoke: '/mcp/revoke',
         enterpriseIdps: '/mcp/enterprise/idps',
         metadata: '/.well-known/oauth-authorization-server',
-        nexusVerify: '/mcp/nexus/verify',
-        nexusProofs: '/mcp/nexus/proofs',
       },
       nexus: {
         version: '1.0',
         discovery: 'enabled',
         consciousness: 'active',
-      },
-      nexus: {
-        description: 'PRAXIS Intelligence Fabric — every tool response includes x-nexus-consciousness and x-nexus-proof envelopes',
+        description:
+          'PRAXIS Intelligence Fabric — every tool response includes x-nexus-consciousness and x-nexus-proof envelopes',
         features: [
           'consciousness_envelope',
           'proof_chain',
@@ -936,7 +1002,13 @@ export function createDiscoveryHandler(): express.RequestHandler {
           'evidence_graph',
           'id_jag_enterprise_auth',
         ],
-        resourcePrefixes: ['nexus://convergence/', 'nexus://signals/', 'nexus://agents/', 'nexus://evidence/', 'nexus://proof/'],
+        resourcePrefixes: [
+          'nexus://convergence/',
+          'nexus://signals/',
+          'nexus://agents/',
+          'nexus://evidence/',
+          'nexus://proof/',
+        ],
       },
       authMethods: ['bearer_token', 'oauth2_pkce', 'enterprise_idjag'],
       extensions: SERVER_EXTENSIONS,
@@ -962,10 +1034,7 @@ export function createAuthorizationServerMetadata(): express.RequestHandler {
       registration_endpoint: `${issuer}/mcp/register`,
       revocation_endpoint: `${issuer}/mcp/revoke`,
       token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'private_key_jwt'],
-      grant_types_supported: [
-        'authorization_code',
-        'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      ],
+      grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:jwt-bearer'],
       response_types_supported: ['code'],
       code_challenge_methods_supported: ['S256'],
       scopes_supported: ['mcp', 'mcp:read', 'mcp:write', 'mcp:approve', 'mcp:admin'],
@@ -973,12 +1042,14 @@ export function createAuthorizationServerMetadata(): express.RequestHandler {
         version: '1.0',
         extension: 'io.modelcontextprotocol/enterprise-managed-authorization',
         idjag_grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        registered_idps: listEnterpriseIdps().filter((idp) => idp.enabled).map((idp) => ({
-          id: idp.id,
-          name: idp.name,
-          issuer: idp.issuerUrl,
-          audience: idp.expectedAudience,
-        })),
+        registered_idps: listEnterpriseIdps()
+          .filter((idp) => idp.enabled)
+          .map((idp) => ({
+            id: idp.id,
+            name: idp.name,
+            issuer: idp.issuerUrl,
+            audience: idp.expectedAudience,
+          })),
         revocation_endpoint: `${issuer}/mcp/revoke`,
         revocation_webhook_secret_header: 'x-revocation-secret',
       },

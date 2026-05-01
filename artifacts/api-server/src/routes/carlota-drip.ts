@@ -9,7 +9,13 @@ import {
   carlotaDripEnrollmentsTable,
   carlotaDripEngagementEventsTable,
 } from '@szl-holdings/db';
-import { handleRouteError, sendBadRequest, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
 import { sendEmail } from '../lib/email';
@@ -25,7 +31,7 @@ const AUTH_PATHS = [
 ];
 router.use(AUTH_PATHS, authMiddleware());
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9\-]{0,98}[a-z0-9]$/;
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$/;
 
 const createSequenceSchema = z.object({
   sequenceId: z.string().regex(SLUG_REGEX).optional(),
@@ -419,9 +425,7 @@ router.post(
           ),
         );
 
-      const nextSendAt = firstStep
-        ? new Date(Date.now() + firstStep.delayDays * 86_400_000)
-        : null;
+      const nextSendAt = firstStep ? new Date(Date.now() + firstStep.delayDays * 86_400_000) : null;
 
       await db.insert(carlotaDripEnrollmentsTable).values({
         enrollmentId,
@@ -451,7 +455,10 @@ router.post(
         .from(carlotaDripEnrollmentsTable)
         .where(eq(carlotaDripEnrollmentsTable.enrollmentId, enrollmentId));
 
-      logger.info({ enrollmentId, contactEmail, sequenceId, stripeSessionId }, '[carlota-drip] checkout enrollment');
+      logger.info(
+        { enrollmentId, contactEmail, sequenceId, stripeSessionId },
+        '[carlota-drip] checkout enrollment',
+      );
       sendCreated(res, { enrollment });
     } catch (err) {
       handleRouteError(res, err, 'Failed to enroll from checkout');

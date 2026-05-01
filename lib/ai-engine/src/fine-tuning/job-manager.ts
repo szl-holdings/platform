@@ -6,7 +6,13 @@
  * stores job metadata in fine_tuning_jobs DB table, and emits events on completion.
  */
 
-import { db, auditLogsTable, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
+import {
+  db,
+  auditLogsTable,
+  fineTunedModelRegistry,
+  fineTuningDatasets,
+  fineTuningJobs,
+} from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
 import { serializeToJSONL, serializeDPOToJSONL, type OpenAIDPOSample } from './dataset-exporter.js';
 import { curateDatasetForAgent } from './domain-curators.js';
@@ -131,13 +137,14 @@ async function submitGeminiFineTuning(
   agentId: string,
   hyperparameters: FineTuningJobRequest['hyperparameters'],
 ): Promise<{ providerJobId: string }> {
-  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  const geminiKey =
+    process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
   if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
   const geminiBase =
     process.env.GEMINI_FINE_TUNING_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
 
-  let trainingData: Array<{ text_input: string; output: string }> = [];
+  const trainingData: Array<{ text_input: string; output: string }> = [];
   try {
     const lines = samples.split('\n').filter(Boolean);
     for (const line of lines) {
@@ -181,14 +188,11 @@ async function submitGeminiFineTuning(
     },
   };
 
-  const response = await fetch(
-    `${geminiBase}/tunedModels?key=${geminiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    },
-  );
+  const response = await fetch(`${geminiBase}/tunedModels?key=${geminiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+  });
 
   if (!response.ok) {
     const err = await response.text().catch(() => '');
@@ -217,7 +221,8 @@ async function submitHuggingFaceFineTuning(
   if (!hfToken) throw new Error('HUGGINGFACE_API_KEY not configured for HuggingFace fine-tuning');
 
   const hfUsername = process.env.HF_USERNAME;
-  if (!hfUsername) throw new Error('HF_USERNAME not configured (required for AutoTrain dataset upload)');
+  if (!hfUsername)
+    throw new Error('HF_USERNAME not configured (required for AutoTrain dataset upload)');
 
   const autotrainBase = process.env.HF_AUTOTRAIN_BASE_URL ?? 'https://huggingface.co/api/autotrain';
   const hubApiBase = process.env.HF_HUB_API_BASE_URL ?? 'https://huggingface.co/api';
@@ -274,28 +279,27 @@ async function submitHuggingFaceFineTuning(
     .join('\n');
 
   if (!hfSftLines) {
-    throw new Error('HF fine-tuning: no valid instruction/output pairs found after converting training data');
+    throw new Error(
+      'HF fine-tuning: no valid instruction/output pairs found after converting training data',
+    );
   }
 
   const fileContent = Buffer.from(hfSftLines, 'utf-8').toString('base64');
-  const commitResp = await fetch(
-    `${hubApiBase}/datasets/${datasetRepoId}/commit/main`,
-    {
-      method: 'POST',
-      headers: authHeaders,
-      body: JSON.stringify({
-        commit_message: `Upload training data for ${agentId} fine-tuning`,
-        operations: [
-          {
-            operation: 'addOrUpdate',
-            path: 'train.jsonl',
-            encoding: 'base64',
-            content: fileContent,
-          },
-        ],
-      }),
-    },
-  );
+  const commitResp = await fetch(`${hubApiBase}/datasets/${datasetRepoId}/commit/main`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify({
+      commit_message: `Upload training data for ${agentId} fine-tuning`,
+      operations: [
+        {
+          operation: 'addOrUpdate',
+          path: 'train.jsonl',
+          encoding: 'base64',
+          content: fileContent,
+        },
+      ],
+    }),
+  });
 
   if (!commitResp.ok) {
     const err = await commitResp.text().catch(() => '');
@@ -314,7 +318,9 @@ async function submitHuggingFaceFineTuning(
       model_max_length: 2048,
       epochs: hyperparameters?.nEpochs ?? 3,
       batch_size: hyperparameters?.batchSize ?? 4,
-      lr: hyperparameters?.learningRateMultiplier ? hyperparameters.learningRateMultiplier * 2e-4 : 2e-4,
+      lr: hyperparameters?.learningRateMultiplier
+        ? hyperparameters.learningRateMultiplier * 2e-4
+        : 2e-4,
       mixed_precision: 'bf16',
       use_peft: true,
       quantization: 'int4',
@@ -427,7 +433,8 @@ async function pollGeminiJobStatus(providerJobId: string): Promise<{
   fineTunedModelId?: string;
   error?: string;
 }> {
-  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  const geminiKey =
+    process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
   if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
   const geminiBase =
@@ -495,7 +502,11 @@ export async function submitFineTuningJob(
   }
 
   const exportFormat = isDPO ? 'openai-dpo' : 'openai-jsonl';
-  const dataset = await curateDatasetForAgent(agentId, exportFormat, (options?.since !== undefined ? { since: options.since } : {}));
+  const dataset = await curateDatasetForAgent(
+    agentId,
+    exportFormat,
+    options?.since !== undefined ? { since: options.since } : {},
+  );
 
   if (dataset.sampleCount < minSamples) {
     throw new Error(
@@ -565,10 +576,21 @@ export async function submitFineTuningJob(
   let providerJobId: string;
 
   if (provider === 'openai') {
-    const result = await submitOpenAIFineTuning(jsonlContent, baseModel, hyperparameters, suffix, isDPO);
+    const result = await submitOpenAIFineTuning(
+      jsonlContent,
+      baseModel,
+      hyperparameters,
+      suffix,
+      isDPO,
+    );
     providerJobId = result.providerJobId;
   } else if (provider === 'huggingface') {
-    const result = await submitHuggingFaceFineTuning(jsonlContent, baseModel, agentId, hyperparameters);
+    const result = await submitHuggingFaceFineTuning(
+      jsonlContent,
+      baseModel,
+      agentId,
+      hyperparameters,
+    );
     providerJobId = result.providerJobId;
   } else {
     const result = await submitGeminiFineTuning(jsonlContent, baseModel, agentId, hyperparameters);

@@ -1,7 +1,6 @@
-import { cefExportAdapter } from './adapters/cef-export';
+import { cefExportAdapter, type SentraFinding } from './adapters/cef-export';
 import { sentinelAsimAdapter } from './adapters/sentinel-asim-export';
 import { chronicleUdmAdapter } from './adapters/chronicle-udm-export';
-import type { SentraFinding } from './adapters/cef-export';
 
 export type SiemExportAdapterId = 'splunk-cef' | 'sentinel-asim' | 'chronicle-udm';
 
@@ -11,7 +10,9 @@ export interface SiemExportAdapter {
   description: string;
   configSchema: { shape: Record<string, unknown> };
   validate(config: Record<string, unknown>): { ok: true } | { ok: false; errors: string[] };
-  testConnection(config: Record<string, unknown>): Promise<{ ok: true } | { ok: false; error: string }>;
+  testConnection(
+    config: Record<string, unknown>,
+  ): Promise<{ ok: true } | { ok: false; error: string }>;
   export(
     config: Record<string, unknown>,
     findings: SentraFinding[],

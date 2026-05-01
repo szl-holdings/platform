@@ -5,12 +5,10 @@ import {
   intelligenceCacheTable,
   pcDeadlinesTable,
   pcMattersTable,
+  GLOBAL_TENANT_SENTINEL,
 } from '@szl-holdings/db';
-import { and, count, desc, gte, lte } from 'drizzle-orm';
-import { eq, sql } from 'drizzle-orm';
+import { and, count, desc, gte, lte, eq, sql } from 'drizzle-orm';
 import os from 'node:os';
-import { GLOBAL_TENANT_SENTINEL } from '@szl-holdings/db';
-
 export interface CachedThreatItem {
   severity: string;
   timestamp?: string;
@@ -44,9 +42,7 @@ export function isThreatItem(v: unknown): v is CachedThreatItem {
 
 export function isVesselItem(v: unknown): v is CachedVesselItem {
   return (
-    typeof v === 'object' &&
-    v !== null &&
-    typeof (v as Record<string, unknown>).status === 'string'
+    typeof v === 'object' && v !== null && typeof (v as Record<string, unknown>).status === 'string'
   );
 }
 
@@ -317,8 +313,7 @@ export function getStephenData(): {
   const sparkline = Array.from({ length: 24 }, (_, i) => {
     // eslint-disable-next-line no-loss-of-precision
     return clamp(
-      score +
-        Math.round((((seed + i + 7) * 6364136223846793005 + 1442695040888963407) % 11) - 5),
+      score + Math.round((((seed + i + 7) * 6364136223846793005 + 1442695040888963407) % 11) - 5),
       45,
       99,
     );
@@ -409,9 +404,7 @@ export async function getTerraData() {
   }
 }
 
-export async function buildTimeline(
-  _aegisData: Awaited<ReturnType<typeof getAegisData>>,
-) {
+export async function buildTimeline(_aegisData: Awaited<ReturnType<typeof getAegisData>>) {
   const items: Array<{
     id: number;
     time: string;

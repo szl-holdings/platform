@@ -1,5 +1,4 @@
-import { createContext, useContext, useState } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 export type OrgId = 'szl' | 'acme' | 'northwind';
 
@@ -13,11 +12,7 @@ const OrgContext = createContext<OrgContextType | undefined>(undefined);
 export function OrgProvider({ children }: { children: ReactNode }) {
   const [currentOrg, setOrg] = useState<OrgId>('szl');
 
-  return (
-    <OrgContext.Provider value={{ currentOrg, setOrg }}>
-      {children}
-    </OrgContext.Provider>
-  );
+  return <OrgContext.Provider value={{ currentOrg, setOrg }}>{children}</OrgContext.Provider>;
 }
 
 export function useOrg() {

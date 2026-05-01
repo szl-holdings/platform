@@ -13,7 +13,7 @@ import {
 import { jobQueue } from './lib/job-queue';
 import { logger } from './lib/logger';
 import { startPrismBusBridge, stopPrismBusBridge } from './lib/prism-bus-bridge';
-import { failFastOnInvalidConfig } from './lib/startup-validation';
+import { failFastOnInvalidConfig, validateHFConnectivity } from './lib/startup-validation';
 import { validateMarketDataConfig } from './lib/market-data-adapter';
 import { initWebSocket } from './lib/websocket';
 import './lib/platform-jobs';
@@ -35,13 +35,16 @@ import {
   runBootSeedSequence,
   type SeedTask,
 } from './lib/boot-orchestrator';
-import { runOpsMgmtBootInit } from './routes/ops-management';
+import { runOpsMgmtBootInit, runAlertRuleEvaluation } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
 import { runStartupSmokeCheck } from './lib/startup-smoke-check';
-import { validateHFConnectivity } from './lib/startup-validation';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
-import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-holdings/ai-engine';
+import {
+  startScheduledTriggerChecks,
+  stopScheduledTriggerChecks,
+  twinRegistry,
+} from '@szl-holdings/ai-engine';
 import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
@@ -88,9 +91,7 @@ import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
 import { runPulsePushDelivery } from './jobs/pulse-push-delivery';
-import { runAlertRuleEvaluation } from './routes/ops-management';
 import { bootstrapChainState } from './routes/signal-chains';
-import { twinRegistry } from '@szl-holdings/ai-engine';
 
 failFastOnInvalidConfig();
 validateMarketDataConfig();
@@ -169,9 +170,14 @@ export async function bootstrap(
   initFusionPersistence().catch((err) =>
     logger.warn({ err }, '[fusion-persistence] initFusionPersistence startup error (non-fatal)'),
   );
-  twinRegistry.initialize().catch((err) =>
-    logger.warn({ err }, '[twin-registry] Failed to initialize twin registry from DB (non-fatal)'),
-  );
+  twinRegistry
+    .initialize()
+    .catch((err) =>
+      logger.warn(
+        { err },
+        '[twin-registry] Failed to initialize twin registry from DB (non-fatal)',
+      ),
+    );
   startPrismBusBridge();
   startDomainNotificationGenerators();
   registerApprovalNotificationHook();
@@ -378,7 +384,10 @@ export async function bootstrap(
             );
             for (const job of active) {
               await pollJobStatus(job.jobId).catch((err) => {
-                logger.warn({ err, jobId: job.jobId }, '[fine-tuning-poller] poll error (non-fatal)');
+                logger.warn(
+                  { err, jobId: job.jobId },
+                  '[fine-tuning-poller] poll error (non-fatal)',
+                );
               });
             }
             if (active.length > 0) {
@@ -473,7 +482,9 @@ export async function bootstrap(
     if (onMigrationsReady) {
       try {
         onMigrationsReady(app as unknown as http.RequestListener);
-        logger.info('[bootstrap] Live HTTP handler activated — post-migration init continues in background');
+        logger.info(
+          '[bootstrap] Live HTTP handler activated — post-migration init continues in background',
+        );
       } catch (err) {
         logger.warn({ err }, '[bootstrap] onMigrationsReady callback threw (non-fatal)');
       }
@@ -501,7 +512,8 @@ export async function bootstrap(
       _chainStatePromise,
       new Promise<void>((_, reject) =>
         setTimeout(
-          () => reject(new Error(`bootstrapChainState exceeded ${CHAIN_STATE_HYDRATE_TIMEOUT_MS}ms`)),
+          () =>
+            reject(new Error(`bootstrapChainState exceeded ${CHAIN_STATE_HYDRATE_TIMEOUT_MS}ms`)),
           CHAIN_STATE_HYDRATE_TIMEOUT_MS,
         ),
       ),
@@ -526,7 +538,10 @@ export async function bootstrap(
       // rejection and (in production) would crash the process.
       const fnPromise = fn();
       fnPromise.catch((err) => {
-        logger.warn({ err }, `[bootstrap] ${name} background completion error (step already timed out — non-fatal)`);
+        logger.warn(
+          { err },
+          `[bootstrap] ${name} background completion error (step already timed out — non-fatal)`,
+        );
       });
       try {
         await Promise.race([
@@ -537,7 +552,10 @@ export async function bootstrap(
         ]);
         logger.info({ durationMs: Date.now() - t }, `[bootstrap] ${name} OK`);
       } catch (err) {
-        logger.warn({ err, durationMs: Date.now() - t }, `[bootstrap] ${name} failed or timed out — continuing`);
+        logger.warn(
+          { err, durationMs: Date.now() - t },
+          `[bootstrap] ${name} failed or timed out — continuing`,
+        );
       }
     };
 
@@ -563,7 +581,10 @@ export async function bootstrap(
         initDurablePersistence(),
         new Promise<void>((_, reject) =>
           setTimeout(
-            () => reject(new Error(`initDurablePersistence exceeded ${DURABLE_PERSISTENCE_TIMEOUT_MS}ms`)),
+            () =>
+              reject(
+                new Error(`initDurablePersistence exceeded ${DURABLE_PERSISTENCE_TIMEOUT_MS}ms`),
+              ),
             DURABLE_PERSISTENCE_TIMEOUT_MS,
           ),
         ),
@@ -993,7 +1014,10 @@ if (!process.env.__FAST_START_SERVER) {
     bootstrap(server, port, (handler) => {
       readyHandler = handler;
       bootstrapDone = true;
-      logger.info({ port }, '[api-server] Live handler activated post-migrations — accepting traffic');
+      logger.info(
+        { port },
+        '[api-server] Live handler activated post-migrations — accepting traffic',
+      );
     })
       .then((handler) => {
         readyHandler = handler;

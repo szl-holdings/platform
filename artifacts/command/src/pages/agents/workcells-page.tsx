@@ -14,10 +14,12 @@ import {
   Eye,
   GitBranch,
 } from 'lucide-react';
-import { DEMO_WORKCELLS } from '@szl/a11oy-runtime';
-import type { WorkcellStatus, Workcell } from '@szl/a11oy-runtime';
+import { DEMO_WORKCELLS, type WorkcellStatus, type Workcell } from '@szl/a11oy-runtime';
 
-const STATUS_CONFIG: Record<WorkcellStatus, { label: string; color: string; icon: typeof CheckCircle2 }> = {
+const STATUS_CONFIG: Record<
+  WorkcellStatus,
+  { label: string; color: string; icon: typeof CheckCircle2 }
+> = {
   intake: { label: 'Intake', color: '#64748b', icon: Eye },
   planning: { label: 'Planning', color: '#8b7ac8', icon: GitBranch },
   context_building: { label: 'Context Building', color: '#4d8fcc', icon: Layers },
@@ -46,17 +48,46 @@ export function WorkcellsPage() {
     return true;
   });
 
-  const statusCounts = DEMO_WORKCELLS.reduce((acc, w) => {
-    acc[w.status] = (acc[w.status] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statusCounts = DEMO_WORKCELLS.reduce(
+    (acc, w) => {
+      acc[w.status] = (acc[w.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
+    <div
+      style={{
+        background: '#080c14',
+        minHeight: '100vh',
+        color: '#e2e8f0',
+        fontFamily: 'system-ui, sans-serif',
+      }}
+    >
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          borderBottom: '1px solid #1e293b',
+          padding: '20px 32px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, background: 'rgba(139,122,200,0.15)', border: '1px solid rgba(139,122,200,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              background: 'rgba(139,122,200,0.15)',
+              border: '1px solid rgba(139,122,200,0.3)',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <Layers size={18} color="#8b7ac8" />
           </div>
           <div>
@@ -70,17 +101,34 @@ export function WorkcellsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as WorkcellStatus | 'all')}
-            style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
+            style={{
+              background: '#0f172a',
+              border: '1px solid #334155',
+              borderRadius: 6,
+              padding: '6px 10px',
+              color: '#94a3b8',
+              fontSize: 12,
+            }}
           >
             <option value="all">All Statuses</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}{statusCounts[k] ? ` (${statusCounts[k]})` : ''}</option>
+              <option key={k} value={k}>
+                {v.label}
+                {statusCounts[k] ? ` (${statusCounts[k]})` : ''}
+              </option>
             ))}
           </select>
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 6, padding: '6px 10px', color: '#94a3b8', fontSize: 12 }}
+            style={{
+              background: '#0f172a',
+              border: '1px solid #334155',
+              borderRadius: 6,
+              padding: '6px 10px',
+              color: '#94a3b8',
+              fontSize: 12,
+            }}
           >
             <option value="all">All Priorities</option>
             <option value="critical">Critical</option>
@@ -92,7 +140,15 @@ export function WorkcellsPage() {
       </div>
 
       {/* Status Summary */}
-      <div style={{ display: 'flex', gap: 8, padding: '12px 32px', borderBottom: '1px solid #1e293b', overflowX: 'auto' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 8,
+          padding: '12px 32px',
+          borderBottom: '1px solid #1e293b',
+          overflowX: 'auto',
+        }}
+      >
         {[
           { status: 'proven', count: statusCounts['proven'] ?? 0 },
           { status: 'executing', count: statusCounts['executing'] ?? 0 },
@@ -105,12 +161,19 @@ export function WorkcellsPage() {
           return (
             <button
               key={status}
-              onClick={() => setFilterStatus(filterStatus === status ? 'all' : status as WorkcellStatus)}
+              onClick={() =>
+                setFilterStatus(filterStatus === status ? 'all' : (status as WorkcellStatus))
+              }
               style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
                 background: filterStatus === status ? `${cfg.color}18` : 'transparent',
                 border: `1px solid ${filterStatus === status ? cfg.color + '40' : '#1e293b'}`,
-                borderRadius: 20, cursor: 'pointer', whiteSpace: 'nowrap',
+                borderRadius: 20,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               <cfg.icon size={10} color={cfg.color} />
@@ -146,32 +209,61 @@ export function WorkcellsPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1e293b')}
               >
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', marginBottom: 3 }}>{wc.title}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', marginBottom: 3 }}>
+                    {wc.title}
+                  </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <span style={{ fontSize: 10, color: '#64748b' }}>{wc.vertical}</span>
                     <span style={{ fontSize: 10, color: '#334155' }}>·</span>
                     <span style={{ fontSize: 10, color: '#64748b' }}>{wc.domain}</span>
                     <span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                    <span style={{ fontSize: 10, color: '#64748b' }}>{wc.operatorSequence.length} operators</span>
+                    <span style={{ fontSize: 10, color: '#64748b' }}>
+                      {wc.operatorSequence.length} operators
+                    </span>
                   </div>
                 </div>
 
                 {/* Priority */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: PRIORITY_COLOR[wc.priority] }} />
-                  <span style={{ fontSize: 11, color: PRIORITY_COLOR[wc.priority], fontWeight: 600 }}>{wc.priority}</span>
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: PRIORITY_COLOR[wc.priority],
+                    }}
+                  />
+                  <span
+                    style={{ fontSize: 11, color: PRIORITY_COLOR[wc.priority], fontWeight: 600 }}
+                  >
+                    {wc.priority}
+                  </span>
                 </div>
 
                 {/* Cost */}
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 11, color: '#94a3b8' }}>${wc.totalCostUsd.toFixed(3)}</div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>
+                    ${wc.totalCostUsd.toFixed(3)}
+                  </div>
                   <div style={{ fontSize: 10, color: '#64748b' }}>cost</div>
                 </div>
 
                 {/* Status */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: `${statusCfg.color}10`, border: `1px solid ${statusCfg.color}28`, borderRadius: 20, padding: '3px 10px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    background: `${statusCfg.color}10`,
+                    border: `1px solid ${statusCfg.color}28`,
+                    borderRadius: 20,
+                    padding: '3px 10px',
+                  }}
+                >
                   <statusCfg.icon size={10} color={statusCfg.color} />
-                  <span style={{ fontSize: 10, color: statusCfg.color, fontWeight: 600 }}>{statusCfg.label}</span>
+                  <span style={{ fontSize: 10, color: statusCfg.color, fontWeight: 600 }}>
+                    {statusCfg.label}
+                  </span>
                 </div>
 
                 <ChevronRight size={14} color="#475569" />

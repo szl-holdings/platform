@@ -1,6 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { db } from '@szl-holdings/db';
-import { a11oyDefensePayloads } from '@szl-holdings/db';
+import { db, a11oyDefensePayloads } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import {
@@ -91,10 +90,7 @@ for (const slug of DEFENSE_SLUGS) {
       }
       return ok(res, result.payload, result.updatedAt);
     } catch (err) {
-      logger.error(
-        { err, slug },
-        '[internal-a11oy-defense] failed to load defense payload',
-      );
+      logger.error({ err, slug }, '[internal-a11oy-defense] failed to load defense payload');
       return fail(res, 500, 'Failed to load defense payload');
     }
   });

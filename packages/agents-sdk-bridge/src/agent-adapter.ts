@@ -13,10 +13,8 @@
  * declare useAgentsSdk: true.
  */
 
-import { Agent } from '@openai/agents';
-import type { InputGuardrail, OutputGuardrail } from '@openai/agents';
-import { SzlToolAdapter } from './tool-adapter.js';
-import type { SzlToolAdapterOptions } from './tool-adapter.js';
+import { Agent, type InputGuardrail, type OutputGuardrail } from '@openai/agents';
+import { SzlToolAdapter, type SzlToolAdapterOptions } from './tool-adapter.js';
 import { SzlGuardrailAdapter } from './guardrail-adapter.js';
 
 /**
@@ -158,9 +156,10 @@ export class SzlAgentAdapter {
     return {
       name: `szl-policy-output:${domain}`,
       execute: async (args) => {
-        const text = typeof args.agentOutput === 'string'
-          ? args.agentOutput
-          : JSON.stringify(args.agentOutput ?? '');
+        const text =
+          typeof args.agentOutput === 'string'
+            ? args.agentOutput
+            : JSON.stringify(args.agentOutput ?? '');
         const result = await guardrailAdapter.checkOutput(text);
         return {
           tripwireTriggered: !result.allowed,

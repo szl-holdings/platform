@@ -1,5 +1,4 @@
-import { randomUUID } from 'node:crypto';
-import { createHmac } from 'node:crypto';
+import { randomUUID, createHmac } from 'node:crypto';
 import { eq, and, lte, inArray } from 'drizzle-orm';
 import {
   db,
@@ -9,7 +8,15 @@ import {
 } from '@szl-holdings/db';
 import { logger } from '../lib/logger';
 
-export type OutboundChannel = 'webhook' | 'email' | 'sms' | 'slack' | 'teams' | 'discord' | 'siem' | 'custom';
+export type OutboundChannel =
+  | 'webhook'
+  | 'email'
+  | 'sms'
+  | 'slack'
+  | 'teams'
+  | 'discord'
+  | 'siem'
+  | 'custom';
 
 export interface DeliveryRequest {
   channel: OutboundChannel;
@@ -65,7 +72,12 @@ async function deliverWebhook(
   const deliveryId = randomUUID();
 
   if (isBlockedUrl(url)) {
-    return { deliveryId, status: 'failed', error: 'Webhook URL targets a blocked private/internal network', retryable: false };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: 'Webhook URL targets a blocked private/internal network',
+      retryable: false,
+    };
   }
 
   const body = JSON.stringify(payload);
@@ -76,7 +88,8 @@ async function deliverWebhook(
   };
 
   if (secret) {
-    headers['X-Signature-SHA256'] = `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`;
+    headers['X-Signature-SHA256'] =
+      `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`;
   }
 
   const resp = await fetch(url, { method: 'POST', headers, body });
@@ -98,7 +111,12 @@ async function deliverSlack(
 ): Promise<DeliveryResult> {
   const deliveryId = randomUUID();
   if (isBlockedUrl(webhookUrl)) {
-    return { deliveryId, status: 'failed', error: 'Slack webhook URL targets a blocked private/internal network', retryable: false };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: 'Slack webhook URL targets a blocked private/internal network',
+      retryable: false,
+    };
   }
   const block = {
     attachments: [
@@ -113,7 +131,9 @@ async function deliverSlack(
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: String(payload.message ?? payload.body ?? JSON.stringify(payload).slice(0, 500)),
+              text: String(
+                payload.message ?? payload.body ?? JSON.stringify(payload).slice(0, 500),
+              ),
             },
           },
           {
@@ -137,7 +157,12 @@ async function deliverSlack(
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
-    return { deliveryId, status: 'failed', error: `Slack ${resp.status}: ${body}`, retryable: resp.status >= 500 };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: `Slack ${resp.status}: ${body}`,
+      retryable: resp.status >= 500,
+    };
   }
   return { deliveryId, status: 'delivered', providerMessageId: `slack-${Date.now()}` };
 }
@@ -148,7 +173,12 @@ async function deliverTeams(
 ): Promise<DeliveryResult> {
   const deliveryId = randomUUID();
   if (isBlockedUrl(webhookUrl)) {
-    return { deliveryId, status: 'failed', error: 'Teams webhook URL targets a blocked private/internal network', retryable: false };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: 'Teams webhook URL targets a blocked private/internal network',
+      retryable: false,
+    };
   }
   const card = {
     type: 'message',
@@ -159,8 +189,18 @@ async function deliverTeams(
           type: 'AdaptiveCard',
           version: '1.4',
           body: [
-            { type: 'TextBlock', text: String(payload.title ?? 'Notification'), weight: 'Bolder', size: 'Medium' },
-            { type: 'TextBlock', text: String(payload.message ?? payload.body ?? ''), wrap: true, isSubtle: true },
+            {
+              type: 'TextBlock',
+              text: String(payload.title ?? 'Notification'),
+              weight: 'Bolder',
+              size: 'Medium',
+            },
+            {
+              type: 'TextBlock',
+              text: String(payload.message ?? payload.body ?? ''),
+              wrap: true,
+              isSubtle: true,
+            },
             {
               type: 'FactSet',
               facts: [
@@ -181,7 +221,12 @@ async function deliverTeams(
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
-    return { deliveryId, status: 'failed', error: `Teams ${resp.status}: ${body}`, retryable: resp.status >= 500 };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: `Teams ${resp.status}: ${body}`,
+      retryable: resp.status >= 500,
+    };
   }
   return { deliveryId, status: 'delivered', providerMessageId: `teams-${Date.now()}` };
 }
@@ -192,7 +237,12 @@ async function deliverDiscord(
 ): Promise<DeliveryResult> {
   const deliveryId = randomUUID();
   if (isBlockedUrl(webhookUrl)) {
-    return { deliveryId, status: 'failed', error: 'Discord webhook URL targets a blocked private/internal network', retryable: false };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: 'Discord webhook URL targets a blocked private/internal network',
+      retryable: false,
+    };
   }
   const embed = {
     embeds: [
@@ -216,14 +266,17 @@ async function deliverDiscord(
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
-    return { deliveryId, status: 'failed', error: `Discord ${resp.status}: ${body}`, retryable: resp.status >= 500 };
+    return {
+      deliveryId,
+      status: 'failed',
+      error: `Discord ${resp.status}: ${body}`,
+      retryable: resp.status >= 500,
+    };
   }
   return { deliveryId, status: 'delivered', providerMessageId: `discord-${Date.now()}` };
 }
 
-async function deliverEmail(
-  payload: Record<string, unknown>,
-): Promise<DeliveryResult> {
+async function deliverEmail(payload: Record<string, unknown>): Promise<DeliveryResult> {
   const deliveryId = randomUUID();
   try {
     const { sendEmail } = await import('../lib/email');
@@ -242,12 +295,11 @@ async function deliverEmail(
   }
 }
 
-async function deliverSms(
-  payload: Record<string, unknown>,
-): Promise<DeliveryResult> {
+async function deliverSms(payload: Record<string, unknown>): Promise<DeliveryResult> {
   const deliveryId = randomUUID();
   const phone = String(payload.recipient ?? payload.phone ?? payload.to ?? '');
-  if (!phone) return { deliveryId, status: 'failed', error: 'No recipient phone', retryable: false };
+  if (!phone)
+    return { deliveryId, status: 'failed', error: 'No recipient phone', retryable: false };
 
   if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
     return { deliveryId, status: 'failed', error: 'SMS provider not configured', retryable: false };
@@ -255,7 +307,8 @@ async function deliverSms(
 
   try {
     const { default: twilio } = await import('twilio').catch(() => ({ default: null }));
-    if (!twilio) return { deliveryId, status: 'failed', error: 'Twilio not available', retryable: false };
+    if (!twilio)
+      return { deliveryId, status: 'failed', error: 'Twilio not available', retryable: false };
 
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     const msg = await client.messages.create({
@@ -279,22 +332,46 @@ async function executeDelivery(
   switch (channel) {
     case 'webhook': {
       const url = String(config.url ?? config.webhookUrl ?? '');
-      if (!url) return { deliveryId: randomUUID(), status: 'failed', error: 'No webhook URL', retryable: false };
+      if (!url)
+        return {
+          deliveryId: randomUUID(),
+          status: 'failed',
+          error: 'No webhook URL',
+          retryable: false,
+        };
       return deliverWebhook(url, payload, config.secret as string | undefined);
     }
     case 'slack': {
       const url = String(config.webhookUrl ?? process.env.SLACK_WEBHOOK_URL ?? '');
-      if (!url) return { deliveryId: randomUUID(), status: 'failed', error: 'No Slack webhook URL', retryable: false };
+      if (!url)
+        return {
+          deliveryId: randomUUID(),
+          status: 'failed',
+          error: 'No Slack webhook URL',
+          retryable: false,
+        };
       return deliverSlack(url, payload);
     }
     case 'teams': {
       const url = String(config.webhookUrl ?? process.env.TEAMS_WEBHOOK_URL ?? '');
-      if (!url) return { deliveryId: randomUUID(), status: 'failed', error: 'No Teams webhook URL', retryable: false };
+      if (!url)
+        return {
+          deliveryId: randomUUID(),
+          status: 'failed',
+          error: 'No Teams webhook URL',
+          retryable: false,
+        };
       return deliverTeams(url, payload);
     }
     case 'discord': {
       const url = String(config.webhookUrl ?? process.env.DISCORD_WEBHOOK_URL ?? '');
-      if (!url) return { deliveryId: randomUUID(), status: 'failed', error: 'No Discord webhook URL', retryable: false };
+      if (!url)
+        return {
+          deliveryId: randomUUID(),
+          status: 'failed',
+          error: 'No Discord webhook URL',
+          retryable: false,
+        };
       return deliverDiscord(url, payload);
     }
     case 'email':
@@ -302,7 +379,12 @@ async function executeDelivery(
     case 'sms':
       return deliverSms(payload);
     default:
-      return { deliveryId: randomUUID(), status: 'failed', error: `Unsupported channel: ${channel}`, retryable: false };
+      return {
+        deliveryId: randomUUID(),
+        status: 'failed',
+        error: `Unsupported channel: ${channel}`,
+        retryable: false,
+      };
   }
 }
 
@@ -363,13 +445,18 @@ export async function submitDelivery(request: DeliveryRequest): Promise<Delivery
       .set({ status: 'delivering', attempts: 1, updatedAt: new Date() })
       .where(eq(outboundDeliveriesTable.deliveryId, deliveryId));
 
-    const resolvedConfig = await resolveChannelConfig(request.channel, request.orgId, request.channelConfig);
+    const resolvedConfig = await resolveChannelConfig(
+      request.channel,
+      request.orgId,
+      request.channelConfig,
+    );
 
     const mergedPayload = { ...request.payload };
     if (request.recipient) {
       mergedPayload.recipient = request.recipient;
       if (!mergedPayload.to) mergedPayload.to = request.recipient;
-      if (!mergedPayload.phone && request.channel === 'sms') mergedPayload.phone = request.recipient;
+      if (!mergedPayload.phone && request.channel === 'sms')
+        mergedPayload.phone = request.recipient;
     }
 
     const result = await executeDelivery(request.channel, mergedPayload, resolvedConfig);
@@ -382,9 +469,7 @@ export async function submitDelivery(request: DeliveryRequest): Promise<Delivery
         lastError: result.error ?? null,
         deliveredAt: result.status === 'delivered' ? new Date() : null,
         nextRetryAt:
-          result.status === 'failed' && result.retryable
-            ? new Date(Date.now() + 60_000)
-            : null,
+          result.status === 'failed' && result.retryable ? new Date(Date.now() + 60_000) : null,
         updatedAt: new Date(),
       })
       .where(eq(outboundDeliveriesTable.deliveryId, deliveryId));
@@ -470,7 +555,9 @@ export async function retryFailedDeliveries(orgId?: string): Promise<number> {
           lastError: result.error ?? delivery.lastError,
           deliveredAt: result.status === 'delivered' ? new Date() : null,
           nextRetryAt:
-            result.status === 'failed' && result.retryable && delivery.attempts + 1 < delivery.maxAttempts
+            result.status === 'failed' &&
+            result.retryable &&
+            delivery.attempts + 1 < delivery.maxAttempts
               ? new Date(Date.now() + backoffMs)
               : null,
           updatedAt: new Date(),
@@ -508,10 +595,7 @@ export async function getDeliveryStats(orgId?: string): Promise<{
   byChannel: Record<string, number>;
 }> {
   const filter = orgId ? eq(outboundDeliveriesTable.orgId, orgId) : undefined;
-  const rows = await db
-    .select()
-    .from(outboundDeliveriesTable)
-    .where(filter);
+  const rows = await db.select().from(outboundDeliveriesTable).where(filter);
 
   const byChannel: Record<string, number> = {};
   let delivered = 0;

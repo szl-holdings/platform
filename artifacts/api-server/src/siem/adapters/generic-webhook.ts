@@ -1,12 +1,20 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
-import { randomUUID } from 'node:crypto';
+import { createHmac, timingSafeEqual, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { SiemAdapter, SiemConnectionConfig, NormalizedAlert } from '../adapter-interface';
 
 const configSchema = z.object({
-  hmacSecret: z.string().min(8).describe('HMAC-SHA256 secret used to verify incoming webhook signatures'),
-  signatureHeader: z.string().default('X-Signature-SHA256').describe('HTTP header containing the signature'),
-  severityField: z.string().default('severity').describe('JSON field path mapping to alert severity'),
+  hmacSecret: z
+    .string()
+    .min(8)
+    .describe('HMAC-SHA256 secret used to verify incoming webhook signatures'),
+  signatureHeader: z
+    .string()
+    .default('X-Signature-SHA256')
+    .describe('HTTP header containing the signature'),
+  severityField: z
+    .string()
+    .default('severity')
+    .describe('JSON field path mapping to alert severity'),
 });
 
 export type GenericWebhookConfig = z.infer<typeof configSchema>;
@@ -48,7 +56,13 @@ export function normalizeWebhookPayload(
     severity,
     source: `webhook · ${connectionName}`,
     description: String(p.description ?? p.details ?? p.body ?? JSON.stringify(p).slice(0, 200)),
-    asset: p.host ? String(p.host) : p.asset ? String(p.asset) : p.hostname ? String(p.hostname) : undefined,
+    asset: p.host
+      ? String(p.host)
+      : p.asset
+        ? String(p.asset)
+        : p.hostname
+          ? String(p.hostname)
+          : undefined,
     rawPayload: p,
     detectedAt: String(p.timestamp ?? p.time ?? p.detectedAt ?? new Date().toISOString()),
   };
@@ -57,7 +71,8 @@ export function normalizeWebhookPayload(
 const genericWebhookAdapter: SiemAdapter = {
   id: 'generic-webhook',
   displayName: 'Generic Webhook',
-  description: 'Receives JSON alerts pushed from any SIEM via HTTP POST with optional HMAC-SHA256 verification.',
+  description:
+    'Receives JSON alerts pushed from any SIEM via HTTP POST with optional HMAC-SHA256 verification.',
   configSchema,
 
   validate(config: SiemConnectionConfig) {
@@ -77,7 +92,8 @@ const genericWebhookAdapter: SiemAdapter = {
       {
         title: 'Test — Webhook Connection Verified',
         severity: 'low',
-        description: 'This is a synthetic test event confirming the webhook configuration is valid.',
+        description:
+          'This is a synthetic test event confirming the webhook configuration is valid.',
         timestamp: new Date().toISOString(),
       },
       'test',
@@ -86,7 +102,11 @@ const genericWebhookAdapter: SiemAdapter = {
     return { ok: true, sample: [sample] };
   },
 
-  start(_connectionId: string, _config: SiemConnectionConfig, _onAlert: (a: NormalizedAlert) => void) {
+  start(
+    _connectionId: string,
+    _config: SiemConnectionConfig,
+    _onAlert: (a: NormalizedAlert) => void,
+  ) {
     // Webhook adapters are inbound-push; the ingest route calls onAlert directly
   },
 

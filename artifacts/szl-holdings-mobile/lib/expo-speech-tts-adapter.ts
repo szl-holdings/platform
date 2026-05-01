@@ -12,8 +12,7 @@
 
 import * as Speech from 'expo-speech';
 
-import type { TTSAdapter } from '@szl-holdings/speech-specialist';
-import type { TTSRequest, TTSResult } from '@szl-holdings/speech-specialist';
+import { type TTSAdapter, type TTSRequest, type TTSResult } from '@szl-holdings/speech-specialist';
 
 export class ExpoSpeechTTSAdapter implements TTSAdapter {
   readonly providerId = 'expo-speech';

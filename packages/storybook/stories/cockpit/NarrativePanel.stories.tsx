@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { NarrativePanel } from '@szl-holdings/design-system';
-import type { NarrativeParagraph } from '@szl-holdings/design-system';
+import { NarrativePanel, type NarrativeParagraph } from '@szl-holdings/design-system';
 
 const paragraphs: NarrativeParagraph[] = [
   {
@@ -27,7 +26,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'AI-generated narrative explanation of an agent\'s reasoning, structured as headed paragraphs with optional per-paragraph confidence.',
+        component:
+          "AI-generated narrative explanation of an agent's reasoning, structured as headed paragraphs with optional per-paragraph confidence.",
       },
     },
   },

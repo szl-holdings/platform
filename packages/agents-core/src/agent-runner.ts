@@ -28,8 +28,8 @@ import {
   type HandoffData,
   type RunHooks,
   type ToolCallData,
+  type ConversationMessage,
 } from './hooks.js';
-import type { ConversationMessage } from './hooks.js';
 import type { MutableRunContext } from './run-context.js';
 import { AgentRun } from './run.js';
 import { emitStepLog } from './step-log.js';
@@ -233,9 +233,7 @@ export class AgentRunner {
     this.inferenceFn = options.inferenceFn ?? defaultInferenceFn;
     this.guardian = options.guardian ?? platformDefaultGuardian;
     this.runHooks = options.runHooks ?? {};
-    this.agentTools = new Map(
-      (options.agentTools ?? []).map((t) => [t.toolId, t]),
-    );
+    this.agentTools = new Map((options.agentTools ?? []).map((t) => [t.toolId, t]));
     this.toolGateway = options.toolGateway ?? noopGateway;
     this.maxTotalTurns = options.maxTotalTurns ?? 20;
     this.traceWriter = new TraceWriter(defaultTraceStore);
@@ -338,7 +336,13 @@ export class AgentRunner {
         totalTurns++;
 
         const turnInput = history.at(-1)?.content ?? input;
-        await fireAgentStart(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, turnInput);
+        await fireAgentStart(
+          this.runHooks,
+          currentAgent.hooks,
+          this.ctx,
+          currentAgent.agentId,
+          turnInput,
+        );
         this.emit('agent_start', currentAgent.agentId, { turn: totalTurns });
 
         // ── Guardian check: agent-level ───────────────────────────────────────
@@ -430,7 +434,11 @@ export class AgentRunner {
         }
 
         // Append assistant message to history
-        history.push({ role: 'assistant', content: response.content, agentId: currentAgent.agentId });
+        history.push({
+          role: 'assistant',
+          content: response.content,
+          agentId: currentAgent.agentId,
+        });
 
         // ── Handle tool calls ─────────────────────────────────────────────────
         if (response.toolCalls && response.toolCalls.length > 0) {
@@ -481,7 +489,10 @@ export class AgentRunner {
               );
             }
 
-            this.emit('tool_call', currentAgent.agentId, { toolId: tc.toolId, toolName: tc.toolName });
+            this.emit('tool_call', currentAgent.agentId, {
+              toolId: tc.toolId,
+              toolName: tc.toolName,
+            });
 
             let toolOutput = '';
             const toolCallStart = Date.now();
@@ -560,7 +571,10 @@ export class AgentRunner {
             hadHandoff: false,
             output: undefined,
           });
-          this.emit('step_complete', currentAgent.agentId, { turn: totalTurns, hadToolCalls: true });
+          this.emit('step_complete', currentAgent.agentId, {
+            turn: totalTurns,
+            hadToolCalls: true,
+          });
 
           // After tool calls, continue the loop to get the next agent response
           continue;
@@ -574,7 +588,13 @@ export class AgentRunner {
           if (!targetAgent || !currentAgent.canHandoffTo(response.handoffTarget)) {
             // Handoff not declared or target unknown — treat as final output
             finalOutput = response.content;
-            await fireAgentEnd(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, finalOutput);
+            await fireAgentEnd(
+              this.runHooks,
+              currentAgent.hooks,
+              this.ctx,
+              currentAgent.agentId,
+              finalOutput,
+            );
             this.emit('agent_end', currentAgent.agentId, { output: finalOutput?.slice(0, 200) });
             break;
           }
@@ -591,7 +611,13 @@ export class AgentRunner {
                 error: parseResult.error.message,
               });
               finalOutput = response.content;
-              await fireAgentEnd(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, finalOutput);
+              await fireAgentEnd(
+                this.runHooks,
+                currentAgent.hooks,
+                this.ctx,
+                currentAgent.agentId,
+                finalOutput,
+              );
               this.emit('agent_end', currentAgent.agentId, {
                 output: finalOutput?.slice(0, 200),
                 handoffSchemaViolation: true,
@@ -613,7 +639,13 @@ export class AgentRunner {
 
           if (handoffGuardian.outcome === 'block') {
             finalOutput = response.content;
-            await fireAgentEnd(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, finalOutput);
+            await fireAgentEnd(
+              this.runHooks,
+              currentAgent.hooks,
+              this.ctx,
+              currentAgent.agentId,
+              finalOutput,
+            );
             break;
           }
 
@@ -636,9 +668,10 @@ export class AgentRunner {
             fromAgentId: currentAgent.agentId,
             toAgentId: response.handoffTarget,
             reason: response.content,
-            context: typeof response.handoffData === 'object' && response.handoffData !== null
-              ? (response.handoffData as Record<string, unknown>)
-              : undefined,
+            context:
+              typeof response.handoffData === 'object' && response.handoffData !== null
+                ? (response.handoffData as Record<string, unknown>)
+                : undefined,
             historyMode,
           };
 
@@ -686,7 +719,13 @@ export class AgentRunner {
             hadHandoff: true,
           });
           this.emit('step_complete', currentAgent.agentId, { turn: totalTurns, hadHandoff: true });
-          await fireAgentEnd(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, undefined);
+          await fireAgentEnd(
+            this.runHooks,
+            currentAgent.hooks,
+            this.ctx,
+            currentAgent.agentId,
+            undefined,
+          );
 
           currentAgent = targetAgent;
           continue;
@@ -705,7 +744,13 @@ export class AgentRunner {
         });
         this.emit('step_complete', currentAgent.agentId, { turn: totalTurns, final: true });
 
-        await fireAgentEnd(this.runHooks, currentAgent.hooks, this.ctx, currentAgent.agentId, finalOutput);
+        await fireAgentEnd(
+          this.runHooks,
+          currentAgent.hooks,
+          this.ctx,
+          currentAgent.agentId,
+          finalOutput,
+        );
         this.emit('agent_end', currentAgent.agentId, { output: finalOutput?.slice(0, 200) });
         break;
       }
@@ -742,7 +787,12 @@ export class AgentRunner {
         throw err;
       }
       const msg = err instanceof Error ? err.message : String(err);
-      await fireRunEnd(this.runHooks, this.ctx, undefined, err instanceof Error ? err : new Error(msg));
+      await fireRunEnd(
+        this.runHooks,
+        this.ctx,
+        undefined,
+        err instanceof Error ? err : new Error(msg),
+      );
       this.traceWriter.recordError(traceId, 'unknown', msg);
       this.traceWriter.completeTrace(traceId, { status: 'failed', latencyMs: 0 });
       await agentRun.fail(err);
@@ -828,7 +878,9 @@ export class AgentRunner {
     };
 
     const runPromise = this.run(input)
-      .catch((err) => { runError = err; })
+      .catch((err) => {
+        runError = err;
+      })
       .finally(() => {
         done = true;
         const fn = notify;
@@ -842,7 +894,9 @@ export class AgentRunner {
           yield queue.shift()!;
         }
         if (done) break;
-        await new Promise<void>((resolve) => { notify = resolve; });
+        await new Promise<void>((resolve) => {
+          notify = resolve;
+        });
       }
       // Drain any events produced during final teardown
       while (queue.length > 0) {

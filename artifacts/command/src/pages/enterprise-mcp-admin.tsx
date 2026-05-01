@@ -92,7 +92,7 @@ interface TenantSummary {
 async function fetchTenants(): Promise<TenantSummary[]> {
   const r = await fetch(`${BASE}/api/admin/tenants`, { credentials: 'include' });
   if (!r.ok) return [];
-  const d = await r.json() as { tenants?: TenantSummary[]; data?: { tenants?: TenantSummary[] } };
+  const d = (await r.json()) as { tenants?: TenantSummary[]; data?: { tenants?: TenantSummary[] } };
   return d.tenants ?? d.data?.tenants ?? [];
 }
 
@@ -103,7 +103,7 @@ async function fetchIdps(tenantId: number): Promise<EnterpriseIdp[]> {
     credentials: 'include',
   });
   if (!r.ok) return [];
-  const d = await r.json() as { idps: EnterpriseIdp[] };
+  const d = (await r.json()) as { idps: EnterpriseIdp[] };
   return d.idps ?? [];
 }
 
@@ -113,7 +113,7 @@ async function fetchAudit(tenantId: number, idpId?: number): Promise<AuditEvent[
     : `${BASE}/api/admin/tenants/${tenantId}/enterprise-mcp/audit?limit=30`;
   const r = await fetch(url, { credentials: 'include' });
   if (!r.ok) return [];
-  const d = await r.json() as { events: AuditEvent[] };
+  const d = (await r.json()) as { events: AuditEvent[] };
   return d.events ?? [];
 }
 
@@ -122,24 +122,24 @@ async function fetchUsers(tenantId: number): Promise<ProvisionedUser[]> {
     credentials: 'include',
   });
   if (!r.ok) return [];
-  const d = await r.json() as { provisionedUsers: ProvisionedUser[] };
+  const d = (await r.json()) as { provisionedUsers: ProvisionedUser[] };
   return d.provisionedUsers ?? [];
 }
 
 async function toggleIdp(tenantId: number, idpId: number, enabled: boolean): Promise<boolean> {
-  const r = await fetch(
-    `${BASE}/api/admin/tenants/${tenantId}/enterprise-mcp/idps/${idpId}`,
-    {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled }),
-    },
-  );
+  const r = await fetch(`${BASE}/api/admin/tenants/${tenantId}/enterprise-mcp/idps/${idpId}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  });
   return r.ok;
 }
 
-async function createIdp(tenantId: number, body: Record<string, unknown>): Promise<EnterpriseIdp | null> {
+async function createIdp(
+  tenantId: number,
+  body: Record<string, unknown>,
+): Promise<EnterpriseIdp | null> {
   const r = await fetch(`${BASE}/api/admin/tenants/${tenantId}/enterprise-mcp/idps`, {
     method: 'POST',
     credentials: 'include',
@@ -147,11 +147,15 @@ async function createIdp(tenantId: number, body: Record<string, unknown>): Promi
     body: JSON.stringify(body),
   });
   if (!r.ok) return null;
-  const d = await r.json() as { idp?: EnterpriseIdp };
+  const d = (await r.json()) as { idp?: EnterpriseIdp };
   return d.idp ?? null;
 }
 
-async function updateIdp(tenantId: number, idpId: number, body: Record<string, unknown>): Promise<EnterpriseIdp | null> {
+async function updateIdp(
+  tenantId: number,
+  idpId: number,
+  body: Record<string, unknown>,
+): Promise<EnterpriseIdp | null> {
   const r = await fetch(`${BASE}/api/admin/tenants/${tenantId}/enterprise-mcp/idps/${idpId}`, {
     method: 'PATCH',
     credentials: 'include',
@@ -159,7 +163,7 @@ async function updateIdp(tenantId: number, idpId: number, body: Record<string, u
     body: JSON.stringify(body),
   });
   if (!r.ok) return null;
-  const d = await r.json() as { idp?: EnterpriseIdp };
+  const d = (await r.json()) as { idp?: EnterpriseIdp };
   return d.idp ?? null;
 }
 
@@ -189,7 +193,11 @@ function fmtTime(iso: string): string {
 }
 
 function eventColor(eventType: string): string {
-  if (eventType.includes('error') || eventType.includes('failed') || eventType.includes('invalid')) {
+  if (
+    eventType.includes('error') ||
+    eventType.includes('failed') ||
+    eventType.includes('invalid')
+  ) {
     return 'text-red-400';
   }
   if (eventType.includes('revoked')) return 'text-orange-400';
@@ -215,24 +223,26 @@ function ClaimsMappingEditor({
 
   const addGroupRule = () => {
     if (!newKey) return;
-    onChange({ ...value, groups: { ...(value.groups ?? {}), [newKey]: newRole } });
-    setNewKey(''); setNewRole('viewer');
+    onChange({ ...value, groups: { ...value.groups, [newKey]: newRole } });
+    setNewKey('');
+    setNewRole('viewer');
   };
 
   const removeGroupRule = (k: string) => {
-    const next = { ...(value.groups ?? {}) };
+    const next = { ...value.groups };
     delete next[k];
     onChange({ ...value, groups: next });
   };
 
   const addRoleRule = () => {
     if (!newKey) return;
-    onChange({ ...value, roles: { ...(value.roles ?? {}), [newKey]: newRole } });
-    setNewKey(''); setNewRole('viewer');
+    onChange({ ...value, roles: { ...value.roles, [newKey]: newRole } });
+    setNewKey('');
+    setNewRole('viewer');
   };
 
   const removeRoleRule = (k: string) => {
-    const next = { ...(value.roles ?? {}) };
+    const next = { ...value.roles };
     delete next[k];
     onChange({ ...value, roles: next });
   };
@@ -240,8 +250,13 @@ function ClaimsMappingEditor({
   const addCustomRule = () => {
     if (!newClaim || !newClaimVal) return;
     const existing = value.customClaims ?? [];
-    onChange({ ...value, customClaims: [...existing, { claim: newClaim, value: newClaimVal, role: newRole }] });
-    setNewClaim(''); setNewClaimVal(''); setNewRole('viewer');
+    onChange({
+      ...value,
+      customClaims: [...existing, { claim: newClaim, value: newClaimVal, role: newRole }],
+    });
+    setNewClaim('');
+    setNewClaimVal('');
+    setNewRole('viewer');
   };
 
   const removeCustomRule = (i: number) => {
@@ -249,33 +264,94 @@ function ClaimsMappingEditor({
     onChange({ ...value, customClaims: next });
   };
 
-  const inputCls = 'rounded border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-300 focus:border-blue-500 focus:outline-none';
+  const inputCls =
+    'rounded border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-300 focus:border-blue-500 focus:outline-none';
   const sectionBtnCls = (s: typeof section) =>
     `px-3 py-1.5 text-xs rounded-md transition-colors ${section === s ? 'bg-blue-500/20 text-blue-400' : 'text-slate-500 hover:text-slate-300'}`;
 
   return (
     <div className="space-y-3">
       <div className="flex gap-1">
-        <button type="button" className={sectionBtnCls('groups')} onClick={() => { setSection('groups'); setNewKey(''); setNewRole('viewer'); }}>Groups</button>
-        <button type="button" className={sectionBtnCls('roles')} onClick={() => { setSection('roles'); setNewKey(''); setNewRole('viewer'); }}>App Roles</button>
-        <button type="button" className={sectionBtnCls('custom')} onClick={() => { setSection('custom'); setNewClaim(''); setNewClaimVal(''); setNewRole('viewer'); }}>Custom Claims</button>
+        <button
+          type="button"
+          className={sectionBtnCls('groups')}
+          onClick={() => {
+            setSection('groups');
+            setNewKey('');
+            setNewRole('viewer');
+          }}
+        >
+          Groups
+        </button>
+        <button
+          type="button"
+          className={sectionBtnCls('roles')}
+          onClick={() => {
+            setSection('roles');
+            setNewKey('');
+            setNewRole('viewer');
+          }}
+        >
+          App Roles
+        </button>
+        <button
+          type="button"
+          className={sectionBtnCls('custom')}
+          onClick={() => {
+            setSection('custom');
+            setNewClaim('');
+            setNewClaimVal('');
+            setNewRole('viewer');
+          }}
+        >
+          Custom Claims
+        </button>
       </div>
 
       {(section === 'groups' || section === 'roles') && (
         <div className="space-y-2">
-          {Object.entries(section === 'groups' ? (value.groups ?? {}) : (value.roles ?? {})).map(([k, r]) => (
-            <div key={k} className="flex items-center gap-2 rounded bg-slate-800 px-3 py-2">
-              <span className="flex-1 text-xs font-mono text-slate-300">{k}</span>
-              <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{r}</span>
-              <button type="button" onClick={() => section === 'groups' ? removeGroupRule(k) : removeRoleRule(k)} className="text-slate-600 hover:text-red-400 text-xs ml-1">×</button>
-            </div>
-          ))}
+          {Object.entries(section === 'groups' ? (value.groups ?? {}) : (value.roles ?? {})).map(
+            ([k, r]) => (
+              <div key={k} className="flex items-center gap-2 rounded bg-slate-800 px-3 py-2">
+                <span className="flex-1 text-xs font-mono text-slate-300">{k}</span>
+                <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">
+                  {r}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => (section === 'groups' ? removeGroupRule(k) : removeRoleRule(k))}
+                  className="text-slate-600 hover:text-red-400 text-xs ml-1"
+                >
+                  ×
+                </button>
+              </div>
+            ),
+          )}
           <div className="flex items-center gap-2">
-            <input className={`${inputCls} flex-1`} placeholder={section === 'groups' ? 'Group name' : 'App role name'} value={newKey} onChange={(e) => setNewKey(e.target.value)} />
-            <select className={inputCls} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-              {MCP_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+            <input
+              className={`${inputCls} flex-1`}
+              placeholder={section === 'groups' ? 'Group name' : 'App role name'}
+              value={newKey}
+              onChange={(e) => setNewKey(e.target.value)}
+            />
+            <select
+              className={inputCls}
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+            >
+              {MCP_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
-            <button type="button" onClick={section === 'groups' ? addGroupRule : addRoleRule} className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500">Add</button>
+            <button
+              type="button"
+              onClick={section === 'groups' ? addGroupRule : addRoleRule}
+              className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500"
+            >
+              Add
+            </button>
           </div>
         </div>
       )}
@@ -284,18 +360,52 @@ function ClaimsMappingEditor({
         <div className="space-y-2">
           {(value.customClaims ?? []).map((cc, i) => (
             <div key={i} className="flex items-center gap-2 rounded bg-slate-800 px-3 py-2">
-              <span className="text-xs font-mono text-slate-400">{cc.claim}={cc.value}</span>
-              <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{cc.role}</span>
-              <button type="button" onClick={() => removeCustomRule(i)} className="text-slate-600 hover:text-red-400 text-xs ml-auto">×</button>
+              <span className="text-xs font-mono text-slate-400">
+                {cc.claim}={cc.value}
+              </span>
+              <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">
+                {cc.role}
+              </span>
+              <button
+                type="button"
+                onClick={() => removeCustomRule(i)}
+                className="text-slate-600 hover:text-red-400 text-xs ml-auto"
+              >
+                ×
+              </button>
             </div>
           ))}
           <div className="flex items-center gap-2">
-            <input className={`${inputCls} w-24`} placeholder="claim" value={newClaim} onChange={(e) => setNewClaim(e.target.value)} />
-            <input className={`${inputCls} flex-1`} placeholder="value" value={newClaimVal} onChange={(e) => setNewClaimVal(e.target.value)} />
-            <select className={inputCls} value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-              {MCP_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+            <input
+              className={`${inputCls} w-24`}
+              placeholder="claim"
+              value={newClaim}
+              onChange={(e) => setNewClaim(e.target.value)}
+            />
+            <input
+              className={`${inputCls} flex-1`}
+              placeholder="value"
+              value={newClaimVal}
+              onChange={(e) => setNewClaimVal(e.target.value)}
+            />
+            <select
+              className={inputCls}
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+            >
+              {MCP_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
-            <button type="button" onClick={addCustomRule} className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500">Add</button>
+            <button
+              type="button"
+              onClick={addCustomRule}
+              className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500"
+            >
+              Add
+            </button>
           </div>
         </div>
       )}
@@ -326,7 +436,9 @@ function IdpFormPanel({
   const [expectedAudience, setExpectedAudience] = useState(idp?.expectedAudience ?? '');
   const [defaultRole, setDefaultRole] = useState(idp?.defaultRole ?? 'viewer');
   const [autoProvisionUsers, setAutoProvisionUsers] = useState(idp?.autoProvisionUsers ?? false);
-  const [requireEmailVerified, setRequireEmailVerified] = useState(idp?.requireEmailVerified ?? true);
+  const [requireEmailVerified, setRequireEmailVerified] = useState(
+    idp?.requireEmailVerified ?? true,
+  );
   const [jwksCacheTtlSeconds, setJwksCacheTtlSeconds] = useState(idp?.jwksCacheTtlSeconds ?? 3600);
   const [notes, setNotes] = useState(idp?.notes ?? '');
   const [claimsMapping, setClaimsMapping] = useState<ClaimsToRoleMapping>(
@@ -338,8 +450,12 @@ function IdpFormPanel({
     setSaving(true);
     setError(null);
     const commonFields = {
-      name, jwksUri, expectedAudience, defaultRole,
-      autoProvisionUsers, requireEmailVerified,
+      name,
+      jwksUri,
+      expectedAudience,
+      defaultRole,
+      autoProvisionUsers,
+      requireEmailVerified,
       jwksCacheTtlSeconds: Number(jwksCacheTtlSeconds),
       notes: notes || null,
       claimsToRoleMapping: claimsMapping,
@@ -349,11 +465,15 @@ function IdpFormPanel({
       ? await updateIdp(tenantId, idp.id, body)
       : await createIdp(tenantId, body);
     setSaving(false);
-    if (!saved) { setError('Save failed. Check all fields and try again.'); return; }
+    if (!saved) {
+      setError('Save failed. Check all fields and try again.');
+      return;
+    }
     onSave(saved);
   };
 
-  const inputCls = 'w-full rounded border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:border-blue-500 focus:outline-none';
+  const inputCls =
+    'w-full rounded border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:border-blue-500 focus:outline-none';
   const labelCls = 'block text-xs text-slate-500 mb-1';
 
   return (
@@ -374,7 +494,13 @@ function IdpFormPanel({
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5 px-5 py-6">
           <div>
             <label className={labelCls}>Display Name *</label>
-            <input className={inputCls} required value={name} onChange={(e) => setName(e.target.value)} placeholder="Acme Corp — Azure AD" />
+            <input
+              className={inputCls}
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Acme Corp — Azure AD"
+            />
           </div>
 
           <div>
@@ -385,44 +511,86 @@ function IdpFormPanel({
               required={!idp}
               readOnly={!!idp}
               value={issuerUrl}
-              onChange={(e) => { if (!idp) setIssuerUrl(e.target.value); }}
+              onChange={(e) => {
+                if (!idp) setIssuerUrl(e.target.value);
+              }}
               placeholder="https://login.microsoftonline.com/{tenant-id}/v2.0"
             />
             <p className="mt-1 text-xs text-slate-600">
-              {idp ? 'Issuer URL cannot be changed after registration.' : 'Must be globally unique across all tenants.'}
+              {idp
+                ? 'Issuer URL cannot be changed after registration.'
+                : 'Must be globally unique across all tenants.'}
             </p>
           </div>
 
           <div>
             <label className={labelCls}>JWKS URI *</label>
-            <input className={inputCls} required type="url" value={jwksUri} onChange={(e) => setJwksUri(e.target.value)} placeholder="https://login.microsoftonline.com/{tenant-id}/discovery/v2.0/keys" />
+            <input
+              className={inputCls}
+              required
+              type="url"
+              value={jwksUri}
+              onChange={(e) => setJwksUri(e.target.value)}
+              placeholder="https://login.microsoftonline.com/{tenant-id}/discovery/v2.0/keys"
+            />
           </div>
 
           <div>
             <label className={labelCls}>Expected Audience *</label>
-            <input className={inputCls} required value={expectedAudience} onChange={(e) => setExpectedAudience(e.target.value)} placeholder="api://your-app-client-id" />
+            <input
+              className={inputCls}
+              required
+              value={expectedAudience}
+              onChange={(e) => setExpectedAudience(e.target.value)}
+              placeholder="api://your-app-client-id"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Default Role</label>
-              <select className={inputCls} value={defaultRole} onChange={(e) => setDefaultRole(e.target.value)}>
-                {MCP_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              <select
+                className={inputCls}
+                value={defaultRole}
+                onChange={(e) => setDefaultRole(e.target.value)}
+              >
+                {MCP_ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
               <label className={labelCls}>JWKS Cache TTL (seconds)</label>
-              <input className={inputCls} type="number" min={60} max={86400} value={jwksCacheTtlSeconds} onChange={(e) => setJwksCacheTtlSeconds(Number(e.target.value))} />
+              <input
+                className={inputCls}
+                type="number"
+                min={60}
+                max={86400}
+                value={jwksCacheTtlSeconds}
+                onChange={(e) => setJwksCacheTtlSeconds(Number(e.target.value))}
+              />
             </div>
           </div>
 
           <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="rounded" checked={autoProvisionUsers} onChange={(e) => setAutoProvisionUsers(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="rounded"
+                checked={autoProvisionUsers}
+                onChange={(e) => setAutoProvisionUsers(e.target.checked)}
+              />
               <span className="text-sm text-slate-300">Auto-provision users</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="rounded" checked={requireEmailVerified} onChange={(e) => setRequireEmailVerified(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="rounded"
+                checked={requireEmailVerified}
+                onChange={(e) => setRequireEmailVerified(e.target.checked)}
+              />
               <span className="text-sm text-slate-300">Require email verified</span>
             </label>
           </div>
@@ -432,12 +600,20 @@ function IdpFormPanel({
             <div className="rounded-lg border border-slate-700 bg-slate-800/40 p-3">
               <ClaimsMappingEditor value={claimsMapping} onChange={setClaimsMapping} />
             </div>
-            <p className="mt-1 text-xs text-slate-600">Map IdP groups, app roles, or custom claims to MCP access roles.</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Map IdP groups, app roles, or custom claims to MCP access roles.
+            </p>
           </div>
 
           <div>
             <label className={labelCls}>Notes</label>
-            <textarea className={inputCls} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes for this IdP" />
+            <textarea
+              className={inputCls}
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional notes for this IdP"
+            />
           </div>
 
           {error && (
@@ -447,10 +623,18 @@ function IdpFormPanel({
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:text-slate-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:text-slate-200"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
+            >
               {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Register IdP'}
             </button>
           </div>
@@ -484,9 +668,13 @@ function IdpCard({
   };
 
   return (
-    <div className={`rounded-lg border ${idp.enabled ? 'border-slate-700 bg-slate-800/60' : 'border-slate-700/50 bg-slate-800/30 opacity-60'}`}>
+    <div
+      className={`rounded-lg border ${idp.enabled ? 'border-slate-700 bg-slate-800/60' : 'border-slate-700/50 bg-slate-800/30 opacity-60'}`}
+    >
       <div className="flex items-center gap-3 p-4">
-        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${idp.enabled ? 'bg-blue-500/10' : 'bg-slate-600/20'}`}>
+        <div
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${idp.enabled ? 'bg-blue-500/10' : 'bg-slate-600/20'}`}
+        >
           <Shield className={`h-5 w-5 ${idp.enabled ? 'text-blue-400' : 'text-slate-500'}`} />
         </div>
 
@@ -539,8 +727,18 @@ function IdpCard({
           ) : (
             <div className="flex items-center gap-1">
               <span className="text-xs text-red-400">Delete?</span>
-              <button onClick={() => onDelete(idp.id)} className="rounded px-2 py-1 text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="rounded px-2 py-1 text-xs text-slate-500 hover:text-slate-300">No</button>
+              <button
+                onClick={() => onDelete(idp.id)}
+                className="rounded px-2 py-1 text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded px-2 py-1 text-xs text-slate-500 hover:text-slate-300"
+              >
+                No
+              </button>
             </div>
           )}
 
@@ -569,13 +767,17 @@ function IdpCard({
           </div>
           <div>
             <span className="text-slate-500">Auto-Provision Users</span>
-            <p className={`mt-0.5 ${idp.autoProvisionUsers ? 'text-emerald-400' : 'text-slate-400'}`}>
+            <p
+              className={`mt-0.5 ${idp.autoProvisionUsers ? 'text-emerald-400' : 'text-slate-400'}`}
+            >
               {idp.autoProvisionUsers ? 'Enabled' : 'Disabled'}
             </p>
           </div>
           <div>
             <span className="text-slate-500">Require Email Verified</span>
-            <p className={`mt-0.5 ${idp.requireEmailVerified ? 'text-amber-400' : 'text-slate-400'}`}>
+            <p
+              className={`mt-0.5 ${idp.requireEmailVerified ? 'text-amber-400' : 'text-slate-400'}`}
+            >
               {idp.requireEmailVerified ? 'Required' : 'Not required'}
             </p>
           </div>
@@ -589,9 +791,7 @@ function IdpCard({
               <p className="mt-0.5 text-slate-400">{idp.notes}</p>
             </div>
           )}
-          <div className="col-span-2 text-slate-600">
-            Last updated {fmtTime(idp.updatedAt)}
-          </div>
+          <div className="col-span-2 text-slate-600">Last updated {fmtTime(idp.updatedAt)}</div>
         </div>
       )}
     </div>
@@ -613,7 +813,10 @@ function AuditLog({ events }: { events: AuditEvent[] }) {
   return (
     <div className="space-y-1">
       {events.map((ev) => (
-        <div key={ev.id} className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-slate-800/40">
+        <div
+          key={ev.id}
+          className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-slate-800/40"
+        >
           <div className="mt-0.5 flex-shrink-0">
             <div className={`text-xs font-mono font-medium ${eventColor(ev.eventType)}`}>
               {ev.eventType}
@@ -621,10 +824,12 @@ function AuditLog({ events }: { events: AuditEvent[] }) {
           </div>
           <div className="min-w-0 flex-1 text-xs text-slate-400">
             {ev.email && <span className="text-slate-300">{ev.email}</span>}
-            {ev.mappedRole && <span className="ml-2 rounded bg-slate-700 px-1.5 py-0.5 text-slate-300">{ev.mappedRole}</span>}
-            {ev.errorCode && (
-              <span className="ml-2 text-red-400">[{ev.errorCode}]</span>
+            {ev.mappedRole && (
+              <span className="ml-2 rounded bg-slate-700 px-1.5 py-0.5 text-slate-300">
+                {ev.mappedRole}
+              </span>
             )}
+            {ev.errorCode && <span className="ml-2 text-red-400">[{ev.errorCode}]</span>}
           </div>
           <div className="flex-shrink-0 text-xs text-slate-600">{fmtTime(ev.createdAt)}</div>
         </div>
@@ -652,12 +857,16 @@ function UsersPanel({ users }: { users: ProvisionedUser[] }) {
           key={`${u.issuer}|${u.subject}|${idx}`}
           className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${u.revoked ? 'border-red-500/20 bg-red-500/5 opacity-60' : 'border-slate-700/50 bg-slate-800/40'}`}
         >
-          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-medium ${u.revoked ? 'bg-red-900/30 text-red-400' : 'bg-slate-700 text-slate-300'}`}>
+          <div
+            className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-medium ${u.revoked ? 'bg-red-900/30 text-red-400' : 'bg-slate-700 text-slate-300'}`}
+          >
             {(u.email ?? u.subject ?? '?')[0]?.toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <div className="text-sm font-medium text-slate-200 truncate">{u.email ?? u.subject ?? '—'}</div>
+              <div className="text-sm font-medium text-slate-200 truncate">
+                {u.email ?? u.subject ?? '—'}
+              </div>
               {u.revoked && (
                 <span className="inline-flex items-center rounded-full bg-red-500/10 px-1.5 py-0.5 text-xs text-red-400">
                   <XCircle className="mr-1 h-3 w-3" /> Revoked
@@ -696,15 +905,17 @@ export default function EnterpriseMcpAdminPage() {
   const [editingIdp, setEditingIdp] = useState<EnterpriseIdp | null>(null);
 
   useEffect(() => {
-    fetchTenants().then((ts) => {
-      setTenants(ts);
-      if (ts.length > 0 && tenantId === null) {
-        setTenantId(ts[0].id);
-      }
-    }).catch(() => {
-      setTenants([]);
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchTenants()
+      .then((ts) => {
+        setTenants(ts);
+        if (ts.length > 0 && tenantId === null) {
+          setTenantId(ts[0].id);
+        }
+      })
+      .catch(() => {
+        setTenants([]);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const load = useCallback(async (tid: number, quiet = false) => {
@@ -734,26 +945,32 @@ export default function EnterpriseMcpAdminPage() {
     }
   }, [tenantId, load]);
 
-  const handleToggle = useCallback(async (idpId: number, enabled: boolean) => {
-    if (tenantId === null) return;
-    const ok = await toggleIdp(tenantId, idpId, enabled);
-    if (ok) {
-      setIdps((prev) => prev.map((idp) => idp.id === idpId ? { ...idp, enabled } : idp));
-    }
-  }, [tenantId]);
+  const handleToggle = useCallback(
+    async (idpId: number, enabled: boolean) => {
+      if (tenantId === null) return;
+      const ok = await toggleIdp(tenantId, idpId, enabled);
+      if (ok) {
+        setIdps((prev) => prev.map((idp) => (idp.id === idpId ? { ...idp, enabled } : idp)));
+      }
+    },
+    [tenantId],
+  );
 
   const handleEdit = useCallback((idp: EnterpriseIdp) => {
     setEditingIdp(idp);
     setShowForm(true);
   }, []);
 
-  const handleDelete = useCallback(async (idpId: number) => {
-    if (tenantId === null) return;
-    const ok = await deleteIdp(tenantId, idpId);
-    if (ok) {
-      setIdps((prev) => prev.filter((idp) => idp.id !== idpId));
-    }
-  }, [tenantId]);
+  const handleDelete = useCallback(
+    async (idpId: number) => {
+      if (tenantId === null) return;
+      const ok = await deleteIdp(tenantId, idpId);
+      if (ok) {
+        setIdps((prev) => prev.filter((idp) => idp.id !== idpId));
+      }
+    },
+    [tenantId],
+  );
 
   const handleSave = useCallback((saved: EnterpriseIdp) => {
     setIdps((prev) => {
@@ -770,9 +987,24 @@ export default function EnterpriseMcpAdminPage() {
   }, []);
 
   const tabs: { id: Tab; label: string; icon: ReactNode; count?: number }[] = [
-    { id: 'idps', label: 'Identity Providers', icon: <Key className="h-4 w-4" />, count: idps.length },
-    { id: 'audit', label: 'Audit Log', icon: <Eye className="h-4 w-4" />, count: auditEvents.length },
-    { id: 'users', label: 'Provisioned Users', icon: <User className="h-4 w-4" />, count: users.length },
+    {
+      id: 'idps',
+      label: 'Identity Providers',
+      icon: <Key className="h-4 w-4" />,
+      count: idps.length,
+    },
+    {
+      id: 'audit',
+      label: 'Audit Log',
+      icon: <Eye className="h-4 w-4" />,
+      count: auditEvents.length,
+    },
+    {
+      id: 'users',
+      label: 'Provisioned Users',
+      icon: <User className="h-4 w-4" />,
+      count: users.length,
+    },
   ];
 
   return (
@@ -783,7 +1015,8 @@ export default function EnterpriseMcpAdminPage() {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-semibold text-slate-100">Enterprise MCP Authorization</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Manage corporate SSO identity providers, view provisioned users, and audit access events for the ID-JAG enterprise authorization flow.
+              Manage corporate SSO identity providers, view provisioned users, and audit access
+              events for the ID-JAG enterprise authorization flow.
             </p>
             {tenants.length > 1 && (
               <div className="mt-3 flex items-center gap-2">
@@ -860,7 +1093,9 @@ export default function EnterpriseMcpAdminPage() {
                 {t.icon}
                 {t.label}
                 {t.count !== undefined && t.count > 0 && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-xs ${tab === t.id ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700 text-slate-500'}`}>
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-xs ${tab === t.id ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700 text-slate-500'}`}
+                  >
                     {t.count}
                   </span>
                 )}
@@ -880,7 +1115,10 @@ export default function EnterpriseMcpAdminPage() {
               <div className="space-y-3">
                 <div className="flex justify-end">
                   <button
-                    onClick={() => { setEditingIdp(null); setShowForm(true); }}
+                    onClick={() => {
+                      setEditingIdp(null);
+                      setShowForm(true);
+                    }}
                     disabled={tenantId === null}
                     className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-500 disabled:opacity-40"
                   >
@@ -922,7 +1160,10 @@ export default function EnterpriseMcpAdminPage() {
           tenantId={tenantId}
           idp={editingIdp}
           onSave={handleSave}
-          onClose={() => { setShowForm(false); setEditingIdp(null); }}
+          onClose={() => {
+            setShowForm(false);
+            setEditingIdp(null);
+          }}
         />
       )}
     </OpsLayout>

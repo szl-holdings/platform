@@ -1,15 +1,22 @@
-import { type PostureTwinState, type PropertyTwinState, type SimulationScenario, type VesselTwinState, postureTwin, propertyTwin, twinRegistry, vesselTwin } from '@szl-holdings/ai-engine';
-import type { AuthenticatedUser } from '../middlewares/auth';
+import {
+  type PostureTwinState,
+  type PropertyTwinState,
+  type SimulationScenario,
+  type VesselTwinState,
+  postureTwin,
+  propertyTwin,
+  twinRegistry,
+  vesselTwin,
+} from '@szl-holdings/ai-engine';
+import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { db, twinSimulationRunsTable } from '@szl-holdings/db';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { and, desc, eq } from 'drizzle-orm';
-import type { Request, Response, NextFunction } from 'express';
-import { Router } from 'express';
+import { type Request, type Response, type NextFunction, Router } from 'express';
 import { z } from 'zod';
 import { sendBadRequest, sendError } from '../lib/api-response';
 import { guardSeedInProduction } from '../lib/seed-guard';
 import { validateBody } from '../lib/validation';
-import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 
 const INGEST_RATE_LIMIT = new Map<string, number>();
@@ -52,36 +59,61 @@ function twinOrgFilter(orgId: number | undefined) {
 
 const router = Router();
 
-router.get('/digital-twins', authMiddleware(), tenantScope(), requireTwinRegistryReady, (req, res) => {
-  const orgId = req.tenantOrgId;
-  const allTwins = twinRegistry.list();
-  const twins = orgId !== undefined ? allTwins.filter(twinOrgFilter(orgId)) : allTwins;
-  res.json({ success: true, twins, total: twins.length });
-});
+router.get(
+  '/digital-twins',
+  authMiddleware(),
+  tenantScope(),
+  requireTwinRegistryReady,
+  (req, res) => {
+    const orgId = req.tenantOrgId;
+    const allTwins = twinRegistry.list();
+    const twins = orgId !== undefined ? allTwins.filter(twinOrgFilter(orgId)) : allTwins;
+    res.json({ success: true, twins, total: twins.length });
+  },
+);
 
-router.get('/digital-twins/:twinId', authMiddleware(), tenantScope(), requireTwinRegistryReady, (req, res) => {
-  const twin = twinRegistry.get(req.params.twinId as string);
-  if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId)) return sendError(res, 'Twin not found', 404);
-  res.json({ success: true, twin });
-});
+router.get(
+  '/digital-twins/:twinId',
+  authMiddleware(),
+  tenantScope(),
+  requireTwinRegistryReady,
+  (req, res) => {
+    const twin = twinRegistry.get(req.params.twinId as string);
+    if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId))
+      return sendError(res, 'Twin not found', 404);
+    res.json({ success: true, twin });
+  },
+);
 
-router.get('/digital-twins/entity/:entityId', authMiddleware(), tenantScope(), requireTwinRegistryReady, (req, res) => {
-  const orgId = req.tenantOrgId;
-  const twin = twinRegistry.list().find(
-    (t) => t.entityId === req.params.entityId && twinBelongsToOrg(t, orgId),
-  );
-  if (!twin) return sendError(res, 'No twin registered for this entity', 404);
-  res.json({ success: true, twin });
-});
+router.get(
+  '/digital-twins/entity/:entityId',
+  authMiddleware(),
+  tenantScope(),
+  requireTwinRegistryReady,
+  (req, res) => {
+    const orgId = req.tenantOrgId;
+    const twin = twinRegistry
+      .list()
+      .find((t) => t.entityId === req.params.entityId && twinBelongsToOrg(t, orgId));
+    if (!twin) return sendError(res, 'No twin registered for this entity', 404);
+    res.json({ success: true, twin });
+  },
+);
 
-router.get('/digital-twins/type/:type', authMiddleware(), tenantScope(), requireTwinRegistryReady, (req, res) => {
-  const type = req.params.type as string as import('@szl-holdings/ai-engine').TwinType;
-  const validTypes = ['vessel', 'property', 'posture', 'matter', 'portfolio', 'incident', 'port'];
-  if (!validTypes.includes(type)) return sendBadRequest(res, 'Invalid twin type');
-  const orgId = req.tenantOrgId;
-  const twins = twinRegistry.getByType(type).filter(twinOrgFilter(orgId));
-  res.json({ success: true, twins });
-});
+router.get(
+  '/digital-twins/type/:type',
+  authMiddleware(),
+  tenantScope(),
+  requireTwinRegistryReady,
+  (req, res) => {
+    const type = req.params.type as string as import('@szl-holdings/ai-engine').TwinType;
+    const validTypes = ['vessel', 'property', 'posture', 'matter', 'portfolio', 'incident', 'port'];
+    if (!validTypes.includes(type)) return sendBadRequest(res, 'Invalid twin type');
+    const orgId = req.tenantOrgId;
+    const twins = twinRegistry.getByType(type).filter(twinOrgFilter(orgId));
+    res.json({ success: true, twins });
+  },
+);
 
 router.post(
   '/digital-twins/vessel',
@@ -91,7 +123,11 @@ router.post(
   async (req, res) => {
     try {
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
-      const twin = vesselTwin.createTwin(entityId, state as unknown as VesselTwinState, req.tenantOrgId);
+      const twin = vesselTwin.createTwin(
+        entityId,
+        state as unknown as VesselTwinState,
+        req.tenantOrgId,
+      );
       res.json({ success: true, twin });
     } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create vessel twin' });
@@ -107,7 +143,11 @@ router.post(
   async (req, res) => {
     try {
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
-      const twin = propertyTwin.createTwin(entityId, state as unknown as PropertyTwinState, req.tenantOrgId);
+      const twin = propertyTwin.createTwin(
+        entityId,
+        state as unknown as PropertyTwinState,
+        req.tenantOrgId,
+      );
       res.json({ success: true, twin });
     } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create property twin' });
@@ -123,7 +163,11 @@ router.post(
   async (req, res) => {
     try {
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
-      const twin = postureTwin.createTwin(entityId, state as unknown as PostureTwinState, req.tenantOrgId);
+      const twin = postureTwin.createTwin(
+        entityId,
+        state as unknown as PostureTwinState,
+        req.tenantOrgId,
+      );
       res.json({ success: true, twin });
     } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create posture twin' });
@@ -149,7 +193,8 @@ router.post(
       const twinId = req.params.twinId as string;
 
       const twin = twinRegistry.get(twinId);
-      if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId)) return sendError(res, 'Twin not found', 404);
+      if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId))
+        return sendError(res, 'Twin not found', 404);
 
       let result;
       if (twin.twinType === 'vessel') {
@@ -179,7 +224,8 @@ router.patch(
     try {
       const twinId = req.params.twinId as string;
       const existing = twinRegistry.get(twinId);
-      if (!existing || !twinBelongsToOrg(existing, req.tenantOrgId)) return sendError(res, 'Twin not found', 404);
+      if (!existing || !twinBelongsToOrg(existing, req.tenantOrgId))
+        return sendError(res, 'Twin not found', 404);
       const updated = twinRegistry.update(twinId, req.body);
       if (!updated) return sendError(res, 'Twin not found', 404);
       res.json({ success: true, twin: updated });
@@ -195,7 +241,9 @@ router.post(
   tenantScope(),
   validateBody(
     z.object({
-      stateUpdates: z.record(z.unknown()).refine((v) => Object.keys(v).length >= 1, { message: 'At least one state update is required' }),
+      stateUpdates: z.record(z.unknown()).refine((v) => Object.keys(v).length >= 1, {
+        message: 'At least one state update is required',
+      }),
       source: z.string().optional().default('api'),
     }),
   ),
@@ -207,7 +255,10 @@ router.post(
     if (now - lastCall < INGEST_RATE_WINDOW_MS) {
       const count = INGEST_RATE_LIMIT.get(`${twinId}:count`) ?? 0;
       if ((count as number) >= INGEST_MAX_PER_WINDOW) {
-        return res.status(429).json({ success: false, error: 'Rate limit exceeded — max 20 ingests per 5 seconds per twin' });
+        return res.status(429).json({
+          success: false,
+          error: 'Rate limit exceeded — max 20 ingests per 5 seconds per twin',
+        });
       }
       INGEST_RATE_LIMIT.set(`${twinId}:count`, (count as number) + 1);
     } else {
@@ -217,9 +268,13 @@ router.post(
 
     try {
       const twin = twinRegistry.get(twinId);
-      if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId)) return sendError(res, 'Twin not found', 404);
+      if (!twin || !twinBelongsToOrg(twin, req.tenantOrgId))
+        return sendError(res, 'Twin not found', 404);
 
-      const { stateUpdates } = req.body as { stateUpdates: Record<string, unknown>; source: string };
+      const { stateUpdates } = req.body as {
+        stateUpdates: Record<string, unknown>;
+        source: string;
+      };
 
       const mergedState = { ...twin.currentState, ...stateUpdates };
 
@@ -227,7 +282,10 @@ router.post(
       if (twin.twinType === 'vessel') {
         updatedTwin = vesselTwin.refreshTwin(twin.id, mergedState as unknown as VesselTwinState);
       } else if (twin.twinType === 'property') {
-        updatedTwin = propertyTwin.refreshTwin(twin.id, mergedState as unknown as PropertyTwinState);
+        updatedTwin = propertyTwin.refreshTwin(
+          twin.id,
+          mergedState as unknown as PropertyTwinState,
+        );
       } else if (twin.twinType === 'posture') {
         updatedTwin = postureTwin.refreshTwin(twin.id, mergedState as unknown as PostureTwinState);
       } else {
@@ -250,30 +308,40 @@ router.post(
   },
 );
 
-router.get('/digital-twins/:twinId/simulation-history', authMiddleware(), tenantScope(), requireTwinRegistryReady, async (req, res) => {
-  try {
-    const twinId = req.params.twinId as string;
-    const orgId = req.tenantOrgId;
-    const twin = twinRegistry.get(twinId);
-    if (!twin || !twinBelongsToOrg(twin, orgId)) return sendError(res, 'Twin not found', 404);
+router.get(
+  '/digital-twins/:twinId/simulation-history',
+  authMiddleware(),
+  tenantScope(),
+  requireTwinRegistryReady,
+  async (req, res) => {
+    try {
+      const twinId = req.params.twinId as string;
+      const orgId = req.tenantOrgId;
+      const twin = twinRegistry.get(twinId);
+      if (!twin || !twinBelongsToOrg(twin, orgId)) return sendError(res, 'Twin not found', 404);
 
-    const whereClause = orgId !== undefined
-      ? and(eq(twinSimulationRunsTable.twinId, twinId), eq(twinSimulationRunsTable.orgId, orgId))
-      : eq(twinSimulationRunsTable.twinId, twinId);
+      const whereClause =
+        orgId !== undefined
+          ? and(
+              eq(twinSimulationRunsTable.twinId, twinId),
+              eq(twinSimulationRunsTable.orgId, orgId),
+            )
+          : eq(twinSimulationRunsTable.twinId, twinId);
 
-    const runs = await db
-      .select()
-      .from(twinSimulationRunsTable)
-      .where(whereClause)
-      .orderBy(desc(twinSimulationRunsTable.createdAt))
-      .limit(50);
+      const runs = await db
+        .select()
+        .from(twinSimulationRunsTable)
+        .where(whereClause)
+        .orderBy(desc(twinSimulationRunsTable.createdAt))
+        .limit(50);
 
-    res.json({ success: true, runs, total: runs.length });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to fetch simulation history';
-    res.status(500).json({ success: false, error: msg });
-  }
-});
+      res.json({ success: true, runs, total: runs.length });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch simulation history';
+      res.status(500).json({ success: false, error: msg });
+    }
+  },
+);
 
 router.post(
   '/digital-twins/demo/seed',

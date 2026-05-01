@@ -147,29 +147,53 @@ function StatCard({
       style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs" style={{ color: '#8a8a8a' }}>{label}</span>
+        <span className="text-xs" style={{ color: '#8a8a8a' }}>
+          {label}
+        </span>
         <Icon className="w-4 h-4" style={{ color }} />
       </div>
       <div className="flex items-end gap-2">
-        <span className="text-2xl font-bold font-mono" style={{ color: '#f5f5f5' }}>{value}</span>
+        <span className="text-2xl font-bold font-mono" style={{ color: '#f5f5f5' }}>
+          {value}
+        </span>
         {trend && (
-          <span className="text-xs mb-0.5" style={{ color: trend === 'up' ? '#6b8f71' : trend === 'down' ? '#c45a4a' : '#8a8a8a' }}>
-            {trend === 'up' ? <TrendingUp className="w-3 h-3 inline" /> : trend === 'down' ? <TrendingDown className="w-3 h-3 inline" /> : null}
+          <span
+            className="text-xs mb-0.5"
+            style={{ color: trend === 'up' ? '#6b8f71' : trend === 'down' ? '#c45a4a' : '#8a8a8a' }}
+          >
+            {trend === 'up' ? (
+              <TrendingUp className="w-3 h-3 inline" />
+            ) : trend === 'down' ? (
+              <TrendingDown className="w-3 h-3 inline" />
+            ) : null}
           </span>
         )}
       </div>
-      {sub && <span className="text-xs" style={{ color: '#5e5e5e' }}>{sub}</span>}
+      {sub && (
+        <span className="text-xs" style={{ color: '#5e5e5e' }}>
+          {sub}
+        </span>
+      )}
     </div>
   );
 }
 
-
 function StarRating({ rating }: { rating: number | null }) {
-  if (!rating) return <span className="text-xs" style={{ color: '#5e5e5e' }}>No rating</span>;
+  if (!rating)
+    return (
+      <span className="text-xs" style={{ color: '#5e5e5e' }}>
+        No rating
+      </span>
+    );
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star key={s} className="w-3 h-3" fill={s <= rating ? '#d4a054' : 'none'} style={{ color: '#d4a054' }} />
+        <Star
+          key={s}
+          className="w-3 h-3"
+          fill={s <= rating ? '#d4a054' : 'none'}
+          style={{ color: '#d4a054' }}
+        />
       ))}
     </div>
   );
@@ -178,8 +202,14 @@ function StarRating({ rating }: { rating: number | null }) {
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+    <div
+      className="h-1.5 rounded-full overflow-hidden"
+      style={{ background: 'rgba(255,255,255,0.08)' }}
+    >
+      <div
+        className="h-full rounded-full transition-all"
+        style={{ width: `${pct}%`, background: color }}
+      />
     </div>
   );
 }
@@ -198,7 +228,10 @@ function CannedResponsesPanel() {
 
   const createMutation = useMutation({
     mutationFn: (payload: object) =>
-      apiFetch('/admin/support/canned-responses', { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch('/admin/support/canned-responses', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['canned-responses'] });
       setShowForm(false);
@@ -256,8 +289,13 @@ function CannedResponsesPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4" style={{ color: '#8b7ac8' }} />
-          <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>Canned Responses</span>
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.06)', color: '#8a8a8a' }}>
+          <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>
+            Canned Responses
+          </span>
+          <span
+            className="text-xs px-1.5 py-0.5 rounded"
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#8a8a8a' }}
+          >
             {responses.length}
           </span>
         </div>
@@ -327,10 +365,17 @@ function CannedResponsesPanel() {
       )}
 
       <div className="relative">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: '#5e5e5e' }} />
+        <Search
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
+          style={{ color: '#5e5e5e' }}
+        />
         <input
           className="w-full pl-7 pr-3 py-1.5 text-xs rounded-lg border focus:outline-none"
-          style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#f5f5f5' }}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            borderColor: 'rgba(255,255,255,0.08)',
+            color: '#f5f5f5',
+          }}
           placeholder="Search responses…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -339,7 +384,10 @@ function CannedResponsesPanel() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-6">
-          <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(139,122,200,0.3)', borderTopColor: 'transparent' }} />
+          <div
+            className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+            style={{ borderColor: 'rgba(139,122,200,0.3)', borderTopColor: 'transparent' }}
+          />
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-xs text-center py-4" style={{ color: '#5e5e5e' }}>
@@ -351,12 +399,17 @@ function CannedResponsesPanel() {
             <div
               key={r.id}
               className="rounded-lg border p-2.5 group"
-              style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                borderColor: 'rgba(255,255,255,0.06)',
+              }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                    <span className="text-xs font-medium" style={{ color: '#f5f5f5' }}>{r.title}</span>
+                    <span className="text-xs font-medium" style={{ color: '#f5f5f5' }}>
+                      {r.title}
+                    </span>
                     <span
                       className="text-[10px] px-1.5 py-0.5 rounded"
                       style={{ background: 'rgba(255,255,255,0.06)', color: '#8a8a8a' }}
@@ -364,16 +417,23 @@ function CannedResponsesPanel() {
                       {r.category}
                     </span>
                     {r.usage_count > 0 && (
-                      <span className="text-[10px]" style={{ color: '#5e5e5e' }}>×{r.usage_count}</span>
+                      <span className="text-[10px]" style={{ color: '#5e5e5e' }}>
+                        ×{r.usage_count}
+                      </span>
                     )}
                   </div>
-                  <p className="text-[11px] line-clamp-2" style={{ color: '#6a6a6a' }}>{r.body}</p>
+                  <p className="text-[11px] line-clamp-2" style={{ color: '#6a6a6a' }}>
+                    {r.body}
+                  </p>
                 </div>
                 <div className="flex gap-1 shrink-0">
                   <button
                     onClick={() => handleCopy(r)}
                     className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: copiedId === r.id ? '#6b8f71' : '#8a8a8a' }}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      color: copiedId === r.id ? '#6b8f71' : '#8a8a8a',
+                    }}
                     title="Copy to clipboard"
                   >
                     <Copy className="w-3 h-3" />
@@ -440,7 +500,9 @@ function TicketMergePanel() {
     >
       <div className="flex items-center gap-2">
         <GitMerge className="w-4 h-4" style={{ color: '#4a90b8' }} />
-        <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>Merge Duplicate Tickets</span>
+        <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>
+          Merge Duplicate Tickets
+        </span>
       </div>
       <p className="text-xs" style={{ color: '#6a6a6a' }}>
         Close a duplicate ticket and redirect its history into the canonical ticket.
@@ -448,7 +510,12 @@ function TicketMergePanel() {
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: '#5e5e5e' }}>Duplicate (Source ID)</label>
+            <label
+              className="text-[10px] uppercase tracking-wider mb-1 block"
+              style={{ color: '#5e5e5e' }}
+            >
+              Duplicate (Source ID)
+            </label>
             <input
               className="w-full text-xs bg-transparent border rounded px-2 py-1.5 focus:outline-none"
               style={{ borderColor: 'rgba(255,255,255,0.12)', color: '#f5f5f5' }}
@@ -458,7 +525,12 @@ function TicketMergePanel() {
             />
           </div>
           <div className="flex-1">
-            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: '#5e5e5e' }}>Keep (Target ID)</label>
+            <label
+              className="text-[10px] uppercase tracking-wider mb-1 block"
+              style={{ color: '#5e5e5e' }}
+            >
+              Keep (Target ID)
+            </label>
             <input
               className="w-full text-xs bg-transparent border rounded px-2 py-1.5 focus:outline-none"
               style={{ borderColor: 'rgba(255,255,255,0.12)', color: '#f5f5f5' }}
@@ -505,7 +577,10 @@ function SlaTimerBadge({ seconds }: { seconds: number | null }) {
   const label = breached ? `-${h}h ${m}m` : `${h}h ${m}m`;
 
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-mono" style={{ background: bg, color }}>
+    <span
+      className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-mono"
+      style={{ background: bg, color }}
+    >
       <Clock className="w-2.5 h-2.5" />
       {label}
     </span>
@@ -558,7 +633,6 @@ function CannedResponsePicker({ onInsert }: { onInsert: (body: string) => void }
         >
           <div className="p-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <input
-              autoFocus
               className="w-full text-xs bg-transparent border rounded px-2 py-1 focus:outline-none"
               style={{ borderColor: 'rgba(255,255,255,0.12)', color: '#f5f5f5' }}
               placeholder="Search responses…"
@@ -568,7 +642,9 @@ function CannedResponsePicker({ onInsert }: { onInsert: (body: string) => void }
           </div>
           <div className="max-h-56 overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="text-[11px] text-center py-4" style={{ color: '#5e5e5e' }}>No responses found</p>
+              <p className="text-[11px] text-center py-4" style={{ color: '#5e5e5e' }}>
+                No responses found
+              </p>
             ) : (
               filtered.map((r) => (
                 <button
@@ -577,8 +653,12 @@ function CannedResponsePicker({ onInsert }: { onInsert: (body: string) => void }
                   className="w-full text-left px-3 py-2 hover:bg-white/[0.04] transition-colors"
                   type="button"
                 >
-                  <div className="text-xs font-medium truncate" style={{ color: '#e5e5e5' }}>{r.title}</div>
-                  <div className="text-[11px] line-clamp-1 mt-0.5" style={{ color: '#5e5e5e' }}>{r.body}</div>
+                  <div className="text-xs font-medium truncate" style={{ color: '#e5e5e5' }}>
+                    {r.title}
+                  </div>
+                  <div className="text-[11px] line-clamp-1 mt-0.5" style={{ color: '#5e5e5e' }}>
+                    {r.body}
+                  </div>
                 </button>
               ))
             )}
@@ -628,8 +708,13 @@ function TicketComposer({ ticketId, onClose }: { ticketId: number; onClose: () =
       />
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <CannedResponsePicker onInsert={(text) => setBody((prev) => prev ? `${prev}\n${text}` : text)} />
-          <label className="flex items-center gap-1.5 text-[11px] cursor-pointer select-none" style={{ color: '#6a6a6a' }}>
+          <CannedResponsePicker
+            onInsert={(text) => setBody((prev) => (prev ? `${prev}\n${text}` : text))}
+          />
+          <label
+            className="flex items-center gap-1.5 text-[11px] cursor-pointer select-none"
+            style={{ color: '#6a6a6a' }}
+          >
             <input
               type="checkbox"
               checked={isInternal}
@@ -694,9 +779,14 @@ function TicketQueuePanel() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Inbox className="w-4 h-4" style={{ color: '#d4a054' }} />
-            <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>Ticket Queue</span>
+            <span className="text-sm font-semibold" style={{ color: '#f5f5f5' }}>
+              Ticket Queue
+            </span>
             {data?.total !== undefined && (
-              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.06)', color: '#8a8a8a' }}>
+              <span
+                className="text-xs px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(255,255,255,0.06)', color: '#8a8a8a' }}
+              >
                 {data.total} total
               </span>
             )}
@@ -712,10 +802,17 @@ function TicketQueuePanel() {
 
         <div className="flex flex-wrap gap-2">
           <div className="relative flex-1 min-w-32">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3" style={{ color: '#5e5e5e' }} />
+            <Search
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3"
+              style={{ color: '#5e5e5e' }}
+            />
             <input
               className="w-full pl-6 pr-2 py-1.5 text-xs rounded-lg border focus:outline-none"
-              style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#f5f5f5' }}
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                borderColor: 'rgba(255,255,255,0.08)',
+                color: '#f5f5f5',
+              }}
               placeholder="Search tickets…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -725,7 +822,11 @@ function TicketQueuePanel() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-xs rounded-lg border px-2 py-1.5 focus:outline-none"
-            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#f5f5f5' }}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              borderColor: 'rgba(255,255,255,0.08)',
+              color: '#f5f5f5',
+            }}
           >
             <option value="">All statuses</option>
             <option value="open">Open</option>
@@ -738,7 +839,11 @@ function TicketQueuePanel() {
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
             className="text-xs rounded-lg border px-2 py-1.5 focus:outline-none"
-            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#f5f5f5' }}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              borderColor: 'rgba(255,255,255,0.08)',
+              color: '#f5f5f5',
+            }}
           >
             <option value="">All priorities</option>
             <option value="urgent">Urgent</option>
@@ -763,10 +868,15 @@ function TicketQueuePanel() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(212,160,84,0.3)', borderTopColor: '#d4a054' }} />
+          <div
+            className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
+            style={{ borderColor: 'rgba(212,160,84,0.3)', borderTopColor: '#d4a054' }}
+          />
         </div>
       ) : tickets.length === 0 ? (
-        <p className="text-xs text-center py-8" style={{ color: '#5e5e5e' }}>No tickets match your filters</p>
+        <p className="text-xs text-center py-8" style={{ color: '#5e5e5e' }}>
+          No tickets match your filters
+        </p>
       ) : (
         <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
           {tickets.map((t) => (
@@ -778,7 +888,9 @@ function TicketQueuePanel() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <code className="text-[10px] font-mono" style={{ color: '#5e5e5e' }}>{t.ticket_ref}</code>
+                      <code className="text-[10px] font-mono" style={{ color: '#5e5e5e' }}>
+                        {t.ticket_ref}
+                      </code>
                       <span
                         className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                         style={{
@@ -798,17 +910,26 @@ function TicketQueuePanel() {
                         {t.status.replace(/_/g, ' ')}
                       </span>
                       {t.escalation_count > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(196,90,74,0.1)', color: '#c45a4a' }}>
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded-full"
+                          style={{ background: 'rgba(196,90,74,0.1)', color: '#c45a4a' }}
+                        >
                           ↑ escalated ×{t.escalation_count}
                         </span>
                       )}
                       {t.csat_rating !== null && <StarRating rating={t.csat_rating} />}
                     </div>
-                    <p className="text-xs font-medium truncate mb-1" style={{ color: '#e5e5e5' }}>{t.subject}</p>
+                    <p className="text-xs font-medium truncate mb-1" style={{ color: '#e5e5e5' }}>
+                      {t.subject}
+                    </p>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-[11px]" style={{ color: '#6a6a6a' }}>{t.submitter_name}</span>
+                      <span className="text-[11px]" style={{ color: '#6a6a6a' }}>
+                        {t.submitter_name}
+                      </span>
                       {t.assigned_to_name && (
-                        <span className="text-[11px]" style={{ color: '#5e5e5e' }}>→ {t.assigned_to_name}</span>
+                        <span className="text-[11px]" style={{ color: '#5e5e5e' }}>
+                          → {t.assigned_to_name}
+                        </span>
                       )}
                       <span className="text-[11px]" style={{ color: '#5e5e5e' }}>
                         {new Date(t.created_at).toLocaleDateString()}
@@ -823,7 +944,9 @@ function TicketQueuePanel() {
                       <SlaTimerBadge seconds={t.sla_resolution_seconds_remaining} />
                     )}
                     {(t.sla_response_breached || t.sla_resolution_breached) && (
-                      <span className="text-[10px]" style={{ color: '#c45a4a' }}>SLA BREACHED</span>
+                      <span className="text-[10px]" style={{ color: '#c45a4a' }}>
+                        SLA BREACHED
+                      </span>
                     )}
                   </div>
                 </div>
@@ -866,7 +989,9 @@ function CsatDistributionChart({ dist }: { dist: CsatDist[] }) {
             <div className="flex-1">
               <ProgressBar value={count} max={max} color={STAR_COLORS[rating - 1]} />
             </div>
-            <span className="text-xs font-mono w-8 text-right" style={{ color: '#8a8a8a' }}>{count}</span>
+            <span className="text-xs font-mono w-8 text-right" style={{ color: '#8a8a8a' }}>
+              {count}
+            </span>
             <span className="text-[10px] w-10 text-right" style={{ color: '#5e5e5e' }}>
               {total > 0 ? `${Math.round((count / total) * 100)}%` : '0%'}
             </span>
@@ -879,7 +1004,9 @@ function CsatDistributionChart({ dist }: { dist: CsatDist[] }) {
 
 export default function SupportOps() {
   const [days, setDays] = useState(30);
-  const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'canned' | 'merge'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tickets' | 'canned' | 'merge'>(
+    'overview',
+  );
 
   const { data, isLoading, error, refetch } = useQuery<AnalyticsData>({
     queryKey: ['support-ops-analytics', days],
@@ -892,7 +1019,13 @@ export default function SupportOps() {
   const SLA_POLICIES = [
     { priority: 'urgent', label: 'Urgent', response: '1 hr', resolution: '4 hr', color: '#c45a4a' },
     { priority: 'high', label: 'High', response: '4 hr', resolution: '24 hr', color: '#d4a054' },
-    { priority: 'medium', label: 'Medium', response: '8 hr', resolution: '48 hr', color: '#4a90b8' },
+    {
+      priority: 'medium',
+      label: 'Medium',
+      response: '8 hr',
+      resolution: '48 hr',
+      color: '#4a90b8',
+    },
     { priority: 'low', label: 'Low', response: '24 hr', resolution: '72 hr', color: '#6b8f71' },
   ];
 
@@ -920,7 +1053,11 @@ export default function SupportOps() {
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
             className="text-xs rounded-lg border px-2 py-1.5 focus:outline-none"
-            style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: '#f5f5f5' }}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              borderColor: 'rgba(255,255,255,0.08)',
+              color: '#f5f5f5',
+            }}
           >
             <option value={7}>Last 7 days</option>
             <option value={14}>Last 14 days</option>
@@ -959,10 +1096,15 @@ export default function SupportOps() {
           {error ? (
             <div
               className="rounded-xl border p-8 text-center"
-              style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
             >
               <AlertTriangle className="w-8 h-8 mx-auto mb-2" style={{ color: '#d4a054' }} />
-              <p className="text-sm" style={{ color: '#8a8a8a' }}>Failed to load analytics — API connection required</p>
+              <p className="text-sm" style={{ color: '#8a8a8a' }}>
+                Failed to load analytics — API connection required
+              </p>
             </div>
           ) : (
             <>
@@ -989,14 +1131,26 @@ export default function SupportOps() {
                 />
                 <StatCard
                   label="Avg CSAT"
-                  value={isLoading ? '—' : overview?.avg_csat != null ? `${Number(overview.avg_csat).toFixed(1)} / 5` : 'N/A'}
+                  value={
+                    isLoading
+                      ? '—'
+                      : overview?.avg_csat != null
+                        ? `${Number(overview.avg_csat).toFixed(1)} / 5`
+                        : 'N/A'
+                  }
                   icon={Star}
                   color="#d4a054"
                   sub={`${overview?.csat_count ?? 0} responses`}
                 />
                 <StatCard
                   label="Avg Resolution"
-                  value={isLoading ? '—' : overview?.avg_resolution_hrs != null ? `${Number(overview.avg_resolution_hrs).toFixed(1)}h` : 'N/A'}
+                  value={
+                    isLoading
+                      ? '—'
+                      : overview?.avg_resolution_hrs != null
+                        ? `${Number(overview.avg_resolution_hrs).toFixed(1)}h`
+                        : 'N/A'
+                  }
                   icon={Clock}
                   color="#8b7ac8"
                   sub={`${overview?.avg_first_response_hrs != null ? Number(overview.avg_first_response_hrs).toFixed(1) + 'h' : 'N/A'} first response`}
@@ -1006,16 +1160,26 @@ export default function SupportOps() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div
                   className="rounded-xl border p-4"
-                  style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  style={{
+                    background: 'rgba(255,255,255,0.025)',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                  }}
                 >
-                  <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: '#f5f5f5' }}>
+                  <h3
+                    className="text-xs font-semibold mb-3 flex items-center gap-2"
+                    style={{ color: '#f5f5f5' }}
+                  >
                     <BarChart3 className="w-3.5 h-3.5" style={{ color: '#4a90b8' }} />
                     Volume by Category
                   </h3>
                   {isLoading ? (
                     <div className="space-y-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-7 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                        <div
+                          key={i}
+                          className="h-7 rounded animate-pulse"
+                          style={{ background: 'rgba(255,255,255,0.04)' }}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -1023,7 +1187,9 @@ export default function SupportOps() {
                       {(data?.byCategory ?? []).map((c) => (
                         <div key={c.category}>
                           <div className="flex justify-between text-xs mb-1">
-                            <span style={{ color: '#c9c9c9' }}>{c.category.replace(/_/g, ' ')}</span>
+                            <span style={{ color: '#c9c9c9' }}>
+                              {c.category.replace(/_/g, ' ')}
+                            </span>
                             <span className="font-mono" style={{ color: '#8a8a8a' }}>
                               {c.total} ({c.open} open)
                             </span>
@@ -1041,20 +1207,32 @@ export default function SupportOps() {
 
                 <div
                   className="rounded-xl border p-4"
-                  style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
+                  style={{
+                    background: 'rgba(255,255,255,0.025)',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                  }}
                 >
-                  <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: '#f5f5f5' }}>
+                  <h3
+                    className="text-xs font-semibold mb-3 flex items-center gap-2"
+                    style={{ color: '#f5f5f5' }}
+                  >
                     <Star className="w-3.5 h-3.5" style={{ color: '#d4a054' }} />
                     CSAT Distribution
                   </h3>
                   {isLoading ? (
                     <div className="space-y-2">
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="h-5 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                        <div
+                          key={i}
+                          className="h-5 rounded animate-pulse"
+                          style={{ background: 'rgba(255,255,255,0.04)' }}
+                        />
                       ))}
                     </div>
                   ) : (data?.csatDistribution ?? []).length === 0 ? (
-                    <p className="text-xs" style={{ color: '#5e5e5e' }}>No CSAT responses in this period</p>
+                    <p className="text-xs" style={{ color: '#5e5e5e' }}>
+                      No CSAT responses in this period
+                    </p>
                   ) : (
                     <CsatDistributionChart dist={data?.csatDistribution ?? []} />
                   )}
@@ -1063,27 +1241,45 @@ export default function SupportOps() {
 
               <div
                 className="rounded-xl border p-4"
-                style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
+                style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                }}
               >
-                <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: '#f5f5f5' }}>
+                <h3
+                  className="text-xs font-semibold mb-3 flex items-center gap-2"
+                  style={{ color: '#f5f5f5' }}
+                >
                   <Trophy className="w-3.5 h-3.5" style={{ color: '#d4a054' }} />
                   Agent Leaderboard
                 </h3>
                 {isLoading ? (
                   <div className="space-y-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-8 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                      <div
+                        key={i}
+                        className="h-8 rounded animate-pulse"
+                        style={{ background: 'rgba(255,255,255,0.04)' }}
+                      />
                     ))}
                   </div>
                 ) : (data?.agentLeaderboard ?? []).length === 0 ? (
-                  <p className="text-xs" style={{ color: '#5e5e5e' }}>No agent data in this period</p>
+                  <p className="text-xs" style={{ color: '#5e5e5e' }}>
+                    No agent data in this period
+                  </p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                           {['Agent', 'Resolved', 'Open', 'Avg CSAT', 'Avg Response'].map((h) => (
-                            <th key={h} className="text-left pb-2 pr-3 font-medium" style={{ color: '#5e5e5e' }}>{h}</th>
+                            <th
+                              key={h}
+                              className="text-left pb-2 pr-3 font-medium"
+                              style={{ color: '#5e5e5e' }}
+                            >
+                              {h}
+                            </th>
                           ))}
                         </tr>
                       </thead>
@@ -1095,12 +1291,18 @@ export default function SupportOps() {
                           >
                             <td className="py-2 pr-3" style={{ color: '#e5e5e5' }}>
                               <div className="flex items-center gap-1.5">
-                                {i === 0 && <Trophy className="w-3 h-3" style={{ color: '#d4a054' }} />}
+                                {i === 0 && (
+                                  <Trophy className="w-3 h-3" style={{ color: '#d4a054' }} />
+                                )}
                                 {a.agent}
                               </div>
                             </td>
-                            <td className="py-2 pr-3 font-mono" style={{ color: '#6b8f71' }}>{a.resolved}</td>
-                            <td className="py-2 pr-3 font-mono" style={{ color: '#4a90b8' }}>{a.open}</td>
+                            <td className="py-2 pr-3 font-mono" style={{ color: '#6b8f71' }}>
+                              {a.resolved}
+                            </td>
+                            <td className="py-2 pr-3 font-mono" style={{ color: '#4a90b8' }}>
+                              {a.open}
+                            </td>
                             <td className="py-2 pr-3">
                               {a.avg_csat != null ? (
                                 <span className="font-mono" style={{ color: '#d4a054' }}>
@@ -1125,9 +1327,15 @@ export default function SupportOps() {
 
               <div
                 className="rounded-xl border p-4"
-                style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
+                style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                }}
               >
-                <h3 className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: '#f5f5f5' }}>
+                <h3
+                  className="text-xs font-semibold mb-3 flex items-center gap-2"
+                  style={{ color: '#f5f5f5' }}
+                >
                   <Zap className="w-3.5 h-3.5" style={{ color: '#8b7ac8' }} />
                   SLA Policy Reference
                 </h3>
@@ -1153,11 +1361,19 @@ export default function SupportOps() {
                   ))}
                 </div>
                 {data?.deflectionStats && (
-                  <div className="mt-3 flex items-center gap-2 text-xs" style={{ color: '#6a6a6a' }}>
+                  <div
+                    className="mt-3 flex items-center gap-2 text-xs"
+                    style={{ color: '#6a6a6a' }}
+                  >
                     <CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#6b8f71' }} />
                     <span>
-                      AI deflection: <strong style={{ color: '#6b8f71' }}>{data.deflectionStats.total_deflections}</strong> tickets deflected via{' '}
-                      <strong style={{ color: '#e5e5e5' }}>{data.deflectionStats.articles}</strong> KB articles
+                      AI deflection:{' '}
+                      <strong style={{ color: '#6b8f71' }}>
+                        {data.deflectionStats.total_deflections}
+                      </strong>{' '}
+                      tickets deflected via{' '}
+                      <strong style={{ color: '#e5e5e5' }}>{data.deflectionStats.articles}</strong>{' '}
+                      KB articles
                     </span>
                   </div>
                 )}
@@ -1178,22 +1394,36 @@ export default function SupportOps() {
             className="rounded-xl border p-4"
             style={{ background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.08)' }}
           >
-            <h3 className="text-sm font-semibold mb-2" style={{ color: '#f5f5f5' }}>How Merge Works</h3>
+            <h3 className="text-sm font-semibold mb-2" style={{ color: '#f5f5f5' }}>
+              How Merge Works
+            </h3>
             <ul className="space-y-2 text-xs" style={{ color: '#8a8a8a' }}>
               <li className="flex gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#6b8f71' }} />
+                <CheckCircle2
+                  className="w-3.5 h-3.5 shrink-0 mt-0.5"
+                  style={{ color: '#6b8f71' }}
+                />
                 The source (duplicate) ticket is closed and marked as merged
               </li>
               <li className="flex gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#6b8f71' }} />
+                <CheckCircle2
+                  className="w-3.5 h-3.5 shrink-0 mt-0.5"
+                  style={{ color: '#6b8f71' }}
+                />
                 An internal note is added to the source ticket linking it to the target
               </li>
               <li className="flex gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#6b8f71' }} />
+                <CheckCircle2
+                  className="w-3.5 h-3.5 shrink-0 mt-0.5"
+                  style={{ color: '#6b8f71' }}
+                />
                 The target ticket continues tracking SLA and CSAT normally
               </li>
               <li className="flex gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#d4a054' }} />
+                <AlertTriangle
+                  className="w-3.5 h-3.5 shrink-0 mt-0.5"
+                  style={{ color: '#d4a054' }}
+                />
                 Merges are permanent and cannot be undone
               </li>
             </ul>

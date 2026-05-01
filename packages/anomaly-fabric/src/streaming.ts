@@ -1,10 +1,10 @@
-import type {
-  AnomalyDetectionResult,
-  AnomalyEvent,
-  StreamingDetectionInput,
+import {
+  type AnomalyDetectionResult,
+  type AnomalyEvent,
+  type StreamingDetectionInput,
+  AnomalyDetectionResultSchema,
+  AnomalyEventSchema,
 } from './types.js';
-import { AnomalyDetectionResultSchema, AnomalyEventSchema } from './types.js';
-
 interface RollingWindow {
   values: number[];
   timestamps: string[];

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { EvidenceBadge } from '@szl-holdings/design-system';
-import type { EvidenceSource } from '@szl-holdings/design-system';
+import { EvidenceBadge, type EvidenceSource } from '@szl-holdings/design-system';
 
 const sources: EvidenceSource[] = [
   { id: 'e1', label: 'SIEM Alert #8842', type: 'signal', timestamp: '2026-04-26T14:29:55Z' },
@@ -16,7 +15,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Compact badge showing the number of evidence sources backing a claim. Expands on click.',
+        component:
+          'Compact badge showing the number of evidence sources backing a claim. Expands on click.',
       },
     },
   },

@@ -26,7 +26,10 @@ function getHfToken(): string | undefined {
   return process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
 }
 
-async function withTimeout<T>(factory: (signal: AbortSignal) => Promise<T>, ms: number): Promise<T> {
+async function withTimeout<T>(
+  factory: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
@@ -109,7 +112,12 @@ async function checkMcpProxy(): Promise<{
     const latencyMs = Date.now() - start;
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
-      return { reachable: false, toolCount: 0, latencyMs, error: `HTTP ${response.status}: ${errText.slice(0, 200)}` };
+      return {
+        reachable: false,
+        toolCount: 0,
+        latencyMs,
+        error: `HTTP ${response.status}: ${errText.slice(0, 200)}`,
+      };
     }
     const data = (await response.json()) as {
       result?: { tools?: unknown[] } | unknown[];
@@ -120,7 +128,7 @@ async function checkMcpProxy(): Promise<{
     }
     const tools = Array.isArray(data.result)
       ? data.result
-      : (data.result as { tools?: unknown[] })?.tools ?? [];
+      : ((data.result as { tools?: unknown[] })?.tools ?? []);
     return { reachable: true, toolCount: tools.length, latencyMs };
   } catch (err) {
     return {
@@ -193,8 +201,7 @@ async function checkEmbeddingBackend(): Promise<{
     const { embeddingPipeline } = await import('@szl-holdings/ai-engine');
     const health = await embeddingPipeline.getHealth();
     const localProvider = health.providers?.find(
-      (p: { name: string; healthy: boolean }) =>
-        p.name === 'local' || p.name === 'transformers',
+      (p: { name: string; healthy: boolean }) => p.name === 'local' || p.name === 'transformers',
     );
     return {
       available: localProvider?.healthy ?? health.healthy ?? false,
@@ -219,16 +226,18 @@ async function checkAutoTrainApi(): Promise<{
     const response = await withTimeout(
       (signal) =>
         fetch(`${HF_AUTOTRAIN_BASE}/`, {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal,
         }),
       TIMEOUT_MS,
     );
     const latencyMs = Date.now() - start;
     return {
-      reachable: response.ok || response.status === 401 || response.status === 403 || response.status === 404,
+      reachable:
+        response.ok ||
+        response.status === 401 ||
+        response.status === 403 ||
+        response.status === 404,
       latencyMs,
       ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
     };
@@ -281,7 +290,8 @@ router.get('/hf/status', async (_req: Request, res: Response) => {
       },
       connectorAdapter: {
         ...connector,
-        description: 'HuggingFace connector adapter (text classification, embeddings, model search)',
+        description:
+          'HuggingFace connector adapter (text classification, embeddings, model search)',
       },
       tokenValidity: {
         ...tokenValidity,

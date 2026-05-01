@@ -185,6 +185,7 @@ export function AppShell({
             <span aria-hidden="true">Search or run command…</span>
             <kbd
               aria-hidden="true"
+              tabIndex={-1}
               className="rounded px-1"
               style={{
                 background: color.border.subtle,

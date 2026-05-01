@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useOrg } from '../../context/OrgContext';
-import type { OrgId } from '../../context/OrgContext';
+import { useOrg, type OrgId } from '../../context/OrgContext';
 import { ChevronDown } from 'lucide-react';
 
 export function TopBar() {
@@ -12,7 +11,7 @@ export function TopBar() {
   const orgs: { id: OrgId; name: string }[] = [
     { id: 'szl', name: 'a11oy' },
     { id: 'acme', name: 'Acme Industries' },
-    { id: 'northwind', name: 'Northwind Labs' }
+    { id: 'northwind', name: 'Northwind Labs' },
   ];
 
   useEffect(() => {
@@ -47,7 +46,10 @@ export function TopBar() {
           <span className="font-display font-medium text-lg tracking-tight text-[var(--color-a11oy-text)]">
             A<span className="font-mono text-[var(--color-a11oy-blue)] font-bold">11</span>oy
           </span>
-          <span className="text-[10px] uppercase tracking-widest text-[var(--color-a11oy-text-ghost)]" aria-hidden="true">
+          <span
+            className="text-[10px] uppercase tracking-widest text-[var(--color-a11oy-text-ghost)]"
+            aria-hidden="true"
+          >
             One of one. Forged from many.
           </span>
         </div>
@@ -58,24 +60,24 @@ export function TopBar() {
           <button
             ref={triggerRef}
             type="button"
-            onClick={() => setIsOpen(prev => !prev)}
+            onClick={() => setIsOpen((prev) => !prev)}
             aria-haspopup="listbox"
             aria-expanded={isOpen}
-            aria-label={`Current organization: ${orgs.find(o => o.id === currentOrg)?.name}. Change organization`}
+            aria-label={`Current organization: ${orgs.find((o) => o.id === currentOrg)?.name}. Change organization`}
             className="flex items-center gap-2 text-sm text-[var(--color-a11oy-text-sub)] hover:text-[var(--color-a11oy-text)] transition-colors cursor-pointer"
           >
-            <span>{orgs.find(o => o.id === currentOrg)?.name}</span>
+            <span>{orgs.find((o) => o.id === currentOrg)?.name}</span>
             <ChevronDown className="w-4 h-4 opacity-50" aria-hidden="true" />
           </button>
 
           {isOpen && (
-            <ul
+            <div
               role="listbox"
               aria-label="Select organization"
               className="absolute top-full left-0 mt-2 w-48 bg-[var(--color-a11oy-card)] border border-[var(--color-a11oy-border)] rounded shadow-xl z-50 py-1"
             >
-              {orgs.map(org => (
-                <li key={org.id} role="option" aria-selected={currentOrg === org.id}>
+              {orgs.map((org) => (
+                <div key={org.id} role="option" aria-selected={currentOrg === org.id}>
                   <button
                     type="button"
                     onClick={() => handleOrgSelect(org.id)}
@@ -83,16 +85,22 @@ export function TopBar() {
                   >
                     {org.name}
                   </button>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] animate-pulse" aria-hidden="true" />
-        <span className="text-[11px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', letterSpacing: '0.04em' }}>
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] animate-pulse"
+          aria-hidden="true"
+        />
+        <span
+          className="text-[11px] font-mono"
+          style={{ color: 'var(--color-a11oy-text-ghost)', letterSpacing: '0.04em' }}
+        >
           Governed Environment
         </span>
       </div>

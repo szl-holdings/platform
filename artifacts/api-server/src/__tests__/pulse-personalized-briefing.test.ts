@@ -10,8 +10,7 @@
 
 import express from 'express';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mocks — ALL must be hoisted before the route import
@@ -76,14 +75,19 @@ vi.mock('../middlewares/auth.js', () => {
     orgs: [{ orgId: 1, orgSlug: 'szl', orgName: 'SZL Holdings', role: 'admin' }],
   };
   return {
-    authMiddleware: () => (req: express.Request, _res: express.Response, next: express.NextFunction) => {
-      if (req.headers['x-test-auth'] === 'yes') {
-        (req as express.Request & { user: typeof mockUser }).user = mockUser;
-      }
-      next();
-    },
-    requireRole: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => next(),
-    tenantScope: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => next(),
+    authMiddleware:
+      () => (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+        if (req.headers['x-test-auth'] === 'yes') {
+          (req as express.Request & { user: typeof mockUser }).user = mockUser;
+        }
+        next();
+      },
+    requireRole:
+      () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+        next(),
+    tenantScope:
+      () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+        next(),
   };
 });
 
@@ -144,12 +148,24 @@ vi.mock('drizzle-orm', () => {
 
 vi.mock('pdfkit', () => {
   const PDFMock = class {
-    on(_event: string, _cb: () => void) { return this; }
-    pipe(_stream: unknown) { return this; }
-    fontSize(_n: number) { return this; }
-    font(_f: string) { return this; }
-    text(_t: string) { return this; }
-    moveDown() { return this; }
+    on(_event: string, _cb: () => void) {
+      return this;
+    }
+    pipe(_stream: unknown) {
+      return this;
+    }
+    fontSize(_n: number) {
+      return this;
+    }
+    font(_f: string) {
+      return this;
+    }
+    text(_t: string) {
+      return this;
+    }
+    moveDown() {
+      return this;
+    }
     end() {}
   };
   return { default: PDFMock };
@@ -198,39 +214,33 @@ describe('POST /api/pulse/watchlist', () => {
   });
 
   it('returns 400 when domain is missing', async () => {
-    const resp = await request(app)
-      .post('/api/pulse/watchlist')
-      .set('x-test-auth', 'yes')
-      .send({ entityUri: 'maritime:vessel:mv-pd', entityType: 'vessel', entityLabel: 'MV Pacific Dawn' });
+    const resp = await request(app).post('/api/pulse/watchlist').set('x-test-auth', 'yes').send({
+      entityUri: 'maritime:vessel:mv-pd',
+      entityType: 'vessel',
+      entityLabel: 'MV Pacific Dawn',
+    });
     expect(resp.status).toBe(400);
   });
 
   it('accepts valid watchlist entity (DB mock returns empty insert)', async () => {
-    const resp = await request(app)
-      .post('/api/pulse/watchlist')
-      .set('x-test-auth', 'yes')
-      .send({
-        entityUri: 'maritime:vessel:mv-pacific-dawn',
-        entityType: 'vessel',
-        entityLabel: 'MV Pacific Dawn',
-        domain: 'maritime',
-      });
+    const resp = await request(app).post('/api/pulse/watchlist').set('x-test-auth', 'yes').send({
+      entityUri: 'maritime:vessel:mv-pacific-dawn',
+      entityType: 'vessel',
+      entityLabel: 'MV Pacific Dawn',
+      domain: 'maritime',
+    });
     expect([200, 201, 409]).toContain(resp.status);
   });
 });
 
 describe('DELETE /api/pulse/watchlist/:id', () => {
   it('returns 400 for non-numeric id', async () => {
-    const resp = await request(app)
-      .delete('/api/pulse/watchlist/abc')
-      .set('x-test-auth', 'yes');
+    const resp = await request(app).delete('/api/pulse/watchlist/abc').set('x-test-auth', 'yes');
     expect(resp.status).toBe(400);
   });
 
   it('accepts numeric id (DB mock returns empty, so 404 or 200)', async () => {
-    const resp = await request(app)
-      .delete('/api/pulse/watchlist/9999')
-      .set('x-test-auth', 'yes');
+    const resp = await request(app).delete('/api/pulse/watchlist/9999').set('x-test-auth', 'yes');
     expect([200, 404]).toContain(resp.status);
   });
 });
@@ -301,14 +311,11 @@ describe('POST /api/pulse/follow-ups', () => {
   });
 
   it('accepts valid follow-up request and returns 202 Accepted', async () => {
-    const resp = await request(app)
-      .post('/api/pulse/follow-ups')
-      .set('x-test-auth', 'yes')
-      .send({
-        briefingId: 'brief-2024-01-01',
-        question: 'What is the maritime risk level for Pacific routes?',
-        sectionId: 'maritime',
-      });
+    const resp = await request(app).post('/api/pulse/follow-ups').set('x-test-auth', 'yes').send({
+      briefingId: 'brief-2024-01-01',
+      question: 'What is the maritime risk level for Pacific routes?',
+      sectionId: 'maritime',
+    });
     expect(resp.status).toBe(202);
     expect(resp.body).toHaveProperty('success', true);
     // followUp may be undefined when DB mock returns [] from insert.returning()
