@@ -72,13 +72,18 @@ Screenshots depict the alpha demo state of the platform (development environment
 | ![Terra](.github/assets/screenshots/terra-hero.jpg) | ![Vessels](.github/assets/screenshots/vessels-hero.jpg) |
 | Deal pipeline, portfolio analytics, and market intelligence | Fleet command, route optimization, and maritime operations |
 
+| Amaru — Convergent Data Sync | Carlota Jo — UHNW Advisory |
+|---|---|
+| ![Amaru](.github/assets/screenshots/amaru-hero.jpg) | ![Carlota Jo](.github/assets/screenshots/carlota-jo-hero.jpg) |
+| Multi-source data reconciliation with append-only delta logs and hash-verified ingest | Premium concierge operations with Proof-Chain delivery and discreet multi-party coordination |
+
 | Aegis — Defense & Intelligence |
 |---|
 | ![Aegis](.github/assets/screenshots/aegis-hero.jpg) |
 | Threat intelligence, defense operations command, and spatial analytics |
 
-> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-27. Screenshots are not tracked in the git repository.
-> Canonical screenshots are in [`.github/assets/screenshots/`](.github/assets/screenshots/). All captures are from the live platform — no mockups or AI-generated imagery.
+> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-27.
+> Canonical screenshots are in [`.github/assets/screenshots/`](.github/assets/screenshots/).
 
 ---
 
