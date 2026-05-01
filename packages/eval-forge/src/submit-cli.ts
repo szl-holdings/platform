@@ -166,8 +166,7 @@ async function submit(args: string[]): Promise<void> {
   const endpoint = `${apiUrl.replace(/\/$/, '')}/eval-registry/results`;
   console.log(`\n→ Submitting to ${endpoint} …`);
 
-  const { default: fetch } = await import('node-fetch').catch(() => ({ default: globalThis.fetch }));
-  const resp = await (fetch as typeof globalThis.fetch)(endpoint, {
+  const resp = await globalThis.fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
