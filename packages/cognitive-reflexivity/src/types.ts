@@ -45,6 +45,14 @@ export const CognitiveSubtypeSchema = z.enum([
   'memory.working_full',
   'memory.episode_promoted',
   'memory.semantic_pattern_detected',
+  // Telemetry-bridged subtypes — auto-emitted by telemetry-bridge.ts
+  // when raw cognitive metrics breach their targets.
+  'telemetry.hallucination_rate_breach',
+  'telemetry.retrieval_quality_drop',
+  'telemetry.citation_coverage_drop',
+  'telemetry.confidence_anomaly',
+  'telemetry.governance_bottleneck',
+  'telemetry.value_at_risk_spike',
 ]);
 export type CognitiveSubtype = z.infer<typeof CognitiveSubtypeSchema>;
 
@@ -150,6 +158,12 @@ export const ReflexiveStrategySchema = z.object({
   createdAt: z.string().datetime(),
   approvedAt: z.string().datetime().optional(),
   approvedBy: z.string().optional(),
+  // For dual-approved tier strategies: first signature recorded when
+  // status flips proposed→approved. Activation requires a second,
+  // distinct operator. Persisted so the audit trail names both humans
+  // who authorized a high-impact self-modification.
+  firstApprovedBy: z.string().optional(),
+  firstApprovedAt: z.string().datetime().optional(),
   retiredAt: z.string().datetime().optional(),
   // Free-form note explaining why an operator rejected the strategy.
   // Persisted for audit; not consumed by the router.
@@ -178,6 +192,11 @@ export type StrategyDecisionTrace = z.infer<typeof StrategyDecisionTraceSchema>;
 export const CognitiveHealthScoreSchema = z.object({
   score: z.number().min(0).max(100),
   tier: z.enum(['critical', 'at_risk', 'healthy', 'flourishing']),
+  /**
+   * Loop-mechanics dimensions: how the reflexivity loop itself is
+   * functioning (does it reflect? do strategies promote? do operators
+   * trust them?). Preserved for back-compat with existing dashboards.
+   */
   components: z.object({
     monologueCadence: z.number().min(0).max(1),
     strategyPromotionRate: z.number().min(0).max(1),
@@ -185,6 +204,31 @@ export const CognitiveHealthScoreSchema = z.object({
     memoryConsolidationHealth: z.number().min(0).max(1),
     governanceGoodStanding: z.number().min(0).max(1),
   }),
+  /**
+   * Cognitive-quality composite dimensions: what the loop is actually
+   * delivering for the user. These are the four dimensions called out
+   * by the validator and govern the headline tier when telemetry is
+   * present.
+   *
+   *   hallucinationTrend          — 1.0 = falling/low hallucination
+   *                                 rate over window; 0.0 = climbing/high.
+   *   strategyEffectiveness       — fraction of active strategies whose
+   *                                 application correlated with an
+   *                                 *improvement* in downstream metrics.
+   *   confidenceCalibration       — how well stated confidence matches
+   *                                 observed accuracy / citation
+   *                                 coverage (Brier-style).
+   *   memoryRetrievalPrecision    — fraction of retrievals that returned
+   *                                 the actually-used citation.
+   */
+  composite: z
+    .object({
+      hallucinationTrend: z.number().min(0).max(1),
+      strategyEffectiveness: z.number().min(0).max(1),
+      confidenceCalibration: z.number().min(0).max(1),
+      memoryRetrievalPrecision: z.number().min(0).max(1),
+    })
+    .optional(),
   computedAt: z.string().datetime(),
   windowMinutes: z.number().int().positive(),
 });
@@ -215,15 +259,21 @@ export type CognitiveHealthScore = z.infer<typeof CognitiveHealthScoreSchema>;
  * judgment is the gate, not engine self-confidence. Confidence is still
  * surfaced on the strategy for operator visibility.
  */
-export function classifyTier(klass: StrategyClass, _confidence?: number): StrategyTier {
+export function classifyTier(klass: StrategyClass, confidence?: number): StrategyTier {
   switch (klass) {
     case 'router.advisory':
     case 'memory.consolidation-hint':
       return 'advisory';
-    case 'router.constraint':
     case 'router.retrieval-bias':
     case 'sync.retry-policy':
       return 'operator-approved';
+    // High-impact threshold mutations: minConfidence change on the
+    // router constraint or any detection floor change requires two
+    // distinct operators (architect-flagged dual-approval gate).
+    // Low-confidence proposals on router.constraint also dual-approve
+    // because confidence < 0.6 means the engine itself is uncertain.
+    case 'router.constraint':
+      return confidence !== undefined && confidence >= 0.6 ? 'operator-approved' : 'dual-approved';
     case 'detection.confidence-floor':
       return 'dual-approved';
     default:

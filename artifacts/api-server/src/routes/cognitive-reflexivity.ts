@@ -40,7 +40,9 @@ import type {
   CognitiveHealthScore,
   ReflexiveStrategy,
   StrategyDecisionTrace,
+  CognitiveTelemetrySample,
 } from '@workspace/cognitive-reflexivity';
+import { bridgeTelemetryToReflexivity } from '@workspace/cognitive-reflexivity';
 
 const router: IRouter = Router();
 
@@ -119,6 +121,10 @@ function shapeHealthForDashboard(score: CognitiveHealthScore) {
       consolidationHealth: score.components.memoryConsolidationHealth,
       actionRatio: score.components.governanceGoodStanding,
     },
+    // Composite (cognitive-quality) dimensions — only present when
+    // telemetry was supplied to computeHealthScore. Surfaced raw so
+    // the A11oy dashboard can render the four-dimension radar.
+    ...(score.composite ? { composite: score.composite } : {}),
     asOf: score.computedAt,
     windowMinutes: score.windowMinutes,
   };
@@ -271,14 +277,40 @@ router.post(
     const runtime = getReflexivityRuntime();
     const operator = operatorIdFromRequest(req);
     try {
-      const s = runtime.registry.approve(req.params.id, operator);
+      const result = runtime.registry.approve(req.params.id, operator);
+      if (!result.ok) {
+        // Surface dual-approval / status-violation reasons to the operator.
+        const status = result.reason === 'NOT_FOUND' ? 404 : 409;
+        return res.status(status).json({
+          error: result.reason,
+          message: dualApprovalMessage(result.reason),
+          strategy: result.strategy
+            ? shapeStrategyForDashboard(result.strategy, runtime.registry.recentTraces())
+            : null,
+        });
+      }
       const traces = runtime.registry.recentTraces();
-      res.json({ strategy: shapeStrategyForDashboard(s, traces) });
+      res.json({ strategy: shapeStrategyForDashboard(result.strategy, traces) });
     } catch (e) {
       res.status(404).json({ error: 'not_found_or_invalid', message: (e as Error).message });
     }
   },
 );
+
+function dualApprovalMessage(reason: string): string {
+  switch (reason) {
+    case 'NOT_FOUND':
+      return 'Strategy not found.';
+    case 'DUAL_APPROVAL_REQUIRES_DISTINCT_OPERATOR':
+      return 'This strategy is dual-approval gated. The first signature was already recorded by you; a second, distinct operator must co-sign.';
+    case 'STRATEGY_REJECTED':
+      return 'Strategy was rejected and cannot be approved.';
+    case 'STRATEGY_RETIRED':
+      return 'Strategy is retired and cannot be re-approved.';
+    default:
+      return `Approval refused (${reason}).`;
+  }
+}
 
 router.post(
   '/cognitive-reflexivity/strategies/:id/reject',
@@ -364,6 +396,60 @@ router.get(
   (_req: Request, res: Response) => {
     const runtime = getReflexivityRuntime();
     res.json({ signals: runtime.recentSignals() });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Telemetry-bridge: cognitive metrics → cognitive-reflexive signals
+// ---------------------------------------------------------------------------
+
+const TELEMETRY_METRICS = [
+  'hallucination_rate',
+  'retrieval_quality_score',
+  'confidence',
+  'citation_coverage',
+  'approval_bottleneck_ms',
+  'value_at_risk_usd',
+] as const;
+
+const TelemetrySampleSchema = z.object({
+  metric: z.enum(TELEMETRY_METRICS),
+  value: z.number().finite(),
+  observedAt: z.string().datetime().optional(),
+  tenantId: z.string().min(1).max(128).optional(),
+  agentId: z.string().min(1).max(128).optional(),
+  // Cap labels to keep payloads bounded — defends against operator
+  // pushing a huge label-bag through the bridge.
+  labels: z.record(z.string().max(64), z.string().max(256)).optional(),
+  evidenceRefs: z.array(z.string().max(128)).max(50).optional(),
+});
+
+const TelemetryBatchSchema = z.object({
+  // 200 samples per batch is a reasonable upper bound for one polling
+  // tick; anything larger should be split.
+  samples: z.array(TelemetrySampleSchema).min(1).max(200),
+});
+
+router.post(
+  '/cognitive-reflexivity/telemetry',
+  authMiddleware(),
+  requireRole(...REFLEXIVITY_OPERATOR_ROLES),
+  (req: Request, res: Response) => {
+    const parsed = TelemetryBatchSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'invalid_payload', issues: parsed.error.issues });
+    }
+    const runtime = getReflexivityRuntime();
+    // Schema validates `metric` against an exact union, so the cast
+    // below is safe; the explicit cast is purely to satisfy the
+    // CognitiveTelemetrySample shape.
+    const samples = parsed.data.samples as CognitiveTelemetrySample[];
+    const result = bridgeTelemetryToReflexivity(runtime.engine, samples);
+    res.status(202).json({
+      status: 'accepted',
+      emitted: result.emitted,
+      skipped: result.skipped,
+    });
   },
 );
 

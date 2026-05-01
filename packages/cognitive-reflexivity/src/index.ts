@@ -29,7 +29,14 @@ export {
   type RouterDecisionInput,
   type RouterDecisionResult,
 } from './router-integration';
-export { computeHealthScore, type HealthInputs } from './health';
+export { computeHealthScore, type HealthInputs, type HealthTelemetry } from './health';
+export {
+  telemetrySampleToPayload,
+  bridgeTelemetryToReflexivity,
+  type CognitiveTelemetryMetric,
+  type CognitiveTelemetrySample,
+  type BridgeOptions,
+} from './telemetry-bridge';
 export {
   runConsolidationCycle,
   InMemoryConsolidationStore,

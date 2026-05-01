@@ -66,22 +66,80 @@ export class StrategyRegistry {
     return strategy;
   }
 
+  /**
+   * Approve a strategy. For most tiers a single operator signature
+   * activates the strategy. For `dual-approved` tier strategies (the
+   * highest-impact self-modifications: detection floor changes,
+   * low-confidence router constraints) two distinct operators must
+   * sign. The first call records `firstApprovedBy` and flips the
+   * status to `approved` (a holding state); the second call from a
+   * *different* operator activates it.
+   *
+   * Returns `{ ok: false, reason }` for governance failures rather
+   * than silently no-op'ing so the route handler can surface the
+   * reason to the operator.
+   */
   approve(
     strategyId: string,
     approvedBy: string,
-  ): ReflexiveStrategy | null {
+  ): { ok: true; strategy: ReflexiveStrategy } | { ok: false; reason: string; strategy?: ReflexiveStrategy } {
     const s = this.byId.get(strategyId);
-    if (!s) return null;
-    if (s.status !== 'proposed' && s.status !== 'approved') return s;
+    if (!s) return { ok: false, reason: 'NOT_FOUND' };
+    if (s.status === 'rejected' || s.status === 'retired') {
+      return { ok: false, reason: `STRATEGY_${s.status.toUpperCase()}`, strategy: s };
+    }
+    if (s.status === 'active') {
+      // Idempotent: already active. Return the existing record.
+      return { ok: true, strategy: s };
+    }
+
+    const nowIso = new Date().toISOString();
+
+    if (s.tier === 'dual-approved') {
+      // First signature: hold at 'approved' until a second, distinct
+      // operator co-signs. This is the dual-approval gate.
+      if (s.status === 'proposed') {
+        const next: ReflexiveStrategy = {
+          ...s,
+          status: 'approved',
+          firstApprovedBy: approvedBy,
+          firstApprovedAt: nowIso,
+        };
+        this.byId.set(strategyId, next);
+        void this.adapter.saveStrategy(next);
+        return { ok: true, strategy: next };
+      }
+      // Second signature must come from a *different* operator.
+      if (s.firstApprovedBy && s.firstApprovedBy === approvedBy) {
+        return {
+          ok: false,
+          reason: 'DUAL_APPROVAL_REQUIRES_DISTINCT_OPERATOR',
+          strategy: s,
+        };
+      }
+      const next: ReflexiveStrategy = {
+        ...s,
+        status: 'active',
+        approvedAt: nowIso,
+        approvedBy,
+      };
+      this.byId.set(strategyId, next);
+      void this.adapter.saveStrategy(next);
+      return { ok: true, strategy: next };
+    }
+
+    // Single-signature tiers: advisory, supervised, operator-approved.
+    // (At this point s.status has been narrowed to 'proposed' | 'approved'
+    // by the earlier guards.)
     const next: ReflexiveStrategy = {
       ...s,
       status: 'active',
-      approvedAt: new Date().toISOString(),
+      approvedAt: nowIso,
       approvedBy,
     };
     this.byId.set(strategyId, next);
     void this.adapter.saveStrategy(next);
-    return next;
+    return { ok: true, strategy: next };
   }
 
   reject(

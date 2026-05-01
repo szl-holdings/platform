@@ -93,7 +93,7 @@ export class CognitiveReflexivityEngine {
   private approvalRequestedCount = 0;
   private startedAt = Date.now();
 
-  private unsubscribe: (() => void) | null = null;
+  private subscription: { unsubscribe(): void } | null = null;
 
   constructor(opts: ReflexivityEngineOptions = {}) {
     this.bus = opts.bus ?? defaultSignalBus;
@@ -105,8 +105,8 @@ export class CognitiveReflexivityEngine {
   }
 
   start(): void {
-    if (this.unsubscribe) return;
-    this.unsubscribe = this.bus.on('cognitive-reflexive', (sig) => {
+    if (this.subscription) return;
+    this.subscription = this.bus.on('cognitive-reflexive', (sig) => {
       void this.handleSignal(sig).catch(() => {
         // swallow; signals must not crash the loop
       });
@@ -114,9 +114,9 @@ export class CognitiveReflexivityEngine {
   }
 
   stop(): void {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
     }
   }
 
@@ -212,8 +212,11 @@ export class CognitiveReflexivityEngine {
     });
 
     if (strategy.tier === 'advisory') {
-      this.registry.approve(strategy.strategyId, 'auto:advisory');
-      this.autoAppliedCount++;
+      // Advisory tier auto-activates with a synthetic operator id; the
+      // dual-approval gate inside registry.approve() does not apply to
+      // advisory tier, so this is always { ok: true } in practice.
+      const result = this.registry.approve(strategy.strategyId, 'auto:advisory');
+      if (result.ok) this.autoAppliedCount++;
     } else {
       this.approvalRequestedCount++;
       await this.approvalGate.request(strategy);

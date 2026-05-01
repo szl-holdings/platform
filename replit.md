@@ -594,10 +594,19 @@ CognitiveHealthScore.
   - `POST /strategies/:id/reject` — CSRF + auth + role gate (`{reason}`
     persisted on the strategy as `rejectionReason`)
   - `GET  /traces` (public; read-only)
-  - `GET  /health` (public; CognitiveHealthScore 0–100 with 5 components)
+  - `GET  /health` (public; CognitiveHealthScore 0–100 with 5 loop-mechanics
+    components AND, when telemetry is supplied, 4 composite cognitive-quality
+    dimensions: hallucinationTrend, strategyEffectiveness, confidenceCalibration,
+    memoryRetrievalPrecision)
   - `POST /observations` — CSRF + auth + role gate; subtype enum strictly
     validated, invalid subtypes return 400 not 500
   - `GET  /recent-signals` (public; read-only)
+  - `POST /telemetry` — CSRF + auth + role gate. Accepts a batch of
+    cognitive-telemetry samples (`hallucination_rate`,
+    `retrieval_quality_score`, `confidence`, `citation_coverage`,
+    `approval_bottleneck_ms`, `value_at_risk_usd`) and auto-emits typed
+    `cognitive-reflexive` signals via `bridgeTelemetryToReflexivity`.
+    Batch capped at 200 samples; sub-noise samples are skipped server-side.
 - **Auth posture (post-validator):** Reads remain public via the
   `/api/cognitive-reflexivity/` prefix in `global-auth-enforcer.ts`.
   Mutating endpoints (`/observations`, `/approve`, `/reject`) explicitly
@@ -628,6 +637,40 @@ CognitiveHealthScore.
   starts the engine after `initGuardianEngine`. Bootstrap also wires the
   PG persistence adapter (with hydrate-on-start) and registers the
   model-router strategy hook.
+
+### 2026-05-01 — validator follow-up fixes (#4570 v2)
+- **Dual-approval gate (security):** `StrategyRegistry.approve()` previously
+  let a single operator activate any tier. Now `dual-approved` tier
+  (`detection.confidence-floor` and low-confidence `router.constraint`
+  strategies) requires two distinct operators. The first signature flips
+  the strategy to `approved` and records `firstApprovedBy`/`firstApprovedAt`;
+  a second call from the *same* operator is refused with
+  `DUAL_APPROVAL_REQUIRES_DISTINCT_OPERATOR` (HTTP 409); a second call
+  from a different operator activates it. Surfaced via the
+  `/strategies/:id/approve` route as a structured `{ error, message,
+  strategy }` response so the dashboard can show the holding state.
+- **Telemetry → cognitive-reflexive bridge:** new
+  `packages/cognitive-reflexivity/src/telemetry-bridge.ts` converts raw
+  cognitive metrics (six supported: hallucination_rate,
+  retrieval_quality_score, confidence, citation_coverage,
+  approval_bottleneck_ms, value_at_risk_usd) into typed
+  `cognitive-reflexive` payloads with deviation-based intensity, severity
+  mapping, and `affectedDimension` hints. Six new `telemetry.*` subtypes
+  added to `CognitiveSubtypeSchema`. Exposed via
+  `POST /api/cognitive-reflexivity/telemetry` (CSRF + auth + role-gated,
+  batch capped at 200, sub-noise samples skipped server-side).
+- **Cognitive Health Score composite dims:** `computeHealthScore` now
+  accepts an optional `telemetry` block and emits a 4-dimension
+  `composite` object (hallucinationTrend with linear-fit + level blend,
+  strategyEffectiveness, confidenceCalibration via 1-Brier,
+  memoryRetrievalPrecision). When telemetry is supplied, the headline
+  score blends loop-mechanics (40%) and composite quality (60%).
+  Loop-mechanics components are preserved for back-compat; the
+  `composite` block is omitted when no telemetry is provided.
+- **Coverage:** 21/21 tests green in
+  `packages/cognitive-reflexivity/src/cognitive-reflexivity.test.ts`,
+  including dedicated dual-approval gate tests, telemetry-bridge unit
+  tests, and composite-dimension tests.
 - **Cross-domain emitters:** `routes/conduit.ts` emits `sync.success|failed|
   schema_drift|degraded|slow` from `simulateSyncExecution` (the
   `degraded` and `slow` subtypes were added to the enum after the
