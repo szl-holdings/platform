@@ -29,9 +29,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run lint
 
@@ -51,9 +49,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run typecheck
 
@@ -73,9 +69,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run test
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -101,9 +95,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Recursive build covers every workspace package with a `build` script.
       - run: pnpm -r --if-present run build
@@ -145,9 +137,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Run database migrations
         run: pnpm migrate
@@ -244,9 +234,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Check canonical docs are in sync with codebase (advisory)
         # Run with --fix locally or in a dedicated update job to auto-correct numbers:
@@ -270,9 +258,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Check API-CATALOGUE.md is in sync with OpenAPI spec (advisory)
         # Run `pnpm docs:generate` locally to refresh API-CATALOGUE.md when this fails.
@@ -294,9 +280,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Verify documented claims match codebase (roles, CSRF, routes, files, tables)
         run: node scripts/docs/check-docs-claims.js
@@ -368,9 +352,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Run database migrations
         run: pnpm migrate
@@ -427,9 +409,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Static check — executeWorkflow calls carry PolicyEvaluation
         run: node scripts/check-proof-chain.js
@@ -468,9 +448,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Check for banned brand strings (trademark regression guard)
         run: pnpm brand:strings
@@ -491,9 +469,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Runs the full api-server vitest suite, which automatically includes
       # src/routes/__tests__/cortex-security.test.ts (matched by src/**/*.test.ts
@@ -521,9 +497,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Audits every API route file under artifacts/api-server/src/routes/ and
       # fails the build if any are UNCLASSIFIED — i.e. missing a named auth
@@ -552,9 +526,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Scans each artifact's source files for process.env.* / import.meta.env.VITE_*
       # references and fails if any are missing from the artifact's .env.example file.
@@ -578,9 +550,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Scans all 14 governed artifacts for raw hex, inline rgb/hsl, and
       # non-aliased design-system imports. Fails if average compliance score
@@ -613,9 +583,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       # Statically scans all Express route files and compares against
       # lib/api-spec/openapi.yaml. Fails the build if any route file is
@@ -703,9 +671,7 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Build pulse-evals
         run: pnpm --filter @szl-holdings/pulse-evals run build
