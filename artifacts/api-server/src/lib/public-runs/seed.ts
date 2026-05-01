@@ -45,7 +45,13 @@ export function ensureSeeded(opts: { dataDir?: string; force?: boolean } = {}): 
     for (const docId of PUBLIC_TRUST_DOC_IDS) {
       try {
         const { input, result, outputHash } = executeCanonicalRun(docId);
-        const runId = buildRunId(input);
+        const runId = buildRunId({
+          doc_id: input.doc_id,
+          output_hash: outputHash,
+          agent_id: "TrustDocAttestor",
+          agent_version: "1.0.0",
+          kernel_version: KERNEL_VERSION,
+        });
         if (store.get(runId)) { skipped++; continue; }
         const record: PublicRunRecord = {
           run_id: runId,

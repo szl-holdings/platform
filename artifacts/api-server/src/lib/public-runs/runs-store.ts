@@ -11,6 +11,7 @@
  * public key.
  */
 
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type { TraceEvent, ProofLedgerEntry } from "@workspace/codex-kernel";
@@ -131,9 +132,38 @@ export function _clearRunsStoreCache(): void {
 }
 
 /**
- * Build a run_id that is stable across re-runs (so seeding is idempotent).
- * Format: run_<doc_id>_<short_hash> — content-addressable, no time/random parts.
+ * Build a run_id that is FULLY content-addressable across the whole run identity:
+ * the deterministic kernel output_hash, the agent identity, and the kernel version.
+ *
+ * Format: run_<doc_id>_<run_identity_sha256[:16]>
+ *
+ * Why output_hash and not doc-text-hash:
+ *   The earlier implementation derived the suffix from the input doc text only,
+ *   so two semantically different runs over the same doc (e.g., a future agent
+ *   or kernel revision producing different output) would map to the same run_id.
+ *   That is not actually content-addressable — it's input-addressable. Including
+ *   the output_hash + agent + kernel ties the run_id to the full computation
+ *   identity, so any change in the agent code, kernel version, or output state
+ *   produces a new run_id. Idempotent re-runs (same inputs, same code) still
+ *   collapse to the same id.
+ *
+ * 16 hex chars = 64 bits of suffix entropy (collision-resistant for the public
+ * ledger's expected size; the doc_id prefix further partitions the space).
  */
-export function buildRunId(input: { doc_id: string; doc_text_sha256: string }): string {
-  return `run_${input.doc_id}_${input.doc_text_sha256.slice(0, 12)}`;
+export function buildRunId(args: {
+  doc_id: string;
+  output_hash: string;
+  agent_id: string;
+  agent_version: string;
+  kernel_version: string;
+}): string {
+  const identity = JSON.stringify({
+    doc_id: args.doc_id,
+    output_hash: args.output_hash,
+    agent_id: args.agent_id,
+    agent_version: args.agent_version,
+    kernel_version: args.kernel_version,
+  });
+  const suffix = createHash("sha256").update(identity).digest("hex").slice(0, 16);
+  return `run_${args.doc_id}_${suffix}`;
 }

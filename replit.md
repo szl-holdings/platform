@@ -444,10 +444,90 @@ arXiv submission plan for the deterministic-replay paper.
 NYSTEC pitch email + pilot SOW template (no commercial terms filled).
 
 ### Follow-up (not in this PR)
-1. Generate Ed25519 attestation keypair; publish public half via `.well-known`.
-2. Wire real `codexKernel.replay()` + `signAttestation()` shims onto `@workspace/codex-kernel`.
-3. Anchor first canonical public run when the demo video records.
-4. Add `findPublicRun()` query helper to `@workspace/aef-evidence-ledger`.
+1. Generate Ed25519 attestation keypair; publish public half via `.well-known`. **DONE in Phase 2 below.**
+2. Wire real `codexKernel.replay()` + `signAttestation()` shims onto `@workspace/codex-kernel`. **DONE in Phase 2 below.**
+3. Anchor first canonical public run when the demo video records. **DONE — 13 trust-doc runs anchored in Phase 2.**
+4. Add `findPublicRun()` query helper to `@workspace/aef-evidence-ledger`. (Deferred — JSONL store works for Phase 2; ledger integration is Phase 3.)
+
+## Phase 2 — Canonical public-runs surface (2026-05-01, ops/canonical-public-runs)
+
+Phase 1 delivered honest stubs (`unknown_run` for every input, `current: null`
+for the .well-known key). Phase 2 turns those into REAL signed/replayable proof
+without changing the public API contract — frontends and CLI verifiers built
+against Phase 1 keep working unchanged.
+
+### What's now real
+- **Ed25519 keypair** (`artifacts/api-server/src/lib/public-runs/keys.ts`): generated
+  on first request, persisted to `<DATA_DIR>/keys/attestation.{priv,pub}.b64`,
+  loadable from `SZL_ATTESTATION_*` env vars in production.
+  Public half published via `GET /api/.well-known/szl-attestation-keys.json`
+  with PEM + raw base64 + 16-hex-char fingerprint (kid).
+- **Deterministic agent** (`lib/public-runs/agent.ts`): `TrustDocAttestor@1.0.0` —
+  a fixed 4-step codex-kernel runLoop over each of the 13 `docs/trust/*.md`
+  files (validate input → ingest text → digest body → attest provenance).
+  Steps are pure functions of the doc text, so identical re-execution yields
+  identical kernel-chain hashes (FNV1a64).
+- **Content-addressable run IDs** (`lib/public-runs/runs-store.ts`):
+  `run_<doc_id>_<sha12>` where the suffix derives from the recorded
+  `output_hash`. Anyone can reproduce the ID by replaying the run.
+- **Real attestation pipeline** (`lib/public-runs/attestation.ts`):
+  lookup → `replayCanonicalRun()` → `kernelReplay()` trace verify →
+  Ed25519-sign canonical envelope. Returns `match` / `mismatch` / `unknown_run`.
+  Cryptographic integrity comes from the Ed25519 signature on the canonical
+  envelope; FNV1a64 chain hashes provide fast tamper detection.
+- **Lazy idempotent seeding** (`lib/public-runs/seed.ts`): on first request to
+  `/governance/stats`, `/v1/replay-attestation/example`, or
+  `/v1/replay-attestation`, the 13 trust docs are anchored if not already.
+- **Standalone CLI verifier** (`scripts/verify-attestation.mjs`): zero-dependency
+  Node script that fetches the published public key, posts a `run_id`,
+  re-canonicalizes the envelope, and verifies the Ed25519 signature locally.
+  Exit codes: `0` match, `1` mismatch, `2` unknown_run, `3` error.
+- **Auth/CSRF allowlists**: `/api/.well-known/szl-attestation-keys.json` and
+  `/api/governance/stats` added to `PUBLIC_EXACT_PATHS` in `global-auth-enforcer.ts`;
+  `/api/v1/replay-attestation` added to `EXEMPT_PATHS` in `csrf.ts`. The four
+  public endpoints also use route-level `authMiddleware({ required: false })`
+  for defense in depth.
+- **Frontend wiring** (`artifacts/szl-holdings/src/pages/`): `governance.tsx`
+  consumes the new `{anchored_total, last_anchored_at, agents}` schema;
+  `replay-attestation.tsx` fetches `/v1/replay-attestation/example` so users can
+  one-click pre-fill a real anchored run ID.
+- **Tests**: 8/8 pass in `routes/__tests__/replay-attestation.test.ts`,
+  including end-to-end Ed25519 verify via the published `.well-known` key.
+  All 38 `security-middleware` tests still pass.
+
+### Live verification (recorded 2026-05-01)
+```
+$ node scripts/verify-attestation.mjs run_A11OY-01-fedramp-authorization-disclosure_3bc26ff9e48b
+✓ MATCH — attestation is genuine and the run is reproducible.
+  agent         = TrustDocAttestor@1.0.0
+  signing_key   = 90322e8d4ac4af8c (Ed25519)
+  evidence      = https://github.com/szl-holdings/.../A11OY-01-fedramp-authorization-disclosure.md
+```
+
+### Runtime data dir
+`<api-server-cwd>/.szl-public-runs/` (override via `SZL_PUBLIC_RUNS_DIR`).
+Added to `.gitignore` — contains the Ed25519 private key and the JSONL runs
+ledger; must NEVER be committed.
+
+### Phase 3 follow-ups (from Phase 2 architect review)
+1. **Production key provisioning**: Phase 2 auto-generates a keypair on first
+   request and persists it to disk. In a multi-instance production deployment,
+   each instance would generate its OWN key, leading to verifier failures when
+   requests hit different replicas. Provision `SZL_ATTESTATION_PRIV_B64` /
+   `SZL_ATTESTATION_PUB_B64` via shared secret store (KMS, Replit secret,
+   Vercel/Render env) before going multi-instance.
+2. **Key rotation + history**: `.well-known` currently reports `history: []` and
+   one current key only. Add a rotation procedure that moves the active key to
+   `history[]` with `valid_until` and lets verifiers accept signatures from
+   either current or recent-history keys.
+3. **Trust anchor pinning**: The CLI verifier trusts whichever public key the
+   target host serves at `/.well-known/szl-attestation-keys.json`. For
+   higher-assurance verification, allow `--pin-kid=<fingerprint>` so callers
+   can fail-closed if the key changes unexpectedly.
+4. **Multi-instance run-store consistency tests**: Add a CI test that runs the
+   seeder twice in two processes against the same data dir and asserts
+   identical run_ids (verifies the new content-addressable scheme holds across
+   independent deployments).
 
 ### GitHub org audit (snapshot 2026-05-01 00:08 UTC)
 - 11 repos in `szl-holdings`; 9 product repos (ouroboros, terra, etc.) have no CI yet.
