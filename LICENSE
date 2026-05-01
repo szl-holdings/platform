@@ -1,67 +1,79 @@
 PROPRIETARY SOFTWARE LICENSE
 
-Copyright (c) 2024-2026 SZL Holdings. All rights reserved.
+Copyright (c) 2026 SZL Holdings, LLC. All rights reserved.
 
-CONFIDENTIAL AND PROPRIETARY
+1. Definitions
 
-This software and its associated documentation, source code, and intellectual
-property (collectively, the "Software") are the sole and exclusive property of
-SZL Holdings ("Company").
+   "Software" means the source code, object code, documentation, configuration,
+   data, models, prompts, schemas, and all other materials contained in this
+   repository, in any form.
 
-GRANT OF RIGHTS: None. This repository and all contents are proprietary. No
-license, right, or interest in the Software is granted to any person or entity
-by virtue of access to this repository.
+   "Licensor" means SZL Holdings, LLC.
 
-RESTRICTIONS:
+   "You" means the individual or legal entity accessing the Software.
 
-1. You may not copy, modify, merge, publish, distribute, sublicense, sell,
-   or create derivative works based on this Software without prior written
-   authorization from SZL Holdings.
+2. Grant
 
-2. You may not reverse engineer, decompile, or disassemble any part of this
-   Software.
+   No license, express or implied, is granted to You under this LICENSE except
+   the limited right to view the Software in this repository solely for
+   evaluation and reference. All other rights are expressly reserved by
+   Licensor.
 
-3. You may not use the Software, or any part thereof, for competitive analysis,
-   benchmarking, or to build a competing product or service.
+3. Restrictions
 
-4. Viewing this repository does not constitute a grant of any license or right.
+   Without Licensor's prior written consent, You may not, in whole or in part:
 
-INTELLECTUAL PROPERTY:
+   (a) copy, fork, mirror, redistribute, sublicense, sell, rent, or lease the
+       Software;
+   (b) create derivative works of, modify, translate, or adapt the Software;
+   (c) use the Software in production, in any commercial product or service,
+       or to train, fine-tune, or evaluate any machine-learning model;
+   (d) remove or obscure any proprietary, copyright, trademark, or attribution
+       notices;
+   (e) reverse engineer, decompile, or disassemble the Software, except to the
+       extent such restriction is prohibited by applicable law.
 
-All trademarks, service marks, trade names, and brand identifiers used in this
-Software — including but not limited to SZL Holdings, A11oy, TENAX, DOMAINE,
-SEXTANT, PARAGON, KORA, LUMINA, Counsel, Carlota Jo, FORGE, APEX, IMPERIUM,
-and the SZL logo — are the exclusive property of SZL Holdings or its affiliates.
+4. Trademarks
 
-PATENTS:
+   "SZL Holdings", "Ouroboros", "A11oy", "Sentra", "Amaru", "Counsel",
+   "Terra", "Vessels", "Carlota Jo", "Conduit", and associated logos are
+   trademarks of SZL Holdings, LLC. No trademark rights are granted under
+   this LICENSE.
 
-Certain methods, systems, and architectures described or implemented in this
-Software may be the subject of pending or future patent applications.
+5. Confidentiality
 
-CONFIDENTIALITY:
+   The Software contains confidential and proprietary information of
+   Licensor. You agree to maintain its confidentiality with at least the
+   same degree of care You use to protect Your own confidential information,
+   and in no event less than reasonable care.
 
-This Software contains trade secrets and confidential information of SZL
-Holdings. Any unauthorized access, disclosure, or use of the Software may
-result in legal action, including but not limited to claims for breach of
-contract, misappropriation of trade secrets, and intellectual property
-infringement.
+6. Disclaimer of Warranty
 
-WARRANTY DISCLAIMER:
+   THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF
+   ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+   OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+   NON-INFRINGEMENT.
 
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED. SZL HOLDINGS MAKES NO WARRANTIES, REPRESENTATIONS, OR GUARANTEES
-WITH RESPECT TO THE SOFTWARE, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+7. Limitation of Liability
 
-LIMITATION OF LIABILITY:
+   IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THIS LICENSE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGES.
 
-IN NO EVENT SHALL SZL HOLDINGS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR IN CONNECTION
-WITH THE SOFTWARE.
+8. Termination
 
-GOVERNING LAW:
+   This LICENSE terminates automatically upon any breach. Upon termination,
+   You must destroy all copies of the Software in Your possession.
 
-This license shall be governed by and construed in accordance with the laws of
-the State of Delaware, United States.
+9. Governing Law
 
-For licensing inquiries, contact: inquiries@szlholdings.com
+   This LICENSE is governed by the laws of the State of New York, USA,
+   without regard to its conflict-of-law provisions. Exclusive jurisdiction
+   and venue lie in the state and federal courts located in New York County,
+   New York.
+
+10. Contact
+
+    For licensing inquiries, partnerships, or evaluation requests:
+    licensing@szlholdings.com  ·  https://szlholdings.com
