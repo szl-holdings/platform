@@ -22,6 +22,7 @@ import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
 import * as continuumRuntime from "./groups/continuum-runtime-group";
 import * as selfModel from "./groups/self-model";
+import * as cognitiveReflexivity from "./groups/cognitive-reflexivity";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
@@ -379,6 +380,7 @@ graph.register(router);
 guardian.register(router);
 continuumRuntime.register(router);
 selfModel.register(router);
+cognitiveReflexivity.register(router);
 verifier.register(router);
 skillLibrary.register(router);
 

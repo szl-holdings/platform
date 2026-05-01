@@ -39,6 +39,7 @@ export const SignalTypeSchema = z.enum([
   'telemetry',
   'heartbeat',
   'connector-event',
+  'cognitive-reflexive',
   'custom',
 ]);
 export type SignalType = z.infer<typeof SignalTypeSchema>;

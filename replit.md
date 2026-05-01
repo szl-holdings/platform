@@ -567,3 +567,80 @@ A11oy now hosts both decision intelligence and the agentic AI lab.
 **PluginHub**
 - `a11oy Native` category (`artifacts/a11oy/src/data/pluginHubData.ts`)
   gained two new core entries: `A11oy Intelligence` and `A11oy Lab`.
+
+## Cognitive Reflexivity Engine (#4570–#4572)
+
+**Self-observing, self-improving governed cognition layer.** Closes the loop:
+telemetry → cognitive-reflexive signal → InnerMonologue dialectical reasoning →
+StrategyProposal → Guardian-tier classification → (auto-apply | operator approval)
+→ Self-Model → Model Router adapts → Memory Fabric consolidates →
+CognitiveHealthScore.
+
+### Files
+- **Package:** `packages/cognitive-reflexivity/src/{index,types,strategies,engine,
+  router-integration,health,consolidation}.ts` — pure typed domain (no I/O,
+  no Express, no DB).
+- **Runtime adapter:** `artifacts/api-server/src/lib/cognitive-reflexivity-runtime.ts`
+  — lazy singleton wiring: `defaultSignalBus` from `@workspace/signal-mesh`,
+  `InnerMonologue` from `@szl-holdings/ai-engine` (dynamic import), and
+  ApprovalGate via `submitPendingApprovalRequest` from `@workspace/approvals-inbox`.
+- **HTTP surface:** `artifacts/api-server/src/routes/cognitive-reflexivity.ts`
+  + group `routes/groups/cognitive-reflexivity.ts`. Endpoints (all under
+  `/api/cognitive-reflexivity/`):
+  - `GET  /strategies?status=&klass=&tier=&limit=`
+  - `GET  /strategies/:id`
+  - `POST /strategies/:id/approve` (CSRF-protected; `{operator,note}`)
+  - `POST /strategies/:id/reject` (CSRF-protected; `{operator,reason}` —
+    `reason` IS persisted on the strategy as `rejectionReason`)
+  - `GET  /traces`
+  - `GET  /health` (CognitiveHealthScore: 0–100 with 5 components)
+  - `POST /observations` (CSRF-protected; subtype enum strictly validated;
+    invalid subtypes return 400, not 500)
+  - `GET  /recent-signals`
+- **Auth posture:** allowlisted as public in `global-auth-enforcer.ts` (demo
+  mode, no tenant PII). Write endpoints (`/observations`, `/approve`, `/reject`)
+  remain CSRF-protected via global `csrfMiddleware` mounted in `app.ts`.
+- **Bootstrap:** `artifacts/api-server/src/index.ts` `bootstrapStep('initCognitiveReflexivity')`
+  starts the engine after `initGuardianEngine`.
+- **Cross-domain emitters:** `routes/conduit.ts` emits `sync.success|failed|
+  schema_drift` from `simulateSyncExecution`; `routes/sentra.ts` emits
+  `detection.true_positive_confirmed` for critical/high incidents.
+
+### Frontend
+- **Page:** `artifacts/a11oy/src/pages/CognitiveReflexivity.tsx` — KPIs,
+  health score with 5 components, reflexive strategies with approve/reject +
+  dialectic trace expansion, recent signals, recent decision traces, and a
+  "Seed demo signals" button. Wired into `App.tsx` route
+  `/cognitive-reflexivity` and `components/layout.tsx` RUNTIME nav.
+
+### Strategy enum contract (engine-side, in `packages/cognitive-reflexivity/src/types.ts`)
+- `StrategyStatusSchema`: `proposed | approved | active | retired | rejected`
+- `StrategyTierSchema`: `advisory | supervised | operator-approved | dual-approved`
+- The route-level `StrategyFilterSchema` MUST stay in lockstep — keeping the
+  enums identical is intentional (architect-flagged) so dashboards do not
+  silently filter to nothing.
+
+### Guardrails (from architect review)
+- `reinforce()` refuses to mutate strategies that are not `active` — protects
+  against accidental cross-pollination from future non-router consumers.
+- `reject()` accepts and persists an operator `reason` string (`rejectionReason`,
+  max 2000 chars) on the strategy for audit.
+- Bad observation subtypes return HTTP 400 (with the failing enum + hint),
+  not 500.
+
+### Migration #0150
+`lib/db/drizzle/0150_conduit_tables.sql` is a defensive idempotent
+`CREATE TABLE IF NOT EXISTS` for the 6 conduit tables + enums + indexes.
+This fixes the `relation "conduit_sync_runs" does not exist` 500s observed
+in api-server logs. `run-migrations.ts` auto-applies it on boot.
+
+### Known gaps (architect-deferred, low severity)
+- Health score components derived from the strategy registry are currently
+  computed over the entire in-memory lifespan (not the requested
+  `windowMinutes`). Acceptable for current process lifetimes; revisit if
+  api-server uptime becomes long-lived.
+- `router-integration.ts` only consumes `router.constraint` and
+  `router.retrieval-bias` strategy classes. Other classes
+  (`detection.confidence-floor`, `sync.retry-policy`,
+  `memory.consolidation-hint`) are persisted with provenance but await
+  dedicated downstream consumers.

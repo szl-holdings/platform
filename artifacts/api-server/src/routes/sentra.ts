@@ -6,6 +6,41 @@ import { z } from 'zod';
 import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
+import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
+
+/**
+ * Emit a cognitive-reflexive observation when a Sentra incident is created.
+ * Critical / high severity incidents push the engine to consider detection
+ * tuning strategies. Best-effort — never throws into the request path.
+ */
+function emitSentraIncidentReflexive(opts: {
+  incidentId: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  mitreStage?: string;
+  affectedAssets: string[];
+}): void {
+  if (opts.severity === 'low' || opts.severity === 'medium') return;
+  try {
+    const runtime = getReflexivityRuntime();
+    const intensity = opts.severity === 'critical' ? 0.9 : 0.7;
+    runtime.engine.emit({
+      subtype: 'detection.true_positive_confirmed',
+      observation: `Sentra incident ${opts.incidentId} (${opts.severity}): ${opts.title}`,
+      intensity,
+      evidenceRefs: [`sentra:incident:${opts.incidentId}`, ...opts.affectedAssets.map((a) => `asset:${a}`)],
+      data: {
+        incidentId: opts.incidentId,
+        severity: opts.severity,
+        mitreStage: opts.mitreStage,
+        affectedAssetCount: opts.affectedAssets.length,
+      },
+      source: 'system',
+    });
+  } catch (err) {
+    logger.debug({ err }, 'Failed to emit sentra incident reflexive signal');
+  }
+}
 
 const router: IRouter = Router();
 
@@ -146,6 +181,13 @@ router.post('/sentra/incidents', validateBody(createIncidentSchema), async (req:
     }
 
     logger.info({ id }, '[sentra] incident created');
+    emitSentraIncidentReflexive({
+      incidentId: id,
+      severity: body.severity,
+      title: body.title,
+      mitreStage: body.mitreStage,
+      affectedAssets: body.affectedAssets ?? [],
+    });
     sendCreated(res, rowToIncident(row));
   } catch (err) {
     handleRouteError(res, err, 'Failed to create incident');

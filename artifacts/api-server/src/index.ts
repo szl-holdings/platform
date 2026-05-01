@@ -653,6 +653,17 @@ export async function bootstrap(
       logger.info('[bootstrap] Guardian engine and Alloy RunManager ready');
     });
 
+    // Step 2c.1: Bootstrap the Cognitive Reflexivity Engine. The engine
+    // subscribes to type='cognitive-reflexive' on the global SignalBus,
+    // dialectically reasons via Inner Monologue, persists strategies in the
+    // Self-Model and routes non-advisory tier proposals through the Approvals
+    // Inbox. Lazy-loaded singleton — getReflexivityRuntime() is idempotent.
+    await bootstrapStep('initCognitiveReflexivity', async () => {
+      const { getReflexivityRuntime } = await import('./lib/cognitive-reflexivity-runtime');
+      getReflexivityRuntime();
+      logger.info('[bootstrap] Cognitive Reflexivity Engine started');
+    });
+
     // Step 2d: Register governed sandbox tools in the Tool Mesh gateway.
     // Must run at startup (not on first route load) so MCP clients can
     // discover sandbox tools via capability negotiation before any route

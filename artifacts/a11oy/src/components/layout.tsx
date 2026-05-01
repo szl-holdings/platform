@@ -78,6 +78,7 @@ const NAV_GROUPS = [
       { href: '/workcells',      label: 'Workcells' },
       { href: '/evals',          label: 'MirrorEval + Reasoning' },
       { href: '/approval-queue', label: 'Approval Queue' },
+      { href: '/cognitive-reflexivity', label: 'Cognitive Reflexivity' },
       { href: '/verifier',       label: 'Verifier Agent' },
       { href: '/memory',         label: 'Memory Vault' },
       { href: '/pce',            label: 'PCE' },

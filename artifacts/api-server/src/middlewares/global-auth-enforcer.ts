@@ -457,6 +457,13 @@ const PUBLIC_PREFIXES = [
   // and PlaybookEngine screens. No tenant PII; static educational/threat-model
   // payloads. Public in demo mode so the a11oy frontend can render without auth.
   "/api/internal/a11oy/defense/",
+  // Cognitive Reflexivity Engine (#4570–#4572) — observability + operator
+  // approval surface for the self-observing cognition loop. All endpoints are
+  // process-local (in-memory strategy registry, no tenant PII). Public so the
+  // A11oy reflexivity dashboard can render and seed signals without a session.
+  // Write routes (approve/reject/observations) are still protected by CSRF
+  // double-submit (global csrfMiddleware in app.ts).
+  "/api/cognitive-reflexivity/",
 ];
 
 /**

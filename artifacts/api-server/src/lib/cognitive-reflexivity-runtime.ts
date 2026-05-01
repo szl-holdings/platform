@@ -1,0 +1,189 @@
+/**
+ * Cognitive Reflexivity Runtime — server-side singleton.
+ *
+ * Bootstraps the @workspace/cognitive-reflexivity engine and wires it into
+ * the rest of the cognitive substrate:
+ *
+ *   - SignalBus    : reuses defaultSignalBus from @szl-holdings/signal-mesh.
+ *   - Monologue    : adapts lib/ai-engine InnerMonologue.dialecticalReason
+ *                    (which expects multi-agent responses) into our simpler
+ *                    {observation, context} → DialecticalTriple shape.
+ *   - ApprovalGate : creates a pending request in @workspace/approvals-inbox
+ *                    so operators can approve from the existing inbox UI.
+ *   - Recent ring  : keeps the last 100 cognitive-reflexive signals so the
+ *                    /recent-signals route can show live activity without
+ *                    requiring a separate persistence layer.
+ *
+ * All state is process-local. A future iteration can swap StrategyRegistry
+ * persistence for Drizzle/PG via the StrategyPersistenceAdapter hook.
+ */
+
+import { defaultSignalBus } from '@szl-holdings/signal-mesh/bus';
+import {
+  CognitiveReflexivityEngine,
+  defaultStrategyRegistry,
+  computeHealthScore,
+  runConsolidationCycle,
+  InMemoryConsolidationStore,
+  type CognitiveHealthScore,
+  type ReflexiveStrategy,
+  type MonologueAdapter,
+  type ApprovalGate,
+} from '@workspace/cognitive-reflexivity';
+import type { Signal } from '@workspace/ontology/signal';
+
+interface ReflexivityRuntime {
+  engine: CognitiveReflexivityEngine;
+  registry: typeof defaultStrategyRegistry;
+  consolidationStore: InMemoryConsolidationStore;
+  recentSignals(): Signal[];
+  computeHealth(): CognitiveHealthScore;
+  shutdown(): void;
+}
+
+let _runtime: ReflexivityRuntime | null = null;
+
+const RECENT_RING_SIZE = 100;
+const CONSOLIDATION_INTERVAL_MS = 5 * 60_000; // 5 min
+
+function buildMonologueAdapter(): MonologueAdapter {
+  // Lazy-load to avoid pulling ai-engine into the module graph until first use.
+  let innerRef: { innerMonologue: { dialecticalReason: (i: unknown) => unknown } } | null = null;
+  return {
+    async dialecticalReason(observation, context) {
+      try {
+        if (!innerRef) {
+          const mod = (await import('@szl-holdings/ai-engine')) as unknown as {
+            innerMonologue: { dialecticalReason: (i: unknown) => unknown };
+          };
+          innerRef = { innerMonologue: mod.innerMonologue };
+        }
+        const triple = innerRef.innerMonologue.dialecticalReason({
+          topic: context ?? 'cognitive-reflexive observation',
+          context: observation,
+          agentResponses: [
+            { agentId: 'self.proponent', response: observation, confidence: 80, domain: 'self' },
+            {
+              agentId: 'self.skeptic',
+              response: `Counter-view: this could be noise — ${observation.slice(0, 120)}`,
+              confidence: 55,
+              domain: 'self',
+            },
+          ],
+        }) as {
+          tripleId?: string;
+          thesis: string;
+          antithesis: string;
+          synthesis: string;
+          confidence?: number;
+        };
+        return {
+          thesis: triple.thesis,
+          antithesis: triple.antithesis,
+          synthesis: triple.synthesis,
+          confidence:
+            typeof triple.confidence === 'number'
+              ? Math.max(0, Math.min(1, triple.confidence > 1 ? triple.confidence / 100 : triple.confidence))
+              : 0.7,
+          monologueId: triple.tripleId,
+        };
+      } catch {
+        // If ai-engine is unavailable, fall back to a deterministic stub so
+        // the engine never crashes the request path.
+        return {
+          thesis: `Position: ${observation.slice(0, 120)}`,
+          antithesis: 'Counter-position: insufficient evidence — defer.',
+          synthesis: 'Synthesis: emit advisory; revisit if reinforced.',
+          confidence: 0.55,
+        };
+      }
+    },
+  };
+}
+
+function buildApprovalGate(): ApprovalGate {
+  let inboxModP: Promise<typeof import('@workspace/approvals-inbox')> | null = null;
+  return {
+    async request(strategy: ReflexiveStrategy) {
+      try {
+        if (!inboxModP) inboxModP = import('@workspace/approvals-inbox');
+        const inbox = await inboxModP;
+        inbox.submitPendingApprovalRequest({
+          runId: `cognitive-reflexive:${strategy.strategyId}`,
+          stepId: 'apply-strategy',
+          stepName: `Apply reflexive strategy ${strategy.class}`,
+          action: `apply:${strategy.class}`,
+          justification: strategy.description,
+          projectedImpact: `Adjusts ${strategy.class} dimension; tier=${strategy.tier}; confidence=${strategy.confidence.toFixed(2)}`,
+          projectedRisk:
+            strategy.tier === 'sovereign'
+              ? 'High — sovereign-tier change affecting model routing or detection thresholds'
+              : strategy.tier === 'dual-approved'
+                ? 'Medium-high — requires dual approval'
+                : 'Medium — bounded operator-approved change',
+          requestedBy: 'cognitive-reflexivity-engine',
+          domain: 'cognitive-reflexivity',
+          surface: 'a11oy-reflexivity',
+        });
+      } catch {
+        // Inbox is best-effort; the strategy still sits in the registry.
+      }
+    },
+  };
+}
+
+export function getReflexivityRuntime(): ReflexivityRuntime {
+  if (_runtime) return _runtime;
+
+  const recent: Signal[] = [];
+  const recentUnsub = defaultSignalBus.on('cognitive-reflexive', (s) => {
+    recent.push(s);
+    if (recent.length > RECENT_RING_SIZE) recent.splice(0, recent.length - RECENT_RING_SIZE);
+  });
+
+  const engine = new CognitiveReflexivityEngine({
+    bus: defaultSignalBus,
+    registry: defaultStrategyRegistry,
+    monologue: buildMonologueAdapter(),
+    approvalGate: buildApprovalGate(),
+  });
+  engine.start();
+
+  const consolidationStore = new InMemoryConsolidationStore();
+  const consolidationTimer = setInterval(() => {
+    void runConsolidationCycle(consolidationStore).catch(() => {});
+  }, CONSOLIDATION_INTERVAL_MS);
+  if (typeof consolidationTimer.unref === 'function') consolidationTimer.unref();
+
+  _runtime = {
+    engine,
+    registry: defaultStrategyRegistry,
+    consolidationStore,
+    recentSignals: () => [...recent].reverse(),
+    computeHealth: () => {
+      const m = engine.metrics();
+      return computeHealthScore(
+        {
+          signalsObserved: m.signalsObserved,
+          signalsActedOn: m.signalsActedOn,
+          dialecticInvocations: m.dialecticInvocations,
+          consolidationCycles: { ok: 0, fail: 0 },
+        },
+        defaultStrategyRegistry,
+      );
+    },
+    shutdown() {
+      try {
+        engine.stop();
+      } catch {}
+      try {
+        recentUnsub();
+      } catch {}
+      try {
+        clearInterval(consolidationTimer);
+      } catch {}
+      _runtime = null;
+    },
+  };
+  return _runtime;
+}

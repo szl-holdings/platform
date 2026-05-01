@@ -1,0 +1,1052 @@
+[
+  {
+    "searchAnswer": "# Airbyte Open Source Data Integration Platform — 2025 Connector Model Architecture\n\nAirbyte's connector architecture is a layered, modular system designed to handle everything from simple REST APIs to high-throughput CDC database pipelines. Here's a comprehensive breakdown:\n\n---\n\n## 🏗️ 1. Core Platform Architecture\n\nAirbyte's architecture is modular and separates concerns in a way developers appreciate:\n- **Scheduler** — Orchestrates sync jobs either on a schedule (cron) or ad hoc via API/CLI.\n- **Workers** — Run connectors in isolated Docker containers, ensuring fault isolation and platform neutrality.\n- **Database** — Tracks connection metadata, logs, sync history, and schemas.\n- **UI / CLI / API Layer** — Offers complete control for ops engineers and developers to automate, monitor, and extend.\n\nEach component is independently replaceable or extendable. For example, you can hook in a custom logging service, integrate with your own job scheduler, or containerize the entire stack for Kubernetes deployment.\n\n---\n\n## 🔌 2. What Is a Connector?\n\nAirbyte's library of connectors is used by the data replication platform. A connector is a tool to pull data from a source or push data to a destination.\n\nAirbyte provides a catalog of **600+ connectors** for APIs, databases, data warehouses, data lakes, and AI applications.\n\nConnectors have different **support levels**: Airbyte, Marketplace, Enterprise, and Custom.\n\n---\n\n## ⚙️ 3. Three Connector Frameworks (2025 Model)\n\nThere are **three main frameworks** for building Airbyte connectors: the **Declarative Manifest Framework** (low-code), the **Python CDK Framework** (full-code), and the **Bulk CDK Framework** (for high-performance CDC and database operations). Each framework has distinct architectural characteristics and decision criteria for choosing between them.\n\n---\n\n### 🟢 Framework 1: No-Code Connector Builder\nAirbyte's low-code framework enables you to build source connectors for REST APIs via a **connector builder UI** or by modifying boilerplate YAML files via terminal or text editor.\n\nIn 2025, Airbyte aligned the Connector Builder's user interface with the YAML specification it represents. You can now switch intuitively between UI and YAML modes, and virtually all capabilities of YAML mode are available in the UI.\n\nKey 2025 upgrades to the Connector Builder:\n- The **Authenticator panel** handles authentication for each stream. Each stream can use a different authentication method if needed.\n- **OAuth 2.0 flows** are now fully supported in the Connector Builder, including in asynchronous streams.\n- The **Parent Streams** and **Parameterized Requests** panels are now merged into the **Partition Router** panel.\n- A new **Advanced panel** introduces capabilities like file transfers, previously only available in YAML mode.\n\n---\n\n### 🟡 Framework 2: Low-Code CDK (Declarative / Python CDK)\n`airbyte_cdk/sources/declarative` is the **low-code CDK**. It works on top of Airbyte Python CDK, but provides a declarative manifest language to define streams, operations, etc. — making it easier to build connectors without writing Python code.\n\nThe low-code CDK is a part of the Python CDK that provides a **mapping from connector manifest YAML files to actual behavior implementations**.\n\n---\n\n### 🔴 Framework 3: Full-Code Python CDK\nThe **Airbyte Python CDK** is a framework for building Airbyte API Source Connectors. It provides a set of classes and helpers that make it easy to build a connector against an HTTP API (REST, GraphQL, etc), or a generic Python source connector.\n\nThe Python CDK has specialized sub-modules:\n\n| Sub-module | Purpose |\n|---|---|\n| `airbyte_cdk/sources/declarative` | Low-code CDK using declarative YAML manifests |\n| `airbyte_cdk/sources/concurrent_source` | Concurrent CDK — reads streams concurrently per slice/partition |\n| `airbyte_cdk/sources/file_based` | File-based sources (S3, Azure, GCS, etc.) |\n| `airbyte_cdk/destinations` | Destination connector support (e.g., vector DB destinations) |\n| `airbyte_cdk/models` | Exposes `airbyte_protocol.models` |\n\nThe **Concurrent CDK** supports reading data from streams concurrently per slice/partition — useful for connectors with high throughput and high number of records.\n\nThe **File-based CDK** (`airbyte_cdk/sources/file_based`) handles sources like S3, Azure, GCS, etc.\n\n---\n\n### 🔵 Framework 4: Bulk CDK (Kotlin — High-Performance)\nThe **Bulk Load CDK** is a set of libraries and resources for building **destinations** using the Kotlin language. The **Bulk Extract CDK** is a set of libraries and resources for building **sources** using the Kotlin language.\n\nThis framework is purpose-built for high-performance CDC (Change Data Capture) and large-scale database operations.\n\n---\n\n## 🐳 4. Dockerized, Language-Agnostic Connector Model\n\nThanks to its **Dockerized connector model**, you can write a connector in any language — Python, Java, Go, Node.js, Rust — and plug it into the system without worrying about compatibility.\n\nEach connector handles **schema discovery, stateful syncs, error retries, and metadata logging** out-of-the-box.\n\n---\n\n## 🛠️ 5. Three Ways to Build a Connector (Speed Tiers)\n\nAirbyte offers three ways to build a connector:\n1. **No-code Connector Builder** — in less than 10 minutes\n2. **Low-code CDK** — in less than 30 minutes\n3. **Language-specific CDKs** — in about 3 hours\n\n---\n\n## 📦 6. Connector Support Levels\n\n| Level | Description |\n|---|---|\n| **Airbyte** | Officially maintained by the Airbyte team |\n| **Marketplace** | Community-contributed and published |\n| **Enterprise** | For enterprise-specific use cases |\n| **Custom** | Private connectors in your own workspace |\n\nAirbyte's connectors are open source. You can build new connectors or contribute fixes and features to existing connectors. You can add your changes to Airbyte's public connector catalog to help others.\n\n---\n\n## 🤖 7. AI Agent Integration (2025 Addition)\n\nFor building AI agents that need real-time business data, the open-source **Airbyte Agent SDK** (`uv pip install airbyte-agent-sdk`) works with pydantic-ai, LangChain, OpenAI Agents, and FastMCP — enabling connector calls to be turned into LLM tools.\n\n---\n\n## 📜 8. Licensing\n\nAirbyte uses the **Elastic License v2 (ELv2)** for its core platform, with its **connectors remaining MIT-licensed**.\n\n---\n\n## 🔄 9. Sync Modes\n\n| Mode | Description |\n|---|---|\n| **Full Refresh** | Re-syncs all data from source on every run |\n| **Incremental** | Only syncs new/changed records using cursor fields |\n| **CDC (Change Data Capture)** | Real-time, log-based streaming of DB changes |\n\nThe platform also supports **Change Data Capture (CDC)** and data logging, providing real-time data synchronization capabilities.\n\n---\n\n## 📐 Architecture Summary Diagram\n\n```\n┌─────────────────────────────────────────────────────────────────┐\n│                        AIRBYTE PLATFORM                         │\n│                                                                 │\n│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │\n│  │Scheduler │  │ Workers  │  │ Database │  │  UI/CLI/API  │   │\n│  │(cron/API)│  │(Docker)  │  │(metadata)│  │    Layer     │   │\n│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │\n│                                                                 │\n│  ┌─────────────────── CONNECTOR LAYER ─────────────────────┐   │\n│  │                                                         │   │\n│  │  ┌──────────────────┐  ┌──────────────────────────┐    │   │\n│  │  │ SOURCE Connectors│  │ DESTINATION Connectors   │    │   │\n│  │  │  (600+ built-in) │  │  (Warehouses, Lakes, AI) │    │   │\n│  │  └──────────────────┘  └──────────────────────────┘    │   │\n│  │                                                         │   │\n│  │  ┌────────────────── CDK FRAMEWORKS ───────────────┐   │   │\n│  │  │ No-Code Builder │ Low-Code CDK │ Python CDK     │   │   │\n│  │  │   (YAML/UI)     │  (Declarative│ Bulk CDK(Kotlin│   │   │\n│  │  │   < 10 min      │   YAML)      │ CDC/DB)        │   │   │\n│  │  │                 │   < 30 min   │ ~3 hrs         │   │   │\n│  │  └─────────────────────────────────────────────────┘   │   │\n│  └─────────────────────────────────────────────────────────┘   │\n│                                                                 │\n│  ┌────────────── DEPLOYMENT OPTIONS ───────────────────────┐   │\n│  │  Self-hosted │ Kubernetes │ Docker Compose │ Cloud SaaS │   │\n│  └─────────────────────────────────────────────────────────┘   │\n└─────────────────────────────────────────────────────────────────┘\n```\n\n---\n\nThis architecture gives Airbyte its key strength: 600+ pre-built connectors, an extensible SDK, ELT-first design, CDC, flexible deployment, robust observability, enterprise-grade security, and an active community — all through an open-source core — without vendor lock-in. The platform scales from startup proof-of-concepts to enterprise production workloads while maintaining consistent functionality across deployment options.",
+    "resultPages": [
+      {
+        "title": "Open Source Data Pipeline | Airbyte",
+        "url": "https://airbyte.com/solutions/airbyte-open-source",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - airbytehq/airbyte: The leading data integration platform for ETL / ELT data pipelines from APIs, databases & files to data warehouses, data lakes & data lakehouses. Both self-hosted and Cloud-hosted. · GitHub",
+        "url": "https://github.com/airbytehq/airbyte",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte 2.0 | Airbyte Docs",
+        "url": "https://docs.airbyte.com/release_notes/v-2.0",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte Review 2025: Is This Open‑Source ELT Platform Worth It?",
+        "url": "https://sider.ai/blog/ai-tools/airbyte-review-2025-is-this-open-source-elt-platform-worth-it",
+        "snippet": ""
+      },
+      {
+        "title": "Top Features to Look for in Open-Source Data Integration Tools | Airbyte",
+        "url": "https://airbyte.com/data-engineering-resources/open-source-data-integration-tools",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte | Open-Source Data Integration Platform | ELT Tool",
+        "url": "https://airbyte.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Data replication connectors | Airbyte Docs",
+        "url": "https://docs.airbyte.com/integrations",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte: Open‑Source Data Integration for Modern Teams",
+        "url": "https://www.gocodeo.com/post/what-is-airbyte-open-source-data-integration-for-modern-teams",
+        "snippet": ""
+      },
+      {
+        "title": "Understanding Airbyte: Features, Architecture, and Use Cases",
+        "url": "https://celerdata.com/glossary/airbyte",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte: Open-Source Data Movement Infrastructure | Milvus Documentation",
+        "url": "https://milvus.io/docs/integrate_with_airbyte.md",
+        "snippet": ""
+      },
+      {
+        "title": "Connector Development Kit | Airbyte Docs",
+        "url": "https://docs.airbyte.com/platform/connector-development/cdk-python",
+        "snippet": ""
+      },
+      {
+        "title": "airbyte-cdk · PyPI",
+        "url": "https://pypi.org/project/airbyte-cdk/",
+        "snippet": ""
+      },
+      {
+        "title": "No Code Integration | Build A Custom Data Connector in Minutes",
+        "url": "https://airbyte.com/product/connector-development-kit",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - mrhamburg/airbyte.cdk.dotnet: Airbyte dotnet/c# Connector Development Kit · GitHub",
+        "url": "https://github.com/mrhamburg/airbyte.cdk.dotnet",
+        "snippet": ""
+      },
+      {
+        "title": "Connector Development | Airbyte Docs",
+        "url": "https://docs.airbyte.com/connector-development/",
+        "snippet": ""
+      },
+      {
+        "title": "airbyte/docs/connector-development/cdk-dotnet/README.md at gitbook/v1 · airbytehq/airbyte",
+        "url": "https://github.com/airbytehq/airbyte/blob/gitbook/v1/docs/connector-development/cdk-dotnet/README.md",
+        "snippet": ""
+      },
+      {
+        "title": "Connector Development Frameworks | airbytehq/airbyte | DeepWiki",
+        "url": "https://deepwiki.com/airbytehq/airbyte/2-connector-framework",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - airbytehq/airbyte-python-cdk: The Python CDK empowers hundreds of Airbyte connectors, including low-code and no-code connectors. · GitHub",
+        "url": "https://github.com/airbytehq/airbyte-python-cdk",
+        "snippet": ""
+      },
+      {
+        "title": "Developing Connectors Locally | Airbyte Docs",
+        "url": "https://docs.airbyte.com/platform/connector-development/local-connector-development",
+        "snippet": ""
+      },
+      {
+        "title": "Low-code connector development | Airbyte Docs",
+        "url": "https://docs.airbyte.com/platform/connector-development/config-based/low-code-cdk-overview",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# Fivetran: Data Sync, Change Data Capture & Schema Evolution (2025)\n\nA comprehensive deep-dive into how Fivetran handles the full lifecycle of data movement — from capturing changes at the source to gracefully evolving schemas at the destination.\n\n---\n\n## 🔄 1. How CDC Works in Fivetran\n\n### Core Mechanism: Log-Based, Binary Reading\n\nFivetran uses **log-based, binary readers** to capture data changes directly from source databases in real time — delivering high-fidelity, low-latency data replication at scale without needing to query tables or taking performance hits.\n\nWhen Fivetran connects to a source database like PostgreSQL, MySQL, or SQL Server with CDC enabled, it establishes a **replication slot or binlog position** that marks where in the transaction log to begin reading. As transactions occur, Fivetran continuously reads the log, identifies data modifications, and stages them for replication — providing minimal impact on source database performance, capture of all changes including deletes, and preservation of transaction ordering.\n\n### The ELT Data Flow\n\nFivetran reads changes from source transaction logs, transforms them into a standardized format, and writes them to **staging tables** in the destination (e.g., Snowflake). From staging, Fivetran applies transformations and merges changes into final destination tables using Snowflake's `MERGE` statement — handling upsert logic by inserting new records and updating existing ones based on primary keys.\n\n### CDC Methodology Comparison\n\n| Method | How It Works | Source Impact |\n|---|---|---|\n| **Log-Based (Fivetran default)** | Reads binary transaction logs directly | Near-zero load on source |\n| **Trigger-Based** | Uses DB triggers writing to a changelog table | Doubles write operations — degrades performance |\n| **Query-Based (Polling)** | Repeatedly queries tables for recent timestamps | High constant load on production systems |\n\nLog-based CDC reads the database's internal transaction log — the definitive record of every change — **without executing a single query against the production tables**. This architectural separation keeps source database load near zero and delivers the highest level of data integrity, capturing every modification including hard deletes, in the correct transactional order.\n\n---\n\n## ⚡ 2. CDC Update Methods by Database\n\n### Supported Sync Methods\n\nFivetran SQL Server, Oracle, MySQL, and MariaDB connectors use **binary log readers**, which implement logic to parse changes from the transaction log. The binary log reader runs **outside the database**, reading transaction logs directly at the file system level.\n\nFor PostgreSQL, Fivetran offers three incremental update methods: **Logical Replication of the WAL** using the pgoutput plugin, **XMIN**, and **Teleport Sync**.\n\n> **2025 Update:** As of November 2025, Fivetran updated the PostgreSQL connection setup form to support only **two update methods: Logical Replication and Query-Based**. Previously, XMIN, Fivetran Teleport Sync, and Logical Replication were all supported. New connections created after November 5th, 2025, get this functionality by default.\n\n> **2025 Update:** The **Binary Log Reader** incremental sync method for the SQL Server connector is now **generally available** as of December 2025. This proprietary method reads your database's transaction log files in their original binary format.\n\n> **2025 Update:** The Binary Log Reader for Oracle was expanded in 2025 to include support for **Oracle Database 12c** (previously only Oracle 19c) and **Windows and AIX platforms** (previously Linux only).\n\n---\n\n## 🏎️ 3. CDC Performance & High-Volume Architecture\n\nFivetran's **High-Volume Agent (HVA) connectors** use a distributed architecture. The capture agent runs close to the source, providing local access to transaction logs at the file system level (lowest latency and maximum bandwidth), filtering data before sending downstream, and compressing change data for a **5–10x reduction** in data transmitted.\n\n### Sync Frequency\n\nFivetran can replicate CDC data changes as often as **every five minutes**, allowing you to make on-the-fly business decisions for maximum impact.\n\n### What CDC Captures\n\nCDC captures every data change, including **hard and soft deletes**, leading to more reliable business insights and stronger decision-making.\n\nFivetran adds two system columns to every synced table:\n- **`_FIVETRAN_DELETED`** — Boolean flag marking soft-deleted rows\n- **`_FIVETRAN_SYNCED`** — Timestamp of when the row was last synced\n\n---\n\n## 🧬 4. Schema Evolution — Automated Handling\n\nThis is one of Fivetran's flagship capabilities.\n\nFivetran solves the problem of schema changes by **automatically, incrementally, and comprehensively propagating schema changes** from the source to your data warehouse.\n\n### What Happens for Each Change Type\n\n| Schema Event | Fivetran Behavior |\n|---|---|\n| **New column added** | Detected automatically; column added in destination with backfill if applicable |\n| **Column removed** | Soft-deleted — column kept, future records set to `NULL` |\n| **Data type change** | Old column retained; new column created to accommodate both old and new data types |\n| **Column renamed** | Old column stays; renamed column appears as a **new column** in destination |\n| **Column dropped** | Column is **not dropped** in destination; values are preserved |\n| **Row deleted** | Row is **not deleted** in destination; `_FIVETRAN_DELETED` is set to `true` |\n\nSpecifically: if your source **adds a new column**, Fivetran detects the change and adds the same column in the warehouse, backfilling data if applicable. If a **column is removed**, Fivetran won't delete it but \"soft-deletes\" it and marks future records `NULL`. If a **column's data type changes**, Fivetran retains the old column and creates a new column with a data type accommodating both old and new data.\n\nWhen a column is **renamed** at the source, the renamed column appears as a **new column** in the destination. For example, renaming `ACT_QUANTITY` to `ACTIVITY_QTY` results in both column names existing at the destination, with new values populating the new column name.\n\n---\n\n## 🎛️ 5. Schema Change Handling Policies\n\nFivetran gives you fine-grained control over what happens when new schemas, tables, or columns appear at the source.\n\nYou can configure three modes:\n- **Allow all new data** — New schemas, tables, and new columns for existing tables are all synced into the destination.\n- **Allow new columns** — Only new columns for existing tables are synced; new schemas and configurable tables are blocked.\n- **Block all new data** — New schemas, configurable tables, and new columns for existing tables are not synced.\n\n### Via API (`schema_change_handling`)\n\nThe `schema_change_handling` API parameter accepts: `ALLOW_ALL` (all new schemas, tables, and columns are included), `ALLOW_COLUMNS` (new schemas/tables are excluded but new columns are included), or `BLOCK_ALL` (all new schemas, tables, and columns after initial setup are excluded from syncs).\n\n---\n\n## 📊 6. Tracking Schema Changes in the Destination\n\nThe **Fivetran Platform Connector** captures all schema and table changes made to your destination. To see what changed and when, query the `LOG` table for specific events.\n\n```sql\n-- Track all schema-level changes\nSELECT event, message_data, message_event, time_stamp\nFROM <destination_db>.<destination_schema>.log\nWHERE message_event IN (\n  'create_schema', 'create_table', 'drop_table', 'alter_table'\n)\nORDER BY time_stamp DESC;\n```\n\n---\n\n## ⚠️ 7. Key Gotchas & Trade-offs\n\n| Issue | Details |\n|---|---|\n| **Schema drift breaking downstream** | Automatic propagation reduces operational burden, but automatic schema changes can break downstream models if teams don't manage contracts or testing in dbt. |\n| **SQL Server column modifications** | To make DDL changes on a SQL Server table synced with CT or CDC, you must **disable CT or CDC on the table** before applying any changes. |\n| **Column renames are additive** | A renamed column at source becomes a *new* column at destination — old column stays, consuming storage. |\n| **Deletes are soft** | Rows are never physically deleted at the destination; they're flagged with `_FIVETRAN_DELETED`. |\n| **PostgreSQL sync method consolidation (2025)** | XMIN and Teleport Sync deprecated; only Logical Replication and Query-Based going forward. |\n\n---\n\n## 🏗️ Summary Architecture Diagram\n\n```\nSource DB (Postgres / MySQL / SQL Server / Oracle)\n        │\n        │  Binary Log / WAL / Binlog\n        ▼\n  Fivetran CDC Engine\n  ┌─────────────────────────────────┐\n  │  • Reads transaction logs       │\n  │  • No queries on prod tables    │\n  │  • Captures INSERTs/UPDATEs/    │\n  │    DELETEs + hard deletes       │\n  │  • Detects schema changes       │\n  └─────────────────────────────────┘\n        │\n        │  Staged changes (standardized format)\n        ▼\n  Destination (Snowflake / BigQuery / Redshift / Databricks)\n  ┌─────────────────────────────────┐\n  │  • MERGE upserts via primary key│\n  │  • Soft-delete flagging         │\n  │  • Schema auto-propagation      │\n  │  • _FIVETRAN_DELETED/_SYNCED    │\n  └─────────────────────────────────┘\n```\n\nFivetran's CDC + schema evolution combination means you rarely need to touch pipelines after initial setup — but you should wire up dbt tests and monitor `_FIVETRAN_DELETED` flags to avoid silent data quality issues downstream.",
+    "resultPages": [
+      {
+        "title": "Change data capture (CDC): Tools, benefits, and best practices",
+        "url": "https://www.fivetran.com/blog/change-data-capture-what-it-is-and-how-to-use-it",
+        "snippet": ""
+      },
+      {
+        "title": "10 Top CDC Tools and How To Choose the Right Platform",
+        "url": "https://www.fivetran.com/learn/cdc-tools",
+        "snippet": ""
+      },
+      {
+        "title": "Optimize Log-Based Change Data Capture Performance",
+        "url": "https://fivetran.com/docs/connectors/databases/troubleshooting/optimize-cdc-performance",
+        "snippet": ""
+      },
+      {
+        "title": "Warning - Cannot Select - Change Tracking or Change Data Capture Must Be Enabled",
+        "url": "https://fivetran.com/docs/connectors/databases/sql-server/troubleshooting/ct-cdc-must-be-enabled",
+        "snippet": ""
+      },
+      {
+        "title": "CDC Tools: Best 8 Change Data Capture Solutions",
+        "url": "https://www.fivetran.com/learn/cdc-tools-2024",
+        "snippet": ""
+      },
+      {
+        "title": "Change Data Capture",
+        "url": "https://www.fivetran.com/blog-topics/change-data-capture",
+        "snippet": ""
+      },
+      {
+        "title": "Fivetran: Change Data Capture (CDC) Incremental Data Load | by Srikanth Bhadragir | Medium",
+        "url": "https://medium.com/@srikanth44/fivetran-change-data-capture-cdc-incremental-data-load-92a60a751564",
+        "snippet": ""
+      },
+      {
+        "title": "How to Implement a CDC Data Pipeline in Snowflake Using Fivetran",
+        "url": "https://mljourney.com/how-to-implement-a-cdc-data-pipeline-in-snowflake-using-fivetran/",
+        "snippet": ""
+      },
+      {
+        "title": "How Can I Modify Columns in a SQL Server Table That Fivetran Syncs With CT or CDC?",
+        "url": "https://fivetran.com/docs/connectors/databases/sql-server/troubleshooting/table-ct-and-cdc-alteration",
+        "snippet": ""
+      },
+      {
+        "title": "Connector Improvement: Salesforce Change Data Capture – Fivetran Support",
+        "url": "https://support.fivetran.com/hc/en-us/community/posts/33323727390743-Connector-Improvement-Salesforce-Change-Data-Capture",
+        "snippet": ""
+      },
+      {
+        "title": "October 2025",
+        "url": "https://fivetran.com/docs/changelog/2025/october-2025",
+        "snippet": ""
+      },
+      {
+        "title": "How to Think About Schema Changes | Blog | Fivetran",
+        "url": "https://www.fivetran.com/blog/schema-changes",
+        "snippet": ""
+      },
+      {
+        "title": "Release Notes - 2025",
+        "url": "https://fivetran.com/docs/changelog/2025",
+        "snippet": ""
+      },
+      {
+        "title": "How to Set up a Schema Before the Initial Sync",
+        "url": "https://fivetran.com/docs/rest-api/tutorials/schema-status",
+        "snippet": ""
+      },
+      {
+        "title": "How Can I Track Schema Changes in My Destination?",
+        "url": "https://fivetran.com/docs/logs/faq/track-schema-changes",
+        "snippet": ""
+      },
+      {
+        "title": "Fivetran Review 2025 - Features, Pricing & Alternatives | Workflow Automation",
+        "url": "https://workflowautomation.net/reviews/fivetran",
+        "snippet": ""
+      },
+      {
+        "title": "Connection Schemas",
+        "url": "https://fivetran.com/docs/using-fivetran/fivetran-dashboard/connectors/schema",
+        "snippet": ""
+      },
+      {
+        "title": "July 2025",
+        "url": "https://fivetran.com/docs/changelog/2025/july-2025",
+        "snippet": ""
+      },
+      {
+        "title": "Release Notes",
+        "url": "https://fivetran.com/docs/changelog",
+        "snippet": ""
+      },
+      {
+        "title": "Fivetran Deep Dive: Data Pipeline Architecture Explained - Startupik | Startup magazine",
+        "url": "https://startupik.com/fivetran-deep-dive-data-pipeline-architecture-explained/",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# Singer Tap & Target Specification — Complete Reference\n\n## 🎵 What is Singer?\n\nSinger describes how data extraction scripts — called **\"taps\"** — and data loading scripts — called **\"targets\"** — should communicate, allowing them to be used in any combination to move data from any source to any destination.\n\nStitch originally used the standard for its service, then open-sourced it and allowed everybody to contribute. Nowadays, Singer is the de facto standard for building data pipelines.\n\n---\n\n## 🏗️ Core Architecture\n\nThe Singer spec describes how data extraction scripts (Taps) and data loading scripts (Targets) should communicate using a **standard JSON-based data format over stdout**.\n\nSince taps and targets communicate via the Singer spec, they can be used together to move data between systems — done on the command line by sending messages from a tap to a target using a Unix pipe (`|`). A pipe takes information from `stdout` of one process (the tap) and redirects it to `stdin` of a second process (the target). This composability means taps and targets can be composed as simply as `tap | target`.\n\n```bash\ntap-mysql --config tap_config.json | target-csv --config target_config.json\n```\n\n---\n\n## 🔌 Taps (Extraction Scripts)\n\nA Tap is an application that takes a **configuration file** and an **optional state file** as input and produces an ordered stream of **record, state, and schema messages** as output.\n\nA Tap may be implemented in any programming language. Taps are designed to produce a stream of data from sources like databases and web service APIs for use in a data integration or ETL pipeline.\n\n### Tap Invocation Syntax\n\n```bash\ntap --config CONFIG [--state STATE] [--catalog CATALOG]\n```\n\n| Argument | Required | Description |\n|---|---|---|\n| `--config` | ✅ Yes | JSON file with credentials/params for the data source |\n| `--state` | Optional | JSON file to resume from a previous run |\n| `--catalog` | Optional | JSON file to filter which streams to sync |\n\nSTATE is an optional argument pointing to a JSON file that the Tap can use to remember information from the previous invocation, like the point where it left off. CATALOG is an optional argument pointing to a JSON file that the Tap can use to filter which streams should be synced.\n\n---\n\n## 🎯 Targets (Loading Scripts)\n\nTargets are designed to consume streams generated by a Tap — like loading data into a Postgres or Snowflake database. Following the Singer specification, every Target can consume messages from every Tap, making it possible to replicate data from various sources to various destinations.\n\nTargets ingest the 3 messages from standard input (`stdin`). Targets can optionally accept a configuration file if the target system requires authentication information. For a simple target like a CSV file this is not required, but for a more complicated target like a SaaS database, the config file is required.\n\nUnlike taps, targets do not take a state file. Targets are expected to read in the state messages from `stdin`, but typically they do not do anything with the state messages beyond sending them to `stdout`. This is done once all data that appeared in the stream before the state message has been processed by the Target. Targets do not take a schema file.\n\n---\n\n## 📨 The 3 Message Types\n\nThe output is made of three types of JSON messages: **SCHEMA**, **RECORD**, and **STATE** — each essential for the Singer pipeline to function correctly.\n\n---\n\n### 1. 📋 SCHEMA Message\nSchema messages define the structure of the data sent in a record message. Every schema message must have the following properties: `stream` (the unique identifier of the data stream), `schema` (a JSON Schema describing the record), and `key_properties` (a list of strings indicating which properties make up the primary key for the stream).\n\n```json\n{\n  \"type\": \"SCHEMA\",\n  \"stream\": \"users\",\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"id\":         { \"type\": \"integer\" },\n      \"name\":       { \"type\": \"string\" },\n      \"created_at\": { \"type\": \"string\", \"format\": \"date-time\" }\n    }\n  },\n  \"key_properties\": [\"id\"]\n}\n```\n\n---\n\n### 2. 📦 RECORD Message\nA record is JSON-encoded data of any kind. Each record message contains a stream identifier which specifies the unique name of that data. For data coming from an API this can be thought of as the name of the endpoint; for data coming from a database this might be the table name.\n\n```json\n{\n  \"type\": \"RECORD\",\n  \"stream\": \"users\",\n  \"record\": {\n    \"id\": 42,\n    \"name\": \"Alice\",\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  }\n}\n```\n\n---\n\n### 3. 🔖 STATE Message\nState messages keep track of the last successful data sync point. This allows taps to resume data extraction from where they left off, ensuring data integrity and avoiding duplicates.\n\n```json\n{\n  \"type\": \"STATE\",\n  \"value\": {\n    \"bookmarks\": {\n      \"users\": { \"updated_at\": \"2024-01-15T10:30:00Z\" }\n    }\n  }\n}\n```\n\nA Tap that wishes to persist state should periodically write STATE messages to `stdout` as it processes the stream, and should expect the file named by the `--state` argument to have the same format as the value of the STATE messages it emits.\n\n---\n\n## 🗂️ Catalog File (Discovery Mode)\n\nWhen discovery mode is run, the tap should write to stdout a list of streams — known as the **catalog** — with each entry containing some basic information about the stream and a JSON schema describing the stream's data.\n\n```bash\n# Run tap in discovery mode to generate catalog\ntap-foo --config config.json --discover > catalog.json\n```\n\nThe structure of a catalog file is a JSON object with a `streams` list containing information for each data stream. Each item has required properties: `stream` (the primary identifier passed to the target) and `tap_stream_id` (the unique identifier of the stream, which can differ from the stream name).\n\nThe metadata for each stream object can be modified to select whether a stream and/or its fields should be replicated, and how the data should be replicated (`FULL TABLE` vs `INCREMENTAL`).\n\n```json\n{\n  \"streams\": [\n    {\n      \"stream\": \"users\",\n      \"tap_stream_id\": \"mydb-users\",\n      \"schema\": { \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"integer\" } } },\n      \"metadata\": [\n        {\n          \"breadcrumb\": [],\n          \"metadata\": {\n            \"selected\": true,\n            \"replication-method\": \"INCREMENTAL\",\n            \"replication-key\": \"updated_at\"\n          }\n        }\n      ]\n    }\n  ]\n}\n```\n\n---\n\n## 🔄 Replication Methods\n\n| Method | Description |\n|---|---|\n| `FULL_TABLE` | Re-syncs the entire table/endpoint on every run |\n| `INCREMENTAL` | Only syncs new/changed records using a `replication-key` (e.g., `updated_at`, `id`) |\n\n---\n\n## ⚙️ Key Design Principles\n\n| Principle | Detail |\n|---|---|\n| **Language Agnostic** | Singer doesn't depend on particular languages, platforms, or SDKs. |\n| **Composable** | Any tap works with any target via Unix pipes |\n| **JSON-based** | Singer applications communicate with JSON, making them easy to work with in any programming language. |\n| **Schema Support** | Singer supports JSON Schema to provide rich data types and rigid structure when needed. |\n| **Incremental State** | Singer makes it easy to maintain state between invocations to support incremental extraction. |\n\n---\n\n## 🐍 Python Quick Start\n\nSinger has a number of Python libraries you can install based on your use case. The utility library for Singer is known as `singer-python`, while the taps and targets have separate libraries.\n\n```bash\n# Install the Singer Python library\npip install singer-python\n\n# Example: Install a tap and a target\npip install tap-mysql\npip install target-csv\n```\n\n```python\nimport singer\n\n# Write a SCHEMA message\nsinger.write_schema(\n    stream_name=\"users\",\n    schema={\n        \"type\": \"object\",\n        \"properties\": {\n            \"id\":   {\"type\": \"integer\"},\n            \"name\": {\"type\": \"string\"}\n        }\n    },\n    key_properties=[\"id\"]\n)\n\n# Write RECORD messages\nsinger.write_records(\"users\", [\n    {\"id\": 1, \"name\": \"Alice\"},\n    {\"id\": 2, \"name\": \"Bob\"},\n])\n\n# Write a STATE message (bookmark)\nsinger.write_state({\"users\": {\"last_id\": 2}})\n```\n\n---\n\n## 🌐 Ecosystem & Tools\n\n| Resource | URL |\n|---|---|\n| Official Spec (GitHub) | https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md |\n| Singer.io Homepage | https://www.singer.io |\n| Meltano Hub (Tap/Target Directory) | https://hub.meltano.com/singer/spec/ |\n| singer-python Library | https://github.com/singer-io/singer-python |\n| Singer GitHub Org (206+ repos) | https://github.com/singer-io |\n\nThe best way to find singer scripts nowadays is the **Meltano Hub**. There are many ways to run Singer scripts — examples are **Meltano**, **Kestra**, **Mage**, and many more.",
+    "resultPages": [
+      {
+        "title": "Singer | Open Source ETL",
+        "url": "https://www.singer.io/",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - singer-io/getting-started: This repository is a getting started guide to Singer. · GitHub",
+        "url": "https://github.com/singer-io/getting-started",
+        "snippet": ""
+      },
+      {
+        "title": "Singer.io — PipelineWise documentation",
+        "url": "https://transferwise.github.io/pipelinewise/concept/singer.html",
+        "snippet": ""
+      },
+      {
+        "title": "How to Use Singer for Your ETL Pipeline: Step-by-Step Tutorial",
+        "url": "https://blog.panoply.io/etl-with-singer-a-tutorial",
+        "snippet": ""
+      },
+      {
+        "title": "Singer spec",
+        "url": "https://hub.meltano.com/singer/spec/",
+        "snippet": ""
+      },
+      {
+        "title": "Taps & Targets: Simplify ETL Through Singer's Data Pipeline Blueprint",
+        "url": "https://www.datagibberish.com/p/singer-101",
+        "snippet": ""
+      },
+      {
+        "title": "Singer · GitHub",
+        "url": "https://github.com/singer-io",
+        "snippet": ""
+      },
+      {
+        "title": "Cheuk Ting Ho (She/Her) - Developing a tap and target for Singer.io - Open Source ETL - YouTube",
+        "url": "https://www.youtube.com/watch?v=SPMlbPsqa_k",
+        "snippet": ""
+      },
+      {
+        "title": "How Singer is changing the landscape of DataOps - Mighty Digital",
+        "url": "https://www.mighty.digital/blog/how-singer-is-changing-the-landscape-of-dataops",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - iyedsaadli/Singer_python_ETL: This repository is a getting started guide to Singer.",
+        "url": "https://github.com/iyedsaadli/Singer_python_ETL",
+        "snippet": ""
+      },
+      {
+        "title": "getting-started/docs/SPEC.md at master · singer-io/getting-started",
+        "url": "https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md",
+        "snippet": ""
+      },
+      {
+        "title": "Singer.io — PipelineWise documentation",
+        "url": "https://transferwise.github.io/pipelinewise/concept/singer.html",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - singer-io/getting-started: This repository is a getting started guide to Singer. · GitHub",
+        "url": "https://github.com/singer-io/getting-started",
+        "snippet": ""
+      },
+      {
+        "title": "Singer spec",
+        "url": "https://hub.meltano.com/singer/spec/",
+        "snippet": ""
+      },
+      {
+        "title": "getting-started/docs/RUNNING_AND_DEVELOPING.md at master · singer-io/getting-started",
+        "url": "https://github.com/singer-io/getting-started/blob/master/docs/RUNNING_AND_DEVELOPING.md",
+        "snippet": ""
+      },
+      {
+        "title": "getting-started/docs/DISCOVERY_MODE.md at master · singer-io/getting-started",
+        "url": "https://github.com/singer-io/getting-started/blob/master/docs/DISCOVERY_MODE.md",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - singer-io/tap-kafka · GitHub",
+        "url": "https://github.com/singer-io/tap-kafka",
+        "snippet": ""
+      },
+      {
+        "title": "getting-started/docs/SYNC_MODE.md at master · singer-io/getting-started",
+        "url": "https://github.com/singer-io/getting-started/blob/master/docs/SYNC_MODE.md",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - singer-io/tap-stripe: Singer.io tap for extracting data from Stripe.",
+        "url": "https://github.com/singer-io/tap-stripe",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - singer-io/tap-mysql: Singer.io Tap for MySQL",
+        "url": "https://github.com/singer-io/tap-mysql",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# Hightouch Reverse ETL: How It Works for Activating Warehouse Data (2025)\n\nHightouch is the leading platform for **Reverse ETL** — the practice of syncing your transformed, trusted data *out* of your data warehouse *into* the business tools your teams actually use. Here's a comprehensive breakdown:\n\n---\n\n## 🔄 What Is Reverse ETL?\n\nWhereas ELT reads data from SaaS tools and writes to the data warehouse, Reverse ETL reads from the data warehouse and writes to SaaS tools.\n\nReverse ETL is the process of moving your transformed data back into the tools that run business processes — usually SaaS tools used for growth, marketing, sales, and support. Instead of using dashboards to make decisions, Reverse ETL shifts the focus to putting your datasets to work through Operational Analytics — turning insights into action automatically.\n\n---\n\n## 🏗️ Core Architecture: The 4 Building Blocks\n\nReverse ETL runs on three building blocks — **sources**, **models**, and **syncs** — along with the **destinations** where data is activated.\n\n### 1. 📦 Sources\nA source is any system where your data resides. Common examples include Snowflake, BigQuery, Databricks, or PostgreSQL. Sources can also be files, APIs, or BI tools.\n\n### 2. 🧩 Models\nA model defines what data to query from a source. Models can represent users, events, products, or any other entity. Every model requires a unique primary key to identify each row and track changes between syncs.\n\nYou can define models two ways:\nBuild segments using SQL or a visual builder (depending on plan and setup). Use complex conditions based on product usage, revenue, or traits.\n\n### 3. 🔁 Syncs\nA sync defines how data appears in the destination and when. Multiple syncs can be created from the same model to support different use cases. For marketers, a sync is how that dataset shows up in tools like Braze, Salesforce, or Meta Ads so you can run campaigns with it.\n\n### 4. 🎯 Destinations\nReverse ETL works by querying against your data warehouse and writing the results of that query to the downstream tool of your choice. This destination can range from anything from a CRM like Salesforce or HubSpot to an ad platform like Facebook or Google to a lifecycle marketing tool like Braze or Iterable.\n\nHightouch has built an extensive integration catalog of 200+ data sources and destinations.\n\n---\n\n## ⚙️ How a Sync Actually Works (Step-by-Step)\n\nThe typical setup flow follows these steps:\n\n1. Connect Hightouch to your warehouse\n2. Connect Hightouch to your destination\n3. Create a data model or leverage an existing one\n4. Choose your primary key\n5. Create your sync and map your warehouse columns to your end destination fields\n6. Schedule your sync\n\n\n---\n\n## 🔍 Change Data Capture (CDC) — The Efficiency Engine\n\nTo operate efficiently (for speed and cost), Reverse ETL must figure out what changed in the warehouse and sync only the new information to downstream tools. Figuring out what's new is called **Change Data Capture (CDC)**. Without CDC, Reverse ETL would have to sync entire tables every time, which is not only slow but also cost and scale-prohibitive.\n\nBy default, CDC runs on Hightouch-managed infrastructure. For higher performance at scale, data teams can enable the **Lightning Sync Engine** to compute CDC directly in the warehouse.\n\n---\n\n## 🚀 Batch vs. Streaming (2025 Update)\n\nWhile much of Reverse ETL is batch, Hightouch also supports faster, near-real-time use cases: streaming or low-latency syncs for critical events (e.g., new signups, high-intent actions) and triggering personalized campaigns shortly after behaviors occur.\n\nFor same-session personalization, Hightouch has solved one of the most challenging problems in modern marketing technology: combining sub-second event processing with complete customer context from the data warehouse. The fundamental issue: data warehouses contain rich customer data but operate on batch timelines, while streaming systems process events in milliseconds but lack historical context.\n\n---\n\n## 🔒 Zero-Copy, No Data Storage\n\nHightouch is built to activate governed warehouse data with enterprise-grade security via a **warehouse-native, zero-copy architecture**: Hightouch connects directly to your warehouse or lake and activates data without creating a separate customer database. Data stays in your infrastructure. Hightouch runs queries and computes changes (diffs) either in your warehouse or on Hightouch infrastructure, depending on your configuration.\n\nWith SOC 2, HIPAA, and GDPR compliance, Hightouch ensures top-tier security by operating directly in your data warehouse without storing data, while providing granular access controls and robust data governance.\n\n---\n\n## 🤖 2025 Platform Expansion: Beyond Basic Reverse ETL\n\nFounded in 2018, Hightouch has repositioned from reverse ETL tool → composable CDP (2022) → \"agentic marketing platform\" (2025) — though the underlying architecture remains the same: query the warehouse, push results to external destinations.\n\nKey new capabilities in 2025:\n\n| Feature | What It Does |\n|---|---|\n| **Customer Studio** | No-code audience builder — marketers build segments without SQL |\n| **Adaptive Identity Resolution** | AI-powered deterministic + probabilistic identity matching within the warehouse |\n| **AI Decisioning** | Reinforcement learning for channel selection, send timing, offer ranking, next-best-action |\n| **Streaming Reverse ETL** | Sub-second sync latency for real-time personalization |\n\nInstead of manually defining segments and step-by-step journeys, marketers define the goals, guardrails, and content variants, and allow AI to auto-optimize interactions for each individual customer. This shift reduces the need for hands-on management of every touchpoint, allowing marketers to focus on broader strategic goals.\n\n---\n\n## 🛠️ Key Use Cases\n\n| Team | Use Case |\n|---|---|\n| **Marketing** | Lifecycle campaigns (onboarding, re-engagement) from product behavior signals |\n| **Sales** | Lead scoring and PQL identification pushed to HubSpot/Salesforce |\n| **Paid Acquisition** | Sync LTV & cohort data to Facebook/Google for lookalike audiences |\n| **Customer Success** | Account health dashboards, churn risk flags, upsell signals in CRM |\n| **RevOps** | Consistent metric definitions across all tools from a single warehouse source |\n\nOperationalize analytics by turning analytical models (churn prediction, LTV, propensity scores) into workflows that actually touch customers. Reduce integration backlog by managing a central Reverse ETL layer instead of one-off pipelines to every tool. Maintain a single source of truth — metrics and definitions stay consistent when they all come from the warehouse.\n\n---\n\n## 🏆 Industry Recognition (2025)\n\nHightouch's elevation to **Leader in the 2025 Gartner Magic Quadrant for Customer Data Platforms** is a milestone. This is Hightouch's first-ever appearance in the Magic Quadrant, and Gartner positioned the company squarely among Leaders, citing its Completeness of Vision and Ability to Execute — validating the warehouse-native, composable customer data activation approach.\n\n---\n\n## 💰 Pricing Summary\n\n\n- **Free/Starter**: Limited syncs and destinations — good for evaluation\n- **Growth/Team**: More destinations, higher sync volume, collaboration features\n- **Enterprise**: Custom pricing with SLAs, advanced governance, SSO\n\nCosts generally scale with number of destinations, sync frequency, data volume, and advanced features.\n\n\n> **TL;DR**: Hightouch Reverse ETL queries your warehouse (Snowflake, BigQuery, Databricks, Redshift), tracks only what changed via CDC, and pushes that data to 200+ business tools — without ever storing your data. In 2025, it's evolved into a full agentic marketing platform with AI Decisioning, streaming sync, and no-code audience building layered on top of the same core reverse ETL engine.",
+    "resultPages": [
+      {
+        "title": "Hightouch Reverse ETL | Sync data in minutes | Hightouch",
+        "url": "https://hightouch.com/platform/reverse-etl",
+        "snippet": ""
+      },
+      {
+        "title": "What is Reverse ETL? The Definitive Guide | Hightouch",
+        "url": "https://hightouch.com/blog/reverse-etl",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch: Reverse ETL Platform Explained - Startupik | Startup magazine",
+        "url": "https://startupik.com/hightouch-reverse-etl-platform-explained/",
+        "snippet": ""
+      },
+      {
+        "title": "The Complete Guide to Reverse ETL | Hightouch",
+        "url": "https://hightouch.com/resources/reverse-etl-whitepaper",
+        "snippet": ""
+      },
+      {
+        "title": "How to Use Hightouch for Reverse ETL with Databricks",
+        "url": "https://www.databricks.com/blog/2022/04/01/using-hightouch-for-reverse-etl-with-databricks.html",
+        "snippet": ""
+      },
+      {
+        "title": "What Is Hightouch? Features, Pricing, and Alternatives | CDP.com",
+        "url": "https://cdp.com/articles/what-is-hightouch/",
+        "snippet": ""
+      },
+      {
+        "title": "Reverse ETL 2.0: Streaming Is Here | Hightouch",
+        "url": "https://hightouch.com/blog/announcing-streaming-reverse-etl",
+        "snippet": ""
+      },
+      {
+        "title": "Reverse ETL vs ELT | Hightouch",
+        "url": "https://hightouch.com/blog/reverse-etl-vs-elt",
+        "snippet": ""
+      },
+      {
+        "title": "The Complete Reverse ETL Buyer's Guide | Hightouch",
+        "url": "https://hightouch.com/resources/reverse-etl-buyers-guide",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch",
+        "url": "https://www.braze.com/docs/partners/data_and_analytics/reverse_etl/hightouch",
+        "snippet": ""
+      },
+      {
+        "title": "Data activation overview | Hightouch Docs",
+        "url": "https://hightouch.com/docs/getting-started/concepts",
+        "snippet": ""
+      },
+      {
+        "title": "What Is Hightouch? Features, Pricing, and Alternatives | CDP.com",
+        "url": "https://cdp.com/articles/what-is-hightouch/",
+        "snippet": ""
+      },
+      {
+        "title": "Is Hightouch enterprise-ready? | Hightouch",
+        "url": "https://hightouch.com/blog/is-hightouch-enterprise-ready",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch + Data Teams | Activate your trusted data | Hightouch",
+        "url": "https://hightouch.com/solutions/data",
+        "snippet": ""
+      },
+      {
+        "title": "Batch | Hightouch × Batch: activate your warehouse Data",
+        "url": "https://batch.com/blog/posts/hightouch-batch-from-data-warehouse-to-real-time-crm-activation",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch: Unlocking customer data at scale",
+        "url": "https://www.nvc.vc/stories/hightouch",
+        "snippet": ""
+      },
+      {
+        "title": "How Hightouch brings complete customer history from the data warehouse to real-time marketing | Hightouch",
+        "url": "https://hightouch.com/blog/same-session-architecture",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch | LinkedIn",
+        "url": "https://www.linkedin.com/company/hightouchio",
+        "snippet": ""
+      },
+      {
+        "title": "Technical setup (Data teams & engineers) | Hightouch Docs",
+        "url": "https://hightouch.com/docs/getting-started/data",
+        "snippet": ""
+      },
+      {
+        "title": "Hightouch Named a Leader in the 2025 Gartner Magic Quadrant for Customer Data Platforms, Signaling a Shift to Warehouse-Native CDPs | Martech Edge | Best News on Marketing and Technology",
+        "url": "https://martechedge.com/news/hightouch-named-a-leader-in-the-2025-gartner-magic-quadrant-for-customer-data-platforms-signaling-a-shift-to-warehouse-native-cdps",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "Here is a comprehensive breakdown of both topics:\n\n---\n\n# 🔷 dbt Semantic Layer — Architecture & Concepts (2025)\n\n## What Is It?\n\nIn modern data architectures, the semantic layer is the abstraction layer that sits between your raw data sources (like data warehouses, lakes, or operational databases) and your business intelligence or analytics tools.\n\nThe dbt Semantic Layer, powered by MetricFlow, simplifies the process of defining and using critical business metrics, like revenue, in the modeling layer (your dbt project). By centralizing metric definitions, data teams can ensure consistent self-service access to these metrics in downstream data tools and applications.\n\n---\n\n## 🏗️ Architectural Components\n\nThe dbt Semantic Layer is composed of **five key architectural layers**:\n\n| Component | Role |\n|---|---|\n| **MetricFlow** | Define & manage metrics/semantic models using YAML; generates SQL |\n| **MetricFlow Server** | Handles metric requests; generates optimized SQL per data platform |\n| **Semantic Layer Gateway** | Routes metric queries and executes generated SQL against the warehouse |\n| **Semantic Layer APIs** | GraphQL and JDBC interfaces for external tool consumption |\n| **dbt Cloud** | Manages deployment, credentials, caching, and scheduling |\n\nMetricFlow is where you define and manage the logic of your metrics and semantic models using YAML specifications, and an abstraction layer that generates SQL to query them. MetricFlow Server handles metric requests and generates optimized SQL for the specific data platform. The Semantic Layer Gateway is the gateway to interact with MetricFlow Server, passing the metric queries and executing the generated SQL against the data platform. Semantic Layer APIs are the interfaces to submit metric queries using GraphQL or JDBC APIs.\n\nSome components of the dbt Semantic Layer are open-source, such as dbt-core and MetricFlow, while the other three components of the architecture are part of dbt Cloud and require a Team or Enterprise plan.\n\n---\n\n## 🔑 Core Concepts: Semantic Models\n\nSemantic models serve as the foundation of the dbt Semantic Layer. These models are built based on existing dbt models, maintaining a one-to-one relationship and comprise key components that describe your data.\n\nSemantic models use entities, measures, and dimensions as building blocks for metrics. Four metric types are supported: simple, ratio, cumulative, and derived calculations.\n\n---\n\n## 🌐 Hub-and-Spoke Architecture\n\nA semantic model provides a \"hub-and-spoke\" architecture to your metric definitions. Metrics are written and defined centrally and can be queried from a number of \"spokes\"—analytics tools, APIs, LLMs, and more. Those endpoints are always accessing the same centralized data, so organizations can be sure that they're working off the same metric everywhere, every time.\n\n---\n\n## ✅ Key Benefits\n\n- **Consistency:** Moving metric definitions out of the BI layer and into the modeling layer allows data teams to feel confident that different business units are working from the same metric definitions. If a metric definition changes in dbt, it's refreshed everywhere it's invoked.\n\n- **DRY Principle:** The dbt Semantic Layer reduces redundancy by following the DRY (Don't Repeat Yourself) principle. Instead of calculating metrics in multiple places, you can define them in one location, alongside your dbt models, and tap into them from any endpoint. This reduces duplicative work and code.\n\n- **Multi-platform SQL generation:** MetricFlow generates optimized SQL for Snowflake, BigQuery, Databricks, and Redshift.\n\n---\n\n## 🆕 2025 Updates: New Semantic Layer Spec\n\nThere are three major updates to the structure of semantic modeling in dbt: **Measures → Metrics** (measures are removed from the authorship spec; simple metrics now can include aggregations and expressions); **Reducing nesting** (removing deep dictionary nesting to simplify code); and **Standardizing on models YAML entries** (semantic annotations are embedded within the model's YAML entry to remove the need to manage many files).\n\ndbt also joined an industry initiative called the **Open Semantic Interchange**, working with partners like Snowflake and Tableau to create an open standard for semantic metadata.\n\nTrends to watch include: standardization via the Open Semantic Layer Interoperability (OSI) initiative aimed at making metrics portable across tools, and AI integration allowing LLMs to query semantic layers in natural language.\n\n---\n---\n\n# 🟣 Meltano — Open Source Data Integration Architecture (2025)\n\n## What Is It?\n\nMeltano is an ETL platform built on open-source foundations, engineered by experts for cloud scale, efficiency, and reliability.\n\nMeltano is an open-source data integration and orchestration platform for building ELT pipelines. It uses a plugin-based architecture that supports extractors, loaders, transformers, utilities, and orchestrators. Meltano commonly works with tools like Singer taps and targets, dbt, and Airflow.\n\n---\n\n## 🏗️ Architectural Design\n\nMeltano uses a **project-based structure**. You initialize a project, add plugins, configure credentials, define jobs, and run pipeline commands from the CLI or orchestration layer. The architecture is modular.\n\n### Plugin Architecture\n\nMeltano acts as a control center for the modern data stack, integrating seamlessly with tools like dbt for transformations, Apache Airflow for orchestration, and Great Expectations for data quality testing. Its modular framework is built around Singer **\"taps\"** (extractors) and **\"targets\"** (loaders), allowing teams to customize their workflows.\n\n| Plugin Type | Purpose |\n|---|---|\n| **Taps** (Extractors) | Pull data from source systems (databases, SaaS APIs, files) |\n| **Targets** (Loaders) | Load data to destinations (Snowflake, BigQuery, Postgres, etc.) |\n| **Transformers** | Run dbt for in-warehouse transformations |\n| **Orchestrators** | Integrate with Airflow, Dagster, etc. |\n| **Utilities** | Data quality, testing (Great Expectations), etc. |\n\n---\n\n## 🔌 Connector Ecosystem: Meltano Hub\n\nMeltano Hub is the single source of truth to find any Meltano plugins as well as Singer taps and targets. Users are also able to add more plugins to the Hub and have them immediately discoverable and usable within Meltano. The Hub is lovingly curated by Meltano and the wider Meltano community.\n\nThis command-line-first tool supports over **1 million pipeline runs every month** and relies on the Singer specification to offer access to more than **600 connectors** via the Meltano Hub.\n\n---\n\n## 🛠️ DataOps / GitOps First Philosophy\n\nMeltano gives engineering-oriented teams a way to treat data movement like software development: **version-controlled, testable, reviewable, and portable.**\n\nMeltano stands out among open-source ETL tools by prioritizing developer control and adaptability. It treats data pipelines as code, incorporating **version control, CI/CD testing**, and separate environments for development, staging, and production.\n\n---\n\n## 🚀 Quick Start (Docker)\n\n```bash\n# Slim image (recommended)\ndocker run --rm meltano/meltano:latest-slim --version\n\n# Full image (includes all DB connectors)\ndocker run --rm meltano/meltano:latest --version\n\n# Initialize a new project\nmeltano init my_project\n\n# Add an extractor (tap)\nmeltano add extractor tap-github\n\n# Add a loader (target)\nmeltano add loader target-snowflake\n\n# Run the pipeline\nmeltano run tap-github target-snowflake\n```\n\n---\n\n## ✅ Strengths & Limitations\n\n| ✅ Strengths | ⚠️ Limitations |\n|---|---|\n| Fully open source, no license restrictions | CLI-only; no native UI |\n| GitOps / CI/CD native workflows | Higher learning curve for non-engineers |\n| Pluggable modular architecture | Relies heavily on third-party Singer taps |\n| Tight dbt + Airflow integration | Taps may need debugging / engineering effort |\n| 600+ connectors via Meltano Hub | Self-hosted maintenance responsibility |\n\nThe fact that it is based on open specification (Singer.io) is the key reason to recommend this solution. However, one needs to understand its strong reliance on third-party taps and targets, and take into account some debugging and implementation effort.\n\n---\n\n## 🆕 2025 Notable Development\n\nBig news: **Meltano has been acquired by Matatika**, with a live event held to help shape the future of the platform.\n\nMeltano now includes integrated monitoring, logging, and alerting for system health and pipeline performance. Pipelines can be scheduled and automated to match business cadence. Detailed logs, diagnostics, and the ability to perform full or partial re-syncs allow teams to quickly troubleshoot and recover from issues.\n\n---\n\n## 🔄 How dbt Semantic Layer + Meltano Work Together\n\nThese two tools are highly complementary in the **Modern Data Stack**:\n\n```\nSources (APIs, DBs, SaaS)\n        ↓  [Meltano Taps]\n  Extract & Load (ELT)\n        ↓  [Meltano → Target Warehouse]\n  Snowflake / BigQuery / Redshift\n        ↓  [dbt Models + Meltano transformer]\n  Transformed Data Models\n        ↓  [dbt Semantic Layer + MetricFlow]\n  Centralized Metric Definitions\n        ↓  [GraphQL / JDBC APIs]\n  BI Tools / LLMs / Dashboards\n```\n\nMeltano is primarily used in ELT workflows — it extracts data, loads it into a destination, and commonly uses dbt for transformations after loading. The dbt Semantic Layer then sits on top of those dbt models to serve governed, consistent metrics to all downstream consumers.",
+    "resultPages": [
+      {
+        "title": "dbt Semantic Layer architecture | dbt Developer Hub",
+        "url": "https://docs.getdbt.com/docs/use-dbt-semantic-layer/sl-architecture",
+        "snippet": ""
+      },
+      {
+        "title": "Understanding semantic layer architecture | dbt Labs",
+        "url": "https://www.getdbt.com/blog/semantic-layer-architecture",
+        "snippet": ""
+      },
+      {
+        "title": "dbt Semantic Layer | dbt Developer Hub - dbt Labs",
+        "url": "https://docs.getdbt.com/docs/use-dbt-semantic-layer/dbt-sl",
+        "snippet": ""
+      },
+      {
+        "title": "Understanding the dbt Semantic Layer architecture | Secoda",
+        "url": "https://www.secoda.co/learn/understanding-the-dbt-semantic-layer-architecture",
+        "snippet": ""
+      },
+      {
+        "title": "dbt Semantic Layer for Metrics Definition",
+        "url": "https://atlan.com/dbt-semantic-layer/",
+        "snippet": ""
+      },
+      {
+        "title": "Semantic Layer Architectures: Warehouse vs dbt vs Cube",
+        "url": "https://www.typedef.ai/resources/semantic-layer-architectures-explained-warehouse-native-vs-dbt-vs-cube",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - dbt-labs/Coalesce-2025-Intro-to-the-dbt-Semantic-Layer · GitHub",
+        "url": "https://github.com/dbt-labs/Coalesce-2025-Intro-to-the-dbt-Semantic-Layer",
+        "snippet": ""
+      },
+      {
+        "title": "Modernizing the Semantic Layer Spec | dbt Developer Blog",
+        "url": "https://docs.getdbt.com/blog/modernizing-the-semantic-layer-spec",
+        "snippet": ""
+      },
+      {
+        "title": "Semantic Layer: What it is and when to adopt it | dbt Labs",
+        "url": "https://www.getdbt.com/blog/semantic-layer-introduction",
+        "snippet": ""
+      },
+      {
+        "title": "How the dbt Semantic Layer works with MetricFlow | dbt Labs",
+        "url": "https://www.getdbt.com/blog/how-the-dbt-semantic-layer-works",
+        "snippet": ""
+      },
+      {
+        "title": "Meltano: Dependable Data by Default",
+        "url": "https://meltano.com/",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - meltano/meltano: Meltano: the declarative code-first data integration engine that powers your wildest data and ML-powered product ideas. Say goodbye to writing, maintaining, and scaling your own API integrations. · GitHub",
+        "url": "https://github.com/meltano/meltano",
+        "snippet": ""
+      },
+      {
+        "title": "Meltano in Action: Hands-On Evaluation of an Open-Source ELT Framework | by Pawel Plaszczak | Medium",
+        "url": "https://medium.com/@pp_85623/meltano-in-action-hands-on-evaluation-of-an-open-source-elt-framework-5a1d5b93b483",
+        "snippet": ""
+      },
+      {
+        "title": "Meltano Open Source Production Grade Data Integration – 2/2",
+        "url": "https://www.scalefree.com/blog/tools/meltano-open-source-production-grade-data-integration-part-2/",
+        "snippet": ""
+      },
+      {
+        "title": "Meltano Explained: Open Source Data Pipeline Platform - Startupik | Startup magazine",
+        "url": "https://startupik.com/meltano-explained-open-source-data-pipeline-platform/",
+        "snippet": ""
+      },
+      {
+        "title": "Why is Open-source Data Integration Exploding?",
+        "url": "https://meltano.com/blog/why-is-open-source-data-integration-exploding/",
+        "snippet": ""
+      },
+      {
+        "title": "Meltano vs Airbyte — A 2025 Decision Guide - Estuary.dev",
+        "url": "https://estuary.dev/blog/meltano-vs-airbyte-vs-estuary/",
+        "snippet": ""
+      },
+      {
+        "title": "Open Source ETL Tools: Comparison Guide 2026",
+        "url": "https://www.dataexpert.io/blog/open-source-etl-tools-comparison-guide-2026",
+        "snippet": ""
+      },
+      {
+        "title": "Data Engineering Podcast: Open Source Production Grade Data Integration With Meltano",
+        "url": "https://www.dataengineeringpodcast.com/meltano-data-integration-episode-141/",
+        "snippet": ""
+      },
+      {
+        "title": "Airbyte vs Meltano: Open Source Data Pipeline Tools - Startupik | Startup magazine",
+        "url": "https://startupik.com/airbyte-vs-meltano-open-source-data-pipeline-tools/",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# 🦅 CrowdStrike Falcon Detection Engine & Threat Graph — 2025 Deep Dive\n\n---\n\n## 🏗️ Architecture Overview\n\nPowered by the CrowdStrike Security Cloud and world-class AI, the Falcon® platform leverages real-time indicators of attack, threat intelligence, evolving adversary tradecraft, and enriched telemetry from across the enterprise to deliver hyper-accurate detections, automated protection and remediation, elite threat hunting, and prioritized observability of vulnerabilities.\n\nPurpose-built in the cloud with a single lightweight-agent architecture, the Falcon platform delivers rapid and scalable deployment, superior protection and performance, reduced complexity, and immediate time-to-value.\n\n---\n\n## 🔬 Step 1: The Falcon Sensor (Edge Data Collection)\n\nThe CrowdStrike Falcon sensor is a lightweight endpoint agent that continuously monitors system activity. It captures detailed telemetry on processes, network activity, file operations, registry changes, script executions, and more in real time.\n\nFalcon Insight's kernel-mode driver captures over 400 raw events and related information necessary to retrace incidents.\n\nThis data is securely streamed to the CrowdStrike cloud, where it's analyzed against global threat intelligence, AI models, and behavioral baselines to detect and respond to threats. The sensor requires minimal system resources and does not rely on traditional signature files or periodic scans.\n\n---\n\n## 🧠 Step 2: The Detection Engine — Behavioral AI, Not Signatures\n\nCrowdStrike Falcon detects malware through a combination of behavioral analysis, machine learning, and threat intelligence. Instead of scanning for known file hashes or signatures, it observes how processes behave across the system.\n\nIt flags suspicious actions such as privilege escalation, lateral movement, or fileless script execution. The detection engine evaluates this behavior against millions of known attack patterns and threat actor profiles maintained in CrowdStrike's global Threat Graph. This enables real-time detection of known and unknown threats, including zero-day exploits and malware-free intrusions.\n\nBy leveraging massive flows of high-resolution behavioral and contextual data collected by the kernel-level Falcon agent, its ML models are trained to identify malicious patterns of behavior. The AI can detect a sequence of seemingly benign actions that — when viewed in context — constitute a malicious attack chain, including fileless attacks that exist only in memory and instances of lateral movement where an adversary uses valid credentials to move from one machine to another.\n\n---\n\n## 🕸️ Step 3: CrowdStrike Threat Graph — The Brain\n\n### What it is\nCrowdStrike designed and implemented Threat Graph™ to store, query, and analyze relevant security events. Threat Graph is a cloud-based, massively scalable graph database that enables CrowdStrike to visualize and evaluate mountains of event data generated by the thousands of endpoints and cloud workloads protected by the Falcon platform. It is through Threat Graph that Falcon gets its ability to identify and stop attacks in progress.\n\n### Scale (2025 Numbers)\nThe industry's leading collection of powerful insights gathers more than a trillion events per day, spanning across 2 trillion vertices and analyzing over 15 petabytes of data.\n\nAt the center of this massive data repository is CrowdStrike Threat Graph®, a custom-built, cutting-edge security analytics tool that collects high-fidelity telemetry from millions of endpoints around the globe and indexes them for quick and efficient access. Threat Graph currently manages approximately 2 trillion vertices.\n\n### Why Graph DB vs. Traditional DB?\nUnlike traditional databases, which are mainly effective at answering predetermined questions on a big data scale, graph databases can handle ad hoc queries easily so that threats can be found more efficiently and quickly. Before Threat Graph's creation, an analyst would have to collect endpoint, workload, and container telemetry, add information from threat intelligence feeds, write their own correlation rules, and then examine the data to determine how the events might be related.\n\n---\n\n## 🔄 Step 4: Multi-Layer Data Enrichment\n\nThe true power of Threat Graph is derived from its sophisticated, multi-stage data enrichment process. The trillions of raw security events captured by the Falcon agent are continuously ingested, contextualized, and enriched with multiple layers of intelligence. This includes deep, real-world knowledge on the tactics, techniques, and procedures (TTPs) of more than 245 tracked adversary groups — allowing the system to not only detect a malicious event but to potentially attribute it to a known threat actor and understand its place within a broader campaign.\n\nFalcon agents feed telemetry from all these sources to Threat Graph, which combines it with threat intelligence from CrowdStrike's Threat Intelligence team and various third parties.\n\nThe Threat Graph maps patterns to known attacker tactics, techniques, and procedures (TTPs) defined in the MITRE ATT&CK framework. AI models and ML algorithms flag behaviors associated with cyber threats, even if the specific attack has never been seen before — including detection of ransomware execution, credential dumping, code injection, and other advanced threat detection scenarios.\n\n---\n\n## ⏪ Step 5: Historical Forensics & Trigger Discovery\n\nThreat Graph can also provide a window into the past. Since the state of each endpoint, workload, container, and environment is kept over time, the database can be leveraged to retrace historical events. For example, if an attack is discovered today, its roots can be traced backward in time, allowing analysts to perform an in-depth forensic analysis regardless of when the security event itself occurred.\n\nA trigger points analysts to a specific system or area of the network for further investigation when there are signs of suspicious activity. Threat Graph automates the discovery of triggers, reducing the amount of time it would take in-house security teams to make similar determinations. Once these triggers are presented to the managed hunting team, they can turn back to the Threat Graph for further investigation.\n\nFalcon Insight provides a complete record of endpoint activity over time, whether your environment consists of fewer than 100 endpoints or more than 500,000.\n\n---\n\n## 🤖 Step 6: The AI Feedback Loop — Human + Machine Intelligence\n\nThe daily work performed by CrowdStrike's elite service teams — the Falcon Complete MDR team, which provides 24/7 monitoring and incident response, and the Falcon OverWatch threat hunting team — is systematically captured and used as the highest-quality labeled training data for the entire AI stack. When a Falcon Complete analyst investigates an alert and determines it is a true positive, that validated decision is fed back into the system to make the triage models smarter. When an OverWatch hunter uncovers a novel, never-before-seen attack technique, that TTP is used to train the behavioral detection models.\n\n---\n\n## 🆕 2025 Evolution: Enterprise Graph & Agentic Era\n\nCrowdStrike introduced the **Enterprise Graph** — described as the industry's richest AI-ready data layer and the foundation of the Agentic Security Platform. Enterprise Graph unifies CrowdStrike's pioneering graph technology with telemetry from across the enterprise to build a living, connected model of the enterprise.\n\n**Charlotte AI AgentWorks** is the industry's first no-code platform giving every team the ability to build, test, deploy, and orchestrate trusted security agents. Using natural language, defenders set the mission, define the data, and control the behavior of their agents — without writing a single line of code. Every agent inherits Falcon's telemetry, intelligence, and governance.\n\nThe three underlying graph technologies in the Falcon platform are:\n\n| Graph | Purpose |\n|---|---|\n| **Threat Graph** | Takes trillions of security data points from millions of sensors, enriched by threat intelligence, to identify and link threat activity together and automatically prevent threats in real time. |\n| **Intel Graph** | Analyzes and correlates massive amounts of data on adversaries, their victims and their tools, providing insights on shifts in tactics and techniques. |\n| **Enterprise Graph** | Introduces an AI-ready data layer, mission-ready agents, secure orchestration, and a dynamic AI-powered user experience. |\n\n---\n\n## ⚙️ Under the Hood: Technical Architecture\n\nCrowdStrike processes hundreds of billions of events daily, which are processed by the custom-built Threat Graph database, leveraging cutting-edge security analytics to collect high-fidelity telemetry from millions of endpoints around the globe and index them for quick and efficient analysis.\n\nThreat Graph is written in **Go** and operates based on a strictly defined data model for graph entities and properties.\n\nCrowdStrike determined that by creating a data schema that was extraordinarily simple, they would be able to create a strong and versatile platform. The team focused on iterating and refining until the architecture was simple enough to scale almost endlessly.\n\nPowerful APIs allow for security orchestration, automation, response and other advanced workflows. APIs and bidirectional data flow enable tight integrations with third-party security and IT solutions to share insights from multiple data sources.\n\n---\n\n## 📊 2025 Performance Milestones\n\n| Metric | Value |\n|---|---|\n| Security events processed daily | **1+ trillion** |\n| Data stored in cloud | **15+ petabytes** |\n| Graph vertices managed | **~2 trillion** |\n| Adversary groups tracked | **245+** |\n| MITRE ATT&CK 2025 score | **100% detection, 100% protection, 0 false positives** |\n| Average eCrime breakout time (2025) | **48 minutes** (attacker speed CrowdStrike must beat) |\n\nThis cross-domain visibility was validated in the 2025 MITRE ATT&CK evaluation, where Falcon achieved 100% detection and protection across endpoint, identity, and cloud scenarios.\n\nAccording to the CrowdStrike 2025 Global Threat Report, the average eCrime breakout time — from initial compromise to lateral movement — has dropped to just 48 minutes, down from 62 minutes in the previous year.\n\n---\n\n## 🔑 Key Takeaways for Builders & Integrators\n\n- **API Access:** CrowdStrike Threat Graph uses **OAuth 2.0 client credentials** authentication. Create an API client in Falcon Console at Support > API Clients and Keys and save your Client ID and Client Secret.\n- **Query Language:** Use **GraphQL queries** for complex multi-hop searches across the Threat Graph rather than chaining simple REST calls.\n- **Network Effect:** If an attack technique is spotted anywhere in the global Falcon network, your environment benefits from that insight immediately.\n- **Storage:** Threat Graph scales with demand and provides necessary storage, compute and rich analytics, with up to **a year of all detections** encountered. An optional offline replica of enriched telemetry is available for archive and compliance requirements.",
+    "resultPages": [
+      {
+        "title": "Threat Graph | Falcon Platform | CrowdStrike",
+        "url": "https://www.crowdstrike.com/en-us/platform/threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "What Is CrowdStrike Falcon? A Complete Guide | Osmicro Networks",
+        "url": "https://osmicro.com.au/insights/what-is-crowdstrike-falcon-the-ultimate-guide/",
+        "snippet": ""
+      },
+      {
+        "title": "Stop Cloud Breaches With Threat Graph Cloud-Powered Analytics",
+        "url": "https://www.crowdstrike.com/en-us/blog/stopping-cloud-breaches-with-threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "Dell SafeGuard and Response - CrowdStrike® Threat Graph",
+        "url": "https://www.delltechnologies.com/asset/en-us/solutions/business-solutions/technical-support/crowdstrike-threat-graph-datasheet.pdf",
+        "snippet": ""
+      },
+      {
+        "title": "FALCON INSIGHT: ENDPOINT DETECTION AND RESPONSE (EDR)",
+        "url": "https://slcgp.alabama.gov/wp-content/uploads/2025/09/crowdstrike-falcon-data-sheet.pdf",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike Falcon Review 2026: B2B Security That Scales",
+        "url": "https://work-management.org/antivirus/crowdstrike-review/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike Falcon Review (2025) - AI Flow Review",
+        "url": "https://aiflowreview.com/crowdstrike-falcon-review-2025/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike’s AI Strategy: Analysis of Dominance in Cybersecurity - Klover.ai",
+        "url": "https://www.klover.ai/crowdstrike-ai-strategy-analysis-of-dominance-in-cybersecurity/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike Unveils Fall Release of Agentic Era Falcon Platform",
+        "url": "https://www.crowdstrike.com/en-us/press-releases/crowdstrike-unveils-falcon-platform-fall-release-to-lead-cybersecurity-into-agentic-era/",
+        "snippet": ""
+      },
+      {
+        "title": "AI Innovations Powering Falcon Exposure Management | CrowdStrike",
+        "url": "https://www.crowdstrike.com/en-us/blog/built-for-scale-powered-by-ai-innovation-driving-falcon-exposure-management/",
+        "snippet": ""
+      },
+      {
+        "title": "Threat Graph | Falcon Platform | CrowdStrike",
+        "url": "https://www.crowdstrike.com/en-us/platform/threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike’s AI Strategy: Analysis of Dominance in Cybersecurity - Klover.ai",
+        "url": "https://www.klover.ai/crowdstrike-ai-strategy-analysis-of-dominance-in-cybersecurity/",
+        "snippet": ""
+      },
+      {
+        "title": "Stop Cloud Breaches With Threat Graph Cloud-Powered Analytics",
+        "url": "https://www.crowdstrike.com/en-us/blog/stopping-cloud-breaches-with-threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "How Threat Graph Leverages DSL to Improve Data Ingestion, Part 1",
+        "url": "https://www.crowdstrike.com/en-us/blog/how-crowdstrike-threat-graph-leverages-dsl-to-improve-data-ingestion-part-1/",
+        "snippet": ""
+      },
+      {
+        "title": "Threat Graph Data Sheet",
+        "url": "https://www.crowdstrike.com/en-us/resources/data-sheets/threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "3 Best Practices for Building a High-Performance Graph Database",
+        "url": "https://www.crowdstrike.com/en-us/blog/3-best-practices-for-building-high-performance-graph-database/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike Threat Graph | Cequence AI Gateway",
+        "url": "https://docs.aigateway.cequence.ai/docs/applications/security/crowdstrike-threat-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "CrowdStrike Introduces CrowdStrike Asset Graph to Help Organizations Proactively Identify and Eliminate Blind Spots",
+        "url": "https://www.darkreading.com/cloud-security/crowdstrike-introduces-crowdstrike-asset-graph-to-help-organizations-proactively-identify-and-eliminate-blind-spots",
+        "snippet": ""
+      },
+      {
+        "title": "How CrowdStrike Works: AI Threat Protection",
+        "url": "https://osmicro.com.au/insights/how-does-crowdstrike-work-diving-into-ai-powered-threat-neutralisation/",
+        "snippet": ""
+      },
+      {
+        "title": "What Is CrowdStrike Falcon? A Complete Guide | Osmicro Networks",
+        "url": "https://osmicro.com.au/insights/what-is-crowdstrike-falcon-the-ultimate-guide/",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# 🛡️ Microsoft Sentinel: KQL Detection Rules & SOAR Playbook Architecture (2025)\n\nA comprehensive guide covering the full architecture stack — from raw log ingestion through KQL-powered detection to automated SOAR response.\n\n---\n\n## 🏗️ 1. Overall Platform Architecture\n\nMicrosoft Sentinel is a cloud-native SIEM and SOAR platform built on Microsoft Azure. Unlike traditional, infrastructure-bound SIEM platforms, Sentinel operates entirely in the cloud. Log ingestion, storage, analytics, and automation scale elastically based on demand, removing many of the capacity and performance constraints associated with on-premises SIEM deployments.\n\nIts core value lies in how it correlates data across identity, endpoint, cloud, and network domains to support modern detection and response workflows.\n\nSentinel is the Microsoft SIEM and SOAR solution. SIEM concerns everything related to the collection of data from the various sources of the organization, its storage, retention, and access governance. SOAR concerns everything related to the reporting, mitigation, containment, and eradication of a threat. The ring that connects these two aspects are the analytics rules — defined rules that match the collected data and produce Incidents in Sentinel.\n\n---\n\n## 🔍 2. KQL Detection Rules Architecture\n\n### What Are Analytics Rules?\n\nDetection in Sentinel is driven by analytics rules that operate on collected data. Rather than relying solely on signatures, Sentinel emphasizes contextual and behavioral detection across datasets.\n\nQueries can be run upon request or scheduled as Analytics rules and are written in the KQL language. When an Analytic rule finds a match in the log data, a Sentinel alarm is created.\n\n### Types of Analytics Rules\n\nSentinel offers different types of analytics rules: scheduled, near real-time, Fusion engine, machine learning-based, anomaly detection, etc.\n\n| Rule Type | Description |\n|---|---|\n| **Scheduled** | KQL queries run on a defined interval (e.g., every 5 min) |\n| **Near Real-Time (NRT)** | Sub-minute latency detections for critical threats |\n| **Fusion Engine** | Multi-stage attack correlation using ML |\n| **ML-Based** | Behavioral anomaly detection via built-in ML models |\n| **Anomaly Detection** | Statistical outlier identification over time |\n| **Threat Intelligence** | Matches IOCs from TI feeds against log data |\n\n### Building a KQL Analytics Rule — Key Steps\n\nBefore you do anything else, you should design and build a query in Kusto Query Language (KQL) that your rule will use to query one or more tables in your Log Analytics workspace. Determine a data source, or a set of data sources, that you want to search to detect unusual or suspicious activity. Find the name of the Log Analytics table into which data from those sources is ingested.\n\nMicrosoft Sentinel and its many solutions provided in the Content hub offer templates for the most commonly used types of analytics rules, and you're strongly encouraged to make use of those templates, customizing them to fit your specific scenarios. But it's possible you might need something completely different, so in that case you can create a rule from scratch using the analytics rule wizard.\n\n### Rule Export & Deployment as Code\n\nIf you want to package your rule to be managed and deployed as code, you can easily export the rule to an Azure Resource Manager (ARM) template. You can also import rules from template files in order to view and edit them in the user interface.\n\nTo deploy Sentinel Analytic rules at scale, tools like Terraform can be used — giving the ability to quickly spin up resources like Sentinel workspaces and deploy analytic rules automatically, without any interaction.\n\n---\n\n## 🔎 3. Key KQL Detection Rule Examples (2025)\n\n### Threat Intelligence IP Correlation\nMonitoring access from suspicious IP addresses is crucial for identifying potential threats. This rule integrates threat intelligence to detect such activity by correlating IP addresses from the threat intelligence feed with security events, identifying IPs with frequent activity.\n\n```kql\nlet ti_indicators = ThreatIntelIndicator\n| where IndicatorType == \"IP\"\n| project IndicatorValue;\n\nSecurityEvent\n| where IPAddress in (ti_indicators)\n| summarize Count = count() by IPAddress, Account, bin(TimeGenerated, 1h)\n| where Count > 5\n| extend AccountCustomEntity = Account, IPCustomEntity = IPAddress\n```\n\n### Brute Force / Failed Sign-ins by IP\nDetect IP addresses with a high number of failed sign-in attempts and specific error codes coming from multiple unique users.\n\n```kql\nlet relevantErrorCodes = dynamic([50053, 50126, 50055, 50057, 50155, 50105,\n    50133, 50005, 50076, 50079, 50173, 50158, 50072, 50074, 53003, 53000, 53001, 50129]);\n\nSigninLogs\n| where TimeGenerated >= ago(180d)\n| where ResultType in (relevantErrorCodes)\n| extend OS = tostring(parse_json(DeviceDetail).operatingSystem)\n| project TimeGenerated, IPAddress, Location, OS, UserPrincipalName, ResultType, ResultDescription\n| summarize FailedAttempts = count(), UniqueUsers = dcount(UserPrincipalName)\n    by IPAddress, Location, OS\n| where FailedAttempts > 5 and UniqueUsers > 5\n| order by FailedAttempts desc\n```\n\n### Sensitive Document Access / Data Exfiltration\nDetect historical access to sensitive document files on endpoints by correlating file activity with Microsoft Purview sensitivity labels (e.g., Confidential, Highly Confidential, or Restricted). Use this query to uncover signs of data exfiltration, policy violations, or suspicious user behavior.\n\n### Network Beaconing (Palo Alto)\nIdentify beaconing patterns from Palo Alto Network traffic logs based on recurrent time delta patterns. The query uses various KQL functions to calculate time deltas and then compares it with total events observed in a day to find percentage of beaconing.\n\n### Key KQL Time Field Note\nThe main difference between Defender and Sentinel KQL is the field that indicates the time — it must be adjusted according to the product used. In Sentinel, the `TimeGenerated` field is used.\n\n---\n\n## 🔔 4. Alert → Incident Pipeline\n\nAlerts generated by analytics rules are grouped into incidents to reduce noise and provide investigative context. This structure allows analysts to investigate security events as cohesive attack narratives rather than isolated alerts.\n\nThe rule frames user accounts and IP addresses found in logs as trackable entities, surfaces notable pieces of information in the alerts generated by the rules, and packages alerts as incidents to be investigated.\n\n---\n\n## 🤖 5. SOAR Playbook Architecture\n\n### What is a Playbook?\n\nOne key automation feature SOAR platforms include is the playbook. SOAR playbooks provide automation workflows for handling incident response alerts.\n\nPlaybooks are a list of actions that will be performed on the incident. They can include enrichment, response, remediation, and much more. To achieve this, Microsoft Sentinel utilizes a Microsoft Azure solution called Logic Apps — a platform used to create and run automated workflows.\n\nMicrosoft Sentinel's automation and orchestration provides a highly extensible architecture that enables scalable automation as new technologies and threats emerge. Playbooks in Microsoft Sentinel are based on workflows built in Azure Logic Apps.\n\n### Logic App Types for Playbooks\n\n**Logic Apps Consumption** is a single playbook that has only one workflow. It supports templates and custom connectors and is widely integrated into Microsoft Sentinel with template support. Logic Apps Consumption shares the same backend resources across different customer tenants.\n\n**Logic Apps Standard** is a single Logic App that can have multiple workflows. It doesn't support templates and custom connectors, which is why Microsoft Sentinel doesn't have playbook templates created in Logic Apps Standard. In Logic Apps Standard, workflows in the same Logic App share the same backend resources, and they are not shared across different Logic Apps.\n\n### How Triggers Work\n\nA Logic App is a static definition of steps to perform, in which it is possible to insert conditional if/else logic and cyclic iterations. Each Logic App has an entry point — trigger — which initiates the creation of a new instance and its execution: the trigger can be HTTP, HTTP Endpoint, Recurrence, and Request.\n\n### Automation Rules → Playbook Execution\n\nMicrosoft Sentinel provides SOAR capabilities with automation rules and playbooks. Automation rules facilitate simple incident handling and response, while playbooks run more complex sequences of actions to respond and remediate threats.\n\nAn automation rule aims to automatically respond to an incident and perform management operations on it, such as changing its status and risk, assigning an owner, classifying it, or running a workbook. Matching conditions can be based on the source that created the incident, the analytics rules and metadata associated with the incident (severity, status, tactics, etc.) or the entity involved (account name/domain, file name/hash, process ID, etc.).\n\n### Adaptive Playbooks (2025 Pattern)\n\nAdaptive Playbooks in Microsoft Sentinel are designed to handle dynamic security environments. These playbooks leverage Azure Logic Apps to create workflows that can adjust based on incident severity, type, or other predefined conditions.\n\nKey capabilities of adaptive playbooks:\n- **Dynamic Triggers** — Initiate actions based on real-time data\n- **Conditional Branching** — Modify workflows based on conditions\n- **Multi-Step Actions** — Execute a series of predefined tasks automatically\n\n### Example Playbook: Auto-Block User on Suspicious Login\n\nSay an alert fires when a user's account shows multiple failed logins from different locations within minutes. Instead of waiting for an analyst to notice, a playbook can jump in — disabling the account, sending a Teams message to security, and logging an incident in ServiceNow — all in seconds.\n\n```\nTRIGGER: Microsoft Sentinel Incident Created\n  └── [Condition] Severity == High AND Entity.Type == Account\n        ├── ACTION: Disable Azure AD User (via Entra ID connector)\n        ├── ACTION: Send Teams notification to SOC channel\n        ├── ACTION: Create ServiceNow incident ticket\n        └── ACTION: Update Sentinel incident status → \"In Progress\"\n```\n\n### Integration Ecosystem\n\nAt their heart, Sentinel Playbooks are built on Azure Logic Apps. This means they come with the flexibility to integrate with almost anything — from Microsoft Teams and Azure Functions to third-party tools like ServiceNow or Slack.\n\nFor example, if you use the ServiceNow ticketing system, use Azure Logic Apps to automate your workflows and open a ticket in ServiceNow each time a particular alert or incident is generated.\n\n---\n\n## 🔄 6. End-to-End Flow Diagram\n\n```\n┌─────────────────────────────────────────────────────────────────────┐\n│              MICROSOFT SENTINEL 2025 ARCHITECTURE                   │\n├─────────────────────────────────────────────────────────────────────┤\n│                                                                      │\n│  DATA SOURCES                                                        │\n│  [Entra ID] [Defender] [Cloud] [Network] [On-Prem] [3rd Party]     │\n│       │                                                              │\n│       ▼                                                              │\n│  LOG ANALYTICS WORKSPACE (Data Lake)                                 │\n│  Tables: SigninLogs, SecurityEvent, CommonSecurityLog, etc.          │\n│       │                                                              │\n│       ▼                                                              │\n│  KQL ANALYTICS RULES ENGINE                                          │\n│  ├── Scheduled Rules (every N minutes)                               │\n│  ├── Near Real-Time (NRT) Rules                                      │\n│  ├── Fusion Engine (multi-stage ML correlation)                      │\n│  ├── ML / Anomaly Detection                                          │\n│  └── Threat Intelligence Matching (ThreatIntelIndicator table)       │\n│       │                                                              │\n│       ▼ (on match)                                                   │\n│  ALERT GENERATED → Grouped into INCIDENT                             │\n│  [Entity Mapping: Account, IP, Host, URL, File]                      │\n│       │                                                              │\n│       ▼                                                              │\n│  AUTOMATION RULES (Conditions & Triggers)                            │\n│  ├── Assign owner, change severity/status                            │\n│  └── Run Playbook ──────────────────────────────────┐               │\n│                                                      ▼               │\n│                                          SOAR PLAYBOOK               │\n│                                          (Azure Logic App)            │\n│                                          ├── Enrich (VirusTotal, TI) │\n│                                          ├── Contain (Block IP/User) │\n│                                          ├── Notify (Teams, Email)   │\n│                                          ├── Ticket (ServiceNow)     │\n│                                          └── Remediate & Close       │\n└─────────────────────────────────────────────────────────────────────┘\n```\n\n---\n\n## 📅 7. 2025 Key Updates & Roadmap\n\n| Feature | Status | Notes |\n|---|---|---|\n| **Unified Defender Portal** | GA | After March 31, 2027, Microsoft Sentinel will no longer be supported in the Azure portal — available only in the Microsoft Defender portal. |\n| **UEBA Behaviors Layer** | GA | Summarizes human-readable behavioral insights from high-volume, raw security logs; aggregates and sequences related events into normalized behaviors. |\n| **Sentinel Data Lake (KQL)** | GA | Powered by Microsoft Fabric, data federation lets you analyze security data where it already lives without copying it, using familiar KQL experiences. |\n| **BlinkOps Integration** | New | BlinkOps integration combined with Sentinel's SOAR capabilities empowers SOC teams to automate repetitive tasks, orchestrate complex playbooks, and streamline workflows end-to-end, cutting Mean Time to Respond (MTTR). |\n| **ThreatIntelligenceIndicator Table** | Retiring | Update custom queries, analytics rules, workbooks, and automation to use the new tables by July 31, 2025 — after this date, Sentinel will stop ingesting data to the legacy `ThreatIntelligenceIndicator` table. |\n| **Agentic AI Defense** | Preview | Security is being re-engineered for the AI era, moving beyond static, rule-based controls toward platform-led, machine-speed defense — Sentinel has evolved into a unified security platform for agentic defense. |\n\n---\n\n## ✅ 8. Best Practices Summary\n\n| Area | Best Practice |\n|---|---|\n| **KQL Rules** | Leverage contextual data, such as user profiles and threat intelligence, to enrich queries and improve detection accuracy. |\n| **Tuning** | Continue to tune, update, and adapt queries on a regular basis. |\n| **Testing** | Before deploying a rule, test KQL queries to verify their accuracy and performance. |\n| **Playbooks** | Break down workflows into smaller, more manageable components — use modular playbooks that can be reused across different workflows. |\n| **Secrets** | Use managed identities and service principals to authenticate against Azure services within Logic Apps, storing secrets in Azure Key Vault. |\n| **Monitoring** | Monitor the performance of playbooks using the Playbooks health monitoring workbook. |\n| **ARM Templates** | Logic app code is based on Azure Resource Manager (ARM) templates, which facilitate development, deployment, and portability across multiple environments. To convert a custom playbook into a portable ARM template, use the ARM template generator. |\n\n---\n\n## 📚 Useful Resources\n\n| Resource | URL |\n|---|---|\n| Official Sentinel GitHub | https://github.com/Azure/Azure-Sentinel |\n| KQL Detection Rules (Community) | https://github.com/Bert-JanP/Hunting-Queries-Detection-Rules |\n| Must Learn KQL | https://github.com/rod-trent/MustLearnKQL |\n| Sentinel Data Lake KQL Samples | https://learn.microsoft.com/en-us/azure/sentinel/datalake/kql-sample-queries |\n| Official Sentinel Docs | https://learn.microsoft.com/en-us/azure/sentinel/overview |\n| Sentinel Developer Reference | https://aka.ms/AppAssure_SentinelDeveloper |",
+    "resultPages": [
+      {
+        "title": "Building Custom KQL Analytics Rules in Sentinel – AzureTracks",
+        "url": "https://azuretracks.com/2025/01/building-custom-kql-analytics-rules-in-sentinel/",
+        "snippet": ""
+      },
+      {
+        "title": "What Is Microsoft Sentinel? Architecture, Detection, and Security Operations Explained",
+        "url": "https://wizardcyber.com/learning-hub/learning-post/what-is-microsoft-sentinel/",
+        "snippet": ""
+      },
+      {
+        "title": "SOC – Testing Microsoft Sentinel Analytic Rules At Scale",
+        "url": "https://northwave-cybersecurity.com/threat-intel-research/soc-testing-microsoft-sentinel-analytic-rules-at-scale",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - SlimKQL/Hunting-Queries-Detection-Rules: KQL Queries. Microsoft Defender, Microsoft Sentinel · GitHub",
+        "url": "https://github.com/SlimKQL/Hunting-Queries-Detection-Rules",
+        "snippet": ""
+      },
+      {
+        "title": "What's new in Microsoft Sentinel | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/whats-new",
+        "snippet": ""
+      },
+      {
+        "title": "Sample KQL queries for Microsoft Sentinel data lake - Microsoft Security | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/datalake/kql-sample-queries",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - Bert-JanP/Hunting-Queries-Detection-Rules: KQL Queries. Defender For Endpoint and Azure Sentinel Hunting and Detection Queries in KQL. Out of the box KQL queries for: Advanced Hunting, Custom Detection, Analytics Rules & Hunting Rules. · GitHub",
+        "url": "https://github.com/Bert-JanP/Hunting-Queries-Detection-Rules",
+        "snippet": ""
+      },
+      {
+        "title": "Tutorial - Detect threats by using analytics rules in Microsoft Sentinel | Azure Docs",
+        "url": "https://docs.azure.cn/en-us/sentinel/tutorial-log4j-detection",
+        "snippet": ""
+      },
+      {
+        "title": "Create scheduled analytics rules in Microsoft Sentinel | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/create-analytics-rules",
+        "snippet": ""
+      },
+      {
+        "title": "Developing cyber security detection capabilities using Microsoft Sentinel",
+        "url": "https://www.theseus.fi/bitstream/handle/10024/888468/Hakanen_Merja.pdf;jsessionid=B89E0AA7183299E8CED62E38D9447857?sequence=2",
+        "snippet": ""
+      },
+      {
+        "title": "Microsoft Sentinel SOAR content catalog | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/sentinel-soar-content",
+        "snippet": ""
+      },
+      {
+        "title": "Microsoft Sentinel SOAR content catalog | Azure Docs",
+        "url": "https://docs.azure.cn/en-us/sentinel/sentinel-soar-content",
+        "snippet": ""
+      },
+      {
+        "title": "What’s New in Microsoft Sentinel: November 2025 | Microsoft Community Hub",
+        "url": "https://techcommunity.microsoft.com/blog/microsoftsentinelblog/what%E2%80%99s-new-in-microsoft-sentinel-november-2025/4466061",
+        "snippet": ""
+      },
+      {
+        "title": "SOAR Capabilities with Microsoft Sentinel - mc cybersec blog",
+        "url": "https://mccybersec.github.io/microsoft%20sentinel/SOAR-Capabilities-with-Microsoft-Sentinel/",
+        "snippet": ""
+      },
+      {
+        "title": "What is Microsoft Sentinel SIEM? | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/overview",
+        "snippet": ""
+      },
+      {
+        "title": "Microsoft Sentinel automated responses - Azure Architecture Center | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/solution-ideas/articles/microsoft-sentinel-automated-response",
+        "snippet": ""
+      },
+      {
+        "title": "How to create a SOAR playbook in Microsoft Sentinel | TechTarget",
+        "url": "https://www.techtarget.com/searchsecurity/feature/How-to-create-a-SOAR-playbook-in-Microsoft-Sentinel",
+        "snippet": ""
+      },
+      {
+        "title": "Power of Microsoft Sentinel SOAR Playbooks – Lets learn something new",
+        "url": "https://arnav.au/2025/09/23/power-of-microsoft-sentinel-soar-playbooks/",
+        "snippet": ""
+      },
+      {
+        "title": "Sentinel SOAR Integration",
+        "url": "https://quzara.com/blog/sentinel-soar-integration",
+        "snippet": ""
+      },
+      {
+        "title": "Migrate Splunk SOAR automation to Microsoft Sentinel | Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/azure/sentinel/migration-splunk-automation",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# 🐆 Panther: Detection-as-Code, Sigma Rules & Security Data Lake — 2025 Guide\n\nPanther is a modern, cloud-native SIEM platform that combines **detection-as-code**, **Sigma rule compatibility**, and a **security data lake** to give security teams a scalable, engineering-driven alternative to legacy SIEMs. Here's a comprehensive breakdown of how it all fits together.\n\n---\n\n## 🏗️ What Is Panther?\n\nPanther is a cloud-native SIEM featuring detections-as-code and advanced search, with a number of natively supported log sources and alert destinations. It is designed to ingest, normalize, and analyze high volumes of security data from diverse sources, including cloud infrastructure, SaaS applications, and endpoints — storing data in a security data lake for long-term retention and investigation.\n\nPanther's founder, Jack Naglieri, built Panther after years as a Detection Engineer, where he saw firsthand the failure modes of legacy SIEMs: brittle rule engines, spiraling ingestion costs, and workflows that didn't reflect how analysts actually work.\n\n---\n\n## ⚙️ Core Architecture: Three Pillars\n\nPanther combines three core elements:\n1. **SIEM on your data lake** → teams own their data and scale without limits.\n2. **Code-driven, real-time detections** → no more brittle black boxes, but flexible, testable detection as code.\n3. **AI-powered operations** → triage, investigation, and detection tasks accelerated by agents that eliminate analyst toil.\n\nPanther takes a modern, security data lake approach to SIEM by separating compute from storage. They've also challenged the traditional ingestion-based pricing model by offering one based on the number of data sources.\n\nTheir decoupled architecture also allows for flexible deployment: Panther can be deployed either as a SaaS solution or within a customer's own AWS environment.\n\n---\n\n## 🔐 Detection-as-Code (DaC)\n\n### How It Works\nPanther utilizes a \"detection-as-code\" framework, allowing security teams to write, test, and deploy detection logic using Python and YAML. When a detection rule is triggered, the system generates an alert for investigation and response.\n\nPanther uses a combination of Python for detection logic and YAML for metadata, tests, and configuration. This separation of concerns makes detections more maintainable and testable.\n\n### Rule Types\nCommon examples of rules include analyzing logs for: authentication from unknown or unexpected locations, sensitive API calls (such as administrative changes to SaaS services), and network traffic access to sensitive data sources, such as databases or virtual machines.\n\nRules and scheduled rules are segments of logic through which log data is run to detect suspicious activity and generate signals. Rules analyze real-time events, while scheduled rules analyze events queried from your data lake.\n\nRules have the benefit of low-latency detection and alerting.\n\n### Alert Flow\nWhen there's a match on a rule, scheduled rule, or correlation rule, a signal is created — and, if alerting is enabled, a rule match. Policies generate a compliance failure on each match. Rule matches can trigger alerts according to the detection's event threshold and deduplication configurations. Alerts are then routed to destinations based on configurations on the detection and destination.\n\n---\n\n## 🐍 pypanther: The Future of Detection-as-Code (2025)\n\nPanther announced `pypanther`, a Python library for scaling SIEM rule management and generating the most contextualized alerts for an organization.\n\nPreviously, Panther used a combination of YAML and Python files to declare a rule. Now, a rule is expressed within a single Python class, enabling robust customization, overrides, and inheritance.\n\nUnlike traditional methods that depend on declarative languages like YAML or TOML, `pypanther` uses Python to express detection rules and their configuration. This allows for seamless overrides on top of hundreds of pre-built rules, eliminating the hassle of merge conflicts and applying manual changes — resulting in a more agile and efficient SecOps program.\n\nKeeping track of SIEM rule configurations usually requires a vast collection of YAML files in a large code repository. With `pypanther`, your local repository only comprises a `main.py`, custom rules, and overrides. `main.py` is the central configuration that specifies which pre-built rules are loaded, eliminating the need for maintaining copies of rules.\n\n---\n\n## 🔁 Sigma Rules Integration\n\n### What Are Sigma Rules?\nSigma rules are an open-source, generic standard for creating and sharing threat detection logic across different SIEMs. They were first developed and open-sourced by Florian Roth and Thomas Patzke in 2017.\n\nEach Sigma rule captures key information about the log source and detection logic using YAML, a human-readable data serialization language, and then relies on converters, called backends, to translate the detection into a SIEM-specific query language — making the Sigma rule format flexible, easy to use, and applicable to any type of log.\n\nToday, Sigma Rules are a cornerstone of collaborative threat detection, with over 3,000 threat detection rules backed by an extensive open-source community.\n\n### How Panther Converts Sigma Rules\nUse the `sigma-cli` tool to convert Sigma rules into Simple Detections or Python detections. In security and threat intelligence communities, Sigma rules are a common way to share detection logic in a vendor-agnostic format.\n\nThis tool can convert detections for endpoint events from certain EDR sources, applicable to logs generated in Windows, Mac, and Linux systems.\n\nSupported pipelines include: `windows_audit_panther`, `sysmon_panther`, `windows_logsource_panther`, `crowdstrike_panther`, `carbon_black_panther`, and `sentinelone_panther`.\n\nPanther's own ruleset is open source, and it is fully compatible with Sigma rules.\n\n---\n\n## 🗄️ Security Data Lake\n\nBuilt on top of the powerful Snowflake data lake, security teams in Panther can search high-volume log data across vast data lakes with cost-effective storage that scales effortlessly and returns rapid results.\n\nPanther is a leading cloud-native SIEM offering code-driven workflows that produce high-signal alerts, backed by a serverless security data lake that provides 365 days of hot storage for rapid investigations.\n\nHot data storage delivers your data sets fast with no need for tedious rehydration or tinkering to see the data you need when you need it.\n\nThe sophisticated log ingestion engine transforms raw, disparate logs into a unified, structured security data lake, normalizing key fields such as IP addresses and domain names. This allows security analysts to conduct powerful IoC searches using a single query, drastically saving valuable investigation and threat hunting time.\n\n---\n\n## 🤖 AI Agents in the SOC (2025)\n\nPanther embeds AI agents across every critical workflow in your SOC — triage, investigation, detection creation, and threat hunting. Agents investigate with the same depth as your most technical people, act autonomously, and feed what they learn back into the platform, so every alert makes your whole team smarter.\n\nThe AI Detection Builder lets you describe, in plain language, what you'd like to detect — then, it makes suggestions for a new or modified detection.\n\nAI can auto-close benign alerts, escalate critical threats, and propose detection improvements via GitHub PR. Humans stay in control; AI handles the volume.\n\n---\n\n## 🔄 CI/CD Workflow\n\nWith Panther, teams can define detections as code and programmatically upload them to their Panther deployment.\n\nCLI workflows include using Panther Analysis Tool (PAT), an open source utility for testing, packaging, and deploying Panther detections from source code.\n\nUsers can integrate CI/CD workflows and modern engineering best practices directly into their security detection and response lifecycles, guaranteeing agility and high-quality, testable rulesets.\n\nA typical workflow:\n```\nLocal Dev → Git Push → CI Pipeline (test, lint, schema validate) → PR Review → Merge → Deploy to Panther\n```\n\nDetections are organized by log type in the format `<log_type>_<detection_type>` (e.g., `aws_cloudtrail_rules/`, `okta_rules/`).\n\n---\n\n## 📊 Real-World Results\n\n| Customer | Outcome |\n|---|---|\n| **Snyk** | Tuning and correlation reduced alert volume by 70% |\n| **Docker** | Enabled 3× more ingestion while cutting false positives by 85% |\n| **Cockroach Labs** | Gained visibility into 5× more log data while maintaining budget and eliminating $200K+ in tooling overhead; reduced audit prep time by over 85% |\n\n---\n\n## 🗺️ Architecture Summary\n\n```\nLog Sources (Cloud, SaaS, Endpoints)\n        ↓\n   Log Ingestion + Normalization\n        ↓\n Security Data Lake (Snowflake, 365-day hot storage)\n        ↓\n┌───────────────────────────────────┐\n│   Detection Engine                │\n│   • Real-time Python/YAML Rules   │\n│   • Scheduled Rules (SQL queries) │\n│   • Sigma Rule Conversions        │\n│   • Correlation Rules             │\n│   • Cloud Config Policies         │\n└───────────────────────────────────┘\n        ↓\n  Signals → Rule Matches → Alerts\n        ↓\n  AI Agents (Triage, Investigation, Auto-close)\n        ↓\n  Destinations (PagerDuty, Slack, Jira, Tines...)\n```\n\n---\n\n## 📌 Key Links\n- 📄 **Docs**: [docs.panther.com](https://docs.panther.com)\n- 🐙 **GitHub (Open Source Rules)**: [github.com/panther-labs/panther-analysis](https://github.com/panther-labs/panther-analysis)\n- 🔁 **Sigma Conversion Guide**: [docs.panther.com/panther-developer-workflows/converting-sigma-rules](https://docs.panther.com/panther-developer-workflows/converting-sigma-rules)\n- 🐍 **pypanther**: [panther.com/blog/introducing-pypanther](https://panther.com/blog/introducing-pypanther-the-future-of-code-driven-detection-and-response)",
+    "resultPages": [
+      {
+        "title": "Sigma Rules: Your Guide to Threat Detection’s Open Standard - Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/blog/your-guide-to-the-sigma-rules-open-standard-for-threat-detection",
+        "snippet": ""
+      },
+      {
+        "title": "Detections | Panther Docs",
+        "url": "https://docs.panther.com/detections",
+        "snippet": ""
+      },
+      {
+        "title": "Rules and Scheduled Rules | Panther Docs",
+        "url": "https://docs.panther.com/detections/rules",
+        "snippet": ""
+      },
+      {
+        "title": "Beyond SIEM: Francis Odum Highlights the Shift to Data-Driven Security - Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/blog/beyond-siem-francis-odum-highlights-the-shift-to-data-driven-security",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - panther-labs/panther-analysis: Built-in Panther detection rules and policies · GitHub",
+        "url": "https://github.com/panther-labs/panther-analysis",
+        "snippet": ""
+      },
+      {
+        "title": "Converting Sigma Rules | Panther Docs",
+        "url": "https://docs.panther.com/panther-developer-workflows/converting-sigma-rules",
+        "snippet": ""
+      },
+      {
+        "title": "Overview | Panther Docs",
+        "url": "https://docs.panther.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Introducing Panther‚s Security Data Lake Search - Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/blog/introducing-panthers-security-data-lake-search",
+        "snippet": ""
+      },
+      {
+        "title": "Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Data Lakes | Panther Docs",
+        "url": "https://docs.panther.com/search/backend",
+        "snippet": ""
+      },
+      {
+        "title": "Overview | Panther Docs",
+        "url": "https://docs.panther.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Detections | Panther Docs",
+        "url": "https://docs.panther.com/detections",
+        "snippet": ""
+      },
+      {
+        "title": "Panther Cloud SIEM Detection Strategy – Expel Help Center",
+        "url": "https://support.expel.io/hc/en-us/articles/46486419384339-Panther-Cloud-SIEM-Detection-Strategy",
+        "snippet": ""
+      },
+      {
+        "title": "Detection as Code Modernizing Security Operations with Panther SIEM | Manas Ramesh",
+        "url": "https://manasramesh.github.io/posts/detection-as-code/",
+        "snippet": ""
+      },
+      {
+        "title": "Introducing pypanther: The Future of Code-Driven Detection and Response - Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/blog/introducing-pypanther-the-future-of-code-driven-detection-and-response",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - panther-labs/panther-analysis: Built-in Panther detection rules and policies · GitHub",
+        "url": "https://github.com/panther-labs/panther-analysis",
+        "snippet": ""
+      },
+      {
+        "title": "Panther: Pricing, Free Demo & Features | Software Finder",
+        "url": "https://softwarefinder.com/cybersecurity/panther",
+        "snippet": ""
+      },
+      {
+        "title": "Panther - SIEM Platform for Modern Threat Detection",
+        "url": "https://old.panther.com/product/",
+        "snippet": ""
+      },
+      {
+        "title": "GitHub - TachTech-Engineering/panther-siem: Built-in Panther detection rules and policies · GitHub",
+        "url": "https://github.com/TachTech-Engineering/panther-siem",
+        "snippet": ""
+      },
+      {
+        "title": "How Cockroach Labs Ingests 5x More Logs and Cut SecOps Costs Over $200K with Panther - Panther | The Security Monitoring Platform for the Cloud",
+        "url": "https://panther.com/case-studies/how-cockroach-labs-ingests-5x-more-logs-and-cut-secops-costs-over-200k-with-panther",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# 🛡️ Tines — No-Code Security Automation & SOAR Workflow Engine (2025)\n\n---\n\n## 🔎 What Is Tines?\n\nTines is a no-code automation platform designed specifically for security operations teams. It functions as a SOAR (Security Orchestration, Automation, and Response) tool, enabling security analysts to build automated workflows for **incident response, threat intelligence gathering, vulnerability management, and compliance reporting** — all without writing code.\n\nTines focuses on enabling teams — especially security and IT — to connect their technology stack and automate manual processes through an intuitive, story-based interface. Even analysts with limited programming skills can orchestrate complex workflows, because the platform's drag-and-drop approach makes automation accessible to everyone \"regardless of technical skill.\"\n\n---\n\n## 🏢 Company Background\n\n| Detail | Info |\n|---|---|\n| **Founded** | 2018 |\n| **HQ** | Dublin, Ireland |\n| **Employees** | 51–200 |\n| **Type** | Private |\n| **Website** | [tines.com](https://www.tines.com) |\n\nIn February 2025, Tines raised **$125M** for its AI-powered workflow automation platform. In July 2025, Tines hired Heather Planishek as COO and CFO, who previously served as Chief Accounting Officer at Palantir and held finance roles at Hewlett-Packard Enterprise and EY.\n\n---\n\n## ⚙️ How It Works — The \"Story\" Model\n\nThe software enables users to create and manage **\"stories\"** — connected sequences of agents, deterministic automation, and human-in-the-loop checkpoints — that help streamline tasks such as threat detection, data collection, and identity management.\n\nWith Tines, your whole team can build any workflow or process — regardless of complexity — without having to write or manage code. The easy-to-use platform lets you get up and running in minutes, not weeks.\n\n---\n\n## 🚀 Key Features (2025)\n\n### 1. 🎨 No-Code / Low-Code Drag-and-Drop Builder\nA drag-and-drop canvas is where you build your workflows — from the simple to the intricate and complex — all without having to write or manage code.\n\n### 2. 🔗 Universal API Integration\nUnlike legacy SOAR platforms, Tines is built as an **integrator — not on integrations**. It connects to any API to unlock deeper data and insight sharing across tools, both internal or external. As of 2025/2026, Tines includes over **30 built-in integrations** with security tools (CrowdStrike, SentinelOne, Splunk, PagerDuty) and supports custom API connections to any service with a REST API.\n\n### 3. 🤖 AI-Powered Automation\nTines enables teams of all sizes and skill sets to build, run, and monitor their most important workflows. The AI and workflow orchestration platform gives teams the tools to enrich data, add contextualization, and meet users where they are — **natural language, no code, low code, or bring your own code**.\n\nUsers can leverage LLMs to build, run, and monitor their most important workflows, or build and distribute agents throughout workflows with the **AI Agent action**.\n\n### 4. 🧠 Workspaces (Chatbot Interface)\nTines provides a chatbot interface called **Workspaces**, which enables users to manually specify what tasks the platform should perform using natural language prompts.\n\n### 5. 🚨 Cases — Incident Response Module\nThe **Cases** tool helps cybersecurity teams respond to breaches faster. It aggregates data from a company's cybersecurity tools in a centralized interface. A checklist shows the steps administrators should take in response to a breach alert, such as mapping out what systems are affected. Cases also includes an analytics dashboard that displays high-level data about a company's cybersecurity efforts.\n\n### 6. 👥 Human-in-the-Loop Workflows\nInstead of automating black-and-white remediation actions, teams can ask the affected user or an analyst for their input first. This can be facilitated through automated Slack messages or chatbots — and automating the rest of the workflow based on their response.\n\n### 7. 🔒 Security-First Design\nTines is built for SecOps: least-privilege, auditability, secret hygiene. It provides powerful event routing, investigation playbooks, and auto-response, and remains stable under high-volume alerting.\n\n---\n\n## 🎯 Core Use Cases\n\n| Use Case | Description |\n|---|---|\n| **Phishing Response** | Automated triage, user confirmation, and containment |\n| **Alert Triage** | Reduce false positives, enrich alerts, take initial containment actions |\n| **Threat Intelligence** | Gather, correlate, and act on threat data across tools |\n| **Incident Response** | End-to-end orchestration from detection to remediation |\n| **Cloud Security** | IAM adjustments, ephemeral resource monitoring, automated recovery |\n| **Vulnerability Management** | Automate scanning, ticketing, and patch tracking |\n| **Employee Onboarding/Offboarding** | Provision/deprovision access across systems automatically |\n\n---\n\n## 🏆 Why Teams Choose Tines Over Legacy SOAR\n\nFirst-generation SOAR tools addressed these needs; however, building workflows capable of handling the variety of tools and use cases modern security teams need to automate proved **impossible and costly** for the average frontline security team.\n\nTines security orchestration and automation goes beyond traditional SOAR — it allows teams to **move faster and make better decisions in real-time**.\n\nUnlike other SOARs that require extensive Python scripting for any non-standard task, Tines allows users to connect to literally any API with its generic HTTP request agent.\n\n---\n\n## 💰 Pricing (2025)\n\nTines offers a **forever-free Community Edition** for hands-on experience with the platform's powerful capabilities — perfect for proof-of-concepts, learning, and building a business case for broader implementation.\n\nTines employs a **subscription-based pricing model** structured around user tiers and feature sets, with options for monthly or annual billing. Pricing generally varies based on the number of users and access to advanced capabilities. **Custom enterprise pricing** is available for larger deployments.\n\nThe Community Edition is free for single users with unlimited workflows. Enterprise pricing is custom and typically starts at **$50,000 or more per year**, based on team size and deployment requirements.\n\nThe platform does **not use per-action or per-task pricing** — instead billing based on team seats and feature tiers.\n\nBoth Business and Enterprise Editions are available for **self-hosting**.\n\n---\n\n## 🔌 Notable Integrations & Partnerships\n\n- Elastic and Tines unveiled an integrated product offering — **Tines Workflow Automation, available directly through Elastic** — equipping SOC teams with SOAR and observability teams with incident response automation.\n- **CrowdStrike, SentinelOne, Splunk, PagerDuty, Jira, Slack, Okta** — and any REST API.\n- Federal agencies rely on Tines' workflow and automation platform to reach their **zero trust goals** and reinforce their security posture.\n\n---\n\n## 👥 Who Uses Tines?\n\nTines is the intelligent workflow platform trusted by the world's most advanced organizations. Companies like **Coinbase, Databricks, Mars, Reddit, and SAP** use Tines to power their most important workflows, building a secure, flexible foundation to operationalize AI agents and intelligent workflows.\n\n---\n\n## ⚠️ Considerations / Limitations\n\n- Some users note **challenges with handling large data volumes**.\n- Simple workflows are easy, but **advanced workflows can become complex** and require trial and error to perfect.\n- Enterprise plans can be costly for smaller teams (starting ~$50K/year).\n\n---\n\n## 📊 Competitors\n\n| Tool | Key Difference |\n|---|---|\n| **Splunk SOAR (Phantom)** | Python-based playbooks; better for Splunk-heavy enterprises |\n| **Swimlane** | Low-code with advanced security analytics |\n| **Torq** | Security-focused hyperautomation; closest Tines alternative |\n| **n8n** | Open-source, self-hosted; more flexible for engineering-led orgs |\n| **Zapier / Make** | Broader integrations, less security-focused |\n\n---\n\n## 🔗 Resources\n\n- 🌐 [tines.com](https://www.tines.com)\n- 📚 [Tines University (Free Certifications)](https://www.tines.com/university)\n- 📖 [Tines Library / Pre-built Workflows](https://www.tines.com/library)\n- 💬 [Gartner Peer Reviews](https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions/vendor/tines/product/tines)",
+    "resultPages": [
+      {
+        "title": "Essential Guide to No-Code Automation for Security Teams | Tines",
+        "url": "https://www.tines.com/playbooks/no-code-automation-for-security-teams/",
+        "snippet": ""
+      },
+      {
+        "title": "Tines | Intelligent workflow platform",
+        "url": "https://www.tines.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Break away from legacy SOAR | Tines",
+        "url": "https://www.tines.com/soar/",
+        "snippet": ""
+      },
+      {
+        "title": "Elastic and Tines team up to offer SOAR and AIOps",
+        "url": "https://www.elastic.co/blog/elastic-tines-automate-security-observability",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Reviews, Ratings & Features 2026 | Gartner Peer Insights",
+        "url": "https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions/vendor/tines/product/tines",
+        "snippet": ""
+      },
+      {
+        "title": "Tines 2026: No-Code SOAR Platform (7.8/10) | Automation Atlas",
+        "url": "https://automationatlas.io/tools/tines",
+        "snippet": ""
+      },
+      {
+        "title": "Report: Tines Business Breakdown & Founding Story | Contrary Research",
+        "url": "https://research.contrary.com/company/tines",
+        "snippet": ""
+      },
+      {
+        "title": "Security Automation: Best Practices with Examples | Tines",
+        "url": "https://www.tines.com/blog/security-automation/",
+        "snippet": ""
+      },
+      {
+        "title": "Cloud Security Automation: Best Practices and Practical Examples | Tines",
+        "url": "https://www.tines.com/blog/security-automation/cloud-security-automation/",
+        "snippet": ""
+      },
+      {
+        "title": "Security Orchestration Best Practices | Tines",
+        "url": "https://www.tines.com/blog/security-automation/security-orchestration/",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Intelligent Workflow Platform Reviews & Ratings 2026 | Gartner Peer Insights",
+        "url": "https://www.gartner.com/reviews/product/tines-intelligent-workflow-platform",
+        "snippet": ""
+      },
+      {
+        "title": "Tines | Intelligent workflow platform",
+        "url": "https://www.tines.com/",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Reviews, Ratings & Features 2026 | Gartner Peer Insights",
+        "url": "https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions/vendor/tines/product/tines",
+        "snippet": ""
+      },
+      {
+        "title": "Tines nabs $125M for its AI-powered workflow automation platform - SiliconANGLE",
+        "url": "https://siliconangle.com/2025/02/11/tines-nabs-125m-ai-powered-workflow-automation-platform/",
+        "snippet": ""
+      },
+      {
+        "title": "Understanding Tines pricing and packaging | Tines Explained",
+        "url": "https://explained.tines.com/en/articles/9620399-understanding-tines-pricing-and-packaging",
+        "snippet": ""
+      },
+      {
+        "title": "Best Workflow Automation Tools (2026) - Riseup Labs",
+        "url": "https://riseuplabs.com/workflow-automation-tools/",
+        "snippet": ""
+      },
+      {
+        "title": "Elastic and Tines partner to orchestrate and automate team workflows | Elastic Blog",
+        "url": "https://www.elastic.co/blog/elastic-tines-automate-security-observability",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Reviews & Ratings 2026 | Gartner Peer Insights",
+        "url": "https://www.gartner.com/reviews/product/tines",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Reviews 2026: Details, Pricing, & Features | G2",
+        "url": "https://www.g2.com/products/tines/reviews",
+        "snippet": ""
+      },
+      {
+        "title": "Tines Features, Alternatives & More 2025",
+        "url": "https://www.capterra.com/p/178319/Tines/",
+        "snippet": ""
+      }
+    ]
+  },
+  {
+    "searchAnswer": "# 🔐 Wiz Cloud Security Graph: Cross-Cloud Risk Prioritization Architecture (2025)\n\n---\n\n## 🧠 What Is the Wiz Security Graph?\n\nFrom the beginning, everything at Wiz has started with the graph—a unified data model that maps every relationship across code, cloud, and runtime. The Wiz Security Graph gives teams a shared language to see risk clearly, prioritize what matters, and act fast.\n\nWiz connects code, cloud, and runtime into a single security graph that provides the end-to-end context required to automate risk reduction and threat response, enabling security teams to operate at AI speed.\n\n---\n\n## 🏗️ Core Architectural Components\n\n### 1. **Graph Database Foundation (Amazon Neptune)**\n\nWiz maps all detected risks and the entire technology stack onto the Wiz Security Graph, which was built from the ground up using Amazon Neptune, a serverless graph database service. As a result, Wiz can model the complexity of cloud environments, using both automated and security controls to identify and prioritize risks based on holistic context.\n\nWiz scans the entire technology stack without agents and stores a graph of the relevant security metadata in Neptune. The Wiz risk engines traverse the graph and weave together interconnected risk factors in seconds.\n\nThe security graph processes **1.2 billion asset relationships daily**, ties these insights together, mapping relationships across cloud assets to trace attack paths and potential blast radius (e.g., from a compromised container to an S3 bucket, via GraphQL queries).\n\n---\n\n### 2. **Agentless API Scanning Layer**\n\nWiz connects in minutes via API and achieves full coverage across cloud and AI resources across PaaS, virtual machines, containers, serverless functions, agents, models, repositories, and pipelines without disrupting business operations or requiring ongoing maintenance. It scales to any cloud and AI environment with zero impact on resource or workload performance.\n\nWiz's agentless architecture connects directly via APIs, scanning cloud environments without deploying software agents. This approach ensures complete visibility across diverse resources, including PaaS platforms, virtual machines, containers, and serverless functions, simplifying deployment and maintenance.\n\n---\n\n### 3. **Node-and-Edge Graph Model**\n\nWiz uses the information it gathers to create a **node-and-edge graph** of your assets and their interconnections. This graph, called the Wiz Security Graph, lets Wiz identify the most toxic risk combinations.\n\nAn AI security graph is a graph-based model that maps how AI systems actually operate in the cloud. Instead of analyzing models, infrastructure, identities, or data in isolation, it represents them as interconnected nodes—such as AI models, training pipelines, cloud services, service accounts, and data stores—and the relationships between them, including permissions, data flows, and network exposure.\n\n---\n\n### 4. **Multi-Layer Data Ingestion**\n\nThe graph ingests signals from multiple layers simultaneously:\n\n- **Workload scanning** collects metadata of operating systems, apps, packages, secrets, and container files to create a list of vulnerabilities and misconfigurations.\n- **Data scanning** scans Cloud Storage, non-OS volumes, tables in Cloud SQL, and collects metadata from sensitive data objects.\n- **Identity scanning** uses IAM Recommender to find excessive and unused permissions to create Wiz findings.\n- **Threat event ingestion** includes Admin Activity audit logs and Security Command Center findings to add threat events.\n\n---\n\n### 5. **SAST + Code-to-Cloud Pipeline**\n\nWiz SAST expands Wiz Code into proprietary code analysis, giving teams visibility into vulnerabilities in the code they write and the cloud environments where that code runs. Once scanned, SAST findings flow into the Wiz Security Graph, where they're enriched with runtime workload exposure, data access, identity privileges, and attack path insights.\n\n---\n\n## 🎯 Cross-Cloud Risk Prioritization: How It Works\n\n### **\"Toxic Combinations\" — The Core Prioritization Engine**\n\nThe Security Graph is a contextual engine with complete Code-Cloud-Runtime (CLP) coverage. \"Toxic Combinations\" is Wiz's risk prioritization approach that finds the real attack paths, not just flat vulnerability lists.\n\nWiz's system evaluates vulnerabilities in context, factoring in **security impact, business relevance, network exposure, and data sensitivity**. This prioritization ensures teams focus on addressing the most critical risks first.\n\nThe concept of \"context\" in cloud security means prioritization. It's the \"so what\" that tells you a vulnerability is critical because it's public-facing, has high permissions, and touches sensitive data.\n\n### **Exposure Management (GA in 2025)**\n\nWiz brings together every risk across any infrastructure to determine whether an exposure is actually exploitable and identifies its true impact on the environment. Exposure Management at Wiz includes both **Wiz Unified Vulnerability Management (UVM)** and **Wiz Attack Surface Management (ASM)** to surface true exposure—the issues that form viable attack paths that threat actors could actually exploit.\n\nWiz UVM centralizes vulnerability data from all scanners—including third parties—into a single tool for prioritization. It centralizes vulnerability findings from cloud, on-prem, and application environments into the Wiz Security Graph, enriching them with context.\n\n### **Attack Surface Management (ASM)**\n\nWiz ASM provides a clear, validated, and prioritized view of every external exposure across cloud, AI, on-prem, and SaaS environments. It uniquely combines an outside-in attacker's perspective with deep cloud context to help teams focus on the exploitable risks that truly matter before attackers can find them.\n\n---\n\n## ☁️ Cross-Cloud Scope (AWS, Azure, GCP, OCI, and Beyond)\n\nWiz Cloud provides agentless scanning of cloud infrastructure—**AWS, Azure, GCP, OCI, and Kubernetes**—to identify misconfigurations, vulnerabilities, secrets, and identity risks (CIEM).\n\nWiz's Security Graph provides deep cross-cloud correlation, connecting code, identities, data, and runtime into one unified attack path model.\n\nThe company uses **hundreds of Neptune clusters** deployed over more than **20 AWS Regions** to support this global scale.\n\n### **SaaS Extension (2025)**\n\nWiz is bringing its agentless cloud security approach to productivity SaaS, starting with **Microsoft 365**. As cloud and collaboration platforms converge, Wiz unifies security context across infrastructure and SaaS, giving teams a single view of risk.\n\nThe new integration surfaces misconfigurations, excessive access, identifies sensitive data and secrets in OneDrive and SharePoint, correlates Purview labels, and flags risky sharing links and permissions—all connecting through the Wiz Security Graph.\n\n---\n\n## 🤖 AI & Runtime Security (2025 Evolution)\n\nWiz AI Security Posture Management (AI-SPM) builds on the Security Graph by identifying AI-specific risks—such as exposed AI services, over-permissioned service accounts, insecure model storage, or sensitive data accessible to AI pipelines—and correlating them with broader cloud context. This allows teams to understand not just that a risk exists, but whether it creates a realistic attack path.\n\nBy integrating runtime detection with posture, identity, and workload context, all stitched together via the Wiz Security Graph, the platform offers a powerful foundation for reducing noise, accelerating response, and driving collaboration between security, cloud, and development teams.\n\n---\n\n## 🔁 The \"Horizontal Security\" Architecture Model (Wizdom 2025)\n\nThe new announcements are logical extensions of the graph, designed to enable what Wiz calls **\"Horizontal security\"**—a move away from siloed, \"Vertical\" security teams for Dev, Sec, and Ops toward a shared context plane for all.\n\nWhere many other security models are vertically oriented, with a silo per security segment, the **horizontal architecture of the Wiz model is fundamentally different**—a shared context layer spanning all teams.\n\nWhat emerged at Wizdom 2025 was the pivot from **context-for-prioritization** to **context-as-a-knowledge-layer**—a more fundamental architectural shift.\n\n---\n\n## 📊 Architecture Summary Table\n\n| Layer | Technology / Approach | Purpose |\n|---|---|---|\n| **Data Store** | Amazon Neptune (graph DB) | Store billions of asset relationships |\n| **Scanning** | Agentless API scanning | Full cloud coverage, zero agent overhead |\n| **Graph Model** | Node-and-edge (assets + relationships) | Map identities, workloads, data, network |\n| **Risk Engine** | Toxic Combinations engine | Identify real attack paths, not just alerts |\n| **Prioritization** | UVM + ASM + Attack Path Analysis | Surface only exploitable, high-impact risks |\n| **Runtime** | eBPF sensor + Wiz Defend | Real-time threat detection + response |\n| **Code Layer** | SAST + Wiz Code (ASPM) | Shift risk left to the IDE and CI/CD pipeline |\n| **AI Security** | AI-SPM + AI Security Graph | Secure models, pipelines, agents, MCP servers |\n| **SaaS Extension** | M365, Databricks, Cloudflare integrations | Extend graph beyond cloud into SaaS + edge |\n| **Output** | Wiz Issues → automated workflows | Trigger alerts and remediation automatically |\n\n---\n\n## 🔑 Key Differentiators vs. Competitors\n\nTraditional security solutions use siloed data sources for vulnerabilities, network exposures, and identities, making it difficult to understand the real risk to the customer environment. For example, vulnerabilities from within an internal network may be lower priority than those from the public internet, but traditional cybersecurity tools ignore such nuances. By viewing security in a contextual risk model, organizations can prioritize critical issues and focus remediation efforts on them.\n\nThe actionable context created and stored in the graph enables precise answers to proactively identify, prioritize, remediate, and prevent risks to your business. The precision, speed, and explainability of finding risks simply is not possible without using a graph.",
+    "resultPages": [
+      {
+        "title": "Wiz Security Graph: How It Works, Benefits, Use Cases | Wiz",
+        "url": "https://www.wiz.io/lp/wiz-security-graph",
+        "snippet": ""
+      },
+      {
+        "title": "Identify and prioritize security risks with Wiz Security Graph and Google Cloud | Cloud Architecture Center | Google Cloud Documentation",
+        "url": "https://docs.cloud.google.com/architecture/partners/id-prioritize-security-risks-with-wiz",
+        "snippet": ""
+      },
+      {
+        "title": "At Wizdom 2025, Wiz Presents a Broader Vision of Cloud Security - Futurum",
+        "url": "https://futurumgroup.com/insights/at-wizdom-2025-wiz-presents-a-broader-vision-of-cloud-security/",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz: AI Cybersecurity for All Your Cloud and AI Applications",
+        "url": "https://www.wiz.io/",
+        "snippet": ""
+      },
+      {
+        "title": "Can Cloudflare and Wiz Close the AI Security Visibility Gap? - Futurum",
+        "url": "https://futurumgroup.com/insights/can-cloudflare-and-wiz-close-the-ai-security-visibility-gap/",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz Cloud Security: Everything You Need to Know About the Platform Securing the Modern Cloud",
+        "url": "https://www.loginsoft.com/post/wiz-cloud-security-everything-you-need-to-know-about-the-platform-securing-the-modern-cloud",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz | Google Cloud",
+        "url": "https://cloud.google.com/wiz",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz Product Announcements at re:Invent 2025 | Wiz Blog",
+        "url": "https://www.wiz.io/blog/aws-re-invent-2025",
+        "snippet": ""
+      },
+      {
+        "title": "Reimagining cloud security using Amazon Neptune graph database with Wiz | Case Study | AWS",
+        "url": "https://aws.amazon.com/solutions/case-studies/wiz-neptune/",
+        "snippet": ""
+      },
+      {
+        "title": "Wizdom 2025: Expanding the Cloud Operating Model | Wiz Blog",
+        "url": "https://www.wiz.io/blog/wizdom-product-launches-2025",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz Security Graph: How It Works, Benefits, Use Cases | Wiz",
+        "url": "https://www.wiz.io/lp/wiz-security-graph",
+        "snippet": ""
+      },
+      {
+        "title": "Identify and prioritize security risks with Wiz Security Graph and Google Cloud | Cloud Architecture Center | Google Cloud Documentation",
+        "url": "https://docs.cloud.google.com/architecture/partners/id-prioritize-security-risks-with-wiz",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz builds 'horizontal security model' based on Security Graph - Techzine Global",
+        "url": "https://www.techzine.eu/blogs/security/136730/wiz-builds-horizontal-security-model-based-on-security-graph/",
+        "snippet": ""
+      },
+      {
+        "title": "AI Security Graphs Explained: Contextual Risk for AI Systems | Wiz",
+        "url": "https://www.wiz.io/academy/ai-security/ai-security-graph",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz: AI Cybersecurity for All Your Cloud and AI Applications",
+        "url": "https://www.wiz.io/",
+        "snippet": ""
+      },
+      {
+        "title": "Recreating Wiz's Security Graph with PuppyGraph",
+        "url": "https://www.puppygraph.com/blog/wiz-security-graph",
+        "snippet": ""
+      },
+      {
+        "title": "The World is a graph: How Wiz reimagines cloud security using a graph in Amazon Neptune | Amazon Web Services",
+        "url": "https://aws.amazon.com/blogs/database/the-world-is-a-graph-how-wiz-reimagines-cloud-security-using-a-graph-in-amazon-neptune/",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz Cloud and AI Security Platform | Wiz",
+        "url": "https://www.wiz.io/platform",
+        "snippet": ""
+      },
+      {
+        "title": "Runtime Security In 2025: How Wiz Defend Signals The Future of Cloud Security Operations",
+        "url": "https://softwareanalyst.substack.com/p/runtime-security-in-2025-how-wiz",
+        "snippet": ""
+      },
+      {
+        "title": "Wiz and Databricks: Adding Databricks to the Wiz Security Graph",
+        "url": "https://www.wiz.io/blog/wiz-databricks-security-graph",
+        "snippet": ""
+      }
+    ]
+  }
+]

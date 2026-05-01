@@ -756,6 +756,9 @@ importers:
       '@workspace/codex-kernel':
         specifier: workspace:*
         version: link:../../packages/codex-kernel
+      '@workspace/cognitive-reflexivity':
+        specifier: workspace:*
+        version: link:../../packages/cognitive-reflexivity
       '@workspace/cognitive-runtime':
         specifier: workspace:*
         version: link:../../packages/cognitive-runtime
@@ -3410,6 +3413,25 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/cognitive-reflexivity:
+    dependencies:
+      '@szl-holdings/signal-mesh':
+        specifier: workspace:*
+        version: link:../signal-mesh
+      '@workspace/ontology':
+        specifier: workspace:*
+        version: link:../ontology
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/cognitive-runtime:
     dependencies:

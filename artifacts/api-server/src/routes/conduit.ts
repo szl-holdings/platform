@@ -11,6 +11,55 @@ import {
 } from '@szl-holdings/db';
 import { logger } from '../lib/logger';
 import { logActivityFromRequest } from '@szl-holdings/audit';
+import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
+
+/**
+ * Emit a cognitive-reflexive observation when a sync run completes.
+ * Best-effort — never throws into the sync execution path.
+ */
+function emitConduitReflexive(
+  result: 'success' | 'partial' | 'failed',
+  ctx: { syncId: string; runId: string; rowsRead: number; rowsFailed: number; durationMs?: number; errorMessage?: string },
+): void {
+  try {
+    const runtime = getReflexivityRuntime();
+    const failureRate = ctx.rowsRead > 0 ? ctx.rowsFailed / ctx.rowsRead : 0;
+    if (result === 'failed') {
+      runtime.engine.emit({
+        subtype: 'sync.failed',
+        observation: `Conduit sync ${ctx.syncId} run ${ctx.runId} failed: ${ctx.errorMessage ?? 'execution error'}`,
+        intensity: 0.75,
+        evidenceRefs: [`conduit:sync:${ctx.syncId}`, `conduit:run:${ctx.runId}`],
+        data: { syncId: ctx.syncId, runId: ctx.runId, errorMessage: ctx.errorMessage },
+        source: 'system',
+      });
+      return;
+    }
+    if (result === 'partial' && failureRate >= 0.05) {
+      runtime.engine.emit({
+        subtype: 'sync.degraded',
+        observation: `Conduit sync ${ctx.syncId} ran with ${(failureRate * 100).toFixed(1)}% row failures (${ctx.rowsFailed}/${ctx.rowsRead}).`,
+        intensity: Math.min(0.9, 0.4 + failureRate * 4),
+        evidenceRefs: [`conduit:sync:${ctx.syncId}`, `conduit:run:${ctx.runId}`],
+        data: { syncId: ctx.syncId, runId: ctx.runId, failureRate, rowsFailed: ctx.rowsFailed, rowsRead: ctx.rowsRead },
+        source: 'system',
+      });
+      return;
+    }
+    if (result === 'success' && ctx.durationMs && ctx.durationMs > 6000) {
+      runtime.engine.emit({
+        subtype: 'sync.slow',
+        observation: `Conduit sync ${ctx.syncId} succeeded but took ${ctx.durationMs}ms (above 6s baseline).`,
+        intensity: 0.45,
+        evidenceRefs: [`conduit:sync:${ctx.syncId}`, `conduit:run:${ctx.runId}`],
+        data: { syncId: ctx.syncId, runId: ctx.runId, durationMs: ctx.durationMs },
+        source: 'system',
+      });
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Failed to emit conduit reflexive signal');
+  }
+}
 
 const router: IRouter = Router();
 
@@ -516,6 +565,10 @@ async function simulateSyncExecution(runId: string, syncId: string): Promise<voi
       }));
       await db.insert(conduitSyncRunRowsTable).values(failedRows);
     }
+
+    // Emit a cognitive-reflexive observation so the engine can learn from
+    // sync outcomes (degradation patterns, slow runs, recurring failures).
+    emitConduitReflexive(status, { syncId, runId, rowsRead, rowsFailed, durationMs });
   } catch (err) {
     logger.error({ err, runId }, 'Failed to complete sync execution');
     await db.update(conduitSyncRunsTable).set({
@@ -523,6 +576,13 @@ async function simulateSyncExecution(runId: string, syncId: string): Promise<voi
       errorMessage: 'Execution failed unexpectedly',
       finishedAt: new Date(),
     }).where(eq(conduitSyncRunsTable.id, runId));
+    emitConduitReflexive('failed', {
+      syncId,
+      runId,
+      rowsRead: 0,
+      rowsFailed: 0,
+      errorMessage: err instanceof Error ? err.message : 'unknown',
+    });
   }
 }
 
