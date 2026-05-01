@@ -1,4 +1,5 @@
 export * from './engine.js';
+export * from './quantum-optimizer.js';
 export * from './redaction.js';
 export * from './retention.js';
 export * from './tenant.js';

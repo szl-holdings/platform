@@ -98,6 +98,7 @@ const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ defa
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
+const QuantumIntelligence = lazy(() => import('./pages/QuantumIntelligence').then(m => ({ default: m.QuantumIntelligence })));
 const DarpaResilienceHub = lazy(() => import('./pages/DarpaResilienceHub').then(m => ({ default: m.DarpaResilienceHub })));
 const GardRobustness = lazy(() => import('./pages/GardRobustness').then(m => ({ default: m.GardRobustness })));
 const FormalVerification = lazy(() => import('./pages/FormalVerification').then(m => ({ default: m.FormalVerification })));
@@ -271,6 +272,7 @@ export default function App() {
         <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
         <Route path={`${base}/adversarial`} component={AdversarialResilience} />
         <Route path={`${base}/frontier`} component={FrontierIntelligence} />
+        <Route path={`${base}/quantum`} component={QuantumIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />

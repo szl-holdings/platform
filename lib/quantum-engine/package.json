@@ -1,0 +1,24 @@
+{
+  "name": "@szl-holdings/quantum-engine",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./annealing": "./src/quantum-annealing.ts",
+    "./qaoa": "./src/qaoa-optimizer.ts",
+    "./sampler": "./src/amplitude-sampler.ts",
+    "./correlation": "./src/tensor-correlation.ts",
+    "./ensemble": "./src/ensemble-amplifier.ts",
+    "./policy": "./src/policy-optimizer.ts",
+    "./benchmarks": "./src/benchmarks.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "lint": "biome lint ./src"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

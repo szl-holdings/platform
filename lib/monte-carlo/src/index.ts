@@ -93,6 +93,7 @@ export type {
   OutputMetric,
   PartialOutputSnapshot,
   PartialResultCallback,
+  QuantumSamplingConfig,
   RunConfig,
   ScenarioConstraint,
   ScenarioDefinition,
@@ -112,3 +113,8 @@ export {
   tweakedInputs,
   tweakSummary,
 } from './tweaks.js';
+export type {
+  QuantumSampleBatch,
+  QuantumSimulationStats,
+} from './quantum-sampler.js';
+export { quantumSampleBatch, computeQuantumStats } from './quantum-sampler.js';

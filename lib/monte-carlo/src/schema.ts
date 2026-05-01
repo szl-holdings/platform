@@ -64,6 +64,21 @@ export interface ScenarioLibraryEntry {
 
 export type ScenarioLibrary = Record<string, ScenarioLibraryEntry>;
 
+/**
+ * Quantum-inspired sampling configuration.
+ *
+ * When enabled, replaces uniform pseudo-random sampling with a Halton-sequence
+ * quasi-Monte Carlo sampler combined with amplitude-inspired importance weights.
+ * This achieves O((log N)^d / N) convergence vs classical O(1/√N), particularly
+ * beneficial for correlated multi-variable scenarios with ≥3 input dimensions.
+ */
+export interface QuantumSamplingConfig {
+  enabled: boolean;
+  amplificationIterations?: number;
+  correlationThreshold?: number;
+  importanceBias?: number;
+}
+
 export interface RunConfig {
   iterations: number;
   seed?: number;
@@ -71,6 +86,7 @@ export interface RunConfig {
   timeoutMs?: number;
   sensitivitySamples?: number;
   snapshotInterval?: number;
+  quantumSampling?: QuantumSamplingConfig;
 }
 
 export interface PartialOutputSnapshot {

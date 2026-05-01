@@ -16,6 +16,11 @@ import type {
   RunConfig,
   ScenarioDefinition,
 } from './schema.js';
+import {
+  computeQuantumStats,
+  quantumSampleBatch,
+  type QuantumSimulationStats,
+} from './quantum-sampler.js';
 
 export interface SimulationProgress {
   iteration: number;
@@ -45,6 +50,7 @@ export interface SimulationResult {
   results: Record<string, MetricResult>;
   inputSamples: Record<string, number[]>;
   correlationMatrix: Record<string, Record<string, number>>;
+  quantumSamplingStats?: QuantumSimulationStats;
   durationMs: number;
   timestamp: string;
 }
@@ -100,6 +106,7 @@ export async function runSimulation(
     sensitivitySamples: config.sensitivitySamples ?? 200,
     timeoutMs: config.timeoutMs ?? 120_000,
     snapshotInterval: config.snapshotInterval ?? 0,
+    quantumSampling: config.quantumSampling,
   };
 
   const startMs = Date.now();
@@ -120,58 +127,122 @@ export async function runSimulation(
   const batchSize = Math.min(cfg.batchSize ?? 1_000, totalIterations);
   let completed = 0;
 
+  const useQuantumSampling = cfg.quantumSampling?.enabled === true;
+  const quantumBatchResults: import('./quantum-sampler.js').QuantumSampleBatch[] = [];
+
   while (completed < totalIterations) {
     if (Date.now() > deadline) break;
 
     const batchCount = Math.min(batchSize, totalIterations - completed);
 
-    for (let i = 0; i < batchCount; i++) {
-      const inputs: Record<string, number> = {};
-      for (const v of scenario.inputs) {
-        const val = sample(v.distribution);
-        inputs[v.id] = val;
-        inputSamples[v.id]?.push(val);
-      }
+    if (useQuantumSampling && cfg.quantumSampling) {
+      const qBatch = quantumSampleBatch(
+        scenario.inputs,
+        batchCount,
+        completed,
+        cfg.quantumSampling,
+      );
+      quantumBatchResults.push(qBatch);
 
-      let outputs: Record<string, number>;
-      try {
-        outputs = scenario.calculate(inputs, completed + i);
-      } catch {
-        constraintViolations++;
-        continue;
-      }
+      for (let i = 0; i < batchCount; i++) {
+        const inputs: Record<string, number> = {};
+        for (const v of scenario.inputs) {
+          const batchSamples = qBatch.inputSamples[v.id];
+          const val = batchSamples?.[i] ?? sample(v.distribution);
+          inputs[v.id] = val;
+          inputSamples[v.id]?.push(val);
+        }
 
-      let valid = true;
-      if (scenario.constraints) {
-        for (const constraint of scenario.constraints) {
-          if (!constraint.check(outputs)) {
-            valid = false;
-            constraintViolations++;
-            break;
+        let outputs: Record<string, number>;
+        try {
+          outputs = scenario.calculate(inputs, completed + i);
+        } catch {
+          constraintViolations++;
+          continue;
+        }
+
+        let valid = true;
+        if (scenario.constraints) {
+          for (const constraint of scenario.constraints) {
+            if (!constraint.check(outputs)) {
+              valid = false;
+              constraintViolations++;
+              break;
+            }
           }
         }
-      }
 
-      if (!valid) continue;
+        if (!valid) continue;
 
-      validIterations++;
-      for (const v of scenario.inputs) {
-        validInputSamples[v.id]?.push(inputs[v.id]!);
-      }
-      for (const m of scenario.outputs) {
-        const val = outputs[m.id];
-        if (val !== undefined && Number.isFinite(val)) {
-          outputAccumulators[m.id]?.push(val);
+        validIterations++;
+        for (const v of scenario.inputs) {
+          validInputSamples[v.id]?.push(inputs[v.id]!);
+        }
+        for (const m of scenario.outputs) {
+          const val = outputs[m.id];
+          if (val !== undefined && Number.isFinite(val)) {
+            outputAccumulators[m.id]?.push(val);
+          }
+        }
+
+        const snapshotInterval = cfg.snapshotInterval ?? 0;
+        if (onPartialResult && snapshotInterval > 0 && validIterations % snapshotInterval === 0) {
+          onPartialResult(
+            validIterations,
+            totalIterations,
+            buildPartialSnapshots(scenario.outputs, outputAccumulators, validIterations),
+          );
         }
       }
+    } else {
+      for (let i = 0; i < batchCount; i++) {
+        const inputs: Record<string, number> = {};
+        for (const v of scenario.inputs) {
+          const val = sample(v.distribution);
+          inputs[v.id] = val;
+          inputSamples[v.id]?.push(val);
+        }
 
-      const snapshotInterval = cfg.snapshotInterval ?? 0;
-      if (onPartialResult && snapshotInterval > 0 && validIterations % snapshotInterval === 0) {
-        onPartialResult(
-          validIterations,
-          totalIterations,
-          buildPartialSnapshots(scenario.outputs, outputAccumulators, validIterations),
-        );
+        let outputs: Record<string, number>;
+        try {
+          outputs = scenario.calculate(inputs, completed + i);
+        } catch {
+          constraintViolations++;
+          continue;
+        }
+
+        let valid = true;
+        if (scenario.constraints) {
+          for (const constraint of scenario.constraints) {
+            if (!constraint.check(outputs)) {
+              valid = false;
+              constraintViolations++;
+              break;
+            }
+          }
+        }
+
+        if (!valid) continue;
+
+        validIterations++;
+        for (const v of scenario.inputs) {
+          validInputSamples[v.id]?.push(inputs[v.id]!);
+        }
+        for (const m of scenario.outputs) {
+          const val = outputs[m.id];
+          if (val !== undefined && Number.isFinite(val)) {
+            outputAccumulators[m.id]?.push(val);
+          }
+        }
+
+        const snapshotInterval = cfg.snapshotInterval ?? 0;
+        if (onPartialResult && snapshotInterval > 0 && validIterations % snapshotInterval === 0) {
+          onPartialResult(
+            validIterations,
+            totalIterations,
+            buildPartialSnapshots(scenario.outputs, outputAccumulators, validIterations),
+          );
+        }
       }
     }
 
@@ -201,6 +272,11 @@ export async function runSimulation(
     scenario.inputs.map((i) => i.id),
   );
 
+  const quantumSamplingStats =
+    useQuantumSampling && quantumBatchResults.length > 0
+      ? computeQuantumStats(scenario.inputs, quantumBatchResults)
+      : undefined;
+
   return {
     scenarioId: scenario.id,
     scenarioTitle: scenario.title,
@@ -212,6 +288,7 @@ export async function runSimulation(
     results,
     inputSamples,
     correlationMatrix,
+    quantumSamplingStats,
     durationMs: Date.now() - startMs,
     timestamp: new Date().toISOString(),
   };

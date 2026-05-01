@@ -13,6 +13,10 @@ export default defineConfig({
         replacement: resolve(__dirname, '../../lib/db/src/index.ts'),
       },
       {
+        find: '@szl-holdings/quantum-engine',
+        replacement: resolve(__dirname, '../../lib/quantum-engine/src/index.ts'),
+      },
+      {
         find: '@workspace/ontology',
         replacement: resolve(__dirname, '../../packages/ontology/src/index.ts'),
       },
