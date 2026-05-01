@@ -52,6 +52,7 @@ import {
   updateDecisionStatus,
 } from '../lib/alloy-decision-store';
 import { sendBadRequest, sendError, sendNotFound } from '../lib/api-response';
+import { getGatewayStatus } from '../lib/ai-gateway';
 import { getCircuitBreakerMetrics } from '../lib/ai-model-observability';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -168,6 +169,35 @@ router.get('/ai/health', (_req, res) => {
       })),
     },
   });
+});
+
+router.get('/ai/gateway/status', (_req, res) => {
+  try {
+    const status = getGatewayStatus();
+    const circuitBreakers = getCircuitBreakerMetrics();
+    res.json({
+      ...status,
+      circuitBreakers: {
+        summary: {
+          openCount: circuitBreakers.openCount,
+          halfOpenCount: circuitBreakers.halfOpenCount,
+          closedCount: circuitBreakers.closedCount,
+        },
+        providers: circuitBreakers.circuits.map((c) => ({
+          provider: c.provider,
+          state: c.state,
+          consecutiveFailures: c.consecutiveFailures,
+          openedAt: c.openedAt != null ? new Date(c.openedAt).toISOString() : null,
+          lastTestedAt: c.lastTestedAt != null ? new Date(c.lastTestedAt).toISOString() : null,
+          totalTripped: c.totalTripped,
+        })),
+      },
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, '[ai-engine] /ai/gateway/status failed');
+    sendError(res, 'Failed to retrieve gateway status', 500, 'GATEWAY_STATUS_FAILED');
+  }
 });
 
 router.get('/ai/models', (_req, res) => {
