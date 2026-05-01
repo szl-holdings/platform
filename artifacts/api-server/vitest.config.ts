@@ -20,6 +20,10 @@ export default defineConfig({
         find: '@workspace/ontology',
         replacement: resolve(__dirname, '../../packages/ontology/src/index.ts'),
       },
+      {
+        find: '@workspace/codex-kernel',
+        replacement: resolve(__dirname, '../../packages/codex-kernel/src/index.ts'),
+      },
     ],
   },
   test: {

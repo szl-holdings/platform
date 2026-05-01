@@ -1,6 +1,6 @@
 // Public, unauthenticated replay-attestation UI — Track C-01
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 type AttestationResponse =
   | {
@@ -42,6 +42,16 @@ export default function ReplayAttestationPage() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AttestationResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [exampleId, setExampleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/replay-attestation/example")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => alive && d?.run_id && setExampleId(d.run_id))
+      .catch(() => { /* example is optional */ });
+    return () => { alive = false; };
+  }, []);
 
   async function onReplay(e: FormEvent) {
     e.preventDefault();
@@ -123,6 +133,19 @@ export default function ReplayAttestationPage() {
           {busy ? "Replaying..." : "Replay"}
         </button>
       </form>
+
+      {exampleId && !runId && (
+        <p className="mt-3 text-sm text-slate-400">
+          New here? Try a real anchored run:{" "}
+          <button
+            type="button"
+            onClick={() => setRunId(exampleId)}
+            className="font-mono text-xs text-emerald-400 underline hover:text-emerald-300"
+          >
+            {exampleId}
+          </button>
+        </p>
+      )}
 
       {err && <p className="mt-4 text-amber-400">{err}</p>}
 

@@ -186,3 +186,7 @@ screenshots/raw
 # Root-level build/generation scripts (noise at repo root — see archive/scripts/)
 /build_carousel.py
 /build_video.sh
+
+
+# SZL Holdings public-attestation runtime data (Ed25519 private key, runs ledger)
+.szl-public-runs/

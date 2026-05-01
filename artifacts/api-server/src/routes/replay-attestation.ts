@@ -1,20 +1,36 @@
-// Public replay-attestation API route — Track C-02
+// Public replay-attestation API route — Track C-02 (REAL implementation)
 //
-// Per operational payload §4 hard constraint #3: "No fake hashes, no fake run IDs".
-// Until Ed25519 keys are generated and a canonical public run is anchored, the
-// endpoint truthfully returns `unknown_run` for every submission and zero-valued
-// public stats with `last_trust_publish: 2026-04-30`. The schema and the
-// transport contract are the deliverable; the populated values arrive when
-// codexKernel.replay()/signAttestation() and ledger.findRun() are wired to the
-// real ledger and signing key (tracked under follow-up).
+// What this route guarantees, post Phase 2:
+//   - POST /api/v1/replay-attestation { run_id }
+//       Looks up the run in the public ledger, re-executes the deterministic
+//       agent (codex-kernel runLoop), verifies the trace (codex-kernel replay),
+//       and returns an Ed25519-signed attestation envelope on match.
+//   - GET /api/governance/stats
+//       Returns REAL counts from the public ledger (anchored_total,
+//       last_anchored_at, agents) plus the last_trust_publish marker.
+//   - GET /api/.well-known/szl-attestation-keys.json
+//       Returns the real Ed25519 public key (PEM + raw base64 + fingerprint),
+//       generated/loaded at first request and persisted server-side.
 //
-// Wired at routes/index.ts via:
-//   router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-known"], () => import("./replay-attestation"), "replay-attestation"));
+// Per operational payload §4 hard constraint #3 ("no fake hashes/run IDs"):
+// every value returned here is computed from real cryptography and the real
+// codex-kernel primitives over public, replayable inputs.
 
 import express, { type Request, type Response } from "express";
+import { loadAttestationKeys } from "../lib/public-runs/keys.js";
+import { attest, publicStats } from "../lib/public-runs/attestation.js";
+import { ensureSeeded } from "../lib/public-runs/seed.js";
+import { getRunsStore } from "../lib/public-runs/runs-store.js";
+import { authMiddleware } from "../middlewares/auth";
 
 const router = express.Router();
 router.use(express.json({ limit: "1kb" }));
+
+// All routes in this file are intentionally PUBLIC — anyone in the world must
+// be able to verify attestations, fetch the published Ed25519 public key, and
+// see aggregate ledger counts without authenticating. Without this, the auth
+// middleware mounted at the app root would 401 anonymous verifiers.
+const publicNoAuth = authMiddleware({ required: false });
 
 // ---- Light per-IP rate limiter (5 req/min per IP) ----
 type Bucket = { tokens: number; resetAt: number };
@@ -52,8 +68,16 @@ function rateLimit(req: Request, res: Response): boolean {
   return true;
 }
 
+// Lazy seed — first request triggers, subsequent requests no-op via the
+// store's `isSeeded()` check. Wrapped in try/catch so a bad data dir or a
+// missing trust doc does not 500 the whole route; the lookup itself will
+// then return unknown_run truthfully.
+function seedIfNeeded(): void {
+  try { ensureSeeded(); } catch { /* see attestation.ts for honest fallback */ }
+}
+
 // ---- POST /api/v1/replay-attestation ----
-router.post("/v1/replay-attestation", async (req: Request, res: Response) => {
+router.post("/v1/replay-attestation", publicNoAuth, async (req: Request, res: Response) => {
   if (!rateLimit(req, res)) return;
 
   const body = (req.body ?? {}) as { run_id?: unknown };
@@ -62,35 +86,57 @@ router.post("/v1/replay-attestation", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "invalid_run_id", message: "run_id must be a non-empty string ≤ 256 chars" });
   }
 
-  // Honest behavior until canonical public runs are anchored: every run_id is unknown.
-  // When ledger.findRun() + codexKernel.replay() are wired, this becomes a real lookup.
-  return res.json({
-    status: "unknown_run",
-    run_id_received: runId,
-    note: "No public runs are anchored to the ledger yet. The first canonical run will publish with the demo video (Track B).",
-  });
+  seedIfNeeded();
+  const outcome = attest(runId);
+  return res.json(outcome);
 });
 
 // ---- GET /api/governance/stats ----
-router.get("/governance/stats", async (_req: Request, res: Response) => {
-  // Honest zeros + last_trust_publish from Track A doc reviews (2026-04-30).
+router.get("/governance/stats", publicNoAuth, async (_req: Request, res: Response) => {
+  seedIfNeeded();
+  const stats = publicStats();
   return res.json({
-    anchored_24h: 0,
-    replays_24h: 0,
-    open_findings: 0,
+    anchored_total: stats.anchored_total,
+    last_anchored_at: stats.last_anchored_at,
+    agents: stats.agents,
     last_trust_publish: "2026-04-30",
-    note: "Counters initialise at zero. They will populate once the public ledger is anchoring real production events.",
+    schema: "szl/governance-stats@1",
   });
 });
 
 // ---- GET /.well-known/szl-attestation-keys.json ----
-router.get("/.well-known/szl-attestation-keys.json", (_req: Request, res: Response) => {
+router.get("/.well-known/szl-attestation-keys.json", publicNoAuth, (_req: Request, res: Response) => {
+  const keys = loadAttestationKeys();
   return res.json({
     issuer: "SZL Holdings",
-    current: null,
+    schema: "szl/attestation-keys@1",
+    current: {
+      kid: keys.fingerprint,
+      algorithm: "Ed25519",
+      use: "sig",
+      public_key_pem: keys.publicKeyPem,
+      public_key_raw_base64: keys.publicKeyRawBase64,
+      generated_at: keys.generatedAt,
+    },
     history: [],
     documentation: "https://szlholdings.com/governance",
-    note: "Ed25519 attestation keypair has not yet been generated and published. Until then, no signed attestations are issued. Tracked under operational payload Track C-02 §3.",
+    verifier_cli: "node scripts/verify-attestation.mjs <run_id>",
+  });
+});
+
+// ---- GET /api/v1/replay-attestation/example — convenience for the frontend ----
+router.get("/v1/replay-attestation/example", publicNoAuth, async (_req: Request, res: Response) => {
+  seedIfNeeded();
+  const store = getRunsStore();
+  const first = store.list()[0];
+  if (!first) {
+    return res.status(503).json({ error: "no_runs_anchored", note: "Public ledger is empty; seeding may have failed." });
+  }
+  return res.json({
+    run_id: first.run_id,
+    agent_id: first.agent_id,
+    doc_id: first.input.doc_id,
+    note: "Submit this run_id to POST /api/v1/replay-attestation to verify a real signed match.",
   });
 });
 

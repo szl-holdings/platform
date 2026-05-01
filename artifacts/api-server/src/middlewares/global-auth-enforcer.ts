@@ -207,6 +207,13 @@ const PUBLIC_EXACT_PATHS = new Set([
   // { unreadCount: 0 } when no session is present. Exact-path entry ensures
   // only the bare /count URL is public; sub-paths remain protected.
   "/api/notifications/count",
+  // SZL Holdings public attestation surface (Track C-02). Both endpoints MUST
+  // be reachable without a session: the public Ed25519 key publication is the
+  // root of trust for independent verifiers, and /governance/stats backs the
+  // public /governance ledger header. POST /api/v1/replay-attestation is
+  // already covered by the /api/v1/ prefix entry below.
+  "/api/.well-known/szl-attestation-keys.json",
+  "/api/governance/stats",
 ]);
 
 const PUBLIC_PREFIXES = [

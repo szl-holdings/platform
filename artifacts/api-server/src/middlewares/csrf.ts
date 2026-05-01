@@ -58,6 +58,12 @@ const EXEMPT_PATHS = new Set([
   // Anonymous page-view tracking — called from any page (including pre-login) without a
   // browser session/cookie, so CSRF double-submit is not applicable.
   '/api/track/page-view',
+  // SZL Holdings public replay-attestation (Track C-02). Stateless POST that
+  // accepts only { run_id }, returns an Ed25519-signed envelope. No cookies,
+  // no session, no per-user mutation — CSRF double-submit is not applicable.
+  // Anyone in the world (including curl + the standalone CLI verifier) must
+  // be able to call this endpoint without first fetching a CSRF token.
+  '/api/v1/replay-attestation',
   // Newsletter subscription — public anonymous marketing form embedded across portfolio
   // sites; no session or user state is modified, CSRF double-submit not applicable.
   '/api/newsletter/subscribe',

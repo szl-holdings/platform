@@ -117,6 +117,7 @@
     "@workspace/alloy-embedding-api": "workspace:*",
     "@workspace/alloy-rerank-worker": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
+    "@workspace/codex-kernel": "workspace:*",
     "@workspace/cognitive-runtime": "workspace:*",
     "@workspace/demo-seed": "workspace:*",
     "@workspace/eval-forge": "workspace:*",

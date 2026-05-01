@@ -6,10 +6,11 @@
 import { useEffect, useState } from "react";
 
 type GovernanceStats = {
-  anchored_24h: number;
-  replays_24h: number;
-  open_findings: number;
+  anchored_total: number;
+  last_anchored_at: string | null;
+  agents: string[];
   last_trust_publish: string;
+  schema?: string;
 };
 
 const TRUST_DOCS = [
@@ -79,15 +80,28 @@ export default function GovernancePage() {
         </div>
       </section>
 
-      <section className="border-b border-slate-800 py-12">
+      <section className="border-b border-slate-800 py-12" id="public-agents">
         <h2 className="text-2xl font-semibold">Live evidence-ledger header</h2>
-        <p className="mt-2 text-slate-400">Aggregate counts. No tenant identifiers. Refreshed each minute.</p>
+        <p className="mt-2 text-slate-400">
+          Counts come from the public append-only ledger. Each anchored run is independently
+          replayable via <a className="underline" href="/replay-attestation">/replay-attestation</a>.
+        </p>
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <Tile label="Anchored events (24h)" value={stats?.anchored_24h} />
-          <Tile label="Replay attestations (24h)" value={stats?.replays_24h} />
-          <Tile label="Open security findings" value={stats?.open_findings} />
+          <Tile label="Anchored public runs" value={stats?.anchored_total} />
+          <Tile label="Public agents" value={stats?.agents?.length ?? 0} />
+          <Tile label="Last anchored" value={stats?.last_anchored_at ?? "—"} isText />
           <Tile label="Last trust publish" value={stats?.last_trust_publish} isText />
         </div>
+        {stats?.agents && stats.agents.length > 0 && (
+          <p className="mt-4 text-sm text-slate-400">
+            Active public agents:{" "}
+            {stats.agents.map((a, i) => (
+              <span key={a} className="font-mono">
+                {a}{i < stats.agents.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </p>
+        )}
         {statsErr && <p className="mt-4 text-sm text-amber-400">Stats endpoint unreachable: {statsErr}</p>}
       </section>
 
