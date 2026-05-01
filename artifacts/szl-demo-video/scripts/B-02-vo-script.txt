@@ -1,0 +1,37 @@
+VO SCRIPT — SZL Holdings 90-second demo
+Voice direction: US-neutral, calm, measured, dry. Procurement-officer-talking-to-peer cadence.
+Read times below assume 165 WPM. Pad with breath at scene boundaries.
+
+[SCENE 1 — 0:00]
+Most AI products can't show their work.
+We built ours so you can replay every decision back to its primary source.
+
+[SCENE 2 — 0:08]
+Katzilla pulled today's Federal Register filings —
+every record hash-anchored at ingest.
+This isn't a scrape — it's a chain of custody from the federal source forward.
+
+[SCENE 3 — 0:22]
+Amaru routes the deltas to the agency's warehouse —
+every record classified,
+every hop logged,
+every policy decision recorded against the original.
+
+[SCENE 4 — 0:38]
+A11oy ran the watcher agent against the new filings.
+Every step is anchored.
+Every output replays deterministically — that is the difference.
+
+[SCENE 5 — 0:54]
+We tampered with the ledger on purpose.
+Sentra caught it in under a second,
+surfaced the playbook,
+and reverted the change — all anchored in the same chain.
+
+[SCENE 6 — 1:12]
+Anyone, even outside the agency, can replay it themselves at this URL.
+That is what audit-grade looks like.
+
+[SCENE 7 — 1:24]
+A11oy. Sentra. Amaru.
+Run by SZL Holdings.

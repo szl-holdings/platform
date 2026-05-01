@@ -34,7 +34,7 @@ const OPERATING_LOOP = [
     phase: "Recommendation",
     step: "04",
     icon: Layers,
-    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and cross-domain impact. The action queue updates continuously as new signals arrive and conditions change.",
+    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and cross-domain impact. The Approval Queue updates continuously as new signals arrive and conditions change.",
   },
   {
     phase: "Routing",
@@ -97,7 +97,7 @@ const CAPABILITIES = [
   {
     icon: Layers,
     title: "Signal Normalization",
-    body: "Counsel normalizes signals from KORA and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
+    body: "Counsel normalizes signals from KORA and connected systems into a structured Approval Queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
   },
   {
     icon: Workflow,
@@ -142,7 +142,7 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "KORA", desc: "The governed command surface routes signals from all domain packs into Counsel for cross-domain governed action." },
+  { name: "KORA", desc: "The governed Operator Workspace routes signals from all domain packs into Counsel for cross-domain governed action." },
   { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Counsel approval gates." },
   { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
   { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },

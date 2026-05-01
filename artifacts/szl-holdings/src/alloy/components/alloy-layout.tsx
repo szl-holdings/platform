@@ -28,7 +28,7 @@ import {
   BarChart3,
   Bell,
   BookOpen,
-  Brain,
+  Workflow,
   Calendar,
   CheckSquare,
   ChevronRight,
@@ -181,7 +181,7 @@ const ATLAS_NAV = [
 ];
 
 const COMMAND_NAV = [
-  { href: '/alloy/decisions', label: 'Decision Objects', icon: Brain, badge: 'New' },
+  { href: '/alloy/decisions', label: 'Decision Objects', icon: Workflow, badge: 'New' },
   { href: '/alloy/skills', label: 'Capability Library', icon: Layers, badge: 'New' },
   { href: '/alloy/operator', label: 'Agent Control', icon: Shield, badge: 'New' },
 ];
@@ -190,7 +190,7 @@ const CREATIVE_NAV = [
   { href: '/alloy/creative', label: 'Campaign Hub', icon: Film },
   { href: '/alloy/creative/brand-voice', label: 'Brand Voice', icon: Mic },
   { href: '/alloy/creative/content-calendar', label: 'Content Calendar', icon: Calendar },
-  { href: '/alloy/creative/ai-studio', label: 'AI Studio', icon: Wand2 },
+  { href: '/alloy/creative/ai-studio', label: 'Content Studio', icon: Wand2 },
 ];
 
 const DOCS_NAV = [{ href: '/alloy/documents', label: 'Document Engine', icon: FileText }];
@@ -218,7 +218,7 @@ const NURO_FORGE_NAV = [
   { href: '/nuro-forge/arena', label: 'Model Benchmarks', icon: Zap },
   { href: '/nuro-forge/composition', label: 'Model Composition', icon: GitBranch },
   { href: '/nuro-forge/governance', label: 'Governance & Safety', icon: Shield },
-  { href: '/nuro-forge/fine-tuning', label: 'Fine-Tuning Engine', icon: Brain },
+  { href: '/nuro-forge/fine-tuning', label: 'Fine-Tuning Engine', icon: Workflow },
   { href: '/nuro-forge/cost', label: 'Cost Intelligence', icon: DollarSign },
   { href: '/nuro-forge/multimodal', label: 'Multimodal Hub', icon: Image },
   { href: '/nuro-forge/prompts', label: 'Prompt Studio', icon: Wand2 },

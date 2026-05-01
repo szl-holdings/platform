@@ -40,6 +40,8 @@ const InvestorStoryPage = lazy(() => import("@/pages/investor-story"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
 const TrustPage = lazy(() => import("@/pages/trust"));
+const GovernancePublicPage = lazy(() => import("@/pages/governance"));
+const ReplayAttestationPage = lazy(() => import("@/pages/replay-attestation"));
 const TrustSecurityPage = lazy(() => import("@/pages/trust-security"));
 const TrustGovernancePage = lazy(() => import("@/pages/trust-governance"));
 const TrustArchitecturePage = lazy(() => import("@/pages/trust-architecture"));
@@ -72,7 +74,7 @@ const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
-const APEXIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
+const APEXIntelligenceHubPage = lazy(() => import("@/pages/Workflow-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
@@ -174,7 +176,7 @@ const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const ForgotPasswordPage = lazy(() => import("@/pages/forgot-password"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
-const AutopilotPage = lazy(() => import("@/pages/autopilot"));
+const AutopilotPage = lazy(() => import("@/pages/Supervised Automation"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const OrgSettingsPage = lazy(() => import("@/pages/org-settings"));
@@ -813,6 +815,13 @@ function App() {
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
             </Route>
+            {/* Public proof surface (Track C-01) — must remain unauthenticated. */}
+            <Route path="/governance">
+              <Suspense fallback={<PageLoader />}><GovernancePublicPage /></Suspense>
+            </Route>
+            <Route path="/replay-attestation">
+              <Suspense fallback={<PageLoader />}><ReplayAttestationPage /></Suspense>
+            </Route>
             <Route path="/product-readiness">
               <Suspense fallback={<PageLoader />}><ProductReadinessPage /></Suspense>
             </Route>
@@ -1188,7 +1197,7 @@ function App() {
             </Route>
 
             {/* ── Intelligence Fabric ── */}
-            <Route path="/intelligence/cortex">
+            <Route path="/intelligence/Workflow">
               <RequireAuth><Suspense fallback={<PageLoader />}><APEXIntelligenceHubPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/intelligence/fabric">
@@ -1477,7 +1486,7 @@ function App() {
             <Route path="/ecosystem">
               <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
             </Route>
-            <Route path="/autopilot">
+            <Route path="/Supervised Automation">
               <Suspense fallback={<PageLoader />}><AutopilotPage /></Suspense>
             </Route>
             <Route path="/business-state">

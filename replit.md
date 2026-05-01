@@ -390,14 +390,67 @@ tag) was already documented in `docs/github/actions-ci-audit.md` (commit
    workflow generating recurring failure notifications.
 
 ### Open items (require user action)
-- **Open the PR** (PAT lacks `Pull requests: Write` scope; one-click URL):
+- **Open the CI-repair PR** (PAT lacks `Pull requests: Write` scope):
   https://github.com/szl-holdings/szl-holdings-platform/compare/master...fix/ci-mass-repair-2026-04-30?expand=1
-- **Rotate** `REPLIT_STAGING_DEPLOY_TOKEN` in repo Settings → Environments
-  → staging (currently expired/invalid, returning 403).
-- **PR #60** (dependabot ui-components bump) — needs manual rebase to
-  resolve `pnpm-lock.yaml` + `pnpm-workspace.yaml` + 3× `package.json`
-  conflicts.
-- **PR #38** (Governed Python migration, DRAFT) — likely abandoned;
-  decide rebase-or-close.
-- **Lighthouse threshold failures** — real perf regression, not a config
-  bug; address as separate ticket once `master` CI is green again.
+- **Open the operational-payload PR** (same PAT scope limit):
+  https://github.com/szl-holdings/szl-holdings-platform/compare/master...ops/operational-payload-2026-04-30?expand=1
+- **Rotate** `REPLIT_STAGING_DEPLOY_TOKEN` in repo Settings → Environments → staging (currently expired/invalid).
+- **PR #60** (dependabot ui-components bump) — needs manual rebase.
+- **PR #38** (Governed Python migration, DRAFT) — likely abandoned; decide rebase-or-close.
+- **Lighthouse threshold failures** — real perf regression, separate ticket.
+
+## Operational Deployment Payload — 2026-04-30 (Tracks A-F)
+
+Branch: `ops/operational-payload-2026-04-30`
+Commits: `00c27489` (initial, 31 files) + `10c9bc3b` (security review fixes, 3 files)
+Source spec: `/tmp/payload/operational_payload/PAYLOAD.md` (306 lines)
+
+### Track A — NYSTEC trust documents (`docs/trust/`)
+13 compliance docs published verbatim — A11OY-01..05 (FedRAMP disclosure,
+CMMC/NIST 800-171, bias methodology, US data residency, 72-hr IR);
+SENTRA-01..04 (SOC 2 Type II plan, IR runbook, threat-feed catalog,
+pen-test plan); AMARU-01..04 (data classification, retention, COTS-ERP,
+PIA template). Closes the gaps from the April 2026 NYSTEC pre-briefing.
+
+### Track B — Demo video assets (`artifacts/szl-demo-video/scripts/`)
+90-second script, voiceover, recording runbook, distribution copy.
+Scripts only — recording is human work and ships with the first canonical
+public run ID.
+
+### Track C — Public proof surface
+- **C-01 frontend** (`artifacts/szl-holdings/src/pages/`): `governance.tsx` and
+  `replay-attestation.tsx`, wired into App.tsx Switch at unauthenticated routes
+  `/governance` and `/replay-attestation`.
+- **C-02 API** (`artifacts/api-server/src/routes/replay-attestation.ts`): new
+  Express router with `POST /api/v1/replay-attestation`,
+  `GET /api/governance/stats`, `GET /api/.well-known/szl-attestation-keys.json`,
+  wired via `lazyMatch` in `routes/index.ts`. **Honest stubs** per payload §4
+  hard constraint #3 — no fake hashes, no fake run IDs:
+  - All run IDs return `status: "unknown_run"` until the public ledger is anchoring real runs.
+  - Stats return zeros + `last_trust_publish: "2026-04-30"`.
+  - `.well-known` returns `{issuer: "SZL Holdings", current: null, history: []}` — Ed25519 key not yet generated.
+  - Per-IP rate limiter: 5 req/min, uses `req.ip` only (not client-controlled `X-Forwarded-For`).
+  - 7 vitest+supertest tests, all passing locally.
+
+### Track D — Vocabulary rewrite (`artifacts/szl-holdings/src/`)
+6 substitutions across 3 files (alloy-page, alloy-layout, App.tsx).
+Internal operator pages (admin/, ops-, atlas-, action-queue,
+operating-doctrine, aegis-public) preserved per spec.
+
+### Track E — `paper/ARXIV_SUBMISSION_CHECKLIST.md`
+arXiv submission plan for the deterministic-replay paper.
+
+### Track F — `sales/F-01-nystec-pilot-pitch-email.md`, `sales/F-02-pilot-sow-template.md`
+NYSTEC pitch email + pilot SOW template (no commercial terms filled).
+
+### Follow-up (not in this PR)
+1. Generate Ed25519 attestation keypair; publish public half via `.well-known`.
+2. Wire real `codexKernel.replay()` + `signAttestation()` shims onto `@workspace/codex-kernel`.
+3. Anchor first canonical public run when the demo video records.
+4. Add `findPublicRun()` query helper to `@workspace/aef-evidence-ledger`.
+
+### GitHub org audit (snapshot 2026-05-01 00:08 UTC)
+- 11 repos in `szl-holdings`; 9 product repos (ouroboros, terra, etc.) have no CI yet.
+- Latest master CI runs: 4/5 success (only failure is unrelated dependency-graph upload).
+- 9 platform branches; 2 open PRs (#60 dependabot, #38 codex draft).
+- Branches awaiting PR creation by owner: `fix/ci-mass-repair-2026-04-30` (df2e3b8b), `ops/operational-payload-2026-04-30` (10c9bc3b).

@@ -57,6 +57,10 @@ router.use(lazyMatch("/analytics-engine", () => import("./analytics-engine-publi
 // Newsletter subscribe proxy — public, unauthenticated.
 router.use(lazyMatch("/newsletter", () => import("./newsletter"), "newsletter"));
 
+// Public replay-attestation + governance stats + .well-known attestation keys (Track C-02).
+// Owns POST /v1/replay-attestation, GET /governance/stats, GET /.well-known/szl-attestation-keys.json.
+router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-known/szl-attestation-keys.json"], () => import("./replay-attestation"), "replay-attestation"));
+
 // Email provider webhooks (bounces, complaints) + unsubscribe handler — public, unauthenticated.
 router.use(emailWebhooksRouter);
 
