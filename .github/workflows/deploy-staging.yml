@@ -63,8 +63,7 @@ jobs:
             elif [ "$RESPONSE" = "000" ]; then
               echo "::warning::Could not reach Replit API — staging deployment may need to be triggered manually"
             else
-              echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — token may be expired; rotate REPLIT_STAGING_DEPLOY_TOKEN in env settings"
-              exit 1
+              echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — token may be expired; rotate REPLIT_STAGING_DEPLOY_TOKEN in env settings (fail-soft, not blocking release)"
             fi
           else
             echo "::warning::REPLIT_STAGING_APP_ID not configured — staging deployment skipped"
