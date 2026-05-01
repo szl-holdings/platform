@@ -13,7 +13,7 @@ import {
   ExternalLink,
   FileText,
   Filter,
-  Github,
+  Code as Github,
   Globe,
   Info,
   Layers,

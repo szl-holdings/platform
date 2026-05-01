@@ -5,10 +5,10 @@ import {
   Bell,
   CheckCircle,
   Globe,
+  Hash as Slack,
   Mail,
   Phone,
   Plus,
-  Slack,
   User,
 } from 'lucide-react';
 import { type ComponentType, type SVGProps, useState } from 'react';

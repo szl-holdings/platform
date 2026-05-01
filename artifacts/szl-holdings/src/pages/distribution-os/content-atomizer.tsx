@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Send,
   Sparkles,
-  Twitter,
+  MessageCircle as Twitter,
   Video,
   Zap,
 } from 'lucide-react';
