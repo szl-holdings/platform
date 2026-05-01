@@ -16,6 +16,7 @@ import Settings from '@/pages/settings';
 import ConvergentSync from '@/pages/convergent-sync';
 import CodexLoop from '@/pages/codex-loop';
 import OuroborosPage from '@/pages/ouroboros';
+import ConduitSigil from '@/pages/sigil';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function AppContent() {
         <Route path="/convergent-sync" component={ConvergentSync} />
         <Route path="/codex-loop" component={CodexLoop} />
         <Route path="/ouroboros" component={OuroborosPage} />
+        <Route path="/sigil" component={ConduitSigil} />
         <Route>
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Page not found

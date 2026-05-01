@@ -532,4 +532,12 @@ router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"),
 // PATCH /eval-registry/submissions/:id/reject
 router.use(lazyMatch("/eval-registry", () => import("./eval-registry"), "eval-registry"));
 
+// SIGIL — SZL Integrated Governance & Invariant Layer
+// GET  /sigil/health
+// POST /sigil/compose
+// POST /sigil/witness
+// POST /sigil/coherence
+// POST /sigil/saturation
+router.use(lazyRegisterMatch(["/sigil"], () => import("./sigil"), "sigil"));
+
 export default router;

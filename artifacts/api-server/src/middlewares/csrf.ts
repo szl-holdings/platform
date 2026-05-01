@@ -125,6 +125,12 @@ function isExempt(path: string): boolean {
   // Zod-validated. Public in demo mode so the three artifact frontends can
   // POST without a browser CSRF token; rate-limited by route group.
   if (path.startsWith('/api/ouroboros/')) return true;
+  // SIGIL — SZL Integrated Governance & Invariant Layer.
+  // Pure-functional, stateless, all inputs strictly Zod-validated, no
+  // session or PII involved. The demo UI in A11oy/Sentra/Amaru POSTs
+  // payloads from the browser before a session exists. Rate-limited
+  // by the global limiter; no CSRF risk surface.
+  if (path.startsWith('/api/sigil/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

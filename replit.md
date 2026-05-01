@@ -879,3 +879,32 @@ pre-existing parked task explicitly called out in the
 `non-interactive-migrate.mjs` docstring, NOT something this pass
 introduced. Future task: regenerate the journal and switch the workflow
 to `drizzle-kit migrate` for full reproducibility.
+
+## SIGIL — SZL Integrated Governance & Invariant Layer (2026-05-01)
+
+SIGIL is SZL's original runtime trust framework. It composes four
+independent runtime axes through a closed-form weighted geometric mean:
+
+    Σ = P^wₚ · K^wₖ · Φ^wᵩ · C^wₒ
+
+  P — Provenance      verifiable-lineage fraction (shift-add accumulator)
+  K — Containment     boundary-rate slack (bounded saturation, cap=7)
+  Φ — Coherence       multi-agent phase order parameter (Kuramoto r)
+  C — Convergence     N-witness reconciliation (Jaccard index)
+
+Weights are exact rationals expressed as distinct unit-fraction sums
+(Fibonacci–Sylvester decomposition) and verified to sum to 1 over
+exact rational arithmetic before any composition runs. The framework
+guarantees three theorems: zero-pinning (any axis = 0 ⇒ Σ = 0),
+monotonicity (∂Σ/∂axisᵢ ≥ 0), and the bound (Σ ≤ min axis ≤ max axis ≤ 1).
+
+  Library: artifacts/api-server/src/lib/sigil/{rationals,sigma,witness,coherence,saturation,accumulator,index}.ts
+  Proofs:  artifacts/api-server/src/lib/sigil/__tests__/sigil.test.ts (21 passing)
+  API:     /api/sigil/{health,compose,witness,coherence,saturation} (public, Zod-validated, stateless)
+  UI:      /a11oy/sigil (navy+gold ring), /sentra/sigil (dark cyber), /conduit/sigil (cyan command-center)
+
+The math primitives (weighted geometric mean, Jaccard, Kuramoto order
+parameter, Egyptian doubling) are public-domain. SZL's contribution
+is the four-axis choice tailored to the A11oy/Sentra/Amaru platform
+surface, the rational-weight gate at every composition boundary, the
+calibrated thresholds, and the SZL-original framework name and API.

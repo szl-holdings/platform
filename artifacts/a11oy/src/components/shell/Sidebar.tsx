@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive, Beaker, Sparkles } from 'lucide-react';
+import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive, Beaker, Sparkles, Sigma } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -17,6 +17,7 @@ const navItems = [
 
 const intelligenceItems = [
   { id: 'intelligence', name: 'Decision Intelligence', icon: Sparkles, path: '/intelligence' },
+  { id: 'sigil', name: 'SIGIL · Σ', icon: Sigma, path: '/sigil' },
   { id: 'lab', name: 'A11oy Lab', icon: Beaker, path: '/lab' },
 ];
 

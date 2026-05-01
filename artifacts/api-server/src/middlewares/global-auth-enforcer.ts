@@ -221,6 +221,11 @@ const PUBLIC_PREFIXES = [
   "/api/auth/",
   "/api/oidc/",
   "/api/public/",
+  // SIGIL — SZL Integrated Governance & Invariant Layer.
+  // Pure-functional, stateless, validated by Zod, no PII. The framework's
+  // demo UI in A11oy/Sentra/Amaru calls these endpoints from the browser
+  // before any session exists. Compute-only; no data is read or written.
+  "/api/sigil/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",

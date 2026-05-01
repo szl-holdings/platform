@@ -48,6 +48,7 @@ const SecurityCompliance = lazy(() => import('./pages/SecurityCompliance').then(
 const RightToAudit = lazy(() => import('./pages/RightToAudit').then(m => ({ default: m.RightToAudit })));
 const ModelRouter = lazy(() => import('./pages/ModelRouter').then(m => ({ default: m.ModelRouter })));
 const IntelligenceCommand = lazy(() => import('./pages/intelligence/IntelligenceCommand').then(m => ({ default: m.IntelligenceCommand })));
+const SigilPage = lazy(() => import('./pages/Sigil').then(m => ({ default: m.Sigil })));
 const IntelligenceDeepDive = lazy(() => import('./pages/intelligence/IntelligenceDeepDive').then(m => ({ default: m.IntelligenceDeepDive })));
 const IntelligenceRoiLens = lazy(() => import('./pages/intelligence/IntelligenceRoiLens').then(m => ({ default: m.IntelligenceRoiLens })));
 const Lab = lazy(() => import('./pages/lab/Lab').then(m => ({ default: m.Lab })));
@@ -399,6 +400,9 @@ export default function App() {
         </Route>
         <Route path={`${base}/intelligence`}>
           <WithShell><IntelligenceCommand /></WithShell>
+        </Route>
+        <Route path={`${base}/sigil`}>
+          <WithShell><SigilPage /></WithShell>
         </Route>
         <Route path={`${base}/lab/patterns`}>
           <WithShell><PatternAtlasNative /></WithShell>

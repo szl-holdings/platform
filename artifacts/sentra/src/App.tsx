@@ -38,6 +38,7 @@ import {
   BookOpen,
   Bot,
   Brain,
+  Sigma,
   Briefcase,
   Bug,
   Cpu,
@@ -154,6 +155,13 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Loop Layer',
     items: [
       { path: '/recursive-threat-modeler', label: 'Recursive Threat Modeler', icon: RotateCcw, comp: L(() => import('@/pages/recursive-threat-modeler')) },
+    ],
+  },
+  {
+    id: 'sigil',
+    label: 'SIGIL',
+    items: [
+      { path: '/sigil', label: 'SIGIL · Σ', icon: Sigma, comp: L(() => import('@/pages/sigil')) },
     ],
   },
   {
