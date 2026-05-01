@@ -50,7 +50,7 @@ function footer(doc: jsPDF) {
   doc.setFontSize(6);
   doc.setFont('helvetica', 'normal');
   textColor(doc, MUTED);
-  doc.text('© 2026 SZL Holdings · Governed Autonomy · inquiries@szlholdings.com · szlholdings.com', 12, y + 5);
+  doc.text('© 2026 SZL Holdings · Governed Autonomy · stephen@szlholdings.com · szlholdings.com', 12, y + 5);
   doc.text('2026', 198, y + 5, { align: 'right' });
 }
 
@@ -605,7 +605,7 @@ function buildVerticalDoc(spec: VerticalSpec): jsPDF {
   doc.setFont('helvetica', 'normal');
   textColor(doc, MUTED);
   doc.text('Washington, D.C. · London · Singapore', cx + 8, y + 19);
-  doc.text('inquiries@szlholdings.com · szlholdings.com', cx + 8, y + 26);
+  doc.text('stephen@szlholdings.com · szlholdings.com', cx + 8, y + 26);
   doc.text('Governed Autonomy — Built for Enterprise — 2026', cx + 8, y + 33);
 
   footer(doc);
@@ -875,7 +875,7 @@ function buildPlatformBriefDoc(): jsPDF {
   doc.setFont('helvetica', 'normal');
   textColor(doc, MUTED);
   doc.text('Washington, D.C. · London · Singapore', cx + 8, y + 18);
-  doc.text('inquiries@szlholdings.com · szlholdings.com', cx + 8, y + 25);
+  doc.text('stephen@szlholdings.com · szlholdings.com', cx + 8, y + 25);
   doc.text('Governed Autonomy — Built for Enterprise — 2026', cx + 8, y + 32);
 
   footer(doc);

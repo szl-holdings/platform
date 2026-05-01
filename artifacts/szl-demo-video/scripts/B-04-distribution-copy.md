@@ -28,7 +28,7 @@
 >
 > Every action shown is anchored in the same hash chain and is publicly replayable at szlholdings.com/replay-attestation.
 >
-> For procurement, NYSTEC, and prime-contractor evaluations, SZL Holdings can be reached at inquiries@szlholdings.com.
+> For procurement, NYSTEC, and prime-contractor evaluations, SZL Holdings can be reached at stephen@szlholdings.com.
 >
 > [video]
 
@@ -59,7 +59,7 @@
 >
 > Stephen P. Lutar Jr.
 > Founder, SZL Holdings
-> inquiries@szlholdings.com
+> stephen@szlholdings.com
 
 ## Internal Slack #wins post
 
@@ -74,7 +74,7 @@
 > Replay this run yourself: https://szlholdings.com/replay-attestation
 > Governance posture: https://szlholdings.com/governance
 > NYSTEC documentation: https://szlholdings.com/trust
-> Contact: inquiries@szlholdings.com
+> Contact: stephen@szlholdings.com
 >
 > #governmentAI #FedRAMP #NYSTEC #auditgradeAI
 

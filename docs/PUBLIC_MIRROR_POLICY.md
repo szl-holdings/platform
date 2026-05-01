@@ -80,4 +80,4 @@ The infrastructure, schemas, APIs, and interfaces are designed for real workload
 ## Contact
 
 For questions about the platform, evaluation access, or investor data room access:
-[inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+[stephen@szlholdings.com](mailto:stephen@szlholdings.com)

@@ -142,7 +142,7 @@ All per-artifact READMEs were reviewed and found investor-quality with no change
 - **A11oy description:** Consistently described as the "governed agentic execution fabric" across all artifacts
 - **Security posture:** RBAC, deny-by-default, org-scoped isolation — consistent framing
 - **Proof Chain and Covenant Policy:** Referenced consistently across all domain pack READMEs
-- **Company contact:** Stephen Lutar, inquiries@szlholdings.com, szlholdings.com — consistent
+- **Company contact:** Stephen Lutar, stephen@szlholdings.com, szlholdings.com — consistent
 
 ### ⚠️ Inconsistencies Resolved in Pass 1
 

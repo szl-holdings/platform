@@ -142,7 +142,7 @@ Full incident response detail: `docs/internal/ops/incident-response-runbook.md`
 | Design partner technical issue | Direct Slack/email to founder | 4 hours during business hours |
 | Design partner billing question | Direct email | 24 hours |
 | Security disclosure | security@szlholdings.com | 24 hours |
-| General enterprise inquiry | inquiries@szlholdings.com | 24 hours |
+| General enterprise inquiry | stephen@szlholdings.com | 24 hours |
 | Investment inquiry | stephen@szlholdings.com | 48 hours |
 
 ---

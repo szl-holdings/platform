@@ -9,7 +9,7 @@
 **Stephen Lutar**  
 Founder, SZL Holdings  
 [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
-[inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+[stephen@szlholdings.com](mailto:stephen@szlholdings.com)
 
 ---
 

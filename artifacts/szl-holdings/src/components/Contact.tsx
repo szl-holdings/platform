@@ -98,7 +98,7 @@ export function Contact() {
               inquiries receive a personal response within one business day.
             </p>
             <div className="space-y-1 text-sm text-szl-text-muted">
-              <p>inquiries@szlholdings.com</p>
+              <p>stephen@szlholdings.com</p>
               <p>Washington, D.C. · London · Singapore</p>
             </div>
           </m.div>

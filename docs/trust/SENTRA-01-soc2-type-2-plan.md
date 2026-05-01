@@ -123,4 +123,4 @@ Until the SOC 2 Type II is issued, buyers may request:
 
 ## 11. Contact
 
-Stephen P. Lutar Jr. · inquiries@szlholdings.com
+Stephen P. Lutar Jr. · stephen@szlholdings.com

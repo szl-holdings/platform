@@ -179,7 +179,7 @@ export default function DiligenceExecutivePage() {
   
           {/* Print footer */}
           <div style={{ marginTop: "1.5rem", display: "none" }} className="print-only">
-            <p style={{ fontSize: "0.75rem", color: "#64748b" }}>SZL Holdings — szlholdings.com/trust — Contact: inquiries@szlholdings.com</p>
+            <p style={{ fontSize: "0.75rem", color: "#64748b" }}>SZL Holdings — szlholdings.com/trust — Contact: stephen@szlholdings.com</p>
           </div>
         </main>
   

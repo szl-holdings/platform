@@ -113,4 +113,4 @@ When a customer enables a vendor feed, the vendor becomes a sub-processor for th
 
 ## 12. Contact
 
-Stephen P. Lutar Jr. · `security@szlholdings.com` · `inquiries@szlholdings.com`
+Stephen P. Lutar Jr. · `security@szlholdings.com` · `stephen@szlholdings.com`

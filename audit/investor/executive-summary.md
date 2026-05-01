@@ -143,7 +143,7 @@ The architecture is differentiated by the six platform primitives — particular
 The domain packs (Vessels, Terra, Aegis, Carlota Jo) demonstrate that the governance infrastructure generalizes across verticals. Each new pack is structured, not bespoke — it runs on the same Lyte + Alloy foundation with domain-specific intelligence layered on top.
 
 **For design partner conversations, enterprise evaluation, and investment introductions:**
-Contact: stephen@szlholdings.com | inquiries@szlholdings.com
+Contact: stephen@szlholdings.com | stephen@szlholdings.com
 
 ---
 

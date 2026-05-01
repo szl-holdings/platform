@@ -47,7 +47,7 @@ The same six primitives power a SOC alert in Aegis, a voyage P&L call in Vessels
 
 ## One CTA
 
-If you are evaluating governance infrastructure for AI-assisted operations and want to co-design what comes next as a design partner — reply to this email or write to **inquiries@szlholdings.com**.
+If you are evaluating governance infrastructure for AI-assisted operations and want to co-design what comes next as a design partner — reply to this email or write to **stephen@szlholdings.com**.
 
 Monday closes the series with one full decision walked end-to-end.
 

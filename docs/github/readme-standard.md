@@ -102,7 +102,7 @@ See [SECURITY.md](../../SECURITY.md) for the vulnerability disclosure policy and
 
 This repository is a public mirror of the SZL Holdings platform workspace. Direct contributions are not accepted at this time. 
 
-For enterprise evaluation, design partner conversations, or technical review access: inquiries@szlholdings.com
+For enterprise evaluation, design partner conversations, or technical review access: stephen@szlholdings.com
 ```
 
 Or adapt for repos that do accept contributions.
@@ -166,7 +166,7 @@ Explicit links to trust center, security docs, investor docs, architecture docs.
 2. **Architecture:** [System Overview](../architecture/system-overview.md)
 3. **Trust surface:** [Trust Center](./docs/trust/)
 4. **Investor materials:** [Platform Thesis](../investor/platform-thesis.md)
-5. **Enterprise evaluation:** inquiries@szlholdings.com
+5. **Enterprise evaluation:** stephen@szlholdings.com
 ```
 
 ---
@@ -183,7 +183,7 @@ For any repo that is archived:
 > **Why archived:** [Brief reason — e.g., "Superseded by szl-holdings-platform monorepo."]  
 > **Current version:** [Link to current repo if it moved]  
 > **Archived:** [Month Year]  
-> **Access:** Contact inquiries@szlholdings.com for historical context
+> **Access:** Contact stephen@szlholdings.com for historical context
 
 ---
 
