@@ -233,6 +233,11 @@ export {
   type RouterCallResult,
   type RouterConfig,
   registerTelemetryHandler,
+  registerRouterStrategyHook,
+  getRouterStrategyHook,
+  type RouterStrategyHook,
+  type RouterStrategyDecisionInput,
+  type RouterStrategyDecisionResult,
   routerCall,
   type TenantFeatureToggles,
 } from './model-router.js';

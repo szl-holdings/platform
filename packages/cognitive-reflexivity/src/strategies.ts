@@ -143,11 +143,13 @@ export class StrategyRegistry {
   list(filter?: {
     status?: StrategyStatus;
     klass?: StrategyClass;
+    tier?: ReflexiveStrategy['tier'];
     agentId?: string;
   }): ReflexiveStrategy[] {
     let list = Array.from(this.byId.values());
     if (filter?.status) list = list.filter((s) => s.status === filter.status);
     if (filter?.klass) list = list.filter((s) => s.class === filter.klass);
+    if (filter?.tier) list = list.filter((s) => s.tier === filter.tier);
     if (filter?.agentId) {
       const aid = filter.agentId;
       list = list.filter((s) => s.applicableContexts.some((c) => c.includes(aid)));

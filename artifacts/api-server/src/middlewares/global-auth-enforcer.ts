@@ -458,11 +458,12 @@ const PUBLIC_PREFIXES = [
   // payloads. Public in demo mode so the a11oy frontend can render without auth.
   "/api/internal/a11oy/defense/",
   // Cognitive Reflexivity Engine (#4570–#4572) — observability + operator
-  // approval surface for the self-observing cognition loop. All endpoints are
-  // process-local (in-memory strategy registry, no tenant PII). Public so the
-  // A11oy reflexivity dashboard can render and seed signals without a session.
-  // Write routes (approve/reject/observations) are still protected by CSRF
-  // double-submit (global csrfMiddleware in app.ts).
+  // approval surface. The broad prefix lets the A11oy reflexivity dashboard
+  // read strategies / traces / health / recent-signals without a session.
+  // Mutating routes (approve / reject / observations) are NOT relying on
+  // this allowlist — they enforce `authMiddleware()` + `requireRole(...)`
+  // explicitly inside the route handler so any operator approval is bound
+  // to a real authenticated identity, never a body-supplied string.
   "/api/cognitive-reflexivity/",
 ];
 

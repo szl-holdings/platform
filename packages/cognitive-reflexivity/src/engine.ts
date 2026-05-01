@@ -249,7 +249,9 @@ function pickStrategyClass(
       return 'detection.confidence-floor';
     case 'sync.failed':
     case 'sync.schema_drift':
+    case 'sync.degraded':
       return 'sync.retry-policy';
+    case 'sync.slow':
     case 'sync.success':
       return 'router.advisory';
     case 'memory.working_full':

@@ -587,23 +587,51 @@ CognitiveHealthScore.
 - **HTTP surface:** `artifacts/api-server/src/routes/cognitive-reflexivity.ts`
   + group `routes/groups/cognitive-reflexivity.ts`. Endpoints (all under
   `/api/cognitive-reflexivity/`):
-  - `GET  /strategies?status=&klass=&tier=&limit=`
-  - `GET  /strategies/:id`
-  - `POST /strategies/:id/approve` (CSRF-protected; `{operator,note}`)
-  - `POST /strategies/:id/reject` (CSRF-protected; `{operator,reason}` —
-    `reason` IS persisted on the strategy as `rejectionReason`)
-  - `GET  /traces`
-  - `GET  /health` (CognitiveHealthScore: 0–100 with 5 components)
-  - `POST /observations` (CSRF-protected; subtype enum strictly validated;
-    invalid subtypes return 400, not 500)
-  - `GET  /recent-signals`
-- **Auth posture:** allowlisted as public in `global-auth-enforcer.ts` (demo
-  mode, no tenant PII). Write endpoints (`/observations`, `/approve`, `/reject`)
-  remain CSRF-protected via global `csrfMiddleware` mounted in `app.ts`.
+  - `GET  /strategies?status=&klass=&tier=&limit=` (public; read-only)
+  - `GET  /strategies/:id` (public; read-only)
+  - `POST /strategies/:id/approve` — CSRF + auth + role gate (operator id
+    derived from session; `operator` body field is IGNORED)
+  - `POST /strategies/:id/reject` — CSRF + auth + role gate (`{reason}`
+    persisted on the strategy as `rejectionReason`)
+  - `GET  /traces` (public; read-only)
+  - `GET  /health` (public; CognitiveHealthScore 0–100 with 5 components)
+  - `POST /observations` — CSRF + auth + role gate; subtype enum strictly
+    validated, invalid subtypes return 400 not 500
+  - `GET  /recent-signals` (public; read-only)
+- **Auth posture (post-validator):** Reads remain public via the
+  `/api/cognitive-reflexivity/` prefix in `global-auth-enforcer.ts`.
+  Mutating endpoints (`/observations`, `/approve`, `/reject`) explicitly
+  apply `authMiddleware()` + `requireRole('super_admin','admin','ops','analyst')`
+  in the route handler. Operator identity is derived from the authenticated
+  principal (`user:<id>:<email>` or `internal_agent:<name>`) — the body
+  `operator` string is never trusted. Defense in depth: CSRF blocks
+  unauthenticated POSTs first (403), then the auth gate fires (401), then
+  role check (403).
+- **Persistence (post-validator):** `cognitive_reflexive_strategies` and
+  `cognitive_reflexive_decision_traces` tables (migration
+  `lib/db/drizzle/0151_cognitive_reflexivity.sql`) hold the strategy
+  registry and per-decision audit log. Strategies in
+  `proposed|approved|active` survive process restarts via
+  `lib/cognitive-reflexivity-persistence.ts` (Drizzle-free, raw `pg`
+  queries). Best-effort writes — failures degrade to in-memory only.
+- **Model-router integration (post-validator):** `lib/ai-engine/src/model-router.ts`
+  exposes `registerRouterStrategyHook()`. The runtime adapter installs a
+  hook that calls `applyStrategiesToDecision` on every `routerCall(...)`,
+  applying active reflexive strategies (lane / model / retrieval-depth /
+  confidence-floor) and recording per-decision traces. Operator overrides
+  and fine-tuned model resolution take precedence over strategy
+  suggestions; the hook is wrapped in try/catch so reflexivity can NEVER
+  break model dispatch. Telemetry now carries `reflexiveStrategyIds` and
+  `reflexiveInfluencedDimensions` so any audit can answer "what
+  influenced this decision?"
 - **Bootstrap:** `artifacts/api-server/src/index.ts` `bootstrapStep('initCognitiveReflexivity')`
-  starts the engine after `initGuardianEngine`.
+  starts the engine after `initGuardianEngine`. Bootstrap also wires the
+  PG persistence adapter (with hydrate-on-start) and registers the
+  model-router strategy hook.
 - **Cross-domain emitters:** `routes/conduit.ts` emits `sync.success|failed|
-  schema_drift` from `simulateSyncExecution`; `routes/sentra.ts` emits
+  schema_drift|degraded|slow` from `simulateSyncExecution` (the
+  `degraded` and `slow` subtypes were added to the enum after the
+  validator caught them being silently dropped); `routes/sentra.ts` emits
   `detection.true_positive_confirmed` for critical/high incidents.
 
 ### Frontend

@@ -32,6 +32,10 @@ export const CognitiveSubtypeSchema = z.enum([
   'sync.success',
   'sync.failed',
   'sync.schema_drift',
+  // Partial-success runs with elevated row-failure rate
+  'sync.degraded',
+  // Successful runs whose duration exceeded the SLA baseline
+  'sync.slow',
   // Cognition layer (self)
   'cognition.dialectic_disagreement',
   'cognition.strategy_promoted',

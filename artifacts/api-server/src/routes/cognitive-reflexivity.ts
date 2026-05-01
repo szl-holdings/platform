@@ -18,8 +18,38 @@
 import { Router, type IRouter, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
+
+/**
+ * Operator gate for reflexivity write endpoints.
+ * Roles allowed to approve/reject reflexive strategies or emit cognitive
+ * observations into the engine. We deliberately do NOT trust any
+ * `operator` field in the request body — operator identity is derived
+ * from the authenticated session.
+ */
+const REFLEXIVITY_OPERATOR_ROLES = [
+  'super_admin',
+  'admin',
+  'ops',
+  'analyst',
+] as const;
+
+/**
+ * Build a stable operator identifier from the authenticated principal.
+ * Falls back to `internal_agent:<name>` for service-to-service calls and
+ * `operator:unknown` only as a last resort (which can't happen once
+ * authMiddleware is enforced — kept defensively).
+ */
+function operatorIdFromRequest(req: Request): string {
+  if (req.user?.id) {
+    const email = req.user.email ?? `user-${req.user.id}`;
+    return `user:${req.user.id}:${email}`;
+  }
+  if (req.internalAgent?.name) return `internal_agent:${req.internalAgent.name}`;
+  return 'operator:unknown';
+}
 
 // IMPORTANT: keep these enums in lockstep with
 // packages/cognitive-reflexivity/src/types.ts (StrategyStatusSchema /
@@ -53,30 +83,39 @@ router.get('/cognitive-reflexivity/strategies/:id', (req: Request, res: Response
   res.json({ strategy: s });
 });
 
-router.post('/cognitive-reflexivity/strategies/:id/approve', (req: Request, res: Response) => {
-  const runtime = getReflexivityRuntime();
-  const operator =
-    (req.body && typeof req.body.operator === 'string' && req.body.operator) || 'operator:unknown';
-  try {
-    const s = runtime.registry.approve(req.params.id, operator);
-    res.json({ strategy: s });
-  } catch (e) {
-    res.status(404).json({ error: 'not_found_or_invalid', message: (e as Error).message });
-  }
-});
+router.post(
+  '/cognitive-reflexivity/strategies/:id/approve',
+  authMiddleware(),
+  requireRole(...REFLEXIVITY_OPERATOR_ROLES),
+  (req: Request, res: Response) => {
+    const runtime = getReflexivityRuntime();
+    const operator = operatorIdFromRequest(req);
+    try {
+      const s = runtime.registry.approve(req.params.id, operator);
+      res.json({ strategy: s });
+    } catch (e) {
+      res.status(404).json({ error: 'not_found_or_invalid', message: (e as Error).message });
+    }
+  },
+);
 
-router.post('/cognitive-reflexivity/strategies/:id/reject', (req: Request, res: Response) => {
-  const runtime = getReflexivityRuntime();
-  const operator =
-    (req.body && typeof req.body.operator === 'string' && req.body.operator) || 'operator:unknown';
-  const reason = (req.body && typeof req.body.reason === 'string' && req.body.reason) || 'rejected';
-  try {
-    const s = runtime.registry.reject(req.params.id, operator, reason);
-    res.json({ strategy: s });
-  } catch (e) {
-    res.status(404).json({ error: 'not_found_or_invalid', message: (e as Error).message });
-  }
-});
+router.post(
+  '/cognitive-reflexivity/strategies/:id/reject',
+  authMiddleware(),
+  requireRole(...REFLEXIVITY_OPERATOR_ROLES),
+  (req: Request, res: Response) => {
+    const runtime = getReflexivityRuntime();
+    const operator = operatorIdFromRequest(req);
+    const reason =
+      (req.body && typeof req.body.reason === 'string' && req.body.reason) || 'rejected';
+    try {
+      const s = runtime.registry.reject(req.params.id, operator, reason);
+      res.json({ strategy: s });
+    } catch (e) {
+      res.status(404).json({ error: 'not_found_or_invalid', message: (e as Error).message });
+    }
+  },
+);
 
 router.get('/cognitive-reflexivity/traces', (req: Request, res: Response) => {
   const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 100));
@@ -99,7 +138,11 @@ const ObservationSchema = z.object({
   source: z.string().optional(),
 });
 
-router.post('/cognitive-reflexivity/observations', (req: Request, res: Response) => {
+router.post(
+  '/cognitive-reflexivity/observations',
+  authMiddleware(),
+  requireRole(...REFLEXIVITY_OPERATOR_ROLES),
+  (req: Request, res: Response) => {
   const parsed = ObservationSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: 'invalid_payload', issues: parsed.error.issues });
@@ -122,7 +165,8 @@ router.post('/cognitive-reflexivity/observations', (req: Request, res: Response)
     });
   }
   res.status(202).json({ status: 'accepted' });
-});
+  },
+);
 
 router.get('/cognitive-reflexivity/recent-signals', (_req: Request, res: Response) => {
   const runtime = getReflexivityRuntime();

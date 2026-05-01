@@ -163,6 +163,10 @@ export interface ModelRouterTelemetry {
   kernelStrategy?: string;
   kernelLatencyMs?: number;
   kernelMemoryMB?: number;
+  /** Cognitive Reflexivity strategies that influenced this decision. */
+  reflexiveStrategyIds?: string[];
+  /** Dimensions modified by the strategies (lane / model / etc.). */
+  reflexiveInfluencedDimensions?: string[];
 }
 
 export type TelemetryHandler = (telemetry: ModelRouterTelemetry) => void | Promise<void>;
@@ -220,6 +224,55 @@ const _telemetryHandlers: TelemetryHandler[] = [];
 
 export function registerTelemetryHandler(handler: TelemetryHandler): void {
   _telemetryHandlers.push(handler);
+}
+
+/**
+ * RouterStrategyHook — pluggable seam used by the Cognitive Reflexivity
+ * Engine (#4570–#4572) to bias router decisions with operator-approved
+ * reflexive strategies (lane / model / retrieval-depth / confidence-floor).
+ *
+ * The hook receives the resolved defaults the router computed from
+ * routeModel(routeClass) + tenant overrides and returns adaptations the
+ * router will fold back in BEFORE dispatching the chat completion. The
+ * hook MUST be synchronous-friendly (returns void or a promise) and MUST
+ * NEVER throw — on error the router proceeds with defaults.
+ *
+ * api-server installs the hook from
+ * `artifacts/api-server/src/lib/cognitive-reflexivity-runtime.ts` so this
+ * package has zero compile-time dependency on the reflexivity engine.
+ */
+export interface RouterStrategyDecisionInput {
+  routeClass: string;
+  agentId?: string;
+  defaults: {
+    lane?: string;
+    model?: string;
+    retrievalDepth?: number;
+    minConfidence?: number;
+  };
+}
+
+export interface RouterStrategyDecisionResult {
+  lane?: string;
+  model?: string;
+  retrievalDepth?: number;
+  minConfidence?: number;
+  appliedStrategyIds: string[];
+  influencedDimensions: string[];
+}
+
+export type RouterStrategyHook = (
+  input: RouterStrategyDecisionInput,
+) => RouterStrategyDecisionResult | undefined;
+
+let _strategyHook: RouterStrategyHook | null = null;
+
+export function registerRouterStrategyHook(hook: RouterStrategyHook | null): void {
+  _strategyHook = hook;
+}
+
+export function getRouterStrategyHook(): RouterStrategyHook | null {
+  return _strategyHook;
 }
 
 async function emitTelemetry(t: ModelRouterTelemetry): Promise<void> {
@@ -318,7 +371,45 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     }
   }
 
-  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? tenantToggles?.overrideModel?.[routeClass];
+  // ── Cognitive Reflexivity bias ────────────────────────────────────────
+  // Apply operator-approved reflexive strategies to the routing decision.
+  // The hook is registered by api-server at boot; if absent, this is a
+  // pure no-op and routing proceeds with normal defaults. Operator
+  // overrides (overrideModel, fine-tuned resolution) take precedence over
+  // strategy suggestions — the engine only fills in gaps where the
+  // operator has not pinned a value.
+  let strategyOverride: { lane?: string; model?: string } = {};
+  let appliedStrategyIds: string[] = [];
+  let influencedDimensions: string[] = [];
+  try {
+    const hook = _strategyHook;
+    if (hook) {
+      const decision = hook({
+        routeClass,
+        agentId,
+        defaults: {
+          lane: routeClass,
+          model: resolvedFineTunedModel ?? overrideModel ?? baseRoute.model,
+        },
+      });
+      if (decision) {
+        appliedStrategyIds = decision.appliedStrategyIds ?? [];
+        influencedDimensions = decision.influencedDimensions ?? [];
+        if (
+          decision.model &&
+          !overrideModel &&
+          !resolvedFineTunedModel &&
+          decision.model !== baseRoute.model
+        ) {
+          strategyOverride.model = decision.model;
+        }
+      }
+    }
+  } catch {
+    // Strategy hook MUST NOT break routing; swallow and proceed.
+  }
+
+  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? strategyOverride.model ?? tenantToggles?.overrideModel?.[routeClass];
 
   const route = {
     ...routeModel(routeClass, {
@@ -404,6 +495,10 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     ...(tenantToggles?.tenantId !== undefined ? { tenantId: tenantToggles.tenantId } : {}),
     ...(tenantToggles?.packSlug !== undefined ? { packSlug: tenantToggles.packSlug } : {}),
     ...(taskId !== undefined ? { taskId } : {}),
+    ...(appliedStrategyIds.length > 0 ? { reflexiveStrategyIds: appliedStrategyIds } : {}),
+    ...(influencedDimensions.length > 0
+      ? { reflexiveInfluencedDimensions: influencedDimensions }
+      : {}),
   };
 
   void emitTelemetry(telemetry);

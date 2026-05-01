@@ -25,12 +25,17 @@ import {
   computeHealthScore,
   runConsolidationCycle,
   InMemoryConsolidationStore,
+  applyStrategiesToDecision,
   type CognitiveHealthScore,
   type ReflexiveStrategy,
   type MonologueAdapter,
   type ApprovalGate,
 } from '@workspace/cognitive-reflexivity';
 import type { Signal } from '@workspace/ontology/signal';
+import { pool } from '@szl-holdings/db';
+import { registerRouterStrategyHook } from '@szl-holdings/ai-engine';
+import { buildCognitiveReflexivityAdapter } from './cognitive-reflexivity-persistence';
+import { logger } from './logger';
 
 interface ReflexivityRuntime {
   engine: CognitiveReflexivityEngine;
@@ -116,11 +121,13 @@ function buildApprovalGate(): ApprovalGate {
           justification: strategy.description,
           projectedImpact: `Adjusts ${strategy.class} dimension; tier=${strategy.tier}; confidence=${strategy.confidence.toFixed(2)}`,
           projectedRisk:
-            strategy.tier === 'sovereign'
-              ? 'High — sovereign-tier change affecting model routing or detection thresholds'
-              : strategy.tier === 'dual-approved'
-                ? 'Medium-high — requires dual approval'
-                : 'Medium — bounded operator-approved change',
+            strategy.tier === 'dual-approved'
+              ? 'High — requires dual approval; affects model routing or detection thresholds'
+              : strategy.tier === 'operator-approved'
+                ? 'Medium — bounded operator-approved change'
+                : strategy.tier === 'supervised'
+                  ? 'Low-medium — single human approval'
+                  : 'Low — advisory tier, audit-only',
           requestedBy: 'cognitive-reflexivity-engine',
           domain: 'cognitive-reflexivity',
           surface: 'a11oy-reflexivity',
@@ -134,6 +141,55 @@ function buildApprovalGate(): ApprovalGate {
 
 export function getReflexivityRuntime(): ReflexivityRuntime {
   if (_runtime) return _runtime;
+
+  // Wire DB-backed persistence so operator-approved strategies and
+  // per-decision traces survive restarts. The adapter is best-effort —
+  // failures degrade to in-memory only, never break engine startup.
+  try {
+    defaultStrategyRegistry.setPersistenceAdapter(
+      buildCognitiveReflexivityAdapter(pool),
+    );
+    void defaultStrategyRegistry.hydrate?.().catch((err: unknown) => {
+      logger.warn(
+        { err: (err as Error).message },
+        'cognitive-reflexivity registry hydrate failed',
+      );
+    });
+  } catch (err) {
+    logger.warn(
+      { err: (err as Error).message },
+      'cognitive-reflexivity persistence adapter wiring skipped',
+    );
+  }
+
+  // Install the model-router strategy hook so reflexive strategies bias
+  // routing decisions in production. The hook is wrapped in try/catch
+  // inside the router; here we only translate the registry call.
+  try {
+    registerRouterStrategyHook((input) => {
+      const r = applyStrategiesToDecision(
+        {
+          routeClass: input.routeClass,
+          ...(input.agentId !== undefined ? { agentId: input.agentId } : {}),
+          defaults: input.defaults,
+        },
+        defaultStrategyRegistry,
+      );
+      return {
+        ...(r.lane !== undefined ? { lane: r.lane } : {}),
+        ...(r.model !== undefined ? { model: r.model } : {}),
+        ...(r.retrievalDepth !== undefined ? { retrievalDepth: r.retrievalDepth } : {}),
+        ...(r.minConfidence !== undefined ? { minConfidence: r.minConfidence } : {}),
+        appliedStrategyIds: r.appliedStrategyIds,
+        influencedDimensions: r.influencedDimensions,
+      };
+    });
+  } catch (err) {
+    logger.warn(
+      { err: (err as Error).message },
+      'cognitive-reflexivity model-router hook registration failed',
+    );
+  }
 
   const recent: Signal[] = [];
   const recentUnsub = defaultSignalBus.on('cognitive-reflexive', (s) => {
