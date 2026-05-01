@@ -163,39 +163,25 @@ test.describe('PRAXIS eval console', () => {
   });
 
   test('Run Evals button is present and clickable', async ({ page }) => {
-    await page.route('**/api/pulse-evals/run', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          report: {
-            suiteId: 'test-suite',
-            suiteName: 'Test Suite',
-            model: 'claude-sonnet-4-6',
-            totalCases: 42,
-            passedCases: 38,
-            failedCases: 4,
-            passRate: 0.905,
-            avgScore: 88.5,
-            avgLatencyMs: 342,
-            totalCostUsd: 0.00123,
-            domains: ['research'],
-            completedAt: new Date().toISOString(),
-          },
-        }),
-      }),
-    );
-
+    // NEXUS scope: scripted-only — Run Evals simulates suites locally and
+    // appends a run named after one of the EVAL_SUITES entries (e.g.
+    // "PARAGON Threat Scorer v3"). No /api/pulse-evals/run mock is needed.
     await page.goto(`${PRAXIS}#eval-console`);
     const runButton = page.getByRole('button', { name: /Run Evals/ });
     await expect(runButton).toBeVisible();
     await runButton.click();
-    await expect(page.getByText('Recent Runs')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Test Suite')).toBeVisible();
+    // The simulated run loops through cases with ~200ms per case across
+    // multiple suites, so allow generous time before "Recent Runs" appears.
+    await expect(page.getByText('Recent Runs')).toBeVisible({ timeout: 30000 });
+    // First non-red-team suite name is rendered in the run list.
+    await expect(page.getByText('PARAGON Threat Scorer v3')).toBeVisible({ timeout: 10000 });
   });
 });
 
 test.describe('PRAXIS prompt registry', () => {
+  // NEXUS scope: prompts are sourced from DEMO_PROMPTS in the page module —
+  // no /api/ai/prompts call. Assertions reference the canonical demo
+  // entries (see artifacts/mockup-sandbox/src/pages/PromptRegistry.tsx).
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -208,32 +194,6 @@ test.describe('PRAXIS prompt registry', () => {
           registeredTools: 0,
           orchestrationsToday: 0,
         }),
-      }),
-    );
-
-    await page.route('**/api/ai/prompts', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          {
-            id: 'p1',
-            name: 'Research Summarizer',
-            description: 'Summarizes research findings into executive briefs',
-            domain: 'research',
-            routeClass: 'generation',
-            activeVersionId: 'p1@v2',
-            activeVersion: 2,
-            versionCount: 2,
-            status: 'active',
-            lastEvalScore: 91.5,
-            lastEvalPassRate: 0.94,
-            lastEvalAt: new Date().toISOString(),
-            tags: ['research', 'summarization'],
-            updatedAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-          },
-        ]),
       }),
     );
   });
@@ -245,76 +205,33 @@ test.describe('PRAXIS prompt registry', () => {
 
   test('shows prompt count metric card', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    // 'Prompts' appears in the sidebar nav and on the metric card. Pin to
-    // the metric label by scoping to its sibling counter.
+    // 'Prompts' appears in the sidebar nav and on the metric card. The
+    // scripted DEMO_PROMPTS list contains five entries, so pin to the
+    // counter showing exactly "5".
     await expect(page.getByText('Prompts').first()).toBeVisible();
-    await expect(page.locator('.text-praxis-cyan').filter({ hasText: /^1$/ }).first()).toBeVisible();
+    await expect(page.locator('.text-praxis-cyan').filter({ hasText: /^5$/ }).first()).toBeVisible();
   });
 
   test('lists prompts with name and status', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await expect(page.getByText('Research Summarizer')).toBeVisible();
+    await expect(page.getByText('PARAGON Threat Scorer')).toBeVisible();
     await expect(page.getByText('active').first()).toBeVisible();
   });
 
   test('search filters prompts by name', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await page.getByPlaceholder('Search prompts…').fill('Research');
-    await expect(page.getByText('Research Summarizer')).toBeVisible();
+    await page.getByPlaceholder('Search prompts…').fill('PARAGON');
+    await expect(page.getByText('PARAGON Threat Scorer')).toBeVisible();
+    // Other prompts should be filtered out.
+    await expect(page.getByText('DOMAINE Distress Scorer')).toHaveCount(0);
   });
 });
 
 test.describe('PRAXIS prompt save flow', () => {
-  const V1_TIMESTAMP = new Date().toISOString();
-  const V2_TIMESTAMP = new Date().toISOString();
-
-  const PROMPT_LIST = [
-    {
-      id: 'p1',
-      name: 'Research Summarizer',
-      description: 'Summarizes research findings',
-      domain: 'research',
-      routeClass: 'generation',
-      activeVersionId: 'p1@v1',
-      activeVersion: 1,
-      versionCount: 2,
-      status: 'active',
-      lastEvalScore: 91.0,
-      lastEvalPassRate: 0.95,
-      lastEvalAt: V1_TIMESTAMP,
-      tags: ['research'],
-      updatedAt: V2_TIMESTAMP,
-      createdAt: V1_TIMESTAMP,
-    },
-  ];
-
-  const PROMPT_DETAIL = {
-    ...PROMPT_LIST[0],
-    versions: [
-      {
-        versionId: 'p1@v2',
-        version: 2,
-        template: 'Enhanced: Summarize the following research findings: {{content}}',
-        changelog: 'Improved summarization prompt',
-        createdBy: 'nexus-agent',
-        createdAt: V2_TIMESTAMP,
-        tags: ['research', 'v2'],
-        evalMetadata: { score: 91.0, passRate: 0.95, avgLatencyMs: 280, sampleCount: 60 },
-      },
-      {
-        versionId: 'p1@v1',
-        version: 1,
-        template: 'Summarize the following research findings: {{content}}',
-        changelog: 'Initial version',
-        createdBy: 'nexus-agent',
-        createdAt: V1_TIMESTAMP,
-        tags: ['research', 'v1'],
-        evalMetadata: { score: 88.0, passRate: 0.92, avgLatencyMs: 320, sampleCount: 50 },
-      },
-    ],
-    comparison: null,
-  };
-
+  // NEXUS scope: scripted-only — promote and eval mutate local state and
+  // surface a toast; no /api/ai/prompts/* calls. Assertions reference the
+  // canonical PARAGON Threat Scorer entry from DEMO_PROMPTS, which has
+  // three versions with v3 active (so v1 and v2 expose Promote).
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -329,93 +246,45 @@ test.describe('PRAXIS prompt save flow', () => {
         }),
       }),
     );
-
-    await page.route('**/api/ai/prompts', (route) => {
-      if (route.request().method() === 'GET') {
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(PROMPT_LIST),
-        });
-      }
-    });
-
-    await page.route('**/api/ai/prompts/p1', (route) => {
-      if (route.request().method() === 'GET') {
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(PROMPT_DETAIL),
-        });
-      }
-    });
   });
 
   test('expanding a prompt shows its version history with active badge', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await page.getByRole('button', { name: /Research Summarizer/ }).click();
-    // The version rows render multiple "v1"-style strings (label + count
-    // metric). First() is sufficient to confirm the panel expanded.
+    await page.getByRole('button', { name: /PARAGON Threat Scorer/ }).click();
+    // Version rows render "v1"-style labels — first() is enough to confirm
+    // the panel expanded.
     await expect(page.getByText(/^v1\b/).first()).toBeVisible({ timeout: 5000 });
     // ACTIVE appears as both a status chip on the prompt header and a badge
     // on the active version row — first() is enough to assert presence.
     await expect(page.getByText('ACTIVE').first()).toBeVisible();
   });
 
-  test('version 2 shows Promote button since it is not the active version', async ({ page }) => {
+  test('inactive versions show Promote button (v3 is active)', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await page.getByRole('button', { name: /Research Summarizer/ }).click();
+    await page.getByRole('button', { name: /PARAGON Threat Scorer/ }).click();
     await expect(page.getByText(/^v2\b/).first()).toBeVisible({ timeout: 5000 });
-    // Only inactive versions render a Promote button. .first() guards against
-    // future rows also exposing one.
+    // Inactive versions render a Promote button.
     await expect(page.getByRole('button', { name: /^Promote$/ }).first()).toBeVisible();
   });
 
-  test('clicking Promote on v2 POSTs to the promote endpoint', async ({ page }) => {
-    let promoteCalled = false;
-
-    await page.route('**/api/ai/prompts/p1/promote', async (route) => {
-      promoteCalled = true;
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ ok: true }),
-      });
-    });
-
+  test('clicking Promote on an inactive version mutates local state and toasts', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await page.getByRole('button', { name: /Research Summarizer/ }).click();
+    await page.getByRole('button', { name: /PARAGON Threat Scorer/ }).click();
     const promote = page.getByRole('button', { name: /^Promote$/ }).first();
     await expect(promote).toBeVisible({ timeout: 5000 });
     await promote.click();
     await expect(page.getByText(/promoted to active/)).toBeVisible({ timeout: 8000 });
-    expect(promoteCalled).toBe(true);
   });
 
-  test('clicking Eval on v1 POSTs to the eval endpoint and shows result toast', async ({
-    page,
-  }) => {
-    let evalCalled = false;
-
-    await page.route(/\/api\/ai\/prompts\/p1\/versions\/.*\/eval/, async (route) => {
-      evalCalled = true;
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ score: 91.0, passRate: 0.95, sampleCount: 60 }),
-      });
-    });
-
+  test('clicking Eval on a version shows the scripted result toast', async ({ page }) => {
     await page.goto(`${PRAXIS}#prompt-registry`);
-    await page.getByRole('button', { name: /Research Summarizer/ }).click();
+    await page.getByRole('button', { name: /PARAGON Threat Scorer/ }).click();
     // Scope to the per-version Eval button (exact match) so we don't pick up
-    // the "Evals" sidebar nav entry which would just route away from the
-    // prompt registry.
+    // the "Evals" sidebar nav entry which would route away from the registry.
     const evalBtn = page.getByRole('button', { name: /^Eval$/ }).first();
     await expect(evalBtn).toBeVisible({ timeout: 5000 });
     await evalBtn.click();
     await expect(page.getByText(/Eval complete/)).toBeVisible({ timeout: 10000 });
-    expect(evalCalled).toBe(true);
   });
 });
 

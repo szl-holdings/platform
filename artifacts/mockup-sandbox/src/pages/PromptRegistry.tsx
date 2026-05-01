@@ -15,7 +15,7 @@ import {
   Tag,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 interface PromptVersion {
   versionId: string;
@@ -399,18 +399,8 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
   const [promoting, setPromoting] = useState(false);
   const [evallingVersion, setEvallingVersion] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open && prompt.versions.length === 0) {
-      fetch(`/api/ai/prompts/${prompt.id}`)
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((data: { versions?: PromptVersion[] }) => {
-          if (data?.versions && data.versions.length > 0) {
-            setPrompt((prev) => ({ ...prev, versions: data.versions! }));
-          }
-        })
-        .catch(() => {});
-    }
-  }, [open, prompt.id, prompt.versions.length]);
+  // NEXUS scope: scripted demo data only — versions come from DEMO_PROMPTS.
+  // No live /api/ai/prompts/* calls. See docs/demos/nexus-scope.md.
 
   function showToastMsg(msg: string) {
     setToast(msg);
@@ -418,14 +408,8 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
   }
 
   async function promote(v: PromptVersion) {
+    // NEXUS scope: scripted promotion only — no live /api call.
     setPromoting(true);
-    try {
-      await fetch(`/api/ai/prompts/${prompt.id}/promote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ versionId: v.versionId }),
-      });
-    } catch {}
     await new Promise((r) => setTimeout(r, 400));
     setPrompt((prev) => ({ ...prev, activeVersionId: v.versionId, activeVersion: v.version }));
     setPromoting(false);
@@ -433,20 +417,8 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
   }
 
   async function evalVersion(v: PromptVersion) {
+    // NEXUS scope: scripted eval only — no live /api call.
     setEvallingVersion(v.versionId);
-    try {
-      const res = await fetch(`/api/ai/prompts/${prompt.id}/versions/${v.versionId}/eval`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      if (res.ok) {
-        const result = await res.json();
-        showToastMsg(`Eval complete — score: ${result.score != null ? result.score.toFixed(1) : (v.evalMetadata?.score?.toFixed(1) ?? '—')}`);
-        setEvallingVersion(null);
-        return;
-      }
-    } catch {}
     await new Promise((r) => setTimeout(r, 1200));
     showToastMsg(`Eval complete — score: ${v.evalMetadata?.score?.toFixed(1) ?? '91.0'}`);
     setEvallingVersion(null);
@@ -544,35 +516,11 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
 }
 
 export default function PromptRegistry() {
-  const [prompts, setPrompts] = useState<PromptEntry[]>(DEMO_PROMPTS);
+  // NEXUS scope: scripted demo data only — prompts come from DEMO_PROMPTS
+  // at module load. No live /api/ai/prompts call. See docs/demos/nexus-scope.md.
+  const prompts = DEMO_PROMPTS;
   const [filter, setFilter] = useState('');
   const [domainFilter, setDomainFilter] = useState('all');
-
-  useEffect(() => {
-    fetch('/api/ai/prompts')
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: any[]) => {
-        if (!Array.isArray(data) || data.length === 0) return;
-        const apiPrompts: PromptEntry[] = data.map((p) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description ?? '',
-          domain: p.domain ?? 'general',
-          routeClass: p.routeClass ?? 'generation',
-          activeVersionId: p.activeVersionId ?? '',
-          activeVersion: p.activeVersion ?? 1,
-          versionCount: p.versionCount ?? 1,
-          status: p.status ?? 'active',
-          lastEvalScore: p.lastEvalScore ?? null,
-          lastEvalPassRate: p.lastEvalPassRate ?? null,
-          tags: p.tags ?? [],
-          updatedAt: p.updatedAt ?? new Date().toISOString(),
-          versions: p.versions ?? [],
-        }));
-        setPrompts(apiPrompts);
-      })
-      .catch(() => {});
-  }, []);
 
   const domains = ['all', ...Array.from(new Set(prompts.map((p) => p.domain)))];
   const filtered = prompts.filter((p) => {

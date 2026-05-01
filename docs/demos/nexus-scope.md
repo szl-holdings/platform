@@ -85,23 +85,13 @@ artifacts together).
   pre-written content. It must never imply live model output to the viewer.
 - The header must display a visible "Demo data — scripted runs" badge.
 
-## Transitional exceptions (sunset list)
+## Transitional exceptions
 
-These existing call sites pre-date the guardrail and are recognised by
-`pnpm check:nexus-scope` so the gate stays green and only flags **new**
-violations. Each must be unwound (rerouted into `/api/nexus/*` or replaced
-with scripted demo data) in the NEXUS innovation pass; do not add to this
-list without an explicit Project Task amendment.
-
-| Page                                                | Calls                          | How it's recognised | Plan to unwind |
-| --------------------------------------------------- | ------------------------------ | ------------------- | -------------- |
-| `artifacts/mockup-sandbox/src/pages/EvalConsole.tsx`     | `/api/pulse-evals/datasets`, `/api/pulse-evals/run` | Bounded prefix `/api/pulse-evals` in the script's `TRANSITIONAL_ALLOWED_PREFIXES`. | Move to `/api/nexus/evals/*` or scripted demo data. |
-| `artifacts/mockup-sandbox/src/pages/PromptRegistry.tsx`  | `/api/ai/prompts`, `/api/ai/prompts/:id`, `/api/ai/prompts/:id/promote`, `/api/ai/prompts/:id/versions/:v/eval` | Bounded prefix `/api/ai/prompts` in the script's `TRANSITIONAL_ALLOWED_PREFIXES`. | Move to `/api/nexus/prompts/*` or scripted demo data. |
-| `artifacts/mockup-sandbox/src/pages/AIQuality.tsx`       | `/api/ai/ops/traces/:id/feedback` (via shared `apiFetch`) | Single `// nexus-scope-allow` comment on the `apiFetch` helper, since the URL is constructed at runtime from a generic `/api` base. | Replace with a same-origin `/api/nexus/...` route or scripted demo data, then drop the allow-comment. |
-
-When the unwinding lands, remove the prefix from
-`TRANSITIONAL_ALLOWED_PREFIXES` in `scripts/check-nexus-scope.ts` so the
-allowlist shrinks back to `/api/nexus/*` only.
+**None.** As of Project Task #4570 the NEXUS sandbox calls scripted demo
+data only — no live backend routes. `TRANSITIONAL_ALLOWED_PREFIXES` in
+`scripts/check-nexus-scope.ts` is empty and pinned by
+`scripts/check-nexus-scope.test.ts`. Adding an entry here requires an
+explicit Project Task amendment to this document.
 
 ## If you need to violate a rule
 

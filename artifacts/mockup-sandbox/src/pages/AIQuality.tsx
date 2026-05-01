@@ -16,18 +16,9 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-const API = '/api';
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  // nexus-scope-allow: transitional — AIQuality calls /api/ai/ops/* (see docs/demos/nexus-scope.md)
-  const r = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
-  if (!r.ok) throw new Error(`${r.status}`);
-  const json = (await r.json()) as { data?: T; success?: boolean } & T;
-  return (json as { data?: T }).data ?? (json as T);
-}
+// NEXUS scope: scripted demo data only — no live /api/ai/ops calls. The
+// previous transitional `apiFetch` helper has been removed. See
+// docs/demos/nexus-scope.md.
 
 interface CircuitBreakerStatus {
   provider: string;
@@ -91,23 +82,18 @@ function StateChip({ state }: { state: string }) {
   );
 }
 
-function FeedbackWidget({ traceId }: { traceId: string }) {
+function FeedbackWidget({ traceId: _traceId }: { traceId: string }) {
   const [sent, setSent] = useState<'up' | 'down' | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function sendFeedback(sentiment: 'up' | 'down') {
+    // NEXUS scope: scripted feedback only — no live /api call. The thumb
+    // is recorded in local state and surfaces a confirmation chip.
     if (sent || loading) return;
     setLoading(true);
-    try {
-      await apiFetch(`/ai/ops/traces/${traceId}/feedback`, {
-        method: 'POST',
-        body: JSON.stringify({ sentiment }),
-      });
-      setSent(sentiment);
-    } catch {
-    } finally {
-      setLoading(false);
-    }
+    await new Promise((r) => setTimeout(r, 250));
+    setSent(sentiment);
+    setLoading(false);
   }
 
   if (sent) {
@@ -174,39 +160,165 @@ function MetricCard({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Scripted demo data (NEXUS scope: no live /api/ai/ops calls)
+// ---------------------------------------------------------------------------
+
+const SCRIPTED_SUMMARY: OpsSummary = {
+  period: 'last_24h',
+  traces: {
+    total: 1487,
+    reviewRequired: 42,
+    reviewRate: 0.028,
+    avgLatencyMs: 638,
+    avgConfidence: 0.91,
+    totalCostUsd: 12.84,
+    evalPassRate: 0.94,
+  },
+  reviewQueue: {
+    total: 42,
+    pending: 31,
+    inReview: 8,
+    escalated: 3,
+    criticalPending: 2,
+    highPending: 9,
+  },
+};
+
+const SCRIPTED_CIRCUITS: CircuitBreakerStatus[] = [
+  {
+    provider: 'openai-gpt-4o',
+    state: 'closed',
+    consecutiveFailures: 0,
+    openedAt: null,
+    lastTestedAt: Date.now() - 1000 * 60 * 4,
+    totalTripped: 2,
+  },
+  {
+    provider: 'anthropic-claude-3.5-sonnet',
+    state: 'closed',
+    consecutiveFailures: 0,
+    openedAt: null,
+    lastTestedAt: Date.now() - 1000 * 60 * 2,
+    totalTripped: 0,
+  },
+  {
+    provider: 'anthropic-claude-3-opus',
+    state: 'half-open',
+    consecutiveFailures: 1,
+    openedAt: Date.now() - 1000 * 60 * 12,
+    lastTestedAt: Date.now() - 1000 * 60 * 1,
+    totalTripped: 4,
+  },
+  {
+    provider: 'gemini-1.5-pro',
+    state: 'open',
+    consecutiveFailures: 7,
+    openedAt: Date.now() - 1000 * 60 * 6,
+    lastTestedAt: Date.now() - 1000 * 60 * 6,
+    totalTripped: 9,
+  },
+];
+
+const SCRIPTED_TRACES: OpsTrace[] = [
+  {
+    traceId: 'trc_01HX9P1A',
+    model: 'gpt-4o-2024-08-06',
+    modelProvider: 'openai',
+    domain: 'maritime.bunkering',
+    confidence: 0.96,
+    latencyMs: 612,
+    costEstimateUsd: 0.014,
+    status: 'completed',
+    requiresReview: false,
+    capturedAt: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
+    inputSummary: 'Compute optimal bunker port for VLSFO + scrubber pivot',
+    outputSummary: 'Singapore at +0.4d delay, $32k savings vs Rotterdam baseline.',
+    evalScore: 0.97,
+  },
+  {
+    traceId: 'trc_01HX9P22',
+    model: 'claude-3-5-sonnet-20241022',
+    modelProvider: 'anthropic',
+    domain: 'aegis.compliance',
+    confidence: 0.74,
+    latencyMs: 1184,
+    costEstimateUsd: 0.022,
+    status: 'completed',
+    requiresReview: true,
+    capturedAt: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
+    inputSummary: 'Map MAS Notice 626 changes to active KYC playbook',
+    outputSummary: 'Section 4.2 — beneficial-owner refresh needs operator review.',
+    evalScore: 0.81,
+  },
+  {
+    traceId: 'trc_01HX9P3M',
+    model: 'gpt-4o-mini',
+    modelProvider: 'openai',
+    domain: 'terra.appraisal',
+    confidence: 0.93,
+    latencyMs: 414,
+    costEstimateUsd: 0.003,
+    status: 'completed',
+    requiresReview: false,
+    capturedAt: new Date(Date.now() - 1000 * 60 * 11).toISOString(),
+    inputSummary: 'Comp set for 8 Battery Rd refresh',
+    outputSummary: '6-comp set assembled, weighted price/sf range $1,820–$2,240.',
+    evalScore: 0.94,
+  },
+  {
+    traceId: 'trc_01HX9P5Q',
+    model: 'claude-3-5-sonnet-20241022',
+    modelProvider: 'anthropic',
+    domain: 'counsel.matter',
+    confidence: 0.62,
+    latencyMs: 1742,
+    costEstimateUsd: 0.031,
+    status: 'completed',
+    requiresReview: true,
+    capturedAt: new Date(Date.now() - 1000 * 60 * 19).toISOString(),
+    inputSummary: 'Cross-reference NDA clause 7 against state-of-the-art carve-outs',
+    outputSummary: 'Clause 7(b) conflicts with Annex C definition — escalate to partner.',
+    evalScore: 0.69,
+  },
+  {
+    traceId: 'trc_01HX9P7Z',
+    model: 'gpt-4o-2024-08-06',
+    modelProvider: 'openai',
+    domain: 'sentra.detection',
+    confidence: 0.88,
+    latencyMs: 522,
+    costEstimateUsd: 0.011,
+    status: 'completed',
+    requiresReview: false,
+    capturedAt: new Date(Date.now() - 1000 * 60 * 24).toISOString(),
+    inputSummary: 'Triage 3 SOC alerts (auth-anomaly cluster)',
+    outputSummary: '2 alerts auto-suppressed (known maintenance window); 1 escalated.',
+    evalScore: 0.91,
+  },
+];
+
 export default function AIQuality() {
   const [summary, setSummary] = useState<OpsSummary | null>(null);
   const [circuits, setCircuits] = useState<CircuitBreakerStatus[]>([]);
   const [traces, setTraces] = useState<OpsTrace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [selectedTrace, setSelectedTrace] = useState<OpsTrace | null>(null);
 
   const load = useCallback(async () => {
+    // NEXUS scope: scripted demo data only — no live /api/ai/ops calls.
     setLoading(true);
-    setError(null);
-    try {
-      const [sum, cb, tr] = await Promise.all([
-        apiFetch<OpsSummary>('/ai/ops/summary').catch(() => null),
-        apiFetch<{ circuits: CircuitBreakerStatus[] }>('/ai/ops/circuit-breaker').catch(() => ({
-          circuits: [],
-        })),
-        apiFetch<{ traces: OpsTrace[] }>('/ai/ops/traces?limit=20').catch(() => ({ traces: [] })),
-      ]);
-      setSummary(sum);
-      setCircuits(cb.circuits ?? []);
-      setTraces(tr.traces ?? []);
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setLoading(false);
-    }
+    // brief artificial delay so the refresh interaction still feels live
+    await new Promise((r) => setTimeout(r, 180));
+    setSummary(SCRIPTED_SUMMARY);
+    setCircuits(SCRIPTED_CIRCUITS);
+    setTraces(SCRIPTED_TRACES);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     load();
-    const id = setInterval(load, 30000);
-    return () => clearInterval(id);
   }, [load]);
 
   const openCount = circuits.filter((c) => c.state === 'open').length;

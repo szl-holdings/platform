@@ -12,7 +12,7 @@ import {
   TrendingUp,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface EvalCase {
   id: string;
@@ -299,23 +299,14 @@ interface RunningProgress {
 }
 
 export default function EvalConsole() {
-  const [domains, setDomains] = useState<EvalDomain[]>(SCRIPTED_DOMAINS);
+  // NEXUS scope: scripted demo data only — no live API. Domains, suites and
+  // simulated runs all live in this module. See docs/demos/nexus-scope.md.
+  const domains = SCRIPTED_DOMAINS;
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [includeRedTeam, setIncludeRedTeam] = useState(false);
   const [runState, setRunState] = useState<RunState>('idle');
   const [progress, setProgress] = useState<RunningProgress | null>(null);
   const [results, setResults] = useState<DisplayResult[]>([]);
-
-  useEffect(() => {
-    fetch('/api/pulse-evals/datasets')
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data: { data?: { domains?: EvalDomain[] } }) => {
-        if (data?.data?.domains && data.data.domains.length > 0) {
-          setDomains(data.data.domains);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   function toggleDomain(d: string) {
     setSelectedDomains((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]));
@@ -324,34 +315,7 @@ export default function EvalConsole() {
   async function runEvals() {
     setRunState('running');
 
-    try {
-      const res = await fetch('/api/pulse-evals/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domains: selectedDomains }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const r = data.report ?? data;
-        const display: DisplayResult = {
-          name: r.suiteName ?? r.name ?? 'Eval Run',
-          passRate: r.passRate ?? 0,
-          totalCases: r.totalCases ?? 0,
-          passedCases: r.passedCases ?? Math.round((r.passRate ?? 0) * (r.totalCases ?? 0)),
-          failedCases: r.failedCases ?? 0,
-          avgScore: r.avgScore ?? 0,
-          avgLatencyMs: r.avgLatencyMs ?? 0,
-          totalCostUsd: r.totalCostUsd ?? 0,
-          completedAt: r.completedAt ?? new Date().toISOString(),
-        };
-        setResults((prev) => [display, ...prev.slice(0, 3)]);
-        setRunState('done');
-        setProgress(null);
-        setTimeout(() => setRunState('idle'), 2000);
-        return;
-      }
-    } catch {}
-
+    // NEXUS scope: scripted runs only — no live /api call.
     const suitesToRun = EVAL_SUITES.filter((s) => includeRedTeam || !s.isRedTeam);
     const newResults: DisplayResult[] = [];
 

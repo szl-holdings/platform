@@ -49,12 +49,20 @@ const DEPRECATED_ROUTES = [
 const NAV_PATTERN =
   /(?:href|to|navigate|push|replace|window\.location(?:\.href|\.assign|\.replace)?)\s*[=(]\s*["'`]([^"'`]+)["'`]/gi;
 
+// JSON nav fields. Matches `"link": "/path"`, `"href": "/path"`, etc.
+// `path`, `route`, `slug` are intentionally excluded — they collide with
+// non-navigation uses (file paths, route names, URL slugs in metadata).
+const JSON_NAV_PATTERN =
+  /"(href|link|url|to)"\s*:\s*"([^"]+)"/g;
+
 const SERVER_ROUTE_DEFINITION = /^\s*router\.(get|post|put|patch|delete|use|all)\s*\(/;
 
 const API_CALL_PATTERN =
   /^\s*(?:apiGet|apiPost|apiPut|apiPatch|apiDelete|apiFetchRaw|fetch|axios)\s*[(<]/;
 
 const SOURCE_EXTENSIONS = /\.(ts|tsx|js|jsx|mts|mjs|html)$/;
+const JSON_EXTENSIONS = /\.json$/;
+const GENERATED_FILE_SUFFIX = /\.generated\.json$/;
 
 const EXCLUDED_DIR_NAMES = new Set([
   'node_modules',
@@ -66,6 +74,25 @@ const EXCLUDED_DIR_NAMES = new Set([
 ]);
 
 const EXCLUDED_FILE_NAMES = new Set(['check-deprecated-links.js']);
+
+// JSON files that aren't navigation data: package manifests, TS configs,
+// JSON schemas, lockfiles, etc. These rarely contain deprecated nav links and
+// scanning them adds noise + cost. Match by exact basename or suffix.
+const EXCLUDED_JSON_BASENAMES = new Set([
+  'package.json',
+  'package-lock.json',
+  'tsconfig.json',
+  'tsconfig.base.json',
+  'tsconfig.build.json',
+  'pnpm-workspace.json',
+  'turbo.json',
+  'vercel.json',
+  'eslint.config.json',
+  '.eslintrc.json',
+  '.prettierrc.json',
+  'manifest.json',
+]);
+const EXCLUDED_JSON_SUFFIXES = [/\.schema\.json$/, /\.tsbuildinfo$/];
 
 function* walkDir(dir) {
   let entries;
@@ -79,8 +106,13 @@ function* walkDir(dir) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       yield* walkDir(fullPath);
-    } else if (entry.isFile() && SOURCE_EXTENSIONS.test(entry.name)) {
-      if (!EXCLUDED_FILE_NAMES.has(entry.name)) {
+    } else if (entry.isFile()) {
+      if (EXCLUDED_FILE_NAMES.has(entry.name)) continue;
+      if (SOURCE_EXTENSIONS.test(entry.name)) {
+        yield fullPath;
+      } else if (JSON_EXTENSIONS.test(entry.name) && !GENERATED_FILE_SUFFIX.test(entry.name)) {
+        if (EXCLUDED_JSON_BASENAMES.has(entry.name)) continue;
+        if (EXCLUDED_JSON_SUFFIXES.some((re) => re.test(entry.name))) continue;
         yield fullPath;
       }
     }
@@ -91,6 +123,21 @@ function isServerRouteDefinition(line) {
   return SERVER_ROUTE_DEFINITION.test(line) || API_CALL_PATTERN.test(line);
 }
 
+function matchesDeprecated(href) {
+  for (const { slug, replacement } of DEPRECATED_ROUTES) {
+    const base = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    const matched =
+      href === slug ||
+      href === base ||
+      href.startsWith(slug) ||
+      href.startsWith(`${base}/`) ||
+      href.startsWith(`/api${slug}`) ||
+      href.startsWith(`/api${base}/`);
+    if (matched) return { slug, replacement };
+  }
+  return null;
+}
+
 function scanFile(filePath) {
   let content;
   try {
@@ -99,11 +146,32 @@ function scanFile(filePath) {
     return [];
   }
 
+  const isJson = JSON_EXTENSIONS.test(filePath);
   const lines = content.split('\n');
   const hits = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+
+    if (isJson) {
+      JSON_NAV_PATTERN.lastIndex = 0;
+      let match;
+      while ((match = JSON_NAV_PATTERN.exec(line)) !== null) {
+        const href = match[2];
+        const dep = matchesDeprecated(href);
+        if (dep) {
+          hits.push({
+            file: relative(ROOT, filePath),
+            line: i + 1,
+            content: line.trim(),
+            route: dep.slug,
+            replacement: dep.replacement,
+            href,
+          });
+        }
+      }
+      continue;
+    }
 
     if (isServerRouteDefinition(line)) continue;
 
@@ -111,25 +179,16 @@ function scanFile(filePath) {
     let match;
     while ((match = NAV_PATTERN.exec(line)) !== null) {
       const href = match[1];
-      for (const { slug, replacement } of DEPRECATED_ROUTES) {
-        const base = slug.endsWith('/') ? slug.slice(0, -1) : slug;
-        const matched =
-          href === slug ||
-          href === base ||
-          href.startsWith(slug) ||
-          href.startsWith(`${base}/`) ||
-          href.startsWith(`/api${slug}`) ||
-          href.startsWith(`/api${base}/`);
-        if (matched) {
-          hits.push({
-            file: relative(ROOT, filePath),
-            line: i + 1,
-            content: line.trim(),
-            route: slug,
-            replacement,
-            href,
-          });
-        }
+      const dep = matchesDeprecated(href);
+      if (dep) {
+        hits.push({
+          file: relative(ROOT, filePath),
+          line: i + 1,
+          content: line.trim(),
+          route: dep.slug,
+          replacement: dep.replacement,
+          href,
+        });
       }
     }
   }

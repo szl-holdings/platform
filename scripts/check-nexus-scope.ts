@@ -30,7 +30,7 @@ interface Violation {
   hint: string;
 }
 
-const BANNED_ARTIFACT_PREFIXES = [
+export const BANNED_ARTIFACT_PREFIXES = [
   'artifacts/sentra',
   'artifacts/command',
   'artifacts/pulse',
@@ -47,7 +47,7 @@ const BANNED_ARTIFACT_PREFIXES = [
   'artifacts/conduit',
 ];
 
-const BANNED_ALLOY_PREFIXES = [
+export const BANNED_ALLOY_PREFIXES = [
   '@szl/alloy',
   '@workspace/alloy',
   '@szl-holdings/alloy',
@@ -55,7 +55,7 @@ const BANNED_ALLOY_PREFIXES = [
   'packages/szl-alloy',
 ];
 
-const BANNED_AI_SDK_NAMES = new Set([
+export const BANNED_AI_SDK_NAMES = new Set([
   'openai',
   '@anthropic-ai/sdk',
   '@google/generative-ai',
@@ -70,7 +70,7 @@ const BANNED_AI_SDK_NAMES = new Set([
   'replicate',
 ]);
 
-const BANNED_AUTH_BILLING_NAMES = new Set([
+export const BANNED_AUTH_BILLING_NAMES = new Set([
   'stripe',
   '@stripe/stripe-js',
   '@stripe/react-stripe-js',
@@ -119,7 +119,7 @@ function listFiles(dir: string, exts: string[]): string[] {
   return out;
 }
 
-function isAllowed(line: string, prevLine: string | undefined): boolean {
+export function isAllowed(line: string, prevLine: string | undefined): boolean {
   // Support both same-line and previous-line forms (mirrors
   // eslint-disable-line / eslint-disable-next-line semantics).
   if (line.includes(ALLOW_MARKER)) return true;
@@ -127,7 +127,7 @@ function isAllowed(line: string, prevLine: string | undefined): boolean {
   return false;
 }
 
-function checkResolvedPath(absPath: string): { rule: string; hint: string } | null {
+export function checkResolvedPath(absPath: string): { rule: string; hint: string } | null {
   // Path is absolute; compare to repo-relative banned prefixes.
   const relFromRoot = relative(ROOT, absPath).replace(/\\/g, '/');
   for (const banned of BANNED_ARTIFACT_PREFIXES) {
@@ -149,7 +149,7 @@ function checkResolvedPath(absPath: string): { rule: string; hint: string } | nu
   return null;
 }
 
-function classifyImport(spec: string, fromFile: string): { rule: string; hint: string } | null {
+export function classifyImport(spec: string, fromFile: string): { rule: string; hint: string } | null {
   if (spec.startsWith('node:') || spec.startsWith('virtual:')) return null;
 
   // Relative imports — resolve to an absolute path and check against
@@ -220,28 +220,30 @@ function scanImports(file: string, content: string) {
   }
 }
 
-// Transitional allowlist: legacy backend routes already wired into NEXUS pages.
-// Scheduled for unwinding into /api/nexus/* in the innovation pass — see
-// docs/demos/nexus-scope.md ("Transitional exceptions"). Recognised here so
-// the check stays green and only flags *new* violations.
+// Transitional allowlist: any legacy backend route this NEXUS sandbox is
+// temporarily allowed to call. As of Project Task #4570 (NEXUS pages →
+// /api/nexus/* only), this list is INTENTIONALLY EMPTY — every page now
+// uses scripted demo data per docs/demos/nexus-scope.md. Adding an entry
+// here without a corresponding scope-doc amendment is a regression and
+// must be flagged in code review.
 //
 // Stored without trailing slash; the matcher requires the next character to
-// be a path/query boundary so `/api/pulse-evals-malicious` does NOT pass.
-const TRANSITIONAL_ALLOWED_PREFIXES = ['/api/pulse-evals', '/api/ai/prompts'];
+// be a path/query boundary so `/api/<prefix>-malicious` does NOT pass.
+export const TRANSITIONAL_ALLOWED_PREFIXES: string[] = [];
 
 // Template-literal URLs that begin with one of these identifiers are treated
 // as same-origin nexus iff the same file declares the identifier as a string
 // literal whose value starts with `/api/nexus`. We will not blindly trust
 // `${API}` — we verify what `API` actually equals.
-const TEMPLATE_BASE_IDENTS = ['API', 'API_BASE', 'NEXUS_API', 'NEXUS_BASE'];
+export const TEMPLATE_BASE_IDENTS = ['API', 'API_BASE', 'NEXUS_API', 'NEXUS_BASE'];
 
-function endsAtPathBoundary(url: string, prefixLen: number): boolean {
+export function endsAtPathBoundary(url: string, prefixLen: number): boolean {
   if (url.length === prefixLen) return true;
   const next = url.charAt(prefixLen);
   return next === '/' || next === '?' || next === '#';
 }
 
-function stripLineCommentsForScan(content: string): string {
+export function stripLineCommentsForScan(content: string): string {
   // Strip `// …` line comments to defeat commented-out fake declarations
   // like `// const API = '/api/nexus'`. We don't try to strip block
   // comments — the regex still requires a clean `const|let|var` declaration
@@ -250,7 +252,7 @@ function stripLineCommentsForScan(content: string): string {
   return content.replace(/\/\/[^\n]*/g, '');
 }
 
-function resolveBaseIdent(content: string, ident: string): string | null {
+export function resolveBaseIdent(content: string, ident: string): string | null {
   // Fail-closed declaration resolver. Returns the literal value ONLY when:
   //   - exactly one `const|let|var <ident> = '<value>'` declaration exists,
   //   - the rhs is a single string literal (no `+` concatenation, no template,
@@ -275,7 +277,7 @@ function resolveBaseIdent(content: string, ident: string): string | null {
   return only.value;
 }
 
-function isAllowedFetchUrl(url: string, fileContent: string): boolean {
+export function isAllowedFetchUrl(url: string, fileContent: string): boolean {
   // Canonical: same-origin /api/nexus
   if (url === '/api/nexus' || url.startsWith('/api/nexus/') || url.startsWith('/api/nexus?')) {
     return true;
@@ -462,4 +464,15 @@ function main() {
   process.exit(1);
 }
 
-main();
+// Only auto-run when invoked directly (e.g. `tsx scripts/check-nexus-scope.ts`),
+// not when imported by the regression test suite. We compare import.meta.url
+// to the URL form of process.argv[1]; vitest sets argv[1] to its own runner
+// binary, so this branch is skipped during test runs.
+const invokedDirectly =
+  typeof process !== 'undefined' &&
+  Array.isArray(process.argv) &&
+  typeof process.argv[1] === 'string' &&
+  import.meta.url === `file://${process.argv[1]}`;
+if (invokedDirectly) {
+  main();
+}
