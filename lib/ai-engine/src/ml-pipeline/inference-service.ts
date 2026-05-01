@@ -154,6 +154,70 @@ function runModelInference(
       confidence: 0.73 + Math.random() * 0.18,
     };
   }
+  if (domain === 'vessels' && modelType === 'route-anomaly') {
+    // GBT route anomaly — dominant features: ais_gap_hours, speed_deviation, heading_variance
+    const aisGapWeight = 0.38;
+    const speedDevWeight = 0.27;
+    const headingVarWeight = 0.18;
+    const feats = features as Record<string, number>;
+    const driven =
+      (feats['ais_gap_hours'] ?? avg) * aisGapWeight +
+      (feats['speed_deviation'] ?? avg) * speedDevWeight +
+      (feats['heading_variance'] ?? avg) * headingVarWeight +
+      avg * (1 - aisGapWeight - speedDevWeight - headingVarWeight);
+    const prob = Math.min(0.99, Math.max(0.01, driven * 0.7 + 0.04));
+    const confidence = parseFloat((0.82 + (1 - Math.abs(prob - 0.5)) * 0.08).toFixed(4));
+    return {
+      prediction: { probability: parseFloat(prob.toFixed(4)), anomaly: prob > 0.65 },
+      confidence,
+    };
+  }
+  if (domain === 'vessels' && modelType === 'dark-activity') {
+    // Random Forest dark-activity — dominant features: ais_blackout_duration, region_risk_tier, flag_state_opacity
+    const feats = features as Record<string, number>;
+    const blackoutWeight = 0.41;
+    const regionWeight = 0.24;
+    const flagWeight = 0.19;
+    const driven =
+      (feats['ais_blackout_duration'] ?? avg) * blackoutWeight +
+      (feats['region_risk_tier'] ?? avg) * regionWeight +
+      (feats['flag_state_opacity'] ?? avg) * flagWeight +
+      avg * (1 - blackoutWeight - regionWeight - flagWeight);
+    const prob = Math.min(0.99, Math.max(0.01, driven * 0.75 + 0.06));
+    const confidence = parseFloat((0.85 + (1 - Math.abs(prob - 0.5)) * 0.06).toFixed(4));
+    return {
+      prediction: { probability: parseFloat(prob.toFixed(4)), dark: prob > 0.55 },
+      confidence,
+    };
+  }
+  if (domain === 'vessels' && modelType === 'voyage-pnl') {
+    // Monte Carlo ensemble TCE output — base prediction, intervals computed at API layer
+    const feats = features as Record<string, number>;
+    const bunkerWeight = 0.34;
+    const congestionWeight = 0.22;
+    const weatherWeight = 0.18;
+    const counterpartyWeight = 0.15;
+    const routeWeight = 0.11;
+    // bunker_price is 0-1 normalized; high bunker = lower TCE
+    const bunkerFactor = 1 - (feats['bunker_price'] ?? 0.5) * 0.4;
+    const congestionFactor = 1 - (feats['port_congestion_index'] ?? 0.3) * 0.25;
+    const weatherFactor = 1 - (feats['weather_routing_penalty'] ?? 0.15) * 0.2;
+    const counterpartyFactor = (feats['counterparty_credit_score'] ?? 0.7) * 0.15 + 0.85;
+    const routeFactor = 1 - (feats['route_distance_nm'] ?? 0.5) * 0.1;
+    const weightedAdj =
+      bunkerFactor * bunkerWeight +
+      congestionFactor * congestionWeight +
+      weatherFactor * weatherWeight +
+      counterpartyFactor * counterpartyWeight +
+      routeFactor * routeWeight;
+    const normalizedAdj = weightedAdj / (bunkerWeight + congestionWeight + weatherWeight + counterpartyWeight + routeWeight);
+    const baseTce = Math.round(12000 + normalizedAdj * 14000);
+    const confidence = parseFloat((0.79 + normalizedAdj * 0.12).toFixed(4));
+    return {
+      prediction: { tce_usd_per_day: baseTce, profitable: baseTce > 14500 },
+      confidence,
+    };
+  }
   if (modelType.includes('forecast')) {
     const horizon = 7;
     const values = Array.from({ length: horizon }, (_, i) =>

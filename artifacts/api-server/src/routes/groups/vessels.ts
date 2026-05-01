@@ -22,4 +22,5 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/vessels', () => import('../vessels-voyage-risk'), 'vessels-voyage-risk'));
   router.use(lazyMatch('/vessels', () => import('../vessels-freight'), 'vessels-freight'));
   router.use(lazyMatch('/vessels', () => import('../vessels-sanctions-network'), 'vessels-sanctions-network'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-forecasts'), 'vessels-forecasts'));
 }

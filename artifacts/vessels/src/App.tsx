@@ -333,6 +333,7 @@ const VesselsAtlasRuntimePage = lazy(() => import('@/pages/atlas-runtime'));
 const VesselsAtlasExecutePage = lazy(() => import('@/pages/atlas-execute'));
 const VesselsReplayPage = lazy(() => import('@/pages/replay'));
 const VesselsScenarioBranchesPage = lazy(() => import('@/pages/scenario-branches'));
+const MedShadowFleetCaseStudyPage = lazy(() => import('@/pages/med-shadow-fleet-case-study'));
 const OwnerCargoGraphPage = lazy(() => import('@/pages/owner-cargo-graph'));
 const RouteAnomalyEnginePage = lazy(() => import('@/pages/route-anomaly-engine'));
 const SanctionsChainExplorerPage = lazy(() => import('@/pages/sanctions-chain-explorer'));
@@ -748,6 +749,12 @@ function VesselsSidebarContent({
           label: 'Dark Fleet Economics',
           href: '/dark-fleet-economics',
           icon: <Calculator className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'med-shadow-fleet',
+          label: 'Med Shadow-Fleet Case Study',
+          href: '/med-shadow-fleet',
+          icon: <Globe className="w-3.5 h-3.5" />,
         },
         {
           id: 'sanctions-heat',
@@ -1166,6 +1173,7 @@ function DashboardRouter() {
         <Route path="/atlas-execute" component={VesselsAtlasExecutePage} />
         <Route path="/replay" component={VesselsReplayPage} />
         <Route path="/scenario-branches" component={VesselsScenarioBranchesPage} />
+        <Route path="/med-shadow-fleet" component={MedShadowFleetCaseStudyPage} />
         <Route path="/owner-cargo-graph" component={OwnerCargoGraphPage} />
         <Route path="/route-anomaly-engine" component={RouteAnomalyEnginePage} />
         <Route path="/sanctions-chain-explorer" component={SanctionsChainExplorerPage} />
@@ -1496,7 +1504,8 @@ function AppContent({
     location.startsWith('/atlas-runtime') ||
     location.startsWith('/replay') ||
     location.startsWith('/scenario-branches') ||
-    location.startsWith('/satellite-rf-intelligence');
+    location.startsWith('/satellite-rf-intelligence') ||
+    location.startsWith('/med-shadow-fleet');
 
   if (isDashboard) {
     return (

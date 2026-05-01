@@ -181,8 +181,65 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
           required: ['identifier'],
         },
       },
+      {
+        id: 'vessels.risk_rescore',
+        name: 'Vessel Risk Re-Score',
+        description: 'Re-score vessel risk using latest AIS position, sanctions adjacency, and behavioral signals. Returns updated risk tier and confidence.',
+        input_schema: {
+          type: 'object',
+          properties: {
+            mmsi: { type: 'string', description: 'Vessel MMSI' },
+            imo: { type: 'string', description: 'Vessel IMO (optional)' },
+            includeAdjacency: { type: 'boolean', description: 'Include STS and port co-visit adjacency in scoring' },
+          },
+          required: ['mmsi'],
+        },
+      },
+      {
+        id: 'vessels.voyage_replan',
+        name: 'Voyage Replan',
+        description: 'Compute alternative voyage routing given current sanctions exclusion zones, weather routing, and port congestion. Returns updated TCE estimate.',
+        input_schema: {
+          type: 'object',
+          properties: {
+            vesselClass: { type: 'string', description: 'Vessel class (vlcc, suezmax, aframax, handysize)' },
+            origin: { type: 'string', description: 'Origin port or coordinates' },
+            destination: { type: 'string', description: 'Destination port or coordinates' },
+            avoidSanctionZones: { type: 'boolean', description: 'Avoid OFAC/UN sanctioned areas' },
+            avoidCongestedPorts: { type: 'boolean', description: 'Route around ports with >48h wait time' },
+          },
+          required: ['vesselClass', 'origin', 'destination'],
+        },
+      },
+      {
+        id: 'vessels.sanctions_fleet_sweep',
+        name: 'Fleet Sanctions Sweep',
+        description: 'Run a batch sanctions check across all vessels in a fleet. Cross-references OFAC SDN, UN Consolidated, UK OFSI, and EU FSF. Returns hits with confidence scores.',
+        input_schema: {
+          type: 'object',
+          properties: {
+            fleetId: { type: 'string', description: 'Fleet ID to sweep' },
+            checkAdjacency: { type: 'boolean', description: 'Include adjacency screening (STS, port co-visits)' },
+            outputFormat: { type: 'string', enum: ['summary', 'full'], description: 'Level of detail in response' },
+          },
+          required: ['fleetId'],
+        },
+      },
+      {
+        id: 'vessels.dark_activity_forecast',
+        name: 'Dark Activity Forecast',
+        description: 'Query the dark-activity ML head (vessels:dark-activity-v2) for 24h ahead AIS gap probability. Returns calibrated point estimate with 80/95% intervals and feature attribution.',
+        input_schema: {
+          type: 'object',
+          properties: {
+            mmsi: { type: 'string', description: 'Vessel MMSI' },
+            region: { type: 'string', description: 'Operating region for context (e.g., Persian Gulf, Mediterranean)' },
+          },
+          required: ['mmsi'],
+        },
+      },
     ],
-    keywords: ['vessel', 'ship', 'maritime', 'fleet', 'ais', 'port', 'cargo', 'route', 'sanctions', 'chokepoint', 'straits'],
+    keywords: ['vessel', 'ship', 'maritime', 'fleet', 'ais', 'port', 'cargo', 'route', 'sanctions', 'chokepoint', 'straits', 'dark-shipping', 'spoofing', 'sts-transfer', 'shadow-fleet'],
   },
   counsel: {
     displayName: 'Counsel Legal Matter Command',
