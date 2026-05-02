@@ -1077,3 +1077,25 @@ narrow CSRF / global-auth allowlist additions). Verdict:
 
   LOW  — Zod + try/catch around `evaluate()` correctly rejects malformed
          input without crashing the runtime.
+
+## SZL Holdings audit — recent state (2026-05-02)
+
+### Thesis verification (V1/V2/V3)
+- V1 `docs/ouroboros-thesis.md`: trio = A11oy / Sentra / Amaru. CORRECT.
+- V2 `docs/research/ouroboros-thesis-v2.md`: maps loop to Alloy / Sentra / Amaru (lines 22, 135, 218). No Terra. No fabricated test counts. CORRECT.
+- V3 GitHub canonical (`szl-holdings/ouroboros-thesis/papers/v3/OUROBOROS_THESIS_V3.md`, 904 lines, sha cddd8da): zero Terra mentions, correct Amaru reference at line 419. CORRECT.
+- V3 local draft (`attached_assets/ouroboros-thesis-v3_(1)_*.md`, 183 lines): had Terra fabrication on lines 9, 110, 112-114 + cited non-existent `artifacts/api-server/src/lib/terra-distress-loop.ts`. FIXED — replaced with real Amaru runtime (`artifacts/conduit/src/pages/codex-loop.tsx`, 14000 bytes / 413 lines). Backup at `.bak`.
+
+### Lutar Invariant Λ proof
+- PR #8 OPEN on `szl-holdings/ouroboros`: https://github.com/szl-holdings/ouroboros/pull/8
+- Branch `lutar-invariant-evidence`, commit `fb87e0a`, author Stephen Lutar.
+- Result: 168 of 172 tests pass (150 baseline + 18 new). 4 fail.
+- Root cause of all 4 failures: `W_EGYPTIAN = [1/3,1/3,1/9,1/9,1/9,1/27,1/27,1/27,1/27]` sums to 31/27, not 1. A3 precondition violated by the literal as shipped in the source payload.
+- Per payload ground rules, test committed verbatim. README badge reads 168/172. Owner decides remediation.
+
+### V3 announcements/publishing fabrications
+- 5 announcement files + ZENODO_METADATA + papers/ouroboros-thesis-v3.md still contain "1,372", "FedRAMP", "$360K", "Booz Allen", "AWS Marketplace", "Series A", "Truist", "Northwell".
+- PR #9 already OPEN on `szl-holdings/ouroboros-thesis` to retract these. Stephen merges; this audit does NOT duplicate.
+
+### Codex-kernel attestation
+- `packages/codex-kernel`: vitest reports 29/29 passing (4 test files). This is the V3 reference implementation.
