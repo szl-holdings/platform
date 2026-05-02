@@ -117,7 +117,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | **Vessels** | Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L | Active |
 | **Terra** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
 | **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
-| **Pulse** | AI executive briefing — narrative intelligence reports synthesized from live platform signals | Active |
+| **Pulse** | AI executive briefing — narrative intelligence reports synthesized from live platform signals | Removed — source directory deleted; briefing capability consolidated into a11oy substrate. |
 | **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Archived (Task #920) |
 
 <!-- END: portfolio-table -->

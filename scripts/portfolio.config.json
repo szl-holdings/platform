@@ -40,8 +40,8 @@
     {
       "product": "Pulse",
       "domain": "AI executive briefing — narrative intelligence reports synthesized from live platform signals",
-      "status": "Active",
-      "artifactId": "artifacts/pulse"
+      "status": "Removed — source directory deleted; briefing capability consolidated into a11oy substrate.",
+      "artifactId": null
     },
     {
       "product": "IMPERIUM",
@@ -50,14 +50,6 @@
     }
   ],
   "excludeArtifacts": [
-    "artifacts/szl-holdings",
-    "artifacts/api-server",
-    "artifacts/a11oy",
-    "artifacts/command",
-    "artifacts/conduit",
-    "artifacts/szl-demo-video",
-    "artifacts/szl-holdings-mobile",
-    "artifacts/lyte-command-center",
-    "XegfDyZt7HqfW2Bb8Ghoy"
+    "artifacts/a11oy"
   ]
 }
