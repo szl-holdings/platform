@@ -251,7 +251,20 @@ describe('Finance tool manifests', () => {
       { orgId: 'org-1', period: 'quarterly' },
       FINANCE_TOOL_MANIFESTS.find((m) => m.id === 'finance.budget-forecast')!,
     );
-    expect(result).toMatchObject({ orgId: 'org-1', period: 'quarterly', forecast: [] });
+    // The handler synthesises a forecast series from the (here, empty)
+    // historical transactions feed; with no transactions every projected
+    // spend is 0 but the period scaffolding is still produced. We assert
+    // on the structural fields and on the shape of one forecast row
+    // rather than expecting an empty forecast array.
+    expect(result).toMatchObject({ orgId: 'org-1', period: 'quarterly' });
+    expect(Array.isArray((result as { forecast: unknown }).forecast)).toBe(true);
+    const forecast = (result as { forecast: Array<Record<string, unknown>> }).forecast;
+    expect(forecast.length).toBeGreaterThan(0);
+    expect(forecast[0]).toMatchObject({
+      period: 1,
+      currency: 'USD',
+      projectedSpend: 0,
+    });
   });
 });
 
