@@ -6,8 +6,10 @@
  * swapped at any time without restarting.
  */
 
-import type { ASRAdapter, DiarizationAdapter, TTSAdapter } from './adapters.js';
 import {
+  type ASRAdapter,
+  type DiarizationAdapter,
+  type TTSAdapter,
   MultilingualASRAdapterSlot,
   MultilingualTTSAdapterSlot,
   NoOpDiarizationAdapter,

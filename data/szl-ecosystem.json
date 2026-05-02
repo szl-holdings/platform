@@ -5,38 +5,6 @@
   "organization": "SZL Holdings",
   "apps": [
     {
-      "name": "SZL Holdings Dashboard",
-      "slug": "szl-holdings",
-      "previewPath": "/",
-      "description": "Main executive dashboard and tenant management portal",
-      "artifactId": "artifacts/szl-holdings",
-      "category": "Core"
-    },
-    {
-      "name": "Unified Command",
-      "slug": "command",
-      "previewPath": "/command/",
-      "description": "Single-pane-of-glass ecosystem command portal",
-      "artifactId": "artifacts/command",
-      "category": "Core"
-    },
-    {
-      "name": "Lyte — Decision Intelligence",
-      "slug": "lyte-command-center",
-      "previewPath": "/lyte/",
-      "description": "AI-powered decision intelligence and analytics hub",
-      "artifactId": "artifacts/lyte-command-center",
-      "category": "Intelligence"
-    },
-    {
-      "name": "Pulse — AI Executive Briefing",
-      "slug": "pulse",
-      "previewPath": "/pulse/",
-      "description": "Automated executive briefing and signal aggregation",
-      "artifactId": "artifacts/pulse",
-      "category": "Intelligence"
-    },
-    {
       "name": "Vessels — Maritime Intelligence",
       "slug": "vessels",
       "previewPath": "/vessels/",
@@ -69,14 +37,6 @@
       "category": "Domain"
     },
     {
-      "name": "Aegis — Defense & Intelligence Command",
-      "slug": "aegis",
-      "previewPath": "/aegis/",
-      "description": "Defense readiness, threat intelligence, and operations command",
-      "artifactId": "artifacts/aegis",
-      "category": "Domain"
-    },
-    {
       "name": "A11oy — Brand Orchestration Layer",
       "slug": "a11oy",
       "previewPath": "/a11oy/",
@@ -85,20 +45,12 @@
       "category": "Platform"
     },
     {
-      "name": "API Server",
-      "slug": "api-server",
-      "previewPath": "/api/",
-      "description": "Shared Express API server with MCP, Alloy, and domain routes",
-      "artifactId": "artifacts/api-server",
-      "category": "Infrastructure"
-    },
-    {
-      "name": "SZL Holdings Mobile",
-      "slug": "szl-holdings-mobile",
-      "previewPath": "/szl-holdings-mobile/",
-      "description": "React Native mobile command center for iOS and Android",
-      "artifactId": "artifacts/szl-holdings-mobile",
-      "category": "Mobile"
+      "name": "Carlota Jo Consulting",
+      "slug": "carlota-jo",
+      "previewPath": "/carlota-jo/",
+      "description": "Strategic consulting brand",
+      "artifactId": "artifacts/carlota-jo",
+      "category": "Domain"
     }
   ],
   "auditScripts": [
@@ -137,26 +89,50 @@
     {
       "name": "CI Pipeline",
       "file": ".github/workflows/ci.yml",
-      "triggers": ["push", "pull_request"],
-      "jobs": ["typecheck", "lint", "test", "build"]
+      "triggers": [
+        "push",
+        "pull_request"
+      ],
+      "jobs": [
+        "typecheck",
+        "lint",
+        "test",
+        "build"
+      ]
     },
     {
       "name": "Deploy Production",
       "file": ".github/workflows/deploy.yml",
-      "triggers": ["push to main"],
-      "jobs": ["build", "deploy-replit"]
+      "triggers": [
+        "push to main"
+      ],
+      "jobs": [
+        "build",
+        "deploy-replit"
+      ]
     },
     {
       "name": "Security Scan",
       "file": ".github/workflows/security.yml",
-      "triggers": ["weekly schedule", "on-demand"],
-      "jobs": ["sast-scan", "dependency-audit", "secret-detection"]
+      "triggers": [
+        "weekly schedule",
+        "on-demand"
+      ],
+      "jobs": [
+        "sast-scan",
+        "dependency-audit",
+        "secret-detection"
+      ]
     },
     {
       "name": "E2E Tests",
       "file": ".github/workflows/e2e.yml",
-      "triggers": ["pull_request"],
-      "jobs": ["playwright-e2e"]
+      "triggers": [
+        "pull_request"
+      ],
+      "jobs": [
+        "playwright-e2e"
+      ]
     }
   ],
   "scheduledChats": [

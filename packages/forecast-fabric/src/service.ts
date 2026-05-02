@@ -1,14 +1,14 @@
-import type {
-  AdapterRegistry,
-  ForecastHeadRegistry,
-  ForecastInput,
-  ForecastOutput,
-  HeadDefinition,
-  HeadName,
-  Lane,
-  ModelAdapter,
+import {
+  type AdapterRegistry,
+  type ForecastHeadRegistry,
+  type ForecastInput,
+  type ForecastOutput,
+  type HeadDefinition,
+  type HeadName,
+  type Lane,
+  type ModelAdapter,
+  ForecastInputSchema,
 } from './types.js';
-import { ForecastInputSchema } from './types.js';
 import { AdapterRegistryImpl, SafeDefaultAdapter } from './adapters.js';
 
 export class HeadRegistryImpl implements ForecastHeadRegistry {
@@ -66,7 +66,10 @@ export class ForecastService {
     return adapter.invoke(input, head);
   }
 
-  async forecastLane(lane: Lane, contextOverride?: Record<string, unknown>): Promise<ForecastOutput[]> {
+  async forecastLane(
+    lane: Lane,
+    contextOverride?: Record<string, unknown>,
+  ): Promise<ForecastOutput[]> {
     const heads = this.headRegistry.listByLane(lane);
     return Promise.all(
       heads.map((head) =>

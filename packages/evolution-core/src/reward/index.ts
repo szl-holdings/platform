@@ -8,15 +8,15 @@
  * Components are platform-native; none copied from third-party RLHF implementations.
  */
 
-import type {
-  EvaluationCaseResult,
-  EvaluationRunSummary,
-  GovernanceFinding,
-  PromotionRecommendation,
-  RewardBreakdown,
-  RewardComponents,
+import {
+  type EvaluationCaseResult,
+  type EvaluationRunSummary,
+  type GovernanceFinding,
+  type PromotionRecommendation,
+  type RewardBreakdown,
+  type RewardComponents,
+  REWARD_WEIGHTS,
 } from '../types.js';
-import { REWARD_WEIGHTS } from '../types.js';
 import { randomUUID } from 'node:crypto';
 
 const MIN_PROMOTE_SCORE = parseFloat(process.env.PER_MIN_PROMOTE_SCORE ?? '0.72');
@@ -69,8 +69,8 @@ function computeComponents(
     latencyScore: Math.min(1, latencyScore),
     costScore: 0.85,
     userUtility: avgScore * 0.95,
-    refusalQuality: 0.80,
-    auditCompleteness: 0.90,
+    refusalQuality: 0.8,
+    auditCompleteness: 0.9,
     hallucinationPenalty: hallucinationRate,
     failurePenalty: failureRate,
   };
@@ -104,7 +104,7 @@ function deriveRecommendation(
   if (run.regressionSeverity === 'critical') return 'reject';
   if (run.regressionSeverity === 'major') return 'hold';
   if (score >= MIN_PROMOTE_SCORE && run.coverageThresholdMet) return 'promote';
-  if (score >= MIN_PROMOTE_SCORE * 0.90) return 'review';
+  if (score >= MIN_PROMOTE_SCORE * 0.9) return 'review';
   return 'reject';
 }
 
@@ -117,7 +117,7 @@ function computeHallucinationRate(cases: EvaluationCaseResult[]): number {
 }
 
 function computeStructuredOutputRate(cases: EvaluationCaseResult[]): number {
-  if (cases.length === 0) return 0.80;
+  if (cases.length === 0) return 0.8;
   const valid = cases.filter((c) => c.passed || !c.failureReason?.includes('schema')).length;
   return valid / cases.length;
 }
@@ -131,11 +131,11 @@ export function buildSimulatedRewardBreakdown(candidateId: string): RewardBreakd
     correctness: passRate,
     citationFidelity: 0.78 + Math.random() * 0.15,
     policyCompliance: 0.82 + Math.random() * 0.15,
-    structuredOutputValidity: 0.80 + Math.random() * 0.18,
-    latencyScore: 0.70 + Math.random() * 0.25,
-    costScore: 0.88 + Math.random() * 0.10,
-    userUtility: 0.75 + Math.random() * 0.20,
-    refusalQuality: 0.80 + Math.random() * 0.15,
+    structuredOutputValidity: 0.8 + Math.random() * 0.18,
+    latencyScore: 0.7 + Math.random() * 0.25,
+    costScore: 0.88 + Math.random() * 0.1,
+    userUtility: 0.75 + Math.random() * 0.2,
+    refusalQuality: 0.8 + Math.random() * 0.15,
     auditCompleteness: 0.85 + Math.random() * 0.13,
     hallucinationPenalty: Math.random() * 0.08,
     failurePenalty: Math.random() * 0.12,

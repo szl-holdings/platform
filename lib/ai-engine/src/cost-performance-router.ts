@@ -6,14 +6,16 @@
  * preferences. Logs every routing decision with rationale for observability.
  */
 
-import type { ModelCapability, ModelSpec, ProviderName, RoutingLane } from './model-registry.js';
 import {
+  type ModelCapability,
+  type ModelSpec,
+  type ProviderName,
+  type RoutingLane,
   estimateCostUsd,
   FAILOVER_CHAINS,
   getFailoverChain,
   MODEL_REGISTRY,
 } from './model-registry.js';
-
 export interface QueryComplexityScore {
   tokenEstimate: number;
   domainCount: number;
@@ -52,7 +54,15 @@ export interface CostPerformanceRouterOptions {
 }
 
 const STAKES_KEYWORDS: Record<QueryComplexityScore['stakesLevel'], string[]> = {
-  critical: ['emergency', 'breach', 'sanctions violation', 'litigation', 'regulatory violation', 'critical', 'immediate action'],
+  critical: [
+    'emergency',
+    'breach',
+    'sanctions violation',
+    'litigation',
+    'regulatory violation',
+    'critical',
+    'immediate action',
+  ],
   high: ['risk', 'compliance', 'legal', 'financial', 'security', 'urgent', 'alert', 'warning'],
   medium: ['analysis', 'review', 'assess', 'evaluate', 'monitor'],
   low: ['summarize', 'list', 'describe', 'what is', 'overview'],
@@ -61,9 +71,22 @@ const STAKES_KEYWORDS: Record<QueryComplexityScore['stakesLevel'], string[]> = {
 const VISION_KEYWORDS = ['image', 'photo', 'screenshot', 'diagram', 'chart', 'visual', 'picture'];
 
 const DOMAIN_INDICATORS = [
-  'maritime', 'vessel', 'ship', 'security', 'threat', 'legal', 'compliance',
-  'financial', 'investment', 'real estate', 'property', 'analytics', 'research',
-  'creative', 'client', 'infrastructure',
+  'maritime',
+  'vessel',
+  'ship',
+  'security',
+  'threat',
+  'legal',
+  'compliance',
+  'financial',
+  'investment',
+  'real estate',
+  'property',
+  'analytics',
+  'research',
+  'creative',
+  'client',
+  'infrastructure',
 ];
 
 export function analyzeQueryComplexity(
@@ -172,7 +195,10 @@ function selectOptimalModel(
         return false;
       }
       if (complexity.requiresVision && !s.supportsVision) return false;
-      if (complexity.requiredCapabilities.includes('reasoning') && !s.capabilities.includes('reasoning')) {
+      if (
+        complexity.requiredCapabilities.includes('reasoning') &&
+        !s.capabilities.includes('reasoning')
+      ) {
         return false;
       }
       return true;
@@ -230,7 +256,11 @@ export function routeQuery(
   const fallbackChain = [chain.primary, ...chain.fallbacks].filter((id) => id !== model.id);
 
   const estimatedOutputTokens = Math.min(model.maxOutputTokens, complexity.tokenEstimate * 0.5);
-  const estimatedCostUsd = estimateCostUsd(model.id, complexity.tokenEstimate, estimatedOutputTokens);
+  const estimatedCostUsd = estimateCostUsd(
+    model.id,
+    complexity.tokenEstimate,
+    estimatedOutputTokens,
+  );
 
   const decision: RoutingDecision = {
     decisionId: `route_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -287,8 +317,13 @@ export function getRoutingStats(): {
   };
 }
 
-export function buildFailoverSequence(lane: RoutingLane, allowedProviders?: ProviderName[]): string[] {
-  const chain = FAILOVER_CHAINS.find((c) => c.lane === lane) ?? FAILOVER_CHAINS.find((c) => c.lane === 'general')!;
+export function buildFailoverSequence(
+  lane: RoutingLane,
+  allowedProviders?: ProviderName[],
+): string[] {
+  const chain =
+    FAILOVER_CHAINS.find((c) => c.lane === lane) ??
+    FAILOVER_CHAINS.find((c) => c.lane === 'general')!;
   const all = [chain.primary, ...chain.fallbacks];
   if (!allowedProviders?.length) return all;
   return all.filter((id) => {

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { GraphCanvas } from '@szl-holdings/design-system';
-import type { GraphNode, GraphEdge } from '@szl-holdings/design-system';
+import { GraphCanvas, type GraphNode, type GraphEdge } from '@szl-holdings/design-system';
 
 const nodes: GraphNode[] = [
   { id: 'attacker', label: 'Threat Actor', group: 'threat', x: 100, y: 200 },
@@ -23,7 +22,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Interactive force-directed graph for visualising entity relationships, attack paths, and evidence connections.',
+        component:
+          'Interactive force-directed graph for visualising entity relationships, attack paths, and evidence connections.',
       },
     },
   },

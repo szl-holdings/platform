@@ -9,17 +9,7 @@ types-regenerated: 2026-04-27
 
  * OpenAPI spec version: 0.3.0
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
-import type {
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query';
-
+import { useMutation, useQuery, type MutationFunction, type QueryFunction, type QueryKey, type UseMutationOptions, type UseMutationResult, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query';
 import type {
   A2AAgentCard,
   A2ATask,
@@ -394,8 +384,7 @@ import type {
   WebsocketHealthCheck200,
 } from './api.schemas';
 
-import { customFetch } from '../custom-fetch';
-import type { ErrorType, BodyType } from '../custom-fetch';
+import { customFetch, type ErrorType, type BodyType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 

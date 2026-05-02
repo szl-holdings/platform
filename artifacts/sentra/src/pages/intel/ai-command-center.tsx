@@ -372,9 +372,10 @@ function AgentCard({ agent }: { agent: AgentNode }) {
             <span className={cn('w-2 h-2 rounded-full', statusDot)} />
             <span
               className={cn('text-[10px] font-mono capitalize', {
-                'text-[#c9b787]': agent.status === 'active',
-                'text-[#c9b787]': agent.status === 'monitoring',
-                'text-[#c9b787]': agent.status === 'processing',
+                'text-[#c9b787]':
+                  agent.status === 'active' ||
+                  agent.status === 'monitoring' ||
+                  agent.status === 'processing',
                 'text-slate-400': agent.status === 'standby',
               })}
             >

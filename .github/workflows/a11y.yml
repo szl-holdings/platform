@@ -25,30 +25,14 @@ jobs:
       fail-fast: false
       matrix:
         app:
-          - name: szl-holdings
-            filter: "@workspace/szl-holdings"
-            dist: artifacts/szl-holdings/dist
-            port: 4100
           - name: carlota-jo
             filter: "@workspace/carlota-jo"
             dist: artifacts/carlota-jo/dist
             port: 4102
-          - name: command
-            filter: "@workspace/command"
-            dist: artifacts/command/dist
-            port: 4103
           - name: counsel
             filter: "@workspace/counsel"
             dist: artifacts/counsel/dist
             port: 4104
-          - name: lyte-command-center
-            filter: "@workspace/lyte-command-center"
-            dist: artifacts/lyte-command-center/dist
-            port: 4105
-          - name: pulse
-            filter: "@workspace/pulse"
-            dist: artifacts/pulse/dist
-            port: 4106
           - name: sentra
             filter: "@workspace/sentra"
             dist: artifacts/sentra/dist
@@ -65,10 +49,6 @@ jobs:
             filter: "@workspace/a11oy"
             dist: artifacts/a11oy/dist
             port: 4110
-          - name: conduit
-            filter: "@workspace/conduit"
-            dist: artifacts/conduit/dist
-            port: 4111
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -149,7 +129,7 @@ jobs:
       - name: Enforce a11y gate
         run: |
           echo "Accessibility gate — WCAG 2.1 AA (wcag2a, wcag2aa, wcag21a, wcag21aa)"
-          echo "Tool: @axe-core/playwright — 11 CI-scanned web artifacts (+ aegis via live-proxy only)."
+          echo "Tool: @axe-core/playwright — 6 CI-scanned web artifacts."
           echo "See audit/a11y/findings.md for the findings register."
           if [[ "${{ needs.a11y-axe.result }}" == "failure" ]]; then
             echo "::error::One or more axe scans failed — zero critical/serious violations required."

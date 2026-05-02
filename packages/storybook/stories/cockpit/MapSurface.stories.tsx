@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MapSurface } from '@szl-holdings/design-system';
-import type { MapMarker } from '@szl-holdings/design-system';
+import { MapSurface, type MapMarker } from '@szl-holdings/design-system';
 
 const markers: MapMarker[] = [
   { id: 'm1', lat: 51.5074, lng: -0.1278, label: 'London HQ', variant: 'success' },
@@ -22,7 +21,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Geographic intelligence surface for entity location, vessel tracking, and threat geospatial analysis.',
+        component:
+          'Geographic intelligence surface for entity location, vessel tracking, and threat geospatial analysis.',
       },
     },
   },

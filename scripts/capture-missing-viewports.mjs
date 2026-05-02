@@ -47,7 +47,7 @@ const executablePath = resolveChromiumPath();
 console.log(`  Chromium: ${executablePath ?? 'playwright default'}`);
 console.log(`  Base URL: ${BASE_URL}\n`);
 
-const browser = await chromium.launch({ ...(executablePath ? { executablePath } : {}) });
+const browser = await chromium.launch((executablePath ? { executablePath } : {}));
 let captured = 0;
 let failed = 0;
 

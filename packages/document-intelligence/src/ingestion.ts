@@ -10,9 +10,13 @@
  *   - ingestTerraDistressFiling      — Terra distress filing
  */
 
-import type { DocumentPipelineAdapters } from './pipeline.js';
-import { runDocumentPipeline } from './pipeline.js';
-import type { DocumentIngestionRequest, DocumentKind, DocumentLane, DocumentPipelineResult } from './types.js';
+import { type DocumentPipelineAdapters, runDocumentPipeline } from './pipeline.js';
+import type {
+  DocumentIngestionRequest,
+  DocumentKind,
+  DocumentLane,
+  DocumentPipelineResult,
+} from './types.js';
 
 export interface IngestDocumentOptions {
   adapters?: DocumentPipelineAdapters;
@@ -38,18 +42,16 @@ export async function ingestDocument(
 /**
  * Helper to build an ingestion request from minimal parameters.
  */
-export function buildIngestionRequest(
-  params: {
-    documentId?: string;
-    kind: DocumentKind;
-    lane: DocumentLane;
-    fileName: string;
-    mimeType?: string;
-    content?: Uint8Array;
-    tenantId?: string;
-    metadata?: Record<string, unknown>;
-  },
-): DocumentIngestionRequest {
+export function buildIngestionRequest(params: {
+  documentId?: string;
+  kind: DocumentKind;
+  lane: DocumentLane;
+  fileName: string;
+  mimeType?: string;
+  content?: Uint8Array;
+  tenantId?: string;
+  metadata?: Record<string, unknown>;
+}): DocumentIngestionRequest {
   return {
     documentId: params.documentId ?? generateDocumentId(params.kind),
     kind: params.kind,

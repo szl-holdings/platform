@@ -14,8 +14,8 @@
  * Scores are persisted to the JuryStore for later audit.
  */
 import { randomUUID } from 'node:crypto';
-import type { DimensionScores } from './scorer.js';
 import {
+  type DimensionScores,
   computeComposite,
   scoreActionability,
   scoreConfidence,
@@ -81,7 +81,13 @@ export async function scoreRecommendation(input: JuryInput): Promise<JuryVerdict
   const policyCompliance = scorePolicyCompliance(input);
   const reversibility = scoreReversibility(input);
   const confidence = scoreConfidence(input);
-  const composite = computeComposite({ grounding, actionability, policyCompliance, reversibility, confidence });
+  const composite = computeComposite({
+    grounding,
+    actionability,
+    policyCompliance,
+    reversibility,
+    confidence,
+  });
 
   const verdict: JuryVerdict = {
     juryId: randomUUID(),

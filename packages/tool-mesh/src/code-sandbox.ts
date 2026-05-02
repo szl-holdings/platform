@@ -14,8 +14,11 @@
  *     (Node's structured-clone protocol). Sandboxed code receives deep copies and
  *     cannot mutate the live registry state.
  */
-import type { ForgeSandboxPolicy, ForgeSandboxViolation } from '@szl-holdings/forge-runtime/sandbox';
-import { ForgeSandbox } from '@szl-holdings/forge-runtime/sandbox';
+import {
+  type ForgeSandboxPolicy,
+  type ForgeSandboxViolation,
+  ForgeSandbox,
+} from '@szl-holdings/forge-runtime/sandbox';
 import { globalCollector } from '@workspace/cognitive-observability';
 import { randomUUID } from 'node:crypto';
 import { Worker } from 'node:worker_threads';
@@ -269,8 +272,18 @@ export class CodeSandbox {
     if (domainViolation) {
       errors.push(`Policy violation [domain_blocked]: ${domainViolation.detail}`);
       return this.buildRecord(
-        id, sourceCode, policy, toolCalls, undefined, [], errors,
-        sandbox.getViolations(), false, 0, 0, startedAt,
+        id,
+        sourceCode,
+        policy,
+        toolCalls,
+        undefined,
+        [],
+        errors,
+        sandbox.getViolations(),
+        false,
+        0,
+        0,
+        startedAt,
       );
     }
 
@@ -278,8 +291,18 @@ export class CodeSandbox {
     if (hostViolation) {
       errors.push(`Policy violation [host_blocked]: ${hostViolation.detail}`);
       return this.buildRecord(
-        id, sourceCode, policy, toolCalls, undefined, [], errors,
-        sandbox.getViolations(), false, 0, 0, startedAt,
+        id,
+        sourceCode,
+        policy,
+        toolCalls,
+        undefined,
+        [],
+        errors,
+        sandbox.getViolations(),
+        false,
+        0,
+        0,
+        startedAt,
       );
     }
 
@@ -335,19 +358,31 @@ export class CodeSandbox {
           // ── Per-call policy enforcement ──────────────────────────────────
           const toolViolation = sandbox.checkTool(toolId);
           if (toolViolation) {
-            worker.postMessage({ seq, ok: false, error: `Policy violation [tool_blocked]: ${toolViolation.detail}` });
+            worker.postMessage({
+              seq,
+              ok: false,
+              error: `Policy violation [tool_blocked]: ${toolViolation.detail}`,
+            });
             return;
           }
 
           const perCallHostViolation = sandbox.checkHost('tool-mesh.internal');
           if (perCallHostViolation) {
-            worker.postMessage({ seq, ok: false, error: `Policy violation [host_blocked]: ${perCallHostViolation.detail}` });
+            worker.postMessage({
+              seq,
+              ok: false,
+              error: `Policy violation [host_blocked]: ${perCallHostViolation.detail}`,
+            });
             return;
           }
 
           const perCallDomainViolation = sandbox.checkDomain(policy.domain);
           if (perCallDomainViolation) {
-            worker.postMessage({ seq, ok: false, error: `Policy violation [domain_blocked]: ${perCallDomainViolation.detail}` });
+            worker.postMessage({
+              seq,
+              ok: false,
+              error: `Policy violation [domain_blocked]: ${perCallDomainViolation.detail}`,
+            });
             return;
           }
 
@@ -356,14 +391,19 @@ export class CodeSandbox {
           const projectedCost = (toolCalls.length + 1) * 0.001;
           const preCostViolation = sandbox.checkCost(projectedCost);
           if (preCostViolation) {
-            worker.postMessage({ seq, ok: false, error: `Policy violation [cost_exceeded]: ${preCostViolation.detail}` });
+            worker.postMessage({
+              seq,
+              ok: false,
+              error: `Policy violation [cost_exceeded]: ${preCostViolation.detail}`,
+            });
             return;
           }
 
           // ── Gateway invocation ──────────────────────────────────────────
           const requestId = randomUUID();
           const callStart = Date.now();
-          this.gateway.invoke(toolId, input, { ...invokeContext, requestId })
+          this.gateway
+            .invoke(toolId, input, { ...invokeContext, requestId })
             .then((result) => {
               const latencyMs = Date.now() - callStart;
               toolCalls.push({
@@ -375,7 +415,11 @@ export class CodeSandbox {
                 latencyMs,
               });
               if (!result.success) {
-                worker.postMessage({ seq, ok: false, error: result.error ?? `Tool '${toolId}' failed` });
+                worker.postMessage({
+                  seq,
+                  ok: false,
+                  error: result.error ?? `Tool '${toolId}' failed`,
+                });
               } else {
                 worker.postMessage({ seq, ok: true, output: result.output });
               }
@@ -387,7 +431,6 @@ export class CodeSandbox {
                 error: err instanceof Error ? err.message : String(err),
               });
             });
-
         } else if (msg.type === 'DONE') {
           finalize(() => {
             output = msg.output;
@@ -396,7 +439,6 @@ export class CodeSandbox {
           });
           clearTimeout(killTimer);
           worker.terminate().catch(() => {});
-
         } else if (msg.type === 'EXEC_ERROR') {
           finalize(() => {
             errors.push((msg.error as string) ?? 'Unknown execution error');
@@ -409,14 +451,10 @@ export class CodeSandbox {
       });
 
       worker.on('error', (err: Error & { code?: string }) => {
-        const isOom =
-          err.code === 'ERR_WORKER_OUT_OF_MEMORY' ||
-          /out of memory/i.test(err.message);
+        const isOom = err.code === 'ERR_WORKER_OUT_OF_MEMORY' || /out of memory/i.test(err.message);
         finalize(() => {
           errors.push(
-            isOom
-              ? `Memory limit exceeded (${this.maxMemoryMb} MB): ${err.message}`
-              : err.message,
+            isOom ? `Memory limit exceeded (${this.maxMemoryMb} MB): ${err.message}` : err.message,
           );
           executionSuccess = false;
         });
@@ -451,18 +489,28 @@ export class CodeSandbox {
       executionSuccess = false;
     }
 
-    const policyViolations = sandbox.getViolations().filter(
-      (v) =>
-        v.type === 'tool_blocked' ||
-        v.type === 'domain_blocked' ||
-        v.type === 'host_blocked',
-    );
+    const policyViolations = sandbox
+      .getViolations()
+      .filter(
+        (v) =>
+          v.type === 'tool_blocked' || v.type === 'domain_blocked' || v.type === 'host_blocked',
+      );
     const finalSuccess = executionSuccess && policyViolations.length === 0;
 
     const record = this.buildRecord(
-      id, sourceCode, policy, toolCalls, output, workerLogs, errors,
-      sandbox.getViolations(), finalSuccess, durationMs, costEstimateUsd,
-      startedAt, completedAt,
+      id,
+      sourceCode,
+      policy,
+      toolCalls,
+      output,
+      workerLogs,
+      errors,
+      sandbox.getViolations(),
+      finalSuccess,
+      durationMs,
+      costEstimateUsd,
+      startedAt,
+      completedAt,
     );
 
     // ── Observability metrics ────────────────────────────────────────────────

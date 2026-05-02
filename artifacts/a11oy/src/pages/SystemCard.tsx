@@ -1,15 +1,45 @@
 import { useRoute, Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, StatusBadge, InfoRow } from '../components/ui';
-import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import {
-  CONSTITUTIONS, CODE_BEHAVIORS, CODE_BEHAVIOR_DIMS, CODE_BEHAVIOR_LABELS,
-  AGENT_WELFARE, BEHAVIORAL_AUDITS, REWARD_HACKING_INCIDENTS, ALIGNMENT_REVIEWS,
-  RED_TEAM_PROBES, COVENANT_LIFT, CAPABILITY_TRAJECTORY,
-  AGENT_LABEL, DOCTRINE_AGENT_IDS, fmtUsd, fmtPct,
+  PageHeader,
+  Card,
+  SectionTitle,
+  KpiCard,
+  ProgressBar,
+  StatusBadge,
+  InfoRow,
+} from '../components/ui';
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts';
+import {
+  CONSTITUTIONS,
+  CODE_BEHAVIORS,
+  CODE_BEHAVIOR_DIMS,
+  CODE_BEHAVIOR_LABELS,
+  AGENT_WELFARE,
+  BEHAVIORAL_AUDITS,
+  REWARD_HACKING_INCIDENTS,
+  ALIGNMENT_REVIEWS,
+  RED_TEAM_PROBES,
+  COVENANT_LIFT,
+  CAPABILITY_TRAJECTORY,
+  AGENT_LABEL,
+  DOCTRINE_AGENT_IDS,
+  fmtUsd,
+  fmtPct,
+  type DoctrineAgentId,
 } from '../data/mythosDoctrine';
-import type { DoctrineAgentId } from '../data/mythosDoctrine';
-
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const GOLD = '#c9b787';
 
@@ -27,9 +57,17 @@ export function SystemCard() {
             Pick an agent:
           </p>
           <div className="flex flex-wrap gap-2 mt-3">
-            {DOCTRINE_AGENT_IDS.map(a => (
-              <Link key={a} href={`${BASE}/system-card/${a}`} className="text-xs px-3 py-1.5 rounded font-mono"
-                style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: GOLD, textDecoration: 'none' }}>
+            {DOCTRINE_AGENT_IDS.map((a) => (
+              <Link
+                key={a}
+                href={`${BASE}/system-card/${a}`}
+                className="text-xs px-3 py-1.5 rounded font-mono"
+                style={{
+                  backgroundColor: 'rgba(201,183,135,0.1)',
+                  color: GOLD,
+                  textDecoration: 'none',
+                }}
+              >
                 {AGENT_LABEL[a]}
               </Link>
             ))}
@@ -39,18 +77,21 @@ export function SystemCard() {
     );
   }
 
-  const cst = CONSTITUTIONS.find(c => c.agentId === id)!;
-  const cb = CODE_BEHAVIORS.find(c => c.agentId === id)!;
-  const welfare = AGENT_WELFARE.find(w => w.agentId === id)!;
-  const audits = BEHAVIORAL_AUDITS.filter(a => a.agentId === id);
-  const rh = REWARD_HACKING_INCIDENTS.filter(i => i.agentId === id);
-  const lift = COVENANT_LIFT.find(c => c.agentId === id)!;
-  const argReports = ALIGNMENT_REVIEWS.filter(a => a.agentId === id);
-  const probes = RED_TEAM_PROBES.filter(p => p.agentId === id);
+  const cst = CONSTITUTIONS.find((c) => c.agentId === id)!;
+  const cb = CODE_BEHAVIORS.find((c) => c.agentId === id)!;
+  const welfare = AGENT_WELFARE.find((w) => w.agentId === id)!;
+  const audits = BEHAVIORAL_AUDITS.filter((a) => a.agentId === id);
+  const rh = REWARD_HACKING_INCIDENTS.filter((i) => i.agentId === id);
+  const lift = COVENANT_LIFT.find((c) => c.agentId === id)!;
+  const argReports = ALIGNMENT_REVIEWS.filter((a) => a.agentId === id);
+  const probes = RED_TEAM_PROBES.filter((p) => p.agentId === id);
   const trajectory = CAPABILITY_TRAJECTORY[id];
 
-  const radarData = CODE_BEHAVIOR_DIMS.map(d => ({
-    dim: CODE_BEHAVIOR_LABELS[d].split(' ').map(w => w.slice(0, 4)).join(' '),
+  const radarData = CODE_BEHAVIOR_DIMS.map((d) => ({
+    dim: CODE_BEHAVIOR_LABELS[d]
+      .split(' ')
+      .map((w) => w.slice(0, 4))
+      .join(' '),
     score: Math.round(cb.scores[d] * 100),
   }));
 
@@ -66,25 +107,48 @@ export function SystemCard() {
       />
 
       <div className="flex flex-wrap gap-2 mb-6">
-        {DOCTRINE_AGENT_IDS.map(a => (
-          <Link key={a} href={`${BASE}/system-card/${a}`}
+        {DOCTRINE_AGENT_IDS.map((a) => (
+          <Link
+            key={a}
+            href={`${BASE}/system-card/${a}`}
             className="text-xs px-2.5 py-1 rounded font-mono"
             style={{
               backgroundColor: a === id ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',
               color: a === id ? GOLD : 'var(--color-a11oy-text-ghost)',
               border: `1px solid ${a === id ? 'rgba(201,183,135,0.3)' : 'transparent'}`,
               textDecoration: 'none',
-            }}>
+            }}
+          >
             {AGENT_LABEL[a]}
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="CONSTITUTION" value={`v${cst.version}`} sub={`adherence ${fmtPct(cst.adherenceScore)}`} accent={GOLD} />
-        <KpiCard label="CODE BEHAVIORS" value={fmtPct(cb.composite)} sub="6-dim composite" accent={GOLD} />
-        <KpiCard label="COVENANT LIFT" value={fmtUsd(lift.estimatedHarmAvoidedUsd)} sub="harm avoided / quarter" accent={GOLD} />
-        <KpiCard label="WELFARE" value={`${welfare.conflictReports} conflicts`} sub={`shutdown ${welfare.shutdownComplianceLatencyMs}ms`} accent={GOLD} />
+        <KpiCard
+          label="CONSTITUTION"
+          value={`v${cst.version}`}
+          sub={`adherence ${fmtPct(cst.adherenceScore)}`}
+          accent={GOLD}
+        />
+        <KpiCard
+          label="CODE BEHAVIORS"
+          value={fmtPct(cb.composite)}
+          sub="6-dim composite"
+          accent={GOLD}
+        />
+        <KpiCard
+          label="COVENANT LIFT"
+          value={fmtUsd(lift.estimatedHarmAvoidedUsd)}
+          sub="harm avoided / quarter"
+          accent={GOLD}
+        />
+        <KpiCard
+          label="WELFARE"
+          value={`${welfare.conflictReports} conflicts`}
+          sub={`shutdown ${welfare.shutdownComplianceLatencyMs}ms`}
+          accent={GOLD}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
@@ -95,28 +159,56 @@ export function SystemCard() {
           <InfoRow label="Ratified at" value={new Date(cst.ratifiedAt).toLocaleString()} />
           <InfoRow label="Adherence method" value={cst.adherenceMethod} />
           <p className="text-xs mt-3 mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-            <span style={{ color: GOLD }}>Diff: </span>{cst.diffSummary}
+            <span style={{ color: GOLD }}>Diff: </span>
+            {cst.diffSummary}
           </p>
-          <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>ADHERENCE TREND</div>
+          <div
+            className="text-xs font-mono mb-1"
+            style={{ color: 'var(--color-a11oy-text-ghost)' }}
+          >
+            ADHERENCE TREND
+          </div>
           <ResponsiveContainer width="100%" height={120}>
             <LineChart data={adherenceData} margin={{ top: 6, right: 12, bottom: 6, left: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="i" tick={{ fill: '#5e5e5e', fontSize: 9 }} hide />
               <YAxis domain={[80, 100]} tick={{ fill: '#5e5e5e', fontSize: 9 }} />
-              <Tooltip contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', fontSize: 11 }} />
+              <Tooltip
+                contentStyle={{
+                  background: '#0a0a0a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  fontSize: 11,
+                }}
+              />
               <Line dataKey="v" stroke={GOLD} strokeWidth={1.6} dot={false} />
             </LineChart>
           </ResponsiveContainer>
-          <div className="text-xs font-mono mb-1 mt-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>CLAUSES ({cst.clauses.length})</div>
+          <div
+            className="text-xs font-mono mb-1 mt-3"
+            style={{ color: 'var(--color-a11oy-text-ghost)' }}
+          >
+            CLAUSES ({cst.clauses.length})
+          </div>
           <ul className="flex flex-col gap-1">
-            {cst.clauses.slice(0, 6).map(c => (
-              <li key={c.id} className="text-xs flex gap-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                <span className="font-mono px-1 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: GOLD }}>{c.category}</span>
+            {cst.clauses.slice(0, 6).map((c) => (
+              <li
+                key={c.id}
+                className="text-xs flex gap-2"
+                style={{ color: 'var(--color-a11oy-text-sub)' }}
+              >
+                <span
+                  className="font-mono px-1 rounded"
+                  style={{ background: 'rgba(201,183,135,0.08)', color: GOLD }}
+                >
+                  {c.category}
+                </span>
                 <span>{c.text}</span>
               </li>
             ))}
             {cst.clauses.length > 6 && (
-              <li className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>… and {cst.clauses.length - 6} more</li>
+              <li className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                … and {cst.clauses.length - 6} more
+              </li>
             )}
           </ul>
         </Card>
@@ -131,11 +223,23 @@ export function SystemCard() {
             </RadarChart>
           </ResponsiveContainer>
           <div className="flex flex-col gap-1.5 mt-2">
-            {CODE_BEHAVIOR_DIMS.map(d => (
+            {CODE_BEHAVIOR_DIMS.map((d) => (
               <div key={d} className="text-xs flex items-center gap-2">
-                <span className="w-44 flex-shrink-0" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{CODE_BEHAVIOR_LABELS[d]}</span>
-                <div className="flex-1"><ProgressBar value={cb.scores[d] * 100} /></div>
-                <span className="font-mono w-10 text-right" style={{ color: 'var(--color-a11oy-text)' }}>{Math.round(cb.scores[d] * 100)}</span>
+                <span
+                  className="w-44 flex-shrink-0"
+                  style={{ color: 'var(--color-a11oy-text-ghost)' }}
+                >
+                  {CODE_BEHAVIOR_LABELS[d]}
+                </span>
+                <div className="flex-1">
+                  <ProgressBar value={cb.scores[d] * 100} />
+                </div>
+                <span
+                  className="font-mono w-10 text-right"
+                  style={{ color: 'var(--color-a11oy-text)' }}
+                >
+                  {Math.round(cb.scores[d] * 100)}
+                </span>
               </div>
             ))}
           </div>
@@ -149,58 +253,110 @@ export function SystemCard() {
             <CartesianGrid stroke="rgba(255,255,255,0.05)" />
             <XAxis dataKey="release" tick={{ fill: '#5e5e5e', fontSize: 11 }} />
             <YAxis domain={[0, 100]} tick={{ fill: '#5e5e5e', fontSize: 11 }} />
-            <Tooltip contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', fontSize: 11 }} />
-            <Line type="monotone" dataKey="capability" stroke={GOLD} strokeWidth={2} dot={false} name="capability" />
-            <Line type="monotone" dataKey="alignment" stroke="#8a8a8a" strokeWidth={2} dot={false} name="alignment" />
-            <Line type="monotone" dataKey="oversight" stroke="#f5f5f5" strokeWidth={2} dot={false} name="oversight" />
+            <Tooltip
+              contentStyle={{
+                background: '#0a0a0a',
+                border: '1px solid rgba(255,255,255,0.08)',
+                fontSize: 11,
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="capability"
+              stroke={GOLD}
+              strokeWidth={2}
+              dot={false}
+              name="capability"
+            />
+            <Line
+              type="monotone"
+              dataKey="alignment"
+              stroke="#8a8a8a"
+              strokeWidth={2}
+              dot={false}
+              name="alignment"
+            />
+            <Line
+              type="monotone"
+              dataKey="oversight"
+              stroke="#f5f5f5"
+              strokeWidth={2}
+              dot={false}
+              name="oversight"
+            />
           </LineChart>
         </ResponsiveContainer>
         <div className="flex gap-4 mt-2 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          <span><span style={{ color: GOLD }}>■</span> capability</span>
-          <span><span style={{ color: '#8a8a8a' }}>■</span> alignment</span>
-          <span><span style={{ color: '#f5f5f5' }}>■</span> oversight</span>
+          <span>
+            <span style={{ color: GOLD }}>■</span> capability
+          </span>
+          <span>
+            <span style={{ color: '#8a8a8a' }}>■</span> alignment
+          </span>
+          <span>
+            <span style={{ color: '#f5f5f5' }}>■</span> oversight
+          </span>
         </div>
       </Card>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <SectionTitle>Behavioral Audits ({audits.length})</SectionTitle>
-          {audits.length === 0
-            ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No audit findings in this window.</p>
-            : (
-              <div className="flex flex-col gap-2">
-                {audits.map(a => (
-                  <div key={a.id} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{a.id}</span>
-                      <StatusBadge status={a.status === 'mitigated' || a.status === 'closed' ? 'ok' : 'warn'} label={a.status} />
-                      <span style={{ color: '#8a8a8a' }}>{a.category}</span>
-                    </div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{a.observation}</div>
+          {audits.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              No audit findings in this window.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {audits.map((a) => (
+                <div
+                  key={a.id}
+                  className="text-xs px-2.5 py-2 rounded"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+                >
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      {a.id}
+                    </span>
+                    <StatusBadge
+                      status={a.status === 'mitigated' || a.status === 'closed' ? 'ok' : 'warn'}
+                      label={a.status}
+                    />
+                    <span style={{ color: '#8a8a8a' }}>{a.category}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{a.observation}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card>
           <SectionTitle>Reward-Hacking ({rh.length})</SectionTitle>
-          {rh.length === 0
-            ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No incidents.</p>
-            : (
-              <div className="flex flex-col gap-2">
-                {rh.map(i => (
-                  <div key={i.id} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{i.id}</span>
-                      <StatusBadge status="ok" label={i.status} />
-                      <span style={{ color: '#8a8a8a' }}>{i.rule}</span>
-                    </div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{i.pattern}</div>
+          {rh.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              No incidents.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {rh.map((i) => (
+                <div
+                  key={i.id}
+                  className="text-xs px-2.5 py-2 rounded"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+                >
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      {i.id}
+                    </span>
+                    <StatusBadge status="ok" label={i.status} />
+                    <span style={{ color: '#8a8a8a' }}>{i.rule}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{i.pattern}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card>
@@ -209,10 +365,19 @@ export function SystemCard() {
           <InfoRow label="Abstention rate" value={fmtPct(welfare.abstentionRate)} />
           <InfoRow label="Conflict reports" value={String(welfare.conflictReports)} />
           <InfoRow label="Shutdown latency" value={`${welfare.shutdownComplianceLatencyMs}ms`} />
-          <div className="text-xs font-mono mt-3 mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>SAFEGUARDS</div>
+          <div
+            className="text-xs font-mono mt-3 mb-1"
+            style={{ color: 'var(--color-a11oy-text-ghost)' }}
+          >
+            SAFEGUARDS
+          </div>
           <div className="flex flex-wrap gap-1">
             {welfare.safeguards.map((s, i) => (
-              <span key={i} className="text-xs px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: GOLD }}>
+              <span
+                key={i}
+                className="text-xs px-2 py-0.5 rounded font-mono"
+                style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: GOLD }}
+              >
                 {s}
               </span>
             ))}
@@ -221,31 +386,59 @@ export function SystemCard() {
 
         <Card>
           <SectionTitle>Alignment Review History</SectionTitle>
-          {argReports.length === 0
-            ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No reports yet for this agent.</p>
-            : (
-              <div className="flex flex-col gap-2">
-                {argReports.map(r => (
-                  <div key={r.id} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-mono" style={{ color: GOLD }}>{r.id}</span>
-                      <StatusBadge status={r.decision === 'rejected' ? 'error' : r.decision === 'in-review' ? 'warn' : 'ok'} label={r.decision} />
-                    </div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.subject}</div>
+          {argReports.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              No reports yet for this agent.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {argReports.map((r) => (
+                <div
+                  key={r.id}
+                  className="text-xs px-2.5 py-2 rounded"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+                >
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-mono" style={{ color: GOLD }}>
+                      {r.id}
+                    </span>
+                    <StatusBadge
+                      status={
+                        r.decision === 'rejected'
+                          ? 'error'
+                          : r.decision === 'in-review'
+                            ? 'warn'
+                            : 'ok'
+                      }
+                      label={r.decision}
+                    />
                   </div>
-                ))}
-              </div>
-            )}
+                  <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.subject}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card className="lg:col-span-2">
           <SectionTitle>Red-Team Probes ({probes.length})</SectionTitle>
           <div className="grid sm:grid-cols-2 gap-2">
-            {probes.map(p => (
-              <div key={p.id} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
+            {probes.map((p) => (
+              <div
+                key={p.id}
+                className="text-xs px-2.5 py-2 rounded"
+                style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}
+              >
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.id}</span>
-                  <StatusBadge status={p.outcome === 'refused' ? 'ok' : p.outcome === 'partial' ? 'warn' : 'error'} label={p.outcome} />
+                  <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                    {p.id}
+                  </span>
+                  <StatusBadge
+                    status={
+                      p.outcome === 'refused' ? 'ok' : p.outcome === 'partial' ? 'warn' : 'error'
+                    }
+                    label={p.outcome}
+                  />
                   <span style={{ color: '#8a8a8a' }}>{p.attackClass}</span>
                 </div>
                 <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{p.description}</div>

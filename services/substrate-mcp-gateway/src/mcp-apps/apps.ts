@@ -140,7 +140,7 @@ function render(){
   thead.innerHTML = '<tr>' + cols.map(function(c){
     var icon = (_sortKey===c.key) ? (_sortAsc?'▲':'▼') : '▲';
     var cls = (_sortKey===c.key) ? ' sorted' : '';
-    return '<th class="' + cls + '" onclick="sortBy(\'' + c.key + '\')"><span>' + escHtml(c.label) + '</span><span class="sort-icon">' + icon + '</span></th>';
+    return '<th class="' + cls + '" onclick="sortBy('' + c.key + '')"><span>' + escHtml(c.label) + '</span><span class="sort-icon">' + icon + '</span></th>';
   }).join('') + '</tr>';
 
   var ps = _config.pageSize || 25;
@@ -387,7 +387,7 @@ function fmt(v){ if(Math.abs(v)>=1000) return (v/1000).toFixed(1)+'k'; return v%
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 
 document.getElementById('typeSelector').innerHTML = ['bar','line','area','pie','donut','scatter'].map(function(t){
-  return '<button class="type-btn' + (t===_type?' active':'') + '" onclick="setType(\''+t+'\')">' + t + '</button>';
+  return '<button class="type-btn' + (t===_type?' active':'') + '" onclick="setType(''+t+'')">' + t + '</button>';
 }).join('');
 
 function setType(t){
@@ -750,7 +750,7 @@ const STRICT_CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
-  "img-src data: blob:",
+  'img-src data: blob:',
   "connect-src 'none'",
   "frame-ancestors 'none'",
 ].join('; ');
@@ -767,7 +767,8 @@ export const MCP_APP_REGISTRY: McpAppDescriptor[] = [
   {
     uri: 'ui://szl/chart',
     name: 'SZL Chart Visualizer',
-    description: 'Recharts-compatible chart renderer for line, bar, pie, area, scatter, and donut charts.',
+    description:
+      'Recharts-compatible chart renderer for line, bar, pie, area, scatter, and donut charts.',
     mimeType: 'text/html',
     csp: STRICT_CSP,
     html: CHART_HTML,
@@ -775,7 +776,8 @@ export const MCP_APP_REGISTRY: McpAppDescriptor[] = [
   {
     uri: 'ui://szl/approval-form',
     name: 'SZL Approval Workflow Form',
-    description: 'Governed approval/rejection form that calls substrate_approve/substrate_reject via the MCP tool-call bridge.',
+    description:
+      'Governed approval/rejection form that calls substrate_approve/substrate_reject via the MCP tool-call bridge.',
     mimeType: 'text/html',
     csp: STRICT_CSP,
     permissions: ['tools/call'],
@@ -792,7 +794,8 @@ export const MCP_APP_REGISTRY: McpAppDescriptor[] = [
   {
     uri: 'ui://szl/timeline',
     name: 'SZL Timeline / Audit Trail',
-    description: 'Chronological event trail with severity badges, actor attribution, and expandable metadata.',
+    description:
+      'Chronological event trail with severity badges, actor attribution, and expandable metadata.',
     mimeType: 'text/html',
     csp: STRICT_CSP,
     html: TIMELINE_HTML,

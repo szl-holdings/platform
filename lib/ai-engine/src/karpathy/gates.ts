@@ -53,9 +53,15 @@ export function getGateAuditLog(limit = 50): GateAuditEntry[] {
 
 export function getGateStats(): {
   totalChecks: number;
-  byGate: Record<string, { total: number; pass: number; warn: number; reject: number; clarify: number }>;
+  byGate: Record<
+    string,
+    { total: number; pass: number; warn: number; reject: number; clarify: number }
+  >;
 } {
-  const byGate: Record<string, { total: number; pass: number; warn: number; reject: number; clarify: number }> = {};
+  const byGate: Record<
+    string,
+    { total: number; pass: number; warn: number; reject: number; clarify: number }
+  > = {};
 
   for (const entry of gateAuditLog) {
     if (!byGate[entry.gateName]) {
@@ -81,7 +87,7 @@ export function runThinkGate(
   strictness = 0.5,
 ): GateResult {
   const confidenceToComplexity = complexity > 0 ? confidence / complexity : confidence;
-  const threshold = 0.3 + (strictness * 0.5);
+  const threshold = 0.3 + strictness * 0.5;
 
   let verdict: GateVerdict = 'pass';
   let reason = 'Confidence-to-complexity ratio adequate';
@@ -107,7 +113,8 @@ export function runThinkGate(
   if (!hasExplicitAssumptions && confidence < 0.6 && strictness > 0.5) {
     if (verdict === 'pass') {
       verdict = 'warn';
-      reason = 'No explicit assumptions stated despite moderate confidence. Think Gate recommends stating assumptions.';
+      reason =
+        'No explicit assumptions stated despite moderate confidence. Think Gate recommends stating assumptions.';
       suggestedAction = 'State assumptions before proceeding';
     }
   }
@@ -142,7 +149,7 @@ export function runSimplicityGate(
   strictness = 0.5,
 ): GateResult {
   const ratio = historicalAvgSteps > 0 ? proposedStepCount / historicalAvgSteps : 1;
-  const maxRatio = 1.5 + ((1 - strictness) * 2);
+  const maxRatio = 1.5 + (1 - strictness) * 2;
 
   let verdict: GateVerdict = 'pass';
   let reason = `Proposed plan (${proposedStepCount} steps) aligns with historical pattern (${historicalAvgSteps.toFixed(1)} avg)`;
@@ -193,16 +200,15 @@ export function runSurgicalScopeGate(
   proposedChanges: string[],
   strictness = 0.5,
 ): GateResult {
-  const outOfScope = proposedChanges.filter(change => {
+  const outOfScope = proposedChanges.filter((change) => {
     const changeLower = change.toLowerCase();
-    return !declaredScope.some(scope => changeLower.includes(scope.toLowerCase()));
+    return !declaredScope.some((scope) => changeLower.includes(scope.toLowerCase()));
   });
 
-  const scopeViolationRatio = proposedChanges.length > 0
-    ? outOfScope.length / proposedChanges.length
-    : 0;
+  const scopeViolationRatio =
+    proposedChanges.length > 0 ? outOfScope.length / proposedChanges.length : 0;
 
-  const threshold = 0.3 - (strictness * 0.2);
+  const threshold = 0.3 - strictness * 0.2;
 
   let verdict: GateVerdict = 'pass';
   let reason = 'All proposed changes within declared scope';
@@ -210,7 +216,7 @@ export function runSurgicalScopeGate(
 
   if (scopeViolationRatio > threshold + 0.3) {
     verdict = 'reject';
-    reason = `${outOfScope.length}/${proposedChanges.length} proposed changes are outside declared scope: ${outOfScope.slice(0, 3).join(', ')}. Surgical Scope Gate blocks "while I\'m here" scope creep.`;
+    reason = `${outOfScope.length}/${proposedChanges.length} proposed changes are outside declared scope: ${outOfScope.slice(0, 3).join(', ')}. Surgical Scope Gate blocks "while I'm here" scope creep.`;
     suggestedAction = `Remove out-of-scope changes and create separate tasks for: ${outOfScope.slice(0, 3).join(', ')}`;
   } else if (scopeViolationRatio > threshold) {
     verdict = 'warn';
@@ -262,14 +268,17 @@ export function runGoalVerificationGate(
   }
 
   const outputLower = outputContent.toLowerCase();
-  const metCriteria = declaredSuccessCriteria.filter(criterion => {
-    const keywords = criterion.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-    const matchCount = keywords.filter(kw => outputLower.includes(kw)).length;
+  const metCriteria = declaredSuccessCriteria.filter((criterion) => {
+    const keywords = criterion
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 3);
+    const matchCount = keywords.filter((kw) => outputLower.includes(kw)).length;
     return keywords.length > 0 && matchCount / keywords.length >= 0.5;
   });
 
   const metRatio = metCriteria.length / declaredSuccessCriteria.length;
-  const threshold = 0.5 + (strictness * 0.3);
+  const threshold = 0.5 + strictness * 0.3;
 
   let verdict: GateVerdict = 'pass';
   let reason = `${metCriteria.length}/${declaredSuccessCriteria.length} success criteria met (${(metRatio * 100).toFixed(0)}%)`;
@@ -277,7 +286,7 @@ export function runGoalVerificationGate(
 
   if (metRatio < threshold * 0.5) {
     verdict = 'reject';
-    const unmet = declaredSuccessCriteria.filter(c => !metCriteria.includes(c));
+    const unmet = declaredSuccessCriteria.filter((c) => !metCriteria.includes(c));
     reason = `Only ${metCriteria.length}/${declaredSuccessCriteria.length} criteria met. Unmet: ${unmet.slice(0, 3).join('; ')}`;
     suggestedAction = 'Revise output to address unmet success criteria before marking complete';
   } else if (metRatio < threshold) {
@@ -327,21 +336,46 @@ export function runAllGates(params: {
   const strictness = params.strictness ?? 0.5;
 
   const gates = [
-    runThinkGate(params.agentId, params.query, params.proposedAction, params.confidence, params.complexity, strictness),
-    runSimplicityGate(params.agentId, params.query, params.proposedStepCount, params.historicalAvgSteps, strictness),
-    runSurgicalScopeGate(params.agentId, params.query, params.declaredScope, params.proposedChanges, strictness),
-    runGoalVerificationGate(params.agentId, params.query, params.successCriteria, params.outputContent, strictness),
+    runThinkGate(
+      params.agentId,
+      params.query,
+      params.proposedAction,
+      params.confidence,
+      params.complexity,
+      strictness,
+    ),
+    runSimplicityGate(
+      params.agentId,
+      params.query,
+      params.proposedStepCount,
+      params.historicalAvgSteps,
+      strictness,
+    ),
+    runSurgicalScopeGate(
+      params.agentId,
+      params.query,
+      params.declaredScope,
+      params.proposedChanges,
+      strictness,
+    ),
+    runGoalVerificationGate(
+      params.agentId,
+      params.query,
+      params.successCriteria,
+      params.outputContent,
+      strictness,
+    ),
   ];
 
-  const blockedBy = gates.filter(g => g.verdict === 'reject').map(g => g.gateName);
-  const hasClarification = gates.some(g => g.verdict === 'force_clarification');
+  const blockedBy = gates.filter((g) => g.verdict === 'reject').map((g) => g.gateName);
+  const hasClarification = gates.some((g) => g.verdict === 'force_clarification');
 
   let overallVerdict: GateVerdict = 'pass';
   if (blockedBy.length > 0) {
     overallVerdict = 'reject';
   } else if (hasClarification) {
     overallVerdict = 'force_clarification';
-  } else if (gates.some(g => g.verdict === 'warn')) {
+  } else if (gates.some((g) => g.verdict === 'warn')) {
     overallVerdict = 'warn';
   }
 

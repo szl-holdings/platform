@@ -251,7 +251,7 @@ export class SandboxAgent {
     let session: SandboxSession | null = null;
     let shellCommandsExecuted = 0;
     let filesRead = 0;
-    let filesWritten = 0;
+    const filesWritten = 0;
 
     // Collect per-command results for the verify step
     const commandResults: Array<{ command: string; exitCode: number; durationMs: number }> = [];
@@ -353,7 +353,14 @@ export class SandboxAgent {
               'sandbox.shell',
               { sessionId, tenantId, command: 'git status --short 2>/dev/null || echo ""' },
               gwCtx,
-            ).catch(() => ({ stdout: '', stderr: '', exitCode: 0, durationMs: 0, timedOut: false, command: 'git status' }));
+            ).catch(() => ({
+              stdout: '',
+              stderr: '',
+              exitCode: 0,
+              durationMs: 0,
+              timedOut: false,
+              command: 'git status',
+            }));
 
             const currentMemory = await memory.readMemory();
 
@@ -487,7 +494,14 @@ export class SandboxAgent {
               }
             }
 
-            return { steps: results.map((r) => ({ stepId: r.stepId, command: r.command, exitCode: r.result.exitCode, durationMs: r.result.durationMs })) };
+            return {
+              steps: results.map((r) => ({
+                stepId: r.stepId,
+                command: r.command,
+                exitCode: r.result.exitCode,
+                durationMs: r.result.durationMs,
+              })),
+            };
           },
         },
         undefined,
@@ -502,18 +516,18 @@ export class SandboxAgent {
           handler: async () => {
             const failedSteps = commandResults.filter((r) => r.exitCode !== 0);
             const outputDirs = opts.outputDirs ?? manifest.outputDirs ?? [];
-            const artifacts = outputDirs.length > 0
-              ? await collectArtifacts(workspaceRoot, outputDirs)
-              : [];
+            const artifacts =
+              outputDirs.length > 0 ? await collectArtifacts(workspaceRoot, outputDirs) : [];
 
             await emitStepLog({
               runId,
               stepId: 'sandbox:verify',
               stepName: 'sandbox.verify',
               level: failedSteps.length > 0 ? 'warn' : 'info',
-              message: failedSteps.length > 0
-                ? `Verify: ${failedSteps.length} step(s) failed`
-                : `Verify: all ${commandResults.length} step(s) succeeded`,
+              message:
+                failedSteps.length > 0
+                  ? `Verify: ${failedSteps.length} step(s) failed`
+                  : `Verify: all ${commandResults.length} step(s) succeeded`,
               data: {
                 totalSteps: commandResults.length,
                 failedSteps: failedSteps.length,

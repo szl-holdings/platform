@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
-import { AutonomyModeToggle } from '@szl-holdings/design-system';
-import type { AutonomyMode } from '@szl-holdings/design-system';
+import { AutonomyModeToggle, type AutonomyMode } from '@szl-holdings/design-system';
 
 const meta = {
   title: 'Proof & Governance/AutonomyModeToggle',
@@ -9,7 +8,8 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Controls the agent\'s operational autonomy level — from passive observation to fully autonomous action.',
+        component:
+          "Controls the agent's operational autonomy level — from passive observation to fully autonomous action.",
       },
     },
   },
@@ -56,7 +56,9 @@ export const Interactive: Story = {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <AutonomyModeToggle value={mode} onChange={setMode} variant="full" />
-        <p style={{ fontSize: 'var(--gi-text-xs)', color: 'var(--gi-text-secondary)' }}>Current mode: {mode}</p>
+        <p style={{ fontSize: 'var(--gi-text-xs)', color: 'var(--gi-text-secondary)' }}>
+          Current mode: {mode}
+        </p>
       </div>
     );
   },

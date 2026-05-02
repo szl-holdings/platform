@@ -1,8 +1,13 @@
 packages:
   - apps/*
-  - artifacts/*
-  - '!artifacts/imperium'
-  - '!artifacts/stephen-site'
+  # Keep list (2026-05-02): only six product artifacts remain in this monorepo.
+  # Other apps were removed; Amaru lives in szl-holdings/amaru as its own repo.
+  - artifacts/a11oy
+  - artifacts/sentra
+  - artifacts/terra
+  - artifacts/carlota-jo
+  - artifacts/counsel
+  - artifacts/vessels
   - lib/*
   - lib/integrations/*
   - packages/*

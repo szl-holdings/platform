@@ -2,15 +2,11 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { client } from './client.js';
-import { formatOutput } from './output.js';
-import type { OutputFormat } from './output.js';
+import { formatOutput, type OutputFormat } from './output.js';
 
 const program = new Command();
 
-program
-  .name('a11oy')
-  .description('A11oy Terminal CLI')
-  .version('1.0.0');
+program.name('a11oy').description('A11oy Terminal CLI').version('1.0.0');
 
 program.option('-o, --output <format>', 'output format (json, table)', 'table');
 program.option('--tenant <id>', 'tenant ID', 'default');
@@ -416,7 +412,7 @@ program
     console.log(chalk.cyan('A11oy Doctor Diagnostics:'));
     console.log(`API Base URL: ${process.env.A11OY_API_BASE_URL || 'http://localhost:80'}`);
     console.log(`API Key: ${process.env.A11OY_API_KEY ? 'Set' : 'Not Set'}`);
-    
+
     try {
       const response = await client.get('/api/a11oy/now');
       if (response.ok) {
@@ -440,7 +436,7 @@ program
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: chalk.cyan('a11oy> ')
+      prompt: chalk.cyan('a11oy> '),
     });
 
     console.log('A11oy Interactive Shell (type "exit" to quit)');

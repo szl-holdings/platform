@@ -1,10 +1,9 @@
-import type {
-  DriftResult,
-  EvalRegistry,
-  ModelSnapshot,
+import {
+  type DriftResult,
+  type EvalRegistry,
+  type ModelSnapshot,
+  DriftResultSchema,
 } from './types.js';
-import { DriftResultSchema } from './types.js';
-
 function generateId(): string {
   return `drift-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -28,15 +27,13 @@ function computePerformanceDrift(
     deltas.push({ metric: 'rmse', delta: (cm.rmse - bm.rmse) / (bm.rmse || 1) });
   }
   if (bm.calibrationScore !== undefined && cm.calibrationScore !== undefined) {
-    deltas.push({ metric: 'calibrationScore', delta: (bm.calibrationScore - cm.calibrationScore) });
+    deltas.push({ metric: 'calibrationScore', delta: bm.calibrationScore - cm.calibrationScore });
   }
   if (bm.coverageRate !== undefined && cm.coverageRate !== undefined) {
-    deltas.push({ metric: 'coverageRate', delta: (bm.coverageRate - cm.coverageRate) });
+    deltas.push({ metric: 'coverageRate', delta: bm.coverageRate - cm.coverageRate });
   }
 
-  const affectedMetrics = deltas
-    .filter((d) => Math.abs(d.delta) > 0.05)
-    .map((d) => d.metric);
+  const affectedMetrics = deltas.filter((d) => Math.abs(d.delta) > 0.05).map((d) => d.metric);
 
   const score =
     deltas.length > 0
@@ -64,22 +61,10 @@ export async function detectDrift(
   if (score < 0.05) return null;
 
   const severity =
-    score >= 0.5
-      ? 'critical'
-      : score >= 0.3
-        ? 'high'
-        : score >= 0.15
-          ? 'medium'
-          : 'low';
+    score >= 0.5 ? 'critical' : score >= 0.3 ? 'high' : score >= 0.15 ? 'medium' : 'low';
 
   const recommendation =
-    score >= 0.5
-      ? 'rollback'
-      : score >= 0.3
-        ? 'retrain'
-        : score >= 0.15
-          ? 'monitor'
-          : 'monitor';
+    score >= 0.5 ? 'rollback' : score >= 0.3 ? 'retrain' : score >= 0.15 ? 'monitor' : 'monitor';
 
   const result = DriftResultSchema.parse({
     id: generateId(),

@@ -145,7 +145,10 @@ section('Platform roles — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.t
 if (!authSchema) {
   fail('Cannot read lib/db/src/schema/auth.ts', 'file not found or unreadable');
 } else if (!accessMatrix) {
-  skip('Platform role enum check', 'ACCESS-CONTROL-MATRIX.md not found — create the file to enable this check');
+  skip(
+    'Platform role enum check',
+    'ACCESS-CONTROL-MATRIX.md not found — create the file to enable this check',
+  );
 } else {
   const liveRoles = extractTsEnumValues(authSchema, 'platform_role');
   if (!liveRoles || liveRoles.length === 0) {
@@ -337,7 +340,7 @@ const DOCUMENTED_ROUTE_MOUNTS = [
   { desc: 'security routes registered', pattern: /security\.register\(router\)/ },
   { desc: 'terra routes registered', pattern: /terra\.register\(router\)/ },
   { desc: 'vessels routes registered', pattern: /vessels\.register\(router\)/ },
-  { desc: 'alloy routes registered', pattern: /alloy\.register\(router\)/ },
+  { desc: 'alloy-forge routes registered', pattern: /lazyMatch\("\/alloy-forge"/ },
   { desc: 'guardian policy check applied', pattern: /guardianPolicyCheck\(\)/ },
 ];
 
@@ -476,7 +479,10 @@ function parseKeyRoutePathsTable(mdText) {
     if (line.includes('---')) continue;
     if (/^\|\s*Group\s*\|/.test(line)) continue;
 
-    const cols = line.split('|').map((c) => c.trim()).filter(Boolean);
+    const cols = line
+      .split('|')
+      .map((c) => c.trim())
+      .filter(Boolean);
     if (cols.length < 3) continue;
 
     const pathMatch = cols[1].match(/`([^`]+)`/);
@@ -540,7 +546,9 @@ if (!apiSpec) {
 
 if (failures > 0) {
   console.error(`\n✗  ${failures} claim(s) failed, ${passes} passed. See above for details.`);
-  console.error('   Update ACCESS-CONTROL-MATRIX.md, API-SPEC.md, or SECURITY-CHECKLIST.md to match the codebase.');
+  console.error(
+    '   Update ACCESS-CONTROL-MATRIX.md, API-SPEC.md, or SECURITY-CHECKLIST.md to match the codebase.',
+  );
 } else {
   console.log(`\n✓  All ${passes} claims verified.`);
 }

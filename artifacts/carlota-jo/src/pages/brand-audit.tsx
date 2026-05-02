@@ -2,12 +2,12 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   AlertTriangle,
+  Camera as Instagram,
   CheckCircle,
   Eye,
   Globe,
-  Instagram,
-  Linkedin,
-  Twitter,
+  MessageCircle as Twitter,
+  Users as Linkedin,
   XCircle,
 } from 'lucide-react';
 import { useState } from 'react';

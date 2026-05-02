@@ -34,9 +34,9 @@ export interface ArtifactSmokeConfig {
 
 export const ARTIFACT_SMOKE_CONFIGS: ArtifactSmokeConfig[] = [
   {
-    name: 'SZL Holdings — Governed Decision OS',
-    path: '/',
-    titleContains: 'SZL Holdings',
+    name: 'A11oy — Genetic AI Substrate',
+    path: '/a11oy/',
+    titleContains: 'A11oy',
     timeBudgetMs: 8000,
   },
   {
@@ -46,33 +46,9 @@ export const ARTIFACT_SMOKE_CONFIGS: ArtifactSmokeConfig[] = [
     timeBudgetMs: 8000,
   },
   {
-    name: 'Counsel — Legal Matter Command',
-    path: '/counsel/',
-    titleContains: 'Counsel',
-    timeBudgetMs: 8000,
-  },
-  {
-    name: 'Pulse — AI Executive Briefing',
-    path: '/pulse/',
-    titleContains: 'Pulse',
-    timeBudgetMs: 8000,
-  },
-  {
     name: 'Terra — Real Estate Intelligence',
     path: '/terra/',
     titleContains: 'Terra',
-    timeBudgetMs: 8000,
-  },
-  {
-    name: 'Vessels — Maritime Intelligence',
-    path: '/vessels/',
-    titleContains: 'Vessels',
-    timeBudgetMs: 8000,
-  },
-  {
-    name: 'Unified Command',
-    path: '/command/',
-    titleContains: 'Command',
     timeBudgetMs: 8000,
   },
   {
@@ -82,30 +58,15 @@ export const ARTIFACT_SMOKE_CONFIGS: ArtifactSmokeConfig[] = [
     timeBudgetMs: 8000,
   },
   {
-    name: 'Conduit — Reverse ETL',
-    path: '/conduit/',
-    titleContains: 'Conduit',
+    name: 'Counsel — Legal Matter Command',
+    path: '/counsel/',
+    titleContains: 'Counsel',
     timeBudgetMs: 8000,
   },
   {
-    name: 'A11oy — Brand Orchestration Layer',
-    path: '/a11oy/',
-    titleContains: 'A11oy',
-    timeBudgetMs: 8000,
-  },
-  {
-    name: 'Lyte — Decision Intelligence',
-    path: '/lyte/',
-    titleContains: 'Lyte',
-    timeBudgetMs: 8000,
-  },
-  {
-    name: 'PRAXIS — Unified Agentic AI Layer',
-    path: '/nexus/',
-    titleContains: 'PRAXIS',
+    name: 'Vessels — Maritime Intelligence',
+    path: '/vessels/',
+    titleContains: 'Vessels',
     timeBudgetMs: 8000,
   },
 ];
-
-/** The API health endpoint, checked separately from the frontend artifacts. */
-export const API_HEALTH_PATH = '/api/health';

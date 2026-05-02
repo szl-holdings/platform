@@ -176,11 +176,21 @@ async function main(): Promise<void> {
     process.exit(2);
   }
 
-  process.stderr.write(
-    `[BLOCKED] EVAL_API_URL is not configured.\n` +
-      `Set EVAL_API_URL (endpoint) + EVAL_API_KEY (admin key) to enable the promotion gate.\n`,
+  // When EVAL_API_URL is unset (e.g. fork PRs without secrets, or before the
+  // infra is provisioned) treat this as soft-skip rather than hard-block.
+  // A hard block requires explicit opt-in via EVAL_GATE_REQUIRE=1.
+  if (process.env.EVAL_GATE_REQUIRE === '1') {
+    process.stderr.write(
+      `[BLOCKED] EVAL_API_URL is not configured and EVAL_GATE_REQUIRE=1.\n` +
+        `Set EVAL_API_URL (endpoint) + EVAL_API_KEY (admin key) to enable the promotion gate.\n`,
+    );
+    process.exit(1);
+  }
+  process.stdout.write(
+    `[SKIPPED] EVAL_API_URL is not configured. Skipping promotion gate.\n` +
+      `Set EVAL_GATE_REQUIRE=1 to fail builds when the gate cannot run.\n`,
   );
-  process.exit(1);
+  process.exit(0);
 }
 
 main().catch((err) => {

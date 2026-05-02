@@ -1,5 +1,10 @@
-import type { ForecastInput, ForecastOutput, HeadDefinition, ModelAdapter } from './types.js';
-import { ForecastOutputSchema } from './types.js';
+import {
+  type ForecastInput,
+  type ForecastOutput,
+  type HeadDefinition,
+  type ModelAdapter,
+  ForecastOutputSchema,
+} from './types.js';
 
 function nowIso(): string {
   return new Date().toISOString();

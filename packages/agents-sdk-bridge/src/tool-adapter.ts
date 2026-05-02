@@ -11,10 +11,8 @@
 
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { tool } from '@openai/agents';
-import type { FunctionTool } from '@openai/agents';
-import type { ToolManifest } from '@workspace/tool-mesh';
-import { ToolMeshGateway, defaultToolRegistry } from '@workspace/tool-mesh';
+import { tool, type FunctionTool } from '@openai/agents';
+import { type ToolManifest, ToolMeshGateway, defaultToolRegistry } from '@workspace/tool-mesh';
 
 export interface SzlToolAdapterOptions {
   /**
@@ -80,9 +78,7 @@ function jsonSchemaNodeToZod(node: JsonSchemaNode): z.ZodTypeAny {
 
   if (type === 'object' || node['properties']) {
     const properties = node['properties'] as Record<string, JsonSchemaNode> | undefined;
-    const required = Array.isArray(node['required'])
-      ? (node['required'] as string[])
-      : [];
+    const required = Array.isArray(node['required']) ? (node['required'] as string[]) : [];
 
     if (!properties || Object.keys(properties).length === 0) {
       return withDescription(z.record(z.unknown()));
@@ -93,9 +89,7 @@ function jsonSchemaNodeToZod(node: JsonSchemaNode): z.ZodTypeAny {
       const propSchema = jsonSchemaNodeToZod(propNode as JsonSchemaNode);
       // OpenAI structured outputs require optional fields to also be nullable.
       // Required fields remain as-is; optional fields use .nullable().optional().
-      shape[key] = required.includes(key)
-        ? propSchema
-        : propSchema.nullable().optional();
+      shape[key] = required.includes(key) ? propSchema : propSchema.nullable().optional();
     }
     return withDescription(z.object(shape));
   }

@@ -276,9 +276,14 @@ function main(): void {
   }
 
   if (!SINGLE_ARTIFACT) {
+    // api-server was the canonical .env.example for shared packages, but it has
+    // been removed in the 6-keep cleanup. Skip the shared-packages cross-check
+    // when no canonical example exists.
     const apiServerExample = path.join(ROOT, 'artifacts', 'api-server', '.env.example');
-    const sharedReport = checkSharedPackages(apiServerExample);
-    if (sharedReport) reports.push(sharedReport);
+    if (fs.existsSync(apiServerExample)) {
+      const sharedReport = checkSharedPackages(apiServerExample);
+      if (sharedReport) reports.push(sharedReport);
+    }
   }
 
   let totalUndocumented = 0;

@@ -241,7 +241,7 @@ function routeGoal(goal, availablePlugins = []) {
     'sec': ['sec-edgar'], 'canva': ['canva'], 'story': ['storybook'],
   };
 
-  let scoredSlugs = {};
+  const scoredSlugs = {};
   for (const [keyword, slugs] of Object.entries(keywordMap)) {
     if (goalLower.includes(keyword)) {
       for (const slug of slugs) {
@@ -439,10 +439,10 @@ function handleToolCall(id, toolName, toolArgs) {
       case 'pluginmesh_hf_model_router': {
         const { task, preferOpen = false, maxResults = 3 } = toolArgs || {};
         if (!task) return sendError(id, -32602, 'task is required');
-        let models = HF_MODELS_DATA?.models || [];
+        const models = HF_MODELS_DATA?.models || [];
         const taskLower = task.toLowerCase();
         
-        let scored = models.map(m => {
+        const scored = models.map(m => {
           let score = 0;
           if (m.task.includes(taskLower.replace(/ /g, '-'))) score += 5;
           if (m.tags.some(t => taskLower.includes(t) || t.includes(taskLower.split(' ')[0]))) score += 3;

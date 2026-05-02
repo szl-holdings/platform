@@ -156,11 +156,7 @@ function selectCrewForObjective(objective: string, domain?: string): CrewMember[
   return selected;
 }
 
-function decomposeIntoSubPlans(
-  planId: string,
-  objective: string,
-  crew: CrewMember[],
-): SubPlan[] {
+function decomposeIntoSubPlans(planId: string, objective: string, crew: CrewMember[]): SubPlan[] {
   const subPlans: SubPlan[] = [];
   const roles = crew.map((m) => m.role);
   let priority = 1;
@@ -262,7 +258,11 @@ Answer concisely and factually. Structure your output clearly.`;
       return { output, artifacts: {}, success: true };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Crew executor error';
-      return { output: `[Error from ${member.displayName}]: ${msg}`, artifacts: {}, success: false };
+      return {
+        output: `[Error from ${member.displayName}]: ${msg}`,
+        artifacts: {},
+        success: false,
+      };
     }
   };
 }
@@ -296,16 +296,22 @@ export class MultiAgentCrew {
     } else {
       throw new Error(
         'MultiAgentCrew requires either an llmClient or a custom executor. ' +
-        'Pass { llmClient } for default LLM-based execution, or { executor } for custom logic.',
+          'Pass { llmClient } for default LLM-based execution, or { executor } for custom logic.',
       );
     }
   }
 
-  private evaluateApprovalRequirement(
-    subPlan: SubPlan,
-  ): { requiresApproval: boolean; trustLevel: TrustLevel; reason: string } {
+  private evaluateApprovalRequirement(subPlan: SubPlan): {
+    requiresApproval: boolean;
+    trustLevel: TrustLevel;
+    reason: string;
+  } {
     if (!this.trustEngine) {
-      return { requiresApproval: false, trustLevel: 'supervised', reason: 'No trust engine configured' };
+      return {
+        requiresApproval: false,
+        trustLevel: 'supervised',
+        reason: 'No trust engine configured',
+      };
     }
 
     const decision = this.trustEngine.evaluateApproval(
@@ -340,17 +346,14 @@ export class MultiAgentCrew {
 
     const getReadyPlans = () =>
       subPlans.filter(
-        (sp) =>
-          sp.status === 'pending' &&
-          sp.dependencies.every((dep) => completed.has(dep)),
+        (sp) => sp.status === 'pending' && sp.dependencies.every((dep) => completed.has(dep)),
       );
 
     let readyPlans = getReadyPlans();
 
     while (readyPlans.length > 0) {
       for (const subPlan of readyPlans) {
-        const { requiresApproval, trustLevel, reason } =
-          this.evaluateApprovalRequirement(subPlan);
+        const { requiresApproval, trustLevel, reason } = this.evaluateApprovalRequirement(subPlan);
 
         if (requiresApproval) {
           approvalGatesTriggered++;
@@ -418,8 +421,8 @@ export class MultiAgentCrew {
         subPlan.status = 'running';
 
         const t0 = Date.now();
-        const priorResults = results.filter((r) =>
-          subPlan.dependencies.includes(r.subPlanId) && r.success,
+        const priorResults = results.filter(
+          (r) => subPlan.dependencies.includes(r.subPlanId) && r.success,
         );
 
         try {
@@ -510,7 +513,7 @@ export class MultiAgentCrew {
     let approvalGatesTriggered = 0;
     let autoApproved = 0;
     let gatedPendingApproval = 0;
-    let rejectedByApprover = 0;
+    const rejectedByApprover = 0;
 
     const completed = new Set<string>();
     for (const r of priorResults) {
@@ -531,7 +534,9 @@ export class MultiAgentCrew {
       subPlans.filter(
         (sp) =>
           !gatedThisRound.has(sp.subPlanId) &&
-          (sp.status === 'approved' || sp.status === 'awaiting_approval' || sp.status === 'pending') &&
+          (sp.status === 'approved' ||
+            sp.status === 'awaiting_approval' ||
+            sp.status === 'pending') &&
           sp.dependencies.every((dep) => completed.has(dep)),
       );
 
@@ -670,7 +675,9 @@ export class MultiAgentCrew {
 
   private async synthesize(objective: string, results: SubPlanResult[]): Promise<string> {
     const successful = results.filter((r) => r.success);
-    const gated = results.filter((r) => r.approvalStatus === 'gated' || r.approvalStatus === 'human_rejected');
+    const gated = results.filter(
+      (r) => r.approvalStatus === 'gated' || r.approvalStatus === 'human_rejected',
+    );
 
     if (successful.length === 0 && gated.length > 0) {
       return `All sub-plans require human approval before execution.\n\n${gated.map((r) => `- [${r.role}] ${r.output}`).join('\n')}`;
@@ -689,9 +696,10 @@ export class MultiAgentCrew {
         .map((r) => `## ${r.role.toUpperCase()} (${r.agentId})\n${r.output}`)
         .join('\n\n');
 
-      const gatedContext = gated.length > 0
-        ? `\n\n## GATED (Awaiting Approval)\n${gated.map((r) => `- [${r.role}]: ${r.output}`).join('\n')}`
-        : '';
+      const gatedContext =
+        gated.length > 0
+          ? `\n\n## GATED (Awaiting Approval)\n${gated.map((r) => `- [${r.role}]: ${r.output}`).join('\n')}`
+          : '';
 
       const output = await this.llmClient.chat({
         model: 'gpt-4o-mini',

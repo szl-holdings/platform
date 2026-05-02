@@ -1,17 +1,17 @@
-import type {
-  ChampionChallengerResult,
-  EvalRegistry,
-  ModelSnapshot,
+import {
+  type ChampionChallengerResult,
+  type EvalRegistry,
+  type ModelSnapshot,
+  ChampionChallengerResultSchema,
 } from './types.js';
-import { ChampionChallengerResultSchema } from './types.js';
-
 function generateId(): string {
   return `cc-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 function primaryMetricValue(snapshot: ModelSnapshot): { metric: string; value: number } | null {
   const m = snapshot.metrics;
-  if (m.calibrationScore !== undefined) return { metric: 'calibrationScore', value: m.calibrationScore };
+  if (m.calibrationScore !== undefined)
+    return { metric: 'calibrationScore', value: m.calibrationScore };
   if (m.mape !== undefined) return { metric: 'mape', value: -m.mape };
   if (m.mae !== undefined) return { metric: 'mae', value: -m.mae };
   if (m.rmse !== undefined) return { metric: 'rmse', value: -m.rmse };

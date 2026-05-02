@@ -6,9 +6,12 @@
  * Called by Lyte, Command Portal, and APEX.
  */
 
-import type { TTSAdapter } from './adapters.js';
-import { NoOpTTSAdapter } from './adapters.js';
-import type { BriefingAudioProvenance, BriefingAudioRequest, BriefingAudioResult } from './types.js';
+import { type TTSAdapter, NoOpTTSAdapter } from './adapters.js';
+import type {
+  BriefingAudioProvenance,
+  BriefingAudioRequest,
+  BriefingAudioResult,
+} from './types.js';
 
 const DEFAULT_VOICE_ID = 'executive-neutral-v1';
 

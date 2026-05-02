@@ -33,15 +33,20 @@ jobs:
           path: |
             node_modules
             **/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: ${{ runner.os }}-node-modules-v2-${{ hashFiles('pnpm-lock.yaml', '**/package.json') }}
 
       - run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Validate PR commit messages
         run: |
-          pnpm exec commitlint \
-            --from "${{ github.event.pull_request.base.sha }}" \
-            --to   "${{ github.event.pull_request.head.sha }}" \
-            --verbose
+          # On pull_request events, lint only PR commits.
+          # On workflow_dispatch (manual), lint just the most recent commit
+          # so we don't fail on pre-existing history outside our control.
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            pnpm exec commitlint \
+              --from "${{ github.event.pull_request.base.sha }}" \
+              --to   "${{ github.event.pull_request.head.sha }}" \
+              --verbose
+          else
+            pnpm exec commitlint --from HEAD~1 --to HEAD --verbose
+          fi

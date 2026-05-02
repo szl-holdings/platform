@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SzlToolAdapter, adaptToolManifest } from '../tool-adapter.js';
-import { defaultToolRegistry } from '@workspace/tool-mesh';
-import type { ToolManifest } from '@workspace/tool-mesh';
+import { defaultToolRegistry, type ToolManifest } from '@workspace/tool-mesh';
 
 function makeManifest(overrides: Partial<ToolManifest> = {}): ToolManifest {
   return {
@@ -35,7 +34,11 @@ function makeManifest(overrides: Partial<ToolManifest> = {}): ToolManifest {
 }
 
 function makeMockGateway(output: unknown = 'tool result', success = true) {
-  return { invoke: vi.fn().mockResolvedValue({ success, output, error: success ? undefined : String(output) }) };
+  return {
+    invoke: vi
+      .fn()
+      .mockResolvedValue({ success, output, error: success ? undefined : String(output) }),
+  };
 }
 
 describe('SzlToolAdapter', () => {

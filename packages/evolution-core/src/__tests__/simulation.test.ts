@@ -2,8 +2,7 @@
  * Unit tests — Simulation Engine
  */
 
-import { buildSimulatedState } from '../simulation/index.js';
-import type { SimulatedPERState } from '../simulation/index.js';
+import { buildSimulatedState, type SimulatedPERState } from '../simulation/index.js';
 
 describe('buildSimulatedState', () => {
   let state: SimulatedPERState;
@@ -84,8 +83,12 @@ describe('buildSimulatedState', () => {
 
   test('each candidate has a valid precisionProfile', () => {
     const validProfiles = new Set([
-      'cpu_safe', 'cuda_bf16', 'cuda_fp8_linear',
-      'cuda_fp8_linear_kv', 'remote_accelerated', 'future_blackwell_path',
+      'cpu_safe',
+      'cuda_bf16',
+      'cuda_fp8_linear',
+      'cuda_fp8_linear_kv',
+      'remote_accelerated',
+      'future_blackwell_path',
     ]);
     state.candidates.forEach((c) => {
       expect(validProfiles.has(c.precisionProfile)).toBe(true);
