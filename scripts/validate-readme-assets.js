@@ -221,9 +221,12 @@ for (const link of linkedMdFiles) {
 }
 
 if (errors.length > 0) {
-  for (const _e of errors) {
+  console.error(`README validation failed with ${errors.length} error(s):\n`);
+  for (const e of errors) {
+    console.error(`  - ${e}`);
   }
   process.exit(1);
 } else {
+  console.log('README validation passed.');
   process.exit(0);
 }
