@@ -2,8 +2,6 @@
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
-[![Runtime tests](https://img.shields.io/badge/runtime%20tests-1%2C372%2F1%2C372-2da44e?style=flat-square)](https://github.com/szl-holdings/ouroboros) [![Paper v3](https://img.shields.io/badge/paper-v3.0.0%20Lutar%20Invariant-c4356b?style=flat-square)](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v3) [![Zenodo v3](https://zenodo.org/badge/DOI/10.5281/zenodo.19951520.svg)](https://doi.org/10.5281/zenodo.19951520)
-
 **The governed infrastructure for high-consequence decisions.**
 
 > Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single platform.
@@ -161,21 +159,6 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 - **Audit trail:** Every consequential action writes an immutable proof entry with actor attribution, timestamp, and decision context.
 - **Multi-tenancy:** Cross-tenant access is architecturally prevented, not only policy-controlled.
 - **Vulnerability disclosure:** Responsible disclosure only. See [SECURITY.md](SECURITY.md).
-
----
-
-## Research foundation
-
-The runtime that powers this platform implements the **Lutar Invariant** Λ — a closed-form scalar in [0, 1] that aggregates nine independent runtime-trust axes into a single auditable number. The full thesis line is published on Zenodo:
-
-| Paper | Date | DOI |
-|---|---|---|
-| **v3 — The Lutar Invariant** (latest) | 2026-05-01 | [10.5281/zenodo.19951520](https://doi.org/10.5281/zenodo.19951520) |
-| v2 — Empirical Companion | 2026-04-30 | [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) |
-| v1 — Position Paper | 2026-04-28 | [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) |
-| Concept DOI (always-latest) | — | [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) |
-
-Full thesis repository: [`szl-holdings/ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis). Reference implementation: [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) — `@szl-holdings/ouroboros` v6.1.0, **1,372/1,372 tests** passing (925 TypeScript + 447 Python).
 
 ---
 
