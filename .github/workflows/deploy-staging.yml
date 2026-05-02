@@ -45,31 +45,50 @@ jobs:
 
       - name: Trigger staging deployment
         if: steps.verify.outputs.skip != 'true'
+        # Fail-soft: emit warnings on Replit API failures but never fail the
+        # GitHub Actions job. Staging is best-effort — a 403 from an expired
+        # token should be reported, not block the release pipeline.
+        shell: bash
         run: |
+          set +e
           echo "Triggering Replit staging deployment..."
           REPLIT_APP_ID="${{ secrets.REPLIT_STAGING_APP_ID }}"
           REPLIT_DEPLOY_TOKEN="${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}"
 
-          if [ -n "$REPLIT_APP_ID" ] && [ -n "$REPLIT_DEPLOY_TOKEN" ]; then
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-              -X POST \
-              -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
-              -H "Content-Type: application/json" \
-              "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments" \
-              2>/dev/null || echo "000")
-
-            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-              echo "Staging deployment triggered successfully (HTTP $RESPONSE)"
-            elif [ "$RESPONSE" = "000" ]; then
-              echo "::warning::Could not reach Replit API — staging deployment may need to be triggered manually"
-            else
-              echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — token may be expired; rotate REPLIT_STAGING_DEPLOY_TOKEN in env settings (fail-soft, not blocking release)"
-            fi
-          else
-            echo "::warning::REPLIT_STAGING_APP_ID not configured — staging deployment skipped"
-            echo "To enable automated staging deployment, set REPLIT_STAGING_APP_ID and REPLIT_STAGING_DEPLOY_TOKEN"
-            echo "in Settings → Environments → staging"
+          if [ -z "$REPLIT_APP_ID" ] || [ -z "$REPLIT_DEPLOY_TOKEN" ]; then
+            echo "::warning::REPLIT_STAGING_APP_ID or REPLIT_STAGING_DEPLOY_TOKEN not configured — staging deployment skipped"
+            echo "To enable automated staging deployment, set both secrets in Settings → Environments → staging"
+            exit 0
           fi
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments" \
+            2>/dev/null)
+          CURL_EXIT=$?
+          # Default RESPONSE to a sentinel if curl produced nothing
+          if [ -z "$RESPONSE" ] || ! [[ "$RESPONSE" =~ ^[0-9]+$ ]]; then
+            RESPONSE="000"
+          fi
+
+          if [ "$CURL_EXIT" -ne 0 ] || [ "$RESPONSE" = "000" ]; then
+            echo "::warning::Could not reach Replit API (curl exit=$CURL_EXIT, http=$RESPONSE) — trigger staging manually if needed"
+            exit 0
+          fi
+
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
+            echo "Staging deployment triggered successfully (HTTP $RESPONSE)"
+            exit 0
+          fi
+
+          if [ "$RESPONSE" = "401" ] || [ "$RESPONSE" = "403" ]; then
+            echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — REPLIT_STAGING_DEPLOY_TOKEN is likely expired. Rotate it in Settings → Environments → staging. (fail-soft, not blocking release)"
+          else
+            echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — unexpected response, investigate. (fail-soft, not blocking release)"
+          fi
+          exit 0
 
       - name: Deployment summary
         if: always()
