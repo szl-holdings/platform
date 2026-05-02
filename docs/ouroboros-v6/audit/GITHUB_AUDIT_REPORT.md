@@ -60,7 +60,7 @@ Net: 5 of 7 open PRs cleared. 2 remaining are conflicted and require Replit-side
 
 | Surface | Action |
 | --- | --- |
-| Personal profile README (`stephenlutar2-hash/stephenlutar2-hash`) | Test count badge updated `133/133` → **`1,372/1,372`**; **DOI v1 + DOI v2 badges added** below ORCID |
+| Personal profile README (`stephenlutar2-hash/stephenlutar2-hash`) | Test count badge updated `133/133` → `1,372/1,372` (subsequently corrected to **`150/150`** on 2026-05-02 — the 1,372 figure was an aggregate that did not reflect the actual single-package test count); **DOI v1 + DOI v2 badges added** below ORCID |
 | Org `.github` README | Contact email updated to `stephen@szlholdings.com` |
 | `ouroboros-thesis` repo description | Updated to include both DOIs: `v1 10.5281/zenodo.19867281 (position paper, Apr 28 2026)` + `v2 10.5281/zenodo.19934129 (empirical companion, Apr 30 2026)` |
 | Pinned repos on personal profile | Not changed — GitHub's pinned-items GraphQL mutation (`replacePinnedItems`) is not exposed through the audit token. The personal profile README already serves as the canonical featured-repo surface. |
@@ -127,13 +127,9 @@ Security posture moved from `1/10` to `10/10` across every active repo in a sing
 
 ---
 
-## 9. Proof bundle
+## 9. Proof bundle — RETRACTED
 
-The thesis proof anchor for funding decks, government briefings, and vendor outreach lives at:
-- `evolution/proof/THESIS_PROOF_BUNDLE.md` (human-readable)
-- `evolution/proof/THESIS_PROOF_BUNDLE.json` (machine-readable schema `ouroboros.thesis.proof/v1`)
-
-Captures: both DOIs, both annotated tag commit SHAs, test counts (925 TS + 447 Py = 1,372), 24 packages, 91 primitives, 9 Λ axes, full standards coverage, full governance posture.
+A thesis proof bundle was previously checked in at `docs/ouroboros-v6/proof/THESIS_PROOF_BUNDLE.{md,json}` capturing test counts of "925 TypeScript + 447 Python = 1,372" across "24 packages" with "91 primitives." Those figures were not accurate. The actual test surface at the v6.1.0 release is **150 declared Vitest tests in the single `@szl-holdings/ouroboros` package**, verified by running `pnpm exec vitest run` against the release commit. There is no `packages/ouroboros-py` directory at this release and no Python test surface. The proof bundle files were removed on 2026-05-02 in the same self-audit cleanup that retracted Ouroboros Thesis v3 (Zenodo 19951520). The DOIs and annotated-tag commit SHAs in the rest of this document remain accurate.
 
 ---
 
