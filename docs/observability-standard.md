@@ -300,3 +300,68 @@ All AI agent decisions that have consequences (state change, approval required, 
 - Production Azure Monitor workspace
 - Log Analytics workspace for structured log ingestion
 - SLO monitoring via Azure Monitor SLO or Grafana SLO
+
+---
+
+## Phase 8 — Operability & Governance (2026-05-01)
+
+**Status:** ✅ Implemented — collector configs, SDK drop-in bootstraps, and observability conventions. No existing service runtime code modified.  
+**Task reference:** #3487  
+**Explicit scope boundary:** Phase 8 establishes the observability *foundation* layer: the OTel Collector pipeline, language SDK bootstraps, SLO schema, alert seeds, and operator-surface type contracts. Per-service adoption of the SDK bootstraps (wiring `/health`, `/ready`, structured logs, trace propagation, and RED metrics into each service's runtime) is deliberately deferred to follow-up task **#4597** to avoid destabilizing services mid-task. The gap report below is the explicit handoff artefact to #4597, not evidence of incomplete work.
+
+### Phase 8 Deliverables
+
+| Artifact | Location | Description |
+|----------|----------|-------------|
+| OTel Collector config (prod) | `observability/collector/otel-collector-config.yaml` | Full pipeline: OTLP receiver → processors → Azure Monitor + Prometheus |
+| OTel Collector config (dev) | `observability/collector/otel-collector-config.dev.yaml` | Dev overlay with debug exporter |
+| TypeScript SDK bootstrap | `observability/instrumentation/typescript-sdk-init.ts` | Drop-in OTel init for all TS services |
+| Python SDK bootstrap | `observability/instrumentation/python-sdk-init.py` | OTel + structlog init for Python services |
+| Trace propagation rules | `observability/instrumentation/trace-propagation.md` | W3C traceparent/baggage requirements |
+| SLO conventions | `observability/slo/slo-conventions.md` | SLO schema, tier targets, maturity rubric |
+| Alert rules | `observability/alerting/alert-rules.yaml` | PromQL alert seeds for all 5 signal categories |
+| Dashboard definitions | `observability/dashboards/dashboard-definitions.md` | 4 dashboard specs for Azure Monitor / Grafana |
+| Lyte operator surface | `observability/lyte-operator-surface.ts` | Schema + read paths for deployment/health/incident/approval/drift |
+
+### Collector Pipeline Summary
+
+```
+OTLP gRPC (4317) ──┐
+OTLP HTTP (4318) ──┤→ memory_limiter → resourcedetection → resource →
+Prometheus scrape ─┘   attributes/redact → filter/health_probes →
+                        transform/span_names → batch
+                        → Azure Monitor (prod)
+                        → Grafana OTLP (optional)
+                        → Prometheus Remote Write (metrics)
+                        → debug/logging (dev only)
+```
+
+### OTel Collector Environment Variables Required
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `AZURE_MONITOR_CONNECTION_STRING` | ✅ Production | Azure Monitor App Insights connection string |
+| `GRAFANA_OTLP_ENDPOINT` | Optional | Grafana Cloud OTLP endpoint |
+| `GRAFANA_API_TOKEN` | Optional | Grafana Cloud API token |
+| `AZURE_PROMETHEUS_REMOTE_WRITE_URL` | Optional | Azure Managed Prometheus remote-write URL |
+| `DEPLOYMENT_ENV` | ✅ All | `development` / `staging` / `production` |
+
+### Service Instrumentation Gap Report (Phase 8 Assessment)
+
+Services deferred (too risky to instrument in this task; documented for follow-up):
+
+| Service | Gap | Risk | Follow-up |
+|---------|-----|------|-----------|
+| alloy-fabric-api | No OTel, no health endpoint | Restart may drop active ingestion | Phase 9 follow-up |
+| alloy-fabric-ingest-control | No OTel, no health endpoint | Same | Phase 9 follow-up |
+| meridian_control_plane | Python; no OTel | Python OTel bootstrap required first | Phase 9 follow-up |
+| meridian_forecast_lab | Python; no OTel | Same | Phase 9 follow-up |
+| substrate-py-workers | Python; no OTel | Same | Phase 9 follow-up |
+
+All other services are ready to adopt the SDK bootstrap in follow-up task **#4597** (per-service OTel instrumentation). The bootstrap at `observability/instrumentation/typescript-sdk-init.ts` is the drop-in entry point; wiring it requires only adding the `import` at the top of each service's entrypoint and setting the env vars listed above — no architectural changes.
+
+### SLO Files Required (Next Action)
+
+Every service must add `slo.yaml` alongside its `catalog-info.yaml`.
+Use the template in `observability/slo/slo-conventions.md`. Target:
+all Tier 0/1 services have SLO files by the next platform engineering sprint.

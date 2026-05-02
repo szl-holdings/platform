@@ -547,3 +547,143 @@ All changes in this phase are new files — no existing files were modified exce
 # Verify: OPA constraint evaluates correctly against a DomainService claim dry-run
 # argocd app sync crossplane-system --dry-run
 ```
+
+---
+
+## Phase 8+9+10 — Operability & Governance (2026-05-01)
+
+**Scope**: OpenTelemetry observability baseline (Phase 8), OPA policy layer (Phase 9), Temporal/Dapr orchestration substrate (Phase 10).  
+**Task reference**: #3487  
+**Status**: ✅ Implemented — configs, schemas, policies, workflows, and CI integration only. No existing artifact runtime code modified. No Azure resources provisioned. No secrets embedded.  
+**Phase 8 scope note**: Phase 8 deliberately delivers the *foundation* layer only — OTel Collector pipeline, SDK drop-in bootstraps, SLO schema, alert seeds, and operator-surface contracts. Per-service adoption (wiring `/health`, `/ready`, structured logs, trace propagation, RED metrics into each service's runtime entrypoint) is the explicit scope of follow-up task **#4597** to avoid destabilising services mid-task. The gap report in `docs/observability-standard.md` § "Service Instrumentation Gap Report" is the handoff artefact to #4597.
+
+---
+
+### Phase 8 — Observability Baseline
+
+#### Files Created
+
+| File | Description |
+|------|-------------|
+| `observability/collector/otel-collector-config.yaml` | Full OTel Collector config: OTLP receiver, processors (memory_limiter, resourcedetection, attributes/redact, filter/health_probes, transform), exporters (Azure Monitor, Prometheus remote write, logging) |
+| `observability/collector/otel-collector-config.dev.yaml` | Dev overlay: debug exporter, verbose logging, no PII redaction |
+| `observability/instrumentation/typescript-sdk-init.ts` | Drop-in OTel Node.js SDK bootstrap for all TypeScript services (tracer, metrics, logs, W3C propagation, auto-instrumentation) |
+| `observability/instrumentation/python-sdk-init.py` | OTel Python SDK bootstrap + structlog JSON config for Python services |
+| `observability/instrumentation/trace-propagation.md` | W3C traceparent/baggage rules, required baggage keys, manual propagation patterns |
+| `observability/slo/slo-conventions.md` | SLO schema (slo.yaml), tier targets, error budget policy, service maturity scoring rubric (0–20) |
+| `observability/alerting/alert-rules.yaml` | Alert rule seeds for: availability, latency, saturation, governance (proof chain, policy blocks, OPA errors), orchestration (Temporal failures, stuck approvals) |
+| `observability/dashboards/dashboard-definitions.md` | 4 dashboard specs: Platform Overview, AI/Cognitive Quality, Governance & Audit, Per-Service Detail |
+| `observability/lyte-operator-surface.ts` | Full TypeScript schema + read path contracts for: DeploymentState, ServiceHealthSnapshot, IncidentEvidence, ServiceLineageGraph, ApprovalTrace, DriftViolation, LyteOperatorSurface |
+
+#### Files Extended
+
+- `docs/observability-standard.md` — Phase 8 section appended: deliverables, collector pipeline, env vars, gap report, SLO file action
+
+---
+
+### Phase 9 — OPA Policy Layer
+
+#### Files Created
+
+| File | Description |
+|------|-------------|
+| `platform/policy/ci/ci-policy.rego` | 6 deny rules + 2 warn rules: PR branch control, action pinning, push protection, required checks, production approval gate, vulnerability blocking |
+| `platform/policy/manifest/manifest-validation.rego` | 8 deny rules: required labels/annotations, non-root containers, resource limits, image tag/registry control, Crossplane environment declaration, Argo source repo allow-list |
+| `platform/policy/environment/environment-guardrails.rego` | 7 deny rules: change window gates, production deployer group, staging-health prerequisite, secret scope isolation, break-glass requirement, production ACR enforcement |
+| `platform/policy/approval/approval-requirements.rego` | Approval count + group requirements by operation type; SLA enforcement |
+| `platform/policy/mutation/mutation-scope.rego` | 5 deny rules: unknown kind gates, stateful resource deletion, cluster-scope restriction, Secret read path control, platform infra protection |
+| `platform/policy/network/network-exposure.rego` | 6 deny rules: internal service exposure, prohibited ports, OTel collector exposure, database ports, hostNetwork/hostPort, NetworkPolicy requirement |
+| `platform/policy/secrets/secret-patterns.rego` | 6 deny rules: stringData in Secrets, credential keys in ConfigMaps, literal values in env vars, high-entropy secret detection, unapproved secret stores, placeholder values in staging/prod |
+| `platform/policy/tagging/tagging-ownership.rego` | 6 deny rules: required labels, domain/tier/owner/manager allowlists, production cost-center + runbook annotations |
+| `platform/policy/tests/ci_policy_test.rego` | 9 unit tests for szl.ci |
+| `platform/policy/tests/manifest_validation_test.rego` | 6 unit tests for szl.manifest |
+| `platform/policy/tests/environment_guardrails_test.rego` | 7 unit tests for szl.environment |
+| `platform/policy/README.md` | Full policy bundle docs: test commands, CI integration, adding new policies, non-bypassability contract |
+| `platform/policy/aegis-trust-surface.ts` | Full TypeScript schema + read paths for: PolicyEvaluationRecord, SupplyChainPosture, VulnerabilityPosture, AuditHistoryEvent, PolicyException, AegisTrustSurface |
+| `.github/workflows/opa-policy.yml` | 4-job CI workflow: policy tests, CI policy eval on PRs, manifest policy eval on manifest changes, Rego lint |
+
+#### Files Extended
+
+- `docs/security-baseline.md` — Phase 9 section appended: deliverables, test commands, non-bypassability contract, PLT-004 gap closure, Aegis schema summary
+
+---
+
+### Phase 10 — Temporal/Dapr Orchestration
+
+#### Files Created
+
+| File | Description |
+|------|-------------|
+| `platform/temporal/types/workflow-types.ts` | All shared TypeScript types: workflow inputs/outputs, evidence types, approval records, dependency checks, ingestion checkpoint |
+| `platform/temporal/activities/approval-activities.ts` | 6 activities: evaluatePolicyActivity (OPA REST), requestApprovalActivity (api-server), recordEvidenceActivity (evidence ledger), emitLyteVisibilityActivity (Lyte), deployServiceActivity (Argo CD), checkServiceHealthActivity (health check) |
+| `platform/temporal/workflows/approval-workflow.ts` | Durable approval gate: signals (approvalDecision, cancelApproval), OPA evaluation, notification, evidence recording, Lyte visibility, SLA timeout |
+| `platform/temporal/workflows/remediation-workflow.ts` | Remediation chain: policy check, human-approval gate (signal), strategy execution (rollback/scale-down/circuit-break/manual), health verification, evidence recording |
+| `platform/temporal/workflows/promotion-workflow.ts` | Dependency-aware promotion: policy check, source health, dependency version checks, child approval workflow, Argo CD deploy, post-deploy health, evidence chain |
+| `platform/temporal/workflows/evidence-collection-workflow.ts` | Incident evidence packager: multi-type/multi-service collection, tamper-evident storage ref + checksum, Lyte incident visibility |
+| `platform/temporal/workflows/ingestion-sync-workflow.ts` | Long-running sync (continue-as-new at 100 iterations): batch fetch, validate, ingest, rate-limited, heartbeating |
+| `platform/temporal/tests/approval-workflow.test.ts` | 5 tests: happy path, rejection, timeout, cancellation, policy-allows short-circuit |
+| `platform/temporal/tests/remediation-workflow.test.ts` | 4 tests: happy path (rollback succeeds), failure (all attempts exhausted), policy-blocked, human-abort |
+| `platform/temporal/README.md` | Workflow registry, activity registry, Lyte visibility contract, local dev commands, namespace config, adding new workflows, design principles |
+| `platform/dapr/components/pubsub-service-bus.yaml` | Dapr pub/sub (Azure Service Bus prod / Redis dev) for Alloy worker topic subscriptions |
+| `platform/dapr/components/statestore-redis.yaml` | Dapr state store (Redis) for evidence ledger checkpoints (conditional production deployment) |
+| `platform/dapr/docs/dapr-usage-justification.md` | Decision framework: 2 approved touchpoints (pub/sub, service invocation), 1 conditional (state store), 5 rejected use cases |
+
+---
+
+### Risks
+
+| Risk | Severity | Mitigation |
+|------|----------|-----------|
+| OPA policies add friction to CI before tooling matures | Medium | Policies start as warn in Phase 9; graduate to blocking deny as adoption grows |
+| Temporal worker deployment requires Temporal server | Medium | Dev uses `temporalio/cli` start-dev; prod deployment is Phase 5 follow-up |
+| Dapr adds sidecar overhead to Alloy workers | Low | Justified use cases only; rejected blanket adoption |
+| OTel Collector is not yet deployed | Medium | Configs ready; deployment requires Container Apps (Phase 5) |
+| Temporal tests require `@temporalio/*` packages at install time | Low | `platform/temporal/package.json` declares all required devDependencies; `pnpm install` adds them to the workspace; tests run via `pnpm --filter @szl-holdings/temporal-tests test` |
+
+### Rollback Path
+
+All Phase 8+9+10 changes are new files under `observability/`, `platform/policy/`, `platform/temporal/`, `platform/dapr/`, and one new CI workflow. No existing runtime code was modified. Rollback:
+- Remove `observability/` directory
+- Remove `platform/policy/`, `platform/temporal/`, `platform/dapr/` directories
+- Delete `.github/workflows/opa-policy.yml`
+- Remove Phase 8+9+10 sections appended to `docs/observability-standard.md`, `docs/security-baseline.md`, and this file
+
+---
+
+## Next Dependency and Next Command
+
+### Next Dependency: Agent Gateway + UX Normalization
+
+**Task:** "SZL Agent Gateway (OpenAI Agents SDK) + UX Normalization shell across all SZL apps"
+
+**What that task needs from this phase:**
+- `observability/lyte-operator-surface.ts` — schema for operator surface API endpoints the agent gateway will query
+- `platform/policy/aegis-trust-surface.ts` — schema for trust surface API endpoints the gateway will expose
+- `platform/policy/approval/approval-requirements.rego` — the approval hooks the gateway must call before executing privileged actions
+- `platform/temporal/workflows/approval-workflow.ts` — the Temporal approval workflow the gateway triggers for human-gated actions
+- `.github/workflows/opa-policy.yml` — CI gates the gateway's own manifests must pass
+
+**What that task does NOT need to re-decide:**
+- Which OPA policies gate which operations (fully specified in this phase)
+- Temporal workflow input/output types (fully typed in workflow-types.ts)
+- Lyte and Aegis surface schemas (defined in this phase)
+- Dapr adoption scope (settled: pub/sub for Alloy workers only)
+
+### Next Command
+
+```bash
+# Agent Gateway + UX Normalization kick-off
+# Pre-read:
+#   observability/lyte-operator-surface.ts     (operator surface API contracts)
+#   platform/policy/aegis-trust-surface.ts     (trust surface API contracts)
+#   platform/temporal/README.md               (workflow registry for agent hooks)
+#   platform/policy/README.md                 (OPA bundle — approval + environment policies)
+
+# First action: scaffold the agent gateway package
+pnpm --filter @szl-holdings/agent-gateway run scaffold
+
+# Then: wire OpenAI Agents SDK with approval hook middleware that calls:
+#   1. evaluatePolicyActivity (OPA szl.approval)
+#   2. approvalWorkflow (Temporal) for policy-required approvals
+#   3. emitLyteVisibilityActivity (Lyte surface)
+```

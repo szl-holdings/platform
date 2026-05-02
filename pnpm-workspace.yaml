@@ -9,6 +9,7 @@ packages:
   - services/*
   - workers/*
   - scripts
+  - platform/temporal
 
 autoInstallPeers: false
 

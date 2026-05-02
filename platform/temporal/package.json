@@ -1,0 +1,22 @@
+{
+  "name": "@szl-holdings/temporal-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SZL Holdings Temporal workflow definitions, activities, and unit/replay tests (Phase 10 — Operability & Governance)",
+  "scripts": {
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@temporalio/activity": "^1.11.0",
+    "@temporalio/client": "^1.11.0",
+    "@temporalio/testing": "^1.11.0",
+    "@temporalio/worker": "^1.11.0",
+    "@temporalio/workflow": "^1.11.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {}
+}

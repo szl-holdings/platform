@@ -1,0 +1,59 @@
+##
+## SZL Holdings — Dapr Service Invocation Configuration
+## Phase 10 (Operability & Governance)
+##
+## Purpose: Temporal activity workers → api-server calls (evidence recording,
+##   health checks, Lyte visibility events). Provides automatic mTLS between
+##   Dapr sidecars, built-in retries, and distributed tracing propagation.
+##
+## Adoption scope: Approved for Temporal worker → api-server only.
+##   See platform/dapr/docs/dapr-usage-justification.md §2 for rationale.
+##
+## Dapr Service Invocation does not require an explicit component YAML
+## for basic HTTP-based invocation — the capability is built into the
+## Dapr runtime. This file documents the resiliency policy applied to
+## Temporal worker → api-server calls, registered as a named resiliency
+## policy in the Dapr control plane.
+##
+## Reference: https://docs.dapr.io/operations/resiliency/policies/
+##
+
+apiVersion: dapr.io/v1alpha1
+kind: Resiliency
+metadata:
+  name: szl-temporal-to-apiserver-resiliency
+  namespace: szl-platform
+  labels:
+    app.kubernetes.io/part-of: szl-holdings
+    app.kubernetes.io/component: dapr-resiliency
+    szl.io/dapr-scope: temporal-to-apiserver
+spec:
+  policies:
+    timeouts:
+      activityCallTimeout: 30s
+      healthCheckTimeout: 10s
+
+    retries:
+      activityCallRetry:
+        policy: exponential
+        maxInterval: 30s
+        maxRetries: 5
+      healthCheckRetry:
+        policy: constant
+        duration: 5s
+        maxRetries: 3
+
+    circuitBreakers:
+      apiServerCircuitBreaker:
+        maxRequests: 1
+        interval: 10s
+        timeout: 30s
+        trip: consecutiveFailures >= 5
+
+  targets:
+    apps:
+      api-server:
+        timeout: activityCallTimeout
+        retry: activityCallRetry
+        circuitBreaker: apiServerCircuitBreaker
+        circuitBreakerCacheSize: 100

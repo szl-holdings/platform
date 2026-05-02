@@ -1,0 +1,40 @@
+# SZL Holdings — Dapr State Store Component (Redis)
+# Justification: platform/dapr/docs/dapr-usage-justification.md §3
+# Environment: development / staging (conditional in production)
+# See justification doc for production deployment criteria.
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-statestore
+  namespace: szl-platform
+  labels:
+    szl.io/domain: platform
+    szl.io/owner: platform-team
+    szl.io/managed-by: argo-cd
+    szl.io/environment: staging
+  annotations:
+    szl.io/justification: "platform/dapr/docs/dapr-usage-justification.md#3"
+    szl.io/condition: "Only deploy to production if db availability SLO < 99.5%"
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      secretKeyRef:
+        name: szl-redis-secret
+        key: host
+    - name: redisPassword
+      secretKeyRef:
+        name: szl-redis-secret
+        key: password
+    - name: enableTLS
+      value: "true"
+    - name: failover
+      value: "false"
+    - name: ttlInSeconds
+      value: "86400"  # 24h; evidence checkpoints are short-lived
+    - name: keyPrefix
+      value: "szl-evidence-checkpoint:"
+auth:
+  secretStore: azure-keyvault-staging

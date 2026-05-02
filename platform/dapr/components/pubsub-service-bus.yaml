@@ -1,0 +1,76 @@
+# SZL Holdings — Dapr Pub/Sub Component (Azure Service Bus)
+# Justification: platform/dapr/docs/dapr-usage-justification.md §1
+# Environment: production / staging
+# Dev alternative: pubsub-redis.yaml (see below)
+#
+# Deployed by: Argo CD as part of the szl-platform AppProject
+# Requires: AZURE_SERVICE_BUS_CONNECTION_STRING in Azure Key Vault
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-pubsub
+  namespace: szl-platform
+  labels:
+    szl.io/domain: platform
+    szl.io/owner: platform-team
+    szl.io/managed-by: argo-cd
+    szl.io/environment: production
+  annotations:
+    szl.io/justification: "platform/dapr/docs/dapr-usage-justification.md#1"
+    szl.io/runbook: "infra/runbooks/dapr-pubsub.md"
+spec:
+  type: pubsub.azure.servicebus.topics
+  version: v1
+  metadata:
+    # Connection string sourced from Azure Key Vault via External Secrets Operator
+    - name: connectionString
+      secretKeyRef:
+        name: szl-service-bus-secret
+        key: connectionString
+    - name: timeoutInSec
+      value: "60"
+    - name: handlerTimeoutInSec
+      value: "60"
+    - name: lockRenewalInSec
+      value: "20"
+    - name: maxActiveMessages
+      value: "10"
+    - name: maxRetriableErrorsPerSec
+      value: "10"
+    - name: minConnectionRecoveryInSec
+      value: "2"
+    - name: maxConnectionRecoveryInSec
+      value: "300"
+    - name: disableEntityManagement
+      value: "false"
+    - name: deadLetterTopicName
+      value: "szl-dead-letter"
+    - name: errorMessageTopic
+      value: "szl-error-queue"
+auth:
+  secretStore: azure-keyvault-production
+---
+# Dev overlay — uses Redis Streams instead of Azure Service Bus
+# Apply this in development namespace to avoid Azure Service Bus costs
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: szl-pubsub
+  namespace: szl-dev
+  labels:
+    szl.io/environment: development
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      value: "redis:6379"
+    - name: redisPassword
+      value: ""
+    - name: enableTLS
+      value: "false"
+    - name: processingTimeout
+      value: "60s"
+    - name: redeliverInterval
+      value: "30s"
