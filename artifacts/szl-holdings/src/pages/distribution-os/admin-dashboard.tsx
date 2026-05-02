@@ -38,7 +38,7 @@ import {
   Send,
   Settings,
   Shuffle,
-  Twitter,
+  MessageCircle as Twitter,
   Users,
   Zap,
 } from 'lucide-react';

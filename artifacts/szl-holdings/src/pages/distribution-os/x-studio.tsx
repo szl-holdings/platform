@@ -9,7 +9,7 @@ import {
   Plus,
   Send,
   Trash2,
-  Twitter,
+  MessageCircle as Twitter,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

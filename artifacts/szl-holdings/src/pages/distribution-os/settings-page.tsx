@@ -16,7 +16,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Trash2,
-  Twitter,
+  MessageCircle as Twitter,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
