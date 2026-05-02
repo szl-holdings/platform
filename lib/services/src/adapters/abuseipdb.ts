@@ -18,7 +18,7 @@ export interface IpReputationResult {
 
 const DEMO_IP_RESULTS: Record<string, IpReputationResult> = {
   "192.168.1.1": { ipAddress: "192.168.1.1", isPublic: false, abuseConfidenceScore: 0, countryCode: "US", usageType: "Reserved", isp: "Private", domain: "local", totalReports: 0, numDistinctUsers: 0, lastReportedAt: null, categories: [], isWhitelisted: false, riskLevel: "low" },
-  "185.220.101.45": { ipAddress: "185.220.101.45", isPublic: true, abuseConfidenceScore: 100, countryCode: "DE", usageType: "Tor Exit Node", isp: "Hetzner Online GmbH", domain: "hetzner.com", totalReports: 4523, numDistinctUsers: 1287, lastReportedAt: new Date().toISOString(), categories: ["Tor Exit Node", "Port Scan", "Exploits"], isWhitelisted: false, riskLevel: "critical" },
+  "185.220.101.45": { ipAddress: "185.220.101.45", isPublic: true, abuseConfidenceScore: 100, countryCode: "DE", usageType: "Tor Exit Node", isp: "Anonymized Hosting Provider", domain: "example.invalid", totalReports: 4523, numDistinctUsers: 1287, lastReportedAt: new Date().toISOString(), categories: ["Tor Exit Node", "Port Scan", "Exploits"], isWhitelisted: false, riskLevel: "critical" },
 };
 
 export class AbuseIPDBAdapter extends ServiceAdapter {

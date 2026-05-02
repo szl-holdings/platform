@@ -24,7 +24,7 @@ This document is the SZL Holdings PIA *template* for Amaru. A customer agency's 
 | System owner (agency side) | _to be filled by customer_ |
 | Authority to operate (agency side) | _to be filled by customer_ |
 | Operational date for this deployment | _to be filled by customer_ |
-| Hosting environment | AWS GovCloud (US) for "A11oy US" deployments; Hetzner EU otherwise |
+| Hosting environment | AWS GovCloud (US) for "A11oy US" deployments; commercial cloud provider TBD otherwise |
 | Architecture summary | Connector-based ingest from sources, classification, hash-verified delta log, policy-guarded routing to destinations |
 
 ## 3. Section B — Information collected

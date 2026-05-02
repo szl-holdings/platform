@@ -21,7 +21,7 @@ Sentra is the cyber-resilience product. SOC 2 is the most-asked-for trust eviden
 |---|---|
 | Product | Sentra (incident command, recursive threat modeling, action queue, adversary engine) |
 | Underlying control plane | A11oy (the substrate Sentra runs on, including the AEF packages) |
-| Hosting environment | AWS GovCloud (US) for SOC-scoped tenants; commercial Hetzner for non-SOC-scoped tenants is **out of scope** of the report |
+| Hosting environment | AWS GovCloud (US) for SOC-scoped tenants; non-SOC-scoped commercial deployments are **out of scope** of the report |
 | Data | Customer-supplied threat data, security telemetry, alerts, runbooks, incident artifacts |
 | Operations | SZL Holdings operations: provisioning, change management, access control, vulnerability management, incident response, vendor management |
 
