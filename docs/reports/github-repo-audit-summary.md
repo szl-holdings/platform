@@ -56,7 +56,6 @@ Inference metrics, accuracy drift detection, model health summary.
 | NuroMesh agent-to-agent delegation | Requires Redis, complex state management, and DB tables not present |
 | MCP (Model Context Protocol) client | Requires separate MCP server infrastructure not in workspace |
 | Aegis, Beacon, Nimbus, Zeus, DreamEra apps | Functionality already covered by Firestorm, Lyte, INCA, Dreamscape |
-| Alloy/AlloyScape agent system | Separate agent framework, redundant with domain agents |
 | OpenAI SDK direct integration | Workspace uses existing AI adapter with Replit proxy/OpenAI/Anthropic fallback |
 | Redis session/caching layer | Workspace uses in-memory caching; Redis not configured |
 | Entra ID / Azure AD auth | Enterprise SSO not configured in workspace |

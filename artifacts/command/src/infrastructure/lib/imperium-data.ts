@@ -87,7 +87,6 @@ const FRONTEND_APPS = [
   'lyte',
   'carlota-jo',
   'szl-holdings',
-  'alloyscape',
 ];
 
 function staticWebAppSentinel(app: string): Sentinel {
@@ -109,7 +108,6 @@ function staticWebAppSentinel(app: string): Sentinel {
     lyte: 96,
     'carlota-jo': 91,
     'szl-holdings': 98,
-    alloyscape: 84,
   };
   return {
     id: `swa-${app}`,

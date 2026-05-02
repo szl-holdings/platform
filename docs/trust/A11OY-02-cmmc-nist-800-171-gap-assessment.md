@@ -41,7 +41,7 @@ This document is SZL Holdings' self-assessment of A11oy against NIST SP 800-171 
 | 03.07 Maintenance | 6 | 5 | 1 | 0 | 0 | Automated patch cycle. Gap: 03.07.05 (nonlocal maintenance — partial). |
 | 03.08 Media Protection | 9 | 7 | 1 | 1 | 0 | Encrypted at rest. Gap: 03.08.07 (removable media use — N/A in cloud-only ops, formally documented). |
 | 03.09 Personnel Security | 2 | 1 | 1 | 0 | 0 | Background check policy adopted; not yet exercised (single-founder). |
-| 03.10 Physical Protection | 6 | 0 | 0 | 0 | 6 | Cloud-only; inherited from Hetzner / AWS. |
+| 03.10 Physical Protection | 6 | 0 | 0 | 0 | 6 | Cloud-only; inherited from underlying cloud provider (AWS for US deployments; commercial provider TBD otherwise). |
 | 03.11 Risk Assessment | 5 | 4 | 1 | 0 | 0 | Threat model maintained in `docs/`. Gap: 03.11.04 (risk response) — formalization needed. |
 | 03.12 Security Assessment | 5 | 3 | 2 | 0 | 0 | Self-assessment cadence quarterly. Gap: independent assessment not yet performed. |
 | 03.13 System and Communications Protection | 17 | 14 | 2 | 1 | 0 | TLS 1.3 enforced. Gaps: 03.13.11 (FIPS 140-3 validated crypto — using FIPS-capable libs but not validated module), 03.13.16 (CUI at rest — N/A until CUI handling). |
