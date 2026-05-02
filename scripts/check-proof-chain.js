@@ -57,8 +57,8 @@ const ROOT = new URL('..', import.meta.url).pathname;
 
 const SCAN_DIRS = [
   'packages',
-  // Only scan api-server (the only artifact that calls executeWorkflow)
-  'artifacts/api-server/src',
+  // api-server was removed in the 6-keep monorepo cleanup; executeWorkflow callers now
+  // live in packages only.
 ];
 
 const IGNORE_PATTERNS = [

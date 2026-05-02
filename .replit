@@ -1,10 +1,22 @@
 modules = ["nodejs-24", "python-3.11", "javascript", "postgresql-16"]
 
 [[artifacts]]
-id = "artifacts/api-server"
+id = "artifacts/a11oy"
 
 [[artifacts]]
-id = "artifacts/mockup-sandbox"
+id = "artifacts/sentra"
+
+[[artifacts]]
+id = "artifacts/terra"
+
+[[artifacts]]
+id = "artifacts/carlota-jo"
+
+[[artifacts]]
+id = "artifacts/counsel"
+
+[[artifacts]]
+id = "artifacts/vessels"
 
 [deployment]
 router = "application"
@@ -24,7 +36,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/lyte-command-center: web"
+args = "artifacts/a11oy: web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/sentra: web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -32,7 +48,15 @@ args = "artifacts/counsel: web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "security-tests"
+args = "artifacts/terra: web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/carlota-jo: web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/vessels: web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -40,32 +64,26 @@ args = "brand-strings"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/pluginmesh: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "praxis-smoke-e2e"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "GI Design System Storybook"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/conduit: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "api-integration-tests"
-
 [[workflows.workflow]]
-name = "artifacts/lyte-command-center: web"
+name = "artifacts/a11oy: web"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
-waitForPort = 9090
+args = "bash -c 'cd /home/runner/workspace/artifacts/a11oy && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "artifacts/sentra: web"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'cd /home/runner/workspace/artifacts/sentra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
 [workflows.workflow.metadata]
 outputType = "webview"
@@ -82,15 +100,37 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 outputType = "webview"
 
 [[workflows.workflow]]
-name = "security-tests"
+name = "artifacts/terra: web"
 author = "agent"
-
-[workflows.workflow.metadata]
-isValidation = true
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pnpm --filter @workspace/api-server test"
+args = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "artifacts/carlota-jo: web"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'cd /home/runner/workspace/artifacts/carlota-jo && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "artifacts/vessels: web"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [[workflows.workflow]]
 name = "brand-strings"
@@ -104,29 +144,6 @@ args = "pnpm brand:strings"
 isValidation = true
 
 [[workflows.workflow]]
-name = "artifacts/pluginmesh: web"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/pluginmesh && VITE_PORT=8099 BASE_PATH=/pluginmesh/ exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-waitForPort = 8099
-
-[[workflows.workflow]]
-name = "praxis-smoke-e2e"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "set -e; pnpm --filter @workspace/mockup-sandbox run build && rm -rf /tmp/served-praxis && mkdir -p /tmp/served-praxis/nexus && cp -r artifacts/mockup-sandbox/dist/public/. /tmp/served-praxis/nexus/ && (cd /tmp/served-praxis && python3 -m http.server 3010 >/tmp/praxis-serve.log 2>&1 &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:3010 pnpm exec playwright test tests/e2e/nexus-smoke.spec.ts --project=chromium; rc=$?; pkill -f 'http.server 3010' || true; exit $rc"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
 name = "GI Design System Storybook"
 author = "agent"
 
@@ -137,29 +154,6 @@ outputType = "webview"
 task = "shell.exec"
 args = "pnpm --filter @workspace/storybook run dev"
 waitForPort = 6800
-
-[[workflows.workflow]]
-name = "artifacts/conduit: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/conduit && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-waitForPort = 5300
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "api-integration-tests"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm --filter @workspace/api-server test"
-
-[workflows.workflow.metadata]
-isValidation = true
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -188,10 +182,6 @@ DB_CONNECT_TIMEOUT_MS = "90000"
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
-X_API_KEY = "REPLACE_ME_when_x_developer_account_is_paid"
-X_API_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
-X_ACCESS_TOKEN = "REPLACE_ME_when_x_developer_account_is_paid"
-X_ACCESS_TOKEN_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
 SUBSTRATE_GATEWAY_PORT = "8077"
 AEF_GATEWAY_URL = "http://localhost:4200"
 VITE_AEF_GATEWAY_URL = "http://localhost:4200"

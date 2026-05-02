@@ -13,17 +13,13 @@
   },
   "artifactInventory": {
     "source": "data/szl-ecosystem.json",
-    "count": 12,
-    "categories": ["Core", "Intelligence", "Domain", "Platform", "Infrastructure", "Mobile"]
+    "count": 6,
+    "artifacts": ["a11oy", "sentra", "terra", "carlota-jo", "counsel", "vessels"],
+    "categories": ["Substrate", "Intelligence", "Domain"]
   },
   "mcpActivation": {
     "configFile": ".mcp.json",
     "servers": [
-      {
-        "name": "pluginmesh",
-        "command": "node scripts/mcp-server.mjs",
-        "tools": ["pluginmesh_search", "pluginmesh_route", "pluginmesh_replit_ecosystem_payload"]
-      },
       {
         "name": "alloy",
         "url": "https://${REPLIT_DEV_DOMAIN}/api/mcp",
@@ -33,7 +29,7 @@
   },
   "devCommands": {
     "install": "pnpm install",
-    "dev": "pnpm --filter @workspace/szl-holdings run dev",
+    "dev": "pnpm --filter @workspace/a11oy run dev",
     "build": "pnpm turbo build",
     "test": "pnpm turbo test",
     "validate": "node scripts/validate.mjs",
@@ -45,9 +41,8 @@
     "keyFiles": [
       "pnpm-workspace.yaml",
       "turbo.json",
-      "lib/api-spec/openapi.yaml",
       "lib/db/src/schema/",
-      "artifacts/api-server/src/routes/",
+      "artifacts/a11oy/",
       "packages/tool-registry/",
       "packages/skill-library/"
     ]

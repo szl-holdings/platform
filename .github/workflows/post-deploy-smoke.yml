@@ -64,34 +64,18 @@ jobs:
         # IMPORTANT: grep values must match the test.describe() string in the spec
         # (case-sensitive Playwright regex).
         include:
-          - artifact: szl-holdings
-            grep: "SZL Holdings"
+          - artifact: a11oy
+            grep: "A11oy"
           - artifact: sentra
             grep: "Sentra"
           - artifact: counsel
             grep: "Counsel"
-          - artifact: pulse
-            grep: "Pulse"
           - artifact: terra
             grep: "Terra"
           - artifact: vessels
             grep: "Vessels"
-          - artifact: command
-            grep: "Unified Command"
           - artifact: carlota-jo
             grep: "Carlota Jo"
-          - artifact: conduit
-            grep: "Conduit"
-          - artifact: a11oy
-            grep: "A11oy"
-          - artifact: lyte
-            grep: "Lyte"
-          - artifact: praxis
-            grep: "PRAXIS"
-          # "API server" matches the describe block:
-          # test.describe('Post-deploy smoke — API server', ...)
-          - artifact: api-server
-            grep: "API server"
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

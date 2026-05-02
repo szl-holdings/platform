@@ -26,10 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         app:
-          - name: szl-holdings
-            filter: "@workspace/szl-holdings"
-            dist: artifacts/szl-holdings/dist
-            port: 3000
           - name: terra
             filter: "@workspace/terra"
             dist: artifacts/terra/dist
@@ -42,14 +38,6 @@ jobs:
             filter: "@workspace/carlota-jo"
             dist: artifacts/carlota-jo/dist
             port: 3004
-          - name: command
-            filter: "@workspace/command"
-            dist: artifacts/command/dist
-            port: 3005
-          - name: lyte-command-center
-            filter: "@workspace/lyte-command-center"
-            dist: artifacts/lyte-command-center/dist
-            port: 3006
           - name: sentra
             filter: "@workspace/sentra"
             dist: artifacts/sentra/dist
@@ -58,18 +46,10 @@ jobs:
             filter: "@workspace/counsel"
             dist: artifacts/counsel/dist
             port: 3008
-          - name: pulse
-            filter: "@workspace/pulse"
-            dist: artifacts/pulse/dist
-            port: 3009
           - name: a11oy
             filter: "@workspace/a11oy"
             dist: artifacts/a11oy/dist
             port: 3010
-          - name: conduit
-            filter: "@workspace/conduit"
-            dist: artifacts/conduit/dist
-            port: 3011
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

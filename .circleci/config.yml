@@ -12,15 +12,6 @@ executors:
       - image: cimg/node:24.4
     resource_class: medium
 
-  node24-with-postgres:
-    docker:
-      - image: cimg/node:24.4
-      - image: cimg/postgres:16.4
-        environment:
-          POSTGRES_DB: szl_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-    resource_class: medium
 
 # ---------------------------------------------------------------------------
 # Reusable commands
@@ -61,22 +52,6 @@ commands:
           name: Install dependencies
           command: pnpm install --frozen-lockfile --prefer-offline
       - save-pnpm-cache
-
-  wait-for-postgres:
-    description: Poll until PostgreSQL accepts connections
-    steps:
-      - run:
-          name: Wait for PostgreSQL
-          command: |
-            for i in $(seq 1 30); do
-              if pg_isready -h 127.0.0.1 -p 5432 -U postgres > /dev/null 2>&1; then
-                echo "PostgreSQL ready after ${i}s"
-                exit 0
-              fi
-              sleep 1
-            done
-            echo "PostgreSQL did not become ready in time"
-            exit 1
 
 # ---------------------------------------------------------------------------
 # Jobs
@@ -123,100 +98,23 @@ jobs:
           name: Build all workspace packages
           command: pnpm -r --if-present run build
       - run:
-          name: Build @workspace/command (Ecosystem Command Portal)
-          command: pnpm --filter @workspace/command run build
+          name: Build @workspace/a11oy
+          command: pnpm --filter @workspace/a11oy run build
       - run:
-          name: Build @workspace/pulse (Executive Briefing)
-          command: pnpm --filter @workspace/pulse run build
-      - run:
-          name: Build @workspace/api-server
-          command: pnpm --filter @workspace/api-server run build
-      - run:
-          name: Build @workspace/szl-holdings
-          command: pnpm --filter @workspace/szl-holdings run build
+          name: Build @workspace/sentra
+          command: pnpm --filter @workspace/sentra run build
       - run:
           name: Build @workspace/terra
           command: pnpm --filter @workspace/terra run build
       - run:
-          name: Build @workspace/vessels
-          command: pnpm --filter @workspace/vessels run build
-      - run:
           name: Build @workspace/carlota-jo
           command: pnpm --filter @workspace/carlota-jo run build
-
-  integration-test:
-    executor: node24-with-postgres
-    steps:
-      - checkout
-      - install-deps
-      - wait-for-postgres
       - run:
-          name: Run database migrations
-          command: pnpm migrate
-          environment:
-            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/szl_test
+          name: Build @workspace/counsel
+          command: pnpm --filter @workspace/counsel run build
       - run:
-          name: Build API server
-          command: pnpm --filter @workspace/api-server exec node ./build.mjs
-          environment:
-            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/szl_test
-            SESSION_SECRET: ci-test-session-secret-not-for-production
-            NODE_ENV: test
-      - run:
-          name: Start API server in background
-          command: pnpm --filter @workspace/api-server run start 2>&1 | tee /tmp/api-server.log
-          background: true
-          environment:
-            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/szl_test
-            SESSION_SECRET: ci-test-session-secret-not-for-production
-            NODE_ENV: test
-            PORT: "5000"
-            ALLOY_INTERNAL_TOKEN: $INTEGRATION_TEST_TOKEN
-      - run:
-          name: Wait for API server to be healthy
-          command: |
-            echo "Waiting for API server on port 5000..."
-            for i in $(seq 1 30); do
-              if curl -sf http://localhost:5000/api/health > /dev/null 2>&1; then
-                echo "API server is up after ${i}s"
-                exit 0
-              fi
-              sleep 1
-            done
-            echo "=== API server log (last 50 lines) ==="
-            tail -n 50 /tmp/api-server.log 2>/dev/null || true
-            echo "API server did not become healthy within 30s"
-            exit 1
-      - run:
-          name: Run integration tests
-          command: pnpm test:integration
-          environment:
-            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/szl_test
-            NODE_ENV: test
-            CI: "true"
-            PORT: "5000"
-            BASE_URL: http://localhost:5000
-      - run:
-          name: Health pool saturation regression test
-          command: pnpm --filter @workspace/api-server exec vitest run src/__tests__/health-pool-saturation.test.ts
-          environment:
-            DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/szl_test
-            SESSION_SECRET: ci-test-session-secret-not-for-production
-            NODE_ENV: test
-            CI: "true"
-      - run:
-          name: Dump API server logs
-          when: always
-          command: |
-            if [ -f /tmp/api-server.log ]; then
-              echo "=== API server output (last 100 lines) ==="
-              tail -n 100 /tmp/api-server.log
-            fi
-      - store_test_results:
-          path: coverage
-      - store_artifacts:
-          path: coverage
-          destination: integration-coverage
+          name: Build @workspace/vessels
+          command: pnpm --filter @workspace/vessels run build
 
   secret-scan:
     executor: node24
@@ -271,15 +169,6 @@ workflows:
               ignore: /.*/
 
       - build:
-          filters:
-            branches:
-              only: /.*/
-            tags:
-              ignore: /.*/
-
-      - integration-test:
-          requires:
-            - build
           filters:
             branches:
               only: /.*/

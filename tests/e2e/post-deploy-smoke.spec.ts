@@ -33,7 +33,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   ARTIFACT_SMOKE_CONFIGS,
-  API_HEALTH_PATH,
   type ArtifactSmokeConfig,
 } from '../../tools/smoke/artifact-smoke.config';
 
@@ -73,25 +72,6 @@ async function navigateWithTiming(
   const elapsedMs = Date.now() - start;
   return { status: response?.status() ?? 0, elapsedMs };
 }
-
-test.describe('Post-deploy smoke — API server', () => {
-  test('GET /api/health returns 200', async ({ request }) => {
-    const url = `${BASE_URL}${API_HEALTH_PATH}`;
-    const start = Date.now();
-    const response = await request.get(url);
-    const elapsedMs = Date.now() - start;
-
-    expect(
-      response.status(),
-      `[api-server] ${url} returned HTTP ${response.status()} (expected 200)`,
-    ).toBe(200);
-
-    expect(
-      elapsedMs,
-      `[api-server] health check took ${elapsedMs}ms, expected < 5000ms`,
-    ).toBeLessThan(5000);
-  });
-});
 
 for (const config of ARTIFACT_SMOKE_CONFIGS) {
   const skip = config.skipInCI && !!process.env.CI;

@@ -207,10 +207,17 @@ function main(): void {
 
   mkdirSync(dirname(OUT_PATH), { recursive: true });
   writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
-  mkdirSync(dirname(PUBLISH_PATH), { recursive: true });
-  writeFileSync(PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
-  mkdirSync(dirname(SZL_HOLDINGS_PUBLISH_PATH), { recursive: true });
-  writeFileSync(SZL_HOLDINGS_PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
+  // Publish to surface artifacts only when the parent artifact dir still exists.
+  // mockup-sandbox and szl-holdings were removed in the 6-keep cleanup; in that
+  // case we skip the publish step rather than recreate the dir tree.
+  if (existsSync(join(ROOT, 'artifacts/mockup-sandbox'))) {
+    mkdirSync(dirname(PUBLISH_PATH), { recursive: true });
+    writeFileSync(PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
+  }
+  if (existsSync(join(ROOT, 'artifacts/szl-holdings'))) {
+    mkdirSync(dirname(SZL_HOLDINGS_PUBLISH_PATH), { recursive: true });
+    writeFileSync(SZL_HOLDINGS_PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
+  }
 
   // ---------------------------------------------------------------------------
   // Trend / history append. Stored as a rolling window of {ts, average, perArtifact}
@@ -231,8 +238,12 @@ function main(): void {
   history.push(historyEntry);
   while (history.length > HISTORY_LIMIT) history.shift();
   writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
-  writeFileSync(HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
-  writeFileSync(SZL_HOLDINGS_HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+  if (existsSync(join(ROOT, 'artifacts/mockup-sandbox'))) {
+    writeFileSync(HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+  }
+  if (existsSync(join(ROOT, 'artifacts/szl-holdings'))) {
+    writeFileSync(SZL_HOLDINGS_HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+  }
 
   // Append single-line JSONL entry to the committed audit trail.
   mkdirSync(dirname(AUDIT_JSONL_PATH), { recursive: true });
@@ -246,8 +257,6 @@ function main(): void {
     console.log(`  ${bar}  ${String(r.score).padStart(3)}  ${r.id.padEnd(22)}  ${r.violations} hits / ${r.lines} lines`);
   }
   console.log(`\nReport: ${relative(ROOT, OUT_PATH)}`);
-  console.log(`Published to NEXUS: ${relative(ROOT, PUBLISH_PATH)}`);
-  console.log(`Published to SZL Holdings: ${relative(ROOT, SZL_HOLDINGS_PUBLISH_PATH)}`);
   console.log(`Audit trail: ${relative(ROOT, AUDIT_JSONL_PATH)}\n`);
 
   if (checkMode && averageScore < threshold) {
