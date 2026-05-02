@@ -38,11 +38,18 @@ import {
 } from '@szl-holdings/db';
 import { and, desc, eq } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router = Router();
+const rolloutLaunchRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const IS_SIMULATION = process.env.EVOLUTION_MODE === 'simulation' || !process.env.EVOLUTION_MODE;
 const MIN_PROMOTE_SCORE = parseFloat(process.env.PER_MIN_PROMOTE_SCORE ?? '0.72');
@@ -1068,6 +1075,7 @@ router.get('/evolution/audit', async (_req: Request, res: Response) => {
 
 router.post(
   '/evolution/candidates/:id/rollout',
+  rolloutLaunchRateLimiter,
   authMiddleware(),
   validateBody(
     z.object({
