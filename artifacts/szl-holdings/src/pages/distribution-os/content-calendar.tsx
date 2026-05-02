@@ -11,7 +11,7 @@ import {
   Megaphone,
   Plus,
   Tag,
-  Twitter,
+  MessageCircle as Twitter,
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
