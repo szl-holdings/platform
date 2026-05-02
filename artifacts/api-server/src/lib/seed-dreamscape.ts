@@ -81,7 +81,7 @@ export async function seedDreamscapeData(): Promise<void> {
       {
         name: 'Alloy Platform Launch',
         description:
-          'Multi-channel product launch campaign for AlloyScape Execution Fabric — digital video, social cutdowns, and executive demo reels.',
+          'Multi-channel product launch campaign — digital video, social cutdowns, and executive demo reels.',
         clientName: 'Alloy Product',
         status: 'production',
         category: 'product_launch',

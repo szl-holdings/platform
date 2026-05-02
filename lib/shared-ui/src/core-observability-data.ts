@@ -21,7 +21,7 @@ export type EntityState =
   | 'failed'
   | 'recovered';
 export type CommandPhase = 'DETECT' | 'INTERPRET' | 'DECIDE' | 'EXECUTE' | 'VERIFY';
-export type ProductId = 'beacon' | 'lyte' | 'alloy' | 'alloyscape';
+export type ProductId = 'beacon' | 'lyte' | 'alloy';
 
 export interface ObsEvent {
   event_id: string;
@@ -602,7 +602,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: 'evt-005',
     event_type: 'intervention_executed',
-    source_product: 'alloyscape',
+    source_product: 'alloy',
     entity_type: 'execution_run',
     entity_id: 'run-002',
     entity_name: 'Contract Workflow Reroute',
@@ -910,11 +910,6 @@ export const KPI_FRAMEWORK = {
     avg_confidence: { label: 'Avg Confidence', value: '81%', trend: 4 },
     high_probability_risks: { label: 'High-Prob Risks', value: '4', trend: -25 },
   },
-  alloyscape: {
-    runs_24h: { label: 'Runs (24h)', value: '1,247', trend: 8 },
-    success_rate: { label: 'Success Rate', value: '94.2%', trend: 2 },
-    exceptions_open: { label: 'Open Exceptions', value: '6', trend: -33 },
-  },
 };
 
 export const COMMAND_LOOP_PHASES: {
@@ -949,7 +944,7 @@ export const COMMAND_LOOP_PHASES: {
     phase: 'EXECUTE',
     label: 'Execute',
     description: 'Run automations and manage interventions',
-    product: 'alloyscape',
+    product: 'alloy',
     color: '#4B8BDB',
   },
   {

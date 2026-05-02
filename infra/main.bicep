@@ -252,7 +252,6 @@ var frontendApps = [
   'lyte'
   'carlota-jo'
   'szl-holdings'
-  'alloyscape'
 ]
 
 module staticWebApps 'modules/staticwebapp.bicep' = [for app in frontendApps: {

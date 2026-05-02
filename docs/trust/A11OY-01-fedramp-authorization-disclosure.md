@@ -55,7 +55,7 @@ A11oy's production control plane runs on the following infrastructure:
 
 | Layer | Provider | FedRAMP status |
 |---|---|---|
-| Compute (production) | Hetzner Cloud (EU) — non-government deployments | Not FedRAMP authorized |
+| Compute (production) | Commercial cloud — non-government deployments (provider TBD) | Not FedRAMP authorized |
 | Compute (US-only deployments) | AWS GovCloud (US) — pilot-scoped, on request | FedRAMP High inheritable |
 | Database | Neon (Postgres) — non-government deployments | Not FedRAMP authorized |
 | Database (US gov pilots) | AWS RDS Postgres in GovCloud — pilot-scoped, on request | FedRAMP High inheritable |

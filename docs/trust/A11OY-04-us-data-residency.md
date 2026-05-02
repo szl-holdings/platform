@@ -15,7 +15,7 @@ SZL Holdings offers A11oy in two production postures:
 
 | Posture | Default region | Data-residency guarantee |
 |---|---|---|
-| **Commercial (default)** | Hetzner — Falkenstein, Germany (EU) | Customer data resides in EU. No US-origin guarantee. |
+| **Commercial (default)** | Commercial cloud provider — region TBD | Hosting provider not yet provisioned. Data-residency guarantees defined per deployment. |
 | **US-only ("A11oy US")** | AWS GovCloud (US) — `us-gov-west-1` and/or `us-gov-east-1` | All customer data, derived data, telemetry, logs, and backups remain in the US. No data leaves US borders at rest, in transit, or in processing. |
 
 **A11oy US** is the posture intended for any buyer subject to US data-residency requirements (including most US state governments, federal agencies, US healthcare entities under HIPAA, US-only contracts with data-localization clauses, and any deployment where CUI may be present).
