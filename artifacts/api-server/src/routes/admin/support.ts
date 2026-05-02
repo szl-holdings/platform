@@ -10,6 +10,7 @@ import {
 } from '@szl-holdings/db';
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { IRouter } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { sendBadRequest, sendError, sendNotFound, sendSuccess } from '../../lib/api-response.js';
 import {
@@ -1008,6 +1009,13 @@ export function register(router: IRouter): void {
 
   // ── Canned Responses CRUD ─────────────────────────────────────────────────
 
+  const cannedResponsesWriteLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
   const cannedResponseSchema = z.object({
     title: z.string().min(1).max(200),
     category: z.string().min(1).max(100).default('general'),
@@ -1030,6 +1038,7 @@ export function register(router: IRouter): void {
   router.post(
     '/admin/support/canned-responses',
     validateBody(cannedResponseSchema),
+    cannedResponsesWriteLimiter,
     async (req, res) => {
       try {
         const { title, category, body, tags } = req.body as z.infer<typeof cannedResponseSchema>;
