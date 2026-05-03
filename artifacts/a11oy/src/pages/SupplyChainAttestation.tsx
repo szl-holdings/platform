@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { SUPPLY_CHAIN, DARPA_PROGRAMS, fmtPct, DARPA_VERSION } from '../data/darpaResilience';
+import { DefenseCrossNav, DefenseLink, type DefensePageId } from '../components/DefenseCrossNav';
 
 const T = {
   surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -243,9 +244,27 @@ export function SupplyChainAttestation() {
                     <div className="text-xs font-mono" style={{ color: '#ef4444' }}>{metric.incidents2026.toLocaleString()}</div>
                   </div>
                 </div>
-                <div className="p-2 rounded mt-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
-                  <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY MITIGATION:</span>
-                  <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{metric.a11oyMitigation}</span>
+                <div className="p-2 rounded mt-2 flex items-start justify-between gap-3" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                  <div>
+                    <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY MITIGATION:</span>
+                    <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{metric.a11oyMitigation}</span>
+                  </div>
+                  {(() => {
+                    const target: DefensePageId | null =
+                      /Agent Zero Trust|ephemeral|OAuth token/i.test(metric.a11oyMitigation) ? 'agent-zero-trust' :
+                      /Connector Firewall|connector|MCP/i.test(metric.a11oyMitigation) ? 'agent-zero-trust' :
+                      /attestation|inventory/i.test(metric.a11oyMitigation) ? 'atlas-shield' :
+                      'adversarial';
+                    const label =
+                      target === 'agent-zero-trust' ? 'Agent Zero Trust →' :
+                      target === 'atlas-shield' ? 'ATLAS Shield →' :
+                      'Adversarial Resilience →';
+                    return (
+                      <DefenseLink to={target} title="View related defense page">
+                        <span className="text-[9px] whitespace-nowrap">{label}</span>
+                      </DefenseLink>
+                    );
+                  })()}
                 </div>
               </Card>
             ))}
@@ -353,6 +372,16 @@ export function SupplyChainAttestation() {
       <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.muted }}>
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.accent }} /> Supply Chain Attestation — SocialCyber-inspired integrity verification with SaaS attack defense, OAuth abuse tracking, vendor risk scoring, and continuous attestation pipeline.
       </div>
+
+      <DefenseCrossNav
+        currentId="supply-chain"
+        related={[
+          { id: 'agent-zero-trust', reason: 'Ephemeral OAuth + connector identity controls' },
+          { id: 'weaponized-intel', reason: 'MCP server compromise threat patterns' },
+          { id: 'atlas-shield', reason: 'OWASP Agentic + MITRE coverage mapping' },
+          { id: 'cyber-resilience', reason: 'DARPA programs behind attestation' },
+        ]}
+      />
     </Layout>
   );
 }

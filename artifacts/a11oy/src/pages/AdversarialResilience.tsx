@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { DefenseCrossNav, DefenseLink } from '../components/DefenseCrossNav';
 
 const T = {
   surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -164,6 +165,13 @@ export function AdversarialResilience() {
         <KpiCard label="BLOCK RATE" value="100%" sub="all attacks stopped" accent={T.accent} />
         <KpiCard label="AVG INTERCEPTION" value="Layer 3.2" sub="average catch point" accent={T.accent} />
         <KpiCard label="PROOF ENTRIES" value={ATTACKS.length} sub="audit trail intact" accent={T.dim} />
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-[10px]" style={{ color: T.muted }}>
+        <span className="font-mono uppercase tracking-wider">Cross-reference:</span>
+        <DefenseLink to="atlas-shield">ATLAS Shield coverage matrix →</DefenseLink>
+        <DefenseLink to="weaponized-intel">Adversary kill-chain →</DefenseLink>
+        <DefenseLink to="precision-ai">SmartScore triage →</DefenseLink>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -454,6 +462,16 @@ export function AdversarialResilience() {
       <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.muted }}>
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.accent }} /> Adversarial Resilience — governance stress testing, data poisoning defense, post-quantum cryptography readiness, and frontier AI exposure analysis.
       </div>
+
+      <DefenseCrossNav
+        currentId="adversarial"
+        related={[
+          { id: 'atlas-shield', reason: 'MITRE techniques behind each scenario' },
+          { id: 'weaponized-intel', reason: 'Real-world adversary playbook' },
+          { id: 'supply-chain', reason: 'SBOM + attestation defense layer' },
+          { id: 'gard-robustness', reason: 'DARPA-tier robustness benchmarks' },
+        ]}
+      />
     </Layout>
   );
 }

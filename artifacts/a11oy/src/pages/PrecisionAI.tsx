@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useDefenseData } from '../hooks/useDefenseData';
 import { LoadingState, ErrorState, RefreshBar } from '../components/DefenseDataState';
+import { DefenseCrossNav } from '../components/DefenseCrossNav';
 
 const T = {
   surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -256,6 +257,15 @@ export function PrecisionAI() {
           <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.muted }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.accent }} /> Precision AI Engine — every signal scored, calibrated, and triaged autonomously. Only high-confidence, high-SNR signals reach human operators.
           </div>
+
+          <DefenseCrossNav
+            currentId="precision-ai"
+            related={[
+              { id: 'weaponized-intel', reason: 'Threats SmartScore is calibrated against' },
+              { id: 'atlas-shield', reason: 'MITRE techniques scored by analytics modules' },
+              { id: 'adversarial', reason: 'Stress tests for triage decisions' },
+            ]}
+          />
         </>
       )}
     </Layout>

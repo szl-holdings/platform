@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useDefenseData } from '../hooks/useDefenseData';
 import { LoadingState, ErrorState, RefreshBar } from '../components/DefenseDataState';
+import { DefenseCrossNav, DefenseLink } from '../components/DefenseCrossNav';
 
 const T = {
   surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -131,7 +132,10 @@ export function WeaponizedIntel() {
                             <p className="text-[10px]" style={{ color: T.dim }}>{phase.agenticCapability}</p>
                           </div>
                           <div className="p-3 rounded" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
-                            <div className="text-[9px] font-mono uppercase tracking-wider mb-1" style={{ color: T.accent }}>A11OY DEFENSE</div>
+                            <div className="text-[9px] font-mono uppercase tracking-wider mb-1 flex items-center justify-between gap-2" style={{ color: T.accent }}>
+                              <span>A11OY DEFENSE</span>
+                              <DefenseLink to="atlas-shield" title="View MITRE technique coverage">View in ATLAS Shield →</DefenseLink>
+                            </div>
                             <p className="text-[10px]" style={{ color: T.dim }}>{phase.a11oyDefense}</p>
                           </div>
                         </div>
@@ -173,9 +177,14 @@ export function WeaponizedIntel() {
                         <div className="text-[9px] font-mono mt-1" style={{ color: T.muted }}>{threat.agentCount}</div>
                       </div>
                     </div>
-                    <div className="p-2.5 rounded mt-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
-                      <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY MITIGATION:</span>
-                      <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{threat.a11oyMitigation}</span>
+                    <div className="p-2.5 rounded mt-2 flex items-start justify-between gap-3" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                      <div>
+                        <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY MITIGATION:</span>
+                        <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{threat.a11oyMitigation}</span>
+                      </div>
+                      <DefenseLink to="adversarial" title="See attack simulated through governance layers">
+                        <span className="text-[9px] whitespace-nowrap">Simulate →</span>
+                      </DefenseLink>
                     </div>
                   </Card>
                 ))}
@@ -254,6 +263,15 @@ export function WeaponizedIntel() {
           <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)', color: T.muted }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.red }} /> Weaponized Intelligence Center — threat intelligence derived from Palo Alto Networks Unit 42, XSIAM architecture, and OWASP Agentic Security Initiative research.
           </div>
+
+          <DefenseCrossNav
+            currentId="weaponized-intel"
+            related={[
+              { id: 'atlas-shield', reason: 'How A11oy maps each threat to MITRE coverage' },
+              { id: 'adversarial', reason: 'Watch attacks blocked through governance layers' },
+              { id: 'precision-ai', reason: 'SmartScore triage for these threat signals' },
+            ]}
+          />
         </>
       )}
     </Layout>

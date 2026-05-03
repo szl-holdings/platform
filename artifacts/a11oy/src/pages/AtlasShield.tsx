@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useDefenseData } from '../hooks/useDefenseData';
 import { LoadingState, ErrorState, RefreshBar } from '../components/DefenseDataState';
+import { DefenseCrossNav, DefenseLink } from '../components/DefenseCrossNav';
 
 const T = {
   surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -117,7 +118,12 @@ export function AtlasShield() {
                         <td className="px-4 py-2.5"><span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', color: T.dim }}>{tech.tactic}</span></td>
                         <td className="px-4 py-2.5"><span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${COVERAGE_COLORS[tech.coverage]}15`, color: COVERAGE_COLORS[tech.coverage] }}>{tech.coverage}</span></td>
                         <td className="px-4 py-2.5 font-mono" style={{ color: tech.detections > 100 ? T.text : T.dim }}>{tech.detections.toLocaleString()}</td>
-                        <td className="px-4 py-2.5 text-[10px]" style={{ color: T.dim, maxWidth: 300 }}>{tech.a11oyDefense}</td>
+                        <td className="px-4 py-2.5 text-[10px]" style={{ color: T.dim, maxWidth: 300 }}>
+                          <div>{tech.a11oyDefense}</div>
+                          <DefenseLink to="adversarial" title="See this technique blocked in a simulation">
+                            <span className="text-[9px] font-mono">Simulate in Adversarial Resilience →</span>
+                          </DefenseLink>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -182,9 +188,14 @@ export function AtlasShield() {
                         </div>
                       )}
                     </div>
-                    <div className="p-2.5 rounded" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
-                      <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY CONTROL:</span>
-                      <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{item.a11oyControl}</span>
+                    <div className="p-2.5 rounded flex items-start justify-between gap-3" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                      <div>
+                        <span className="text-[9px] font-mono" style={{ color: T.accent }}>A11OY CONTROL:</span>
+                        <span className="text-[10px] ml-1.5" style={{ color: T.dim }}>{item.a11oyControl}</span>
+                      </div>
+                      <DefenseLink to="agent-zero-trust" title="Agent identity & ephemeral credentials">
+                        <span className="text-[9px] whitespace-nowrap">Zero Trust →</span>
+                      </DefenseLink>
                     </div>
                   </Card>
                 ))}
@@ -256,6 +267,16 @@ export function AtlasShield() {
           <div className="p-3 rounded-lg text-xs flex items-center gap-2 mt-6" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.muted }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.accent }} /> ATLAS Shield — dual-framework threat coverage combining MITRE ATLAS AI techniques, MITRE ATT&CK enterprise techniques, and OWASP Agentic Security Top 10.
           </div>
+
+          <DefenseCrossNav
+            currentId="atlas-shield"
+            related={[
+              { id: 'weaponized-intel', reason: 'Adversary techniques behind these mappings' },
+              { id: 'adversarial', reason: 'Live attack simulations across coverage' },
+              { id: 'agent-zero-trust', reason: 'Identity controls for OWASP Agentic Top 10' },
+              { id: 'precision-ai', reason: 'Detection telemetry feeding the matrix' },
+            ]}
+          />
         </>
       )}
     </Layout>
