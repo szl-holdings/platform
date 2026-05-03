@@ -20,7 +20,16 @@ pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
 # drizzle-kit push is non-fatal: the 800+ table schema takes longer than the
 # introspection timeout on some runs. Failures are logged but do not block
 # the merge or workflow reconciliation.
-DB_MIGRATE_TIMEOUT_MS=300000 pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 \
+# Inner wrapper timeout (12 min) sits ~3 min under the outer post-merge
+# timeout (15 min) so the wrapper finishes cleanly and prints diagnostics
+# before the platform sends SIGTERM. FAIL_ON_PROMPT stays off because the
+# wrapper auto-answers drizzle's "create new table?" prompts with the safe
+# default (Enter -> "create"); failing closed here would block every merge
+# whenever the schema introduces a new table that visually resembles one
+# of the orphan legacy tables in the live DB.
+DB_MIGRATE_TIMEOUT_MS=720000 \
+DB_MIGRATE_FAIL_ON_PROMPT=false \
+  pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 \
   || echo "drizzle-kit push timed out or failed (non-fatal, 800+ table schema)"
 
 # Ensure the corporate site's capability manifest is a symlink to the audit
