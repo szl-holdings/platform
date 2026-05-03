@@ -1,17 +1,39 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, ProgressBar } from '../components/ui';
-import { DEFENDER_CREDIT_POOL, partnerById } from '../data/mythosDoctrine';
+import { useDefenderCreditPool, usePartners, DoctrineLoader } from '../hooks/useDoctrine';
 
 const fmtCurrency = (n: number) => `$${n.toLocaleString('en-US')}`;
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 
 export function DefenderCredits() {
-  const pool = DEFENDER_CREDIT_POOL;
-  const allocPct = (pool.totalAllocated / pool.totalCommitted) * 100;
-  const paidPct = (pool.totalPaid / pool.totalCommitted) * 100;
+  const { data: pool, loading: loadingPool, error: errorPool } = useDefenderCreditPool();
+  const { data: partners } = usePartners();
+  const partnerItems = partners ?? [];
+
+  const partnerById = (id: string) => partnerItems.find((p: any) => p.partnerId === id);
+
+  if (!pool) {
+    return (
+      <Layout>
+        <DoctrineLoader loading={loadingPool} error={errorPool}>
+          <div />
+        </DoctrineLoader>
+      </Layout>
+    );
+  }
+
+  const totalCommitted = Number(pool.totalCommitted);
+  const totalAllocated = Number(pool.totalAllocated);
+  const totalPaid = Number(pool.totalPaid);
+  const allocPct = (totalAllocated / totalCommitted) * 100;
+  const paidPct = (totalPaid / totalCommitted) * 100;
+  const rubric = pool.rubric as any[];
+  const perPartner = pool.perPartner as any[];
+  const ledger = pool.ledger as any[];
 
   return (
     <Layout>
+      <DoctrineLoader loading={loadingPool} error={errorPool}>
       <PageHeader
         label="DOCTRINE · DEFENDER CREDIT POOL"
         title="Defender Credit Pool"
@@ -24,10 +46,10 @@ export function DefenderCredits() {
       </Card>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="COMMITTED" value={fmtCurrency(pool.totalCommitted)} accent="#c9b787" />
-        <KpiCard label="ALLOCATED" value={fmtCurrency(pool.totalAllocated)} sub={`${allocPct.toFixed(0)}% of pool`} accent="#c9b787" />
-        <KpiCard label="PAID" value={fmtCurrency(pool.totalPaid)} sub={`${paidPct.toFixed(0)}% of pool`} accent="#c9b787" />
-        <KpiCard label="REMAINING" value={fmtCurrency(pool.totalCommitted - pool.totalAllocated)} accent="#c9b787" />
+        <KpiCard label="COMMITTED" value={fmtCurrency(totalCommitted)} accent="#c9b787" />
+        <KpiCard label="ALLOCATED" value={fmtCurrency(totalAllocated)} sub={`${allocPct.toFixed(0)}% of pool`} accent="#c9b787" />
+        <KpiCard label="PAID" value={fmtCurrency(totalPaid)} sub={`${paidPct.toFixed(0)}% of pool`} accent="#c9b787" />
+        <KpiCard label="REMAINING" value={fmtCurrency(totalCommitted - totalAllocated)} accent="#c9b787" />
       </div>
 
       <Card className="mb-4">
@@ -36,23 +58,23 @@ export function DefenderCredits() {
           <div>
             <div className="flex justify-between text-xs mb-1">
               <span style={{ color: 'var(--color-a11oy-text-sub)' }}>Allocated</span>
-              <span className="font-mono" style={{ color: '#c9b787' }}>{fmtCurrency(pool.totalAllocated)} / {fmtCurrency(pool.totalCommitted)}</span>
+              <span className="font-mono" style={{ color: '#c9b787' }}>{fmtCurrency(totalAllocated)} / {fmtCurrency(totalCommitted)}</span>
             </div>
-            <ProgressBar value={pool.totalAllocated} max={pool.totalCommitted} />
+            <ProgressBar value={totalAllocated} max={totalCommitted} />
           </div>
           <div>
             <div className="flex justify-between text-xs mb-1">
               <span style={{ color: 'var(--color-a11oy-text-sub)' }}>Paid</span>
-              <span className="font-mono" style={{ color: '#c9b787' }}>{fmtCurrency(pool.totalPaid)} / {fmtCurrency(pool.totalCommitted)}</span>
+              <span className="font-mono" style={{ color: '#c9b787' }}>{fmtCurrency(totalPaid)} / {fmtCurrency(totalCommitted)}</span>
             </div>
-            <ProgressBar value={pool.totalPaid} max={pool.totalCommitted} />
+            <ProgressBar value={totalPaid} max={totalCommitted} />
           </div>
         </div>
       </Card>
 
       <Card className="mb-4">
         <SectionTitle>Allocation rubric</SectionTitle>
-        {pool.rubric.map((r, i) => (
+        {rubric?.map((r: any, i: number) => (
           <InfoRow key={i} label={r.factor} value={
             <span className="flex items-center gap-2">
               <span className="font-mono" style={{ color: '#c9b787' }}>weight {(r.weight * 100).toFixed(0)}%</span>
@@ -65,7 +87,7 @@ export function DefenderCredits() {
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
           <SectionTitle>Per-partner allocation</SectionTitle>
-          {pool.perPartner.map(p => {
+          {perPartner?.map((p: any) => {
             const partner = partnerById(p.partnerId);
             return (
               <InfoRow
@@ -84,7 +106,7 @@ export function DefenderCredits() {
 
         <Card>
           <SectionTitle>Ledger</SectionTitle>
-          {pool.ledger.map((e, i) => {
+          {ledger?.map((e: any, i: number) => {
             const partner = partnerById(e.partnerId);
             return (
               <InfoRow
@@ -105,6 +127,7 @@ export function DefenderCredits() {
           })}
         </Card>
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }

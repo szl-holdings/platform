@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { BEHAVIORAL_AUDITS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { useBehavioralAudits, DoctrineLoader } from '../hooks/useDoctrine';
 
 const CATEGORY_LABELS: Record<string, string> = {
   'sycophancy': 'Sycophancy',
@@ -13,18 +14,20 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export function BehavioralAudit() {
+  const { data: BEHAVIORAL_AUDITS, loading, error } = useBehavioralAudits();
   const [filter, setFilter] = useState<string>('all');
 
   const filtered = useMemo(() =>
-    filter === 'all' ? BEHAVIORAL_AUDITS : BEHAVIORAL_AUDITS.filter(a => a.category === filter),
-  [filter]);
+    filter === 'all' ? BEHAVIORAL_AUDITS! : BEHAVIORAL_AUDITS!.filter((a: any) => a.category === filter),
+  [filter, BEHAVIORAL_AUDITS]);
 
-  const open = BEHAVIORAL_AUDITS.filter(a => a.status === 'open').length;
-  const mitigated = BEHAVIORAL_AUDITS.filter(a => a.status === 'mitigated').length;
-  const closed = BEHAVIORAL_AUDITS.filter(a => a.status === 'closed').length;
+  const open = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'open').length ?? 0;
+  const mitigated = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'mitigated').length ?? 0;
+  const closed = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'closed').length ?? 0;
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · BEHAVIORAL AUDIT"
         title="Behavioral Audit Pipeline"
@@ -33,7 +36,7 @@ export function BehavioralAudit() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="FINDINGS" value={BEHAVIORAL_AUDITS.length} sub="this window" accent="#c9b787" />
+        <KpiCard label="FINDINGS" value={BEHAVIORAL_AUDITS?.length ?? 0} sub="this window" accent="#c9b787" />
         <KpiCard label="OPEN" value={open} sub="needs action" accent="#8a8a8a" />
         <KpiCard label="MITIGATED" value={mitigated} sub="rules added" accent="#c9b787" />
         <KpiCard label="CLOSED" value={closed} sub="positive controls" accent="#c9b787" />
@@ -64,7 +67,7 @@ export function BehavioralAudit() {
 
       <SectionTitle>Findings</SectionTitle>
       <div className="flex flex-col gap-3">
-        {filtered.map(a => (
+        {(filtered ?? []).map((a: any) => (
           <Card key={a.id}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">
@@ -89,6 +92,7 @@ export function BehavioralAudit() {
           </Card>
         ))}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }

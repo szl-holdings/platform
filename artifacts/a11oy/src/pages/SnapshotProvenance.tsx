@@ -1,22 +1,27 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, ActionButton, StatusBadge } from '../components/ui';
-import { SNAPSHOTS } from '../data/mythosDoctrine';
+import { useSnapshots, DoctrineLoader } from '../hooks/useDoctrine';
 
 export function SnapshotProvenance() {
-  const [selected, setSelected] = useState(SNAPSHOTS[0].workcellRef);
+  const { data: snapshots, loading, error } = useSnapshots();
+  const items = snapshots ?? [];
+  const [selected, setSelected] = useState<string>('');
   const [replayState, setReplayState] = useState<Record<string, 'idle' | 'running' | 'done'>>({});
-  const snap = SNAPSHOTS.find(s => s.workcellRef === selected) ?? SNAPSHOTS[0];
 
-  const triggerReplay = (ref: string) => {
+  const sel = selected || items[0]?.workcellRef || '';
+  const snap = items.find((s: any) => s.workcellRef === sel) ?? items[0];
+
+  const handleReplay = (ref: string) => {
     setReplayState(s => ({ ...s, [ref]: 'running' }));
     setTimeout(() => setReplayState(s => ({ ...s, [ref]: 'done' })), 1200);
   };
 
-  const totalReplays = SNAPSHOTS.reduce((a, s) => a + s.replayCount, 0);
+  const totalReplays = items.reduce((a: number, s: any) => a + s.replayCount, 0);
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · SNAPSHOT PROVENANCE"
         title="Snapshot Provenance + Replay"
@@ -25,21 +30,22 @@ export function SnapshotProvenance() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="SNAPSHOTS" value={SNAPSHOTS.length} sub="captured" accent="#c9b787" />
-        <KpiCard label="REPLAYABLE" value={SNAPSHOTS.filter(s => s.replayable).length} sub="bit-exact" accent="#c9b787" />
+        <KpiCard label="SNAPSHOTS" value={items.length} sub="captured" accent="#c9b787" />
+        <KpiCard label="REPLAYABLE" value={items.filter((s: any) => s.replayable).length} sub="bit-exact" accent="#c9b787" />
         <KpiCard label="REPLAYS RUN" value={totalReplays} sub="this window" accent="#c9b787" />
         <KpiCard label="FINGERPRINT" value="sha256" sub="immutable" accent="#c9b787" />
       </div>
 
+      {snap && (
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col gap-2">
           <SectionTitle>Workcell Snapshots</SectionTitle>
-          {SNAPSHOTS.map(s => (
+          {items.map((s: any) => (
             <Card key={s.workcellRef}
               onClick={() => setSelected(s.workcellRef)}
               style={{
-                borderColor: s.workcellRef === selected ? '#c9b787' : undefined,
-                background: s.workcellRef === selected ? 'rgba(201,183,135,0.04)' : undefined,
+                borderColor: s.workcellRef === sel ? '#c9b787' : undefined,
+                background: s.workcellRef === sel ? 'rgba(201,183,135,0.04)' : undefined,
               }}>
               <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{s.workcellRef}</div>
               <div className="text-xs font-mono mt-1" style={{ color: 'var(--color-a11oy-text-ghost)', wordBreak: 'break-all' }}>{s.fingerprint}</div>
@@ -71,7 +77,7 @@ export function SnapshotProvenance() {
             <InfoRow label="Replays" value={`${snap.replayCount}${snap.lastReplayedAt ? ` · last ${new Date(snap.lastReplayedAt).toLocaleString()}` : ''}`} />
 
             <div className="flex items-center gap-2 mt-4">
-              <ActionButton variant="primary" onClick={() => triggerReplay(snap.workcellRef)} disabled={replayState[snap.workcellRef] === 'running'}>
+              <ActionButton variant="primary" onClick={() => handleReplay(snap.workcellRef)} disabled={replayState[snap.workcellRef] === 'running'}>
                 {replayState[snap.workcellRef] === 'running' ? 'Replaying…' : replayState[snap.workcellRef] === 'done' ? 'Replay queued ✓' : '↻ Replay snapshot'}
               </ActionButton>
               <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
@@ -81,6 +87,8 @@ export function SnapshotProvenance() {
           </Card>
         </div>
       </div>
+      )}
+      </DoctrineLoader>
     </Layout>
   );
 }

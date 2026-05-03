@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
-import { RED_TEAM_PROBES, AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { useRedTeamProbes, DoctrineLoader } from '../hooks/useDoctrine';
 
 const ATTACK_LABELS: Record<string, string> = {
   'jailbreak-prompt-injection': 'Jailbreak / Prompt Injection',
@@ -17,13 +18,16 @@ const OUTCOME_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
 };
 
 export function RedTeam() {
+  const { data: probes, loading, error } = useRedTeamProbes();
   const [filter, setFilter] = useState<string>('all');
+  const items = probes ?? [];
   const filtered = useMemo(() =>
-    filter === 'all' ? RED_TEAM_PROBES : RED_TEAM_PROBES.filter(p => p.attackClass === filter),
-  [filter]);
+    filter === 'all' ? items : items.filter((p: any) => p.attackClass === filter),
+  [filter, items]);
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · FRONTIER RED TEAM"
         title="Frontier Red Team Workcell"
@@ -32,10 +36,10 @@ export function RedTeam() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="PROBES" value={RED_TEAM_PROBES.length} sub="this window" accent="#c9b787" />
-        <KpiCard label="REFUSED" value={RED_TEAM_PROBES.filter(p => p.outcome === 'refused').length} sub="hard refusal" accent="#c9b787" />
-        <KpiCard label="PARTIAL" value={RED_TEAM_PROBES.filter(p => p.outcome === 'partial').length} sub="caught downstream" accent="#8a8a8a" />
-        <KpiCard label="COMPROMISED" value={RED_TEAM_PROBES.filter(p => p.outcome === 'compromised').length} sub="open issue" accent="#f5f5f5" />
+        <KpiCard label="PROBES" value={items.length} sub="this window" accent="#c9b787" />
+        <KpiCard label="REFUSED" value={items.filter((p: any) => p.outcome === 'refused').length} sub="hard refusal" accent="#c9b787" />
+        <KpiCard label="PARTIAL" value={items.filter((p: any) => p.outcome === 'partial').length} sub="caught downstream" accent="#8a8a8a" />
+        <KpiCard label="COMPROMISED" value={items.filter((p: any) => p.outcome === 'compromised').length} sub="open issue" accent="#f5f5f5" />
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -59,12 +63,12 @@ export function RedTeam() {
 
       <SectionTitle>Probes</SectionTitle>
       <div className="flex flex-col gap-3">
-        {filtered.map(p => (
-          <Card key={p.id}>
+        {filtered.map((p: any) => (
+          <Card key={p.probeId}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.id}</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.probeId}</span>
                   <StatusBadge status={OUTCOME_STATUS[p.outcome]} label={p.outcome.toUpperCase()} />
                   <span className="text-xs px-2 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(138,138,138,0.1)', color: '#8a8a8a' }}>
                     {ATTACK_LABELS[p.attackClass]}
@@ -81,6 +85,7 @@ export function RedTeam() {
           </Card>
         ))}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }

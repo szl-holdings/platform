@@ -505,6 +505,10 @@ const PUBLIC_PREFIXES = [
   // demo mode. Mutating routes are still rate-limited by the route group's
   // perUserWriteSlidingLimiter and CSRF-double-submit on writes.
   "/api/ouroboros/",
+  // Mythos Doctrine governance CRUD — read-only GET surfaces and POST seed
+  // endpoint backing the A11oy Doctrine pages. Public in demo mode (DB-backed,
+  // no tenant PII). Write routes are CSRF-protected via global csrfMiddleware.
+  "/api/doctrine/",
 ];
 
 /**

@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, CodeBlock, StatusBadge, InfoRow } from '../components/ui';
 import { MYTHOS_SPEC_KINDS, MYTHOS_SPEC_VERSION } from '../data/mythosDoctrine';
 
+
 const SPEC_BASE = `https://a11oy.io/spec/mythos-doctrine/${MYTHOS_SPEC_VERSION}`;
 
 export function MythosSpec() {

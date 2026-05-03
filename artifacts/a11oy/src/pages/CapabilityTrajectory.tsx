@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { CAPABILITY_TRAJECTORY, AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/mythosDoctrine';
+import { AGENT_LABEL, DOCTRINE_AGENT_IDS } from '../data/mythosDoctrine';
+import { useCapabilitySnapshots, DoctrineLoader } from '../hooks/useDoctrine';
 
 const GOLD = '#c9b787';
 const COLORS: Record<string, string> = {
@@ -14,36 +16,43 @@ const COLORS: Record<string, string> = {
 };
 
 export function CapabilityTrajectory() {
-  // Build a merged series indexed by release
-  const releases = CAPABILITY_TRAJECTORY['op-cascade'].map(p => p.release);
-  const capabilitySeries = releases.map(r => {
-    const row: Record<string, number | string> = { release: r };
-    DOCTRINE_AGENT_IDS.forEach(id => {
-      const pt = CAPABILITY_TRAJECTORY[id].find(p => p.release === r);
-      if (pt) row[id] = pt.capability;
-    });
-    return row;
-  });
-  const alignmentSeries = releases.map(r => {
-    const row: Record<string, number | string> = { release: r };
-    DOCTRINE_AGENT_IDS.forEach(id => {
-      const pt = CAPABILITY_TRAJECTORY[id].find(p => p.release === r);
-      if (pt) row[id] = pt.alignment;
-    });
-    return row;
-  });
-  const oversightSeries = releases.map(r => {
-    const row: Record<string, number | string> = { release: r };
-    DOCTRINE_AGENT_IDS.forEach(id => {
-      const pt = CAPABILITY_TRAJECTORY[id].find(p => p.release === r);
-      if (pt) row[id] = pt.oversight;
-    });
-    return row;
-  });
+  const { data: snapshots, loading, error } = useCapabilitySnapshots();
+  const items = snapshots ?? [];
 
-  const latest = (key: 'capability' | 'alignment' | 'oversight') => {
-    const vals = DOCTRINE_AGENT_IDS.map(id => CAPABILITY_TRAJECTORY[id].slice(-1)[0][key]);
-    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  const byAgent = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    for (const row of items) {
+      if (!map[row.agentId]) map[row.agentId] = [];
+      map[row.agentId].push(row);
+    }
+    return map;
+  }, [items]);
+
+  const releases = useMemo(() => {
+    const first = byAgent[DOCTRINE_AGENT_IDS[0]] ?? [];
+    return first.map((p: any) => p.release);
+  }, [byAgent]);
+
+  const buildSeries = (key: string) =>
+    releases.map((r: string) => {
+      const row: Record<string, number | string> = { release: r };
+      DOCTRINE_AGENT_IDS.forEach(id => {
+        const pt = (byAgent[id] ?? []).find((p: any) => p.release === r);
+        if (pt) row[id] = pt[key];
+      });
+      return row;
+    });
+
+  const capabilitySeries = buildSeries('capability');
+  const alignmentSeries = buildSeries('alignment');
+  const oversightSeries = buildSeries('oversight');
+
+  const latest = (key: string) => {
+    const vals = DOCTRINE_AGENT_IDS.map(id => {
+      const pts = byAgent[id] ?? [];
+      return pts.length ? pts[pts.length - 1][key] : 0;
+    });
+    return vals.length ? Math.round(vals.reduce((a: number, b: number) => a + b, 0) / vals.length) : 0;
   };
 
   const renderChart = (data: Record<string, number | string>[], title: string, hint: string) => (
@@ -67,6 +76,7 @@ export function CapabilityTrajectory() {
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · CAPABILITY TRAJECTORY"
         title="Capability Trajectory"
@@ -96,6 +106,7 @@ export function CapabilityTrajectory() {
           decisions in this same workspace. Hover any release to see the underlying numbers.
         </p>
       </Card>
+      </DoctrineLoader>
     </Layout>
   );
 }

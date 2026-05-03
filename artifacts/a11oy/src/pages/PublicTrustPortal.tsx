@@ -1,10 +1,11 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
-import {
-  CONSTITUTIONS, AGENT_LABEL, MYTHOS_SPEC_VERSION,
-  TRANSPARENCY_REPORTS_90D, ROBUSTNESS_WALL, CAVD_RECORDS, DEFENDER_CREDIT_POOL,
-} from '../data/mythosDoctrine';
+import { AGENT_LABEL, MYTHOS_SPEC_VERSION } from '../data/mythosDoctrine';
 import { Link } from 'wouter';
+import {
+  useConstitutions, useCavdRecords, useRobustnessSnapshots,
+  useTransparencyReports, useDefenderCreditPool, DoctrineLoader,
+} from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const link = (path: string) => `${BASE}${path}`;
@@ -12,12 +13,24 @@ const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const fmtCurrency = (n: number) => `$${n.toLocaleString('en-US')}`;
 
 export function PublicTrustPortal() {
-  const disclosed = CAVD_RECORDS.filter(r => r.stage === 'disclosed');
-  const intakeAnchored = CAVD_RECORDS.filter(r => r.stage !== 'disclosed' && r.stage !== 'withdrawn');
-  const publicSnapshots = ROBUSTNESS_WALL.filter(s => s.visibility === 'public');
+  const { data: constitutions, loading: loadingC, error: errorC } = useConstitutions();
+  const { data: cavd } = useCavdRecords();
+  const { data: robustness } = useRobustnessSnapshots();
+  const { data: reports } = useTransparencyReports();
+  const { data: pool } = useDefenderCreditPool();
+
+  const cstItems = constitutions ?? [];
+  const cavdItems = cavd ?? [];
+  const robustnessItems = robustness ?? [];
+  const reportItems = reports ?? [];
+
+  const disclosed = cavdItems.filter((r: any) => r.stage === 'disclosed');
+  const intakeAnchored = cavdItems.filter((r: any) => r.stage !== 'disclosed' && r.stage !== 'withdrawn');
+  const publicSnapshots = robustnessItems.filter((s: any) => s.visibility === 'public');
 
   return (
     <Layout>
+      <DoctrineLoader loading={loadingC} error={errorC}>
       <PageHeader
         label="TRUST · PUBLIC PORTAL"
         title="Public Trust Portal"
@@ -29,7 +42,7 @@ export function PublicTrustPortal() {
         <KpiCard label="OPEN SPEC" value={MYTHOS_SPEC_VERSION} sub="CC-BY-4.0" accent="#c9b787" />
         <KpiCard label="GLASSWING AGENTS" value={publicSnapshots.length} sub="public scores" accent="#c9b787" />
         <KpiCard label="CAVD DISCLOSED" value={disclosed.length} sub={`${intakeAnchored.length} anchored`} accent="#c9b787" />
-        <KpiCard label="DEFENDER POOL" value={fmtCurrency(DEFENDER_CREDIT_POOL.totalCommitted)} sub={`${fmtCurrency(DEFENDER_CREDIT_POOL.totalPaid)} paid`} accent="#c9b787" />
+        <KpiCard label="DEFENDER POOL" value={pool ? fmtCurrency(Number(pool.totalCommitted)) : '—'} sub={pool ? `${fmtCurrency(Number(pool.totalPaid))} paid` : ''} accent="#c9b787" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
@@ -46,9 +59,9 @@ export function PublicTrustPortal() {
 
         <Card>
           <SectionTitle>90-Day Transparency Reports</SectionTitle>
-          {TRANSPARENCY_REPORTS_90D.map(r => (
+          {reportItems.map((r: any) => (
             <InfoRow
-              key={r.id}
+              key={r.reportId}
               label={r.label}
               value={
                 <span className="flex items-center gap-2">
@@ -64,8 +77,8 @@ export function PublicTrustPortal() {
 
       <Card className="mb-4">
         <SectionTitle>Per-agent disclosure (Glasswing-Mode agents)</SectionTitle>
-        {CONSTITUTIONS.map(c => {
-          const snap = publicSnapshots.find(s => s.agentId === c.agentId);
+        {cstItems.map((c: any) => {
+          const snap = publicSnapshots.find((s: any) => s.agentId === c.agentId);
           return (
             <InfoRow
               key={c.agentId}
@@ -95,7 +108,7 @@ export function PublicTrustPortal() {
           {disclosed.length === 0 ? (
             <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>None yet.</p>
           ) : (
-            disclosed.map(r => (
+            disclosed.map((r: any) => (
               <InfoRow
                 key={r.advisoryId}
                 label={r.advisoryId}
@@ -113,7 +126,7 @@ export function PublicTrustPortal() {
 
         <Card>
           <SectionTitle>CAVD ledger — intake-anchored (embargoed)</SectionTitle>
-          {intakeAnchored.map(r => (
+          {intakeAnchored.map((r: any) => (
             <InfoRow
               key={r.advisoryId}
               label={r.advisoryId}
@@ -129,14 +142,16 @@ export function PublicTrustPortal() {
         </Card>
       </div>
 
+      {pool && (
       <Card className="mb-4">
         <SectionTitle>Defender Credit Pool</SectionTitle>
-        <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)', lineHeight: 1.7 }}>{DEFENDER_CREDIT_POOL.poolNameDisclaimer}</p>
-        <InfoRow label="total committed" value={fmtCurrency(DEFENDER_CREDIT_POOL.totalCommitted)} />
-        <InfoRow label="allocated" value={fmtCurrency(DEFENDER_CREDIT_POOL.totalAllocated)} />
-        <InfoRow label="paid" value={fmtCurrency(DEFENDER_CREDIT_POOL.totalPaid)} />
+        <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)', lineHeight: 1.7 }}>{pool.poolNameDisclaimer}</p>
+        <InfoRow label="total committed" value={fmtCurrency(Number(pool.totalCommitted))} />
+        <InfoRow label="allocated" value={fmtCurrency(Number(pool.totalAllocated))} />
+        <InfoRow label="paid" value={fmtCurrency(Number(pool.totalPaid))} />
         <InfoRow label="ledger" value={<Link href={link('/defender-credits')} className="font-mono" style={{ color: '#c9b787' }}>view full ledger ›</Link>} />
       </Card>
+      )}
 
       <Card>
         <SectionTitle>Notes</SectionTitle>
@@ -145,6 +160,7 @@ export function PublicTrustPortal() {
           it is not posted here. Retractions are published next to originals; originals are never edited or deleted.
         </p>
       </Card>
+      </DoctrineLoader>
     </Layout>
   );
 }

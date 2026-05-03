@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge, ActionButton } from '../components/ui';
-import { TRANSPARENCY_REPORTS_90D, type TransparencyReport90d } from '../data/mythosDoctrine';
+import { useTransparencyReports, DoctrineLoader } from '../hooks/useDoctrine';
 
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const fmtNum = (n: number) => n.toLocaleString('en-US');
 const fmtSigned = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}`;
 
-function NextReportSchedule({ currentReport }: { currentReport: TransparencyReport90d }) {
+function NextReportSchedule({ currentReport }: { currentReport: any }) {
   const nextStart = new Date(currentReport.endedAt);
   const nextEnd = new Date(nextStart);
   nextEnd.setDate(nextEnd.getDate() + 90);
@@ -53,17 +53,26 @@ function NextReportSchedule({ currentReport }: { currentReport: TransparencyRepo
 }
 
 export function TransparencyReport() {
-  const [activeId, setActiveId] = useState(TRANSPARENCY_REPORTS_90D[0].id);
+  const { data: reports, loading, error } = useTransparencyReports();
+  const items = reports ?? [];
+  const [activeId, setActiveId] = useState<string>('');
   const [downloading, setDownloading] = useState(false);
-  const active = TRANSPARENCY_REPORTS_90D.find(r => r.id === activeId) ?? TRANSPARENCY_REPORTS_90D[0];
+
+  const selId = activeId || items[0]?.reportId || '';
+  const active = items.find((r: any) => r.reportId === selId) ?? items[0];
 
   const downloadPdf = async () => {
+    if (!active) return;
     setDownloading(true);
     try {
       const { jsPDF } = await import('jspdf');
       const doc = new jsPDF({ unit: 'pt', format: 'letter' });
       const margin = 48;
       let y = margin;
+      const metrics = active.metrics as any;
+      const narrativeParagraphs = active.narrativeParagraphs as string[];
+      const signoffs = active.signoffs as any[];
+
       doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
       doc.text('A11oy — 90-Day Transparency Report', margin, y); y += 26;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
@@ -73,15 +82,14 @@ export function TransparencyReport() {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
       doc.text('Metrics', margin, y); y += 16;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-      const m = active.metrics;
       const lines = [
-        `Governed decisions: ${fmtNum(m.governedDecisions)}`,
-        `Approvals required: ${fmtNum(m.approvalsRequired)}`,
-        `Policy blocks: ${fmtNum(m.policyBlocks)}`,
-        `Behavioral-audit findings: ${fmtNum(m.behavioralAuditFindings)}`,
-        `Robustness delta: ${fmtSigned(m.robustnessDelta)}`,
-        `Welfare interventions: ${fmtNum(m.welfareInterventions)}`,
-        `CAVD: opened ${m.cavd.opened} · embargoed ${m.cavd.embargoed} · disclosed ${m.cavd.disclosed} · patched ${m.cavd.patched}`,
+        `Governed decisions: ${fmtNum(metrics.governedDecisions)}`,
+        `Approvals required: ${fmtNum(metrics.approvalsRequired)}`,
+        `Policy blocks: ${fmtNum(metrics.policyBlocks)}`,
+        `Behavioral-audit findings: ${fmtNum(metrics.behavioralAuditFindings)}`,
+        `Robustness delta: ${fmtSigned(metrics.robustnessDelta)}`,
+        `Welfare interventions: ${fmtNum(metrics.welfareInterventions)}`,
+        `CAVD: opened ${metrics.cavd.opened} · embargoed ${metrics.cavd.embargoed} · disclosed ${metrics.cavd.disclosed} · patched ${metrics.cavd.patched}`,
       ];
       lines.forEach(l => { doc.text(l, margin, y); y += 14; });
       y += 8;
@@ -89,7 +97,7 @@ export function TransparencyReport() {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
       doc.text('Narrative', margin, y); y += 16;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-      active.narrativeParagraphs.forEach(p => {
+      narrativeParagraphs.forEach(p => {
         const wrapped = doc.splitTextToSize(p, 612 - margin * 2);
         doc.text(wrapped, margin, y);
         y += wrapped.length * 13 + 6;
@@ -99,9 +107,9 @@ export function TransparencyReport() {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
       doc.text('Signoffs', margin, y); y += 16;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-      active.signoffs.forEach(s => { doc.text(`${s.role}: ${s.actor} · ${fmtDate(s.signedAt)}`, margin, y); y += 14; });
+      signoffs.forEach(s => { doc.text(`${s.role}: ${s.actor} · ${fmtDate(s.signedAt)}`, margin, y); y += 14; });
 
-      doc.save(`a11oy-${active.id}.pdf`);
+      doc.save(`a11oy-${active.reportId}.pdf`);
     } finally {
       setDownloading(false);
     }
@@ -109,6 +117,15 @@ export function TransparencyReport() {
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
+      {active && (() => {
+        const metrics = active.metrics as any;
+        const narrativeParagraphs = active.narrativeParagraphs as string[];
+        const signoffs = active.signoffs as any[];
+        const notableEvents = active.notableEvents as any[];
+
+        return (
+        <>
       <PageHeader
         label="DOCTRINE · 90-DAY TRANSPARENCY"
         title="90-Day Transparency Report"
@@ -123,15 +140,15 @@ export function TransparencyReport() {
       <Card className="mb-6">
         <SectionTitle>Reports</SectionTitle>
         <div className="flex gap-2 flex-wrap">
-          {TRANSPARENCY_REPORTS_90D.map(r => (
+          {items.map((r: any) => (
             <button
-              key={r.id}
-              onClick={() => setActiveId(r.id)}
+              key={r.reportId}
+              onClick={() => setActiveId(r.reportId)}
               className="px-3 py-2 rounded text-xs font-mono"
               style={{
-                backgroundColor: activeId === r.id ? 'rgba(201,183,135,0.12)' : 'transparent',
-                color: activeId === r.id ? '#c9b787' : 'var(--color-a11oy-text-sub)',
-                border: `1px solid ${activeId === r.id ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
+                backgroundColor: selId === r.reportId ? 'rgba(201,183,135,0.12)' : 'transparent',
+                color: selId === r.reportId ? '#c9b787' : 'var(--color-a11oy-text-sub)',
+                border: `1px solid ${selId === r.reportId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
                 cursor: 'pointer',
               }}
             >
@@ -142,20 +159,20 @@ export function TransparencyReport() {
       </Card>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="GOVERNED DECISIONS" value={fmtNum(active.metrics.governedDecisions)} accent="#c9b787" />
-        <KpiCard label="APPROVALS REQUIRED" value={fmtNum(active.metrics.approvalsRequired)} accent="#c9b787" />
-        <KpiCard label="POLICY BLOCKS" value={fmtNum(active.metrics.policyBlocks)} accent="#c9b787" />
-        <KpiCard label="ROBUSTNESS DELTA" value={fmtSigned(active.metrics.robustnessDelta)} sub="vs prev period" accent="#c9b787" trend={active.metrics.robustnessDelta >= 0 ? 'up' : 'down'} />
-        <KpiCard label="BEHAVIORAL FINDINGS" value={fmtNum(active.metrics.behavioralAuditFindings)} accent="#c9b787" />
-        <KpiCard label="WELFARE INTERVENTIONS" value={fmtNum(active.metrics.welfareInterventions)} accent="#c9b787" />
-        <KpiCard label="CAVD OPENED" value={fmtNum(active.metrics.cavd.opened)} sub={`${active.metrics.cavd.disclosed} disclosed`} accent="#c9b787" />
-        <KpiCard label="CAVD PATCHED" value={fmtNum(active.metrics.cavd.patched)} accent="#c9b787" />
+        <KpiCard label="GOVERNED DECISIONS" value={fmtNum(metrics.governedDecisions)} accent="#c9b787" />
+        <KpiCard label="APPROVALS REQUIRED" value={fmtNum(metrics.approvalsRequired)} accent="#c9b787" />
+        <KpiCard label="POLICY BLOCKS" value={fmtNum(metrics.policyBlocks)} accent="#c9b787" />
+        <KpiCard label="ROBUSTNESS DELTA" value={fmtSigned(metrics.robustnessDelta)} sub="vs prev period" accent="#c9b787" trend={metrics.robustnessDelta >= 0 ? 'up' : 'down'} />
+        <KpiCard label="BEHAVIORAL FINDINGS" value={fmtNum(metrics.behavioralAuditFindings)} accent="#c9b787" />
+        <KpiCard label="WELFARE INTERVENTIONS" value={fmtNum(metrics.welfareInterventions)} accent="#c9b787" />
+        <KpiCard label="CAVD OPENED" value={fmtNum(metrics.cavd.opened)} sub={`${metrics.cavd.disclosed} disclosed`} accent="#c9b787" />
+        <KpiCard label="CAVD PATCHED" value={fmtNum(metrics.cavd.patched)} accent="#c9b787" />
       </div>
 
       <Card className="mb-4">
         <SectionTitle>Narrative</SectionTitle>
         <div className="flex flex-col gap-3">
-          {active.narrativeParagraphs.map((p, i) => (
+          {narrativeParagraphs.map((p: string, i: number) => (
             <p key={i} className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>{p}</p>
           ))}
         </div>
@@ -164,7 +181,7 @@ export function TransparencyReport() {
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <Card>
           <SectionTitle>Signoffs</SectionTitle>
-          {active.signoffs.map((s, i) => (
+          {signoffs.map((s: any, i: number) => (
             <InfoRow
               key={i}
               label={s.role.replace('-', ' ')}
@@ -179,7 +196,7 @@ export function TransparencyReport() {
         </Card>
         <Card>
           <SectionTitle>Notable events</SectionTitle>
-          {active.notableEvents.map((e, i) => (
+          {notableEvents.map((e: any, i: number) => (
             <InfoRow key={i} label={fmtDate(e.at)} value={e.summary} />
           ))}
         </Card>
@@ -193,6 +210,10 @@ export function TransparencyReport() {
       </Card>
 
       <NextReportSchedule currentReport={active} />
+        </>
+        );
+      })()}
+      </DoctrineLoader>
     </Layout>
   );
 }

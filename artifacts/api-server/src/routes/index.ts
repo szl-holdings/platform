@@ -227,6 +227,10 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 
+// Mythos Doctrine — governance CRUD, seed, overview, system-card endpoints.
+// Public (demo surface); mounted before guardianPolicyCheck.
+router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-crud"));
+
 // A11oy Public API — unauthenticated read-only routes for public system story.
 // GET /api/public/a11oy/constellation, /applications, /architecture, /resources.
 router.use(publicA11oyRouter);

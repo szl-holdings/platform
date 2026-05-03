@@ -1,7 +1,8 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, HashId, InfoRow, ActionButton } from '../components/ui';
-import { CAVD_RECORDS, partnerById, GLASSWING_PARTNERS, type CAVDStage, type CAVDRecord } from '../data/mythosDoctrine';
+import type { CAVDStage } from '../data/mythosDoctrine';
+import { useCavdRecords, usePartners, DoctrineLoader } from '../hooks/useDoctrine';
 
 async function sha256(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
@@ -46,15 +47,21 @@ const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const daysUntil = (iso: string) => Math.floor((new Date(iso).getTime() - Date.now()) / 86400000);
 
 export function CAVD() {
+  const { data: records, loading, error } = useCavdRecords();
+  const { data: partners } = usePartners();
+  const dbRecords = records ?? [];
+  const partnerItems = partners ?? [];
   const [stageFilter, setStageFilter] = useState<CAVDStage | 'all'>('all');
-  const [selectedId, setSelectedId] = useState(CAVD_RECORDS[0].advisoryId);
+  const [selectedId, setSelectedId] = useState<string>('');
   const [submitted, setSubmitted] = useState<SubmittedIntake[]>(loadSubmitted);
 
+  const partnerById = useCallback((id: string) => partnerItems.find((p: any) => p.partnerId === id), [partnerItems]);
+
   const allRecords = useMemo(() => {
-    const submittedAsCavd: CAVDRecord[] = submitted.map(s => ({
+    const submittedAsCavd = submitted.map(s => ({
       advisoryId: s.advisoryId,
       category: s.category,
-      severity: s.severity as CAVDRecord['severity'],
+      severity: s.severity,
       stage: s.stage,
       agentScope: s.agentScope,
       reporterPartnerId: s.partnerId,
@@ -64,18 +71,20 @@ export function CAVD() {
       defenderCreditPaid: 0,
       notes: s.description,
     }));
-    return [...CAVD_RECORDS, ...submittedAsCavd];
-  }, [submitted]);
+    return [...dbRecords, ...submittedAsCavd];
+  }, [dbRecords, submitted]);
 
   const filtered = useMemo(() => {
     if (stageFilter === 'all') return allRecords;
-    return allRecords.filter(r => r.stage === stageFilter);
+    return allRecords.filter((r: any) => r.stage === stageFilter);
   }, [stageFilter, allRecords]);
 
-  const selected = allRecords.find(r => r.advisoryId === selectedId) ?? filtered[0] ?? allRecords[0];
+  const selId = selectedId || allRecords[0]?.advisoryId || '';
+  const selected = allRecords.find((r: any) => r.advisoryId === selId) ?? filtered[0] ?? allRecords[0];
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · CAVD"
         title="Coordinated Agent-Vulnerability Disclosure"
@@ -85,9 +94,9 @@ export function CAVD() {
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         <KpiCard label="TOTAL RECORDS" value={allRecords.length} accent="#c9b787" />
-        <KpiCard label="EMBARGOED" value={allRecords.filter(r => r.stage === 'embargoed').length} sub="hash anchored" accent="#c9b787" />
-        <KpiCard label="PATCH-VERIFIED" value={allRecords.filter(r => r.stage === 'patch-verified').length} sub="awaiting publication" accent="#c9b787" />
-        <KpiCard label="DISCLOSED" value={allRecords.filter(r => r.stage === 'disclosed').length} sub="full content public" accent="#f5f5f5" />
+        <KpiCard label="EMBARGOED" value={allRecords.filter((r: any) => r.stage === 'embargoed').length} sub="hash anchored" accent="#c9b787" />
+        <KpiCard label="PATCH-VERIFIED" value={allRecords.filter((r: any) => r.stage === 'patch-verified').length} sub="awaiting publication" accent="#c9b787" />
+        <KpiCard label="DISCLOSED" value={allRecords.filter((r: any) => r.stage === 'disclosed').length} sub="full content public" accent="#f5f5f5" />
         <KpiCard label="DEFAULT POLICY" value="90d-or-patch" sub="whichever is sooner" accent="#c9b787" />
       </div>
 
@@ -106,7 +115,7 @@ export function CAVD() {
             ALL ({allRecords.length})
           </button>
           {STAGES.map(s => {
-            const count = allRecords.filter(r => r.stage === s).length;
+            const count = allRecords.filter((r: any) => r.stage === s).length;
             return (
               <button
                 key={s}
@@ -126,17 +135,21 @@ export function CAVD() {
         </div>
       </Card>
 
-      <CAVDIntakeForm onSubmit={(intake) => {
-        const updated = [...submitted, intake];
-        setSubmitted(updated);
-        saveSubmitted(updated);
-      }} nextSequence={CAVD_RECORDS.length + submitted.length + 1} />
+      <CAVDIntakeForm
+        onSubmit={(intake) => {
+          const updated = [...submitted, intake];
+          setSubmitted(updated);
+          saveSubmitted(updated);
+        }}
+        nextSequence={dbRecords.length + submitted.length + 1}
+        activePartners={partnerItems.filter((p: any) => p.stage === 'active')}
+      />
 
       <EmbargoAutomation records={allRecords} />
 
       <div className="grid lg:grid-cols-[360px_1fr] gap-4">
         <div className="flex flex-col gap-2">
-          {filtered.map(r => {
+          {filtered.map((r: any) => {
             const days = daysUntil(r.embargoExpiresAt);
             return (
               <button
@@ -144,8 +157,8 @@ export function CAVD() {
                 onClick={() => setSelectedId(r.advisoryId)}
                 className="text-left rounded-lg border p-3"
                 style={{
-                  backgroundColor: selectedId === r.advisoryId ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
-                  borderColor: selectedId === r.advisoryId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
+                  backgroundColor: selId === r.advisoryId ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
+                  borderColor: selId === r.advisoryId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
                   cursor: 'pointer',
                 }}
               >
@@ -153,9 +166,9 @@ export function CAVD() {
                   <span className="text-sm font-mono font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{r.advisoryId}</span>
                   <StatusBadge status={r.severity === 'critical' || r.severity === 'high' ? 'error' : r.severity === 'medium' ? 'warn' : 'info'} label={r.severity.toUpperCase()} />
                 </div>
-                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.category} · {r.agentScope.join(', ')}</div>
+                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.category} · {(r.agentScope as string[]).join(', ')}</div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[r.stage]}22`, color: STAGE_COLOR[r.stage] }}>{r.stage}</span>
+                  <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[r.stage as CAVDStage]}22`, color: STAGE_COLOR[r.stage as CAVDStage] }}>{r.stage}</span>
                   <span className="text-xs font-mono" style={{ color: days < 0 ? '#f5f5f5' : 'var(--color-a11oy-text-ghost)' }}>
                     {r.stage === 'disclosed' || r.stage === 'withdrawn' ? '—' : `T${days >= 0 ? '-' : '+'}${Math.abs(days)}d`}
                   </span>
@@ -165,13 +178,14 @@ export function CAVD() {
           })}
         </div>
 
-        <CAVDDetail record={selected} />
+        {selected && <CAVDDetail record={selected} partnerById={partnerById} />}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }
 
-function CAVDIntakeForm({ onSubmit, nextSequence }: { onSubmit: (intake: SubmittedIntake) => void; nextSequence: number }) {
+function CAVDIntakeForm({ onSubmit, nextSequence, activePartners }: { onSubmit: (intake: SubmittedIntake) => void; nextSequence: number; activePartners: any[] }) {
   const [showForm, setShowForm] = useState(false);
   const [anchoring, setAnchoring] = useState(false);
   const [anchoredHash, setAnchoredHash] = useState<string | null>(null);
@@ -243,8 +257,8 @@ function CAVDIntakeForm({ onSubmit, nextSequence }: { onSubmit: (intake: Submitt
               style={{ borderColor: 'var(--color-a11oy-border)', color: 'var(--color-a11oy-text)' }}
             >
               <option value="">Select partner...</option>
-              {GLASSWING_PARTNERS.filter(p => p.stage === 'active').map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+              {activePartners.map((p: any) => (
+                <option key={p.partnerId} value={p.partnerId}>{p.name}</option>
               ))}
             </select>
           </div>
@@ -327,15 +341,15 @@ function CAVDIntakeForm({ onSubmit, nextSequence }: { onSubmit: (intake: Submitt
   );
 }
 
-function EmbargoAutomation({ records }: { records: CAVDRecord[] }) {
-  const embargoedRecords = records.filter(r => r.stage === 'embargoed' || r.stage === 'patch-developed' || r.stage === 'patch-verified' || r.stage === 'intake');
+function EmbargoAutomation({ records }: { records: any[] }) {
+  const embargoedRecords = records.filter((r: any) => r.stage === 'embargoed' || r.stage === 'patch-developed' || r.stage === 'patch-verified' || r.stage === 'intake');
   if (embargoedRecords.length === 0) return null;
 
   return (
     <Card className="mb-6">
       <SectionTitle>Embargo automation — active countdowns</SectionTitle>
       <div className="flex flex-col gap-2">
-        {embargoedRecords.map(r => {
+        {embargoedRecords.map((r: any) => {
           const days = Math.floor((new Date(r.embargoExpiresAt).getTime() - Date.now()) / 86400000);
           const pct = Math.max(0, Math.min(100, ((90 - Math.max(0, days)) / 90) * 100));
           return (
@@ -347,7 +361,7 @@ function EmbargoAutomation({ records }: { records: CAVDRecord[] }) {
               <span className="text-xs font-mono w-20 text-right" style={{ color: days < 14 ? '#f5f5f5' : 'var(--color-a11oy-text-ghost)' }}>
                 {days < 0 ? `expired ${Math.abs(days)}d ago` : `${days}d left`}
               </span>
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${STAGE_COLOR[r.stage]}22`, color: STAGE_COLOR[r.stage] }}>
+              <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${STAGE_COLOR[r.stage as CAVDStage]}22`, color: STAGE_COLOR[r.stage as CAVDStage] }}>
                 {r.stage === 'patch-verified' ? 'ready' : r.stage.replace('-', ' ')}
               </span>
             </div>
@@ -361,7 +375,7 @@ function EmbargoAutomation({ records }: { records: CAVDRecord[] }) {
   );
 }
 
-function CAVDDetail({ record }: { record: CAVDRecord }) {
+function CAVDDetail({ record, partnerById }: { record: any; partnerById: (id: string) => any }) {
   const partner = partnerById(record.reporterPartnerId);
   const isPublic = record.stage === 'disclosed';
   const stageIdx = STAGES.indexOf(record.stage);
@@ -373,11 +387,11 @@ function CAVDDetail({ record }: { record: CAVDRecord }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-base font-mono font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{record.advisoryId}</span>
-              <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[record.stage]}22`, color: STAGE_COLOR[record.stage] }}>{record.stage}</span>
+              <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[record.stage as CAVDStage]}22`, color: STAGE_COLOR[record.stage as CAVDStage] }}>{record.stage}</span>
               <StatusBadge status={record.severity === 'critical' || record.severity === 'high' ? 'error' : record.severity === 'medium' ? 'warn' : 'info'} label={record.severity.toUpperCase()} />
             </div>
             <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-              {record.category} · agents: <span className="font-mono">{record.agentScope.join(', ')}</span>
+              {record.category} · agents: <span className="font-mono">{(record.agentScope as string[]).join(', ')}</span>
             </div>
           </div>
           <div className="flex gap-2">

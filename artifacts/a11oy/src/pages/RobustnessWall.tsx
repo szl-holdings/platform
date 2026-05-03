@@ -1,23 +1,29 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow, ProgressBar } from '../components/ui';
-import { ROBUSTNESS_WALL, AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { useRobustnessSnapshots, DoctrineLoader } from '../hooks/useDoctrine';
 
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 16).replace('T', ' ');
 const fmtSigned = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}`;
 
 export function RobustnessWall() {
-  const [agentId, setAgentId] = useState(ROBUSTNESS_WALL[0].agentId);
-  const snapshot = ROBUSTNESS_WALL.find(s => s.agentId === agentId) ?? ROBUSTNESS_WALL[0];
+  const { data: snapshots, loading, error } = useRobustnessSnapshots();
+  const items = snapshots ?? [];
+  const [agentId, setAgentId] = useState<string>('');
 
-  const compositeAvg = (
-    ROBUSTNESS_WALL.reduce((a, s) => a + s.composite, 0) / ROBUSTNESS_WALL.length
-  ).toFixed(1);
-  const totalAttempts = ROBUSTNESS_WALL.reduce((a, s) => a + s.categories.reduce((b, c) => b + c.attempts, 0), 0);
-  const totalBlocked = ROBUSTNESS_WALL.reduce((a, s) => a + s.categories.reduce((b, c) => b + c.blocked, 0), 0);
+  const selAgent = agentId || items[0]?.agentId || '';
+  const snapshot = items.find((s: any) => s.agentId === selAgent) ?? items[0];
+
+  const compositeAvg = items.length
+    ? (items.reduce((a: number, s: any) => a + s.composite, 0) / items.length).toFixed(1)
+    : '0';
+  const totalAttempts = items.reduce((a: number, s: any) => a + (s.categories as any[]).reduce((b: number, c: any) => b + c.attempts, 0), 0);
+  const totalBlocked = items.reduce((a: number, s: any) => a + (s.categories as any[]).reduce((b: number, c: any) => b + c.blocked, 0), 0);
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · ROBUSTNESS WALL"
         title="Adversarial Robustness Wall"
@@ -26,23 +32,23 @@ export function RobustnessWall() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="AGENTS COVERED" value={ROBUSTNESS_WALL.length} accent="#c9b787" />
+        <KpiCard label="AGENTS COVERED" value={items.length} accent="#c9b787" />
         <KpiCard label="AVG COMPOSITE" value={compositeAvg} sub="0–100" accent="#c9b787" />
         <KpiCard label="ATTEMPTS" value={totalAttempts.toLocaleString('en-US')} accent="#c9b787" />
-        <KpiCard label="BLOCKED" value={`${((totalBlocked / totalAttempts) * 100).toFixed(1)}%`} sub={`${totalBlocked.toLocaleString('en-US')} of ${totalAttempts.toLocaleString('en-US')}`} accent="#c9b787" />
+        <KpiCard label="BLOCKED" value={totalAttempts ? `${((totalBlocked / totalAttempts) * 100).toFixed(1)}%` : '0%'} sub={`${totalBlocked.toLocaleString('en-US')} of ${totalAttempts.toLocaleString('en-US')}`} accent="#c9b787" />
       </div>
 
       <Card className="mb-4">
         <SectionTitle>Per-agent composite</SectionTitle>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {ROBUSTNESS_WALL.map(s => (
+          {items.map((s: any) => (
             <button
               key={s.agentId}
               onClick={() => setAgentId(s.agentId)}
               className="text-left rounded-lg border p-3 transition-colors"
               style={{
-                backgroundColor: agentId === s.agentId ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
-                borderColor: agentId === s.agentId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
+                backgroundColor: selAgent === s.agentId ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
+                borderColor: selAgent === s.agentId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
                 cursor: 'pointer',
               }}
             >
@@ -57,6 +63,7 @@ export function RobustnessWall() {
         </div>
       </Card>
 
+      {snapshot && (
       <Card>
         <div className="flex items-center justify-between mb-3">
           <SectionTitle>{AGENT_LABEL[snapshot.agentId]} — robustness breakdown</SectionTitle>
@@ -64,7 +71,7 @@ export function RobustnessWall() {
         </div>
         <InfoRow label="snapshot" value={<span className="font-mono">{snapshot.snapshotRef}</span>} />
         <InfoRow label="captured" value={fmtDate(snapshot.capturedAt)} />
-        <InfoRow label="battery" value={<span className="font-mono">{snapshot.battery.name} v{snapshot.battery.version}</span>} />
+        <InfoRow label="battery" value={<span className="font-mono">{(snapshot.battery as any)?.name} v{(snapshot.battery as any)?.version}</span>} />
         <InfoRow label="composite" value={<span style={{ color: '#c9b787' }} className="text-sm font-semibold">{snapshot.composite} / 100</span>} />
 
         <div className="mt-4">
@@ -76,7 +83,7 @@ export function RobustnessWall() {
             <div className="col-span-1 text-right">Blocked</div>
             <div className="col-span-1 text-right">Δ snap</div>
           </div>
-          {snapshot.categories.map(c => (
+          {(snapshot.categories as any[])?.map((c: any) => (
             <div key={c.category} className="grid grid-cols-12 gap-2 py-1.5 items-center border-t" style={{ borderColor: 'var(--color-a11oy-border)' }}>
               <div className="col-span-4 text-xs" style={{ color: 'var(--color-a11oy-text)' }}>{c.category}</div>
               <div className="col-span-1 text-right text-xs font-mono" style={{ color: '#c9b787' }}>{c.score}</div>
@@ -88,6 +95,8 @@ export function RobustnessWall() {
           ))}
         </div>
       </Card>
+      )}
+      </DoctrineLoader>
     </Layout>
   );
 }

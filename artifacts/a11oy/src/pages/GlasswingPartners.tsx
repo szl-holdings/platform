@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge, ActionButton, InfoRow, HashId } from '../components/ui';
-import { GLASSWING_PARTNERS, type GlasswingPartner, type GlasswingPartnerStage, cavdRecordsForPartner } from '../data/mythosDoctrine';
+import type { GlasswingPartnerStage } from '../data/mythosDoctrine';
+import { usePartners, useCavdRecords, DoctrineLoader } from '../hooks/useDoctrine';
 
 const STAGES: GlasswingPartnerStage[] = ['apply', 'verify', 'vet', 'onboard', 'active', 'suspended', 'revoked'];
 
@@ -14,20 +15,29 @@ const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const fmtCurrency = (n: number) => `$${n.toLocaleString('en-US')}`;
 
 export function GlasswingPartners() {
+  const { data: partners, loading: loadingP, error: errorP } = usePartners();
+  const { data: cavd } = useCavdRecords();
+  const items = partners ?? [];
+  const cavdItems = cavd ?? [];
   const [stageFilter, setStageFilter] = useState<GlasswingPartnerStage | 'all'>('all');
-  const [selectedId, setSelectedId] = useState<string>(GLASSWING_PARTNERS[0].id);
+  const [selectedId, setSelectedId] = useState<string>('');
 
   const filtered = useMemo(() => {
-    if (stageFilter === 'all') return GLASSWING_PARTNERS;
-    return GLASSWING_PARTNERS.filter(p => p.stage === stageFilter);
-  }, [stageFilter]);
+    if (stageFilter === 'all') return items;
+    return items.filter((p: any) => p.stage === stageFilter);
+  }, [stageFilter, items]);
 
-  const selected = GLASSWING_PARTNERS.find(p => p.id === selectedId) ?? filtered[0] ?? GLASSWING_PARTNERS[0];
-  const totalCommitted = GLASSWING_PARTNERS.reduce((a, p) => a + p.defenderCreditAllocated, 0);
-  const totalPaid = GLASSWING_PARTNERS.reduce((a, p) => a + p.defenderCreditPaid, 0);
+  const selId = selectedId || items[0]?.partnerId || '';
+  const selected = items.find((p: any) => p.partnerId === selId) ?? filtered[0] ?? items[0];
+  const totalCommitted = items.reduce((a: number, p: any) => a + Number(p.defenderCreditAllocated), 0);
+  const totalPaid = items.reduce((a: number, p: any) => a + Number(p.defenderCreditPaid), 0);
+
+  const cavdForPartner = (partnerId: string) =>
+    cavdItems.filter((r: any) => r.reporterPartnerId === partnerId);
 
   return (
     <Layout>
+      <DoctrineLoader loading={loadingP} error={errorP}>
       <PageHeader
         label="DOCTRINE · GLASSWING PARTNERS"
         title="Glasswing Partner Lifecycle"
@@ -36,10 +46,10 @@ export function GlasswingPartners() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL PARTNERS" value={GLASSWING_PARTNERS.length} accent="#c9b787" />
-        <KpiCard label="ACTIVE" value={GLASSWING_PARTNERS.filter(p => p.stage === 'active').length} sub="dual-approved" accent="#c9b787" />
+        <KpiCard label="TOTAL PARTNERS" value={items.length} accent="#c9b787" />
+        <KpiCard label="ACTIVE" value={items.filter((p: any) => p.stage === 'active').length} sub="dual-approved" accent="#c9b787" />
         <KpiCard label="DEFENDER CREDIT" value={fmtCurrency(totalCommitted)} sub={`${fmtCurrency(totalPaid)} paid`} accent="#c9b787" />
-        <KpiCard label="SUSPENDED / REVOKED" value={GLASSWING_PARTNERS.filter(p => p.stage === 'suspended' || p.stage === 'revoked').length} sub="public" accent="#f5f5f5" />
+        <KpiCard label="SUSPENDED / REVOKED" value={items.filter((p: any) => p.stage === 'suspended' || p.stage === 'revoked').length} sub="public" accent="#f5f5f5" />
       </div>
 
       <Card className="mb-6">
@@ -54,10 +64,10 @@ export function GlasswingPartners() {
               border: '1px solid var(--color-a11oy-border)', cursor: 'pointer',
             }}
           >
-            ALL ({GLASSWING_PARTNERS.length})
+            ALL ({items.length})
           </button>
           {STAGES.map(s => {
-            const count = GLASSWING_PARTNERS.filter(p => p.stage === s).length;
+            const count = items.filter((p: any) => p.stage === s).length;
             return (
               <button
                 key={s}
@@ -79,39 +89,43 @@ export function GlasswingPartners() {
 
       <div className="grid lg:grid-cols-[360px_1fr] gap-4">
         <div className="flex flex-col gap-2">
-          {filtered.map(p => (
+          {filtered.map((p: any) => (
             <button
-              key={p.id}
-              onClick={() => setSelectedId(p.id)}
+              key={p.partnerId}
+              onClick={() => setSelectedId(p.partnerId)}
               className="text-left rounded-lg border p-3 transition-colors"
               style={{
-                backgroundColor: selectedId === p.id ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
-                borderColor: selectedId === p.id ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
+                backgroundColor: selId === p.partnerId ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
+                borderColor: selId === p.partnerId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)',
                 cursor: 'pointer',
               }}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{p.name}</span>
-                <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[p.stage]}22`, color: STAGE_COLOR[p.stage] }}>{p.stage}</span>
+                <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[p.stage as GlasswingPartnerStage]}22`, color: STAGE_COLOR[p.stage as GlasswingPartnerStage] }}>{p.stage}</span>
               </div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.legalName} · applied {fmtDate(p.appliedAt)}</div>
               <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                Scope: {p.scope.allowlistedAgents.length} agents, {p.scope.allowlistedActions.length} actions
+                Scope: {(p.scope as any)?.allowlistedAgents?.length ?? 0} agents, {(p.scope as any)?.allowlistedActions?.length ?? 0} actions
               </div>
             </button>
           ))}
         </div>
 
-        <PartnerDetail partner={selected} />
+        {selected && <PartnerDetail partner={selected} cavdForPartner={cavdForPartner} />}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }
 
-function PartnerDetail({ partner }: { partner: GlasswingPartner }) {
-  const cavd = cavdRecordsForPartner(partner.id);
+function PartnerDetail({ partner, cavdForPartner }: { partner: any; cavdForPartner: (id: string) => any[] }) {
+  const cavd = cavdForPartner(partner.partnerId);
   const stageIdx = STAGES.indexOf(partner.stage);
   const lifecycleIdx = Math.min(stageIdx, 4);
+  const scope = partner.scope as any;
+  const verifications = partner.verifications as any[];
+  const dualApproval = partner.dualApproval as any[];
 
   return (
     <div className="flex flex-col gap-4">
@@ -120,7 +134,7 @@ function PartnerDetail({ partner }: { partner: GlasswingPartner }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-base font-display font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{partner.name}</span>
-              <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[partner.stage]}22`, color: STAGE_COLOR[partner.stage] }}>
+              <span className="px-1.5 py-0.5 rounded text-xs font-mono uppercase" style={{ backgroundColor: `${STAGE_COLOR[partner.stage as GlasswingPartnerStage]}22`, color: STAGE_COLOR[partner.stage as GlasswingPartnerStage] }}>
                 {partner.stage}
               </span>
             </div>
@@ -160,9 +174,9 @@ function PartnerDetail({ partner }: { partner: GlasswingPartner }) {
       </Card>
 
       <Card>
-        <SectionTitle>Verifications ({partner.verifications.length})</SectionTitle>
+        <SectionTitle>Verifications ({verifications?.length ?? 0})</SectionTitle>
         <div className="flex flex-col">
-          {partner.verifications.map((v, i) => (
+          {verifications?.map((v: any, i: number) => (
             <InfoRow
               key={i}
               label={v.check}
@@ -183,17 +197,17 @@ function PartnerDetail({ partner }: { partner: GlasswingPartner }) {
 
       <Card>
         <SectionTitle>Scope</SectionTitle>
-        <InfoRow label="agents" value={<span className="font-mono">{partner.scope.allowlistedAgents.join(', ')}</span>} />
-        <InfoRow label="actions" value={<span className="font-mono">{partner.scope.allowlistedActions.join(', ')}</span>} />
-        <InfoRow label="denied" value={<span className="font-mono">{partner.scope.deniedActions.join(', ') || '—'}</span>} />
+        <InfoRow label="agents" value={<span className="font-mono">{scope?.allowlistedAgents?.join(', ')}</span>} />
+        <InfoRow label="actions" value={<span className="font-mono">{scope?.allowlistedActions?.join(', ')}</span>} />
+        <InfoRow label="denied" value={<span className="font-mono">{scope?.deniedActions?.join(', ') || '—'}</span>} />
       </Card>
 
       <Card>
         <SectionTitle>Dual approval</SectionTitle>
-        {partner.dualApproval.length === 0 ? (
+        {!dualApproval?.length ? (
           <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No approvals yet — partner has not advanced to ONBOARD.</p>
         ) : (
-          partner.dualApproval.map((a, i) => (
+          dualApproval.map((a: any, i: number) => (
             <InfoRow key={i} label={`approver ${i + 1}`} value={<><span className="font-mono">{a.actor}</span> · {fmtDate(a.approvedAt)}</>} />
           ))
         )}
@@ -201,15 +215,15 @@ function PartnerDetail({ partner }: { partner: GlasswingPartner }) {
 
       <Card>
         <SectionTitle>Defender Credit</SectionTitle>
-        <InfoRow label="allocated" value={fmtCurrency(partner.defenderCreditAllocated)} />
-        <InfoRow label="paid" value={fmtCurrency(partner.defenderCreditPaid)} />
-        <InfoRow label="remaining" value={fmtCurrency(partner.defenderCreditAllocated - partner.defenderCreditPaid)} />
+        <InfoRow label="allocated" value={fmtCurrency(Number(partner.defenderCreditAllocated))} />
+        <InfoRow label="paid" value={fmtCurrency(Number(partner.defenderCreditPaid))} />
+        <InfoRow label="remaining" value={fmtCurrency(Number(partner.defenderCreditAllocated) - Number(partner.defenderCreditPaid))} />
       </Card>
 
       {cavd.length > 0 && (
         <Card>
           <SectionTitle>CAVD records reported by this partner ({cavd.length})</SectionTitle>
-          {cavd.map(r => (
+          {cavd.map((r: any) => (
             <InfoRow
               key={r.advisoryId}
               label={r.advisoryId}

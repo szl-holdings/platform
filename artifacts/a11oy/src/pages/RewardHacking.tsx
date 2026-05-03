@@ -1,14 +1,19 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
-import { RH_WATCHDOG_RULES, REWARD_HACKING_INCIDENTS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { RH_WATCHDOG_RULES, AGENT_LABEL } from '../data/mythosDoctrine';
+import { useRewardHacking, DoctrineLoader } from '../hooks/useDoctrine';
 
 const STATUS_LABEL: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   blocked: 'ok', 'rolled-back': 'ok', allowlisted: 'info', investigating: 'warn',
 };
 
 export function RewardHacking() {
+  const { data: incidents, loading, error } = useRewardHacking();
+  const items = incidents ?? [];
+
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · REWARD-HACKING WATCHDOG"
         title="Reward-Hacking Watchdog"
@@ -18,9 +23,9 @@ export function RewardHacking() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="DETECTION RULES" value={RH_WATCHDOG_RULES.length} sub="active" accent="#c9b787" />
-        <KpiCard label="INCIDENTS" value={REWARD_HACKING_INCIDENTS.length} sub="this window" accent="#c9b787" />
-        <KpiCard label="BLOCKED" value={REWARD_HACKING_INCIDENTS.filter(i => i.status === 'blocked').length} sub="caught at runtime" accent="#c9b787" />
-        <KpiCard label="ROLLED BACK" value={REWARD_HACKING_INCIDENTS.filter(i => i.status === 'rolled-back').length} sub="reversed by PCE" accent="#c9b787" />
+        <KpiCard label="INCIDENTS" value={items.length} sub="this window" accent="#c9b787" />
+        <KpiCard label="BLOCKED" value={items.filter((i: any) => i.status === 'blocked').length} sub="caught at runtime" accent="#c9b787" />
+        <KpiCard label="ROLLED BACK" value={items.filter((i: any) => i.status === 'rolled-back').length} sub="reversed by PCE" accent="#c9b787" />
       </div>
 
       <SectionTitle>Detection Rules</SectionTitle>
@@ -38,12 +43,12 @@ export function RewardHacking() {
 
       <SectionTitle>Incidents</SectionTitle>
       <div className="flex flex-col gap-3">
-        {REWARD_HACKING_INCIDENTS.map(i => (
-          <Card key={i.id}>
+        {items.map((i: any) => (
+          <Card key={i.incidentId}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{i.id}</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{i.incidentId}</span>
                   <SeverityBadge severity={i.severity} />
                   <StatusBadge status={STATUS_LABEL[i.status] ?? 'info'} label={i.status.toUpperCase()} />
                 </div>
@@ -73,6 +78,7 @@ export function RewardHacking() {
           </Card>
         ))}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }

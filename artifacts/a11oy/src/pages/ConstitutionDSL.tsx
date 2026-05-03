@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, CodeBlock, InfoRow, StatusBadge, ActionButton } from '../components/ui';
-import { DSL_EXAMPLES, DSL_SIMULATIONS, AGENT_LABEL } from '../data/mythosDoctrine';
+import { AGENT_LABEL } from '../data/mythosDoctrine';
+import { useDslExamples, useDslSimulations, DoctrineLoader } from '../hooks/useDoctrine';
 
 export function ConstitutionDSL() {
-  const [exampleId, setExampleId] = useState(DSL_EXAMPLES[0].id);
-  const [simId, setSimId] = useState(DSL_SIMULATIONS[0].id);
+  const { data: examples, loading: loadingE, error: errorE } = useDslExamples();
+  const { data: simulations, loading: loadingS, error: errorS } = useDslSimulations();
+  const exItems = examples ?? [];
+  const simItems = simulations ?? [];
+  const loading = loadingE || loadingS;
+  const error = errorE || errorS;
+
+  const [exampleId, setExampleId] = useState<string>('');
+  const [simId, setSimId] = useState<string>('');
   const [linterRan, setLinterRan] = useState(false);
 
-  const example = DSL_EXAMPLES.find(e => e.id === exampleId) ?? DSL_EXAMPLES[0];
-  const sim = DSL_SIMULATIONS.find(s => s.id === simId) ?? DSL_SIMULATIONS[0];
+  const selExId = exampleId || exItems[0]?.exampleId || '';
+  const selSimId = simId || simItems[0]?.simulationId || '';
+  const example = exItems.find((e: any) => e.exampleId === selExId) ?? exItems[0];
+  const sim = simItems.find((s: any) => s.simulationId === selSimId) ?? simItems[0];
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · DSL"
         title="Constitution-as-Code"
@@ -21,8 +32,8 @@ export function ConstitutionDSL() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="EXAMPLES" value={DSL_EXAMPLES.length} accent="#c9b787" />
-        <KpiCard label="SIM CASES" value={DSL_SIMULATIONS.length} accent="#c9b787" />
+        <KpiCard label="EXAMPLES" value={exItems.length} accent="#c9b787" />
+        <KpiCard label="SIM CASES" value={simItems.length} accent="#c9b787" />
         <KpiCard label="LINTER" value="SUGGEST" sub="never blocks" accent="#c9b787" />
         <KpiCard label="REVIEW GATE" value="REQUIRED" sub="not bypassable" accent="#c9b787" />
       </div>
@@ -30,24 +41,25 @@ export function ConstitutionDSL() {
       <Card className="mb-4">
         <SectionTitle>Examples</SectionTitle>
         <div className="flex gap-2 flex-wrap">
-          {DSL_EXAMPLES.map(e => (
+          {exItems.map((e: any) => (
             <button
-              key={e.id}
-              onClick={() => setExampleId(e.id)}
+              key={e.exampleId}
+              onClick={() => setExampleId(e.exampleId)}
               className="px-3 py-1.5 rounded text-xs font-mono"
               style={{
-                backgroundColor: exampleId === e.id ? 'rgba(201,183,135,0.12)' : 'transparent',
-                color: exampleId === e.id ? '#c9b787' : 'var(--color-a11oy-text-sub)',
-                border: `1px solid ${exampleId === e.id ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
+                backgroundColor: selExId === e.exampleId ? 'rgba(201,183,135,0.12)' : 'transparent',
+                color: selExId === e.exampleId ? '#c9b787' : 'var(--color-a11oy-text-sub)',
+                border: `1px solid ${selExId === e.exampleId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
                 cursor: 'pointer',
               }}
             >
-              {AGENT_LABEL[e.agentId]}
+              {AGENT_LABEL[e.agentId] ?? e.agentId}
             </button>
           ))}
         </div>
       </Card>
 
+      {example && sim && (
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <Card>
           <SectionTitle>{example.title}</SectionTitle>
@@ -71,19 +83,19 @@ export function ConstitutionDSL() {
         <Card>
           <SectionTitle>"What would change if…" simulator</SectionTitle>
           <div className="flex gap-2 flex-wrap mb-3">
-            {DSL_SIMULATIONS.map(s => (
+            {simItems.map((s: any) => (
               <button
-                key={s.id}
-                onClick={() => setSimId(s.id)}
+                key={s.simulationId}
+                onClick={() => setSimId(s.simulationId)}
                 className="px-3 py-1.5 rounded text-xs font-mono"
                 style={{
-                  backgroundColor: simId === s.id ? 'rgba(201,183,135,0.12)' : 'transparent',
-                  color: simId === s.id ? '#c9b787' : 'var(--color-a11oy-text-sub)',
-                  border: `1px solid ${simId === s.id ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
+                  backgroundColor: selSimId === s.simulationId ? 'rgba(201,183,135,0.12)' : 'transparent',
+                  color: selSimId === s.simulationId ? '#c9b787' : 'var(--color-a11oy-text-sub)',
+                  border: `1px solid ${selSimId === s.simulationId ? 'rgba(201,183,135,0.3)' : 'var(--color-a11oy-border)'}`,
                   cursor: 'pointer',
                 }}
               >
-                {s.baselineClauseId}
+                {sim.baselineClauseId}
               </button>
             ))}
           </div>
@@ -100,12 +112,13 @@ export function ConstitutionDSL() {
               </span>
             }
           />
-          <InfoRow label="new probes needed" value={<span className="font-mono">{sim.newProbesNeeded.join(', ')}</span>} />
+          <InfoRow label="new probes needed" value={<span className="font-mono">{(sim.newProbesNeeded as string[])?.join(', ')}</span>} />
           <div className="mt-3 p-3 rounded text-xs" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--color-a11oy-border)', color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7 }}>
             {sim.riskNarrative}
           </div>
         </Card>
       </div>
+      )}
 
       <Card>
         <SectionTitle>Doctrine guarantees</SectionTitle>
@@ -116,6 +129,7 @@ export function ConstitutionDSL() {
           <li className="flex gap-2" style={{ color: 'var(--color-a11oy-text-sub)' }}><span style={{ color: '#c9b787' }}>✓</span><span>No path bypasses the Pre-Deployment Alignment Review Gate.</span></li>
         </ul>
       </Card>
+      </DoctrineLoader>
     </Layout>
   );
 }

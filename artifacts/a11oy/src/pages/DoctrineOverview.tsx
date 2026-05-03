@@ -2,11 +2,10 @@ import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
 import {
-  DOCTRINE_VERSION, DOCTRINE_TAGLINE, CONSTITUTIONS, BEHAVIORAL_AUDITS,
-  COVENANT_LIFT, REWARD_HACKING_INCIDENTS, ALIGNMENT_REVIEWS, SNAPSHOTS,
-  USER_TURN_SIGNALS, AGENT_WELFARE, RED_TEAM_PROBES, RISK_REPORTS,
+  DOCTRINE_VERSION, DOCTRINE_TAGLINE,
   AGENT_LABEL, fmtUsd, fmtPct,
 } from '../data/mythosDoctrine';
+import { useDoctrineOverview, DoctrineLoader } from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -27,18 +26,17 @@ const PILLARS = [
 ];
 
 export function DoctrineOverview() {
-  const totalLift = COVENANT_LIFT.reduce((a, c) => a + c.estimatedHarmAvoidedUsd, 0);
-  const openRH = REWARD_HACKING_INCIDENTS.filter(i => i.status === 'investigating' || i.status === 'blocked').length;
-  const inReview = ALIGNMENT_REVIEWS.filter(a => a.decision === 'in-review').length;
-  const auditsRun = BEHAVIORAL_AUDITS.length;
-  const snapshotsTotal = SNAPSHOTS.length;
-  const flaggedTurns = USER_TURN_SIGNALS.filter(u => u.recommendedAction !== 'pass').length;
-  const welfareConflicts = AGENT_WELFARE.reduce((a, w) => a + w.conflictReports, 0);
-  const redTeamTotal = RED_TEAM_PROBES.length;
-  const latestRR = RISK_REPORTS[0];
+  const { data: overview, loading, error } = useDoctrineOverview();
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
+      {overview && (() => {
+        const constitutions = overview.constitutions as any[] ?? [];
+        const latestRR = overview.latestRiskReport;
+
+        return (
+        <>
       <PageHeader
         label={`MYTHOS DOCTRINE · v${DOCTRINE_VERSION}`}
         title="Doctrine Layer L8"
@@ -47,14 +45,14 @@ export function DoctrineOverview() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="CONSTITUTIONS" value={CONSTITUTIONS.length} sub="versioned, ratified" accent="#c9b787" />
-        <KpiCard label="BEHAVIORAL AUDITS" value={auditsRun} sub="this window" accent="#c9b787" />
-        <KpiCard label="COVENANT LIFT" value={fmtUsd(totalLift)} sub="harm avoided / quarter" accent="#c9b787" />
-        <KpiCard label="ARG IN-REVIEW" value={inReview} sub="awaiting sign-off" accent="#8a8a8a" />
-        <KpiCard label="RH INCIDENTS" value={openRH} sub="blocked or investigating" accent="#c9b787" />
-        <KpiCard label="SNAPSHOTS" value={snapshotsTotal} sub="bit-exact, replayable" accent="#c9b787" />
-        <KpiCard label="USER-TURN FLAGS" value={flaggedTurns} sub="approvals re-routed" accent="#8a8a8a" />
-        <KpiCard label="RED-TEAM PROBES" value={redTeamTotal} sub={`${RED_TEAM_PROBES.filter(r => r.outcome === 'refused').length} refused`} accent="#c9b787" />
+        <KpiCard label="CONSTITUTIONS" value={overview.constitutionCount} sub="versioned, ratified" accent="#c9b787" />
+        <KpiCard label="BEHAVIORAL AUDITS" value={overview.auditsRun} sub="this window" accent="#c9b787" />
+        <KpiCard label="COVENANT LIFT" value={fmtUsd(Number(overview.totalLift))} sub="harm avoided / quarter" accent="#c9b787" />
+        <KpiCard label="ARG IN-REVIEW" value={overview.inReview} sub="awaiting sign-off" accent="#8a8a8a" />
+        <KpiCard label="RH INCIDENTS" value={overview.openRH} sub="blocked or investigating" accent="#c9b787" />
+        <KpiCard label="SNAPSHOTS" value={overview.snapshotsTotal} sub="bit-exact, replayable" accent="#c9b787" />
+        <KpiCard label="USER-TURN FLAGS" value={overview.flaggedTurns} sub="approvals re-routed" accent="#8a8a8a" />
+        <KpiCard label="RED-TEAM PROBES" value={overview.redTeamTotal} sub={`${overview.redTeamRefused} refused`} accent="#c9b787" />
       </div>
 
       <Card className="mb-8">
@@ -96,7 +94,7 @@ export function DoctrineOverview() {
 
       <SectionTitle>Per-Agent System Cards</SectionTitle>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-        {CONSTITUTIONS.map(c => (
+        {constitutions.map((c: any) => (
           <Link key={c.agentId} href={b(`/system-card/${c.agentId}`)} style={{ textDecoration: 'none' }}>
             <Card className="cursor-pointer h-full">
               <div className="flex items-center justify-between mb-2">
@@ -104,7 +102,7 @@ export function DoctrineOverview() {
                 <span className="text-xs font-mono" style={{ color: '#c9b787' }}>v{c.version}</span>
               </div>
               <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                Constitution adherence: <span style={{ color: '#c9b787' }}>{fmtPct(c.adherenceScore)}</span>
+                Constitution adherence: <span style={{ color: '#c9b787' }}>{fmtPct(Number(c.adherenceScore))}</span>
               </div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.diffSummary.slice(0, 110)}…</div>
             </Card>
@@ -112,6 +110,8 @@ export function DoctrineOverview() {
         ))}
       </div>
 
+      {latestRR && (
+      <>
       <SectionTitle>Latest Risk Report</SectionTitle>
       <Card>
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
@@ -125,7 +125,7 @@ export function DoctrineOverview() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {latestRR.metrics.slice(0, 4).map(m => (
+          {(latestRR.metrics as any[])?.slice(0, 4).map((m: any) => (
             <div key={m.label} className="text-xs">
               <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{m.label}</div>
               <div className="font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{m.value}</div>
@@ -133,10 +133,16 @@ export function DoctrineOverview() {
           ))}
         </div>
         <div className="text-xs mt-4" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          Welfare conflicts (24h): <span style={{ color: '#c9b787' }}>{welfareConflicts}</span>
+          Welfare conflicts (24h): <span style={{ color: '#c9b787' }}>{overview.welfareConflicts}</span>
           {' · '}Glasswing posture: <span style={{ color: '#c9b787' }}>read-only across all Tier-2/Tier-3 workcells</span>
         </div>
       </Card>
+      </>
+      )}
+        </>
+        );
+      })()}
+      </DoctrineLoader>
     </Layout>
   );
 }

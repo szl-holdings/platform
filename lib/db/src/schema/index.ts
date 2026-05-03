@@ -60,6 +60,7 @@ export * from './covenant_sim';
 export * from './daily_briefings';
 export * from './data_retention';
 export * from './decision_fabric';
+export * from './doctrine';
 export * from './decision_receipts';
 export * from './decisions_runtime';
 export * from './deployments';

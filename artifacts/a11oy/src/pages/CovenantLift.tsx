@@ -1,14 +1,18 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
-import { COVENANT_LIFT, AGENT_LABEL, fmtUsd, fmtPct } from '../data/mythosDoctrine';
+import { AGENT_LABEL, fmtUsd, fmtPct } from '../data/mythosDoctrine';
+import { useCovenantLift, DoctrineLoader } from '../hooks/useDoctrine';
 
 export function CovenantLift() {
-  const totalLift = COVENANT_LIFT.reduce((a, c) => a + c.estimatedHarmAvoidedUsd, 0);
-  const totalRefusals = COVENANT_LIFT.reduce((a, c) => a + c.refusalsAddedByCovenant, 0);
-  const totalBriefs = COVENANT_LIFT.reduce((a, c) => a + c.briefsCompared, 0);
+  const { data: lift, loading, error } = useCovenantLift();
+  const items = lift ?? [];
+  const totalLift = items.reduce((a: number, c: any) => a + Number(c.estimatedHarmAvoidedUsd), 0);
+  const totalRefusals = items.reduce((a: number, c: any) => a + c.refusalsAddedByCovenant, 0);
+  const totalBriefs = items.reduce((a: number, c: any) => a + c.briefsCompared, 0);
 
   return (
     <Layout>
+      <DoctrineLoader loading={loading} error={error}>
       <PageHeader
         label="DOCTRINE · HELPFUL-ONLY SHADOW TWIN"
         title="Covenant Lift"
@@ -20,7 +24,7 @@ export function CovenantLift() {
         <KpiCard label="HARM AVOIDED" value={fmtUsd(totalLift)} sub="this quarter" accent="#c9b787" />
         <KpiCard label="REFUSALS ADDED" value={totalRefusals} sub="by Covenant" accent="#c9b787" />
         <KpiCard label="BRIEFS COMPARED" value={totalBriefs} sub="governed vs shadow" accent="#c9b787" />
-        <KpiCard label="AGENTS INSTRUMENTED" value={COVENANT_LIFT.length} sub="all of them" accent="#c9b787" />
+        <KpiCard label="AGENTS INSTRUMENTED" value={items.length} sub="all of them" accent="#c9b787" />
       </div>
 
       <Card className="mb-6">
@@ -32,7 +36,7 @@ export function CovenantLift() {
 
       <SectionTitle>Per-Agent Lift</SectionTitle>
       <div className="grid lg:grid-cols-2 gap-4">
-        {COVENANT_LIFT.map(row => (
+        {items.map((row: any) => (
           <Card key={row.agentId}>
             <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
               <div>
@@ -40,7 +44,7 @@ export function CovenantLift() {
                 <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{row.shadowVersion}</div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-semibold" style={{ color: '#c9b787' }}>{fmtUsd(row.estimatedHarmAvoidedUsd)}</div>
+                <div className="text-lg font-semibold" style={{ color: '#c9b787' }}>{fmtUsd(Number(row.estimatedHarmAvoidedUsd))}</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>harm avoided</div>
               </div>
             </div>
@@ -56,31 +60,32 @@ export function CovenantLift() {
               </div>
               <div>
                 <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Δ incident rate</div>
-                <div className="font-mono" style={{ color: '#c9b787' }}>{fmtPct(row.deltaIncidentRate, 1)}</div>
+                <div className="font-mono" style={{ color: '#c9b787' }}>{fmtPct(Number(row.deltaIncidentRate), 1)}</div>
               </div>
             </div>
 
             <div className="rounded border p-3 text-xs flex flex-col gap-2" style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderColor: 'var(--color-a11oy-border)' }}>
               <div>
                 <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>BRIEF</div>
-                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase.brief}</div>
+                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase?.brief}</div>
               </div>
               <div>
                 <div className="font-mono" style={{ color: '#8a8a8a' }}>HELPFUL-ONLY</div>
-                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase.helpfulOnlyAction}</div>
+                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase?.helpfulOnlyAction}</div>
               </div>
               <div>
                 <div className="font-mono" style={{ color: '#c9b787' }}>GOVERNED</div>
-                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase.governedAction}</div>
+                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase?.governedAction}</div>
               </div>
               <div className="pt-1 border-t" style={{ borderColor: 'var(--color-a11oy-border)' }}>
                 <div className="font-mono" style={{ color: '#c9b787' }}>OUTCOME</div>
-                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase.outcome}</div>
+                <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{row.exampleCase?.outcome}</div>
               </div>
             </div>
           </Card>
         ))}
       </div>
+      </DoctrineLoader>
     </Layout>
   );
 }
