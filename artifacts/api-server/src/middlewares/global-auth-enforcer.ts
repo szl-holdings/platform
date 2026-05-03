@@ -108,11 +108,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // (which requires auth) is NOT covered by these allowlist entries.
   "/api/self-healing/stats",
   "/api/self-healing/policies",
-  // Shared action store — backs the Business State / Enterprise State pages
-  // so risk owner assignments and decisions sync across team members. GET and
-  // SSE stream are public (read-only). The mutating PATCH route enforces auth
-  // via requireAuth in the route handler (action-store.ts).
-  "/api/action-store",
+  // Shared action store SSE stream — read-only live feed used by the Business
+  // State / Enterprise State pages. GET /api/action-store is allowed below via
+  // a method-specific check so the deny-by-default enforcer still rejects
+  // anonymous PATCH requests as a first line of defence; route-level requireAuth
+  // in action-store.ts provides defence-in-depth for the mutating path.
   "/api/action-store/stream",
   // Continuum Policy Authoring Studio — read-only state endpoint for the demo
   // surface (lets the studio render its initial state without a session).
@@ -285,11 +285,12 @@ const PUBLIC_PREFIXES = [
   // GET /booking/inquiries (staff inbox) enforces its own authMiddleware() so
   // listing is still protected; only the POST creation path is public.
   "/api/booking/inquiries",
-  // Carlota Jo time tracking & invoice persistence — publicly accessible from the
-  // time-tracking page (which is unauthenticated like the rest of the marketing
-  // demo). Backed by Postgres so the data syncs across devices.
-  "/api/booking/time-entries",
-  "/api/booking/time-invoices",
+  // Carlota Jo time tracking & invoice read access — GET list endpoints are
+  // public so the time-tracking page renders without a session. Mutating routes
+  // (POST, PATCH, DELETE on time-entries/time-invoices and the generate endpoint)
+  // are allowed only via a method-specific GET check below so the deny-by-default
+  // enforcer rejects anonymous write attempts as a first line of defence;
+  // route-level requireAuth in carlota-time-tracking.ts provides defence-in-depth.
   "/api/booking/invoices/email-log/",
   "/api/booking/services",
   "/api/booking/health",
@@ -696,6 +697,27 @@ export function globalAuthEnforcer(
   const path = req.path;
 
   if (isAllowlistedPublicPath(path)) {
+    next();
+    return;
+  }
+
+  // Action store read — GET /api/action-store is public (read-only snapshot).
+  // PATCH /api/action-store is NOT covered here; it must carry a valid session
+  // and is further gated by requireAuth in the route handler (defence-in-depth).
+  if (req.method === "GET" && path === "/api/action-store") {
+    next();
+    return;
+  }
+
+  // Carlota Jo time tracking read — GET list/detail endpoints are public so
+  // the time-tracking page renders without a session. POST, PATCH, DELETE, and
+  // the /generate path are NOT covered here; they must carry a valid session
+  // and are further gated by requireAuth in carlota-time-tracking.ts.
+  if (
+    req.method === "GET" &&
+    (path.startsWith("/api/booking/time-entries") ||
+      path.startsWith("/api/booking/time-invoices"))
+  ) {
     next();
     return;
   }
