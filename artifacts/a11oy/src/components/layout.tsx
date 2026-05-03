@@ -226,6 +226,7 @@ const NAV_GROUPS = [
   {
     label: 'OPERATIONS',
     items: [
+      { href: '/chat',               label: 'A11oy Chat' },
       { href: '/karpathy-evolution', label: 'Karpathy Evolution' },
     ],
   },
