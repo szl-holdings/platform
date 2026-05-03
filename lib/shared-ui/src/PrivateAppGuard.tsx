@@ -8,12 +8,26 @@ export interface PrivateAppGuardProps {
   loadingColor?: string;
 }
 
-// Shared sessionStorage key for the validated demo PIN. Once a user passes
-// the PIN modal in any app (Pulse, PARAGON, DOMAINE, SEXTANT...), the validated
-// PIN is stored here so subsequent route navigations within the SPA stay in
-// demo mode without prompting again. The PIN is never embedded in the URL or
-// the client bundle — it is entered via the modal and validated server-side.
+// Shared sessionStorage key for the validated demo session. Once a user passes
+// the PIN modal in any app (Pulse, PARAGON, DOMAINE, SEXTANT...), a SHA-256
+// digest of the validated PIN is stored here — never the raw PIN — so
+// subsequent route navigations within the SPA stay in demo mode without
+// prompting again. The raw PIN is never embedded in the URL, the client
+// bundle, or sessionStorage; it is entered via the modal and validated
+// server-side, and only its digest is persisted client-side.
 const DEMO_TOKEN_KEY = 'szl-demo-token';
+
+async function digestPin(pin: string): Promise<string> {
+  try {
+    const data = new TextEncoder().encode(pin);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  } catch {
+    return '';
+  }
+}
 const DEMO_ALLOWED =
   ((import.meta as unknown as { env?: Record<string, string | boolean | undefined> }).env?.DEV ===
     true) ||
@@ -39,7 +53,8 @@ async function verifyAndStorePin(pin: string): Promise<boolean> {
     const data = (await res.json()) as { valid?: boolean };
     if (data.valid) {
       try {
-        sessionStorage.setItem(DEMO_TOKEN_KEY, pin);
+        const digest = await digestPin(pin);
+        if (digest) sessionStorage.setItem(DEMO_TOKEN_KEY, digest);
       } catch {
         // ignore storage errors — caller will treat as failure
       }

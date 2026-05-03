@@ -414,8 +414,11 @@ program
   .description('check connectivity, env vars, deps')
   .action(async () => {
     console.log(chalk.cyan('A11oy Doctor Diagnostics:'));
-    console.log(`API Base URL: ${process.env.A11OY_API_BASE_URL || 'http://localhost:80'}`);
-    console.log(`API Key: ${process.env.A11OY_API_KEY ? 'Set' : 'Not Set'}`);
+    const apiBase = process.env.A11OY_API_BASE_URL || 'http://localhost:80';
+    const credentialPresent = Boolean(process.env.A11OY_API_KEY);
+    console.log(`API Base URL: ${apiBase}`);
+    // Print only presence/absence — never the credential value itself.
+    console.log(`Credential: ${credentialPresent ? 'configured' : 'missing'}`);
     
     try {
       const response = await client.get('/api/a11oy/now');

@@ -46,6 +46,10 @@ A11oy is the orchestration control plane and the decision-intelligence surface. 
 
 ![A11oy home](screenshots/a11oy_home.jpg)
 
+A live Claude-Sonnet-4.6-backed advisory chat is available at `/a11oy/chat`. Conversation memory persists per session, every prompt is rate-limited, and the system prompt cites the canonical SOURCE_OF_TRUTH numbers and the published Zenodo DOI so the model never fabricates platform metrics.
+
+![A11oy chat — live Claude advisor](screenshots/a11oy_chat.jpg)
+
 ### Sentra — Cyber Resilience Command (codename TENAX)
 
 Slug: `/sentra/`
@@ -61,6 +65,10 @@ Slug: `/conduit/` (display name Amaru)
 Append-only delta log, hash-verified ingest, and the three-witness reconciliation primitive (Frustum) from the Ouroboros Thesis. The data-convergence surface that feeds every other vertical.
 
 ![Amaru home](screenshots/amaru_home.jpg)
+
+Amaru's operator settings are fully wired — notifications, vault policy, MFA, session timeout, API key issuance with cryptographically random keys, outbound webhook URL, theme density, accent picker, and reduce-motion — all persisted locally per device, no "Coming soon" stubs.
+
+![Amaru operational settings](screenshots/amaru_settings.jpg)
 
 ### Terra — Real Estate Intelligence (codename DOMAINE)
 
@@ -92,7 +100,7 @@ Slug: `/carlota-jo/`
 
 Premium service brand for individuals who require precision and discretion across every dimension of their private life. Proof-Chain decision-receipts bound to the runtime.
 
-![Carlota Jo home](screenshots/carlota_jo_home.jpg)
+![Carlota Jo home](screenshots/carlota-jo_home.jpg)
 
 ---
 

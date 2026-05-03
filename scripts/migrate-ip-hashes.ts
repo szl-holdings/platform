@@ -145,7 +145,8 @@ export async function migrateTable(
         [hashed, row.id],
       );
       if (verbose) {
-        console.log(`  [${table}] id=${row.id} ${row.ip_address} → ${hashed}`);
+        // Never echo raw IPs to logs — only the resulting digest.
+        console.log(`  [${table}] id=${row.id} hashed → ${hashed}`);
       }
     }
 
