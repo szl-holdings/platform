@@ -37,6 +37,7 @@ import {
 } from './lib/boot-orchestrator';
 import { runOpsMgmtBootInit } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
+import { ensureRuntimeConfigDefaults } from './lib/runtime-config';
 import { runMigrations } from './lib/run-migrations';
 import { runStartupSmokeCheck } from './lib/startup-smoke-check';
 import { validateHFConnectivity } from './lib/startup-validation';
@@ -556,8 +557,9 @@ export async function bootstrap(
       }
     };
 
-    // Step 2: Platform flags and knowledge store depend on schema being ready
+    // Step 2: Platform flags, runtime config, and knowledge store depend on schema being ready
     await bootstrapStep('ensurePlatformFlags', ensurePlatformFlags);
+    await bootstrapStep('ensureRuntimeConfigDefaults', ensureRuntimeConfigDefaults);
     await bootstrapStep('knowledgeStore.loadFromDb', () => knowledgeStore.loadFromDb());
 
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,

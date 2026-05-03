@@ -1,0 +1,276 @@
+/**
+ * Runtime Configuration — operator-tunable parameters backed by Postgres.
+ *
+ * Usage:
+ *   const maxRequests = await getConfig('rate_limit_global_max', 200);
+ *   const label      = await getConfig('site_banner_text', '');
+ *
+ * Values are stored as text in `runtime_config` and cast to the appropriate
+ * type based on `value_type`. Reads resolve from an in-memory TTL cache so
+ * hot paths stay < 1 ms. Admin writes call `invalidateConfigCache(key)` to
+ * bust the relevant entry immediately.
+ */
+
+import { db, runtimeConfigTable, type RuntimeConfig } from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
+import { logger } from './logger';
+
+const DEFAULT_CACHE_TTL_MS = 60_000;
+
+/**
+ * Live-tunable cache TTL. Initialised to the code default; updated from the
+ * `config_cache_ttl_ms` DB row during boot and whenever that key is
+ * invalidated so operators can change the TTL without a restart.
+ */
+let cacheTtlMs = DEFAULT_CACHE_TTL_MS;
+
+/**
+ * Read `config_cache_ttl_ms` directly from the DB (bypasses the cache to
+ * avoid a chicken-and-egg situation) and update the module-level TTL.
+ */
+async function refreshCacheTtl(): Promise<void> {
+  try {
+    const [row] = await db
+      .select()
+      .from(runtimeConfigTable)
+      .where(eq(runtimeConfigTable.key, 'config_cache_ttl_ms'))
+      .limit(1);
+    if (row) {
+      const parsed = parseInt(row.value, 10);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        cacheTtlMs = parsed;
+      }
+    }
+  } catch {
+    // Non-fatal — keep current TTL
+  }
+}
+
+interface CacheEntry {
+  value: RuntimeConfig | null;
+  expiresAt: number;
+}
+
+const configCache = new Map<string, CacheEntry>();
+
+async function getCachedRow(key: string): Promise<RuntimeConfig | null> {
+  const entry = configCache.get(key);
+  if (entry && entry.expiresAt > Date.now()) return entry.value;
+  const [row] = await db
+    .select()
+    .from(runtimeConfigTable)
+    .where(eq(runtimeConfigTable.key, key))
+    .limit(1);
+  const value: RuntimeConfig | null = row ?? null;
+  configCache.set(key, { value, expiresAt: Date.now() + cacheTtlMs });
+  return value;
+}
+
+function castValue(raw: string, type: string): unknown {
+  switch (type) {
+    case 'number': {
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : 0;
+    }
+    case 'boolean':
+      return raw === 'true' || raw === '1';
+    case 'json': {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+    default:
+      return raw;
+  }
+}
+
+/**
+ * Retrieve a runtime config value, casting it to the registered type.
+ * Falls back to `defaultValue` when the key is absent from the database
+ * or when evaluation fails (fail-safe, never throws).
+ *
+ * @example
+ *   const max = await getConfig('rate_limit_global_max', 200); // → number
+ *   const label = await getConfig('site_banner_text', '');     // → string
+ */
+export async function getConfig<T = string>(key: string, defaultValue: T): Promise<T> {
+  try {
+    const row = await getCachedRow(key);
+    if (!row) return defaultValue;
+    return castValue(row.value, row.valueType) as T;
+  } catch (err) {
+    logger.warn({ err, key }, '[runtime-config] getConfig failed — returning default');
+    return defaultValue;
+  }
+}
+
+/**
+ * Retrieve the raw config row (including metadata) for a given key.
+ * Returns null when the key does not exist.
+ */
+export async function getConfigRow(key: string): Promise<RuntimeConfig | null> {
+  try {
+    return await getCachedRow(key);
+  } catch (err) {
+    logger.warn({ err, key }, '[runtime-config] getConfigRow failed');
+    return null;
+  }
+}
+
+/**
+ * Immediately evict a key from the in-memory cache.
+ * Call this after admin writes so the next read fetches a fresh row.
+ * If the invalidated key is `config_cache_ttl_ms`, also refreshes the
+ * live TTL so the new value takes effect without a restart.
+ */
+export function invalidateConfigCache(key: string): void {
+  configCache.delete(key);
+  if (key === 'config_cache_ttl_ms') {
+    void refreshCacheTtl();
+  }
+}
+
+/**
+ * Evict all entries from the config cache.
+ * Useful after bulk updates.
+ */
+export function invalidateAllConfigCache(): void {
+  configCache.clear();
+}
+
+/**
+ * Default operational parameters seeded into the database.
+ * Used by `ensureRuntimeConfigDefaults()` at startup to guarantee that every
+ * known key has a live row so `getConfig()` can always resolve from cache.
+ */
+export const RUNTIME_CONFIG_DEFAULTS = [
+  {
+    key: 'rate_limit_global_max',
+    value: '200',
+    valueType: 'number' as const,
+    description: 'Global rate limiter: max requests per 15-minute window per user/org',
+    defaultValue: '200',
+    category: 'rate_limits',
+  },
+  {
+    key: 'rate_limit_write_max',
+    value: '100',
+    valueType: 'number' as const,
+    description: 'Write rate limiter: max write requests per 15-minute window',
+    defaultValue: '100',
+    category: 'rate_limits',
+  },
+  {
+    key: 'rate_limit_ai_inference_max',
+    value: '30',
+    valueType: 'number' as const,
+    description: 'AI inference rate limiter: max calls per 15-minute window',
+    defaultValue: '30',
+    category: 'rate_limits',
+  },
+  {
+    key: 'circuit_breaker_threshold',
+    value: '50',
+    valueType: 'number' as const,
+    description: 'Circuit breaker: error-rate percentage (0-100) that opens the breaker',
+    defaultValue: '50',
+    category: 'circuit_breaker',
+  },
+  {
+    key: 'circuit_breaker_reset_ms',
+    value: '30000',
+    valueType: 'number' as const,
+    description: 'Circuit breaker: cooldown milliseconds before half-open probe',
+    defaultValue: '30000',
+    category: 'circuit_breaker',
+  },
+  {
+    key: 'slo_latency_p99_ms',
+    value: '2000',
+    valueType: 'number' as const,
+    description: 'SLO target: p99 response latency budget in milliseconds',
+    defaultValue: '2000',
+    category: 'slo',
+  },
+  {
+    key: 'slo_error_rate_pct',
+    value: '1',
+    valueType: 'number' as const,
+    description: 'SLO target: max acceptable error rate percentage (0-100)',
+    defaultValue: '1',
+    category: 'slo',
+  },
+  {
+    key: 'job_cleanup_interval_ms',
+    value: '3600000',
+    valueType: 'number' as const,
+    description: 'Scheduled job: interval for cleanup/pruning jobs in milliseconds',
+    defaultValue: '3600000',
+    category: 'jobs',
+  },
+  {
+    key: 'job_health_check_interval_ms',
+    value: '60000',
+    valueType: 'number' as const,
+    description: 'Scheduled job: health-probe polling interval in milliseconds',
+    defaultValue: '60000',
+    category: 'jobs',
+  },
+  {
+    key: 'load_shed_lag_threshold_ms',
+    value: '200',
+    valueType: 'number' as const,
+    description: 'Adaptive load shedder: event-loop lag threshold to start shedding traffic',
+    defaultValue: '200',
+    category: 'load_shedder',
+  },
+  {
+    key: 'load_shed_pool_pct_threshold',
+    value: '90',
+    valueType: 'number' as const,
+    description: 'Adaptive load shedder: DB pool saturation % that triggers shedding',
+    defaultValue: '90',
+    category: 'load_shedder',
+  },
+  {
+    key: 'flag_cache_ttl_ms',
+    value: '30000',
+    valueType: 'number' as const,
+    description: 'Feature flag in-memory cache TTL in milliseconds',
+    defaultValue: '30000',
+    category: 'feature_flags',
+  },
+  {
+    key: 'config_cache_ttl_ms',
+    value: '60000',
+    valueType: 'number' as const,
+    description: 'Runtime config in-memory cache TTL in milliseconds',
+    defaultValue: '60000',
+    category: 'runtime_config',
+  },
+] as const;
+
+export type RuntimeConfigKey = (typeof RUNTIME_CONFIG_DEFAULTS)[number]['key'];
+
+/**
+ * Upsert all known default entries into the database at startup.
+ * Uses ON CONFLICT DO NOTHING so existing operator overrides are preserved.
+ */
+export async function ensureRuntimeConfigDefaults(): Promise<void> {
+  try {
+    await db
+      .insert(runtimeConfigTable)
+      .values(RUNTIME_CONFIG_DEFAULTS.map((d) => ({ ...d, valueType: d.valueType })))
+      .onConflictDoNothing();
+    logger.info(
+      { count: RUNTIME_CONFIG_DEFAULTS.length },
+      '[runtime-config] Defaults ensured',
+    );
+    // Load the live TTL from DB so subsequent cache writes use the operator value.
+    await refreshCacheTtl();
+  } catch (err) {
+    logger.warn({ err }, '[runtime-config] Failed to ensure defaults — config may be missing');
+  }
+}

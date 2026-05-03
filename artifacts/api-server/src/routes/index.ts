@@ -580,4 +580,13 @@ router.use(
 // POST /a11oy/chat  (SSE stream of {content, done, error})
 router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 
+// Runtime Configuration — operator-tunable parameters (ops/admin only)
+// GET    /runtime-config            — list all config entries
+// GET    /runtime-config/:key       — get a single entry
+// POST   /runtime-config            — create a new entry
+// PATCH  /runtime-config/:key       — update value / description
+// DELETE /runtime-config/:key       — delete (resets to code default)
+// POST   /runtime-config/invalidate-cache — bust cache for one or all keys
+router.use(lazyMatch("/runtime-config", () => import("./runtime-config"), "runtime-config"));
+
 export default router;
