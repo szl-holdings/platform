@@ -71,8 +71,7 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "tailwind-merge": "catalog:",
-    "@workspace/alloy": "workspace:*",
-    "@szl-holdings/shared-ui": "workspace:*"
+    "@workspace/alloy": "workspace:*"
   },
   "scripts": {
     "lint": "biome lint ./src",

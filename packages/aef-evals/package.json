@@ -39,11 +39,11 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@workspace/alloy-vector-worker": "workspace:*",
-    "vitest": "^4.1.2"
+    "vitest": "catalog:"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   }
 }

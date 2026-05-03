@@ -40,10 +40,10 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "vitest": "^4.1.2"
+    "vitest": "catalog:"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

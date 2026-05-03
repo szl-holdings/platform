@@ -7,6 +7,7 @@ export interface SZLClientOptions {
 }
 
 export interface PaginationOptions {
+  [key: string]: string | number | boolean | undefined;
   limit?: number;
   offset?: number;
   page?: number;

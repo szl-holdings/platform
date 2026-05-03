@@ -1,4 +1,10 @@
-import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`/api${path}`, { credentials: 'include', ...options });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (res.status === 204) return undefined as T;
+  const body = await res.json();
+  return (body?.data ?? body) as T;
+}
 import { AlertTriangle, ChevronDown, ChevronUp, Cpu, Loader, Play, Shield } from 'lucide-react';
 import { useState } from 'react';
 

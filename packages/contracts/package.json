@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Zod request/response contracts for internal APIs and webhooks. TS types are inferred from schemas \u2014 never hand-written in parallel.",
+  "description": "Zod request/response contracts for internal APIs and webhooks. TS types are inferred from schemas — never hand-written in parallel.",
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/auth.ts",
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

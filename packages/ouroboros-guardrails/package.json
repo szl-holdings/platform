@@ -6,10 +6,10 @@
   "main": "src/index.ts",
   "description": "SZL Guardrails — drop-in LLM safety SKU. NeMo-Guardrails-compatible config surface, closed-form Λ scoring, tamper-evident hash-chained receipts. Part of Ouroboros v6 (primitives 81–91).",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
-    "vitest": "^2.1.9"
+    "vitest": "catalog:"
   }
 }

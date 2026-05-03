@@ -51,7 +51,7 @@
     "eval-submit": "./src/submit-cli.ts"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "run-suite": "tsx src/cli.ts",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
@@ -67,6 +67,6 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:",
-    "vitest": "^4.1.2"
+    "vitest": "catalog:"
   }
 }

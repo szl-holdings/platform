@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "vitest": "^4.1.2"
+    "vitest": "catalog:"
   },
   "scripts": {
     "lint": "biome lint ./src",

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Constellation \u2014 cross-domain ontology and intelligence graph for the SZL platform",
+  "description": "Constellation — cross-domain ontology and intelligence graph for the SZL platform",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -76,7 +76,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "vitest": "^4.1.2"
+    "vitest": "catalog:"
   },
   "scripts": {
     "lint": "biome lint ./src",

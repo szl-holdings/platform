@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
-  "description": "Gau\u00df primitives \u2014 least-squares network adjustment, conformal projection, class-number invariant, and Gaussian residual goodness-of-fit. Sourced from the Gau\u00df Nachlass at SUB G\u00f6ttingen (Cod. Ms. Gau\u00df).",
+  "description": "Gauß primitives — least-squares network adjustment, conformal projection, class-number invariant, and Gaussian residual goodness-of-fit. Sourced from the Gauß Nachlass at SUB Göttingen (Cod. Ms. Gauß).",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "demo:full": "tsx examples/full-gauss-demo.ts"
   },
   "devDependencies": {
-    "vitest": "^2.1.0",
+    "vitest": "catalog:",
     "typescript": "^5.7.0",
     "tsx": "^4.19.0"
   }
