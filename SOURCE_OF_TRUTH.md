@@ -10,19 +10,22 @@
 
 | Metric | Canonical Value | Verification Command |
 |---|---|---|
-| Registered artifacts | **14** | `find artifacts -name artifact.toml \| wc -l` |
-| Database tables (live, provisioned) | **798** | `bash scripts/audit/db/inventory-schema.sh` |
-| API endpoints | **2,816** | `grep -rh 'router\.(get\|post\|put\|patch\|delete\|use)' artifacts/api-server/src/routes --include='*.ts' \| wc -l` |
-| Verticals | **8** | See Verticals section below |
+| Registered artifacts (artifact.toml) | **9** | `find artifacts -name artifact.toml \| wc -l` |
+| Database tables (live, provisioned) | **848** | `psql "$DATABASE_URL" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';"` |
+| API endpoints (router declarations) | **5,524** | `grep -rhE 'router\.(get\|post\|put\|patch\|delete\|use)' artifacts/api-server/src/routes --include='*.ts' \| wc -l` |
+| Verticals (post KORA consolidation) | **7** | See Verticals section below |
 | Monorepo packages (packages/ + lib/) | **126** | `echo $(( $(ls packages/ \| wc -l) + $(ls lib/ \| wc -l) ))` |
 | DB schema files | **170** | `find lib/db/src/schema -name '*.ts' \| wc -l` |
 | CI workflows | **23** | `ls .github/workflows/ \| wc -l` |
 | Declared env vars | **213** | `grep -cE '^[A-Z_]+=' .env.example` |
 | Platform primitives | **6** | See Primitives section below |
 | RBAC roles | **11** | Cross-document consistency (README + docs) |
+| Ouroboros vitest test calls | **133** | `grep -rhE "^\s*(it\|test)\(" packages/ouroboros/src --include='*.test.ts' \| wc -l` |
+| Codex-kernel vitest test calls | **29** | `grep -rhE "^\s*(it\|test)\(" packages/codex-kernel/src --include='*.test.ts' \| wc -l` |
 
-**Last verified:** 2026-04-28
+**Last verified:** 2026-05-03
 **Audit trail:** `audit/source-of-truth.json`
+**Note:** Re-verification on 2026-05-03 produced material deltas from the 2026-04-28 baseline. DB tables grew 798 → 848 (+50). API endpoints grew 2,816 → 5,524 (+2,708) following recent route-system expansion. Registered artifacts dropped 14 → 9 (vestigial artifact.toml files were removed in the 2026-04-25 cleanup; the canonical count is now `find artifacts -name artifact.toml`). Ouroboros tests revised to a literal call count of 133 (the earlier "150" figure was a declared-suite count and is no longer authoritative). Verticals dropped 8 → 7: KORA (Decision Intelligence) consolidated into A11oy as a unified Orchestration + Decision Intelligence surface; the `/lyte/` archive directory is retained but is no longer a standalone product line.
 
 ---
 
@@ -39,7 +42,8 @@
 | Counsel | `/counsel/` | PRISM Counsel | Legal Matter Command |
 | LUMINA | `/pulse/` | Pulse | AI Executive Briefing; slug retained |
 | PARAGON | `/aegis/` | Aegis | Security & Compliance |
-| KORA | `/lyte/` | Lyte | Decision Intelligence |
+| KORA | `/lyte/` | Lyte | Decision Intelligence — consolidated into A11oy 2026-05-03; archive directory `archive/artifacts/lyte-command-center` retained for history |
+| A11oy | `/a11oy/` | Alloy, AEEP | Orchestration + Decision Intelligence — unified surface that powers and orchestrates all verticals |
 | Carlota Jo | `/carlota-jo/` | — | Consulting vertical |
 | Amaru | `/conduit/` | Conduit | Convergent Reverse-ETL; slug retained |
 | Unified Command | `/command/` | — | Cross-vertical intelligence layer |
@@ -50,7 +54,7 @@
 
 ---
 
-## Eight Verticals
+## Seven Verticals (post KORA consolidation)
 
 1. **TENAX** — Cyber Resilience Command (`/sentra/`)
 2. **SEXTANT** — Maritime Intelligence (`/vessels/`)
@@ -58,8 +62,11 @@
 4. **Counsel** — Legal Matter Command (`/counsel/`)
 5. **LUMINA** — AI Executive Briefing (`/pulse/`)
 6. **PARAGON** — Security & Compliance (`/aegis/`)
-7. **KORA** — Decision Intelligence (`/lyte/`)
-8. **Carlota Jo** — Consulting (`/carlota-jo/`)
+7. **Carlota Jo** — Consulting (`/carlota-jo/`)
+
+**Orchestration layer (powers and unifies all seven):** **A11oy** — `/a11oy/` — Brand Orchestration + Decision Intelligence (formerly KORA `/lyte/`, consolidated 2026-05-03).
+
+**Public-proof open source (not a vertical, foundational runtime):** **Ouroboros** runtime (`@szl-holdings/ouroboros`, current release v6.2.0) and **Ouroboros Thesis** (paper-v3-2.0.0 "The Lutar Invariant — audit-supported rewrite", DOI 10.5281/zenodo.19934129). Both repositories are public on `github.com/szl-holdings`.
 
 ---
 

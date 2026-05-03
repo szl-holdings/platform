@@ -1,24 +1,26 @@
 {
   "meta": {
-    "generated": "2026-04-28",
+    "generated": "2026-05-03",
     "track": "Moonshot Phase 1 — Truth & Audit",
-    "version": "1.4.0",
-    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Live DB table count is 798 (re-verified 2026-04-28 via scripts/audit/db/inventory-schema.sh; up from 730 on 2026-04-21). Active verticals raised to 8 with KORA (Decision Intelligence, slug /lyte/) reactivated. Mirrors the human-readable SOURCE_OF_TRUTH.md at repo root."
+    "version": "1.5.0",
+    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Re-verified 2026-05-03. Material deltas from the 2026-04-28 baseline: db_tables 798 -> 848 (+50), api_endpoints 2816 -> 5524 (+2708, route-system expansion), registered_artifacts 14 -> 9 (vestigial artifact.toml files removed in 2026-04-25 cleanup; canonical count is `find artifacts -name artifact.toml`), verticals 8 -> 7 (KORA Decision Intelligence consolidated into A11oy as unified Orchestration + Decision Intelligence surface; archive/artifacts/lyte-command-center retained for history). Mirrors the human-readable SOURCE_OF_TRUTH.md at repo root."
   },
   "canonical_metrics": {
     "source_document": "SOURCE_OF_TRUTH.md",
-    "last_verified": "2026-04-28",
+    "last_verified": "2026-05-03",
     "metrics": {
-      "registered_artifacts": 14,
-      "db_tables_live": 798,
-      "api_endpoints": 2816,
-      "verticals": 8,
+      "registered_artifacts": 9,
+      "db_tables_live": 848,
+      "api_endpoints": 5524,
+      "verticals": 7,
       "monorepo_packages": 126,
       "db_schema_files": 170,
       "ci_workflows": 23,
       "declared_env_vars": 213,
       "platform_primitives": 6,
-      "rbac_roles": 11
+      "rbac_roles": 11,
+      "ouroboros_test_calls": 133,
+      "codex_kernel_test_calls": 29
     },
     "verticals_active": [
       "TENAX",
@@ -27,9 +29,9 @@
       "Counsel",
       "LUMINA",
       "PARAGON",
-      "KORA",
       "Carlota Jo"
     ],
+    "orchestration_layer": "A11oy (formerly KORA /lyte/; consolidated 2026-05-03)",
     "model_profile": "model-profiles/qwen3_6_27b_szl_profile.json",
     "endpoint_profile": "endpoint-profiles/alloy_endpoint_plane.json",
     "plugin_registry": "ecosystem-plugin-registry.json",
