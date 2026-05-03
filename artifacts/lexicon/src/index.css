@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-lexicon-blue: #4f8ef7;
+  --color-lexicon-blue-dim: #3a6fd4;
+  --color-lexicon-green: #34d399;
+  --color-lexicon-amber: #fbbf24;
+  --color-lexicon-red: #f87171;
+  --color-lexicon-purple: #a78bfa;
+  --color-lexicon-surface: #0d1526;
+  --color-lexicon-surface-raised: #121e35;
+  --color-lexicon-surface-raised-hover: #172642;
+  --color-lexicon-border: #1e2d4a;
+  --color-lexicon-border-hover: #2e4168;
+  --color-lexicon-text: #e2e8f0;
+  --color-lexicon-text-muted: #94a3b8;
+  --font-lexicon-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+:root {
+  --background: 222 47% 6%;
+  --foreground: 213 31% 91%;
+  --card: 222 40% 9%;
+  --card-foreground: 213 31% 91%;
+  --popover: 222 40% 9%;
+  --popover-foreground: 213 31% 91%;
+  --primary: 217 91% 65%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 222 32% 14%;
+  --secondary-foreground: 213 31% 91%;
+  --muted: 222 32% 14%;
+  --muted-foreground: 215 20% 55%;
+  --accent: 217 91% 65%;
+  --accent-foreground: 222 47% 6%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 213 31% 91%;
+  --border: 222 32% 18%;
+  --input: 222 32% 18%;
+  --ring: 217 91% 65%;
+  --radius: 0.5rem;
+
+  /* LEXICON brand tokens */
+  --lexicon-blue: #4f8ef7;
+  --lexicon-blue-dim: #3a6fd4;
+  --lexicon-green: #34d399;
+  --lexicon-amber: #fbbf24;
+  --lexicon-red: #f87171;
+  --lexicon-purple: #a78bfa;
+  --lexicon-surface: #0d1526;
+  --lexicon-surface-raised: #121e35;
+  --lexicon-border: #1e2d4a;
+  --lexicon-text: #e2e8f0;
+  --lexicon-text-muted: #94a3b8;
+  --lexicon-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--lexicon-surface);
+  color: var(--lexicon-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+code, pre, .mono {
+  font-family: var(--lexicon-mono);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--lexicon-surface); }
+::-webkit-scrollbar-thumb { background: var(--lexicon-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3d5c; }
+
+/* Selection */
+::selection {
+  background: rgba(79, 142, 247, 0.3);
+  color: var(--lexicon-text);
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid var(--lexicon-blue);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Permission/condition/limitation badges */
+.badge-green { @apply bg-lexicon-green/10 text-lexicon-green border border-lexicon-green/30; }
+.badge-amber { @apply bg-lexicon-amber/10 text-lexicon-amber border border-lexicon-amber/30; }
+.badge-red { @apply bg-lexicon-red/10 text-lexicon-red border border-lexicon-red/30; }
+.badge-blue { @apply bg-lexicon-blue/10 text-lexicon-blue border border-lexicon-blue/30; }
+.badge-purple { @apply bg-lexicon-purple/10 text-lexicon-purple border border-lexicon-purple/30; }
+.badge-gray { @apply bg-slate-400/10 text-slate-400 border border-slate-400/20; }
+
+/* Compatibility matrix */
+.compat-green { @apply bg-lexicon-green/15 text-lexicon-green hover:bg-lexicon-green/25 transition-colors; }
+.compat-amber { @apply bg-lexicon-amber/15 text-lexicon-amber hover:bg-lexicon-amber/25 transition-colors; }
+.compat-red { @apply bg-lexicon-red/15 text-lexicon-red hover:bg-lexicon-red/25 transition-colors; }
+.compat-gray { @apply bg-slate-400/10 text-slate-400 hover:bg-slate-400/20 transition-colors; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Stagger children */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+/* Prose for full license text */
+.license-text {
+  font-family: var(--lexicon-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--lexicon-text-muted);
+}

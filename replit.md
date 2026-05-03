@@ -120,6 +120,16 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+## 2026-05-03 — LEXICON — License Intelligence Catalog
+
+Standalone web artifact at `/lexicon/` (repurposed `artifacts/lyte-command-center` slot, id kept):
+- **Source:** `artifacts/lexicon/` — React + Vite + Tailwind + wouter, port 8097
+- **Data layer:** 100+ licenses (all Hugging Face identifiers + ~30 beyond), N×N compatibility matrix (17 key licenses), 6 license family trees (GPL/LGPL/AGPL, BSD, Creative Commons, OpenRAIL, Llama, BigScience)
+- **Pages:** catalog home (search + filter + grid), license detail (permissions/conditions/limitations/YAML/badge/download), compare view (2–4 licenses), recommender quiz (7 questions → ranked shortlist), compatibility matrix, family trees (collapsible), API docs, 404
+- **Public JSON API:** `artifacts/api-server/src/routes/lexicon.ts` — 7 endpoints under `/api/lexicon/v1/` (licenses, compatibility, families, stats, openapi.json); lib bridges at `artifacts/api-server/src/lib/lexicon-{data,compatibility,families}.ts`
+- **No auth, no per-user state** — all data embedded in the SPA
+- **Workflow:** `archive/artifacts/lyte-command-center: web`
+
 ## 2026-04-29 — Portfolio consolidation pass
 
 Live SZL surface narrowed to 7 products + shared backend + canvas tool:

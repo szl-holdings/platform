@@ -82,6 +82,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     return;
   }
 
+
   const messages = req.body?.messages as ChatMessage[] | undefined;
   if (!Array.isArray(messages) || messages.length === 0) {
     res.status(400).json({ error: 'messages array required' });
@@ -108,6 +109,7 @@ router.post('/chat', async (req: Request, res: Response) => {
   }
 
   inflight += 1;
+
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');

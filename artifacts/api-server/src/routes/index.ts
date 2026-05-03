@@ -601,4 +601,15 @@ router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 // POST   /runtime-config/invalidate-cache — bust cache for one or all keys
 router.use(lazyMatch("/runtime-config", () => import("./runtime-config"), "runtime-config"));
 
+// LEXICON — License Intelligence Catalog API
+// GET /lexicon/v1/licenses
+// GET /lexicon/v1/licenses/:id
+// GET /lexicon/v1/compatibility
+// GET /lexicon/v1/compatibility/:a/:b
+// GET /lexicon/v1/families
+// GET /lexicon/v1/families/:id
+// GET /lexicon/v1/stats
+// GET /lexicon/v1/openapi.json
+router.use(lazyMatch("/lexicon", () => import("./lexicon"), "lexicon"));
+
 export default router;

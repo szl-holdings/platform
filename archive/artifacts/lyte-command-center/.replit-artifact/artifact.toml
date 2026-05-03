@@ -1,6 +1,6 @@
 kind = "web"
-  previewPath = "/lyte-command-center/"
-  title = "KORA — Decision Intelligence Command"
+  previewPath = "/lexicon/"
+  title = "LEXICON — License Intelligence Catalog"
   version = "1.0.0"
   id = "artifacts/lyte-command-center"
   router = "path"
@@ -11,16 +11,15 @@ kind = "web"
 
   [[services]]
   name = "web"
-  paths = [ "/lyte-command-center/" ]
+  paths = [ "/lexicon/" ]
   localPort = 9090
-  autoStart = true
 
   [services.development]
-  run = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+  run = "bash -c 'cd /home/runner/workspace/artifacts/lexicon && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
   [services.production]
-  build = [ "pnpm", "--filter", "@workspace/lyte-command-center", "run", "build" ]
-  publicDir = "artifacts/lyte-command-center/dist/public"
+  build = [ "pnpm", "--filter", "@workspace/lexicon", "run", "build" ]
+  publicDir = "artifacts/lexicon/dist/public"
   serve = "static"
 
   [[services.production.rewrites]]
@@ -29,4 +28,4 @@ kind = "web"
 
   [services.env]
   VITE_PORT = "8097"
-  BASE_PATH = "/lyte-command-center/"
+  BASE_PATH = "/lexicon/"
