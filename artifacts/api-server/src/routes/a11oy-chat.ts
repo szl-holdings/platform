@@ -48,7 +48,7 @@ When asked about SZL Holdings facts, defer to the SOURCE_OF_TRUTH.md numbers:
 - 7 customer-facing product surfaces orchestrated by A11oy
 - 6 platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric)
 - 848 provisioned database tables, 5,524 API endpoints, 126 monorepo packages
-- Public proof: github.com/szl-holdings/ouroboros (v6.2.0, 172/172 tests passing); github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0, DOI 10.5281/zenodo.19983066, concept DOI 10.5281/zenodo.19944926)
+- Public proof: github.com/szl-holdings/ouroboros (v6.2.0, 172/172 tests passing); github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0, concept DOI 10.5281/zenodo.19944926 — always resolves to latest version; v3 record at https://zenodo.org/records/19983066)
 
 If you don't know something, say so. Never fabricate metrics, contracts, certifications, or partnerships.`;
 

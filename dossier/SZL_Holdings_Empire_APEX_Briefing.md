@@ -151,7 +151,7 @@ This is the bounded-loop runtime that the platform is built on. It is not a mark
 
 Repository: `https://github.com/szl-holdings/ouroboros-thesis`
 Latest release: **paper-v3-2.0.0** — "The Lutar Invariant (audit-supported rewrite)" (May 2, 2026)
-DOI (v3 current): `10.5281/zenodo.19983066`  ·  Concept DOI: `10.5281/zenodo.19944926`  ·  Published: 2026-05-02  ·  Title: "The Loop Is the Product: Measuring Bounded Recursion as a System Primitive for Auditable AI"  ·  Author: Stephen P. Lutar (SZL Holdings), ORCID 0009-0001-0110-4173.  Earlier v2 empirical companion remains at DOI `10.5281/zenodo.19934129`.
+DOI (v3 current): `10.5281/zenodo.19944926`  ·  Concept DOI: `10.5281/zenodo.19944926`  ·  Published: 2026-05-02  ·  Title: "The Loop Is the Product: Measuring Bounded Recursion as a System Primitive for Auditable AI"  ·  Author: Stephen P. Lutar (SZL Holdings), ORCID 0009-0001-0110-4173.  Earlier v2 empirical companion remains at DOI `10.5281/zenodo.19934129`.
 License: CC-BY-4.0 (academic distribution)
 
 The paper formalizes the convergence properties of the bounded-loop the runtime implements (the closed-form Λ bound). The May 2, 2026 release was an audit-supported rewrite that explicitly retracted a prior version (paper-v3-1.0.0) after a self-audit identified residual fabrications in announcement materials. That retraction is itself in the public record. This is how the platform's governance discipline shows up in its own publishing record: when something is wrong, it is publicly retracted and replaced.
@@ -224,7 +224,7 @@ A standalone one-pager is at `dossier/SZL_Holdings_Capability_Statement.md`. The
 | Secondary NAICS | 541511, 541519, 541611, 541690 |
 | Primary capability | Governed operational-intelligence platform; AI governance; auditable decision-systems |
 | Differentiator | Open-source runtime + DOI-pinned theoretical proof; full proof-chain by construction |
-| Public proof | github.com/szl-holdings/ouroboros (v6.2.0, 172/172 tests); github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0, DOI 10.5281/zenodo.19983066) |
+| Public proof | github.com/szl-holdings/ouroboros (v6.2.0, 172/172 tests); github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0, DOI 10.5281/zenodo.19944926) |
 
 ---
 

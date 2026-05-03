@@ -26,7 +26,7 @@ The actual canonical v3 DOI was issued under a different concept on the same day
 
 | Field | Value |
 |---|---|
-| DOI (v3 current) | `10.5281/zenodo.19983066` |
+| DOI (v3 current) | `10.5281/zenodo.19944926` |
 | Concept DOI | `10.5281/zenodo.19944926` |
 | Title | The Loop Is the Product: Measuring Bounded Recursion as a System Primitive for Auditable AI |
 | Version | paper-v3-2.0.0 |
