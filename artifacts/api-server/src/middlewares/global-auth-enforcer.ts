@@ -214,6 +214,15 @@ const PUBLIC_EXACT_PATHS = new Set([
   // already covered by the /api/v1/ prefix entry below.
   "/api/.well-known/szl-attestation-keys.json",
   "/api/governance/stats",
+  // Agent Mesh — genuinely-public read-only paths. Listed here (exact match
+  // via Set.has) rather than in PUBLIC_PREFIXES (startsWith) to prevent any
+  // future /api/agent-mesh/state* or /api/agent-mesh/scan* route from being
+  // accidentally bypassed. Gateway telemetry sub-paths (/gateway, /gateway/stream,
+  // /gateway/export.csv, /gateway/latency) are NOT included; those require
+  // operator-only auth enforced at route level.
+  "/api/agent-mesh/state",
+  "/api/agent-mesh/index",
+  "/api/agent-mesh/scan",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -362,11 +371,14 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
-  // Agent Mesh telemetry — read-only GET state/index plus POST scan that
-  // re-reads local config files and refreshes the resilience index. Public
-  // so Sentra's Mesh Map and Pulse's MeshCard can render live data in the
-  // unauthenticated demo experience.
-  "/api/agent-mesh/",
+  // Agent Mesh telemetry — the three genuinely-public paths (state, index, scan)
+  // are listed in PUBLIC_EXACT_PATHS above using exact Set.has() matching.
+  // The broad "/api/agent-mesh/" prefix is intentionally absent here to prevent
+  // any startsWith bypass of the gateway telemetry sub-paths
+  // (/gateway, /gateway/stream, /gateway/export.csv, /gateway/latency),
+  // which expose platform-wide MCP containment data and must stay behind
+  // operator-only auth (authMiddleware + requireRole('super_admin', 'ops')).
+  // NOTE: nothing to add here — see PUBLIC_EXACT_PATHS for the agent-mesh entries.
   // Sentra cyber resilience cockpit — incidents + alerts CRUD backed by an
   // in-memory store (no DB). Public so the Sentra demo surface can fetch
   // live incident/alert data and run the create→triage→resolve flow without
