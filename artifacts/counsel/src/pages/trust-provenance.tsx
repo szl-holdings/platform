@@ -1,5 +1,6 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { ingestCounselFiling, type DocumentPipelineResult } from '@szl-holdings/document-intelligence';
+import { GovernanceDock } from '../components/governance-dock';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, Cpu, FileSearch, FileText, Filter, GitBranch, Hash, Link2, Lock, ShieldCheck } from 'lucide-react';
@@ -559,6 +560,8 @@ export default function TrustProvenance() {
           )}
         </div>
       )}
+
+      <GovernanceDock />
     </div>
   );
 }

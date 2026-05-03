@@ -1,5 +1,6 @@
 import { AdminAuditTrail, type AuditTrailEntry } from '@szl-holdings/shared-ui/admin-audit-trail';
 import { postPolicyAppeal } from '@szl-holdings/shared-ui/policy-appeal-client';
+import { GovernanceDock } from '../components/governance-dock';
 import { type PolicyDecisionRecord, PolicyResult } from '@szl-holdings/shared-ui/policy-result';
 import { ProofPanel, type ProofPanelData } from '@szl-holdings/shared-ui/proof-panel';
 import {
@@ -311,6 +312,8 @@ export default function TrustProvenancePage() {
             domainLabel="Maritime Intelligence"
           />
         ))}
+
+      <GovernanceDock />
     </div>
   );
 }

@@ -10,6 +10,7 @@ packages:
   - workers/*
   - scripts
   - platform/temporal
+  - platform/agent-gateway
 
 autoInstallPeers: false
 

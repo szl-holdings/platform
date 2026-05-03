@@ -1,5 +1,6 @@
 import { Bot, FileText, Lock, Terminal } from 'lucide-react';
 import { useMeshState } from '@/lib/mesh-store';
+import { GovernanceDock } from '../components/governance-dock';
 
 export default function TrustProvenance() {
   const meshState = useMeshState();
@@ -95,6 +96,8 @@ export default function TrustProvenance() {
           );
         })}
       </div>
+
+      <GovernanceDock />
     </div>
   );
 }

@@ -1,0 +1,34 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: agent-gateway
+  title: Agent Gateway
+  description: Policy, audit, and evidence boundary for all AI agent operations. Fronts the OpenAI Agents SDK with authentication, authorization (OPA), simulation, approval routing (Temporal), and full audit logging.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    szl.io/health-endpoint: http://localhost:8090/health
+    szl.io/runbook: platform/agent-gateway/README.md
+    szl.io/scorecard-score: "78"
+    szl.io/platform-maturity: "phase-11"
+    szl.io/tracing-enabled: "true"
+  tags:
+    - platform
+    - agent-gateway
+    - security
+    - typescript
+  links:
+    - url: http://localhost:8090/health
+      title: Health
+      icon: dashboard
+    - url: http://localhost:8090/v1/capabilities
+      title: Capabilities API
+      icon: api
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:platform-team
+  system: system:agent-fabric
+  dependsOn:
+    - resource:azure-key-vault
+  consumesApis:
+    - api:szl-rest-v1
