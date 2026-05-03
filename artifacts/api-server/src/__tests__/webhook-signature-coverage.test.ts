@@ -61,7 +61,7 @@ const INBOUND_WEBHOOK_REGISTRY: WebhookRegistryEntry[] = [
     sourceFile: 'routes/email-webhooks.ts',
     verifierKind: 'svix-hmac-sha256',
     secretEnvVar: 'RESEND_WEBHOOK_SECRET',
-    notes: 'Resend uses Svix HMAC-SHA256 with svix-id, svix-timestamp, svix-signature headers',
+    notes: 'Resend uses Svix HMAC-SHA256 with svix-id, svix-timestamp, svix-signature headers; svix-timestamp validated within 5-minute replay-protection window',
   },
 
   // ── Payment providers ────────────────────────────────────────────────────────

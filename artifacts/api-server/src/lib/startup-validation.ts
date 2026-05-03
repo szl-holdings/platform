@@ -1317,7 +1317,7 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'UNSUBSCRIBE_SECRET',
     required: false,
-    description: 'HMAC secret used to sign and verify email unsubscribe tokens',
+    description: 'HMAC secret used to sign and verify email unsubscribe tokens — required in production (min 32 chars)',
     sensitive: true,
     group: 'security',
   },
@@ -1389,14 +1389,14 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'RESEND_WEBHOOK_SECRET',
     required: false,
-    description: 'Resend email webhook signing secret (svix payload verification)',
+    description: 'Resend email webhook signing secret (svix HMAC-SHA256 payload verification) — required in production; absence causes all webhook deliveries to be rejected',
     sensitive: true,
     group: 'integrations',
   },
   {
     key: 'SENDGRID_WEBHOOK_SECRET',
     required: false,
-    description: 'SendGrid event webhook verification key',
+    description: 'SendGrid event webhook verification key (timingSafeEqual Authorization header) — required in production; absence causes all webhook deliveries to be rejected',
     sensitive: true,
     group: 'integrations',
   },
@@ -2140,6 +2140,18 @@ export function validateStartupConfig(): ValidationResult {
       warnings.push(
         'UNSUBSCRIBE_SECRET not set — generateUnsubscribeToken() and verifyUnsubscribeToken() will throw at runtime. ' +
           'Set UNSUBSCRIBE_SECRET before testing email unsubscribe flows.',
+      );
+    }
+  } else if (process.env.UNSUBSCRIBE_SECRET.length < 32) {
+    if (isProduction) {
+      errors.push(
+        `UNSUBSCRIBE_SECRET is too short (${process.env.UNSUBSCRIBE_SECRET.length} chars, minimum 32) — ` +
+          'a short secret allows attackers to brute-force valid unsubscribe tokens for arbitrary email addresses. ' +
+          'Generate a cryptographically random 32+ character secret and set it in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        `UNSUBSCRIBE_SECRET is short (${process.env.UNSUBSCRIBE_SECRET.length} chars) — use at least 32 characters in production to prevent token brute-forcing`,
       );
     }
   }

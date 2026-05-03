@@ -21,6 +21,8 @@ function validateSendGridSignature(req: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
+const SVIX_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000;
+
 function validateResendSignature(req: Request): boolean {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
   if (!secret) {
@@ -33,6 +35,17 @@ function validateResendSignature(req: Request): boolean {
   const msgSignature = req.headers['svix-signature'];
 
   if (typeof msgId !== 'string' || typeof msgTimestamp !== 'string' || typeof msgSignature !== 'string') {
+    return false;
+  }
+
+  const tsSeconds = Number(msgTimestamp);
+  if (!Number.isFinite(tsSeconds)) {
+    logger.warn('[email-webhook/resend] svix-timestamp is not a valid number');
+    return false;
+  }
+  const ageMs = Date.now() - tsSeconds * 1000;
+  if (Math.abs(ageMs) > SVIX_TIMESTAMP_TOLERANCE_MS) {
+    logger.warn({ ageMs }, '[email-webhook/resend] svix-timestamp is outside the 5-minute tolerance window — possible replay attack');
     return false;
   }
 
