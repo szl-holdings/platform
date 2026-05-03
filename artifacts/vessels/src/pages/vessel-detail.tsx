@@ -1,10 +1,12 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { useState } from 'react';
 import { ActivityFeed, CommentThread } from '@szl-holdings/shared-ui/collaboration';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@szl-holdings/shared-ui/ui/tabs';
-import { ArrowLeft, Clock, MapPin, Navigation, Package, Ship } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, EyeOff, Loader2, MapPin, Navigation, Package, Ship, XCircle } from 'lucide-react';
 import { Link, useRoute } from 'wouter';
 import { api } from '@/lib/api';
 
@@ -77,9 +79,26 @@ function DetailSkeleton() {
   );
 }
 
+interface StealthPortSnapshot {
+  policy: 'allowed' | 'blocked';
+  reason?: string;
+  portName?: string;
+  vesselQueue?: number;
+  congestion?: string;
+  nextDeparture?: string;
+  berthsOccupied?: string;
+  fetchedUrl: string;
+  auditId: string;
+  bytes?: number;
+  fetchedAt: string;
+}
+
 export default function VesselDetailPage() {
   const [, params] = useRoute('/vessel/:id');
   const vesselId = Number(params?.id);
+  const [stealthLoading, setStealthLoading] = useState(false);
+  const [stealthSnapshot, setStealthSnapshot] = useState<StealthPortSnapshot | null>(null);
+  const [stealthOpen, setStealthOpen] = useState(false);
 
   const { data: vessel, isLoading } = useStandardQuery<any>({
     queryKey: ['vessel', vesselId],
@@ -101,6 +120,71 @@ export default function VesselDetailPage() {
     queryFn: () => api.vessels.routes(vesselId) as any,
     enabled: !!vesselId,
   });
+
+  async function fetchPortSnapshot() {
+    if (!vessel) return;
+    setStealthLoading(true);
+    setStealthOpen(true);
+    const targetUrl = 'https://portofrotterdam.com/en/shipping/vessels';
+    try {
+      type StealthInvokeResponse = {
+        ok: boolean;
+        policyDecision: string;
+        policyNote?: string;
+        reason?: string;
+        auditId?: string;
+        requestHash?: string;
+        bytes?: number;
+        fetchedAt?: string;
+        snapshot?: {
+          portName?: string; vesselQueue?: number; congestion?: string;
+          nextDeparture?: string; berthsOccupied?: string;
+        };
+      };
+      const data = await apiFetch<StealthInvokeResponse>('/nexus/tools/web.stealth/invoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accessibility-snapshot', url: targetUrl, callerAgent: 'sextant' }),
+      });
+      if (!data.ok || data.policyDecision === 'blocked') {
+        setStealthSnapshot({
+          policy: 'blocked',
+          reason: data.reason ?? data.policyNote ?? 'Domain not in Camofox allowlist. Add it in PRAXIS → Skills → Camofox.',
+          fetchedUrl: targetUrl,
+          auditId: data.auditId ?? data.requestHash ?? 'n/a',
+          fetchedAt: new Date().toISOString(),
+        });
+      } else {
+        const snap = data.snapshot ?? {};
+        setStealthSnapshot({
+          policy: 'allowed',
+          portName: snap.portName,
+          vesselQueue: snap.vesselQueue,
+          congestion: snap.congestion,
+          nextDeparture: snap.nextDeparture,
+          berthsOccupied: snap.berthsOccupied,
+          fetchedUrl: targetUrl,
+          auditId: data.auditId ?? data.requestHash ?? 'n/a',
+          bytes: data.bytes,
+          fetchedAt: data.fetchedAt ?? new Date().toISOString(),
+        });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setStealthSnapshot({
+        policy: 'blocked',
+        reason: msg.includes('401') || msg.includes('Unauthorized')
+          ? 'Authentication required — sign in via PRAXIS first, then retry.'
+          : msg.includes('403') || msg.includes('blocked')
+            ? 'Domain not in Camofox allowlist. Add it in PRAXIS → Skills → Camofox.'
+            : `Request failed: ${msg}`,
+        fetchedUrl: targetUrl,
+        auditId: 'n/a',
+        fetchedAt: new Date().toISOString(),
+      });
+    }
+    setStealthLoading(false);
+  }
 
   if (isLoading) return <DetailSkeleton />;
   if (!vessel)
@@ -124,7 +208,7 @@ export default function VesselDetailPage() {
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
           </Button>
         </Link>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3">
             <h1 className="font-display text-2xl font-bold">{vessel.name}</h1>
             <Badge
@@ -141,7 +225,69 @@ export default function VesselDetailPage() {
             IMO: {vessel.imo} | MMSI: {vessel.mmsi || 'N/A'} | {vessel.flag}
           </p>
         </div>
+        <button
+          onClick={fetchPortSnapshot}
+          disabled={stealthLoading}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 shrink-0"
+          style={{ background: 'rgba(244,114,182,0.08)', border: '1px solid rgba(244,114,182,0.25)', color: '#f472b6' }}
+        >
+          {stealthLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <EyeOff className="w-3.5 h-3.5" />}
+          {stealthLoading ? 'Fetching…' : 'Fetch Port Snapshot'}
+        </button>
       </div>
+
+      {stealthOpen && (
+        <div className="rounded-xl overflow-hidden animate-fade-in-up" style={{ background: 'rgba(244,114,182,0.04)', border: '1px solid rgba(244,114,182,0.2)' }}>
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'rgba(244,114,182,0.15)' }}>
+            <EyeOff className="w-3.5 h-3.5" style={{ color: '#f472b6' }} />
+            <span className="text-xs font-semibold" style={{ color: '#f472b6' }}>web.stealth · Port Snapshot</span>
+            <span className="text-[9px] font-mono text-muted-foreground/40 ml-1">via Camofox · portofrotterdam.com · audit-logged</span>
+            <button onClick={() => setStealthOpen(false)} className="ml-auto text-muted-foreground/30 hover:text-muted-foreground/70 transition-colors">
+              <XCircle className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          {stealthLoading ? (
+            <div className="flex items-center gap-3 px-4 py-4">
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#f472b6' }} />
+              <span className="text-xs text-muted-foreground">Running accessibility-snapshot via Camofox stealth browser…</span>
+            </div>
+          ) : stealthSnapshot?.policy === 'blocked' ? (
+            <div className="px-4 py-3">
+              <div className="flex items-start gap-3 rounded-lg px-3 py-2.5 bg-destructive/5 border border-destructive/20">
+                <XCircle className="w-4 h-4 text-destructive/70 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-destructive/80">Request blocked by policy</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">{stealthSnapshot.reason}</p>
+                  <p className="text-[9px] font-mono text-muted-foreground/30 mt-1">{stealthSnapshot.auditId} · {stealthSnapshot.fetchedUrl}</p>
+                </div>
+              </div>
+            </div>
+          ) : stealthSnapshot?.policy === 'allowed' ? (
+            <div className="px-4 py-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {([
+                  { label: 'Port', value: stealthSnapshot.portName },
+                  { label: 'Vessel Queue', value: stealthSnapshot.vesselQueue != null ? String(stealthSnapshot.vesselQueue) : undefined },
+                  { label: 'Congestion', value: stealthSnapshot.congestion },
+                  { label: 'Next Departure', value: stealthSnapshot.nextDeparture },
+                  { label: 'Berths Occupied', value: stealthSnapshot.berthsOccupied },
+                ] as { label: string; value: string | undefined }[]).map((f) => f.value ? (
+                  <div key={f.label} className="rounded-lg px-3 py-2" style={{ background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.12)' }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-0.5 text-muted-foreground/50">{f.label}</p>
+                    <p className="text-sm font-semibold truncate">{f.value}</p>
+                  </div>
+                ) : null)}
+              </div>
+              <div className="flex items-center gap-3 mt-2.5 text-[10px] font-mono text-muted-foreground/40">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400/70" />
+                <span>{stealthSnapshot.fetchedUrl}</span>
+                <span className="ml-auto">{stealthSnapshot.auditId}{stealthSnapshot.bytes ? ` · ${(stealthSnapshot.bytes / 1024).toFixed(1)} KB` : ''} · {new Date(stealthSnapshot.fetchedAt).toLocaleTimeString()}</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
+
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">

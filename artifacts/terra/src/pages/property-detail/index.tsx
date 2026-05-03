@@ -3,13 +3,15 @@ import { type OperationalEntity, OperationalQueueRow } from '@szl-holdings/share
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import {
-  Activity, ArrowLeft, Building2, Clock, DollarSign, Download, Eye, FileText, Flame,
+  Activity, ArrowLeft, Building2, CheckCircle2, Clock, DollarSign, Download, Eye, EyeOff, FileText, Flame,
   LayoutDashboard, Loader2, MapPin, Shield, Tag, Target, TrendingUp, Users,
+  XCircle,
 } from 'lucide-react';
 import { type ComponentType, type CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import { AtlasScenePanel } from '@/components/atlas-scene-panel';
 import { alerts, properties, tenants } from '@/data/portfolio';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { type GqlTerraActionItem, gqlFetch } from '@/lib/api';
 import { ActionsTab } from './actions-tab';
 import { DiligenceTab } from './diligence-tab';
@@ -53,6 +55,20 @@ function ProvenanceTag({ source }: { source: string }) {
   );
 }
 
+interface StealthListingSnapshot {
+  policy: 'allowed' | 'blocked';
+  reason?: string;
+  price?: string;
+  sqft?: string;
+  yearBuilt?: string;
+  zestimate?: string;
+  daysOnMarket?: string;
+  fetchedUrl: string;
+  auditId: string;
+  bytes?: number;
+  fetchedAt: string;
+}
+
 export default function PropertyDetailPage() {
   const [, params] = useRoute('/property/:id');
   const [downloading, setDownloading] = useState(false);
@@ -64,8 +80,76 @@ export default function PropertyDetailPage() {
   const [whyNowData, setWhyNowData] = useState<WhyNowPanelData | null>(null);
   const [whyNowLoading, setWhyNowLoading] = useState(false);
   const [whyNowError, setWhyNowError] = useState<string | null>(null);
+  const [stealthLoading, setStealthLoading] = useState(false);
+  const [stealthSnapshot, setStealthSnapshot] = useState<StealthListingSnapshot | null>(null);
+  const [stealthOpen, setStealthOpen] = useState(false);
 
   const property = properties.find((p) => p.id === params?.id);
+
+  async function fetchListingSnapshot() {
+    if (!property) return;
+    setStealthLoading(true);
+    setStealthOpen(true);
+    const targetUrl = `https://zillow.com/homes/${encodeURIComponent(property.address)}`;
+    try {
+      type StealthInvokeResponse = {
+        ok: boolean;
+        policyDecision: string;
+        policyNote?: string;
+        reason?: string;
+        auditId?: string;
+        requestHash?: string;
+        bytes?: number;
+        fetchedAt?: string;
+        snapshot?: {
+          price?: string; sqft?: string; yearBuilt?: string;
+          zestimate?: string; daysOnMarket?: string;
+        };
+      };
+      const data = await apiFetch<StealthInvokeResponse>('/nexus/tools/web.stealth/invoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accessibility-snapshot', url: targetUrl, callerAgent: 'domaine' }),
+      });
+      if (!data.ok || data.policyDecision === 'blocked') {
+        setStealthSnapshot({
+          policy: 'blocked',
+          reason: data.reason ?? data.policyNote ?? 'Domain not in Camofox allowlist. Add it in Skills → Camofox.',
+          fetchedUrl: targetUrl,
+          auditId: data.auditId ?? data.requestHash ?? 'n/a',
+          fetchedAt: new Date().toISOString(),
+        });
+      } else {
+        const snap = data.snapshot ?? {};
+        setStealthSnapshot({
+          policy: 'allowed',
+          price: snap.price,
+          sqft: snap.sqft,
+          yearBuilt: snap.yearBuilt,
+          zestimate: snap.zestimate,
+          daysOnMarket: snap.daysOnMarket,
+          fetchedUrl: targetUrl,
+          auditId: data.auditId ?? data.requestHash ?? 'n/a',
+          bytes: data.bytes,
+          fetchedAt: data.fetchedAt ?? new Date().toISOString(),
+        });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setStealthSnapshot({
+        policy: 'blocked',
+        reason: msg.includes('401') || msg.includes('Unauthorized')
+          ? 'Authentication required — sign in via PRAXIS first, then retry.'
+          : msg.includes('403') || msg.includes('blocked')
+            ? 'Domain not in Camofox allowlist. Add it in PRAXIS → Skills → Camofox.'
+            : `Request failed: ${msg}`,
+        fetchedUrl: targetUrl,
+        auditId: 'n/a',
+        fetchedAt: new Date().toISOString(),
+      });
+    }
+    setStealthLoading(false);
+  }
 
   const loadActionItems = useCallback(async (propertyId: string) => {
     setActionItemsLoading(true);
@@ -183,7 +267,16 @@ export default function PropertyDetailPage() {
               {sourceInfo && (<><ProvenanceTag source={sourceInfo.source} /><FreshnessTag label={sourceInfo.freshness} confidence={sourceInfo.confidence} /></>)}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={fetchListingSnapshot}
+              disabled={stealthLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+              style={{ background: 'rgba(244,114,182,0.08)', border: '1px solid rgba(244,114,182,0.25)', color: '#f472b6' }}
+            >
+              {stealthLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <EyeOff className="w-3.5 h-3.5" />}
+              {stealthLoading ? 'Fetching…' : 'Fetch Listing Snapshot'}
+            </button>
             <Link href={`/evidence?entity=${encodeURIComponent(property.id)}`}>
               <button data-testid="link-view-evidence" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style={{ background: 'rgba(139,122,200,0.1)', border: '1px solid rgba(139,122,200,0.25)', color: '#8b7ac8' }}>
                 <Eye className="w-3.5 h-3.5" /> View Evidence
@@ -236,6 +329,58 @@ export default function PropertyDetailPage() {
           </motion.div>
         ))}
       </div>
+
+      {stealthOpen && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl overflow-hidden" style={{ background: 'rgba(244,114,182,0.04)', border: '1px solid rgba(244,114,182,0.2)' }}>
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: 'rgba(244,114,182,0.15)' }}>
+            <EyeOff className="w-3.5 h-3.5" style={{ color: '#f472b6' }} />
+            <span className="text-xs font-semibold" style={{ color: '#f472b6' }}>web.stealth · Listing Snapshot</span>
+            <span className="text-[9px] font-mono text-muted-foreground/40 ml-1">via Camofox · zillow.com · audit-logged</span>
+            <button onClick={() => setStealthOpen(false)} className="ml-auto text-muted-foreground/30 hover:text-muted-foreground transition-colors">
+              <XCircle className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          {stealthLoading ? (
+            <div className="flex items-center gap-3 px-4 py-4">
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#f472b6' }} />
+              <span className="text-xs text-muted-foreground">Running accessibility-snapshot via Camofox stealth browser…</span>
+            </div>
+          ) : stealthSnapshot?.policy === 'blocked' ? (
+            <div className="px-4 py-3">
+              <div className="flex items-start gap-3 rounded-lg px-3 py-2.5" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <XCircle className="w-4 h-4 text-red-400/70 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-red-400/80">Request blocked by policy</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">{stealthSnapshot.reason}</p>
+                  <p className="text-[9px] font-mono text-muted-foreground/30 mt-1">{stealthSnapshot.auditId} · {stealthSnapshot.fetchedUrl}</p>
+                </div>
+              </div>
+            </div>
+          ) : stealthSnapshot?.policy === 'allowed' ? (
+            <div className="px-4 py-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {[
+                  { label: 'Listed Price', value: stealthSnapshot.price },
+                  { label: 'Zestimate', value: stealthSnapshot.zestimate },
+                  { label: 'Sq Ft (est.)', value: stealthSnapshot.sqft },
+                  { label: 'Year Built', value: stealthSnapshot.yearBuilt },
+                  { label: 'Days on Market', value: stealthSnapshot.daysOnMarket },
+                ].map((f) => f.value ? (
+                  <div key={f.label} className="rounded-lg px-3 py-2" style={{ background: 'rgba(244,114,182,0.06)', border: '1px solid rgba(244,114,182,0.12)' }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-0.5" style={{ color: 'rgba(244,114,182,0.5)' }}>{f.label}</p>
+                    <p className="text-sm font-semibold text-white">{f.value}</p>
+                  </div>
+                ) : null)}
+              </div>
+              <div className="flex items-center gap-3 mt-2.5 text-[10px] font-mono text-muted-foreground/40">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400/70" />
+                <span>{stealthSnapshot.fetchedUrl}</span>
+                <span className="ml-auto">{stealthSnapshot.auditId}{stealthSnapshot.bytes ? ` · ${(stealthSnapshot.bytes / 1024).toFixed(1)} KB` : ''} · {new Date(stealthSnapshot.fetchedAt).toLocaleTimeString()}</span>
+              </div>
+            </div>
+          ) : null}
+        </motion.div>
+      )}
 
       <div className="flex gap-1 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         {tabs.map((tab) => (

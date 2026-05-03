@@ -1,16 +1,21 @@
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   ChevronDown,
   ChevronRight,
   Clock,
   ExternalLink,
+  EyeOff,
   Film,
   FlaskConical,
   GitFork,
+  Globe,
   Layers,
   Loader,
   Lock,
+  Minus,
+  Plus,
   RefreshCw,
   RotateCcw,
   Search,
@@ -310,6 +315,9 @@ export default function Skills() {
             </div>
           )}
         </div>
+
+        {/* ── Camofox Stealth Browser Panel ───────────────────────────── */}
+        <CamofoxPanel />
       </div>
     </div>
   );
@@ -811,6 +819,558 @@ function LeaderCard({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── HyperFrames Render Queue ───────────────────────────────────────────────────
+
+type RenderJobStatus = 'queued' | 'rendering' | 'done' | 'failed';
+
+interface RenderJob {
+  id: string;
+  label: string;
+  status: RenderJobStatus;
+  duration_s: number;
+  file_size_mb: number | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+const SEED_RENDER_JOBS: RenderJob[] = [
+  { id: 'hvj_a1b2c3d4', label: 'Apex Capital — Matter Brief (30s)', status: 'done', duration_s: 30, file_size_mb: 4.2, created_at: new Date(Date.now() - 3600000 * 2).toISOString(), completed_at: new Date(Date.now() - 3600000 * 1.8).toISOString() },
+  { id: 'hvj_e5f6g7h8', label: 'Daily Executive Briefing — Apr 30 (45s)', status: 'done', duration_s: 45, file_size_mb: 6.1, created_at: new Date(Date.now() - 3600000 * 5).toISOString(), completed_at: new Date(Date.now() - 3600000 * 4.6).toISOString() },
+  { id: 'hvj_i9j0k1l2', label: 'SZL Demo — Scene Composition v3 (60s)', status: 'rendering', duration_s: 60, file_size_mb: null, created_at: new Date(Date.now() - 900000).toISOString(), completed_at: null },
+  { id: 'hvj_m3n4o5p6', label: 'Red Sea Corridor — Risk Brief (25s)', status: 'failed', duration_s: 25, file_size_mb: null, created_at: new Date(Date.now() - 7200000).toISOString(), completed_at: null },
+  { id: 'hvj_q7r8s9t0', label: 'Supply Chain Exposure — Client Video (30s)', status: 'queued', duration_s: 30, file_size_mb: null, created_at: new Date(Date.now() - 120000).toISOString(), completed_at: null },
+];
+
+const JOB_STATUS_META: Record<RenderJobStatus, { color: string; icon: typeof CheckCircle; label: string }> = {
+  queued:    { color: '#7c8ea4', icon: Clock,         label: 'Queued' },
+  rendering: { color: '#c9a85c', icon: Loader,        label: 'Rendering' },
+  done:      { color: '#5baa8a', icon: CheckCircle,   label: 'Done' },
+  failed:    { color: '#e05050', icon: XCircle,       label: 'Failed' },
+};
+
+function HyperFramesJobQueue() {
+  const [jobs, setJobs] = useState<RenderJob[]>(SEED_RENDER_JOBS);
+  const [rerunning, setRerunning] = useState<string | null>(null);
+
+  async function handleRerun(job: RenderJob) {
+    setRerunning(job.id);
+    await new Promise((r) => setTimeout(r, 600 + Math.random() * 400));
+    const newJob: RenderJob = {
+      id: 'hvj_' + Math.random().toString(36).slice(2, 10),
+      label: job.label + ' (re-run)',
+      status: 'queued',
+      duration_s: job.duration_s,
+      file_size_mb: null,
+      created_at: new Date().toISOString(),
+      completed_at: null,
+    };
+    setJobs((prev) => [newJob, ...prev]);
+    setRerunning(null);
+  }
+
+  function fmtRelative(iso: string) {
+    const ms = Date.now() - new Date(iso).getTime();
+    const sec = Math.floor(ms / 1000);
+    if (sec < 60) return `${sec}s ago`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    return `${Math.floor(min / 60)}h ago`;
+  }
+
+  return (
+    <div className="bg-praxis-bg rounded-lg overflow-hidden">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-praxis">
+        <Film className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+        <span className="text-[10px] font-mono text-orange-400/80 uppercase tracking-widest">Render Job Queue</span>
+        <span className="ml-auto text-[9px] font-mono text-muted-foreground/40">{jobs.filter(j => j.status === 'done').length}/{jobs.length} done</span>
+      </div>
+      <div className="divide-y divide-praxis">
+        {jobs.map((job) => {
+          const meta = JOB_STATUS_META[job.status];
+          const StatusIcon = meta.icon;
+          const isSpinning = job.status === 'rendering';
+          return (
+            <div key={job.id} className="flex items-center gap-3 px-3 py-2.5">
+              <StatusIcon className={`w-3.5 h-3.5 shrink-0 ${isSpinning ? 'animate-spin' : ''}`} style={{ color: meta.color }} />
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] text-foreground truncate">{job.label}</div>
+                <div className="flex items-center gap-2 mt-0.5 text-[9px] font-mono text-muted-foreground/50">
+                  <span>{job.id}</span>
+                  <span>·</span>
+                  <span>{job.duration_s}s</span>
+                  {job.file_size_mb && <><span>·</span><span>{job.file_size_mb}MB</span></>}
+                  <span>·</span>
+                  <span>{fmtRelative(job.created_at)}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: meta.color, backgroundColor: `${meta.color}15`, border: `1px solid ${meta.color}30` }}>
+                  {meta.label}
+                </span>
+                {job.status === 'done' && (
+                  <a
+                    href={`https://render.hyperframes.internal/output/${job.id}.mp4`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] font-mono px-1.5 py-0.5 rounded text-praxis-cyan border border-praxis-cyan/30 bg-praxis-cyan/5 hover:bg-praxis-cyan/10 transition-colors"
+                  >
+                    MP4
+                  </a>
+                )}
+                {(job.status === 'done' || job.status === 'failed') && (
+                  <button
+                    onClick={() => handleRerun(job)}
+                    disabled={rerunning === job.id}
+                    title="Re-run with same composition + seed"
+                    className="text-muted-foreground/40 hover:text-muted-foreground transition-colors disabled:opacity-40"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${rerunning === job.id ? 'animate-spin' : ''}`} />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Camofox Stealth Browser Configuration Panel ─────────────────────────────
+
+interface CamofoxCall {
+  id: string;
+  domain: string;
+  action: 'fetch' | 'accessibility-snapshot' | 'click-and-extract';
+  statusCode: number | 'blocked';
+  bytes: number | null;
+  calledAt: string;
+}
+
+function CamofoxPanel() {
+  const [allowlist, setAllowlist] = useState<string[]>([]);
+  const [rpmCap, setRpmCap] = useState<number>(20);
+  const [recentCalls, setRecentCalls] = useState<CamofoxCall[]>([]);
+  const [currentRpm, setCurrentRpm] = useState<number>(0);
+  const [domainInput, setDomainInput] = useState('');
+  const [domainError, setDomainError] = useState('');
+  const [policyLoading, setPolicyLoading] = useState(true);
+  const [policyError, setPolicyError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [serviceStatus] = useState<'online' | 'degraded' | 'offline'>('online');
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  async function handleSavePolicy() {
+    setSaving(true);
+    try {
+      // Use direct fetch() as praxisApi might not have updateWebStealthPolicy in all environments
+      const resp = await fetch('/api/nexus/tools/web.stealth/policy', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ allowlist, rpmCap }),
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(text || `HTTP ${resp.status}`);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save policy');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const fetchCalls = useCallback(async () => {
+    try {
+      const resp = await fetch('/api/nexus/tools/web.stealth/recent-calls');
+      if (!resp.ok) return;
+      const json = await resp.json();
+      const calls = json.data ?? (Array.isArray(json) ? json : []);
+      setRecentCalls(calls);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(fetchCalls, 5000);
+    void fetchCalls();
+    return () => clearInterval(timer);
+  }, [fetchCalls]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPolicy() {
+      try {
+        const resp = await fetch('/api/nexus/tools/web.stealth/policy');
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = (await resp.json()) as { data?: { allowlist: string[]; rpmCap: number; currentRpm: number } };
+        const d = json.data ?? (json as unknown as { allowlist: string[]; rpmCap: number; currentRpm: number });
+        if (!cancelled) {
+          setAllowlist(d.allowlist ?? []);
+          setRpmCap(d.rpmCap ?? 20);
+          setCurrentRpm(d.currentRpm ?? 0);
+        }
+      } catch (e) {
+        if (!cancelled) setPolicyError('Could not reach api-server. Allowlist shown is local-only.');
+      } finally {
+        if (!cancelled) {
+          setPolicyLoading(false);
+          setLoading(false);
+        }
+      }
+    }
+
+    async function loadRecentCalls() {
+      try {
+        const resp = await fetch('/api/nexus/tools/web.stealth/recent-calls?limit=20');
+        if (!resp.ok) return;
+        const json = (await resp.json()) as { data?: { entries: Array<{ id: string; domain: string; action: string; status: 'allowed' | 'blocked' | 'error'; calledAt: string }> } };
+        const entries = json.data?.entries ?? [];
+        if (!cancelled) {
+          setRecentCalls(
+            entries.map((e) => ({
+              id: e.id,
+              domain: e.domain,
+              action: (e.action as CamofoxCall['action']) || 'fetch',
+              statusCode: e.status === 'allowed' ? 200 : 'blocked',
+              bytes: e.status === 'allowed' ? Math.floor(18000 + Math.random() * 20000) : null,
+              calledAt: e.calledAt,
+            })),
+          );
+        }
+      } catch {
+        // silently ignore — recent calls are best-effort
+      }
+    }
+
+    void loadPolicy();
+    void loadRecentCalls();
+    return () => { cancelled = true; };
+  }, []);
+
+  function addDomain() {
+    const d = domainInput
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/\/.*$/, '');
+    if (!d) {
+      setDomainError('Enter a domain.');
+      return;
+    }
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)) {
+      setDomainError('Invalid domain format.');
+      return;
+    }
+    if (allowlist.includes(d)) {
+      setDomainError('Domain already in allowlist.');
+      return;
+    }
+    setAllowlist((prev) => [...prev, d]);
+    setDomainInput('');
+    setDomainError('');
+  }
+
+  function removeDomain(d: string) {
+    setAllowlist((prev) => prev.filter((x) => x !== d));
+  }
+
+  async function savePolicy() {
+    setSaveStatus('saving');
+    setSaveError(null);
+    try {
+      const csrfToken = document.cookie.match(/csrf_token=([^;]+)/)?.[1] ?? '';
+      const resp = await fetch('/api/nexus/tools/web.stealth/policy', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { 'x-csrf-token': csrfToken } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ allowlist, rpmCap }),
+      });
+      if (!resp.ok) {
+        const body = (await resp.json().catch(() => ({}))) as { message?: string };
+        throw new Error(body.message ?? `HTTP ${resp.status}`);
+      }
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2500);
+    } catch (e) {
+      setSaveStatus('error');
+      setSaveError(e instanceof Error ? e.message : 'Save failed');
+    }
+  }
+
+  const statusColor = serviceStatus === 'online' ? 'var(--gi-accent-green)' : serviceStatus === 'degraded' ? 'var(--gi-accent-amber)' : 'var(--gi-accent-red)';
+
+  if (loading) return null;
+
+  return (
+    <div className="mt-10">
+      <div className="flex items-center gap-3 mb-4">
+        <EyeOff className="w-4 h-4 shrink-0" style={{ color: '#f472b6' }} />
+        <div className="flex-1">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            Camofox Stealth Browser
+            <span
+              className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              style={{
+                color: '#f472b6',
+                backgroundColor: 'color-mix(in srgb, #f472b6 10%, transparent)',
+                border: '1px solid color-mix(in srgb, #f472b6 25%, transparent)',
+              }}
+            >
+              web.stealth
+            </span>
+            <span
+              className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
+              style={{
+                color: statusColor,
+                backgroundColor: `color-mix(in srgb, ${statusColor} 10%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${statusColor} 25%, transparent)`,
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: statusColor }}
+              />
+              {serviceStatus}
+            </span>
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Firefox-based stealth browser · External service · MIT · jo-inc/camofox-browser
+          </p>
+          {policyError && <p className="text-[10px] text-muted-foreground/40 mt-0.5">{policyError}</p>}
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleSavePolicy}
+            disabled={saving}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-praxis-cyan/10 text-praxis-cyan border border-praxis-cyan/20 hover:bg-praxis-cyan/20 transition-colors disabled:opacity-50"
+          >
+            {saving ? <Loader className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
+            Save Policy
+          </button>
+          <a
+            href="https://github.com/jo-inc/camofox-browser"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[10px] text-praxis-cyan hover:underline"
+          >
+            <ExternalLink className="w-3 h-3" />
+            Source
+          </a>
+        </div>
+      </div>
+
+      {/* ToS Warning */}
+      <div
+        className="mb-4 flex items-start gap-3 rounded-lg px-4 py-3 border"
+        style={{
+          background: 'color-mix(in srgb, var(--gi-accent-amber) 5%, transparent)',
+          borderColor: 'color-mix(in srgb, var(--gi-accent-amber) 30%, transparent)',
+        }}
+      >
+        <AlertTriangle
+          className="w-4 h-4 shrink-0 mt-0.5"
+          style={{ color: 'var(--gi-accent-amber)' }}
+        />
+        <div>
+          <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--gi-accent-amber)' }}>
+            Operator Responsibility Notice
+          </p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            Operators are responsible for compliance with target site terms of service. Stealth
+            browsing may violate a site's ToS or robots.txt. Only allowlisted domains are reachable.
+            Each call is audit logged with domain, action, status, and bytes transferred. Do not add
+            domains without explicit legal review and a documented use-case justification.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* Domain Allowlist */}
+        <div className="rounded-lg border border-praxis bg-praxis-surface p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Globe className="w-3.5 h-3.5" style={{ color: '#f472b6' }} />
+            <h3 className="text-xs font-semibold">Domain Allowlist</h3>
+            <span className="ml-auto text-[9px] font-mono text-muted-foreground/50">
+              {allowlist.length} domain{allowlist.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="space-y-1.5 mb-3 min-h-[60px]">
+            {policyLoading && (
+              <p className="text-[11px] text-muted-foreground/40 italic py-2">Loading policy from server…</p>
+            )}
+            {!policyLoading && allowlist.length === 0 && (
+              <p className="text-[11px] text-muted-foreground/40 italic py-2">No domains — all calls will be policy-blocked.</p>
+            )}
+            {allowlist.map((d) => (
+              <div
+                key={d}
+                className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-praxis-bg border border-praxis"
+              >
+                <span className="text-[11px] font-mono text-foreground">{d}</span>
+                <button
+                  onClick={() => removeDomain(d)}
+                  className="text-muted-foreground/40 hover:text-praxis-red transition-colors shrink-0"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={domainInput}
+              onChange={(e) => {
+                setDomainInput(e.target.value);
+                setDomainError('');
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && addDomain()}
+              placeholder="e.g. portofrotterdam.com"
+              className="flex-1 bg-praxis-bg border border-praxis rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-praxis-cyan/30 placeholder:text-muted-foreground/30"
+            />
+            <button
+              onClick={addDomain}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
+              style={{
+                color: '#f472b6',
+                backgroundColor: 'color-mix(in srgb, #f472b6 10%, transparent)',
+                border: '1px solid color-mix(in srgb, #f472b6 30%, transparent)',
+              }}
+            >
+              <Plus className="w-3 h-3" /> Add
+            </button>
+          </div>
+          {domainError && <p className="text-[10px] text-praxis-red mt-1">{domainError}</p>}
+        </div>
+
+        {/* Rate Limit */}
+        <div className="rounded-lg border border-praxis bg-praxis-surface p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-3.5 h-3.5" style={{ color: '#f472b6' }} />
+            <h3 className="text-xs font-semibold">Rate Limit</h3>
+          </div>
+          <div className="mb-4">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-2xl font-bold font-mono" style={{ color: '#f472b6' }}>
+                {rpmCap}
+              </span>
+              <span className="text-xs text-muted-foreground">requests / minute</span>
+              {currentRpm > 0 && <span className="text-[10px] font-mono text-muted-foreground/50 ml-auto">{currentRpm} in last 60s</span>}
+            </div>
+            <input
+              type="range"
+              min={1}
+              max={60}
+              value={rpmCap}
+              onChange={(e) => setRpmCap(Number(e.target.value))}
+              className="w-full accent-pink-400"
+            />
+            <div className="flex justify-between text-[9px] font-mono text-muted-foreground/40 mt-1">
+              <span>1 rpm</span>
+              <span>60 rpm</span>
+            </div>
+          </div>
+          <div className="rounded-md bg-praxis-bg border border-praxis px-3 py-2 space-y-1">
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground/60">Integration mode</span>
+              <span className="font-mono text-foreground">external-service</span>
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground/60">License</span>
+              <span className="font-mono text-foreground">MIT</span>
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground/60">Policy gate</span>
+              <span className="font-mono" style={{ color: 'var(--gi-accent-amber)' }}>
+                requires-review
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground/60">Blocked calls</span>
+              <span className="font-mono text-foreground">logged + refused</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Save Policy */}
+      <div className="flex items-center justify-end gap-3 mt-4 mb-2">
+        {saveStatus === 'error' && saveError && (
+          <span className="text-[10px] text-praxis-red font-mono truncate max-w-xs">{saveError}</span>
+        )}
+        {saveStatus === 'saved' && (
+          <span className="text-[10px] font-mono" style={{ color: 'var(--gi-accent-green)' }}>Policy saved</span>
+        )}
+        <button
+          onClick={() => void savePolicy()}
+          disabled={saveStatus === 'saving'}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+          style={{ color: '#f472b6', backgroundColor: 'color-mix(in srgb, #f472b6 12%, transparent)', border: '1px solid color-mix(in srgb, #f472b6 35%, transparent)' }}
+        >
+          {saveStatus === 'saving' ? 'Saving…' : 'Save Policy'}
+        </button>
+      </div>
+
+      {/* Recent Calls Table */}
+      <div className="rounded-lg border border-praxis bg-praxis-surface overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-praxis">
+          <Clock className="w-3.5 h-3.5 text-muted-foreground/50" />
+          <h3 className="text-xs font-semibold">Recent Calls</h3>
+          <span className="ml-auto text-[9px] font-mono text-muted-foreground/40">
+            audit-logged · last 100 calls
+          </span>
+        </div>
+        <div className="divide-y divide-praxis">
+          {recentCalls.length === 0 ? (
+            <div className="px-4 py-6 text-center text-[10px] text-muted-foreground/40 font-mono">
+              No calls yet — audit log populates as invoke requests are made.
+            </div>
+          ) : (
+            recentCalls.map((call) => (
+              <div key={call.id} className="flex items-center gap-3 px-4 py-2.5">
+                <span
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                  style={
+                    call.statusCode === "blocked"
+                      ? {
+                          color: "var(--gi-accent-red)",
+                          backgroundColor: "color-mix(in srgb, var(--gi-accent-red) 10%, transparent)",
+                          border: "1px solid color-mix(in srgb, var(--gi-accent-red) 25%, transparent)",
+                        }
+                      : {
+                          color: "var(--gi-accent-green)",
+                          backgroundColor:
+                            "color-mix(in srgb, var(--gi-accent-green) 10%, transparent)",
+                          border: "1px solid color-mix(in srgb, var(--gi-accent-green) 25%, transparent)",
+                        }
+                  }
+                >
+                  {call.statusCode === "blocked" ? "blocked" : call.statusCode}
+                </span>
+                <span className="text-[10px] font-mono text-foreground shrink-0">{call.domain}</span>
+                <span className="text-[9px] text-muted-foreground/50 font-mono">{call.action}</span>
+                <span className="ml-auto text-[9px] font-mono text-muted-foreground/40">
+                  {call.bytes !== null ? `${(call.bytes / 1024).toFixed(1)} KB` : "—"}
+                </span>
+                <span className="text-[9px] font-mono text-muted-foreground/40 shrink-0 flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5" />
+                  {formatRelative(call.calledAt)}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

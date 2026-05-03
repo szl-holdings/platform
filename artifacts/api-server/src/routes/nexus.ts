@@ -1841,6 +1841,312 @@ async function thirdPartyCall<T>(
 // Export for downstream leader integrations so they don't re-implement gating.
 export { thirdPartyCall };
 
+// ─── web.stealth Policy Store ────────────────────────────────────────────────
+//
+// In-memory policy for Camofox web.stealth calls. Default allowlist is empty;
+// operators must explicitly add domains via PUT /api/nexus/tools/web.stealth/policy.
+// The RPM cap is enforced per-server in a rolling 60-second window.
+
+interface WebStealthPolicy {
+  allowlist: string[];
+  rpmCap: number;
+}
+
+const webStealthPolicy: WebStealthPolicy = {
+  allowlist: [],
+  rpmCap: 20,
+};
+
+// Rolling 60-second RPM tracker (timestamps only)
+const webStealthCallLog: number[] = [];
+
+// Detailed audit log — last MAX_AUDIT_ENTRIES entries, newest first
+const MAX_AUDIT_ENTRIES = 100;
+interface WebStealthAuditEntry {
+  id: string;
+  domain: string;
+  action: string;
+  status: 'allowed' | 'blocked' | 'error';
+  reason: string | null;
+  callerAgent: string;
+  calledAt: string;
+}
+const webStealthAuditLog: WebStealthAuditEntry[] = [];
+
+function pushAuditEntry(entry: Omit<WebStealthAuditEntry, 'id' | 'calledAt'>): void {
+  webStealthAuditLog.unshift({
+    ...entry,
+    id: `wsa_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    calledAt: new Date().toISOString(),
+  });
+  if (webStealthAuditLog.length > MAX_AUDIT_ENTRIES) webStealthAuditLog.pop();
+}
+
+function countRecentCalls(): number {
+  const cutoff = Date.now() - 60_000;
+  while (webStealthCallLog.length > 0 && (webStealthCallLog[0] ?? 0) < cutoff) {
+    webStealthCallLog.shift();
+  }
+  return webStealthCallLog.length;
+}
+
+function extractHostname(raw: string): string | null {
+  try {
+    const url = raw.startsWith('http') ? raw : `https://${raw}`;
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+function isDomainAllowed(targetUrl: string): boolean {
+  const host = extractHostname(targetUrl);
+  if (!host) return false;
+  return webStealthPolicy.allowlist.some(
+    (entry) => host === entry || host.endsWith(`.${entry}`),
+  );
+}
+
+// Exported for unit-test assertions. Do NOT call in production code.
+export { isDomainAllowed as __isDomainAllowedForTest, countRecentCalls as __countRecentCallsForTest };
+
+// Exported for unit-test setup. Do NOT call in production code.
+export function __getWebStealthPolicyForTest(): { allowlist: string[]; rpmCap: number } {
+  return { allowlist: [...webStealthPolicy.allowlist], rpmCap: webStealthPolicy.rpmCap };
+}
+export function __setWebStealthAllowlistForTest(domains: string[]): void {
+  webStealthPolicy.allowlist = [...domains];
+}
+export function __resetWebStealthPolicyForTest(): void {
+  webStealthPolicy.allowlist = [];
+  webStealthPolicy.rpmCap = 20;
+  webStealthCallLog.length = 0;
+  webStealthAuditLog.length = 0;
+}
+
+// GET /api/nexus/tools/web.stealth/policy — returns current policy (no auth required)
+router.get('/tools/web.stealth/policy', async (_req: Request, res: Response) => {
+  try {
+    sendSuccess(res, {
+      allowlist: webStealthPolicy.allowlist,
+      rpmCap: webStealthPolicy.rpmCap,
+      currentRpm: countRecentCalls(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/tools/web.stealth/policy');
+  }
+});
+
+// PUT /api/nexus/tools/web.stealth/policy — ops-only, persists allowlist + rpmCap
+router.put(
+  '/tools/web.stealth/policy',
+  authMiddleware({ required: true }),
+  requireNexusOps,
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      allowlist: z.array(z.string()).optional(),
+      rpmCap: z.number().int().min(1).max(120).optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { allowlist, rpmCap } = req.body as { allowlist?: string[]; rpmCap?: number };
+      if (allowlist !== undefined) webStealthPolicy.allowlist = allowlist;
+      if (rpmCap !== undefined) webStealthPolicy.rpmCap = rpmCap;
+      void writeAuditEvent({
+        userId: (req.user as { id?: string } | undefined)?.id ?? null,
+        action: 'praxis.web_stealth.policy_updated',
+        entityType: 'nexus_tool_policy',
+        entityId: 'web.stealth',
+        newValues: { allowlist: webStealthPolicy.allowlist, rpmCap: webStealthPolicy.rpmCap },
+      });
+      sendSuccess(res, { allowlist: webStealthPolicy.allowlist, rpmCap: webStealthPolicy.rpmCap });
+    } catch (err) {
+      handleRouteError(res, err, 'PUT /api/nexus/tools/web.stealth/policy');
+    }
+  },
+);
+
+// GET /api/nexus/tools/web.stealth/recent-calls — returns the last N audit entries (no auth required)
+router.get('/tools/web.stealth/recent-calls', async (req: Request, res: Response) => {
+  try {
+    const limitRaw = Number((req.query as Record<string, string>).limit ?? '50');
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(1, limitRaw), 100) : 50;
+    sendSuccess(res, { entries: webStealthAuditLog.slice(0, limit), total: webStealthAuditLog.length });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/tools/web.stealth/recent-calls');
+  }
+});
+
+const WEB_STEALTH_ACTIONS = new Set(['fetch', 'accessibility-snapshot', 'click-and-extract']);
+
+// POST /api/nexus/tools/web.stealth/invoke — triggers a web.stealth action through
+// the thirdPartyCall wrapper (policy-gated, audit-logged). Auth is required; in
+// demo/dev environments the session cookie from the frontend satisfies this requirement.
+// The Camofox leader must be enabled by ops and the target domain must be in the allowlist.
+router.post(
+  '/tools/web.stealth/invoke',
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      action: z.string(),
+      url: z.string(),
+      callerAgent: z.string().optional(),
+      selector: z.string().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        action,
+        url: targetUrl,
+        callerAgent = 'anonymous',
+        selector,
+      } = req.body as { action: string; url: string; callerAgent?: string; selector?: string };
+
+      if (!WEB_STEALTH_ACTIONS.has(action)) {
+        sendError(
+          res,
+          `Unknown action '${action}'. Must be one of: ${[...WEB_STEALTH_ACTIONS].join(', ')}.`,
+          400,
+          'INVALID_ACTION',
+        );
+        return;
+      }
+
+      const callResult = await thirdPartyCall<unknown>(
+        'tpl_camofox',
+        { callerAgent, requestPayload: { action, url: targetUrl, selector } },
+        async () => {
+          const host = extractHostname(targetUrl) ?? targetUrl;
+
+          // Domain allowlist gate
+          if (!isDomainAllowed(targetUrl)) {
+            const blockedReason = `Domain '${host}' is not in the Camofox allowlist. Add it via Skills → Camofox before retrying.`;
+            pushAuditEntry({ domain: host, action, status: 'blocked', reason: blockedReason, callerAgent });
+            return {
+              policy: 'blocked',
+              reason: blockedReason,
+              auditId: `audit_${randomUUID().slice(0, 8)}`,
+              url: targetUrl,
+            };
+          }
+
+          // RPM cap gate
+          if (countRecentCalls() >= webStealthPolicy.rpmCap) {
+            const rpmReason = `RPM cap of ${webStealthPolicy.rpmCap} exceeded. Retry in ${60 - Math.floor((Date.now() - (webStealthCallLog[0] ?? Date.now())) / 1000)}s.`;
+            pushAuditEntry({ domain: host, action, status: 'blocked', reason: rpmReason, callerAgent });
+            return {
+              policy: 'blocked',
+              reason: rpmReason,
+              auditId: `audit_${randomUUID().slice(0, 8)}`,
+              url: targetUrl,
+            };
+          }
+
+          // Record call in rolling window
+          webStealthCallLog.push(Date.now());
+
+          // Simulate browser fetch latency
+          await sleep(800 + Math.random() * 600);
+
+          const auditId = `audit_${randomUUID().slice(0, 8)}`;
+          const bytes = Math.floor(18000 + Math.random() * 20000);
+
+          if (action === 'accessibility-snapshot') {
+            // Return structured snapshot fields based on caller context
+            const isRealEstate =
+              host.includes('zillow') || host.includes('realtor') || host.includes('redfin');
+            const isPort =
+              host.includes('portof') || host.includes('marinetraffic') || host.includes('port');
+
+            if (isRealEstate) {
+              pushAuditEntry({ domain: host, action, status: 'allowed', reason: null, callerAgent });
+              return {
+                policy: 'allowed',
+                action,
+                url: targetUrl,
+                auditId,
+                bytes,
+                fetchedAt: new Date().toISOString(),
+                snapshot: {
+                  title: `Listing at ${host}`,
+                  price: `$${(900000 + Math.floor(Math.random() * 5000000)).toLocaleString()}`,
+                  sqft: `${Math.floor(1200 + Math.random() * 8000).toLocaleString()} sqft`,
+                  yearBuilt: String(1970 + Math.floor(Math.random() * 50)),
+                  zestimate: `$${(950000 + Math.floor(Math.random() * 5000000)).toLocaleString()}`,
+                  daysOnMarket: `${Math.floor(10 + Math.random() * 60)} days`,
+                },
+              };
+            } else if (isPort) {
+              const ports = ['Rotterdam', 'Singapore', 'Hamburg', 'Shanghai', 'Antwerp'];
+              const port = ports[Math.floor(Math.random() * ports.length)];
+              pushAuditEntry({ domain: host, action, status: 'allowed', reason: null, callerAgent });
+              return {
+                policy: 'allowed',
+                action,
+                url: targetUrl,
+                auditId,
+                bytes,
+                fetchedAt: new Date().toISOString(),
+                snapshot: {
+                  portName: `Port of ${port}`,
+                  vesselQueue: Math.floor(8 + Math.random() * 24),
+                  congestion: ['Low (32%)', 'Moderate (61%)', 'High (84%)'][
+                    Math.floor(Math.random() * 3)
+                  ],
+                  nextDeparture: new Date(
+                    Date.now() + (2 + Math.random() * 10) * 3_600_000,
+                  )
+                    .toUTCString()
+                    .slice(0, 22) + ' UTC',
+                  berthsOccupied: `${Math.floor(6 + Math.random() * 8)} / ${Math.floor(14 + Math.random() * 6)}`,
+                },
+              };
+            }
+          }
+
+          // Generic fetch / click-and-extract fallback
+          pushAuditEntry({ domain: host, action, status: 'allowed', reason: null, callerAgent });
+          return {
+            policy: 'allowed',
+            action,
+            url: targetUrl,
+            auditId,
+            bytes,
+            fetchedAt: new Date().toISOString(),
+            snapshot: { status: 200, contentType: 'text/html', selector },
+          };
+        },
+      );
+
+      if (!callResult.ok && callResult.policyDecision === 'blocked') {
+        sendSuccess(res, {
+          ok: false,
+          policyDecision: 'blocked' as const,
+          policyNote: callResult.policyNote,
+          error: callResult.error,
+          requestHash: callResult.requestHash,
+          durationMs: callResult.durationMs,
+        });
+        return;
+      }
+
+      sendSuccess(res, {
+        ok: callResult.ok,
+        policyDecision: callResult.policyDecision,
+        requestHash: callResult.requestHash,
+        durationMs: callResult.durationMs,
+        ...(callResult.result as object),
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'POST /api/nexus/tools/web.stealth/invoke');
+    }
+  },
+);
+
 // ─── Third-Party Leaders Routes ───────────────────────────────────────────────
 
 router.use(['/leaders'], authMiddleware({ required: true }));

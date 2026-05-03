@@ -6,6 +6,7 @@ import {
   Clock,
   Cpu,
   Code2,
+  EyeOff,
   Figma,
   Film,
   Github,
@@ -49,10 +50,30 @@ const FIGMA_TOOLS: DemoTool[] = [
     ],
     mockResponse: () => ({
       files: [
-        { key: 'abc123', name: 'NEXUS Design System v2.4', last_modified: '2026-04-22T14:30:00Z', thumbnail_url: null },
-        { key: 'def456', name: 'SZL Holdings Dashboard — Q2 2026', last_modified: '2026-04-20T09:15:00Z', thumbnail_url: null },
-        { key: 'ghi789', name: 'Sentra Cyber Command — Wireframes', last_modified: '2026-04-18T16:45:00Z', thumbnail_url: null },
-        { key: 'jkl012', name: 'Mobile Command — iOS/Android', last_modified: '2026-04-17T11:00:00Z', thumbnail_url: null },
+        {
+          key: 'abc123',
+          name: 'NEXUS Design System v2.4',
+          last_modified: '2026-04-22T14:30:00Z',
+          thumbnail_url: null,
+        },
+        {
+          key: 'def456',
+          name: 'SZL Holdings Dashboard — Q2 2026',
+          last_modified: '2026-04-20T09:15:00Z',
+          thumbnail_url: null,
+        },
+        {
+          key: 'ghi789',
+          name: 'Sentra Cyber Command — Wireframes',
+          last_modified: '2026-04-18T16:45:00Z',
+          thumbnail_url: null,
+        },
+        {
+          key: 'jkl012',
+          name: 'Mobile Command — iOS/Android',
+          last_modified: '2026-04-17T11:00:00Z',
+          thumbnail_url: null,
+        },
       ],
       total: 4,
     }),
@@ -66,12 +87,31 @@ const FIGMA_TOOLS: DemoTool[] = [
     domain: 'figma.com',
     params: [
       { name: 'file_key', type: 'string', required: true, description: 'Figma file key' },
-      { name: 'node_ids', type: 'string[]', required: true, description: 'Array of node IDs to retrieve' },
+      {
+        name: 'node_ids',
+        type: 'string[]',
+        required: true,
+        description: 'Array of node IDs to retrieve',
+      },
     ],
     mockResponse: (args) => ({
       nodes: {
-        '1:2': { document: { id: '1:2', name: 'Color / Accent / Cyan', type: 'RECTANGLE', fills: [{ type: 'SOLID', color: { r: 0.133, g: 0.827, b: 0.933, a: 1 } }] } },
-        '1:3': { document: { id: '1:3', name: 'Color / Accent / Green', type: 'RECTANGLE', fills: [{ type: 'SOLID', color: { r: 0.639, g: 0.902, b: 0.208, a: 1 } }] } },
+        '1:2': {
+          document: {
+            id: '1:2',
+            name: 'Color / Accent / Cyan',
+            type: 'RECTANGLE',
+            fills: [{ type: 'SOLID', color: { r: 0.133, g: 0.827, b: 0.933, a: 1 } }],
+          },
+        },
+        '1:3': {
+          document: {
+            id: '1:3',
+            name: 'Color / Accent / Green',
+            type: 'RECTANGLE',
+            fills: [{ type: 'SOLID', color: { r: 0.639, g: 0.902, b: 0.208, a: 1 } }],
+          },
+        },
       },
       file_key: (args.file_key as string) || 'abc123',
     }),
@@ -83,13 +123,21 @@ const FIGMA_TOOLS: DemoTool[] = [
     name: 'figma_export_tokens',
     description: 'Export design tokens from a Figma file as a JSON token set.',
     domain: 'figma.com',
-    params: [
-      { name: 'file_key', type: 'string', required: true, description: 'Figma file key' },
-    ],
+    params: [{ name: 'file_key', type: 'string', required: true, description: 'Figma file key' }],
     mockResponse: () => ({
       tokens: {
-        color: { accent: { cyan: { value: '#22d3ee', type: 'color' }, green: { value: '#a3e635', type: 'color' }, amber: { value: '#f59e0b', type: 'color' } } },
-        spacing: { xs: { value: '4px', type: 'dimension' }, sm: { value: '8px', type: 'dimension' }, md: { value: '16px', type: 'dimension' } },
+        color: {
+          accent: {
+            cyan: { value: '#22d3ee', type: 'color' },
+            green: { value: '#a3e635', type: 'color' },
+            amber: { value: '#f59e0b', type: 'color' },
+          },
+        },
+        spacing: {
+          xs: { value: '4px', type: 'dimension' },
+          sm: { value: '8px', type: 'dimension' },
+          md: { value: '16px', type: 'dimension' },
+        },
       },
       schema_version: '1.0',
     }),
@@ -109,9 +157,36 @@ const GITHUB_TOOLS: DemoTool[] = [
     ],
     mockResponse: (args) => ({
       repos: [
-        { id: 1, name: 'platform-monorepo', full_name: `${(args.org as string) || 'szl-holdings'}/platform-monorepo`, private: true, stars: 0, forks: 0, open_issues: 12, updated_at: '2026-04-25T08:00:00Z' },
-        { id: 2, name: 'praxis-agents', full_name: `${(args.org as string) || 'szl-holdings'}/praxis-agents`, private: true, stars: 0, forks: 0, open_issues: 3, updated_at: '2026-04-24T14:30:00Z' },
-        { id: 3, name: 'design-system', full_name: `${(args.org as string) || 'szl-holdings'}/design-system`, private: false, stars: 47, forks: 8, open_issues: 5, updated_at: '2026-04-23T10:00:00Z' },
+        {
+          id: 1,
+          name: 'platform-monorepo',
+          full_name: `${(args.org as string) || 'szl-holdings'}/platform-monorepo`,
+          private: true,
+          stars: 0,
+          forks: 0,
+          open_issues: 12,
+          updated_at: '2026-04-25T08:00:00Z',
+        },
+        {
+          id: 2,
+          name: 'praxis-agents',
+          full_name: `${(args.org as string) || 'szl-holdings'}/praxis-agents`,
+          private: true,
+          stars: 0,
+          forks: 0,
+          open_issues: 3,
+          updated_at: '2026-04-24T14:30:00Z',
+        },
+        {
+          id: 3,
+          name: 'design-system',
+          full_name: `${(args.org as string) || 'szl-holdings'}/design-system`,
+          private: false,
+          stars: 47,
+          forks: 8,
+          open_issues: 5,
+          updated_at: '2026-04-23T10:00:00Z',
+        },
       ],
       total: 3,
     }),
@@ -155,9 +230,27 @@ const GITHUB_TOOLS: DemoTool[] = [
     ],
     mockResponse: () => ({
       issues: [
-        { number: 203, title: 'TokensGovernance: add per-artifact sparklines', state: 'open', labels: ['praxis', 'enhancement'], created_at: '2026-04-25T10:00:00Z' },
-        { number: 197, title: 'PatternAtlas: add "where used" section per pattern', state: 'open', labels: ['praxis'], created_at: '2026-04-24T08:30:00Z' },
-        { number: 191, title: 'Bridge: Figma adapter missing token export tool', state: 'closed', labels: ['praxis', 'bug'], created_at: '2026-04-22T14:00:00Z' },
+        {
+          number: 203,
+          title: 'TokensGovernance: add per-artifact sparklines',
+          state: 'open',
+          labels: ['praxis', 'enhancement'],
+          created_at: '2026-04-25T10:00:00Z',
+        },
+        {
+          number: 197,
+          title: 'PatternAtlas: add "where used" section per pattern',
+          state: 'open',
+          labels: ['praxis'],
+          created_at: '2026-04-24T08:30:00Z',
+        },
+        {
+          number: 191,
+          title: 'Bridge: Figma adapter missing token export tool',
+          state: 'closed',
+          labels: ['praxis', 'bug'],
+          created_at: '2026-04-22T14:00:00Z',
+        },
       ],
       total: 3,
     }),
@@ -174,13 +267,38 @@ const LINEAR_TOOLS: DemoTool[] = [
     domain: 'linear.app',
     params: [
       { name: 'team_id', type: 'string', required: true, description: 'Linear team ID' },
-      { name: 'state', type: 'string', description: 'Filter by state: "todo" | "in_progress" | "done"' },
+      {
+        name: 'state',
+        type: 'string',
+        description: 'Filter by state: "todo" | "in_progress" | "done"',
+      },
     ],
     mockResponse: () => ({
       issues: [
-        { id: 'PRX-483', title: 'Fill Bridge placeholder pages', priority: 'urgent', state: 'in_progress', assignee: 'praxis-agent', created_at: '2026-04-25T09:00:00Z' },
-        { id: 'PRX-479', title: 'Add org switcher to NEXUS layout', priority: 'high', state: 'done', assignee: 'praxis-agent', created_at: '2026-04-24T14:00:00Z' },
-        { id: 'PRX-471', title: 'Eval Console scripted suites', priority: 'medium', state: 'todo', assignee: null, created_at: '2026-04-23T10:00:00Z' },
+        {
+          id: 'PRX-483',
+          title: 'Fill Bridge placeholder pages',
+          priority: 'urgent',
+          state: 'in_progress',
+          assignee: 'praxis-agent',
+          created_at: '2026-04-25T09:00:00Z',
+        },
+        {
+          id: 'PRX-479',
+          title: 'Add org switcher to NEXUS layout',
+          priority: 'high',
+          state: 'done',
+          assignee: 'praxis-agent',
+          created_at: '2026-04-24T14:00:00Z',
+        },
+        {
+          id: 'PRX-471',
+          title: 'Eval Console scripted suites',
+          priority: 'medium',
+          state: 'todo',
+          assignee: null,
+          created_at: '2026-04-23T10:00:00Z',
+        },
       ],
       total: 3,
     }),
@@ -193,12 +311,18 @@ const LINEAR_TOOLS: DemoTool[] = [
     description: 'Get a single Linear issue by ID.',
     domain: 'linear.app',
     params: [
-      { name: 'issue_id', type: 'string', required: true, description: 'Linear issue ID (e.g. PRX-483)' },
+      {
+        name: 'issue_id',
+        type: 'string',
+        required: true,
+        description: 'Linear issue ID (e.g. PRX-483)',
+      },
     ],
     mockResponse: (args) => ({
       id: (args.issue_id as string) || 'PRX-483',
       title: 'Fill Bridge placeholder pages',
-      description: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the NEXUS Protocol Bridge.',
+      description:
+        'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the NEXUS Protocol Bridge.',
       priority: 'urgent',
       state: 'in_progress',
       assignee: 'praxis-agent',
@@ -231,6 +355,209 @@ const LINEAR_TOOLS: DemoTool[] = [
   },
 ];
 
+const CAMOFOX_DEMO_ALLOWLIST = [
+  'example.com',
+  'portofrotterdam.com',
+  'marinetraffic.com',
+  'zillow.com',
+];
+
+function camofoxPolicyCheck(url: string): { allowed: boolean; domain: string } {
+  let domain = '';
+  try {
+    domain = new URL(url || 'http://unknown').hostname;
+  } catch {
+    domain = 'unknown';
+  }
+  const allowed = CAMOFOX_DEMO_ALLOWLIST.some((d) => domain === d || domain.endsWith(`.${d}`));
+  return { allowed, domain };
+}
+
+const CAMOFOX_TOOLS: DemoTool[] = [
+  {
+    id: 'web_stealth_fetch',
+    protocol: 'MCP',
+    adapter: 'Camofox',
+    name: 'web.stealth.fetch',
+    description:
+      'Fetch a URL through the Camofox stealth browser. Only allowlisted domains are reachable.',
+    domain: 'camofox.internal',
+    params: [
+      {
+        name: 'url',
+        type: 'string',
+        required: true,
+        description: 'Target URL (must be on the domain allowlist)',
+      },
+      { name: 'timeout_ms', type: 'number', description: 'Request timeout in ms (default: 15000)' },
+    ],
+    mockResponse: (args) => {
+      const url = (args.url as string) || '';
+      const { allowed, domain } = camofoxPolicyCheck(url);
+      if (!allowed) {
+        return {
+          policy: 'blocked',
+          reason: `Domain "${domain}" is not on the PRAXIS web.stealth allowlist. Add it via Skills → Camofox before retrying.`,
+          allowed_domains: CAMOFOX_DEMO_ALLOWLIST,
+          audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+        };
+      }
+      return {
+        status_code: 200,
+        url,
+        content_type: 'text/html; charset=utf-8',
+        bytes: Math.floor(28000 + Math.random() * 12000),
+        title:
+          domain === 'portofrotterdam.com'
+            ? 'Port of Rotterdam — Live Operations'
+            : domain === 'marinetraffic.com'
+              ? 'MarineTraffic — Vessel Tracking'
+              : domain === 'zillow.com'
+                ? 'Zillow — Real Estate Listings'
+                : 'Example Domain',
+        fetch_time_ms: Math.floor(800 + Math.random() * 1200),
+        fingerprint_profile: {
+          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          resolution: '1920x1080',
+          locale: 'en-US',
+          timezone: 'America/New_York',
+        },
+        camofox_version: '2.3.1',
+        audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+      };
+    },
+  },
+  {
+    id: 'web_stealth_snapshot',
+    protocol: 'MCP',
+    adapter: 'Camofox',
+    name: 'web.stealth.accessibility-snapshot',
+    description:
+      'Capture an accessibility tree snapshot of a rendered page — ideal for structured data extraction without CSS parsing.',
+    domain: 'camofox.internal',
+    params: [
+      {
+        name: 'url',
+        type: 'string',
+        required: true,
+        description: 'Target URL (must be on the domain allowlist)',
+      },
+      {
+        name: 'selector',
+        type: 'string',
+        description: 'CSS selector to scope snapshot (default: body)',
+      },
+      {
+        name: 'wait_for',
+        type: 'string',
+        description: 'CSS selector to wait for before snapshotting',
+      },
+    ],
+    mockResponse: (args) => {
+      const url = (args.url as string) || '';
+      const { allowed, domain } = camofoxPolicyCheck(url);
+      if (!allowed) {
+        return {
+          policy: 'blocked',
+          reason: `Domain "${domain}" is not on the PRAXIS web.stealth allowlist.`,
+          audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+        };
+      }
+      const isPort = domain.includes('rotterdam') || domain.includes('marinetraffic');
+      const isProperty = domain.includes('zillow');
+      return {
+        status_code: 200,
+        url,
+        snapshot_nodes: isPort
+          ? [
+              { role: 'heading', name: 'Live Vessel Queue — Berth 7', level: 1 },
+              { role: 'table', name: 'Vessel Schedule', rows: 12 },
+              { role: 'region', name: 'Port Congestion Indicator', text: 'Moderate (67%)' },
+              {
+                role: 'list',
+                name: 'Active Arrivals',
+                items: ['MSC MAYA — ETA 06:30 UTC', 'EVER GIVEN — ETA 09:15 UTC'],
+              },
+            ]
+          : isProperty
+            ? [
+                { role: 'heading', name: '3BR/2BA — 142 Oak St, Austin TX', level: 1 },
+                { role: 'region', name: 'Price', text: '$485,000' },
+                {
+                  role: 'list',
+                  name: 'Key Facts',
+                  items: ['1,840 sqft', 'Built 2003', '0.18 acre lot', 'Zestimate: $491K'],
+                },
+                { role: 'region', name: 'Days on Market', text: '23 days' },
+              ]
+            : [
+                { role: 'heading', name: 'Example Domain', level: 1 },
+                {
+                  role: 'paragraph',
+                  text: 'This domain is for use in illustrative examples in documents.',
+                },
+              ],
+        node_count: 847,
+        bytes: Math.floor(12000 + Math.random() * 8000),
+        camofox_version: '2.3.1',
+        audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+      };
+    },
+  },
+  {
+    id: 'web_stealth_click_extract',
+    protocol: 'MCP',
+    adapter: 'Camofox',
+    name: 'web.stealth.click-and-extract',
+    description:
+      'Click a UI element then extract the resulting page state — for paginated tables, tabs, and reveal interactions.',
+    domain: 'camofox.internal',
+    params: [
+      {
+        name: 'url',
+        type: 'string',
+        required: true,
+        description: 'Target URL (must be on the domain allowlist)',
+      },
+      {
+        name: 'click_selector',
+        type: 'string',
+        required: true,
+        description: 'CSS selector of element to click',
+      },
+      {
+        name: 'extract_selector',
+        type: 'string',
+        description: 'CSS selector to extract after click (default: body)',
+      },
+    ],
+    mockResponse: (args) => {
+      const url = (args.url as string) || '';
+      const { allowed, domain } = camofoxPolicyCheck(url);
+      if (!allowed) {
+        return {
+          policy: 'blocked',
+          reason: `Domain "${domain}" is not on the PRAXIS web.stealth allowlist.`,
+          audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+        };
+      }
+      return {
+        status_code: 200,
+        url,
+        click_selector: (args.click_selector as string) || 'button',
+        click_found: true,
+        extract_selector: (args.extract_selector as string) || 'body',
+        extracted_text_length: Math.floor(4200 + Math.random() * 3000),
+        extracted_snippet:
+          'Page state after click interaction captured. Stealth profile active during navigation.',
+        interaction_time_ms: Math.floor(1200 + Math.random() * 800),
+        camofox_version: '2.3.1',
+        audit_id: 'audit_' + Math.random().toString(36).slice(2, 8),
+      };
+    },
+  },
+];
+
 const TOKEN_CDN_TOOLS: DemoTool[] = [
   {
     id: 'token_cdn_list_sets',
@@ -242,10 +569,34 @@ const TOKEN_CDN_TOOLS: DemoTool[] = [
     params: [],
     mockResponse: () => ({
       sets: [
-        { id: 'gi-core', name: 'GI Core', version: '2.4.1', last_published: '2026-04-22T10:00:00Z', tags: ['stable', 'design-system'] },
-        { id: 'gi-dark', name: 'GI Dark Mode', version: '2.4.1', last_published: '2026-04-22T10:00:00Z', tags: ['stable', 'theme'] },
-        { id: 'gi-high-contrast', name: 'GI High Contrast', version: '1.2.0', last_published: '2026-03-14T08:00:00Z', tags: ['a11y', 'theme'] },
-        { id: 'gi-brand-szl', name: 'SZL Brand Override', version: '1.0.3', last_published: '2026-04-18T16:00:00Z', tags: ['brand', 'tenant'] },
+        {
+          id: 'gi-core',
+          name: 'GI Core',
+          version: '2.4.1',
+          last_published: '2026-04-22T10:00:00Z',
+          tags: ['stable', 'design-system'],
+        },
+        {
+          id: 'gi-dark',
+          name: 'GI Dark Mode',
+          version: '2.4.1',
+          last_published: '2026-04-22T10:00:00Z',
+          tags: ['stable', 'theme'],
+        },
+        {
+          id: 'gi-high-contrast',
+          name: 'GI High Contrast',
+          version: '1.2.0',
+          last_published: '2026-03-14T08:00:00Z',
+          tags: ['a11y', 'theme'],
+        },
+        {
+          id: 'gi-brand-szl',
+          name: 'SZL Brand Override',
+          version: '1.0.3',
+          last_published: '2026-04-18T16:00:00Z',
+          tags: ['brand', 'tenant'],
+        },
       ],
       cdn_url: 'https://tokens.szl.internal/v2',
     }),
@@ -258,7 +609,12 @@ const TOKEN_CDN_TOOLS: DemoTool[] = [
     description: 'Fetch a complete token set from the CDN by ID.',
     domain: 'tokens.szl.internal',
     params: [
-      { name: 'set_id', type: 'string', required: true, description: 'Token set ID (e.g. "gi-core")' },
+      {
+        name: 'set_id',
+        type: 'string',
+        required: true,
+        description: 'Token set ID (e.g. "gi-core")',
+      },
       { name: 'format', type: 'string', description: '"json" | "css" | "scss"' },
     ],
     mockResponse: (args) => ({
@@ -506,7 +862,12 @@ const EXISTING_MCP_TOOLS: DemoTool[] = [
     description: 'Retrieve current agent context window (model, memory items, active skills).',
     domain: 'nexus.internal',
     params: [],
-    mockResponse: () => ({ model: 'claude-3-5-sonnet-20241022', memory_items: 3241, active_skills: 84, context_tokens: 12847 }),
+    mockResponse: () => ({
+      model: 'claude-3-5-sonnet-20241022',
+      memory_items: 3241,
+      active_skills: 84,
+      context_tokens: 12847,
+    }),
   },
 ];
 
@@ -518,8 +879,14 @@ const EXISTING_A2A_TOOLS: DemoTool[] = [
     name: 'a2a_ping',
     description: 'Ping a peer agent to verify A2A connectivity.',
     domain: 'nexus.internal',
-    params: [{ name: 'agent_id', type: 'string', required: true, description: 'Target agent slug' }],
-    mockResponse: (args) => ({ status: 'pong', agent_id: args.agent_id || 'aegis', latency_ms: 12 }),
+    params: [
+      { name: 'agent_id', type: 'string', required: true, description: 'Target agent slug' },
+    ],
+    mockResponse: (args) => ({
+      status: 'pong',
+      agent_id: args.agent_id || 'aegis',
+      latency_ms: 12,
+    }),
   },
 ];
 
@@ -569,6 +936,7 @@ const ALL_TOOLS: DemoTool[] = [
   ...FINCEPT_TOOLS,
   ...HYPERFRAMES_TOOLS,
   ...FIGMA_TOOLS,
+  ...CAMOFOX_TOOLS,
   ...EXISTING_A2A_TOOLS,
   ...GITHUB_TOOLS,
   ...EXISTING_ACP_TOOLS,
@@ -589,6 +957,7 @@ const ADAPTER_META: Record<string, { color: string; isDemo: boolean }> = {
   'GitHub': { color: '#e8f0fe', isDemo: true },
   'Linear': { color: '#5e6ad2', isDemo: true },
   'Design-Token CDN': { color: '#22d3ee', isDemo: true },
+  Camofox: { color: '#f472b6', isDemo: true },
 };
 
 const PROTOCOL_META: Record<string, { color: string; description: string; badge: string }> = {
@@ -689,7 +1058,7 @@ export default function Bridge() {
           <div>
             <h1 className="text-lg font-semibold">Universal Protocol Bridge</h1>
             <p className="text-xs text-muted-foreground">
-              MCP · A2A · ACP · ANP · AdsAgent · Toprank · Fincept Terminal · HyperFrames · Figma · GitHub · Linear · Design-Token CDN · {totalDemo} demo adapters
+              MCP · A2A · ACP · ANP · AdsAgent · Toprank · Fincept Terminal · HyperFrames · Figma · GitHub · Linear · Camofox · Design-Token CDN · {totalDemo} demo adapters
             </p>
           </div>
         </div>
@@ -705,15 +1074,29 @@ export default function Bridge() {
                 className="rounded-lg border p-3 text-left transition-all"
                 style={{
                   borderColor: protocolFilter === proto ? meta.color : 'var(--gi-border-subtle)',
-                  background: protocolFilter === proto ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)` : 'var(--gi-bg-surface)',
+                  background:
+                    protocolFilter === proto
+                      ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)`
+                      : 'var(--gi-bg-surface)',
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-mono font-bold" style={{ color: meta.color }}>{proto}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ color: meta.color, backgroundColor: `${meta.color}15` }}>{meta.badge}</span>
+                  <span className="text-xs font-mono font-bold" style={{ color: meta.color }}>
+                    {proto}
+                  </span>
+                  <span
+                    className="text-[9px] px-1.5 py-0.5 rounded"
+                    style={{ color: meta.color, backgroundColor: `${meta.color}15` }}
+                  >
+                    {meta.badge}
+                  </span>
                 </div>
-                <div className="text-[10px] text-muted-foreground/60 leading-snug mb-2">{meta.description}</div>
-                <div className="text-[10px] font-mono" style={{ color: meta.color }}>{count} tools</div>
+                <div className="text-[10px] text-muted-foreground/60 leading-snug mb-2">
+                  {meta.description}
+                </div>
+                <div className="text-[10px] font-mono" style={{ color: meta.color }}>
+                  {count} tools
+                </div>
               </button>
             );
           })}
@@ -735,9 +1118,12 @@ export default function Bridge() {
               {a === 'GitHub' && <Github className="w-3 h-3" />}
               {a === 'Linear' && <Zap className="w-3 h-3" />}
               {a === 'Design-Token CDN' && <Cpu className="w-3 h-3" />}
+              {a === 'Camofox' && <EyeOff className="w-3 h-3" />}
               {a}
               {a !== 'all' && ADAPTER_META[a]?.isDemo && (
-                <span className="text-[8px] px-1 py-0.5 rounded bg-praxis-amber/10 text-praxis-amber border border-praxis-amber/20">DEMO</span>
+                <span className="text-[8px] px-1 py-0.5 rounded bg-praxis-amber/10 text-praxis-amber border border-praxis-amber/20">
+                  DEMO
+                </span>
               )}
             </button>
           ))}
@@ -748,8 +1134,14 @@ export default function Bridge() {
             const meta = PROTOCOL_META[proto];
             return (
               <div key={proto}>
-                <h2 className="text-xs font-mono uppercase tracking-widest mb-3 flex items-center gap-2" style={{ color: meta.color }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: meta.color }} />
+                <h2
+                  className="text-xs font-mono uppercase tracking-widest mb-3 flex items-center gap-2"
+                  style={{ color: meta.color }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: meta.color }}
+                  />
                   {proto} — {protoTools.length} tools
                 </h2>
                 <div className="space-y-2">
@@ -808,14 +1200,26 @@ function ToolCard({
   const isDemo = adapterMeta?.isDemo;
 
   return (
-    <div className="rounded-lg border overflow-hidden bg-praxis-surface transition-all" style={{ borderColor: expanded ? `${color}30` : 'var(--gi-border-subtle)' }}>
+    <div
+      className="rounded-lg border overflow-hidden bg-praxis-surface transition-all"
+      style={{ borderColor: expanded ? `${color}30` : 'var(--gi-border-subtle)' }}
+    >
       <div className="flex items-center gap-3 px-4 py-3">
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-          {expanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />}
+          {expanded ? (
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+          ) : (
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5 flex-wrap">
               <span className="text-sm font-semibold font-mono">{tool.name}</span>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color, backgroundColor: `${color}15`, border: `1px solid ${color}30` }}>{tool.protocol}</span>
+              <span
+                className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{ color, backgroundColor: `${color}15`, border: `1px solid ${color}30` }}
+              >
+                {tool.protocol}
+              </span>
               {isDemo && (
                 <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-praxis-amber bg-praxis-amber/10 border border-praxis-amber/30">
                   <Sparkles className="w-2.5 h-2.5" />
@@ -828,8 +1232,18 @@ function ToolCard({
           </div>
         </button>
         <div className="flex items-center gap-2 shrink-0">
-          {result && (result.status === 'success' ? <CheckCircle className="w-3.5 h-3.5 text-praxis-green" /> : <XCircle className="w-3.5 h-3.5 text-praxis-red" />)}
-          <button onClick={onCall} disabled={calling} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-40" style={{ color, backgroundColor: `${color}10`, border: `1px solid ${color}30` }}>
+          {result &&
+            (result.status === 'success' ? (
+              <CheckCircle className="w-3.5 h-3.5 text-praxis-green" />
+            ) : (
+              <XCircle className="w-3.5 h-3.5 text-praxis-red" />
+            ))}
+          <button
+            onClick={onCall}
+            disabled={calling}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-40"
+            style={{ color, backgroundColor: `${color}10`, border: `1px solid ${color}30` }}
+          >
             {calling ? <Loader className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
             Call
           </button>
@@ -840,7 +1254,9 @@ function ToolCard({
         <div className="px-4 pb-4 border-t border-praxis pt-3 space-y-3">
           {tool.params.length > 0 && (
             <div>
-              <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1.5 block">Parameters</label>
+              <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1.5 block">
+                Parameters
+              </label>
               <div className="bg-praxis-bg rounded-lg p-3 space-y-1">
                 {tool.params.map((p) => (
                   <div key={p.name} className="flex items-start gap-2 text-[10px] font-mono">
@@ -855,7 +1271,9 @@ function ToolCard({
             </div>
           )}
           <div>
-            <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">Arguments (JSON)</label>
+            <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">
+              Arguments (JSON)
+            </label>
             <textarea
               value={args}
               onChange={(e) => onArgsChange(e.target.value)}
@@ -867,9 +1285,17 @@ function ToolCard({
           {result && (
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">Response</label>
-                <span className="text-[9px] font-mono text-muted-foreground/40">{result.durationMs}ms · {result.traceId}</span>
-                {isDemo && <span className="text-[9px] font-mono text-praxis-amber/60 ml-auto">scripted / loopback</span>}
+                <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">
+                  Response
+                </label>
+                <span className="text-[9px] font-mono text-muted-foreground/40">
+                  {result.durationMs}ms · {result.traceId}
+                </span>
+                {isDemo && (
+                  <span className="text-[9px] font-mono text-praxis-amber/60 ml-auto">
+                    scripted / loopback
+                  </span>
+                )}
               </div>
               <div className="bg-praxis-bg rounded-lg p-3 text-xs font-mono text-muted-foreground overflow-auto max-h-40">
                 {JSON.stringify(result.output, null, 2)}

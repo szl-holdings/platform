@@ -60,6 +60,7 @@ vi.mock('@workspace/tool-mesh', () => ({
     list: vi.fn().mockReturnValue([]),
   },
   registerNEXUSHandlers: vi.fn(),
+  registerPRAXISHandlers: vi.fn(),
 }));
 
 vi.mock('@szl-holdings/forge-runtime', () => ({

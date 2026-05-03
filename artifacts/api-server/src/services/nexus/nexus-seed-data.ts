@@ -723,6 +723,57 @@ export const TOOLS_DATA: Array<Omit<ProtocolTool, 'isCustom'>> = [
       },
       tags: ['anp', 'publish', 'capability', 'network'],
     },
+    // Camofox web.stealth tools
+    {
+      id: 'mcp_web_stealth_fetch',
+      name: 'web.stealth.fetch',
+      description: 'Fetch a URL through the Camofox stealth Firefox browser. Bypasses common bot fingerprinting. Only allowlisted domains reachable; non-allowlisted calls return a structured policy-blocked response and are audit logged.',
+      protocol: 'MCP',
+      domain: 'web.stealth',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', description: 'Target URL (must be on the domain allowlist)' },
+          timeout_ms: { type: 'number', description: 'Request timeout in ms (default: 15000)' },
+        },
+        required: ['url'],
+      },
+      tags: ['web.stealth', 'camofox', 'browser', 'fetch', 'policy-gated'],
+    },
+    {
+      id: 'mcp_web_stealth_snapshot',
+      name: 'web.stealth.accessibility-snapshot',
+      description: 'Capture an accessibility tree snapshot of a rendered page via Camofox stealth browser — ideal for structured field extraction without CSS parsing.',
+      protocol: 'MCP',
+      domain: 'web.stealth',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', description: 'Target URL (must be on the domain allowlist)' },
+          selector: { type: 'string', description: 'CSS selector to scope snapshot (default: body)' },
+          wait_for: { type: 'string', description: 'CSS selector to wait for before snapshotting' },
+        },
+        required: ['url'],
+      },
+      tags: ['web.stealth', 'camofox', 'accessibility', 'snapshot', 'policy-gated'],
+    },
+    {
+      id: 'mcp_web_stealth_click_extract',
+      name: 'web.stealth.click-and-extract',
+      description: 'Click a UI element then extract resulting page state via Camofox — for paginated tables, tabs, and reveal interactions on allowlisted domains.',
+      protocol: 'MCP',
+      domain: 'web.stealth',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', description: 'Target URL (must be on the domain allowlist)' },
+          click_selector: { type: 'string', description: 'CSS selector of element to click' },
+          extract_selector: { type: 'string', description: 'CSS selector to extract after click (default: body)' },
+        },
+        required: ['url', 'click_selector'],
+      },
+      tags: ['web.stealth', 'camofox', 'click', 'extract', 'policy-gated'],
+    },
   ];
 
 export const SEED_MEMORY_DATA: MemoryItem[] = [
@@ -791,17 +842,17 @@ export const THIRD_PARTY_LEADERS_DATA: ThirdPartyLeader[] = [
   {
     id: 'tpl_camofox',
     name: 'Camofox',
-    sourceRepo: 'Camofox',
-    sourceUrl: 'https://github.com/camofox/camofox',
-    licenseSpdx: 'Apache-2.0',
+    sourceRepo: 'jo-inc/camofox-browser',
+    sourceUrl: 'https://github.com/jo-inc/camofox-browser',
+    licenseSpdx: 'MIT',
     capabilitySummary:
-      'Stealth-browser toolkit that runs headless Chromium with fingerprint randomization, residential proxy rotation, and CAPTCHA-solver hooks — designed for large-scale web intelligence gathering without detection.',
-    capabilityTags: ['web.stealth', 'browser', 'scraping', 'fingerprint'],
-    integrationMode: 'in-process',
+      'Firefox-based stealth browser exposed as a REST API for agents — bypasses common bot fingerprinting that breaks Playwright and headless Chrome. PRAXIS registers it as the web.stealth tool with three actions: fetch, accessibility-snapshot, and click-and-extract. Domain allowlist and RPM cap enforced before forwarding; non-allowlisted calls return a structured policy-blocked response and are audit logged.',
+    capabilityTags: ['web.stealth', 'browser', 'fingerprint', 'accessibility-snapshot', 'allowlist', 'policy'],
+    integrationMode: 'external-service',
     policyState: 'requires-review',
     policyNote:
-      'Apache-2.0 approved for bundling. Policy gate required: stealth-browsing carries legal and ethical risk depending on target domains. Each invocation must pass the PRAXIS policy engine with an explicit use-case justification.',
-    lastFetchedCommit: 'pending',
+      'MIT approved. Runs as a separate port-bound process; PRAXIS calls it over loopback REST. Operators are responsible for compliance with target site ToS. Each call is audit logged. Only allowlisted domains are reachable — default allowlist is empty. Add domains via Skills → Camofox panel with documented use-case justification.',
+    lastFetchedCommit: 'a3f91cc',
     lastFetchedAt: new Date().toISOString(),
     enabled: false,
     logicalCapability: 'web.stealth',
