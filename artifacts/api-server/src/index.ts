@@ -71,6 +71,7 @@ import {
   scheduleIntelligenceCachePruning,
   scheduleIntelligenceRefresh,
 } from './routes/intelligence/index.js';
+import { scheduleSentraFeedRefresh } from './routes/sentra-threat-feeds.js';
 import { seedTerraPortfolioModules } from './routes/terra-portfolio-intel';
 import { registerAllPrismJobHandlers } from './services/prism-job-handlers';
 import { startPrismJobPoller } from './services/prism-queue';
@@ -428,6 +429,7 @@ export async function bootstrap(
   });
   scheduleIntelligenceRefresh();
   scheduleIntelligenceCachePruning();
+  scheduleSentraFeedRefresh();
 
   import('@szl-holdings/ai-engine')
     .then(({ startCognitiveLearning }) => startCognitiveLearning())

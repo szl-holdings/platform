@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { PageHeader, SeverityChip, StatusChip } from '@/lib/data-provenance';
+import { HealthcareCaseStudyBanner } from '../components/healthcare-case-study-banner';
 import {
   createIncident,
   listIncidents,
@@ -28,7 +29,6 @@ import {
   type IncidentSeverity,
   type IncidentStatus,
 } from '@/lib/sentra-api';
-import { sentraTwin } from '@/data/sentra-twin';
 
 const ACCENT = '#f5f5f5';
 
@@ -392,7 +392,6 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
           <h3 className="text-xs text-slate-500 uppercase font-mono mb-4">Affected Assets</h3>
           <div className="space-y-2">
             {incident.affectedAssets.map((assetId) => {
-              const asset = sentraTwin.assets.find((a) => a.id === assetId);
               return (
                 <div
                   key={assetId}
@@ -402,7 +401,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                     <Cpu className="w-4 h-4 text-[#f5f5f5]" />
                     <div>
                       <div className="text-xs font-bold text-slate-200">
-                        {asset?.name ?? assetId}
+                        {assetId}
                       </div>
                       <div className="text-[10px] text-slate-500 font-mono">{assetId}</div>
                     </div>
@@ -566,6 +565,8 @@ export default function IncidentCommander() {
           </div>
         }
       />
+
+      <HealthcareCaseStudyBanner currentPage="incident-commander" />
 
       {showCreate && (
         <CreateIncidentModal

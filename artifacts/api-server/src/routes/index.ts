@@ -203,6 +203,18 @@ router.use(lazyMatch("/sentra", () => import("./sentra-hunt"), "sentra-hunt"));
 // AI Swarm Defense, MITRE ATLAS Overlay, Weaponized Intel Feed, SOAR Hub).
 router.use(lazyMatch("/sentra/pages", () => import("./sentra-pages"), "sentra-pages"));
 
+// Sentra Live Threat Feeds — NVD, KEV, EPSS, ATT&CK, abuse.ch URLhaus/ThreatFox,
+// AlienVault OTX. Per-feed health panel, caching, drift, freshness telemetry.
+router.use(lazyMatch("/sentra/threat-feeds", () => import("./sentra-threat-feeds"), "sentra-threat-feeds"));
+
+// Sentra ML Scoring — three inference heads: asset risk, identity blast-radius,
+// adversary-replay simulator. Monte Carlo, drift monitors, model registry.
+router.use(lazyMatch("/sentra/ml", () => import("./sentra-ml-scoring"), "sentra-ml-scoring"));
+
+// Sentra A11oy Integration — tool registry, PCE-gated invocations, Healthcare
+// case study, Prism Bus event stream.
+router.use(lazyMatch("/sentra/a11oy", () => import("./sentra-a11oy"), "sentra-a11oy"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

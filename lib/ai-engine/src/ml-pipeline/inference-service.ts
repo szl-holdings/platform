@@ -256,6 +256,82 @@ function runModelInference(
       confidence,
     };
   }
+  // ── Sentra ────────────────────────────────────────────────────────────────
+  if (domain === 'sentra' && modelType === 'asset_risk') {
+    const f = features as Record<string, number>;
+    const epssWeight = 0.34;
+    const kevWeight = 0.27;
+    const cvssWeight = 0.18;
+    const exposureWeight = 0.12;
+    const critWeight = 0.06;
+    const patchWeight = 0.03;
+    const epss = Math.min(1, Math.max(0, f['epssScore'] ?? 0.05));
+    const kev = Math.min(1, Math.max(0, f['isKevListed'] ?? 0));
+    const cvssNorm = Math.min(1, Math.max(0, (f['cvssBaseScore'] ?? 5.0) / 10));
+    const exposure = Math.min(1, Math.max(0, f['internetExposure'] ?? 0));
+    const criticality = Math.min(1, Math.max(0, f['assetCriticality'] ?? 0.5));
+    const patchLag = Math.min(1, Math.max(0, (f['patchLag'] ?? 30) / 365));
+    const p30d = Math.min(0.97, Math.max(0.01,
+      epss * epssWeight + kev * kevWeight + cvssNorm * cvssWeight +
+      exposure * exposureWeight + criticality * critWeight + patchLag * patchWeight,
+    ));
+    let riskLabel: string;
+    if (p30d >= 0.7) riskLabel = 'critical';
+    else if (p30d >= 0.45) riskLabel = 'high';
+    else if (p30d >= 0.2) riskLabel = 'medium';
+    else riskLabel = 'low';
+    return {
+      prediction: { p30dCompromise: parseFloat(p30d.toFixed(4)), riskLabel },
+      confidence: parseFloat((0.82 + (1 - Math.abs(p30d - 0.5)) * 0.09).toFixed(4)),
+    };
+  }
+  if (domain === 'sentra' && modelType === 'identity_blast') {
+    const f = features as Record<string, number>;
+    const privWeight = 0.31;
+    const permWeight = 0.24;
+    const sysWeight = 0.19;
+    const mfaWeight = 0.14;
+    const ageWeight = 0.08;
+    const loginWeight = 0.04;
+    const privGroups = Math.min(1, Math.max(0, (f['privilegedGroupCount'] ?? 2) / 10));
+    const openPerms = Math.min(1, Math.max(0, f['openPermissions'] ?? 0.3));
+    const sysAccess = Math.min(1, Math.max(0, f['sensitiveSystemAccess'] ?? 0.3));
+    const mfaInverse = Math.min(1, Math.max(0, 1 - (f['mfaEnabled'] ?? 0)));
+    const svcAge = Math.min(1, Math.max(0, (f['serviceAccountAge'] ?? 180) / 730));
+    const loginAge = Math.min(1, Math.max(0, (f['lastLoginDays'] ?? 30) / 90));
+    const p7d = Math.min(0.95, Math.max(0.02,
+      privGroups * privWeight + openPerms * permWeight + sysAccess * sysWeight +
+      mfaInverse * mfaWeight + svcAge * ageWeight + loginAge * loginWeight,
+    ));
+    return {
+      prediction: { p7dLateralPath: parseFloat(p7d.toFixed(4)), estimatedBlastRadius: Math.round(p7d * 100) },
+      confidence: parseFloat((0.79 + (1 - Math.abs(p7d - 0.5)) * 0.11).toFixed(4)),
+    };
+  }
+  if (domain === 'sentra' && modelType === 'adversary_replay') {
+    const f = features as Record<string, number>;
+    const detGapWeight = 0.36;
+    const techCountWeight = 0.24;
+    const dwellWeight = 0.17;
+    const edrWeight = 0.12;
+    const patchWeight2 = 0.07;
+    const mfaWeight2 = 0.04;
+    const detGap = Math.min(1, Math.max(0, f['detectionCoverageGap'] ?? 0.4));
+    const techCount = Math.min(1, Math.max(0, (f['attackTechniqueCount'] ?? 8) / 20));
+    const dwell = Math.min(1, Math.max(0, (f['avgDwellTimeDays'] ?? 15) / 60));
+    const edrInverse = Math.min(1, Math.max(0, 1 - (f['edrCoverageRatio'] ?? 0.7)));
+    const patchInverse = Math.min(1, Math.max(0, 1 - (f['patchedCveRatio'] ?? 0.5)));
+    const mfaInverse2 = Math.min(1, Math.max(0, 1 - (f['mfaEnforcement'] ?? 0.8)));
+    const successRate = Math.min(0.95, Math.max(0.05,
+      detGap * detGapWeight + techCount * techCountWeight + dwell * dwellWeight +
+      edrInverse * edrWeight + patchInverse * patchWeight2 + mfaInverse2 * mfaWeight2,
+    ));
+    return {
+      prediction: { overallSuccessRate: parseFloat(successRate.toFixed(4)), meanTimeToBreakoutHrs: Math.round(15 + (1 - successRate) * 120) },
+      confidence: parseFloat((0.85 + (1 - Math.abs(successRate - 0.5)) * 0.07).toFixed(4)),
+    };
+  }
+
   if (modelType.includes('forecast')) {
     const horizon = 7;
     const values = Array.from({ length: horizon }, (_, i) =>

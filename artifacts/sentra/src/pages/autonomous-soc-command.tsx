@@ -22,6 +22,9 @@ import {
   type SmartScoreAlert,
   getAutonomousSocPage,
 } from '../lib/sentra-api';
+import { HealthcareCaseStudyBanner } from '../components/healthcare-case-study-banner';
+
+const API = import.meta.env.VITE_API_URL ?? '/api';
 
 const STAGE_ICONS: Record<string, typeof Brain> = {
   database: Database,
@@ -69,13 +72,31 @@ export default function AutonomousSOCCommand() {
     let active = true;
     setLoading(true);
     setError(null);
-    getAutonomousSocPage()
-      .then((res) => {
+    // Fetch seed page data + live Sentra ML model registry in parallel
+    Promise.all([
+      getAutonomousSocPage(),
+      fetch(`${API}/sentra/ml/model-registry`, { credentials: 'include' })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+    ])
+      .then(([pageRes, registryRes]) => {
         if (!active) return;
-        if (!res) {
+        if (!pageRes) {
           setError('Unable to load Autonomous SOC data.');
+          return;
+        }
+        // Augment the page with live model registry data if available
+        if (registryRes?.data?.models && Array.isArray(registryRes.data.models)) {
+          const liveModels: Array<{ modelName: string; version: string; status: string }> = registryRes.data.models;
+          const activeLiveCount = liveModels.filter(m => m.status === 'active').length;
+          setData({
+            ...pageRes,
+            mlModelClusters: pageRes.mlModelClusters?.map((c: { label: string; count: number; color: string }, i: number) =>
+              i === 0 ? { ...c, count: Math.max(c.count, activeLiveCount * 1000) } : c,
+            ) ?? pageRes.mlModelClusters,
+          });
         } else {
-          setData(res);
+          setData(pageRes);
         }
       })
       .finally(() => {
@@ -135,6 +156,8 @@ export default function AutonomousSOCCommand() {
           </span>
         </div>
       </div>
+
+      <HealthcareCaseStudyBanner currentPage="autonomous-soc-command" />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[

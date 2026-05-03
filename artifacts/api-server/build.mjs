@@ -200,6 +200,7 @@ async function buildAll() {
       'electron',
       'graphql-query-complexity',
       '@hono/zod-openapi',
+      '@szl/alloy-agentic-rag',
     ],
     sourcemap: 'linked',
     plugins: [

@@ -818,6 +818,178 @@ export function getWeaponizedIntelPage() {
   return getJson<WeaponizedIntelResponse>('/sentra/pages/weaponized-intel');
 }
 
+// ─── Threat Feeds ──────────────────────────────────────────────────────────
+
+export interface FeedHealth {
+  feedId: string;
+  displayName: string;
+  source: string;
+  lastFetched: string | null;
+  freshness: 'live' | 'cached' | 'stale' | 'error';
+  latencyMs: number;
+  recordCount: number;
+  cacheAgeMs: number;
+  ttlMs: number;
+  error?: string;
+}
+
+export interface FeedHealthResponse {
+  feeds: FeedHealth[];
+  asOf: string;
+}
+
+export interface DailyBriefResponse {
+  date: string;
+  headline: string;
+  recentKev: Record<string, unknown>[];
+  topCves: Record<string, unknown>[];
+  topPulses: Record<string, unknown>[];
+  threatLevel: 'elevated' | 'moderate' | 'low';
+  asOf: string;
+}
+
+export function getThreatFeedHealth() {
+  return getJson<FeedHealthResponse>('/sentra/threat-feeds/health');
+}
+
+export function getDailyBrief() {
+  return getJson<DailyBriefResponse>('/sentra/threat-feeds/daily-brief');
+}
+
+export function getKevFeed() {
+  return getJson<{ vulnerabilities: Record<string, unknown>[]; count: number; source: string; asOf: string }>('/sentra/threat-feeds/kev');
+}
+
+export function getNvdFeed() {
+  return getJson<{ vulnerabilities: Record<string, unknown>[]; count: number; source: string; asOf: string }>('/sentra/threat-feeds/nvd');
+}
+
+export function getEpssScores(cveIds?: string[]) {
+  const qs = cveIds && cveIds.length > 0 ? `?cve=${cveIds.join(',')}` : '';
+  return getJson<{ scores: Record<string, unknown>[]; source: string; asOf: string }>(`/sentra/threat-feeds/epss${qs}`);
+}
+
+// ─── ML Scoring ────────────────────────────────────────────────────────────
+
+export interface AssetRiskScore {
+  assetId: string;
+  p30dCompromise: number;
+  riskLabel: 'critical' | 'high' | 'medium' | 'low';
+  factors: Record<string, number>;
+  modelVersion: string;
+  scoredAt: string;
+  confidenceInterval: { lower: number; upper: number };
+}
+
+export interface IdentityBlastRadiusForecast {
+  identityId: string;
+  p7dLateralPath: number;
+  estimatedBlastRadius: number;
+  highRiskTargets: string[];
+  forecastHorizonDays: 7;
+  nextLikelyPivots: Array<{ system: string; probability: number; technique: string }>;
+  modelVersion: string;
+  scoredAt: string;
+  monteCarloIterations: number;
+}
+
+export interface MLModelInfo {
+  modelId: string;
+  displayName: string;
+  version: string;
+  status: string;
+  description: string;
+  accuracy: number;
+  driftStatus: string;
+  inferenceEndpoint: string;
+  lastUpdated: string;
+}
+
+export function getMLModelRegistry() {
+  return getJson<{ models: MLModelInfo[]; asOf: string }>('/sentra/ml/model-registry');
+}
+
+export function getMLDriftStatus() {
+  return getJson<{ models: Array<{ modelId: string; driftStatus: string; psiScore: number; lastEvaluated: string }>; asOf: string }>('/sentra/ml/drift-status');
+}
+
+export async function scoreAssetRiskML(input: {
+  assetId: string;
+  cvssScore?: number;
+  epssScore?: number;
+  isKevListed?: boolean;
+  assetCriticality?: string;
+  internetExposure?: boolean;
+}) {
+  const token = await ensureCsrf();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['X-CSRF-Token'] = token;
+  const resp = await fetch(`${BASE}/sentra/ml/asset-risk`, {
+    method: 'POST',
+    credentials: 'include',
+    headers,
+    body: JSON.stringify(input),
+  });
+  if (!resp.ok) return null;
+  const r = await resp.json();
+  return r?.data?.score as AssetRiskScore | null;
+}
+
+// ─── A11oy Integration ──────────────────────────────────────────────────────
+
+export interface SentraToolMeta {
+  toolId: string;
+  displayName: string;
+  description: string;
+  domain: 'sentra';
+  capabilities: string[];
+  requiresPCEGate: boolean;
+  riskLevel: string;
+  isDestructive: boolean;
+}
+
+export interface HealthcareTimelineStep {
+  step: number;
+  timestamp: string;
+  event: string;
+  detail: string;
+  severity: string;
+  page: string;
+  deepLink: string;
+  mlSignal?: Record<string, unknown>;
+}
+
+export interface HealthcareCaseStudy {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  severity: string;
+  mitreStages: string[];
+  timeline: HealthcareTimelineStep[];
+  affectedSystems: Record<string, number>;
+  businessImpact: Record<string, unknown>;
+  a11oyDeepLink: string;
+  mlScores: Record<string, unknown>;
+  feedSources: string[];
+  createdAt: string;
+  lastUpdated: string;
+}
+
+export function getSentraTools() {
+  return getJson<{ tools: SentraToolMeta[]; count: number; domain: string }>('/sentra/a11oy/tools');
+}
+
+export function getHealthcareCaseStudy() {
+  return getJson<{ caseStudy: HealthcareCaseStudy }>('/sentra/a11oy/case-study/healthcare');
+}
+
+export function getPrismEvents(limit = 50) {
+  return getJson<{ events: unknown[]; total: number; asOf: string }>(`/sentra/a11oy/prism-events?limit=${limit}`);
+}
+
+// ─── SOAR Automation Hub (existing) ─────────────────────────────────────────
+
 // SOAR Automation Hub
 export interface PlaybookTemplate {
   id: string;

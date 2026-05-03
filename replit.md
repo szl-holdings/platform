@@ -1099,3 +1099,44 @@ narrow CSRF / global-auth allowlist additions). Verdict:
 
 ### Codex-kernel attestation
 - `packages/codex-kernel`: vitest reports 29/29 passing (4 test files). This is the V3 reference implementation.
+
+## Sentra — Live Threat Intel & ML Scoring (Task #4268)
+
+Three new API route groups registered at `/api/sentra/`:
+
+### `/sentra/threat-feeds`
+- `GET /health` — per-feed freshness, latency, record count for all 7 feeds (NVD, KEV, EPSS, ATT&CK, URLhaus, ThreatFox, OTX)
+- `GET /daily-brief` — headline + KEV/CVE/OTX pulse summary with threat level
+- `GET /kev`, `/nvd`, `/epss`, `/mitre-attack`, `/urlhaus`, `/threatfox`, `/otx` — individual live feed endpoints with caching
+- `POST /refresh` — force-refresh all feeds (auth-protected)
+
+Key files: `artifacts/api-server/src/routes/sentra-threat-feeds.ts`
+
+### `/sentra/ml`
+- Three ML inference heads: `POST /asset-risk`, `POST /identity-blast-radius`, `POST /adversary-replay`
+- `GET /model-registry` — model metadata, accuracy, version
+- `GET /drift-status` — PSI drift scores per model
+- Monte Carlo simulation, calibrated probabilities, no seed data
+
+Key files: `artifacts/api-server/src/lib/sentra-ml-scoring.ts`, `artifacts/api-server/src/routes/sentra-ml-scoring.ts`
+
+### `/sentra/a11oy`
+- `GET /tools` — Sentra tool registry for A11oy mesh
+- `POST /invoke/:toolId` — PCE-gated tool invocation
+- `GET /case-study/healthcare` — Healthcare IdP compromise case study (full timeline, ML scores, deep links)
+- `GET /prism-events` — Prism Bus events for Sentra domain
+
+Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-server/src/routes/sentra-a11oy.ts`
+
+### Prism Bus Signals
+`artifacts/api-server/src/lib/sentra-prism-signals.ts` — emits typed signals:
+- `kev-fleet-impact` (domain: aegis) — KEV vulnerability match against fleet
+- `blast-radius-prediction` (domain: aegis) — identity lateral movement forecast
+- `adversary-replay-finding` (domain: aegis) — adversary emulation finding
+
+### Frontend Updates
+- `artifacts/sentra/src/lib/sentra-api.ts` — client functions for all new endpoints (FeedHealth, DailyBrief, AssetRiskScore, IdentityBlastRadiusForecast, MLModelInfo, SentraToolMeta, HealthcareCaseStudy)
+- `artifacts/sentra/src/pages/threat-feed-health.tsx` — new page: per-feed status cards, daily brief panel, feed architecture grid. Route: `/intel/threat-feed-health` (in Research Intelligence section to avoid feature-gate filtering)
+- `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
+- `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
+- Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander

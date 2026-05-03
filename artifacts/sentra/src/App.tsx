@@ -317,6 +317,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/intel/adversarial-defense', label: 'Adversarial ML Defense', icon: Swords, comp: L(() => import('@/pages/adversarial-defense-console')) },
       { path: '/intel/cyber-roadmap', label: 'Cyber Innovation Roadmap', icon: Microscope, comp: L(() => import('@/pages/cyber-innovation-roadmap')) },
       { path: '/intel/photonic-inference', label: 'Photonic Inference Tier', icon: Zap, comp: L(() => import('@/pages/photonic-inference')) },
+      { path: '/intel/threat-feed-health', label: 'Live Feed Health', icon: Activity, comp: L(() => import('@/pages/threat-feed-health')) },
     ],
   },
   {
