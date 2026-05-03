@@ -267,6 +267,17 @@ export {
   storeInsight,
 } from './nuro-mesh.js';
 export {
+  CAPABILITY_DOMAINS,
+  type CapabilityDomain,
+  type CapabilityDefinition,
+  type CapabilityRouteScore,
+  type UniversalRouterOptions,
+  type UniversalRouterResult,
+  CAPABILITY_FABRIC_SEED,
+  scoreCapabilities,
+  routeUniversalPrompt,
+} from './capability-fabric.js';
+export {
   chatCompletion,
   chatCompletionWithFallback,
   type HFChatMessage,

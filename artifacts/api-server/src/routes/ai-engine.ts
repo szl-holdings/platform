@@ -6,6 +6,9 @@ import {
   APPROVAL_MATRIX,
   alloyRetrieval,
   autoEnqueueTrace,
+  CAPABILITY_DOMAINS,
+  CAPABILITY_FABRIC_SEED,
+  type CapabilityDomain,
   captureTrace,
   chatCompletionWithFallback,
   checkToolPolicy,
@@ -26,9 +29,11 @@ import {
   RefusalError,
   type RouteClass,
   routeModel,
+  routeUniversalPrompt,
   runEvals,
   runEvaluatorHooksForTrace,
   safeFallbackDecision,
+  scoreCapabilities,
   type TriageDecision,
   updateTraceStatus,
 } from '@szl-holdings/ai-engine';
@@ -1358,5 +1363,103 @@ router.get('/ai/structured-intelligence/proof-chain', (_req, res) => {
   const entries = proofChain.getEntries(limit, domain);
   res.json({ entries, total: entries.length, generatedAt: new Date().toISOString() });
 });
+
+// ─── A11OY Capability Fabric — Universal AI Operating System (Task #3553) ──
+//
+// Surfaces the 15 governed AI capabilities and the Universal Prompt Router so
+// any client (Command UI, mobile app, external integration) can discover what
+// the platform can do and execute prompts through a single endpoint that picks
+// the right Nuro Mesh agent.
+
+const capabilityRouteBodySchema = bodyShape({
+  prompt: z.unknown().optional(),
+  context: z.unknown().optional(),
+  forceDomain: z.unknown().optional(),
+  workflowId: z.unknown().optional(),
+  traceId: z.unknown().optional(),
+});
+
+router.get('/ai/capability/registry', (_req, res) => {
+  res.json({
+    capabilities: CAPABILITY_FABRIC_SEED,
+    domains: CAPABILITY_DOMAINS,
+    total: CAPABILITY_FABRIC_SEED.length,
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+router.post(
+  '/ai/capability/score',
+  validateBody(capabilityRouteBodySchema),
+  async (req, res) => {
+    try {
+      const { prompt } = req.body as { prompt?: string };
+      if (!prompt || typeof prompt !== 'string') {
+        return sendBadRequest(res, 'prompt (string) required');
+      }
+      const scores = scoreCapabilities(prompt);
+      res.json({ prompt, scores, total: scores.length });
+    } catch (err) {
+      logger.error({ err }, 'Capability scoring failed');
+      sendError(res, 500, 'capability_scoring_failed', 'Failed to score capabilities');
+    }
+  },
+);
+
+router.post(
+  '/ai/capability/route',
+  authMiddleware({ required: false }),
+  validateBody(capabilityRouteBodySchema),
+  async (req, res) => {
+    const start = Date.now();
+    try {
+      const { prompt, context, forceDomain, workflowId, traceId } = req.body as {
+        prompt?: string;
+        context?: string;
+        forceDomain?: string;
+        workflowId?: string;
+        traceId?: string;
+      };
+      if (!prompt || typeof prompt !== 'string') {
+        return sendBadRequest(res, 'prompt (string) required');
+      }
+
+      const validForceDomain =
+        typeof forceDomain === 'string' &&
+        (CAPABILITY_DOMAINS as readonly string[]).includes(forceDomain)
+          ? (forceDomain as CapabilityDomain)
+          : undefined;
+
+      const result = await routeUniversalPrompt(prompt, context ?? '', {
+        orgId: getOrgId(req.user),
+        callerUserId: req.user?.id ?? null,
+        callerRoles: req.user?.roles ?? [],
+        workflowId,
+        traceId,
+        forceDomain: validForceDomain,
+      });
+
+      writeAudit({
+        endpoint: 'capability/route',
+        domain: result.selectedDomain,
+        agentId: result.selectedAgentId,
+        latencyMs: result.latencyMs,
+        invocationId: result.invocationId,
+        orgId: getOrgId(req.user),
+      });
+
+      res.json({
+        ...result,
+        totalLatencyMs: Date.now() - start,
+      });
+    } catch (err) {
+      logger.error({ err }, 'Capability routing failed');
+      if (err instanceof PolicyBlockError || err instanceof RefusalError) {
+        return sendError(res, 403, 'capability_blocked', err.message);
+      }
+      sendError(res, 500, 'capability_routing_failed', 'Failed to route capability prompt');
+    }
+  },
+);
 
 export default router;

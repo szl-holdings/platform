@@ -205,6 +205,160 @@ function classifyRepo(repo: StarredRepo): string {
   return 'Uncategorized';
 }
 
+// ─── A11OY Capability Fabric harvest (Task #3553) ─────────────────────────
+// Cross-classifies starred repos against the 15 unified AI capability domains
+// so the Capability Fabric registry can surface "external patterns informing
+// each capability" as part of the governed knowledge layer.
+
+const CAPABILITY_FABRIC_TAXONOMY: Record<
+  string,
+  { slug: string; description: string; keywords: string[] }
+> = {
+  presentation: {
+    slug: 'presentation',
+    description: 'Slide decks, pitch decks, presentation generation, narrative arcs.',
+    keywords: ['slide', 'deck', 'presentation', 'pptx', 'keynote', 'storyboard', 'reveal'],
+  },
+  chatbots: {
+    slug: 'chatbots',
+    description: 'Conversational chat UIs, multi-turn assistants.',
+    keywords: ['chatbot', 'chat-ui', 'conversation', 'assistant', 'dialogue', 'rasa'],
+  },
+  email: {
+    slug: 'email',
+    description: 'Email composition, triage, summarization.',
+    keywords: ['email', 'inbox', 'imap', 'smtp', 'mailbox', 'newsletter'],
+  },
+  code: {
+    slug: 'code',
+    description: 'Code generation, refactoring, code review tooling.',
+    keywords: ['code-gen', 'codegen', 'copilot', 'refactor', 'codemod', 'lsp', 'tree-sitter'],
+  },
+  spreadsheet: {
+    slug: 'spreadsheet',
+    description: 'Spreadsheet engines, formula libraries, CSV reasoning.',
+    keywords: ['spreadsheet', 'csv', 'excel', 'pivot', 'formula', 'xlsx', 'sheet'],
+  },
+  image_generation: {
+    slug: 'image-generation',
+    description: 'Diffusion, GAN, image generation pipelines.',
+    keywords: ['stable-diffusion', 'diffusion', 'gan', 'image-gen', 'comfyui', 'sdxl', 'flux'],
+  },
+  workflow_automation: {
+    slug: 'workflow-automation',
+    description: 'Workflow orchestrators, integration glue, n8n-style.',
+    keywords: ['workflow', 'orchestrat', 'n8n', 'temporal', 'airflow', 'prefect', 'dagster'],
+  },
+  graphic_design: {
+    slug: 'graphic-design',
+    description: 'Layout, design tokens, brand systems.',
+    keywords: ['design-system', 'figma', 'token', 'brand', 'layout', 'svg-icon'],
+  },
+  scheduling: {
+    slug: 'scheduling',
+    description: 'Calendar, scheduling, time-finding libraries.',
+    keywords: ['calendar', 'schedul', 'caldav', 'ical', 'cron', 'time-zone'],
+  },
+  writing: {
+    slug: 'writing',
+    description: 'Long-form writing assistants, editors, grammar.',
+    keywords: ['writing', 'grammar', 'editor', 'prose', 'markdown', 'mdx'],
+  },
+  meeting_notes: {
+    slug: 'meeting-notes',
+    description: 'Transcription, meeting summarization, minutes.',
+    keywords: ['transcrib', 'whisper', 'meeting', 'minutes', 'speech-to-text', 'stt'],
+  },
+  video_generation: {
+    slug: 'video-generation',
+    description: 'Video synthesis, animation, motion generation.',
+    keywords: ['video-gen', 'animation', 'motion', 'remotion', 'manim', 'ffmpeg'],
+  },
+  knowledge_management: {
+    slug: 'knowledge-management',
+    description: 'KB engines, wiki tooling, embedding-based memory.',
+    keywords: ['wiki', 'knowledge-base', 'kb', 'notion', 'obsidian', 'vector-store', 'rag'],
+  },
+  data_visualization: {
+    slug: 'data-visualization',
+    description: 'Charts, dashboards, plotting libraries.',
+    keywords: ['chart', 'visualization', 'dashboard', 'recharts', 'd3', 'plot', 'observable'],
+  },
+  general_intelligence: {
+    slug: 'general-intelligence',
+    description: 'Foundation-model SDKs, reasoning frameworks, agent runtimes.',
+    keywords: ['agent', 'llm', 'reasoning', 'autogen', 'crewai', 'langgraph', 'foundation'],
+  },
+};
+
+interface CapabilityClassification {
+  capabilityDomain: string;
+  confidence: number;
+  matchedKeywords: string[];
+}
+
+function classifyRepoForCapabilityFabric(repo: StarredRepo): CapabilityClassification[] {
+  const text = [repo.name, repo.description || '', (repo.topics || []).join(' ')]
+    .join(' ')
+    .toLowerCase();
+  const results: CapabilityClassification[] = [];
+  for (const [domain, { keywords }] of Object.entries(CAPABILITY_FABRIC_TAXONOMY)) {
+    const matched = keywords.filter((k) => text.includes(k));
+    if (matched.length > 0) {
+      const confidence = Math.min(1, matched.length / Math.max(1, keywords.length * 0.3));
+      results.push({ capabilityDomain: domain, confidence, matchedKeywords: matched });
+    }
+  }
+  results.sort((a, b) => b.confidence - a.confidence);
+  return results;
+}
+
+function generateCapabilityFabricReport(repos: StarredRepo[]): string {
+  const now = new Date().toISOString().split('T')[0];
+  const byDomain: Record<string, Array<{ repo: StarredRepo; confidence: number; matched: string[] }>> = {};
+  for (const domain of Object.keys(CAPABILITY_FABRIC_TAXONOMY)) byDomain[domain] = [];
+
+  let classifiedCount = 0;
+  for (const repo of repos) {
+    const matches = classifyRepoForCapabilityFabric(repo);
+    if (matches.length === 0) continue;
+    classifiedCount += 1;
+    for (const m of matches) {
+      byDomain[m.capabilityDomain].push({
+        repo,
+        confidence: m.confidence,
+        matched: m.matchedKeywords,
+      });
+    }
+  }
+
+  let md = `# A11OY Capability Fabric — GitHub Knowledge Harvest\n\n`;
+  md += `**Generated:** ${now}  \n`;
+  md += `**Source repos scanned:** ${repos.length}  \n`;
+  md += `**Repos classified into capability fabric:** ${classifiedCount}  \n\n`;
+  md += `This report cross-classifies starred repositories against the 15 governed AI capability domains in the A11OY Capability Fabric (Task #3553). Each domain shows external patterns and reference implementations that inform the corresponding Nuro Mesh agent.\n\n`;
+  md += `---\n\n`;
+
+  for (const [domain, { description }] of Object.entries(CAPABILITY_FABRIC_TAXONOMY)) {
+    const matches = byDomain[domain].sort((a, b) => b.confidence - a.confidence).slice(0, 10);
+    md += `## ${domain}\n\n`;
+    md += `${description}\n\n`;
+    md += `**Reference repos (${byDomain[domain].length} total, top 10 shown):**\n\n`;
+    if (matches.length === 0) {
+      md += `_No reference repos in current export._\n\n`;
+      continue;
+    }
+    md += `| Repo | Stars | Confidence | Matched signals |\n`;
+    md += `|------|-------|------------|------------------|\n`;
+    for (const { repo, confidence, matched } of matches) {
+      md += `| [${repo.full_name}](${repo.html_url}) | ${repo.stargazers_count.toLocaleString()} | ${(confidence * 100).toFixed(0)}% | ${matched.join(', ')} |\n`;
+    }
+    md += `\n`;
+  }
+
+  return md;
+}
+
 function generateCategoryReport(category: string, repos: StarredRepo[]): string {
   const { description } = TAXONOMY[category] || { description: 'Miscellaneous' };
   const now = new Date().toISOString().split('T')[0];
@@ -311,6 +465,10 @@ function main() {
       .map(([cat, r]) => generateCategoryReport(cat, r))
       .join('\n---\n\n');
   fs.writeFileSync(combinedPath, allMd);
+
+  // A11OY Capability Fabric harvest (Task #3553)
+  const fabricPath = path.join(OUTPUT_DIR, 'capability-fabric-harvest.md');
+  fs.writeFileSync(fabricPath, generateCapabilityFabricReport(repos));
 }
 
 main();
