@@ -87,6 +87,7 @@ const AgentOrchestration = lazy(() => import('./pages/AgentOrchestration').then(
 const AgentViz = lazy(() => import('./pages/AgentViz').then(m => ({ default: m.AgentViz })));
 const DevPlatform = lazy(() => import('./pages/DevPlatform').then(m => ({ default: m.DevPlatform })));
 const A11oyCode = lazy(() => import('./pages/A11oyCode').then(m => ({ default: m.A11oyCode })));
+const A11oyChat = lazy(() => import('./pages/A11oyChat').then(m => ({ default: m.A11oyChat })));
 const AgentMesh = lazy(() => import('./pages/AgentMesh').then(m => ({ default: m.AgentMesh })));
 const PluginHub = lazy(() => import('./pages/PluginHub').then(m => ({ default: m.PluginHub })));
 const DeepResearch = lazy(() => import('./pages/DeepResearch').then(m => ({ default: m.DeepResearch })));
@@ -254,6 +255,9 @@ export default function App() {
         <Route path={`${base}/sdk`} component={DevPlatform} />
         <Route path={`${base}/a11oy-code`}>
           <WithShell><A11oyCode /></WithShell>
+        </Route>
+        <Route path={`${base}/chat`}>
+          <WithShell><A11oyChat /></WithShell>
         </Route>
         <Route path={`${base}/agent-mesh`} component={AgentMesh} />
         <Route path={`${base}/plugins`}>

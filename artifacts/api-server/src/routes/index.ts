@@ -575,4 +575,9 @@ router.use(
   ),
 );
 
+// A11oy Chat — real Claude streaming chat surface
+// GET  /a11oy/health
+// POST /a11oy/chat  (SSE stream of {content, done, error})
+router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
+
 export default router;

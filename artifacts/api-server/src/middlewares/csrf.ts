@@ -67,6 +67,11 @@ const EXEMPT_PATHS = new Set([
   // Newsletter subscription — public anonymous marketing form embedded across portfolio
   // sites; no session or user state is modified, CSRF double-submit not applicable.
   '/api/newsletter/subscribe',
+  // A11oy public chat surface — stateless SSE proxy to the Replit AI Integrations
+  // Anthropic endpoint. No per-user state written; conversation memory is held
+  // entirely in the browser tab. Public so anyone can demo A11oy without a session.
+  '/api/a11oy/chat',
+  '/api/a11oy/health',
   // Demo reset — public POST endpoint called by the Demo Launchpad presenter
   // surface to clear in-memory scenario state without a browser session.
   // No per-user state modified; memory flush is safe without CSRF protection.
