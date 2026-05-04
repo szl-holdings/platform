@@ -82,6 +82,11 @@ import {
   Workflow,
   Zap,
   Sparkles,
+  Atom,
+  CircuitBoard,
+  Dna,
+  Telescope,
+  Waves,
 } from 'lucide-react';
 import {
   type ComponentType,
@@ -258,6 +263,18 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/atlas-runtime', label: 'Threat Mesh', icon: Layers, comp: L(() => import('@/pages/atlas-runtime')) },
       { path: '/atlas-runtime/correlation', label: 'Worldline Correlation', icon: Network, comp: L(() => import('@/pages/atlas-correlation')) },
       { path: '/replay', label: 'Incident Replay', icon: RotateCcw, comp: L(() => import('@/pages/replay')) },
+    ],
+  },
+  {
+    id: 'quantum-resilience',
+    label: 'Quantum & Microsystem Resilience',
+    items: [
+      { path: '/quantum/threat-surface', label: 'Quantum Threat Surface', icon: Atom, comp: L(() => import('@/pages/quantum-threat-surface')) },
+      { path: '/quantum/supply-chain', label: 'Hardware Supply Chain', icon: CircuitBoard, comp: L(() => import('@/pages/hardware-supply-chain')) },
+      { path: '/quantum/microsystem-integrity', label: 'Microsystem Integrity', icon: Fingerprint, comp: L(() => import('@/pages/microsystem-integrity')) },
+      { path: '/quantum/photonic-grid', label: 'Photonic & Quantum Sensor Grid', icon: Waves, comp: L(() => import('@/pages/photonic-sensor-grid')) },
+      { path: '/quantum/bio-cyber', label: 'Bio-Cyber Convergence', icon: Dna, comp: L(() => import('@/pages/bio-cyber-convergence')) },
+      { path: '/quantum/threat-horizon', label: 'DARPA Threat Horizon', icon: Telescope, comp: L(() => import('@/pages/darpa-threat-horizon')) },
     ],
   },
   {

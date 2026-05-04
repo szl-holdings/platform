@@ -135,3 +135,12 @@ export const SENTRA_RECOMMENDATION_LABELS = [
   { id: 'rec-sentra-001', title: 'Isolate Compromised OT Assets', confidence: 0.95 },
   { id: 'rec-sentra-002', title: 'Initiate Bare-Metal Recovery', confidence: 0.88 },
 ] as const;
+
+export type {
+  QuantumCryptoInventory,
+  HardwareProvenanceChain,
+  MicrosystemIntegrityRecord,
+  PhotonicSensorNode,
+  BioSubstrateAsset,
+  ThreatHorizonVector,
+} from './quantum-resilience';
