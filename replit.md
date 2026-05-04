@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. It provides a controlled, auditable environment for enterprise signals, agents, tools, people, policies, and proof to operate as a unified system, focusing on decision intelligence and operational oversight. The platform is designed for highly regulated sectors requiring strict compliance and auditable AI applications, supporting web and mobile applications, an API, and a cohesive design system, aiming for market leadership in regulated AI applications. Key capabilities include Governed Workflow Orchestration, Maritime Intelligence, a Sovereign Execution Lab, the Continuum Business Observability Fabric, and OMNIA for Unified Portfolio Intelligence.
+SZL Holdings provides FORGE, a governed operational intelligence platform for regulated enterprises. Its core product, Alloy, functions as a unified enterprise AI hub, integrating all products, agents, models, datasets, and governance records within the SZL ecosystem. The platform offers a controlled, auditable environment for AI applications, focusing on decision intelligence and operational oversight in highly regulated sectors. Key capabilities include Governed Workflow Orchestration, Maritime Intelligence, a Sovereign Execution Lab, the Continuum Business Observability Fabric, and OMNIA for Unified Portfolio Intelligence.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -9,7 +9,7 @@ I want iterative development.
 Ask before making major changes.
 
 ## System Architecture
-The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js within a micro-frontend architecture, known as the Continuum Business Observability Fabric.
+The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js, structured with a micro-frontend architecture called the Continuum Business Observability Fabric.
 
 **Core Architectural Principles:**
 - **FORGE Execution Fabric:** Incorporates Human-in-the-loop governance, Outcome Graph, Proof Chain, and Covenant Policy.
@@ -19,61 +19,28 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 - **ATLAS Enterprise State Model:** Defines a shared entity vocabulary and event taxonomy.
 - **Living Signal Mesh & Evidence Graph:** Unifies event/signal handling with an `EvidenceStore`.
 - **Memory Fabric & FORGE Runtime:** Tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
+- **Cognitive Reflexivity Engine:** A self-observing, self-improving governed cognition layer that integrates dialectical reasoning and strategy application to enhance AI decision-making.
+- **Ouroboros Loop Kernel:** Shared TS package for bounded loops with measurable convergence and replay-grade governed execution, using hash-chained state and an append-only proof ledger.
+- **Continuum Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolving into a Proof-Carrying Agentic Execution Platform.
+- **SIGIL (SZL Integrated Governance & Invariant Layer):** A runtime trust framework composing four independent runtime axes (Provenance, Containment, Coherence, Convergence) through a closed-form weighted geometric mean for verifiable and monotonic trust scores.
 
-**Monorepo Structure:** Organizes active/archived artifacts, shared infrastructure, and packages for business observability, AI Control Plane, NVIDIA-Ready Modules, and Substrate Edge Inference, utilizing Drizzle ORM for PostgreSQL schemas.
+**UI/UX and Design System:** The Governed-Intelligence Design Language v2 provides a single source of truth for visual design. All authenticated product surfaces are evidence-first, employing a pure dark theme with a single warm accent and unified by a One-of-One Platform Shell.
 
-**UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) provides a single source of truth for visual design, including typography, spacing, and UI components. All authenticated product surfaces are evidence-first, employing a pure dark theme with a single warm accent. A One-of-One Platform Shell unifies user interfaces.
+**API Layers:** The platform offers REST API, GraphQL API (Apollo Server), and an MCP Gateway. An OS-Layer API (`/api/v1/os/*`) provides live data for Decision Center.
 
-**API Layers:** The platform provides REST API, GraphQL API (Apollo Server), and an MCP Gateway (protocol version 2025-11-25 with Roots, Sampling, and Elicitation capabilities).
-
-**Zero-Trust Authentication:** Implements robust security with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
+**Zero-Trust Authentication:** Implements passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference.
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
 - **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
-- **Continuum — Business Observability Fabric (formerly Alloy):** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents.
-- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline and knowledge collections.
-- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products. Key capabilities include dual planner modes (ReAct, CoT-decompose), three MCP server classes, specialist agents, two-tier memory, evidence merging, and AggregatorTrace instrumentation.
+- **Continuum Conversational AI Interface:** Claude-style governed AI chat, MCP Hub, and Agentic RAG with multi-step retrieval pipeline and knowledge collections.
+- **Alloy Hub (`/a11oy/hub`):** Flagship enterprise AI hub with fleet exploration, model foundry, governance evidence stream, and three-tier pricing.
+- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products.
 - **Hugging Face Unified Ecosystem:** First-class Hugging Face integration for model/dataset/space search, inference, and token management.
 - **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with metadata.
-- **Cognitive Reflexivity Engine:** A self-observing, self-improving governed cognition layer that processes telemetry into cognitive-reflexive signals for strategy adaptation and self-model updates.
-
-**Key Technical Implementations:**
-- **Red-Team Game Day Engine:** For live competitive crisis simulations.
-- **Cross-Domain Signal Bus (Alert Bus):** "When/then" automation engine.
-- **Outbound Gateway:** Unified omni-channel notification layer.
-- **Amaru — Convergent Reverse-ETL:** A visual no-code Reverse-ETL system.
-- **@workspace/ouroboros — Ouroboros Loop Kernel:** A shared TS package for bounded loops with measurable convergence and replay-grade governed execution. Implements hash-chained state, decision receipts, and an append-only proof ledger with tamper-evident digests for replay verification and auditability.
-- **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory fabric, evidence ledger, and policy guard.
-- **Multi-Agent Crew System:** Supports specialized agent roles with plan decomposition.
-- **Trust Score Engine:** A graduated autonomy system.
-- **Fine-Tuned Model Router:** Domain-aware model routing with fallback chains.
-- **Offline-First Sync (Mobile):** For mobile applications with local cache and conflict resolution.
-- **Unified Auth Mesh:** Backend-only authentication unification layer.
-- **Forecast & Anomaly Fabric:** Unified forecasting and anomaly detection services.
-- **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, and Adversarial ML Defense Console.
-- **Continuum ARGO — Field Intelligence Forge:** Fuses external signals with defensive doctrines.
-- **Continuum Aerial Twin & Mythos Layer:** Doctrine hubs for digital-twin and defensive architecture.
-- **Mythos Doctrine Governance (DB-backed):** All ~21 doctrine governance pages in A11oy are wired to real PostgreSQL tables via REST API endpoints.
-- **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, synthetic metrics, self-healing, AI alert triage, cost-aware monitoring, and observability as code.
-- **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`, `/alloy/workspace/*`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, Project Memory, and Admin Control Center. Includes WorkGraph Explorer & Answer Engine (semantic query interface returning permission-scoped answers with source evidence from 11 connectors: Email, Drive, Doc Editor, Chat, Video Meetings, Tasks, CRM, ERP, Legal Vault, Approval Engine, MCP Bridge), Workspace Intelligence Home, Event Stream (normalized event log with proof state lifecycle), Skills Studio (10 seed skills with MirrorEval scores and approval classes), Project Memory, Meeting to Execution, Approval Chase, Proof Packets (tamper-evident SHA-256 evidence chains), and Admin Control Center (7 DLP enforcement policies, 9 data classification tiers). Data model: `WorkGraphNode`, `WorkGraphEdge`, `WorkObject`, `WorkspaceConnector`, `WorkspaceEvent`, `WorkGraphAnswer`, `A11oySkill`, `ProjectMemory`, `ProofPacket` types in `src/alloy/data/workgraph.ts`. Governance: all connectors are demo mode only; approval gates enforced per skill (`auto`, `review`, `finance`, `legal`, `security`, `executive`); Alloy-original generic connector names (no Google branding). Audit: `artifacts/szl-holdings/audit/workgraph-feature-audit.md`.
-- **OS-Layer API (`/api/v1/os/*`):** Live API endpoints for Decision Center data (recommendations, source health, runs, eval results, command KPIs, executive brief, watchlist, correlations, platform stats). Backed by 6 PostgreSQL tables (`os_recommendations`, `os_source_health`, `os_runs`, `os_eval_results`, `os_command_kpis`, `os_platform_stats`) with auto-seeding. Frontend hooks in `lib/shared-ui/src/use-os-data.ts`. Decision Center pages in vessels, terra, carlota-jo, and szl-holdings all consume live API data.
-- **Shared Reverse Proxy (`packages/shared-proxy`) & Security Headers (`@szl-holdings/security-headers`):** Ensures consistent platform routing and security policies.
-- **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs in a dedicated database table.
-- **Cognitive Reflexivity Engine:** A self-observing, self-improving governed cognition layer that closes the loop from telemetry to self-model adaptation, integrating dialectical reasoning and strategy application to enhance AI decision-making.
-- **Ouroboros Integrations & Lambda Engine:** Unified 9-axis Lutar Invariant pipeline orchestrated by A11oy. The Lambda Engine (`packages/ouroboros-integrations/src/lambda-engine.ts`) runs all philosopher/mathematician packages through a single pipeline producing formal Lambda-9 scores with Egyptian-inspectable weights. Includes Adaptive Depth Routing (ADR) -- the trust score IS the cost optimizer, routing high-trust content to workhorse models at 0.1x cost and low-trust content to frontier models with full verification. API endpoints: `POST /api/ouroboros/a11oy/guard` (internal LaaS), `GET /api/ouroboros/a11oy/pulse` (Convergence Pulse), `GET /api/ouroboros/a11oy/stats` (orchestrator statistics). Public LaaS surface: `POST /api/v1/guard` (Lambda-as-a-Service), `GET /api/v1/guard/pulse`, `GET /api/v1/guard/axes`, `GET /api/v1/guard/health`. Reconciliation primitives (frustum, seked, unit-fractions, doubling) applied to handoff reconciliation, fleet auditing, and HSM governance. Includes `ouroboros-gauss` for least-squares network adjustment and residual fit.
-- **A11oy Orchestrator:** (`packages/ouroboros-integrations/src/a11oy-orchestrator.ts`) The unified control plane. Ingests every guard decision, runs the Lambda Engine, updates the Convergence Pulse, reconciles agent handoffs, and routes to the right model tier. v5 Stack of One: one orchestrator for every product. (consolidated from former Lyte platform).
-- **Convergence Pulse:** (`packages/ouroboros-integrations/src/convergence-pulse.ts`) Real-time Lambda-9 trust heartbeat. Computes rolling Lambda across a sliding window of guard decisions, surfaces trust trajectory (IMPROVING/DEGRADING/STABLE), rate of change, per-axis trends, weakest axis identification, and predicted time to threshold breach. Alert levels: NOMINAL/WATCH/ALERT/CRITICAL.
-- **Sovereign Engine v22-44 (XI-COMPLETE):** All 44 SZL original innovations fully operational in TypeScript, including A11oy Propeller Drive (APD), SOTA Agentic Router (SAR), Language Arbitrage Engine (LAE, A_lang formula), PagedAttention KV Cache (PKC), Ultra Router with Speculative Decoding (URS), and Xi Unification Invariant with Multi-Agent Council (XUC -- Xi = L_Omega * P_Lambda * sigmoid(A_lang) * 1/(1+H_dialog), 7-agent handoff roster, council deliberation).
-- **Ouroboros Thesis Papers:** Consolidated arXiv-format papers (v1-v12) detailing the Lutar Omega Formalism, Prisca-GraphRAG, Hermetic AI Safety, Sefirot-Kabbalah Hopfield, Free-Energy Predictive Coding, Tawa SAE Interpretability, EPR-Bell Sacred Geometry, Chinchilla-Lutar Scaling/Grokking/Bifurcation, and Propeller-Drive SOTA Routing.
-- **Ouroboros 9-Axis Invariant:** (`packages/ouroboros-invariant/`) Formal Lutar Invariant with 9 axes: C (Cleanliness, anchor), H (Horizon, Page curve), R (Resonance, Q-factor), F (Frustum, three-witness Jaccard), G (Gauss closure, class number), I (Invariance, Blanca/Lorentz), M (Moral, Oppenheimer accountability), B (Being, Socrates divided-line), N (Non-measurability, Lara/Jamneshan-Shalom-Tao). Each weight is a single Egyptian unit fraction (1/9), preserving inspectability. Bound theorem: 0 <= Lambda <= min(axes) <= max(axes) <= 1.
-- **SIGIL — SZL Integrated Governance & Invariant Layer:** A runtime trust framework composing four independent runtime axes (Provenance, Containment, Coherence, Convergence) through a closed-form weighted geometric mean, ensuring verifiable and monotonic trust scores.
-- **Ouroboros Guardrails:** A drop-in NeMo Guardrails replacement with Colang-compatible config, emitting a formal 9-axis Lambda-9 Lutar Invariant score and a tamper-evident hash-chained receipt for every decision. Every receipt now carries the full Lambda-9 composite, per-axis breakdown, bound verification, and Adaptive Depth Routing decision.
-- **Sovereign AI Hub:** A HuggingFace-inspired AI Operations Console within Conduit (Amaru) with 7 pages: Hub Landing (`/sovereign-ai-hub`), Model Fleet Console (`/sovereign-ai-hub/model-fleet`), Inference Observatory (`/sovereign-ai-hub/inference`), Domain Distillery (`/sovereign-ai-hub/distillery`), PRAXIS Playground (`/sovereign-ai-hub/praxis`), Data Estate Catalog (`/sovereign-ai-hub/data-estate`), and Cognitive Insights (`/sovereign-ai-hub/cognitive`). All pages consume real API endpoints from `api-server` routes (ml-pipeline, fine-tuning, fusion, cognitive-runtime). Pages at `artifacts/conduit/src/pages/sovereign-ai-hub/`.
-
-**Canonical Identity & Source of Truth:**
-The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`.
+- **Ouroboros Guardrails:** A NeMo Guardrails replacement emitting a formal 9-axis Lambda-9 Lutar Invariant score and a tamper-evident hash-chained receipt for every decision.
+- **Sovereign AI Hub:** A HuggingFace-inspired AI Operations Console within Conduit (Amaru).
 
 **AI Governance Rules:**
 1. Every AI call must produce a `ProvenanceEnvelope`.
@@ -90,16 +57,14 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport.
 - **Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts` (`AlloyModelGateway`) as the single sanctioned path to the Qwen endpoint.
 
-**Python Substrate Engine:**
-- **Package:** `lib/a11oy-fabric-py/` — A11oy Fabric Python substrate engine.
-- **PCPR:** Proof-Carrying Pack Runs — sha256 hash-chained proof artifacts alongside every report.
+**Python Substrate Engine:** `lib/a11oy-fabric-py/` — A11oy Fabric Python substrate engine with Proof-Carrying Pack Runs.
 
 **Technology Preferences:**
 - TypeScript 5.9 / Node 20+ / pnpm workspaces
-- React 19 + Vite for web artifacts; Expo for mobile
+- React 19 + Vite for web; Expo for mobile
 - Drizzle ORM on PostgreSQL (Neon-compatible)
-- Hugging Face Inference Endpoints for governed LLM serving (Qwen 3.6-27B as the primary reasoning model)
-- Shared design system (`@szl-holdings/design-system`) — pure dark theme, single warm accent
+- Hugging Face Inference Endpoints for governed LLM serving (Qwen 3.6-27B primary)
+- Shared design system (`@szl-holdings/design-system`)
 - Cloudflare for edge / DNS / WAF; Vercel and Replit for app hosting
 - GitHub for VCS; CI via GitHub Actions
 
@@ -108,39 +73,15 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Authentication:** Replit Auth
 - **Payment Processing:** Stripe
 - **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, Elevenlabs, Substrate/oLLM
-- **Governed Compute:** HuggingFace Jobs (GPU/CPU compute backend for agent workloads).
+- **Governed Compute:** HuggingFace Jobs (GPU/CPU compute backend for agent workloads)
 - **Communication:** Slack, Twilio, Resend, SendGrid
 - **Maritime Data:** MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather
-- **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar
-- **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
-
-## Terra — Real Estate Intelligence
-Terra is the real estate intelligence platform at `/terra/`.
-
-**Data Architecture:**
-- Core brokerage data seeded via `seedTerraDemo()` in boot chain (brokerages, agents, properties, listings, inquiries, transactions)
-- Operating module seed data via independent `seedTerraOperatingModules()` boot task (6 leases, 3 tax appeals, 3 tenant applications, 2 1031 exchanges, 2 pro-forma projects, 2 construction projects, 4 deals, 3 leads) — runs independently with per-table idempotent guards
-- NYC Open Data ingestion pipeline populates `terra_distress_properties` (5500+ records) and `terra_distress_alerts` from ACRIS, HPD, DOB, 311, and tax lien sale datasets
-- Market intelligence endpoint (`/terra/market-intelligence`) uses real DB aggregates via `computeDbMarketSignals()`
-- Sector performance endpoint blends REIT benchmark constants with portfolio DB aggregates from `terra_commercial_properties`
-
-**API Endpoints (all in `artifacts/api-server/src/routes/`):**
-- CRM: `/terra/pipeline/deals`, `/terra/crm/leads`, `/terra/convert/distress-to-lead`, `/terra/convert/lead-to-deal` (terra-crm/)
-- Operating modules: `/terra/leases`, `/terra/tax-appeals`, `/terra/tenant-applications`, `/terra/exchanges-1031`, `/terra/pro-forma-projects`, `/terra/construction-projects`, `/terra/waterfall-structures`, `/terra/rent-roll` (terra-modules.ts)
-- Market: `/terra/market-intelligence`, `/terra/sector-performance` (terra.ts)
-- Distress: `/terra/distress/*` (terra-distress.ts)
-- Sourcing: `/terra/sourcing/*` (terra-sourcing.ts)
-- Properties: `/terra/properties` (terra.ts)
-- Broker: `/terra/broker/listings`, `/terra/broker/inquiries` (terra-broker.ts)
-
-**Frontend → API Wiring (all in `artifacts/terra/src/pages/`):**
-- Pages wired to live API with static fallback on transport error: dashboard (deals, alerts, properties), pipeline (deals with CRM→pipeline stage mapping), lease-abstraction, rent-roll, tax-appeal, tenant-screening, market (market-intelligence + mortgage + BLS), deals, leads, distress-engine, investor-mode
-- Pages using static reference data: analytics, portfolio-performance, property-map-page, alerts-page, lender-report, property-detail (these display portfolio summaries and reference visualizations)
-- Dashboard agents sidebar uses static brokerage reference data (no `/terra/agents` API endpoint exists)
-
+- **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar, NVD CVE, MITRE ATT&CK, CISA KEV
+- **Government Data:** Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
 - **Government Data:** Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+
 ## 2026-05-04 — Empire APEX Meeting Pack (complete dossier)
 
 Comprehensive meeting pack for May 6, 2026 session with Mercy McInnis (Empire APEX Accelerator):
@@ -1254,3 +1195,4 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
+- **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot

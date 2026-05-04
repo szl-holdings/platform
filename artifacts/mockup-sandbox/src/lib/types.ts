@@ -16,7 +16,8 @@ export type Page =
   | 'marketplace'
   | 'eval-layer'
   | 'kernel'
-  | 'passport-registry';
+  | 'passport-registry'
+  | 'alloy-preview';
 
 export interface PraxisStatus {
   activeSwarms: number;

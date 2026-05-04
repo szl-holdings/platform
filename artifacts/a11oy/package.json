@@ -15,6 +15,7 @@
   "dependencies": {
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/shared-ui": "workspace:*",
     "@szl-holdings/domain-profiles": "workspace:*",
     "@szl-holdings/flexcache": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",

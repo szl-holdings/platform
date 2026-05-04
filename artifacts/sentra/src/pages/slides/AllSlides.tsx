@@ -9,6 +9,8 @@ import S07SeriesDomains from './S07SeriesDomains';
 import S08BusinessModel from './S08BusinessModel';
 import S08DividerMoat from './S08DividerMoat';
 import S09Ask from './S09Ask';
+import S10Alloy from './S10Alloy';
+import S11AlloyFoundry from './S11AlloyFoundry';
 import S13DividerVerdict from './S13DividerVerdict';
 
 const SLIDES = [
@@ -20,6 +22,8 @@ const SLIDES = [
   S08DividerMoat,
   S06Market,
   S07SeriesDomains,
+  S10Alloy,
+  S11AlloyFoundry,
   S13DividerVerdict,
   S08BusinessModel,
   S09Ask,

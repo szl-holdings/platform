@@ -97,6 +97,13 @@ const NAV_ITEMS: Array<{
     description: 'NEXUS Kernel — Unified AI Compute Layer',
     group: 'control',
   },
+  {
+    id: 'alloy-preview',
+    label: 'Alloy Hub',
+    icon: Layers,
+    description: 'Alloy — Flagship Enterprise AI Hub preview',
+    group: 'control',
+  },
 ];
 
 export default function Layout({

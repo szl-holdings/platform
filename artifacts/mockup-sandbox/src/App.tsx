@@ -20,6 +20,7 @@ import Skills from './pages/Skills';
 import TokensGovernance from './pages/TokensGovernance';
 import KernelDashboard from './pages/KernelDashboard';
 import PassportRegistry from './pages/PassportRegistry';
+import AlloyPreview from './pages/AlloyPreview';
 
 const VALID_PAGES: Page[] = [
   'home',
@@ -39,6 +40,7 @@ const VALID_PAGES: Page[] = [
   'marketplace',
   'kernel',
   'passport-registry',
+  'alloy-preview',
 ];
 
 function getInitialPage(): Page {
@@ -86,6 +88,7 @@ function AppInner() {
       {page === 'audit' && <AuditTrail />}
       {page === 'kernel' && <KernelDashboard />}
       {page === 'passport-registry' && <PassportRegistry />}
+      {page === 'alloy-preview' && <AlloyPreview />}
     </Layout>
   );
 }

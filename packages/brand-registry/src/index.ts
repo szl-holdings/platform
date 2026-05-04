@@ -68,4 +68,8 @@ export function ecosystemThesis(): string {
   return registry.boilerplate.ecosystemThesis;
 }
 
+export function productHref(id: string): string {
+  return getProduct(id)?.link ?? '/';
+}
+
 export const brand = registry;

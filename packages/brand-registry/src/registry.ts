@@ -101,17 +101,17 @@ export const registry: BrandRegistry = {
 
   products: [
     {
-      id: 'a11oy',
-      name: 'A11oy',
-      tagline: 'Brand Orchestration & Decision Intelligence',
-      category: 'Decision Intelligence',
+      id: 'alloy',
+      name: 'Alloy',
+      tagline: 'Enterprise AI Hub & Decision Intelligence',
+      category: 'AI Hub',
       oneLiner:
-        'Governed decision intelligence and brand orchestration layer that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs.',
+        'The unified front door to the SZL ecosystem — where every product, agent, model, dataset, and governance record becomes browsable, deployable, and auditable from one place.',
       description:
-        'Governed decision intelligence and brand orchestration platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Consolidates the former Lyte Decision Intelligence capability with the A11oy orchestration layer.',
+        'Alloy is the SZL flagship enterprise AI hub and governed decision intelligence platform. The Hub surface (/a11oy/hub) provides HF-caliber model, dataset, space, and governance browsing. The orchestration surface (/a11oy/) provides brand orchestration, decision intelligence, and the A11oy control plane. Built on Proof Chain, Policy Engine, Cognitive Runtime, and Prism Bus.',
       status: 'live',
-      doctrineRole: 'OBSERVE',
-      link: '/a11oy/',
+      doctrineRole: 'EXECUTE',
+      link: '/a11oy/hub',
       color: '#c9b787',
     },
     {
@@ -221,7 +221,7 @@ export const registry: BrandRegistry = {
       'The enterprises that win the next decade are not the ones with the most data. They are the ones that can reason across their data, connect operational signal to strategic decision, and act with confidence.',
     prismExpansion: 'Pulse, Risk, Action, eXecution, Intelligence, Signals',
     alloyDescription:
-      'Counsel is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem.',
+      'Alloy is the SZL flagship enterprise AI hub — the unified front door where every product, agent, model, dataset, and governance record in the ecosystem becomes browsable, deployable, and auditable from one place.',
     ecosystemThesis:
       'Six operating companies. One intelligence fabric. Each platform commands its vertical. Shared infrastructure compounds the advantage across all of them.',
   },

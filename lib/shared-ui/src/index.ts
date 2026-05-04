@@ -980,3 +980,12 @@ export {
   type CommentThreadProps,
   type Comment as CollabComment,
 } from './collaboration';
+
+export {
+  createHfHubClient,
+  type HFHubClient,
+  type HFModel,
+  type HFDataset,
+  type HFSpace,
+  type HFStatus,
+} from './hf-hub-client';

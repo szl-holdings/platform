@@ -8,6 +8,9 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { CARLOTA_JO_RETENTION, CARLOTA_JO_YEARS_EXPERIENCE, metricDisplay } from '@/lib/claims';
 
+import { productHref } from '@szl-holdings/brand-registry';
+
+const ALLOY_HREF = productHref('alloy');
 const EVAL_API = `${import.meta.env.BASE_URL}api/eval-registry/public/benchmarks`;
 const EVAL_TRACE_BASE = 'https://github.com/szlholdings/eval-results/blob/main/.eval_results';
 
@@ -129,6 +132,32 @@ function LuxuryHero() {
               >
                 Private Advisory
               </span>
+              <span style={{ color: 'rgba(196,170,126,0.25)', margin: '0 0.25rem' }}>·</span>
+              <a
+                href={ALLOY_HREF}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                  fontSize: '0.5625rem', fontWeight: 600, letterSpacing: '0.18em',
+                  textTransform: 'uppercase', textDecoration: 'none',
+                  color: 'rgba(196,170,126,0.5)',
+                  padding: '0.2rem 0.5rem',
+                  border: '1px solid rgba(196,170,126,0.18)',
+                  borderRadius: 4,
+                  transition: 'color 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.color = 'rgba(196,170,126,0.9)';
+                  el.style.borderColor = 'rgba(196,170,126,0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.color = 'rgba(196,170,126,0.5)';
+                  el.style.borderColor = 'rgba(196,170,126,0.18)';
+                }}
+              >
+                Powered by Alloy
+              </a>
             </motion.div>
 
             <motion.h1
@@ -157,8 +186,8 @@ function LuxuryHero() {
               className="mt-7 text-[15px] font-light leading-[1.8] max-w-lg"
               style={{ color: 'rgba(244,237,224,0.6)' }}
             >
-              Carlota Jo is a concierge advisory practice for individuals who demand precision,
-              discretion, and a trusted presence across every dimension of their private life.
+              Precision advisory, governed by Alloy — for individuals who demand discretion,
+              expert presence, and a trusted partner across every dimension of their private life.
             </motion.p>
 
             <motion.div
@@ -944,13 +973,47 @@ function SZLPlatformNote() {
               compromising independence.
             </p>
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-end gap-3">
             <a
               href="/"
               className="text-[10px] tracking-[0.2em] uppercase font-light transition-opacity hover:opacity-70"
               style={{ color: 'var(--color-stone-400)' }}
             >
               SZL Holdings
+            </a>
+            <a
+              href={ALLOY_HREF}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+                padding: '0.3125rem 0.75rem',
+                background: 'rgba(196,170,126,0.06)',
+                border: '1px solid rgba(196,170,126,0.2)',
+                borderRadius: 6,
+                fontSize: '0.5625rem', fontWeight: 600,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'rgba(196,170,126,0.65)',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.background = 'rgba(196,170,126,0.1)';
+                el.style.color = 'rgba(196,170,126,0.9)';
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.background = 'rgba(196,170,126,0.06)';
+                el.style.color = 'rgba(196,170,126,0.65)';
+              }}
+            >
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 12, height: 12,
+                border: '1px solid rgba(196,170,126,0.5)',
+                borderRadius: 2, fontSize: 7, fontWeight: 700,
+                color: 'rgba(196,170,126,0.7)',
+              }}>a</span>
+              Powered by Alloy
             </a>
           </div>
         </motion.div>

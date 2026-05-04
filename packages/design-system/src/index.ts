@@ -30,4 +30,5 @@ export * from './shell/index.js';
 export * from './timeline/index.js';
 export * from './eval/index.js';
 export * from './tokens/index.js';
+export * from './alloy/index.js';
 export { cn } from './utils.js';

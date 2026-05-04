@@ -25,6 +25,11 @@ function WithShell({ children }: { children: ReactNode }) {
   return <AppShell>{children}</AppShell>;
 }
 
+const AlloyHubLanding = lazy(() => import('./pages/AlloyHubLanding').then(m => ({ default: m.AlloyHubLanding })));
+const AlloyFleet = lazy(() => import('./pages/AlloyFleet').then(m => ({ default: m.AlloyFleet })));
+const AlloyFoundry = lazy(() => import('./pages/AlloyFoundry').then(m => ({ default: m.AlloyFoundry })));
+const AlloyGovernance = lazy(() => import('./pages/AlloyGovernance').then(m => ({ default: m.AlloyGovernance })));
+const AlloyPricing = lazy(() => import('./pages/AlloyPricing').then(m => ({ default: m.AlloyPricing })));
 const LoopReasoner = lazy(() => import('./pages/LoopReasoner').then(m => ({ default: m.LoopReasoner })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const NowBoard = lazy(() => import('./pages/NowBoard').then(m => ({ default: m.NowBoard })));
@@ -427,6 +432,22 @@ export default function App() {
         </Route>
         <Route path={`${base}/lab`}>
           <WithShell><Lab /></WithShell>
+        </Route>
+
+        <Route path={`${base}/hub/fleet`}>
+          <Suspense fallback={<Loader />}><AlloyFleet /></Suspense>
+        </Route>
+        <Route path={`${base}/hub/foundry`}>
+          <Suspense fallback={<Loader />}><AlloyFoundry /></Suspense>
+        </Route>
+        <Route path={`${base}/hub/governance`}>
+          <Suspense fallback={<Loader />}><AlloyGovernance /></Suspense>
+        </Route>
+        <Route path={`${base}/hub/pricing`}>
+          <Suspense fallback={<Loader />}><AlloyPricing /></Suspense>
+        </Route>
+        <Route path={`${base}/hub`}>
+          <Suspense fallback={<Loader />}><AlloyHubLanding /></Suspense>
         </Route>
 
         <Route>
