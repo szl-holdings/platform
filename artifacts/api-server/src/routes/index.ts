@@ -203,6 +203,11 @@ router.use(lazyMatch("/sentra/siem-export", () => import("./sentra-siem-export")
 // Publishes typed domain events to the signal mesh when analyst approves a hunt or plan.
 router.use(lazyMatch("/sentra", () => import("./sentra-hunt"), "sentra-hunt"));
 
+// Sentra domain CRUD — in-memory seed-data stores for research intelligence,
+// threat twin, cyber twin, hunt data, PQC readiness, hardware root of trust,
+// photonic inference, and DARPA MTO research domains.
+router.use(lazyMatch("/sentra", () => import("./sentra-domains"), "sentra-domains"));
+
 // Sentra "research surfaces" — read-only datasets for the rich operator pages
 // (Autonomous SOC Command, Frontier AI Threat Lab, Attack Surface Command,
 // AI Swarm Defense, MITRE ATLAS Overlay, Weaponized Intel Feed, SOAR Hub).
