@@ -9,13 +9,18 @@
     ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
     "./a11oy": { "types": "./src/a11oy.ts", "default": "./src/a11oy.ts" },
     "./amaru": { "types": "./src/amaru.ts", "default": "./src/amaru.ts" },
-    "./sentra": { "types": "./src/sentra.ts", "default": "./src/sentra.ts" }
+    "./sentra": { "types": "./src/sentra.ts", "default": "./src/sentra.ts" },
+    "./lambda-engine": { "types": "./src/lambda-engine.ts", "default": "./src/lambda-engine.ts" },
+    "./orchestrator": { "types": "./src/a11oy-orchestrator.ts", "default": "./src/a11oy-orchestrator.ts" },
+    "./convergence-pulse": { "types": "./src/convergence-pulse.ts", "default": "./src/convergence-pulse.ts" }
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@workspace/reconciliation": "workspace:*"
+    "@workspace/reconciliation": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/ouroboros-guardrails": "workspace:*"
   },
   "devDependencies": {
     "typescript": "*"

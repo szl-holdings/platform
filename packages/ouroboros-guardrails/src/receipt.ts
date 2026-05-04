@@ -11,10 +11,15 @@
  *
  * Receipts chain: each new receipt embeds the SHA-256 of the previous
  * receipt's content. Tampering with any link breaks the chain.
+ *
+ * Schema versions:
+ *   1.0.0 -- original receipt without Lambda-9
+ *   2.0.0 -- Lambda-9 fields included in the signed skeleton
+ *            (cryptographically covered by contentHash + seal)
  */
 
 import { createHash } from "node:crypto";
-import type { GuardrailReceipt, RailDecision, RailVerdict } from "./types.js";
+import type { GuardrailReceipt, RailDecision, RailVerdict, ReceiptVersion } from "./types.js";
 
 export interface ReceiptInput {
   id: string;
@@ -23,6 +28,8 @@ export interface ReceiptInput {
   rails: RailDecision[];
   prevReceiptHash?: string;
   tenantKeyId: string;
+  lambda9?: GuardrailReceipt["lambda9"];
+  lambda9BoundVerified?: boolean;
 }
 
 export function sha256Hex(s: string): string {
@@ -30,7 +37,7 @@ export function sha256Hex(s: string): string {
 }
 
 function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (value === null || value === undefined || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]";
   const keys = Object.keys(value as object).sort();
   return (
@@ -59,9 +66,11 @@ export function buildReceipt(input: ReceiptInput): GuardrailReceipt {
   const lambda = geomean(input.rails.map((r) => r.lambda));
   const action = compositeAction(input.rails);
   const issuedAt = new Date().toISOString();
+  const hasLambda9 = input.lambda9 !== undefined;
+  const version: ReceiptVersion = hasLambda9 ? "2.0.0" : "1.0.0";
 
-  const skeleton = {
-    version: "1.0.0" as const,
+  const skeleton: Record<string, unknown> = {
+    version,
     id: input.id,
     issuedAt,
     tenantId: input.tenantId,
@@ -72,10 +81,15 @@ export function buildReceipt(input: ReceiptInput): GuardrailReceipt {
     prevReceiptHash: input.prevReceiptHash,
   };
 
+  if (hasLambda9) {
+    skeleton.lambda9 = input.lambda9;
+    skeleton.lambda9BoundVerified = input.lambda9BoundVerified;
+  }
+
   const contentHash = sha256Hex(canonicalJson(skeleton));
   const seal = sha256Hex(contentHash + ":" + input.tenantKeyId);
 
-  return { ...skeleton, contentHash, seal };
+  return { ...(skeleton as Omit<GuardrailReceipt, "contentHash" | "seal">), contentHash, seal };
 }
 
 export function verifyReceipt(
@@ -91,7 +105,6 @@ export function verifyReceipt(
   return { valid: true };
 }
 
-/** Verify a chain of receipts. Returns first broken link or "ok". */
 export function verifyReceiptChain(
   chain: GuardrailReceipt[],
   tenantKeyId: string,

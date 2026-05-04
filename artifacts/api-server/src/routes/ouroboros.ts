@@ -8,6 +8,9 @@
  *
  *   POST /api/ouroboros/a11oy/reconcile-handoff      — MMP-14 frustum
  *   POST /api/ouroboros/a11oy/audit-fleet            — fleet audit
+ *   POST /api/ouroboros/a11oy/guard                  — LaaS guard (Lambda-9)
+ *   GET  /api/ouroboros/a11oy/pulse                  — Convergence Pulse
+ *   GET  /api/ouroboros/a11oy/stats                  — orchestrator stats
  *   POST /api/ouroboros/amaru/observe-metric         — RMP seked sample
  *   POST /api/ouroboros/amaru/audit-threshold        — unit-fraction audit
  *   POST /api/ouroboros/sentra/anchor-event          — doubling append
@@ -31,19 +34,21 @@ import {
   a11oy as a11oyAdapter,
   amaru as amaruAdapter,
   sentra as sentraAdapter,
+  A11oyOrchestrator,
 } from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
 
 // ---------------------------------------------------------------------------
 // Process-local Sentra HSM stand-in.
-// In production this would be backed by a real HSM; for the integration
-// surface we keep an in-memory accumulator scoped per server instance.
 // ---------------------------------------------------------------------------
 const sentraAnchor = new sentraAdapter.SentraHSMAnchor();
 
 // Track Amaru fleet monitor per metricId (process-local).
 const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
+
+// Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse.
+const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -70,19 +75,25 @@ const MetricSampleSchema = z.object({
   timestamp: z.number().int().nonnegative().optional(),
 });
 
-// Bounded by reconciliation/unit-fractions MAX_DENOMINATOR (1e6). Beyond
-// that the greedy decomposition produces intermediate denominators that
-// exceed Number.MAX_SAFE_INTEGER and the unit-fraction primitive refuses.
 const ThresholdSchema = z.object({
   p: z.number().int().positive().max(1_000_000),
   q: z.number().int().positive().max(1_000_000),
   maxTerms: z.number().int().min(1).max(16).optional(),
 });
 
-// 80 decimal digits is enough to represent a 256-bit integer; we cap leaf
-// hashes there to keep the doubling trace bounded (one row per bit).
+const GuardRequestSchema = z.object({
+  subject: z.string().min(1).max(256),
+  prompt: z.string().min(1).max(32768),
+  response: z.string().max(65536).optional(),
+  citations: z.number().int().nonnegative().optional(),
+  witnessCount: z.number().int().nonnegative().optional(),
+  priorLambda: z.number().min(0).max(1).optional(),
+  axisOverrides: z.record(z.string(), z.number().min(0).max(1)).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
+});
+
 const LEAF_HASH_MAX_DECIMAL = 80;
-const LEAF_HASH_MAX_HEX = 66; // "0x" + 64 hex digits
+const LEAF_HASH_MAX_HEX = 66;
 
 const LeafHashSchema = z.union([
   z.string().min(1).max(LEAF_HASH_MAX_HEX),
@@ -91,7 +102,6 @@ const LeafHashSchema = z.union([
 
 const GovernanceEventSchema = z.object({
   eventId: z.string().min(1).max(256),
-  // Accept leafHash as either decimal string, hex string, or number.
   leafHash: LeafHashSchema,
   timestamp: z.number().int().nonnegative().optional(),
 });
@@ -136,6 +146,29 @@ function jsonError(res: Response, status: number, code: string, message: string,
 }
 
 // ---------------------------------------------------------------------------
+// A11oy — Lambda-9 Guard (LaaS endpoint)
+// ---------------------------------------------------------------------------
+router.post('/a11oy/guard', async (req: Request, res: Response) => {
+  const parsed = GuardRequestSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return jsonError(res, 400, 'INVALID_GUARD_REQUEST', parsed.error.message, parsed.error.flatten());
+  }
+  const result = await orchestrator.guard({
+    ...parsed.data,
+    axisOverrides: parsed.data.axisOverrides as any,
+  });
+  return res.json(result);
+});
+
+router.get('/a11oy/pulse', (_req: Request, res: Response) => {
+  return res.json(orchestrator.currentPulse());
+});
+
+router.get('/a11oy/stats', (_req: Request, res: Response) => {
+  return res.json(orchestrator.stats());
+});
+
+// ---------------------------------------------------------------------------
 // A11oy — frustum reconciliation
 // ---------------------------------------------------------------------------
 router.post('/a11oy/reconcile-handoff', (req: Request, res: Response) => {
@@ -144,7 +177,7 @@ router.post('/a11oy/reconcile-handoff', (req: Request, res: Response) => {
     return jsonError(res, 400, 'INVALID_HANDOFF', parsed.error.message, parsed.error.flatten());
   }
   const event = { ...parsed.data, timestamp: parsed.data.timestamp ?? now() };
-  const verdict = a11oyAdapter.reconcileHandoff(event);
+  const verdict = orchestrator.reconcile(event);
   return res.json(verdict);
 });
 
@@ -154,7 +187,7 @@ router.post('/a11oy/audit-fleet', (req: Request, res: Response) => {
     return jsonError(res, 400, 'INVALID_FLEET_AUDIT', parsed.error.message, parsed.error.flatten());
   }
   const events = parsed.data.events.map((e) => ({ ...e, timestamp: e.timestamp ?? now() }));
-  const result = a11oyAdapter.auditFleetHandoffs(events);
+  const result = orchestrator.auditFleet(events);
   return res.json(result);
 });
 
@@ -241,10 +274,6 @@ router.post('/sentra/anchor-batch', (req: Request, res: Response) => {
 });
 
 router.post('/sentra/verify-trace', (req: Request, res: Response) => {
-  // Accept the trace shape we serialize above (string bigints) and rebuild.
-  // Cap step bigint string lengths to LEAF_HASH_MAX_DECIMAL (80) — enough for
-  // a 256-bit accumulator. Without this an attacker could submit thousands
-  // of multi-megabyte decimal strings and force quadratic BigInt parses.
   const TraceSchema = z.object({
     product: z.string().min(1).max(LEAF_HASH_MAX_DECIMAL),
     steps: z
@@ -289,12 +318,14 @@ router.get('/sentra/anchor-state', (_req: Request, res: Response) => {
   });
 });
 
-// Public health: verifies the routes are wired and the prime is loaded.
 router.get('/health', (_req: Request, res: Response) => {
+  const pulse = orchestrator.currentPulse();
   return res.json({
     ok: true,
     sentraPrime: bigintToString(sentraAdapter.SHIFT_ADD_PRIME),
     eventsAnchored: sentraAnchor.snapshot().eventCount,
+    lambdaEngineActive: true,
+    convergencePulse: pulse.alertLevel,
     asOf: new Date().toISOString(),
   });
 });

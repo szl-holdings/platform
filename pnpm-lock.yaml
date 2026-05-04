@@ -4258,6 +4258,10 @@ importers:
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-guardrails:
+    dependencies:
+      '@workspace/ouroboros-invariant':
+        specifier: workspace:*
+        version: link:../ouroboros-invariant
     devDependencies:
       typescript:
         specifier: ^5.4.0
@@ -4278,6 +4282,12 @@ importers:
 
   packages/ouroboros-integrations:
     dependencies:
+      '@workspace/ouroboros-guardrails':
+        specifier: workspace:*
+        version: link:../ouroboros-guardrails
+      '@workspace/ouroboros-invariant':
+        specifier: workspace:*
+        version: link:../ouroboros-invariant
       '@workspace/reconciliation':
         specifier: workspace:*
         version: link:../reconciliation

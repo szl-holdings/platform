@@ -1,16 +1,38 @@
 /**
  * @workspace/ouroboros-invariant — the Lutar Invariant.
  *
- * The single closed-form scalar Λ ∈ [0,1] that compounds Cleanliness,
- * Horizon, Resonance, and Frustum into one runtime-trust number, with
- * Egyptian-inspectable weights and a provable bound.
+ * The single closed-form scalar in [0,1] that compounds runtime-trust axes
+ * into one auditable number, with Egyptian-inspectable weights and a
+ * provable bound.
  *
- * No prior law in 8000 years carried the Egyptian inspectability axiom
- * into runtime governance because the four axes themselves had to be
- * assembled first: black-hole physics (Page 1993), Tesla resonance
- * (1893–1899), classical witness theory (cryptographic anchors,
- * 1990s–2020s), and Egyptian mathematics (RMP/MMP, c. 1850 BCE).
- * The synthesis is what is new; the invariant is the closed form.
+ * Exports:
+ *   - Lutar Invariant (4-axis original)
+ *   - Lutar Invariant 6-9 (extended axes: Gauss, Invariance, Moral, Being, Non-measurability)
+ *   - 9-Axis Evaluator pipeline (feeds philosopher packages into the formal invariant)
  */
 
 export * from "./lutar-invariant.js";
+
+export {
+  lutarInvariant6,
+  lutarInvariant7,
+  lutarInvariant8,
+  lutarInvariant9,
+  verifyLutarBoundN,
+} from "./lutar-invariant-9.js";
+export type {
+  LutarAxes6,
+  LutarAxes7,
+  LutarAxes8,
+  LutarAxes9,
+  LutarReportN,
+} from "./lutar-invariant-9.js";
+
+export {
+  evaluateAxes9,
+  evaluateAxesFromReceipt,
+} from "./axis-evaluator.js";
+export type {
+  AxisEvaluatorInput,
+  AxisEvaluatorReport,
+} from "./axis-evaluator.js";

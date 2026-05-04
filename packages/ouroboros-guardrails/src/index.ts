@@ -1,34 +1,14 @@
 /**
- * @szl-holdings/guardrails — drop-in LLM safety SKU.
+ * @szl-holdings/guardrails -- drop-in LLM safety SKU.
  *
  * The runtime competing with NVIDIA NeMo Guardrails. Same config surface,
- * same rail kinds, same drop-in pattern — but every decision produces a
- * closed-form Λ scalar and a tamper-evident receipt.
+ * same rail kinds, same drop-in pattern -- but every decision produces a
+ * formal Lutar Invariant (9-axis, Egyptian-inspectable, closed-form)
+ * and a tamper-evident receipt.
  *
- * Usage:
- *
- *   import { Guardrails } from "@szl-holdings/guardrails";
- *
- *   const g = new Guardrails({
- *     tenantId: "acme-corp",
- *     inputRails: [{ name: "jailbreak_detection" }, { name: "sensitive_data_detection" }],
- *     outputRails: [{ name: "pii_filter" }, { name: "hallucination_check" }],
- *     executionRails: [{ name: "tool_authority_check" }],
- *   });
- *
- *   const verdict = await g.guard({
- *     subject: "claude-sonnet-4.5/req-abc123",
- *     prompt: userPrompt,
- *     response: modelOutput,
- *     toolCall: { tool: "fs.delete", capability: "ROLE_FS_WRITE", args: { path: "/tmp/x" } },
- *   });
- *
- *   if (verdict.action !== "PROCEED") refuse(verdict);
- *
- * The `verdict` is a `GuardrailReceipt` — it persists to whatever sink
- * the tenant configured (file, S3, Splunk, Kafka). Passing the receipt
- * to `verifyReceipt(receipt, tenantKeyId)` returns valid only if no
- * byte has been altered since issuance.
+ * v2.0.0 receipts: Lambda-9 fields are included in the signed skeleton.
+ * Every field is cryptographically covered by contentHash + seal.
+ * Tampering with any Lambda-9 axis value invalidates the receipt.
  */
 
 import { randomUUID, createHash } from "node:crypto";
@@ -40,10 +20,12 @@ import {
   runExecutionRail,
 } from "./rails.js";
 import { buildReceipt } from "./receipt.js";
+import { lambdaScore9, extractAxes9FromRails } from "./lambda.js";
 import type { GuardCallInput, GuardrailReceipt, GuardrailsConfig, RailDecision } from "./types.js";
 
 export * from "./types.js";
-export { lambdaScore, lambdaVerdict, compositeLambda } from "./lambda.js";
+export { lambdaScore, lambdaScore9, lambdaVerdict, compositeLambda, extractAxes9FromRails } from "./lambda.js";
+export type { Lambda9Result } from "./lambda.js";
 export { buildReceipt, verifyReceipt, verifyReceiptChain, sha256Hex } from "./receipt.js";
 
 export class Guardrails {
@@ -66,6 +48,9 @@ export class Guardrails {
     for (const spec of this.config.executionRails ?? []) rails.push(runExecutionRail(spec, input));
     for (const spec of this.config.outputRails ?? []) rails.push(runOutputRail(spec, input));
 
+    const axes9 = extractAxes9FromRails(rails);
+    const lambda9Result = lambdaScore9(axes9);
+
     const receipt = buildReceipt({
       id: randomUUID(),
       tenantId: this.config.tenantId,
@@ -73,6 +58,8 @@ export class Guardrails {
       rails,
       prevReceiptHash: this.prevHash,
       tenantKeyId: this.tenantKeyId,
+      lambda9: lambda9Result.report,
+      lambda9BoundVerified: lambda9Result.boundVerified,
     });
 
     this.prevHash = receipt.contentHash;
@@ -83,12 +70,10 @@ export class Guardrails {
     return receipt;
   }
 
-  /** Read-only access to the in-memory receipt log. */
   receipts(): readonly GuardrailReceipt[] {
     return this.receiptBuffer;
   }
 
-  /** Reset the chain — only for tests. Production never calls this. */
   reset(): void {
     this.prevHash = undefined;
     this.receiptBuffer = [];
