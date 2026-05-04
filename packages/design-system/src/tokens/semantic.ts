@@ -1,65 +1,65 @@
 /**
- * AEEP Semantic State Tokens
+ * GI Semantic State Tokens — v3 Warm-Light
  *
  * Standard status and severity semantics used across all surfaces.
- * All values reference the color token system — never raw hex here.
+ * Muted, desaturated variants for the warm-light default theme.
  */
 
 export const semantic = {
   status: {
     success: {
-      bg: '#0d2a1a',
-      border: '#1a4a2a',
-      text: '#5baa8a',
-      icon: '#5baa8a',
+      bg: '#f2f8f4',
+      border: '#c5ddc9',
+      text: '#4a7a5e',
+      icon: '#5a8a6e',
     },
     warning: {
-      bg: '#2a2010',
-      border: '#4a3810',
-      text: '#c9a85c',
-      icon: '#c9a85c',
+      bg: '#fdf8ee',
+      border: '#e5d6a8',
+      text: '#96802e',
+      icon: '#b5973a',
     },
     error: {
-      bg: '#2a0d12',
-      border: '#4a1a22',
-      text: '#c96070',
-      icon: '#c96070',
+      bg: '#fdf4f3',
+      border: '#e5bbb8',
+      text: '#a04440',
+      icon: '#b85450',
     },
     info: {
-      bg: '#0d1a2a',
-      border: '#1a304a',
-      text: '#4d8fcc',
-      icon: '#4d8fcc',
+      bg: '#F5F0E8',
+      border: '#D4CCC0',
+      text: '#5C564E',
+      icon: '#6B7280',
     },
     neutral: {
-      bg: '#111c2a',
-      border: '#243040',
-      text: '#7a99b8',
-      icon: '#7a99b8',
+      bg: '#F5F0E8',
+      border: '#D4CCC0',
+      text: '#5C564E',
+      icon: '#8A8279',
     },
   },
   severity: {
-    critical: '#c96070',
-    high: '#c9a05c',
-    medium: '#c9a85c',
-    low: '#7a99b8',
-    info: '#4d8fcc',
+    critical: '#b85450',
+    high: '#b07040',
+    medium: '#b5973a',
+    low: '#6B7280',
+    info: '#5C564E',
   },
   approval: {
-    pending: '#c9a85c',
-    approved: '#5baa8a',
-    rejected: '#c96070',
-    escalated: '#9b7cc8',
+    pending: '#b5973a',
+    approved: '#5a8a6e',
+    rejected: '#b85450',
+    escalated: '#7e6aad',
   },
   evidence: {
-    strong: '#5baa8a',
-    moderate: '#c9a85c',
-    weak: '#c96070',
-    unverified: '#4a6070',
+    strong: '#5a8a6e',
+    moderate: '#b5973a',
+    weak: '#b85450',
+    unverified: '#8A8279',
   },
   confidence: {
-    high: '#5baa8a',
-    medium: '#c9a85c',
-    low: '#c96070',
+    high: '#5a8a6e',
+    medium: '#b5973a',
+    low: '#b85450',
   },
 } as const;

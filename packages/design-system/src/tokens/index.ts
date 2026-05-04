@@ -1,13 +1,13 @@
 /**
  * Governed-Intelligence Design Language — Token Definitions
  *
- * AEEP Edition — Dark-first. Cool neutral base. Disciplined enterprise accent family.
- * Every AI-driven surface carries its proof envelope.
+ * v3 — Warm-light default. Gold (#c9b787) primary accent.
+ * Cool-slate secondaries. No blue in the primary accent family.
  *
  * Design constraints:
  *   - No raw hex outside this file and the /tokens/* sub-modules
- *   - No neon/glow/oversaturated palette in authenticated product UX
- *   - Chart palette: executive-quiet (muted, distinguishable series on dark)
+ *   - Gold is the primary accent; slate replaces blue
+ *   - Chart palette: warm-executive (muted, distinguishable series on light)
  *   - Motion: max 200ms, no decorative animations
  *   - Product headings: max text-2xl in authenticated surfaces
  */
@@ -16,42 +16,39 @@ export { v } from './vars.js';
 
 export const color = {
   bg: {
-    base: '#060b12',
-    surface: '#0d1520',
-    overlay: '#111c2a',
-    raised: '#162030',
-    hover: '#1a2a3a',
-    active: '#1e3248',
+    base: '#FAF7F2',
+    surface: '#FFFFFF',
+    overlay: '#F5F0E8',
+    raised: '#EDE8DF',
+    hover: '#E8E2D8',
+    active: '#DED7CC',
   },
   border: {
-    subtle: '#1a2535',
-    default: '#243040',
-    strong: '#304055',
-    focus: '#4d8fcc',
+    subtle: '#E8E2D8',
+    default: '#D4CCC0',
+    strong: '#B8AFA3',
+    focus: '#c9b787',
   },
   text: {
-    primary: '#c8d8e8',
-    secondary: '#7a99b8',
-    muted: '#4a6070',
-    inverse: '#060b12',
-    link: '#4d8fcc',
-    placeholder: '#3a5060',
+    primary: '#1A1814',
+    secondary: '#5C564E',
+    muted: '#8A8279',
+    inverse: '#FAF7F2',
+    link: '#b5a070',
+    placeholder: '#B8AFA3',
   },
 
-  /**
-   * AEEP enterprise accent family — disciplined, cool-tone.
-   * These replace the neon palette for authenticated product surfaces.
-   * Neon values are preserved below under `accent.neon.*` for backward compatibility
-   * but are deprecated for use in authenticated product UX.
-   */
   accent: {
-    blue: '#4d8fcc',
-    teal: '#3ea89a',
-    green: '#5baa8a',
-    amber: '#c9a85c',
-    red: '#c96070',
-    violet: '#9b7cc8',
-    slate: '#7a99b8',
+    gold: '#c9b787',
+    slate: '#6B7280',
+    green: '#5a8a6e',
+    amber: '#b5973a',
+    red: '#b85450',
+    violet: '#7e6aad',
+    teal: '#4a8a80',
+
+    /** @deprecated Use accent.slate. Blue alias kept for backward compatibility. */
+    blue: '#6B7280',
 
     /** @deprecated Use enterprise accent family above in product UX. Neon is for marketing only. */
     neon: {
@@ -63,36 +60,36 @@ export const color = {
       teal: '#14b8a6',
     },
 
-    /** @deprecated Backward-compatible alias — use `accent.blue` instead */
-    cyan: '#4d8fcc',
+    /** @deprecated Backward-compatible alias — use `accent.gold` instead */
+    cyan: '#6B7280',
   },
 
   state: {
-    allowed: '#5baa8a',
-    requiresApproval: '#c9a85c',
-    blocked: '#c96070',
+    allowed: '#5a8a6e',
+    requiresApproval: '#b5973a',
+    blocked: '#b85450',
   },
   confidence: {
-    high: '#5baa8a',
-    medium: '#c9a85c',
-    low: '#c96070',
-    contradiction: '#9b7cc8',
+    high: '#5a8a6e',
+    medium: '#b5973a',
+    low: '#b85450',
+    contradiction: '#7e6aad',
   },
   freshness: {
-    fresh: '#5baa8a',
-    aging: '#c9a85c',
-    stale: '#c96070',
-    unknown: '#4a6070',
+    fresh: '#5a8a6e',
+    aging: '#b5973a',
+    stale: '#b85450',
+    unknown: '#8A8279',
   },
 } as const;
 
 export const productAccent = {
-  command: color.accent.blue,
+  command: color.accent.gold,
   holdings: color.accent.teal,
   sentra: color.accent.red,
   counsel: color.accent.violet,
   aegis: color.accent.violet,
-  vessels: color.accent.blue,
+  vessels: color.accent.slate,
   terra: color.accent.green,
   pulse: color.accent.amber,
   lyte: color.accent.amber,
@@ -102,8 +99,8 @@ export const productAccent = {
 export const typography = {
   fontFamily: {
     mono: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-    sans: "'Inter', 'DM Sans', system-ui, sans-serif",
-    display: "'DM Sans', 'Inter', system-ui, sans-serif",
+    sans: "'Inter', system-ui, -apple-system, sans-serif",
+    display: "'Space Grotesk', 'Inter', system-ui, sans-serif",
   },
   scale: {
     '2xs': '0.625rem',
@@ -151,20 +148,20 @@ export const spacing = {
 
 export const radius = {
   none: '0px',
-  sm: '2px',
-  md: '4px',
-  lg: '6px',
-  xl: '8px',
-  '2xl': '12px',
+  sm: '4px',
+  md: '6px',
+  lg: '8px',
+  xl: '10px',
+  '2xl': '14px',
   full: '9999px',
 } as const;
 
 export const elevation = {
   0: 'none',
-  1: '0 1px 3px rgba(0,0,0,0.5)',
-  2: '0 4px 12px rgba(0,0,0,0.6)',
-  3: '0 8px 24px rgba(0,0,0,0.7)',
-  4: '0 16px 48px rgba(0,0,0,0.8)',
+  1: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)',
+  2: '0 4px 12px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03)',
+  3: '0 8px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+  4: '0 16px 48px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.05)',
 } as const;
 
 export const motion = {
@@ -183,10 +180,6 @@ export const motion = {
   },
 } as const;
 
-/**
- * AEEP density mode configuration.
- * Controls spacing, row heights, and font sizes across the shell.
- */
 export const densityConfig = {
   comfortable: {
     pagePadding: '32px',
@@ -195,7 +188,7 @@ export const densityConfig = {
     rowHeight: '56px',
     inputHeight: '40px',
     iconSize: '20px',
-    fontSize: '13px',
+    fontSize: '14px',
   },
   compact: {
     pagePadding: '24px',
@@ -219,32 +212,25 @@ export const densityConfig = {
 
 export type DensityMode = keyof typeof densityConfig;
 
-/**
- * Executive-quiet chart palette.
- */
 export const chartPalette = {
-  series: ['#4d8fcc', '#5baa8a', '#c9a85c', '#9b7cc8', '#c97a64', '#6bb5c2'] as const,
-  positive: '#5baa8a',
-  negative: '#c96070',
-  neutral: '#7a99b8',
-  warning: '#c9a85c',
-  grid: '#1a2535',
-  axis: '#4a6070',
-  tooltip: { bg: '#0d1520', border: '#243040', text: '#c8d8e8' },
+  series: ['#c9b787', '#5a8a6e', '#6B7280', '#7e6aad', '#b87a5a', '#4a8a80'] as const,
+  positive: '#5a8a6e',
+  negative: '#b85450',
+  neutral: '#6B7280',
+  warning: '#b5973a',
+  grid: '#E8E2D8',
+  axis: '#8A8279',
+  tooltip: { bg: '#FFFFFF', border: '#D4CCC0', text: '#1A1814' },
 } as const;
 
-/**
- * Semantic status tokens.
- */
 export const semanticColors = {
-  success: { text: '#5baa8a', bg: '#0d2a1a', border: '#1a4a2a' },
-  warning: { text: '#c9a85c', bg: '#2a2010', border: '#4a3810' },
-  error: { text: '#c96070', bg: '#2a0d12', border: '#4a1a22' },
-  info: { text: '#4d8fcc', bg: '#0d1a2a', border: '#1a304a' },
-  neutral: { text: '#7a99b8', bg: '#111c2a', border: '#243040' },
+  success: { text: '#4a7a5e', bg: '#f2f8f4', border: '#c5ddc9' },
+  warning: { text: '#96802e', bg: '#fdf8ee', border: '#e5d6a8' },
+  error: { text: '#a04440', bg: '#fdf4f3', border: '#e5bbb8' },
+  info: { text: '#5C564E', bg: '#F5F0E8', border: '#D4CCC0' },
+  neutral: { text: '#5C564E', bg: '#F5F0E8', border: '#D4CCC0' },
 } as const;
 
-/** CSS custom-property injection helper — call once at root */
 export function injectTokens(target: HTMLElement = document.documentElement): void {
   Object.assign(target.style, {
     '--gi-bg-base': color.bg.base,
@@ -266,6 +252,7 @@ export function injectTokens(target: HTMLElement = document.documentElement): vo
     '--gi-text-link': color.text.link,
     '--gi-text-placeholder': color.text.placeholder,
 
+    '--gi-accent-gold': color.accent.gold,
     '--gi-accent-blue': color.accent.blue,
     '--gi-accent-teal': color.accent.teal,
     '--gi-accent-green': color.accent.green,

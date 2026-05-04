@@ -3,24 +3,25 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
-import { SEVEN_PRINCIPLES } from '../data/blueprint';
 import { useAlloyDashboard } from '../graphql';
 
 const T = {
-  bg: '#0a0a0a',
-  surface: 'rgba(255,255,255,0.025)',
-  surfaceHover: 'rgba(255,255,255,0.045)',
-  border: 'rgba(255,255,255,0.08)',
-  borderStrong: 'rgba(255,255,255,0.14)',
-  text: '#f5f5f5',
-  textDim: '#8a8a8a',
-  textMuted: '#5e5e5e',
+  bg: '#FAF7F2',
+  surface: '#FFFFFF',
+  surfaceHover: '#F5F0E8',
+  border: '#D4CCC0',
+  borderSubtle: '#E8E2D8',
+  borderStrong: '#B8AFA3',
+  text: '#1A1814',
+  textDim: '#5C564E',
+  textMuted: '#8A8279',
   accent: '#c9b787',
-  accentDim: 'rgba(201,183,135,0.15)',
-  accentGlow: 'rgba(201,183,135,0.06)',
-  mono: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace",
-  serif: "Georgia, 'Times New Roman', Times, serif",
-  sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  accentDim: '#b5a070',
+  accentSoft: 'rgba(201,183,135,0.12)',
+  accentBorder: 'rgba(201,183,135,0.35)',
+  mono: "'JetBrains Mono', 'Fira Code', monospace",
+  sans: "'Inter', system-ui, -apple-system, sans-serif",
+  display: "'Space Grotesk', 'Inter', system-ui, sans-serif",
 };
 
 const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
@@ -31,21 +32,21 @@ const CAPABILITIES = [
   {
     icon: 'S',
     title: 'Signal Intelligence',
-    sub: 'Like Claude\'s analysis — but governed',
+    sub: 'Governed perception at scale',
     desc: 'Ingest signals from any source — market feeds, IoT telemetry, document streams, API webhooks. Every signal is classified, enriched, and attributed before it reaches a decision-maker.',
     features: ['Real-time ingestion', 'Multi-source fusion', 'Anomaly detection', 'Signal attribution'],
   },
   {
     icon: 'G',
     title: 'Governed Agents',
-    sub: 'Beyond Claude\'s agents — with proof',
+    sub: 'Autonomous with proof',
     desc: 'Autonomous agents that plan, act, and collaborate — but every action passes through covenant policy gates. No agent executes without human approval on material decisions.',
     features: ['Policy-gated execution', 'Durable workflows', 'Human-in-the-loop', 'Full audit trail'],
   },
   {
     icon: 'E',
     title: 'Enterprise Connectors',
-    sub: 'Like Claude\'s connectors — governed by MCP',
+    sub: 'Governed by MCP',
     desc: 'Connect to 200+ enterprise systems through the Model Context Protocol. Every data flow is logged, every integration is policy-gated, every connector carries proof-chain attribution.',
     features: ['200+ integrations', 'MCP-native', 'Governed data flow', 'Zero-trust architecture'],
   },
@@ -121,10 +122,10 @@ const SOLUTIONS = [
 function FadeIn({ children, delay = 0, style }: { children: ReactNode; delay?: number; style?: CSSProperties }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.8, delay, ease }}
+      transition={{ duration: 0.7, delay, ease }}
       style={style}
     >{children}</motion.div>
   );
@@ -134,48 +135,9 @@ function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <p style={{
       fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500,
-      letterSpacing: '0.2em', textTransform: 'uppercase',
-      color: T.textMuted, margin: '0 0 1.75rem',
+      letterSpacing: '0.18em', textTransform: 'uppercase',
+      color: T.accentDim, margin: '0 0 1.5rem',
     }}>{children}</p>
-  );
-}
-
-function HeroArt() {
-  return (
-    <svg viewBox="0 0 500 500" fill="none" style={{ width: '100%', maxWidth: 480, opacity: 0.9 }}>
-      <defs>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={T.accent} stopOpacity="0.15" />
-          <stop offset="100%" stopColor={T.accent} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <circle cx="250" cy="250" r="200" fill="url(#glow)" />
-      <circle cx="250" cy="250" r="160" stroke={T.border} strokeWidth="0.5" fill="none" />
-      <circle cx="250" cy="250" r="120" stroke={T.border} strokeWidth="0.5" fill="none" />
-      <circle cx="250" cy="250" r="80" stroke="rgba(201,183,135,0.2)" strokeWidth="0.5" fill="none" />
-      {[0, 60, 120, 180, 240, 300].map((angle, i) => {
-        const r1 = 80, r2 = 160;
-        const x1 = 250 + r1 * Math.cos((angle * Math.PI) / 180);
-        const y1 = 250 + r1 * Math.sin((angle * Math.PI) / 180);
-        const x2 = 250 + r2 * Math.cos((angle * Math.PI) / 180);
-        const y2 = 250 + r2 * Math.sin((angle * Math.PI) / 180);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(201,183,135,0.12)" strokeWidth="0.5" />;
-      })}
-      {[0, 72, 144, 216, 288].map((angle, i) => {
-        const r = 120;
-        const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
-        const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-        return <circle key={i} cx={cx} cy={cy} r="4" fill={T.accent} opacity="0.6" />;
-      })}
-      <circle cx="250" cy="250" r="6" fill={T.accent} opacity="0.9" />
-      {[30, 90, 150, 210, 270, 330].map((angle, i) => {
-        const r = 160;
-        const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
-        const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-        return <circle key={`o-${i}`} cx={cx} cy={cy} r="2.5" fill={T.textMuted} opacity="0.4" />;
-      })}
-      <text x="250" y="254" textAnchor="middle" fill={T.text} fontSize="14" fontFamily={T.mono} opacity="0.5">a11oy</text>
-    </svg>
   );
 }
 
@@ -187,13 +149,14 @@ function CommandPrompt() {
     <div style={{
       display: 'flex', alignItems: 'center', gap: '0.75rem',
       padding: '0.875rem 1.25rem', borderRadius: 12,
-      background: 'rgba(255,255,255,0.03)',
+      background: T.surface,
       border: `1px solid ${T.border}`,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       maxWidth: 520, width: '100%',
-      transition: 'border-color 0.3s ease',
+      transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
     }}
-    onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(201,183,135,0.3)'; }}
-    onBlur={(e) => { e.currentTarget.style.borderColor = T.border; }}
+    onFocus={(e) => { e.currentTarget.style.borderColor = T.accent; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(201,183,135,0.15)'; }}
+    onBlur={(e) => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
     >
       <label htmlFor="a11oy-command" className="sr-only">Command prompt</label>
       <span style={{ color: T.accent, fontSize: '0.875rem', fontFamily: T.mono, flexShrink: 0 }} aria-hidden="true">{'>'}</span>
@@ -210,7 +173,7 @@ function CommandPrompt() {
         }}
       />
       <Link href={b('/now')} style={{
-        padding: '0.5rem 1.125rem', background: T.accent, color: T.bg,
+        padding: '0.5rem 1.125rem', background: T.text, color: T.bg,
         borderRadius: 8, fontSize: '0.8125rem', fontWeight: 600,
         textDecoration: 'none', whiteSpace: 'nowrap', letterSpacing: '-0.01em',
       }}>Execute</Link>
@@ -229,12 +192,12 @@ function LivePulseStrip() {
     { label: 'Avg Duration', value: dashboard.avgDurationMs ? `${Math.round(dashboard.avgDurationMs / 1000)}s` : '—' },
   ];
   return (
-    <section style={{ padding: '1.25rem 0', borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+    <section style={{ padding: '1.25rem 0', borderTop: `1px solid ${T.borderSubtle}`, borderBottom: `1px solid ${T.borderSubtle}`, background: T.surface }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '1rem' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#c9b787', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accent }}>LIVE</span>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#5a8a6e', display: 'inline-block' }} />
+            <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5a8a6e' }}>LIVE</span>
           </div>
           {stats.map(s => (
             <div key={s.label} style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
@@ -245,6 +208,19 @@ function LivePulseStrip() {
         </div>
       </div>
     </section>
+  );
+}
+
+function Card({ children, style, highlight }: { children: ReactNode; style?: CSSProperties; highlight?: boolean }) {
+  return (
+    <div style={{
+      padding: 'clamp(1.75rem, 3vw, 2.5rem)',
+      background: highlight ? T.accentSoft : T.surface,
+      border: `1px solid ${highlight ? T.accentBorder : T.borderSubtle}`,
+      borderRadius: 12,
+      height: '100%',
+      ...style,
+    }}>{children}</div>
   );
 }
 
@@ -263,16 +239,16 @@ export function HomePage() {
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
         height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 clamp(1.5rem, 5vw, 4rem)',
-        background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(20px) saturate(1.4)',
-        borderBottom: `1px solid ${T.border}`,
+        background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(20px) saturate(1.2)',
+        borderBottom: `1px solid ${T.borderSubtle}`,
       }}>
         <Link href={b('/')} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>
           <span style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 24, height: 24, border: `1.5px solid ${T.accent}`,
-            borderRadius: 6, fontSize: 12, fontFamily: T.mono, color: T.accent, fontWeight: 600,
+            width: 26, height: 26, border: `1.5px solid ${T.accent}`,
+            borderRadius: 7, fontSize: 12, fontFamily: T.mono, color: T.accent, fontWeight: 700,
           }}>a</span>
-          <span style={{ fontSize: '1rem', fontWeight: 600, color: T.text, letterSpacing: '-0.02em' }}>a11oy</span>
+          <span style={{ fontSize: '1.0625rem', fontWeight: 600, color: T.text, letterSpacing: '-0.02em', fontFamily: T.display }}>a11oy</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2.25rem' }}>
           {[
@@ -284,11 +260,11 @@ export function HomePage() {
           ].map(link => (
             <Link key={link.label} href={link.href} style={{
               fontSize: '0.8125rem', color: T.textDim, textDecoration: 'none',
-              letterSpacing: '-0.005em', transition: 'color 0.2s',
+              letterSpacing: '-0.005em', transition: 'color 0.2s', fontWeight: 500,
             }}>{link.label}</Link>
           ))}
           <Link href={b('/investor-demo')} style={{
-            padding: '0.45rem 1.125rem', fontSize: '0.8125rem', fontWeight: 600,
+            padding: '0.5rem 1.125rem', fontSize: '0.8125rem', fontWeight: 600,
             color: T.bg, background: T.text, borderRadius: 8,
             textDecoration: 'none', letterSpacing: '-0.01em',
           }}>Request access</Link>
@@ -300,25 +276,9 @@ export function HomePage() {
         position: 'relative', overflow: 'hidden',
         padding: 'clamp(8rem, 14vh, 12rem) clamp(2rem, 6vw, 5rem) clamp(5rem, 10vh, 8rem)',
       }}>
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.25 }}>
-            <defs>
-              <pattern id="hero-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-                <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="0.5" />
-              </pattern>
-              <radialGradient id="grid-fade" cx="0.3" cy="0.4" r="0.6">
-                <stop offset="0%" stopColor="white" stopOpacity="1" />
-                <stop offset="100%" stopColor="white" stopOpacity="0" />
-              </radialGradient>
-              <mask id="grid-mask"><rect width="100%" height="100%" fill="url(#grid-fade)" /></mask>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-grid)" mask="url(#grid-mask)" />
-          </svg>
-        </div>
-
         <div style={{
           position: 'relative', display: 'grid',
-          gridTemplateColumns: '1fr 0.7fr', gap: 'clamp(3rem, 6vw, 6rem)',
+          gridTemplateColumns: '1fr 0.6fr', gap: 'clamp(3rem, 6vw, 6rem)',
           alignItems: 'center', maxWidth: 1320, margin: '0 auto', width: '100%',
         }}>
           <div>
@@ -328,8 +288,8 @@ export function HomePage() {
               transition={{ duration: 0.6, ease }}
               style={{
                 fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                color: T.accent, marginBottom: '2.5rem',
+                letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: T.accentDim, marginBottom: '2rem',
               }}
             >Governed Decision Operating System</motion.p>
 
@@ -338,14 +298,14 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease }}
               style={{
-                fontSize: 'clamp(3rem, 6.5vw, 5.5rem)',
-                fontFamily: T.serif, fontWeight: 400,
-                letterSpacing: '-0.03em', lineHeight: 1.05,
-                color: T.text, margin: '0 0 2rem',
+                fontSize: 'clamp(2.75rem, 5.5vw, 4.5rem)',
+                fontFamily: T.display, fontWeight: 600,
+                letterSpacing: '-0.03em', lineHeight: 1.08,
+                color: T.text, margin: '0 0 1.75rem',
               }}
             >
-              Governed intelligence{'\n'}
-              <span style={{ color: T.accent }}>your unfair</span>{' '}
+              Governed intelligence{'\u2002'}
+              <span style={{ color: T.accentDim }}>your unfair</span>{' '}
               advantage
             </motion.h1>
 
@@ -354,15 +314,14 @@ export function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2, ease }}
               style={{
-                fontSize: 'clamp(1.0625rem, 1.4vw, 1.1875rem)',
+                fontSize: 'clamp(1rem, 1.3vw, 1.125rem)',
                 lineHeight: 1.7, color: T.textDim,
-                maxWidth: '48ch', margin: '0 0 2.5rem',
+                maxWidth: '50ch', margin: '0 0 2.5rem',
               }}
             >
               A governed agentic OS that perceives business events, reasons across domains,
               calls tools, executes workflows, verifies outcomes, and leaves a proof trail.
-              Every action policy-gated. Every outcome proven. Built for the enterprise
-              that can't afford to guess — and can't afford to not know.
+              Every action policy-gated. Every outcome proven.
             </motion.p>
 
             <motion.div
@@ -384,41 +343,78 @@ export function HomePage() {
                 <span key={chip} style={{
                   padding: '0.4rem 0.875rem', borderRadius: 8,
                   fontSize: '0.8125rem', fontWeight: 500,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${T.border}`,
+                  background: T.surface,
+                  border: `1px solid ${T.borderSubtle}`,
                   color: T.textDim, cursor: 'default',
-                  transition: 'all 0.2s ease',
                 }}>{chip}</span>
               ))}
             </motion.div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.3, ease }}
-            style={{ display: 'flex', justifyContent: 'center' }}
+            transition={{ duration: 1, delay: 0.3, ease }}
+            style={{
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              padding: '3rem', background: T.surface, borderRadius: 20,
+              border: `1px solid ${T.borderSubtle}`,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+            }}
           >
-            <HeroArt />
+            <svg viewBox="0 0 500 500" fill="none" style={{ width: '100%', maxWidth: 380 }}>
+              <defs>
+                <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor={T.accent} stopOpacity="0.18" />
+                  <stop offset="100%" stopColor={T.accent} stopOpacity="0" />
+                </radialGradient>
+              </defs>
+              <circle cx="250" cy="250" r="200" fill="url(#glow)" />
+              <circle cx="250" cy="250" r="160" stroke={T.border} strokeWidth="0.75" fill="none" />
+              <circle cx="250" cy="250" r="120" stroke={T.border} strokeWidth="0.75" fill="none" />
+              <circle cx="250" cy="250" r="80" stroke={T.accentBorder} strokeWidth="0.75" fill="none" />
+              {[0, 60, 120, 180, 240, 300].map((angle, i) => {
+                const r1 = 80, r2 = 160;
+                const x1 = 250 + r1 * Math.cos((angle * Math.PI) / 180);
+                const y1 = 250 + r1 * Math.sin((angle * Math.PI) / 180);
+                const x2 = 250 + r2 * Math.cos((angle * Math.PI) / 180);
+                const y2 = 250 + r2 * Math.sin((angle * Math.PI) / 180);
+                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={T.borderSubtle} strokeWidth="0.5" />;
+              })}
+              {[0, 72, 144, 216, 288].map((angle, i) => {
+                const r = 120;
+                const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
+                const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
+                return <circle key={i} cx={cx} cy={cy} r="5" fill={T.accent} opacity="0.5" />;
+              })}
+              <circle cx="250" cy="250" r="7" fill={T.accent} opacity="0.8" />
+              {[30, 90, 150, 210, 270, 330].map((angle, i) => {
+                const r = 160;
+                const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
+                const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
+                return <circle key={`o-${i}`} cx={cx} cy={cy} r="3" fill={T.textMuted} opacity="0.35" />;
+              })}
+              <text x="250" y="254" textAnchor="middle" fill={T.textDim} fontSize="14" fontFamily={T.mono} fontWeight="500" opacity="0.6">a11oy</text>
+            </svg>
           </motion.div>
         </div>
       </section>
 
-      <section style={{ padding: '4rem 0', borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+      <section style={{ padding: '3.5rem 0', borderTop: `1px solid ${T.borderSubtle}`, borderBottom: `1px solid ${T.borderSubtle}`, background: T.surface }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <p style={{
             fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500,
-            letterSpacing: '0.2em', textTransform: 'uppercase',
-            color: T.textMuted, textAlign: 'center', marginBottom: '2rem',
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            color: T.textMuted, textAlign: 'center', marginBottom: '1.75rem',
           }}>Powering governed decisions with frontier intelligence</p>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 'clamp(2rem, 5vw, 4rem)', flexWrap: 'wrap', opacity: 0.4,
+            gap: 'clamp(2rem, 5vw, 4rem)', flexWrap: 'wrap', opacity: 0.45,
           }}>
             {['OpenAI', 'Anthropic', 'DeepSeek', 'Google', 'Meta', 'Qwen', 'HuggingFace'].map(name => (
               <span key={name} style={{
-                fontSize: '0.9375rem', fontWeight: 500, color: T.text,
-                letterSpacing: '-0.01em', fontFamily: T.sans,
+                fontSize: '0.9375rem', fontWeight: 600, color: T.text,
+                letterSpacing: '-0.01em',
               }}>{name}</span>
             ))}
           </div>
@@ -427,83 +423,18 @@ export function HomePage() {
 
       <LivePulseStrip />
 
-      <section style={{ padding: 'clamp(7rem, 14vw, 12rem) 0' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
-          <FadeIn>
-            <SectionLabel>Premise</SectionLabel>
-            <h2 style={{
-              fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)',
-              fontFamily: T.serif, fontWeight: 400,
-              letterSpacing: '-0.03em', color: T.text,
-              lineHeight: 1.1, margin: '0 0 2rem',
-            }}>
-              The enterprise does not need{' '}
-              <span style={{ color: T.accent }}>another dashboard.</span>
-            </h2>
-            <p style={{
-              fontSize: '1.125rem', lineHeight: 1.75,
-              color: T.textDim, maxWidth: '52ch', margin: '0 auto',
-            }}>
-              It needs a system that senses signals across every domain,
-              understands their cause, recommends governed responses,
-              executes them with human approval, and proves it did so correctly.
-            </p>
-          </FadeIn>
-        </div>
-      </section>
-
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0' }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
-            <div style={{ marginBottom: '3rem' }}>
-              <SectionLabel>Seven Governing Principles</SectionLabel>
-              <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
-              }}>
-                From signal to outcome.{' '}
-                <span style={{ color: T.accent }}>Seven steps. One proof.</span>
-              </h2>
-              <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, maxWidth: '60ch', margin: 0 }}>
-                Every action in a11oy flows through the same seven governing principles —
-                the canonical lifecycle of a governed agentic intelligence layer.
-              </p>
-            </div>
-          </FadeIn>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
-            border: `1px solid ${T.border}`,
-          }}>
-            {SEVEN_PRINCIPLES.map((p, i) => (
-              <FadeIn key={p.label} delay={i * 0.05}>
-                <div style={{ padding: '2rem 1.5rem', background: T.bg, height: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                    <span style={{ fontSize: '1.25rem', color: T.accent, lineHeight: 1, fontFamily: T.mono }}>{p.glyph}</span>
-                    <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', color: T.textMuted }}>{p.step}</span>
-                  </div>
-                  <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '-0.015em', color: T.text, margin: 0 }}>{p.label}</h3>
-                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{p.desc}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
-        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
-          <FadeIn>
-            <div style={{ marginBottom: '4rem', maxWidth: 640 }}>
+            <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Core Capabilities</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1.25rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
-                Everything Claude offers.{' '}
-                <span style={{ color: T.accent }}>Plus proof.</span>
+                Everything you need.{' '}
+                <span style={{ color: T.accentDim }}>Plus proof.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Signal intelligence, governed agents, enterprise connectors, and an immutable proof chain
@@ -512,95 +443,88 @@ export function HomePage() {
             </div>
           </FadeIn>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
             {CAPABILITIES.map((cap, i) => (
               <FadeIn key={cap.title} delay={i * 0.08}>
-                <div style={{
-                  padding: 'clamp(2rem, 3vw, 3rem)', background: T.bg, height: '100%',
-                  transition: 'background 0.3s ease',
-                }}>
+                <Card>
                   <div style={{
                     width: 44, height: 44, borderRadius: 10,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: T.accentGlow, border: `1px solid ${T.accentDim}`,
-                    fontSize: '1.125rem', fontFamily: T.serif, fontWeight: 400,
-                    color: T.accent, marginBottom: '1.5rem',
+                    background: T.accentSoft, border: `1px solid ${T.accentBorder}`,
+                    fontSize: '1.125rem', fontFamily: T.display, fontWeight: 600,
+                    color: T.accentDim, marginBottom: '1.5rem',
                   }}>{cap.icon}</div>
                   <h3 style={{
                     fontSize: '1.25rem', fontWeight: 600, letterSpacing: '-0.02em',
-                    color: T.text, margin: '0 0 0.375rem',
+                    color: T.text, margin: '0 0 0.375rem', fontFamily: T.display,
                   }}>{cap.title}</h3>
                   <p style={{
                     fontSize: '0.75rem', fontFamily: T.mono, fontWeight: 500,
-                    color: T.accent, margin: '0 0 1rem', letterSpacing: '0.02em',
+                    color: T.accentDim, margin: '0 0 1rem', letterSpacing: '0.02em',
                   }}>{cap.sub}</p>
                   <p style={{ fontSize: '0.9375rem', lineHeight: 1.7, color: T.textDim, margin: '0 0 1.5rem' }}>{cap.desc}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
                     {cap.features.map(f => (
                       <span key={f} style={{
                         fontSize: '0.6875rem', fontFamily: T.mono,
-                        padding: '0.25rem 0.625rem', borderRadius: 6,
-                        background: 'rgba(255,255,255,0.03)', border: `1px solid ${T.border}`,
+                        padding: '0.3rem 0.625rem', borderRadius: 6,
+                        background: T.bg, border: `1px solid ${T.borderSubtle}`,
                         color: T.textDim,
                       }}>{f}</span>
                     ))}
                   </div>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
-            <div style={{ marginBottom: '4rem', maxWidth: 640 }}>
+            <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Each character carries weight</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: 0,
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: 0,
               }}>What a11oy means.</h2>
             </div>
           </FadeIn>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: '1px', background: T.border,
-            border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden',
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
             {ALLOY_CHARS.map((c, i) => (
               <FadeIn key={i} delay={i * 0.06}>
-                <div style={{ background: T.bg, padding: '2.5rem 1.5rem', height: '100%' }}>
+                <Card>
                   <div style={{
-                    fontSize: '2.75rem', fontWeight: 300, fontFamily: T.serif,
-                    color: T.text, lineHeight: 1, marginBottom: '1.5rem',
+                    fontSize: '2.5rem', fontWeight: 300, fontFamily: T.display,
+                    color: T.text, lineHeight: 1, marginBottom: '1.25rem',
                   }}>{c.ch}</div>
                   <p style={{
                     fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: T.accent, marginBottom: '0.75rem',
+                    letterSpacing: '0.16em', textTransform: 'uppercase',
+                    color: T.accentDim, marginBottom: '0.75rem',
                   }}>{c.word}</p>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{c.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Platform Primitives</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
-                Four governed objects.{' '}
-                <span style={{ color: T.accent }}>One coherent system.</span>
+                Seven governed layers.{' '}
+                <span style={{ color: T.accentDim }}>One coherent system.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Every action that matters flows through the same primitives — the building blocks that
@@ -608,38 +532,38 @@ export function HomePage() {
               </p>
             </div>
           </FadeIn>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
             {PRIMITIVES.map((p, i) => (
               <FadeIn key={p.name} delay={i * 0.07}>
-                <div style={{ padding: '2.5rem', background: T.bg, height: '100%' }}>
+                <Card>
                   <p style={{
                     fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600,
-                    letterSpacing: '0.18em', color: T.textMuted, marginBottom: '0.75rem',
+                    letterSpacing: '0.16em', color: T.textMuted, marginBottom: '0.75rem',
                   }}>{p.num}</p>
                   <h3 style={{
-                    fontSize: '1.1875rem', fontWeight: 600, letterSpacing: '-0.02em',
-                    color: T.text, margin: '0 0 0.75rem',
+                    fontSize: '1.125rem', fontWeight: 600, letterSpacing: '-0.02em',
+                    color: T.text, margin: '0 0 0.75rem', fontFamily: T.display,
                   }}>{p.name}</h3>
                   <p style={{ fontSize: '0.9375rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>{p.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
               <SectionLabel>Enterprise Connectors</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 Connect a11oy to{' '}
-                <span style={{ color: T.accent }}>your entire stack.</span>
+                <span style={{ color: T.accentDim }}>your entire stack.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: '0 auto', maxWidth: '56ch' }}>
                 200+ governed connectors powered by the Model Context Protocol.
@@ -654,10 +578,10 @@ export function HomePage() {
                 key={cat}
                 onClick={() => setConnectorFilter(cat)}
                 style={{
-                  padding: '0.375rem 0.75rem', borderRadius: 6,
-                  border: `1px solid ${connectorFilter === cat ? T.accent : T.border}`,
-                  background: connectorFilter === cat ? T.accentGlow : 'transparent',
-                  color: connectorFilter === cat ? T.accent : T.textDim,
+                  padding: '0.4rem 0.875rem', borderRadius: 8,
+                  border: `1px solid ${connectorFilter === cat ? T.accent : T.borderSubtle}`,
+                  background: connectorFilter === cat ? T.accentSoft : T.surface,
+                  color: connectorFilter === cat ? T.accentDim : T.textDim,
                   fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
                   fontFamily: T.sans, transition: 'all 0.2s',
                 }}
@@ -667,111 +591,105 @@ export function HomePage() {
 
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
-            border: `1px solid ${T.border}`,
+            gap: '0.75rem',
           }}>
-            {filteredConnectors.map((c, i) => (
-              <div key={c.name} style={{
-                padding: '1.25rem', background: T.bg,
-                display: 'flex', flexDirection: 'column', gap: '0.375rem',
-                transition: 'background 0.2s',
-              }}>
-                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, letterSpacing: '-0.01em' }}>{c.name}</span>
+            {filteredConnectors.map((c) => (
+              <Card key={c.name} style={{ padding: '1.25rem' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, letterSpacing: '-0.01em', display: 'block', marginBottom: '0.25rem' }}>{c.name}</span>
                 <span style={{
                   fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500,
-                  letterSpacing: '0.14em', textTransform: 'uppercase', color: T.textMuted,
+                  letterSpacing: '0.12em', textTransform: 'uppercase', color: T.textMuted,
                 }}>{c.cat}</span>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Solutions</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 One platform.{' '}
-                <span style={{ color: T.accent }}>Every governed use case.</span>
+                <span style={{ color: T.accentDim }}>Every governed use case.</span>
               </h2>
             </div>
           </FadeIn>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             {SOLUTIONS.map((s, i) => (
               <FadeIn key={s.title} delay={i * 0.06}>
-                <div style={{ padding: '2.25rem', background: T.bg, height: '100%' }}>
+                <Card>
                   <h3 style={{
                     fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '-0.015em',
-                    color: T.text, margin: '0 0 0.75rem',
+                    color: T.text, margin: '0 0 0.75rem', fontFamily: T.display,
                   }}>{s.title}</h3>
                   <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{s.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Domain Packs</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 One agentic layer.{' '}
-                <span style={{ color: T.accent }}>Every governed domain.</span>
+                <span style={{ color: T.accentDim }}>Every governed domain.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Each vertical runs on the same seven governing principles — from Ingest to Learn —
                 with domain-specific intelligence applied at the context layer.
-                Twelve applications across maritime, legal, real estate, defense, and more.
               </p>
             </div>
           </FadeIn>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
             {VERTICALS.map((v, i) => (
               <FadeIn key={v.name} delay={i * 0.06}>
-                <div style={{ padding: '2.25rem', background: T.bg, height: '100%' }}>
+                <Card>
                   <span style={{ fontSize: '2rem', display: 'block', marginBottom: '1rem' }}>{v.icon}</span>
                   <p style={{
                     fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: T.accent, marginBottom: '0.625rem',
+                    letterSpacing: '0.16em', textTransform: 'uppercase',
+                    color: T.accentDim, marginBottom: '0.625rem',
                   }}>{v.domain}</p>
                   <h3 style={{
                     fontSize: '1.125rem', fontWeight: 600, letterSpacing: '-0.015em',
-                    color: T.text, margin: '0 0 0.75rem',
+                    color: T.text, margin: '0 0 0.75rem', fontFamily: T.display,
                   }}>{v.name}</h3>
                   <p style={{ fontSize: '0.875rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{v.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3.5rem', maxWidth: 640 }}>
               <SectionLabel>Model Hub</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 Every model.{' '}
-                <span style={{ color: T.accent }}>One governance layer.</span>
+                <span style={{ color: T.accentDim }}>One governance layer.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 a11oy routes requests to the right model — frontier reasoning,
@@ -783,53 +701,52 @@ export function HomePage() {
 
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
-            border: `1px solid ${T.border}`,
+            gap: '1rem',
           }}>
             {MODEL_PROVIDERS.map((m, i) => (
               <FadeIn key={m.name} delay={i * 0.05}>
-                <div style={{ padding: '2rem', background: T.bg, height: '100%', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.01em' }}>{m.name}</h3>
+                <Card>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
+                    <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.01em', fontFamily: T.display }}>{m.name}</h3>
                     <span style={{
                       fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
-                      letterSpacing: '0.14em', textTransform: 'uppercase',
-                      padding: '0.2rem 0.5rem', borderRadius: 4,
-                      color: m.tier === 'frontier' ? T.accent : m.tier === 'platform' ? '#7ab8d9' : T.textMuted,
-                      background: m.tier === 'frontier' ? T.accentGlow : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${m.tier === 'frontier' ? T.accentDim : T.border}`,
+                      letterSpacing: '0.12em', textTransform: 'uppercase',
+                      padding: '0.2rem 0.5rem', borderRadius: 6,
+                      color: m.tier === 'frontier' ? T.accentDim : T.textMuted,
+                      background: m.tier === 'frontier' ? T.accentSoft : T.bg,
+                      border: `1px solid ${m.tier === 'frontier' ? T.accentBorder : T.borderSubtle}`,
                     }}>{m.tier}</span>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.875rem' }}>
                     {m.models.map(model => (
                       <span key={model} style={{
                         fontSize: '0.6875rem', fontFamily: T.mono,
-                        padding: '0.2rem 0.5rem', borderRadius: 4,
-                        background: 'rgba(255,255,255,0.03)', color: T.textDim,
-                        border: `1px solid ${T.border}`,
+                        padding: '0.25rem 0.5rem', borderRadius: 6,
+                        background: T.bg, color: T.textDim,
+                        border: `1px solid ${T.borderSubtle}`,
                       }}>{model}</span>
                     ))}
                   </div>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{m.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3rem', maxWidth: 640 }}>
               <SectionLabel>Industry Solutions</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 One governed loop.{' '}
-                <span style={{ color: T.accent }}>Every industry.</span>
+                <span style={{ color: T.accentDim }}>Every industry.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Other platforms give you a chatbot. a11oy gives you a governed decision operating system — the same
@@ -845,9 +762,9 @@ export function HomePage() {
                 onClick={() => { setActiveIndustry(s.id); setExpandedUseCase(null); }}
                 style={{
                   padding: '0.5rem 1rem', borderRadius: 8,
-                  border: `1px solid ${activeIndustry === s.id ? T.accent : T.border}`,
-                  background: activeIndustry === s.id ? T.accentGlow : 'transparent',
-                  color: activeIndustry === s.id ? T.accent : T.textDim,
+                  border: `1px solid ${activeIndustry === s.id ? T.accent : T.borderSubtle}`,
+                  background: activeIndustry === s.id ? T.accentSoft : T.surface,
+                  color: activeIndustry === s.id ? T.accentDim : T.textDim,
                   fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: '0.4rem',
                   transition: 'all 0.2s ease', fontFamily: T.sans,
@@ -865,38 +782,38 @@ export function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease }}
           >
-            <div style={{ border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', marginBottom: '2rem' }}>
-              <div style={{ padding: '2rem', background: T.surface, borderBottom: `1px solid ${T.border}` }}>
+            <div style={{ border: `1px solid ${T.borderSubtle}`, borderRadius: 14, overflow: 'hidden', marginBottom: '2rem', background: T.surface }}>
+              <div style={{ padding: '2rem', borderBottom: `1px solid ${T.borderSubtle}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                   <span style={{ fontSize: '1.75rem' }}>{activeSolution.icon}</span>
                   <div>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.02em' }}>{activeSolution.name}</h3>
-                    <p style={{ fontSize: '0.8125rem', color: T.accent, margin: 0, fontWeight: 500 }}>{activeSolution.tagline}</p>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.02em', fontFamily: T.display }}>{activeSolution.name}</h3>
+                    <p style={{ fontSize: '0.8125rem', color: T.accentDim, margin: 0, fontWeight: 500 }}>{activeSolution.tagline}</p>
                   </div>
                 </div>
                 <p style={{ fontSize: '0.9375rem', lineHeight: 1.7, color: T.textDim, margin: '0 0 1rem', maxWidth: '72ch' }}>{activeSolution.desc}</p>
                 <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
                   {activeSolution.models.map(m => (
                     <span key={m} style={{
-                      fontSize: '0.6875rem', fontFamily: T.mono, padding: '0.2rem 0.5rem', borderRadius: 4,
-                      background: T.accentGlow, color: T.accent, border: `1px solid ${T.accentDim}`,
+                      fontSize: '0.6875rem', fontFamily: T.mono, padding: '0.25rem 0.5rem', borderRadius: 6,
+                      background: T.accentSoft, color: T.accentDim, border: `1px solid ${T.accentBorder}`,
                     }}>{m}</span>
                   ))}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: T.border }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: T.borderSubtle }}>
                 {activeSolution.stats.map(s => (
-                  <div key={s.label} style={{ padding: '1.25rem', background: T.bg }}>
+                  <div key={s.label} style={{ padding: '1.25rem', background: T.surface }}>
                     <p style={{ fontSize: '1.375rem', fontWeight: 600, color: T.text, margin: '0 0 0.25rem', fontFamily: T.mono }}>{s.value}</p>
-                    <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.textMuted, margin: 0 }}>{s.label}</p>
+                    <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.textMuted, margin: 0 }}>{s.label}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
-              <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.textMuted, margin: '0 0 0.75rem' }}>
+              <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.textMuted, margin: '0 0 0.75rem' }}>
                 Governed Use Cases
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
@@ -907,9 +824,9 @@ export function HomePage() {
                     <div key={key}
                       onClick={() => setExpandedUseCase(isExpanded ? null : key)}
                       style={{
-                        padding: '1.25rem', borderRadius: 10, cursor: 'pointer',
-                        border: `1px solid ${isExpanded ? 'rgba(201,183,135,0.25)' : T.border}`,
-                        background: isExpanded ? T.accentGlow : T.bg,
+                        padding: '1.25rem', borderRadius: 12, cursor: 'pointer',
+                        border: `1px solid ${isExpanded ? T.accentBorder : T.borderSubtle}`,
+                        background: isExpanded ? T.accentSoft : T.surface,
                         transition: 'all 0.2s ease',
                       }}
                     >
@@ -919,12 +836,12 @@ export function HomePage() {
                       </div>
                       {isExpanded && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.25 }}>
-                          <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: `1px solid ${T.border}` }}>
-                            <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.accent, margin: '0 0 0.375rem' }}>Prompt</p>
+                          <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderRadius: 8, background: T.bg, border: `1px solid ${T.borderSubtle}` }}>
+                            <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.accentDim, margin: '0 0 0.375rem' }}>Prompt</p>
                             <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.textDim, margin: 0, fontStyle: 'italic' }}>"{uc.prompt}"</p>
                           </div>
-                          <div style={{ marginTop: '0.5rem', padding: '0.75rem', borderRadius: 8, background: T.accentGlow, border: `1px solid ${T.accentDim}` }}>
-                            <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.accent, margin: '0 0 0.375rem' }}>Proof Chain</p>
+                          <div style={{ marginTop: '0.5rem', padding: '0.75rem', borderRadius: 8, background: T.accentSoft, border: `1px solid ${T.accentBorder}` }}>
+                            <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.accentDim, margin: '0 0 0.375rem' }}>Proof Chain</p>
                             <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.textDim, margin: 0 }}>{uc.proof}</p>
                           </div>
                         </motion.div>
@@ -938,18 +855,18 @@ export function HomePage() {
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3rem', maxWidth: 640 }}>
               <SectionLabel>The Canonical Loop</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 Nine stages.{' '}
-                <span style={{ color: T.accent }}>One canonical path.</span>
+                <span style={{ color: T.accentDim }}>One canonical path.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 While others offer chat windows, a11oy enforces the governed Decision Loop —
@@ -959,67 +876,63 @@ export function HomePage() {
           </FadeIn>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
-            border: `1px solid ${T.border}`, marginBottom: '2.5rem',
+            gap: '0.75rem', marginBottom: '2.5rem',
           }}>
             {CANONICAL_STEPS.map((step, i) => (
               <FadeIn key={step.name} delay={i * 0.04}>
-                <div style={{ padding: '1.75rem', background: T.bg, height: '100%' }}>
+                <Card style={{ padding: '1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '1.25rem' }}>{step.icon}</span>
-                    <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.14em', color: T.textMuted }}>{step.num}</span>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, color: T.text, letterSpacing: '-0.01em' }}>{step.name}</span>
+                    <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.12em', color: T.textMuted }}>{step.num}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 600, color: T.text, letterSpacing: '-0.01em', fontFamily: T.display }}>{step.name}</span>
                   </div>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{step.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
 
           <FadeIn delay={0.3}>
-            <div style={{
-              padding: '2.25rem', borderRadius: 12, border: `1px solid ${T.border}`,
-              background: T.surface,
-            }}>
-              <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accent, margin: '0 0 1rem' }}>
+            <Card style={{ padding: '2rem' }}>
+              <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.accentDim, margin: '0 0 1rem' }}>
                 Live Example — {activeSolution.icon} {activeSolution.name}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {Object.entries(activeSolution.loopExample).map(([stage, text], i) => (
                   <div key={stage} style={{
                     display: 'flex', gap: '1rem', padding: '0.875rem 0',
-                    borderBottom: i < 8 ? `1px solid ${T.border}` : 'none',
+                    borderBottom: i < 8 ? `1px solid ${T.borderSubtle}` : 'none',
                     alignItems: 'flex-start',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 140, flexShrink: 0 }}>
                       <span style={{ fontSize: '0.875rem' }}>{CANONICAL_STEPS[i]?.icon}</span>
                       <span style={{
                         fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 600,
-                        letterSpacing: '0.1em', textTransform: 'uppercase',
-                        color: stage === 'proof' ? T.accent : T.text,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        color: stage === 'proof' ? T.accentDim : T.text,
                       }}>{stage}</span>
                     </div>
                     <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{text}</p>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </FadeIn>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
               <SectionLabel>Why a11oy</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 Not a copilot.{' '}
-                <span style={{ color: T.accent }}>A governed operating system.</span>
+                <span style={{ color: T.accentDim }}>A governed operating system.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: '0 auto', maxWidth: '58ch' }}>
                 Chatbots answer questions. a11oy governs decisions. Every model call is attributed.
@@ -1027,7 +940,7 @@ export function HomePage() {
               </p>
             </div>
           </FadeIn>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             {[
               { title: 'Proof on Every Decision', desc: 'Immutable, append-only record of every model call, every approval, every outcome. Cryptographically verifiable. Auditor-ready.' },
               { title: '8 Model Providers, One Router', desc: 'OpenAI, Anthropic, DeepSeek, Google, Qwen, Meta, Moonshot, HuggingFace — routed by task type, vertical, cost, and compliance policy.' },
@@ -1038,32 +951,32 @@ export function HomePage() {
               { title: 'Glasswing Transparency', desc: 'Public trust portal, CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall. Every governance claim backed by a verifiable open-spec artifact.' },
             ].map((item, i) => (
               <FadeIn key={item.title} delay={i * 0.05}>
-                <div style={{ padding: '2.25rem', background: T.bg, height: '100%' }}>
+                <Card>
                   <h3 style={{
                     fontSize: '1rem', fontWeight: 600, color: T.text, margin: '0 0 0.75rem',
-                    letterSpacing: '-0.01em',
+                    letterSpacing: '-0.01em', fontFamily: T.display,
                   }}>{item.title}</h3>
                   <p style={{ fontSize: '0.875rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>{item.desc}</p>
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(3rem, 6vw, 6rem)', alignItems: 'start' }}>
               <div>
                 <SectionLabel>Publication</SectionLabel>
                 <h2 style={{
-                  fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontFamily: T.serif,
-                  fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                  lineHeight: 1.08, margin: '0 0 2rem',
+                  fontSize: 'clamp(2.25rem, 4.5vw, 3.25rem)', fontFamily: T.display,
+                  fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                  lineHeight: 1.1, margin: '0 0 2rem',
                 }}>
                   What is{' '}
-                  <span style={{ color: T.accent }}>a11oy?</span>
+                  <span style={{ color: T.accentDim }}>a11oy?</span>
                 </h2>
                 <div style={{ fontSize: '1.0625rem', lineHeight: 1.8, color: T.textDim }}>
                   <p style={{ margin: '0 0 1.25rem' }}>
@@ -1081,26 +994,22 @@ export function HomePage() {
                 </div>
               </div>
               <div>
-                <div style={{
-                  padding: '2.5rem', borderRadius: 12, border: `1px solid ${T.border}`,
-                  background: T.surface,
-                }}>
+                <Card style={{ padding: '2.5rem' }}>
                   <p style={{
                     fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: T.accent, margin: '0 0 1.5rem',
+                    letterSpacing: '0.16em', textTransform: 'uppercase',
+                    color: T.accentDim, margin: '0 0 1.5rem',
                   }}>The Governing Principle</p>
                   <blockquote style={{
-                    fontSize: '1.5rem', fontFamily: T.serif, fontWeight: 400,
+                    fontSize: '1.375rem', fontFamily: T.display, fontWeight: 500,
                     lineHeight: 1.4, color: T.text, margin: '0 0 2rem',
-                    borderLeft: `2px solid ${T.accent}`, paddingLeft: '1.5rem',
-                    fontStyle: 'italic',
+                    borderLeft: `3px solid ${T.accent}`, paddingLeft: '1.5rem',
                   }}>
                     No material action executes without human approval. Not as an option. Not as a feature flag. As a structural guarantee embedded in the execution fabric.
                   </blockquote>
                   <div style={{
                     display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px',
-                    background: T.border, borderRadius: 8, overflow: 'hidden',
+                    background: T.borderSubtle, borderRadius: 10, overflow: 'hidden',
                     marginBottom: '1.5rem',
                   }}>
                     {[
@@ -1109,34 +1018,34 @@ export function HomePage() {
                       { val: '7', label: 'Fabric Layers' },
                       { val: '100%', label: 'Proof Integrity' },
                     ].map(m => (
-                      <div key={m.label} style={{ padding: '1rem', background: T.bg }}>
-                        <p style={{ fontSize: '1.5rem', fontFamily: T.mono, fontWeight: 600, color: T.accent, margin: '0 0 0.25rem' }}>{m.val}</p>
-                        <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.textMuted, margin: 0 }}>{m.label}</p>
+                      <div key={m.label} style={{ padding: '1rem', background: T.surface }}>
+                        <p style={{ fontSize: '1.5rem', fontFamily: T.mono, fontWeight: 600, color: T.accentDim, margin: '0 0 0.25rem' }}>{m.val}</p>
+                        <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.textMuted, margin: 0 }}>{m.label}</p>
                       </div>
                     ))}
                   </div>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.textMuted, margin: 0, fontFamily: T.mono }}>
                     SZL Holdings &middot; Est. 2023 &middot; London
                   </p>
-                </div>
+                </Card>
               </div>
             </div>
           </FadeIn>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>
             <div style={{ marginBottom: '3.5rem', maxWidth: 720 }}>
               <SectionLabel>Competitive Landscape</SectionLabel>
               <h2 style={{
-                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
-                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
-                lineHeight: 1.1, margin: '0 0 1rem',
+                fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontFamily: T.display,
+                fontWeight: 600, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.12, margin: '0 0 1rem',
               }}>
                 Beyond aggregation.{' '}
-                <span style={{ color: T.accent }}>Into governance.</span>
+                <span style={{ color: T.accentDim }}>Into governance.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Other platforms observe signals or automate workflows. a11oy governs the entire path from signal to consequence — with structural proof at every step.
@@ -1145,8 +1054,7 @@ export function HomePage() {
           </FadeIn>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
-            border: `1px solid ${T.border}`,
+            gap: '1rem',
           }}>
             {[
               {
@@ -1187,20 +1095,16 @@ export function HomePage() {
               },
             ].map((comp, i) => (
               <FadeIn key={comp.name} delay={i * 0.05}>
-                <div style={{
-                  padding: '2rem', background: comp.name === 'a11oy' ? T.accentGlow : T.bg,
-                  height: '100%', display: 'flex', flexDirection: 'column',
-                  border: comp.name === 'a11oy' ? `1px solid ${T.accentDim}` : 'none',
-                }}>
+                <Card highlight={comp.name === 'a11oy'}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <h3 style={{
-                      fontSize: '1rem', fontWeight: 600, color: comp.name === 'a11oy' ? T.accent : T.text,
-                      margin: 0, letterSpacing: '-0.01em',
+                      fontSize: '1rem', fontWeight: 600, color: comp.name === 'a11oy' ? T.accentDim : T.text,
+                      margin: 0, letterSpacing: '-0.01em', fontFamily: T.display,
                     }}>{comp.name}</h3>
                   </div>
                   <p style={{
                     fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600,
-                    letterSpacing: '0.14em', textTransform: 'uppercase',
+                    letterSpacing: '0.12em', textTransform: 'uppercase',
                     color: T.textMuted, margin: '0 0 0.75rem',
                   }}>{comp.category}</p>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: '0 0 0.75rem' }}>
@@ -1208,32 +1112,32 @@ export function HomePage() {
                   </p>
                   {comp.gap && (
                     <p style={{
-                      fontSize: '0.8125rem', lineHeight: 1.65, color: T.accent,
+                      fontSize: '0.8125rem', lineHeight: 1.65, color: T.accentDim,
                       margin: 0, marginTop: 'auto', paddingTop: '0.75rem',
-                      borderTop: `1px solid ${T.border}`,
+                      borderTop: `1px solid ${T.borderSubtle}`,
                     }}>
                       {comp.gap}
                     </p>
                   )}
-                </div>
+                </Card>
               </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(8rem, 16vw, 14rem) 0', borderTop: `1px solid ${T.border}` }}>
+      <section style={{ padding: 'clamp(7rem, 14vw, 12rem) 0', borderTop: `1px solid ${T.borderSubtle}`, background: T.surface }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
           <FadeIn>
             <SectionLabel>See it in motion</SectionLabel>
             <h2 style={{
-              fontSize: 'clamp(2.5rem, 5.5vw, 4rem)',
-              fontFamily: T.serif, fontWeight: 400,
+              fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
+              fontFamily: T.display, fontWeight: 600,
               letterSpacing: '-0.03em', color: T.text,
-              lineHeight: 1.05, margin: '0 0 1.5rem',
+              lineHeight: 1.08, margin: '0 0 1.5rem',
             }}>
               Watch the loop{' '}
-              <span style={{ color: T.accent }}>close.</span>
+              <span style={{ color: T.accentDim }}>close.</span>
             </h2>
             <p style={{
               fontSize: '1.125rem', lineHeight: 1.75,
@@ -1251,14 +1155,14 @@ export function HomePage() {
               }}>Request access</Link>
               <Link href={b('/proof')} style={{
                 display: 'inline-flex', alignItems: 'center',
-                padding: '0.875rem 2rem', background: 'transparent', color: T.text,
+                padding: '0.875rem 2rem', background: T.surface, color: T.text,
                 border: `1px solid ${T.borderStrong}`, borderRadius: 10,
                 fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none',
               }}>Browse Proof Ledger</Link>
               <Link href={b('/sdk')} style={{
                 display: 'inline-flex', alignItems: 'center',
-                padding: '0.875rem 2rem', background: 'transparent', color: T.accent,
-                border: `1px solid ${T.accentDim}`, borderRadius: 10,
+                padding: '0.875rem 2rem', background: T.accentSoft, color: T.accentDim,
+                border: `1px solid ${T.accentBorder}`, borderRadius: 10,
                 fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none',
               }}>SDK & Cookbook</Link>
             </div>
@@ -1266,16 +1170,16 @@ export function HomePage() {
         </div>
       </section>
 
-      <footer style={{ borderTop: `1px solid ${T.border}`, padding: '4rem clamp(2rem, 5vw, 4rem)' }}>
+      <footer style={{ borderTop: `1px solid ${T.borderSubtle}`, padding: '4rem clamp(2rem, 5vw, 4rem)', background: T.bg }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: 20, height: 20, border: `1px solid ${T.accent}`,
-                borderRadius: 4, fontSize: 10, fontFamily: T.mono, color: T.accent,
+                width: 22, height: 22, border: `1.5px solid ${T.accent}`,
+                borderRadius: 5, fontSize: 11, fontFamily: T.mono, color: T.accent, fontWeight: 700,
               }}>a</span>
-              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text }}>a11oy</span>
+              <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, fontFamily: T.display }}>a11oy</span>
             </div>
             <p style={{ fontSize: '0.8125rem', color: T.textMuted, maxWidth: '32ch', lineHeight: 1.6 }}>
               Governed Decision Operating System.
@@ -1292,7 +1196,7 @@ export function HomePage() {
               <div key={col.title}>
                 <p style={{
                   fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
-                  letterSpacing: '0.18em', textTransform: 'uppercase',
+                  letterSpacing: '0.16em', textTransform: 'uppercase',
                   color: T.textMuted, marginBottom: '0.75rem',
                 }}>{col.title}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -1306,7 +1210,7 @@ export function HomePage() {
             ))}
           </div>
         </div>
-        <div style={{ maxWidth: 1320, margin: '3rem auto 0', paddingTop: '2rem', borderTop: `1px solid ${T.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ maxWidth: 1320, margin: '3rem auto 0', paddingTop: '2rem', borderTop: `1px solid ${T.borderSubtle}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.75rem', color: T.textMuted }}>
             &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </span>

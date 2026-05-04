@@ -64,13 +64,13 @@ export function DashboardShell({
     });
   }, [collapsible, collapseStorageKey]);
 
-  const sidebarBg = theme?.sidebarBg ?? '#0a0c10';
-  const headerBg = theme?.headerBg ?? toAlpha('#0a0c10', 0.92);
-  const pageBg = theme?.pageBg ?? '#070810';
+  const sidebarBg = theme?.sidebarBg ?? '#FFFFFF';
+  const headerBg = theme?.headerBg ?? toAlpha('#FFFFFF', 0.92);
+  const pageBg = theme?.pageBg ?? '#FAF7F2';
 
   return (
     <div
-      className={cn('flex h-screen overflow-hidden text-white', className)}
+      className={cn('flex h-screen overflow-hidden', className)}
       style={{ background: pageBg }}
     >
       {sidebar && (

@@ -33,6 +33,7 @@ export const v = {
   textPlaceholder: 'var(--gi-text-placeholder)',
 
   /* ── Accent family ───────────────────────────────── */
+  accentGold:   'var(--gi-accent-gold)',
   accentBlue:   'var(--gi-accent-blue)',
   accentTeal:   'var(--gi-accent-teal)',
   accentGreen:  'var(--gi-accent-green)',
