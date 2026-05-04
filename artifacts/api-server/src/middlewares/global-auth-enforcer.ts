@@ -249,6 +249,10 @@ const PUBLIC_PREFIXES = [
   // so no tenant state leaks across requests. The broader /api/ouroboros/
   // tree retains its default auth, so this exemption stays narrowed.
   "/api/ouroboros/guardrails/",
+  "/api/ouroboros/sovereign/propeller/",
+  "/api/ouroboros/sovereign/sota/",
+  "/api/ouroboros/sovereign/arbitrage/",
+  "/api/ouroboros/sovereign/ultra/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",

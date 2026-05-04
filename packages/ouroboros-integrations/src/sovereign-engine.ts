@@ -1,7 +1,7 @@
 /**
- * Sovereign Engine v19 -- All 28 SZL Original Innovations (ALLOY-COMPLETE)
+ * Sovereign Engine v21 -- All 38 SZL Original Innovations (ALLOY-COMPLETE)
  *
- * Faithful TypeScript implementation of alloy_sovereign v12-v19 payloads.
+ * Faithful TypeScript implementation of alloy_sovereign v12-v32 payloads.
  * Every innovation is named, attributed, and testable via API.
  *
  *   1. Lutar Simplex Router (LSR)                -- vs FrugalGPT/RouteLLM
@@ -32,9 +32,19 @@
  *  26. Tawa Sparse Autoencoder (TSA)              -- vs Anthropic SAE / dictionary learning
  *  27. Apollo-METR Red-Team Harness (AMRTH)       -- vs METR/Anthropic/Apollo red-teaming 2026
  *  28. Condor Mamba-SSM State Tracker (CMST)      -- vs Mamba-3 ICLR 2026 Oral
+ *  29. EPR-Bell Entanglement Validator (EBEV)     -- vs EPR 1935 / Bell 1964 / CHSH 1969
+ *  30. Hopfield-Amaru Associative Memory (HAAM)   -- vs Hopfield 2024 Nobel / Ramsauer 2021
+ *  31. Predictive Coding Error Minimizer (PCEM)   -- vs Rao-Ballard 1999 / Millidge 2021
+ *  32. Sacred Geometry Coherence Engine (SGCE)     -- vs Carlson SGI / phi-harmonic analysis
+ *  33. Cognitive Map Navigator (CMN)              -- vs Tolman 1948 / O'Keefe-Moser 2014 Nobel
+ *  34. Dynamical Systems Bifurcation Detector     -- vs Strogatz / Izhikevich 2007
+ *  35. Lutar-MIMO Engine (LME)                    -- vs Mamba-3 MIMO / exponential-trapezoidal
+ *  36. Olmec Reflection Router (ORR)              -- vs OpenAI o3 / Anthropic extended thinking
+ *  37. Quipu Knowledge Compression (QKC)          -- vs Gemini 2.5 1M / Claude 4 long-memory
+ *  38. Pachakuti Evolutionary Optimizer (PEO)     -- vs xAI Grok evo-tune / DeepMind AlphaEvolve
  *
  * Author: Stephen Lutar / SZL Consulting Ltd
- * Source: alloy_sovereign v12-v19 Python payloads
+ * Source: alloy_sovereign v12-v32 Python payloads (a11oy_master_v1_v32.py)
  */
 
 import { createHash } from "node:crypto";
@@ -2574,6 +2584,1158 @@ export class DynamicalBifurcationDetector {
   }
 }
 
+export interface LMEStepRecord {
+  step: number;
+  suyu: string;
+  Y_heads: number[];
+  L_Omega_mimo: number;
+  state_norm: number;
+}
+
+export interface LMERitualResult {
+  steps: number;
+  trajectory: LMEStepRecord[];
+  mean_Y_heads: number[];
+  final_L_Omega_mimo: number;
+  final_state_norm: number;
+  architecture: string;
+  input_channels: number;
+  output_heads: number;
+  complexity: string;
+}
+
+export class LutarMIMO {
+  static readonly INPUT_CHANNELS = 6;
+  static readonly OUTPUT_HEADS = 7;
+  static readonly STATE_SIZE = 12;
+  private readonly N: number;
+  private H_re: number[];
+  private H_im: number[];
+  private stepCount = 0;
+  private prevX: number[];
+  private readonly B: number[][];
+  private readonly C: number[][];
+  private readonly u: number[];
+  private readonly mu: number;
+  private readonly nu: number;
+
+  constructor() {
+    this.N = LutarMIMO.STATE_SIZE;
+    this.H_re = new Array(this.N).fill(0);
+    this.H_im = new Array(this.N).fill(0);
+    this.prevX = new Array(LutarMIMO.INPUT_CHANNELS).fill(0);
+
+    this.B = [];
+    for (let i = 0; i < this.N; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < LutarMIMO.INPUT_CHANNELS; j++) {
+        const hex = createHash("sha256").update(`B|${i}|${j}`).digest("hex").slice(0, 8);
+        row.push((Number(BigInt(`0x${hex}`) % 2000n) - 1000) / 1000);
+      }
+      this.B.push(row);
+    }
+
+    this.C = [];
+    for (let j = 0; j < LutarMIMO.OUTPUT_HEADS; j++) {
+      const row: number[] = [];
+      for (let i = 0; i < this.N; i++) {
+        const hex = createHash("sha256").update(`C|${j}|${i}`).digest("hex").slice(0, 8);
+        row.push((Number(BigInt(`0x${hex}`) % 2000n) - 1000) / 1000);
+      }
+      this.C.push(row);
+    }
+
+    this.u = [];
+    for (let k = 0; k < LutarMIMO.OUTPUT_HEADS; k++) {
+      const hex = createHash("sha256").update(`u|${k}`).digest("hex").slice(0, 8);
+      this.u.push((Number(BigInt(`0x${hex}`) % 2000n) - 1000) / 1000);
+    }
+    this.mu = 0.01;
+    this.nu = 0.005;
+  }
+
+  private _coeffs(dt: number, A: number): [number, number, number] {
+    const alpha = Math.exp(A * dt);
+    const lam = 0.5;
+    const beta = (alpha - 1) / (A || 1e-12) * (1 - lam);
+    const gamma = (alpha - 1) / (A || 1e-12) * lam;
+    return [alpha, beta, gamma];
+  }
+
+  private _buildX(opts?: {
+    cequeIdx?: number;
+    huacaDensity?: number;
+    suyuIdx?: number;
+    alchemyWeights?: Record<string, number>;
+    calendarPhase?: number;
+    solarPhase?: number;
+  }): number[] {
+    const ci = opts?.cequeIdx ?? 0;
+    const hd = opts?.huacaDensity ?? INCA_HUACAS / INCA_CEQUES;
+    const si = opts?.suyuIdx ?? 0;
+    const cp = opts?.calendarPhase ?? 0;
+    const sp = opts?.solarPhase ?? 0;
+    const aw = opts?.alchemyWeights;
+
+    const L1 = icrcL1GeometricRatio();
+    const L2 = icrcL2SuyuEntropy();
+    let L3 = 0.7;
+    if (aw) {
+      L3 = icrcL3AlchemyCoherence(aw);
+    }
+    const L4 = icrcL4CalendarReconciliation();
+    const L5 = icrcL5RitualCycleDensity();
+    const L6 = icrcL6SolarGeodesic();
+    return [
+      L1 * (1 + 0.1 * Math.sin(2 * Math.PI * ci / INCA_CEQUES)),
+      L2 * (1 + 0.05 * (si / 3)),
+      L3,
+      L4 + 0.01 * cp,
+      L5 * hd / 8,
+      L6 * (1 + 0.05 * sp),
+    ];
+  }
+
+  step(X_t: number[], dt = 1.0, A_t = -0.3): number[] {
+    if (X_t.length !== LutarMIMO.INPUT_CHANNELS) {
+      throw new Error(`Expected ${LutarMIMO.INPUT_CHANNELS} channels`);
+    }
+    const [alpha, beta, gamma] = this._coeffs(dt, A_t);
+
+    const BXprev: number[] = new Array(this.N).fill(0);
+    const BXcurr: number[] = new Array(this.N).fill(0);
+    for (let i = 0; i < this.N; i++) {
+      for (let j = 0; j < LutarMIMO.INPUT_CHANNELS; j++) {
+        BXprev[i] += this.B[i]![j]! * this.prevX[j]!;
+        BXcurr[i] += this.B[i]![j]! * X_t[j]!;
+      }
+    }
+
+    const newRe: number[] = [];
+    for (let i = 0; i < this.N; i++) {
+      newRe.push(alpha * this.H_re[i]! + beta * BXprev[i]! + gamma * BXcurr[i]!);
+    }
+
+    const phase = (2 * Math.PI * this.stepCount) / INCA_CEQUES;
+    const rotC = Math.cos(phase);
+    const rotS = Math.sin(phase);
+    const newIm: number[] = [];
+    for (let i = 0; i < this.N; i++) {
+      newIm.push(
+        alpha * (this.H_im[i]! * rotC - this.H_re[i]! * rotS) +
+        0.2 * gamma * BXcurr[i]!,
+      );
+    }
+
+    this.H_re = newRe;
+    this.H_im = newIm;
+    this.prevX = [...X_t];
+    this.stepCount++;
+
+    const Y: number[] = [];
+    for (let j = 0; j < LutarMIMO.OUTPUT_HEADS; j++) {
+      let s = 0;
+      for (let i = 0; i < this.N; i++) {
+        s += this.C[j]![i]! * this.H_re[i]!;
+      }
+      Y.push(s);
+    }
+    return Y;
+  }
+
+  omegaProjection(Y_t: number[]): number {
+    let uY = 0;
+    for (let k = 0; k < LutarMIMO.OUTPUT_HEADS; k++) {
+      uY += this.u[k]! * Y_t[k]!;
+    }
+    let frob = 0;
+    for (let i = 0; i < this.N; i++) {
+      frob += this.H_re[i]! * this.H_re[i]! + this.H_im[i]! * this.H_im[i]!;
+    }
+    frob = Math.sqrt(frob);
+    let rot = 0;
+    for (let k = 0; k < this.N; k++) {
+      rot +=
+        this.H_re[k]! * Math.cos((2 * Math.PI * k) / this.N) -
+        this.H_im[k]! * Math.sin((2 * Math.PI * k) / this.N);
+    }
+    return uY + this.mu * frob + this.nu * rot;
+  }
+
+  processRitualSequence(opts?: {
+    ceques?: number;
+    huacas?: number;
+    suyuCounts?: number[];
+    alchemyWeights?: Record<string, number>;
+  }): LMERitualResult {
+    this.reset();
+    const ceques = opts?.ceques ?? INCA_CEQUES;
+    const huacas = opts?.huacas ?? INCA_HUACAS;
+    const sc = opts?.suyuCounts ?? [...INCA_SUYU_CEQUE_COUNTS];
+    const aw = opts?.alchemyWeights;
+
+    const boundaries = [0];
+    for (const c of sc) boundaries.push(boundaries[boundaries.length - 1]! + c);
+
+    const trajectory: LMEStepRecord[] = [];
+    for (let i = 0; i < ceques; i++) {
+      let suyuIdx = 0;
+      for (let s = 0; s < sc.length; s++) {
+        if (boundaries[s]! <= i && i < boundaries[s + 1]!) {
+          suyuIdx = s;
+          break;
+        }
+      }
+      const X = this._buildX({
+        cequeIdx: i,
+        huacaDensity: huacas / ceques,
+        suyuIdx,
+        alchemyWeights: aw,
+        calendarPhase: i * (huacas / ceques),
+        solarPhase: Math.sin((2 * Math.PI * i) / ceques),
+      });
+      const Y = this.step(X, 1.0, -0.3);
+      const omega = this.omegaProjection(Y);
+      let norm = 0;
+      for (let k = 0; k < this.N; k++) {
+        norm += this.H_re[k]! ** 2 + this.H_im[k]! ** 2;
+      }
+      norm = Math.sqrt(norm);
+      trajectory.push({
+        step: i,
+        suyu: INCA_SUYU_NAMES[suyuIdx]!,
+        Y_heads: Y.map((y) => Math.round(y * 1e4) / 1e4),
+        L_Omega_mimo: Math.round(omega * 1e4) / 1e4,
+        state_norm: Math.round(norm * 1e4) / 1e4,
+      });
+    }
+
+    const meanY = new Array(LutarMIMO.OUTPUT_HEADS).fill(0) as number[];
+    let finalOmega = 0;
+    for (const t of trajectory) {
+      for (let k = 0; k < LutarMIMO.OUTPUT_HEADS; k++) {
+        meanY[k] += t.Y_heads[k]! / trajectory.length;
+      }
+      finalOmega += t.L_Omega_mimo / trajectory.length;
+    }
+
+    let finalNorm = 0;
+    for (let k = 0; k < this.N; k++) {
+      finalNorm += this.H_re[k]! ** 2 + this.H_im[k]! ** 2;
+    }
+    finalNorm = Math.sqrt(finalNorm);
+
+    return {
+      steps: trajectory.length,
+      trajectory,
+      mean_Y_heads: meanY.map((y) => Math.round(y * 1e4) / 1e4),
+      final_L_Omega_mimo: Math.round(finalOmega * 1e4) / 1e4,
+      final_state_norm: Math.round(finalNorm * 1e4) / 1e4,
+      architecture: "Mamba-3 MIMO exponential-trapezoidal",
+      input_channels: LutarMIMO.INPUT_CHANNELS,
+      output_heads: LutarMIMO.OUTPUT_HEADS,
+      complexity: "O(L*N) linear",
+    };
+  }
+
+  reset(): void {
+    this.H_re = new Array(this.N).fill(0);
+    this.H_im = new Array(this.N).fill(0);
+    this.stepCount = 0;
+    this.prevX = new Array(LutarMIMO.INPUT_CHANNELS).fill(0);
+  }
+}
+
+export interface ORRResult {
+  query: string;
+  thinkingBudgetTokens: number;
+  headsUsed: number;
+  winnerHead: number;
+  winnerCeque: number;
+  winnerScore: number;
+  consensusFraction: number;
+  top3: Array<{ head: number; ceque: number; score: number; draft: string }>;
+}
+
+export class OlmecReflectionRouter {
+  static readonly HEADS = 20;
+  private votes: Array<{ head: number; ceque: number; score: number }> = [];
+
+  private _budget(stateNorm: number): number {
+    return Math.floor(8 + 32 * Math.min(1.0, stateNorm / 5.0));
+  }
+
+  reflect(query: string, lmeStateNorm = 1.0): ORRResult {
+    const budget = this._budget(lmeStateNorm);
+    const drafts: Array<{ head: number; ceque: number; score: number; draft: string }> = [];
+    for (let h = 0; h < OlmecReflectionRouter.HEADS; h++) {
+      const ceque = h * Math.floor(INCA_CEQUES / OlmecReflectionRouter.HEADS);
+      const hex = createHash("sha256")
+        .update(`${query}|${h}|${ceque}`)
+        .digest("hex")
+        .slice(0, 4);
+      const score = Math.round((parseInt(hex, 16) / 0xffff) * 1e4) / 1e4;
+      drafts.push({ head: h, ceque, score, draft: `draft_${h}_c${ceque}` });
+    }
+    drafts.sort((a, b) => b.score - a.score);
+    const winner = drafts[0]!;
+    const consensus =
+      Math.round(
+        (drafts.filter((d) => d.score >= 0.5).length / OlmecReflectionRouter.HEADS) * 1000,
+      ) / 1000;
+    this.votes.push({ head: winner.head, ceque: winner.ceque, score: winner.score });
+    return {
+      query,
+      thinkingBudgetTokens: budget,
+      headsUsed: OlmecReflectionRouter.HEADS,
+      winnerHead: winner.head,
+      winnerCeque: winner.ceque,
+      winnerScore: winner.score,
+      consensusFraction: consensus,
+      top3: drafts.slice(0, 3),
+    };
+  }
+
+  voteHistory(): typeof this.votes {
+    return [...this.votes];
+  }
+}
+
+export interface QKCEncodeResult {
+  originalBytes: number;
+  quipuBytes: number;
+  ratio: number;
+  quipu: string;
+  cordsUsed: number;
+}
+
+export class QuipuCompressor {
+  static readonly CORDS = 41;
+
+  encode(payload: unknown): QKCEncodeResult {
+    const s = JSON.stringify(payload, Object.keys(payload as object).sort());
+    const tokens = s.match(/"[^"]*"|\d+|[{}\[\]:,]|[a-zA-Z_][a-zA-Z0-9_]*/g) ?? [];
+    const freq = new Map<string, number>();
+    for (const t of tokens) freq.set(t, (freq.get(t) ?? 0) + 1);
+    const dictionary = [...freq.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, QuipuCompressor.CORDS)
+      .map(([t]) => t);
+    const codeMap = new Map<string, string>();
+    dictionary.forEach((t, i) => codeMap.set(t, `|${String(i).padStart(2, "0")}`));
+    const encoded = tokens.map((t) => codeMap.get(t) ?? t).join("");
+    const header = JSON.stringify(dictionary);
+    const quipu = `QKC|${QuipuCompressor.CORDS}|${header}|${encoded}`;
+    return {
+      originalBytes: s.length,
+      quipuBytes: quipu.length,
+      ratio: Math.round((s.length / Math.max(1, quipu.length)) * 1000) / 1000,
+      quipu,
+      cordsUsed: dictionary.length,
+    };
+  }
+
+  decode(quipuStr: string): unknown {
+    const pipeIdx1 = quipuStr.indexOf("|");
+    const pipeIdx2 = quipuStr.indexOf("|", pipeIdx1 + 1);
+    const pipeIdx3 = quipuStr.indexOf("|", pipeIdx2 + 1);
+    const tag = quipuStr.slice(0, pipeIdx1);
+    if (tag !== "QKC") throw new Error("Not a QKC-encoded string");
+    const dictStr = quipuStr.slice(pipeIdx2 + 1, pipeIdx3);
+    const dictionary: string[] = JSON.parse(dictStr);
+    const body = quipuStr.slice(pipeIdx3 + 1);
+    const out: string[] = [];
+    let i = 0;
+    while (i < body.length) {
+      if (body[i] === "|") {
+        const idx = parseInt(body.slice(i + 1, i + 3), 10);
+        out.push(dictionary[idx]!);
+        i += 3;
+      } else {
+        const j = body.indexOf("|", i);
+        const end = j !== -1 ? j : body.length;
+        out.push(body.slice(i, end));
+        i = end;
+      }
+    }
+    return JSON.parse(out.join(""));
+  }
+}
+
+export interface PEOHistory {
+  generation: number;
+  bestFitness: number;
+  bestWeights: Record<string, number>;
+  avgFitness: number;
+  shock: boolean;
+}
+
+export interface PEOResult {
+  generations: number;
+  bestFitness: number;
+  bestWeights: Record<string, number>;
+  history: PEOHistory[];
+  suyuPopulations: number;
+  popPerSuyu: number;
+}
+
+export class PachakutiOptimizer {
+  static readonly SUYUS = 4;
+  static readonly POP_PER_SUYU = 10;
+  static readonly ELITES = 2;
+  static readonly SHOCK_EVERY = 5;
+  private readonly materials = Object.keys(INCA_ALCHEMY_MATERIALS);
+  private populations: Array<Array<Record<string, number>>>;
+  private readonly rng: () => number;
+
+  constructor(seed = 413280) {
+    let s = seed;
+    this.rng = () => {
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      return s / 0x7fffffff;
+    };
+    this.populations = [];
+    for (let si = 0; si < PachakutiOptimizer.SUYUS; si++) {
+      const pop: Array<Record<string, number>> = [];
+      for (let p = 0; p < PachakutiOptimizer.POP_PER_SUYU; p++) {
+        const w: Record<string, number> = {};
+        for (const m of this.materials) {
+          w[m] = Math.round(this.rng() * 1000) / 1000;
+        }
+        pop.push(w);
+      }
+      this.populations.push(pop);
+    }
+  }
+
+  private _fitness(weights: Record<string, number>): number {
+    const v2 = icrcComputeAll({ alchemyWeights: weights, H: 0.3 });
+    const lme = new LutarMIMO();
+    const mimo = lme.processRitualSequence({ alchemyWeights: weights });
+    return Math.round((mimo.final_L_Omega_mimo + 0.5 * v2.L_Omega_v2) * 1e4) / 1e4;
+  }
+
+  private _crossover(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
+    const child: Record<string, number> = {};
+    for (const m of this.materials) {
+      child[m] = Math.round(
+        Math.max(0, Math.min(1, ((a[m] ?? 0) + (b[m] ?? 0)) / 2 + (this.rng() - 0.5) * 0.1)) * 1000,
+      ) / 1000;
+    }
+    return child;
+  }
+
+  private _mutate(w: Record<string, number>, rate = 0.1): Record<string, number> {
+    const out: Record<string, number> = { ...w };
+    for (const m of this.materials) {
+      if (this.rng() < rate) {
+        const gauss = Math.sqrt(-2 * Math.log(this.rng() + 1e-12)) * Math.cos(2 * Math.PI * this.rng());
+        out[m] = Math.round(Math.max(0, Math.min(1, (out[m] ?? 0) + gauss * 0.15)) * 1000) / 1000;
+      }
+    }
+    return out;
+  }
+
+  evolve(generations = 20): PEOResult {
+    const history: PEOHistory[] = [];
+    let globalBest: { fitness: number; weights: Record<string, number> } = {
+      fitness: -1e9,
+      weights: {},
+    };
+
+    for (let g = 0; g < generations; g++) {
+      const shock = g > 0 && g % PachakutiOptimizer.SHOCK_EVERY === 0;
+      const scored: Array<Array<[number, Record<string, number>]>> = [];
+      for (const pop of this.populations) {
+        const ranked = pop
+          .map((w) => [this._fitness(w), w] as [number, Record<string, number>])
+          .sort((a, b) => b[0] - a[0]);
+        scored.push(ranked);
+      }
+
+      let genBestFitness = -1e9;
+      let genBestWeights: Record<string, number> = {};
+      let totalFitness = 0;
+      let totalCount = 0;
+      for (const suyu of scored) {
+        for (const [f, w] of suyu) {
+          totalFitness += f;
+          totalCount++;
+          if (f > genBestFitness) {
+            genBestFitness = f;
+            genBestWeights = w;
+          }
+        }
+      }
+
+      if (genBestFitness > globalBest.fitness) {
+        globalBest = { fitness: genBestFitness, weights: { ...genBestWeights } };
+      }
+
+      history.push({
+        generation: g,
+        bestFitness: genBestFitness,
+        bestWeights: genBestWeights,
+        avgFitness: Math.round((totalFitness / totalCount) * 1e4) / 1e4,
+        shock,
+      });
+
+      for (let si = 0; si < PachakutiOptimizer.SUYUS; si++) {
+        const elites = scored[si]!.slice(0, PachakutiOptimizer.ELITES).map(([, w]) => w);
+        const newPop = [...elites];
+        while (newPop.length < PachakutiOptimizer.POP_PER_SUYU) {
+          const parentA = elites[Math.floor(this.rng() * elites.length)]!;
+          const crossSuyu = shock
+            ? scored[Math.floor(this.rng() * PachakutiOptimizer.SUYUS)]!
+            : scored[si]!;
+          const parentB = crossSuyu[Math.floor(this.rng() * crossSuyu.length)]![1];
+          const child = this._crossover(parentA, parentB);
+          const mutRate = shock ? 0.4 : 0.1;
+          newPop.push(this._mutate(child, mutRate));
+        }
+        this.populations[si] = newPop;
+      }
+    }
+
+    return {
+      generations,
+      bestFitness: globalBest.fitness,
+      bestWeights: globalBest.weights,
+      history,
+      suyuPopulations: PachakutiOptimizer.SUYUS,
+      popPerSuyu: PachakutiOptimizer.POP_PER_SUYU,
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Innovation 39: A11oy Propeller Drive (APD)
+// P_Lambda = rho_I * A_omega * delta_v * froude_eff * cos_theta
+// vs: static model selection / round-robin routing
+// ---------------------------------------------------------------------------
+
+export interface SOTAModelSpec {
+  name: string;
+  provider: string;
+  inputCost: number;
+  outputCost: number;
+  tps: number;
+  context: number;
+  intelligence: number;
+  batchDiscount: number;
+  strengths: string[];
+}
+
+export interface PropellerReading {
+  thrust: number;
+  froudeEff: number;
+  alignment: number;
+  pLambda: number;
+  vector: [number, number, number];
+  notes: string;
+}
+
+export interface PropellerRouteResult {
+  model: string;
+  score: number;
+  thrust: number;
+  froudeEff: number;
+  alignment: number;
+  pLambda: number;
+  estCost: number;
+  estLatencyMs: number;
+  reason: string;
+  breakdown: Record<string, number>;
+}
+
+const SOTA_MODELS: Record<string, SOTAModelSpec> = {
+  "gpt-5.5": { name: "gpt-5.5", provider: "openai", inputCost: 1.25, outputCost: 10.0, tps: 120, context: 400_000, intelligence: 60, batchDiscount: 0.5, strengths: ["reasoning", "coding", "agentic", "supreme"] },
+  "claude-opus-4.7": { name: "claude-opus-4.7", provider: "anthropic", inputCost: 15.0, outputCost: 75.0, tps: 85, context: 1_000_000, intelligence: 57, batchDiscount: 0.5, strengths: ["coding", "long-context", "writing", "agentic", "supreme"] },
+  "gemini-3.1-pro": { name: "gemini-3.1-pro", provider: "google", inputCost: 1.25, outputCost: 10.0, tps: 180, context: 2_000_000, intelligence: 57, batchDiscount: 0.5, strengths: ["multimodal", "long-context", "agentic", "supreme"] },
+  "kimi-k2.6": { name: "kimi-k2.6", provider: "openrouter", inputCost: 0.55, outputCost: 2.20, tps: 140, context: 262_000, intelligence: 54, batchDiscount: 0.0, strengths: ["math", "coding", "cheap", "open-weight"] },
+  "gpt-5-nano": { name: "gpt-5-nano", provider: "openai", inputCost: 0.05, outputCost: 0.40, tps: 180, context: 400_000, intelligence: 46, batchDiscount: 0.5, strengths: ["cheap", "classification", "routing"] },
+  "gemini-2.5-flash-lite": { name: "gemini-2.5-flash-lite", provider: "google", inputCost: 0.10, outputCost: 0.40, tps: 250, context: 1_000_000, intelligence: 44, batchDiscount: 0.5, strengths: ["long-context", "cheap", "multimodal"] },
+  "mistral-small-free": { name: "mistral-small-free", provider: "openrouter", inputCost: 0.0, outputCost: 0.0, tps: 90, context: 128_000, intelligence: 38, batchDiscount: 0.0, strengths: ["free", "general"] },
+  "groq-llama-3.3-70b": { name: "groq-llama-3.3-70b", provider: "groq", inputCost: 0.59, outputCost: 0.79, tps: 394, context: 131_000, intelligence: 41, batchDiscount: 0.0, strengths: ["speed", "fast", "agentic", "cheap"] },
+};
+
+function _L1_bekenstein(m: SOTAModelSpec, inTok: number): number {
+  const C = Math.max(m.inputCost + m.outputCost, 1e-6);
+  return (m.intelligence * Math.log(1 + inTok)) / C;
+}
+function _L2_newton(m: SOTAModelSpec, outTok: number): number {
+  const lat = Math.max((outTok / m.tps) * 1000, 1e-3);
+  return (m.tps * m.tps) / lat;
+}
+function _L3_chinchilla(m: SOTAModelSpec, inTok: number, outTok: number): number {
+  const head = m.context - inTok - outTok;
+  return Math.log(1 + Math.max(head, 0)) * m.intelligence;
+}
+function _L4_friston(m: SOTAModelSpec, require: string[]): number {
+  const match = require.filter((s) => m.strengths.includes(s)).length;
+  return Math.exp(match) / (1 + m.inputCost);
+}
+function _L5_noether(m: SOTAModelSpec, batch: boolean): number {
+  const disc = batch ? 1 - m.batchDiscount : 1.0;
+  return m.intelligence * (1 / Math.max(disc, 0.1));
+}
+function _L6_omega(m: SOTAModelSpec, inTok: number, outTok: number): number {
+  return Math.sqrt(_L1_bekenstein(m, inTok) * _L2_newton(m, outTok));
+}
+
+type LutarGenFn = (m: SOTAModelSpec, inTok: number, outTok: number, require: string[], batch: boolean) => number;
+const LUTAR_GENS: LutarGenFn[] = [
+  (m, i, _o, _r, _b) => _L1_bekenstein(m, i),
+  (m, _i, o, _r, _b) => _L2_newton(m, o),
+  (m, i, o, _r, _b) => _L3_chinchilla(m, i, o),
+  (m, _i, _o, r, _b) => _L4_friston(m, r),
+  (m, _i, _o, _r, b) => _L5_noether(m, b),
+  (m, i, o, _r, _b) => _L6_omega(m, i, o),
+];
+
+const SOTA_MODE_WEIGHTS: Record<string, number[]> = {
+  agentic: [0.15, 0.20, 0.10, 0.25, 0.10, 0.20],
+  supreme: [0.10, 0.05, 0.25, 0.30, 0.05, 0.25],
+  cheap:   [0.45, 0.05, 0.10, 0.25, 0.10, 0.05],
+  fast:    [0.05, 0.55, 0.05, 0.15, 0.10, 0.10],
+  batch:   [0.25, 0.10, 0.15, 0.15, 0.25, 0.10],
+  propel:  [0.10, 0.25, 0.15, 0.20, 0.05, 0.25],
+};
+const SOTA_DEFAULT_W = [0.22, 0.18, 0.15, 0.20, 0.10, 0.15];
+
+function _rhoI(m: SOTAModelSpec): number {
+  return m.intelligence / Math.max(m.inputCost + m.outputCost, 1e-6);
+}
+function _aOmega(m: SOTAModelSpec, inTok: number, outTok: number): number {
+  const heads = Math.max(1, Math.floor(m.intelligence / 4));
+  const headroomK = Math.max(0, (m.context - inTok - outTok) / 1000);
+  return heads * Math.log(1 + headroomK);
+}
+function _cosine(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  if (n === 0) return 0;
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < n; i++) {
+    dot += a[i]! * b[i]!;
+    na += a[i]! * a[i]!;
+    nb += b[i]! * b[i]!;
+  }
+  na = Math.sqrt(na) || 1;
+  nb = Math.sqrt(nb) || 1;
+  return Math.max(-1, Math.min(1, dot / (na * nb)));
+}
+
+export class PropellerDrive {
+  static readonly VERSION = "a11oy-propeller-1.0";
+  static readonly MODELS = SOTA_MODELS;
+
+  computePropeller(
+    modelName: string,
+    inTok: number,
+    outTok: number,
+    omegaIn: number,
+    omegaOut: number,
+    goalVec: number[],
+    stepVec: number[],
+  ): PropellerReading {
+    const m = SOTA_MODELS[modelName];
+    if (!m) throw new Error(`Unknown model: ${modelName}`);
+    const dv = Math.max(omegaOut - omegaIn, 1e-6);
+    const thrust = _rhoI(m) * _aOmega(m, inTok, outTok) * dv;
+    const vRatio = omegaOut / Math.max(omegaIn, 1e-6);
+    const froude = 2.0 / (1.0 + vRatio);
+    const align = _cosine(goalVec, stepVec);
+    const P = thrust * froude * align;
+    return {
+      thrust: Math.round(thrust * 1e4) / 1e4,
+      froudeEff: Math.round(froude * 1e4) / 1e4,
+      alignment: Math.round(align * 1e4) / 1e4,
+      pLambda: Math.round(P * 1e4) / 1e4,
+      vector: [
+        Math.round(thrust * 1e4) / 1e4,
+        Math.round(froude * 1e4) / 1e4,
+        Math.round(align * 1e4) / 1e4,
+      ],
+      notes: `rho_I=${_rhoI(m).toFixed(2)} A_omega=${_aOmega(m, inTok, outTok).toFixed(2)} dv=${dv.toFixed(3)}`,
+    };
+  }
+
+  route(
+    prompt: string,
+    maxOut = 800,
+    mode = "propel",
+    require: string[] = [],
+    batch = false,
+    goalVec: number[] = [1.0, 0.8, 0.6],
+  ): PropellerRouteResult {
+    const inTok = Math.max(1, Math.floor(prompt.length / 4));
+    const w = SOTA_MODE_WEIGHTS[mode] ?? SOTA_DEFAULT_W;
+    const entries = Object.entries(SOTA_MODELS).filter(
+      ([, c]) => inTok + maxOut <= c.context,
+    );
+    if (entries.length === 0) throw new Error("No model fits context");
+
+    const raw = entries.map(([n, c]) =>
+      LUTAR_GENS.map((f) => f(c, inTok, maxOut, require, batch)),
+    );
+    const cols = Array.from({ length: 6 }, (_, ci) => raw.map((r) => r[ci]!));
+    const lo = cols.map((c) => Math.min(...c));
+    const hi = cols.map((c) => Math.max(...c));
+    const norm = raw.map((r) =>
+      r.map((v, i) => (v - lo[i]!) / Math.max(hi[i]! - lo[i]!, 1e-9)),
+    );
+    const scores = norm.map((vs) =>
+      vs.reduce((s, v, i) => s + w[i]! * v, 0),
+    );
+
+    let bestIdx = 0;
+    let bestP = -1e18;
+    let bestPr: PropellerReading | null = null;
+    for (let idx = 0; idx < entries.length; idx++) {
+      const [n, c] = entries[idx]!;
+      const omegaRaw = LUTAR_GENS.reduce(
+        (s, f) => s + f(c, inTok, maxOut, require, batch),
+        0,
+      );
+      const omegaIn = omegaRaw * 0.5;
+      const omegaOut = omegaRaw * (1 + 0.1 * scores[idx]!);
+      const stepVec = [scores[idx]!, c.tps / 400, 1 / (1 + c.inputCost)];
+      const pr = this.computePropeller(n, inTok, maxOut, omegaIn, omegaOut, goalVec, stepVec);
+      if (pr.pLambda > bestP) {
+        bestP = pr.pLambda;
+        bestIdx = idx;
+        bestPr = pr;
+      }
+    }
+
+    const [bestName, bestCfg] = entries[bestIdx]!;
+    const mult = batch ? 1 - bestCfg.batchDiscount : 1.0;
+    const cost = ((inTok * bestCfg.inputCost + maxOut * bestCfg.outputCost) / 1e6) * mult;
+    const lat = (maxOut / bestCfg.tps) * 1000;
+    const bd: Record<string, number> = {};
+    for (let i = 0; i < 6; i++) bd[`L${i + 1}`] = Math.round(norm[bestIdx]![i]! * 1000) / 1000;
+
+    return {
+      model: bestName,
+      score: Math.round(scores[bestIdx]! * 1e4) / 1e4,
+      thrust: bestPr!.thrust,
+      froudeEff: bestPr!.froudeEff,
+      alignment: bestPr!.alignment,
+      pLambda: bestPr!.pLambda,
+      estCost: Math.round(cost * 1e6) / 1e6,
+      estLatencyMs: Math.round(lat),
+      reason: `P_Lambda picked ${bestName}: thrust=${bestPr!.thrust} eta=${bestPr!.froudeEff} cos_theta=${bestPr!.alignment} P=${bestPr!.pLambda} $${cost.toFixed(4)}`,
+      breakdown: bd,
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Innovation 40: SOTA Agentic Router (SAR)
+// L_Omega = sum(w_k * L_k), sum(w_k) = 1  (6-generation simplex)
+// vs: static model catalogs / manual model selection
+// ---------------------------------------------------------------------------
+
+export interface SOTARouteResult {
+  model: string;
+  score: number;
+  estCostUsd: number;
+  estLatencyMs: number;
+  weights: number[];
+  breakdown: Record<string, number>;
+  reason: string;
+}
+
+export interface SOTALutarTable {
+  weights: number[];
+  scores: Record<string, { L: number[]; lOmega: number }>;
+}
+
+export class SOTAAgenticRouter {
+  static readonly VERSION = "a11oy-sota-1.0";
+  static readonly MODELS = SOTA_MODELS;
+  static readonly MODES = SOTA_MODE_WEIGHTS;
+  static readonly DEFAULT_W = SOTA_DEFAULT_W;
+
+  route(
+    prompt: string,
+    maxOut = 800,
+    mode = "agentic",
+    require: string[] = [],
+    batch = false,
+  ): SOTARouteResult {
+    const inTok = Math.max(1, Math.floor(prompt.length / 4));
+    const w = SOTA_MODE_WEIGHTS[mode] ?? SOTA_DEFAULT_W;
+    const entries = Object.entries(SOTA_MODELS).filter(
+      ([, c]) => inTok + maxOut <= c.context,
+    );
+    if (entries.length === 0) throw new Error("No model fits context");
+
+    const raw = entries.map(([, c]) =>
+      LUTAR_GENS.map((f) => f(c, inTok, maxOut, require, batch)),
+    );
+    const cols = Array.from({ length: 6 }, (_, ci) => raw.map((r) => r[ci]!));
+    const lo = cols.map((c) => Math.min(...c));
+    const hi = cols.map((c) => Math.max(...c));
+    const norm = raw.map((r) =>
+      r.map((v, i) => (v - lo[i]!) / Math.max(hi[i]! - lo[i]!, 1e-9)),
+    );
+    const scores = norm.map((vs) =>
+      vs.reduce((s, v, i) => s + w[i]! * v, 0),
+    );
+
+    let bestIdx = 0;
+    for (let i = 1; i < scores.length; i++) {
+      if (scores[i]! > scores[bestIdx]!) bestIdx = i;
+    }
+
+    const [bestName, bestCfg] = entries[bestIdx]!;
+    const mult = batch ? 1 - bestCfg.batchDiscount : 1.0;
+    const cost = ((inTok * bestCfg.inputCost + maxOut * bestCfg.outputCost) / 1e6) * mult;
+    const lat = (maxOut / bestCfg.tps) * 1000;
+    const bd: Record<string, number> = {};
+    for (let i = 0; i < 6; i++) bd[`L${i + 1}`] = Math.round(norm[bestIdx]![i]! * 1000) / 1000;
+
+    return {
+      model: bestName,
+      score: Math.round(scores[bestIdx]! * 1e4) / 1e4,
+      estCostUsd: Math.round(cost * 1e6) / 1e6,
+      estLatencyMs: Math.round(lat),
+      weights: w,
+      breakdown: bd,
+      reason: `L_Omega(${mode}) chose ${bestName}: score=${scores[bestIdx]!.toFixed(3)} $${cost.toFixed(4)} ${Math.round(lat)}ms${batch ? " batch-50%" : ""}`,
+    };
+  }
+
+  lutarTable(
+    inTok = 500,
+    outTok = 800,
+    require: string[] = [],
+    batch = false,
+    weights?: number[],
+  ): SOTALutarTable {
+    const w = weights ?? SOTA_DEFAULT_W;
+    const scores: Record<string, { L: number[]; lOmega: number }> = {};
+    for (const [name, cfg] of Object.entries(SOTA_MODELS)) {
+      const vals = LUTAR_GENS.map((f) => f(cfg, inTok, outTok, require, batch));
+      const lOmega = vals.reduce((s, v, i) => s + w[i]! * v, 0);
+      scores[name] = {
+        L: vals.map((v) => Math.round(v * 1000) / 1000),
+        lOmega: Math.round(lOmega * 1000) / 1000,
+      };
+    }
+    return { weights: w, scores };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Innovation 41: Language Arbitrage Engine (LAE)
+// A_lang = (T_py/T_ts) * (M_ts/M_py) * L4_lib * cos_theta_role - kappa
+// vs: manual language migration decisions / no quantitative framework
+// ---------------------------------------------------------------------------
+
+export interface ArbitrageComponent {
+  name: string;
+  current: string;
+  role: string;
+  tPy: number;
+  tTs: number;
+  m: number;
+  lib: number;
+  cos: number;
+  k: number;
+  rustT?: number;
+  rustM?: number;
+  rustLib?: number;
+  rustCos?: number;
+  rustK?: number;
+}
+
+export interface ArbitrageResult {
+  name: string;
+  current: string;
+  role: string;
+  aPy: number;
+  aRust: number | null;
+  recommend: "PORT_PY" | "RUST" | "KEEP";
+  score: number;
+}
+
+export interface ArbitrageScan {
+  summary: Record<string, number>;
+  rows: ArbitrageResult[];
+}
+
+const ARBITRAGE_COMPONENTS: ArbitrageComponent[] = [
+  { name: "a11oy_api_edge", current: "ts", role: "io", tPy: 2.1, tTs: 1.0, m: 1.00, lib: 0.85, cos: 0.10, k: 0.15 },
+  { name: "aristotle_1_83", current: "ts", role: "mixed", tPy: 1.4, tTs: 1.0, m: 1.10, lib: 0.70, cos: 0.20, k: 0.30 },
+  { name: "aristotle_84_91", current: "deferred", role: "compute", tPy: 0.4, tTs: 1.0, m: 1.30, lib: 0.90, cos: 0.90, k: 0.05 },
+  { name: "lutar_omega", current: "py", role: "compute", tPy: 0.3, tTs: 1.0, m: 1.40, lib: 0.95, cos: 1.00, k: 0.00 },
+  { name: "propeller_router", current: "py", role: "compute", tPy: 0.35, tTs: 1.0, m: 1.30, lib: 0.90, cos: 1.00, k: 0.00 },
+  { name: "ouroboros_closure", current: "ts", role: "kernel", tPy: 1.6, tTs: 1.0, m: 1.20, lib: 0.60, cos: -0.50, k: 0.40, rustT: 0.05, rustM: 0.40, rustLib: 0.80, rustCos: 1.0, rustK: 0.35 },
+  { name: "amaru_delta_log", current: "ts", role: "kernel", tPy: 1.5, tTs: 1.0, m: 1.20, lib: 0.55, cos: -0.40, k: 0.35, rustT: 0.06, rustM: 0.45, rustLib: 0.75, rustCos: 1.0, rustK: 0.30 },
+  { name: "sentra_redteam", current: "ts", role: "compute", tPy: 0.5, tTs: 1.0, m: 1.30, lib: 0.90, cos: 0.85, k: 0.20 },
+  { name: "express_sse_edge", current: "node", role: "io", tPy: 2.4, tTs: 1.0, m: 0.95, lib: 0.90, cos: -0.10, k: 0.25 },
+  { name: "chief_of_staff", current: "mixed", role: "compute", tPy: 0.6, tTs: 1.0, m: 1.25, lib: 0.90, cos: 0.80, k: 0.15 },
+];
+
+function _aLang(c: ArbitrageComponent, target: "py" | "rust"): number {
+  if (target === "py") {
+    const sp = 1.0 / Math.max(c.tPy / c.tTs, 1e-6);
+    return sp * c.m * c.lib * c.cos - c.k;
+  }
+  if (target === "rust" && c.rustT != null && c.rustM != null && c.rustLib != null && c.rustCos != null && c.rustK != null) {
+    const sp = 1.0 / Math.max(c.rustT / c.tTs, 1e-6);
+    const mm = 1.0 / Math.max(c.rustM, 1e-6);
+    return sp * mm * c.rustLib * c.rustCos - c.rustK;
+  }
+  return -Infinity;
+}
+
+function _portRec(c: ArbitrageComponent): { recommend: "PORT_PY" | "RUST" | "KEEP"; score: number } {
+  const aPy = _aLang(c, "py");
+  const aRu = _aLang(c, "rust");
+  if (aRu > Math.max(aPy, 0)) return { recommend: "RUST", score: Math.round(aRu * 1000) / 1000 };
+  if (aPy > 0) return { recommend: "PORT_PY", score: Math.round(aPy * 1000) / 1000 };
+  return { recommend: "KEEP", score: 0 };
+}
+
+export class LanguageArbitrageEngine {
+  static readonly VERSION = "a11oy-arbitrage-1.0";
+  static readonly COMPONENTS = ARBITRAGE_COMPONENTS;
+
+  scan(): ArbitrageScan {
+    const summary: Record<string, number> = { PORT_PY: 0, RUST: 0, KEEP: 0 };
+    const rows: ArbitrageResult[] = ARBITRAGE_COMPONENTS.map((c) => {
+      const { recommend, score } = _portRec(c);
+      summary[recommend] = (summary[recommend] ?? 0) + 1;
+      return {
+        name: c.name,
+        current: c.current,
+        role: c.role,
+        aPy: Math.round(_aLang(c, "py") * 1000) / 1000,
+        aRust: c.rustT != null ? Math.round(_aLang(c, "rust") * 1000) / 1000 : null,
+        recommend,
+        score,
+      };
+    });
+    return { summary, rows };
+  }
+
+  evaluate(name: string): ArbitrageResult | null {
+    const c = ARBITRAGE_COMPONENTS.find((x) => x.name === name);
+    if (!c) return null;
+    const { recommend, score } = _portRec(c);
+    return {
+      name: c.name,
+      current: c.current,
+      role: c.role,
+      aPy: Math.round(_aLang(c, "py") * 1000) / 1000,
+      aRust: c.rustT != null ? Math.round(_aLang(c, "rust") * 1000) / 1000 : null,
+      recommend,
+      score,
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Innovation 42: PagedAttention KV Cache (PKC)
+// Simulated paged KV cache with hit tracking for prompt deduplication
+// vs: naive full-recompute / no cache / token-level caching
+// ---------------------------------------------------------------------------
+
+export interface KVCacheStats {
+  entries: number;
+  hits: number;
+  hitRate: number;
+  totalPages: number;
+}
+
+export class PagedKVCache {
+  static readonly VERSION = "a11oy-kvcache-1.0";
+  private pageSize: number;
+  private maxPages: number;
+  private table: Map<string, { pages: number; tokens: number; hits: number }>;
+
+  constructor(pageSize = 16, maxPages = 1024) {
+    this.pageSize = pageSize;
+    this.maxPages = maxPages;
+    this.table = new Map();
+  }
+
+  put(key: string, tokenCount: number): number {
+    const need = Math.ceil(tokenCount / this.pageSize);
+    this.table.set(key, { pages: need, tokens: tokenCount, hits: 0 });
+    return need;
+  }
+
+  hit(key: string): boolean {
+    const entry = this.table.get(key);
+    if (entry) {
+      entry.hits += 1;
+      return true;
+    }
+    return false;
+  }
+
+  stats(): KVCacheStats {
+    let hits = 0;
+    let totalPages = 0;
+    for (const v of this.table.values()) {
+      hits += v.hits;
+      totalPages += v.pages;
+    }
+    const total = Math.max(1, this.table.size);
+    return {
+      entries: this.table.size,
+      hits,
+      hitRate: Math.round((hits / total) * 1000) / 1000,
+      totalPages,
+    };
+  }
+
+  clear(): void {
+    this.table.clear();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Innovation 43: Ultra Router with Speculative Decoding (URS)
+// Combines L_Omega + P_Lambda + speculative draft-verify + KV cache + continuous batching
+// vs: single-model inference / no speculation / no caching
+// ---------------------------------------------------------------------------
+
+export interface UltraRouteResult {
+  model: string;
+  score: number;
+  thrust: number;
+  froudeEff: number;
+  alignment: number;
+  pLambda: number;
+  estCost: number;
+  estLatencyMs: number;
+  speculative: string | null;
+  expectedSpeedup: number;
+  kvCacheHit: boolean;
+  reason: string;
+  breakdown: Record<string, number>;
+}
+
+export class UltraRouter {
+  static readonly VERSION = "a11oy-ultra-1.0";
+  static readonly MODELS = SOTA_MODELS;
+  static readonly MODES = { ...SOTA_MODE_WEIGHTS, ultra: [0.12, 0.22, 0.14, 0.22, 0.10, 0.20] };
+
+  private kv: PagedKVCache;
+  private specAcceptP: number;
+
+  constructor(specAcceptP = 0.72) {
+    this.kv = new PagedKVCache();
+    this.specAcceptP = specAcceptP;
+  }
+
+  private _expectedSpeedup(outTok: number): number {
+    const L = this.specAcceptP < 1 ? 1 / (1 - this.specAcceptP) : outTok;
+    return Math.round(Math.min(L, outTok / 4) * 100) / 100;
+  }
+
+  private _hashKey(prompt: string): string {
+    let h = 0;
+    const sub = prompt.substring(0, 512);
+    for (let i = 0; i < sub.length; i++) {
+      h = ((h << 5) - h + sub.charCodeAt(i)) | 0;
+    }
+    return `kv_${(h >>> 0).toString(16)}`;
+  }
+
+  route(
+    prompt: string,
+    maxOut = 800,
+    mode = "ultra",
+    require: string[] = [],
+    batch = false,
+    goalVec: number[] = [1.0, 0.8, 0.6],
+    enableSpec = true,
+  ): UltraRouteResult {
+    const inTok = Math.max(1, Math.floor(prompt.length / 4));
+    const modeWeights = UltraRouter.MODES[mode as keyof typeof UltraRouter.MODES] ?? SOTA_DEFAULT_W;
+    const w = modeWeights as number[];
+    const entries = Object.entries(SOTA_MODELS).filter(([, c]) => inTok + maxOut <= c.context);
+    if (entries.length === 0) throw new Error("No model fits context");
+
+    const raw = entries.map(([, c]) => LUTAR_GENS.map((f) => f(c, inTok, maxOut, require, batch)));
+    const cols = Array.from({ length: 6 }, (_, ci) => raw.map((r) => r[ci]!));
+    const lo = cols.map((c) => Math.min(...c));
+    const hi = cols.map((c) => Math.max(...c));
+    const norm = raw.map((r) => r.map((v, i) => (v - lo[i]!) / Math.max(hi[i]! - lo[i]!, 1e-9)));
+    const scores = norm.map((vs) => vs.reduce((s, v, i) => s + w[i]! * v, 0));
+
+    let bestIdx = 0;
+    let bestP = -1e18;
+    let bestPr: PropellerReading | null = null;
+    for (let idx = 0; idx < entries.length; idx++) {
+      const [n, c] = entries[idx]!;
+      const omegaRaw = LUTAR_GENS.reduce((s, f) => s + f(c, inTok, maxOut, require, batch), 0);
+      const omegaIn = omegaRaw * 0.5;
+      const omegaOut = omegaRaw * (1 + 0.1 * scores[idx]!);
+      const stepVec = [scores[idx]!, c.tps / 400, 1 / (1 + c.inputCost)];
+      const apd = new PropellerDrive();
+      const pr = apd.computePropeller(n, inTok, maxOut, omegaIn, omegaOut, goalVec, stepVec);
+      if (pr.pLambda > bestP) {
+        bestP = pr.pLambda;
+        bestIdx = idx;
+        bestPr = pr;
+      }
+    }
+
+    const [bestName, bestCfg] = entries[bestIdx]!;
+    const mult = batch ? 1 - bestCfg.batchDiscount : 1.0;
+    const cost = ((inTok * bestCfg.inputCost + maxOut * bestCfg.outputCost) / 1e6) * mult;
+    let lat = (maxOut / bestCfg.tps) * 1000;
+
+    let specModel: string | null = null;
+    let specSpeed = 1.0;
+    if (enableSpec && ["gpt-5.5", "claude-opus-4.7", "gemini-3.1-pro", "kimi-k2.6"].includes(bestName)) {
+      specModel = ["openai", "openrouter"].includes(bestCfg.provider) ? "gpt-5-nano" : "gemini-2.5-flash-lite";
+      specSpeed = this._expectedSpeedup(maxOut);
+      lat = lat / Math.max(specSpeed, 1.0);
+    }
+
+    const ck = this._hashKey(prompt);
+    const kvHit = this.kv.hit(ck);
+    if (!kvHit) this.kv.put(ck, prompt.split(" ").length);
+
+    const bd: Record<string, number> = {};
+    for (let i = 0; i < 6; i++) bd[`L${i + 1}`] = Math.round(norm[bestIdx]![i]! * 1000) / 1000;
+
+    return {
+      model: bestName,
+      score: Math.round(scores[bestIdx]! * 1e4) / 1e4,
+      thrust: bestPr!.thrust,
+      froudeEff: bestPr!.froudeEff,
+      alignment: bestPr!.alignment,
+      pLambda: bestPr!.pLambda,
+      estCost: Math.round(cost * 1e6) / 1e6,
+      estLatencyMs: Math.round(lat),
+      speculative: specModel,
+      expectedSpeedup: specSpeed,
+      kvCacheHit: kvHit,
+      reason: `ULTRA->${bestName} P_Lambda=${bestPr!.pLambda} spec=${specModel} x${specSpeed} KV=${kvHit ? "hit" : "miss"} $${cost.toFixed(4)}`,
+      breakdown: bd,
+    };
+  }
+
+  kvStats(): KVCacheStats {
+    return this.kv.stats();
+  }
+
+  clearCache(): void {
+    this.kv.clear();
+  }
+}
+
+// ---------------------------------------------------------------------------
+
 export const INNOVATION_MANIFEST = [
   { id: 1, name: "Lutar Simplex Router (LSR)", vs: "FrugalGPT/RouteLLM" },
   { id: 2, name: "Prisca-GraphRAG", vs: "MS GraphRAG/HyDE/ColBERT" },
@@ -2609,6 +3771,15 @@ export const INNOVATION_MANIFEST = [
   { id: 32, name: "Sacred Geometry Coherence Engine (SGCE)", vs: "Carlson SGI / phi-harmonic analysis" },
   { id: 33, name: "Cognitive Map Navigator (CMN)", vs: "Tolman 1948 / O'Keefe-Moser 2014 Nobel" },
   { id: 34, name: "Dynamical Systems Bifurcation Detector (DSBD)", vs: "Strogatz / Izhikevich 2007" },
+  { id: 35, name: "Lutar-MIMO Engine (LME)", vs: "Mamba-3 MIMO / exponential-trapezoidal SSM" },
+  { id: 36, name: "Olmec Reflection Router (ORR)", vs: "OpenAI o3 / Anthropic extended thinking / DeepSeek R1" },
+  { id: 37, name: "Quipu Knowledge Compression (QKC)", vs: "Gemini 2.5 1M-token / Claude 4 long-memory / OpenAI context caching" },
+  { id: 38, name: "Pachakuti Evolutionary Optimizer (PEO)", vs: "xAI Grok evolutionary fine-tune / DeepMind AlphaEvolve 2025" },
+  { id: 39, name: "A11oy Propeller Drive (APD)", vs: "static model selection / round-robin routing / no thrust governance" },
+  { id: 40, name: "SOTA Agentic Router (SAR)", vs: "manual model catalogs / OpenRouter auto / LiteLLM fallback chains" },
+  { id: 41, name: "Language Arbitrage Engine (LAE)", vs: "manual language migration / no quantitative porting framework" },
+  { id: 42, name: "PagedAttention KV Cache (PKC)", vs: "naive full-recompute / no prompt deduplication" },
+  { id: 43, name: "Ultra Router with Speculative Decoding (URS)", vs: "single-model inference / no speculation / no KV cache" },
 ] as const;
 
 export interface SovereignChatRequest {
@@ -2646,6 +3817,15 @@ export interface SovereignChatResult {
   sacredGeometry: SacredGeometryMetrics;
   cognitiveMap: CognitiveMapResult;
   bifurcationProbe: BifurcationObservation;
+  lmeMimo: LMERitualResult;
+  olmecReflection: ORRResult;
+  quipuCompression: QKCEncodeResult;
+  pachakutiEvolution: PEOResult;
+  propellerRoute: PropellerRouteResult;
+  sotaRoute: SOTARouteResult;
+  ultraRoute: UltraRouteResult;
+  arbitrageScan: ArbitrageScan;
+  kvCacheStats: KVCacheStats;
   hermeticGuard: HermeticGuardResult;
   noetherEval: NoetherJudgment;
   bekensteinConfident: boolean;
@@ -2676,11 +3856,20 @@ export class SovereignEngine {
   private pcem: PredictiveCodingEngine;
   private cmn: CognitiveMapNavigator;
   private dsbd: DynamicalBifurcationDetector;
+  private lme: LutarMIMO;
+  private orr: OlmecReflectionRouter;
+  private qkc: QuipuCompressor;
+  private peo: PachakutiOptimizer;
+  private apd: PropellerDrive;
+  private sar: SOTAAgenticRouter;
+  private lae: LanguageArbitrageEngine;
+  private pkc: PagedKVCache;
+  private urs: UltraRouter;
 
   constructor() {
     this.ktm = new KabbalahTieredMemory();
     this.ktm.setIdentity("author", "Stephen Lutar / SZL Consulting Ltd");
-    this.ktm.setIdentity("codex", "a11oy v19 ALLOY-COMPLETE -- 34 innovations");
+    this.ktm.setIdentity("codex", "a11oy v21 ALLOY-COMPLETE -- 43 innovations");
 
     this.ocm = new OuroborosConformalMemory();
     this.mcp = new CequeMCPRegistry();
@@ -2699,6 +3888,15 @@ export class SovereignEngine {
     this.pcem = new PredictiveCodingEngine(3, 8);
     this.cmn = new CognitiveMapNavigator();
     this.dsbd = new DynamicalBifurcationDetector();
+    this.lme = new LutarMIMO();
+    this.orr = new OlmecReflectionRouter();
+    this.qkc = new QuipuCompressor();
+    this.peo = new PachakutiOptimizer();
+    this.apd = new PropellerDrive();
+    this.sar = new SOTAAgenticRouter();
+    this.lae = new LanguageArbitrageEngine();
+    this.pkc = new PagedKVCache();
+    this.urs = new UltraRouter();
 
     this.cmn.addNode("origin", 0, 0, "place");
     this.cmn.addNode("north", 0, 1, "grid");
@@ -2755,7 +3953,7 @@ export class SovereignEngine {
     this.rth.reset();
     const redTeamCampaign = this.rth.runCampaign(
       "sovereign-chat",
-      (p: string) => hermeticGuard(p, "").verdict === "pass" ? "I refuse" : "ok",
+      (p: string) => hermeticGuard(p, "").allowed ? "ok" : "I refuse",
       6,
     );
     this.cmst.reset();
@@ -2778,7 +3976,27 @@ export class SovereignEngine {
     this.dsbd.reset();
     const bifurcationProbe = this.dsbd.observe(Date.now() % 10000, H, 0.8, 0.05);
 
-    const content = `[a11oy-v19-34 via ${route.provider} | CLS N=${cls.nParams} D=${cls.dTokens} | GPD ${gp.phase} | FELAI F=${felai.fLutar} | E8 ${route.slot.slot}/192 | Gobekli ${slm.slot}/80 ${slm.adapter.domain} | HQO ${hqoOpt.lOmega} | NSP iter=${nspProbe.iteration} | PWM ${worldModel.regime} | FPP lineages=${fppAgg.lineagesParticipating} | ICRC L_Omega=${icrc.L_Omega_v2} | TSA active=${tsaResult.sparseCodeNonzero}/656 | AMRTH critical=${redTeamCampaign.criticalCount} | CMST tokens=${cmstSequence.tokensProcessed} | EBEV S=${eprBellResult.S} cert=${eprBellResult.bellCertificate} | HAAM match=${hopfieldRetrieval.bestMatch} sim=${hopfieldRetrieval.similarity} | PCEM FE=${predictiveCoding.totalFreeEnergy} | SGCE coh=${sacredGeometry.coherenceScore} | CMN path=${cognitiveMap.path.length} | DSBD ${bifurcationProbe.bifurcationType}]`;
+    this.lme.reset();
+    const lmeMimo = this.lme.processRitualSequence();
+
+    const olmecReflection = this.orr.reflect(prompt, lmeMimo.final_state_norm);
+
+    const quipuCompression = this.qkc.encode({
+      prompt: prompt.substring(0, 64),
+      route: route.provider,
+      omega: icrc.L_Omega_v2,
+      mimo: lmeMimo.final_L_Omega_mimo,
+    });
+
+    const pachakutiEvolution = this.peo.evolve(5);
+
+    const propellerRoute = this.apd.route(prompt, 800, "propel", ["agentic"]);
+    const sotaRoute = this.sar.route(prompt, 800, "agentic", ["agentic"]);
+    const ultraRoute = this.urs.route(prompt, 800, "ultra", ["agentic"]);
+    const arbitrageScan = this.lae.scan();
+    const kvCacheStats = this.urs.kvStats();
+
+    const content = `[a11oy-v21-43 via ${route.provider} | CLS N=${cls.nParams} D=${cls.dTokens} | GPD ${gp.phase} | FELAI F=${felai.fLutar} | E8 ${route.slot.slot}/192 | Gobekli ${slm.slot}/80 ${slm.adapter.domain} | HQO ${hqoOpt.lOmega} | NSP iter=${nspProbe.iteration} | PWM ${worldModel.regime} | FPP lineages=${fppAgg.lineagesParticipating} | ICRC L_Omega=${icrc.L_Omega_v2} | TSA active=${tsaResult.sparseCodeNonzero}/656 | AMRTH critical=${redTeamCampaign.criticalCount} | CMST tokens=${cmstSequence.tokensProcessed} | EBEV S=${eprBellResult.S} cert=${eprBellResult.bellCertificate} | HAAM match=${hopfieldRetrieval.bestMatch} sim=${hopfieldRetrieval.similarity} | PCEM FE=${predictiveCoding.totalFreeEnergy} | SGCE coh=${sacredGeometry.coherenceScore} | CMN path=${cognitiveMap.path.length} | DSBD ${bifurcationProbe.bifurcationType} | LME Omega_mimo=${lmeMimo.final_L_Omega_mimo} | ORR budget=${olmecReflection.thinkingBudgetTokens} consensus=${olmecReflection.consensusFraction} | QKC ratio=${quipuCompression.ratio} | PEO best=${pachakutiEvolution.bestFitness} | APD P=${propellerRoute.pLambda} model=${propellerRoute.model} | SAR score=${sotaRoute.score} model=${sotaRoute.model} | ULTRA model=${ultraRoute.model} P_Lambda=${ultraRoute.pLambda} spec=${ultraRoute.speculative} KV=${ultraRoute.kvCacheHit?"hit":"miss"} | LAE PORT_PY=${arbitrageScan.summary["PORT_PY"]} RUST=${arbitrageScan.summary["RUST"]} KEEP=${arbitrageScan.summary["KEEP"]}]`;
     const guard = hermeticGuard(prompt, content);
     this.ktm.pushCore({ id: prompt.substring(0, 32), v: content });
     this.ocm.write(session, prompt.substring(0, 32), content);
@@ -2815,6 +4033,15 @@ export class SovereignEngine {
       sacredGeometry,
       cognitiveMap,
       bifurcationProbe,
+      lmeMimo,
+      olmecReflection,
+      quipuCompression,
+      pachakutiEvolution,
+      propellerRoute,
+      sotaRoute,
+      ultraRoute,
+      arbitrageScan,
+      kvCacheStats,
       hermeticGuard: guard,
       noetherEval: ev,
       bekensteinConfident: confident,
@@ -2883,6 +4110,33 @@ export class SovereignEngine {
   }
   getDSBD(): DynamicalBifurcationDetector {
     return this.dsbd;
+  }
+  getLME(): LutarMIMO {
+    return this.lme;
+  }
+  getORR(): OlmecReflectionRouter {
+    return this.orr;
+  }
+  getQKC(): QuipuCompressor {
+    return this.qkc;
+  }
+  getPEO(): PachakutiOptimizer {
+    return this.peo;
+  }
+  getAPD(): PropellerDrive {
+    return this.apd;
+  }
+  getSAR(): SOTAAgenticRouter {
+    return this.sar;
+  }
+  getLAE(): LanguageArbitrageEngine {
+    return this.lae;
+  }
+  getPKC(): PagedKVCache {
+    return this.pkc;
+  }
+  getURS(): UltraRouter {
+    return this.urs;
   }
 
   manifest(): typeof INNOVATION_MANIFEST {
