@@ -86,6 +86,7 @@ import {
   CircuitBoard,
   Dna,
   Telescope,
+  Smartphone,
   Waves,
 } from 'lucide-react';
 import {
@@ -360,6 +361,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/approvals', label: 'Approvals', icon: Shield, comp: L(() => import('@/pages/approvals')) },
       { path: '/trust', label: 'Trust & Provenance', icon: Lock, comp: L(() => import('@/pages/trust-provenance')) },
+      { path: '/mobile', label: 'Mobile Command', icon: Smartphone, comp: L(() => import('@/pages/mobile/mobile-shell')) },
     ],
   },
   {
@@ -417,6 +419,7 @@ const SLIDES_NAV: NavItem = {
   comp: L(() => import('@/pages/aegis-home')),
 };
 
+const MobileShell = lazy(() => import('@/pages/mobile/mobile-shell'));
 const SentraLandingPage = lazy(() => import('@/pages/sentra-landing'));
 const SentraPricingPage = lazy(() => import('@/pages/pricing'));
 const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
@@ -950,6 +953,8 @@ function AppShell({
   const isPresenter = location === '/slides/presenter' || location.startsWith('/slides/presenter');
   const isSlides = location.startsWith('/slides') || location.startsWith('/slide');
 
+  const isMobile = location.startsWith('/mobile');
+
   if (isPrintAllSlides) {
     return <AllSlides />;
   }
@@ -960,6 +965,14 @@ function AppShell({
 
   if (isSlides) {
     return <SlideDeck />;
+  }
+
+  if (isMobile) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <MobileShell />
+      </Suspense>
+    );
   }
 
   if (location === '/' || location === '') {

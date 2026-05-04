@@ -422,7 +422,310 @@ export async function toggleSiemConnection(
   }
 }
 
-// ── Threat Hunt ─────────────────────────────────────────────────────────────
+// ── Threat Hunt List ────────────────────────────────────────────────────────
+
+export interface HuntListItem {
+  id: string;
+  title: string;
+  hypothesis: string;
+  reasoning: string;
+  proposedAt: string;
+  mitreTactics: string[];
+  mitreIds: string[];
+  falsePositiveRate: number;
+  confidenceScore: number;
+  signalCount: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'proposed' | 'active' | 'completed' | 'dismissed';
+  blastRadiusCost: number;
+  affectedBusinessEntities: string[];
+}
+
+interface RawHunt {
+  id: string;
+  title: string;
+  hypothesis: string;
+  reasoning: string;
+  proposedAt: string;
+  mitreTactics: string[];
+  mitreIds: string[];
+  falsePositiveRate: number;
+  confidenceScore: number;
+  signalCount: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'proposed' | 'active' | 'completed' | 'dismissed';
+  attackPath?: {
+    blastRadiusCost?: number;
+    affectedBusinessEntities?: string[];
+  };
+  blastRadiusCost?: number;
+  affectedBusinessEntities?: string[];
+}
+
+function normalizeHunt(raw: RawHunt): HuntListItem {
+  return {
+    id: raw.id,
+    title: raw.title,
+    hypothesis: raw.hypothesis ?? '',
+    reasoning: raw.reasoning ?? '',
+    proposedAt: raw.proposedAt ?? new Date().toISOString(),
+    mitreTactics: raw.mitreTactics ?? [],
+    mitreIds: raw.mitreIds ?? [],
+    falsePositiveRate: raw.falsePositiveRate ?? 0,
+    confidenceScore: raw.confidenceScore ?? 0,
+    signalCount: raw.signalCount ?? 0,
+    severity: raw.severity ?? 'medium',
+    status: raw.status ?? 'proposed',
+    blastRadiusCost: raw.blastRadiusCost ?? raw.attackPath?.blastRadiusCost ?? 0,
+    affectedBusinessEntities: raw.affectedBusinessEntities ?? raw.attackPath?.affectedBusinessEntities ?? [],
+  };
+}
+
+export async function listHunts(): Promise<{ hunts: HuntListItem[]; source: 'live' | 'seed' }> {
+  const res = await fetch(`${BASE}/sentra/hunt-data/hunts`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch hunts (${res.status})`);
+  const body = (await res.json()) as { hunts: RawHunt[]; source?: string };
+  const hunts = (body.hunts ?? []).map(normalizeHunt);
+  return { hunts, source: (body.source as 'live' | 'seed') ?? 'live' };
+}
+
+// ── PQC & Hardware Trust ────────────────────────────────────────────────────
+
+export interface PqcStandardItem {
+  id: string;
+  fips: string;
+  name: string;
+  purpose: string;
+  status: 'deployed' | 'in-progress' | 'planned' | 'not-started';
+  deployedCount: number;
+  plannedCount: number;
+}
+
+interface RawPqcStandard {
+  id: string;
+  fips: string;
+  name: string;
+  purpose: string;
+  status: 'deployed' | 'in-progress' | 'planned' | 'not-started';
+  deployedIn?: string[];
+  planned?: string[];
+  deployedCount?: number;
+  plannedCount?: number;
+}
+
+function normalizePqcStandard(raw: RawPqcStandard): PqcStandardItem {
+  return {
+    id: raw.id,
+    fips: raw.fips ?? '',
+    name: raw.name ?? '',
+    purpose: raw.purpose ?? '',
+    status: raw.status ?? 'not-started',
+    deployedCount: raw.deployedCount ?? raw.deployedIn?.length ?? 0,
+    plannedCount: raw.plannedCount ?? raw.planned?.length ?? 0,
+  };
+}
+
+export interface MigrationPhaseItem {
+  id: string;
+  phase: string;
+  status: 'deployed' | 'in-progress' | 'planned' | 'not-started';
+  taskCount: number;
+}
+
+interface RawMigrationPhase {
+  id: string;
+  phase: string;
+  status: 'deployed' | 'in-progress' | 'planned' | 'not-started';
+  tasks?: string[];
+  taskCount?: number;
+}
+
+function normalizeMigrationPhase(raw: RawMigrationPhase): MigrationPhaseItem {
+  return {
+    id: raw.id,
+    phase: raw.phase ?? '',
+    status: raw.status ?? 'not-started',
+    taskCount: raw.taskCount ?? raw.tasks?.length ?? 0,
+  };
+}
+
+export interface PqcReadinessScore {
+  score: number;
+  deployed: number;
+  inProgress: number;
+  total: number;
+}
+
+export interface HardwareTrustSummary {
+  verifiedAnchors: number;
+  totalAnchors: number;
+  avgIntegrity: number;
+  cheriCompartments: number;
+  attestedComponents: number;
+  totalComponents: number;
+}
+
+export async function listPqcStandards(): Promise<PqcStandardItem[]> {
+  const res = await fetch(`${BASE}/sentra/pqc/standards`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch PQC standards (${res.status})`);
+  const body = (await res.json()) as { standards: RawPqcStandard[] };
+  return (body.standards ?? []).map(normalizePqcStandard);
+}
+
+export async function listMigrationPhases(): Promise<MigrationPhaseItem[]> {
+  const res = await fetch(`${BASE}/sentra/pqc/migration-phases`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch migration phases (${res.status})`);
+  const body = (await res.json()) as { phases: RawMigrationPhase[] };
+  return (body.phases ?? []).map(normalizeMigrationPhase);
+}
+
+export async function getPqcReadinessScore(): Promise<PqcReadinessScore | null> {
+  const res = await fetch(`${BASE}/sentra/pqc/readiness-score`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch readiness score (${res.status})`);
+  return (await res.json()) as PqcReadinessScore;
+}
+
+export async function getHardwareTrustSummary(): Promise<HardwareTrustSummary | null> {
+  const res = await fetch(`${BASE}/sentra/hardware-trust/summary`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch hardware trust summary (${res.status})`);
+  return (await res.json()) as HardwareTrustSummary;
+}
+
+// ── Agent Mesh (Sentra API) ──────────────────────────────────────────────────
+
+export interface MeshRuntime {
+  id: string;
+  name: string;
+  version: string;
+  sourceRegistry: string;
+  lastSeen: string;
+  trustState: 'trusted' | 'unverified' | 'quarantined';
+  configFiles: string[];
+  activeAgentIds: string[];
+}
+
+export interface MeshMcpServer {
+  id: string;
+  name: string;
+  packageRef: string;
+  version: string;
+  pinned: boolean;
+  sourceRegistry: string;
+  lastSeen: string;
+  trustState: 'trusted' | 'unverified' | 'quarantined';
+  runtimeIds: string[];
+  allowedEgressDomains: string[];
+  detectedEgressDomains: string[];
+}
+
+export interface MeshExposureItem {
+  id: string;
+  title: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  affectedAgentIds: string[];
+  affectedSecretIds: string[];
+  affectedMcpIds: string[];
+  explanation: string;
+  status: 'open' | 'fix-pending' | 'resolved';
+}
+
+export interface MeshResilienceItem {
+  id: string;
+  overall: number;
+  grade: string;
+  secretHygiene: number;
+  permissionSurface: number;
+  supplyChain: number;
+  egressContainment: number;
+}
+
+export interface MeshSummary {
+  totalRuntimes: number;
+  trustedRuntimes: number;
+  quarantinedRuntimes: number;
+  totalMcpServers: number;
+  quarantinedServers: number;
+  openExposures: number;
+  criticalExposures: number;
+  resilienceGrade: string;
+  resilienceScore: number;
+}
+
+export async function listMeshRuntimes(): Promise<MeshRuntime[]> {
+  const res = await fetch(`${BASE}/sentra/agent-mesh/runtimes`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch mesh runtimes (${res.status})`);
+  const body = (await res.json()) as { runtimes: MeshRuntime[] };
+  return body.runtimes ?? [];
+}
+
+export async function listMeshMcpServers(): Promise<MeshMcpServer[]> {
+  const res = await fetch(`${BASE}/sentra/agent-mesh/mcp-servers`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch MCP servers (${res.status})`);
+  const body = (await res.json()) as { mcpServers: MeshMcpServer[] };
+  return body.mcpServers ?? [];
+}
+
+export async function listMeshExposures(): Promise<MeshExposureItem[]> {
+  const res = await fetch(`${BASE}/sentra/agent-mesh/exposures`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch mesh exposures (${res.status})`);
+  const body = (await res.json()) as { exposures: MeshExposureItem[] };
+  return body.exposures ?? [];
+}
+
+export async function getMeshSummary(): Promise<MeshSummary | null> {
+  const res = await fetch(`${BASE}/sentra/agent-mesh/summary`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch mesh summary (${res.status})`);
+  return (await res.json()) as MeshSummary;
+}
+
+export async function listMeshResilience(): Promise<MeshResilienceItem | null> {
+  const res = await fetch(`${BASE}/sentra/agent-mesh/resilience`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`Failed to fetch mesh resilience (${res.status})`);
+  const body = (await res.json()) as { resilience: MeshResilienceItem[] };
+  return body.resilience?.[0] ?? null;
+}
+
+export async function patchMeshRuntimeTrustState(
+  runtimeId: string,
+  trustState: 'trusted' | 'unverified' | 'quarantined',
+): Promise<{ ok: true; runtime: MeshRuntime } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agent-mesh/runtimes/${encodeURIComponent(runtimeId)}`, {
+      method: 'PATCH',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ trustState }),
+    });
+    if (res.status === 404) return { ok: false, error: 'Runtime not found' };
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const data = (await res.json()) as MeshRuntime;
+    return { ok: true, runtime: data };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function patchMcpServerTrustState(
+  mcpId: string,
+  trustState: 'trusted' | 'unverified' | 'quarantined',
+): Promise<{ ok: true; server: MeshMcpServer } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agent-mesh/mcp-servers/${encodeURIComponent(mcpId)}`, {
+      method: 'PATCH',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ trustState }),
+    });
+    if (res.status === 404) return { ok: false, error: 'MCP server not found' };
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const data = (await res.json()) as MeshMcpServer;
+    return { ok: true, server: data };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// ── Threat Hunt Actions ─────────────────────────────────────────────────────
 
 export interface HuntApprovalResult {
   huntId: string;
@@ -1032,4 +1335,47 @@ export interface SoarAutomationResponse extends ResearchEnvelope {
 
 export function getSoarAutomationPage() {
   return getJson<SoarAutomationResponse>('/sentra/pages/soar-automation');
+}
+
+// ─── SIGIL Composition ─────────────────────────────────────────────────────
+
+export interface SigilReport {
+  sigma: number;
+  axes: { provenance: number; containment: number; coherence: number; convergence: number };
+  weights: Record<string, { value: number; rendered: string }>;
+  proof: { weightsExact: boolean; minAxis: number; maxAxis: number; formula: string; law: string };
+}
+
+export async function composeSigil(axes: {
+  provenance: number;
+  containment: number;
+  coherence: number;
+  convergence: number;
+}): Promise<SigilReport | null> {
+  try {
+    const res = await fetch(`${BASE}/sigil/compose`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ axes }),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as SigilReport;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Convergence Pulse ─────────────────────────────────────────────────────
+
+export interface ConvergencePulse {
+  timestamp: string;
+  lambda: number;
+  coherence: number;
+  driftDetected: boolean;
+  activeTenants: number;
+}
+
+export function getConvergencePulse() {
+  return getJson<ConvergencePulse>('/ouroboros/a11oy/pulse');
 }
