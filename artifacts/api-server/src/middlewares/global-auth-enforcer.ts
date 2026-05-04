@@ -253,6 +253,7 @@ const PUBLIC_PREFIXES = [
   "/api/ouroboros/sovereign/sota/",
   "/api/ouroboros/sovereign/arbitrage/",
   "/api/ouroboros/sovereign/ultra/",
+  "/api/ouroboros/sovereign/xi/",
   "/api/webhooks/",
   "/api/scim/",
   "/api/stream/webhook/",
