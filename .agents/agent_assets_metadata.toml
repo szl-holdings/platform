@@ -863,3 +863,39 @@ id = "hozYY2FhUYpAZwLH3FZAJ"
 uri = "file://docs/ouroboros-v6/OUROBOROS_THESIS_V4_V5_V6_UNIFIED.md"
 type = "text"
 title = "Ouroboros Thesis -- Unified v4/v5/v6 (Review Draft)"
+
+[[outputs]]
+id = "8eySCNAes4U2uXGGcQs9d"
+uri = "file://dossier/APEX_DOSSIER_INDEX.md"
+type = "text"
+title = "APEX Dossier Index -- Start Here"
+
+[[outputs]]
+id = "KOZr4Jlb2UlLZCmGkBTET"
+uri = "file://dossier/APEX_Meeting_Script.md"
+type = "text"
+title = "Meeting Script -- 30-Minute Flow with Talking Points"
+
+[[outputs]]
+id = "hgfq04GxWsy2PhFLbRCtT"
+uri = "file://dossier/APEX_Live_Demo_Guide.md"
+type = "text"
+title = "Live Demo Guide -- Teams Screen Share Walkthrough"
+
+[[outputs]]
+id = "R_anZlgkAaZJKwE-WI_hk"
+uri = "file://dossier/APEX_Business_Proposal.md"
+type = "text"
+title = "Business Proposal -- Formal Document for APEX"
+
+[[outputs]]
+id = "KK06JlPDLSnDxP1i4kCpu"
+uri = "file://dossier/SZL_Holdings_Capability_Statement.md"
+type = "text"
+title = "Capability Statement -- Updated One-Pager"
+
+[[outputs]]
+id = "LkNpHK5nDuh6qpBtNLtyq"
+uri = "file://dossier/SZL_Holdings_Empire_APEX_Briefing.md"
+type = "text"
+title = "Operational Briefing -- Detailed Technical Brief"

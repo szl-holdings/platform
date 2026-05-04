@@ -1,7 +1,7 @@
 # SZL Holdings — Operational Briefing
 ## Prepared for Empire APEX Accelerator
 
-**Recipient:** Mercy McInnis, Procurement Counselor — Empire APEX Accelerator (powered by NYSTEC)
+**Recipient:** Mercy McInnis, Procurement Counselor — Empire APEX Accelerator
 **Meeting:** Tuesday, May 6, 2026 at 10:00 AM (Microsoft Teams)
 **Author:** Stephen Lutar, Founder, SZL Holdings
 **Author email:** stephenlutar2@gmail.com

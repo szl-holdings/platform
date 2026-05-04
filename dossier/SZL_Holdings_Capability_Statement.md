@@ -4,7 +4,7 @@
 **Email:** stephenlutar2@gmail.com
 **Headquarters:** New York State
 **Public organization:** github.com/szl-holdings
-**Document date:** May 3, 2026
+**Document date:** May 4, 2026 (updated)
 
 ---
 
@@ -15,7 +15,7 @@ SZL Holdings builds **governed operational-intelligence platforms** — software
 ## Differentiators
 
 - **Open-source runtime, in production.** `@szl-holdings/ouroboros`, current release v6.2.0, with full test suite, dependabot, and CodeQL on the repository. No vaporware.
-- **DOI-pinned theoretical foundation.** The bounded-loop convergence theorem the runtime implements is published as the Ouroboros Thesis (DOI 10.5281/zenodo.19934129, CC-BY-4.0). The math is written down.
+- **DOI-pinned theoretical foundation.** The bounded-loop convergence theorem the runtime implements is published as the Ouroboros Thesis (DOI 10.5281/zenodo.19944926, CC-BY-4.0). The math is written down.
 - **Proof-chain by construction.** Every output carries a hash chain back to its inputs and the approver who released it. Audit is not a feature you turn on; it is what the runtime does.
 - **Self-correcting publishing record.** The May 2, 2026 thesis re-release publicly retracted and replaced an earlier version after a self-audit identified residual fabrications in announcement materials. Governance discipline is shown in the org's own record.
 
@@ -36,7 +36,9 @@ Each number below is produced by a documented verification command. Re-runnable.
 - 848 provisioned database tables
 - 5,524 API endpoint declarations
 - 126 monorepo packages
+- 44 original innovations in the sovereign engine
 - 133 Ouroboros runtime test calls; 29 codex-kernel test calls
+- 126 security tests passing
 - 23 CI workflows
 
 ## NAICS Codes
@@ -63,7 +65,7 @@ In the interest of credibility with procurement counsel: SZL Holdings is not cur
 |---|---|
 | Open-source runtime | `github.com/szl-holdings/ouroboros` (release v6.2.0, May 2, 2026) |
 | Theoretical foundation | `github.com/szl-holdings/ouroboros-thesis` (paper-v3-2.0.0, May 2, 2026) |
-| Paper DOI | `10.5281/zenodo.19934129` |
+| Paper DOI | `10.5281/zenodo.19944926` |
 | Paper license | CC-BY-4.0 |
 | Source-of-truth audit | `SOURCE_OF_TRUTH.md` + `audit/source-of-truth.json` in the platform repository |
 
