@@ -305,7 +305,7 @@ export function recordGatewayMcpCall(
 
   if (!needsApproval) {
     call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName, parameters, ts: call.timestamp }))
+      .update(JSON.stringify({ callId: call.callId, toolName, parameters }))
       .digest('hex')
       .slice(0, 16);
   }
@@ -803,7 +803,7 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
   if (call) {
     call.disposition = 'allowed';
     call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName: call.toolName, parameters: call.parameters, approvedAt: approval.reviewedAt }))
+      .update(JSON.stringify({ callId: call.callId, toolName: call.toolName, parameters: call.parameters }))
       .digest('hex')
       .slice(0, 16);
     const conn = connections.get(call.connectionId);
@@ -1079,7 +1079,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
 
   if (!needsApproval) {
     call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName, parameters: parameters ?? {}, ts: call.timestamp }))
+      .update(JSON.stringify({ callId: call.callId, toolName, parameters: parameters ?? {} }))
       .digest('hex')
       .slice(0, 16);
   }

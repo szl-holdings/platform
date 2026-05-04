@@ -653,6 +653,47 @@ function isNexusOrchestratorLoopback(req: Request): boolean {
  * never reached by unauthenticated callers; the route handler performs an
  * additional validation pass as defense-in-depth.
  */
+/**
+ * MCP Governed Gateway API key bypass.
+ * External agents (Claude Desktop, Cursor, VS Code Copilot, Codex) authenticate
+ * with a Bearer szl_gw_... API key instead of a browser session. This bypass lets
+ * them reach the MCP transport endpoints and governed gateway bearer-only paths
+ * where gatewayApiKeyGate performs full key validation, rate limiting, and
+ * governance enforcement.
+ *
+ * Scoped narrowly to:
+ *  - MCP transport: /api/mcp, /api/mcp/sse, /api/mcp/message, /api/mcp/stream
+ *  - Governed gateway bearer-only: /api/mcp-governed-gateway/tool-call,
+ *    /api/mcp-governed-gateway/connect-instructions
+ *
+ * Session-authenticated operator endpoints (approve/reject, api-key CRUD) are
+ * NOT covered — they require a real session + CSRF token.
+ */
+const GATEWAY_KEY_ALLOWED_PREFIXES = [
+  "/api/mcp",
+  "/api/mcp/sse",
+  "/api/mcp/message",
+  "/api/mcp/stream",
+  "/api/mcp/tools",
+  "/api/mcp-governed-gateway/tool-call",
+  "/api/mcp-governed-gateway/connect-instructions",
+];
+
+function isValidGatewayApiKey(req: Request): boolean {
+  const authHeader = req.headers["authorization"];
+  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer szl_gw_")) return false;
+  const path = req.path;
+  const allowed = GATEWAY_KEY_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + "/"));
+  if (!allowed) return false;
+  try {
+    const { validateGatewayApiKey } = require("../routes/mcp-governed-gateway");
+    const key = validateGatewayApiKey(authHeader.slice(7));
+    return key !== null;
+  } catch {
+    return false;
+  }
+}
+
 function isValidSiemWebhookToken(req: Request): boolean {
   if (req.method !== "POST") return false;
   if (req.path !== "/api/stream/webhook-siem") return false;
@@ -733,6 +774,11 @@ export function globalAuthEnforcer(
   }
 
   if (isValidSiemWebhookToken(req)) {
+    next();
+    return;
+  }
+
+  if (isValidGatewayApiKey(req)) {
     next();
     return;
   }

@@ -123,6 +123,21 @@ async function hydrateOrgMemberships(userId: number): Promise<AuthenticatedUser[
  * - For general routes, attaches the user's primary org (first in list).
  * - If no org can be resolved and required=true, returns 403.
  */
+const MCP_TRANSPORT_FULL_PREFIXES = [
+  "/api/mcp/sse",
+  "/api/mcp/message",
+  "/api/mcp/stream",
+  "/api/mcp/tools",
+  "/api/mcp",
+];
+
+function isGatewayKeyBearerOnMcpTransport(req: Request): boolean {
+  const authHeader = req.headers["authorization"];
+  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer szl_gw_")) return false;
+  const full = fullApiPath(req);
+  return MCP_TRANSPORT_FULL_PREFIXES.some(p => full === p || full.startsWith(p + "/"));
+}
+
 export function tenantScope(options: { required?: boolean } = {}) {
   const { required = true } = options;
 
@@ -132,14 +147,11 @@ export function tenantScope(options: { required?: boolean } = {}) {
 
       if (!user) {
         if (required) {
-          // Honor the global public allowlist: if globalAuthEnforcer would
-          // have let this request through unauthenticated, we must not 401
-          // it here. Without this check, any allowlisted endpoint mounted
-          // under a tenantScope-gated prefix (e.g. /federation/health under
-          // `router.use("/federation", tenantScope({...}))`) would return a
-          // misleading 401 even though it is supposed to be public. See
-          // global-auth-enforcer.ts for the rationale.
           if (isAllowlistedPublicPath(fullApiPath(req))) {
+            next();
+            return;
+          }
+          if (isGatewayKeyBearerOnMcpTransport(req)) {
             next();
             return;
           }

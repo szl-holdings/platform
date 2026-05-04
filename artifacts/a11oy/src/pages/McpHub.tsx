@@ -4,6 +4,16 @@ import { PageHeader } from '../components/ui';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function csrfHeaders(): Record<string, string> {
+  const token = getCsrfToken();
+  return token ? { 'x-csrf-token': token } : {};
+}
+
 interface McpServer {
   id: string;
   name: string;
@@ -277,7 +287,8 @@ function ApiKeyManager({ onKeysChanged, keys }: { onKeysChanged: () => void; key
     try {
       const res = await fetch(`${API_BASE}/mcp-governed-gateway/api-keys`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+        credentials: 'include',
         body: JSON.stringify({ label: newLabel.trim(), rateLimit: parseInt(newRateLimit, 10) || 120 }),
       });
       if (res.ok) {
@@ -294,7 +305,11 @@ function ApiKeyManager({ onKeysChanged, keys }: { onKeysChanged: () => void; key
   const handleRevoke = useCallback(async (keyId: string) => {
     setRevoking(keyId);
     try {
-      const res = await fetch(`${API_BASE}/mcp-governed-gateway/api-keys/${keyId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/mcp-governed-gateway/api-keys/${keyId}`, {
+        method: 'DELETE',
+        headers: csrfHeaders(),
+        credentials: 'include',
+      });
       if (res.ok) onKeysChanged();
     } catch { /* ignore */ }
     setRevoking(null);
@@ -412,7 +427,8 @@ function GatewayMonitor() {
     try {
       const res = await fetch(`${API_BASE}/mcp-governed-gateway/approvals/${approvalId}/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+        credentials: 'include',
         body: JSON.stringify({ note: `${action === 'approve' ? 'Approved' : 'Rejected'} via Gateway Monitor` }),
       });
       if (res.ok) {
