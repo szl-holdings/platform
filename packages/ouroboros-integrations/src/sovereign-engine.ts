@@ -3822,6 +3822,7 @@ export interface XiRouteResult {
   kvHit: boolean;
   agent: string;
   persona: string;
+  dialogEntropy: number;
   reason: string;
 }
 
@@ -3859,15 +3860,13 @@ export class ChatUltraRouter {
     require: string[] = ["chat"],
   ): XiRouteResult {
     const agent = _pickAgent(prompt);
-    const ultraResult = this.ultra.route(prompt, maxOut, mode, require, false, [1.0, 0.8, 0.6], true);
-    const xi = _xiInvariant(ultraResult.score, ultraResult.pLambda, this.aLangMean, history);
-
     const agentInfo = AGENT_ROSTER[agent];
-    const persona = agentInfo
-      ? (SOTA_MODELS[agentInfo.model as keyof typeof SOTA_MODELS] as { provider: string } | undefined)
-        ? agentInfo.role
-        : agentInfo.role
-      : "general";
+    const agentRequire = agentInfo
+      ? [agentInfo.model, ...require]
+      : require;
+    const ultraResult = this.ultra.route(prompt, maxOut, mode, agentRequire, false, [1.0, 0.8, 0.6], true);
+    const H = _dialogEntropy(history);
+    const xi = _xiInvariant(ultraResult.score, ultraResult.pLambda, this.aLangMean, history);
 
     return {
       model: ultraResult.model,
@@ -3884,8 +3883,9 @@ export class ChatUltraRouter {
       speedup: ultraResult.expectedSpeedup,
       kvHit: ultraResult.kvCacheHit,
       agent,
-      persona,
-      reason: `Xi->${ultraResult.model} (${agent}) L_Omega=${ultraResult.score} P_Lambda=${ultraResult.pLambda} Xi=${xi} spec=${ultraResult.speculative}`,
+      persona: agentInfo?.role ?? "general",
+      dialogEntropy: Math.round(H * 1e6) / 1e6,
+      reason: `Xi->${ultraResult.model} (${agent}) L_Omega=${ultraResult.score} P_Lambda=${ultraResult.pLambda} Xi=${xi} H=${Math.round(H * 1e4) / 1e4} spec=${ultraResult.speculative}`,
     };
   }
 
@@ -3893,24 +3893,27 @@ export class ChatUltraRouter {
     question: string,
     history: Array<{ role: string; content: string }> = [],
   ): CouncilResult {
-    const panelModels = ["gpt-5.5", "claude-opus-4.7", "gemini-3.1-pro"];
-    const panel = panelModels.map((m) => {
-      const d = this.route(question, history, 500, "council");
-      const cfg = SOTA_MODELS[m as keyof typeof SOTA_MODELS];
+    const panelAgents = ["planner", "engineer", "analyst"];
+    const panel = panelAgents.map((agentKey) => {
+      const info = AGENT_ROSTER[agentKey]!;
+      const d = this.route(question, history, 500, "council", [info.model]);
       return {
-        agent: m,
+        agent: agentKey,
         model: d.model,
         xi: d.xi,
-        persona: cfg ? (cfg as any).provider : m,
+        persona: info.role,
+        dialogEntropy: d.dialogEntropy,
       };
     });
 
-    const arbiter = this.route("Synthesize council: " + question, history, 600, "supreme");
+    const bestXi = panel.reduce((a, b) => (a.xi >= b.xi ? a : b));
+    const arbiter = this.route("Synthesize council: " + question, history, 600, "supreme", ["agentic"]);
+    const votes = panel.map((p) => `${p.agent}(Xi=${p.xi})`).join(", ");
     return {
       panel,
       arbiterModel: arbiter.model,
       arbiterXi: arbiter.xi,
-      synthesis: `Council chose Xi-max ${arbiter.model} with Xi=${arbiter.xi}`,
+      synthesis: `Council: ${votes}. Winner=${bestXi.agent} Xi=${bestXi.xi}. Arbiter ${arbiter.model} Xi=${arbiter.xi}`,
     };
   }
 
