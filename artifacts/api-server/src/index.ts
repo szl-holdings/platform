@@ -66,6 +66,7 @@ import { seedLyteSurfaces } from './lib/seed-lyte-surfaces';
 import { seedMspData } from './lib/seed-msp';
 import { seedPlatformData } from './lib/seed-platform';
 import { seedBillingData } from './seed/seed-billing';
+import { seedA11oyCognitive } from './lib/seed-a11oy-cognitive';
 import {
   prewarmIntelligenceCache,
   scheduleIntelligenceCachePruning,
@@ -799,6 +800,7 @@ export async function bootstrap(
         { name: 'seedLyteSurfaces', fn: seedLyteSurfaces },
         { name: 'seedTerraPortfolioModules', fn: seedTerraPortfolioModules },
         { name: 'seedBillingData', fn: seedBillingData },
+        { name: 'seedA11oyCognitive', fn: seedA11oyCognitive },
       );
     } else {
       logger.info(

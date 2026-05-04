@@ -184,6 +184,7 @@ const ObservabilityAsCode = lazy(() => import('./pages/ObservabilityAsCode').the
 const AlertTriage = lazy(() => import('./pages/AlertTriage').then(m => ({ default: m.AlertTriage })));
 const CostAwareMonitoring = lazy(() => import('./pages/CostAwareMonitoring').then(m => ({ default: m.CostAwareMonitoring })));
 const AndeanOrchestration = lazy(() => import('./pages/AndeanOrchestration').then(m => ({ default: m.AndeanOrchestration })));
+const RuntimeCommandCenter = lazy(() => import('./pages/RuntimeCommandCenter').then(m => ({ default: m.RuntimeCommandCenter })));
 
 
 export default function App() {
@@ -291,6 +292,9 @@ export default function App() {
         <Route path={`${base}/frontier`} component={FrontierIntelligence} />
         <Route path={`${base}/quantum`} component={QuantumIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
+        <Route path={`${base}/runtime`}>
+          <WithShell><RuntimeCommandCenter /></WithShell>
+        </Route>
         <Route path={`${base}/cognitive-reflexivity`} component={CognitiveReflexivity} />
         <Route path={`${base}/ouroboros`} component={Ouroboros} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />

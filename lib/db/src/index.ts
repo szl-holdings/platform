@@ -446,3 +446,4 @@ const _sweeperInterval = _sweeperEnabled ? setInterval(() => {
 _sweeperInterval?.unref?.();
 
 export * from "./schema";
+export * from "./repositories/cognitive-runtime.js";

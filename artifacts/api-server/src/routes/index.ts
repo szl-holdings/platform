@@ -30,6 +30,7 @@ import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
+import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
@@ -251,6 +252,20 @@ router.use(internalA11oyDefenseRouter);
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.
 // Note: routes/index.ts is mounted at /api in app.ts, so this resolves to /api/a11oy/*.
 router.use('/a11oy', a11oySovereignRouter);
+
+// A11oy Cognitive Runtime API — Cortex Router, Memory Fabric, Phase Engine, SLA Planner,
+// Worker Registry, Guided Output Guard, Proof Chain, Event Plane.
+// GET  /api/a11oy/cognitive/health
+// POST /api/a11oy/cognitive/route
+// POST /api/a11oy/cognitive/execute
+// POST /api/a11oy/cognitive/sla-plan
+// GET  /api/a11oy/cognitive/workers
+// POST /api/a11oy/cognitive/workers/register
+// POST /api/a11oy/cognitive/workers/drain
+// GET  /api/a11oy/cognitive/events
+// POST /api/a11oy/cognitive/proof-chains
+// GET  /api/a11oy/cognitive/deployments
+router.use(a11oyCognitiveRuntimeRouter);
 
 // A11oy Runtime API (Phase 2) — mutating endpoints, operators, MirrorEval, PCE gate, Workcells, Skills.
 // Mounted BEFORE the Phase 1 fabric router so runtime routes take precedence when paths overlap.

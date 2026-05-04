@@ -1,3 +1,4 @@
+export * from './a11oy_cognitive_runtime';
 export * from './a11oy_defense';
 export * from './a2a';
 export * from './activity';

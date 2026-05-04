@@ -157,6 +157,20 @@ const ALLOWED_PUBLIC_MOUNTS: Record<string, string> = {
     'Public — A11oy Runtime API (Phase 2) operators, MirrorEval, PCE gate',
   'a11oyFabricRouter':
     'Public — A11oy Fabric API read-only enterprise execution fabric',
+  'a11oyCognitiveRuntimeRouter':
+    'Public (demo surface) — A11oy Cognitive Runtime API; tenant resolved from X-Tenant-Id header; handler-level scoping; no session auth required in demo mode.',
+  'replay-attestation':
+    'Public — replay attestation, governance stats, and .well-known attestation keys; no per-tenant session required',
+  'sentra-threat-feeds':
+    'Public — Sentra external threat-feed ingest and aggregation surface',
+  'sentra-ml-scoring':
+    'Public — Sentra ML anomaly scoring and model-health endpoints',
+  'sentra-a11oy':
+    'Public — Sentra ↔ A11oy bridge read-only telemetry surface',
+  'doctrine-crud':
+    'Public — Doctrine governance rule CRUD demo surface',
+  'os-layer-api':
+    'Public — OS Layer v1 action recommendations; read-only advisory surface',
 };
 
 // ---------------------------------------------------------------------------
@@ -234,6 +248,20 @@ const GUARDIAN_GATED_MOUNTS = new Set([
   'oauthRouter',
   'meshObservabilityRouter',
   'openaiConversationsRouter',
+  'alloy-agentic-rag',
+  'sigil',
+  'ouroboros-gauss',
+  'ouroboros-guardrails',
+  'a11oy-chat',
+  'runtime-config',
+  'lexicon',
+  'os-layer-actions',
+  'praxis-tools',
+  'ai-gateway',
+  'hf-jobs',
+  'nexus-kernel',
+  'ouroboros',
+  'alloy-forge',
 ]);
 
 // ---------------------------------------------------------------------------
