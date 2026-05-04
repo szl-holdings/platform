@@ -108,6 +108,14 @@ import {
   SacredGeometryEngine,
   CognitiveMapNavigator,
   DynamicalBifurcationDetector,
+  LutarMIMO,
+  OlmecReflectionRouter,
+  QuipuCompressor,
+  PachakutiOptimizer,
+  PropellerDrive,
+  SOTAAgenticRouter,
+  LanguageArbitrageEngine,
+  UltraRouter,
   INNOVATION_MANIFEST,
   PRISCA_LINEAGES,
   type Modality,
@@ -124,11 +132,14 @@ const sentraAnchor = new sentraAdapter.SentraHSMAnchor();
 // Track Amaru fleet monitor per metricId (process-local).
 const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
 
-// Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse.
+// Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse + Sovereign Engine (43 innovations).
 const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
 
-// Process-local Sovereign Engine v19 -- all 34 SZL innovations.
-const sovereign = new SovereignEngine();
+const lae = new LanguageArbitrageEngine();
+const ultraRouter = new UltraRouter();
+
+// Sovereign Engine is owned by the orchestrator -- single source of truth for all products.
+const sovereign = orchestrator.getSovereign();
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -246,6 +257,25 @@ router.get('/a11oy/pulse', (_req: Request, res: Response) => {
 
 router.get('/a11oy/stats', (_req: Request, res: Response) => {
   return res.json(orchestrator.stats());
+});
+
+router.get('/a11oy/innovations', (_req: Request, res: Response) => {
+  return res.json(orchestrator.innovationRegistry());
+});
+
+router.post('/a11oy/sovereign-chat', async (req: Request, res: Response) => {
+  const { prompt, session, deadline, reason, simulate } = req.body ?? {};
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' });
+  }
+  const result = await orchestrator.sovereignChat({
+    prompt,
+    session: session ?? 'default',
+    deadline: typeof deadline === 'number' ? deadline : 2026,
+    reason: !!reason,
+    simulate: !!simulate,
+  });
+  return res.json(result);
 });
 
 // ---------------------------------------------------------------------------
@@ -756,7 +786,7 @@ router.get('/prisca/conformal-rescale', (req: Request, res: Response) => {
 });
 
 // ---------------------------------------------------------------------------
-// Sovereign Engine v19 — 25 SZL Original Innovations (ALLOY-EVOLVED)
+// Sovereign Engine v21 — 38 SZL Original Innovations (ALLOY-COMPLETE)
 // ---------------------------------------------------------------------------
 
 router.post('/sovereign/chat', (req: Request, res: Response) => {
@@ -886,7 +916,7 @@ router.post('/sovereign/rahab-sample', (req: Request, res: Response) => {
 });
 
 // ---------------------------------------------------------------------------
-// Innovations 15-25 (v19 ALLOY-EVOLVED)
+// Innovations 15-38 (v21 ALLOY-COMPLETE)
 // ---------------------------------------------------------------------------
 
 router.post('/sovereign/reason', (req: Request, res: Response) => {
@@ -1158,6 +1188,234 @@ router.post('/sovereign/bifurcation/observe', (req: Request, res: Response) => {
     observations: results,
     upcomingBifurcation: dsbd.detectUpcoming(),
   });
+});
+
+router.post('/sovereign/mimo/sequence', (req: Request, res: Response) => {
+  const { ceques, huacas, suyuCounts, alchemyWeights } = req.body ?? {};
+  if (ceques != null && (!Number.isInteger(ceques) || ceques < 1 || ceques > 200)) {
+    return res.status(400).json({ error: 'ceques must be 1-200' });
+  }
+  const lme = new LutarMIMO();
+  const result = lme.processRitualSequence({
+    ceques: ceques ?? undefined,
+    huacas: huacas ?? undefined,
+    suyuCounts: suyuCounts ?? undefined,
+    alchemyWeights: alchemyWeights ?? undefined,
+  });
+  const trimmed = {
+    ...result,
+    trajectory: result.trajectory.length > 8
+      ? [...result.trajectory.slice(0, 5), { step: -1, suyu: '...truncated...', Y_heads: [], L_Omega_mimo: 0, state_norm: 0 }, ...result.trajectory.slice(-3)]
+      : result.trajectory,
+  };
+  return res.json(trimmed);
+});
+
+router.get('/sovereign/mimo/constants', (_req: Request, res: Response) => {
+  return res.json({
+    inputChannels: LutarMIMO.INPUT_CHANNELS,
+    outputHeads: LutarMIMO.OUTPUT_HEADS,
+    stateSize: LutarMIMO.STATE_SIZE,
+    architecture: 'Mamba-3 MIMO exponential-trapezoidal',
+    complexity: 'O(L*N) linear',
+  });
+});
+
+router.post('/sovereign/reflect', (req: Request, res: Response) => {
+  const { query, stateNorm } = req.body ?? {};
+  if (!query) return res.status(400).json({ error: 'query required' });
+  const orr = new OlmecReflectionRouter();
+  return res.json(orr.reflect(String(query), Number(stateNorm) || 1.0));
+});
+
+router.post('/sovereign/quipu/encode', (req: Request, res: Response) => {
+  const { payload } = req.body ?? {};
+  if (!payload) return res.status(400).json({ error: 'payload required' });
+  const qkc = new QuipuCompressor();
+  return res.json(qkc.encode(payload));
+});
+
+router.post('/sovereign/quipu/decode', (req: Request, res: Response) => {
+  const { quipu } = req.body ?? {};
+  if (!quipu) return res.status(400).json({ error: 'quipu string required' });
+  try {
+    const qkc = new QuipuCompressor();
+    return res.json({ decoded: qkc.decode(String(quipu)) });
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+router.post('/sovereign/evolve', (req: Request, res: Response) => {
+  const { generations, seed } = req.body ?? {};
+  const gens = Math.min(Math.max(Number(generations) || 10, 1), 100);
+  const peo = new PachakutiOptimizer(seed ?? undefined);
+  return res.json(peo.evolve(gens));
+});
+
+// ---------------------------------------------------------------------------
+// Innovation 39: Propeller Drive (APD)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/propeller/compute', (req: Request, res: Response) => {
+  const { model, inTok, outTok, omegaIn, omegaOut, goalVec, stepVec } = req.body ?? {};
+  const apd = new PropellerDrive();
+  try {
+    const reading = apd.computePropeller(
+      model ?? 'gpt-5.5',
+      Number(inTok) || 500,
+      Number(outTok) || 800,
+      Number(omegaIn) || 0.4,
+      Number(omegaOut) || 0.7,
+      goalVec ?? [1.0, 0.8, 0.6],
+      stepVec ?? [0.8, 0.5, 0.9],
+    );
+    return res.json(reading);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+router.post('/sovereign/propeller/route', (req: Request, res: Response) => {
+  const { prompt, maxOut, mode, require: reqArr, batch, goalVec } = req.body ?? {};
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' });
+  }
+  const apd = new PropellerDrive();
+  try {
+    const decision = apd.route(
+      prompt,
+      Math.min(Number(maxOut) || 800, 4096),
+      mode ?? 'propel',
+      reqArr ?? [],
+      !!batch,
+      goalVec ?? [1.0, 0.8, 0.6],
+    );
+    return res.json(decision);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+router.get('/sovereign/propeller/models', (_req: Request, res: Response) => {
+  return res.json(PropellerDrive.MODELS);
+});
+
+router.get('/sovereign/propeller/formula', (_req: Request, res: Response) => {
+  return res.json({
+    propeller: 'P_Lambda = rho_I * A_omega * delta_v * (2/(1+v_out/v_in)) * cos_theta',
+    omega: 'L_Omega = sum(w_k * L_k), sum(w_k) = 1',
+    generations: ['L1 Bekenstein', 'L2 Newton', 'L3 Chinchilla', 'L4 Friston', 'L5 Noether', 'L6 Omega'],
+    modes: Object.keys(SOTAAgenticRouter.MODES),
+    version: PropellerDrive.VERSION,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Innovation 40: SOTA Agentic Router (SAR)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/sota/route', (req: Request, res: Response) => {
+  const { prompt, maxOut, mode, require: reqArr, batch } = req.body ?? {};
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' });
+  }
+  const sar = new SOTAAgenticRouter();
+  try {
+    const decision = sar.route(
+      prompt,
+      Math.min(Number(maxOut) || 800, 4096),
+      mode ?? 'agentic',
+      reqArr ?? [],
+      !!batch,
+    );
+    return res.json(decision);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
+router.post('/sovereign/sota/lutar', (req: Request, res: Response) => {
+  const { inTok, outTok, require: reqArr, batch, weights } = req.body ?? {};
+  const sar = new SOTAAgenticRouter();
+  const table = sar.lutarTable(
+    Number(inTok) || 500,
+    Number(outTok) || 800,
+    reqArr ?? [],
+    !!batch,
+    weights ?? undefined,
+  );
+  return res.json(table);
+});
+
+router.get('/sovereign/sota/models', (_req: Request, res: Response) => {
+  return res.json(SOTAAgenticRouter.MODELS);
+});
+
+router.get('/sovereign/sota/modes', (_req: Request, res: Response) => {
+  return res.json({
+    modes: SOTAAgenticRouter.MODES,
+    defaultWeights: SOTAAgenticRouter.DEFAULT_W,
+    version: SOTAAgenticRouter.VERSION,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Innovation 41: Language Arbitrage Engine (LAE)
+// ---------------------------------------------------------------------------
+
+router.get('/sovereign/arbitrage/scan', (_req: Request, res: Response) => {
+  return res.json(lae.scan());
+});
+
+router.get('/sovereign/arbitrage/components', (_req: Request, res: Response) => {
+  return res.json({
+    components: LanguageArbitrageEngine.COMPONENTS,
+    version: LanguageArbitrageEngine.VERSION,
+  });
+});
+
+router.get('/sovereign/arbitrage/formula', (_req: Request, res: Response) => {
+  return res.json({
+    aLang: 'A_lang = (T_py/T_ts) * (M_ts/M_py) * L4_lib * cos_theta_role - kappa',
+    playbook: {
+      PORT_PY: ['numpy vectorize', 'numba @njit', 'msgspec', 'FastAPI+uvicorn workers'],
+      RUST: ['pyo3 scaffold', 'expose close()/ingest()', 'maturin develop --release'],
+      KEEP: ['tracemalloc baseline', 'httpx keep-alive pool', 'batch 50% discount'],
+    },
+  });
+});
+
+router.post('/sovereign/arbitrage/evaluate', (req: Request, res: Response) => {
+  const name = req.body?.name;
+  if (!name || typeof name !== 'string') return res.status(400).json({ error: 'name required' });
+  const result = lae.evaluate(name);
+  if (!result) return res.status(404).json({ error: 'component not found' });
+  return res.json(result);
+});
+
+// ---------------------------------------------------------------------------
+// Innovation 43: Ultra Router with Speculative Decoding (URS)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/ultra/route', (req: Request, res: Response) => {
+  const prompt = req.body?.prompt ?? 'default routing query';
+  const maxOut = req.body?.maxOut ?? 800;
+  const mode = req.body?.mode ?? 'ultra';
+  const require = req.body?.require ?? [];
+  const batch = req.body?.batch ?? false;
+  const goalVec = req.body?.goalVec ?? [1.0, 0.8, 0.6];
+  const enableSpec = req.body?.enableSpec ?? true;
+  const result = ultraRouter.route(prompt, maxOut, mode, require, batch, goalVec, enableSpec);
+  return res.json({ decision: result, kvStats: ultraRouter.kvStats() });
+});
+
+router.get('/sovereign/ultra/kv-stats', (_req: Request, res: Response) => {
+  return res.json(ultraRouter.kvStats());
+});
+
+router.get('/sovereign/ultra/modes', (_req: Request, res: Response) => {
+  return res.json({ modes: UltraRouter.MODES, version: UltraRouter.VERSION });
 });
 
 router.get('/health', (_req: Request, res: Response) => {
