@@ -158,7 +158,7 @@
     "supertest": "^7.2.2",
     "tsx": "catalog:",
     "turbo": "^2.9.6",
-    "typescript": "~5.9.2",
+    "typescript": "~6.0.3",
     "vitest": "^4.1.5",
     "ws": "^8.18.0"
   },
