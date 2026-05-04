@@ -27,7 +27,7 @@ pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
 # default (Enter -> "create"); failing closed here would block every merge
 # whenever the schema introduces a new table that visually resembles one
 # of the orphan legacy tables in the live DB.
-DB_MIGRATE_TIMEOUT_MS=720000 \
+DB_MIGRATE_TIMEOUT_MS=120000 \
 DB_MIGRATE_FAIL_ON_PROMPT=false \
   pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 \
   || echo "drizzle-kit push timed out or failed (non-fatal, 800+ table schema)"

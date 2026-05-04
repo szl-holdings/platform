@@ -45,7 +45,10 @@ services:
       context: apps/substrate-inference
       dockerfile: Dockerfile
       target: runtime
-    image: ${ACR_LOGIN_SERVER:-substrate-inference}:${GIT_SHA:-latest}
+    # INFERENCE_IMAGE must include the full repository path when ACR_LOGIN_SERVER is set.
+    # Set it explicitly: INFERENCE_IMAGE=${ACR_LOGIN_SERVER}/substrate-inference:${GIT_SHA}
+    # Default is a local image name for non-ACR builds (docker build only).
+    image: ${INFERENCE_IMAGE:-substrate-inference:latest}
     container_name: substrate-inference
     restart: unless-stopped
     logging: *default-logging
@@ -89,7 +92,10 @@ services:
       context: services/substrate-py-workers
       dockerfile: Dockerfile
       target: runtime
-    image: ${ACR_LOGIN_SERVER:-substrate-py-workers}:${GIT_SHA:-latest}
+    # WORKER_IMAGE must include the full repository path when ACR_LOGIN_SERVER is set.
+    # Set it explicitly: WORKER_IMAGE=${ACR_LOGIN_SERVER}/substrate-py-workers:${GIT_SHA}
+    # Default is a local image name for non-ACR builds (docker build only).
+    image: ${WORKER_IMAGE:-substrate-py-workers:latest}
     container_name: substrate-py-workers
     restart: unless-stopped
     logging: *default-logging

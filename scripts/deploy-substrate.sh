@@ -106,6 +106,9 @@ info "Image tag: $GIT_SHA"
 INFERENCE_IMAGE="${ACR_LOGIN_SERVER}/substrate-inference:${GIT_SHA}"
 WORKER_IMAGE="${ACR_LOGIN_SERVER}/substrate-py-workers:${GIT_SHA}"
 
+# Export for docker-compose (image: ${INFERENCE_IMAGE:-...} / ${WORKER_IMAGE:-...})
+export INFERENCE_IMAGE WORKER_IMAGE
+
 # ── Build images ──────────────────────────────────────────────────────────────
 info "Building substrate-inference image..."
 run docker build \
@@ -144,6 +147,39 @@ if [[ $SKIP_DEPLOY -eq 0 ]]; then
   info "Running Bicep deployment (deploySubstrateFleet=true)..."
   DEPLOYMENT_NAME="substrate-fleet-${GIT_SHA}-$(date +%Y%m%d%H%M%S)"
 
+  # Auto-detect the caller's public egress IP and restrict both Container Apps
+  # ingresses to it. This ensures the fleet is not publicly open by default.
+  # Override with ALLOWED_CIDR env var to supply a specific CIDR (e.g. in CI).
+  if [[ -z "${ALLOWED_CIDR:-}" ]]; then
+    EGRESS_IP=$(curl -sf --max-time 5 https://api.ipify.org 2>/dev/null \
+              || curl -sf --max-time 5 https://checkip.amazonaws.com 2>/dev/null \
+              | tr -d '[:space:]')
+    if [[ -n "$EGRESS_IP" ]]; then
+      ALLOWED_CIDR="${EGRESS_IP}/32"
+      info "Restricting substrate ingress to caller egress IP: $ALLOWED_CIDR"
+    else
+      warn "Could not detect egress IP — substrate ingress will be unrestricted. Set ALLOWED_CIDR to override."
+      ALLOWED_CIDR=""
+    fi
+  fi
+
+  # On re-deployments, fetch the worker FQDN from the most recent successful
+  # substrate fleet deployment to wire the Python /metrics two-layer autoscaler.
+  PREV_WORKER_FQDN="${SUBSTRATE_WORKER_FQDN:-}"
+  if [[ -z "$PREV_WORKER_FQDN" ]]; then
+    PREV_WORKER_FQDN=$(az deployment group list \
+      --resource-group "$AZURE_RESOURCE_GROUP" \
+      --query "[?starts_with(name, 'substrate-fleet-') && properties.provisioningState=='Succeeded'] | sort_by(@, &properties.timestamp) | [-1].properties.outputs.substrateWorkerFqdn.value" \
+      -o tsv 2>/dev/null || echo "")
+  fi
+  [[ -n "$PREV_WORKER_FQDN" ]] && info "Wiring two-layer autoscaler to prior worker FQDN: $PREV_WORKER_FQDN"
+
+  CIDR_PARAM=""
+  [[ -n "$ALLOWED_CIDR" ]] && CIDR_PARAM="apiServerEgressCidrs=[\"${ALLOWED_CIDR}\"]"
+
+  WORKER_FQDN_PARAM=""
+  [[ -n "$PREV_WORKER_FQDN" ]] && WORKER_FQDN_PARAM="substrateWorkerExternalFqdn=${PREV_WORKER_FQDN}"
+
   run az deployment group create \
     --subscription "$AZURE_SUBSCRIPTION_ID" \
     --resource-group "$AZURE_RESOURCE_GROUP" \
@@ -156,7 +192,9 @@ if [[ $SKIP_DEPLOY -eq 0 ]]; then
       substrateApiKey="$SUBSTRATE_API_KEY" \
       maxWorkerReplicas="${MAX_WORKERS:-10}" \
       minWorkerReplicas="${MIN_WORKERS:-1}" \
-      scaleOutQueueDepth="${SCALE_OUT_QUEUE_DEPTH:-3}"
+      scaleOutQueueDepth="${SCALE_OUT_QUEUE_DEPTH:-3}" \
+      ${CIDR_PARAM:+"$CIDR_PARAM"} \
+      ${WORKER_FQDN_PARAM:+"$WORKER_FQDN_PARAM"}
 
   info "Deployment '$DEPLOYMENT_NAME' submitted. Waiting for health..."
 

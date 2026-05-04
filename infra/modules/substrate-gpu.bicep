@@ -4,16 +4,19 @@
 //
 // Resources created:
 //   - Azure Container Registry (or extended if existing)
-//   - NC-series GPU Container App in an existing CAE, OR
+//   - GPU Container App in an existing CAE (GPU workload profile), OR
 //     NC-series VMSS with CUDA drivers (controlled by useVmss param)
-//   - NVMe data disk attachment for SSD KV-cache (VMSS path)
-//   - KEDA HTTP scaler on Container Apps path
+//   - Python workers Container App (Consumption profile, CPU-bound)
 //
-// Autoscaling contract:
-//   The Python worker's /metrics endpoint exposes available_slots and active_claims.
-//   KEDA's HTTP scaler polls concurrentRequests; the worker tracks queue depth and
-//   exposes it so Container Apps scales when concurrent HTTP pressure exceeds
-//   scaleOutQueueDepth. Scale-in uses the CAE's built-in cooldown period.
+// Autoscaling (two-layer):
+//   Layer 1 — Container Apps HTTP scaler: scales out when each replica is
+//   handling more than scaleOutQueueDepth concurrent /claim requests.
+//   This is a built-in CAE capability — no external KEDA infrastructure needed.
+//
+//   Layer 2 — KEDA metrics-api scaler (active after the first deployment when
+//   workerExternalFqdn is known): polls the Python worker's /metrics endpoint
+//   for queueDepth (reported by AutoscalingPolicy) and drives an independent
+//   scale-out signal alongside the HTTP trigger.
 //
 // GPU workload profile:
 //   The inference Container App is pinned to the GPU workload profile so it is
@@ -55,7 +58,7 @@ param minWorkerReplicas int = 1
 @description('Maximum replicas for the Python worker Container App')
 param maxWorkerReplicas int = 10
 
-@description('Queue depth threshold that triggers scale-out (concurrent HTTP requests)')
+@description('Queue depth threshold that triggers scale-out (concurrent HTTP requests per replica)')
 param scaleOutQueueDepth int = 3
 
 @description('Use VMSS instead of Container Apps for the GPU lane')
@@ -75,6 +78,14 @@ param gpuWorkloadProfileName string = ''
 @description('IP CIDR ranges allowed to call the substrate apps (should be set to the API server egress CIDRs). Empty array = no restriction.')
 param allowedIngressCidrs array = []
 
+@description('''
+Worker app external FQDN for the Python-advisory two-layer autoscaling rule.
+Leave empty on the initial deployment (FQDN is not yet known); on subsequent
+deployments pass the FQDN from the previous run to wire the KEDA metrics-api
+scaler into the workerApp scale rules (Layer 2: Python /metrics queue depth).
+''')
+param workerExternalFqdn string = ''
+
 var inferenceAppName = '${baseName}-substrate-inference'
 var workerAppName = '${baseName}-substrate-workers'
 var inferenceImage = '${acrLoginServer}/substrate-inference:${imageTag}'
@@ -82,6 +93,8 @@ var workerImage = '${acrLoginServer}/substrate-py-workers:${imageTag}'
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var useGpuProfile = !empty(gpuWorkloadProfileName)
 var useIpRestrictions = length(allowedIngressCidrs) > 0
+var kvSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6'
+var useWorkerMetricsScaler = !empty(workerExternalFqdn)
 
 // ── Key Vault secret for SUBSTRATE_API_KEY ────────────────────────────────────
 resource kvRef 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
@@ -295,7 +308,7 @@ resource workerApp 'Microsoft.App/containerApps@2024-03-01' = if (!useVmss) {
         minReplicas: minWorkerReplicas
         maxReplicas: maxWorkerReplicas
         rules: [
-          // HTTP scaler — built-in Container Apps capability, no external KEDA required.
+          // Layer 1: HTTP scaler — built-in Container Apps capability.
           // Scale out when each replica is handling more than scaleOutQueueDepth
           // concurrent /claim requests. Scale in on cooldown when pressure drops.
           {
@@ -306,6 +319,25 @@ resource workerApp 'Microsoft.App/containerApps@2024-03-01' = if (!useVmss) {
               }
             }
           }
+          // Layer 2: Python-advisory autoscaling via the worker's /metrics endpoint.
+          // The Python AutoscalingPolicy reports queueDepth (pending claims not yet
+          // claimed by any replica); KEDA metrics-api scaler drives scale-out when
+          // queueDepth exceeds scaleOutQueueDepth between HTTP scaling decisions.
+          // Only active when workerExternalFqdn is supplied (second+ deployment).
+          ...useWorkerMetricsScaler ? [
+            {
+              name: 'python-queue-depth'
+              custom: {
+                type: 'metrics-api'
+                metadata: {
+                  targetValue: string(scaleOutQueueDepth)
+                  url: 'https://${workerExternalFqdn}/metrics'
+                  valueLocation: 'queueDepth'
+                  format: 'json'
+                }
+              }
+            }
+          ] : []
         ]
       }
     }
@@ -334,6 +366,30 @@ resource workerAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = if
   properties: {
     principalId: workerApp.identity.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// ── Key Vault Secrets User RBAC for substrate app identities ──────────────────
+// Both apps read SUBSTRATE_API_KEY from Key Vault via secret ref. Each system-
+// assigned identity needs the Key Vault Secrets User role on the vault so the
+// Container Apps runtime can resolve the secret at startup.
+resource inferenceKvRead 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!useVmss) {
+  name: guid(keyVaultId, inferenceApp.identity.principalId, kvSecretsUserRoleId)
+  scope: kvRef
+  properties: {
+    principalId: inferenceApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource workerKvRead 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!useVmss) {
+  name: guid(keyVaultId, workerApp.identity.principalId, kvSecretsUserRoleId)
+  scope: kvRef
+  properties: {
+    principalId: workerApp.identity.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
     principalType: 'ServicePrincipal'
   }
 }

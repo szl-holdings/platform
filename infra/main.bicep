@@ -71,6 +71,9 @@ param scaleOutQueueDepth int = 3
 @description('API server egress CIDRs for the substrate NSG allow-list (leave empty to allow all VNet traffic)')
 param apiServerEgressCidrs array = []
 
+@description('Worker app external FQDN from a previous deployment — used to wire the Python /metrics two-layer autoscaling rule. Empty on the initial deployment.')
+param substrateWorkerExternalFqdn string = ''
+
 var uniqueSuffix = uniqueString(resourceGroup().id, baseName)
 var vaultName = '${baseName}-kv-${take(uniqueSuffix, 6)}'
 var pgServerName = '${baseName}-pg-${take(uniqueSuffix, 6)}'
@@ -336,6 +339,9 @@ module substrateFleet 'modules/substrate-gpu.bicep' = if (deploySubstrateFleet) 
     // Pass API server egress CIDRs so both Container Apps ingresses are IP-restricted.
     // Empty by default (dev/test); set in prod parameter file to lock down public endpoints.
     allowedIngressCidrs: apiServerEgressCidrs
+    // Pass the worker FQDN from the previous deployment to enable the two-layer
+    // Python-advisory autoscaling rule (metrics-api scaler on /metrics endpoint).
+    workerExternalFqdn: substrateWorkerExternalFqdn
   }
   dependsOn: [substrateNsg]
 }

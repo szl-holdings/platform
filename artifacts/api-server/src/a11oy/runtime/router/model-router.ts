@@ -353,6 +353,27 @@ export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> 
   }
 }
 
+/**
+ * Call a specific provider directly, bypassing resolveProvider().
+ * Used when the Python bridge (model_router.py) has already selected the
+ * provider and model — Python is source-of-truth; TS just dispatches.
+ */
+export async function callWithProvider(req: ModelRequest, provider: ModelProvider): Promise<ModelResponse> {
+  try {
+    switch (provider) {
+      case 'substrate': return await callSubstrate(req);
+      case 'openai': return await callOpenAI(req);
+      case 'deepseek': return await callDeepseek(req);
+      case 'nvidia': return await callNvidia(req);
+      case 'huggingface': return await callHuggingFace(req);
+      case 'local': return await callLocal(req);
+      default: return callMock(req);
+    }
+  } catch {
+    return callMock(req);
+  }
+}
+
 export async function routeModelCallWithFailover(req: ModelRequest, fallbackModels: string[]): Promise<ModelResponse> {
   const provider = resolveProvider();
 
