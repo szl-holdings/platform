@@ -127,6 +127,20 @@ export interface IngestJob {
   error?: string;
 }
 
+export interface OrchestrationRecipe {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  requiredCapabilities: string[];
+  defaultTicker?: string;
+  stepSequence: Array<{
+    capability: string;
+    label: string;
+    action: string;
+  }>;
+}
+
 export type ThirdPartyIntegrationMode = 'in-process' | 'external-service' | 'pattern-reference';
 export type ThirdPartyPolicyState = 'allowed' | 'requires-review' | 'blocked';
 

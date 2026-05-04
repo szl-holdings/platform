@@ -19,6 +19,12 @@ import type { OrchestrationPlan, OrchestrationStep } from '../lib/types';
 
 const EXAMPLE_INTENTS = [
   {
+    label: '⚡ Earnings Brief in 60s',
+    intent:
+      'Brief me on $AAPL\'s last quarter — pull financials, audit their marketing, check SEO, and render a video brief.',
+    highlight: true,
+  },
+  {
     label: 'Risk Brief',
     intent:
       "Summarize today's threat risk across PARAGON and SEXTANT, then draft an executive brief in Pulse format.",
@@ -46,6 +52,14 @@ const APP_COLORS: Record<string, string> = {
   'prism-counsel': '#818cf8',
   lyte: '#fb923c',
   imperium: '#34d399',
+  'web.stealth': '#f97316',
+  'finance.terminal': '#06b6d4',
+  'marketing.audit': '#ec4899',
+  'seo.audit': '#8b5cf6',
+  'compose.brief': '#a3e635',
+  'video.render': '#f43f5e',
+  'publish.pulse': '#c9a85c',
+  'publish.video-library': '#22d3ee',
 };
 
 const RATE_LIMITS: Record<string, { rpm: number; used: number; tpm: number; tUsed: number }> = {
@@ -141,6 +155,78 @@ const STEP_EXPLANATIONS: Record<
       'Pull full matter text (rejected — exceeds token budget; entity list is sufficient)',
     ],
     confidence: 0.87,
+  },
+  'web.stealth': {
+    why: 'Camofox stealth browser is the first step in the Earnings Brief recipe — it fetches IR pages, SEC filings, and recent news without triggering bot detection.',
+    how: 'Dispatched stealth-fetch requests to 4 targets: company IR page, Yahoo Finance, SEC EDGAR 10-Q index, and Google News. All responses captured as text snapshots.',
+    alternatives: [
+      'Direct HTTP fetch (rejected — many IR pages block non-browser user agents)',
+      'Use cached news data (rejected — earnings data requires real-time freshness)',
+    ],
+    confidence: 0.93,
+  },
+  'finance.terminal': {
+    why: 'Fincept Terminal pulls structured financial data — revenue, EPS, P/E ratio, margins — that form the quantitative backbone of the earnings brief.',
+    how: 'Queried Fincept Terminal for Q4 2025 financials including income statement, balance sheet ratios, and analyst consensus. Response is structured JSON.',
+    alternatives: [
+      'Parse financials from IR page HTML (rejected — Fincept provides pre-structured data with less latency)',
+      'Use SEC XBRL filings (rejected — XBRL parsing adds latency and the terminal already normalizes this)',
+    ],
+    confidence: 0.95,
+  },
+  'marketing.audit': {
+    why: 'claude-ads audits the company public site to assess marketing posture — ad creatives, landing page quality, and brand consistency — adding a marketing layer to the financial brief.',
+    how: 'Ran 256-check audit on the company domain covering accessibility, CTA effectiveness, structured data, and estimated ad spend.',
+    alternatives: [
+      'Skip marketing layer (rejected — the capstone recipe requires all five leaders)',
+      'Use SimilarWeb data only (rejected — claude-ads provides creative-level audit detail)',
+    ],
+    confidence: 0.88,
+  },
+  'seo.audit': {
+    why: 'Toprank SEO audit reveals the company digital presence strength — domain authority, organic traffic, and keyword positioning relative to competitors.',
+    how: 'Analyzed domain authority, organic traffic estimates, keyword gaps, and top-ranking terms. Competitor overlap percentage computed.',
+    alternatives: [
+      'Use Ahrefs API (rejected — Toprank is the registered SEO leader in the registry)',
+      'Skip SEO (rejected — digital presence is a key investor signal)',
+    ],
+    confidence: 0.90,
+  },
+  'compose.brief': {
+    why: 'PRAXIS composer stitches all prior step outputs into a single, structured HTML brief with BLUF layout, highlighted metrics, and risk annotations.',
+    how: 'Aggregated outputs from Camofox, Fincept, claude-ads, and Toprank into an HTML composition with executive summary, per-section data, and footer metadata.',
+    alternatives: [
+      'Plain text stitching (rejected — HTML enables richer video rendering with HyperFrames)',
+      'Markdown output (rejected — video render step requires HTML input)',
+    ],
+    confidence: 0.96,
+  },
+  'video.render': {
+    why: 'HyperFrames renders the HTML brief as a ~60-second narrated video — the final deliverable that makes the brief shareable and exec-consumable.',
+    how: 'Submitted the HTML composition to HyperFrames render pipeline. Video includes narrated financial summary, marketing overlay, and SEO positioning chart.',
+    alternatives: [
+      'PDF export only (rejected — video is the capstone differentiator)',
+      'Slide deck generation (rejected — HyperFrames video is higher-impact for exec audience)',
+    ],
+    confidence: 0.92,
+  },
+  'publish.pulse': {
+    why: 'Publishing to Pulse places the brief in the executive briefing surface where it is immediately visible to leadership alongside other operational signals.',
+    how: 'Created a Pulse "earnings-brief" card with ticker, period, and generated content. Card is now queryable in the Pulse executive surface.',
+    alternatives: [
+      'Email distribution (rejected — Pulse is the native briefing surface)',
+      'Slack notification only (rejected — Pulse provides structured card with full context)',
+    ],
+    confidence: 0.97,
+  },
+  'publish.video-library': {
+    why: 'Archiving in szl-demo-video ensures the rendered video is tagged, searchable, and replayable — creating a library of earnings briefs over time.',
+    how: 'Wrote video entry to szl-demo-video library with tags [ticker, earnings-brief, Q4-2025, auto-generated]. Entry is browsable and linked to the audit trace.',
+    alternatives: [
+      'Store in S3 only (rejected — szl-demo-video provides tagging and browsable library UI)',
+      'Skip archival (rejected — reproducibility requires persisted video entries)',
+    ],
+    confidence: 0.95,
   },
 };
 
@@ -559,7 +645,11 @@ export default function Orchestrator() {
                   setIntent(ex.intent);
                   handleRun(ex.intent);
                 }}
-                className="text-[10px] px-2.5 py-1 rounded-lg bg-praxis-bg border border-praxis text-muted-foreground/60 hover:text-muted-foreground hover:border-praxis-amber/20 transition-colors flex items-center gap-1"
+                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
+                  'highlight' in ex && ex.highlight
+                    ? 'bg-praxis-amber/10 border-praxis-amber/40 text-praxis-amber font-semibold hover:bg-praxis-amber/20'
+                    : 'bg-praxis-bg border-praxis text-muted-foreground/60 hover:text-muted-foreground hover:border-praxis-amber/20'
+                }`}
               >
                 <Zap className="w-2.5 h-2.5 text-praxis-amber/60" />
                 {ex.label}

@@ -115,6 +115,10 @@ export const praxisApi = {
       method: 'POST',
       body: JSON.stringify({ enabled }),
     }),
+
+  listRecipes: () => req<import('./types').OrchestrationRecipe[]>('/recipes'),
+
+  getRecipe: (id: string) => req<import('./types').OrchestrationRecipe>(`/recipes/${id}`),
 };
 
 export function getApiBase() {

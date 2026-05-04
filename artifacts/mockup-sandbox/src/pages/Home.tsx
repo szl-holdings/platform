@@ -1,4 +1,6 @@
-import { ArrowRight, Brain, FlaskConical, Network, Shield, Workflow, Zap } from 'lucide-react';
+import { ArrowRight, Brain, FlaskConical, Network, Play, Shield, Workflow, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { praxisApi } from '../lib/api';
 import type { Page } from '../lib/types';
 
 const PILLARS = [
@@ -72,6 +74,24 @@ const STATS = [
 ];
 
 export default function Home({ navigate }: { navigate: (p: Page) => void }) {
+  const [briefLoading, setBriefLoading] = useState(false);
+  const [briefStatus, setBriefStatus] = useState<string | null>(null);
+
+  async function handleRunSampleBrief() {
+    setBriefLoading(true);
+    setBriefStatus(null);
+    try {
+      const { id } = await praxisApi.orchestrate(
+        "Brief me on $AAPL's last quarter — pull financials, audit their marketing, check SEO, and render a video brief."
+      );
+      setBriefStatus(`Running — ${id.slice(0, 8)}`);
+      navigate('orchestrator');
+    } catch (err) {
+      setBriefStatus(err instanceof Error ? err.message : 'Failed to start');
+      setBriefLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-full bg-praxis-bg">
       <div className="relative overflow-hidden">
@@ -101,6 +121,43 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
             research, persistent cross-session memory, protocol-agnostic tool calls, and
             cross-product orchestration — behind one console. No competitor ships all four.
           </p>
+
+          <div className="mb-10 bg-praxis-surface border border-praxis-amber/30 rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-praxis-amber/10 border border-praxis-amber/30 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-praxis-amber" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-praxis-amber">Earnings Brief in 60 seconds</h3>
+                <p className="text-[11px] text-muted-foreground/60">
+                  Capstone demo — fires all 5 leaders through a single intent
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground/70 leading-relaxed mb-4">
+              One click: stealth-fetch IR pages (Camofox), pull financials (Fincept Terminal),
+              audit marketing (claude-ads), check SEO (Toprank), compose an HTML brief, render
+              as video (HyperFrames), and publish to Pulse + szl-demo-video — all in under 60 seconds.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleRunSampleBrief}
+                disabled={briefLoading}
+                className="px-5 py-2.5 rounded-lg bg-praxis-amber/15 border border-praxis-amber/40 text-praxis-amber text-sm font-semibold hover:bg-praxis-amber/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                <Play className="w-4 h-4" />
+                {briefLoading ? 'Launching…' : 'Run sample brief'}
+              </button>
+              <span className="text-[10px] font-mono text-muted-foreground/40">
+                Demo ticker: $AAPL · Q4 2025
+              </span>
+            </div>
+            {briefStatus && (
+              <div className="mt-3 text-[10px] font-mono text-praxis-amber/70">
+                {briefStatus}
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-4 gap-4 mb-12">
             {STATS.map((s) => {

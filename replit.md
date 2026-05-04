@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers FORGE, a governed operational intelligence platform designed for regulated enterprises. Its primary purpose is to provide a controlled environment where enterprise signals, agents, tools, people, policies, and proof operate as a unified system. The platform focuses on decision intelligence and operational oversight, particularly for highly regulated sectors requiring strict compliance and auditable AI applications. Key capabilities include Governed Workflow Orchestration, Maritime Intelligence, a Sovereign Execution Lab, the Continuum Business Observability Fabric, the Continuum Mythos Doctrine for governance, the Continuum Compliance Fabric, the Continuum DARPA Resilience Layer, and OMNIA for Unified Portfolio Intelligence. The platform is designed to support web and mobile applications, an API, and a cohesive design system.
+SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. It provides a controlled environment for enterprise signals, agents, tools, people, policies, and proof to operate as a unified system, focusing on decision intelligence and operational oversight. The platform is designed for highly regulated sectors requiring strict compliance and auditable AI applications, supporting web and mobile applications, an API, and a cohesive design system. Key capabilities include Governed Workflow Orchestration, Maritime Intelligence, a Sovereign Execution Lab, the Continuum Business Observability Fabric, and OMNIA for Unified Portfolio Intelligence.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -9,21 +9,21 @@ I want iterative development.
 Ask before making major changes.
 
 ## System Architecture
-The platform is built as a pnpm monorepo, known as the Continuum Business Observability Fabric, leveraging TypeScript 5.9, React 19, Vite, and Node.js within a micro-frontend architecture.
+The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js within a micro-frontend architecture, known as the Continuum Business Observability Fabric.
 
 **Core Architectural Principles:**
-- **FORGE Execution Fabric:** Incorporates Human-in-the-loop governance, Outcome Graph, Proof Chain, and Covenant Policy for controlled execution.
+- **FORGE Execution Fabric:** Incorporates Human-in-the-loop governance, Outcome Graph, Proof Chain, and Covenant Policy.
 - **Sovereign Execution Substrate:** Ensures durable, governed, and replayable runtime for orchestration and policy enforcement.
 - **Workflow Engine:** Orchestrates durable business processes.
 - **Event Fabric (PRISM Bus):** A cross-domain event bus for seamless communication.
-- **SZL Foundation – Trace Graph:** The canonical trace layer for all agent runs and workflow steps.
+- **SZL Foundation – Trace Graph:** Canonical trace layer for agent runs and workflow steps.
 - **ATLAS Enterprise State Model:** Defines a shared entity vocabulary and event taxonomy.
 - **Living Signal Mesh & Evidence Graph:** Unifies event/signal handling with an `EvidenceStore`.
-- **Memory Fabric & FORGE Runtime:** A tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
+- **Memory Fabric & FORGE Runtime:** Tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
 
-**Monorepo Structure:** The monorepo organizes active/archived artifacts, shared infrastructure, and packages for business observability, AI Control Plane, NVIDIA-Ready Modules, and Substrate Edge Inference, utilizing Drizzle ORM for PostgreSQL schemas.
+**Monorepo Structure:** Organizes active/archived artifacts, shared infrastructure, and packages for business observability, AI Control Plane, NVIDIA-Ready Modules, and Substrate Edge Inference, utilizing Drizzle ORM for PostgreSQL schemas.
 
-**UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) serves as the single source of truth for visual design, encompassing accent palette, typography, spacing, and UI components. All authenticated product surfaces are evidence-first, employing a pure dark theme with a single warm accent. A One-of-One Platform Shell unifies user interfaces across applications.
+**UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) provides a single source of truth for visual design. All authenticated product surfaces are evidence-first, employing a pure dark theme with a single warm accent. A One-of-One Platform Shell unifies user interfaces.
 
 **API Layers:** The platform provides REST API, GraphQL API (Apollo Server), and an MCP Gateway (protocol version 2025-11-25 with Roots, Sampling, and Elicitation capabilities).
 
@@ -32,31 +32,29 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 - **Governed Sampling** (`governed-sampling.ts`): Model preference routing through AI Control Plane, Covenant Policy gates, iteration cap (10), and Proof Chain logging for every sampling session. Tenant-scoped session visibility.
 - **Governed Elicitation** (`governed-elicitation.ts`): Form mode with JSON Schema validation and URL mode with HTTPS enforcement and session binding. Schema-validated accept actions. Tenant-scoped flow access control.
 
-**Zero-Trust Authentication:** The API server implements robust security with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging. Architectural guardrail tests enforce comprehensive authentication coverage.
+**Zero-Trust Authentication:** Implements robust security with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
-- **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
-- **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
-- **Continuum — Business Observability Fabric (formerly Alloy):** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents. A continuous, governed view of every signal and decision flowing through the business.
-- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline and knowledge collections.
-- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer wired across all SZL products (Sentra, Counsel, Pulse, Command, Lyte, Terra, Vessels, and mobile). Key capabilities: dual planner modes (ReAct, CoT-decompose), three MCP server classes (LocalData, SearchEngine, CloudEngine), three specialist agents (knowledge, web-research, cloud-ops), two-tier memory (short-term + long-term), Reciprocal Rank Fusion + cross-encoder evidence merging, and full AggregatorTrace instrumentation. API routes at `/alloy/agentic-rag` (POST /run, GET /runs/:id, GET /runs/:id/trace, POST /run/stream, GET /specialists, GET /mcp-classes). Central SDK re-export via `@szl-holdings/alloy-client`. 46 vitest tests. Research dossier at `docs/alloy-agentic-rag/RESEARCH.md`; architecture at `docs/alloy-agentic-rag/ARCHITECTURE.md`.
-- **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
+- **Precision Evolution Runtime (PER):** Governed, evidence-gated system for continuously evolving agent policies.
+- **PRAXIS – Unified Agentic AI Layer:** Internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
+- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, with capabilities like Agent Gateway, Reasoning Proof Engine, Governed Memory Vault, and Self-Optimization Engine.
+- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline.
+- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products. Key capabilities include dual planner modes (ReAct, CoT-decompose), three MCP server classes, specialist agents, two-tier memory, and evidence merging.
+- **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with metadata.
 
 **Key Technical Implementations:**
 - **Red-Team Game Day Engine:** For live competitive crisis simulations.
 - **Cross-Domain Signal Bus (Alert Bus):** A "When/then" automation engine.
 - **Outbound Gateway:** Unified omni-channel notification layer.
 - **Amaru — Convergent Reverse-ETL:** A visual no-code Reverse-ETL system.
-- **@workspace/ouroboros — Ouroboros Loop Kernel:** A shared TS package for bounded loops with measurable convergence.
-- **@workspace/codex-kernel — Replay-Grade Governed Loop Kernel:** Implements hash-chained state, decision receipts, and an append-only proof ledger with tamper-evident digests, crucial for replay verification and auditability. Ships a payload-driven CLI (`pnpm --filter @workspace/codex-kernel codex:run` / `codex:replay`) backed by `runner/payload.json` (the E4 unified loop spec). Writes six deterministic deliverables to `./output/` (trace.jsonl, proof_ledger.jsonl, final_state.json, run_summary.json, decision_receipt.json, final_table_preview.json). Determinism + replay-attestation are enforced by `src/cli/run.test.ts`.
+- **@workspace/codex-kernel — Replay-Grade Governed Loop Kernel:** Implements hash-chained state, decision receipts, and an append-only proof ledger with tamper-evident digests for replay verification and auditability.
 - **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory fabric, evidence ledger, and policy guard.
 - **Multi-Agent Crew System:** Supports specialized agent roles with plan decomposition.
 - **Trust Score Engine:** A graduated autonomy system.
 - **Fine-Tuned Model Router:** Domain-aware model routing with fallback chains.
 - **Multi-Language Voice Pipeline:** Provides 5-language support for voice interactions.
 - **Offline-First Sync (Mobile):** For mobile applications with local cache and conflict resolution.
-- **Mobile Biometric Sign-In:** A secure server-side authentication factor.
 - **Unified Auth Mesh:** Backend-only authentication unification layer.
 - **Forecast & Anomaly Fabric:** Unified forecasting and anomaly detection services.
 - **Premium Data Fabric:** Adapter framework for data integration.
@@ -71,49 +69,29 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 - **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, synthetic metrics, self-healing, AI alert triage, cost-aware monitoring, and observability as code.
 - **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`, `/alloy/workspace/*`):** A full semantic workspace intelligence layer (demo mode, frontend-only). Includes WorkGraph Explorer & Answer Engine (semantic query interface returning permission-scoped answers with source evidence from 11 connectors: Email, Drive, Doc Editor, Chat, Video Meetings, Tasks, CRM, ERP, Legal Vault, Approval Engine, MCP Bridge), Workspace Intelligence Home, Event Stream (normalized event log with proof state lifecycle), Skills Studio (10 seed skills with MirrorEval scores and approval classes), Project Memory, Meeting to Execution, Approval Chase, Proof Packets (tamper-evident SHA-256 evidence chains), and Admin Control Center (7 DLP enforcement policies, 9 data classification tiers). Data model: `WorkGraphNode`, `WorkGraphEdge`, `WorkObject`, `WorkspaceConnector`, `WorkspaceEvent`, `WorkGraphAnswer`, `A11oySkill`, `ProjectMemory`, `ProofPacket` types in `src/alloy/data/workgraph.ts`. Governance: all connectors are demo mode only; approval gates enforced per skill (`auto`, `review`, `finance`, `legal`, `security`, `executive`); Alloy-original generic connector names (no Google branding). Audit: `artifacts/szl-holdings/audit/workgraph-feature-audit.md`.
 - **Shared Reverse Proxy (`packages/shared-proxy`) & Security Headers (`@szl-holdings/security-headers`):** Ensures consistent platform routing and security policies.
-- **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs in a dedicated database table.
+- **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs.
+- **Cognitive Reflexivity Engine:** A self-observing, self-improving governed cognition layer that closes the loop from telemetry to self-model adaptation.
+- **Ouroboros Integrations:** Reconciliation primitives (frustum, seked, unit-fractions, doubling) applied to handoff reconciliation, fleet auditing, and HSM governance.
+- **SIGIL — SZL Integrated Governance & Invariant Layer:** A runtime trust framework composing four independent runtime axes (Provenance, Containment, Coherence, Convergence) through a closed-form weighted geometric mean.
+- **Ouroboros Guardrails:** A drop-in NeMo Guardrails replacement with Colang-compatible config, emitting a closed-form Λ scalar and a tamper-evident hash-chained receipt for every decision.
 
-## Canonical Identity & Source of Truth
-The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`. Any document, slide, or README that cites a count (artifacts, DB tables, API endpoints, verticals, packages, etc.) must draw the number from `SOURCE_OF_TRUTH.md` and re-run the verification command listed there before publishing. Naming conventions: display names use the canonical name (TENAX, SEXTANT, DOMAINE, Counsel, LUMINA, PARAGON, KORA, Carlota Jo, Continuum, Amaru, APEX, PRAXIS); slugs and API paths are stable and do not change on rebrand. The eight production verticals are TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, LUMINA (Pulse), PARAGON (Aegis), KORA (Lyte), and Carlota Jo. Counsel is the canonical legal vertical; the older "PRISM Counsel" name is archived. "Alloy" is retained as the name of the AI execution plane (Alloy Model Gateway, Alloy Endpoint Plane, Alloy Embedding Fabric); the broader Business Observability Fabric is now called Continuum.
+**Canonical Identity & Source of Truth:**
+The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`. Naming conventions ensure stable slugs and API paths.
 
-## Technology Preferences
-- TypeScript 5.9 / Node 20+ / pnpm workspaces
-- React 19 + Vite for web artifacts; Expo for mobile
-- Drizzle ORM on PostgreSQL (Neon-compatible)
-- Hugging Face Inference Endpoints for governed LLM serving (Qwen 3.6-27B as the primary reasoning model)
-- Shared design system (`@szl-holdings/design-system`) — pure dark theme, single warm accent
-- Cloudflare for edge / DNS / WAF; Vercel and Replit for app hosting
-- GitHub for VCS; CI via GitHub Actions
+**AI Governance Rules:**
+1. Every AI call must produce a `ProvenanceEnvelope`.
+2. Every AI call must emit minimum `alloy.model_request_sent` and `alloy.model_response_received` audit events.
+3. PII must be redacted before any input leaves the platform.
+4. Hidden reasoning ("thinking" content) must be stripped from any output returned to callers and from any log line.
+5. High-risk actions require human-in-the-loop approval.
+6. Per-request and daily budget caps are enforced with hard cutoff.
+7. No model weights are hosted in this repo; all inference is remote.
+8. No secrets are committed; all credentials flow through environment variables.
 
-## AI Governance Rules
-1. Every AI call must produce a `ProvenanceEnvelope` (model, prompt hash, tokens, cost, latency, governance verdict).
-2. Every AI call must emit at minimum the `alloy.model_request_sent` and `alloy.model_response_received` audit events; blocks, retries, redactions, and budget events emit additional events listed in `ecosystem-plugin-registry.json` → `required_audit_events`.
-3. PII (SSN, credit card, email, private key, AWS secret, etc.) must be redacted before any input leaves the platform — the gateway enforces this and is the only sanctioned path to the Qwen endpoint.
-4. Hidden reasoning ("thinking" content) must be stripped from any output returned to callers and from any log line. Only a boolean `thinkingPresent` flag may be persisted in evidence metadata.
-5. High-risk actions (`purge_data`, `external_transfer`, `modify_policy`, `force_approve`, `delete_tenant`, `export_all`) require a human-in-the-loop approval token before the gateway will dispatch the request.
-6. Per-request and daily budget caps are enforced with hard cutoff — new requests are rejected, never queued silently.
-7. No model weights are hosted in this repo. All inference is remote and routes through the Alloy Endpoint Plane.
-8. No secrets are committed. All credentials flow through environment variables documented in the relevant profile.
-
-## Model & Endpoint Policy
-- **Primary governed model:** Qwen 3.6-27B Reasoning (`Qwen/Qwen3-27B`). Profile: `model-profiles/qwen3_6_27b_szl_profile.json`. License: Qwen Research License (commercial use requires written approval from Alibaba Cloud).
-- **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport. Profile: `endpoint-profiles/alloy_endpoint_plane.json`. Autoscale 0–4 replicas; 15-min idle scale-down; expected cold start ~120s.
-- **Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts` (`AlloyModelGateway`). The single sanctioned path from any vertical to the Qwen endpoint. Validates vertical + task, redacts PII, strips thinking content, attaches evidence, emits audit events, enforces approval gates, retries 503 cold-starts (3× with 2s/5s/10s backoff), and enforces budgets.
-- **Vertical contract:** `AlloyVertical`, `AlloyModelTask`, `AlloyModelRequest` are the canonical types; vertical apps use the gateway via `getDefaultAlloyModelGateway()`.
-- **Required env vars (documented, never hard-coded):** `QWEN36_BASE_URL`, `QWEN36_API_KEY`, `QWEN36_MODEL`, `HF_TOKEN`, `HF_ENDPOINT_NAMESPACE`. The gateway returns `outcome: 'error'` when these are missing — there is no silent fallback to a different model.
-- **Plugin registry:** `ecosystem-plugin-registry.json` enumerates the eight verticals, their allowed tasks, approval gates, shared plugins (GitHub, HuggingFace, Vercel, Neon, Cloudflare), and domain-specific plugins.
-
-## External Research Policy
-- All external research, threat intel, and market data flow through the per-vertical plugins listed in `ecosystem-plugin-registry.json`. Direct fetches that bypass the registry are prohibited.
-- Public-source citations (CISA KEV, NVD, MITRE ATT&CK, SEC EDGAR, CourtListener, OFAC SDN, etc.) are recorded as `SourceCitation` entries on the evidence envelope.
-- Provider rate limits and cost meters are honored by the adapter framework; circuit breaker opens on repeated failures.
-
-## Verification Checklist (run before publishing claims)
-1. Re-run the verification commands in `SOURCE_OF_TRUTH.md` and confirm every quoted number matches.
-2. Confirm `model-profiles/qwen3_6_27b_szl_profile.json` and `endpoint-profiles/alloy_endpoint_plane.json` reference only env vars (no inline secrets).
-3. Confirm `ecosystem-plugin-registry.json` lists all 8 verticals and the 5 shared plugins.
-4. Confirm any new vertical wiring uses `AlloyModelGateway` and not direct provider SDK calls.
-5. Confirm no thinking content, secrets, or customer data appear in committed JSON, MD, or TS files.
+**Model & Endpoint Policy:**
+- **Primary governed model:** Qwen 3.6-27B Reasoning (`Qwen/Qwen3-27B`).
+- **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport.
+- **Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts` (`AlloyModelGateway`) as the single sanctioned path to the Qwen endpoint, enforcing validation, redaction, audit events, approvals, and budgets.
 
 ## External Dependencies
 - **Database:** PostgreSQL
@@ -122,7 +100,7 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, Elevenlabs, Substrate/oLLM
 - **Communication:** Slack, Twilio, Resend, SendGrid
 - **Maritime Data:** MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather
-- **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, EU Consolidated List, Shodan, GreyNoise, MalwareBazaar
+- **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar
 - **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
@@ -1156,3 +1134,6 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
+=======
+- **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+>>>>>>> aa74149e6 (feat(nexus): Add "Earnings Brief in 60s" capstone recipe for PRAXIS Orchestrator)
