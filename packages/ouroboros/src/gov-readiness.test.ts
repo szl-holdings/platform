@@ -1,6 +1,6 @@
 /**
  * SZL Holdings government-readiness module tests — pin every cardinal
- * fact from the April 30, 2026 NYSTEC pre-briefing audit so future edits
+ * fact from the April 30, 2026 Empire APEX pre-briefing audit so future edits
  * cannot silently drift the public scorecard.
  */
 
@@ -169,7 +169,7 @@ describe('Manifest summary + helpers', () => {
   it('manifest pins audit metadata exactly', () => {
     expect(GOV_READINESS_MANIFEST.auditDate).toBe('2026-04-30');
     expect(GOV_READINESS_MANIFEST.preparedBy).toContain('Stephen P. Lutar Jr.');
-    expect(GOV_READINESS_MANIFEST.meeting).toContain('NYSTEC');
+    expect(GOV_READINESS_MANIFEST.meeting).toContain('Empire APEX');
   });
   it('manifest counts match the underlying registries', () => {
     expect(GOV_READINESS_MANIFEST.counts.platforms).toBe(

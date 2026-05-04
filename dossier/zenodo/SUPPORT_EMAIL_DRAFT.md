@@ -33,7 +33,7 @@ What I am observing (verified after >24 hours, not a propagation delay):
 5. https://hdl.handle.net/api/handles/10.5281/zenodo.19983066 also returns 404.
 6. By contrast, the concept DOI 10.5281/zenodo.19944926 is `findable` in
    DataCite (registered 2026-05-01) and resolves correctly via doi.org.
-7. Older versions of this same work (19944926, 19934129, 19867281) all
+7. Older versions of this same work (19944926, 19944926, 19867281) all
    resolve correctly via doi.org with HTTP 302 redirects.
 
 Diagnosis: this looks like a one-off Zenodo→DataCite minting failure for

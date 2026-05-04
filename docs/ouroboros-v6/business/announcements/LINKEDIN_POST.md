@@ -17,7 +17,7 @@ What I'm looking for:
 3. Strategic conversations with observability and policy-runtime teams.
 
 Repo: github.com/szl-holdings
-Thesis v2 DOI: 10.5281/zenodo.19934129
+Thesis v2 DOI: 10.5281/zenodo.19944926
 
 If you're building agent infrastructure, drop a comment or DM. The runtime is real, the tests are green, and the envelope is well-defined.
 

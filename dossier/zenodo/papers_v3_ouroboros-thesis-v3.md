@@ -7,7 +7,7 @@
 **Date:** 2 May 2026
 **Version:** v3 (replaces retracted preprint 10.5281/zenodo.19951520)
 **Reference implementation:** [github.com/szl-holdings/ouroboros](https://github.com/szl-holdings/ouroboros) — commit `5f6ee65`, suite 172/172
-**Companion papers:** v1 [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281), v2 [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+**Companion papers:** v1 [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281), v2 [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 
 ---
 
@@ -265,6 +265,6 @@ Stating limitations explicitly is part of the contribution.
 3. Gaifulina, D., Doynikova, E., Novikova, E., & Kotenko, I. (2022). Construction and Analysis of Integral User-Oriented Trustworthiness Metrics. *Electronics, 11(2), 234.* [DOI 10.3390/electronics11020234](https://doi.org/10.3390/electronics11020234).
 4. Henriques, J., Sousa, J., Gonçalves, L., Paredes, S., Sousa, S., & Rocha, T. (2024). Machine learning models' assessment: trust and performance. *Medical & Biological Engineering & Computing.* [DOI 10.1007/s11517-024-03145-5](https://doi.org/10.1007/s11517-024-03145-5).
 5. Lutar, S. P. (2026a). *The Ouroboros Thesis: Looped Computation as a System Primitive for AI Systems* (v1). Zenodo. [DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281).
-6. Lutar, S. P. (2026b). *The Loop Is the Product: An Empirical Companion to the Ouroboros Thesis* (v2). Zenodo. [DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).
+6. Lutar, S. P. (2026b). *The Loop Is the Product: An Empirical Companion to the Ouroboros Thesis* (v2). Zenodo. [DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 7. Mahmood, A., Suzuki, H., Sheng, Q. Z., Siddiqui, S. A., & Ni, W. (2023). Trust in Vehicles: Toward Context-Aware Trust and Attack Resistance for the Internet of Vehicles. *IEEE Transactions on Intelligent Transportation Systems.* [DOI 10.1109/TITS.2023.3268301](https://doi.org/10.1109/TITS.2023.3268301).
 8. Thomas, M., Boursalie, O., Samavi, R., & Doyle, T. E. (2023). Data-driven approach to quantify trust in medical devices using Bayesian networks. *Journal of Medical Devices.* [DOI 10.1177/15353702231215893](https://doi.org/10.1177/15353702231215893).

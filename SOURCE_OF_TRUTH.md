@@ -23,6 +23,7 @@
 | Ouroboros vitest test calls | **133** | `grep -rhE "^\s*(it\|test)\(" packages/ouroboros/src --include='*.test.ts' \| wc -l` |
 | Codex-kernel vitest test calls | **29** | `grep -rhE "^\s*(it\|test)\(" packages/codex-kernel/src --include='*.test.ts' \| wc -l` |
 | Sovereign engine innovations | **44** | Count of entries in INNOVATION_MANIFEST in `packages/ouroboros-integrations/src/sovereign-engine.ts` |
+| Thesis papers (papers/) | **10** | `ls papers/*.tex \| wc -l` |
 | Security tests passing | **126** | `pnpm --filter @workspace/api-server test` (security suite) |
 
 **Last verified:** 2026-05-04

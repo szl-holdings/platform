@@ -1,7 +1,7 @@
 # Federal Lighthouse Pilot Template — Ouroboros Guardrails
 **SZL Holdings | Stephen P. Lutar | ORCID 0009-0001-0110-4173**
 **Product:** `@szl-holdings/ouroboros` v6.1.0 | No-cost 90-day pilot
-**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 **Post-Meeting Reference:** Mercy McInnis, Procurement Counselor, Empire APEX Accelerator (Empire APEX/DoD) — Teams meeting May 6, 2026
 
 ---

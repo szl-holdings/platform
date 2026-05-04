@@ -16,7 +16,7 @@
 **Affiliation:** SZL Holdings
 **Date:** May 4, 2026
 **Status:** Operational -- deployed and tested against live API endpoints
-**Compounds:** Ouroboros v1 (DOI 10.5281/zenodo.19867281), v2 (DOI 10.5281/zenodo.19934129), v3 (GitHub release v6.1.0)
+**Compounds:** Ouroboros v1 (DOI 10.5281/zenodo.19867281), v2 (DOI 10.5281/zenodo.19944926), v3 (GitHub release v6.1.0)
 **Runtime reference:** `@workspace/ouroboros-*` -- 25 packages, 54 guardrails tests passing, 9 formal axes, live LaaS API
 
 ---
@@ -569,7 +569,7 @@ curl http://localhost:5000/api/ouroboros/a11oy/pulse
 
 # 8. Verify Zenodo DOIs resolve
 curl -sI https://doi.org/10.5281/zenodo.19867281 | grep -i location
-curl -sI https://doi.org/10.5281/zenodo.19934129 | grep -i location
+curl -sI https://doi.org/10.5281/zenodo.19944926 | grep -i location
 ```
 
 ---
@@ -590,7 +590,7 @@ We invite review, replication, and adoption.
 
 Lutar, S. P. (2026). Ouroboros v1: Position paper. Zenodo. DOI 10.5281/zenodo.19867281.
 
-Lutar, S. P. (2026). Ouroboros v2: The Loop Is the Product -- empirical companion. Zenodo. DOI 10.5281/zenodo.19934129.
+Lutar, S. P. (2026). Ouroboros v2: The Loop Is the Product -- empirical companion. Zenodo. DOI 10.5281/zenodo.19944926.
 
 Page, D. N. (1993). Information in black hole radiation. Phys. Rev. Lett. 71, 3743. arXiv:hep-th/9306083.
 

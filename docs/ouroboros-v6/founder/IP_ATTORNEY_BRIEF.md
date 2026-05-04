@@ -23,7 +23,7 @@ I have built a runtime trust system that compounds four to nine inspectable scal
 
 | Date | Event | Effect on US filing window |
 |---|---|---|
-| ~March 2025 | Zenodo v2 thesis published (DOI 10.5281/zenodo.19934129) | Started 35 USC 102(b) one-year on-sale / public-disclosure bar |
+| ~March 2025 | Zenodo v2 thesis published (DOI 10.5281/zenodo.19944926) | Started 35 USC 102(b) one-year on-sale / public-disclosure bar |
 | ~March 2026 | One-year bar expired for v2 disclosures | Cannot obtain US utility patent that reads on v2 content |
 | May 1, 2026 (today) | v4.6 thesis written; 40 new primitives (21-60) NOT YET PUBLISHED | These are still patentable in the US if filed before any further public disclosure |
 | Today + 1 to 14 days | File provisional applications on every primitive 21-60 | Locks in priority before Zenodo v3, GitHub release, or arXiv companion |
@@ -119,7 +119,7 @@ All on request, all under attorney-client privilege upon engagement:
 - Full source: https://github.com/szl-holdings (private repos accessible upon NDA).
 - v4.6 thesis: /home/user/workspace/ouroboros-unified-payload/OUROBOROS_THESIS_V4.md.
 - Test results: 612 TypeScript + 107+ Python passing.
-- Zenodo v2 DOI: 10.5281/zenodo.19934129.
+- Zenodo v2 DOI: 10.5281/zenodo.19944926.
 - This brief as PDF on request.
 
 ## 10. Bottom line

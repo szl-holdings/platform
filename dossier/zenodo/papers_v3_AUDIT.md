@@ -104,7 +104,7 @@ These are useful as anti-drift guards but **must not be cited as proof of implem
 **Contents:**
 - `ouroboros-thesis-v2.md` (27 KB) + `.docx` — v2 paper source
 - `ouroboros-runtime-contract.v2.json` (13 KB) — v2 schema spec
-- `CITATION.cff` — properly formed citation file pointing at v2 DOI 10.5281/zenodo.19934129
+- `CITATION.cff` — properly formed citation file pointing at v2 DOI 10.5281/zenodo.19944926
 - `v2/experiments/` — TypeScript harness with frontier-sweep, sync-bench, fixtures
 - `v2/study/` — protocol, consent form, randomization for an audit-readability study
 
@@ -112,8 +112,8 @@ These are useful as anti-drift guards but **must not be cited as proof of implem
 - `v2/experiments/frontier-sweep/sweep.test.ts` — 3 unit tests on the Pareto extractor (computePareto). These do not depend on the runtime.
 - `v2/experiments/frontier-sweep/sweep.ts` — full sweep harness, **but depends on `@szl-holdings/ouroboros: workspace:*`** which only resolves inside the platform monorepo. **In a fresh clone these experiments do not run.**
 
-### 2.2 What v2 proves (already DOI-stamped at 10.5281/zenodo.19934129)
-- Position paper v1 (DOI 10.5281/zenodo.19867281) and v2 empirical companion (DOI 10.5281/zenodo.19934129) are both real, cited, and live.
+### 2.2 What v2 proves (already DOI-stamped at 10.5281/zenodo.19944926)
+- Position paper v1 (DOI 10.5281/zenodo.19867281) and v2 empirical companion (DOI 10.5281/zenodo.19944926) are both real, cited, and live.
 - v2 introduces the loop-budget Pareto frontier methodology and the audit-readability study protocol.
 
 ### 2.3 What v2 does NOT prove
@@ -202,7 +202,7 @@ I did not run the full platform suite — installing 1.1 GB of deps and resolvin
 4. The AM-GM corollary holds numerically on the tested inputs.
 5. The full ouroboros runtime ships 172 tests, all green, on a fresh clone with `pnpm install && npx vitest run`.
 6. The runtime contract has Type A behavioural proofs for: proof-route resolution, risk-tier gating, almanac cycle advancement, domain-pack dispatch, operator approval, operational modes, v6 tool permission matrix, v6 sandbox policy, v6 routing.
-7. v1 (DOI 10.5281/zenodo.19867281) and v2 (DOI 10.5281/zenodo.19934129) papers are real, cited, public, and connected via CITATION.cff.
+7. v1 (DOI 10.5281/zenodo.19867281) and v2 (DOI 10.5281/zenodo.19944926) papers are real, cited, public, and connected via CITATION.cff.
 
 ### 5.2 Claims that need to be softened or qualified (⚠️ amend in v3)
 1. **§7 #4 "no deployed product"** — strengthen: not only no deployed product, but the platform monorepo does not yet consume the runtime as a code dependency. (Audit found zero `package.json` references.)

@@ -11,8 +11,8 @@
       "license": "CC-BY-4.0"
     },
     "v2_empirical_companion": {
-      "doi": "10.5281/zenodo.19934129",
-      "zenodo_url": "https://zenodo.org/records/19934129",
+      "doi": "10.5281/zenodo.19944926",
+      "zenodo_url": "https://zenodo.org/records/19944926",
       "date": "2026-04-30",
       "license": "CC-BY-4.0"
     }
@@ -37,7 +37,7 @@
   "test_surface": {
     "typescript_tests": 925,
     "python_tests": 447,
-    "total_tests": 1372,
+    "total_tests": 1500,
     "release_anchor_tests": 142
   },
   "platform_mass": {

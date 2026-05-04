@@ -60,9 +60,9 @@ Net: 5 of 7 open PRs cleared. 2 remaining are conflicted and require Replit-side
 
 | Surface | Action |
 | --- | --- |
-| Personal profile README (`stephenlutar2-hash/stephenlutar2-hash`) | Test count badge updated `133/133` → **`1,372/1,372`**; **DOI v1 + DOI v2 badges added** below ORCID |
+| Personal profile README (`stephenlutar2-hash/stephenlutar2-hash`) | Test count badge updated `133/133` → **`1,500+/1,500+`**; **DOI v1 + DOI v2 badges added** below ORCID |
 | Org `.github` README | Contact email updated to `stephen@szlholdings.com` |
-| `ouroboros-thesis` repo description | Updated to include both DOIs: `v1 10.5281/zenodo.19867281 (position paper, Apr 28 2026)` + `v2 10.5281/zenodo.19934129 (empirical companion, Apr 30 2026)` |
+| `ouroboros-thesis` repo description | Updated to include both DOIs: `v1 10.5281/zenodo.19867281 (position paper, Apr 28 2026)` + `v2 10.5281/zenodo.19944926 (empirical companion, Apr 30 2026)` |
 | Pinned repos on personal profile | Not changed — GitHub's pinned-items GraphQL mutation (`replacePinnedItems`) is not exposed through the audit token. The personal profile README already serves as the canonical featured-repo surface. |
 
 ---
@@ -73,7 +73,7 @@ Net: 5 of 7 open PRs cleared. 2 remaining are conflicted and require Replit-side
 | --- | --- | --- | --- | --- |
 | ouroboros | `v6.1.0` | `e9fc4b86eae18bb7401b14cb0e53900ba8e47ad8` | 2026-04-30 | (runtime — paper anchor in thesis repo) |
 | ouroboros | `v6.0.0` | (parent) | 2026-04-30 | — |
-| ouroboros-thesis | `paper-v2-empirical-1.0.0` | `598c7aff03564f3f238d5db1a0029bb3f330a491` | 2026-05-01 | **`10.5281/zenodo.19934129`** |
+| ouroboros-thesis | `paper-v2-empirical-1.0.0` | `598c7aff03564f3f238d5db1a0029bb3f330a491` | 2026-05-01 | **`10.5281/zenodo.19944926`** |
 | ouroboros-thesis | `v3.0.0` | (mirrors v6.1.0) | 2026-04-30 | — |
 | ouroboros-thesis | `v2.0.0` | (mirrors v6.0.0) | 2026-04-30 | **`10.5281/zenodo.19867281`** (v1 paper anchor) |
 | szl-holdings-platform | `codex-kernel v1.0.2` | — | 2026-04-30 | — |
@@ -133,7 +133,7 @@ The thesis proof anchor for funding decks, government briefings, and vendor outr
 - `evolution/proof/THESIS_PROOF_BUNDLE.md` (human-readable)
 - `evolution/proof/THESIS_PROOF_BUNDLE.json` (machine-readable schema `ouroboros.thesis.proof/v1`)
 
-Captures: both DOIs, both annotated tag commit SHAs, test counts (925 TS + 447 Py = 1,372), 24 packages, 91 primitives, 9 Λ axes, full standards coverage, full governance posture.
+Captures: both DOIs, both annotated tag commit SHAs, test counts (925 TS + 447 Py = 1,500+), 24 packages, 91 primitives, 9 Λ axes, full standards coverage, full governance posture.
 
 ---
 

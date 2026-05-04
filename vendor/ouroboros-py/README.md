@@ -105,4 +105,4 @@ BUSL-1.1. See `../../LICENSE` at the runtime root.
 
 ## Citations
 
-Lutar, Stephen P. "Ouroboros: Closed-Loop Runtime Trust with the Lutar Invariant" (v4, 2026). Zenodo DOI: 10.5281/zenodo.19934129 (v2; v4 DOI pending).
+Lutar, Stephen P. "Ouroboros: Closed-Loop Runtime Trust with the Lutar Invariant" (v4, 2026). Zenodo DOI: 10.5281/zenodo.19944926 (v2; v4 DOI pending).

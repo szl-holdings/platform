@@ -22,7 +22,7 @@ Three things you might care about:
 
 3. Threat model and privacy posture against GDPR, HIPAA, SOC2, ISO 27001 already written and public.
 
-The thesis has a DOI ([10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)). The payload is deployable today via Docker + OpenTelemetry + Prometheus + Grafana.
+The thesis has a DOI ([10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)). The payload is deployable today via Docker + OpenTelemetry + Prometheus + Grafana.
 
 I'm looking for one design partner per regulated vertical for v0.3. In exchange for early integration, you'd get founder-led white-glove deployment, co-authorship on the case study, and pricing locked at design-partner tier through 2027.
 

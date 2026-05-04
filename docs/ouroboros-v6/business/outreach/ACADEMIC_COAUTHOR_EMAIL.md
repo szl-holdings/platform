@@ -10,7 +10,7 @@ Subject: Co-author invitation — Ouroboros v3.1 formal verification
 
 Dear Prof. {last name},
 
-I'm a non-academic founder building Ouroboros — a runtime trust envelope for AI systems with three axes (cleanliness, horizon, resonance). v2 has a DOI ([10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)). v3 introduces two theorems — the Cleanliness Theorem and the Resonance Handoff Theorem — bounded above by the Landauer thermal ceiling.
+I'm a non-academic founder building Ouroboros — a runtime trust envelope for AI systems with three axes (cleanliness, horizon, resonance). v2 has a DOI ([10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)). v3 introduces two theorems — the Cleanliness Theorem and the Resonance Handoff Theorem — bounded above by the Landauer thermal ceiling.
 
 The Resonance Handoff Theorem leans on the Kuramoto model and on impedance matching (Pozar). My citations include your AKOrN paper (ICLR 2025) — the bridge from oscillatory neural networks to runtime governance is, as far as I can tell, original to v3.
 

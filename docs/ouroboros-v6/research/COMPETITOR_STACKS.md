@@ -541,7 +541,7 @@ None produces a **closed-form scalar trust value** with:
 2. Formal proof obligations that the scalar correctly aggregates its constituent dimensions
 3. A published, peer-reviewable derivation
 
-**Ouroboros provides:** The **9-axis Λ trust scalar** — a composable, mathematically grounded aggregate that collapses nine independent honesty/trust dimensions into a single scalar with formal semantics. The construction and proof are publicly archived at Zenodo (DOI [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)).
+**Ouroboros provides:** The **9-axis Λ trust scalar** — a composable, mathematically grounded aggregate that collapses nine independent honesty/trust dimensions into a single scalar with formal semantics. The construction and proof are publicly archived at Zenodo (DOI [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)).
 
 ---
 
@@ -631,4 +631,4 @@ Based on the gap analysis, the following differentiation vectors are mathematica
 
 ---
 
-*All citations verified against primary sources. Key source URLs embedded inline. Zenodo DOIs for Ouroboros: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).*
+*All citations verified against primary sources. Key source URLs embedded inline. Zenodo DOIs for Ouroboros: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).*

@@ -8,7 +8,7 @@ The [DoD Responsible AI Strategy's](https://media.defense.gov/2024/Oct/26/200357
 
 ### What it is
 
-@szl-holdings/ouroboros runtime v6.1.0 is a closed-form AI trust runtime shipping 91 primitives across 23 workspaces. The companion SKU @szl-holdings/guardrails v0.1.0 ships per-decision tamper-evident receipts with hash-chained provenance as a first-class primitive. The 9 Λ trust axes — Cleanliness, Horizon, Resonance, Frustum, Gauss, Invariance (Blanca), Moral (Oppenheimer), Being (Socrates), Non-measurability (Lara) — map directly and provably to [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) MEASURE subcategories. The construction is publicly archived under ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173) at Zenodo DOI [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) (v2, Apr 30 2026) and [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) (v1, Apr 28 2026). 1,372 tests passing across the full primitive stack.
+@szl-holdings/ouroboros runtime v6.1.0 is a closed-form AI trust runtime shipping 91 primitives across 23 workspaces. The companion SKU @szl-holdings/guardrails v0.1.0 ships per-decision tamper-evident receipts with hash-chained provenance as a first-class primitive. The 9 Λ trust axes — Cleanliness, Horizon, Resonance, Frustum, Gauss, Invariance (Blanca), Moral (Oppenheimer), Being (Socrates), Non-measurability (Lara) — map directly and provably to [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) MEASURE subcategories. The construction is publicly archived under ORCID [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173) at Zenodo DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) (v2, Apr 30 2026) and [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) (v1, Apr 28 2026). 1,500+ tests passing across the full primitive stack.
 
 ### Why we win
 
@@ -38,7 +38,7 @@ Stephen Lutar, Founder, SZL Holdings — partnerships@szlholdings.com | Mercy Mc
 
 ---
 
-SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 tests
+SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,500+ tests
 
 ---
 
@@ -49,4 +49,4 @@ SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 
 - [EU AI Act Article 12 — Record-Keeping](https://artificialintelligenceact.eu/article/12/)
 - [DoD Responsible AI Strategy and Implementation Pathway (2024)](https://media.defense.gov/2024/Oct/26/2003571790/-1/-1/0/2024-06-RAI-STRATEGY-IMPLEMENTATION-PATHWAY.PDF)
 - [CDAO Responsible AI](https://www.ai.mil/Initiatives/Responsible-AI/)
-- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

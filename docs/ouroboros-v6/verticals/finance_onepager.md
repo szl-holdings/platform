@@ -8,7 +8,7 @@ The [Federal Reserve's SR 11-7](https://www.modelop.com/ai-governance/ai-regulat
 
 ### What it is
 
-@szl-holdings/ouroboros runtime v6.1.0 ships 91 primitives across 23 workspaces, with 1,372 tests passing including 54 dedicated to the companion SKU @szl-holdings/guardrails v0.1.0. Three Λ axes are direct answers to finance's hardest model risk problems: Blanca (Invariance) tracks model behavior consistency over time, catching distributional drift before it becomes a validation finding; Oppenheimer (Moral) assigns consequence weight per decision class, allowing a loan adjudication model and a fraud model to operate with calibrated, documented risk thresholds; Frustum (Counterfactual) provides built-in counterfactual hedging, producing alternative decision paths that satisfy SR 11-7's conceptual soundness requirements and DORA's operational resilience testing obligations. The closed-form Λ scalar has a published mathematical proof, archived at Zenodo DOI [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) (v2, Apr 30 2026) and [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) (v1, Apr 28 2026).
+@szl-holdings/ouroboros runtime v6.1.0 ships 91 primitives across 23 workspaces, with 1,500+ tests passing including 54 dedicated to the companion SKU @szl-holdings/guardrails v0.1.0. Three Λ axes are direct answers to finance's hardest model risk problems: Blanca (Invariance) tracks model behavior consistency over time, catching distributional drift before it becomes a validation finding; Oppenheimer (Moral) assigns consequence weight per decision class, allowing a loan adjudication model and a fraud model to operate with calibrated, documented risk thresholds; Frustum (Counterfactual) provides built-in counterfactual hedging, producing alternative decision paths that satisfy SR 11-7's conceptual soundness requirements and DORA's operational resilience testing obligations. The closed-form Λ scalar has a published mathematical proof, archived at Zenodo DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) (v2, Apr 30 2026) and [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) (v1, Apr 28 2026).
 
 ### Why we win
 
@@ -38,7 +38,7 @@ Stephen Lutar, Founder, SZL Holdings — partnerships@szlholdings.com
 
 ---
 
-SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 tests
+SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,500+ tests
 
 ---
 
@@ -49,4 +49,4 @@ SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 
 - [SEC 2026 Examination Priorities — AI governance](https://www.wealthmanagement.com/regulation-compliance/sec-2026-examination-priorities-what-financial-services-firms-need-to-know)
 - [IBM watsonx.governance pricing and features](https://www.ibm.com/products/watsonx-governance/pricing)
 - [NIST AI RMF — Finance sector applicability](https://www.nist.gov/itl/ai-risk-management-framework)
-- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

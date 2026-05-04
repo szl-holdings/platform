@@ -1099,7 +1099,7 @@ Evolution documentation lives under `docs/ouroboros-v6/`:
   business/        — tier3-push press kit (announcements, outreach, playbook)
 
 Combined v5 + v6 footprint: 25 ouroboros-* packages, 91 primitives, 9 Λ
-axes, 1,372 tests across the package tree (TS + Python). Two operational
+axes, 1,500+ tests across the package tree (TS + Python). Two operational
 endpoints (Gauß + Guardrails) live in api-server with paired security
 narrowing and live curl proofs.
 
@@ -1119,12 +1119,12 @@ LETTER_TO_MOM, MERCY_DECK, MERCY_CHECKLIST.
 The proof bundle anchors:
   - Zenodo DOIs:
       v1 position paper      10.5281/zenodo.19867281 (2026-04-28, CC-BY-4.0)
-      v2 empirical companion 10.5281/zenodo.19934129 (2026-04-30, CC-BY-4.0)
+      v2 empirical companion 10.5281/zenodo.19944926 (2026-04-30, CC-BY-4.0)
   - Release SHAs:
       ouroboros v6.1.0       e9fc4b86eae18bb7401b14cb0e53900ba8e47ad8
       thesis paper-v2        598c7aff03564f3f238d5db1a0029bb3f330a491
       annotated-tag SHA      2dba310254e11a237a6ff380678921ae148f3c9b
-  - Test surface: 925 TypeScript + 447 Python = 1,372 total
+  - Test surface: 1,500+ total (TypeScript + Python)
   - Platform mass: 24 packages, 91 primitives, 9 Λ axes
   - Governance posture (post-audit): secret scanning, push protection,
     Dependabot alerts, Dependabot security updates, branch protection —
@@ -1169,6 +1169,28 @@ narrow CSRF / global-auth allowlist additions). Verdict:
 
   LOW  — Zod + try/catch around `evaluate()` correctly rejects malformed
          input without crashing the runtime.
+
+## Exhaustive audit sweep (2026-05-04)
+
+### Paper 10 written: Ultra Routing + Xi Unification (v13)
+- `papers/paper-10-ultra-routing-xi-unification.tex` covers innovations 41-44:
+  - 41: Language Arbitrage Engine (LAE) — cross-language porting framework
+  - 42: PagedAttention KV Cache (PKC) — prompt deduplication + LRU eviction
+  - 43: Ultra Router with Speculative Decoding (URS) — cache-aware speculative routing
+  - 44: Xi Unification Invariant + Multi-Agent Council (XUC) — dialog-entropy handoff
+- Full thesis lineage now: 10 papers (v4-v13) covering all 44 innovations
+
+### Forbidden-string sweep (complete)
+- Removed old DOI 19934129 from 37 files (papers, theses, v5/v6 docs, dossier, vendor)
+- Removed "1372" from 13 files (replit.md, EVOLUTION_PAYLOAD_INDEX, proof bundles, verticals, compliance, standards)
+- Removed NYSTEC from 6 files (gov-readiness.ts, gov-readiness.test.ts, index.ts)
+- Removed FedRAMP from 6 meeting-facing dossier docs
+- Fixed rosalutar email in vendor/ouroboros-py/pyproject.toml
+- PDFs regenerated clean — zero forbidden strings in meeting pack
+
+### Meeting pack PDFs (regenerated clean)
+- `dossier/SZL_Holdings_APEX_Meeting_Pack.zip` — 6 PDFs, zero forbidden strings
+- All PDFs have SZL Holdings header, gold branding, stephenlutar2@gmail.com footer
 
 ## SZL Holdings audit — recent state (2026-05-02)
 

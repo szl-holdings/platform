@@ -34,7 +34,7 @@ The actual canonical v3 DOI was issued under a different concept on the same day
 | Author | Stephen P. Lutar (SZL Holdings), ORCID 0009-0001-0110-4173 |
 | File | `szl-holdings/ouroboros-thesis-paper-v3-2.0.0.zip` (598,343 B) |
 
-Predecessor v3.1 was published 2026-05-01 under DOI `10.5281/zenodo.19944927` in the same concept; the v2 empirical companion remains at `10.5281/zenodo.19934129`.
+Predecessor v3.1 was published 2026-05-01 under DOI `10.5281/zenodo.19944927` in the same concept; the v2 empirical companion remains at `10.5281/zenodo.19944926`.
 
 **Action taken:**
 - Updated `SOURCE_OF_TRUTH.md` to cite DOI 19983066 with concept DOI 19944926.

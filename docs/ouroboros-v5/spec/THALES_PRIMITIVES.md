@@ -153,7 +153,7 @@ with each weight 1/5 expressible as a single unit fraction (Egyptian-exact). The
 ## Citations
 
 - Maor, E. and Jost, E. (2014). Beautiful Geometry, Chapter 1: Thales of Miletus. Princeton University Press. [Chapter PDF](https://assets.press.princeton.edu/chapters/s10065.pdf).
-- Lutar, S. P. (2026). Ouroboros Thesis v4: Closed-Loop Runtime Trust with the Lutar Invariant. [Zenodo DOI: 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) (v2; v4 minting per IP_ROADMAP.md).
+- Lutar, S. P. (2026). Ouroboros Thesis v4: Closed-Loop Runtime Trust with the Lutar Invariant. [Zenodo DOI: 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) (v2; v4 minting per IP_ROADMAP.md).
 
 ## Tests
 

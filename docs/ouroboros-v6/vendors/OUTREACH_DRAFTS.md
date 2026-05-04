@@ -1,7 +1,7 @@
 # Vendor Outreach Packages — Top 3 Priority Integrations
 **SZL Holdings | Stephen P. Lutar | ORCID 0009-0001-0110-4173**
 **Product:** `@szl-holdings/ouroboros` v6.1.0 | `@szl-holdings/guardrails` SKU
-**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 
 Priority rationale from INTEGRATION_TARGETS.md: LangChain is the canonical Λ attestation surface (Callbacks API fires at every discrete agent decision); Anthropic offers free Claude Partner Network membership with the highest-leverage agentic safety pitch; Arize AI / Phoenix is fully OSS (8.5k stars) and a PR-based integration is executable in days without partner approval.
 
@@ -26,7 +26,7 @@ I am Stephen Lutar, founder of SZL Holdings (single-member NY entity). We build 
 
 LangChain is the canonical integration surface for Ouroboros. The LangChain Callbacks API fires at every discrete agent decision point: tool selection, LLM call, chain step, agent action. A `LambdaCallbackHandler` attaches a Λ scalar to each LangSmith run as metadata — zero breaking changes, zero schema migration, fully compatible with existing LangSmith deployments. Every existing LangSmith user gets structured trust attestation on every run without changing their code beyond adding the handler.
 
-We intend to contribute `langchain-ouroboros` to the `langchain-community` package and submit a listing through the LangChain Partner Network. Our mathematical model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. We have a working prototype and can share a branch PR within one week of a technical contact being identified.
+We intend to contribute `langchain-ouroboros` to the `langchain-community` package and submit a listing through the LangChain Partner Network. Our mathematical model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. We have a working prototype and can share a branch PR within one week of a technical contact being identified.
 
 The `@szl-holdings/guardrails` SKU (54 tests, closed-form Λ, hash-chained receipts) is a drop-in NeMo Guardrails replacement. LangChain customers who currently use NeMo can replace it with a single package swap and gain a verifiable, auditable receipt log on every guardrail decision.
 
@@ -42,12 +42,12 @@ GitHub: github.com/szl-holdings/ouroboros
 
 ### Attached Artifacts
 1. Pitch deck: `/home/user/workspace/ouroboros-unified-payload/pitch/SZL_Holdings_Ouroboros_Pitch_Deck.pdf` [placeholder — generate before send]
-2. Technical specification: `https://doi.org/10.5281/zenodo.19934129` (v2 Zenodo DOI, peer-reviewed Λ axis model)
+2. Technical specification: `https://doi.org/10.5281/zenodo.19944926` (v2 Zenodo DOI, peer-reviewed Λ axis model)
 3. GitHub repository: `https://github.com/szl-holdings/ouroboros` [confirm repo URL before send]
 
 ### LinkedIn DM Alternative
 
-Stephen Lutar, SZL Holdings — building `@szl-holdings/ouroboros`, a 9-axis AI trust receipt runtime. We want to contribute `langchain-ouroboros` to `langchain-community`: a `LambdaCallbackHandler` that writes Λ scalars to LangSmith run metadata on every callback. Peer-reviewed model at doi.org/10.5281/zenodo.19934129. Can I connect with whoever reviews community integrations?
+Stephen Lutar, SZL Holdings — building `@szl-holdings/ouroboros`, a 9-axis AI trust receipt runtime. We want to contribute `langchain-ouroboros` to `langchain-community`: a `LambdaCallbackHandler` that writes Λ scalars to LangSmith run metadata on every callback. Peer-reviewed model at doi.org/10.5281/zenodo.19944926. Can I connect with whoever reviews community integrations?
 
 ---
 
@@ -119,7 +119,7 @@ Claude's tool use API is the primary surface where agentic AI systems take actio
 
 The integration is straightforward: Ouroboros ships as an MCP server that proxies Claude tool calls, computing a Λ trust receipt on each tool invocation before passing results back to Claude. The receipt includes a scope-creep score (how far the tool's actual effect deviated from the stated task scope) and a consent-alignment score (how closely the tool invocation matches the user's authorized intent as stated in the original system prompt). Both scores are closed-form computations — no additional LLM call is required. The MCP server is fewer than 300 lines of Python.
 
-We have reviewed the Claude Partner Network terms. Membership is free and open. Our formal 9-axis trust model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. The `@szl-holdings/guardrails` SKU (54 tests, hash-chained receipts) is also positioned as a drop-in replacement for NeMo Guardrails in Claude pipelines.
+We have reviewed the Claude Partner Network terms. Membership is free and open. Our formal 9-axis trust model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. The `@szl-holdings/guardrails` SKU (54 tests, hash-chained receipts) is also positioned as a drop-in replacement for NeMo Guardrails in Claude pipelines.
 
 We would welcome a technical review from your safety or integrations team. We can have a reference MCP server implementation ready for review within two weeks.
 
@@ -229,7 +229,7 @@ Phoenix evaluators are registered as `llm_classify`-compatible Python functions 
 
 The integration ships as a PR to `Arize-ai/phoenix` adding a `OuroborosEvaluator` class under `phoenix/evals/` that wraps the Ouroboros Python package and returns a `pandas.DataFrame` of per-span Λ scores in the format Phoenix's eval framework expects. It also ships as an OpenInference span attribute set — a `ouroboros.*` attribute namespace that can be sent over OTLP to Phoenix's collector endpoint — for teams that instrument at the trace level rather than the eval level.
 
-Our mathematical model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. We can open a draft PR to `Arize-ai/phoenix` within one week. Who reviews evaluator contributions to Phoenix?
+Our mathematical model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. We can open a draft PR to `Arize-ai/phoenix` within one week. Who reviews evaluator contributions to Phoenix?
 
 Best,
 Stephen P. Lutar
@@ -241,7 +241,7 @@ GitHub: github.com/szl-holdings/ouroboros
 
 ### Attached Artifacts
 1. Pitch deck: `/home/user/workspace/ouroboros-unified-payload/pitch/SZL_Holdings_Ouroboros_Pitch_Deck.pdf` [placeholder — generate before send]
-2. Technical specification: `https://doi.org/10.5281/zenodo.19934129` (v2 Zenodo DOI, complete Λ axis definitions)
+2. Technical specification: `https://doi.org/10.5281/zenodo.19944926` (v2 Zenodo DOI, complete Λ axis definitions)
 3. GitHub repository: `https://github.com/szl-holdings/ouroboros` [confirm repo URL before send]
 
 ### LinkedIn DM Alternative
@@ -327,4 +327,4 @@ Primary: a merged PR to `Arize-ai/phoenix` adding `OuroborosEvaluator` to the Ph
 - [Anthropic Model Context Protocol Announcement](https://www.anthropic.com/news/model-context-protocol)
 - [Arize Phoenix Documentation](https://docs.arize.com/phoenix)
 - [Ouroboros v1 DOI](https://doi.org/10.5281/zenodo.19867281)
-- [Ouroboros v2 DOI](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros v2 DOI](https://doi.org/10.5281/zenodo.19944926)

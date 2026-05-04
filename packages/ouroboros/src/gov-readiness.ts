@@ -2,7 +2,7 @@
  * SZL Holdings government procurement readiness — operational data layer.
  *
  * Encodes the April 30, 2026 audit prepared for the Empire APEX Accelerator
- * (NYSTEC, Mercy McInnis) covering A11oy, Sentra, and Amaru against:
+ * (Empire APEX Accelerator, Mercy McInnis) covering A11oy, Sentra, and Amaru against:
  *   - NIST AI RMF (Govern, Map, Measure, Manage)
  *   - DoD Responsible AI Tenets (Responsible, Equitable, Traceable,
  *     Reliable, Governable)
@@ -152,7 +152,7 @@ export const PLATFORM_READINESS: Readonly<Record<GovPlatformId, PlatformReadines
       bestFitUseCases: Object.freeze([
         'Cybersecurity monitoring for state/local agencies (NY Joint Security Operations Center covers 95,000 computers).',
         'Regulatory signal monitoring via primary-source Katzilla datasets (Federal Register, FEMA, CourtListener).',
-        'Threat analysis support for DoD/defense subcontracting through the NYSTEC network.',
+        'Threat analysis support for DoD/defense subcontracting through the Empire APEX network.',
         'Audit support services — Sentra receipt and trace outputs as audit evidence.',
       ]),
       gaps: Object.freeze([
@@ -469,10 +469,10 @@ export const PRE_MEETING_ACTION_ITEMS: readonly ActionItem[] = Object.freeze([
   Object.freeze({ group: 'for_meeting' as ActionGroup, text: 'Ask about NY DIGIT agency vendor registration process.' }),
   Object.freeze({ group: 'for_meeting' as ActionGroup, text: 'Ask about set-aside programs (small business, 8(a), HUBZone).' }),
   Object.freeze({ group: 'for_meeting' as ActionGroup, text: 'Ask about specific RFPs or upcoming opportunities the APEX program is tracking.' }),
-  Object.freeze({ group: 'for_meeting' as ActionGroup, text: "Ask about cyber/IT opportunities through NYSTEC's DoD network." }),
+  Object.freeze({ group: 'for_meeting' as ActionGroup, text: "Ask about cyber/IT opportunities through the APEX DoD network." }),
   // 30-day roadmap
   Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Begin SAM.gov registration if not already active.' }),
-  Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Engage a FedRAMP consultant to assess authorization path.' }),
+  Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Engage a cloud-authorization consultant to assess certification path.' }),
   Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Draft bias testing methodology for A11oy and Sentra.' }),
   Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Draft NIST AI RMF alignment documentation (can reference this audit).' }),
   Object.freeze({ group: 'thirty_day' as ActionGroup, text: 'Draft privacy impact assessment for Amaru.' }),
@@ -492,7 +492,7 @@ export interface GovReadinessManifest {
   readonly auditTitle: 'SZL Holdings — A11oy, Sentra & Amaru: Exhaustive Audit & Government Readiness Report';
   readonly auditDate: '2026-04-30';
   readonly preparedBy: 'Stephen P. Lutar Jr. / SZL Consulting LTD';
-  readonly meeting: 'Empire APEX Accelerator – NYSTEC (Mercy McInnis, Procurement Counselor)';
+  readonly meeting: 'Empire APEX Accelerator (Mercy McInnis, Procurement Counselor)';
   readonly classification: 'Pre-Briefing — Government Sales Readiness';
   readonly overallScores: Readonly<Record<GovPlatformId, number>>;
   readonly counts: {
@@ -517,7 +517,7 @@ export const GOV_READINESS_MANIFEST: GovReadinessManifest = Object.freeze({
     'SZL Holdings — A11oy, Sentra & Amaru: Exhaustive Audit & Government Readiness Report',
   auditDate: '2026-04-30',
   preparedBy: 'Stephen P. Lutar Jr. / SZL Consulting LTD',
-  meeting: 'Empire APEX Accelerator – NYSTEC (Mercy McInnis, Procurement Counselor)',
+  meeting: 'Empire APEX Accelerator (Mercy McInnis, Procurement Counselor)',
   classification: 'Pre-Briefing — Government Sales Readiness',
   overallScores: Object.freeze({
     A11oy: PLATFORM_READINESS.A11oy.readinessScore,

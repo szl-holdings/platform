@@ -15,7 +15,7 @@ What you have:
 - A working open-source runtime (`@szl-holdings/ouroboros` v6.1.0).
 - 233/233 test coverage on a deployable payload.
 - A novel published mathematical contribution (the Lutar Invariant).
-- A thesis at DOI 10.5281/zenodo.19934129.
+- A thesis at DOI 10.5281/zenodo.19944926.
 - A fourteen-primitive trust envelope mappable directly to NIST AI RMF and MITRE ATLAS.
 
 What you don't have yet:
@@ -194,7 +194,7 @@ CORE COMPETENCIES
 
 DIFFERENTIATORS
 - Open-source runtime: 233/233 tests across 8 workspaces
-- Published thesis: DOI 10.5281/zenodo.19934129
+- Published thesis: DOI 10.5281/zenodo.19944926
 - Novel mathematics: Lutar Invariant (uniqueness + bound theorem)
 - Egyptian-inspectability axiom for bit-exact cross-runtime auditability
 

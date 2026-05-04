@@ -4,7 +4,7 @@
 **ORCID:** 0009-0001-0110-4173
 **Date:** May 1, 2026
 **Version:** Ouroboros v6.1.0
-**Zenodo DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) | [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+**Zenodo DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) | [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 
 ---
 
@@ -70,7 +70,7 @@ The second requirement is that the aggregation be scale-invariant in the sense t
 
 The third requirement is determinism. The same nine axis scores must always produce the same Λ composite. The geometric mean of a fixed set of values is a fixed value — there is no sampling, no randomness, no state dependence. This means that if the nine axis scoring functions are themselves deterministic (which Ouroboros guarantees through its closed-form primitive implementations), then the composite Λ is deterministic end-to-end. The same input to the same Ouroboros deployment always produces the same Λ.
 
-The proof that the construction satisfies these three requirements is archived at [Zenodo DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129). The proof is not a simulation result or an empirical benchmark. It is a mathematical derivation from the definition of the geometric mean and the properties of the nine scoring functions. Any assessor with a mathematics background can verify it without access to SZL systems. The 1,372 tests in Ouroboros v6.1.0 validate the implementation of the proof — they confirm that the software produces what the proof says it should produce, across all 91 primitives and all nine axes.
+The proof that the construction satisfies these three requirements is archived at [Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926). The proof is not a simulation result or an empirical benchmark. It is a mathematical derivation from the definition of the geometric mean and the properties of the nine scoring functions. Any assessor with a mathematics background can verify it without access to SZL systems. The 1,500+ tests in Ouroboros v6.1.0 validate the implementation of the proof — they confirm that the software produces what the proof says it should produce, across all 91 primitives and all nine axes.
 
 ---
 
@@ -80,7 +80,7 @@ The proof that the construction satisfies these three requirements is archived a
 
 For any fixed input presented to any Ouroboros v6.1.0 deployment, the nine axis scores and the composite Λ scalar are identical across every evaluation, across every deployment instance, and across any future version of Ouroboros that preserves the same primitive implementations. This is not a performance claim. It is a structural claim about the implementation.
 
-It is falsifiable. A counterexample is any pair of identical inputs that produce different Λ values in the same or different Ouroboros v6.1.0 deployments. SZL Holdings invites any assessor to construct such a counterexample. The 1,372-test suite includes determinism tests across all 91 primitives that serve as public evidence of this property. If any test fails, the claim is falsified and the test record is the falsification.
+It is falsifiable. A counterexample is any pair of identical inputs that produce different Λ values in the same or different Ouroboros v6.1.0 deployments. SZL Holdings invites any assessor to construct such a counterexample. The 1,500+-test suite includes determinism tests across all 91 primitives that serve as public evidence of this property. If any test fails, the claim is falsified and the test record is the falsification.
 
 ### Claim 2: Any Byte-Tampered Receipt Fails Verification
 
@@ -129,7 +129,7 @@ Four major regulatory obligations. One artifact. Generated deterministically at 
 ## 7. Sources
 
 1. [Ouroboros v1 Position Paper — Zenodo DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281)
-2. [Ouroboros v2 Empirical Companion — Zenodo DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+2. [Ouroboros v2 Empirical Companion — Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 3. [NIST AI RMF 1.0 (NIST AI 100-1)](https://nvlpubs.nist.gov/nistpubs/ai/nist.ai.100-1.pdf)
 4. [NIST AI RMF landing page](https://www.nist.gov/itl/ai-risk-management-framework)
 5. [NIST AI 600-1 Generative AI Profile](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf)

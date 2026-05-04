@@ -14,7 +14,7 @@ Enterprises deploying AI agents have observability (Datadog, Splunk, Honeycomb) 
 
 ## What's defensible
 
-- **Published thesis** with DOI: [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).
+- **Published thesis** with DOI: [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 - **144 passing tests** across 5 TypeScript workspaces.
 - **Two theorems** (Cleanliness, Resonance Handoff) with full citation chain to Page, 't Hooft, Susskind, Wootters & Zurek, Landauer, Kuramoto, Pozar.
 - **Air-gapped deployment mode** for HIPAA, defense, public-sector buyers who cannot phone home.

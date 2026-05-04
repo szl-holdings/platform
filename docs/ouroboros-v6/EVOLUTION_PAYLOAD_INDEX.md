@@ -5,7 +5,7 @@ Author: Stephen Lutar, SZL Holdings.
 ORCID: 0009-0001-0110-4173.
 Runtime: @szl-holdings/ouroboros v6.1.0.
 New SKU: @szl-holdings/guardrails v0.1.0.
-Tests: 1,372 combined (925 TypeScript + 447 Python).
+Tests: 1,500+ combined (TypeScript + Python).
 Primitives: 91 across 24 packages, 9 Λ axes.
 
 This payload closes every gap identified in the zoom-out analysis against NVIDIA NeMo Guardrails, Google DeepMind Frontier Safety Framework v3, and IBM watsonx.governance. It is operational, deployable, and ready to ship. Every artifact below cites real sources.

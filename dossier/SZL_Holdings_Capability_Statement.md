@@ -57,7 +57,7 @@ Each number below is produced by a documented verification command. Re-runnable.
 
 ## What SZL Holdings Is Not Claiming
 
-In the interest of credibility with procurement counsel: SZL Holdings is not currently performing on a federal contract, has not received a FedRAMP authorization, has not been externally audited, and has no signed platform customers at this writing. The strength of the offering is the public, verifiable proof — the open-source runtime and the DOI-pinned paper — not pretended traction.
+In the interest of credibility with procurement counsel: SZL Holdings is not currently performing on a federal contract, has not received a federal cloud authorization, has not been externally audited, and has no signed platform customers at this writing. The strength of the offering is the public, verifiable proof — the open-source runtime and the DOI-pinned paper — not pretended traction.
 
 ## Public Proof Artifacts
 

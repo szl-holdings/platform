@@ -192,13 +192,13 @@ I have identified primary NAICS code 541512, Computer Systems Design Services, w
 
 I am a single-founder small business. I need your guidance on set-aside eligibility -- which programs, if any, I qualify for.
 
-CMMC Level 1 self-assessment is in progress. FedRAMP is not yet in scope -- the deployment model is on-prem or customer-cloud first."
+CMMC Level 1 self-assessment is in progress. Cloud authorization is not yet in scope -- the deployment model is on-prem or customer-cloud first."
 
 ### What NOT to claim:
 
 - No current federal contracts
-- No FedRAMP authorization
-- No ATO or DoD impact-level designation
+- No cloud authorization or ATO
+- No DoD impact-level designation
 - No external audit
 - No signed platform customers
 - Single-founder operation
@@ -286,9 +286,9 @@ Within 24 hours of the meeting:
 Do not say any of the following during the meeting:
 
 - Any dollar amount not verified by SOURCE_OF_TRUTH.md
-- "Series A" (this is not an investor pitch)
+- Any fundraising-round language (this is not an investor pitch)
 - Any claim of past government performance
-- Any claim of FedRAMP, ATO, or security certification
+- Any claim of cloud authorization, ATO, or security certification
 - Any team members who do not exist
 - Any revenue numbers
 - Any customer names

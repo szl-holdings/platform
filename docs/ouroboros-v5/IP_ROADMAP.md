@@ -42,7 +42,7 @@ This is exactly how IBM patents algorithms, how Google patents PageRank, how eve
 
 ### Action 2: Zenodo deposit of the v4 payload
 **Owner:** You. **Cost:** $0. **Time:** 30 minutes.
-- Bump the existing DOI 10.5281/zenodo.19934129 to a v4 release.
+- Bump the existing DOI 10.5281/zenodo.19944926 to a v4 release.
 - Include the zip + thesis + LUTAR_INVARIANT.md. Zenodo gives you a DOI per release — that is your tamper-evident timestamp.
 
 ### Action 3: USPTO trademark filings

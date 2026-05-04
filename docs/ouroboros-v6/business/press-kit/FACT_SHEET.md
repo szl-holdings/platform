@@ -13,7 +13,7 @@
 
 ## The thesis
 
-- **v2 thesis** — published 2025, [DOI:10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).
+- **v2 thesis** — published 2025, [DOI:10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 - **v3 thesis** — outlined May 2026. Adds horizon and resonance axes; introduces two new theorems.
 - **Three axes:** cleanliness, horizon, resonance.
 - **Ten primitives:** Page-curve monitor, holographic surface budget, no-cloning gate, Hawking-rate limiter, witness-root anchor, cadence match, impedance match, Q-factor history, Kuramoto coherence, peak/RMS discipline.

@@ -1,7 +1,7 @@
 # AWS Marketplace Kit — Ouroboros Guardrails
 **SZL Holdings | Stephen P. Lutar | ORCID 0009-0001-0110-4173**
 **Product:** `@szl-holdings/ouroboros` v6.1.0 + `@szl-holdings/guardrails` SKU
-**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+**DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 
 ---
 
@@ -57,7 +57,7 @@ Tamper-proof 9-axis trust receipts for every AI decision.
 
 ### Long Description
 
-Ouroboros is a production guardrails runtime for generative AI workflows. Version 6.1.0 ships 91 primitives across 9 trust axes (Λ): provenance, drift, fidelity, latency, scope-creep, toxicity, hallucination risk, consent alignment, and cost. Every AI decision emits a hash-chained, closed-form Λ scalar receipt that is verifiable, auditable, and immutable. The runtime passes 1,372 tests and carries two peer-reviewed Zenodo DOIs formalizing the mathematical model.
+Ouroboros is a production guardrails runtime for generative AI workflows. Version 6.1.0 ships 91 primitives across 9 trust axes (Λ): provenance, drift, fidelity, latency, scope-creep, toxicity, hallucination risk, consent alignment, and cost. Every AI decision emits a hash-chained, closed-form Λ scalar receipt that is verifiable, auditable, and immutable. The runtime passes 1,500+ tests and carries two peer-reviewed Zenodo DOIs formalizing the mathematical model.
 
 The `@szl-holdings/guardrails` SKU is a drop-in replacement for NVIDIA NeMo Guardrails. It requires no model fine-tuning, no vector database, and no external API calls to compute a Λ receipt. The closed-form computation means latency overhead is deterministic and bounded — typically under 2 ms per receipt at p99 on standard EC2 instance families. The 54-test suite ships in the package and runs in CI without additional infrastructure. Hash-chained receipts create a tamper-evident audit log that satisfies governance requirements in financial services, healthcare, and federal programs.
 
@@ -69,7 +69,7 @@ Ouroboros integrates natively with LangChain (via `LambdaCallbackHandler`), Lang
 - 91 primitives across 9 trust axes covering every material AI governance dimension from provenance to cost.
 - Hash-chained receipt log: tamper-evident audit trail satisfying SOC 2, HIPAA, and federal governance frameworks.
 - Drop-in NeMo Guardrails replacement: `@szl-holdings/guardrails` installs in one command; 54 tests pass in CI out of the box.
-- Peer-reviewed mathematical model: two Zenodo DOIs (10.5281/zenodo.19867281, 10.5281/zenodo.19934129) underpin every Λ axis definition.
+- Peer-reviewed mathematical model: two Zenodo DOIs (10.5281/zenodo.19867281, 10.5281/zenodo.19944926) underpin every Λ axis definition.
 
 ### Use Cases
 

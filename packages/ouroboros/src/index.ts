@@ -201,7 +201,7 @@ export type {
   V6ManifestSummary,
 } from './v6-payload.js';
 
-// SZL Holdings government procurement readiness (NYSTEC pre-briefing audit
+// SZL Holdings government procurement readiness (Empire APEX pre-briefing audit
 // 2026-04-30): structured platform scorecards, NIST AI RMF + DoD tenets +
 // GSAR 552.239-7001 alignment, SAM.gov + NAICS, action items.
 export {

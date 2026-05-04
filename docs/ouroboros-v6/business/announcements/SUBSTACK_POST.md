@@ -2,7 +2,7 @@
 
 A year ago I wrote the first Ouroboros thesis. It made one claim: a clean AI runtime is one where every released bit is reproducible from a tamper-evident witness root. That was v1.
 
-Last fall I extended it to v2 and shipped it with a DOI ([10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)). v2 added the cleanliness theorem, the falsification ledger, and three product surfaces (A11oy, Sentra, Amaru) sitting on top.
+Last fall I extended it to v2 and shipped it with a DOI ([10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)). v2 added the cleanliness theorem, the falsification ledger, and three product surfaces (A11oy, Sentra, Amaru) sitting on top.
 
 This week I'm publishing v3. v3 says cleanliness is necessary but not sufficient. There are two more axes a trustworthy runtime has to satisfy. One comes from black hole physics. The other comes from Tesla.
 
@@ -49,7 +49,7 @@ I'm not claiming AGI. I'm not claiming consciousness. I'm not claiming over-unit
 
 A unified payload. Five workspaces. 144 passing tests. A property-based verifier. A benchmark suite. A full Docker + OpenTelemetry + Prometheus + Grafana deploy stack with the ten primitives wired into a prebuilt dashboard. Reference adapters for OpenAI- and Perplexity-shaped APIs. A witness anchor with three drivers (LOCAL, REKOR public, HSM air-gapped). A threat model. A privacy posture against GDPR, HIPAA, SOC2. A public list of non-claims.
 
-The repo is at [github.com/szl-holdings](https://github.com/szl-holdings). The thesis is at [doi.org/10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129).
+The repo is at [github.com/szl-holdings](https://github.com/szl-holdings). The thesis is at [doi.org/10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926).
 
 ## What I want next
 

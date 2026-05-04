@@ -16,7 +16,7 @@
 **Affiliation:** SZL Holdings
 **Date:** May 4, 2026
 **Status:** Operational -- deployed and tested against live API endpoints
-**Compounds:** v1 (DOI 10.5281/zenodo.19867281), v2 (DOI 10.5281/zenodo.19934129), v3 (GitHub release v6.1.0), v4/v5/v6 (unified operational thesis)
+**Compounds:** v1 (DOI 10.5281/zenodo.19867281), v2 (DOI 10.5281/zenodo.19944926), v3 (GitHub release v6.1.0), v4/v5/v6 (unified operational thesis)
 **Runtime reference:** `@workspace/ouroboros-*` -- 25 packages, 54 guardrails tests passing, 9 formal axes, live LaaS API, Supreme Codex v9-GLOBAL-NOETHER with 60 nodes (45 sourced, 20 formula) and 62 typed edges across 11 domains
 **Codex schema:** `alloy.supreme_knowledge/v9-GLOBAL-NOETHER`
 

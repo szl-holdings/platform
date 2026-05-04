@@ -30,7 +30,7 @@ The AI governance market in 2026 is dominated by three types of artifacts: polic
 
 Closed-form means the Λ scalar is computed by a deterministic function whose derivation is publicly archived at [Zenodo](https://doi.org/10.5281/zenodo.19867281). The same input always produces the same output. This is not true of any learned safety model. Any assessor can reproduce any Λ computation from the derivation alone, without access to SZL systems.
 
-Deterministic means Ouroboros produces the same Λ score for the same input every time, across every deployment, without version drift. The 1,372-test suite validates this property across all 91 primitives. When a standard requires that a measurement instrument be reliable and valid (NIST MEASURE 2.5, ISO 42001 Clause 9), Ouroboros can demonstrate this with a test record, not an assertion.
+Deterministic means Ouroboros produces the same Λ score for the same input every time, across every deployment, without version drift. The 1,500+-test suite validates this property across all 91 primitives. When a standard requires that a measurement instrument be reliable and valid (NIST MEASURE 2.5, ISO 42001 Clause 9), Ouroboros can demonstrate this with a test record, not an assertion.
 
 Receipts-first means every AI decision processed by Ouroboros generates a tamper-evident audit receipt at the moment of inference. The receipt is not a log entry; it is a self-contained document that carries all nine Λ axis scores, the composite scalar, a timestamp, and a Merkle hash linking it to the preceding receipt in the chain. This artifact simultaneously satisfies [EU AI Act Article 12](https://artificialintelligenceact.eu/article/12/) (automatic logging of events over system lifetime), [NIST SP 800-53 AU-12](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) (audit record generation), and the DoD CDAO "Traceable" tenet. The receipt is the compliance artifact. Professional services are not required to produce it.
 
@@ -109,4 +109,4 @@ Reassess Colorado and multi-state AI law landscape. As of April 2026, four or mo
 13. [DoD Responsible AI Strategy and Implementation Pathway (2024)](https://media.defense.gov/2024/Oct/26/2003571790/-1/-1/0/2024-06-RAI-STRATEGY-IMPLEMENTATION-PATHWAY.PDF)
 14. [CDAO Responsible AI Initiatives](https://www.ai.mil/Initiatives/Responsible-AI/)
 15. [Ouroboros v1 Position Paper — Zenodo DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281)
-16. [Ouroboros v2 Empirical Companion — Zenodo DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+16. [Ouroboros v2 Empirical Companion — Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

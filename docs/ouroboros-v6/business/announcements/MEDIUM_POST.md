@@ -37,7 +37,7 @@ I'm not claiming AGI, consciousness, emergence, or any flavor of mysticism. The 
 
 ## Where to look
 
-- Thesis v2 (with DOI): [doi.org/10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- Thesis v2 (with DOI): [doi.org/10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
 - Thesis v3 outline (this drop): [github.com/szl-holdings/ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis)
 - Unified payload: [github.com/szl-holdings/ouroboros](https://github.com/szl-holdings/ouroboros)
 - Substack: [szlholdings.substack.com](https://szlholdings.substack.com)

@@ -1,6 +1,6 @@
 # SZL Holdings — Executable Compliance Roadmap
 **Entity:** SZL Holdings LLC (single-member, New York) | **Founder:** Stephen P. Lutar  
-**Product:** Ouroboros v6.1.0 — 91 primitives, 9 Λ axes, 1,372 tests | **@szl-holdings/guardrails SKU active**  
+**Product:** Ouroboros v6.1.0 — 91 primitives, 9 Λ axes, 1,500+ tests | **@szl-holdings/guardrails SKU active**  
 **Date:** May 2026 | **Horizon:** 24 months
 
 ---
@@ -110,4 +110,4 @@ Mercy McInnis is a procurement counselor at Empire APEX Empire APEX, a New York 
 - [Rhymetec ISO 27001 Cost Breakdown](https://rhymetec.com/iso-27001-certification-cost-breakdown-2025/)
 - [CSA Research Note — EU AI Act High-Risk Deadline](https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/)
 - [Ouroboros v1 — Zenodo DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281)
-- [Ouroboros v2 — Zenodo DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros v2 — Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

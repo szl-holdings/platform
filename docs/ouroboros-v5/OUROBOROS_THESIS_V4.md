@@ -5,7 +5,7 @@
 **ORCID:** 0009-0001-0110-4173
 **Affiliation:** SZL Holdings
 **Status:** Draft for arXiv (cs.CR / cs.AI / math.HO cross-list) and Zenodo
-**Compounds:** Ouroboros v2 (DOI 10.5281/zenodo.19934129), Ouroboros v3 outline
+**Compounds:** Ouroboros v2 (DOI 10.5281/zenodo.19944926), Ouroboros v3 outline
 **Runtime reference:** `ouroboros-unified-payload` v0.3 — 233/233 tests across 8 workspaces
 
 ---
@@ -131,7 +131,7 @@ We invite review, replication, and adoption.
 
 ## Citations
 
-[^v2]: Lutar, S. P. (2025). *Ouroboros v2: A self-closing trust loop for agentic AI runtimes.* Zenodo. DOI 10.5281/zenodo.19934129. [github.com/szl-holdings/ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis)
+[^v2]: Lutar, S. P. (2025). *Ouroboros v2: A self-closing trust loop for agentic AI runtimes.* Zenodo. DOI 10.5281/zenodo.19944926. [github.com/szl-holdings/ouroboros-thesis](https://github.com/szl-holdings/ouroboros-thesis)
 [^page]: Page, D. N. (1993). *Information in black hole radiation.* Phys. Rev. Lett. 71, 3743. [arXiv:hep-th/9306083](https://arxiv.org/abs/hep-th/9306083)
 [^amps]: Almheiri, A., Marolf, D., Polchinski, J., Sully, J. (2013). *Black holes: complementarity or firewalls?* JHEP 02 (2013) 062. [arXiv:1207.3123](https://arxiv.org/abs/1207.3123)
 [^akorn]: Miyato, T., Löwe, S., Geiger, A., Welling, M. (2025). *Artificial Kuramoto Oscillatory Neurons.* ICLR 2025. [arXiv:2410.13821](https://arxiv.org/abs/2410.13821)

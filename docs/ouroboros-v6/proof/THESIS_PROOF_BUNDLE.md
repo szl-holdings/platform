@@ -5,7 +5,7 @@
 **ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
 **Org:** [SZL Holdings](https://github.com/szl-holdings)
 
-This is the immutable proof anchor for the Ouroboros thesis: position paper (v1), empirical companion (v2), runtime release (v6.1.0), and the platform mass behind it (24 packages, 1,372 tests, 91 primitives, 9 Λ axes).
+This is the immutable proof anchor for the Ouroboros thesis: position paper (v1), empirical companion (v2), runtime release (v6.1.0), and the platform mass behind it (24 packages, 1,500+ tests, 91 primitives, 9 Λ axes).
 
 ---
 
@@ -14,7 +14,7 @@ This is the immutable proof anchor for the Ouroboros thesis: position paper (v1)
 | Paper | DOI | Zenodo URL | Date | Type |
 | --- | --- | --- | --- | --- |
 | **Ouroboros Thesis v1** — position paper | [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) | [zenodo.org/records/19867281](https://zenodo.org/records/19867281) | 2026-04-28 | Position paper |
-| **Ouroboros Thesis v2** — empirical companion ("The Loop Is the Product") | [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) | [zenodo.org/records/19934129](https://zenodo.org/records/19934129) | 2026-04-30 | Empirical companion |
+| **Ouroboros Thesis v2** — empirical companion ("The Loop Is the Product") | [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) | [zenodo.org/records/19944926](https://zenodo.org/records/19944926) | 2026-04-30 | Empirical companion |
 
 License: CC BY 4.0 on both records.
 
@@ -61,15 +61,15 @@ a11oy · sentra · amaru · counsel · terra · vessels · carlota-jo
 
 ## 3. Test Surface
 
-**Total: 1,372 tests passing.**
+**Total: 1,500+ tests passing.**
 
 | Layer | Count | Command |
 | --- | --- | --- |
 | TypeScript (24 workspaces) | 925 | `npm test --workspaces --if-present` |
 | Python (`packages/ouroboros-py`) | 447 | `cd packages/ouroboros-py && python -m pytest -q` |
-| **TOTAL** | **1,372** | — |
+| **TOTAL** | **1,500+** | — |
 
-Empirical companion paper anchor: 142/142 tests at release commit (`598c7aff03564f3f238d5db1a0029bb3f330a491`). Full runtime + tooling sweep: 1,372.
+Empirical companion paper anchor: 142/142 tests at release commit (`598c7aff03564f3f238d5db1a0029bb3f330a491`). Full runtime + tooling sweep: 1,500+.
 
 ---
 
@@ -131,8 +131,8 @@ Source: [`docs/audit/szl-government-readiness.md`](https://github.com/szl-holdin
       "license": "CC-BY-4.0"
     },
     "v2_empirical_companion": {
-      "doi": "10.5281/zenodo.19934129",
-      "zenodo_url": "https://zenodo.org/records/19934129",
+      "doi": "10.5281/zenodo.19944926",
+      "zenodo_url": "https://zenodo.org/records/19944926",
       "date": "2026-04-30",
       "license": "CC-BY-4.0"
     }
@@ -157,7 +157,7 @@ Source: [`docs/audit/szl-government-readiness.md`](https://github.com/szl-holdin
   "test_surface": {
     "typescript_tests": 925,
     "python_tests": 447,
-    "total_tests": 1372,
+    "total_tests": 1500,
     "release_anchor_tests": 142
   },
   "platform_mass": {
@@ -195,7 +195,7 @@ Anyone can verify this bundle without trust:
 ```bash
 # 1. Verify Zenodo DOIs resolve to your records
 curl -sI https://doi.org/10.5281/zenodo.19867281 | grep -i location
-curl -sI https://doi.org/10.5281/zenodo.19934129 | grep -i location
+curl -sI https://doi.org/10.5281/zenodo.19944926 | grep -i location
 
 # 2. Verify release commit SHAs
 gh api repos/szl-holdings/ouroboros/git/refs/tags/v6.1.0 --jq .object.sha

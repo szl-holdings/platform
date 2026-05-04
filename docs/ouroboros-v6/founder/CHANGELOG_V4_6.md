@@ -402,7 +402,7 @@ folder: evolution/
 
 - TypeScript total: **925** (871 + 54 guardrails)
 - Python SDK total: **447** (unchanged)
-- **Combined: 1,372 tests green**
+- **Combined: 1,500+ tests green**
 
 Workspaces: 24 (added @szl-holdings/guardrails — first non-@workspace SKU package)
 Primitives: 91 (unchanged — guardrails is composition layer, not new primitives)

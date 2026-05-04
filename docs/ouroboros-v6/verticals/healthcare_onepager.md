@@ -8,7 +8,7 @@ Most hospitals have deployed clinical AI without a per-decision audit trail. The
 
 ### What it is
 
-@szl-holdings/ouroboros runtime v6.1.0 ships 91 primitives across 23 workspaces. The companion SKU @szl-holdings/guardrails v0.1.0 generates per-decision tamper-evident receipts, hash-chained and encrypted, with no PHI retained in the receipt payload itself. Three of the 9 Λ trust axes address clinical dimensions directly: Lara (Non-measurability) makes clinical uncertainty explicit and machine-auditable rather than hidden in model confidence scores; Oppenheimer (Moral) gates decisions by consequence weight, blocking high-stakes outputs that breach a defined Λ floor; Socrates (Being) verifies being-aligned consent conditions before a decision receipt is issued. The mathematical construction behind the closed-form Λ scalar is publicly archived at Zenodo DOI [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129) (v2, Apr 30 2026). 1,372 tests passing, including 54 dedicated guardrails tests.
+@szl-holdings/ouroboros runtime v6.1.0 ships 91 primitives across 23 workspaces. The companion SKU @szl-holdings/guardrails v0.1.0 generates per-decision tamper-evident receipts, hash-chained and encrypted, with no PHI retained in the receipt payload itself. Three of the 9 Λ trust axes address clinical dimensions directly: Lara (Non-measurability) makes clinical uncertainty explicit and machine-auditable rather than hidden in model confidence scores; Oppenheimer (Moral) gates decisions by consequence weight, blocking high-stakes outputs that breach a defined Λ floor; Socrates (Being) verifies being-aligned consent conditions before a decision receipt is issued. The mathematical construction behind the closed-form Λ scalar is publicly archived at Zenodo DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) (v2, Apr 30 2026). 1,500+ tests passing, including 54 dedicated guardrails tests.
 
 ### Why we win
 
@@ -38,7 +38,7 @@ Stephen Lutar, Founder, SZL Holdings — partnerships@szlholdings.com
 
 ---
 
-SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 tests
+SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,500+ tests
 
 ---
 
@@ -49,4 +49,4 @@ SZL Holdings · Ouroboros runtime v6.1.0 · 91 primitives · 9 Λ axes · 1,372 
 - [21 CFR Part 11 — Electronic Records](https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?CFRPart=11)
 - [IBM watsonx.governance product page](https://www.ibm.com/products/watsonx-governance)
 - [NIST AI RMF — Healthcare context](https://www.nist.gov/itl/ai-risk-management-framework)
-- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros Zenodo v2 — DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

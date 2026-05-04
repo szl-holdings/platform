@@ -1,7 +1,7 @@
 # Ouroboros (Λ Runtime) — Vendor Integration Targets
 **SZL Holdings | Runtime: `@szl-holdings/ouroboros` | MIT License**
 *Maintained by Stephen P. Lutar — ORCID 0009-0001-0110-4173*
-*Thesis DOIs: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)*
+*Thesis DOIs: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)*
 
 ---
 
@@ -48,7 +48,7 @@
 >
 > Your LLM Observability SDK's `evaluation.score` span attributes are an exact landing zone for the Λ scalar. We'd like to ship a reference integration as a Datadog Partner Network technology partner — an instrumentation wrapper that writes Ouroboros receipts as first-class LLM Observability spans.
 >
-> Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Happy to share a working prototype. Is there a technical partner contact we should loop in?
+> Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Happy to share a working prototype. Is there a technical partner contact we should loop in?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -77,7 +77,7 @@
 >
 > I'm Stephen Lutar, SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT) — a runtime that emits a 9-axis trust receipt (Λ scalar) per AI inference call over OpenTelemetry.
 >
-> Since Ouroboros already speaks OTLP, the integration is minimal: we'd add a `ouroboros.*` attribute namespace spec and a Honeycomb Board template so teams can BubbleUp on Λ drift and scope-creep. We'd like to ship this as a Technology Partner listing. Our thesis (DOIs 10.5281/zenodo.19867281 / 10.5281/zenodo.19934129) formalizes the 9-axis model. Would a Honeycomb integrations engineer like to co-author the reference Board?
+> Since Ouroboros already speaks OTLP, the integration is minimal: we'd add a `ouroboros.*` attribute namespace spec and a Honeycomb Board template so teams can BubbleUp on Λ drift and scope-creep. We'd like to ship this as a Technology Partner listing. Our thesis (DOIs 10.5281/zenodo.19867281 / 10.5281/zenodo.19944926) formalizes the 9-axis model. Would a Honeycomb integrations engineer like to co-author the reference Board?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -106,7 +106,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT), a runtime that fires a structured 9-axis trust receipt (Λ scalar) per AI decision — including provenance, consent alignment, and hallucination risk fields that map directly to your AI governance use cases.
 >
-> We'd like to ship a Splunkbase Add-On as a Partnerverse Technology Alliance partner: an HEC ingest adapter plus ready-to-use Splunk dashboards for Λ-axis compliance monitoring. Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Can we connect with your Splunkbase integration team?
+> We'd like to ship a Splunkbase Add-On as a Partnerverse Technology Alliance partner: an HEC ingest adapter plus ready-to-use Splunk dashboards for Λ-axis compliance monitoring. Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Can we connect with your Splunkbase integration team?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -135,7 +135,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. Ouroboros (`@szl-holdings/ouroboros`, MIT) enriches every AI inference call with a 9-axis trust receipt (Λ scalar) covering latency, cost, fidelity, drift, and five additional governance dimensions — a natural complement to New Relic AI Monitoring's token/latency tracking.
 >
-> We'd like to submit an Instant Observability quickstart (dashboard + alert conditions + SDK adapter) as a New Relic Technology Partner. Our academic model is formalized in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Would your I/O catalog team be the right contact?
+> We'd like to submit an Instant Observability quickstart (dashboard + alert conditions + SDK adapter) as a New Relic Technology Partner. Our academic model is formalized in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Would your I/O catalog team be the right contact?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -164,7 +164,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT), which attaches a 9-axis trust receipt (Λ scalar) to every LLM span. Axes 3 (fidelity) and 7 (hallucination risk) are a direct superset of Phoenix's correctness and hallucination evaluators — we'd register Ouroboros as a composite `llm_classify`-compatible evaluator writing all 9 axes as OpenInference span attributes.
 >
-> We'd like to ship this as a reference integration listed in the Arize partner ecosystem. Our formal model is in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Happy to open a PR to `Arize-ai/phoenix` to start.
+> We'd like to ship this as a reference integration listed in the Arize partner ecosystem. Our formal model is in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Happy to open a PR to `Arize-ai/phoenix` to start.
 >
 > Best,
 > **Stephen P. Lutar**
@@ -197,7 +197,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT), a runtime that emits a 9-axis trust receipt (Λ scalar) per AI agent action — including scope-creep (axis 5) and toxicity (axis 6) scores that are semantically aligned with Falcon AIDR's behavioral detection model.
 >
-> We'd like to propose a CrowdXDR Alliance reference integration: Ouroboros receipts delivered via Falcon Data Replicator to enrich AIDR detections with pre-computed trust scores, reducing detection latency. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Could we schedule a technical review with your AIDR team?
+> We'd like to propose a CrowdXDR Alliance reference integration: Ouroboros receipts delivered via Falcon Data Replicator to enrich AIDR detections with pre-computed trust scores, reducing detection latency. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Could we schedule a technical review with your AIDR team?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -226,7 +226,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT), which emits a 9-axis trust receipt per AI decision. Axes 1 (provenance) and 8 (consent alignment) create a runtime evidence layer that complements Wiz AI-SPM's static posture scan — answering not just "what AI assets exist" but "what trust state did each decision have at inference time."
 >
-> We'd like to build a Wiz Connector as a Wiz Partner Alliance Technology partner. Our formal model is in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Would your AI-SPM product team be open to a technical design session?
+> We'd like to build a Wiz Connector as a Wiz Partner Alliance Technology partner. Our formal model is in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Would your AI-SPM product team be open to a technical design session?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -255,7 +255,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. Ouroboros (`@szl-holdings/ouroboros`, MIT) emits a 9-axis trust receipt per AI action at runtime. Axes 2 (drift) and 7 (hallucination risk) are a natural complement to DeepCode AI's static analysis — together they close the loop from code-time vulnerability detection to runtime behavioral attestation.
 >
-> We'd like to push Ouroboros receipts as Snyk AppRisk third-party findings via your integration API, listed under the Snyk Technology Alliance Program. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Can we connect with your AppRisk integration team?
+> We'd like to push Ouroboros receipts as Snyk AppRisk third-party findings via your integration API, listed under the Snyk Technology Alliance Program. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Can we connect with your AppRisk integration team?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -284,7 +284,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT), a runtime that pre-computes a 9-axis trust receipt (Λ scalar) per AI agent action — specifically toxicity (axis 6) and scope-creep (axis 5), the same threat vectors Prisma AIRS enforces at runtime.
 >
-> Our proposition: Ouroboros as a Precision AI Partner that registers a webhook callback with AIRS, delivering pre-computed Λ scores that reduce AIRS's inspection overhead for low-risk requests while flagging high-Λ-deviation events for deep inspection. Formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Could we connect with your AIRS partnership team?
+> Our proposition: Ouroboros as a Precision AI Partner that registers a webhook callback with AIRS, delivering pre-computed Λ scores that reduce AIRS's inspection overhead for low-risk requests while flagging high-Λ-deviation events for deep inspection. Formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Could we connect with your AIRS partnership team?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -317,7 +317,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We believe LangChain/LangSmith is the canonical integration surface for Ouroboros (`@szl-holdings/ouroboros`, MIT) — a runtime that emits a 9-axis trust receipt (Λ scalar) at every agent decision point.
 >
-> The pitch is simple: a `LambdaCallbackHandler` that attaches Λ scalars to LangSmith run metadata with zero breaking changes. Every tool call, chain step, and LLM invocation gets a structured trust attestation. We'd like to ship this via the LangChain Partner Network and contribute `langchain-ouroboros` to `langchain-community`. Academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129.
+> The pitch is simple: a `LambdaCallbackHandler` that attaches Λ scalars to LangSmith run metadata with zero breaking changes. Every tool call, chain step, and LLM invocation gets a structured trust attestation. We'd like to ship this via the LangChain Partner Network and contribute `langchain-ouroboros` to `langchain-community`. Academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926.
 >
 > Best,
 > **Stephen P. Lutar**
@@ -346,7 +346,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT) — a runtime that attaches 9-axis trust receipts (Λ scalar) to AI decisions. For LlamaIndex, the landing zone is your Instrumentation API: a `LambdaSpanHandler` that enriches every retrieval and synthesis span with Λ fidelity (axis 3) and provenance (axis 1) scores.
 >
-> We'd like to contribute `llama-index-ouroboros` to the `llama-index-integrations/` directory and list it on LlamaHub. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Happy to open a draft PR. Who reviews instrumentation integrations?
+> We'd like to contribute `llama-index-ouroboros` to the `llama-index-integrations/` directory and list it on LlamaHub. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Happy to open a draft PR. Who reviews instrumentation integrations?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -375,7 +375,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. Ouroboros (`@szl-holdings/ouroboros`, MIT) wraps any OpenAI-compatible inference endpoint and emits a 9-axis trust receipt (Λ scalar) per call — extending your native latency and cost telemetry with drift, fidelity, hallucination risk, and governance axes.
 >
-> For Modal, we'd ship this as an Integration Partner pattern: a Python decorator that wraps serverless inference functions with Λ attestation. For Together AI, a middleware adapter for your OpenAI-compatible API. We'd like to be listed as an integration partner. Formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129.
+> For Modal, we'd ship this as an Integration Partner pattern: a Python decorator that wraps serverless inference functions with Λ attestation. For Together AI, a middleware adapter for your OpenAI-compatible API. We'd like to be listed as an integration partner. Formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926.
 >
 > Best,
 > **Stephen P. Lutar**
@@ -408,7 +408,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-domains/ouroboros`, MIT), a zero-dependency middleware that intercepts OpenAI Responses API and Realtime API calls to compute a 9-axis trust receipt (Λ scalar) — including hallucination risk and fidelity scores — before returning the response to the caller.
 >
-> We'd like to discuss a reference integration and listing through OpenAI's partner program. Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. We've submitted through the partner intake form and would welcome a follow-up from your technical partnerships team.
+> We'd like to discuss a reference integration and listing through OpenAI's partner program. Our academic grounding: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. We've submitted through the partner intake form and would welcome a follow-up from your technical partnerships team.
 >
 > Best,
 > **Stephen P. Lutar**
@@ -437,7 +437,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT) and would like to join the Claude Partner Network to ship a reference MCP server integration. Ouroboros wraps each Claude tool call to compute scope-creep (axis 5) and consent-alignment (axis 8) trust receipts — the two failure modes most critical for safe agentic Claude deployments.
 >
-> Claude Partner Network membership is free and we've reviewed the terms. Our formal 9-axis trust model is documented in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. We'd love a technical review from your safety or integrations team.
+> Claude Partner Network membership is free and we've reviewed the terms. Our formal 9-axis trust model is documented in DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. We'd love a technical review from your safety or integrations team.
 >
 > Best,
 > **Stephen P. Lutar**
@@ -466,7 +466,7 @@
 >
 > I'm Stephen Lutar at SZL Holdings. We build Ouroboros (`@szl-holdings/ouroboros`, MIT) — a runtime that emits 9-axis trust receipts per Vertex AI decision. Axes 2 (drift) and 9 (cost) are a semantic superset of Vertex AI Model Monitoring's existing drift detection, adding cross-model cost normalization and governance attestation.
 >
-> We'd like to list Ouroboros on the Google Cloud Marketplace as a Build-engagement ISV and submit a Vertex AI SDK middleware integration. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19934129. Can we connect with your AI/ML ISV partner team?
+> We'd like to list Ouroboros on the Google Cloud Marketplace as a Build-engagement ISV and submit a Vertex AI SDK middleware integration. Our formal model: DOIs 10.5281/zenodo.19867281 and 10.5281/zenodo.19944926. Can we connect with your AI/ML ISV partner team?
 >
 > Best,
 > **Stephen P. Lutar**
@@ -501,4 +501,4 @@
 
 *Runtime: [@szl-holdings/ouroboros](https://github.com/szl-holdings/ouroboros) · License: MIT*
 *ORCID: [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)*
-*Thesis: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)*
+*Thesis: [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)*

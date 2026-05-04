@@ -174,7 +174,7 @@ Every number below is produced by a documented verification command. Re-runnable
 This section is included deliberately. Honesty builds trust with procurement professionals:
 
 - SZL Holdings is not currently performing on any federal contract
-- SZL Holdings has not received a FedRAMP authorization, ATO, or DoD impact-level designation
+- SZL Holdings has not received a federal cloud authorization, ATO, or DoD impact-level designation
 - SZL Holdings has not been audited by an outside firm
 - SZL Holdings has no signed customer contracts for the platform at this writing
 - SZL Holdings is a single-founder operation

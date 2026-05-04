@@ -75,7 +75,7 @@ DM open.
 
 **Tweet 10**
 Repo: github.com/szl-holdings
-v2 DOI: 10.5281/zenodo.19934129
+v2 DOI: 10.5281/zenodo.19944926
 Substack: szlholdings.substack.com
 
 The runtime is real. The tests are green. The envelope is well-defined.

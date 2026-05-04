@@ -10,7 +10,7 @@ Founder building runtime infrastructure for trustworthy AI. Author of the Ourobo
 
 ## Highlights
 
-- **Author, Ouroboros Thesis v2** — published 2025, [DOI:10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129). Three-axis trust runtime: cleanliness, horizon, resonance.
+- **Author, Ouroboros Thesis v2** — published 2025, [DOI:10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926). Three-axis trust runtime: cleanliness, horizon, resonance.
 - **Maintainer, `@szl-holdings/ouroboros`** — production runtime, v6.1.0, 142/142 tests, MIT-equivalent posture pending license decision.
 - **Maintainer, `ouroboros-unified-payload`** — unified physics payload, v0.2, 144 tests across 5 workspaces, full Docker + OTel + Grafana deploy stack.
 - **Original synthesis**: black-hole information theory (Page, 't Hooft, Susskind) + Tesla resonance physics (LC, impedance, Q-factor, Kuramoto) → ten observable runtime primitives.
@@ -37,7 +37,7 @@ Shipped:
 
 ## Selected Publications
 
-- **Ouroboros Thesis v2** (2025). [DOI:10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129). The cleanliness theorem and the v2 falsification ledger.
+- **Ouroboros Thesis v2** (2025). [DOI:10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926). The cleanliness theorem and the v2 falsification ledger.
 - **Ouroboros Thesis v3 — outline** (2026, in press). Adds horizon and resonance axes, two new theorems, ten primitives, extended falsification ledger.
 - **Black Holes to Ouroboros — synthesis memo** (2026). Mapping black-hole information theory to runtime governance.
 - **Tesla Synthesis memo** (2026). Mapping Tesla-coil resonance physics to multi-agent coordination.

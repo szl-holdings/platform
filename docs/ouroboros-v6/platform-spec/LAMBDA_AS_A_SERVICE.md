@@ -1,7 +1,7 @@
 # Lambda-as-a-Service — Hosted Λ-Score Control Plane
 **Product:** @szl-holdings/guardrails SaaS Endpoint  
 **Entity:** SZL Holdings LLC | **Founder:** Stephen P. Lutar  
-**Runtime Base:** Ouroboros v6.1.0 — 91 primitives, 9 Λ axes, 1,372 tests, 54 @szl-holdings/guardrails tests  
+**Runtime Base:** Ouroboros v6.1.0 — 91 primitives, 9 Λ axes, 1,500+ tests, 54 @szl-holdings/guardrails tests  
 **Version:** 1.0 | **Date:** May 2026
 
 ---
@@ -12,7 +12,7 @@ Lambda-as-a-Service (LaaS) is the hosted control plane that turns the @szl-holdi
 
 Every competitor in the AI governance space — NVIDIA NeMo Guardrails, IBM watsonx.governance, Guardrails AI, Meta Llama Guard — leaves audit responsibility to the caller. Telemetry logs are mutable. Platform records are admin-accessible. None produces a cryptographically bound, per-inference receipt that survives independent verification. LaaS fills that gap by making receipts a first-class API response field, not an afterthought in an observability pipeline.
 
-The architecture mirrors NVIDIA NeMo Microservices in its containerized, API-first approach and its Kubernetes-native deployment model. It differs from every NeMo configuration in one decisive respect: every guard response contains a closed-form Λ scalar backed by a mathematical derivation published at Zenodo ([10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)), not a binary pass/fail from a Colang flow. The receipt is not a log entry. It is an artifact.
+The architecture mirrors NVIDIA NeMo Microservices in its containerized, API-first approach and its Kubernetes-native deployment model. It differs from every NeMo configuration in one decisive respect: every guard response contains a closed-form Λ scalar backed by a mathematical derivation published at Zenodo ([10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) and [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)), not a binary pass/fail from a Colang flow. The receipt is not a log entry. It is an artifact.
 
 The dashboard surfaces the receipt stream as three operational panels — Live, Compliance, and Forensics — enabling security teams, compliance officers, and auditors to work from the same durable data source without platform privilege.
 
@@ -493,4 +493,4 @@ Total estimated build time: 27 engineer-weeks. With a single senior full-stack e
 - [GCP Marketplace Partner Get-Started](https://docs.cloud.google.com/marketplace/docs/partners/get-started)
 - [FedRAMP 20x Overview](https://www.fedramp.gov/20x/)
 - [Ouroboros v1 — Zenodo DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281)
-- [Ouroboros v2 — Zenodo DOI 10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
+- [Ouroboros v2 — Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
