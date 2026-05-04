@@ -74,6 +74,8 @@ export const conduitSyncsTable = pgTable('conduit_syncs', {
   lastRunId: uuid('last_run_id'),
   lastRunAt: timestamp('last_run_at', { withTimezone: true }),
   lastRunStatus: text('last_run_status'),
+  cursorValue: text('cursor_value'),
+  cursorUpdatedAt: timestamp('cursor_updated_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

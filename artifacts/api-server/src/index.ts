@@ -697,6 +697,11 @@ export async function bootstrap(
       await initSandboxRuntime();
     });
 
+    await bootstrapStep('initConduitEngine', async () => {
+      const { initConduitEngine } = await import('./lib/conduit/index');
+      initConduitEngine();
+    });
+
     // Step 3: Start durable (PostgreSQL-backed) job queue
     await bootstrapStep('startDurableQueue', startDurableQueue);
 

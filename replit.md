@@ -47,7 +47,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Red-Team Game Day Engine:** For live competitive crisis simulations.
 - **Cross-Domain Signal Bus (Alert Bus):** "When/then" automation engine.
 - **Outbound Gateway:** Unified omni-channel notification layer.
-- **Amaru — Convergent Reverse-ETL:** A visual no-code Reverse-ETL system.
+- **Amaru — Convergent Reverse-ETL:** A production-grade Reverse-ETL system with a real sync engine and connector framework. Features a `SourceConnector`/`DestinationConnector` protocol, working Postgres source (queries `information_schema`, cursor-based pagination), Internal API source (calls Terra/Vessels/Counsel endpoints), Webhook destination (real HTTP POST with retry/backoff), Slack destination (webhook + bot token), transform engine (uppercase, lowercase, concat, split, format_date, json_extract, constant, conditional, lookup), CDC/incremental sync via cursor state, cron scheduler (60s tick), and connector stubs for 11 OAuth-based destinations. Engine code lives in `artifacts/api-server/src/lib/conduit/`.
 - **@workspace/ouroboros — Ouroboros Loop Kernel:** A shared TS package for bounded loops with measurable convergence and replay-grade governed execution. Implements hash-chained state, decision receipts, and an append-only proof ledger with tamper-evident digests for replay verification and auditability.
 - **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory fabric, evidence ledger, and policy guard.
 - **Multi-Agent Crew System:** Supports specialized agent roles with plan decomposition.
