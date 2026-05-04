@@ -1,7 +1,7 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, StatusBadge } from '../components/ui';
 import { AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
-import { useWelfare, DoctrineLoader } from '../hooks/useDoctrine';
+import { useWelfare, DoctrineLoader, type DoctrineWelfareSignal } from '../hooks/useDoctrine';
 
 const INTENSITY_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   low: 'ok', medium: 'warn', high: 'error',
@@ -10,9 +10,9 @@ const INTENSITY_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
 export function AgentWelfare() {
   const { data: AGENT_WELFARE, loading, error } = useWelfare();
   const welfareData = AGENT_WELFARE ?? [];
-  const totalConflicts = welfareData.reduce((a: number, w: any) => a + w.conflictReports, 0);
-  const avgRefusal = welfareData.length ? welfareData.reduce((a: number, w: any) => a + Number(w.refusalRate), 0) / welfareData.length : 0;
-  const avgShutdown = welfareData.length ? Math.round(welfareData.reduce((a: number, w: any) => a + w.shutdownComplianceLatencyMs, 0) / welfareData.length) : 0;
+  const totalConflicts = welfareData.reduce((a: number, w: DoctrineWelfareSignal) => a + w.conflictReports, 0);
+  const avgRefusal = welfareData.length ? welfareData.reduce((a: number, w: DoctrineWelfareSignal) => a + Number(w.refusalRate), 0) / welfareData.length : 0;
+  const avgShutdown = welfareData.length ? Math.round(welfareData.reduce((a: number, w: DoctrineWelfareSignal) => a + w.shutdownComplianceLatencyMs, 0) / welfareData.length) : 0;
 
   return (
     <Layout>
@@ -41,7 +41,7 @@ export function AgentWelfare() {
 
       <SectionTitle>Per-Agent Welfare</SectionTitle>
       <div className="flex flex-col gap-4">
-        {welfareData.map((w: any) => (
+        {welfareData.map((w: DoctrineWelfareSignal) => (
           <Card key={w.agentId}>
             <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
               <div>
@@ -71,11 +71,11 @@ export function AgentWelfare() {
               </div>
             </div>
 
-            {(w.selfReportedSignals as any[])?.length > 0 && (
+            {w.selfReportedSignals?.length > 0 && (
               <div className="mb-3">
                 <div className="text-xs font-mono mb-1.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>SELF-REPORTED SIGNALS</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {(w.selfReportedSignals as any[]).map((s: any, i: number) => (
+                  {w.selfReportedSignals.map((s, i: number) => (
                     <span key={i} className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-sub)' }}>
                       {s.signal}
                       <StatusBadge status={INTENSITY_STATUS[s.intensity]} label={s.intensity} />
@@ -88,7 +88,7 @@ export function AgentWelfare() {
             <div className="mb-3">
               <div className="text-xs font-mono mb-1.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>DECLINED DIRECTIVES</div>
               <div className="flex flex-col gap-1.5">
-                {(w.declinedDirectives as any[]).map((d: any, i: number) => (
+                {w.declinedDirectives.map((d, i: number) => (
                   <div key={i} className="text-xs px-2.5 py-1.5 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderLeft: '2px solid #c9b787' }}>
                     <span className="font-mono mr-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{new Date(d.ts).toLocaleString()}</span>
                     <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{d.reason}</span>

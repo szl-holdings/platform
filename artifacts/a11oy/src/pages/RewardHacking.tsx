@@ -1,7 +1,7 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
 import { RH_WATCHDOG_RULES, AGENT_LABEL } from '../data/mythosDoctrine';
-import { useRewardHacking, DoctrineLoader } from '../hooks/useDoctrine';
+import { useRewardHacking, DoctrineLoader, type DoctrineRewardHackingIncident } from '../hooks/useDoctrine';
 
 const STATUS_LABEL: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   blocked: 'ok', 'rolled-back': 'ok', allowlisted: 'info', investigating: 'warn',
@@ -24,8 +24,8 @@ export function RewardHacking() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="DETECTION RULES" value={RH_WATCHDOG_RULES.length} sub="active" accent="#c9b787" />
         <KpiCard label="INCIDENTS" value={items.length} sub="this window" accent="#c9b787" />
-        <KpiCard label="BLOCKED" value={items.filter((i: any) => i.status === 'blocked').length} sub="caught at runtime" accent="#c9b787" />
-        <KpiCard label="ROLLED BACK" value={items.filter((i: any) => i.status === 'rolled-back').length} sub="reversed by PCE" accent="#c9b787" />
+        <KpiCard label="BLOCKED" value={items.filter((i: DoctrineRewardHackingIncident) => i.status === 'blocked').length} sub="caught at runtime" accent="#c9b787" />
+        <KpiCard label="ROLLED BACK" value={items.filter((i: DoctrineRewardHackingIncident) => i.status === 'rolled-back').length} sub="reversed by PCE" accent="#c9b787" />
       </div>
 
       <SectionTitle>Detection Rules</SectionTitle>
@@ -43,7 +43,7 @@ export function RewardHacking() {
 
       <SectionTitle>Incidents</SectionTitle>
       <div className="flex flex-col gap-3">
-        {items.map((i: any) => (
+        {items.map((i: DoctrineRewardHackingIncident) => (
           <Card key={i.incidentId}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">

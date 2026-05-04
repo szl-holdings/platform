@@ -161,6 +161,8 @@ const ALLOWED_PUBLIC_MOUNTS: Record<string, string> = {
     'Public (demo surface) — A11oy Cognitive Runtime API; tenant resolved from X-Tenant-Id header; handler-level scoping; no session auth required in demo mode.',
   'a11oyAgenticPagesRouter':
     'Public — A11oy Agentic Pages read-only seed data for 9 frontend pages',
+  'a11oyDoctrineRouter':
+    'Public — A11oy Doctrine API; all doctrine endpoints namespaced under /a11oy/doctrine/*',
   'replay-attestation':
     'Public — replay attestation, governance stats, and .well-known attestation keys; no per-tenant session required',
   'sentra-threat-feeds':

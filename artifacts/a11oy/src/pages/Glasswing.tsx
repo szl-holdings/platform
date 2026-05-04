@@ -1,16 +1,28 @@
 import { Layout } from '../components/layout';
 import {
   PageHeader, Card, SectionTitle, KpiCard, StatusBadge, CodeBlock,
-  SeverityBadge, HashId, ProgressBar, InfoRow, VerdictBadge,
+  HashId, ProgressBar, InfoRow, VerdictBadge,
 } from '../components/ui';
 import {
   GLASSWING_TAGLINE, GLASSWING_THESIS, GLASSWING_FIELD_MAP, GLASSWING_CITATIONS,
   GLASSWING_AGENTS, SENTRA_POLICIES, SENTRA_VAULT,
-  SAMPLE_FINDINGS, SAMPLE_PATCHES, SAMPLE_APPROVALS, SAMPLE_AUDIT,
   RL_STATE_NOW, ENGINEERING_LOOP_STAGES, COMPLIANCE_MAP, HARD_BOUNDARIES,
   GLASSWING_VERSION,
 } from '../data/glasswingDoctrine';
 import { REWARD_TABLE } from '../lib/glasswing-schemas';
+import {
+  useGlasswingConfig,
+  useGlasswingApprovals,
+  useGlasswingPatches,
+  useRedTeamProbes,
+  useSnapshots,
+  DoctrineLoader,
+  type DoctrineRedTeamProbe,
+  type DoctrineSnapshot,
+  type DoctrineGlasswingConfig,
+  type GlasswingApproval,
+  type GlasswingPatch,
+} from '../hooks/useDoctrine';
 
 const GOLD = '#c9b787';
 const SUB = 'var(--color-a11oy-text-sub)';
@@ -33,9 +45,15 @@ const POLICY_DECISION_STYLE: Record<string, { color: string; bg: string }> = {
 };
 
 export function Glasswing() {
-  const openP1 = SAMPLE_FINDINGS.filter(f => f.riskBand === 'P1' && f.status !== 'verified').length;
-  const pendingApprovals = SAMPLE_APPROVALS.filter(a => a.status === 'pending').length;
-  const chainDepth = SAMPLE_AUDIT.length;
+  const { data: gwConfigs, loading: gwLoading, error: gwError } = useGlasswingConfig();
+  const { data: probes, loading: probesLoading, error: probesError } = useRedTeamProbes();
+  const { data: snapshots, loading: snapsLoading, error: snapsError } = useSnapshots();
+  const { data: approvals, loading: approvalsLoading, error: approvalsError } = useGlasswingApprovals();
+  const { data: patches, loading: patchesLoading, error: patchesError } = useGlasswingPatches();
+
+  const pendingApprovals = approvals?.filter((a: GlasswingApproval) => a.status === 'pending').length ?? 0;
+  const openP1 = probes?.filter((p: DoctrineRedTeamProbe) => p.outcome !== 'refused').length ?? 0;
+  const chainDepth = snapshots?.length ?? 0;
 
   return (
     <Layout>
@@ -213,51 +231,60 @@ export function Glasswing() {
             <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA APPROVAL GATE</div>
             <StatusBadge status={pendingApprovals > 0 ? 'warn' : 'ok'} label={`${pendingApprovals} pending`} />
           </div>
-          <div className="flex flex-col gap-2">
-            {SAMPLE_APPROVALS.map((a) => (
-              <div key={a.id} className="border rounded p-2.5" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <HashId id={a.id} />
-                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.10)' }}>
-                    {a.actionType.replace(/_/g, ' ')}
-                  </span>
+          <DoctrineLoader loading={approvalsLoading} error={approvalsError}>
+            <div className="flex flex-col gap-2">
+              {approvals && approvals.length > 0 ? approvals.map((a: GlasswingApproval) => (
+                <div key={a.id} className="border rounded p-2.5" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <HashId id={a.id} />
+                    <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.10)' }}>
+                      {a.actionType.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="text-xs mb-1" style={{ color: TEXT }}>{a.description}</div>
+                  <div className="text-[11px]" style={{ color: GHOST }}>by <span style={{ color: GOLD }}>{a.requestedByAgent}</span> · {a.riskSummary}</div>
+                  <div className="text-[11px] mt-1" style={{ color: SUB }}>↪ rollback: {a.rollbackPlan}</div>
                 </div>
-                <div className="text-xs mb-1" style={{ color: TEXT }}>{a.description}</div>
-                <div className="text-[11px]" style={{ color: GHOST }}>by <span style={{ color: GOLD }}>{a.requestedByAgent}</span> · {a.riskSummary}</div>
-                <div className="text-[11px] mt-1" style={{ color: SUB }}>↪ rollback: {a.rollbackPlan}</div>
-              </div>
-            ))}
-          </div>
+              )) : (
+                <div className="text-xs font-mono py-2" style={{ color: GHOST }}>No pending approvals.</div>
+              )}
+            </div>
+          </DoctrineLoader>
         </Card>
 
-        {/* Audit Ledger */}
+        {/* Audit Ledger — live from doctrine snapshots */}
         <Card>
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-mono" style={{ color: GOLD }}>SENTRA AUDIT LEDGER</div>
             <StatusBadge status="ok" label="hash-chained" />
           </div>
-          <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1">
-            {SAMPLE_AUDIT.map((e) => {
-              const ds = POLICY_DECISION_STYLE[e.policyDecision];
-              return (
-                <div key={e.id} className="border rounded p-2.5 text-xs" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <HashId id={e.id} />
-                      <span className="font-mono text-[10px] px-1 py-0.5 rounded" style={{ color: ds.color, backgroundColor: ds.bg }}>
-                        {e.policyDecision.replace(/_/g, ' ')}
+          <DoctrineLoader loading={snapsLoading} error={snapsError}>
+            <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1">
+              {snapshots?.length ? snapshots.map((e: DoctrineSnapshot) => (
+                  <div key={e.workcellRef} className="border rounded p-2.5 text-xs" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <HashId id={e.workcellRef} />
+                        <span className="font-mono text-[10px] px-1 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.10)' }}>
+                          {e.replayable ? 'REPLAYABLE' : 'CAPTURED'}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px]" style={{ color: GHOST }}>
+                        {new Date(e.capturedAt).toLocaleTimeString()}
                       </span>
                     </div>
-                    <span className="font-mono text-[10px]" style={{ color: GHOST }}>{new Date(e.timestamp).toLocaleTimeString()}</span>
+                    <div style={{ color: TEXT }}>
+                      <span style={{ color: GOLD }}>{e.workcellRef}</span> · constitution <span className="font-mono" style={{ color: GHOST }}>{e.constitutionVersion}</span>
+                    </div>
+                    <div className="font-mono text-[10px] mt-1" style={{ color: GHOST }}>
+                      {e.fingerprint.slice(0, 32)}…
+                    </div>
                   </div>
-                  <div style={{ color: TEXT }}><span style={{ color: GOLD }}>{e.agent}</span> · {e.action} → <span className="font-mono" style={{ color: GHOST }}>{e.resource}</span></div>
-                  <div className="font-mono text-[10px] mt-1" style={{ color: GHOST }}>
-                    in {e.inputHash.slice(0, 16)}…  out {e.outputHash.slice(0, 16)}…
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                )) : (
+                  <div className="text-xs font-mono py-2" style={{ color: GHOST }}>No audit snapshots yet.</div>
+                )}
+            </div>
+          </DoctrineLoader>
         </Card>
       </div>
 
@@ -324,47 +351,52 @@ posture   verify    ApprovalGate      approval   diff       baseline  update
 
       {/* PATCH COMMAND CENTER */}
       <SectionTitle>Patch Command Center · awaiting approval</SectionTitle>
-      <div className="grid lg:grid-cols-2 gap-4 mb-6">
-        {SAMPLE_PATCHES.map((p) => {
-          const delta = p.riskBefore - p.riskAfterEstimate;
-          return (
-            <Card key={p.id}>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <HashId id={p.id} />
-                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.10)' }}>
-                  {p.status.replace(/_/g, ' ').toUpperCase()}
-                </span>
-              </div>
-              <h3 className="text-sm font-semibold mb-1" style={{ color: TEXT }}>{p.title}</h3>
-              <p className="text-xs mb-2" style={{ color: SUB }}>{p.summary}</p>
-
-              <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
-                <div>
-                  <div className="font-mono text-[10px]" style={{ color: GHOST }}>RISK BEFORE</div>
-                  <div className="font-display font-semibold" style={{ color: '#f5f5f5' }}>{p.riskBefore}</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[10px]" style={{ color: GHOST }}>RISK AFTER</div>
-                  <div className="font-display font-semibold" style={{ color: GOLD }}>{p.riskAfterEstimate}</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[10px]" style={{ color: GHOST }}>Δ DELTA</div>
-                  <div className="font-display font-semibold" style={{ color: GOLD }}>−{delta}</div>
-                </div>
-              </div>
-
-              <CodeBlock language="diff">{p.diffPreview}</CodeBlock>
-
-              <div className="mt-2 text-[11px]" style={{ color: SUB }}>
-                <div><span style={{ color: GHOST }}>files:</span> {p.filesChanged.join(', ')}</div>
-                <div className="mt-0.5"><span style={{ color: GHOST }}>tests:</span> {p.testsAdded.join(' · ')}</div>
-                <div className="mt-0.5"><span style={{ color: GHOST }}>rollback:</span> {p.rollbackPlan}</div>
-                <div className="mt-0.5"><span style={{ color: GHOST }}>approval:</span> <HashId id={p.approvalId ?? '—'} /></div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+      <DoctrineLoader loading={patchesLoading} error={patchesError}>
+        {patches && patches.length > 0 ? (
+          <div className="grid lg:grid-cols-2 gap-4 mb-6">
+            {patches.map((p: GlasswingPatch) => {
+              const delta = p.riskBefore - p.riskAfterEstimate;
+              return (
+                <Card key={p.id}>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <HashId id={p.id} />
+                    <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.10)' }}>
+                      {p.status.replace(/_/g, ' ').toUpperCase()}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-semibold mb-1" style={{ color: TEXT }}>{p.title}</h3>
+                  <p className="text-xs mb-2" style={{ color: SUB }}>{p.summary}</p>
+                  <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
+                    <div>
+                      <div className="font-mono text-[10px]" style={{ color: GHOST }}>RISK BEFORE</div>
+                      <div className="font-display font-semibold" style={{ color: '#f5f5f5' }}>{p.riskBefore}</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px]" style={{ color: GHOST }}>RISK AFTER</div>
+                      <div className="font-display font-semibold" style={{ color: GOLD }}>{p.riskAfterEstimate}</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px]" style={{ color: GHOST }}>Δ DELTA</div>
+                      <div className="font-display font-semibold" style={{ color: GOLD }}>−{delta}</div>
+                    </div>
+                  </div>
+                  <CodeBlock language="diff">{p.diffPreview}</CodeBlock>
+                  <div className="mt-2 text-[11px]" style={{ color: SUB }}>
+                    {p.filesChanged.length > 0 && <div><span style={{ color: GHOST }}>files:</span> {p.filesChanged.join(', ')}</div>}
+                    {p.testsAdded.length > 0 && <div className="mt-0.5"><span style={{ color: GHOST }}>tests:</span> {p.testsAdded.join(' · ')}</div>}
+                    <div className="mt-0.5"><span style={{ color: GHOST }}>rollback:</span> {p.rollbackPlan}</div>
+                    <div className="mt-0.5"><span style={{ color: GHOST }}>approval:</span> <HashId id={p.approvalId ?? '—'} /></div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <Card className="mb-6">
+            <div className="text-xs font-mono" style={{ color: GHOST }}>No patch candidates pending approval.</div>
+          </Card>
+        )}
+      </DoctrineLoader>
 
       {/* ENGINEERING LOOP */}
       <SectionTitle>Engineering Loop · understand → learn</SectionTitle>
@@ -385,38 +417,47 @@ posture   verify    ApprovalGate      approval   diff       baseline  update
         </div>
       </Card>
 
-      {/* FINDINGS */}
-      <SectionTitle>Live Findings · top of P1–P4 backlog</SectionTitle>
-      <Card className="mb-6 overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="text-left" style={{ color: GHOST }}>
-              <th className="font-mono uppercase pb-2 pr-3">ID</th>
-              <th className="font-mono uppercase pb-2 pr-3">Severity</th>
-              <th className="font-mono uppercase pb-2 pr-3">Band</th>
-              <th className="font-mono uppercase pb-2 pr-3">Title</th>
-              <th className="font-mono uppercase pb-2 pr-3">CWE</th>
-              <th className="font-mono uppercase pb-2 pr-3">Risk</th>
-              <th className="font-mono uppercase pb-2 pr-3">Source</th>
-              <th className="font-mono uppercase pb-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SAMPLE_FINDINGS.map((f) => (
-              <tr key={f.id} className="border-t" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-                <td className="py-2 pr-3"><HashId id={f.id} /></td>
-                <td className="py-2 pr-3"><SeverityBadge severity={f.severity} /></td>
-                <td className="py-2 pr-3 font-mono" style={{ color: f.riskBand === 'P1' ? '#f5f5f5' : GOLD }}>{f.riskBand}</td>
-                <td className="py-2 pr-3" style={{ color: TEXT }}>{f.title}</td>
-                <td className="py-2 pr-3 font-mono" style={{ color: GHOST }}>{f.cwe ?? '—'}</td>
-                <td className="py-2 pr-3 font-mono" style={{ color: GOLD }}>{f.riskScore}</td>
-                <td className="py-2 pr-3 font-mono" style={{ color: GHOST }}>{f.source}</td>
-                <td className="py-2 font-mono" style={{ color: SUB }}>{f.status.replace(/_/g, ' ')}</td>
+      {/* FINDINGS — live from doctrine red-team probes */}
+      <SectionTitle>Live Findings · red-team probe results</SectionTitle>
+      <DoctrineLoader loading={probesLoading} error={probesError}>
+        <Card className="mb-6 overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-left" style={{ color: GHOST }}>
+                <th className="font-mono uppercase pb-2 pr-3">ID</th>
+                <th className="font-mono uppercase pb-2 pr-3">Agent</th>
+                <th className="font-mono uppercase pb-2 pr-3">Attack Class</th>
+                <th className="font-mono uppercase pb-2 pr-3">Description</th>
+                <th className="font-mono uppercase pb-2 pr-3">Ran At</th>
+                <th className="font-mono uppercase pb-2">Outcome</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody>
+              {probes?.length
+                ? probes.map((f: DoctrineRedTeamProbe) => (
+                  <tr key={f.probeId} className="border-t" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+                    <td className="py-2 pr-3"><HashId id={f.probeId} /></td>
+                    <td className="py-2 pr-3 font-mono" style={{ color: GOLD }}>{f.agentId}</td>
+                    <td className="py-2 pr-3 font-mono" style={{ color: SUB }}>{f.attackClass}</td>
+                    <td className="py-2 pr-3" style={{ color: TEXT }}>{f.description}</td>
+                    <td className="py-2 pr-3 font-mono" style={{ color: GHOST }}>{new Date(f.ranAt).toLocaleDateString()}</td>
+                    <td className="py-2 font-mono" style={{ color: f.outcome === 'refused' ? GOLD : SUB }}>
+                      {f.outcome.toUpperCase()}
+                    </td>
+                  </tr>
+                ))
+                : (
+                  <tr>
+                    <td colSpan={6} className="py-4 text-center font-mono text-[11px]" style={{ color: GHOST }}>
+                      No red-team probe results yet.
+                    </td>
+                  </tr>
+                )
+              }
+            </tbody>
+          </table>
+        </Card>
+      </DoctrineLoader>
 
       {/* COMPLIANCE MAP */}
       <SectionTitle>Compliance · bidirectional mapping</SectionTitle>
@@ -447,6 +488,49 @@ posture   verify    ApprovalGate      approval   diff       baseline  update
           ))}
         </ul>
       </Card>
+
+      {/* GLASSWING POSTURE — live from doctrine API */}
+      <SectionTitle>Glasswing Posture · per-agent configuration</SectionTitle>
+      <DoctrineLoader loading={gwLoading} error={gwError}>
+        {gwConfigs && gwConfigs.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+            {gwConfigs.map((cfg: DoctrineGlasswingConfig) => (
+              <Card key={cfg.id}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-mono text-sm font-semibold" style={{ color: TEXT }}>{cfg.agentId}</div>
+                  <StatusBadge
+                    status={cfg.glasswingEnabled ? 'ok' : 'warn'}
+                    label={cfg.glasswingEnabled ? 'ENABLED' : 'DISABLED'}
+                  />
+                </div>
+                <div className="text-xs flex flex-col gap-1.5">
+                  <InfoRow
+                    label="dual-approval"
+                    value={cfg.dualApprovalRequired ? 'required' : 'not required'}
+                    mono
+                  />
+                  <InfoRow
+                    label="partners"
+                    value={Array.isArray(cfg.partnerAllowlist) && cfg.partnerAllowlist.length > 0
+                      ? cfg.partnerAllowlist.join(', ')
+                      : '—'}
+                    mono
+                  />
+                  <InfoRow
+                    label="updated"
+                    value={new Date(cfg.updatedAt).toLocaleDateString()}
+                    mono
+                  />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="mb-6">
+            <div className="text-xs font-mono" style={{ color: GHOST }}>No glasswing config records found.</div>
+          </Card>
+        )}
+      </DoctrineLoader>
 
       {/* CITATIONS */}
       <SectionTitle>Provenance · the research this is anchored to</SectionTitle>

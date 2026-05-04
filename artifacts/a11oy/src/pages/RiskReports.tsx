@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge } from '../components/ui';
-import { useRiskReports, DoctrineLoader } from '../hooks/useDoctrine';
+import { useRiskReports, DoctrineLoader, type DoctrineRiskReport } from '../hooks/useDoctrine';
 
 export function RiskReports() {
   const { data: reports, loading, error } = useRiskReports();
   const items = reports ?? [];
   const [selectedId, setSelectedId] = useState<string>('');
   const selId = selectedId || items[0]?.reportId || '';
-  const report = items.find((r: any) => r.reportId === selId) ?? items[0];
+  const report = items.find((r: DoctrineRiskReport) => r.reportId === selId) ?? items[0];
 
   return (
     <Layout>
@@ -21,7 +21,7 @@ export function RiskReports() {
       />
 
       <div className="flex gap-2 mb-6 flex-wrap">
-        {items.map((r: any) => (
+        {items.map((r: DoctrineRiskReport) => (
           <button key={r.reportId} type="button" onClick={() => setSelectedId(r.reportId)}
             className="text-xs px-3 py-1.5 rounded font-mono"
             style={{
@@ -52,7 +52,7 @@ export function RiskReports() {
       </Card>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {(report.metrics as any[])?.map((m: any) => (
+        {report.metrics?.map((m) => (
           <KpiCard key={m.label} label={m.label} value={m.value} accent="#c9b787" />
         ))}
       </div>
@@ -85,7 +85,7 @@ export function RiskReports() {
       <Card className="mb-6">
         <SectionTitle>Residual Risks</SectionTitle>
         <div className="flex flex-col gap-2">
-          {(report.residualRisks as any[])?.map((r: any, i: number) => (
+          {report.residualRisks?.map((r, i: number) => (
             <div key={i} className="flex items-start gap-3 py-2 border-b" style={{ borderColor: 'var(--color-a11oy-border)' }}>
               <SeverityBadge severity={r.severity} />
               <div className="flex-1">
@@ -100,7 +100,7 @@ export function RiskReports() {
       <Card>
         <SectionTitle>Sign-offs</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {(report.signoffs as any[])?.map((s: any, i: number) => (
+          {report.signoffs?.map((s, i: number) => (
             <div key={i} className="rounded border p-2.5" style={{ borderColor: 'var(--color-a11oy-border)' }}>
               <div className="text-sm font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{s.name}</div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{s.role}</div>

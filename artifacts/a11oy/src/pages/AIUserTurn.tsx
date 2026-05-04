@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, StatusBadge } from '../components/ui';
-import { useUserTurnSignals, DoctrineLoader } from '../hooks/useDoctrine';
+import { useUserTurnSignals, DoctrineLoader, type DoctrineUserTurnSignal } from '../hooks/useDoctrine';
 
 const VERDICT_STATUS: Record<string, 'ok' | 'warn' | 'error' | 'info'> = {
   human: 'ok', 'likely-human': 'ok', uncertain: 'warn', 'likely-ai': 'error', ai: 'error',
@@ -13,8 +13,8 @@ const ACTION_LABEL: Record<string, string> = {
 export function AIUserTurn() {
   const { data: signals, loading, error } = useUserTurnSignals();
   const items = signals ?? [];
-  const flagged = items.filter((s: any) => s.recommendedAction !== 'pass').length;
-  const blocked = items.filter((s: any) => s.recommendedAction === 'block-and-reroute').length;
+  const flagged = items.filter((s: DoctrineUserTurnSignal) => s.recommendedAction !== 'pass').length;
+  const blocked = items.filter((s: DoctrineUserTurnSignal) => s.recommendedAction === 'block-and-reroute').length;
 
   return (
     <Layout>
@@ -35,8 +35,8 @@ export function AIUserTurn() {
 
       <SectionTitle>Recent Approval Checks</SectionTitle>
       <div className="flex flex-col gap-3">
-        {items.map((s: any) => {
-          const sig = s.signals as any;
+        {items.map((s: DoctrineUserTurnSignal) => {
+          const sig = s.signals;
           return (
           <Card key={s.signalId}>
             <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">

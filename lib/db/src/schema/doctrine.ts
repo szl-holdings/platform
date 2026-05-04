@@ -454,3 +454,35 @@ export type DoctrinePartner = typeof doctrinePartnersTable.$inferSelect;
 export type InsertDoctrinePartner = typeof doctrinePartnersTable.$inferInsert;
 export type DoctrineGlasswingConfig = typeof doctrineGlasswingConfigTable.$inferSelect;
 export type InsertDoctrineGlasswingConfig = typeof doctrineGlasswingConfigTable.$inferInsert;
+
+export const doctrineSystemCardsTable = pgTable(
+  'doctrine_system_cards',
+  {
+    id: serial('id').primaryKey(),
+    cardId: text('card_id').notNull(),
+    agentId: text('agent_id').notNull(),
+    version: text('version').notNull(),
+    ratifiedAt: timestamp('ratified_at').notNull(),
+    ratifiedBy: text('ratified_by').notNull(),
+    constitutionSummary: jsonb('constitution_summary').notNull().default({}),
+    evalScores: jsonb('eval_scores').notNull().default({}),
+    welfareSummary: jsonb('welfare_summary').notNull().default({}),
+    alignmentDecision: text('alignment_decision').notNull(),
+    redTeamPassRate: numeric('red_team_pass_rate', { precision: 5, scale: 3 }).notNull().default('0'),
+    covenantLiftUsd: numeric('covenant_lift_usd', { precision: 12, scale: 2 }).notNull().default('0'),
+    knownLimitations: jsonb('known_limitations').notNull().default([]),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('doctrine_sc_agent_idx').on(t.agentId),
+    index('doctrine_sc_version_idx').on(t.version),
+    index('doctrine_sc_card_idx').on(t.cardId),
+  ],
+);
+
+export type DoctrineSystemCard = typeof doctrineSystemCardsTable.$inferSelect;
+export type InsertDoctrineSystemCard = typeof doctrineSystemCardsTable.$inferInsert;
+export type DoctrineDslExample = typeof doctrineDslExamplesTable.$inferSelect;
+export type InsertDoctrineDslExample = typeof doctrineDslExamplesTable.$inferInsert;
+export type DoctrineDslSimulation = typeof doctrineDslSimulationsTable.$inferSelect;
+export type InsertDoctrineDslSimulation = typeof doctrineDslSimulationsTable.$inferInsert;

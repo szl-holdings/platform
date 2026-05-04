@@ -5,7 +5,7 @@ import {
   DOCTRINE_VERSION, DOCTRINE_TAGLINE,
   AGENT_LABEL, fmtUsd, fmtPct,
 } from '../data/mythosDoctrine';
-import { useDoctrineOverview, DoctrineLoader } from '../hooks/useDoctrine';
+import { useDoctrineOverview, DoctrineLoader, type DoctrineConstitution, type DoctrineRiskReport } from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
@@ -32,7 +32,7 @@ export function DoctrineOverview() {
     <Layout>
       <DoctrineLoader loading={loading} error={error}>
       {overview && (() => {
-        const constitutions = overview.constitutions as any[] ?? [];
+        const constitutions: DoctrineConstitution[] = overview.constitutions ?? [];
         const latestRR = overview.latestRiskReport;
 
         return (
@@ -94,7 +94,7 @@ export function DoctrineOverview() {
 
       <SectionTitle>Per-Agent System Cards</SectionTitle>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-        {constitutions.map((c: any) => (
+        {constitutions.map((c: DoctrineConstitution) => (
           <Link key={c.agentId} href={b(`/system-card/${c.agentId}`)} style={{ textDecoration: 'none' }}>
             <Card className="cursor-pointer h-full">
               <div className="flex items-center justify-between mb-2">
@@ -125,7 +125,7 @@ export function DoctrineOverview() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {(latestRR.metrics as any[])?.slice(0, 4).map((m: any) => (
+          {(latestRR as DoctrineRiskReport).metrics?.slice(0, 4).map((m) => (
             <div key={m.label} className="text-xs">
               <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{m.label}</div>
               <div className="font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{m.value}</div>

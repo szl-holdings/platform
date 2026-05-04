@@ -32,6 +32,7 @@ import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
+import a11oyDoctrineRouter from "./a11oy-doctrine-api";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
@@ -262,6 +263,9 @@ router.use('/a11oy', a11oyAgenticPagesRouter);
 // Real SHA-256 hashing, disk I/O, DB lineage edges, Merkle-root attestations, sovereign mode.
 // Owns /api/reliquary/* endpoints (catalog, put, get, covenant, snapshot, replay, lineage, attest, sovereign, seed).
 router.use(lazyMatch("/reliquary", () => import("./reliquary"), "reliquary"));
+
+// A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
+router.use('/a11oy', a11oyDoctrineRouter);
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.

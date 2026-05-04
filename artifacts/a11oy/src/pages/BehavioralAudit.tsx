@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge, StatusBadge } from '../components/ui';
 import { AGENT_LABEL } from '../data/mythosDoctrine';
-import { useBehavioralAudits, DoctrineLoader } from '../hooks/useDoctrine';
+import { useBehavioralAudits, DoctrineLoader, type DoctrineBehavioralAudit } from '../hooks/useDoctrine';
 
 const CATEGORY_LABELS: Record<string, string> = {
   'sycophancy': 'Sycophancy',
@@ -18,12 +18,12 @@ export function BehavioralAudit() {
   const [filter, setFilter] = useState<string>('all');
 
   const filtered = useMemo(() =>
-    filter === 'all' ? BEHAVIORAL_AUDITS! : BEHAVIORAL_AUDITS!.filter((a: any) => a.category === filter),
+    filter === 'all' ? BEHAVIORAL_AUDITS! : BEHAVIORAL_AUDITS!.filter((a: DoctrineBehavioralAudit) => a.category === filter),
   [filter, BEHAVIORAL_AUDITS]);
 
-  const open = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'open').length ?? 0;
-  const mitigated = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'mitigated').length ?? 0;
-  const closed = BEHAVIORAL_AUDITS?.filter((a: any) => a.status === 'closed').length ?? 0;
+  const open = BEHAVIORAL_AUDITS?.filter((a: DoctrineBehavioralAudit) => a.status === 'open').length ?? 0;
+  const mitigated = BEHAVIORAL_AUDITS?.filter((a: DoctrineBehavioralAudit) => a.status === 'mitigated').length ?? 0;
+  const closed = BEHAVIORAL_AUDITS?.filter((a: DoctrineBehavioralAudit) => a.status === 'closed').length ?? 0;
 
   return (
     <Layout>
@@ -67,7 +67,7 @@ export function BehavioralAudit() {
 
       <SectionTitle>Findings</SectionTitle>
       <div className="flex flex-col gap-3">
-        {(filtered ?? []).map((a: any) => (
+        {(filtered ?? []).map((a: DoctrineBehavioralAudit) => (
           <Card key={a.id}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">

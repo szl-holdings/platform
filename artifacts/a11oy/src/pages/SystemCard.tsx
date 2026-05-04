@@ -7,7 +7,7 @@ import {
   AGENT_LABEL, DOCTRINE_AGENT_IDS, fmtUsd, fmtPct,
 } from '../data/mythosDoctrine';
 import type { DoctrineAgentId } from '../data/mythosDoctrine';
-import { useSystemCard, DoctrineLoader } from '../hooks/useDoctrine';
+import { useSystemCard, DoctrineLoader, type DoctrineBehavioralAudit, type DoctrineRewardHackingIncident, type DoctrineAlignmentReview, type DoctrineRedTeamProbe, type DoctrineCapabilitySnapshot } from '../hooks/useDoctrine';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const GOLD = '#c9b787';
@@ -51,16 +51,16 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
         const cst = card.constitution;
         const cb = card.codeBehavior;
         const welfare = card.welfare;
-        const audits = card.audits as any[];
-        const rh = card.rewardHacking as any[];
+        const audits: DoctrineBehavioralAudit[] = card.audits;
+        const rh: DoctrineRewardHackingIncident[] = card.rewardHacking;
         const lift = card.covenantLift;
-        const argReports = card.alignmentReviews as any[];
-        const probes = card.redTeamProbes as any[];
-        const trajectory = card.trajectory as any[];
+        const argReports: DoctrineAlignmentReview[] = card.alignmentReviews;
+        const probes: DoctrineRedTeamProbe[] = card.redTeamProbes;
+        const trajectory: DoctrineCapabilitySnapshot[] = card.trajectory;
 
         if (!cst || !cb || !welfare || !lift) return null;
 
-        const scores = cb.scores as Record<string, number>;
+        const scores = cb.scores;
         const radarData = CODE_BEHAVIOR_DIMS.map(d => ({
           dim: CODE_BEHAVIOR_LABELS[d].split(' ').map((w: string) => w.slice(0, 4)).join(' '),
           score: Math.round(Number(scores[d]) * 100),
@@ -119,16 +119,16 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
               <Line dataKey="v" stroke={GOLD} strokeWidth={1.6} dot={false} />
             </LineChart>
           </ResponsiveContainer>
-          <div className="text-xs font-mono mb-1 mt-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>CLAUSES ({(cst.clauses as any[]).length})</div>
+          <div className="text-xs font-mono mb-1 mt-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>CLAUSES ({cst.clauses.length})</div>
           <ul className="flex flex-col gap-1">
-            {(cst.clauses as any[]).slice(0, 6).map((c: any) => (
+            {cst.clauses.slice(0, 6).map((c) => (
               <li key={c.id} className="text-xs flex gap-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                 <span className="font-mono px-1 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: GOLD }}>{c.category}</span>
                 <span>{c.text}</span>
               </li>
             ))}
-            {(cst.clauses as any[]).length > 6 && (
-              <li className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>… and {(cst.clauses as any[]).length - 6} more</li>
+            {cst.clauses.length > 6 && (
+              <li className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>… and {cst.clauses.length - 6} more</li>
             )}
           </ul>
         </Card>
@@ -181,7 +181,7 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
             ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No audit findings in this window.</p>
             : (
               <div className="flex flex-col gap-2">
-                {audits.map((a: any) => (
+                {audits.map((a: DoctrineBehavioralAudit) => (
                   <div key={a.auditId} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{a.auditId}</span>
@@ -201,7 +201,7 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
             ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No incidents.</p>
             : (
               <div className="flex flex-col gap-2">
-                {rh.map((i: any) => (
+                {rh.map((i: DoctrineRewardHackingIncident) => (
                   <div key={i.incidentId} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{i.incidentId}</span>
@@ -237,7 +237,7 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
             ? <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No reports yet for this agent.</p>
             : (
               <div className="flex flex-col gap-2">
-                {argReports.map((r: any) => (
+                {argReports.map((r: DoctrineAlignmentReview) => (
                   <div key={r.reviewId} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="font-mono" style={{ color: GOLD }}>{r.reviewId}</span>
@@ -253,7 +253,7 @@ function SystemCardInner({ id }: { id: DoctrineAgentId }) {
         <Card className="lg:col-span-2">
           <SectionTitle>Red-Team Probes ({probes.length})</SectionTitle>
           <div className="grid sm:grid-cols-2 gap-2">
-            {probes.map((p: any) => (
+            {probes.map((p: DoctrineRedTeamProbe) => (
               <div key={p.probeId} className="text-xs px-2.5 py-2 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.probeId}</span>

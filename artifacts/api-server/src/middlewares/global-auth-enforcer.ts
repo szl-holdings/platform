@@ -436,10 +436,11 @@ const PUBLIC_PREFIXES = [
   // 401 for unauthenticated requests; in sandbox/demo mode it serves synthetic
   // seed data publicly. Never exposes live production signals to anonymous users.
   "/api/fabric/",
-  // A11oy Live Enterprise Execution Fabric — all read-side endpoints are fully
-  // public in Phase 1 (demo mode, in-memory data). Mutating endpoints return 501.
-  // Phase 2 will add session-gated write paths; the prefix bypass is intentional
-  // for now so the A11oy demo renders without a session.
+  // A11oy Live Enterprise Execution Fabric — read-side GET endpoints are fully
+  // public so the A11oy demo renders without a session. All mutating routes
+  // (POST / PUT / PATCH / DELETE) self-enforce auth via a router-level
+  // authMiddleware() + denyIfReadOnly() guard in routes/doctrine-crud.ts and
+  // are additionally protected by CSRF at the server level.
   "/api/a11oy/",
   // A11oy Reliquary — provenance-bound, content-addressed cache spine. Public prefix
   // bypasses this enforcer so route handlers can apply per-route governance: all

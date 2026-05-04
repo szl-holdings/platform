@@ -2,14 +2,14 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from 'recharts';
 import { CODE_BEHAVIOR_DIMS, CODE_BEHAVIOR_LABELS, AGENT_LABEL, fmtPct } from '../data/mythosDoctrine';
-import { useCodeBehaviors, DoctrineLoader } from '../hooks/useDoctrine';
+import { useCodeBehaviors, DoctrineLoader, type DoctrineCodeBehavior } from '../hooks/useDoctrine';
 
 const GOLD = '#c9b787';
 
 export function CodeBehaviors() {
   const { data: behaviors, loading, error } = useCodeBehaviors();
   const items = behaviors ?? [];
-  const avg = items.length ? items.reduce((a: number, c: any) => a + Number(c.composite), 0) / items.length : 0;
+  const avg = items.length ? items.reduce((a: number, c: DoctrineCodeBehavior) => a + Number(c.composite), 0) / items.length : 0;
 
   return (
     <Layout>
@@ -30,8 +30,8 @@ export function CodeBehaviors() {
 
       <SectionTitle>Per-Agent Profile</SectionTitle>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {items.map((c: any) => {
-          const scores = c.scores as Record<string, number>;
+        {items.map((c: DoctrineCodeBehavior) => {
+          const scores = c.scores;
           const data = CODE_BEHAVIOR_DIMS.map(d => ({
             dim: CODE_BEHAVIOR_LABELS[d].split(' ').map((w: string) => w.slice(0, 4)).join(' '),
             score: Math.round(Number(scores[d]) * 100),

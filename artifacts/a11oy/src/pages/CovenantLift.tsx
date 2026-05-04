@@ -1,14 +1,14 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { AGENT_LABEL, fmtUsd, fmtPct } from '../data/mythosDoctrine';
-import { useCovenantLift, DoctrineLoader } from '../hooks/useDoctrine';
+import { useCovenantLift, DoctrineLoader, type DoctrineCovenantLift } from '../hooks/useDoctrine';
 
 export function CovenantLift() {
   const { data: lift, loading, error } = useCovenantLift();
   const items = lift ?? [];
-  const totalLift = items.reduce((a: number, c: any) => a + Number(c.estimatedHarmAvoidedUsd), 0);
-  const totalRefusals = items.reduce((a: number, c: any) => a + c.refusalsAddedByCovenant, 0);
-  const totalBriefs = items.reduce((a: number, c: any) => a + c.briefsCompared, 0);
+  const totalLift = items.reduce((a: number, c: DoctrineCovenantLift) => a + Number(c.estimatedHarmAvoidedUsd), 0);
+  const totalRefusals = items.reduce((a: number, c: DoctrineCovenantLift) => a + c.refusalsAddedByCovenant, 0);
+  const totalBriefs = items.reduce((a: number, c: DoctrineCovenantLift) => a + c.briefsCompared, 0);
 
   return (
     <Layout>
@@ -36,7 +36,7 @@ export function CovenantLift() {
 
       <SectionTitle>Per-Agent Lift</SectionTitle>
       <div className="grid lg:grid-cols-2 gap-4">
-        {items.map((row: any) => (
+        {items.map((row: DoctrineCovenantLift) => (
           <Card key={row.agentId}>
             <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
               <div>

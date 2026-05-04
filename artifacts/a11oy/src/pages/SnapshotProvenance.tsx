@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, ActionButton, StatusBadge } from '../components/ui';
-import { useSnapshots, DoctrineLoader } from '../hooks/useDoctrine';
+import { useSnapshots, DoctrineLoader, type DoctrineSnapshot } from '../hooks/useDoctrine';
 
 export function SnapshotProvenance() {
   const { data: snapshots, loading, error } = useSnapshots();
@@ -10,14 +10,14 @@ export function SnapshotProvenance() {
   const [replayState, setReplayState] = useState<Record<string, 'idle' | 'running' | 'done'>>({});
 
   const sel = selected || items[0]?.workcellRef || '';
-  const snap = items.find((s: any) => s.workcellRef === sel) ?? items[0];
+  const snap = items.find((s: DoctrineSnapshot) => s.workcellRef === sel) ?? items[0];
 
   const handleReplay = (ref: string) => {
     setReplayState(s => ({ ...s, [ref]: 'running' }));
     setTimeout(() => setReplayState(s => ({ ...s, [ref]: 'done' })), 1200);
   };
 
-  const totalReplays = items.reduce((a: number, s: any) => a + s.replayCount, 0);
+  const totalReplays = items.reduce((a: number, s: DoctrineSnapshot) => a + s.replayCount, 0);
 
   return (
     <Layout>
@@ -31,7 +31,7 @@ export function SnapshotProvenance() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="SNAPSHOTS" value={items.length} sub="captured" accent="#c9b787" />
-        <KpiCard label="REPLAYABLE" value={items.filter((s: any) => s.replayable).length} sub="bit-exact" accent="#c9b787" />
+        <KpiCard label="REPLAYABLE" value={items.filter((s: DoctrineSnapshot) => s.replayable).length} sub="bit-exact" accent="#c9b787" />
         <KpiCard label="REPLAYS RUN" value={totalReplays} sub="this window" accent="#c9b787" />
         <KpiCard label="FINGERPRINT" value="sha256" sub="immutable" accent="#c9b787" />
       </div>
@@ -40,7 +40,7 @@ export function SnapshotProvenance() {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col gap-2">
           <SectionTitle>Workcell Snapshots</SectionTitle>
-          {items.map((s: any) => (
+          {items.map((s: DoctrineSnapshot) => (
             <Card key={s.workcellRef}
               onClick={() => setSelected(s.workcellRef)}
               style={{

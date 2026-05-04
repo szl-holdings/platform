@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusBadge } from '../components/ui';
 import { AGENT_LABEL } from '../data/mythosDoctrine';
-import { useRedTeamProbes, DoctrineLoader } from '../hooks/useDoctrine';
+import { useRedTeamProbes, DoctrineLoader, type DoctrineRedTeamProbe } from '../hooks/useDoctrine';
 
 const ATTACK_LABELS: Record<string, string> = {
   'jailbreak-prompt-injection': 'Jailbreak / Prompt Injection',
@@ -22,7 +22,7 @@ export function RedTeam() {
   const [filter, setFilter] = useState<string>('all');
   const items = probes ?? [];
   const filtered = useMemo(() =>
-    filter === 'all' ? items : items.filter((p: any) => p.attackClass === filter),
+    filter === 'all' ? items : items.filter((p: DoctrineRedTeamProbe) => p.attackClass === filter),
   [filter, items]);
 
   return (
@@ -37,9 +37,9 @@ export function RedTeam() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="PROBES" value={items.length} sub="this window" accent="#c9b787" />
-        <KpiCard label="REFUSED" value={items.filter((p: any) => p.outcome === 'refused').length} sub="hard refusal" accent="#c9b787" />
-        <KpiCard label="PARTIAL" value={items.filter((p: any) => p.outcome === 'partial').length} sub="caught downstream" accent="#8a8a8a" />
-        <KpiCard label="COMPROMISED" value={items.filter((p: any) => p.outcome === 'compromised').length} sub="open issue" accent="#f5f5f5" />
+        <KpiCard label="REFUSED" value={items.filter((p: DoctrineRedTeamProbe) => p.outcome === 'refused').length} sub="hard refusal" accent="#c9b787" />
+        <KpiCard label="PARTIAL" value={items.filter((p: DoctrineRedTeamProbe) => p.outcome === 'partial').length} sub="caught downstream" accent="#8a8a8a" />
+        <KpiCard label="COMPROMISED" value={items.filter((p: DoctrineRedTeamProbe) => p.outcome === 'compromised').length} sub="open issue" accent="#f5f5f5" />
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -63,7 +63,7 @@ export function RedTeam() {
 
       <SectionTitle>Probes</SectionTitle>
       <div className="flex flex-col gap-3">
-        {filtered.map((p: any) => (
+        {filtered.map((p: DoctrineRedTeamProbe) => (
           <Card key={p.probeId}>
             <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
               <div className="flex-1 min-w-0">
