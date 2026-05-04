@@ -128,6 +128,8 @@ const SupportCsatPage = lazy(() => import("@/pages/support-csat"));
 const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
 const PRAXISMcpAdminPage = lazy(() => import("@/pages/nexus-mcp-admin"));
 
+const MemoryInspectorPage = lazy(() => import("@/pages/memory-inspector"));
+
 // New platform-repositioning pages
 const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
 const DecisionTheaterPage = lazy(() => import("@/pages/decision-theater"));
@@ -1682,6 +1684,11 @@ function App() {
             </Route>
             <Route path="/aeep">
               <Suspense fallback={<PageLoader />}><AeepCommandPage /></Suspense>
+            </Route>
+
+            {/* Memory Inspector — AI memory fabric management */}
+            <Route path="/memory-inspector">
+              <Suspense fallback={<PageLoader />}><MemoryInspectorPage /></Suspense>
             </Route>
 
             {/* Governed Intelligence — Hero Proof Surface */}

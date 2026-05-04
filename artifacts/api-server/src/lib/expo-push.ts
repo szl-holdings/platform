@@ -1084,4 +1084,21 @@ export async function processScheduledNotifications(): Promise<void> {
   }
 }
 
+/**
+ * Send a critical-alert push to all tokens registered under a given appId.
+ * Unlike sendPushToApp, this bypasses category preference checks — it is
+ * reserved for critical signals and approval requests that must break through
+ * user-configured notification filters (subject to quiet-hours for non-critical).
+ */
+export async function sendCriticalAlertPush(opts: {
+  appId: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+}): Promise<SendResult> {
+  const { appId, title, body, data = {} } = opts;
+  const payload: PushMessagePayload = { title, body, data, sound: 'default' };
+  return sendPushToApp(appId, payload);
+}
+
 export { expo };

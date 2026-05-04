@@ -15,6 +15,8 @@ import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { handleRouteError } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
 import { submitDelivery, type OutboundChannel } from '../services/outbound-gateway';
+import { correlateDomains } from '../lib/cross-domain-correlator.js';
+import { sendPushToOrgApprovers } from '../lib/expo-push.js';
 
 const router = Router();
 
@@ -241,9 +243,55 @@ export function initSignalBusRuleEngine(): void {
 
   defaultSignalBus.on('*', (signal) => {
     if (signal.tags?.includes('signal-bus-routed')) return;
+
     evaluateRulesForSignal(signal).catch((err) => {
       logger.error({ err }, '[signal-bus] async rule evaluation error');
     });
+
+    // Cross-domain correlation engine: check for correlated impacts across
+    // other domains whenever any signal is published to the bus.
+    correlateDomains(signal);
+
+    // Push critical/high-severity signals to registered mobile devices.
+    // IMPORTANT: We only push when the signal carries a numeric orgId — this
+    // ensures delivery is scoped strictly to the originating tenant's users.
+    // Signals without orgId (system/demo signals) are silently skipped to
+    // prevent any cross-tenant data exposure.
+    if (signal.severity === 'critical' || signal.severity === 'high') {
+      // Read the publisher's numeric orgId that was embedded in rawPayload at
+      // HTTP publish time (see POST /publish handler above). Signals emitted
+      // by background connectors or the test-fire route lack this field and
+      // are silently skipped — we never fan-out without an explicit org scope.
+      const orgNumericId =
+        typeof (signal.rawPayload as Record<string, unknown>)?._publisherOrgId === 'number'
+          ? (signal.rawPayload as Record<string, unknown>)._publisherOrgId as number
+          : null;
+
+      if (orgNumericId !== null) {
+        const title = (signal.rawPayload?.title as string) ?? signal.type;
+        const body = `[${signal.domain.toUpperCase()}] ${title}`;
+        // sendPushToOrgApprovers fans out only to users who are members of
+        // orgNumericId with an approver-level role — no cross-tenant leakage.
+        sendPushToOrgApprovers(orgNumericId, {
+          title,
+          body,
+          data: {
+            signalId: signal.signalId,
+            domain: signal.domain,
+            type: signal.type,
+            severity: signal.severity,
+            deepLink: `/signals/${signal.signalId}`,
+          },
+        }, {
+          // deliveryAppId is the per-delivery app identifier used for history
+          // and template-preference lookups. appId is not a valid option here.
+          deliveryAppId: 'cortex-mobile',
+          severity: signal.severity as 'low' | 'medium' | 'high' | 'critical',
+        }).catch((err) => {
+          logger.warn({ err, signalId: signal.signalId, orgNumericId }, '[signal-bus] push delivery failed');
+        });
+      }
+    }
   });
 
   logger.info('[signal-bus] Rule engine initialized — listening for all signals');
@@ -447,6 +495,13 @@ router.post('/publish', async (req: Request, res: Response) => {
       res.status(400).json({ error: 'Missing required fields: type, domain, title' });
       return;
     }
+    // Capture the publisher's numeric orgId at publish time while we still have
+    // req.user context. This is the only point where the HTTP user identity is
+    // available; the signal bus subscription callback runs asynchronously and
+    // does not have access to the request. We embed it in rawPayload under a
+    // well-known underscore-prefixed key so the fanout handler can read it.
+    const publisherOrgId = req.user?.orgs?.[0]?.orgId ?? null;
+
     const signal = createSignal({
       source: 'api',
       type: type as SignalType,
@@ -457,7 +512,12 @@ router.post('/publish', async (req: Request, res: Response) => {
       severity: severity ?? 'medium',
       entityRefs: entityId ? [{ entityId, entityType: entityType ?? 'unknown', displayName: title }] : [],
       tenantId: (req as unknown as { tenantOrgId?: string }).tenantOrgId ?? undefined,
-      rawPayload: { title, ...(payload ?? {}) },
+      rawPayload: {
+        title,
+        ...(payload ?? {}),
+        // Embedded at publish time for org-scoped push fan-out.
+        ...(typeof publisherOrgId === 'number' ? { _publisherOrgId: publisherOrgId } : {}),
+      },
       tags: ['manual-publish'],
       provenance: { sourceService: 'signal-bus-api' },
     });

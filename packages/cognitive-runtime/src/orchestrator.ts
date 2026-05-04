@@ -688,7 +688,14 @@ export async function run(
         if (ctx.reflectionEnabled) {
           // ─── PHASE 6: REFLECT (on failure) ───────────────────────────────
           loopRun.currentPhase = 'reflect';
-          const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
+          const reflectResult = await reflectPhase({
+            traceId,
+            traceStore,
+            memoryStore,
+            // Wire orient-recalled context so reflection engine can factor
+            // prior operator decisions and episodic memory into quality scoring.
+            recalledContext: orientOutput?.worldModelUpdate?.recalledContext,
+          });
           recordPhase(reflectResult);
           loopRun.reflectionId = reflectResult.output.reflectionId;
           lastReflectOutput = reflectResult.output;
@@ -712,7 +719,12 @@ export async function run(
       if (verifyResult.output.needsRevision && iteration < maxIterations - 1 && orientOutput) {
         // ─── PHASE 6: REFLECT (mid-loop revision) ─────────────────────────
         loopRun.currentPhase = 'reflect';
-        const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
+        const reflectResult = await reflectPhase({
+          traceId,
+          traceStore,
+          memoryStore,
+          recalledContext: orientOutput.worldModelUpdate?.recalledContext,
+        });
         recordPhase(reflectResult);
         loopRun.reflectionId = reflectResult.output.reflectionId;
         lastReflectOutput = reflectResult.output;
@@ -769,7 +781,12 @@ export async function run(
 
       if (ctx.reflectionEnabled && !lastReflectOutput) {
         loopRun.currentPhase = 'reflect';
-        const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
+        const reflectResult = await reflectPhase({
+          traceId,
+          traceStore,
+          memoryStore,
+          recalledContext: orientOutput?.worldModelUpdate?.recalledContext,
+        });
         recordPhase(reflectResult);
         loopRun.reflectionId = reflectResult.output.reflectionId;
         lastReflectOutput = reflectResult.output;
@@ -797,7 +814,12 @@ export async function run(
 
     if (ctx.reflectionEnabled && !lastReflectOutput) {
       loopRun.currentPhase = 'reflect';
-      const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
+      const reflectResult = await reflectPhase({
+        traceId,
+        traceStore,
+        memoryStore,
+        recalledContext: orientOutput?.worldModelUpdate?.recalledContext,
+      });
       recordPhase(reflectResult);
       loopRun.reflectionId = reflectResult.output.reflectionId;
       lastReflectOutput = reflectResult.output;

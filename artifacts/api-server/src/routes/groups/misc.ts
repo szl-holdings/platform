@@ -131,6 +131,16 @@ export function register(router: IRouter): void {
   router.use('/correlation-map', _readLimiter);
   router.use(lazyMatch('/correlation-map', () => import('../correlation-map'), 'correlation-map'));
 
+  router.use('/signal-correlations', tenantScope({ required: true }));
+  router.use('/signal-correlations', _readLimiter);
+  router.use(
+    lazyMatch(
+      '/signal-correlations',
+      () => import('../signal-correlations'),
+      'signal-correlations',
+    ),
+  );
+
   router.use('/realtime', _readLimiter);
   router.use(lazyMatch('/realtime', () => import('../realtime'), 'realtime'));
 
@@ -181,6 +191,8 @@ export function register(router: IRouter): void {
 
   router.use('/push-tokens', _writeLimiter);
   router.use(lazyMatch('/push-tokens', () => import('../push-tokens'), 'push-tokens'));
+  router.use('/push', _writeLimiter);
+  router.use(lazyMatch('/push', () => import('../push-register'), 'push-register'));
   router.use('/push-notifications', _writeLimiter);
   router.use(
     lazyMatch('/push-notifications', () => import('../push-notifications'), 'push-notifications'),

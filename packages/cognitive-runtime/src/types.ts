@@ -76,6 +76,18 @@ export const WorldModelUpdateSchema = z.object({
   missingContextKeys: z.array(z.string()).default([]),
   detectedAnomalies: z.array(z.string()).default([]),
   graphUpdates: z.number().int().nonnegative().default(0),
+  // Recalled context from memory fabric — populated by the Orient phase when
+  // prior operator decisions, domain preferences, or entity histories are found.
+  recalledContext: z
+    .array(
+      z.object({
+        tier: z.string(),
+        key: z.string(),
+        summary: z.string(),
+        confidence: z.number().min(0).max(1),
+      }),
+    )
+    .optional(),
 });
 export type WorldModelUpdate = z.infer<typeof WorldModelUpdateSchema>;
 

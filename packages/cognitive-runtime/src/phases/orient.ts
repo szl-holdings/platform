@@ -33,6 +33,43 @@ export async function orientPhase(
 
   const orientationId = `orient-${randomUUID()}`;
 
+  // ── Recall relevant memories before building the world model ──────────────
+  // Pull operator preferences, past decisions on similar signals, and any
+  // domain-specific context that was stored in previous runs. These are
+  // surfaced in the orientation summary so downstream phases (plan, execute)
+  // can incorporate prior context without re-deriving it from scratch.
+  const relevantMemories = memoryStore.list({
+    tier: 'semantic',
+    includeStale: false,
+  }).concat(
+    memoryStore.list({ tier: 'operator-feedback', includeStale: false }),
+    memoryStore.list({ tier: 'executive', includeStale: false }),
+    opts.domain
+      ? memoryStore.list({
+          scopeId: `domain:${opts.domain}`,
+          includeStale: false,
+        })
+      : [],
+  ).filter((m, idx, arr) => arr.findIndex((x) => x.id === m.id) === idx) // deduplicate
+   .slice(0, 12); // cap to avoid bloating the world model
+
+  const memorySummaries: Array<{ tier: string; key: string; summary: string; confidence: number }> =
+    relevantMemories
+      .map((m) => ({
+        tier: m.tier as string,
+        key: m.key,
+        summary:
+          m.summary ??
+          (typeof m.value === 'string' ? m.value : JSON.stringify(m.value).slice(0, 100)),
+        confidence: m.confidence,
+      }))
+      .filter((m) => typeof m.summary === 'string') as Array<{
+      tier: string;
+      key: string;
+      summary: string;
+      confidence: number;
+    }>;
+
   const entities: WorldModelUpdate['entities'] = [];
   const detectedAnomalies: string[] = [];
   const missingContextKeys: string[] = [];
@@ -83,6 +120,9 @@ export async function orientPhase(
     missingContextKeys,
     detectedAnomalies,
     graphUpdates: entities.length,
+    // Recalled context surfaces prior operator decisions and domain-specific
+    // preferences so downstream phases can tailor recommendations accordingly.
+    ...(memorySummaries.length > 0 ? { recalledContext: memorySummaries } : {}),
   };
 
   const orientMemId = `orient-wm-${randomUUID()}`;
@@ -116,7 +156,10 @@ export async function orientPhase(
     `Risk=${riskScore.toFixed(2)}, Novelty=${noveltyScore.toFixed(2)}, ` +
     `Uncertainty=${uncertaintyScore.toFixed(2)}. ` +
     (detectedAnomalies.length > 0 ? `Anomalies: ${detectedAnomalies.join(', ')}. ` : '') +
-    (missingContextKeys.length > 0 ? `Missing context: ${missingContextKeys.join(', ')}.` : '');
+    (missingContextKeys.length > 0 ? `Missing context: ${missingContextKeys.join(', ')}. ` : '') +
+    (memorySummaries.length > 0
+      ? `Recalled ${memorySummaries.length} relevant memor${memorySummaries.length === 1 ? 'y' : 'ies'} from prior sessions.`
+      : '');
 
   const output: OrientOutput = {
     orientationId,

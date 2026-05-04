@@ -25,4 +25,15 @@ export function register(router: IRouter): void {
   router.use('/decisions', tenantScope({ required: true }));
   router.use('/decisions', perUserWriteSlidingLimiter);
   router.use(lazyMatch('/decisions', () => import('../decisions-receipts'), 'decisions-receipts'));
+
+  // Governed Decision Loop — demonstration endpoint
+  router.use('/governed-decision-loop', tenantScope({ required: false }));
+  router.use('/governed-decision-loop', perUserApiSlidingLimiter);
+  router.use(
+    lazyMatch(
+      '/governed-decision-loop',
+      () => import('../governed-decision-loop'),
+      'governed-decision-loop',
+    ),
+  );
 }

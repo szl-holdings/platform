@@ -58,9 +58,25 @@ export async function planPhase(
   const startedAt = Date.now();
   const revision = opts.revisionContext?.revision ?? 0;
 
+  // ── Enrich the planning objective with memory-recalled context ───────────
+  // If the Orient phase retrieved relevant memories (prior operator decisions,
+  // domain preferences, entity histories), we prepend a concise digest to the
+  // planning objective. This ensures the planner's recommendation generation
+  // path is influenced by persisted operator knowledge, not just the current
+  // world-model snapshot.
+  const recalledContext = orientOutput.worldModelUpdate.recalledContext;
+  const memoryDigest =
+    recalledContext && recalledContext.length > 0
+      ? '\n\n[PRIOR OPERATOR CONTEXT — from memory fabric]\n' +
+        recalledContext
+          .slice(0, 5) // cap to avoid token bloat
+          .map((m) => `• [${m.tier}] ${m.key}: ${m.summary} (confidence ${(m.confidence * 100).toFixed(0)}%)`)
+          .join('\n')
+      : '';
+
   const planObjective = opts.revisionContext
-    ? `${objective}\n\n[REVISION ${revision} — Verifier feedback: ${opts.revisionContext.verifierFindings}. Lesson: ${opts.revisionContext.reflectionLesson}]`
-    : objective;
+    ? `${objective}${memoryDigest}\n\n[REVISION ${revision} — Verifier feedback: ${opts.revisionContext.verifierFindings}. Lesson: ${opts.revisionContext.reflectionLesson}]`
+    : `${objective}${memoryDigest}`;
 
   const planContext: PlanContext = {
     agentId: opts.agentId,
@@ -76,6 +92,9 @@ export async function planPhase(
       riskScore: orientOutput.riskScore,
       worldModelEntities: orientOutput.entityCount,
       revision,
+      // Surface memory recall stats in metadata for observability dashboards.
+      recalledMemoryCount: recalledContext?.length ?? 0,
+      memoryInfluenced: (recalledContext?.length ?? 0) > 0,
     },
   };
 
