@@ -3,3 +3,8 @@ export * from './schema.js';
 export * from './crypto.js';
 export * from './resolver.js';
 export * from './seed.js';
+export * from './proof-bundle.js';
+export * from './drift-detector.js';
+export * from './policy-lens.js';
+export * from './passport-diff.js';
+export * from './eval-gates.js';

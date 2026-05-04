@@ -118,6 +118,14 @@ registerInferenceLogBridge();
 import { installPassportResolver } from './lib/passport-resolver-runtime.js';
 installPassportResolver();
 
+// ── Model Passport drift auto-proposal ─────────────────────────────────────
+// Registers a DriftSignal handler on the module-level driftDetector singleton.
+// When a live passport's cost/latency/accuracy crosses declared SLO thresholds,
+// a Covenant Policy approval request is automatically filed with deltas pre-filled,
+// routing it into the Approval Queue without requiring a manual trigger.
+import { registerDriftProposalHandler } from './lib/passport-drift-runtime.js';
+registerDriftProposalHandler();
+
 // Wire the cognitive-observability BatchingExporter so that agent-layer metrics
 // (step traces, latency, cost, error rates, approval wait times) are flushed to
 // the OTEL Collector rather than accumulating in memory.

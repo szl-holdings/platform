@@ -83,8 +83,15 @@ export interface PassportApprovals {
 export interface PassportProvenance {
   sourceRegistryHash: string;
   promptRegistryPins: string[];
+  datasetHashes: string[];
   evalRunId?: string;
   parentPassportId?: string;
+}
+
+export interface EvalGates {
+  minGoldenSetPassRate: number;
+  maxP95LatencyMs: number;
+  maxCostPerCallUsd: number;
 }
 
 export interface PassportDowngradeEntry {
@@ -105,6 +112,11 @@ export interface ModelPassport {
   downgradeTo: PassportDowngradeEntry[];
   state: PassportLifecycleState;
   tenantId?: number;
+  evalGates?: EvalGates;
+}
+
+export interface SignedModelPassportMetadata {
+  pinnedEvalRunId?: string;
 }
 
 export interface SignedModelPassport {
@@ -113,6 +125,7 @@ export interface SignedModelPassport {
   signerPublicKey: string;
   provenanceHash: string;
   signedAt: string;
+  metadata?: SignedModelPassportMetadata;
 }
 
 export interface PassportResolverQuery {

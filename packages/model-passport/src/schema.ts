@@ -77,8 +77,15 @@ export const passportApprovalsSchema = z.object({
 export const passportProvenanceSchema = z.object({
   sourceRegistryHash: z.string(),
   promptRegistryPins: z.array(z.string()),
+  datasetHashes: z.array(z.string()).optional().default([]),
   evalRunId: z.string().optional(),
   parentPassportId: z.string().optional(),
+});
+
+export const evalGatesSchema = z.object({
+  minGoldenSetPassRate: z.number().min(0).max(1),
+  maxP95LatencyMs: z.number().int().positive(),
+  maxCostPerCallUsd: z.number().positive(),
 });
 
 export const passportDowngradeEntrySchema = z.object({
@@ -99,6 +106,7 @@ export const modelPassportSchema = z.object({
   downgradeTo: z.array(passportDowngradeEntrySchema),
   state: lifecycleStateSchema,
   tenantId: z.number().int().optional(),
+  evalGates: evalGatesSchema.optional(),
 });
 
 export const signedModelPassportSchema = z.object({
@@ -107,6 +115,9 @@ export const signedModelPassportSchema = z.object({
   signerPublicKey: z.string(),
   provenanceHash: z.string(),
   signedAt: z.string().datetime(),
+  metadata: z.object({
+    pinnedEvalRunId: z.string().optional(),
+  }).optional(),
 });
 
 export const passportResolverQuerySchema = z.object({
