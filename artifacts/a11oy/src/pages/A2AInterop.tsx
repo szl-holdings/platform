@@ -65,13 +65,23 @@ const ORIGIN_STYLE: Record<string, { color: string; bg: string }> = {
 };
 
 export function A2AInterop() {
-  const { data } = useApiData<{ agentCards: AgentCard[]; tasks: A2ATask[] }>('/pages/a2a', { agentCards: DEMO_AGENT_CARDS, tasks: DEMO_A2A_TASKS });
-  const AGENT_CARDS = data.agentCards;
-  const A2A_TASKS = data.tasks;
+  const { data, loading, error } = useApiData<{ agentCards: AgentCard[]; tasks: A2ATask[] }>('/pages/a2a', { agentCards: DEMO_AGENT_CARDS, tasks: DEMO_A2A_TASKS });
   const [activeTab, setActiveTab] = useState<'cards' | 'tasks' | 'topology'>('cards');
   const [selectedCard, setSelectedCard] = useState<AgentCard | null>(null);
   const [filterOrigin, setFilterOrigin] = useState('all');
 
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading A2A interop data…' : (error ?? 'Failed to load A2A interop data')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const AGENT_CARDS = data.agentCards;
+  const A2A_TASKS = data.tasks;
   const filteredCards = AGENT_CARDS.filter(c => filterOrigin === 'all' || c.origin === filterOrigin);
 
   return (

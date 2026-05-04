@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, KpiCard, SectionTitle } from '../../components/ui';
-import { VERTICALS, FABRIC_RISKS, filterByVertical, rankRisksByScore, SEVERITY_COLORS } from '../../data/fabric';
+import { filterByVertical, rankRisksByScore, SEVERITY_COLORS } from '../../data/fabric';
 import type { VerticalId, RiskCategory, FabricRisk } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -21,20 +22,40 @@ function scoreColor(score: number): string {
 }
 
 export function RiskMatrix() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<RiskCategory | 'all'>('all');
   const [sortBy, setSortBy] = useState<'score' | 'probability' | 'impact'>('score');
   const [drawerRisk, setDrawerRisk] = useState<FabricRisk | null>(null);
 
-  let risks = filterByVertical(FABRIC_RISKS, verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading risk matrix…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load risks</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { risks: allRisks, verticals } = data;
+
+  let risks = filterByVertical(allRisks, verticalFilter);
   if (categoryFilter !== 'all') risks = risks.filter(r => r.riskCategory === categoryFilter);
   if (sortBy === 'score') risks = rankRisksByScore(risks);
   else if (sortBy === 'probability') risks = [...risks].sort((a, b) => b.probability - a.probability);
   else risks = [...risks].sort((a, b) => b.impact - a.impact);
 
-  const openRisks = FABRIC_RISKS.filter(r => r.status === 'open');
+  const openRisks = allRisks.filter(r => r.status === 'open');
   const criticalCount = openRisks.filter(r => r.riskScore >= 30).length;
-  const avgScore = Math.round(FABRIC_RISKS.reduce((s, r) => s + r.riskScore, 0) / FABRIC_RISKS.length);
+  const avgScore = allRisks.length ? Math.round(allRisks.reduce((s, r) => s + r.riskScore, 0) / allRisks.length) : 0;
 
   return (
     <Layout>
@@ -46,7 +67,7 @@ export function RiskMatrix() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL RISKS" value={FABRIC_RISKS.length} sub="cross-vertical" accent={GOLD} />
+        <KpiCard label="TOTAL RISKS" value={allRisks.length} sub="cross-vertical" accent={GOLD} />
         <KpiCard label="OPEN" value={openRisks.length} sub="requires attention" accent="#f59e0b" />
         <KpiCard label="CRITICAL" value={criticalCount} sub="score >= 30" accent="#ef4444" />
         <KpiCard label="AVG SCORE" value={avgScore} sub="P x I x V x 100" accent={GOLD} />
@@ -54,9 +75,9 @@ export function RiskMatrix() {
 
       <SectionTitle>Risk Heatmap</SectionTitle>
       <div className="grid grid-cols-7 gap-1 mb-6">
-        {VERTICALS.map(v => {
-          const vRisks = FABRIC_RISKS.filter(r => r.verticalId === v.id);
-          const maxScore = Math.max(...vRisks.map(r => r.riskScore));
+        {verticals.map(v => {
+          const vRisks = allRisks.filter(r => r.verticalId === v.id);
+          const maxScore = vRisks.length ? Math.max(...vRisks.map(r => r.riskScore)) : 0;
           const openCount = vRisks.filter(r => r.status === 'open').length;
           return (
             <div key={v.id} className="rounded p-2 text-center cursor-pointer" onClick={() => setVerticalFilter(v.id)} style={{ backgroundColor: `${scoreColor(maxScore)}18`, border: verticalFilter === v.id ? `1px solid ${GOLD}` : `1px solid transparent` }}>
@@ -70,7 +91,7 @@ export function RiskMatrix() {
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
-        <FilterSelect label="VERTICAL" value={verticalFilter} onChange={v => setVerticalFilter(v as VerticalId | 'all')} options={[{ value: 'all', label: 'ALL' }, ...VERTICALS.map(v => ({ value: v.id, label: v.name.toUpperCase() }))]} />
+        <FilterSelect label="VERTICAL" value={verticalFilter} onChange={v => setVerticalFilter(v as VerticalId | 'all')} options={[{ value: 'all', label: 'ALL' }, ...verticals.map(v => ({ value: v.id, label: v.name.toUpperCase() }))]} />
         <FilterSelect label="CATEGORY" value={categoryFilter} onChange={v => setCategoryFilter(v as RiskCategory | 'all')} options={[{ value: 'all', label: 'ALL' }, ...RISK_CATS.map(c => ({ value: c, label: c.toUpperCase().replace('_', ' ') }))]} />
         <div className="flex items-center gap-1 ml-auto">
           <span className="text-[10px] font-mono" style={{ color: GHOST }}>SORT</span>

@@ -54,27 +54,6 @@ function relativeTime(iso: string): string {
   return `${Math.floor(diff / 3_600_000)}h ago`;
 }
 
-const MOCK_DATA: AdoptionData = {
-  adoption: [
-    { artifactId: 'command', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 45_000).toISOString(), status: 'adopted' },
-    { artifactId: 'holdings', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 2 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'aegis', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 5 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'sentra', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 8 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'terra', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 12 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'vessels', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 15 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'counsel', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 20 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'a11oy', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 30 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'pulse', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 35 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'carlota-jo', shellVersion: '1.0.0', commandPaletteWired: false, lastBeacon: new Date(Date.now() - 60 * 60_000).toISOString(), status: 'partial' },
-    { artifactId: 'lyte', shellVersion: '1.0.0', commandPaletteWired: true, lastBeacon: new Date(Date.now() - 45 * 60_000).toISOString(), status: 'adopted' },
-    { artifactId: 'praxis', shellVersion: '0.9.0', commandPaletteWired: false, lastBeacon: new Date(Date.now() - 2 * 3600_000).toISOString(), status: 'partial' },
-  ],
-  totalArtifacts: TOTAL_ARTIFACTS,
-  adoptedCount: 10,
-  adoptionRate: 0.83,
-  lastUpdated: new Date(Date.now() - 2 * 60_000).toISOString(),
-};
-
 const STATUS_COLORS = {
   adopted: '#22c55e',
   partial: '#f59e0b',
@@ -88,8 +67,9 @@ const STATUS_LABELS = {
 };
 
 export function OmniaAdoption() {
-  const [data, setData] = useState<AdoptionData>(MOCK_DATA);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<AdoptionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const refresh = async (showR = false) => {
@@ -97,10 +77,15 @@ export function OmniaAdoption() {
     try {
       const base = import.meta.env.BASE_URL.replace(/\/$/, '').replace(/\/a11oy$/, '');
       const res = await fetch(`${base}/api/omnia/adoption`);
-      if (res.ok) setData(await res.json());
-    } catch {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setData(json);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load adoption data');
     } finally {
       setRefreshing(false);
+      setLoading(false);
     }
   };
 
@@ -110,9 +95,65 @@ export function OmniaAdoption() {
     return () => clearInterval(t);
   }, []);
 
+  if (loading) {
+    return (
+      <div style={{ padding: '40px 0', maxWidth: 900, color: 'rgba(235,230,220,0.9)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <Globe size={20} style={{ color: OMNIA_PURPLE }} />
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: 'rgba(235,230,220,0.95)', margin: 0, letterSpacing: '-0.02em' }}>
+            OMNIA Shell Adoption
+          </h1>
+        </div>
+        <div style={{ marginTop: 40, display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+          <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite', color: OMNIA_PURPLE }} />
+          Loading adoption data…
+        </div>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div style={{ padding: '40px 0', maxWidth: 900, color: 'rgba(235,230,220,0.9)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <Globe size={20} style={{ color: OMNIA_PURPLE }} />
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: 'rgba(235,230,220,0.95)', margin: 0, letterSpacing: '-0.02em' }}>
+            OMNIA Shell Adoption
+          </h1>
+        </div>
+        <div style={{
+          marginTop: 32,
+          padding: '20px 24px',
+          background: 'rgba(239,68,68,0.06)',
+          border: '1px solid rgba(239,68,68,0.2)',
+          borderRadius: 10,
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#f87171', marginBottom: 6 }}>
+            Adoption data unavailable
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>
+            {error ?? 'API did not return data.'} — The adoption endpoint may not be configured yet.
+          </div>
+          <button
+            onClick={() => { setLoading(true); setError(null); refresh(); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '6px 14px', background: `${OMNIA_PURPLE}12`,
+              border: `1px solid ${OMNIA_PURPLE}30`, borderRadius: 8,
+              cursor: 'pointer', fontSize: 12, color: OMNIA_PURPLE,
+            }}
+          >
+            <RefreshCw size={11} />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const adoptedArtifacts = data.adoption.filter((a) => a.status === 'adopted');
   const partialArtifacts = data.adoption.filter((a) => a.status === 'partial');
-  const pendingArtifacts = data.adoption.filter((a) => a.status === 'pending');
   const adoptionPct = Math.round(data.adoptionRate * 100);
 
   return (

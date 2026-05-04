@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityDot, VerticalBadge, SeverityBadge } from '../components/ui';
-import { SEED_SIGNALS } from '@workspace/a11oy-fabric';
 import { KnowledgeGraphViz } from '../components/KnowledgeGraphViz';
 import { useApiData } from '../hooks/useApiData';
 
@@ -105,36 +104,50 @@ const REL_COLORS: Record<string, string> = {
 };
 
 export function SignalMesh() {
-  const { data } = useApiData<{ layers: typeof DEMO_LAYERS; sources: typeof DEMO_SOURCES; kgEntities: KGEntity[]; semanticResults: typeof DEMO_SEMANTIC_RESULTS }>('/pages/signal-mesh', { layers: DEMO_LAYERS, sources: DEMO_SOURCES, kgEntities: DEMO_KG_ENTITIES, semanticResults: DEMO_SEMANTIC_RESULTS });
-  const LAYERS = data.layers;
-  const SOURCES = data.sources;
-  const KG_ENTITIES = data.kgEntities;
-  const SEMANTIC_RESULTS = data.semanticResults;
+  type ApiSignal = { id: string; vertical: string; title: string; severity: string; status: string; owner: string };
+  type SignalMeshData = { signals: ApiSignal[]; layers: typeof DEMO_LAYERS; sources: typeof DEMO_SOURCES; kgEntities: KGEntity[]; semanticResults: typeof DEMO_SEMANTIC_RESULTS };
+  const { data, loading, error } = useApiData<SignalMeshData>('/pages/signal-mesh', { signals: [], layers: DEMO_LAYERS, sources: DEMO_SOURCES, kgEntities: DEMO_KG_ENTITIES, semanticResults: DEMO_SEMANTIC_RESULTS });
   const [activeView, setActiveView] = useState<'signals' | 'knowledge' | 'search'>('signals');
   const [filterVertical, setFilterVertical] = useState('all');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [selectedEntity, setSelectedEntity] = useState<KGEntity | null>(null);
   const [kgView, setKgView] = useState<'graph' | 'cards'>('graph');
 
-  const filtered = SEED_SIGNALS.filter(s =>
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading signal mesh…' : (error ?? 'Failed to load signal mesh')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const LAYERS = data.layers;
+  const SOURCES = data.sources;
+  const KG_ENTITIES = data.kgEntities;
+  const SEMANTIC_RESULTS = data.semanticResults;
+  const SIGNALS = data.signals;
+
+  const filtered = SIGNALS.filter(s =>
     (filterVertical === 'all' || s.vertical === filterVertical) &&
     (filterSeverity === 'all' || s.severity === filterSeverity)
   );
 
-  const active = SEED_SIGNALS.filter(s => s.status === 'active' || s.status === 'escalated');
-  const critical = SEED_SIGNALS.filter(s => s.severity === 'critical');
+  const active = SIGNALS.filter(s => s.status === 'active' || s.status === 'escalated');
+  const critical = SIGNALS.filter(s => s.severity === 'critical');
 
   return (
     <Layout>
       <PageHeader
         label="SIGNAL MESH + KNOWLEDGE GRAPH"
         title="Signal Ingestion, Routing & Knowledge Graph"
-        subtitle={`The fabric's sensory layer — ingesting, normalizing, and routing ${SEED_SIGNALS.length} business signals, with a semantic knowledge graph for cross-domain entity relationships and discovery.`}
+        subtitle={`The fabric's sensory layer — ingesting, normalizing, and routing ${SIGNALS.length} business signals, with a semantic knowledge graph for cross-domain entity relationships and discovery.`}
         status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent={GOLD} />
+        <KpiCard label="TOTAL SIGNALS" value={SIGNALS.length} sub="in mesh" accent={GOLD} />
         <KpiCard label="ACTIVE" value={active.length} sub="unresolved" accent="#f5f5f5" />
         <KpiCard label="CRITICAL" value={critical.length} sub="attention" accent="#f5f5f5" />
         <KpiCard label="KG ENTITIES" value={KG_ENTITIES.length} sub="cross-domain" accent={GOLD} />
@@ -157,7 +170,7 @@ export function SignalMesh() {
               <SectionTitle>Vertical Coverage</SectionTitle>
               <div className="flex flex-col gap-2">
                 {Object.entries(VERTICAL_LABELS).map(([id, label]) => {
-                  const sigs = SEED_SIGNALS.filter(s => s.vertical === id);
+                  const sigs = SIGNALS.filter(s => s.vertical === id);
                   const activeSigs = sigs.filter(s => s.status === 'active' || s.status === 'escalated');
                   const color = VERTICAL_COLORS[id] ?? '#5e5e5e';
                   return (

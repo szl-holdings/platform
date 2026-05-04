@@ -51,22 +51,33 @@ const DEMO_POLICY_GRADIENTS = [
 const GRADIENT_COLORS: Record<string, string> = { applied: '#22c55e', pending: GOLD, locked: '#ef4444' };
 
 export function SelfOptimization() {
-  const { data } = useApiData<{ targets: OptTarget[]; rewardSignals: typeof DEMO_REWARD_SIGNALS; policyGradients: typeof DEMO_POLICY_GRADIENTS }>('/pages/optimization', { targets: DEMO_OPT_TARGETS, rewardSignals: DEMO_REWARD_SIGNALS, policyGradients: DEMO_POLICY_GRADIENTS });
+  const { data, loading, error } = useApiData<{ targets: OptTarget[]; rewardSignals: typeof DEMO_REWARD_SIGNALS; policyGradients: typeof DEMO_POLICY_GRADIENTS }>('/pages/optimization', { targets: DEMO_OPT_TARGETS, rewardSignals: DEMO_REWARD_SIGNALS, policyGradients: DEMO_POLICY_GRADIENTS });
+  const [activeTab, setActiveTab] = useState<'targets' | 'rewards' | 'gradients'>('targets');
+  const [targets, setTargets] = useState<OptTarget[]>([]);
+  useEffect(() => { if (data?.targets) setTargets(data.targets); }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading optimization engine…' : (error ?? 'Failed to load optimization data')}
+        </div>
+      </Layout>
+    );
+  }
+
   const REWARD_SIGNALS = data.rewardSignals;
   const POLICY_GRADIENTS = data.policyGradients;
-  const [activeTab, setActiveTab] = useState<'targets' | 'rewards' | 'gradients'>('targets');
-  const [targets, setTargets] = useState(data.targets);
-  useEffect(() => { setTargets(data.targets); }, [data.targets]);
 
   const toggleLock = (id: string) => {
     setTargets(prev => prev.map(t => t.id === id ? { ...t, locked: !t.locked } : t));
   };
 
-  const avgImprovement = Math.round(targets.reduce((a, t) => {
+  const avgImprovement = targets.length > 0 ? Math.round(targets.reduce((a, t) => {
     const range = Math.abs(t.targetValue - t.baselineValue);
     const progress = Math.abs(t.currentValue - t.baselineValue);
     return a + (range > 0 ? (progress / range) * 100 : 0);
-  }, 0) / targets.length);
+  }, 0) / targets.length) : 0;
 
   return (
     <Layout>

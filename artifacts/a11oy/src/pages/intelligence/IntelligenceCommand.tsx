@@ -1,32 +1,75 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowRight, Brain, DollarSign, Search, TrendingUp, Zap } from 'lucide-react';
 
 const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
+const GHOST = '#5e5e5e';
+const GOLD = '#c9b787';
 
-const KPIS = [
+const FALLBACK_KPIS = [
   { label: 'Portfolio Entities', value: '14', delta: '+2 this quarter' },
   { label: 'Active Intel Feeds', value: '6', delta: '2 pending auth' },
   { label: 'Avg ROI Signal', value: '2.3×', delta: 'vs 1.8× baseline' },
   { label: 'Open Alerts', value: '3', delta: '1 critical' },
 ];
 
-const RECENT = [
+const FALLBACK_RECENT = [
   { entity: 'Carlota Jo Consulting', type: 'Entity deep dive', time: '2h ago', status: 'complete' },
   { entity: 'SZL Holdings LLC', type: 'ROI lens', time: '4h ago', status: 'complete' },
   { entity: 'A11oy Platform', type: 'Finance terminal', time: '1d ago', status: 'complete' },
   { entity: 'Vessels Maritime', type: 'Entity deep dive', time: '2d ago', status: 'stale' },
 ];
 
+interface Kpi { label: string; value: string; delta: string }
+interface RecentItem { entity: string; type: string; time: string; status: string }
+
 export function IntelligenceCommand() {
+  const [kpis, setKpis] = useState<Kpi[]>(IS_DEMO ? FALLBACK_KPIS : []);
+  const [recent, setRecent] = useState<RecentItem[]>(IS_DEMO ? FALLBACK_RECENT : []);
+  const [loading, setLoading] = useState(!IS_DEMO);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (IS_DEMO) return;
+    let cancelled = false;
+    setLoading(true);
+    fetch('/api/a11oy/pages/intelligence-summary')
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => {
+        if (cancelled) return;
+        if (d.ok) {
+          setKpis(d.data.kpis ?? []);
+          setRecent(d.data.recent ?? []);
+        } else {
+          setError('API error — check server status');
+        }
+      })
+      .catch((e: Error) => {
+        if (!cancelled) {
+          setError(e.message ?? 'Failed to load intelligence summary');
+        }
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
       <div>
         <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--color-a11oy-text-ghost)] mb-1">
           Intelligence · Command
         </div>
-        <h1 className="text-2xl font-semibold text-[var(--color-a11oy-text)] tracking-tight">
-          Decision Intelligence Overview
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold text-[var(--color-a11oy-text)] tracking-tight">
+            Decision Intelligence Overview
+          </h1>
+          {!IS_DEMO && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: loading ? 'rgba(255,255,255,0.05)' : error ? '#ef444418' : '#22c55e18', color: loading ? GHOST : error ? '#ef4444' : '#22c55e' }}>
+              {loading ? 'LOADING…' : error ? 'FALLBACK' : 'LIVE'}
+            </span>
+          )}
+        </div>
         <p className="text-sm text-[var(--color-a11oy-text-sub)] mt-1 max-w-3xl">
           A11oy aggregates entity intelligence, finance-grade data, and portfolio metrics across the
           SZL Holdings ecosystem under a single governed surface. Every call routes through the same
@@ -35,16 +78,23 @@ export function IntelligenceCommand() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {KPIS.map((k) => (
-          <div
-            key={k.label}
-            className="rounded-xl border border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-card)] p-4 space-y-1"
-          >
-            <p className="text-3xl font-semibold text-[var(--color-a11oy-gold)]">{k.value}</p>
-            <p className="text-xs text-[var(--color-a11oy-text)]">{k.label}</p>
-            <p className="text-[10px] text-[var(--color-a11oy-text-ghost)]">{k.delta}</p>
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-card)] p-4 space-y-1 animate-pulse">
+                <div className="h-8 w-16 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+                <div className="h-3 w-24 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }} />
+              </div>
+            ))
+          : kpis.map((k) => (
+              <div
+                key={k.label}
+                className="rounded-xl border border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-card)] p-4 space-y-1"
+              >
+                <p className="text-3xl font-semibold text-[var(--color-a11oy-gold)]">{k.value}</p>
+                <p className="text-xs text-[var(--color-a11oy-text)]">{k.label}</p>
+                <p className="text-[10px] text-[var(--color-a11oy-text-ghost)]">{k.delta}</p>
+              </div>
+            ))}
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -105,20 +155,27 @@ export function IntelligenceCommand() {
           <span className="text-xs text-[var(--color-a11oy-text)] font-medium">Recent Activity</span>
         </div>
         <div className="divide-y divide-[var(--color-a11oy-border)]">
-          {RECENT.map((r) => (
-            <div key={r.entity + r.type} className="px-5 py-3 flex items-center gap-3">
-              <div
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                  r.status === 'complete' ? 'bg-[var(--color-a11oy-gold)]' : 'bg-[var(--color-a11oy-text-ghost)]'
-                }`}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-[var(--color-a11oy-text)] truncate">{r.entity}</p>
-                <p className="text-[10px] text-[var(--color-a11oy-text-ghost)]">{r.type}</p>
-              </div>
-              <span className="text-[10px] text-[var(--color-a11oy-text-ghost)] shrink-0">{r.time}</span>
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="px-5 py-3 flex items-center gap-3 animate-pulse">
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                  <div className="flex-1"><div className="h-3 w-32 rounded mb-1" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} /></div>
+                </div>
+              ))
+            : recent.map((r) => (
+                <div key={r.entity + r.type} className="px-5 py-3 flex items-center gap-3">
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      r.status === 'complete' ? 'bg-[var(--color-a11oy-gold)]' : 'bg-[var(--color-a11oy-text-ghost)]'
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[var(--color-a11oy-text)] truncate">{r.entity}</p>
+                    <p className="text-[10px] text-[var(--color-a11oy-text-ghost)]">{r.type}</p>
+                  </div>
+                  <span className="text-[10px] text-[var(--color-a11oy-text-ghost)] shrink-0">{r.time}</span>
+                </div>
+              ))}
         </div>
       </div>
 

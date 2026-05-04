@@ -133,11 +133,22 @@ const TOPO_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 export function AgentIdentityRegistry() {
-  const { data } = useApiData<{ agents: AgentIdentity[]; trustEdges: { from: string; to: string; relation: string; strength: number }[] }>('/pages/identity', { agents: DEMO_AGENTS, trustEdges: DEMO_TRUST_EDGES });
-  const AGENTS = data.agents;
-  const TRUST_EDGES = data.trustEdges;
+  const { data, loading, error } = useApiData<{ agents: AgentIdentity[]; trustEdges: { from: string; to: string; relation: string; strength: number }[] }>('/pages/identity', { agents: DEMO_AGENTS, trustEdges: DEMO_TRUST_EDGES });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'registry' | 'topology'>('registry');
+
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading agent registry…' : (error ?? 'Failed to load agent registry')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const AGENTS = data.agents;
+  const TRUST_EDGES = data.trustEdges;
   const selected = AGENTS.find(a => a.id === selectedId);
 
   return (

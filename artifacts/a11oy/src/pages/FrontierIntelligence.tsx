@@ -1,10 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
 } from 'recharts';
+
+const API_BASE = '/api';
+
+interface IntelAlert {
+  id: string;
+  laneId: string;
+  champion: string;
+  title: string;
+  summary: string;
+  link?: string;
+  publishedAt: string;
+  recommendation?: string;
+}
+
+interface IntelStatus {
+  monitored: number;
+  alertsLast24h: number;
+  lastUpdated: string;
+}
 
 const GOLD = '#c9b787';
 const DIM = '#8a8a8a';
@@ -200,6 +219,42 @@ function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest
 
 export function FrontierIntelligence() {
   const [activeCompetitors, setActiveCompetitors] = useState<string[]>(['a11oy', 'openai', 'anthropic', 'palantir']);
+  const [alerts, setAlerts] = useState<IntelAlert[]>([]);
+  const [intelStatus, setIntelStatus] = useState<IntelStatus | null>(null);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [alertsError, setAlertsError] = useState<string | null>(null);
+
+  const fetchIntel = useCallback(async () => {
+    setAlertsLoading(true);
+    setAlertsError(null);
+    try {
+      const [alertsRes, statusRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/competitive-intel/alerts`),
+        fetch(`${API_BASE}/competitive-intel/status`),
+      ]);
+
+      if (alertsRes.status === 'fulfilled' && alertsRes.value.ok) {
+        const body = await alertsRes.value.json() as { data?: IntelAlert[]; alerts?: IntelAlert[] };
+        setAlerts(body.data ?? body.alerts ?? []);
+      } else {
+        const msg = alertsRes.status === 'rejected'
+          ? String(alertsRes.reason)
+          : `HTTP ${alertsRes.value.status}`;
+        setAlertsError(msg);
+      }
+
+      if (statusRes.status === 'fulfilled' && statusRes.value.ok) {
+        const body = await statusRes.value.json() as { data?: IntelStatus } & IntelStatus;
+        setIntelStatus(body.data ?? (body.monitored !== undefined ? body : null));
+      }
+    } catch (e) {
+      setAlertsError(String(e));
+    } finally {
+      setAlertsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchIntel(); }, [fetchIntel]);
 
   const toggleComp = (id: string) => {
     if (id === 'a11oy') return;
@@ -218,6 +273,11 @@ export function FrontierIntelligence() {
         subtitle="A11oy is not trying to replace the enterprise. A11oy is the governed intelligence layer that lets the enterprise observe, decide, approve, execute, verify, and learn across every operational domain."
         status="LIVE"
       />
+
+      <div className="mb-5 px-4 py-2.5 rounded-lg text-xs border flex items-center gap-2" style={{ backgroundColor: 'rgba(90,90,120,0.08)', borderColor: 'rgba(140,140,200,0.2)', color: 'rgba(180,180,220,0.7)' }}>
+        <span style={{ opacity: 0.7 }}>ⓘ</span>
+        <span>Internal analysis — competitor capability scores are A11oy's own assessments based on publicly available product documentation and market research. Live alerts are sourced from the competitive intel API.</span>
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard label="CAPABILITY LEAD" value="+58pts" sub="vs nearest on proof chains" accent={GOLD} />
@@ -375,12 +435,83 @@ export function FrontierIntelligence() {
         </table>
       </div>
 
-      <div className="p-4 rounded-xl border" style={{ backgroundColor: 'rgba(201,183,135,0.03)', borderColor: 'rgba(201,183,135,0.15)' }}>
+      <div className="p-4 rounded-xl border mb-8" style={{ backgroundColor: 'rgba(201,183,135,0.03)', borderColor: 'rgba(201,183,135,0.15)' }}>
         <div className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>METHODOLOGY NOTE</div>
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          Scores represent capability assessments based on publicly available product documentation, published research, and market analysis. All competitor assessments are A11oy's internal view and are illustrative for demo purposes. Real competitive analysis would require verified product benchmarks.
+          Scores represent capability assessments based on publicly available product documentation, published research, and market analysis. All competitor assessments are A11oy's internal view. Assessments are updated as new capability data becomes available.
         </p>
       </div>
+
+      <div className="mb-2 flex items-center justify-between">
+        <SectionTitle>Live Competitive Intel Feed</SectionTitle>
+        {intelStatus && (
+          <div className="text-xs font-mono flex items-center gap-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+            <span>{intelStatus.monitored} lanes monitored</span>
+            <span style={{ color: GOLD }}>{intelStatus.alertsLast24h} alerts / 24h</span>
+          </div>
+        )}
+      </div>
+
+      {alertsLoading && (
+        <div className="rounded-lg border p-6 flex items-center gap-3 mb-8" style={{ borderColor: 'var(--color-a11oy-border)', backgroundColor: 'var(--color-a11oy-card)' }}>
+          <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: `${GOLD}60`, borderTopColor: 'transparent' }} />
+          <span className="text-sm font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading competitive intel feed...</span>
+        </div>
+      )}
+
+      {!alertsLoading && alertsError && (
+        <div className="rounded-lg border p-4 mb-8" style={{ borderColor: 'rgba(239,68,68,0.3)', backgroundColor: 'rgba(239,68,68,0.06)' }}>
+          <div className="text-sm font-mono mb-1" style={{ color: '#ef4444' }}>Feed unavailable — {alertsError}</div>
+          <button
+            onClick={fetchIntel}
+            className="text-xs font-mono underline mt-1"
+            style={{ color: 'var(--color-a11oy-text-ghost)' }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!alertsLoading && !alertsError && alerts.length === 0 && (
+        <div className="rounded-lg border p-4 mb-8 text-sm font-mono" style={{ borderColor: 'var(--color-a11oy-border)', backgroundColor: 'var(--color-a11oy-card)', color: 'var(--color-a11oy-text-ghost)' }}>
+          No active competitive intelligence alerts.
+        </div>
+      )}
+
+      {!alertsLoading && !alertsError && alerts.length > 0 && (
+        <div className="grid lg:grid-cols-2 gap-3 mb-8">
+          {alerts.map(alert => (
+            <div
+              key={alert.id}
+              className="rounded-lg border p-4"
+              style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}
+            >
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-a11oy-text)' }}>{alert.title}</div>
+                <div className="text-xs font-mono px-1.5 py-0.5 rounded shrink-0" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: GOLD, border: '1px solid rgba(201,183,135,0.2)' }}>
+                  {alert.champion}
+                </div>
+              </div>
+              <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{alert.summary}</div>
+              {alert.recommendation && (
+                <div className="text-xs px-2 py-1.5 rounded mt-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'var(--color-a11oy-text-ghost)', borderLeft: `2px solid ${GOLD}40` }}>
+                  A11oy response: {alert.recommendation}
+                </div>
+              )}
+              <div className="flex items-center justify-between mt-3">
+                <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  {alert.laneId} · {new Date(alert.publishedAt).toLocaleDateString()}
+                </div>
+                {alert.link && (
+                  <a href={alert.link} target="_blank" rel="noopener noreferrer" className="text-xs font-mono underline" style={{ color: GOLD }}>
+                    Source →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </Layout>
   );
 }

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader } from '../components/ui';
+
+const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 
 interface KnowledgeCollection {
   id: string;
@@ -35,7 +37,7 @@ interface RagQuery {
   proofId: string;
 }
 
-const COLLECTIONS: KnowledgeCollection[] = [
+const DEMO_COLLECTIONS: KnowledgeCollection[] = [
   { id: 'kc-1', name: 'Governance Policies', description: 'All covenant policies, constitution, compliance frameworks', documentCount: 847, chunkCount: 12340, embeddingModel: 'BAAI/bge-m3', lastIngested: Date.now() - 3600000, sizeBytes: 234000000, vertical: 'Governance' },
   { id: 'kc-2', name: 'Deal Intelligence', description: 'Deal memos, approval chains, revenue forecasts, pipeline data', documentCount: 2341, chunkCount: 45600, embeddingModel: 'BAAI/bge-m3', lastIngested: Date.now() - 1800000, sizeBytes: 567000000, vertical: 'Revenue' },
   { id: 'kc-3', name: 'Security Findings', description: 'Vulnerability reports, threat intel, incident post-mortems', documentCount: 1567, chunkCount: 23400, embeddingModel: 'BAAI/bge-m3', lastIngested: Date.now() - 7200000, sizeBytes: 345000000, vertical: 'Security' },
@@ -124,10 +126,36 @@ function StepPill({ step }: { step: RetrievalStep }) {
 export function AgenticRag() {
   const [activeTab, setActiveTab] = useState<'pipeline' | 'collections' | 'memory'>('pipeline');
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
+  const [collections, setCollections] = useState<KnowledgeCollection[]>(IS_DEMO ? DEMO_COLLECTIONS : []);
+  const [collectionsLoading, setCollectionsLoading] = useState(!IS_DEMO);
+  const [collectionsError, setCollectionsError] = useState<string | null>(null);
 
-  const totalDocs = COLLECTIONS.reduce((s, c) => s + c.documentCount, 0);
-  const totalChunks = COLLECTIONS.reduce((s, c) => s + c.chunkCount, 0);
-  const totalSize = COLLECTIONS.reduce((s, c) => s + c.sizeBytes, 0);
+  useEffect(() => {
+    if (IS_DEMO) return;
+    let cancelled = false;
+    setCollectionsLoading(true);
+    fetch('/api/a11oy/pages/rag')
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => {
+        if (cancelled) return;
+        if (d.ok && d.data?.collections) {
+          setCollections(d.data.collections);
+        } else {
+          setCollectionsError('API error');
+        }
+      })
+      .catch((e: Error) => {
+        if (!cancelled) {
+          setCollectionsError(e.message ?? 'Failed to load collections');
+        }
+      })
+      .finally(() => { if (!cancelled) setCollectionsLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const totalDocs = collections.reduce((s, c) => s + c.documentCount, 0);
+  const totalChunks = collections.reduce((s, c) => s + c.chunkCount, 0);
+  const totalSize = collections.reduce((s, c) => s + c.sizeBytes, 0);
 
   return (
     <Layout>
@@ -238,8 +266,21 @@ export function AgenticRag() {
         )}
 
         {activeTab === 'collections' && (
-          <div className="grid grid-cols-2 gap-4">
-            {COLLECTIONS.map((c) => (
+          <div>
+            {!IS_DEMO && collectionsError && (
+              <div className="mb-4 p-3 rounded-lg text-xs font-mono" style={{ backgroundColor: '#ef444418', color: '#ef4444', border: '1px solid #ef444430' }}>
+                API error — showing cached data. {collectionsError}
+              </div>
+            )}
+            {collectionsLoading ? (
+              <div className="grid grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-xl animate-pulse" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', height: '140px' }} />
+                ))}
+              </div>
+            ) : (
+            <div className="grid grid-cols-2 gap-4">
+            {collections.map((c) => (
               <div key={c.id} className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{c.name}</span>
@@ -263,6 +304,8 @@ export function AgenticRag() {
                 </div>
               </div>
             ))}
+            </div>
+            )}
           </div>
         )}
 

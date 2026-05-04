@@ -92,17 +92,27 @@ function fmt(ts: string) {
 }
 
 export function Memory() {
-  const { data } = useApiData<{ sessionMemories: typeof DEMO_SESSION_MEMORIES; bankMemories: typeof DEMO_BANK_MEMORIES; consolidationEvents: typeof DEMO_CONSOLIDATION_EVENTS; retrievalTraces: typeof DEMO_RETRIEVAL_TRACES }>('/pages/memory', { sessionMemories: DEMO_SESSION_MEMORIES, bankMemories: DEMO_BANK_MEMORIES, consolidationEvents: DEMO_CONSOLIDATION_EVENTS, retrievalTraces: DEMO_RETRIEVAL_TRACES });
-  const SESSION_MEMORIES = data.sessionMemories;
-  const BANK_MEMORIES = data.bankMemories;
-  const CONSOLIDATION_EVENTS = data.consolidationEvents;
-  const RETRIEVAL_TRACES = data.retrievalTraces;
+  const { data, loading, error } = useApiData<{ sessionMemories: typeof DEMO_SESSION_MEMORIES; bankMemories: typeof DEMO_BANK_MEMORIES; consolidationEvents: typeof DEMO_CONSOLIDATION_EVENTS; retrievalTraces: typeof DEMO_RETRIEVAL_TRACES }>('/pages/memory', { sessionMemories: DEMO_SESSION_MEMORIES, bankMemories: DEMO_BANK_MEMORIES, consolidationEvents: DEMO_CONSOLIDATION_EVENTS, retrievalTraces: DEMO_RETRIEVAL_TRACES });
   const [activeTab, setActiveTab] = useState<'vault' | 'consolidation' | 'trace' | 'governance'>('vault');
   const [memoryLayer, setMemoryLayer] = useState<'session' | 'bank'>('session');
   const [selectedWorkcell, setSelectedWorkcell] = useState<string>(DEMO_WORKCELLS[0].id);
   const [traceStep, setTraceStep] = useState(-1);
   const [traceRunning, setTraceRunning] = useState(false);
 
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading memory fabric…' : (error ?? 'Failed to load memory data')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const SESSION_MEMORIES = data.sessionMemories;
+  const BANK_MEMORIES = data.bankMemories;
+  const CONSOLIDATION_EVENTS = data.consolidationEvents;
+  const RETRIEVAL_TRACES = data.retrievalTraces;
   const wc = DEMO_WORKCELLS.find(w => w.id === selectedWorkcell)!;
   const traceSteps = RETRIEVAL_TRACES[selectedWorkcell] ?? [];
 

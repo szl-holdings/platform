@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VERTICALS, ROADMAP_PHASES, FABRIC_AGENTS } from '../../data/fabric';
 import type { VerticalId } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -18,12 +18,32 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function EcosystemRoadmap() {
+  const { data, loading, error } = useFabricData();
   const [expandedPhase, setExpandedPhase] = useState<string | null>('phase-1');
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
 
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading roadmap…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load roadmap</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { roadmap, agents, verticals } = data;
+
   const filtered = verticalFilter === 'all'
-    ? ROADMAP_PHASES
-    : ROADMAP_PHASES.filter(p => p.verticalImpact.includes(verticalFilter));
+    ? roadmap
+    : roadmap.filter(p => p.verticalImpact.includes(verticalFilter));
 
   return (
     <Layout>
@@ -35,10 +55,10 @@ export function EcosystemRoadmap() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="PHASES" value={ROADMAP_PHASES.length} sub="total" accent={GOLD} />
-        <KpiCard label="COMPLETE" value={ROADMAP_PHASES.filter(p => p.status === 'complete').length} sub="phases" accent="#22c55e" />
-        <KpiCard label="ACTIVE" value={ROADMAP_PHASES.filter(p => p.status === 'active').length} sub="in progress" accent="#f59e0b" />
-        <KpiCard label="AGENTS" value={FABRIC_AGENTS.length} sub="command agents" accent={GOLD} />
+        <KpiCard label="PHASES" value={roadmap.length} sub="total" accent={GOLD} />
+        <KpiCard label="COMPLETE" value={roadmap.filter(p => p.status === 'complete').length} sub="phases" accent="#22c55e" />
+        <KpiCard label="ACTIVE" value={roadmap.filter(p => p.status === 'active').length} sub="in progress" accent="#f59e0b" />
+        <KpiCard label="AGENTS" value={agents.length} sub="command agents" accent={GOLD} />
       </div>
 
       <div className="flex items-center gap-2 mb-6">
@@ -50,7 +70,7 @@ export function EcosystemRoadmap() {
         >
           ALL
         </button>
-        {VERTICALS.map(v => (
+        {verticals.map(v => (
           <button
             key={v.id}
             onClick={() => setVerticalFilter(v.id)}
@@ -103,7 +123,7 @@ export function EcosystemRoadmap() {
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-mono" style={{ color: GHOST }}>Vertical impact:</span>
                     {phase.verticalImpact.map(vid => {
-                      const v = VERTICALS.find(vt => vt.id === vid);
+                      const v = verticals.find(vt => vt.id === vid);
                       return <span key={vid} className="text-sm" title={v?.name}>{v?.icon}</span>;
                     })}
                   </div>
@@ -119,7 +139,7 @@ export function EcosystemRoadmap() {
         These agents operate within the Command Fabric. They do not have autonomous authority — every high-impact action requires human approval through Sentra.
       </p>
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
-        {FABRIC_AGENTS.map(agent => (
+        {agents.map(agent => (
           <Card key={agent.id}>
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold" style={{ color: TEXT }}>{agent.name}</span>

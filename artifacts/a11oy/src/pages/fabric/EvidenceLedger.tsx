@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, KpiCard } from '../../components/ui';
-import { VERTICALS, FABRIC_EVIDENCE, filterByVertical } from '../../data/fabric';
+import { filterByVertical } from '../../data/fabric';
 import type { VerticalId, EvidenceType, FabricEvidence } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -20,12 +21,32 @@ function authorityColor(score: number): string {
 }
 
 export function EvidenceLedger() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<EvidenceType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'authority' | 'type' | 'vertical'>('authority');
   const [drawerEv, setDrawerEv] = useState<FabricEvidence | null>(null);
 
-  let evidence = filterByVertical(FABRIC_EVIDENCE, verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading evidence ledger…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load evidence</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { evidence: allEvidence, verticals } = data;
+
+  let evidence = filterByVertical(allEvidence, verticalFilter);
   if (typeFilter !== 'all') evidence = evidence.filter(e => e.evidenceType === typeFilter);
   evidence = [...evidence].sort((a, b) => {
     if (sortBy === 'authority') return b.authorityScore - a.authorityScore;
@@ -33,9 +54,9 @@ export function EvidenceLedger() {
     return a.verticalId.localeCompare(b.verticalId);
   });
 
-  const avgAuthority = Math.round(FABRIC_EVIDENCE.reduce((s, e) => s + e.authorityScore, 0) / FABRIC_EVIDENCE.length * 100);
-  const verified = FABRIC_EVIDENCE.filter(e => e.status === 'verified').length;
-  const disputed = FABRIC_EVIDENCE.filter(e => e.status === 'disputed').length;
+  const avgAuthority = allEvidence.length ? Math.round(allEvidence.reduce((s, e) => s + e.authorityScore, 0) / allEvidence.length * 100) : 0;
+  const verified = allEvidence.filter(e => e.status === 'verified').length;
+  const disputed = allEvidence.filter(e => e.status === 'disputed').length;
 
   return (
     <Layout>
@@ -47,16 +68,16 @@ export function EvidenceLedger() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="EVIDENCE" value={FABRIC_EVIDENCE.length} sub="records" accent={GOLD} />
+        <KpiCard label="EVIDENCE" value={allEvidence.length} sub="records" accent={GOLD} />
         <KpiCard label="AVG AUTHORITY" value={`${avgAuthority}%`} sub="score" accent={GOLD} />
         <KpiCard label="VERIFIED" value={verified} sub="confirmed" accent="#22c55e" />
         <KpiCard label="DISPUTED" value={disputed} sub="needs review" accent="#ef4444" />
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-6">
-        {VERTICALS.map(v => {
-          const count = FABRIC_EVIDENCE.filter(e => e.verticalId === v.id).length;
-          const vAvg = Math.round(FABRIC_EVIDENCE.filter(e => e.verticalId === v.id).reduce((s, e) => s + e.authorityScore, 0) / count * 100);
+        {verticals.map(v => {
+          const count = allEvidence.filter(e => e.verticalId === v.id).length;
+          const vAvg = count ? Math.round(allEvidence.filter(e => e.verticalId === v.id).reduce((s, e) => s + e.authorityScore, 0) / count * 100) : 0;
           return (
             <div key={v.id} className="rounded p-2 text-center cursor-pointer" onClick={() => setVerticalFilter(v.id)} style={{ backgroundColor: verticalFilter === v.id ? `${GOLD}18` : SURFACE, border: verticalFilter === v.id ? `1px solid ${GOLD}` : `1px solid transparent` }}>
               <div className="text-sm mb-1">{v.icon}</div>

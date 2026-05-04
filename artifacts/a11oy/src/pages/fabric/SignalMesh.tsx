@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, KpiCard } from '../../components/ui';
-import { VERTICALS, FABRIC_SIGNALS, filterByVertical, SEVERITY_COLORS } from '../../data/fabric';
+import { filterByVertical, SEVERITY_COLORS } from '../../data/fabric';
 import type { VerticalId, SignalType, SignalStatus, PriorityLevel, FabricSignal } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -15,6 +16,7 @@ const SIGNAL_TYPES: readonly SignalType[] = ['risk', 'opportunity', 'deadline', 
 const STATUSES: readonly SignalStatus[] = ['new', 'triaged', 'routed', 'approved', 'resolved', 'deferred', 'blocked'];
 
 export function FabricSignalMesh() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [severityFilter, setSeverityFilter] = useState<PriorityLevel | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<SignalType | 'all'>('all');
@@ -22,7 +24,26 @@ export function FabricSignalMesh() {
   const [drawerSignal, setDrawerSignal] = useState<FabricSignal | null>(null);
   const [localTriaged, setLocalTriaged] = useState<Set<string>>(new Set());
 
-  let signals = filterByVertical(FABRIC_SIGNALS, verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading signal mesh…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load signals</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { signals: allSignals, verticals } = data;
+
+  let signals = filterByVertical(allSignals, verticalFilter);
   if (severityFilter !== 'all') signals = signals.filter(s => s.severity === severityFilter);
   if (typeFilter !== 'all') signals = signals.filter(s => s.signalType === typeFilter);
   if (statusFilter !== 'all') signals = signals.filter(s => s.status === statusFilter);
@@ -39,14 +60,14 @@ export function FabricSignalMesh() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL SIGNALS" value={FABRIC_SIGNALS.length} sub="cross-vertical" accent={GOLD} />
-        <KpiCard label="NEW" value={FABRIC_SIGNALS.filter(s => s.status === 'new').length} sub="untriaged" accent="#ef4444" />
-        <KpiCard label="CRITICAL" value={FABRIC_SIGNALS.filter(s => s.severity === 'critical').length} sub="highest severity" accent="#ef4444" />
-        <KpiCard label="SENTRA REVIEW" value={FABRIC_SIGNALS.filter(s => s.sentraReviewRequired).length} sub="governance required" accent="#f59e0b" />
+        <KpiCard label="TOTAL SIGNALS" value={allSignals.length} sub="cross-vertical" accent={GOLD} />
+        <KpiCard label="NEW" value={allSignals.filter(s => s.status === 'new').length} sub="untriaged" accent="#ef4444" />
+        <KpiCard label="CRITICAL" value={allSignals.filter(s => s.severity === 'critical').length} sub="highest severity" accent="#ef4444" />
+        <KpiCard label="SENTRA REVIEW" value={allSignals.filter(s => s.sentraReviewRequired).length} sub="governance required" accent="#f59e0b" />
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
-        <FilterGroup label="VERTICAL" value={verticalFilter} onChange={v => setVerticalFilter(v as VerticalId | 'all')} options={[{ value: 'all', label: 'ALL' }, ...VERTICALS.map(v => ({ value: v.id, label: v.name.toUpperCase() }))]} />
+        <FilterGroup label="VERTICAL" value={verticalFilter} onChange={v => setVerticalFilter(v as VerticalId | 'all')} options={[{ value: 'all', label: 'ALL' }, ...verticals.map(v => ({ value: v.id, label: v.name.toUpperCase() }))]} />
         <FilterGroup label="SEVERITY" value={severityFilter} onChange={v => setSeverityFilter(v as PriorityLevel | 'all')} options={[{ value: 'all', label: 'ALL' }, ...(['critical', 'high', 'medium', 'low'] as const).map(s => ({ value: s, label: s.toUpperCase() }))]} />
         <FilterGroup label="TYPE" value={typeFilter} onChange={v => setTypeFilter(v as SignalType | 'all')} options={[{ value: 'all', label: 'ALL' }, ...SIGNAL_TYPES.map(t => ({ value: t, label: t.toUpperCase().replace('_', ' ') }))]} />
         <FilterGroup label="STATUS" value={statusFilter} onChange={v => setStatusFilter(v as SignalStatus | 'all')} options={[{ value: 'all', label: 'ALL' }, ...STATUSES.map(s => ({ value: s, label: s.toUpperCase() }))]} />

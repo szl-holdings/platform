@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
-import { PageHeader, KpiCard, SectionTitle } from '../../components/ui';
-import { VERTICALS, FABRIC_OUTCOMES, filterByVertical } from '../../data/fabric';
+import { PageHeader, KpiCard } from '../../components/ui';
+import { filterByVertical } from '../../data/fabric';
 import type { VerticalId, FabricOutcome } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -12,21 +13,41 @@ const SURFACE = 'rgba(255,255,255,0.018)';
 const BORDER = 'rgba(255,255,255,0.08)';
 
 export function OutcomeMemory() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [sortBy, setSortBy] = useState<'error' | 'reward' | 'risk'>('error');
   const [localReviewed, setLocalReviewed] = useState<Set<string>>(new Set());
   const [drawerOutcome, setDrawerOutcome] = useState<FabricOutcome | null>(null);
 
-  let outcomes = filterByVertical(FABRIC_OUTCOMES, verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading outcome memory…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load outcomes</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { outcomes: allOutcomes, verticals } = data;
+
+  let outcomes = filterByVertical(allOutcomes, verticalFilter);
   outcomes = [...outcomes].sort((a, b) => {
     if (sortBy === 'error') return b.predictionError - a.predictionError;
     if (sortBy === 'reward') return b.rewardScore - a.rewardScore;
     return (b.riskBefore - b.riskAfter) - (a.riskBefore - a.riskAfter);
   });
 
-  const avgError = Math.round(FABRIC_OUTCOMES.reduce((s, o) => s + o.predictionError, 0) / FABRIC_OUTCOMES.length * 100);
-  const avgReward = Math.round(FABRIC_OUTCOMES.reduce((s, o) => s + o.rewardScore, 0) / FABRIC_OUTCOMES.length * 100) / 100;
-  const policyCandidates = FABRIC_OUTCOMES.filter(o => o.policyUpdateCandidate).length;
+  const avgError = allOutcomes.length ? Math.round(allOutcomes.reduce((s, o) => s + o.predictionError, 0) / allOutcomes.length * 100) : 0;
+  const avgReward = allOutcomes.length ? Math.round(allOutcomes.reduce((s, o) => s + o.rewardScore, 0) / allOutcomes.length * 100) / 100 : 0;
+  const policyCandidates = allOutcomes.filter(o => o.policyUpdateCandidate).length;
 
   const markReviewed = (id: string) => setLocalReviewed(prev => new Set(prev).add(id));
 
@@ -40,7 +61,7 @@ export function OutcomeMemory() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="OUTCOMES" value={FABRIC_OUTCOMES.length} sub="tracked" accent={GOLD} />
+        <KpiCard label="OUTCOMES" value={allOutcomes.length} sub="tracked" accent={GOLD} />
         <KpiCard label="AVG ERROR" value={`${avgError}%`} sub="prediction error" accent={avgError > 15 ? '#f59e0b' : GOLD} />
         <KpiCard label="AVG REWARD" value={avgReward} sub="reward score" accent={GOLD} />
         <KpiCard label="POLICY CANDIDATES" value={policyCandidates} sub="update suggested" accent={GOLD} />
@@ -51,7 +72,7 @@ export function OutcomeMemory() {
           <span className="text-[10px] font-mono mr-1" style={{ color: GHOST }}>VERTICAL</span>
           <select value={verticalFilter} onChange={e => setVerticalFilter(e.target.value as VerticalId | 'all')} className="text-[10px] font-mono px-2 py-1 rounded bg-transparent" style={{ color: GOLD, border: `1px solid ${GOLD}40`, outline: 'none' }}>
             <option value="all" style={{ backgroundColor: '#0a0a0a' }}>ALL</option>
-            {VERTICALS.map(v => <option key={v.id} value={v.id} style={{ backgroundColor: '#0a0a0a' }}>{v.name.toUpperCase()}</option>)}
+            {verticals.map(v => <option key={v.id} value={v.id} style={{ backgroundColor: '#0a0a0a' }}>{v.name.toUpperCase()}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-1 ml-auto">

@@ -1,24 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, KpiCard, Card, SectionTitle, ProgressBar } from '../components/ui';
+import { PageHeader, KpiCard, SectionTitle, ProgressBar } from '../components/ui';
 
-const FALLBACK_FABRIC_LAYERS = [
-  { layer: 'signal_mesh', label: 'Signal Mesh', status: 'healthy', latencyMs: 12, healthScore: 99 },
-  { layer: 'causal_core', label: 'Causal Core', status: 'healthy', latencyMs: 28, healthScore: 98 },
-  { layer: 'context_engine', label: 'Context Engine', status: 'healthy', latencyMs: 45, healthScore: 97 },
-  { layer: 'workcell_engine', label: 'Workcell Engine', status: 'healthy', latencyMs: 820, healthScore: 96 },
-  { layer: 'covenant_layer', label: 'Covenant Layer', status: 'healthy', latencyMs: 8, healthScore: 100 },
-  { layer: 'mirror_eval', label: 'MirrorEval', status: 'healthy', latencyMs: 1200, healthScore: 95 },
-  { layer: 'proof_ledger', label: 'Proof Ledger', status: 'healthy', latencyMs: 4, healthScore: 100 },
-];
-
-const SUPPLEMENTARY_VERTICALS = [
-  { id: 'sentra-cyber', label: 'Sentra Cyber' },
-  { id: 'firestorm-ops', label: 'Firestorm Ops' },
-  { id: 'nuro-forge', label: 'NuroForge AI' },
-  { id: 'meridian-infra', label: 'Meridian Infra' },
-  { id: 'constellation-graph', label: 'Constellation Graph' },
-];
 
 const VERTICAL_LABEL_MAP: Record<string, string> = {
   'vessels-maritime': 'SEXTANT Maritime',
@@ -35,12 +18,6 @@ const VERTICAL_LABEL_MAP: Record<string, string> = {
   'constellation-graph': 'Constellation Graph',
 };
 
-const FALLBACK_STORAGE = [
-  { mode: 'database', label: 'PostgreSQL', status: 'healthy', note: 'Primary durable store' },
-  { mode: 'object-store', label: 'Object Store', status: 'healthy', note: 'Reports & exports' },
-  { mode: 'local-cache', label: 'Local Cache', status: 'healthy', note: 'Ephemeral hot-path' },
-  { mode: 'disabled', label: 'Air-Gapped', status: 'not-configured', note: 'Sovereign deployments only' },
-];
 
 function StatusDot({ status }: { status: string }) {
   const color = status === 'healthy' || status === 'online' || status === 'connected' ? '#c9b787'
@@ -130,14 +107,15 @@ export function ControlTower() {
   const [mcpData, setMcpData] = useState<McpReadiness | null>(null);
   const [readinessData, setReadinessData] = useState<Readiness | null>(null);
   const [ctStatus, setCtStatus] = useState<ControlTowerStatus | null>(null);
-  const [fabricLayers, setFabricLayers] = useState(FALLBACK_FABRIC_LAYERS);
+  const [fabricLayers, setFabricLayers] = useState<Array<{ layer: string; label: string; status: string; latencyMs: number; healthScore: number }>>([]);
   const [verticals, setVerticals] = useState<Array<{ id: string; label: string; packStatus: string }>>([]);
-  const [storageModes] = useState(FALLBACK_STORAGE);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const [mcpRes, readRes, ctRes, fabricRes, vertRes] = await Promise.allSettled([
         fetch(`${API_BASE}/internal/a11oy/mcp/readiness`),
@@ -147,18 +125,29 @@ export function ControlTower() {
         fetch(`${API_BASE}/a11oy/verticals`),
       ]);
 
+      const failures: string[] = [];
+
       if (mcpRes.status === 'fulfilled' && mcpRes.value.ok) {
         const j = await mcpRes.value.json();
         if (j.ok) setMcpData(j.data);
+        else failures.push(`MCP gateway (API error)`);
+      } else if (mcpRes.status !== 'fulfilled' || !mcpRes.value.ok) {
+        failures.push(`MCP gateway (${mcpRes.status === 'rejected' ? 'network error' : `HTTP ${mcpRes.value.status}`})`);
       }
+
       if (readRes.status === 'fulfilled' && readRes.value.ok) {
         const j = await readRes.value.json();
         if (j.ok) setReadinessData(j.data);
+        else failures.push(`Readiness (API error)`);
+      } else if (readRes.status !== 'fulfilled' || !readRes.value.ok) {
+        failures.push(`Readiness (${readRes.status === 'rejected' ? 'network error' : `HTTP ${readRes.value.status}`})`);
       }
+
       if (ctRes.status === 'fulfilled' && ctRes.value.ok) {
         const j = await ctRes.value.json();
         if (j.ok) setCtStatus(j.data);
       }
+
       if (fabricRes.status === 'fulfilled' && fabricRes.value.ok) {
         const j = await fabricRes.value.json();
         if (j.ok && j.data?.layers) {
@@ -169,31 +158,38 @@ export function ControlTower() {
               label,
               status: l.status ?? 'healthy',
               latencyMs: l.latencyMs ?? 0,
-              healthScore: l.status === 'healthy' ? 98 + Math.floor(Math.random() * 3) : 80 + Math.floor(Math.random() * 10),
+              healthScore: l.status === 'healthy' ? 98 : l.status === 'degraded' ? 72 : 50,
             };
           });
           setFabricLayers(liveLayers);
+        } else {
+          failures.push(`Fabric layers (API error)`);
         }
+      } else if (fabricRes.status !== 'fulfilled' || !fabricRes.value.ok) {
+        failures.push(`Fabric layers (${fabricRes.status === 'rejected' ? 'network error' : `HTTP ${fabricRes.value.status}`})`);
       }
+
       if (vertRes.status === 'fulfilled' && vertRes.value.ok) {
         const j = await vertRes.value.json();
         if (j.ok && Array.isArray(j.data)) {
           const liveVerts = (j.data as VerticalData[]);
-          const liveVertIds = new Set(liveVerts.map((v: VerticalData) => v.id));
           const merged: Array<{ id: string; label: string; packStatus: string }> = [
             ...liveVerts.map((v: VerticalData) => ({
               id: v.id,
               label: VERTICAL_LABEL_MAP[v.id] ?? v.label,
               packStatus: 'live' as const,
             })),
-            ...SUPPLEMENTARY_VERTICALS
-              .filter(sv => !liveVertIds.has(sv.id))
-              .map(sv => ({ id: sv.id, label: sv.label, packStatus: 'stub' as const })),
           ];
           setVerticals(merged);
         }
       }
-    } catch {}
+
+      if (failures.length > 0) {
+        setFetchError(`Failed to load: ${failures.join(', ')}`);
+      }
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : 'Failed to load control tower data');
+    }
     setLoading(false);
     setLastRefresh(new Date());
   }, []);
@@ -204,9 +200,9 @@ export function ControlTower() {
     return () => clearInterval(timer);
   }, [fetchData]);
 
-  const overallScore = readinessData?.readinessScore ?? 82;
-  const overallLabel = readinessData?.readinessLabel ?? 'partial';
-  const displayVerticals = verticals.length > 0 ? verticals : SUPPLEMENTARY_VERTICALS.map(sv => ({ ...sv, packStatus: 'stub' }));
+  const overallScore = readinessData?.readinessScore ?? null;
+  const overallLabel = readinessData?.readinessLabel ?? '—';
+  const displayVerticals = verticals;
   const liveVerticals = displayVerticals.filter(v => v.packStatus === 'live').length;
   const stubVerticals = displayVerticals.filter(v => v.packStatus === 'stub').length;
   const proofPackets = readinessData?.proofChain?.packetCount ?? 0;
@@ -215,7 +211,9 @@ export function ControlTower() {
   const bridgeStatus = ctStatus?.workerBridge?.status ?? 'not-configured';
   const bridgeLabel = bridgeStatus === 'connected' ? 'Connected' : bridgeStatus === 'disconnected' ? 'Disconnected' : 'Not Configured';
 
-  const scoreColor = overallScore >= 90 ? '#c9b787' : overallScore >= 70 ? '#8a8a8a' : '#f5f5f5';
+  const scoreColor = overallScore !== null
+    ? (overallScore >= 90 ? '#c9b787' : overallScore >= 70 ? '#8a8a8a' : '#f5f5f5')
+    : '#5e5e5e';
 
   return (
     <Layout>
@@ -242,11 +240,31 @@ export function ControlTower() {
         Last refresh: {lastRefresh.toLocaleTimeString()}
       </div>
 
+      {fetchError && (
+        <div className="mb-6 p-3 rounded-lg text-xs border flex items-center gap-2" style={{ backgroundColor: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)', color: '#f87171' }}>
+          <span>⚠</span>
+          <span>Some data could not be loaded — {fetchError}. Partial data may be shown.</span>
+          <button onClick={fetchData} className="ml-auto px-2 py-0.5 rounded text-xs" style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', cursor: 'pointer', color: '#f87171' }}>
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="READINESS SCORE" value={`${overallScore}%`} sub={overallLabel} accent={scoreColor} />
+        <KpiCard
+          label="READINESS SCORE"
+          value={overallScore !== null ? `${overallScore}%` : loading ? '…' : 'N/A'}
+          sub={overallLabel}
+          accent={scoreColor}
+        />
         <KpiCard label="VERTICALS LIVE" value={`${liveVerticals}/${displayVerticals.length}`} sub={`${stubVerticals} stubs`} accent="#c9b787" />
-        <KpiCard label="FABRIC HEALTH" value={`${healthyLayers}/${fabricLayers.length}`} sub="layers healthy" accent="#c9b787" />
-        <KpiCard label="PROOF PACKETS" value={proofPackets || '24'} sub="chain intact" accent="#b08d52" />
+        <KpiCard
+          label="FABRIC HEALTH"
+          value={fabricLayers.length > 0 ? `${healthyLayers}/${fabricLayers.length}` : loading ? '…' : 'N/A'}
+          sub="layers healthy"
+          accent="#c9b787"
+        />
+        <KpiCard label="PROOF PACKETS" value={proofPackets} sub="chain intact" accent="#b08d52" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
@@ -254,12 +272,12 @@ export function ControlTower() {
           <SectionTitle>MCP Gateway</SectionTitle>
           <div className="rounded-lg border p-5" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>
             <div className="flex items-center gap-2 mb-4">
-              <StatusDot status={mcpData?.gatewayStatus ?? 'online'} />
+              <StatusDot status={mcpData?.gatewayStatus ?? (loading ? 'checking' : 'unknown')} />
               <span className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>
-                Gateway {mcpData?.gatewayStatus ?? 'Online'}
+                {mcpData ? `Gateway ${mcpData.gatewayStatus}` : loading ? 'Loading…' : 'Gateway — unavailable'}
               </span>
               <span className="ml-auto text-xs font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>
-                {mcpData?.readiness.score ?? 85}% ready
+                {mcpData?.readiness.score != null ? `${mcpData.readiness.score}% ready` : loading ? '…' : 'N/A'}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs mb-4">
@@ -365,7 +383,7 @@ export function ControlTower() {
             <div className="rounded-lg border p-4 flex flex-col gap-3" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>
               {[
                 { label: 'Chain Status', value: 'Intact', color: '#c9b787' },
-                { label: 'Total Packets', value: String(proofPackets || '24') },
+                { label: 'Total Packets', value: String(proofPackets) },
                 { label: 'Integrity Score', value: '100%', color: '#c9b787' },
                 { label: 'Hash Algorithm', value: 'SHA-256' },
                 { label: 'Verification', value: 'Verified', color: '#c9b787' },
@@ -381,23 +399,33 @@ export function ControlTower() {
           <div>
             <SectionTitle>Storage Providers</SectionTitle>
             <div className="flex flex-col gap-2">
-              {storageModes.map(sp => (
-                <div
-                  key={sp.mode}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded text-xs"
-                  style={{
-                    background: sp.status === 'healthy' ? 'rgba(255,255,255,0.025)' : 'rgba(255,255,255,0.01)',
-                    border: `1px solid ${sp.status === 'healthy' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'}`,
-                  }}
-                >
-                  <StatusDot status={sp.status} />
-                  <div className="flex-1">
-                    <div className="font-medium" style={{ color: sp.status === 'healthy' ? 'var(--color-a11oy-text-sub)' : 'var(--color-a11oy-text-ghost)' }}>{sp.label}</div>
-                    <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{sp.note}</div>
+              {!readinessData && !loading && (
+                <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Storage data unavailable — readiness API unreachable.</p>
+              )}
+              {loading && !readinessData && (
+                <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading…</p>
+              )}
+              {readinessData?.storage && (() => {
+                const s = readinessData.storage;
+                const status = s.healthy ? 'healthy' : 'degraded';
+                return (
+                  <div
+                    className="flex items-center gap-3 px-3 py-2.5 rounded text-xs"
+                    style={{
+                      background: s.healthy ? 'rgba(255,255,255,0.025)' : 'rgba(255,255,255,0.01)',
+                      border: `1px solid ${s.healthy ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'}`,
+                    }}
+                  >
+                    <StatusDot status={status} />
+                    <div className="flex-1">
+                      <div className="font-medium" style={{ color: s.healthy ? 'var(--color-a11oy-text-sub)' : 'var(--color-a11oy-text-ghost)' }}>
+                        {s.mode ?? 'Primary Store'}
+                      </div>
+                    </div>
+                    <span className="font-mono" style={{ color: s.healthy ? '#c9b787' : '#8a8a8a' }}>{status}</span>
                   </div>
-                  <span className="font-mono" style={{ color: sp.status === 'healthy' ? '#c9b787' : '#5e5e5e' }}>{sp.status}</span>
-                </div>
-              ))}
+                );
+              })()}
             </div>
           </div>
         </div>

@@ -64,11 +64,21 @@ const VERDICT_COLORS: Record<string, string> = {
 };
 
 export function GovernedSecurityAgents() {
-  const { data } = useApiData<{ agents: SecurityAgent[] }>('/pages/security-agents', { agents: DEMO_SEC_AGENTS });
-  const SEC_AGENTS = data.agents;
-  const [selectedAgent, setSelectedAgent] = useState<string>(SEC_AGENTS[0]?.id ?? '');
-  const agent = SEC_AGENTS.find(a => a.id === selectedAgent) ?? SEC_AGENTS[0];
+  const { data, loading, error } = useApiData<{ agents: SecurityAgent[] }>('/pages/security-agents', { agents: DEMO_SEC_AGENTS });
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
 
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading security agents…' : (error ?? 'Failed to load security agents')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const SEC_AGENTS = data.agents;
+  const agent = SEC_AGENTS.find(a => a.id === selectedAgent) ?? SEC_AGENTS[0];
   const totalActions = SEC_AGENTS.reduce((a, s) => a + s.actionsToday, 0);
   const totalProofs = SEC_AGENTS.reduce((a, s) => a + s.proofChainEntries, 0);
   const avgTrust = Math.round(SEC_AGENTS.reduce((a, s) => a + s.trustScore, 0) / SEC_AGENTS.length);

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusPill } from '../components/ui';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 function b(path: string) { return `${BASE}${path}`; }
+
+const API = '/api/a11oy';
 
 interface SovereignSummary {
   tenants: number;
@@ -41,79 +43,69 @@ const NAV_LINKS = [
 const ST_COLOR: Record<string, string> = { passed: '#c9b787', warning: '#c9b787', failed: '#f5f5f5' };
 const ST_ICON: Record<string, string> = { passed: '✓', warning: '⚠', failed: '✗' };
 
-const INITIAL_SUMMARY: SovereignSummary = {
-  tenants: 5, models: { registered: 4, active: 3 },
-  evals: { total: 5234, passed: 5081, blocked: 47 },
-  replays: { total: 312, successful: 287, failed: 25 },
-  connectors: { total: 9, approved: 7, blocked: 1 },
-  twins: { total: 7, highRisk: 2 },
-  skills: { total: 15, live: 15 },
-  boardPackets: 5,
-  telemetry: { spans: 18493, blockedSpans: 342 },
-  lastRegenerated: '2026-04-26T14:32:00Z',
-  selfTestStatus: 'passed',
-};
-
-const SELF_TEST_DATA: SelfTestResult = {
-  passed: 28, warned: 1, failed: 0, total: 29,
-  overallStatus: 'passed',
-  tests: [
-    { name: 'Signal mesh connectivity', status: 'passed', detail: '7 verticals active' },
-    { name: 'Proof chain integrity', status: 'passed', detail: '312 packets verified' },
-    { name: 'Covenant engine policy load', status: 'passed', detail: '10 policies enforced' },
-    { name: 'MirrorEval harness (14 dims)', status: 'passed', detail: 'All dimensions operational' },
-    { name: 'Connector firewall policy', status: 'passed', detail: 'Default deny enforced' },
-    { name: 'Human approval gate', status: 'passed', detail: 'Tier 1-3 gates active' },
-    { name: 'PCE contract validation', status: 'passed', detail: '20 contracts verified' },
-    { name: 'Twin sync engine', status: 'passed', detail: '7 twins synced' },
-    { name: 'Skill registry', status: 'passed', detail: '15 skills operational' },
-    { name: 'Model router health', status: 'passed', detail: '3/4 providers active' },
-    { name: 'Prompt injection scanner', status: 'passed', detail: '47 attempts blocked' },
-    { name: 'Output sanitizer', status: 'passed', detail: 'Active on all connectors' },
-    { name: 'SHA-256 hash chain', status: 'passed', detail: 'No integrity violations' },
-    { name: 'PII redaction layer', status: 'passed', detail: 'All CRM data redacted' },
-    { name: 'Sanctions screening', status: 'passed', detail: '100% vendor coverage' },
-    { name: 'Boardroom synthesis', status: 'passed', detail: '5 packets generated' },
-    { name: 'Replay flight recorder', status: 'passed', detail: '312 workcells replayable' },
-    { name: 'No secrets in codebase', status: 'passed', detail: 'Scan: 0 violations' },
-    { name: 'No fake partner claims', status: 'passed', detail: 'All claims evidence-backed' },
-    { name: 'All actions gated', status: 'passed', detail: '0 ungated material actions' },
-    { name: 'Telemetry OTEL spans', status: 'passed', detail: '18,493 spans active' },
-    { name: 'AIS connector latency', status: 'passed', detail: '<120ms avg' },
-    { name: 'CRM connector PII gate', status: 'passed', detail: 'Redaction 100%' },
-    { name: 'Legal privilege firewall', status: 'passed', detail: 'Active on counsel domain' },
-    { name: 'Defense connector clearance', status: 'passed', detail: 'Approval gate enforced' },
-    { name: 'Twin drift alerting', status: 'passed', detail: '2 high-risk twins flagged' },
-    { name: 'Approval queue routing', status: 'passed', detail: '5 items in queue' },
-    { name: 'Eval regression suite', status: 'warning', detail: 'Defense scenario: 1 flaky dim' },
-    { name: 'Fabric uptime SLA', status: 'passed', detail: '99.97% (30d)' },
-  ],
-};
-
 export function Sovereign() {
-  const [summary, setSummary] = useState<SovereignSummary>(INITIAL_SUMMARY);
+  const [summary, setSummary] = useState<SovereignSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
   const [selfTest, setSelfTest] = useState<SelfTestResult | null>(null);
   const [selfTestLoading, setSelfTestLoading] = useState(false);
   const [regenLoading, setRegenLoading] = useState(false);
   const [regenDone, setRegenDone] = useState(false);
 
-  function runSelfTest() {
+  useEffect(() => {
+    setSummaryLoading(true);
+    fetch(`${API}/sovereign/summary`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(d => {
+        if (d?.ok && d.data) {
+          setSummary(d.data);
+          setSummaryError(null);
+        } else {
+          throw new Error('Unexpected response format');
+        }
+      })
+      .catch(e => setSummaryError(e instanceof Error ? e.message : 'Failed to load'))
+      .finally(() => setSummaryLoading(false));
+  }, []);
+
+  async function runSelfTest() {
     setSelfTestLoading(true);
     setSelfTest(null);
-    setTimeout(() => {
-      setSelfTest(SELF_TEST_DATA);
+    try {
+      const r = await fetch(`${API}/selftest/run`, { method: 'POST' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      if (d?.ok && d.data) setSelfTest(d.data);
+    } catch {
+      setSelfTest({
+        passed: 0, warned: 0, failed: 1, total: 1,
+        overallStatus: 'failed',
+        tests: [{ name: 'Self-test runner', status: 'failed', detail: 'API unreachable' }],
+      });
+    } finally {
       setSelfTestLoading(false);
-    }, 1800);
+    }
   }
 
-  function regenerate() {
+  async function regenerate() {
     setRegenLoading(true);
-    setTimeout(() => {
-      setSummary(s => ({ ...s, lastRegenerated: new Date().toISOString() }));
+    try {
+      const r = await fetch(`${API}/demo/regenerate`, { method: 'POST' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      if (d?.ok && d.data?.regeneratedAt) {
+        setSummary(prev => prev ? { ...prev, lastRegenerated: d.data.regeneratedAt } : prev);
+      }
       setRegenDone(true);
       setTimeout(() => setRegenDone(false), 4000);
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : 'Refresh failed');
+    } finally {
       setRegenLoading(false);
-    }, 1200);
+    }
   }
 
   return (
@@ -131,7 +123,7 @@ export function Sovereign() {
           className="text-xs px-3 py-1.5 rounded font-medium"
           style={{ backgroundColor: 'rgba(138,138,138,0.15)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.3)', opacity: regenLoading ? 0.6 : 1 }}
         >
-          {regenLoading ? 'Regenerating…' : regenDone ? '✓ Regenerated' : 'Refresh Enterprise State'}
+          {regenLoading ? 'Refreshing…' : regenDone ? '✓ Refreshed' : 'Refresh Enterprise State'}
         </button>
         <button
           onClick={runSelfTest} disabled={selfTestLoading}
@@ -140,9 +132,11 @@ export function Sovereign() {
         >
           {selfTestLoading ? 'Running tests…' : '▶ Run Sovereign Self-Test'}
         </button>
-        <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          Last sync: {new Date(summary.lastRegenerated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </span>
+        {summary && (
+          <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+            Last sync: {new Date(summary.lastRegenerated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </span>
+        )}
       </div>
 
       {selfTest && (
@@ -166,18 +160,28 @@ export function Sovereign() {
       )}
 
       <SectionTitle>Telemetry Rollup — Governed Fabric</SectionTitle>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
-        <KpiCard label="TENANTS" value={String(summary.tenants)} sub="Synthetic enterprise" accent="#8a8a8a" />
-        <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#c9b787" />
-        <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#c9b787" />
-        <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#c9b787" />
-        <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#f5f5f5" />
-        <KpiCard label="BUSINESS TWINS" value={String(summary.twins.total)} sub={`${summary.twins.highRisk} high risk`} accent="#b08d52" />
-        <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#8a8a8a" />
-        <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="5 tenants" accent="#c9b787" />
-        <KpiCard label="TRACE SPANS" value={summary.telemetry.spans.toLocaleString()} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#5e5e5e" />
-        <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#c9b787" />
-      </div>
+      {summaryLoading ? (
+        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+          Loading sovereign state…
+        </div>
+      ) : summaryError ? (
+        <div className="mb-8 p-3 rounded-lg text-xs border" style={{ backgroundColor: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)', color: '#f87171' }}>
+          Could not load sovereign summary — {summaryError}
+        </div>
+      ) : summary ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+          <KpiCard label="TENANTS" value={String(summary.tenants)} sub="Enterprise orgs" accent="#8a8a8a" />
+          <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#c9b787" />
+          <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#c9b787" />
+          <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#c9b787" />
+          <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#f5f5f5" />
+          <KpiCard label="BUSINESS TWINS" value={String(summary.twins.total)} sub={`${summary.twins.highRisk} high risk`} accent="#b08d52" />
+          <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#8a8a8a" />
+          <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="Generated" accent="#c9b787" />
+          <KpiCard label="TRACE SPANS" value={summary.telemetry.spans.toLocaleString()} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#5e5e5e" />
+          <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#c9b787" />
+        </div>
+      ) : null}
 
       <SectionTitle>Sovereign Sub-Surfaces</SectionTitle>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">

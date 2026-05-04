@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, KpiCard } from '../../components/ui';
-import { VERTICALS, FABRIC_DECISIONS, filterByVertical } from '../../data/fabric';
+import { filterByVertical } from '../../data/fabric';
 import type { VerticalId, DecisionStatus, FabricDecision } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -21,20 +22,40 @@ const STATUS_COLORS: Record<DecisionStatus, string> = {
 };
 
 export function DecisionQueue() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<DecisionStatus | 'all'>('all');
   const [localActions, setLocalActions] = useState<Record<string, DecisionStatus>>({});
   const [drawerDec, setDrawerDec] = useState<FabricDecision | null>(null);
 
-  let decisions = filterByVertical(FABRIC_DECISIONS, verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading decision queue…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load decisions</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { decisions: allDecisions, verticals } = data;
+
+  let decisions = filterByVertical(allDecisions, verticalFilter);
   if (statusFilter !== 'all') decisions = decisions.filter(d => (localActions[d.id] ?? d.status) === statusFilter);
 
   const applyAction = (id: string, action: DecisionStatus) => {
     setLocalActions(prev => ({ ...prev, [id]: action }));
   };
 
-  const pending = FABRIC_DECISIONS.filter(d => d.status === 'draft' || d.status === 'awaiting_review').length;
-  const approved = FABRIC_DECISIONS.filter(d => d.status === 'approved' || d.status === 'executed').length;
+  const pending = allDecisions.filter(d => d.status === 'draft' || d.status === 'awaiting_review').length;
+  const approved = allDecisions.filter(d => d.status === 'approved' || d.status === 'executed').length;
 
   return (
     <Layout>
@@ -46,7 +67,7 @@ export function DecisionQueue() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL DECISIONS" value={FABRIC_DECISIONS.length} sub="cross-vertical" accent={GOLD} />
+        <KpiCard label="TOTAL DECISIONS" value={allDecisions.length} sub="cross-vertical" accent={GOLD} />
         <KpiCard label="PENDING" value={pending} sub="draft + awaiting" accent="#f59e0b" />
         <KpiCard label="APPROVED" value={approved} sub="approved + executed" accent="#22c55e" />
         <KpiCard label="LOCAL ACTIONS" value={Object.keys(localActions).length} sub="this session" accent={GOLD} />
@@ -57,7 +78,7 @@ export function DecisionQueue() {
           <span className="text-[10px] font-mono mr-1" style={{ color: GHOST }}>VERTICAL</span>
           <select value={verticalFilter} onChange={e => setVerticalFilter(e.target.value as VerticalId | 'all')} className="text-[10px] font-mono px-2 py-1 rounded bg-transparent" style={{ color: GOLD, border: `1px solid ${GOLD}40`, outline: 'none' }}>
             <option value="all" style={{ backgroundColor: '#0a0a0a' }}>ALL</option>
-            {VERTICALS.map(v => <option key={v.id} value={v.id} style={{ backgroundColor: '#0a0a0a' }}>{v.name.toUpperCase()}</option>)}
+            {verticals.map(v => <option key={v.id} value={v.id} style={{ backgroundColor: '#0a0a0a' }}>{v.name.toUpperCase()}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-1">

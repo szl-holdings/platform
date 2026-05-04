@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useApiData } from '../hooks/useApiData';
@@ -156,9 +156,8 @@ function fmt(ts: string) {
 }
 
 export function ProofLedger() {
-  const { data } = useApiData<{ chains: ProofChain[] }>('/pages/proof-ledger', { chains: DEMO_CHAINS });
-  const CHAINS = data.chains;
-  const [selectedChain, setSelectedChain] = useState(CHAINS[0]?.id ?? '');
+  const { data, loading, error } = useApiData<{ chains: ProofChain[] }>('/pages/proof-ledger', { chains: DEMO_CHAINS });
+  const [selectedChain, setSelectedChain] = useState('');
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff' | 'reliquary'>('chain');
   const [replayStep, setReplayStep] = useState(0);
@@ -167,8 +166,24 @@ export function ProofLedger() {
   const [attestationList, setAttestationList] = useState<ReliquaryAttestation[] | null>(null);
 
   const { data: reliquaryAttestations } = useApiData<ReliquaryAttestation[]>('/reliquary/attestations', []);
+
+  useEffect(() => {
+    if (data?.chains?.[0]?.id && !selectedChain) setSelectedChain(data.chains[0].id);
+  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const attestations = attestationList ?? (Array.isArray(reliquaryAttestations) ? reliquaryAttestations : []);
 
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading proof ledger…' : (error ?? 'Failed to load proof ledger')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const CHAINS = data.chains;
   const chain = CHAINS.find(c => c.id === selectedChain) ?? CHAINS[0];
 
   async function handleVerify(id: number) {

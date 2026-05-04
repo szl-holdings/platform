@@ -354,6 +354,7 @@ export function ModelRouter() {
   const [models, setModels] = useState<ModelsData | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const [recipeSearch, setRecipeSearch] = useState('');
   const [recipeDomain, setRecipeDomain] = useState('All');
@@ -362,14 +363,14 @@ export function ModelRouter() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/models`).then(r => r.json()),
-      fetch(`${API}/models/health`).then(r => r.json()),
+      fetch(`${API}/models`).then(r => { if (!r.ok) throw new Error(`Models HTTP ${r.status}`); return r.json(); }),
+      fetch(`${API}/models/health`).then(r => { if (!r.ok) throw new Error(`Health HTTP ${r.status}`); return r.json(); }),
     ])
       .then(([m, h]) => {
         if (m.ok) setModels(m.data);
         if (h.ok) setHealth(h.data);
       })
-      .catch(() => {})
+      .catch(e => setFetchError(e instanceof Error ? e.message : 'Failed to load'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -377,26 +378,7 @@ export function ModelRouter() {
   const totalCallsToday = models?.models.reduce((s, m) => s + m.callsToday, 0) ?? 0;
   const avgLatency = activeModels.length ? Math.round(activeModels.reduce((s, m) => s + m.avgLatencyMs, 0) / activeModels.length) : 0;
 
-  const SEED_COST_TODAY = (() => {
-    const perRecipeCost: Record<string, number> = {
-      'deep_reasoning': 0.048, 'long_context': 0.062, 'fast_triage': 0.004,
-      'code_analysis': 0.018, 'document_analysis': 0.031, 'eval_judge': 0.044,
-      'board_packet': 0.057, 'proof_reconstruction': 0.071,
-    };
-    const dailyCallsPerCategory: Record<string, number> = {
-      'deep_reasoning': 14, 'long_context': 6, 'fast_triage': 47,
-      'code_analysis': 9, 'document_analysis': 11, 'eval_judge': 23,
-      'board_packet': 4, 'proof_reconstruction': 3,
-    };
-    return INFERENCE_RECIPES.reduce((sum, r) => {
-      const cost = perRecipeCost[r.taskCategory] ?? 0.02;
-      const calls = dailyCallsPerCategory[r.taskCategory] ?? 8;
-      return sum + cost * calls;
-    }, 0);
-  })();
-
-  const displayCost = models?.models.reduce((s, m) => s + m.costToday, 0)
-    ?? SEED_COST_TODAY;
+  const displayCost = models?.models.reduce((s, m) => s + m.costToday, 0) ?? null;
 
   const filteredRecipes = INFERENCE_RECIPES.filter(r => {
     const matchSearch = recipeSearch === '' || [r.name, r.description, r.model, r.domain, r.task, ...r.tags].join(' ').toLowerCase().includes(recipeSearch.toLowerCase());
@@ -417,13 +399,17 @@ export function ModelRouter() {
 
       {loading ? (
         <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading model router…</div>
+      ) : fetchError ? (
+        <div className="mb-8 p-4 rounded-lg border text-xs" style={{ backgroundColor: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)', color: '#f87171' }}>
+          Model router data unavailable — {fetchError}
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             <KpiCard label="MODELS REGISTERED" value={String(models?.models.length ?? 0)} sub={`${activeModels.length} active, ${(models?.models.length ?? 0) - activeModels.length} roadmap`} accent="#c9b787" />
             <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Routed today" accent="#c9b787" />
             <KpiCard label="AVG LATENCY" value={`${avgLatency}ms`} sub="Active models" accent="#b08d52" />
-            <KpiCard label="COST TODAY" value={`$${displayCost.toFixed(2)}`} sub={`${INFERENCE_RECIPES.length} active recipe routes`} accent="#c9b787" />
+            <KpiCard label="COST TODAY" value={displayCost !== null ? `$${displayCost.toFixed(2)}` : 'N/A'} sub={`${INFERENCE_RECIPES.length} active recipe routes`} accent="#c9b787" />
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 mb-10">

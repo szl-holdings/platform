@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VERTICALS, DOMAIN_TWINS, GOVERNANCE_COLORS } from '../../data/fabric';
+import { GOVERNANCE_COLORS } from '../../data/fabric';
 import type { VerticalId, DomainTwin } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -12,18 +13,38 @@ const SURFACE = 'rgba(255,255,255,0.018)';
 const BORDER = 'rgba(255,255,255,0.08)';
 
 export function DomainTwins() {
+  const { data, loading, error } = useFabricData();
   const [verticalFilter, setVerticalFilter] = useState<VerticalId | 'all'>('all');
   const [sortBy, setSortBy] = useState<'health' | 'signals' | 'risks'>('health');
   const [drawerTwin, setDrawerTwin] = useState<DomainTwin | null>(null);
 
-  const filtered = verticalFilter === 'all' ? [...DOMAIN_TWINS] : DOMAIN_TWINS.filter(t => t.verticalId === verticalFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading domain twins…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load twins</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { twins: allTwins, verticals } = data;
+
+  const filtered = verticalFilter === 'all' ? [...allTwins] : allTwins.filter(t => t.verticalId === verticalFilter);
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === 'health') return b.healthScore - a.healthScore;
     if (sortBy === 'signals') return b.signalVolume - a.signalVolume;
     return b.activeRisks - a.activeRisks;
   });
 
-  const avgHealth = Math.round(DOMAIN_TWINS.reduce((s, t) => s + t.healthScore, 0) / DOMAIN_TWINS.length);
+  const avgHealth = allTwins.length ? Math.round(allTwins.reduce((s, t) => s + t.healthScore, 0) / allTwins.length) : 0;
 
   return (
     <Layout>
@@ -35,10 +56,10 @@ export function DomainTwins() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TWINS" value={DOMAIN_TWINS.length} sub="operational" accent={GOLD} />
+        <KpiCard label="TWINS" value={allTwins.length} sub="operational" accent={GOLD} />
         <KpiCard label="AVG HEALTH" value={`${avgHealth}%`} sub="across twins" accent={GOLD} />
-        <KpiCard label="TOTAL SIGNALS" value={DOMAIN_TWINS.reduce((s, t) => s + t.signalVolume, 0)} sub="ingested" accent={GOLD} />
-        <KpiCard label="OPEN APPROVALS" value={DOMAIN_TWINS.reduce((s, t) => s + t.openApprovals, 0)} sub="pending review" accent="#f59e0b" />
+        <KpiCard label="TOTAL SIGNALS" value={allTwins.reduce((s, t) => s + t.signalVolume, 0)} sub="ingested" accent={GOLD} />
+        <KpiCard label="OPEN APPROVALS" value={allTwins.reduce((s, t) => s + t.openApprovals, 0)} sub="pending review" accent="#f59e0b" />
       </div>
 
       <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -51,7 +72,7 @@ export function DomainTwins() {
           >
             ALL
           </button>
-          {VERTICALS.map(v => (
+          {verticals.map(v => (
             <button
               key={v.id}
               onClick={() => setVerticalFilter(v.id)}
@@ -74,7 +95,7 @@ export function DomainTwins() {
 
       <div className="grid sm:grid-cols-2 gap-4 mb-8">
         {sorted.map(twin => {
-          const v = VERTICALS.find(vt => vt.id === twin.verticalId);
+          const v = verticals.find(vt => vt.id === twin.verticalId);
           return (
             <div
               key={twin.id}

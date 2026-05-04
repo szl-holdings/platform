@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, SeverityDot, SeverityBadge, VerticalBadge, ActionButton, HashId, VerdictBadge, ApprovalGate } from '../components/ui';
-import { SEED_SIGNALS, SEED_WORKCELLS, SEED_OUTCOMES } from '@workspace/a11oy-fabric';
+
 import { useAlloySignals, useAlloyWorkflows, useAlloyDashboard, useAlloyApprovals } from '../graphql';
 import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -117,23 +117,12 @@ export function CommandSurface() {
         evidenceRefs: [],
       }));
     }
-    return SEED_SIGNALS.map(s => ({
-      id: s.id,
-      vertical: s.vertical,
-      severity: s.severity,
-      status: s.status,
-      title: s.title,
-      description: s.description,
-      detectedAt: s.detectedAt,
-      owner: s.owner,
-      businessImpact: s.businessImpact,
-      evidenceRefs: s.evidenceRefs,
-    }));
+    return [];
   }, [isLive, liveSignals]);
 
   const criticalSignals = signals.filter(s => s.severity === 'critical' || s.severity === 'high').slice(0, 20);
-  const pendingWC = SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running').slice(0, 4);
-  const topOutcomes = SEED_OUTCOMES.slice(0, 6);
+  const pendingWC: NormalizedWorkcell[] = [];
+  const topOutcomes: { id: string; title: string; status: string }[] = [];
 
   const selectedSignal = signals.find(s => s.id === selectedSignalId) ?? null;
 
@@ -155,38 +144,17 @@ export function CommandSurface() {
         steps: wf.steps.map(st => ({ step: st.step, name: st.name, status: st.status })),
       };
     }
-    const wc = SEED_WORKCELLS.find(w => w.signals.includes(selectedSignal.id));
-    if (!wc) return null;
-    return {
-      id: wc.id,
-      name: wc.name,
-      status: wc.status,
-      requiresApproval: wc.requiresApproval,
-      approvalState: 'none',
-      description: wc.objective,
-      domain: wc.vertical,
-      priority: wc.actionBrief.priority,
-      isLive: false,
-      steps: [],
-      actionBrief: wc.actionBrief,
-      mirrorEval: {
-        verdict: wc.mirrorEvalResult.verdict,
-        score: wc.mirrorEvalResult.score,
-        dimensions: wc.mirrorEvalResult.dimensions,
-      },
-      pceContractId: wc.pceContractId,
-      verificationStatus: wc.verificationResult.status,
-    };
+    return null;
   }, [selectedSignal, isLive, liveWorkflows]);
 
   const KPI_STRIP = [
-    { label: 'ACTIVE SIGNALS', value: isLive ? signals.filter(s => s.status === 'active').length : SEED_SIGNALS.filter(s => s.status === 'active' || s.status === 'escalated').length, sub: `${signals.filter(s => s.severity === 'critical').length} critical`, color: '#ef4444' },
-    { label: 'RUNNING WORKCELLS', value: isLive ? (dashboard?.runningRuns ?? 0) : SEED_WORKCELLS.filter(w => w.status === 'running').length, sub: 'active now', color: GOLD },
-    { label: 'PENDING APPROVALS', value: isLive ? liveApprovals.length : SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running').length, sub: 'awaiting gate', color: '#f97316' },
-    { label: 'VERIFIED ACTIONS', value: isLive ? (dashboard?.totalRuns ?? 47) : 47, sub: 'last 24h', color: '#22c55e' },
+    { label: 'ACTIVE SIGNALS', value: signals.filter(s => s.status === 'active').length, sub: `${signals.filter(s => s.severity === 'critical').length} critical`, color: '#ef4444' },
+    { label: 'RUNNING WORKCELLS', value: dashboard?.runningRuns ?? 0, sub: 'active now', color: GOLD },
+    { label: 'PENDING APPROVALS', value: liveApprovals.length, sub: 'awaiting gate', color: '#f97316' },
+    { label: 'VERIFIED ACTIONS', value: dashboard?.totalRuns ?? 0, sub: 'last 24h', color: '#22c55e' },
     { label: 'PROOF COVERAGE', value: '91%', sub: '1,204 of 1,324', color: GOLD },
     { label: 'AGENT TRUST', value: 94, sub: 'avg out of 100', color: GOLD },
-    { label: 'OUTCOMES AT RISK', value: SEED_OUTCOMES.filter(o => o.status === 'blocked' || o.status === 'missed').length, sub: 'blocked or missed', color: '#f97316' },
+    { label: 'OUTCOMES AT RISK', value: 0, sub: 'blocked or missed', color: '#f97316' },
     { label: 'PCE HEALTH', value: '96%', sub: '19 of 20 valid', color: '#22c55e' },
   ];
 
@@ -446,8 +414,16 @@ export function CommandSurface() {
           </div>
 
           <div>
-            <SectionTitle>Pending Approvals ({pendingWC.length})</SectionTitle>
+            <SectionTitle>Pending Approvals ({isLive ? liveApprovals.length : '—'})</SectionTitle>
             <div className="flex flex-col gap-2">
+              {!isLive && (
+                <div className="text-xs py-3 text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  {signalsLoading ? 'Connecting to fabric…' : 'No pending approvals — fabric offline or queue empty.'}
+                </div>
+              )}
+              {isLive && liveApprovals.length === 0 && (
+                <div className="text-xs py-3 text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Approval queue is clear.</div>
+              )}
               {pendingWC.map(wc => (
                 <Card key={wc.id}>
                   <div className="text-xs font-medium mb-1 truncate" style={{ color: 'var(--color-a11oy-text)' }}>{wc.actionBrief.title}</div>
@@ -482,6 +458,11 @@ export function CommandSurface() {
           <div>
             <SectionTitle>Outcome Scorecard</SectionTitle>
             <div className="flex flex-col gap-1.5">
+              {topOutcomes.length === 0 && (
+                <div className="text-xs py-3 text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  {isLive ? 'No outcomes recorded.' : 'Outcome data unavailable — connect outcome API.'}
+                </div>
+              )}
               {topOutcomes.map(o => {
                 const statusColor = STATUS_COLORS[o.status] ?? GOLD;
                 return (

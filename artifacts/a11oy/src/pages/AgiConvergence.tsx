@@ -18,13 +18,14 @@ interface SovereignSummary {
 
 function useSovereignStats() {
   const [stats, setStats] = useState<SovereignSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     fetch(`${API}/sovereign/summary`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d?.data ? setStats(d.data) : null)
-      .catch(() => null);
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => { if (d?.data) setStats(d.data); else throw new Error('Unexpected response'); })
+      .catch(e => setError(e instanceof Error ? e.message : 'Failed to load'));
   }, []);
-  return stats;
+  return { stats, error };
 }
 
 const T = {
@@ -299,7 +300,7 @@ function InnovationCard({ innovation, index }: { innovation: typeof ORIGINAL_INN
 }
 
 export function AgiConvergence() {
-  const liveStats = useSovereignStats();
+  const { stats: liveStats } = useSovereignStats();
 
   return (
     <Layout>

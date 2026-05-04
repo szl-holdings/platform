@@ -3,6 +3,8 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
 import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription } from '../graphql';
 
+const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
+
 type GateDecision = 'approved' | 'blocked' | 'info_requested';
 
 const POLICIES = [
@@ -101,46 +103,64 @@ export function Governance() {
         <div>
           <SectionTitle>Active Policy Gates Pending</SectionTitle>
           <div className="flex flex-col gap-3 mb-6">
-            {PENDING.map(p => {
-              const decision = gateDecisions[p.id];
+            {!IS_DEMO && isLive && pendingApprovals.length === 0 && (
+              <div className="px-4 py-3 rounded-lg text-xs font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#5e5e5e', border: '1px solid rgba(255,255,255,0.06)' }}>
+                No pending approvals in queue — all gates cleared.
+              </div>
+            )}
+            {(() => {
               const DECISION_META: Record<GateDecision, { color: string; label: string }> = {
                 approved: { color: '#22c55e', label: '✓ Approved — execution authorized' },
                 blocked: { color: '#ef4444', label: '✕ Blocked — execution prevented' },
                 info_requested: { color: '#c9b787', label: '⏸ Info requested — gate held' },
               };
-              return (
-                <Card key={p.id}>
-                  <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.policy}</div>
-                  <div className="text-sm font-medium mb-2" style={{ color: 'var(--color-a11oy-text)' }}>{p.action}</div>
-                  <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                    Approver: {p.approver} · Deadline: {p.deadline}
-                  </div>
-                  {decision ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono px-3 py-1.5 rounded" style={{ backgroundColor: `${DECISION_META[decision].color}18`, color: DECISION_META[decision].color, border: `1px solid ${DECISION_META[decision].color}30` }}>
-                        {DECISION_META[decision].label}
-                      </span>
-                      <button
-                        onClick={() => setGateDecisions(prev => { const n = { ...prev }; delete n[p.id]; return n; })}
-                        className="text-xs"
-                        style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
-                      >
-                        Undo
-                      </button>
+              const displayItems = IS_DEMO
+                ? PENDING
+                : isLive
+                  ? pendingApprovals.map(a => ({
+                      id: a.id,
+                      policy: `workflow:${a.workflowId.slice(0, 8)}`,
+                      action: a.reason ?? 'Pending approval required',
+                      approver: a.requiredRoles?.join(', ') ?? 'Reviewer',
+                      deadline: a.expiresAt ? new Date(a.expiresAt).toLocaleTimeString() : 'Open',
+                    }))
+                  : PENDING;
+              return displayItems.map(p => {
+                const decision = gateDecisions[p.id];
+                return (
+                  <Card key={p.id}>
+                    <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.policy}</div>
+                    <div className="text-sm font-medium mb-2" style={{ color: 'var(--color-a11oy-text)' }}>{p.action}</div>
+                    <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      Approver: {p.approver} · Deadline: {p.deadline}
                     </div>
-                  ) : (
-                    <>
-                      <ApprovalGate />
-                      <div className="flex gap-2 mt-2">
-                        <ActionButton variant="primary" onClick={() => decideGate(p.id, 'approved')}>Approve</ActionButton>
-                        <ActionButton variant="ghost" onClick={() => decideGate(p.id, 'info_requested')}>Request Info</ActionButton>
-                        <ActionButton variant="danger" onClick={() => decideGate(p.id, 'blocked')}>Block</ActionButton>
+                    {decision ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono px-3 py-1.5 rounded" style={{ backgroundColor: `${DECISION_META[decision].color}18`, color: DECISION_META[decision].color, border: `1px solid ${DECISION_META[decision].color}30` }}>
+                          {DECISION_META[decision].label}
+                        </span>
+                        <button
+                          onClick={() => setGateDecisions(prev => { const n = { ...prev }; delete n[p.id]; return n; })}
+                          className="text-xs"
+                          style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
+                          Undo
+                        </button>
                       </div>
-                    </>
-                  )}
-                </Card>
-              );
-            })}
+                    ) : (
+                      <>
+                        <ApprovalGate />
+                        <div className="flex gap-2 mt-2">
+                          <ActionButton variant="primary" onClick={() => decideGate(p.id, 'approved')}>Approve</ActionButton>
+                          <ActionButton variant="ghost" onClick={() => decideGate(p.id, 'info_requested')}>Request Info</ActionButton>
+                          <ActionButton variant="danger" onClick={() => decideGate(p.id, 'blocked')}>Block</ActionButton>
+                        </div>
+                      </>
+                    )}
+                  </Card>
+                );
+              });
+            })()}
           </div>
 
           <SectionTitle>Policy Registry</SectionTitle>

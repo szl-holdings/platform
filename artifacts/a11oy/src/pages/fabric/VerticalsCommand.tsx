@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VERTICALS, DOMAIN_TWINS, FABRIC_SIGNALS, FABRIC_RISKS, FABRIC_EVIDENCE, GOVERNANCE_COLORS, SEVERITY_COLORS } from '../../data/fabric';
+import { GOVERNANCE_COLORS, SEVERITY_COLORS } from '../../data/fabric';
 import type { VerticalId, MaturityStage } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';
@@ -12,21 +13,41 @@ const SURFACE = 'rgba(255,255,255,0.018)';
 const BORDER = 'rgba(255,255,255,0.08)';
 
 export function VerticalsCommand() {
+  const { data, loading, error } = useFabricData();
   const [maturityFilter, setMaturityFilter] = useState<MaturityStage | 'all'>('all');
   const [sortBy, setSortBy] = useState<'health' | 'name' | 'signals'>('health');
   const [drawerVertical, setDrawerVertical] = useState<VerticalId | null>(null);
 
-  const filtered = VERTICALS.filter(v => maturityFilter === 'all' || v.maturityStage === maturityFilter);
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading verticals…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load verticals</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { verticals, twins, signals, risks, evidence } = data;
+
+  const filtered = verticals.filter(v => maturityFilter === 'all' || v.maturityStage === maturityFilter);
   const sorted = [...filtered].sort((a, b) => {
-    const ta = DOMAIN_TWINS.find(t => t.verticalId === a.id);
-    const tb = DOMAIN_TWINS.find(t => t.verticalId === b.id);
+    const ta = twins.find(t => t.verticalId === a.id);
+    const tb = twins.find(t => t.verticalId === b.id);
     if (sortBy === 'health') return (tb?.healthScore ?? 0) - (ta?.healthScore ?? 0);
     if (sortBy === 'signals') return (tb?.signalVolume ?? 0) - (ta?.signalVolume ?? 0);
     return a.name.localeCompare(b.name);
   });
 
-  const drawerV = drawerVertical ? VERTICALS.find(v => v.id === drawerVertical) : null;
-  const drawerTwin = drawerVertical ? DOMAIN_TWINS.find(t => t.verticalId === drawerVertical) : null;
+  const drawerV = drawerVertical ? verticals.find(v => v.id === drawerVertical) : null;
+  const drawerTwin = drawerVertical ? twins.find(t => t.verticalId === drawerVertical) : null;
 
   return (
     <Layout>
@@ -38,10 +59,10 @@ export function VerticalsCommand() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="VERTICALS" value={VERTICALS.length} sub="fully configured" accent={GOLD} />
-        <KpiCard label="TOTAL SIGNALS" value={FABRIC_SIGNALS.length} sub="cross-vertical" accent={GOLD} />
-        <KpiCard label="OPEN RISKS" value={FABRIC_RISKS.filter(r => r.status === 'open').length} sub="across verticals" accent="#f59e0b" />
-        <KpiCard label="EVIDENCE" value={FABRIC_EVIDENCE.length} sub="records anchored" accent={GOLD} />
+        <KpiCard label="VERTICALS" value={verticals.length} sub="fully configured" accent={GOLD} />
+        <KpiCard label="TOTAL SIGNALS" value={signals.length} sub="cross-vertical" accent={GOLD} />
+        <KpiCard label="OPEN RISKS" value={risks.filter(r => r.status === 'open').length} sub="across verticals" accent="#f59e0b" />
+        <KpiCard label="EVIDENCE" value={evidence.length} sub="records anchored" accent={GOLD} />
       </div>
 
       <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -83,10 +104,10 @@ export function VerticalsCommand() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {sorted.map(v => {
-          const twin = DOMAIN_TWINS.find(t => t.verticalId === v.id);
-          const sigCount = FABRIC_SIGNALS.filter(s => s.verticalId === v.id).length;
-          const riskCount = FABRIC_RISKS.filter(r => r.verticalId === v.id && r.status === 'open').length;
-          const evCount = FABRIC_EVIDENCE.filter(e => e.verticalId === v.id).length;
+          const twin = twins.find(t => t.verticalId === v.id);
+          const sigCount = signals.filter(s => s.verticalId === v.id).length;
+          const riskCount = risks.filter(r => r.verticalId === v.id && r.status === 'open').length;
+          const evCount = evidence.filter(e => e.verticalId === v.id).length;
           return (
             <div
               key={v.id}
@@ -154,18 +175,14 @@ export function VerticalsCommand() {
             <SectionTitle>Top Signals</SectionTitle>
             <div className="flex flex-col gap-1 mb-4">
               {drawerTwin.topSignals.map((s, i) => (
-                <div key={i} className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: SUB }}>
-                  {s}
-                </div>
+                <div key={i} className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: SUB }}>{s}</div>
               ))}
             </div>
 
             <SectionTitle>Top Risks</SectionTitle>
             <div className="flex flex-col gap-1 mb-4">
               {drawerTwin.topRisks.map((r, i) => (
-                <div key={i} className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: SUB }}>
-                  {r}
-                </div>
+                <div key={i} className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: SUB }}>{r}</div>
               ))}
             </div>
 
@@ -181,18 +198,14 @@ export function VerticalsCommand() {
             <SectionTitle>Core Entities</SectionTitle>
             <div className="flex flex-wrap gap-1 mb-4">
               {drawerV.coreEntities.map(e => (
-                <span key={e} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: SUB }}>
-                  {e}
-                </span>
+                <span key={e} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: SUB }}>{e}</span>
               ))}
             </div>
 
             <SectionTitle>Key Metrics</SectionTitle>
             <div className="flex flex-wrap gap-1 mb-4">
               {drawerV.keyMetrics.map(m => (
-                <span key={m} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: `${GOLD}10`, color: GOLD }}>
-                  {m}
-                </span>
+                <span key={m} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: `${GOLD}10`, color: GOLD }}>{m}</span>
               ))}
             </div>
           </div>

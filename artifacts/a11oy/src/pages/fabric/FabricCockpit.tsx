@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VERTICALS, DOMAIN_TWINS, FABRIC_SIGNALS, FABRIC_RISKS, FABRIC_DECISIONS, deriveFabricKpis, rankRisksByScore, rankSignalsBySeverity, SEVERITY_COLORS, GOVERNANCE_COLORS } from '../../data/fabric';
+import { rankRisksByScore, rankSignalsBySeverity, SEVERITY_COLORS, GOVERNANCE_COLORS } from '../../data/fabric';
 import type { VerticalId } from '../../data/fabric';
+import { useFabricData } from '../../hooks/useFabricData';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const GOLD = '#c9b787';
@@ -12,11 +13,30 @@ const GHOST = '#5e5e5e';
 const SUB = '#8a8a8a';
 
 export function FabricCockpit() {
-  const kpis = deriveFabricKpis();
-  const topRisks = rankRisksByScore(FABRIC_RISKS).slice(0, 8);
-  const latestSignals = rankSignalsBySeverity(FABRIC_SIGNALS).slice(0, 8);
-  const pendingDecs = FABRIC_DECISIONS.filter(d => d.status === 'draft' || d.status === 'awaiting_review').slice(0, 6);
+  const { data, loading, error } = useFabricData();
   const [selectedVertical, setSelectedVertical] = useState<string | null>(null);
+
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64">
+        <span className="text-sm font-mono" style={{ color: GHOST }}>Loading fabric data…</span>
+      </div>
+    </Layout>
+  );
+
+  if (error) return (
+    <Layout>
+      <div className="flex items-center justify-center h-64 flex-col gap-2">
+        <span className="text-sm font-mono" style={{ color: '#ef4444' }}>Failed to load fabric data</span>
+        <span className="text-xs font-mono" style={{ color: GHOST }}>{error}</span>
+      </div>
+    </Layout>
+  );
+
+  const { kpis, risks, decisions, signals, twins, verticals } = data;
+  const topRisks = rankRisksByScore(risks).slice(0, 8);
+  const latestSignals = rankSignalsBySeverity(signals).slice(0, 8);
+  const pendingDecs = decisions.filter(d => d.status === 'draft' || d.status === 'awaiting_review').slice(0, 6);
 
   return (
     <Layout>
@@ -46,11 +66,11 @@ export function FabricCockpit() {
 
       <SectionTitle>Vertical Command Map</SectionTitle>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-        {VERTICALS.map(v => {
-          const twin = DOMAIN_TWINS.find(t => t.verticalId === v.id);
+        {verticals.map(v => {
+          const twin = twins.find(t => t.verticalId === v.id);
           if (!twin) return null;
-          const sigCount = FABRIC_SIGNALS.filter(s => s.verticalId === v.id).length;
-          const riskCount = FABRIC_RISKS.filter(r => r.verticalId === v.id && (r.status === 'open' || r.status === 'mitigating')).length;
+          const sigCount = signals.filter(s => s.verticalId === v.id).length;
+          const riskCount = risks.filter(r => r.verticalId === v.id && (r.status === 'open' || r.status === 'mitigating')).length;
           const isSelected = selectedVertical === v.id;
           return (
             <div
@@ -98,9 +118,9 @@ export function FabricCockpit() {
         <div>
           <SectionTitle>Top Cross-Vertical Risks</SectionTitle>
           <div className="flex flex-col gap-2">
-            {topRisks.map(r => (
+            {topRisks.map((r, idx) => (
               <div key={r.id} className="rounded border p-3 flex items-start gap-3" style={{ backgroundColor: 'rgba(255,255,255,0.018)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 font-mono text-xs font-bold" style={{ backgroundColor: `${SEVERITY_COLORS[FABRIC_RISKS.indexOf(r) < 3 ? 'critical' : 'high']}18`, color: SEVERITY_COLORS[FABRIC_RISKS.indexOf(r) < 3 ? 'critical' : 'high'] }}>
+                <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 font-mono text-xs font-bold" style={{ backgroundColor: `${SEVERITY_COLORS[idx < 3 ? 'critical' : 'high']}18`, color: SEVERITY_COLORS[idx < 3 ? 'critical' : 'high'] }}>
                   {r.riskScore}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -170,8 +190,8 @@ export function FabricCockpit() {
         <div>
           <SectionTitle>Domain Command Twins</SectionTitle>
           <div className="flex flex-col gap-2">
-            {DOMAIN_TWINS.map(t => {
-              const v = VERTICALS.find(vt => vt.id === t.verticalId);
+            {twins.map(t => {
+              const v = verticals.find(vt => vt.id === t.verticalId);
               return (
                 <div key={t.id} className="rounded border p-3 flex items-center gap-3" style={{ backgroundColor: 'rgba(255,255,255,0.018)', borderColor: 'rgba(255,255,255,0.08)' }}>
                   <span style={{ color: v?.colorToken ?? GOLD }}>{v?.icon}</span>

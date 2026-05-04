@@ -35,20 +35,28 @@ const VERTICALS = ['A11oy', 'DOMAINE', 'Sentra', 'SEXTANT', 'Conduit', 'Counsel'
 const GPU_TYPES = ['H100 SXM', 'A100 80G', 'H200 141G', 'L40S'] as const;
 const METRICS = ['latency_p99', 'throughput_rps', 'error_rate', 'cache_hit_ratio', 'queue_depth', 'memory_pressure'] as const;
 
+const WORKLOAD_UTILIZATIONS = [72, 85, 64, 91, 58, 79, 88, 43];
+const WORKLOAD_LATENCIES    = [45, 12, 78, 22, 35, 62, 28, 91];
+const WORKLOAD_THROUGHPUTS  = [842, 1240, 380, 960, 520, 710, 1100, 290];
+const WORKLOAD_ANOMALIES    = [18, 42, 7, 68, 31, 55, 12, 84];
+const WORKLOAD_AGE_SECS     = [1800, 720, 3200, 400, 2100, 900, 1500, 3600];
+
 function generateWorkloads(): ComputeWorkload[] {
   return VERTICALS.map((v, i) => ({
     id: `wl-${i}`,
-    name: `${v.toLowerCase()}-inference-${Math.floor(Math.random() * 100)}`,
+    name: `${v.toLowerCase()}-inference-${String(i + 1).padStart(2, '0')}`,
     vertical: v,
     status: (['running', 'running', 'running', 'queued', 'complete', 'running'] as const)[i % 6],
     gpuType: GPU_TYPES[i % GPU_TYPES.length],
-    utilization: Math.floor(30 + Math.random() * 65),
-    latencyMs: Math.floor(10 + Math.random() * 150),
-    throughput: Math.floor(100 + Math.random() * 900),
-    anomalyScore: Math.floor(Math.random() * 100),
-    startedAt: Date.now() - Math.floor(Math.random() * 3600000),
+    utilization: WORKLOAD_UTILIZATIONS[i % WORKLOAD_UTILIZATIONS.length],
+    latencyMs: WORKLOAD_LATENCIES[i % WORKLOAD_LATENCIES.length],
+    throughput: WORKLOAD_THROUGHPUTS[i % WORKLOAD_THROUGHPUTS.length],
+    anomalyScore: WORKLOAD_ANOMALIES[i % WORKLOAD_ANOMALIES.length],
+    startedAt: Date.now() - WORKLOAD_AGE_SECS[i % WORKLOAD_AGE_SECS.length] * 1000,
   }));
 }
+
+const ANOMALY_SCORES = [82, 34, 67, 91, 28, 55, 73, 19, 46, 88, 61, 38];
 
 function generateAnomalySignals(): AnomalySignal[] {
   const now = Date.now();
@@ -57,7 +65,7 @@ function generateAnomalySignals(): AnomalySignal[] {
     timestamp: now - i * 45000,
     source: VERTICALS[i % VERTICALS.length],
     metric: METRICS[i % METRICS.length],
-    score: Math.floor(15 + Math.random() * 80),
+    score: ANOMALY_SCORES[i % ANOMALY_SCORES.length],
     direction: (['up', 'down', 'spike'] as const)[i % 3],
     description: [
       'Latency spike detected in graph rendering pipeline',
@@ -79,7 +87,7 @@ function generateAnomalySignals(): AnomalySignal[] {
 function generateForecast(): ForecastPoint[] {
   return Array.from({ length: 48 }, (_, i) => {
     const base = 500 + Math.sin(i / 6) * 200 + Math.cos(i / 12) * 100;
-    const noise = (Math.random() - 0.5) * 80;
+    const noise = Math.sin(i * 1.3) * 40;
     const actual = i < 36 ? Math.max(0, Math.floor(base + noise)) : 0;
     const predicted = Math.floor(base);
     return {

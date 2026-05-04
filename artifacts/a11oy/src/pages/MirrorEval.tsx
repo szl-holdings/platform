@@ -175,13 +175,23 @@ function ModelRadar({ models }: { models: Array<{ model: string; avgComposite: n
 }
 
 export function MirrorEval() {
-  const { data: apiData, loading } = useApiData<EvalsData>('/pages/mirror-eval', DEMO_EVALS_DATA);
-  const data = apiData;
+  const { data: apiData, loading, error } = useApiData<EvalsData>('/pages/mirror-eval', DEMO_EVALS_DATA);
   const [selected, setSelected] = useState<EvalResult | null>(null);
   const [filterDisp, setFilterDisp] = useState('all');
   const [regressionView, setRegressionView] = useState<'7d' | '30d'>('7d');
 
-  const filtered = data?.evals.filter(e => filterDisp === 'all' || e.disposition === filterDisp) ?? [];
+  if (!apiData) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading eval dashboard…' : (error ?? 'Failed to load eval data')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const data = apiData;
+  const filtered = data.evals.filter(e => filterDisp === 'all' || e.disposition === filterDisp);
   const regressionData = regressionView === '7d' ? REGRESSION_7D : REGRESSION_30D.map((d, i) => ({ ...d, label: `D${i + 1}` }));
 
   return (

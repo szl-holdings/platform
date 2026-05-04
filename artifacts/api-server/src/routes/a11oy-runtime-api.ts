@@ -54,7 +54,7 @@ import { randomUUID } from 'node:crypto';
 const router = Router();
 const now = () => new Date().toISOString();
 
-const DEMO_MODE = process.env.A11OY_DEMO_MODE !== 'false';
+const DEMO_MODE = process.env.A11OY_DEMO_MODE === 'true';
 
 const LIVE_ACTIONS: Array<{
   id: string;

@@ -94,14 +94,24 @@ function RiskBadge({ level }: { level: string }) {
 }
 
 export function ConnectorFirewall() {
-  const { data } = useApiData<{ connectors: AgentGatewayEntry[]; modelArmorEvents: ModelArmorEvent[]; agentFlows: AgentFlow[] }>('/pages/gateway', { connectors: DEMO_CONNECTORS, modelArmorEvents: DEMO_MODEL_ARMOR_EVENTS, agentFlows: DEMO_AGENT_FLOWS });
-  const CONNECTORS = data.connectors;
-  const MODEL_ARMOR_EVENTS = data.modelArmorEvents;
-  const AGENT_FLOWS = data.agentFlows;
+  const { data, loading, error } = useApiData<{ connectors: AgentGatewayEntry[]; modelArmorEvents: ModelArmorEvent[]; agentFlows: AgentFlow[] }>('/pages/gateway', { connectors: DEMO_CONNECTORS, modelArmorEvents: DEMO_MODEL_ARMOR_EVENTS, agentFlows: DEMO_AGENT_FLOWS });
   const [selected, setSelected] = useState<AgentGatewayEntry | null>(null);
   const [activeTab, setActiveTab] = useState<'registry' | 'armor' | 'atc'>('registry');
   const [filterRisk, setFilterRisk] = useState('all');
 
+  if (!data) {
+    return (
+      <Layout>
+        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
+          {loading ? 'Loading connector gateway…' : (error ?? 'Failed to load connector gateway')}
+        </div>
+      </Layout>
+    );
+  }
+
+  const CONNECTORS = data.connectors;
+  const MODEL_ARMOR_EVENTS = data.modelArmorEvents;
+  const AGENT_FLOWS = data.agentFlows;
   const filtered = CONNECTORS.filter(c => filterRisk === 'all' || c.riskLevel === filterRisk);
   const totalBlocked = MODEL_ARMOR_EVENTS.reduce((a, e) => a + e.blocked, 0);
 

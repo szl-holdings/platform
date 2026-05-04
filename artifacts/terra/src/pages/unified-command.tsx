@@ -122,24 +122,34 @@ function formatTimeSince(isoDate: string | null): string {
 }
 
 export default function UnifiedCommandDashboard() {
-  const { data: rawLyteActions } = useStandardQuery({
+  const {
+    data: rawLyteActions,
+    isPending: lyteLoading,
+    isError: lyteError,
+  } = useStandardQuery({
     queryKey: ['unified-lyte-actions'],
     queryFn: () => apiFetch<LyteAction[]>('/lyte/actions?state=new'),
-    placeholderData: [],
   });
 
-  const { data: rawVesselEvents } = useStandardQuery({
+  const {
+    data: rawVesselEvents,
+    isPending: vesselLoading,
+    isError: vesselError,
+  } = useStandardQuery({
     queryKey: ['unified-vessel-events'],
     queryFn: () => apiFetch<VesselEvent[]>('/vessels/events?status=open'),
-    placeholderData: [],
   });
 
-  const { data: rawTerraSignals } = useStandardQuery({
+  const {
+    data: rawTerraSignals,
+    isPending: terraLoading,
+    isError: terraError,
+  } = useStandardQuery({
     queryKey: ['unified-terra-signals'],
     queryFn: () => apiFetch<TerraSignal[]>('/terra/signals'),
-    placeholderData: [],
   });
 
+  const isLoading = lyteLoading || vesselLoading || terraLoading;
   const lyteActions: LyteAction[] = rawLyteActions ?? [];
   const vesselEvents: VesselEvent[] = rawVesselEvents ?? [];
   const terraSignals: TerraSignal[] = rawTerraSignals ?? [];
@@ -185,7 +195,26 @@ export default function UnifiedCommandDashboard() {
       })),
     },
     workflows: { recentRuns: [] as WorkflowRun[] },
-    recommendations: [] as Recommendation[],
+    recommendations: [
+      ...lyteActions.slice(0, 2).map((a, i) => ({
+        id: `lyte-${String((a as Record<string,unknown>).id ?? i)}`,
+        domain: 'lyte' as const,
+        priority: (a.priority as string) ?? 'high',
+        text: (a.title ?? (a as Record<string,unknown>).name ?? 'KORA action requires attention') as string,
+      })),
+      ...vesselEvents.slice(0, 1).map((e, i) => ({
+        id: `vessel-${String((e as Record<string,unknown>).id ?? i)}`,
+        domain: 'vessels' as const,
+        priority: (e.severity as string) ?? 'medium',
+        text: (e.title ?? (e as Record<string,unknown>).name ?? 'Vessel event requires review') as string,
+      })),
+      ...terraSignals.slice(0, 1).map((s, i) => ({
+        id: `terra-${String((s as Record<string,unknown>).id ?? i)}`,
+        domain: 'terra' as const,
+        priority: (s.severity as string) ?? 'medium',
+        text: (s.title ?? (s as Record<string,unknown>).name ?? 'Terra signal detected') as string,
+      })),
+    ],
   };
 
   return (
@@ -201,8 +230,22 @@ export default function UnifiedCommandDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-slate-500">
-          <Activity className="w-3 h-3 text-emerald-400" />
-          Live
+          {isLoading ? (
+            <>
+              <Clock className="w-3 h-3 animate-spin text-slate-500" />
+              Loading…
+            </>
+          ) : (lyteError || vesselError || terraError) ? (
+            <>
+              <Activity className="w-3 h-3 text-amber-400" />
+              <span className="text-amber-400">Partial data</span>
+            </>
+          ) : (
+            <>
+              <Activity className="w-3 h-3 text-emerald-400" />
+              Live
+            </>
+          )}
         </div>
       </div>
 
@@ -231,7 +274,13 @@ export default function UnifiedCommandDashboard() {
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-amber-400" />
             <span className="text-sm font-semibold text-amber-400">KORA — Business Command</span>
+            {lyteError && <span className="ml-auto text-[10px] text-amber-600 font-normal">API error</span>}
+            {lyteLoading && <span className="ml-auto text-[10px] text-slate-500 font-normal">Loading…</span>}
           </div>
+          {lyteError && !lyteLoading ? (
+            <div className="text-[11px] text-amber-600/70 py-4 text-center">KORA data unavailable — API error</div>
+          ) : (
+          <>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <div className="text-2xl font-bold text-amber-400">{data.lyte.openActions}</div>
@@ -248,16 +297,14 @@ export default function UnifiedCommandDashboard() {
           <div className="mt-3 space-y-1.5">
             {data.lyte.topActions.map((action, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${action.priority === 'urgent' ? 'bg-red-400' : 'bg-orange-400'}`}
-                />
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${action.priority === 'urgent' ? 'bg-red-400' : 'bg-orange-400'}`} />
                 <span className="truncate">{action.title}</span>
-                <span className="ml-auto text-amber-400/80 flex-shrink-0">
-                  {formatCurrency(action.valueAtRisk)}
-                </span>
+                <span className="ml-auto text-amber-400/80 flex-shrink-0">{formatCurrency(action.valueAtRisk)}</span>
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
 
         <div
@@ -268,16 +315,20 @@ export default function UnifiedCommandDashboard() {
           <div className="flex items-center gap-2 mb-3">
             <Ship className="w-4 h-4 text-sky-400" />
             <span className="text-sm font-semibold text-sky-400">SEXTANT — Maritime Command</span>
+            {vesselError && <span className="ml-auto text-[10px] text-sky-600 font-normal">API error</span>}
+            {vesselLoading && <span className="ml-auto text-[10px] text-slate-500 font-normal">Loading…</span>}
           </div>
+          {vesselError && !vesselLoading ? (
+            <div className="text-[11px] text-sky-600/70 py-4 text-center">SEXTANT data unavailable — API error</div>
+          ) : (
+          <>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <div className="text-2xl font-bold text-red-400">{data.vessels.criticalEvents}</div>
               <div className="text-[10px] text-slate-500">Critical Events</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-400">
-                {data.vessels.openExceptions}
-              </div>
+              <div className="text-2xl font-bold text-orange-400">{data.vessels.openExceptions}</div>
               <div className="text-[10px] text-slate-500">Open Exceptions</div>
             </div>
           </div>
@@ -287,18 +338,14 @@ export default function UnifiedCommandDashboard() {
           <div className="mt-3 space-y-1.5">
             {data.vessels.topEvents.map((ev, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ev.severity === 'critical' ? 'bg-red-400' : 'bg-amber-400'}`}
-                />
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ev.severity === 'critical' ? 'bg-red-400' : 'bg-amber-400'}`} />
                 <span className="truncate">{ev.title}</span>
-                {ev.impact > 0 && (
-                  <span className="ml-auto text-sky-400/80 flex-shrink-0">
-                    {formatCurrency(ev.impact)}
-                  </span>
-                )}
+                {ev.impact > 0 && <span className="ml-auto text-sky-400/80 flex-shrink-0">{formatCurrency(ev.impact)}</span>}
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
 
         <div
@@ -309,7 +356,13 @@ export default function UnifiedCommandDashboard() {
           <div className="flex items-center gap-2 mb-3">
             <Navigation className="w-4 h-4 text-orange-400" />
             <span className="text-sm font-semibold text-orange-400">TERRA — Broker Platform</span>
+            {terraError && <span className="ml-auto text-[10px] text-orange-600 font-normal">API error</span>}
+            {terraLoading && <span className="ml-auto text-[10px] text-slate-500 font-normal">Loading…</span>}
           </div>
+          {terraError && !terraLoading ? (
+            <div className="text-[11px] text-orange-600/70 py-4 text-center">TERRA data unavailable — API error</div>
+          ) : (
+          <>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
               <div className="text-2xl font-bold text-orange-400">{data.terra.activeListings}</div>
@@ -320,27 +373,21 @@ export default function UnifiedCommandDashboard() {
               <div className="text-[10px] text-slate-500">Stalled Deals</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-emerald-400">
-                {formatCurrency(data.terra.pipelineValue)}
-              </div>
+              <div className="text-2xl font-bold text-emerald-400">{formatCurrency(data.terra.pipelineValue)}</div>
               <div className="text-[10px] text-slate-500">Pipeline</div>
             </div>
           </div>
           <div className="mt-3 space-y-1.5">
             {data.terra.topSignals.map((s, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.severity === 'critical' ? 'bg-red-400' : 'bg-orange-400'}`}
-                />
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.severity === 'critical' ? 'bg-red-400' : 'bg-orange-400'}`} />
                 <span className="truncate">{s.title}</span>
-                {s.impact > 0 && (
-                  <span className="ml-auto text-orange-400/80 flex-shrink-0">
-                    {formatCurrency(s.impact)}
-                  </span>
-                )}
+                {s.impact > 0 && <span className="ml-auto text-orange-400/80 flex-shrink-0">{formatCurrency(s.impact)}</span>}
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
       </div>
 
@@ -351,6 +398,9 @@ export default function UnifiedCommandDashboard() {
             <span className="text-sm font-semibold text-white">AI Recommendation Feed</span>
           </div>
           <div className="space-y-3">
+            {data.recommendations.length === 0 && (
+              <p className="text-[11px] text-slate-500 py-2">No recommendations available — connect domain APIs to generate live recommendations.</p>
+            )}
             {data.recommendations.map((rec) => (
               <div
                 key={rec.id}
@@ -399,6 +449,9 @@ export default function UnifiedCommandDashboard() {
             </a>
           </div>
           <div className="space-y-2.5">
+            {data.workflows.recentRuns.length === 0 && (
+              <p className="text-[11px] text-slate-500 py-2">No recent workflow runs — workflow history will appear here once runs complete.</p>
+            )}
             {data.workflows.recentRuns.map((wf) => (
               <div
                 key={wf.id}

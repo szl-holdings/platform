@@ -28,6 +28,7 @@ import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
+import a11oyDomainFabricRouter from "./a11oy-domain-fabric-api.js";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
@@ -255,17 +256,24 @@ router.use(internalA11oyRouter);
 // GET /api/internal/a11oy/defense/{precision-ai|weaponized-intel|agent-zero-trust|atlas-shield|swarm-orchestrator|playbook-engine}.
 router.use(internalA11oyDefenseRouter);
 
+// A11oy Domain Fabric API — fabric data routes for domain twins, signals, risks, decisions,
+// outcomes, evidence, verticals, agents, roadmap, and page-specific summaries.
+// Resolves to /api/a11oy/fabric/*, /api/a11oy/pages/identity, /api/a11oy/pages/rag, etc.
+// Mounted before agentic-pages so live fabric routes win over seed-backed overlapping paths.
+router.use('/a11oy', a11oyDomainFabricRouter);
+
+// A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
+router.use('/a11oy', a11oyDoctrineRouter);
+
 // A11oy Agentic Pages API — seed data endpoints for the 9 agentic frontend pages
 // (A2A Interop, Agent Identity, Self-Optimization, Security Agents, Gateway, Proof Ledger, Memory, Signal Mesh).
+// Mounted after domain-fabric so any overlapping paths resolve to live fabric data first.
 router.use('/a11oy', a11oyAgenticPagesRouter);
 
 // A11oy Reliquary — provenance-bound content-addressed cache spine.
 // Real SHA-256 hashing, disk I/O, DB lineage edges, Merkle-root attestations, sovereign mode.
 // Owns /api/reliquary/* endpoints (catalog, put, get, covenant, snapshot, replay, lineage, attest, sovereign, seed).
 router.use(lazyMatch("/reliquary", () => import("./reliquary"), "reliquary"));
-
-// A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
-router.use('/a11oy', a11oyDoctrineRouter);
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.
