@@ -1,0 +1,17 @@
+{
+  "name": "EU AI Act Article 12 Audit Dataset",
+  "version": "2024-Q4",
+  "records": 14820,
+  "schema": [
+    "incident_id",
+    "description",
+    "severity",
+    "eu_act_article",
+    "remediation"
+  ],
+  "sources": [
+    "ENISA reports",
+    "Member state disclosures",
+    "Industry submissions"
+  ]
+}

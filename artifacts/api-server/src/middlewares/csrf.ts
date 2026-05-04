@@ -202,6 +202,12 @@ function isExempt(path: string): boolean {
   // Carlota Jo, KORA (lyte-command-center), and the NEXUS Bridge without a
   // browser session. CSRF double-submit is not applicable.
   if (path.startsWith('/api/praxis-tools/') || path.startsWith('/praxis-tools/')) return true;
+  // Reliquary — provenance-bound cache spine. All mutations are content-addressed
+  // (idempotent by SHA-256 hash) and governance-bound; no per-user session data is
+  // read or mutated. CSRF double-submit is not applicable: there is no user-specific
+  // state that an attacker could hijack. Mutating routes additionally carry
+  // authMiddleware({ required: false }) so sessions are attached when available.
+  if (path.startsWith('/api/reliquary/')) return true;
   // LaaS v1 guard — public Lambda-as-a-Service endpoint. Stateless, Zod-validated,
   // no PII or session. Receipts returned to caller; no server-side persistence.
   if (path === '/api/v1/guard' || path.startsWith('/api/v1/guard/')) return true;

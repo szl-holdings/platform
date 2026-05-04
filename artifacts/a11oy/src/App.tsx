@@ -190,6 +190,11 @@ const AlertTriage = lazy(() => import('./pages/AlertTriage').then(m => ({ defaul
 const CostAwareMonitoring = lazy(() => import('./pages/CostAwareMonitoring').then(m => ({ default: m.CostAwareMonitoring })));
 const AndeanOrchestration = lazy(() => import('./pages/AndeanOrchestration').then(m => ({ default: m.AndeanOrchestration })));
 const RuntimeCommandCenter = lazy(() => import('./pages/RuntimeCommandCenter').then(m => ({ default: m.RuntimeCommandCenter })));
+const VaultBrowser = lazy(() => import('./pages/reliquary/VaultBrowser').then(m => ({ default: m.VaultBrowser })));
+const LineageGraph = lazy(() => import('./pages/reliquary/LineageGraph').then(m => ({ default: m.LineageGraph })));
+const SnapshotReplay = lazy(() => import('./pages/reliquary/SnapshotReplay').then(m => ({ default: m.SnapshotReplay })));
+const SovereignMode = lazy(() => import('./pages/reliquary/SovereignMode').then(m => ({ default: m.SovereignMode })));
+const ReliquaryDoctrine = lazy(() => import('./pages/reliquary/ReliquaryDoctrine').then(m => ({ default: m.ReliquaryDoctrine })));
 
 
 export default function App() {
@@ -385,6 +390,22 @@ export default function App() {
         </Route>
         <Route path={`${base}/andean-orchestration`}>
           <WithShell><AndeanOrchestration /></WithShell>
+        </Route>
+
+        <Route path={`${base}/reliquary/vault`}>
+          <WithShell><VaultBrowser /></WithShell>
+        </Route>
+        <Route path={`${base}/reliquary/lineage`}>
+          <WithShell><LineageGraph /></WithShell>
+        </Route>
+        <Route path={`${base}/reliquary/snapshots`}>
+          <WithShell><SnapshotReplay /></WithShell>
+        </Route>
+        <Route path={`${base}/reliquary/sovereign`}>
+          <WithShell><SovereignMode /></WithShell>
+        </Route>
+        <Route path={`${base}/reliquary/doctrine`}>
+          <WithShell><ReliquaryDoctrine /></WithShell>
         </Route>
 
         <Route path={`${base}/atlas`}>

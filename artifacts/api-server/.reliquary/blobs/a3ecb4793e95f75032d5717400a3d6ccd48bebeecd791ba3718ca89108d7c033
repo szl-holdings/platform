@@ -1,0 +1,16 @@
+{
+  "id": "compliance-sentinel-v3",
+  "role": "Compliance Sentinel",
+  "capabilities": [
+    "eu-ai-act-audit",
+    "nist-rmf-eval",
+    "proof-compilation"
+  ],
+  "modelRevision": "265e3e4a12050c51475715c422fa42ed6240d53bf6e34a3b79cad78bc26ac700",
+  "promptRevision": "05a9ba5354c756aa41cb8ee0dbac1e5e43d7d25695476da5dc43d6b663672f80",
+  "policyConstraints": [
+    "covenant:governance-v3",
+    "covenant:export-safe"
+  ],
+  "maxAutonomy": "level-2"
+}

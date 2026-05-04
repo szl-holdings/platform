@@ -437,6 +437,13 @@ const PUBLIC_PREFIXES = [
   // Phase 2 will add session-gated write paths; the prefix bypass is intentional
   // for now so the A11oy demo renders without a session.
   "/api/a11oy/",
+  // A11oy Reliquary — provenance-bound, content-addressed cache spine. Public prefix
+  // bypasses this enforcer so route handlers can apply per-route governance: all
+  // read-only GET routes are unrestricted; mutating POST routes (put, snapshot, attest,
+  // sovereign toggle, seed) each carry authMiddleware({ required: false }) which attaches
+  // session context when available and enriches the covenant audit trail. Mutations are
+  // content-addressed (idempotent by SHA-256) so no per-user state can be hijacked.
+  "/api/reliquary/",
   // n8n Automation Bridge — MCP-compatible proxy to a connected n8n instance.
   // Public so the Command Automations surface renders in demo mode without a
   // session. When N8N_INSTANCE_URL/N8N_API_KEY are not set, the proxy returns

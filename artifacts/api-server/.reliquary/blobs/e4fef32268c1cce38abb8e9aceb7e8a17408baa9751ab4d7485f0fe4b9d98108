@@ -1,0 +1,8 @@
+{
+  "sourceId": "2b2f4168d2a94ab2af0c02a702506659ae7996837f15ed07f144a8abf2aebc68",
+  "model": "text-embedding-3-large",
+  "dimension": 3072,
+  "chunkCount": 14820,
+  "indexType": "hnsw",
+  "createdAt": "2026-05-04T16:47:31.678Z"
+}

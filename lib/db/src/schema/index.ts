@@ -213,3 +213,4 @@ export * from './os_layer';
 export * from './model_passports';
 export * from './hf_pinned';
 export * from './model_passport_lenses';
+export * from './reliquary';

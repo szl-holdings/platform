@@ -732,6 +732,9 @@ importers:
       '@workspace/a11oy-fabric':
         specifier: workspace:*
         version: link:../../lib/a11oy-fabric
+      '@workspace/a11oy-reliquary':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-reliquary
       '@workspace/aef-domain-profiles':
         specifier: workspace:*
         version: link:../../packages/aef-domain-profiles
@@ -2963,6 +2966,19 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/a11oy-reliquary:
+    dependencies:
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../../lib/db
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -20111,7 +20127,7 @@ snapshots:
   '@types/compression@1.8.1':
     dependencies:
       '@types/express': 5.0.6
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/connect@3.4.38':
     dependencies:
@@ -20129,7 +20145,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/d3-array@3.2.2': {}
 
@@ -20348,7 +20364,7 @@ snapshots:
 
   '@types/nodemailer@7.0.11':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/pako@2.0.4': {}
 
@@ -20356,7 +20372,7 @@ snapshots:
 
   '@types/pdfkit@0.17.5':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/pg-pool@2.0.7':
     dependencies:
@@ -20460,13 +20476,13 @@ snapshots:
 
   '@types/web-push@3.6.4':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/yargs-parser@21.0.3': {}
 

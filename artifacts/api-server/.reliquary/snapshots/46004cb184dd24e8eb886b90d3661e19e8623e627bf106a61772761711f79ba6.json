@@ -1,0 +1,64 @@
+{
+  "label": "Demo Seed Snapshot — Full Governance Stack",
+  "entries": [
+    {
+      "artifactId": "2",
+      "contentHash": "05a9ba5354c756aa41cb8ee0dbac1e5e43d7d25695476da5dc43d6b663672f80",
+      "covenantHash": "0d13a5e0f6e08e09c092951619528f811d3e44be536e443ee440ab1b14f568d5",
+      "label": "Governed Reasoning Prompt v7",
+      "artifactType": "prompt"
+    },
+    {
+      "artifactId": "1",
+      "contentHash": "265e3e4a12050c51475715c422fa42ed6240d53bf6e34a3b79cad78bc26ac700",
+      "covenantHash": "5f0f0ab95274837b15e80448e907a306c173ce7e2e55e26ffb0b7f6889f228a1",
+      "label": "GPT-4o A11oy Fine-tune v2",
+      "artifactType": "model"
+    },
+    {
+      "artifactId": "8",
+      "contentHash": "29e9bb0767db42aa42687ad9563ed8855e242ef07a81a72e73e1a145471f104c",
+      "covenantHash": "dab1da095199f9487714e212baf356217f2dfe812a5faa783d81c82f86bd0132",
+      "label": "EU AI Act Readiness Briefing Q4-2024",
+      "artifactType": "report"
+    },
+    {
+      "artifactId": "4",
+      "contentHash": "2b2f4168d2a94ab2af0c02a702506659ae7996837f15ed07f144a8abf2aebc68",
+      "covenantHash": "4f718d8ae294a29c2e472f2a081a90270242700c64f10feafa5896a9091cb4f5",
+      "label": "EU AI Act Article 12 Audit Dataset v2024-Q4",
+      "artifactType": "dataset"
+    },
+    {
+      "artifactId": "3",
+      "contentHash": "a3ecb4793e95f75032d5717400a3d6ccd48bebeecd791ba3718ca89108d7c033",
+      "covenantHash": "b68d8529c478501e0e33a3dcd6e105d9098dfa7ec30790ef5fa17aa472fabf47",
+      "label": "Compliance Sentinel v3",
+      "artifactType": "agent"
+    },
+    {
+      "artifactId": "6",
+      "contentHash": "e14acdf6b7dccf26790bf853df4885cd856a1bbe212ba16b275a78ee2a68c63b",
+      "covenantHash": "2e05dce3fa19fd31c3b70283f35020f6eae428253adca1ea9ed9f4563451bf20",
+      "label": "EU AI Act Readiness Briefing Q4-2024",
+      "artifactType": "report"
+    },
+    {
+      "artifactId": "7",
+      "contentHash": "e4fef32268c1cce38abb8e9aceb7e8a17408baa9751ab4d7485f0fe4b9d98108",
+      "covenantHash": "8f8af58ee64e8203b31f0b480d8628283267381c4155d280d68a831e0229f408",
+      "label": "EU AI Act Dataset Embedding Index",
+      "artifactType": "embedding"
+    },
+    {
+      "artifactId": "5",
+      "contentHash": "eeaa9639550e19770d11556ac26ec63a1808b39242dff7f7077e3d5e2330bba5",
+      "covenantHash": "1cb23f0bdf4ebaf3686a43c03d55712cf87dcb50eb04294ce6bdc6cf334eae1f",
+      "label": "EU AI Act Dataset Embedding Index",
+      "artifactType": "embedding"
+    }
+  ],
+  "capturedAt": "2026-05-04T16:47:31.722Z",
+  "doctrineRevision": "doctrine-rev-007",
+  "merkleRoot": "e2b6db26137fd3fa10f7cb58655a8957044b48272b47e4594878df8d4713de94"
+}

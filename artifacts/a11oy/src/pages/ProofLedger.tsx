@@ -3,6 +3,16 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useApiData } from '../hooks/useApiData';
 
+interface ReliquaryAttestation {
+  id: number;
+  merkleRoot: string;
+  artifactCount: number;
+  proofReceiptId: string;
+  verifiedAt?: string | null;
+  verificationResult?: string | null;
+  createdAt: string;
+}
+
 const GOLD = '#c9b787';
 
 interface ReasoningStep {
@@ -150,10 +160,33 @@ export function ProofLedger() {
   const CHAINS = data.chains;
   const [selectedChain, setSelectedChain] = useState(CHAINS[0]?.id ?? '');
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff' | 'reliquary'>('chain');
   const [replayStep, setReplayStep] = useState(0);
+  const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [verifyResult, setVerifyResult] = useState<Record<number, { match: boolean; storedRoot: string; computedRoot: string } | null>>({});
+  const [attestationList, setAttestationList] = useState<ReliquaryAttestation[] | null>(null);
+
+  const { data: reliquaryAttestations } = useApiData<ReliquaryAttestation[]>('/reliquary/attestations', []);
+  const attestations = attestationList ?? (Array.isArray(reliquaryAttestations) ? reliquaryAttestations : []);
 
   const chain = CHAINS.find(c => c.id === selectedChain) ?? CHAINS[0];
+
+  async function handleVerify(id: number) {
+    setVerifyingId(id);
+    try {
+      const res = await fetch(`/api/reliquary/attest/${id}/verify`, { method: 'POST' });
+      const json = await res.json() as { ok: boolean; data: { match: boolean; storedRoot: string; computedRoot: string } };
+      if (json.ok) {
+        setVerifyResult(prev => ({ ...prev, [id]: json.data }));
+        // Refresh attestation list to pick up verifiedAt / verificationResult
+        const listRes = await fetch('/api/reliquary/attestations');
+        const listJson = await listRes.json() as { ok: boolean; data: ReliquaryAttestation[] };
+        if (listJson.ok) setAttestationList(listJson.data);
+      }
+    } finally {
+      setVerifyingId(null);
+    }
+  }
 
   return (
     <Layout>
@@ -173,10 +206,10 @@ export function ProofLedger() {
         <KpiCard label="VERIFICATION" value="100%" sub="all chains verified" accent="#22c55e" />
       </div>
 
-      <div className="flex gap-1 mb-4">
-        {(['chain', 'replay', 'diff'] as const).map(tab => (
+      <div className="flex gap-1 mb-4 flex-wrap">
+        {(['chain', 'replay', 'diff', 'reliquary'] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} className="px-4 py-2 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all" style={{ background: activeTab === tab ? 'rgba(201,183,135,0.1)' : 'transparent', color: activeTab === tab ? GOLD : '#5e5e5e', border: `1px solid ${activeTab === tab ? 'rgba(201,183,135,0.2)' : 'transparent'}`, cursor: 'pointer' }}>
-            {tab === 'chain' ? 'Proof Chain' : tab === 'replay' ? 'Reasoning Replay' : 'Proof Diff'}
+            {tab === 'chain' ? 'Proof Chain' : tab === 'replay' ? 'Reasoning Replay' : tab === 'diff' ? 'Proof Diff' : 'Reliquary Cache'}
           </button>
         ))}
       </div>
@@ -413,6 +446,101 @@ export function ProofLedger() {
           </>
         );
       })()}
+
+      {activeTab === 'reliquary' && (() => (
+        <>
+          <SectionTitle>Reliquary Cache Attestations</SectionTitle>
+          <div className="text-xs mb-4" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+            Merkle-root attestations over the provenance-bound artifact cache. Each attestation hashes all known content hashes into a deterministic Merkle tree and writes a durable entry to the Proof Ledger.
+          </div>
+
+          {attestations.length === 0 ? (
+            <Card>
+              <div className="text-xs text-center py-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                No attestations yet. Visit <span className="font-mono" style={{ color: GOLD }}>Reliquary → Vault Browser</span> and click Attest to generate the first Merkle-root attestation.
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {attestations.map(att => {
+                const vr = verifyResult[att.id];
+                const statusColor = att.verificationResult === 'pass' ? '#22c55e' : att.verificationResult === 'fail' ? '#ef4444' : GOLD;
+                const statusLabel = att.verificationResult === 'pass' ? 'VERIFIED' : att.verificationResult === 'fail' ? 'MISMATCH' : 'UNVERIFIED';
+                return (
+                  <Card key={att.id}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ backgroundColor: `${statusColor}15`, color: statusColor }}>
+                            {statusLabel}
+                          </span>
+                          <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                            Attestation #{att.id}
+                          </span>
+                          <span className="text-[10px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                            {new Date(att.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs mb-3">
+                          <div>
+                            <div className="text-[9px] font-mono uppercase mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Merkle Root (SHA-256)</div>
+                            <div className="font-mono text-[10px] break-all p-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', color: statusColor, border: `1px solid ${statusColor}20` }}>
+                              {att.merkleRoot}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[9px] font-mono uppercase mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Proof Receipt ID</div>
+                            <div className="font-mono text-[10px] break-all p-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', color: 'var(--color-a11oy-text-sub)', border: '1px solid var(--color-a11oy-border)' }}>
+                              {att.proofReceiptId}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs">
+                          <div>
+                            <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Artifacts hashed: </span>
+                            <span className="font-mono" style={{ color: GOLD }}>{att.artifactCount}</span>
+                          </div>
+                          {att.verifiedAt && (
+                            <div>
+                              <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Verified: </span>
+                              <span className="font-mono" style={{ color: '#22c55e' }}>
+                                {new Date(att.verifiedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {vr && (
+                          <div className="mt-2 p-2 rounded text-[10px] font-mono" style={{ backgroundColor: vr.match ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)', border: `1px solid ${vr.match ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`, color: vr.match ? '#22c55e' : '#ef4444' }}>
+                            {vr.match ? '✓ Merkle root recomputed and matches stored root. Cache integrity confirmed.' : `✗ ROOT MISMATCH — stored: ${vr.storedRoot.slice(0, 16)}… computed: ${vr.computedRoot.slice(0, 16)}…`}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => void handleVerify(att.id)}
+                        disabled={verifyingId === att.id}
+                        className="text-[10px] font-mono px-3 py-1.5 rounded flex-shrink-0 transition-all"
+                        style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: verifyingId === att.id ? '#5e5e5e' : GOLD, border: `1px solid rgba(201,183,135,0.2)`, cursor: verifyingId === att.id ? 'wait' : 'pointer' }}
+                      >
+                        {verifyingId === att.id ? 'Verifying…' : 'Verify Root'}
+                      </button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-4 p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.12)', color: 'var(--color-a11oy-text-ghost)' }}>
+            <div className="font-mono text-[9px] uppercase mb-1" style={{ color: GOLD }}>ATTESTATION ENGINE</div>
+            Covenant hash: SHA-256(content ∥ policyId ∥ actor ∥ tenant ∥ doctrineRevision ∥ timestamp) over raw bytes.
+            Merkle root: binary tree over sorted content hashes. Each attestation writes a durable <span className="font-mono" style={{ color: GOLD }}>proof_chain</span> entry for governance audit trail.
+          </div>
+        </>
+      ))()}
 
       <div className="mt-4 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Reasoning Proof Engine — every proof chain includes full reasoning traces (premises → inference → conclusion) with cryptographic attestation. Chains are immutable and append-only.

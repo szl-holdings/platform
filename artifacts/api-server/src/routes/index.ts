@@ -258,6 +258,11 @@ router.use(internalA11oyDefenseRouter);
 // (A2A Interop, Agent Identity, Self-Optimization, Security Agents, Gateway, Proof Ledger, Memory, Signal Mesh).
 router.use('/a11oy', a11oyAgenticPagesRouter);
 
+// A11oy Reliquary — provenance-bound content-addressed cache spine.
+// Real SHA-256 hashing, disk I/O, DB lineage edges, Merkle-root attestations, sovereign mode.
+// Owns /api/reliquary/* endpoints (catalog, put, get, covenant, snapshot, replay, lineage, attest, sovereign, seed).
+router.use(lazyMatch("/reliquary", () => import("./reliquary"), "reliquary"));
+
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.
 // Note: routes/index.ts is mounted at /api in app.ts, so this resolves to /api/a11oy/*.

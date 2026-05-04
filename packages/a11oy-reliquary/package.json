@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/a11oy-reliquary",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "A11oy Reliquary — provenance-bound, content-addressed cache spine for AI artifacts.",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

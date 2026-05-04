@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive, Beaker, Sparkles, Sigma, MessageSquare, Search, DollarSign, Brain, Gauge } from 'lucide-react';
+import { LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive, Beaker, Sparkles, Sigma, MessageSquare, Search, DollarSign, Brain, Gauge, Database, GitFork, History, Lock, BookOpen } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
@@ -35,6 +35,14 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+const reliquaryItems = [
+  { id: 'reliquary-vault', name: 'Vault Browser', icon: Database, path: '/reliquary/vault' },
+  { id: 'reliquary-lineage', name: 'Lineage Graph', icon: GitFork, path: '/reliquary/lineage' },
+  { id: 'reliquary-snapshots', name: 'Snapshot Replay', icon: History, path: '/reliquary/snapshots' },
+  { id: 'reliquary-sovereign', name: 'Sovereign Mode', icon: Lock, path: '/reliquary/sovereign' },
+  { id: 'reliquary-doctrine', name: 'Doctrine', icon: BookOpen, path: '/reliquary/doctrine' },
+];
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -76,6 +84,34 @@ export function Sidebar() {
         <SectionHeader>Intelligence</SectionHeader>
         <nav className="flex flex-col gap-0.5">
           {intelligenceItems.map(renderNavItem)}
+        </nav>
+
+        <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--color-a11oy-text-ghost)] mt-6 mb-4 px-2" style={{ color: '#9a8456' }}>
+          Reliquary
+        </div>
+        <nav className="flex flex-col gap-1">
+          {reliquaryItems.map(item => {
+            const fullPath = `${BASE}${item.path}`;
+            const isActive = location === fullPath || location.startsWith(fullPath + '/');
+            const isSovereign = item.id === 'reliquary-sovereign';
+
+            return (
+              <Link
+                key={item.id}
+                href={fullPath}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                  isActive
+                    ? "bg-[var(--color-a11oy-surface)] font-medium"
+                    : "text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-surface)] hover:text-[var(--color-a11oy-text)]"
+                )}
+                style={isActive ? { color: '#c9b787' } : isSovereign ? { color: '#94a3b8' } : {}}
+              >
+                <item.icon className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-60")} style={isSovereign && !isActive ? { color: '#64748b' } : {}} />
+                {item.name}
+              </Link>
+            );
+          })}
         </nav>
       </div>
       <div className="px-4 py-3 border-t border-[var(--color-a11oy-border-subtle)] text-xs text-[var(--color-a11oy-text-ghost)]">

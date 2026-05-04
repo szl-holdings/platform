@@ -1,0 +1,15 @@
+{
+  "name": "gpt-4o-a11oy-finetune-v2",
+  "provider": "openai",
+  "version": "2.1.0",
+  "parameters": {
+    "temperature": 0.2,
+    "maxTokens": 4096
+  },
+  "domains": [
+    "governance",
+    "compliance",
+    "risk"
+  ],
+  "trainingDataRevision": "doctrine-rev-007"
+}
