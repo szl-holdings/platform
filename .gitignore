@@ -190,3 +190,6 @@ screenshots/raw
 
 # SZL Holdings public-attestation runtime data (Ed25519 private key, runs ledger)
 .szl-public-runs/
+
+# Substrate fleet secrets (never commit)
+.env.substrate
