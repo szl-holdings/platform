@@ -1,14 +1,15 @@
 import { DecisionCenter } from '@szl-holdings/shared-ui/DecisionCenter';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
-import {
-  SHARED_EVAL_RESULTS,
-  VARIANT_RECOMMENDATIONS,
-  VARIANT_RUNS,
-  VARIANT_SOURCE_HEALTH,
-} from '@szl-holdings/shared-ui/os-demo-data';
-import type { Recommendation, RecommendationAction } from '@szl-holdings/shared-ui/os-layer';
+import type { RecommendationAction } from '@szl-holdings/shared-ui/os-layer';
 import { RunConsole } from '@szl-holdings/shared-ui/RunConsole';
 import { SourceHealthStrip } from '@szl-holdings/shared-ui/SourceHealthStrip';
+import {
+  useOsRecommendations,
+  useOsSourceHealth,
+  useOsRuns,
+  useOsEvalResults,
+  useOsAction,
+} from '@szl-holdings/shared-ui/use-os-data';
 import * as React from 'react';
 
 const VARIANT = 'vessels';
@@ -18,24 +19,14 @@ type Tab = 'decisions' | 'runs';
 
 export default function DecisionCenterPage() {
   const [tab, setTab] = React.useState<Tab>('decisions');
-  const [recs, setRecs] = React.useState<Recommendation[]>(VARIANT_RECOMMENDATIONS[VARIANT] ?? []);
-  const sources = VARIANT_SOURCE_HEALTH[VARIANT] ?? [];
-  const runs = VARIANT_RUNS[VARIANT] ?? [];
+  const { data: recs = [], refetch: refetchRecs } = useOsRecommendations(VARIANT);
+  const { data: sources = [] } = useOsSourceHealth(VARIANT);
+  const { data: runs = [] } = useOsRuns(VARIANT);
+  const { data: evalResults = [] } = useOsEvalResults();
+  const actionMutation = useOsAction(VARIANT);
 
-  async function handleAction(id: string, action: RecommendationAction, _justification?: string) {
-    setRecs((prev) =>
-      prev.map((r) => {
-        if (r.id !== id) return r;
-        const statusMap: Record<RecommendationAction, Recommendation['status']> = {
-          approve: 'approved',
-          reject: 'rejected',
-          escalate: 'escalated',
-          rollback: 'rolled_back',
-          defer: 'pending',
-        };
-        return { ...r, status: statusMap[action] };
-      }),
-    );
+  async function handleAction(id: string, action: RecommendationAction, justification?: string) {
+    actionMutation.mutate({ recId: id, action, justification });
   }
 
   return (
@@ -69,7 +60,7 @@ export default function DecisionCenterPage() {
             variant="Vessels"
             recommendations={recs}
             onAction={handleAction}
-            onRefresh={() => setRecs(VARIANT_RECOMMENDATIONS[VARIANT] ?? [])}
+            onRefresh={() => refetchRecs()}
             accentColor={ACCENT}
             className="h-full"
           />
@@ -78,7 +69,7 @@ export default function DecisionCenterPage() {
           <RunConsole
             variant="Vessels"
             runs={runs}
-            evalResults={SHARED_EVAL_RESULTS}
+            evalResults={evalResults}
             onRefresh={() => {}}
             accentColor={ACCENT}
             className="h-full"

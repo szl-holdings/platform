@@ -290,8 +290,16 @@ router.use(lazyMatch("/meridian-mcp", () => import("./meridian-mcp-activation"),
 // is public for external contributors. Mounted BEFORE guardianPolicyCheck intentionally.
 router.use(lazyMatch("/marketplace", () => import("./marketplace"), "marketplace"));
 
+// OS Layer API — read-only endpoints for recommendations, source health, runs, eval results, command KPIs.
+// Public GET endpoints (demo surface) — mounted BEFORE guardianPolicyCheck.
+router.use(lazyMatch("/v1/os", () => import("./os-layer-api"), "os-layer-api"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
+
+// OS Layer Actions — auth-gated POST endpoints for recommendation actions.
+// Mounted AFTER guardianPolicyCheck to require authentication for state mutations.
+router.use(lazyMatch("/v1/os/recommendations", () => import("./os-layer-actions"), "os-layer-actions"));
 
 // Pulse demo + briefing surfaces — owns multiple top-level prefixes.
 router.use(

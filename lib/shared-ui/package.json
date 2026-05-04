@@ -165,6 +165,7 @@
     "./live-clock": "./src/live-clock.tsx",
     "./use-interval": "./src/use-interval.ts",
     "./api-fetch": "./src/api-fetch.ts",
+    "./use-os-data": "./src/use-os-data.ts",
     "./demo-mode": "./src/demo-mode.tsx",
     "./demo-persona-switcher": "./src/demo-persona-switcher.tsx",
     "./analytics-provider": "./src/analytics-provider.tsx",

@@ -11,12 +11,11 @@ import {
   useOsAction,
 } from '@szl-holdings/shared-ui/use-os-data';
 import * as React from 'react';
-import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
 
-const VARIANT = 'terra';
-const ACCENT = LANE_ACCENT_HEX.terra.primaryLight;
+const VARIANT = 'szl-holdings';
+const ACCENT = LANE_ACCENT_HEX.lyte.primaryLight;
 
-type Tab = 'decisions' | 'runs' | 'substrate';
+type Tab = 'decisions' | 'runs';
 
 export default function DecisionCenterPage() {
   const [tab, setTab] = React.useState<Tab>('decisions');
@@ -31,14 +30,14 @@ export default function DecisionCenterPage() {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: 'var(--gi-bg-surface)' }}>
+    <div className="flex flex-col h-full" style={{ background: 'var(--gi-bg-surface, #0c1018)' }}>
       <SourceHealthStrip sources={sources} variant={VARIANT} />
 
       <div
         className="flex gap-1 px-6 pt-4 pb-0"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
-        {(['decisions', 'runs', 'substrate'] as Tab[]).map((t) => (
+        {(['decisions', 'runs'] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -50,7 +49,7 @@ export default function DecisionCenterPage() {
               borderBottom: tab === t ? `2px solid ${ACCENT}` : '2px solid transparent',
             }}
           >
-            {t === 'decisions' ? 'Decision Center' : t === 'runs' ? 'Run Console' : 'Substrate'}
+            {t === 'decisions' ? 'Decision Center' : 'Run Console'}
           </button>
         ))}
       </div>
@@ -58,7 +57,7 @@ export default function DecisionCenterPage() {
       <div className="flex-1 overflow-hidden">
         {tab === 'decisions' && (
           <DecisionCenter
-            variant="TERRA"
+            variant="SZL Holdings"
             recommendations={recs}
             onAction={handleAction}
             onRefresh={() => refetchRecs()}
@@ -68,24 +67,13 @@ export default function DecisionCenterPage() {
         )}
         {tab === 'runs' && (
           <RunConsole
-            variant="TERRA"
+            variant="SZL Holdings"
             runs={runs}
             evalResults={evalResults}
             onRefresh={() => {}}
             accentColor={ACCENT}
             className="h-full"
           />
-        )}
-        {tab === 'substrate' && (
-          <div className="p-6 max-w-2xl space-y-3 overflow-y-auto h-full">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-100">Substrate Workflows</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Portfolio anomaly and event intelligence — Sovereign Execution Substrate
-              </p>
-            </div>
-            <SubstrateWorkflowPanel />
-          </div>
         )}
       </div>
     </div>
