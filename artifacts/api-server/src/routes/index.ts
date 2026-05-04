@@ -332,6 +332,11 @@ router.use(lazyMatch("/v1/os", () => import("./os-layer-api"), "os-layer-api"));
 // Public read-only demo surface — mounted BEFORE guardianPolicyCheck.
 router.use("/sovereign-mesh", lazyMount(() => import("./sovereign-mesh"), "sovereign-mesh"));
 
+// Governance-Injecting MCP Gateway — external agent access with PCE Gate
+// enforcement, proof packets, approval queues, API key management, rate limiting.
+// Public read-only demo surface (GET endpoints); mutations auth-gated at route level.
+router.use("/mcp-governed-gateway", lazyMount(() => import("./mcp-governed-gateway"), "mcp-governed-gateway"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 
