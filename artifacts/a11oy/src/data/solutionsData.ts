@@ -260,6 +260,122 @@ export const INDUSTRY_SOLUTIONS: IndustrySolution[] = [
   },
 ];
 
+export interface CompetitiveVertical {
+  id: string;
+  name: string;
+  fullName: string;
+  emoji: string;
+  domain: string;
+  color: string;
+  incumbent: string;
+  incumbentCategory: string;
+  incumbentStrength: string;
+  incumbentGap: string;
+  alloyAdvantage: string;
+  proofPoint: string;
+}
+
+export const COMPETITIVE_VERTICALS: CompetitiveVertical[] = [
+  {
+    id: 'paragon',
+    name: 'PARAGON',
+    fullName: 'PARAGON — Defense & Intelligence',
+    emoji: '⬡',
+    domain: 'Defense & Security',
+    color: '#6482dc',
+    incumbent: 'Palantir',
+    incumbentCategory: 'Data Integration Platform',
+    incumbentStrength: 'Palantir excels at ingesting and unifying disparate government and enterprise data sources — fusing intelligence signals that were previously siloed across agencies and systems into a single operational picture.',
+    incumbentGap: 'Data integration without governance is a half-solution. Palantir surfaces intelligence but cannot enforce who acts on it, under what authorization, or with what structural accountability. Every action taken from a Palantir dashboard happens outside the platform — untracked, ungoverned, unproven.',
+    alloyAdvantage: 'PARAGON extends the intelligence picture into governed execution. Every threat assessment, containment action, and escalation decision passes through A11oy\'s Covenant Policy — enforced before execution, not reviewed after. The Proof Ledger records every incident from detection to closure with full actor attribution. Regulators and cyber insurers get a complete, tamper-evident record that Palantir cannot produce.',
+    proofPoint: 'Governed incident response with cryptographic proof chain on every action — not just data fusion.',
+  },
+  {
+    id: 'sextant',
+    name: 'SEXTANT',
+    fullName: 'SEXTANT — Maritime Intelligence',
+    emoji: '⚓',
+    domain: 'Maritime Operations',
+    color: '#0e8cd2',
+    incumbent: 'Windward',
+    incumbentCategory: 'Maritime Analytics',
+    incumbentStrength: 'Windward delivers sophisticated vessel behavior analytics — dark ship detection, ownership chain analysis, sanctions risk scoring, and maritime pattern-of-life modeling. It is the leading maritime analytics product for compliance and risk teams.',
+    incumbentGap: 'Analytics without execution governance creates a critical gap: a Windward alert requires a human to leave the platform, make a decision, act on it somewhere else, and log it manually. The decision — who made it, on what basis, under whose authorization — lives nowhere. For P&I clubs, underwriters, and flag state regulators, that missing record is the exposure.',
+    alloyAdvantage: 'SEXTANT closes the loop from alert to governed action. AIS anomalies flow directly into A11oy\'s decision loop — sanctions escalations pass through policy gates, rerouting decisions carry authorization records, and every operational exception is Proof Ledger-attributed. SEXTANT produces the compliance documentation that Windward cannot: a chain-of-custody record from signal to resolution.',
+    proofPoint: 'Voyage decisions and sanctions responses with full authorization chain — audit-ready for P&I clubs and flag states.',
+  },
+  {
+    id: 'domaine',
+    name: 'DOMAINE',
+    fullName: 'DOMAINE — Real Estate Intelligence',
+    emoji: '▣',
+    domain: 'Real Estate & Infrastructure',
+    color: '#408564',
+    incumbent: 'CoStar',
+    incumbentCategory: 'Market Data Platform',
+    incumbentStrength: 'CoStar is the definitive source for commercial real estate market data — the deepest comp database, the most comprehensive listing inventory, and the most trusted lease and sale transaction records in the industry.',
+    incumbentGap: 'CoStar tells you what the market looks like. It cannot tell you what to do about it, under whose authority, or with what documented rationale. Deal decisions — underwriting assumptions, investment committee approvals, acquisition authorizations — happen entirely outside CoStar. The evidentiary record of how capital was committed exists nowhere.',
+    alloyAdvantage: 'DOMAINE applies distress-first signal intelligence to NYC real estate, building a deal pipeline where every acquisition decision carries a complete proof envelope: the distress signal that surfaced it, the underwriting model that priced it, the investment committee approval that authorized it. LPs and regulators get a documented decision record that CoStar cannot produce by design.',
+    proofPoint: 'Distress-first discovery with investment committee proof chains — from signal to close, fully attributed.',
+  },
+  {
+    id: 'counsel',
+    name: 'Counsel',
+    fullName: 'Counsel — Legal Matter Command',
+    emoji: '⚖',
+    domain: 'Legal Operations',
+    color: '#8c64d2',
+    incumbent: 'Relativity',
+    incumbentCategory: 'Document Review Platform',
+    incumbentStrength: 'Relativity dominates e-discovery — high-volume document processing, privilege review automation, review workflow management, and litigation support for large-scale legal matters. It is the standard infrastructure for document-intensive litigation.',
+    incumbentGap: 'Relativity is a document processing engine, not a matter governance platform. It has no model for obligation tracking, no deadline enforcement, no settlement authority gates, and no structured record of material legal decisions. Every commitment made by counsel during a matter happens outside Relativity — undocumented, ungoverned, and unattributable.',
+    alloyAdvantage: 'Counsel governs the full matter lifecycle that Relativity leaves unaddressed. Every obligation is tracked with deadline monitoring. Every settlement authority is gated by Covenant Policy. Every document intelligence finding carries source attribution. The Proof Ledger creates the definitive record of every material legal decision — from engagement through closure — that audit committees and counterparties can inspect.',
+    proofPoint: 'Matter lifecycle governance with obligation tracking and settlement authority proof — beyond document processing.',
+  },
+  {
+    id: 'kora',
+    name: 'KORA',
+    fullName: 'KORA — Decision Intelligence',
+    emoji: '◆',
+    domain: 'Decision Intelligence',
+    color: '#c99840',
+    incumbent: 'Salesforce Einstein / Clari',
+    incumbentCategory: 'CRM Intelligence',
+    incumbentStrength: 'Salesforce Einstein and Clari deliver sophisticated CRM-native intelligence — pipeline scoring, forecast modeling, deal risk signals, and revenue intelligence derived from sales activity data. They are the established tools for revenue team performance.',
+    incumbentGap: 'CRM intelligence is domain-constrained by definition. Einstein knows your pipeline. It cannot know how a maritime sanctions event affects your defense sector contract outlook, or how legal obligation drift creates pricing risk across portfolio verticals. Single-domain intelligence, no matter how sophisticated, cannot produce cross-vertical signal correlation — and cannot prove how any recommendation was reached.',
+    alloyAdvantage: 'KORA routes decision workloads across 8+ frontier models with portfolio-wide signal correlation — surfacing how events in one vertical create exposure or opportunity in another. Every recommendation carries confidence intervals from Monte Carlo simulation. Every decision carries a Proof Ledger record that links the triggering signal to the model that recommended it, the operator who approved it, and the outcome it produced.',
+    proofPoint: 'Cross-vertical signal correlation with multi-model routing and proof chain attribution on every decision.',
+  },
+  {
+    id: 'pulse',
+    name: 'Pulse',
+    fullName: 'Pulse — Market Intelligence',
+    emoji: '◈',
+    domain: 'Market Intelligence',
+    color: '#3caa9b',
+    incumbent: 'Bloomberg Terminal',
+    incumbentCategory: 'Financial Data Platform',
+    incumbentStrength: 'Bloomberg Terminal is the authoritative source for financial market data — real-time prices, fixed income analytics, news, company fundamentals, and the broadest coverage of global securities. It is the information infrastructure of institutional finance.',
+    incumbentGap: 'Bloomberg delivers data. It does not deliver synthesis. A Bloomberg terminal gives every subscriber the same firehose — the work of turning that data into an actionable executive decision, with source attribution and confidence scoring, still requires human analysts. And Bloomberg has no concept of how a rate move connects to your maritime fleet\'s demurrage exposure, or your real estate portfolio\'s refinancing risk.',
+    alloyAdvantage: 'Pulse delivers governed executive intelligence — not raw data, but synthesized briefings where every insight is source-attributed, confidence-scored, and cross-referenced against operational context from all SZL verticals. A rate move surfaces as both a market event and a portfolio implication. Every executive briefing is evidence-based and traceable, producing intelligence that Bloomberg\'s firehose cannot.',
+    proofPoint: 'Executive briefings with cross-vertical context and full source attribution — synthesis, not subscription.',
+  },
+  {
+    id: 'carlota-jo',
+    name: 'Carlota Jo',
+    fullName: 'Carlota Jo — Private Advisory',
+    emoji: '◎',
+    domain: 'Private Advisory',
+    color: '#c88c64',
+    incumbent: 'McKinsey Lilli / Bain Advisory Tools',
+    incumbentCategory: 'Traditional Advisory',
+    incumbentStrength: 'McKinsey Lilli and leading advisory firm AI tools bring institutional knowledge synthesis and research acceleration to the consulting engagement model — allowing advisors to work faster and surface more comprehensive analysis during engagements.',
+    incumbentGap: 'Traditional advisory intelligence tools optimize for the advisor, not for the client\'s evidentiary record. Engagement recommendations are delivered in presentations and documents that have no structured provenance — no record of what evidence supported each conclusion, what alternatives were considered, under whose authorization commitments were made, or how outcomes compared to what was promised. The engagement proof record does not exist.',
+    alloyAdvantage: 'Carlota Jo governs the full advisory engagement lifecycle with structured proof. Every session is recorded. Every commitment is tracked through delivery. Every advisory recommendation carries its evidentiary basis. The Proof Ledger creates an engagement record that clients can inspect — connecting each delivered outcome to the commitment that generated it. Clients gain structured accountability that no traditional advisory model can offer.',
+    proofPoint: 'Advisory engagement proof chains with commitment tracking and outcome attribution — structured accountability by design.',
+  },
+];
+
 export const CANONICAL_STEPS = [
   { num: '01', name: 'Signal', icon: '📡', desc: 'Detect. Ingest live data from any source — AIS feeds, market data, threat intel, regulatory filings, code commits, clinical trials. Every signal is timestamped and attributed.' },
   { num: '02', name: 'Context', icon: '🔍', desc: 'Enrich. Cross-reference against knowledge bases, historical patterns, domain intelligence, and organizational memory. Context is never hallucinated — it is sourced and cited.' },

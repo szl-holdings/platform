@@ -15,6 +15,7 @@ const NAV_GROUPS = [
       { href: '/',              label: 'Home' },
       { href: '/architecture',  label: 'Architecture' },
       { href: '/applications',  label: 'Applications' },
+      { href: '/solutions',     label: 'Solutions' },
       { href: '/resources',     label: 'Resources' },
       { href: '/constellation', label: 'Constellation' },
     ],
