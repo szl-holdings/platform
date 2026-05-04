@@ -3,41 +3,51 @@
 @import "@szl-holdings/design-system/tokens/css";
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --color-a11oy-base:    #FAF7F2;
-  --color-a11oy-surface: #FFFFFF;
-  --color-a11oy-overlay: #F5F0E8;
-  --color-a11oy-card:    #FFFFFF;
-  --color-a11oy-border:  #D4CCC0;
-  --color-a11oy-border-subtle: #E8E2D8;
-  --color-a11oy-muted:   #EDE8DF;
+  --color-a11oy-navy:    #0a0a0a;
+  --color-a11oy-deep:    #0e0e0e;
+  --color-a11oy-surface: #121212;
+  --color-a11oy-card:    #141414;
+  --color-a11oy-border:  rgba(255,255,255,0.08);
+  --color-a11oy-muted:   #1a1a1a;
 
-  --color-a11oy-text:       #1A1814;
-  --color-a11oy-text-sub:   #5C564E;
-  --color-a11oy-text-ghost: #8A8279;
+  --color-a11oy-text:       #f5f5f5;
+  --color-a11oy-text-sub:   #8a8a8a;
+  --color-a11oy-text-ghost: #888888;
 
+  --color-a11oy-blue:       #c9b787;
+  --color-a11oy-blue-dim:   #a89868;
+  --color-a11oy-blue-glow:  rgba(201,183,135,0.12);
   --color-a11oy-gold:       #c9b787;
-  --color-a11oy-gold-dim:   #b5a070;
-  --color-a11oy-gold-soft:  rgba(201,183,135,0.12);
+  --color-a11oy-gold-dim:   #a89868;
+  --color-a11oy-gold-glow:  rgba(201,183,135,0.1);
+
+  --color-a11oy-critical: #f5f5f5;
+  --color-a11oy-warn:     #c9b787;
+  --color-a11oy-ok:       #c9b787;
+  --color-a11oy-info:     #c9b787;
 
   --color-a11oy-success: #5a8a6e;
-  --color-a11oy-warn:    #b5973a;
   --color-a11oy-error:   #b85450;
-  --color-a11oy-info:    #6B7280;
 
-  --radius-sm:  0.25rem;
-  --radius-md:  0.375rem;
-  --radius-lg:  0.5rem;
-  --radius-xl:  0.625rem;
+  --color-a11oy-base:    #0a0a0a;
+  --color-a11oy-overlay: #1a1a1a;
+  --color-a11oy-border-subtle: rgba(255,255,255,0.05);
+  --color-a11oy-gold-soft: rgba(201,183,135,0.12);
+
+  --radius-sm:  0.125rem;
+  --radius-md:  0.25rem;
+  --radius-lg:  0.375rem;
+  --radius-xl:  0.5rem;
 }
 
 :root {
-  background-color: var(--color-a11oy-base);
+  background-color: var(--color-a11oy-navy);
   color: var(--color-a11oy-text);
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
@@ -51,15 +61,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-a11oy-gold);
+  outline: 2px solid var(--color-a11oy-blue);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--color-a11oy-base); }
-::-webkit-scrollbar-thumb { background: var(--color-a11oy-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-a11oy-text-ghost); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--color-a11oy-navy); }
+::-webkit-scrollbar-thumb { background: var(--color-a11oy-border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-a11oy-muted); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

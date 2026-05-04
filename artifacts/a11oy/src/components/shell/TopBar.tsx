@@ -41,15 +41,15 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-14 border-b border-[var(--color-a11oy-border-subtle)] bg-[var(--color-a11oy-surface)] flex items-center justify-between px-6 shrink-0 z-30 sticky top-0">
+    <header className="h-14 border-b border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-deep)] flex items-center justify-between px-6 shrink-0 z-30 sticky top-0">
       <div className="flex items-center gap-5">
         <div className="flex items-baseline gap-2">
           <span className="font-display font-semibold text-lg tracking-tight text-[var(--color-a11oy-text)]">
-            A<span className="font-mono text-[var(--color-a11oy-gold)] font-bold">11</span>oy
+            A<span className="font-mono text-[var(--color-a11oy-blue)] font-bold">11</span>oy
           </span>
         </div>
 
-        <div className="h-5 w-px bg-[var(--color-a11oy-border-subtle)]" aria-hidden="true"></div>
+        <div className="h-4 w-px bg-[var(--color-a11oy-border)]" aria-hidden="true"></div>
 
         <div className="relative" ref={menuRef} onKeyDown={handleKeyDown}>
           <button
@@ -69,14 +69,14 @@ export function TopBar() {
             <ul
               role="listbox"
               aria-label="Select organization"
-              className="absolute top-full left-0 mt-2 w-52 bg-[var(--color-a11oy-surface)] border border-[var(--color-a11oy-border)] rounded-lg shadow-lg z-50 py-1"
+              className="absolute top-full left-0 mt-2 w-48 bg-[var(--color-a11oy-card)] border border-[var(--color-a11oy-border)] rounded shadow-xl z-50 py-1"
             >
               {orgs.map(org => (
                 <li key={org.id} role="option" aria-selected={currentOrg === org.id}>
                   <button
                     type="button"
                     onClick={() => handleOrgSelect(org.id)}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${currentOrg === org.id ? 'bg-[var(--color-a11oy-overlay)] text-[var(--color-a11oy-gold-dim)] font-medium' : 'text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-overlay)] hover:text-[var(--color-a11oy-text)]'}`}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${currentOrg === org.id ? 'bg-[var(--color-a11oy-surface)] text-[var(--color-a11oy-blue)]' : 'text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-surface)] hover:text-[var(--color-a11oy-text)]'}`}
                   >
                     {org.name}
                   </button>
@@ -88,8 +88,8 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-success)]" aria-hidden="true" />
-        <span className="text-xs text-[var(--color-a11oy-text-ghost)]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] animate-pulse" aria-hidden="true" />
+        <span className="text-[11px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', letterSpacing: '0.04em' }}>
           Governed Environment
         </span>
       </div>

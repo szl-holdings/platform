@@ -1496,9 +1496,13 @@ function createAlloyMcpServer(
 
   for (const tool of ALL_TOOLS) {
     const capturedTool = tool;
+    const govMeta = getToolGovernanceMetadata(capturedTool.name);
+    const govSuffix = `\n\n[Governance] Risk: ${govMeta.riskLevel}` +
+      (govMeta.approvalRequired ? ` | Approval: ${govMeta.approvalTier}` : '') +
+      (govMeta.isDestructive ? ' | DESTRUCTIVE' : '');
     server.rawTool(
       capturedTool.name,
-      capturedTool.description,
+      capturedTool.description + govSuffix,
       capturedTool.inputSchema,
       async (args) => {
         if (gatewayCtx) {

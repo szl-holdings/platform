@@ -1,6 +1,14 @@
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { randomUUID, createHash } from 'node:crypto';
 import { logActivity } from '@szl-holdings/audit';
+import {
+  db,
+  mcpGatewayApiKeysTable,
+  mcpGatewayToolCallsTable,
+  mcpGatewayProofPacketsTable,
+  mcpGatewayApprovalsTable,
+} from '@szl-holdings/db';
+import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';
 import {
@@ -116,6 +124,210 @@ const rateLimitWindows = new Map<string, { windowStart: number; count: number }>
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 
+async function persistApiKey(key: GatewayApiKey): Promise<void> {
+  try {
+    await db.insert(mcpGatewayApiKeysTable).values({
+      keyId: key.id,
+      label: key.label,
+      keyHash: key.keyHash,
+      prefix: key.prefix,
+      tenantId: key.tenantId,
+      scopes: key.scopes,
+      rateLimit: key.rateLimit,
+      revoked: !!key.revokedAt,
+      revokedAt: key.revokedAt ? new Date(key.revokedAt) : null,
+      lastUsedAt: key.lastUsedAt ? new Date(key.lastUsedAt) : null,
+    }).onConflictDoNothing();
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistApiKey failed (non-fatal)'); }
+}
+
+async function persistToolCall(call: GatewayToolCall): Promise<void> {
+  try {
+    await db.insert(mcpGatewayToolCallsTable).values({
+      callId: call.callId,
+      connectionId: call.connectionId,
+      tenantId: call.tenantId,
+      agentName: call.agentName,
+      toolName: call.toolName,
+      parameters: call.parameters,
+      riskLevel: call.riskLevel,
+      riskClasses: call.riskClasses,
+      disposition: call.disposition,
+      approvalId: call.approvalId,
+      proofPacketId: call.proofPacketId,
+      resultHash: call.resultHash,
+      latencyMs: call.latencyMs,
+    }).onConflictDoNothing();
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistToolCall failed (non-fatal)'); }
+}
+
+async function persistProofPacket(packet: GatewayProofPacket): Promise<void> {
+  try {
+    await db.insert(mcpGatewayProofPacketsTable).values({
+      packetId: packet.packetId,
+      callId: packet.callId,
+      tenantId: packet.tenantId,
+      connectionId: packet.connectionId,
+      agentName: packet.agentName,
+      toolName: packet.toolName,
+      disposition: packet.disposition,
+      riskLevel: packet.riskLevel,
+      callerIdentity: packet.callerIdentity,
+      parametersHash: packet.parametersHash,
+      resultHash: packet.resultHash,
+      previousHash: packet.previousHash,
+      proofHash: packet.hash,
+      witnessedBy: packet.witnessedBy,
+      attestedAt: packet.issuedAt,
+    }).onConflictDoNothing();
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistProofPacket failed (non-fatal)'); }
+}
+
+async function persistApproval(approval: GatewayApproval, tenantId?: string): Promise<void> {
+  try {
+    const resolvedTenant = tenantId
+      ?? toolCalls.find(c => c.callId === approval.callId)?.tenantId
+      ?? 'unknown';
+    await db.insert(mcpGatewayApprovalsTable).values({
+      approvalId: approval.approvalId,
+      callId: approval.callId,
+      tenantId: resolvedTenant,
+      connectionId: approval.connectionId,
+      agentName: approval.agentName,
+      toolName: approval.toolName,
+      parameters: approval.parameters,
+      riskLevel: approval.riskLevel,
+      riskClasses: approval.riskClasses,
+      requiredTier: approval.requiredTier,
+      status: approval.status,
+      reviewedBy: approval.reviewedBy,
+      reviewedAt: approval.reviewedAt ? new Date(approval.reviewedAt) : null,
+      reviewNote: approval.reviewNote,
+      proofPacketId: approval.proofPacketId,
+    }).onConflictDoUpdate({
+      target: mcpGatewayApprovalsTable.approvalId,
+      set: {
+        status: approval.status,
+        reviewedBy: approval.reviewedBy,
+        reviewedAt: approval.reviewedAt ? new Date(approval.reviewedAt) : null,
+        reviewNote: approval.reviewNote,
+        proofPacketId: approval.proofPacketId,
+      },
+    });
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistApproval failed (non-fatal)'); }
+}
+
+async function persistToolCallUpdate(call: GatewayToolCall): Promise<void> {
+  try {
+    await db.update(mcpGatewayToolCallsTable)
+      .set({
+        disposition: call.disposition,
+        proofPacketId: call.proofPacketId,
+        resultHash: call.resultHash,
+      })
+      .where(eq(mcpGatewayToolCallsTable.callId, call.callId));
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistToolCallUpdate failed (non-fatal)'); }
+}
+
+async function persistApiKeyLastUsed(keyId: string): Promise<void> {
+  try {
+    await db.update(mcpGatewayApiKeysTable)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(mcpGatewayApiKeysTable.keyId, keyId));
+  } catch (e) { logger.debug({ err: e }, 'gateway: persistApiKeyLastUsed failed (non-fatal)'); }
+}
+
+async function hydrateFromDb(): Promise<void> {
+  try {
+    const dbKeys = await db.select().from(mcpGatewayApiKeysTable);
+    for (const row of dbKeys) {
+      apiKeys.set(row.keyId, {
+        id: row.keyId,
+        keyHash: row.keyHash,
+        prefix: row.prefix,
+        label: row.label,
+        tenantId: row.tenantId,
+        scopes: row.scopes,
+        rateLimit: row.rateLimit,
+        createdAt: row.createdAt.toISOString(),
+        lastUsedAt: row.lastUsedAt?.toISOString() ?? null,
+        revokedAt: row.revokedAt?.toISOString() ?? null,
+      });
+    }
+
+    const dbCalls = await db.select().from(mcpGatewayToolCallsTable).orderBy(desc(mcpGatewayToolCallsTable.createdAt));
+    for (const row of dbCalls) {
+      toolCalls.push({
+        callId: row.callId,
+        connectionId: row.connectionId,
+        tenantId: row.tenantId,
+        agentName: row.agentName,
+        toolName: row.toolName,
+        parameters: (row.parameters ?? {}) as Record<string, unknown>,
+        riskLevel: row.riskLevel as GatewayRiskLevel,
+        riskClasses: row.riskClasses as RiskClass[],
+        disposition: row.disposition as GatewayToolCall['disposition'],
+        approvalId: row.approvalId,
+        proofPacketId: row.proofPacketId,
+        resultHash: row.resultHash,
+        latencyMs: row.latencyMs,
+        timestamp: row.createdAt.toISOString(),
+      });
+    }
+
+    const dbApprovals = await db.select().from(mcpGatewayApprovalsTable);
+    for (const row of dbApprovals) {
+      approvals.set(row.approvalId, {
+        approvalId: row.approvalId,
+        callId: row.callId,
+        connectionId: row.connectionId,
+        agentName: row.agentName,
+        toolName: row.toolName,
+        parameters: (row.parameters ?? {}) as Record<string, unknown>,
+        riskLevel: row.riskLevel as GatewayRiskLevel,
+        riskClasses: (row.riskClasses ?? []) as RiskClass[],
+        requiredTier: row.requiredTier,
+        status: row.status as ApprovalStatus,
+        reviewedBy: row.reviewedBy,
+        reviewedAt: row.reviewedAt?.toISOString() ?? null,
+        reviewNote: row.reviewNote,
+        proofPacketId: row.proofPacketId,
+        createdAt: row.createdAt.toISOString(),
+      });
+    }
+
+    const dbProofs = await db.select().from(mcpGatewayProofPacketsTable).orderBy(desc(mcpGatewayProofPacketsTable.createdAt));
+    for (const row of dbProofs) {
+      proofPackets.push({
+        packetId: row.packetId,
+        callId: row.callId,
+        connectionId: row.connectionId,
+        tenantId: row.tenantId,
+        agentName: row.agentName,
+        toolName: row.toolName,
+        riskLevel: row.riskLevel as GatewayRiskLevel,
+        disposition: row.disposition,
+        callerIdentity: row.callerIdentity,
+        parametersHash: row.parametersHash,
+        resultHash: row.resultHash,
+        previousHash: row.previousHash,
+        hash: row.proofHash,
+        witnessedBy: row.witnessedBy,
+        issuedAt: row.attestedAt,
+      });
+    }
+
+    logger.info(
+      { keyCount: dbKeys.length, callCount: dbCalls.length, approvalCount: dbApprovals.length, proofCount: dbProofs.length },
+      'gateway: hydrated all entities from DB',
+    );
+  } catch (e) {
+    logger.warn({ err: e }, 'gateway: DB hydration failed, using in-memory only');
+  }
+}
+
+hydrateFromDb().catch(() => {});
+
 function extractBearerKey(req: Request): string | null {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -175,6 +387,7 @@ export function gatewayApiKeyGate(req: Request, res: Response, next: NextFunctio
     });
     rateLimitedCall.proofPacketId = rateLimitProof.packetId;
     toolCalls.push(rateLimitedCall);
+    persistToolCall(rateLimitedCall).catch(() => {});
     res.status(429).json({
       error: 'Rate limit exceeded',
       remaining: rl.remaining,
@@ -183,6 +396,7 @@ export function gatewayApiKeyGate(req: Request, res: Response, next: NextFunctio
     return;
   }
   matchedKey.lastUsedAt = new Date().toISOString();
+  persistApiKeyLastUsed(matchedKey.id).catch(() => {});
   req.gatewayApiKey = matchedKey;
 
   let existingConn = [...connections.values()].find(
@@ -283,6 +497,7 @@ export function recordGatewayMcpCall(
     const blockedProof = generateGatewayProof(blockedCall, connection);
     blockedCall.proofPacketId = blockedProof.packetId;
     toolCalls.push(blockedCall);
+    persistToolCall(blockedCall).catch(() => {});
     return { disposition: 'blocked', proofPacketId: blockedProof.packetId, approvalId: null };
   }
 
@@ -330,6 +545,7 @@ export function recordGatewayMcpCall(
     };
     call.approvalId = approval.approvalId;
     approvals.set(approval.approvalId, approval);
+    persistApproval(approval, connection.tenantId).catch(() => {});
   }
 
   connection.toolCallCount++;
@@ -337,6 +553,7 @@ export function recordGatewayMcpCall(
   call.proofPacketId = proof.packetId;
   connection.proofPacketCount++;
   toolCalls.push(call);
+  persistToolCall(call).catch(() => {});
 
   return {
     disposition: call.disposition,
@@ -369,6 +586,7 @@ export function recordGatewayLifecycleEvent(
   call.proofPacketId = proof.packetId;
   connection.proofPacketCount++;
   toolCalls.push(call);
+  persistToolCall(call).catch(() => {});
   logger.info({ connectionId: connection.connectionId, eventType, proofPacketId: proof.packetId }, '[mcp-governed-gateway] Lifecycle event recorded');
   return { proofPacketId: proof.packetId };
 }
@@ -491,6 +709,7 @@ function generateGatewayProof(
     issuedAt: new Date().toISOString(),
   };
   proofPackets.push(packet);
+  persistProofPacket(packet).catch(() => {});
   writeProofToAuditLedger(packet, connection.tenantId).catch(() => {});
   return packet;
 }
@@ -813,7 +1032,9 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
       call.proofPacketId = executionProof.packetId;
       approval.proofPacketId = executionProof.packetId;
     }
+    persistToolCallUpdate(call).catch(() => {});
   }
+  persistApproval(approval).catch(() => {});
   logger.info({ approvalId: approval.approvalId, toolName: approval.toolName }, '[mcp-governed-gateway] Approval granted, deferred execution completed');
   res.json({
     approval,
@@ -849,7 +1070,9 @@ router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Respo
       call.proofPacketId = proof.packetId;
       approval.proofPacketId = proof.packetId;
     }
+    persistToolCallUpdate(call).catch(() => {});
   }
+  persistApproval(approval).catch(() => {});
   logger.info({ approvalId: approval.approvalId, toolName: approval.toolName }, '[mcp-governed-gateway] Approval rejected');
   res.json({ approval });
 });
@@ -926,6 +1149,7 @@ router.post('/api-keys', authMiddleware(), (req: Request, res: Response) => {
     revokedAt: null,
   };
   apiKeys.set(key.id, key);
+  persistApiKey(key).catch(() => {});
   logger.info({ keyId: key.id, label }, '[mcp-governed-gateway] API key created');
   res.status(201).json({
     id: key.id,
@@ -949,6 +1173,10 @@ router.delete('/api-keys/:id', authMiddleware(), (req: Request, res: Response) =
   }
   if (key.revokedAt) return res.status(409).json({ error: 'Key already revoked' });
   key.revokedAt = new Date().toISOString();
+  db.update(mcpGatewayApiKeysTable)
+    .set({ revoked: true, revokedAt: new Date(key.revokedAt) })
+    .where(eq(mcpGatewayApiKeysTable.keyId, key.id))
+    .catch(() => {});
   logger.info({ keyId: key.id, label: key.label }, '[mcp-governed-gateway] API key revoked');
   res.json({ id: key.id, label: key.label, revokedAt: key.revokedAt });
 });
@@ -960,9 +1188,8 @@ router.post('/tool-call', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'toolName is required' });
   }
 
-  const bearerKey = extractBearerKey(req);
-  const rawKey = bearerKey ?? req.body?.apiKey;
-  if (!rawKey || typeof rawKey !== 'string') {
+  const rawKey = extractBearerKey(req);
+  if (!rawKey) {
     return res.status(401).json({
       error: 'API key required via Authorization: Bearer header — generate one via POST /api/mcp-governed-gateway/api-keys',
     });
@@ -1014,6 +1241,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
     const rateLimitProof = generateGatewayProof(rateLimitedCall, rateLimitProofConn);
     rateLimitedCall.proofPacketId = rateLimitProof.packetId;
     toolCalls.push(rateLimitedCall);
+    persistToolCall(rateLimitedCall).catch(() => {});
     return res.status(429).json({
       error: 'Rate limit exceeded',
       remaining: rl.remaining,
@@ -1022,6 +1250,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
     });
   }
   matchedKey.lastUsedAt = new Date().toISOString();
+  persistApiKeyLastUsed(matchedKey.id).catch(() => {});
 
   const riskLevel = classifyToolRisk(toolName);
   const riskClasses = classifyRisk({
@@ -1109,6 +1338,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
     };
     call.approvalId = approval.approvalId;
     approvals.set(approval.approvalId, approval);
+    persistApproval(approval, existingConn.tenantId).catch(() => {});
   }
 
   call.latencyMs = Date.now() - start;
@@ -1116,6 +1346,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
   call.proofPacketId = proof.packetId;
   existingConn.proofPacketCount++;
   toolCalls.push(call);
+  persistToolCall(call).catch(() => {});
 
   const responsePayload = {
     callId: call.callId,

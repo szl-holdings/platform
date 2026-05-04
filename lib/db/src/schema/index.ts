@@ -102,6 +102,7 @@ export * from './lyte_surfaces';
 export * from './marine_insurance';
 export * from './maritime';
 export * from './memory_fabric';
+export * from './mcp_gateway';
 export * from './messages';
 export * from './metering';
 export * from './ml_pipeline';

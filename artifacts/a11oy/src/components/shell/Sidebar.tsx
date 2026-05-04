@@ -56,10 +56,10 @@ export function Sidebar() {
         key={item.id}
         href={fullPath}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors",
+          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
           isActive
-            ? "bg-[var(--color-a11oy-gold-soft)] text-[var(--color-a11oy-gold-dim)] font-medium"
-            : "text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-overlay)] hover:text-[var(--color-a11oy-text)]"
+            ? "bg-[var(--color-a11oy-surface)] text-[var(--color-a11oy-blue)] font-medium"
+            : "text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-surface)] hover:text-[var(--color-a11oy-text)]"
         )}
       >
         <item.icon className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-50")} />
@@ -69,7 +69,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-60 border-r border-[var(--color-a11oy-border-subtle)] bg-[var(--color-a11oy-surface)] shrink-0 flex flex-col h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto">
+    <aside className="w-60 border-r border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-deep)] shrink-0 flex flex-col h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto">
       <div className="px-3 py-4 flex-1">
         <SectionHeader>Orchestration</SectionHeader>
         <nav className="flex flex-col gap-0.5">
@@ -114,9 +114,9 @@ export function Sidebar() {
           })}
         </nav>
       </div>
-      <div className="px-4 py-3 border-t border-[var(--color-a11oy-border-subtle)] text-xs text-[var(--color-a11oy-text-ghost)]">
+      <div className="px-4 py-3 border-t border-[var(--color-a11oy-border)] text-xs text-[var(--color-a11oy-text-ghost)]">
         <div>v4.2.0-rc.1</div>
-        <div className="text-[var(--color-a11oy-success)]">System nominal</div>
+        <div>System nominal</div>
       </div>
     </aside>
   );

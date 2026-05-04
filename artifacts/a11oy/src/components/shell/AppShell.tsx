@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[var(--color-a11oy-base)] text-[var(--color-a11oy-text)] flex flex-col">
+    <div className="min-h-screen bg-[var(--color-a11oy-navy)] text-[var(--color-a11oy-text)] flex flex-col">
       <TopBar />
       <div className="flex flex-1">
         <Sidebar />
