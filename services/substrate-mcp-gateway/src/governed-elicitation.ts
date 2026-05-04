@@ -6,18 +6,25 @@ import { recordProof, type ProofRecord } from './nexus-fabric.js';
 export type ElicitationMode = 'form' | 'url';
 export type ElicitationStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired';
 
+export interface ElicitationFormSchemaProperty {
+  type: 'string' | 'number' | 'integer' | 'boolean' | 'array';
+  description?: string;
+  enum?: string[];
+  oneOf?: Array<{ const: string; title: string }>;
+  format?: string;
+  minimum?: number;
+  maximum?: number;
+  default?: unknown;
+  items?: {
+    type: 'string';
+    enum?: string[];
+  };
+  uniqueItems?: boolean;
+}
+
 export interface ElicitationFormSchema {
   type: 'object';
-  properties: Record<string, {
-    type: 'string' | 'number' | 'integer' | 'boolean';
-    description?: string;
-    enum?: string[];
-    oneOf?: Array<{ const: string; title: string }>;
-    format?: string;
-    minimum?: number;
-    maximum?: number;
-    default?: unknown;
-  }>;
+  properties: Record<string, ElicitationFormSchemaProperty>;
   required?: string[];
 }
 
@@ -108,10 +115,15 @@ function validateUrlSafety(url: string): string[] {
 
 function validateSchemaSubset(schema: ElicitationFormSchema): string[] {
   const errors: string[] = [];
-  const allowedTypes = new Set(['string', 'number', 'integer', 'boolean']);
+  const allowedTypes = new Set(['string', 'number', 'integer', 'boolean', 'array']);
   for (const [key, prop] of Object.entries(schema.properties)) {
     if (!allowedTypes.has(prop.type)) {
-      errors.push(`Property "${key}" has unsupported type "${prop.type}". Allowed: string, number, integer, boolean.`);
+      errors.push(`Property "${key}" has unsupported type "${prop.type}". Allowed: string, number, integer, boolean, array.`);
+    }
+    if (prop.type === 'array') {
+      if (!prop.items || prop.items.type !== 'string') {
+        errors.push(`Property "${key}" is an array but must have items.type = "string".`);
+      }
     }
   }
   return errors;
@@ -138,6 +150,18 @@ function validateResponseAgainstSchema(
     }
     if (prop.type === 'boolean' && typeof val !== 'boolean') {
       errors.push(`Field "${key}" must be a boolean.`);
+    }
+    if (prop.type === 'array') {
+      if (!Array.isArray(val)) {
+        errors.push(`Field "${key}" must be an array.`);
+      } else if (prop.items?.enum) {
+        const allowed = new Set(prop.items.enum);
+        for (const item of val) {
+          if (typeof item !== 'string' || !allowed.has(item)) {
+            errors.push(`Field "${key}" contains invalid value "${item}". Allowed: ${prop.items.enum.join(', ')}.`);
+          }
+        }
+      }
     }
     if (prop.enum && typeof val === 'string' && !prop.enum.includes(val)) {
       errors.push(`Field "${key}" must be one of: ${prop.enum.join(', ')}.`);

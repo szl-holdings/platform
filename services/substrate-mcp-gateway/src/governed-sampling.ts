@@ -44,7 +44,7 @@ export interface GovernedSamplingSession {
   tenantId: string;
   model: string;
   provider: string;
-  status: 'active' | 'completed' | 'policy_blocked' | 'iteration_cap' | 'client_unavailable';
+  status: 'active' | 'completed' | 'policy_blocked' | 'pending_approval' | 'iteration_cap' | 'client_unavailable';
   iterations: number;
   maxIterations: number;
   totalInputTokens: number;
@@ -67,11 +67,22 @@ const activeSessions = new Map<string, GovernedSamplingSession>();
 
 let _samplingBridge: SamplingBridge | null = null;
 
+export type SamplingContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
+  | { type: 'tool_result'; tool_use_id: string; content: string };
+
+export interface SamplingBridgeMessage {
+  role: 'user' | 'assistant';
+  content: SamplingContentBlock[];
+}
+
 export interface SamplingBridgeResult {
   role: 'assistant';
   content: { type: 'text'; text: string };
   model: string;
   stopReason?: string;
+  toolUse?: { id: string; name: string; input: Record<string, unknown> };
 }
 
 export interface SamplingBridge {
@@ -173,10 +184,11 @@ function evaluateCovenantPolicy(
     });
 
     return {
-      allowed: true,
-      policyResult: 'passthrough',
-      reason: `High-risk sampling request queued for human review in Approvals Inbox. ` +
-        `Actor '${actor}', model '${model}', ${maxTokens} tokens. Proceeding with governance receipt.`,
+      allowed: false,
+      policyResult: 'deny',
+      reason: `High-risk sampling request held for human approval in Approvals Inbox. ` +
+        `Actor '${actor}', model '${model}', ${maxTokens} tokens. ` +
+        `Execution blocked until operator grants approval via Approvals Inbox.`,
       matchedPolicies: ['high_risk_escalation', 'approvals_inbox_review'],
     };
   }
@@ -261,8 +273,10 @@ export async function handleSamplingCreate(
   activeSessions.set(sessionId, session);
 
   if (!covenantResult.allowed) {
-    session.status = 'policy_blocked';
-    session.completedAt = new Date().toISOString();
+    const isPendingApproval = covenantResult.matchedPolicies.includes('high_risk_escalation');
+    session.status = isPendingApproval ? 'pending_approval' : 'policy_blocked';
+    session.policyEvaluation = isPendingApproval ? 'human_review' : 'blocked';
+    session.completedAt = isPendingApproval ? null : new Date().toISOString();
     persistProofRecord(sessionId, actor, model, proofHash, inputTokens, 0, true);
     session.proofPersistedToWal = true;
 
@@ -270,7 +284,7 @@ export async function handleSamplingCreate(
       type: 'sampling_completed' as RunEventType,
       runId: sessionId,
       actor,
-      status: 'policy_blocked',
+      status: session.status,
       timestamp: Date.now(),
     });
 
@@ -323,32 +337,35 @@ export async function handleSamplingCreate(
         session.model = bridgeResult.model || model;
         lastResult = bridgeResult;
 
-        if (bridgeResult.stopReason !== 'toolUse' || !_samplingBridge.executeToolCall) {
-          break;
-        }
-
-        let toolName = 'unknown';
-        let toolArgs: Record<string, unknown> = {};
-        try {
-          const parsed = JSON.parse(bridgeResult.content.text);
-          toolName = parsed.name ?? parsed.tool ?? 'unknown';
-          toolArgs = parsed.arguments ?? parsed.input ?? {};
-        } catch {
+        const toolCall = bridgeResult.toolUse;
+        if (bridgeResult.stopReason !== 'toolUse' || !_samplingBridge.executeToolCall || !toolCall) {
           break;
         }
 
         const toolResult = await _samplingBridge.executeToolCall({
-          toolName,
-          arguments: toolArgs,
+          toolName: toolCall.name,
+          arguments: toolCall.input,
         });
+
+        const toolUseBlock: SamplingContentBlock = {
+          type: 'tool_use',
+          id: toolCall.id,
+          name: toolCall.name,
+          input: toolCall.input,
+        };
+        const toolResultBlock: SamplingContentBlock = {
+          type: 'tool_result',
+          tool_use_id: toolCall.id,
+          content: toolResult.text,
+        };
 
         conversationMessages.push({
           role: 'assistant',
-          content: { type: 'text', text: bridgeResult.content.text },
+          content: { type: 'text', text: JSON.stringify(toolUseBlock) },
         });
         conversationMessages.push({
           role: 'user',
-          content: { type: 'text', text: toolResult.text },
+          content: { type: 'text', text: JSON.stringify(toolResultBlock) },
         });
 
         session.totalInputTokens += estimateTokens(toolResult.text);

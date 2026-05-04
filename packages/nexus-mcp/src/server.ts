@@ -186,10 +186,10 @@ export class PRAXISMcpServer {
     };
 
     if (config.enableSampling) {
-      capabilities['sampling'] = {};
+      capabilities['sampling'] = { tools: true };
     }
     if (config.enableElicitation) {
-      capabilities['elicitation'] = {};
+      capabilities['elicitation'] = { form: true, url: true };
     }
     if (config.enableRoots && config.roots && config.roots.length > 0) {
       capabilities['roots'] = { listChanged: true };
