@@ -277,9 +277,192 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
       }),
     ],
   },
+  'szl-hf-hub-bridge': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'hf_search_models',
+        name: 'hf_search_models',
+        description:
+          'Search HuggingFace Hub for models by query, task, library, or license. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            search: { type: 'string', description: 'Search query for model name or description' },
+            task: { type: 'string', description: 'Pipeline task filter (e.g., text-generation, token-classification)' },
+            library: { type: 'string', description: 'Library filter (e.g., transformers, diffusers)' },
+            license: { type: 'string', description: 'License filter (e.g., apache-2.0, mit)' },
+            limit: { type: 'number', description: 'Max results to return (default: 20)' },
+            sort: { type: 'string', enum: ['downloads', 'likes', 'trending', 'lastModified'] },
+          },
+          required: [],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_search_datasets',
+        name: 'hf_search_datasets',
+        description:
+          'Search HuggingFace Hub for datasets by query and task. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            search: { type: 'string', description: 'Search query for dataset name or description' },
+            task: { type: 'string', description: 'Task filter' },
+            limit: { type: 'number', description: 'Max results to return (default: 20)' },
+            sort: { type: 'string', enum: ['downloads', 'likes', 'trending'] },
+          },
+          required: [],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_download_model',
+        name: 'hf_download_model',
+        description:
+          'Retrieve model metadata, file listing, and download URLs from HuggingFace Hub. ' +
+          'Returns model card, file manifest with sizes, tags, and direct download link. ' +
+          'Governed operation: PCE gate evaluates risk (medium), proof chain tracks provenance with agent identity.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 30000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            modelId: { type: 'string', description: 'HuggingFace model ID (e.g., meta-llama/Llama-3.1-8B)' },
+            revision: { type: 'string', description: 'Git revision / branch (default: main)' },
+            purpose: { type: 'string', description: 'Purpose of the download for audit trail' },
+          },
+          required: ['modelId'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_upload_model',
+        name: 'hf_upload_model',
+        description:
+          'Upload model artifacts to a HuggingFace Hub repository. ' +
+          'Creates repo if needed, then uploads provided files. ' +
+          'Governed operation: PCE gate evaluates risk (high), requires executive approval, proof chain records provenance.',
+        domainTags: ['data', 'infrastructure'],
+        policyTier: 'human-approval-mandatory',
+        approvalRequired: true,
+        timeoutMs: 60000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            repoId: { type: 'string', description: 'Target HuggingFace repo ID (e.g., org/model-name)' },
+            repoType: { type: 'string', enum: ['model', 'dataset', 'space'] },
+            files: {
+              type: 'array',
+              description: 'Files to upload. Each entry has a path (relative to repo root) and content (string content of the file).',
+              items: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'File path relative to repo root (e.g., README.md, config.json, model_card.md)' },
+                  content: { type: 'string', description: 'String content of the file' },
+                },
+                required: ['path', 'content'],
+              },
+            },
+            commitMessage: { type: 'string', description: 'Commit message for the upload' },
+            purpose: { type: 'string', description: 'Purpose of the upload for audit trail' },
+          },
+          required: ['repoId', 'files'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_manage_bucket',
+        name: 'hf_manage_bucket',
+        description:
+          'Manage HuggingFace storage buckets for tenant-scoped model and dataset storage. ' +
+          'Governed operation: PCE gate evaluates risk (high), proof chain records provenance.',
+        domainTags: ['infrastructure', 'data'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['create', 'list', 'delete', 'get'], description: 'Bucket operation to perform' },
+            bucketName: { type: 'string', description: 'Bucket name (required for create/delete/get)' },
+            prefix: { type: 'string', description: 'Object prefix filter for listing' },
+          },
+          required: ['action'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_launch_space',
+        name: 'hf_launch_space',
+        description:
+          'Manage HuggingFace Spaces — create, list, restart, or pause Spaces. ' +
+          'Governed operation: PCE gate evaluates risk (high), proof chain records provenance.',
+        domainTags: ['infrastructure'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 30000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['create', 'list', 'get', 'restart', 'pause'], description: 'Space management action' },
+            spaceId: { type: 'string', description: 'Space ID (required for get/restart/pause)' },
+            sdk: { type: 'string', enum: ['gradio', 'streamlit', 'docker', 'static'], description: 'SDK for new Space creation' },
+            hardware: { type: 'string', description: 'Hardware tier for Space (e.g., cpu-basic, t4-small)' },
+          },
+          required: ['action'],
+        },
+      }),
+    ],
+  },
 };
 
-/** Register tool manifests for an internal server on connect (discoverable, not yet callable). */
+function getApiServerBase(): string {
+  return process.env.MCP_API_SERVER_BASE_URL ??
+    (process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : 'http://localhost:8080');
+}
+
+async function hfHubProxyHandler(
+  endpoint: string,
+  input: unknown,
+): Promise<unknown> {
+  const apiBase = getApiServerBase();
+  const url = `${apiBase}/api/a11oy/hub-operations/${endpoint}`;
+  const body = (input && typeof input === 'object') ? input : {};
+  const internalToken = process.env.ALLOY_INTERNAL_TOKEN ?? '';
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Agent-Id': 'mcp-gateway',
+    'X-Tenant-Id': 'substrate',
+  };
+  if (internalToken) {
+    headers['x-internal-token'] = internalToken;
+  }
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(55_000),
+  });
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '');
+    throw new Error(`HF Hub API error (${resp.status}): ${errText}`);
+  }
+  return resp.json();
+}
+
+const HF_HANDLER_MAP: Record<string, (input: unknown) => Promise<unknown>> = {
+  hf_search_models: (input) => hfHubProxyHandler('search-models', input),
+  hf_search_datasets: (input) => hfHubProxyHandler('search-datasets', input),
+  hf_download_model: (input) => hfHubProxyHandler('download-model', input),
+  hf_upload_model: (input) => hfHubProxyHandler('upload-model', input),
+  hf_manage_bucket: (input) => hfHubProxyHandler('manage-bucket', input),
+  hf_launch_space: (input) => hfHubProxyHandler('manage-space', input),
+};
+
 function registerInternalServerTools(serverId: string): void {
   const entry = INTERNAL_SERVER_TOOLS[serverId];
   if (!entry) return;
@@ -287,11 +470,15 @@ function registerInternalServerTools(serverId: string): void {
   for (const manifest of entry.manifests) {
     defaultToolRegistry.register(manifest);
     registeredIds.push(manifest.id);
+
+    const handler = HF_HANDLER_MAP[manifest.id];
+    if (handler) {
+      defaultGateway.registerHandler(manifest.id, handler);
+    }
   }
   internalServerRegisteredTools.set(serverId, registeredIds);
 }
 
-/** Unregister tool manifests for an internal server on disconnect. */
 function unregisterInternalServerTools(serverId: string): void {
   const ids = internalServerRegisteredTools.get(serverId) ?? [];
   for (const toolId of ids) {
@@ -460,6 +647,16 @@ serverRegistry.register({
     'Unified Agentic RAG platform: planner, specialist agent registry, MCP class fan-out (LocalData / SearchEngine / CloudEngine), evidence merge, and generation.',
   capabilitiesSummary: 'analytics, documents, retrieval, agentic-rag, evidence',
   endpoint: 'internal://alloy-agentic-rag',
+});
+
+serverRegistry.register({
+  serverId: 'szl-hf-hub-bridge',
+  name: 'HF Hub Bridge MCP',
+  description:
+    'Governed HuggingFace Hub operations — search models/datasets, download model metadata, upload artifacts, manage buckets, and launch Spaces. ' +
+    'Every operation passes through PCE gate evaluation, covenant policy checks, and proof chain recording.',
+  capabilitiesSummary: 'analytics, data, infrastructure, models, hub, governance',
+  endpoint: 'internal://hf-hub-bridge',
 });
 
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────

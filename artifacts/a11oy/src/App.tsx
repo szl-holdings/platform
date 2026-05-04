@@ -181,6 +181,7 @@ const McpHub = lazy(() => import('./pages/McpHub').then(m => ({ default: m.McpHu
 const AgenticRag = lazy(() => import('./pages/AgenticRag').then(m => ({ default: m.AgenticRag })));
 const SubstrateCompute = lazy(() => import('./pages/SubstrateCompute').then(m => ({ default: m.SubstrateCompute })));
 const HfJobs = lazy(() => import('./pages/HfJobs'));
+const HubOperations = lazy(() => import('./pages/HubOperations').then(m => ({ default: m.HubOperations })));
 const TotoForecaster = lazy(() => import('./pages/TotoForecaster').then(m => ({ default: m.TotoForecaster })));
 const CausalRCA = lazy(() => import('./pages/CausalRCA').then(m => ({ default: m.CausalRCA })));
 const SyntheticMetrics = lazy(() => import('./pages/SyntheticMetrics').then(m => ({ default: m.SyntheticMetrics })));
@@ -366,6 +367,9 @@ export default function App() {
         </Route>
         <Route path={`${base}/hf-jobs`}>
           <WithShell><HfJobs /></WithShell>
+        </Route>
+        <Route path={`${base}/hub-operations`}>
+          <WithShell><HubOperations /></WithShell>
         </Route>
         <Route path={`${base}/toto-forecaster`}>
           <WithShell><TotoForecaster /></WithShell>

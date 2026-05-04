@@ -192,6 +192,30 @@ export {
 export { WorldBankAdapter } from './adapters/worldbank.js';
 export { type XPostResult, XTwitterAdapter } from './adapters/x-twitter.js';
 export {
+  type HubOperationType,
+  type HubRiskLevel,
+  type HubOperationRecord,
+  type HubModelSearchParams,
+  type HubModelResult,
+  type HubDatasetSearchParams,
+  type HubDatasetResult,
+  type HubDownloadRequest,
+  type HubUploadRequest,
+  type HubBucketRequest,
+  type HubSpaceRequest,
+  isValidModelSort,
+  isValidDatasetSort,
+  isValidBucketAction,
+  isValidSpaceAction,
+  isValidSpaceSdk,
+  isValidRepoType,
+  classifyHubRisk,
+  estimateHubCost,
+  HuggingFaceHubClient,
+  hubClient,
+  parseRepoId,
+} from './adapters/huggingface-hub.js';
+export {
   type AzureServiceConfig,
   azureAppInsights,
   azureBlobStorage,

@@ -428,6 +428,10 @@ router.use(lazyMatch("/ai-gateway", () => import("./ai-gateway"), "ai-gateway"))
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 
+// A11oy Hub Operations — governed HF CLI bridge for agent-native Hub operations.
+// Search, download, upload with PCE gate evaluation, proof chain, and cost metering.
+router.use(lazyMatch("/a11oy/hub-operations", () => import("./a11oy-hub-operations"), "a11oy-hub-operations"));
+
 // Unified Hugging Face Hub — model/dataset/space search, pinned registry,
 // multimodal inference proxy, and token health. All HF traffic from every
 // frontend flows through this single surface so auth, retries, and cost
