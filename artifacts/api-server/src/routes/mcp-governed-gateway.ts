@@ -1,5 +1,6 @@
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { randomUUID, createHash } from 'node:crypto';
+import { logActivity } from '@szl-holdings/audit';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';
 import {
@@ -45,6 +46,7 @@ interface ExternalConnection {
 interface GatewayToolCall {
   callId: string;
   connectionId: string;
+  tenantId: string;
   agentName: string;
   toolName: string;
   parameters: Record<string, unknown>;
@@ -80,6 +82,7 @@ interface GatewayProofPacket {
   packetId: string;
   callId: string;
   connectionId: string;
+  tenantId: string;
   agentName: string;
   toolName: string;
   riskLevel: GatewayRiskLevel;
@@ -143,6 +146,7 @@ export function gatewayApiKeyGate(req: Request, res: Response, next: NextFunctio
     const rateLimitedCall: GatewayToolCall = {
       callId: `gc-call-${randomUUID().slice(0, 8)}`,
       connectionId: 'rate-limited',
+      tenantId: matchedKey.tenantId,
       agentName: req.headers['x-agent-name'] as string ?? 'unknown',
       toolName: 'mcp-transport',
       parameters: {},
@@ -263,6 +267,7 @@ export function recordGatewayMcpCall(
     const blockedCall: GatewayToolCall = {
       callId: `gc-call-${randomUUID().slice(0, 8)}`,
       connectionId: connection.connectionId,
+      tenantId: connection.tenantId,
       agentName: connection.agentName,
       toolName,
       parameters,
@@ -284,6 +289,7 @@ export function recordGatewayMcpCall(
   const call: GatewayToolCall = {
     callId: `gc-call-${randomUUID().slice(0, 8)}`,
     connectionId: connection.connectionId,
+    tenantId: connection.tenantId,
     agentName: connection.agentName,
     toolName,
     parameters,
@@ -438,6 +444,7 @@ function generateGatewayProof(
     packetId: `gw-pp-${randomUUID().slice(0, 8)}`,
     callId: call.callId,
     connectionId: connection.connectionId,
+    tenantId: connection.tenantId,
     agentName: connection.agentName,
     toolName: call.toolName,
     riskLevel: call.riskLevel,
@@ -451,7 +458,67 @@ function generateGatewayProof(
     issuedAt: new Date().toISOString(),
   };
   proofPackets.push(packet);
+  writeProofToAuditLedger(packet, connection.tenantId).catch(() => {});
   return packet;
+}
+
+async function writeProofToAuditLedger(packet: GatewayProofPacket, tenantId: string): Promise<void> {
+  try {
+    await logActivity({
+      userId: null,
+      action: 'gateway_proof_packet',
+      resource: 'mcp_governed_gateway',
+      resourceId: packet.packetId,
+      description: `Gateway proof: ${packet.toolName} [${packet.riskLevel}/${packet.disposition}] by ${packet.agentName}`,
+      metadata: {
+        packetId: packet.packetId,
+        callId: packet.callId,
+        connectionId: packet.connectionId,
+        toolName: packet.toolName,
+        riskLevel: packet.riskLevel,
+        disposition: packet.disposition,
+        callerIdentity: packet.callerIdentity,
+        parametersHash: packet.parametersHash,
+        resultHash: packet.resultHash,
+        previousHash: packet.previousHash,
+        hash: packet.hash,
+        witnessedBy: packet.witnessedBy,
+        tenantId,
+      },
+    });
+  } catch (err) {
+    logger.warn({ err, packetId: packet.packetId }, '[mcp-governed-gateway] Failed to write proof to audit ledger');
+  }
+}
+
+function resolveTenantId(req: Request): string | null {
+  if (req.gatewayApiKey) return req.gatewayApiKey.tenantId;
+  const orgs = req.user?.orgs;
+  if (orgs && orgs.length > 0) return String(orgs[0]!.orgId);
+  return null;
+}
+
+function filterByTenant<T extends { tenantId?: string }>(items: T[], tenantId: string | null): T[] {
+  if (!tenantId) return items;
+  return items.filter(i => i.tenantId === tenantId);
+}
+
+export function getToolGovernanceMetadata(toolName: string): {
+  riskLevel: GatewayRiskLevel;
+  approvalRequired: boolean;
+  approvalTier: string | null;
+  isDestructive: boolean;
+} {
+  const riskLevel = classifyToolRisk(toolName);
+  const needsApproval = riskLevel === 'medium' || riskLevel === 'high' || riskLevel === 'critical';
+  return {
+    riskLevel,
+    approvalRequired: needsApproval,
+    approvalTier: needsApproval
+      ? (riskLevel === 'critical' ? 'executive' : 'operator')
+      : null,
+    isDestructive: isDestructiveAction(toolName),
+  };
 }
 
 function seedDemoData(): void {
@@ -565,6 +632,7 @@ function seedDemoData(): void {
     const call: GatewayToolCall = {
       callId: `gc-call-${randomUUID().slice(0, 8)}`,
       connectionId: connIds[connIdx]!,
+      tenantId: 'szl-demo',
       agentName: agentNames[connIdx]!,
       toolName,
       parameters: { query: `demo-param-${i}` },
@@ -617,53 +685,66 @@ if (process.env.NODE_ENV !== 'production') {
   seedDemoData();
 }
 
-router.get('/stats', (_req: Request, res: Response) => {
-  const activeConnections = [...connections.values()].filter(c => c.status === 'active').length;
-  const totalCalls = toolCalls.length;
-  const pendingApprovals = [...approvals.values()].filter(a => a.status === 'pending').length;
+router.get('/stats', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
+  const tenantConns = filterByTenant([...connections.values()], tenantId);
+  const tenantCalls = toolCalls.filter(c => !tenantId || c.tenantId === tenantId);
+  const activeConnections = tenantConns.filter(c => c.status === 'active').length;
+  const totalCalls = tenantCalls.length;
+  const pendingApprovals = [...approvals.values()].filter(a => {
+    const call = toolCalls.find(tc => tc.callId === a.callId);
+    return a.status === 'pending' && (!tenantId || call?.tenantId === tenantId);
+  }).length;
   const riskBreakdown = { low: 0, medium: 0, high: 0, critical: 0 };
-  for (const c of toolCalls) riskBreakdown[c.riskLevel]++;
+  for (const c of tenantCalls) riskBreakdown[c.riskLevel]++;
   const dispositionBreakdown = { allowed: 0, blocked: 0, pending_approval: 0, rate_limited: 0 };
-  for (const c of toolCalls) dispositionBreakdown[c.disposition]++;
+  for (const c of tenantCalls) dispositionBreakdown[c.disposition]++;
   const avgLatency = totalCalls > 0
-    ? Math.round(toolCalls.reduce((s, c) => s + c.latencyMs, 0) / totalCalls)
+    ? Math.round(tenantCalls.reduce((s, c) => s + c.latencyMs, 0) / totalCalls)
     : 0;
   res.json({
     activeConnections,
-    totalConnections: connections.size,
+    totalConnections: tenantConns.length,
     totalCalls,
     pendingApprovals,
-    totalProofs: proofPackets.length,
-    totalKeys: [...apiKeys.values()].filter(k => !k.revokedAt).length,
+    totalProofs: proofPackets.filter(p => !tenantId || p.tenantId === tenantId).length,
+    totalKeys: [...apiKeys.values()].filter(k => !k.revokedAt && (!tenantId || k.tenantId === tenantId)).length,
     riskBreakdown,
     dispositionBreakdown,
     avgLatencyMs: avgLatency,
     governanceMode: 'enforced',
     protocolVersion: '2025-11-25',
+    tenantId,
   });
 });
 
-router.get('/connections', (_req: Request, res: Response) => {
-  const list = [...connections.values()].sort(
+router.get('/connections', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
+  const list = filterByTenant([...connections.values()], tenantId).sort(
     (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
   );
   res.json({ connections: list, total: list.length });
 });
 
-router.get('/audit-log', (req: Request, res: Response) => {
+router.get('/audit-log', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
   const limit = Math.min(parseInt(String(req.query.limit) || '50', 10), 200);
   const riskFilter = req.query.risk as string | undefined;
   const dispositionFilter = req.query.disposition as string | undefined;
-  let filtered = [...toolCalls];
+  let filtered = toolCalls.filter(c => !tenantId || c.tenantId === tenantId);
   if (riskFilter) filtered = filtered.filter(c => c.riskLevel === riskFilter);
   if (dispositionFilter) filtered = filtered.filter(c => c.disposition === dispositionFilter);
   const result = filtered.slice(-limit).reverse();
   res.json({ calls: result, total: filtered.length, returned: result.length });
 });
 
-router.get('/approvals', (req: Request, res: Response) => {
+router.get('/approvals', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
   const statusFilter = req.query.status as string | undefined;
-  let list = [...approvals.values()];
+  let list = [...approvals.values()].filter(a => {
+    const call = toolCalls.find(tc => tc.callId === a.callId);
+    return !tenantId || call?.tenantId === tenantId;
+  });
   if (statusFilter) list = list.filter(a => a.status === statusFilter);
   list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   res.json({
@@ -719,17 +800,21 @@ router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Respo
   res.json({ approval });
 });
 
-router.get('/proof-chain', (req: Request, res: Response) => {
+router.get('/proof-chain', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
   const limit = Math.min(parseInt(String(req.query.limit) || '50', 10), 200);
-  const result = proofPackets.slice(-limit).reverse();
-  res.json({ packets: result, total: proofPackets.length, returned: result.length });
+  const filtered = proofPackets.filter(p => !tenantId || p.tenantId === tenantId);
+  const result = filtered.slice(-limit).reverse();
+  res.json({ packets: result, total: filtered.length, returned: result.length });
 });
 
-router.get('/rate-limits', (_req: Request, res: Response) => {
+router.get('/rate-limits', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
   const now = Date.now();
   const limits: RateLimitEntry[] = [];
   for (const key of apiKeys.values()) {
     if (key.revokedAt) continue;
+    if (tenantId && key.tenantId !== tenantId) continue;
     const window = rateLimitWindows.get(key.id);
     const windowActive = window && (now - window.windowStart) < RATE_LIMIT_WINDOW_MS;
     const callCount = windowActive ? window!.count : 0;
@@ -747,18 +832,21 @@ router.get('/rate-limits', (_req: Request, res: Response) => {
   res.json({ rateLimits: limits });
 });
 
-router.get('/api-keys', authMiddleware(), (_req: Request, res: Response) => {
-  const keys = [...apiKeys.values()].map(k => ({
-    id: k.id,
-    prefix: k.prefix,
-    label: k.label,
-    tenantId: k.tenantId,
-    scopes: k.scopes,
-    rateLimit: k.rateLimit,
-    createdAt: k.createdAt,
-    lastUsedAt: k.lastUsedAt,
-    revoked: !!k.revokedAt,
-  }));
+router.get('/api-keys', authMiddleware(), (req: Request, res: Response) => {
+  const tenantId = resolveTenantId(req);
+  const keys = [...apiKeys.values()]
+    .filter(k => !tenantId || k.tenantId === tenantId)
+    .map(k => ({
+      id: k.id,
+      prefix: k.prefix,
+      label: k.label,
+      tenantId: k.tenantId,
+      scopes: k.scopes,
+      rateLimit: k.rateLimit,
+      createdAt: k.createdAt,
+      lastUsedAt: k.lastUsedAt,
+      revoked: !!k.revokedAt,
+    }));
   res.json({ keys, total: keys.length });
 });
 
@@ -833,6 +921,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
     const rateLimitedCall: GatewayToolCall = {
       callId: `gc-call-${randomUUID().slice(0, 8)}`,
       connectionId: 'rate-limited',
+      tenantId: matchedKey.tenantId,
       agentName: agentName ?? 'unknown',
       toolName,
       parameters: parameters ?? {},
@@ -911,6 +1000,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
   const call: GatewayToolCall = {
     callId: `gc-call-${randomUUID().slice(0, 8)}`,
     connectionId: existingConn.connectionId,
+    tenantId: existingConn.tenantId,
     agentName: agentName ?? existingConn.agentName,
     toolName,
     parameters: parameters ?? {},

@@ -406,8 +406,10 @@ const PUBLIC_PREFIXES = [
   "/api/rf-intel/",
   "/api/sovereign-mesh/",
   "/api-server/sovereign-mesh/",
-  "/api/mcp-governed-gateway/",
-  "/api-server/mcp-governed-gateway/",
+  "/api/mcp-governed-gateway/connect-instructions",
+  "/api-server/mcp-governed-gateway/connect-instructions",
+  "/api/mcp-governed-gateway/tool-call",
+  "/api-server/mcp-governed-gateway/tool-call",
   // Crisis Arena — strictly public surfaces only: leaderboard ranking,
   // platform summary, and sanitized architect public profiles.
   // All engagement, submission, triage, award, and graduate endpoints require

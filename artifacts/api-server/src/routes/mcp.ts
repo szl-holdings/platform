@@ -21,7 +21,7 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
+import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
 
 const router = Router();
 
@@ -1623,13 +1623,17 @@ router.get('/mcp/health', (_req: Request, res: Response) => {
 });
 
 router.get('/mcp/tools', authMiddleware({ required: false }), (_req: Request, res: Response) => {
+  const toolsWithGovernance = ALL_TOOLS.map(t => ({
+    ...t,
+    governance: getToolGovernanceMetadata(t.name),
+  }));
   res.json({
-    tools: ALL_TOOLS,
-    count: ALL_TOOLS.length,
+    tools: toolsWithGovernance,
+    count: toolsWithGovernance.length,
     categories: {
-      domain: DOMAIN_TOOLS.map((t) => ({ name: t.name, description: t.description })),
-      platform: PLATFORM_TOOLS.map((t) => ({ name: t.name, description: t.description })),
-      data: DATA_TOOLS.map((t) => ({ name: t.name, description: t.description })),
+      domain: DOMAIN_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
+      platform: PLATFORM_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
+      data: DATA_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
     },
   });
 });
