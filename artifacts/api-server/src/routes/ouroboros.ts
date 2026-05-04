@@ -116,6 +116,8 @@ import {
   SOTAAgenticRouter,
   LanguageArbitrageEngine,
   UltraRouter,
+  ChatUltraRouter,
+  AGENT_ROSTER,
   INNOVATION_MANIFEST,
   PRISCA_LINEAGES,
   type Modality,
@@ -137,6 +139,7 @@ const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
 
 const lae = new LanguageArbitrageEngine();
 const ultraRouter = new UltraRouter();
+const chatUltra = new ChatUltraRouter();
 
 // Sovereign Engine is owned by the orchestrator -- single source of truth for all products.
 const sovereign = orchestrator.getSovereign();
@@ -1416,6 +1419,49 @@ router.get('/sovereign/ultra/kv-stats', (_req: Request, res: Response) => {
 
 router.get('/sovereign/ultra/modes', (_req: Request, res: Response) => {
   return res.json({ modes: UltraRouter.MODES, version: UltraRouter.VERSION });
+});
+
+// ---------------------------------------------------------------------------
+// Xi Unification + Multi-Agent Council (innovation 44)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/xi/route', (req: Request, res: Response) => {
+  const prompt = req.body?.prompt ?? 'default xi query';
+  const history = req.body?.history ?? [];
+  const maxOut = req.body?.maxOut ?? 800;
+  const mode = req.body?.mode ?? 'chat';
+  const require = req.body?.require ?? ['chat'];
+  const result = chatUltra.route(prompt, history, Number(maxOut), String(mode), require);
+  return res.json(result);
+});
+
+router.post('/sovereign/xi/council', (req: Request, res: Response) => {
+  const question = req.body?.question ?? req.body?.prompt ?? 'default council question';
+  const history = req.body?.history ?? [];
+  const result = chatUltra.council(question, history);
+  return res.json(result);
+});
+
+router.get('/sovereign/xi/agents', (_req: Request, res: Response) => {
+  return res.json({ agents: AGENT_ROSTER, version: ChatUltraRouter.VERSION });
+});
+
+router.get('/sovereign/xi/modes', (_req: Request, res: Response) => {
+  return res.json({ modes: ChatUltraRouter.MODES, version: ChatUltraRouter.VERSION });
+});
+
+router.post('/sovereign/xi/entropy', (req: Request, res: Response) => {
+  const history = req.body?.history ?? [];
+  const prompt = req.body?.prompt ?? '';
+  const result = chatUltra.route(prompt, history, 800, 'chat', ['chat']);
+  return res.json({
+    xi: result.xi,
+    lOmega: result.lOmega,
+    pLambda: result.pLambda,
+    aLangMean: result.aLangMean,
+    agent: result.agent,
+    persona: result.persona,
+  });
 });
 
 router.get('/health', (_req: Request, res: Response) => {

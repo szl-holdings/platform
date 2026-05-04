@@ -3735,6 +3735,191 @@ export class UltraRouter {
 }
 
 // ---------------------------------------------------------------------------
+// Innovation 44: Xi Unification Invariant + Multi-Agent Handoffs + Council (XUC)
+// Xi = L_Omega * P_Lambda * sigmoid(A_lang_mean) * 1/(1+H_dialog)
+// vs: single-model chat / no dialog-aware routing / no multi-agent handoff
+// ---------------------------------------------------------------------------
+
+function _dialogEntropy(history: Array<{ role: string; content: string }>): number {
+  if (!history || history.length === 0) return 0;
+  const recent = history.slice(-8);
+  const toks: string[] = [];
+  for (const m of recent) {
+    const words = (m.content ?? "").toLowerCase().split(/\s+/).slice(0, 30);
+    toks.push(...words);
+  }
+  if (toks.length === 0) return 0;
+  const freq: Record<string, number> = {};
+  for (const t of toks) freq[t] = (freq[t] ?? 0) + 1;
+  const n = toks.length;
+  let H = 0;
+  for (const c of Object.values(freq)) {
+    const p = c / n;
+    H -= p * Math.log(p + 1e-9);
+  }
+  return H;
+}
+
+function _sigmoid(x: number): number {
+  return 1 / (1 + Math.exp(-Math.max(-50, Math.min(50, x))));
+}
+
+function _xiInvariant(
+  lOmega: number,
+  pLambda: number,
+  aLangMean: number,
+  history: Array<{ role: string; content: string }>,
+): number {
+  const H = _dialogEntropy(history);
+  const turnWeight = 1.0 / (1.0 + H);
+  return Math.round(lOmega * Math.max(pLambda, 1e-3) * _sigmoid(aLangMean) * turnWeight * 1e4) / 1e4;
+}
+
+export const AGENT_ROSTER: Record<string, { model: string; role: string }> = {
+  triage: { model: "gpt-5-nano", role: "classify intent, hand off" },
+  planner: { model: "gpt-5.5", role: "chief-of-staff planning" },
+  engineer: { model: "claude-opus-4.7", role: "coding + architecture" },
+  analyst: { model: "gemini-3.1-pro", role: "multimodal + long-ctx research" },
+  speed: { model: "groq-llama-3.3-70b", role: "realtime replies" },
+  cheap: { model: "kimi-k2.6", role: "bulk math / open-weight" },
+  free: { model: "mistral-small-free", role: "fallback" },
+};
+
+const HANDOFF_RULES: Array<[string, string]> = [
+  ["code ", "engineer"],
+  ["bug ", "engineer"],
+  ["plan ", "planner"],
+  ["strategy ", "planner"],
+  ["image ", "analyst"],
+  ["pdf ", "analyst"],
+  ["fast ", "speed"],
+  ["quick ", "speed"],
+  ["cheap ", "cheap"],
+  ["free ", "free"],
+];
+
+function _pickAgent(text: string): string {
+  const t = ` ${text.toLowerCase()} `;
+  for (const [kw, agent] of HANDOFF_RULES) {
+    if (t.includes(kw)) return agent;
+  }
+  return "triage";
+}
+
+export interface XiRouteResult {
+  model: string;
+  xi: number;
+  lOmega: number;
+  pLambda: number;
+  aLangMean: number;
+  thrust: number;
+  froudeEff: number;
+  alignment: number;
+  estCost: number;
+  estLatencyMs: number;
+  speculative: string | null;
+  speedup: number;
+  kvHit: boolean;
+  agent: string;
+  persona: string;
+  reason: string;
+}
+
+export interface CouncilResult {
+  panel: Array<{ agent: string; model: string; xi: number; persona: string }>;
+  arbiterModel: string;
+  arbiterXi: number;
+  synthesis: string;
+}
+
+export class ChatUltraRouter {
+  static readonly VERSION = "a11oy-chat-ultra-1.0";
+  static readonly MODES = {
+    ...UltraRouter.MODES,
+    chat: [0.14, 0.22, 0.10, 0.25, 0.09, 0.20] as number[],
+    council: [0.10, 0.10, 0.20, 0.30, 0.10, 0.20] as number[],
+  };
+
+  private ultra: UltraRouter;
+  private lae: LanguageArbitrageEngine;
+  private aLangMean: number;
+
+  constructor() {
+    this.ultra = new UltraRouter();
+    this.lae = new LanguageArbitrageEngine();
+    const scan = this.lae.scan();
+    this.aLangMean = scan.rows.reduce((s, r) => s + r.aPy, 0) / Math.max(scan.rows.length, 1);
+  }
+
+  route(
+    prompt: string,
+    history: Array<{ role: string; content: string }> = [],
+    maxOut = 800,
+    mode = "chat",
+    require: string[] = ["chat"],
+  ): XiRouteResult {
+    const agent = _pickAgent(prompt);
+    const ultraResult = this.ultra.route(prompt, maxOut, mode, require, false, [1.0, 0.8, 0.6], true);
+    const xi = _xiInvariant(ultraResult.score, ultraResult.pLambda, this.aLangMean, history);
+
+    const agentInfo = AGENT_ROSTER[agent];
+    const persona = agentInfo
+      ? (SOTA_MODELS[agentInfo.model as keyof typeof SOTA_MODELS] as { provider: string } | undefined)
+        ? agentInfo.role
+        : agentInfo.role
+      : "general";
+
+    return {
+      model: ultraResult.model,
+      xi,
+      lOmega: ultraResult.score,
+      pLambda: ultraResult.pLambda,
+      aLangMean: Math.round(this.aLangMean * 1000) / 1000,
+      thrust: ultraResult.thrust,
+      froudeEff: ultraResult.froudeEff,
+      alignment: ultraResult.alignment,
+      estCost: ultraResult.estCost,
+      estLatencyMs: ultraResult.estLatencyMs,
+      speculative: ultraResult.speculative,
+      speedup: ultraResult.expectedSpeedup,
+      kvHit: ultraResult.kvCacheHit,
+      agent,
+      persona,
+      reason: `Xi->${ultraResult.model} (${agent}) L_Omega=${ultraResult.score} P_Lambda=${ultraResult.pLambda} Xi=${xi} spec=${ultraResult.speculative}`,
+    };
+  }
+
+  council(
+    question: string,
+    history: Array<{ role: string; content: string }> = [],
+  ): CouncilResult {
+    const panelModels = ["gpt-5.5", "claude-opus-4.7", "gemini-3.1-pro"];
+    const panel = panelModels.map((m) => {
+      const d = this.route(question, history, 500, "council");
+      const cfg = SOTA_MODELS[m as keyof typeof SOTA_MODELS];
+      return {
+        agent: m,
+        model: d.model,
+        xi: d.xi,
+        persona: cfg ? (cfg as any).provider : m,
+      };
+    });
+
+    const arbiter = this.route("Synthesize council: " + question, history, 600, "supreme");
+    return {
+      panel,
+      arbiterModel: arbiter.model,
+      arbiterXi: arbiter.xi,
+      synthesis: `Council chose Xi-max ${arbiter.model} with Xi=${arbiter.xi}`,
+    };
+  }
+
+  kvStats() {
+    return this.ultra.kvStats();
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 export const INNOVATION_MANIFEST = [
   { id: 1, name: "Lutar Simplex Router (LSR)", vs: "FrugalGPT/RouteLLM" },
@@ -3780,6 +3965,7 @@ export const INNOVATION_MANIFEST = [
   { id: 41, name: "Language Arbitrage Engine (LAE)", vs: "manual language migration / no quantitative porting framework" },
   { id: 42, name: "PagedAttention KV Cache (PKC)", vs: "naive full-recompute / no prompt deduplication" },
   { id: 43, name: "Ultra Router with Speculative Decoding (URS)", vs: "single-model inference / no speculation / no KV cache" },
+  { id: 44, name: "Xi Unification Invariant + Multi-Agent Council (XUC)", vs: "single-model chat / no dialog entropy / no multi-agent handoff / no council deliberation" },
 ] as const;
 
 export interface SovereignChatRequest {
@@ -3826,6 +4012,7 @@ export interface SovereignChatResult {
   ultraRoute: UltraRouteResult;
   arbitrageScan: ArbitrageScan;
   kvCacheStats: KVCacheStats;
+  xiRoute: XiRouteResult;
   hermeticGuard: HermeticGuardResult;
   noetherEval: NoetherJudgment;
   bekensteinConfident: boolean;
@@ -3865,11 +4052,12 @@ export class SovereignEngine {
   private lae: LanguageArbitrageEngine;
   private pkc: PagedKVCache;
   private urs: UltraRouter;
+  private xuc: ChatUltraRouter;
 
   constructor() {
     this.ktm = new KabbalahTieredMemory();
     this.ktm.setIdentity("author", "Stephen Lutar / SZL Consulting Ltd");
-    this.ktm.setIdentity("codex", "a11oy v21 ALLOY-COMPLETE -- 43 innovations");
+    this.ktm.setIdentity("codex", "a11oy v22 ALLOY-COMPLETE -- 44 innovations");
 
     this.ocm = new OuroborosConformalMemory();
     this.mcp = new CequeMCPRegistry();
@@ -3897,6 +4085,7 @@ export class SovereignEngine {
     this.lae = new LanguageArbitrageEngine();
     this.pkc = new PagedKVCache();
     this.urs = new UltraRouter();
+    this.xuc = new ChatUltraRouter();
 
     this.cmn.addNode("origin", 0, 0, "place");
     this.cmn.addNode("north", 0, 1, "grid");
@@ -3995,8 +4184,9 @@ export class SovereignEngine {
     const ultraRoute = this.urs.route(prompt, 800, "ultra", ["agentic"]);
     const arbitrageScan = this.lae.scan();
     const kvCacheStats = this.urs.kvStats();
+    const xiRoute = this.xuc.route(prompt, [], 800, "chat", ["chat"]);
 
-    const content = `[a11oy-v21-43 via ${route.provider} | CLS N=${cls.nParams} D=${cls.dTokens} | GPD ${gp.phase} | FELAI F=${felai.fLutar} | E8 ${route.slot.slot}/192 | Gobekli ${slm.slot}/80 ${slm.adapter.domain} | HQO ${hqoOpt.lOmega} | NSP iter=${nspProbe.iteration} | PWM ${worldModel.regime} | FPP lineages=${fppAgg.lineagesParticipating} | ICRC L_Omega=${icrc.L_Omega_v2} | TSA active=${tsaResult.sparseCodeNonzero}/656 | AMRTH critical=${redTeamCampaign.criticalCount} | CMST tokens=${cmstSequence.tokensProcessed} | EBEV S=${eprBellResult.S} cert=${eprBellResult.bellCertificate} | HAAM match=${hopfieldRetrieval.bestMatch} sim=${hopfieldRetrieval.similarity} | PCEM FE=${predictiveCoding.totalFreeEnergy} | SGCE coh=${sacredGeometry.coherenceScore} | CMN path=${cognitiveMap.path.length} | DSBD ${bifurcationProbe.bifurcationType} | LME Omega_mimo=${lmeMimo.final_L_Omega_mimo} | ORR budget=${olmecReflection.thinkingBudgetTokens} consensus=${olmecReflection.consensusFraction} | QKC ratio=${quipuCompression.ratio} | PEO best=${pachakutiEvolution.bestFitness} | APD P=${propellerRoute.pLambda} model=${propellerRoute.model} | SAR score=${sotaRoute.score} model=${sotaRoute.model} | ULTRA model=${ultraRoute.model} P_Lambda=${ultraRoute.pLambda} spec=${ultraRoute.speculative} KV=${ultraRoute.kvCacheHit?"hit":"miss"} | LAE PORT_PY=${arbitrageScan.summary["PORT_PY"]} RUST=${arbitrageScan.summary["RUST"]} KEEP=${arbitrageScan.summary["KEEP"]}]`;
+    const content = `[a11oy-v22-44 via ${route.provider} | CLS N=${cls.nParams} D=${cls.dTokens} | GPD ${gp.phase} | FELAI F=${felai.fLutar} | E8 ${route.slot.slot}/192 | Gobekli ${slm.slot}/80 ${slm.adapter.domain} | HQO ${hqoOpt.lOmega} | NSP iter=${nspProbe.iteration} | PWM ${worldModel.regime} | FPP lineages=${fppAgg.lineagesParticipating} | ICRC L_Omega=${icrc.L_Omega_v2} | TSA active=${tsaResult.sparseCodeNonzero}/656 | AMRTH critical=${redTeamCampaign.criticalCount} | CMST tokens=${cmstSequence.tokensProcessed} | EBEV S=${eprBellResult.S} cert=${eprBellResult.bellCertificate} | HAAM match=${hopfieldRetrieval.bestMatch} sim=${hopfieldRetrieval.similarity} | PCEM FE=${predictiveCoding.totalFreeEnergy} | SGCE coh=${sacredGeometry.coherenceScore} | CMN path=${cognitiveMap.path.length} | DSBD ${bifurcationProbe.bifurcationType} | LME Omega_mimo=${lmeMimo.final_L_Omega_mimo} | ORR budget=${olmecReflection.thinkingBudgetTokens} consensus=${olmecReflection.consensusFraction} | QKC ratio=${quipuCompression.ratio} | PEO best=${pachakutiEvolution.bestFitness} | APD P=${propellerRoute.pLambda} model=${propellerRoute.model} | SAR score=${sotaRoute.score} model=${sotaRoute.model} | ULTRA model=${ultraRoute.model} P_Lambda=${ultraRoute.pLambda} spec=${ultraRoute.speculative} KV=${ultraRoute.kvCacheHit?"hit":"miss"} | LAE PORT_PY=${arbitrageScan.summary["PORT_PY"]} RUST=${arbitrageScan.summary["RUST"]} KEEP=${arbitrageScan.summary["KEEP"]}]`;
     const guard = hermeticGuard(prompt, content);
     this.ktm.pushCore({ id: prompt.substring(0, 32), v: content });
     this.ocm.write(session, prompt.substring(0, 32), content);
@@ -4042,6 +4232,7 @@ export class SovereignEngine {
       ultraRoute,
       arbitrageScan,
       kvCacheStats,
+      xiRoute,
       hermeticGuard: guard,
       noetherEval: ev,
       bekensteinConfident: confident,
@@ -4137,6 +4328,9 @@ export class SovereignEngine {
   }
   getURS(): UltraRouter {
     return this.urs;
+  }
+  getXUC(): ChatUltraRouter {
+    return this.xuc;
   }
 
   manifest(): typeof INNOVATION_MANIFEST {
