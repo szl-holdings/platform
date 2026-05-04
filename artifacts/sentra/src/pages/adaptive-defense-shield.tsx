@@ -10,7 +10,8 @@ import {
   Shield,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 
 interface PolicyDecision {
   id: string;
@@ -164,74 +165,6 @@ const SEED_DECISIONS: PolicyDecision[] = [
   },
 ];
 
-function generateDecision(): PolicyDecision {
-  const agents = [
-    'Maritime Analyst',
-    'IT Sentinel',
-    'Deal Scout',
-    'Counsel Engine',
-    'Portfolio Analyst',
-    'Brand Monitor',
-    'Advisory Agent',
-  ];
-  const domains = [
-    'SEXTANT',
-    'PARAGON Operations',
-    'DOMAINE',
-    'Counsel',
-    'PARAGON',
-    'Stephen',
-    'Carlota Jo',
-  ];
-  const actions = [
-    'Read domain operational metrics',
-    'Query external weather API',
-    'Update agent configuration',
-    'Access historical dataset',
-    'Call prediction model endpoint',
-    'Write cache entry',
-  ];
-  const types: PolicyDecision['actionType'][] = [
-    'data_access',
-    'external_api',
-    'cross_domain',
-    'data_access',
-    'data_access',
-  ];
-  const decisions: PolicyDecision['decision'][] = [
-    'permitted',
-    'permitted',
-    'permitted',
-    'permitted',
-    'escalated',
-    'blocked',
-  ];
-  const idx = Math.floor(Math.random() * agents.length);
-  const dec = decisions[Math.floor(Math.random() * decisions.length)];
-  return {
-    id: Math.random().toString(36).slice(2, 8),
-    timestamp: new Date(),
-    agent: agents[idx],
-    domain: domains[idx],
-    action: actions[Math.floor(Math.random() * actions.length)],
-    actionType: types[Math.floor(Math.random() * types.length)],
-    decision: dec,
-    policyRule: `RULE-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
-    riskScore:
-      dec === 'permitted'
-        ? 5 + Math.floor(Math.random() * 40)
-        : dec === 'escalated'
-          ? 50 + Math.floor(Math.random() * 30)
-          : 80 + Math.floor(Math.random() * 20),
-    details:
-      dec === 'permitted'
-        ? 'Action approved — within policy scope.'
-        : dec === 'escalated'
-          ? 'Elevated risk — routed to human reviewer.'
-          : 'Action blocked — policy violation detected.',
-  };
-}
-
 const POLICY_STATS = [
   { label: 'Actions Today', value: '7,234', color: 'text-foreground' },
   { label: 'Permitted', value: '7,188', sub: '99.4%', color: 'text-[#c9b787]' },
@@ -296,18 +229,43 @@ const DECISION_COLORS = {
 };
 
 export default function AdaptiveDefenseShield() {
-  const [decisions, setDecisions] = useState<PolicyDecision[]>(SEED_DECISIONS);
+  const [decisions, setDecisions] = useState<PolicyDecision[]>([]);
   const [filter, setFilter] = useState<'all' | 'permitted' | 'blocked' | 'escalated'>('all');
   const [expandedPolicy, setExpandedPolicy] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
 
+  const fetchDecisions = useCallback(async () => {
+    try {
+      const data = await api.adaptiveDefense.decisions(50);
+      if (data?.decisions?.length) {
+        const mapped: PolicyDecision[] = data.decisions.map((d: { id: string; decidedAt?: string; createdAt?: string; agentName: string; domain: string; action: string; actionType: PolicyDecision['actionType']; decision: PolicyDecision['decision']; policyRule: string; riskScore?: number; details?: string }) => ({
+          id: d.id,
+          timestamp: new Date(d.decidedAt ?? d.createdAt ?? Date.now()),
+          agent: d.agentName,
+          domain: d.domain,
+          action: d.action,
+          actionType: d.actionType,
+          decision: d.decision,
+          policyRule: d.policyRule,
+          riskScore: d.riskScore ?? 0,
+          details: d.details ?? '',
+        }));
+        setDecisions(mapped);
+      }
+    } catch {
+      /* leave decisions as-is on transient error */
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDecisions();
+  }, [fetchDecisions]);
+
   useEffect(() => {
     if (paused) return;
-    const t = setInterval(() => {
-      setDecisions((prev) => [generateDecision(), ...prev.slice(0, 24)]);
-    }, 3500);
+    const t = setInterval(fetchDecisions, 30_000);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, fetchDecisions]);
 
   const filtered = filter === 'all' ? decisions : decisions.filter((d) => d.decision === filter);
   const permittedCount = decisions.filter((d) => d.decision === 'permitted').length;

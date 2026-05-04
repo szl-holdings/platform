@@ -412,7 +412,7 @@ export const api = {
         body: JSON.stringify({ approvalNote: note }),
         headers: { 'X-Step-Up-Token': stepUpToken },
       }),
-    playbooks: () => apiFetch<any>('/aegis/command/response/playbooks'),
+    playbooks: () => apiFetch<any>('/firestorm/command/response/playbooks'),
     executePlaybook: (actionType: string, targetId: string, stepUpToken: string, notes?: string) =>
       apiFetch<any>('/aegis/command/response/execute', {
         method: 'POST',
@@ -432,5 +432,47 @@ export const api = {
       }),
     executivePosture: () => apiFetch<any>('/aegis/command/executive/posture'),
     executiveCompliance: () => apiFetch<any>('/aegis/command/executive/compliance'),
+  },
+  adaptiveDefense: {
+    decisions: (limit = 50) =>
+      apiFetch<{ decisions: any[]; stats: any }>(`/aegis/adaptive-defense/decisions?limit=${limit}`),
+    recordDecision: (data: {
+      agentName: string;
+      domain: string;
+      action: string;
+      actionType: string;
+      decision: string;
+      policyRule: string;
+      riskScore?: number;
+      details?: string;
+    }) =>
+      apiFetch<any>('/aegis/adaptive-defense/decisions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  },
+  threatEngine: {
+    incidents: (params?: { status?: string; severity?: string; limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.status) q.set('status', params.status);
+      if (params?.severity) q.set('severity', params.severity);
+      if (params?.limit) q.set('limit', String(params.limit));
+      return apiFetch<{ incidents: any[] }>(`/aegis/threat-engine/incidents${q.toString() ? `?${q}` : ''}`);
+    },
+    updateStatus: (id: string, status: string) =>
+      apiFetch<any>(`/aegis/threat-engine/incidents/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+  },
+  predictiveIntel: {
+    threats: (limit = 20) =>
+      apiFetch<{ predictions: any[] }>(`/aegis/predictive/threats?limit=${limit}`),
+  },
+  narrativeEngine: {
+    narratives: (limit = 20) =>
+      apiFetch<{ narratives: any[] }>(`/aegis/narrative-engine/narratives?limit=${limit}`),
+    getById: (id: string) =>
+      apiFetch<{ narrative: any }>(`/aegis/narrative-engine/narratives/${id}`),
   },
 };

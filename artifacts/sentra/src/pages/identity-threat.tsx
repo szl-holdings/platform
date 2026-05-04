@@ -23,54 +23,6 @@ interface LiveIncident {
   createdAt?: string;
 }
 
-const identityAlerts = [
-  {
-    id: 'ID-001',
-    user: 'j.smith@corp.com',
-    type: 'Impossible Travel',
-    severity: 'Critical',
-    detail: 'Login from New York (08:41) and Moscow (09:03) — 22 min apart, 7400km',
-    status: 'Blocked',
-    time: '2h ago',
-  },
-  {
-    id: 'ID-002',
-    user: 'admin.svc@corp.com',
-    type: 'Credential Stuffing',
-    severity: 'Critical',
-    detail: '847 failed logins from 103.45.x.x range in 4 minutes',
-    status: 'Locked',
-    time: '3h ago',
-  },
-  {
-    id: 'ID-003',
-    user: 'm.rodriguez@corp.com',
-    type: 'Anomalous Privilege Escalation',
-    severity: 'High',
-    detail: 'Standard user account accessed Global Admin role for first time',
-    status: 'Revoked',
-    time: '5h ago',
-  },
-  {
-    id: 'ID-004',
-    user: 'finance.svc@corp.com',
-    type: 'After-Hours Access',
-    severity: 'Medium',
-    detail: 'Service account active 2:14 AM — no maintenance window scheduled',
-    status: 'Investigating',
-    time: '8h ago',
-  },
-  {
-    id: 'ID-005',
-    user: 'k.wilson@corp.com',
-    type: 'MFA Bypass Attempt',
-    severity: 'High',
-    detail: '3 consecutive MFA push rejections followed by successful login via legacy auth',
-    status: 'Disabled',
-    time: '11h ago',
-  },
-];
-
 const compromisedAccounts = [
   {
     account: 'j.smith@corp.com',
@@ -149,6 +101,14 @@ function isIdentityRelated(a: LiveAlert): boolean {
 }
 
 export default function IdentityThreat() {
+  const dbQuery = useStandardQuery({
+    queryKey: ['identity-threat', 'db'],
+    queryFn: () =>
+      apiFetch<{ alerts?: Array<{ id: string; title: string; severity: string; source: string; status: string; description: string; asset?: string | null; detectedAt: string }> }>('/aegis/identity-threats'),
+    staleTime: 60_000,
+    retry: false,
+  });
+
   const live = useStandardQuery({
     queryKey: ['identity-threat', 'live'],
     queryFn: () =>
@@ -157,10 +117,20 @@ export default function IdentityThreat() {
     retry: false,
   });
 
+  const dbAlerts = dbQuery.data?.alerts ?? [];
   const liveAlerts = live.data?.alerts ?? [];
   const liveIncidents = live.data?.incidents ?? [];
   const idAlerts = liveAlerts.filter(isIdentityRelated);
-  const liveLoaded = liveAlerts.length + liveIncidents.length > 0;
+
+  const dbMapped = dbAlerts.map((a) => ({
+    id: a.id,
+    user: a.asset ?? a.source,
+    type: a.title,
+    severity: (a.severity.charAt(0).toUpperCase() + a.severity.slice(1).toLowerCase()) as 'Critical' | 'High' | 'Medium',
+    detail: a.description,
+    status: a.status === 'acknowledged' ? 'Investigating' as const : a.status === 'suppressed' ? 'Resolved' as const : 'Open' as const,
+    time: formatRelative(a.detectedAt),
+  }));
 
   const liveIdentityAlerts = idAlerts.slice(0, 5).map((a, i) => ({
     id: String(a.id ?? `LIVE-${i}`),
@@ -170,31 +140,44 @@ export default function IdentityThreat() {
       (a.severity ?? 'Medium').slice(1).toLowerCase()) as 'Critical' | 'High' | 'Medium',
     detail: a.description ?? 'Live identity alert sourced from PARAGON',
     status:
-      a.status === 'resolved' ? 'Resolved' : a.status === 'acknowledged' ? 'Investigating' : 'Open',
+      a.status === 'resolved' ? 'Resolved' as const : a.status === 'acknowledged' ? 'Investigating' as const : 'Open' as const,
     time: formatRelative(a.createdAt),
   }));
 
-  const displayAlerts =
-    liveLoaded && liveIdentityAlerts.length > 0 ? liveIdentityAlerts : identityAlerts;
+  const dbLoaded = dbAlerts.length > 0;
+  const liveLoaded = liveAlerts.length + liveIncidents.length > 0;
 
-  const headlineStats = liveLoaded
+  const displayAlerts = dbLoaded
+    ? dbMapped
+    : liveLoaded && liveIdentityAlerts.length > 0
+      ? liveIdentityAlerts
+      : [];
+
+  const dataSource = dbLoaded
+    ? `DB · /aegis/identity-threats · ${dbAlerts.length} alerts`
+    : liveLoaded
+      ? `Live · /aegis/live/threats · ${idAlerts.length} identity alerts`
+      : dbQuery.isLoading || live.isLoading
+        ? 'Loading…'
+        : 'Reference set — no live data';
+
+  const openCount = displayAlerts.filter((a) => a.status === 'Open').length;
+  const headlineStats = (dbLoaded || liveLoaded)
     ? [
-        { label: 'Active Identity Alerts', value: String(idAlerts.length), color: 'text-[#f5f5f5]' },
-        { label: 'Total Live Alerts', value: String(liveAlerts.length), color: 'text-[#c9b787]' },
+        { label: 'Active Identity Alerts', value: String(displayAlerts.length), color: 'text-[#f5f5f5]' },
+        { label: 'Open', value: String(openCount), color: 'text-[#c9b787]' },
         {
-          label: 'Open Incidents',
-          value: String(
-            liveIncidents.filter((i) => i.status !== 'resolved' && i.status !== 'closed').length,
-          ),
+          label: 'Investigating',
+          value: String(displayAlerts.filter((a) => a.status === 'Investigating').length),
           color: 'text-[#c9b787]',
         },
         { label: 'MFA Coverage', value: '94%', color: 'text-[#c9b787]' },
       ]
     : [
-        { label: 'Active Identity Alerts', value: '5', color: 'text-[#f5f5f5]' },
-        { label: 'Compromised Accounts', value: '3', color: 'text-[#c9b787]' },
-        { label: 'Privileged Sessions', value: '3', color: 'text-[#c9b787]' },
-        { label: 'MFA Coverage', value: '94%', color: 'text-[#c9b787]' },
+        { label: 'Active Identity Alerts', value: '—', color: 'text-[#f5f5f5]' },
+        { label: 'Open', value: '—', color: 'text-[#c9b787]' },
+        { label: 'Investigating', value: '—', color: 'text-[#c9b787]' },
+        { label: 'MFA Coverage', value: '—', color: 'text-[#c9b787]' },
       ];
 
   return (
@@ -210,13 +193,9 @@ export default function IdentityThreat() {
         <div className="flex flex-wrap gap-2 mt-2">
           <Badge
             variant="outline"
-            className={`text-[10px] ${liveLoaded ? 'text-[#c9b787] border-[#c9b787]/30' : 'text-[#c9b787] border-[#c9b787]/30'}`}
+            className="text-[10px] text-[#c9b787] border-[#c9b787]/30"
           >
-            {liveLoaded
-              ? `Live · /aegis/live/threats · ${liveAlerts.length} alerts streamed`
-              : live.isLoading
-                ? 'Loading live feed…'
-                : 'Live feed unavailable — showing reference set'}
+            {dataSource}
           </Badge>
         </div>
       </div>

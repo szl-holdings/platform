@@ -27,7 +27,8 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -1313,6 +1314,7 @@ function ApprovalModal({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function AdversaryNarrativeEngine() {
+  const [incidents, setIncidents] = useState<Incident[]>(NARRATIVE_INCIDENTS);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>(() => {
     const param = new URLSearchParams(window.location.search).get('incident');
     return param && NARRATIVE_INCIDENTS.some((i) => i.id === param)
@@ -1329,8 +1331,43 @@ export default function AdversaryNarrativeEngine() {
   const [approvedActions, setApprovedActions] = useState<Map<string, string>>(new Map()); // actionId → approvalRef
   const [deniedActions, setDeniedActions] = useState<Map<string, string>>(new Map()); // actionId → approvalRef
 
+  useEffect(() => {
+    api.narrativeEngine.narratives(20).then((data) => {
+      if (data?.narratives?.length) {
+        type NarrativeRow = {
+          id: string; title: string; severity: string; status: string; actor: string;
+          confidence?: number; businessImpact?: string; executiveSummary?: string;
+          affectedSystems?: string[]; iocCount?: number; stepsEvidenced?: number;
+          stepsInferred?: number; stepsMissing?: number; totalSteps?: number;
+          steps?: NarrativeStep[];
+        };
+        const mapped: Incident[] = data.narratives.map((n: NarrativeRow) => ({
+          id: n.id,
+          title: n.title,
+          severity: n.severity as Incident['severity'],
+          status: n.status,
+          actor: n.actor,
+          confidence: n.confidence ?? 80,
+          businessImpact: n.businessImpact ?? '',
+          executiveSummary: n.executiveSummary ?? '',
+          affectedSystems: (n.affectedSystems as string[]) ?? [],
+          iocCount: n.iocCount ?? 0,
+          stepsEvidenced: n.stepsEvidenced ?? 0,
+          stepsInferred: n.stepsInferred ?? 0,
+          stepsMissing: n.stepsMissing ?? 0,
+          totalSteps: n.totalSteps ?? 0,
+          steps: (n.steps as NarrativeStep[]) ?? [],
+        }));
+        setIncidents(mapped);
+        const param = new URLSearchParams(window.location.search).get('incident');
+        const validId = param && mapped.some((i) => i.id === param) ? param : mapped[0]?.id;
+        if (validId) setSelectedIncidentId(validId);
+      }
+    }).catch(() => { /* leave incidents as-is on error */ });
+  }, []);
+
   const incident =
-    NARRATIVE_INCIDENTS.find((i) => i.id === selectedIncidentId) ?? NARRATIVE_INCIDENTS[0];
+    incidents.find((i) => i.id === selectedIncidentId) ?? incidents[0] ?? NARRATIVE_INCIDENTS[0];
   const sev = SEV_CONFIG[incident.severity];
 
   const handleApprove = (approvalRef: string) => {
@@ -1476,7 +1513,7 @@ export default function AdversaryNarrativeEngine() {
             </p>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {NARRATIVE_INCIDENTS.map((inc) => {
+            {incidents.map((inc) => {
               const s = SEV_CONFIG[inc.severity];
               const isSelected = inc.id === selectedIncidentId;
               return (

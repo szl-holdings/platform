@@ -1,16 +1,21 @@
 import {
   type ActionQueuePriority,
   type ActionQueueStatus,
-  type AuditEntry,
   aegisActionQueueItemsTable,
+  aegisAdversaryNarrativesTable,
   aegisDeceptionHotpotsTable,
+  aegisPolicyDecisionsTable,
   aegisSoarPlaybooksTable,
   aegisSoarRunsTable,
+  aegisThreatIncidentsTable,
+  aegisThreatPredictionsTable,
+  type AuditEntry,
   db,
   firestormAssetsTable,
   firestormFindingsTable,
   firestormIncidentsTable,
   firestormSimulationRunsTable,
+  sentraAlertsTable,
   type PlaybookNode,
   type PlaybookStatus,
 } from '@szl-holdings/db';
@@ -1180,6 +1185,232 @@ router.post(
       sendSuccess(res, { run, message });
     } catch (err) {
       handleRouteError(res, err, 'Failed to execute playbook');
+    }
+  },
+);
+
+// ─── Adaptive Defense Shield — Policy Decisions ───────────────────────────────
+
+router.get(
+  '/aegis/adaptive-defense/decisions',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+      const decisions = await db
+        .select()
+        .from(aegisPolicyDecisionsTable)
+        .orderBy(desc(aegisPolicyDecisionsTable.decidedAt))
+        .limit(limit);
+      const permitCount = decisions.filter((d) => d.decision === 'permitted').length;
+      const blockCount = decisions.filter((d) => d.decision === 'blocked').length;
+      const escalateCount = decisions.filter((d) => d.decision === 'escalated').length;
+      sendSuccess(res, {
+        decisions,
+        stats: { total: decisions.length, permitted: permitCount, blocked: blockCount, escalated: escalateCount },
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch policy decisions');
+    }
+  },
+);
+
+router.post(
+  '/aegis/adaptive-defense/decisions',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const { agentName, domain, action, actionType, decision, policyRule, riskScore, details } =
+        req.body as {
+          agentName: string;
+          domain: string;
+          action: string;
+          actionType: string;
+          decision: string;
+          policyRule: string;
+          riskScore?: number;
+          details?: string;
+        };
+      if (!agentName || !domain || !action || !actionType || !decision || !policyRule) {
+        sendBadRequest(res, 'Missing required fields');
+        return;
+      }
+      const id = `pd-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const [row] = await db
+        .insert(aegisPolicyDecisionsTable)
+        .values({
+          id,
+          agentName,
+          domain,
+          action,
+          actionType: actionType as 'data_access' | 'external_api' | 'financial_transaction' | 'cross_domain' | 'agent_spawn',
+          decision: decision as 'permitted' | 'blocked' | 'escalated',
+          policyRule,
+          riskScore: riskScore ?? 0,
+          details: details ?? '',
+          decidedAt: new Date(),
+        })
+        .returning();
+      sendSuccess(res, { decision: row });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to record policy decision');
+    }
+  },
+);
+
+// ─── Autonomous Threat Engine — Threat Incidents ──────────────────────────────
+
+router.get(
+  '/aegis/threat-engine/incidents',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const severity = req.query.severity as string | undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+      let query = db
+        .select()
+        .from(aegisThreatIncidentsTable)
+        .orderBy(desc(aegisThreatIncidentsTable.detectedAt))
+        .limit(limit);
+      const incidents = await query;
+      const filtered = incidents.filter((i) => {
+        if (status && i.status !== status) return false;
+        if (severity && i.severity !== severity) return false;
+        return true;
+      });
+      sendSuccess(res, { incidents: filtered });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch threat incidents');
+    }
+  },
+);
+
+router.patch(
+  '/aegis/threat-engine/incidents/:id',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body as { status?: string };
+      if (!status) {
+        sendBadRequest(res, 'status is required');
+        return;
+      }
+      const [updated] = await db
+        .update(aegisThreatIncidentsTable)
+        .set({
+          status: status as 'detected' | 'classified' | 'auto_contained' | 'pending_approval' | 'contained' | 'dismissed',
+          updatedAt: new Date(),
+          resolvedAt: ['contained', 'dismissed'].includes(status) ? new Date() : undefined,
+        })
+        .where(eq(aegisThreatIncidentsTable.id, id))
+        .returning();
+      if (!updated) {
+        sendNotFound(res, 'Incident not found');
+        return;
+      }
+      sendSuccess(res, { incident: updated });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update threat incident');
+    }
+  },
+);
+
+// ─── Predictive Intelligence — Threat Predictions ────────────────────────────
+
+router.get(
+  '/aegis/predictive/threats',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '20', 10), 100);
+      const predictions = await db
+        .select()
+        .from(aegisThreatPredictionsTable)
+        .where(eq(aegisThreatPredictionsTable.isActive, true))
+        .orderBy(desc(aegisThreatPredictionsTable.generatedAt))
+        .limit(limit);
+      sendSuccess(res, { predictions });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch threat predictions');
+    }
+  },
+);
+
+// ─── Adversary Narrative Engine — Narratives ─────────────────────────────────
+
+router.get(
+  '/aegis/narrative-engine/narratives',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '20', 10), 100);
+      const narratives = await db
+        .select()
+        .from(aegisAdversaryNarrativesTable)
+        .orderBy(desc(aegisAdversaryNarrativesTable.generatedAt))
+        .limit(limit);
+      sendSuccess(res, { narratives });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch adversary narratives');
+    }
+  },
+);
+
+router.get(
+  '/aegis/narrative-engine/narratives/:id',
+  authMiddleware(),
+  limiter,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [narrative] = await db
+        .select()
+        .from(aegisAdversaryNarrativesTable)
+        .where(eq(aegisAdversaryNarrativesTable.id, id))
+        .limit(1);
+      if (!narrative) {
+        sendNotFound(res, 'Narrative not found');
+        return;
+      }
+      sendSuccess(res, { narrative });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch narrative');
+    }
+  },
+);
+
+// GET /aegis/identity-threats — identity-related alerts from sentra_alerts
+router.get(
+  '/aegis/identity-threats',
+  authMiddleware({ required: true }),
+  async (_req: Request, res: Response) => {
+    try {
+      const alerts = await db
+        .select()
+        .from(sentraAlertsTable)
+        .where(
+          inArray(sentraAlertsTable.source, [
+            'identity',
+            'iam',
+            'active_directory',
+            'okta',
+            'entra_id',
+            'identity_provider',
+          ]),
+        )
+        .orderBy(desc(sentraAlertsTable.detectedAt))
+        .limit(50);
+      sendSuccess(res, { alerts });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch identity threats');
     }
   },
 );

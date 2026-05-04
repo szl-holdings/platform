@@ -2,7 +2,8 @@ import {
   Brain,
   ChevronRight,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
 
 const ACCENT = '#f5f5f5';
 const PURPLE = '#8a8a8a';
@@ -159,9 +160,37 @@ function SparkLine({ data, color }: { data: number[]; color: string }) {
 }
 
 export default function PredictiveIntelligence() {
-  const [predictions, setPredictions] = useState<ThreatPrediction[]>(SEED_PREDICTIONS);
+  const [predictions, setPredictions] = useState<ThreatPrediction[]>([]);
   const [capacityRisks, setCapacityRisks] = useState<CapacityRisk[]>(CAPACITY_RISKS);
   const [tab, setTab] = useState<'threats' | 'capacity' | 'impact'>('threats');
+  useEffect(() => {
+    api.predictiveIntel.threats(20).then((data) => {
+      if (data?.predictions?.length) {
+        type PredictionRow = {
+          id: string; threatType: string; adversaryGroup?: string;
+          currentStage: string; predictedNextStage: string;
+          timeToNextStageHours?: string; confidencePct?: number;
+          blastRadiusTrend?: number[]; businessImpactUsd?: string;
+          mitigationWindowMins?: number; severity: string; recommendedActions?: string[];
+        };
+        const mapped: ThreatPrediction[] = data.predictions.map((p: PredictionRow) => ({
+          id: p.id,
+          threatType: p.threatType,
+          adversaryGroup: p.adversaryGroup ?? undefined,
+          currentStage: p.currentStage,
+          predictedNextStage: p.predictedNextStage,
+          timeToNextStageHours: parseFloat(p.timeToNextStageHours ?? '2'),
+          confidencePct: p.confidencePct ?? 80,
+          blastRadiusTrend: (p.blastRadiusTrend as number[]) ?? [20, 40, 60, 80],
+          businessImpactUsd: parseFloat(p.businessImpactUsd ?? '0'),
+          mitigationWindow: p.mitigationWindowMins ?? 120,
+          severity: p.severity as ThreatPrediction['severity'],
+          recommendedActions: (p.recommendedActions as string[]) ?? [],
+        }));
+        setPredictions(mapped);
+      }
+    }).catch(() => { /* keep seed data */ });
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => {

@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BalticPill } from '@/components/baltic-pill';
-import { voyageTwins } from '@/data/fleet-twin';
 
 const ACCENT = '#38bdf8';
 const GREEN = '#22c55e';
@@ -448,6 +447,7 @@ export default function TradingDeskPage() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [fills, setFills] = useState<Fill[]>([]);
   const [pnl, setPnl] = useState<PnlSummary | null>(null);
+  const [liveVoyages, setLiveVoyages] = useState<Array<{ id: number; voyageNumber: string; status: string; departurePortId?: number; arrivalPortId?: number; scheduledDepartureAt?: string; scheduledArrivalAt?: string; revenueUsd?: string; fuelCostUsd?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -462,18 +462,23 @@ export default function TradingDeskPage() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [instRes, ordRes, posRes, fillRes, pnlRes] = await Promise.allSettled([
+      const [instRes, ordRes, posRes, fillRes, pnlRes, voyRes] = await Promise.allSettled([
         fetch('/api/vessels/trading/instruments', { credentials: 'include' }).then((r) => r.json()),
         fetch('/api/vessels/trading/orders', { credentials: 'include' }).then((r) => r.json()),
         fetch('/api/vessels/trading/positions', { credentials: 'include' }).then((r) => r.json()),
         fetch('/api/vessels/trading/fills', { credentials: 'include' }).then((r) => r.json()),
         fetch('/api/vessels/trading/pnl', { credentials: 'include' }).then((r) => r.json()),
+        fetch('/api/vessels/voyages?limit=50', { credentials: 'include' }).then((r) => r.json()),
       ]);
       if (instRes.status === 'fulfilled') setInstruments(instRes.value?.data?.instruments ?? []);
       if (ordRes.status === 'fulfilled') setOrders(ordRes.value?.data?.orders ?? []);
       if (posRes.status === 'fulfilled') setPositions(posRes.value?.data?.positions ?? []);
       if (fillRes.status === 'fulfilled') setFills(fillRes.value?.data?.fills ?? []);
       if (pnlRes.status === 'fulfilled') setPnl(pnlRes.value?.data?.summary ?? null);
+      if (voyRes.status === 'fulfilled') {
+        const voys = voyRes.value?.data ?? voyRes.value ?? [];
+        setLiveVoyages(Array.isArray(voys) ? voys : []);
+      }
     } catch {
       /* noop */
     } finally {
@@ -548,8 +553,8 @@ export default function TradingDeskPage() {
       label: 'Voyages',
       icon: Anchor,
       count:
-        voyageTwins.filter(
-          (v) => v.status === 'active' || v.status === 'deviating' || v.status === 'exception',
+        liveVoyages.filter(
+          (v) => v.status === 'active' || v.status === 'in_progress',
         ).length || undefined,
     },
   ];
@@ -1160,7 +1165,7 @@ export default function TradingDeskPage() {
 
             {tab === 'voyages' && (
               <div className="p-4">
-                {voyageTwins.length === 0 ? (
+                {liveVoyages.length === 0 ? (
                   <p className="text-[12px] text-center mt-8" style={{ color: TEXT.muted }}>
                     No voyages
                   </p>
@@ -1171,26 +1176,21 @@ export default function TradingDeskPage() {
                         className="text-[10px] uppercase tracking-wider"
                         style={{ color: TEXT.muted }}
                       >
-                        {[
-                          'Voyage',
-                          'Vessel',
-                          'Route',
-                          'Cargo',
-                          'TC Equiv',
-                          'vs Baltic',
-                          'Margin',
-                          'Status',
-                        ].map((h) => (
-                          <th key={h} className="text-left pb-2 pr-3">
-                            {h}
-                          </th>
-                        ))}
+                        {['Voyage #', 'Status', 'Revenue', 'Fuel Cost', 'Departure', 'Margin'].map(
+                          (h) => (
+                            <th key={h} className="text-left pb-2 pr-3">
+                              {h}
+                            </th>
+                          ),
+                        )}
                       </tr>
                     </thead>
                     <tbody>
-                      {voyageTwins.map((v) => {
-                        const tce = v.economics.tcEquivalent;
-                        const margin = v.economics.profitMarginPct;
+                      {liveVoyages.map((v) => {
+                        const rev = v.revenueUsd ? parseFloat(v.revenueUsd) : null;
+                        const fuel = v.fuelCostUsd ? parseFloat(v.fuelCostUsd) : null;
+                        const margin =
+                          rev && fuel ? (((rev - fuel) / rev) * 100).toFixed(1) : null;
                         return (
                           <tr
                             key={v.id}
@@ -1203,32 +1203,37 @@ export default function TradingDeskPage() {
                             >
                               {v.voyageNumber}
                             </td>
-                            <td className="py-2.5 pr-3 font-semibold" style={{ color: ACCENT }}>
-                              {v.vesselName}
-                            </td>
-                            <td className="py-2.5 pr-3" style={{ color: TEXT.secondary }}>
-                              {v.originPort} → {v.destinationPort}
-                            </td>
-                            <td className="py-2.5 pr-3" style={{ color: TEXT.secondary }}>
-                              {v.cargo}
-                            </td>
-                            <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.primary }}>
-                              ${fmt(tce, 0)}/d
-                            </td>
-                            <td className="py-2.5 pr-3">
-                              <BalticPill voyageTce={tce} cargo={v.cargo} />
-                            </td>
-                            <td
-                              className="py-2.5 pr-3 font-mono"
-                              style={{ color: margin >= 20 ? GREEN : margin >= 0 ? AMBER : RED }}
-                            >
-                              {margin.toFixed(1)}%
-                            </td>
                             <td
                               className="py-2.5 pr-3 capitalize text-[10px]"
                               style={{ color: TEXT.muted }}
                             >
                               {v.status}
+                            </td>
+                            <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.primary }}>
+                              {rev != null ? `$${fmt(rev, 0)}` : '—'}
+                            </td>
+                            <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.secondary }}>
+                              {fuel != null ? `$${fmt(fuel, 0)}` : '—'}
+                            </td>
+                            <td className="py-2.5 pr-3" style={{ color: TEXT.secondary }}>
+                              {v.scheduledDepartureAt
+                                ? new Date(v.scheduledDepartureAt).toLocaleDateString()
+                                : '—'}
+                            </td>
+                            <td
+                              className="py-2.5 pr-3 font-mono"
+                              style={{
+                                color:
+                                  margin != null
+                                    ? parseFloat(margin) >= 20
+                                      ? GREEN
+                                      : parseFloat(margin) >= 0
+                                        ? AMBER
+                                        : RED
+                                    : TEXT.muted,
+                              }}
+                            >
+                              {margin != null ? `${margin}%` : '—'}
                             </td>
                           </tr>
                         );

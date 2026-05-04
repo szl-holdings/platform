@@ -1,4 +1,4 @@
-import { index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, numeric, pgTable, real, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 
@@ -183,3 +183,160 @@ export const insertAegisTwinNodeSchema = createInsertSchema(aegisTwinNodesTable)
 });
 export type InsertAegisTwinNode = z.infer<typeof insertAegisTwinNodeSchema>;
 export type AegisTwinNode = typeof aegisTwinNodesTable.$inferSelect;
+
+// ─── Policy Decisions (Adaptive Defense Shield) ───────────────────────────────
+
+export type PolicyDecisionActionType =
+  | 'data_access'
+  | 'external_api'
+  | 'financial_transaction'
+  | 'cross_domain'
+  | 'agent_spawn';
+export type PolicyDecisionOutcome = 'permitted' | 'blocked' | 'escalated';
+
+export const aegisPolicyDecisionsTable = pgTable(
+  'aegis_policy_decisions',
+  {
+    id: text('id').primaryKey(),
+    agentName: text('agent_name').notNull(),
+    domain: text('domain').notNull(),
+    action: text('action').notNull(),
+    actionType: text('action_type').$type<PolicyDecisionActionType>().notNull(),
+    decision: text('decision').$type<PolicyDecisionOutcome>().notNull(),
+    policyRule: text('policy_rule').notNull(),
+    riskScore: integer('risk_score').notNull().default(0),
+    details: text('details').notNull().default(''),
+    decidedAt: timestamp('decided_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    decisionIdx: index('aegis_pd_decision_idx').on(t.decision),
+    decidedAtIdx: index('aegis_pd_decided_at_idx').on(t.decidedAt),
+  }),
+);
+
+export const insertAegisPolicyDecisionSchema = createInsertSchema(
+  aegisPolicyDecisionsTable,
+).omit({ createdAt: true });
+export type InsertAegisPolicyDecision = z.infer<typeof insertAegisPolicyDecisionSchema>;
+export type AegisPolicyDecision = typeof aegisPolicyDecisionsTable.$inferSelect;
+
+// ─── Threat Incidents (Autonomous Threat Engine) ──────────────────────────────
+
+export type ThreatIncidentSeverity = 'critical' | 'high' | 'medium';
+export type ThreatIncidentStatus =
+  | 'detected'
+  | 'classified'
+  | 'auto_contained'
+  | 'pending_approval'
+  | 'contained'
+  | 'dismissed';
+
+export const aegisThreatIncidentsTable = pgTable(
+  'aegis_threat_incidents',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    severity: text('severity').$type<ThreatIncidentSeverity>().notNull().default('medium'),
+    status: text('status').$type<ThreatIncidentStatus>().notNull().default('detected'),
+    confidenceScore: integer('confidence_score').notNull().default(0),
+    killChainStage: text('kill_chain_stage').notNull().default('recon'),
+    mitreTactic: text('mitre_tactic').notNull().default('initial_access'),
+    mitreId: text('mitre_id').notNull().default('T1000'),
+    affectedAssets: jsonb('affected_assets').$type<string[]>().notNull().default([]),
+    blastRadius: integer('blast_radius').notNull().default(0),
+    autonomousActions: jsonb('autonomous_actions').$type<string[]>().notNull().default([]),
+    requiresApproval: boolean('requires_approval').notNull().default(false),
+    approvalTimeoutSecs: integer('approval_timeout_secs'),
+    ttps: jsonb('ttps').$type<string[]>().notNull().default([]),
+    adversaryGroup: text('adversary_group'),
+    detectedAt: timestamp('detected_at').notNull().defaultNow(),
+    resolvedAt: timestamp('resolved_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    severityIdx: index('aegis_ti_severity_idx').on(t.severity),
+    statusIdx: index('aegis_ti_status_idx').on(t.status),
+    detectedAtIdx: index('aegis_ti_detected_at_idx').on(t.detectedAt),
+  }),
+);
+
+export const insertAegisThreatIncidentSchema = createInsertSchema(
+  aegisThreatIncidentsTable,
+).omit({ createdAt: true, updatedAt: true });
+export type InsertAegisThreatIncident = z.infer<typeof insertAegisThreatIncidentSchema>;
+export type AegisThreatIncident = typeof aegisThreatIncidentsTable.$inferSelect;
+
+// ─── Threat Predictions (Predictive Intelligence) ─────────────────────────────
+
+export const aegisThreatPredictionsTable = pgTable(
+  'aegis_threat_predictions',
+  {
+    id: text('id').primaryKey(),
+    threatType: text('threat_type').notNull(),
+    adversaryGroup: text('adversary_group'),
+    currentStage: text('current_stage').notNull(),
+    predictedNextStage: text('predicted_next_stage').notNull(),
+    timeToNextStageHours: numeric('time_to_next_stage_hours', { precision: 8, scale: 2 }).notNull(),
+    confidencePct: integer('confidence_pct').notNull().default(0),
+    severity: text('severity').$type<ThreatIncidentSeverity>().notNull().default('medium'),
+    blastRadiusTrend: jsonb('blast_radius_trend').$type<number[]>().notNull().default([]),
+    businessImpactUsd: numeric('business_impact_usd', {
+      precision: 18,
+      scale: 2,
+    }).notNull().default('0'),
+    mitigationWindowMins: integer('mitigation_window_mins').notNull().default(0),
+    recommendedActions: jsonb('recommended_actions').$type<string[]>().notNull().default([]),
+    isActive: boolean('is_active').notNull().default(true),
+    generatedAt: timestamp('generated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    severityIdx: index('aegis_tp_severity_idx').on(t.severity),
+    isActiveIdx: index('aegis_tp_active_idx').on(t.isActive),
+  }),
+);
+
+export const insertAegisThreatPredictionSchema = createInsertSchema(
+  aegisThreatPredictionsTable,
+).omit({ createdAt: true, updatedAt: true });
+export type InsertAegisThreatPrediction = z.infer<typeof insertAegisThreatPredictionSchema>;
+export type AegisThreatPrediction = typeof aegisThreatPredictionsTable.$inferSelect;
+
+// ─── Adversary Narratives (Adversary Narrative Engine) ────────────────────────
+
+export const aegisAdversaryNarrativesTable = pgTable(
+  'aegis_adversary_narratives',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    severity: text('severity').$type<ThreatIncidentSeverity>().notNull().default('critical'),
+    status: text('status').notNull().default('in_progress'),
+    actor: text('actor').notNull(),
+    confidence: integer('confidence').notNull().default(0),
+    businessImpact: text('business_impact').notNull().default(''),
+    executiveSummary: text('executive_summary').notNull().default(''),
+    affectedSystems: jsonb('affected_systems').$type<string[]>().notNull().default([]),
+    iocCount: integer('ioc_count').notNull().default(0),
+    steps: jsonb('steps').$type<Record<string, unknown>[]>().notNull().default([]),
+    stepsEvidenced: integer('steps_evidenced').notNull().default(0),
+    stepsInferred: integer('steps_inferred').notNull().default(0),
+    stepsMissing: integer('steps_missing').notNull().default(0),
+    totalSteps: integer('total_steps').notNull().default(0),
+    generatedAt: timestamp('generated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    severityIdx: index('aegis_an_severity_idx').on(t.severity),
+    statusIdx: index('aegis_an_status_idx').on(t.status),
+  }),
+);
+
+export const insertAegisAdversaryNarrativeSchema = createInsertSchema(
+  aegisAdversaryNarrativesTable,
+).omit({ createdAt: true, updatedAt: true });
+export type InsertAegisAdversaryNarrative = z.infer<typeof insertAegisAdversaryNarrativeSchema>;
+export type AegisAdversaryNarrative = typeof aegisAdversaryNarrativesTable.$inferSelect;

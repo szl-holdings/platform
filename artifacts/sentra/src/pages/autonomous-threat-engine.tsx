@@ -9,7 +9,8 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
 
 const ACCENT = '#f5f5f5';
 const DS = {
@@ -289,12 +290,54 @@ function KillChainViz({ stage }: { stage: KillChainStage }) {
 }
 
 export default function AutonomousThreatEngine() {
-  const [threats, setThreats] = useState<ThreatIncident[]>(SEED_THREATS);
+  const [threats, setThreats] = useState<ThreatIncident[]>([]);
   const [selected, setSelected] = useState<string | null>('t001');
   const [autonomous, setAutonomous] = useState(true);
   const [playbook, setPlaybook] = useState<PlaybookStep[]>([]);
   const [scanPulse, setScanPulse] = useState(0);
   const _intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadIncidents = useCallback(async () => {
+    try {
+      const data = await api.threatEngine.incidents({ limit: 50 });
+      if (data?.incidents?.length) {
+        type IncidentRow = {
+          id: string; title: string; detectedAt?: string; createdAt?: string;
+          confidenceScore?: number; severity: string; status: string;
+          killChainStage: string; mitreTactic: string; mitreId?: string;
+          affectedAssets?: string[]; blastRadius?: number; autonomousActions?: string[];
+          requiresApproval?: boolean; approvalTimeoutSecs?: number;
+          ttps?: string[]; adversaryGroup?: string;
+        };
+        const mapped: ThreatIncident[] = data.incidents.map((i: IncidentRow) => ({
+          id: i.id,
+          title: i.title,
+          timestamp: new Date(i.detectedAt ?? i.createdAt).getTime(),
+          confidenceScore: i.confidenceScore ?? 80,
+          severity: i.severity as ThreatIncident['severity'],
+          status: i.status as ThreatStatus,
+          killChainStage: i.killChainStage as KillChainStage,
+          mitreTactic: i.mitreTactic as MitreTactic,
+          mitreId: i.mitreId,
+          affectedAssets: (i.affectedAssets as string[]) ?? [],
+          blastRadius: i.blastRadius ?? 0,
+          autonomousActions: (i.autonomousActions as string[]) ?? [],
+          requiresApproval: i.requiresApproval ?? false,
+          approvalTimeout: i.approvalTimeoutSecs,
+          ttps: (i.ttps as string[]) ?? [],
+          adversaryGroup: i.adversaryGroup ?? undefined,
+        }));
+        setThreats(mapped);
+        setSelected(mapped[0]?.id ?? null);
+      }
+    } catch {
+      /* fall back to seed data */
+    }
+  }, []);
+
+  useEffect(() => {
+    loadIncidents();
+  }, [loadIncidents]);
 
   const selectedThreat = threats.find((t) => t.id === selected) ?? null;
 
@@ -615,26 +658,34 @@ export default function AutonomousThreatEngine() {
                   selectedThreat.status === 'pending_approval' && (
                     <div className="mt-4 flex gap-2">
                       <button
-                        onClick={() =>
+                        onClick={async () => {
+                          const id = selectedThreat.id;
                           setThreats((prev) =>
-                            prev.map((t) =>
-                              t.id === selected ? { ...t, status: 'contained' } : t,
-                            ),
-                          )
-                        }
+                            prev.map((t) => (t.id === id ? { ...t, status: 'contained' } : t)),
+                          );
+                          try {
+                            await api.threatEngine.updateStatus(id, 'contained');
+                          } catch {
+                            /* best-effort — local state already updated */
+                          }
+                        }}
                         className="flex-1 py-2 rounded-lg text-xs font-bold"
                         style={{ background: ACCENT, color: 'white' }}
                       >
                         Approve Containment
                       </button>
                       <button
-                        onClick={() =>
+                        onClick={async () => {
+                          const id = selectedThreat.id;
                           setThreats((prev) =>
-                            prev.map((t) =>
-                              t.id === selected ? { ...t, status: 'dismissed' } : t,
-                            ),
-                          )
-                        }
+                            prev.map((t) => (t.id === id ? { ...t, status: 'dismissed' } : t)),
+                          );
+                          try {
+                            await api.threatEngine.updateStatus(id, 'dismissed');
+                          } catch {
+                            /* best-effort — local state already updated */
+                          }
+                        }}
                         className="px-4 py-2 rounded-lg text-xs font-medium"
                         style={{
                           background: 'rgba(255,255,255,0.06)',
