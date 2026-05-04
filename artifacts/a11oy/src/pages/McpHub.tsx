@@ -266,13 +266,30 @@ function useGatewayData<T>(endpoint: string, interval = 15000): { data: T | null
 
 function GatewayMonitor() {
   const [gwTab, setGwTab] = useState<'connections' | 'calls' | 'approvals' | 'proofs' | 'keys' | 'connect'>('connections');
-  const { data: stats } = useGatewayData<GatewayStats>('stats');
-  const { data: connData } = useGatewayData<{ connections: GatewayConnection[] }>('connections');
-  const { data: auditData } = useGatewayData<{ calls: GatewayToolCall[] }>('audit-log?limit=100');
-  const { data: approvalData } = useGatewayData<{ approvals: GatewayApproval[]; pending: number }>('approvals');
-  const { data: proofData } = useGatewayData<{ packets: GatewayProofPacket[] }>('proof-chain?limit=50');
-  const { data: keysData } = useGatewayData<{ keys: GatewayApiKeyEntry[] }>('api-keys');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { data: stats } = useGatewayData<GatewayStats>(`stats?_r=${refreshKey}`);
+  const { data: connData } = useGatewayData<{ connections: GatewayConnection[] }>(`connections?_r=${refreshKey}`);
+  const { data: auditData } = useGatewayData<{ calls: GatewayToolCall[] }>(`audit-log?limit=100&_r=${refreshKey}`);
+  const { data: approvalData } = useGatewayData<{ approvals: GatewayApproval[]; pending: number }>(`approvals?_r=${refreshKey}`);
+  const { data: proofData } = useGatewayData<{ packets: GatewayProofPacket[] }>(`proof-chain?limit=50&_r=${refreshKey}`);
+  const { data: keysData } = useGatewayData<{ keys: GatewayApiKeyEntry[] }>(`api-keys?_r=${refreshKey}`);
   const { data: connectData } = useGatewayData<ConnectInstructions>('connect-instructions', 60000);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handleApprovalAction = useCallback(async (approvalId: string, action: 'approve' | 'reject') => {
+    setActionLoading(approvalId);
+    try {
+      const res = await fetch(`${API_BASE}/mcp-governed-gateway/approvals/${approvalId}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: `${action === 'approve' ? 'Approved' : 'Rejected'} via Gateway Monitor` }),
+      });
+      if (res.ok) {
+        setRefreshKey(k => k + 1);
+      }
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  }, []);
 
   const gwTabs = [
     { id: 'connections' as const, label: 'Connections' },
@@ -379,11 +396,11 @@ function GatewayMonitor() {
 
       {gwTab === 'approvals' && (
         <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="grid grid-cols-[1fr_140px_80px_100px_100px_100px] px-3 py-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-            <span>Tool</span><span>Agent</span><span>Risk</span><span>Required Tier</span><span>Status</span><span>Time</span>
+          <div className="grid grid-cols-[1fr_120px_70px_90px_90px_130px_80px] px-3 py-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+            <span>Tool</span><span>Agent</span><span>Risk</span><span>Tier</span><span>Status</span><span>Actions</span><span>Time</span>
           </div>
           {(approvalData?.approvals ?? []).map(a => (
-            <div key={a.approvalId} className="grid grid-cols-[1fr_140px_80px_100px_100px_100px] px-3 py-2.5 items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div key={a.approvalId} className="grid grid-cols-[1fr_120px_70px_90px_90px_130px_80px] px-3 py-2.5 items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
               <span className="text-xs font-mono" style={{ color: '#c9b787' }}>{a.toolName}</span>
               <span className="text-[10px] truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{a.agentName}</span>
               <RiskBadge level={a.riskLevel} />
@@ -391,6 +408,32 @@ function GatewayMonitor() {
               <span className="text-[10px] font-mono" style={{
                 color: a.status === 'pending' ? 'rgba(245,158,11,0.8)' : a.status === 'approved' ? 'rgba(34,197,94,0.8)' : 'rgba(239,68,68,0.8)',
               }}>{a.status}</span>
+              <div className="flex gap-1">
+                {a.status === 'pending' ? (
+                  <>
+                    <button
+                      onClick={() => handleApprovalAction(a.approvalId, 'approve')}
+                      disabled={actionLoading === a.approvalId}
+                      className="text-[9px] px-2 py-1 rounded font-mono transition-colors hover:brightness-110"
+                      style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: 'rgba(34,197,94,0.9)', border: '1px solid rgba(34,197,94,0.2)' }}
+                    >
+                      {actionLoading === a.approvalId ? '...' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={() => handleApprovalAction(a.approvalId, 'reject')}
+                      disabled={actionLoading === a.approvalId}
+                      className="text-[9px] px-2 py-1 rounded font-mono transition-colors hover:brightness-110"
+                      style={{ backgroundColor: 'rgba(239,68,68,0.12)', color: 'rgba(239,68,68,0.9)', border: '1px solid rgba(239,68,68,0.2)' }}
+                    >
+                      {actionLoading === a.approvalId ? '...' : 'Reject'}
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    {a.reviewedBy ? `by ${a.reviewedBy}` : '\u2014'}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>{timeAgo(a.createdAt)}</span>
             </div>
           ))}

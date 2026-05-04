@@ -21,7 +21,7 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
+import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
 
 const router = Router();
 
@@ -1622,7 +1622,13 @@ router.get('/mcp/health', (_req: Request, res: Response) => {
   });
 });
 
-router.get('/mcp/tools', authMiddleware({ required: false }), (_req: Request, res: Response) => {
+router.get('/mcp/tools', gatewayApiKeyGate, authMiddleware({ required: false }), (req: Request, res: Response) => {
+  if (req.gatewayApiKey && req.gatewayConnection) {
+    recordGatewayLifecycleEvent(
+      req.gatewayConnection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+      'discover',
+    );
+  }
   const toolsWithGovernance = ALL_TOOLS.map(t => ({
     ...t,
     governance: getToolGovernanceMetadata(t.name),
@@ -1660,15 +1666,29 @@ router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), r
   const transport = new SSEServerTransport('/api/mcp/message', res);
   sseSessions.set(sessionId, transport);
 
+  const gwCtx = req.gatewayApiKey && req.gatewayConnection
+    ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+    : undefined;
+
+  if (gwCtx?.connection) {
+    recordGatewayLifecycleEvent(
+      gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+      'connect',
+    );
+  }
+
   req.on('close', () => {
     sseSessions.delete(sessionId);
+    if (gwCtx?.connection) {
+      recordGatewayLifecycleEvent(
+        gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+        'disconnect',
+      );
+    }
   });
 
   res.setHeader('X-Session-Id', sessionId);
 
-  const gwCtx = req.gatewayApiKey && req.gatewayConnection
-    ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
-    : undefined;
   const mcpServer = createAlloyMcpServer(req.user, gwCtx);
   await mcpServer.connect(transport);
 });
@@ -1712,10 +1732,20 @@ router.post(
       return;
     }
 
+    const gwCtx = req.gatewayApiKey && req.gatewayConnection
+      ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+      : undefined;
+
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (id) => {
         streamableSessions.set(id, transport);
+        if (gwCtx?.connection) {
+          recordGatewayLifecycleEvent(
+            gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+            'connect',
+          );
+        }
       },
     });
 
@@ -1723,11 +1753,14 @@ router.post(
       if (transport.sessionId) {
         streamableSessions.delete(transport.sessionId);
       }
+      if (gwCtx?.connection) {
+        recordGatewayLifecycleEvent(
+          gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+          'disconnect',
+        );
+      }
     };
 
-    const gwCtx = req.gatewayApiKey && req.gatewayConnection
-      ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
-      : undefined;
     const mcpServer = createAlloyMcpServer(req.user, gwCtx);
     await mcpServer.connect(transport);
     await transport.handleRequest(req, res, req.body);

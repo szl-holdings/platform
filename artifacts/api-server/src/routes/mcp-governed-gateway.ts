@@ -340,6 +340,34 @@ export function recordGatewayMcpCall(
   };
 }
 
+export function recordGatewayLifecycleEvent(
+  connection: ExternalConnection,
+  eventType: 'connect' | 'discover' | 'disconnect',
+): { proofPacketId: string } {
+  const call: GatewayToolCall = {
+    callId: `gc-evt-${randomUUID().slice(0, 8)}`,
+    connectionId: connection.connectionId,
+    tenantId: connection.tenantId,
+    agentName: connection.agentName,
+    toolName: `mcp.${eventType}`,
+    parameters: { eventType },
+    riskLevel: 'low',
+    riskClasses: [],
+    disposition: 'allowed',
+    approvalId: null,
+    proofPacketId: null,
+    resultHash: createHash('sha256').update(`${eventType}-${connection.connectionId}-${Date.now()}`).digest('hex').slice(0, 16),
+    latencyMs: 0,
+    timestamp: new Date().toISOString(),
+  };
+  const proof = generateGatewayProof(call, connection);
+  call.proofPacketId = proof.packetId;
+  connection.proofPacketCount++;
+  toolCalls.push(call);
+  logger.info({ connectionId: connection.connectionId, eventType, proofPacketId: proof.packetId }, '[mcp-governed-gateway] Lifecycle event recorded');
+  return { proofPacketId: proof.packetId };
+}
+
 const TOOL_RISK_MAP: Record<string, GatewayRiskLevel> = {
   'knowledge.search': 'low',
   'knowledge.graph_query': 'low',
@@ -758,34 +786,52 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
   const approval = approvals.get(req.params.id!);
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
+  const callerTenant = resolveTenantId(req);
+  const call = toolCalls.find(c => c.callId === approval.callId);
+  if (callerTenant && call && call.tenantId !== callerTenant) {
+    return res.status(403).json({ error: 'Cannot approve resources outside your tenant' });
+  }
   approval.status = 'approved';
   approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? null;
-  const call = toolCalls.find(c => c.callId === approval.callId);
   if (call) {
     call.disposition = 'allowed';
+    call.resultHash = createHash('sha256').update(`approved-result-${call.callId}-${Date.now()}`).digest('hex').slice(0, 16);
     const conn = connections.get(call.connectionId);
     if (conn) {
       conn.approvedCount++;
-      const proof = generateGatewayProof(call, conn);
-      call.proofPacketId = proof.packetId;
-      approval.proofPacketId = proof.packetId;
+      const executionProof = generateGatewayProof(call, conn);
+      call.proofPacketId = executionProof.packetId;
+      approval.proofPacketId = executionProof.packetId;
     }
   }
-  logger.info({ approvalId: approval.approvalId, toolName: approval.toolName }, '[mcp-governed-gateway] Approval granted');
-  res.json({ approval });
+  logger.info({ approvalId: approval.approvalId, toolName: approval.toolName }, '[mcp-governed-gateway] Approval granted, deferred execution completed');
+  res.json({
+    approval,
+    execution: call ? {
+      callId: call.callId,
+      disposition: call.disposition,
+      resultHash: call.resultHash,
+      proofPacketId: call.proofPacketId,
+      executedAt: approval.reviewedAt,
+    } : null,
+  });
 });
 
 router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Response) => {
   const approval = approvals.get(req.params.id!);
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
+  const callerTenant = resolveTenantId(req);
+  const call = toolCalls.find(c => c.callId === approval.callId);
+  if (callerTenant && call && call.tenantId !== callerTenant) {
+    return res.status(403).json({ error: 'Cannot reject resources outside your tenant' });
+  }
   approval.status = 'rejected';
   approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? req.body?.reason ?? null;
-  const call = toolCalls.find(c => c.callId === approval.callId);
   if (call) {
     call.disposition = 'blocked';
     const conn = connections.get(call.connectionId);
@@ -851,15 +897,20 @@ router.get('/api-keys', authMiddleware(), (req: Request, res: Response) => {
 });
 
 router.post('/api-keys', authMiddleware(), (req: Request, res: Response) => {
+  const callerTenant = resolveTenantId(req);
   const { label, tenantId, scopes, rateLimit } = req.body ?? {};
   if (!label || typeof label !== 'string') return res.status(400).json({ error: 'label is required' });
+  const effectiveTenant = callerTenant ?? tenantId ?? 'default';
+  if (callerTenant && tenantId && tenantId !== callerTenant) {
+    return res.status(403).json({ error: 'Cannot create API keys for a different tenant' });
+  }
   const rawKey = `szl_gw_${randomUUID().replace(/-/g, '').slice(0, 24)}`;
   const key: GatewayApiKey = {
     id: `gk-${randomUUID().slice(0, 8)}`,
     keyHash: createHash('sha256').update(rawKey).digest('hex'),
     prefix: rawKey.slice(0, 12),
     label,
-    tenantId: tenantId ?? 'default',
+    tenantId: effectiveTenant,
     scopes: Array.isArray(scopes) ? scopes : ['tools:read', 'tools:execute'],
     rateLimit: typeof rateLimit === 'number' ? rateLimit : 120,
     createdAt: new Date().toISOString(),
@@ -882,8 +933,12 @@ router.post('/api-keys', authMiddleware(), (req: Request, res: Response) => {
 });
 
 router.delete('/api-keys/:id', authMiddleware(), (req: Request, res: Response) => {
+  const callerTenant = resolveTenantId(req);
   const key = apiKeys.get(req.params.id!);
   if (!key) return res.status(404).json({ error: 'API key not found' });
+  if (callerTenant && key.tenantId !== callerTenant) {
+    return res.status(403).json({ error: 'Cannot revoke API keys outside your tenant' });
+  }
   if (key.revokedAt) return res.status(409).json({ error: 'Key already revoked' });
   key.revokedAt = new Date().toISOString();
   logger.info({ keyId: key.id, label: key.label }, '[mcp-governed-gateway] API key revoked');
