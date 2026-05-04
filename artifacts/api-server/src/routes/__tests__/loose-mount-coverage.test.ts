@@ -140,6 +140,8 @@ const ALLOWED_PUBLIC_MOUNTS: Record<string, string> = {
     'Public — Meridian MCP Activation registry read-only',
   'marketplace':
     'Public — MCP Public Trust Layer server directory and discovery',
+  'v1-guard':
+    'Public — Lambda-as-a-Service (LaaS) stateless guard endpoint, Zod-validated, no PII or session',
 
   'emailWebhooksRouter':
     'Webhook receiver — email provider bounces, complaints, unsubscribe',
