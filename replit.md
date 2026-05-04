@@ -107,3 +107,21 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
 - **Government Data:** Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+
+## Platform Status (as of May 2026)
+
+**Active Artifacts (all rendering, themed, operational):**
+| Artifact | Path | Status |
+|----------|------|--------|
+| A11oy — Brand Orchestration Layer | `/a11oy` | Live — flagship landing + governed OS |
+| Amaru (Conduit) — Convergent Reverse-ETL | `/conduit` | Live — dashboard + sovereign AI hub |
+| Sentra — Cyber Resilience Command | `/sentra` | Live — SOC ops + 80+ modules |
+| Counsel — Legal Matter Command | `/counsel` | Live — matter management |
+| Terra — Real Estate Intelligence | `/terra` | Live — distressed property engine |
+| Vessels — Maritime Intelligence | `/vessels` | Live — fleet tracking (214 vessels) |
+| Carlota Jo — Private Advisory | `/carlota-jo` | Live — premium service brand |
+| API Server | `/api` | Healthy — all 6 services OK |
+
+**Backend Services:** Database (PostgreSQL), Job Queue, Auth, AI, Storage — all operational.
+**Design System:** Unified dark theme (#0a0a0a bg, #c9b787 gold) across all surfaces.
+**Deployment:** Ready for publish via Replit Deployments.
