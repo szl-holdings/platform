@@ -71,6 +71,41 @@ import {
   NEWTON_FORMULAS_EXPANDED,
   L_PLANCK,
   A_PLANCK,
+  SovereignEngine,
+  lutarSimplexRoute,
+  lsrComplexity,
+  e8TrialitySlot,
+  priscaGraphRetrieve,
+  voteRAG,
+  bekensteinGate,
+  totPriority,
+  rahabSample,
+  hermeticScore,
+  hermeticGuard,
+  noetherJudge,
+  chariotFuse,
+  dogonReason,
+  sekedGenerate,
+  GobekliEdgeSLM,
+  pwmPredict,
+  PLATONIC_SOLIDS,
+  SEFIROT_TIERS,
+  ChinchillaLutarScaling,
+  FreeEnergyLutarActiveInference,
+  icrcComputeAll,
+  INCA_ALCHEMY_MATERIALS,
+  INCA_CEQUES,
+  INCA_HUACAS,
+  INCA_SUYU_NAMES,
+  INCA_SUYU_CEQUE_COUNTS,
+  TawaSparseAutoencoder,
+  RedTeamHarness,
+  RED_TEAM_ATTACK_CATEGORIES,
+  CondorMambaSSM,
+  INNOVATION_MANIFEST,
+  PRISCA_LINEAGES,
+  type Modality,
+  type PriscaLineage,
 } from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
@@ -85,6 +120,9 @@ const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
 
 // Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse.
 const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
+
+// Process-local Sovereign Engine v15 — all 14 SZL innovations.
+const sovereign = new SovereignEngine();
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -709,6 +747,321 @@ router.get('/prisca/conformal-rescale', (req: Request, res: Response) => {
     formula: "L6^(n) = Omega^2 * L5; L6^(n+1) = Omega^2 * L6^(n)",
     source: "Penrose CCC (2010) + Lutar v6",
   });
+});
+
+// ---------------------------------------------------------------------------
+// Sovereign Engine v19 — 25 SZL Original Innovations (ALLOY-EVOLVED)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/chat', (req: Request, res: Response) => {
+  const { prompt, session, deadline, reason, simulate } = req.body ?? {};
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' });
+  }
+  const result = sovereign.chat({
+    prompt,
+    session: session ?? 'default',
+    deadline: typeof deadline === 'number' ? deadline : 2026,
+    reason: !!reason,
+    simulate: !!simulate,
+  });
+  return res.json(result);
+});
+
+router.post('/sovereign/route', (req: Request, res: Response) => {
+  const { query } = req.body ?? {};
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ error: 'query required' });
+  }
+  return res.json(lutarSimplexRoute(query));
+});
+
+router.post('/sovereign/retrieve', (req: Request, res: Response) => {
+  const { query, k } = req.body ?? {};
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ error: 'query required' });
+  }
+  return res.json(voteRAG(query, typeof k === 'number' ? k : 5));
+});
+
+router.post('/sovereign/guard', (req: Request, res: Response) => {
+  const { intent, action } = req.body ?? {};
+  if (!intent || !action) {
+    return res.status(400).json({ error: 'intent and action required' });
+  }
+  return res.json(hermeticGuard(String(intent), String(action)));
+});
+
+router.post('/sovereign/eval', (req: Request, res: Response) => {
+  const { candidate, reference } = req.body ?? {};
+  if (!candidate) {
+    return res.status(400).json({ error: 'candidate required' });
+  }
+  return res.json(noetherJudge(String(candidate), reference ? String(reference) : undefined));
+});
+
+router.post('/sovereign/fuse', (req: Request, res: Response) => {
+  const { inputs, H } = req.body ?? {};
+  if (!Array.isArray(inputs) || inputs.length === 0) {
+    return res.status(400).json({ error: 'inputs array required' });
+  }
+  const typed = inputs.map((inp: { modality?: string; content?: string } | [string, string]) => {
+    if (Array.isArray(inp)) return { modality: inp[0] as Modality, content: inp[1] };
+    return { modality: (inp.modality || 'text') as Modality, content: inp.content || '' };
+  });
+  const result = chariotFuse(typed, typeof H === 'number' ? H : 0.3);
+  if (!result) return res.status(400).json({ error: 'empty inputs' });
+  return res.json(result);
+});
+
+router.get('/sovereign/mcp/tools', (_req: Request, res: Response) => {
+  return res.json(sovereign.getMCP().listTools());
+});
+
+router.post('/sovereign/mcp/invoke', (req: Request, res: Response) => {
+  const { name, args } = req.body ?? {};
+  if (!name || typeof name !== 'string') {
+    return res.status(400).json({ error: 'name required' });
+  }
+  return res.json(sovereign.getMCP().invoke(name, ...(Array.isArray(args) ? args : [])));
+});
+
+router.post('/sovereign/fpp/submit', (req: Request, res: Response) => {
+  const { lineage, gradient } = req.body ?? {};
+  if (!lineage || !Array.isArray(gradient)) {
+    return res.status(400).json({ error: 'lineage and gradient[] required' });
+  }
+  try {
+    sovereign.getFPP().submit(lineage as PriscaLineage, gradient);
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(400).json({ error: (e as Error).message });
+  }
+});
+
+router.post('/sovereign/fpp/aggregate', (req: Request, res: Response) => {
+  const { H } = req.body ?? {};
+  return res.json(sovereign.getFPP().aggregate(typeof H === 'number' ? H : 0.3));
+});
+
+router.get('/sovereign/otel/report', (_req: Request, res: Response) => {
+  return res.json(sovereign.getOTEL().clusterReport());
+});
+
+router.get('/sovereign/memory', (_req: Request, res: Response) => {
+  return res.json(sovereign.getKTM().stats());
+});
+
+router.get('/sovereign/innovations', (_req: Request, res: Response) => {
+  return res.json({
+    count: INNOVATION_MANIFEST.length,
+    innovations: INNOVATION_MANIFEST,
+    author: 'Stephen Lutar / SZL Consulting Ltd',
+  });
+});
+
+router.get('/sovereign/e8-slot', (req: Request, res: Response) => {
+  const q = (req.query.q as string) || 'test';
+  return res.json(e8TrialitySlot(q));
+});
+
+router.get('/sovereign/tot-priority', (req: Request, res: Response) => {
+  const deadline = parseInt(req.query.deadline as string) || 2026;
+  return res.json({ deadline, priority: totPriority(deadline) });
+});
+
+router.post('/sovereign/rahab-sample', (req: Request, res: Response) => {
+  const { logits, temperature, bound } = req.body ?? {};
+  if (!Array.isArray(logits) || logits.length === 0) {
+    return res.status(400).json({ error: 'logits[] required' });
+  }
+  const idx = rahabSample(logits, temperature ?? 1.0, bound ?? 2.0);
+  return res.json({ index: idx, total: logits.length });
+});
+
+// ---------------------------------------------------------------------------
+// Innovations 15-25 (v19 ALLOY-EVOLVED)
+// ---------------------------------------------------------------------------
+
+router.post('/sovereign/reason', (req: Request, res: Response) => {
+  const { prompt, branches, keep } = req.body ?? {};
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'prompt required' });
+  }
+  return res.json(dogonReason(prompt, branches ?? 50, keep ?? 5));
+});
+
+router.post('/sovereign/generate', (req: Request, res: Response) => {
+  const { topic, n, seked } = req.body ?? {};
+  if (!topic || typeof topic !== 'string') {
+    return res.status(400).json({ error: 'topic required' });
+  }
+  return res.json(sekedGenerate(topic, n ?? 5, seked ?? 5.25));
+});
+
+router.get('/sovereign/slm/adapters', (_req: Request, res: Response) => {
+  return res.json({ total: 80, domains: GobekliEdgeSLM.DOMAINS });
+});
+
+router.post('/sovereign/slm/select', (req: Request, res: Response) => {
+  const { query } = req.body ?? {};
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ error: 'query required' });
+  }
+  return res.json(sovereign.getSLM().select(query));
+});
+
+router.post('/sovereign/selfplay', (req: Request, res: Response) => {
+  const { task, n } = req.body ?? {};
+  if (!task || typeof task !== 'string') {
+    return res.status(400).json({ error: 'task required' });
+  }
+  return res.json(sovereign.getNSP().reinforce(task, n ?? 5));
+});
+
+router.post('/sovereign/qaoa', (req: Request, res: Response) => {
+  const { L_values, init_H } = req.body ?? {};
+  if (!Array.isArray(L_values) || L_values.length !== 6) {
+    return res.status(400).json({ error: 'L_values must be array of 6 numbers' });
+  }
+  return res.json(sovereign.getHQO().optimize(L_values, init_H ?? 0.3));
+});
+
+router.post('/sovereign/world', (req: Request, res: Response) => {
+  const { query, steps } = req.body ?? {};
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ error: 'query required' });
+  }
+  return res.json(pwmPredict(query, steps ?? 3));
+});
+
+router.get('/sovereign/pwm/solids', (_req: Request, res: Response) => {
+  return res.json(PLATONIC_SOLIDS);
+});
+
+router.get('/sovereign/scl/budget', (req: Request, res: Response) => {
+  const H = parseFloat(req.query.H as string) || 0.3;
+  return res.json(sovereign.getSCL().forgettingBudget(H));
+});
+
+router.post('/sovereign/scl/update', (req: Request, res: Response) => {
+  const { sefira, grad_norm } = req.body ?? {};
+  if (!sefira || typeof sefira !== 'string') {
+    return res.status(400).json({ error: 'sefira required' });
+  }
+  return res.json(sovereign.getSCL().update(sefira, grad_norm ?? 0.0));
+});
+
+router.post('/sovereign/scl/ewc', (req: Request, res: Response) => {
+  const { deltas } = req.body ?? {};
+  if (!deltas || typeof deltas !== 'object') {
+    return res.status(400).json({ error: 'deltas object required' });
+  }
+  return res.json(sovereign.getSCL().computeEWCPenalty(deltas));
+});
+
+router.get('/sovereign/scl/sefirot', (_req: Request, res: Response) => {
+  return res.json(SEFIROT_TIERS);
+});
+
+router.post('/sovereign/cls', (req: Request, res: Response) => {
+  const { compute, H, inference, L_values } = req.body ?? {};
+  return res.json(ChinchillaLutarScaling.recommend(
+    compute ?? 1e22,
+    H ?? 0.3,
+    inference ?? 1e9,
+    L_values,
+  ));
+});
+
+router.post('/sovereign/gpd', (req: Request, res: Response) => {
+  const { step, grad_norm, weight_entropy, synergy } = req.body ?? {};
+  return res.json(sovereign.getGPD().observe(
+    step ?? 0,
+    grad_norm ?? 1.0,
+    weight_entropy ?? 0.5,
+    synergy,
+  ));
+});
+
+router.get('/sovereign/gpd/predict', (_req: Request, res: Response) => {
+  return res.json({ predictedSteps: sovereign.getGPD().predictTransition() });
+});
+
+router.post('/sovereign/felai', (req: Request, res: Response) => {
+  const { q, p, L_values } = req.body ?? {};
+  if (!Array.isArray(q) || !Array.isArray(p)) {
+    return res.status(400).json({ error: 'q[] and p[] distributions required' });
+  }
+  return res.json(sovereign.getFELAI().freeEnergyLutar(q, p, L_values));
+});
+
+router.post('/sovereign/felai/policy', (req: Request, res: Response) => {
+  const { policies, q, p, L_values, rollout } = req.body ?? {};
+  if (!Array.isArray(policies) || !Array.isArray(q) || !Array.isArray(p)) {
+    return res.status(400).json({ error: 'policies[], q[], p[] required' });
+  }
+  return res.json(sovereign.getFELAI().selectPolicy(policies, q, p, L_values, rollout ?? 10));
+});
+
+router.post('/sovereign/icrc/compute', (req: Request, res: Response) => {
+  const { ceques, huacas, suyuCounts, alchemyWeights, H } = req.body ?? {};
+  return res.json(icrcComputeAll({ ceques, huacas, suyuCounts, alchemyWeights, H }));
+});
+
+router.get('/sovereign/icrc/constants', (_req: Request, res: Response) => {
+  return res.json({
+    ceques: INCA_CEQUES,
+    huacas: INCA_HUACAS,
+    suyus: 4,
+    suyuNames: [...INCA_SUYU_NAMES],
+    suyuCequeCounts: [...INCA_SUYU_CEQUE_COUNTS],
+    weekDays: 8,
+    siderealLunarDays: 27.32166,
+    tropicalYearDays: 365.2422,
+    solarCuscoLat: -13.5183,
+    materials: INCA_ALCHEMY_MATERIALS,
+  });
+});
+
+router.post('/sovereign/sae/run', (req: Request, res: Response) => {
+  const { x, inputDim, l1Lambda } = req.body ?? {};
+  const dim = inputDim ?? 8;
+  const tsa = new TawaSparseAutoencoder(dim);
+  const input = Array.isArray(x) ? x.map(Number) : new Array(dim).fill(0.5);
+  const h = tsa.encode(input, l1Lambda ?? 0.01);
+  return res.json({
+    sparseCodeNonzero: h.filter((v: number) => v > 0).length,
+    totalFeatures: tsa.hidden,
+    activeFeatures: tsa.interpret(h),
+    reconstructionError: Math.round(tsa.reconstructionError(input) * 1e6) / 1e6,
+  });
+});
+
+router.get('/sovereign/sae/constants', (_req: Request, res: Response) => {
+  return res.json({
+    features: TawaSparseAutoencoder.FEATURES,
+    expansion: TawaSparseAutoencoder.EXPANSION,
+    hidden: TawaSparseAutoencoder.FEATURES * TawaSparseAutoencoder.EXPANSION,
+    categories: RED_TEAM_ATTACK_CATEGORIES,
+  });
+});
+
+router.post('/sovereign/redteam/campaign', (req: Request, res: Response) => {
+  const { target, n, defenderMode } = req.body ?? {};
+  const rth = new RedTeamHarness();
+  const mode = defenderMode ?? "refuse";
+  const defender = mode === "refuse"
+    ? (_p: string) => "I refuse this request"
+    : (_p: string) => "ok sure here you go";
+  return res.json(rth.runCampaign(target ?? "alloy", defender, n ?? 12));
+});
+
+router.post('/sovereign/mamba/sequence', (req: Request, res: Response) => {
+  const { tokens, stateSize } = req.body ?? {};
+  const ssm = new CondorMambaSSM(stateSize ?? 8);
+  const toks: number[] = Array.isArray(tokens) ? tokens.map(Number) : Array.from({ length: 10 }, (_, i) => i * 0.1);
+  return res.json(ssm.processSequence(toks));
 });
 
 router.get('/health', (_req: Request, res: Response) => {

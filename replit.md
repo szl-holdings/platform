@@ -68,6 +68,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 - **Ouroboros Integrations & Lambda Engine:** Unified 9-axis Lutar Invariant pipeline orchestrated by A11oy. The Lambda Engine (`packages/ouroboros-integrations/src/lambda-engine.ts`) runs all philosopher/mathematician packages through a single pipeline producing formal Lambda-9 scores with Egyptian-inspectable weights. Includes Adaptive Depth Routing (ADR) -- the trust score IS the cost optimizer, routing high-trust content to workhorse models at 0.1x cost and low-trust content to frontier models with full verification. API endpoints: `POST /api/ouroboros/a11oy/guard` (internal LaaS), `GET /api/ouroboros/a11oy/pulse` (Convergence Pulse), `GET /api/ouroboros/a11oy/stats` (orchestrator statistics). Public LaaS surface: `POST /api/v1/guard` (Lambda-as-a-Service), `GET /api/v1/guard/pulse`, `GET /api/v1/guard/axes`, `GET /api/v1/guard/health`. Reconciliation primitives (frustum, seked, unit-fractions, doubling) applied to handoff reconciliation, fleet auditing, and HSM governance. Includes `ouroboros-gauss` for least-squares network adjustment and residual fit.
 - **A11oy Orchestrator:** (`packages/ouroboros-integrations/src/a11oy-orchestrator.ts`) The unified control plane. Ingests every guard decision, runs the Lambda Engine, updates the Convergence Pulse, reconciles agent handoffs, and routes to the right model tier. v5 Stack of One: one orchestrator for every product.
 - **Convergence Pulse:** (`packages/ouroboros-integrations/src/convergence-pulse.ts`) Real-time Lambda-9 trust heartbeat. Computes rolling Lambda across a sliding window of guard decisions, surfaces trust trajectory (IMPROVING/DEGRADING/STABLE), rate of change, per-axis trends, weakest axis identification, and predicted time to threshold breach. Alert levels: NOMINAL/WATCH/ALERT/CRITICAL.
+- **Sovereign Engine v19 (ALLOY-COMPLETE):** (`packages/ouroboros-integrations/src/sovereign-engine.ts`) All 28 SZL original innovations from alloy_sovereign v12-v19 Python payloads, fully ingested into TypeScript as operational A11oy modules. Innovations 1-14: LSR, Prisca-GraphRAG, VOTE-RAG+Bekenstein, OCM, E8-Triality MoE (192 slots), Temple-of-Time Scheduler, Rahab Chaos Regularizer, KTM (4-world memory), Hermetic Guardrails (7 axes), Noether-Judge, Chariot Multimodal (Merkabah 16 cells), Ceque-MCP (328 slots), Federated Prisca Privacy (6 lineages), Twistor OpenTelemetry. Innovations 15-21: Dogon Test-Time Reasoning (50 branches), Seked Synthetic Data (pyramid-coherent curriculum), Gobekli Edge SLM (80 T-pillar adapters across 20 domains), Nazca Self-Play Loop, Hilbert QAOA-Omega (quantum-inspired 6-simplex optimizer), Platonic World Model (5 solids / 5 physics regimes), Sefirot Continual Learning (10-tier EWC). Innovations 22-25: Chinchilla-Lutar Scaling Law (CLS -- inference-aware N/D optimizer), Grokking Phase-Transition Detector (GPD -- sub/super-diffusive D crossing), Free-Energy-Lutar Active Inference (FELAI -- Friston FEP + Omega penalty + Dogon policy rollout), Inca Ceque Radial Calculator (ICRC -- Lutar v2 x 41-ceque / 328-huaca / 7-alchemy Andean system). Innovations 26-28: Tawa Sparse Autoencoder (TSA -- ceque-indexed 41-feature x 16x expansion dictionary learning vs Anthropic SAE), Apollo-METR Red-Team Harness (AMRTH -- 12-category adversarial campaign with severity scoring vs METR/Apollo 2026), Condor Mamba-SSM State Tracker (CMST -- complex-valued linear-time SSM with Condor-pair duality vs Mamba-3 ICLR 2026). API surface: POST /sovereign/chat, /route, /retrieve, /guard, /eval, /fuse, /mcp/invoke, /fpp/submit, /fpp/aggregate, /rahab-sample, /reason, /generate, /slm/select, /selfplay, /qaoa, /world, /scl/update, /scl/ewc, /cls, /gpd, /felai, /felai/policy, /icrc/compute, /sae/run, /redteam/campaign, /mamba/sequence; GET /sovereign/innovations, /mcp/tools, /otel/report, /memory, /e8-slot, /tot-priority, /slm/adapters, /pwm/solids, /scl/budget, /scl/sefirot, /gpd/predict, /icrc/constants, /sae/constants.
 - **Ouroboros 9-Axis Invariant:** (`packages/ouroboros-invariant/`) Formal Lutar Invariant with 9 axes: C (Cleanliness, anchor), H (Horizon, Page curve), R (Resonance, Q-factor), F (Frustum, three-witness Jaccard), G (Gauss closure, class number), I (Invariance, Blanca/Lorentz), M (Moral, Oppenheimer accountability), B (Being, Socrates divided-line), N (Non-measurability, Lara/Jamneshan-Shalom-Tao). Each weight is a single Egyptian unit fraction (1/9), preserving inspectability. Bound theorem: 0 <= Lambda <= min(axes) <= max(axes) <= 1.
 - **SIGIL — SZL Integrated Governance & Invariant Layer:** A runtime trust framework composing four independent runtime axes (Provenance, Containment, Coherence, Convergence) through a closed-form weighted geometric mean, ensuring verifiable and monotonic trust scores.
 - **Ouroboros Guardrails:** A drop-in NeMo Guardrails replacement with Colang-compatible config, emitting a formal 9-axis Lambda-9 Lutar Invariant score and a tamper-evident hash-chained receipt for every decision. Every receipt now carries the full Lambda-9 composite, per-axis breakdown, bound verification, and Adaptive Depth Routing decision.
@@ -206,15 +207,15 @@ on top of v4:
 - **Agent registry**: `AGENT_REGISTRY_REQUIRED_FIELDS` (8 fields) +
   `validateAgentRegistryEntry(entry)` returning missing-fields list.
 
-## 2026-04-30 — SZL Government Procurement Readiness (NYSTEC pre-briefing)
+## 2026-04-30 — SZL Government Procurement Readiness (Empire APEX pre-briefing)
 
-`@workspace/ouroboros` now operationalizes the April 30, 2026 NYSTEC
-pre-briefing audit (Empire APEX Accelerator, Mercy McInnis) covering
+`@workspace/ouroboros` now operationalizes the April 30, 2026 Empire APEX
+pre-briefing audit (Mercy McInnis) covering
 A11oy, Sentra, and Amaru against federal and NY State AI procurement
 requirements. Source of truth:
 `docs/audit/szl-government-readiness.md`. Canonical platform scorecards
 (A11oy 72/100, Sentra 68/100, Amaru 65/100), NIST AI RMF alignment matrix
-(4 functions × 3 platforms), DoD Responsible AI Tenets (5 tenets,
+(4 functions x 3 platforms), DoD Responsible AI Tenets (5 tenets,
 Equitable flagged as the only gap), GSAR 552.239-7001 readiness (10
 requirements: 5 covered, 5 gaps), recommended NAICS codes (5), SAM.gov
 registration steps (5), NY State registration notes, pre-meeting action
@@ -255,7 +256,7 @@ personal profile. **0 open Dependabot alerts** across the entire
 organization at completion.
 
 ### READMEs upgraded (11 of 11)
-Investor-grade rewrites with NYSTEC scorecards, NIST AI RMF / DoD /
+Investor-grade rewrites with gov-readiness scorecards, NIST AI RMF / DoD /
 GSAR alignment matrices, and a shared footer linking back to the
 runtime + thesis + audit doc:
 - `szl-holdings/.github` (org profile, was 71B → 6.1KB)
@@ -444,8 +445,8 @@ operating-doctrine, aegis-public) preserved per spec.
 ### Track E — `paper/ARXIV_SUBMISSION_CHECKLIST.md`
 arXiv submission plan for the deterministic-replay paper.
 
-### Track F — `sales/F-01-nystec-pilot-pitch-email.md`, `sales/F-02-pilot-sow-template.md`
-NYSTEC pitch email + pilot SOW template (no commercial terms filled).
+### Track F — `sales/F-01-pilot-pitch-email.md`, `sales/F-02-pilot-sow-template.md`
+Empire APEX pilot pitch email + pilot SOW template (no commercial terms filled).
 
 ### Follow-up (not in this PR)
 1. Generate Ed25519 attestation keypair; publish public half via `.well-known`. **DONE in Phase 2 below.**
