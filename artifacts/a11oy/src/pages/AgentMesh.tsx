@@ -273,19 +273,27 @@ function SovereignMeshTab() {
   const [crews, setCrews] = useState<SovereignCrew[]>([]);
   const [activity, setActivity] = useState<AgentActivityEntry[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [subTab, setSubTab] = useState<'agents' | 'crews' | 'activity' | 'trust'>('agents');
+  const [subTab, setSubTab] = useState<'agents' | 'crews' | 'activity' | 'trust' | 'mcp'>('agents');
   const [loading, setLoading] = useState(true);
+  const [spawnOpen, setSpawnOpen] = useState(false);
+  const [spawnName, setSpawnName] = useState('');
+  const [spawnTemplate, setSpawnTemplate] = useState('research');
+  const [spawning, setSpawning] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+  const [mcpServers, setMcpServers] = useState<Array<{ serverId: string; healthStatus: string; tools: string[]; capabilities: string[] }>>([]);
 
   const load = useCallback(async () => {
     try {
-      const [sRes, aRes, cRes, actRes] = await Promise.all([
+      const [sRes, aRes, cRes, actRes, mcpRes] = await Promise.all([
         fetch(`${SMAPI}/summary`), fetch(`${SMAPI}/agents`),
         fetch(`${SMAPI}/crews`), fetch(`${SMAPI}/activity?limit=50`),
+        fetch(`${SMAPI}/mcp/servers`),
       ]);
       if (sRes.ok) setSummary(await sRes.json());
       if (aRes.ok) setAgents(await aRes.json());
       if (cRes.ok) setCrews(await cRes.json());
       if (actRes.ok) setActivity(await actRes.json());
+      if (mcpRes.ok) setMcpServers(await mcpRes.json());
     } catch { /* network error — keep stale data */ }
     setLoading(false);
   }, []);
@@ -293,6 +301,37 @@ function SovereignMeshTab() {
   useEffect(() => { load(); const iv = setInterval(load, 12000); return () => clearInterval(iv); }, [load]);
 
   const sel = agents.find(a => a.id === selectedAgent);
+
+  const handleSpawn = async () => {
+    if (!spawnName.trim()) return;
+    setSpawning(true);
+    try {
+      const res = await fetch(`${SMAPI}/agents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: spawnName.trim(), template: spawnTemplate }),
+      });
+      if (res.ok) {
+        setSpawnName('');
+        setSpawnOpen(false);
+        await load();
+      }
+    } catch { /* spawn failed */ }
+    setSpawning(false);
+  };
+
+  const handleStatusChange = async (agentId: string, newStatus: string) => {
+    setStatusUpdating(agentId);
+    try {
+      const res = await fetch(`${SMAPI}/agents/${agentId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) await load();
+    } catch { /* status update failed */ }
+    setStatusUpdating(null);
+  };
 
   if (loading && !summary) {
     return (
@@ -314,13 +353,39 @@ function SovereignMeshTab() {
         </div>
       )}
 
-      <div className="flex gap-1 mb-5">
-        {(['agents', 'crews', 'activity', 'trust'] as const).map(t => (
-          <button key={t} onClick={() => setSubTab(t)} className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest rounded transition-all" style={{ background: subTab === t ? 'rgba(201,183,135,0.08)' : 'transparent', color: subTab === t ? T.accent : T.muted, border: `1px solid ${subTab === t ? 'rgba(201,183,135,0.15)' : 'transparent'}` }}>
-            {t === 'agents' ? 'Field Agents' : t === 'crews' ? 'Crew Swarms' : t === 'activity' ? 'Activity Stream' : 'Trust Engine'}
-          </button>
-        ))}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex gap-1">
+          {(['agents', 'crews', 'activity', 'trust', 'mcp'] as const).map(t => (
+            <button key={t} onClick={() => setSubTab(t)} className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest rounded transition-all" style={{ background: subTab === t ? 'rgba(201,183,135,0.08)' : 'transparent', color: subTab === t ? T.accent : T.muted, border: `1px solid ${subTab === t ? 'rgba(201,183,135,0.15)' : 'transparent'}` }}>
+              {t === 'agents' ? 'Field Agents' : t === 'crews' ? 'Crew Swarms' : t === 'activity' ? 'Activity Stream' : t === 'trust' ? 'Trust Engine' : 'MCP Discovery'}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setSpawnOpen(!spawnOpen)} className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest rounded transition-all" style={{ background: 'rgba(201,183,135,0.1)', color: T.accent, border: '1px solid rgba(201,183,135,0.2)' }}>
+          + Spawn Agent
+        </button>
       </div>
+
+      {spawnOpen && (
+        <div className="rounded-lg p-4 mb-5 flex items-end gap-3" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+          <div className="flex-1">
+            <label className="text-[9px] font-mono uppercase tracking-wider block mb-1" style={{ color: T.muted }}>Agent Name</label>
+            <input value={spawnName} onChange={e => setSpawnName(e.target.value)} placeholder="e.g. Research Omega" className="w-full px-3 py-1.5 rounded text-xs font-mono" style={{ background: 'rgba(255,255,255,0.04)', color: T.text, border: `1px solid ${T.border}`, outline: 'none' }} onKeyDown={e => e.key === 'Enter' && handleSpawn()} />
+          </div>
+          <div>
+            <label className="text-[9px] font-mono uppercase tracking-wider block mb-1" style={{ color: T.muted }}>Template</label>
+            <select value={spawnTemplate} onChange={e => setSpawnTemplate(e.target.value)} className="px-3 py-1.5 rounded text-xs font-mono" style={{ background: 'rgba(255,255,255,0.04)', color: T.text, border: `1px solid ${T.border}`, outline: 'none' }}>
+              {['research', 'analysis', 'monitoring', 'synthesis', 'compliance', 'security'].map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <button onClick={handleSpawn} disabled={spawning || !spawnName.trim()} className="px-4 py-1.5 rounded text-[10px] font-mono uppercase tracking-wider transition-all" style={{ background: spawning ? 'rgba(255,255,255,0.04)' : 'rgba(201,183,135,0.15)', color: spawning ? T.muted : T.accent, border: '1px solid rgba(201,183,135,0.2)', opacity: !spawnName.trim() ? 0.4 : 1 }}>
+            {spawning ? 'Spawning...' : 'Spawn'}
+          </button>
+          <button onClick={() => setSpawnOpen(false)} className="px-3 py-1.5 rounded text-[10px] font-mono" style={{ color: T.muted }}>Cancel</button>
+        </div>
+      )}
 
       {subTab === 'agents' && (
         <div className="grid lg:grid-cols-3 gap-6">
@@ -419,6 +484,17 @@ function SovereignMeshTab() {
 
                 <div className="text-[9px] font-mono" style={{ color: T.muted }}>
                   Spawned {relTime(sel.spawnedAt)} · Last active {relTime(sel.lastActiveAt)}
+                </div>
+
+                <div className="pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-2" style={{ color: T.muted }}>Agent Controls</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(['active', 'idle', 'paused', 'terminated'] as const).map(s => (
+                      <button key={s} onClick={() => handleStatusChange(sel.id, s)} disabled={sel.status === s || statusUpdating === sel.id} className="px-2.5 py-1 rounded text-[9px] font-mono uppercase tracking-wider transition-all" style={{ background: sel.status === s ? statusDot(s) + '22' : 'rgba(255,255,255,0.03)', color: sel.status === s ? statusDot(s) : T.muted, border: `1px solid ${sel.status === s ? statusDot(s) + '44' : T.border}`, opacity: statusUpdating === sel.id ? 0.5 : 1, cursor: sel.status === s ? 'default' : 'pointer' }}>
+                        {statusUpdating === sel.id ? '...' : s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -580,6 +656,95 @@ Tier Assignment:
   standard   ≥ 60  → 10 tools, approval required
   provisional ≥ 40 → 5 tools, approval required
   untrusted  < 40  → 2 tools, approval required, sandboxed`}
+            </pre>
+          </Card>
+        </div>
+      )}
+
+      {subTab === 'mcp' && (
+        <div className="space-y-6">
+          <SectionTitle>MCP-Based Agent Discovery</SectionTitle>
+          <p className="text-xs mb-4" style={{ color: T.dim }}>
+            Field agents discover tools and capabilities through MCP (Model Context Protocol) servers. Each server exposes a set of tools that agents can invoke based on their trust tier and covenant bindings.
+          </p>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Registered MCP Servers ({mcpServers.length})</div>
+            <div className="space-y-3">
+              {mcpServers.map(srv => (
+                <div key={srv.serverId} className="rounded-lg p-4" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${T.border}` }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: srv.healthStatus === 'healthy' ? '#7bc987' : srv.healthStatus === 'degraded' ? '#c9a067' : '#c96767' }} />
+                    <span className="text-xs font-medium font-mono" style={{ color: T.text }}>{srv.serverId}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: srv.healthStatus === 'healthy' ? 'rgba(123,201,135,0.08)' : 'rgba(201,160,103,0.08)', color: srv.healthStatus === 'healthy' ? '#7bc987' : '#c9a067' }}>{srv.healthStatus}</span>
+                  </div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1" style={{ color: T.muted }}>Capabilities</div>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {srv.capabilities.map((c: string) => (
+                      <span key={c} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent, border: '1px solid rgba(201,183,135,0.1)' }}>{c}</span>
+                    ))}
+                  </div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1" style={{ color: T.muted }}>Tools Exposed</div>
+                  <div className="flex flex-wrap gap-1">
+                    {srv.tools.map((t: string) => (
+                      <span key={t} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', color: T.dim, border: `1px solid ${T.border}` }}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Agent ↔ MCP Server Mapping</div>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Agent', 'Template', 'MCP Servers', 'Allowed Tools', 'Trust Tier'].map(h => (
+                      <th key={h} className="text-left px-3 py-2 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {agents.map(ag => (
+                    <tr key={ag.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td className="px-3 py-2.5 font-medium" style={{ color: T.text }}>{ag.name}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.template}</td>
+                      <td className="px-3 py-2.5">
+                        <div className="flex flex-wrap gap-1">
+                          {ag.config.mcpServers.map(s => (
+                            <span key={s} className="text-[9px] font-mono px-1 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent }}>{s}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-[10px]" style={{ color: T.dim }}>{ag.config.allowedTools.length} tools</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: tierColor(ag.trustScore.tier), background: tierColor(ag.trustScore.tier) + '12' }}>{ag.trustScore.tier}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>tiny-agents Integration</div>
+            <pre className="font-mono text-[11px] leading-relaxed overflow-x-auto" style={{ color: T.dim }}>
+{`GovernedAgentWrapper (@huggingface/tiny-agents)
+├─ agent.json spec: model, MCP servers, covenant bindings
+├─ trust-tier gated tool access (validates before every call)
+├─ proof packet generation (sha256 hash chain per action)
+├─ cost tracking + budget enforcement per run
+└─ MCP Discovery Registry
+   ├─ register/unregister MCP servers dynamically
+   ├─ heartbeat monitoring (healthy/degraded/unreachable)
+   ├─ capability-based agent↔server matching
+   └─ Workcell Bridge
+      ├─ assign agents to workcells (primary/support/observer)
+      ├─ execute governed steps with MCP tool resolution
+      └─ proof packets enriched with workcell context`}
             </pre>
           </Card>
         </div>

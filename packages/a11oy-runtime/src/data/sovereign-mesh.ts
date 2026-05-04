@@ -7,8 +7,6 @@ import type {
   MeshSummary,
   TrustScore,
   TrustTier,
-  TRUST_TIER_THRESHOLDS,
-  TEMPLATE_DEFINITIONS,
 } from '../types/sovereign-mesh.js';
 
 function trustScore(
