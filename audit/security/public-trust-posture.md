@@ -87,7 +87,7 @@ The following is the honest, accurate version of the platform's public trust pos
 
 ### SZL Holdings Platform — Security Posture Summary (April 2026)
 
-**Stage:** Pre-commercial, Series A. Security is treated as a structural concern.
+**Stage:** Pre-commercial, growth capital. Security is treated as a structural concern.
 
 **Authentication:** OIDC/PKCE via a trusted identity provider. No passwords stored in our systems. Session tokens have a bounded lifetime with server-side invalidation on role change.
 

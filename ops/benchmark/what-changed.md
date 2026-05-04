@@ -1,4 +1,4 @@
-# What Changed — Series A Frontier Pass
+# What Changed — growth capital Frontier Pass
 
 **Date:** April 16, 2026
 **Purpose:** Document the concrete before/after state across every platform surface as a result of the Frontier Pass
@@ -22,7 +22,7 @@ The platform had:
 The platform lacked:
 - Competitive intelligence against specific market peers
 - Researched patterns for trust-as-GTM, API design, and operator UX
-- Series A diligence preparation with current investor benchmarks
+- growth capital diligence preparation with current investor benchmarks
 - A structured launch readiness scorecard
 - Clear separation of archived vs. canonical artifacts
 - Store submission path for CORTEX mobile
@@ -74,7 +74,7 @@ The platform lacked:
 | Gap documentation | Implicit awareness | Explicit known-gaps.md + readiness-gaps.md with severity, risk level, and remediation path for every gap |
 | Route security | Unenumerated | 155/170 routes quantified; deny-by-default guard specified |
 | SOC 2 path | Unspecified | Timeline documented: $15–30K, 6–9 months post-funding |
-| Compliance roadmap | Not documented | Timeline and budget estimates for SOC 2 Type I, FedRAMP track (Aegis-specific) |
+| Compliance roadmap | Not documented | Timeline and budget estimates for SOC 2 Type I, StateRAMP track (Aegis-specific) |
 | Open-source trust signal | Not planned | Governance primitive open-source roadmap: proof-chain, covenant-policy, monte-carlo, prism-bus, outcome-graph |
 | Threat model | Exists | Confirmed as part of operational documentation; linked from data room index |
 

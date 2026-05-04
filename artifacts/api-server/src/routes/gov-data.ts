@@ -417,7 +417,7 @@ router.get(
             signal: AbortSignal.timeout(12000),
           },
         );
-        if (!res2.ok) throw new Error(`FedRAMP CSV ${res2.status}`);
+        if (!res2.ok) throw new Error(`StateRAMP CSV ${res2.status}`);
         const csv = await res2.text();
         const rows = csv.trim().split('\n');
         if (rows.length < 2) throw new Error('Empty CSV');
@@ -466,7 +466,7 @@ router.get(
         );
       if (status) filtered = filtered.filter((p) => p.packageStatus === status);
       sendSuccess(res, {
-        source: 'FedRAMP Marketplace',
+        source: 'StateRAMP Marketplace',
         url: 'https://marketplace.fedramp.gov/',
         count: filtered.length,
         products: filtered,
@@ -481,7 +481,7 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, 'Failed to fetch FedRAMP data');
+      handleRouteError(res, err, 'Failed to fetch StateRAMP data');
     }
   },
 );
@@ -928,7 +928,7 @@ router.get('/gov/summary', govRateLimit, authMiddleware(), async (_req, res) => 
           category: 'security',
         },
         {
-          name: 'FedRAMP',
+          name: 'StateRAMP',
           description: 'Federal Risk and Authorization Management Program',
           endpoint: '/api/gov/fedramp',
           status: 'live',
@@ -1002,7 +1002,7 @@ router.get('/gov/summary', govRateLimit, authMiddleware(), async (_req, res) => 
       ],
       categories: {
         security: ['CISA KEV', 'NIST NVD', 'MITRE ATT&CK'],
-        compliance: ['FedRAMP'],
+        compliance: ['StateRAMP'],
         economic: ['Census Bureau', 'BLS Employment'],
         risk: ['FEMA Risk Index'],
         contracts: ['USASpending.gov'],

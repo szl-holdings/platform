@@ -135,7 +135,7 @@ The following canonical audit documents are maintained in `docs/audit/`:
 | `ENV_AND_SECRETS_REGISTER.md` | 156 env vars with tier, current state, and silent-fallback analysis |
 | `DB_SCHEMA_AND_MIGRATION_AUDIT.md` | 569-table schema review, seed scripts, data integrity |
 | `TEST_MATRIX.md` | Test pyramid, CI gates, coverage by layer |
-| `RELEASE_READINESS.md` | 5-gate release checklist (demo/Series A/pilot/revenue/GCA) |
+| `RELEASE_READINESS.md` | 5-gate release checklist (demo/growth capital/pilot/revenue/GCA) |
 | `DEMO_SCRIPT.md` | Investor demo click-path with pre-demo checklist and avoidance guide |
 | `KNOWN_LIMITATIONS.md` | 19 documented limitations with remediation paths |
 | `EXECUTIVE_SUMMARY.md` | Top-level audit summary and recommended next actions |

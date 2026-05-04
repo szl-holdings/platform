@@ -140,7 +140,7 @@ Previously excluded specs that have since been promoted to the CI matrix:
 |---------|-------------|---------|
 | `pnpm smoke:product-mode` | `scripts/qa/smoke-product-mode.js` | Product-mode boot + env validation |
 | `pnpm readiness:gate` | typecheck → test → qa:routes → audit:mocks → audit:deps → audit:copy → smoke:product-mode → build | CI-free release gate (blocks on Sev 0/1) |
-| `pnpm audit:series-a` | typecheck → test → audit:mocks → audit:routes → audit:deps → audit:copy → security:audit → smoke:product-mode → build | Series A investor readiness (includes all dependency and placeholder audits) |
+| `pnpm audit:series-a` | typecheck → test → audit:mocks → audit:routes → audit:deps → audit:copy → security:audit → smoke:product-mode → build | growth capital investor readiness (includes all dependency and placeholder audits) |
 
 ---
 

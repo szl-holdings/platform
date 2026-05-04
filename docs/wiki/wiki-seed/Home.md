@@ -55,7 +55,7 @@ Signal normalization, workflow orchestration, approval controls, human-in-the-lo
 ### Aegis — Security & Defense Intelligence
 Unified defense platform consolidating SOC, managed operations, and intelligence engine. SOAR playbook engine, STIX/TAXII protocol support, MITRE ATT&CK v14 mapping.
 
-**Status:** Functional alpha. FedRAMP readiness track in Phase 2 roadmap.
+**Status:** Functional alpha. StateRAMP readiness track in Phase 2 roadmap.
 
 ### Vessels — Maritime Intelligence
 Fleet command, AIS tracking, route anomaly detection, sanctions screening, voyage economics, and dark activity monitoring.

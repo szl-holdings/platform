@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-25 (rev 10 — Operationalization Sweep Task #3489)  
 **Owner:** Engineering / DevOps  
-**Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
+**Audience:** Enterprise architects, growth capital technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
 
@@ -28,7 +28,7 @@ Architecture concerns — tenant isolation, auth hardening, encryption, network 
 
 ---
 
-### For Series A Technical Advisors / Investor Diligence
+### For growth capital Technical Advisors / Investor Diligence
 Risk exposure, compliance posture, diligence readiness.
 
 | Gap ID | Description | Severity | Status |
@@ -45,7 +45,7 @@ Risk exposure, compliance posture, diligence readiness.
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ✅ Resolved Apr-2026 (`/.well-known/security.txt` published, RFC 9116 compliant) |
 | KG025 | WCAG accessibility not systematically audited | P2 | ✅ Resolved Apr-2026 (`audit/A11OY_ACCESSIBILITY_AUDIT.md` — all 11 surfaces, F001–F007 findings). F007 skip nav implemented in `artifacts/szl-holdings/src/App.tsx` (WCAG 2.4.1 Level A). Lighthouse a11y gate enforced as CI hard-fail. Remaining F001–F006 remediations are sprint backlog items. |
 
-**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), GAP-002 (secret scanning), and KG010 (E2E regression suite) are now resolved — CI security and quality gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for Series A close.
+**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), GAP-002 (secret scanning), and KG010 (E2E regression suite) are now resolved — CI security and quality gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for growth capital close.
 
 ---
 
@@ -140,7 +140,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG035 | `package.json` uses semver ranges (`^`) while `pnpm-lock.yaml` pins exact versions | Supply Chain | **Formally Accepted — Apr-2026.** `pnpm-lock.yaml` ensures all installs (CI, production) use exact pinned versions. The `^` ranges in `package.json` only affect fresh installs executed without the lockfile, which do not occur in CI or deployment (`pnpm install --frozen-lockfile` is enforced in all pipelines). Dependency vulnerability scanning is provided by the `dependency-review.yml` CI workflow (KG012, resolved). Risk accepted: no action required on `package.json` ranges. |
 | KG032 | `lib/observability/src/collector.ts` seeds simulated data in constructor | Observability / Analytics | Domain app dashboards display synthetic data | Wire live API signals to replace `seedSimulatedData()` call (OBS-008) |
 | KG033 | `OBSERVABILITY_ARCHITECTURE.md` covers decision-fabric surfaces only; no single doc covers production infra observability (OTEL config, logging pipeline, metrics, alerting) | Docs / Observability | Onboarding friction for new VP/Platform lead | Add §Production Infrastructure Observability section to OBSERVABILITY_ARCHITECTURE.md (OBS-006) |
-| RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | **SOC 2 Type II — In Progress (Apr-2026).** Engagement letter signed with A-LIGN Compliance and Security on 2026-04-19. Observation period runs 2026-05-01 → 2026-10-31. Type I bridge report targeted 2026-07-31; Type II report targeted 2027-01-31. Internal readiness assessment completed against `infra/docs/SOC2_CHECKLIST.md`. See `SOC2_AUDIT_ENGAGEMENT.md` for engagement scope, evidence sources, and remediation backlog. FedRAMP remains a post-revenue roadmap item. |
+| RD-001 | SOC 2 Type II / StateRAMP readiness | Compliance | Sales blocker | **SOC 2 Type II — In Progress (Apr-2026).** Engagement letter signed with A-LIGN Compliance and Security on 2026-04-19. Observation period runs 2026-05-01 → 2026-10-31. Type I bridge report targeted 2026-07-31; Type II report targeted 2027-01-31. Internal readiness assessment completed against `infra/docs/SOC2_CHECKLIST.md`. See `SOC2_AUDIT_ENGAGEMENT.md` for engagement scope, evidence sources, and remediation backlog. StateRAMP remains a post-revenue roadmap item. |
 | RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
 ---
@@ -201,7 +201,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 >
 > **April 2026 Production Observability Sprint note:** Three P1 pre-deploy blockers resolved: KG009 (OTEL exporter), KG027 (external uptime monitoring), KG028 (Sentry error tracking). Deliverables: `artifacts/api-server/src/lib/observability.ts` (canonical OTEL configuration module with startup validation and status reporting), `OPERATIONS-RUNBOOK.md` § 5.3 Production Observability Runbook (Sentry, OTEL, and uptime monitor setup + verification steps), `DEPLOYMENT-GUIDE.md` observability environment variables. P1 open count reduced from 11 → 8. Net change: +3 P1 resolved.
 >
-> **April 2026 Phase 10–11 Category Leadership & Final Diligence audit note:** Seven stakeholder lens diligence review conducted (enterprise security architect, platform buyer, AI governance stakeholder, operator lead, Series A technical advisor, VP Engineering, category-savvy product strategist). Key findings and resolutions: (1) TD-007: "Five primitives" inconsistency in 6 investor docs — resolved, all updated to "six primitives" with Event Fabric listed. (2) TD-008: Category naming inconsistency — canonical name established as "Governed Decision Infrastructure" across CATEGORY_POSITIONING.md v2.1, INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, and investor-overview.md. Historical references to "Infrastructure" and "Intelligence" remain in some docs as variant terminology. (3) TD-009, TD-010: Residual primitive count errors in platform-thesis.md and investor-overview.md evaluation path — resolved. (4) MOAT_MAP.md updated to v2.0. (5) INVESTOR_NARRATIVE.md updated to v3.0 with Forge, Decision Fabric, and OS category framing. (6) TECHNICAL_DILIGENCE_PACKET.md footer updated to reflect complete 13-phase audit. Net P2 change: +4 gaps added, all 4 resolved. No new P0/P1 findings.
+> **April 2026 Phase 10–11 Category Leadership & Final Diligence audit note:** Seven stakeholder lens diligence review conducted (enterprise security architect, platform buyer, AI governance stakeholder, operator lead, growth capital technical advisor, VP Engineering, category-savvy product strategist). Key findings and resolutions: (1) TD-007: "Five primitives" inconsistency in 6 investor docs — resolved, all updated to "six primitives" with Event Fabric listed. (2) TD-008: Category naming inconsistency — canonical name established as "Governed Decision Infrastructure" across CATEGORY_POSITIONING.md v2.1, INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, and investor-overview.md. Historical references to "Infrastructure" and "Intelligence" remain in some docs as variant terminology. (3) TD-009, TD-010: Residual primitive count errors in platform-thesis.md and investor-overview.md evaluation path — resolved. (4) MOAT_MAP.md updated to v2.0. (5) INVESTOR_NARRATIVE.md updated to v3.0 with Forge, Decision Fabric, and OS category framing. (6) TECHNICAL_DILIGENCE_PACKET.md footer updated to reflect complete 13-phase audit. Net P2 change: +4 gaps added, all 4 resolved. No new P0/P1 findings.
 
 ---
 
@@ -275,7 +275,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - `PRIVACY_OVERVIEW.md` — GDPR/CCPA privacy framework overview
 - `AI_GOVERNANCE.md` — buyer-facing AI governance posture
 - `COMPANY_FACT_SHEET.md` — concise company overview for press/investors
-- `SERIES_A_READINESS.md` — honest Series A readiness assessment
+- `SERIES_A_READINESS.md` — honest growth capital readiness assessment
 - `DOCS_HOME.md` — documentation home page
 - `GETTING_STARTED.md` — developer and operator quick start
 - `END_USER_GUIDE.md` — end-user operational guide

@@ -113,7 +113,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](../a
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
 | **DB Tables** | 22 tables covering the full security lifecycle |
 | **Primitives used** | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
-| **Strategic role** | Security & defense domain pack. MSP Command module creates managed services revenue path. FedRAMP readiness track |
+| **Strategic role** | Security & defense domain pack. MSP Command module creates managed services revenue path. StateRAMP readiness track |
 
 ---
 

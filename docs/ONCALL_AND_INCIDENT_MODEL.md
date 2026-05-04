@@ -10,13 +10,13 @@
 
 ### Rotation Structure
 
-During pre-revenue / Series A phase, on-call is a single-engineer primary rotation. As headcount grows, the model evolves to a tiered structure.
+During pre-revenue / growth capital phase, on-call is a single-engineer primary rotation. As headcount grows, the model evolves to a tiered structure.
 
-**Current (Series A phase):**
+**Current (growth capital phase):**
 - Primary on-call: Founder / Engineering lead (24/7 for P0; business hours for P1–P2)
 - Escalation: External advisor or contractor for domain expertise as needed
 
-**Target (Post Series A / First Customers):**
+**Target (Post growth capital / First Customers):**
 
 | Tier | Responsibility | Rotation Cadence |
 |---|---|---|

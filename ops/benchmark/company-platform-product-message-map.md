@@ -66,7 +66,7 @@ SZL Holdings (Company)
 
 ---
 
-## Series A Pitch Sequence
+## growth capital Pitch Sequence
 
 1. **Problem:** As AI adoption accelerates, the accountability gap widens. Organizations make more decisions faster with less governance.
 2. **Category:** Governed Decision Infrastructure — a new layer between signal detection and action execution.
@@ -74,4 +74,4 @@ SZL Holdings (Company)
 4. **Proof:** Live Decision Theater demonstrating signal-to-outcome governance in real time.
 5. **Market:** $16.3B decision intelligence market growing 24.7% CAGR. SZL's governed wedge has no direct competition.
 6. **Team:** Founder with domain expertise across defense, maritime, real estate, and technology.
-7. **Ask:** Series A to scale platform infrastructure, expand domain packs, and land enterprise pilots.
+7. **Ask:** growth capital to scale platform infrastructure, expand domain packs, and land enterprise pilots.

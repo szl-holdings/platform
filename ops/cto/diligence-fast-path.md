@@ -118,7 +118,7 @@ Each fast-path destination must remain accurate:
 
 ## What Must Not Be on These Pages
 
-- Certifications not yet achieved (SOC 2, ISO 27001, FedRAMP, etc.)
+- Certifications not yet achieved (SOC 2, ISO 27001, StateRAMP, etc.)
 - Pen test results that do not exist
 - "Enterprise-grade" security claims without grounding
 - SLA commitments not backed by contractual terms

@@ -1,8 +1,8 @@
 # SZL Holdings — Launch Readiness Scorecard
 
-**Purpose:** Scored assessment across 8 dimensions with before/after ratings, reflecting the platform's current state and what has been accomplished in the Series A cleanup phases.
+**Purpose:** Scored assessment across 8 dimensions with before/after ratings, reflecting the platform's current state and what has been accomplished in the growth capital cleanup phases.
 
-**As of:** April 2026 (Series A Cleanup — Phases 1–4)
+**As of:** April 2026 (growth capital Cleanup — Phases 1–4)
 **Scoring:** 1–5 scale. 1 = not started, 3 = functional/credible, 5 = production-ready/investor-grade
 
 ---

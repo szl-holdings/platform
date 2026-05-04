@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-16 · **Audit scope:** Phases 0–13 (complete)
 **Prepared by:** Engineering team — full operational audit  
-**Audience:** Stephen Lutar (Founder), board advisors, Series A technical reviewers  
+**Audience:** Stephen Lutar (Founder), board advisors, growth capital technical reviewers  
 **Purpose:** Definitive go/no-go decision package — all 13 required executive outputs
 
 ---
@@ -40,13 +40,13 @@ The SZL Holdings platform is architecturally production-grade and commercially c
 | Category | Count | Disposition |
 |----------|-------|-------------|
 | Infrastructure provisioning (Azure/prod setup) | 4 | Post-funding |
-| Third-party compliance (SOC 2, ISO 27001, FedRAMP) | 3 | Post-revenue roadmap |
+| Third-party compliance (SOC 2, ISO 27001, StateRAMP) | 3 | Post-revenue roadmap |
 | Customer-facing legal contracts | 2 | Legal counsel required |
 | Financial modeling | 2 | Out of engineering scope |
 | Horizontal scaling and load testing | 2 | Pre-scale milestone |
 | External threat intel feed integration (live AIS, TAXII) | 3 | Sprint 4 / commercial activation |
 | Hiring and team formation | 2 | Founder action |
-| Marketplace certification (AppExchange, Atlassian) | 2 | Post-Series A |
+| Marketplace certification (AppExchange, Atlassian) | 2 | Post-growth capital |
 
 ---
 
@@ -319,13 +319,13 @@ For any investor, technical advisor, or new executive joining the team, review d
 | Security Reviewer (Pen Tester) | AF-001 ✅ resolved (Task #2693), AF-003/007 ✅ resolved (Task #1048); SEC-007 (webhook SSRF) still open | Conditional pass — only SEC-007 remains for first enterprise prod deployment |
 | Operator (Day-to-day user, 6 months in) | No onboarding wizard — sparse empty states | CONDITIONAL PASS — must fix before broad rollout |
 | Diligence Reviewer (VC technical partner) | TECHNICAL_DILIGENCE_PACKET.md is complete and honest | PASS — self-disclosure of gaps is a trust-builder |
-| Series A Investor | No signed design partners — biggest pre-Series A risk | NOT PASS for Series A — commercial proof required |
+| growth capital Investor | No signed design partners — biggest pre-growth capital risk | NOT PASS for growth capital — commercial proof required |
 | Future VP Engineering | Zero production observability instrumentation | CONDITIONAL PASS — Day-0 plan resolves blockers |
 | Future VP Product | Domain-specific mobile apps listed as live but do not exist (TD-006) | CONDITIONAL PASS — fix PRODUCT-SURFACES.md immediately |
 | Future VP Sales | Counsel status inconsistency across docs | CONDITIONAL PASS — resolve before legal-buyer sales cycle |
 | Skeptical SRE (Day-0 production incident) | No OTEL, Sentry, or uptime monitoring | NOT PASS for production — Day-0 plan resolves all three |
 
-**Red-team overall verdict:** Three perspectives are NOT PASS for their specific scenario (security pen test, Series A, SRE production incident). All three are known, scoped, and have active remediation plans. No surprises or previously unknown structural risks were found.
+**Red-team overall verdict:** Three perspectives are NOT PASS for their specific scenario (security pen test, growth capital, SRE production incident). All three are known, scoped, and have active remediation plans. No surprises or previously unknown structural risks were found.
 
 ---
 
@@ -350,14 +350,14 @@ For any investor, technical advisor, or new executive joining the team, review d
 ## Disposition of Out-of-Scope Items
 
 20 items were formally scoped out of this audit (full list in `OUT_OF_SCOPE_REGISTER.md`):
-- 3 items: Third-party compliance certifications (SOC 2, ISO 27001, FedRAMP) — post-revenue
+- 3 items: Third-party compliance certifications (SOC 2, ISO 27001, StateRAMP) — post-revenue
 - 4 items: Azure production infrastructure provisioning — post-funding
 - 2 items: Legal contract review — legal counsel required
 - 2 items: Financial modeling — finance/founder scope
 - 2 items: Horizontal scaling / load testing — pre-scale milestone
 - 3 items: Live external feed integration (AIS, TAXII, court feeds) — Sprint 4 / commercial activation
 - 2 items: VP-level hires — founder action
-- 2 items: Marketplace certification — post-Series A
+- 2 items: Marketplace certification — post-growth capital
 
 None of these represent launch blockers for the design-partner phase.
 
@@ -371,7 +371,7 @@ None of these represent launch blockers for the design-partner phase.
 - [OUT_OF_SCOPE_REGISTER.md](../operations/out-of-scope-register.md) — 20 deferred/out-of-scope items
 - [TRUST_CENTER_INDEX.md](../security/trust-center-index.md) — buyer-facing trust and security hub
 - [TECHNICAL_DILIGENCE_PACKET.md](../investor/technical-diligence-packet.md) — investor/advisor diligence
-- [SERIES_A_READINESS.md](../investor/series-a-readiness.md) — Series A readiness assessment
+- [SERIES_A_READINESS.md](../investor/series-a-readiness.md) — growth capital readiness assessment
 - [PUBLIC_LAUNCH_READINESS.md](public-launch-readiness.md) — launch bar definitions
 - [OPERATIONAL_READINESS_SCORECARD.md](operational-readiness-scorecard.md) — red/yellow/green scorecard
 

@@ -1,14 +1,14 @@
-# Series A Remediation Summary
+# growth capital Remediation Summary
 
 **Date:** April 16, 2026
-**Scope:** All remediation work completed across Waves 1–10 of the Series A audit
+**Scope:** All remediation work completed across Waves 1–10 of the growth capital audit
 **Status:** Final — capstone document
 
 ---
 
 ## Remediation Scope
 
-This document summarizes every category of work completed during the Series A audit cycle. It is the authoritative record of what was cleaned, what was hardened, what remains open, and the rationale for anything left unresolved.
+This document summarizes every category of work completed during the growth capital audit cycle. It is the authoritative record of what was cleaned, what was hardened, what remains open, and the rationale for anything left unresolved.
 
 ---
 
@@ -90,8 +90,8 @@ This document summarizes every category of work completed during the Series A au
 | Current Rollback Doctrine | `docs/releases/current-rollback-doctrine.md` | Authoritative: rollback decision criteria, procedures, and post-rollback process |
 | Current Environment Promotion Model | `docs/releases/current-environment-promotion-model.md` | Authoritative: development → staging → production promotion gates and rules |
 | App Maturity Scorecard | `docs/audit/app-maturity-matrix.md` | All artifacts scored: GA / Beta / Partial / Internal / Deprecated / Skeleton |
-| Series A Executive Closeout | `docs/audit/series-a-executive-closeout.md` | Final go/no-go assessment |
-| Series A Remediation Summary (this doc) | `docs/audit/series-a-remediation-summary.md` | Complete remediation record |
+| growth capital Executive Closeout | `docs/audit/series-a-executive-closeout.md` | Final go/no-go assessment |
+| growth capital Remediation Summary (this doc) | `docs/audit/series-a-remediation-summary.md` | Complete remediation record |
 
 ---
 
@@ -110,7 +110,7 @@ This document summarizes every category of work completed during the Series A au
 
 ## Open Gaps at Closeout
 
-The following gaps remain open at the time of this closeout. None block Series A investor review. Gaps marked as blocking paid tenant onboarding must be resolved before the first paying customer.
+The following gaps remain open at the time of this closeout. None block growth capital investor review. Gaps marked as blocking paid tenant onboarding must be resolved before the first paying customer.
 
 | Gap ID | Severity | Blocker For | Description | Target |
 |--------|----------|-------------|-------------|--------|
@@ -155,4 +155,4 @@ Per the audit mandate, the following were explicitly out of scope:
 | Documents produced | 8 |
 | Routes classified | ~170 |
 | Integrations classified | ~53 |
-| Open gaps remaining | 14 (none blocking Series A investor review) |
+| Open gaps remaining | 14 (none blocking growth capital investor review) |

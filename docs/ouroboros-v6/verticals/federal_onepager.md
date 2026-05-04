@@ -13,8 +13,8 @@ The [DoD Responsible AI Strategy's](https://media.defense.gov/2024/Oct/26/200357
 ### Why we win
 
 - NVIDIA NIM carries a "Government Ready" designation, but [NeMo Guardrails](https://docs.nvidia.com/nemo/guardrails/) fires Colang DSL rules that produce binary pass/fail outputs from a learned classifier — non-deterministic, non-auditable, with no per-decision cryptographic receipt. Ouroboros is closed-form and deterministic: the same input always produces the same Λ scalar, and the receipt is verifiable without calling back to any NVIDIA service.
-- IBM watsonx.governance achieved [FedRAMP Moderate](https://newsroom.ibm.com/2026-04-01-IBM-Expands-FedRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx) in April 2026 and writes AI Factsheets that record lifecycle events. Factsheets are mutable platform database records — administrators can alter them, and they contain no per-inference trust signal. Ouroboros Λ receipts are Merkle-chained: post-hoc alteration is cryptographically detectable by any auditor.
-- Google Vertex AI holds [FedRAMP High and DoD IL5](https://cloud.google.com/blog/topics/public-sector/reflecting-on-a-year-of-transformation-and-mission-impact-together) for infrastructure, but the ATO covers the platform — it says nothing about model honesty, calibration, or the Traceable tenet. Ouroboros operates at the inference layer, not the infrastructure layer, producing per-decision attestation that platform ATOs cannot provide.
+- IBM watsonx.governance achieved [StateRAMP Moderate](https://newsroom.ibm.com/2026-04-01-IBM-Expands-StateRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx) in April 2026 and writes AI Factsheets that record lifecycle events. Factsheets are mutable platform database records — administrators can alter them, and they contain no per-inference trust signal. Ouroboros Λ receipts are Merkle-chained: post-hoc alteration is cryptographically detectable by any auditor.
+- Google Vertex AI holds [StateRAMP High and DoD IL5](https://cloud.google.com/blog/topics/public-sector/reflecting-on-a-year-of-transformation-and-mission-impact-together) for infrastructure, but the ATO covers the platform — it says nothing about model honesty, calibration, or the Traceable tenet. Ouroboros operates at the inference layer, not the infrastructure layer, producing per-decision attestation that platform ATOs cannot provide.
 
 ### Compliance map
 
@@ -30,7 +30,7 @@ The [DoD Responsible AI Strategy's](https://media.defense.gov/2024/Oct/26/200357
 
 1. 90-day no-cost lighthouse deployment — one mission AI workflow (logistics optimization, ISR tasking, or adjudication queue) instrumented with the Ouroboros runtime and @szl-holdings/guardrails SKU. Zero production data required; pilot runs against a designated staging environment.
 2. Full CDAO RAI Tenet mapping delivered at Day 30 — a structured crosswalk document showing which Λ receipt field satisfies each of the five RAI tenets (Responsible, Equitable, Traceable, Reliable, Governable) for the pilot workflow, formatted for your agency's RAI governance board.
-3. Go/no-go at Day 90 with a before/after Λ trace report: baseline decision audit coverage pre-Ouroboros vs. per-inference receipt coverage post-Ouroboros, suitable for submission to your Authorizing Official as evidence of continuous monitoring progress toward FedRAMP readiness.
+3. Go/no-go at Day 90 with a before/after Λ trace report: baseline decision audit coverage pre-Ouroboros vs. per-inference receipt coverage post-Ouroboros, suitable for submission to your Authorizing Official as evidence of continuous monitoring progress toward StateRAMP readiness.
 
 ### Contact
 

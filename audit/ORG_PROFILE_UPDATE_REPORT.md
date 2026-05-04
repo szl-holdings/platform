@@ -41,7 +41,7 @@ See `audit/ORG_PROFILE_MANUAL_STEPS.md` for exact git commands.
 
 ## Constraints Applied
 
-- No SOC 2, HIPAA, FedRAMP, or ISO claims added
+- No SOC 2, HIPAA, StateRAMP, or ISO claims added
 - No production customer or revenue figures referenced
 - No partner logos or "Official Technology Partners" claims
 - Status disclosure included: "active prototype / demo platform under development"

@@ -22,7 +22,7 @@ All major platform products are at functional alpha. Core architecture, authenti
 | Enterprise SSO / SCIM 2.0 provisioning | In progress |
 | OpenAPI developer portal | In progress |
 | Sentry error tracking | In progress |
-| Aegis — FedRAMP readiness track | Roadmap |
+| Aegis — StateRAMP readiness track | Roadmap |
 | SOC 2 Type II preparation | Roadmap |
 
 ---

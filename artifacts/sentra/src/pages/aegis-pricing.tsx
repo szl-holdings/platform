@@ -69,7 +69,7 @@ const tiers = [
       'AI Intelligence Labs access',
       'Custom AI security models',
       'Classified threat feed integration',
-      'FedRAMP / CMMC / IL-4 support',
+      'StateRAMP / CMMC / IL-4 support',
       'Dedicated security engineer',
       'Unlimited analyst seats',
       'Unlimited event history',
@@ -293,7 +293,7 @@ export default function AegisPricingPage() {
               label: 'Air-gap ready',
               desc: 'On-premises deployment available for classified environments.',
             },
-            { label: 'FedRAMP pathway', desc: 'Compliance-first architecture from the ground up.' },
+            { label: 'StateRAMP pathway', desc: 'Compliance-first architecture from the ground up.' },
           ].map((item) => (
             <div key={item.label}>
               <div className="text-[14px] font-semibold text-white mb-1">{item.label}</div>

@@ -1,5 +1,5 @@
 # Final Go-Live Recommendation
-**SZL Holdings — Series A Launch Readiness Program**  
+**SZL Holdings — growth capital Launch Readiness Program**  
 **Date:** April 19, 2026  
 **Program:** Task #2068 — Phase 12 Final Output  
 **Audience:** Stephen Lutar (Founder), board advisors, launch decision-makers
@@ -97,7 +97,7 @@ These are 0.5–1 day fixes; recommended before next investor demo.
 
 ---
 
-## Series A Fundraising Posture
+## growth capital Fundraising Posture
 
 Per `SERIES_A_READINESS.md`:
 
@@ -109,7 +109,7 @@ Per `SERIES_A_READINESS.md`:
 | Team | 🟡 Founder + early team; senior hires in flight |
 | Diligence readiness | ✅ Trust Center, diligence packet, and capability manifest complete |
 
-**Series A target:** Q4 2026 / Q1 2027 (per `SERIES_A_READINESS.md`)  
+**growth capital target:** Q4 2026 / Q1 2027 (per `SERIES_A_READINESS.md`)  
 **Fundraising posture:** Correct for the current stage. Enter the round when 6 of 7 milestones met (design partners, ARR, team).
 
 ---

@@ -294,4 +294,4 @@ All sources are public as of April 2026. No proprietary, paywalled, or unauthori
 
 ---
 
-*This brief is the strategy anchor for Lyte's Series A diligence narrative. Reviewed and updated on every Decision Center milestone.*
+*This brief is the strategy anchor for Lyte's growth capital diligence narrative. Reviewed and updated on every Decision Center milestone.*

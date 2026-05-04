@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-20
 **Scope:** All GitHub Actions workflows in `.github/workflows/`
-**Reviewer:** Series A Hardening — Phase 9 Security Hardening & Sign-On Consolidation
+**Reviewer:** growth capital Hardening — Phase 9 Security Hardening & Sign-On Consolidation
 **Methodology:** Static review of workflow YAML files, job configurations, permission grants, secret handling, and action pinning.
 
 ---

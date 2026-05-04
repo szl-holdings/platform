@@ -50,7 +50,7 @@ land in this directory, splice them in between slides 5 and 6 — do not add the
 to this list until the files actually exist.
 
 1. `assets/screenshots/aegis-overview-desktop.jpg` — **lead image.** Aegis "Four workspaces. One shared intelligence layer." marketing surface. Sets the unified-platform thesis up front.
-2. `assets/screenshots/aegis-executive-board-view-desktop.jpg` — CISO Executive Board view (SLA compliance, MTTD/MTTR, control coverage across NIST CSF / CIS / FedRAMP).
+2. `assets/screenshots/aegis-executive-board-view-desktop.jpg` — CISO Executive Board view (SLA compliance, MTTD/MTTR, control coverage across NIST CSF / CIS / StateRAMP).
 3. `assets/screenshots/aegis-xdr-incident-workbench-desktop.jpg` — XDR Incident Workbench, cross-domain entity graph for an APT41 lateral-movement incident.
 4. `assets/screenshots/aegis-ot-ics-atlas-runtime-desktop.jpg` — Atlas Spatial Runtime showing the OT/ICS posture twin and the unauthorized PLC ladder-logic modification in the live incident theater.
 5. `assets/screenshots/aegis-legal-workspace-desktop.jpg` — merged Legal Workspace inside Aegis (matter overview, deadline risk queue, settlement forecast).

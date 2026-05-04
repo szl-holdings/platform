@@ -1,6 +1,6 @@
 # GitHub Rehaul — Delete/Remove Candidates
 
-> Series A readiness audit · April 2026 · Phase 1 output
+> growth capital readiness audit · April 2026 · Phase 1 output
 
 These are files and directories evaluated for removal, archival, or gitignore enforcement. No core product code is touched. Owner approval is flagged where destructive action is uncertain.
 
@@ -63,4 +63,4 @@ These are files and directories evaluated for removal, archival, or gitignore en
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

@@ -74,7 +74,7 @@ These capabilities are fully functional and investor-presentable but run on seed
 | SOC dashboard + incident lifecycle | Aegis | Seeded events | Yes |
 | ATLAS Spatial Runtime replay | Aegis | Seed-data.ts replay engine | Yes |
 | MSP Command workspace | Aegis | Seeded MSP clients/tickets | Yes |
-| Series A investor pitch deck | Aegis | Static slides | Yes |
+| growth capital investor pitch deck | Aegis | Static slides | Yes |
 | Sentra Decision Center + Incident Commander | Sentra | Demo narrative seeds | Yes |
 | Alloy factory floor | SZL Holdings | Seeded workflow data | Yes — E2E tested |
 | CORTEX Command portal | Command | Seeded data | Yes |

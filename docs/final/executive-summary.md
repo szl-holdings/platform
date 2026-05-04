@@ -3,8 +3,8 @@
 
 **Date:** April 16, 2026  
 **Author:** Engineering / Platform  
-**Audience:** Stephen Lutar (Founder/CEO), Series A technical advisors, incoming VP Engineering  
-**Status:** Capstone quality pass complete. Platform is Series A-credible and enterprise-demo ready.
+**Audience:** Stephen Lutar (Founder/CEO), growth capital technical advisors, incoming VP Engineering  
+**Status:** Capstone quality pass complete. Platform is growth capital-credible and enterprise-demo ready.
 
 ---
 
@@ -169,7 +169,7 @@ Three vessels (M/V Meridian, M/V Catalyst, M/V Horizon) are outside SLA threshol
 - KG020d — No field-level PII encryption
 - KG023 — No SLI/SLO definitions
 - KG024 — Large vendor bundle sizes (1–1.7 MB)
-- RD-001 — SOC 2 Type II / FedRAMP (post-revenue)
+- RD-001 — SOC 2 Type II / StateRAMP (post-revenue)
 - RD-002 — Horizontal scaling / load testing
 
 ---
@@ -211,7 +211,7 @@ These require human execution — no further code changes needed.
 
 ## 8. Recommended Order for Human Review
 
-For an enterprise technical advisor or Series A diligence reviewer:
+For an enterprise technical advisor or growth capital diligence reviewer:
 
 | Step | Document | Purpose | Time |
 |------|----------|---------|------|
@@ -253,7 +253,7 @@ Highest-ROI work for the next 30 days, in priority order:
 
 ## 10. Top 5 Platform Differentiators
 
-These are the five structural advantages that enterprise buyers and Series A investors cannot replicate from competing products:
+These are the five structural advantages that enterprise buyers and growth capital investors cannot replicate from competing products:
 
 ### 1. The Governed Decision Loop — Complete and Instrumented
 Every consequential decision follows a nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. No competitor closes this loop end-to-end. Dashboards stop at signal. Copilots stop at recommendation. Workflow tools stop at execution. SZL closes the loop with attribution at every step.
@@ -274,7 +274,7 @@ New operational domains (maritime, legal, real estate, security) can be added wi
 
 ## Summary Verdict
 
-The platform is **Series A-credible and enterprise-demo ready**. All P0 security gaps are closed. The category narrative is clean and consistent across all surfaces. The flagship demo loop is end-to-end coherent. The documentation suite is complete and diligence-grade.
+The platform is **growth capital-credible and enterprise-demo ready**. All P0 security gaps are closed. The category narrative is clean and consistent across all surfaces. The flagship demo loop is end-to-end coherent. The documentation suite is complete and diligence-grade.
 
 **Honest caveat:** Nine P1 gaps and eighteen P2 gaps remain open (tracked in KNOWN-GAPS.md). None are blockers for diligence or demo readiness. All are scoped with remediation plans. Any serious technical advisor will review KNOWN-GAPS.md — it should be shared proactively, not discovered.
 

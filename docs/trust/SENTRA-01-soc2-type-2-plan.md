@@ -96,7 +96,7 @@ A SOC 2 audit requires evidence at every observation. SZL is building evidence c
 - **Vulnerability cadence** — Dependabot + CodeQL findings reconciled monthly; remediation evidence anchored.
 - **Vendor reviews** — annual sub-processor review with risk score and evidence link.
 
-This pipeline will be presented to the auditor and is intended to also serve as the evidence platform for FedRAMP, ISO 27001, and HITRUST in future cycles.
+This pipeline will be presented to the auditor and is intended to also serve as the evidence platform for StateRAMP, ISO 27001, and HITRUST in future cycles.
 
 ## 8. Compensating evidence offered today
 
@@ -111,7 +111,7 @@ Until the SOC 2 Type II is issued, buyers may request:
 
 ## 9. Honest disclosures
 
-- A SOC 2 Type II report is **not** the same as a FedRAMP authorization. Buyers should not treat them as substitutes.
+- A SOC 2 Type II report is **not** the same as a StateRAMP authorization. Buyers should not treat them as substitutes.
 - The earliest defensible Type II coverage period ends mid-2027. Procurement officers planning earlier go-lives should rely on §8 in the meantime.
 - Any commitment to a sponsor or first reference customer that Sentra **must** be SOC 2 Type II at go-live shifts the timeline only via parallel investment in audit hours; SZL will quote that incremental cost on request.
 

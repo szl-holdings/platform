@@ -4,7 +4,7 @@
 
 ## Why three, why these verticals
 
-Three is enough to claim the runtime is "deployed in regulated production" without overcommitting. One per vertical is enough to triangulate that the runtime works across compliance regimes (GDPR, HIPAA, FedRAMP) without forcing the founder to learn three procurement processes simultaneously.
+Three is enough to claim the runtime is "deployed in regulated production" without overcommitting. One per vertical is enough to triangulate that the runtime works across compliance regimes (GDPR, HIPAA, StateRAMP) without forcing the founder to learn three procurement processes simultaneously.
 
 ## Vertical 1 — Finance
 
@@ -52,7 +52,7 @@ Three is enough to claim the runtime is "deployed in regulated production" witho
 
 **Procurement path:** technical evaluation → ATO discussion → SBIR or OTA contract vehicle → 6–12 month pilot.
 
-**Required artifacts:** FedRAMP gap analysis, threat model with full A1–A8 adversary classes (already shipped), supply-chain attestation (cosign-signed releases), air-gapped deployment runbook.
+**Required artifacts:** StateRAMP gap analysis, threat model with full A1–A8 adversary classes (already shipped), supply-chain attestation (cosign-signed releases), air-gapped deployment runbook.
 
 ## The 90-day playbook
 

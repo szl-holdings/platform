@@ -29,7 +29,7 @@
 | **Problem Solved** | Security and intelligence operations are fragmented across disconnected tools — threat detection, managed operations, and AI research each require separate systems with separate context |
 | **Category** | Cybersecurity & Defense Intelligence |
 | **Status** | Beta |
-| **Core Differentiators** | Three unified workspaces (Defense/Command/Intelligence) sharing one data context, MITRE ATT&CK v14 detection coverage, SOAR playbook engine, STIX/TAXII protocol layer, FedRAMP readiness track |
+| **Core Differentiators** | Three unified workspaces (Defense/Command/Intelligence) sharing one data context, MITRE ATT&CK v14 detection coverage, SOAR playbook engine, STIX/TAXII protocol layer, StateRAMP readiness track |
 | **Strategic Role** | Defense and intelligence vertical built on the same PRISM observability backbone as Lyte. MSP Command module creates a managed services revenue path |
 
 ---

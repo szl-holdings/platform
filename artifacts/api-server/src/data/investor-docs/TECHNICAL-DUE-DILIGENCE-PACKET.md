@@ -1,6 +1,6 @@
 # SZL Holdings — Technical Due Diligence Packet
 
-**Purpose:** Structured technical due diligence document for Series A investors and institutional evaluators.
+**Purpose:** Structured technical due diligence document for growth capital investors and institutional evaluators.
 
 **Prepared:** April 2026
 **Contact:** inquiries@szlholdings.com
@@ -11,7 +11,7 @@
 
 SZL Holdings is a technology holding company building a unified governed decision infrastructure platform. The technical architecture reflects a deliberate, compounding design: one execution fabric (Alloy), one design system, one authentication model, and one data layer — shared across five domain-specific platforms.
 
-The platform is production-grade in architecture. It is pre-revenue by choice (billing infrastructure is built; activation is awaiting commercial milestone). The Series A proceeds will fund: live data feed integration at enterprise tier, team growth (3–5 engineers), and the first revenue-generating customer deployments.
+The platform is production-grade in architecture. It is pre-revenue by choice (billing infrastructure is built; activation is awaiting commercial milestone). The growth capital proceeds will fund: live data feed integration at enterprise tier, team growth (3–5 engineers), and the first revenue-generating customer deployments.
 
 ---
 
@@ -110,7 +110,7 @@ SZL Holdings (corporate surface)
 | Limitation | Plan |
 |---|---|
 | CORS_ORIGINS not configured for production | Set before first enterprise deploy |
-| Penetration testing not completed | Scheduled post-Series A |
+| Penetration testing not completed | Scheduled post-growth capital |
 | SOC 2 Type II not in progress | Planned for Series B preparation |
 | Sentry error monitoring not configured | Configure at production deploy |
 
@@ -242,7 +242,7 @@ SZL Holdings (corporate surface)
 - No technical debt from outside contractors or acquired code
 - All code written and owned by the founding team
 
-### Series A Engineering Plan
+### growth capital Engineering Plan
 
 | Hire | Role | Priority |
 |---|---|---|
@@ -269,7 +269,7 @@ SZL Holdings (corporate surface)
 
 **Months 7–12:**
 - Terra national coverage expansion
-- Aegis FedRAMP readiness track
+- Aegis StateRAMP readiness track
 - Lyte enterprise connector integrations (Salesforce, Jira, ServiceNow)
 - Platform generalisation for next vertical
 

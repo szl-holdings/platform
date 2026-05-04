@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 
 const frameworkLabels: Record<string, string> = {
   nist_csf: 'NIST CSF',
-  fedramp: 'FedRAMP',
+  fedramp: 'StateRAMP',
   fisma: 'FISMA',
 };
 

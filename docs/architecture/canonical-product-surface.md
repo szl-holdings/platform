@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document is the single canonical map of every product surface in the SZL Holdings platform — what it is, who it's for, its maturity level, and its operational status. It is the authoritative reference for investor conversations, Series A due diligence, and all product planning.
+This document is the single canonical map of every product surface in the SZL Holdings platform — what it is, who it's for, its maturity level, and its operational status. It is the authoritative reference for investor conversations, growth capital due diligence, and all product planning.
 
 ---
 

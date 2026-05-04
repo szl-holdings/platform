@@ -3,7 +3,7 @@
 Authority: Task #793 — operational documentation grounded in real repo state
 Updated: 2026-04-16
 
-This directory converts the SZL Holdings platform from a "Series A-grade
+This directory converts the SZL Holdings platform from a "growth capital-grade
 asset" into an operable, closable, scalable company system. No code
 changes; no new product surfaces; no reopening of canon decisions
 (flagship app assignments, mobile disposition, archived artifacts).

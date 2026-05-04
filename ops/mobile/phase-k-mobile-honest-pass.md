@@ -1,7 +1,7 @@
 # Phase K — Mobile Beta Honest Pass (Completion Summary)
 
 **Updated:** 2026-04-16
-**Task:** Series A Frontier Pass — Phase K
+**Task:** growth capital Frontier Pass — Phase K
 **Status:** Complete
 
 This document is the single index for the Phase K Mobile Beta Honest Pass.
@@ -50,7 +50,7 @@ This statement is consistent across:
 
 | File | Purpose |
 |------|---------|
-| `ops/benchmark/mobile-series-a-pass.md` | What CORTEX mobile signals to Series A investors; competitive comparison; current capability matrix |
+| `ops/benchmark/mobile-series-a-pass.md` | What CORTEX mobile signals to growth capital investors; competitive comparison; current capability matrix |
 | `ops/benchmark/mobile-beta-to-launch.md` | Phased path from current alpha to public store listing with exit criteria per phase |
 
 ### `/ops/mobile/` (operator runbooks, credentials, store assets)
@@ -98,7 +98,7 @@ the task definition.
 
 ## Downstream
 
-The downstream "Series A: Readiness Verdict & Final Deliverables" task
+The downstream "growth capital: Readiness Verdict & Final Deliverables" task
 already accounts for the mobile readiness verdict and any remaining
-Series A roll-up. No additional follow-up tasks are proposed from
+growth capital roll-up. No additional follow-up tasks are proposed from
 Phase K.

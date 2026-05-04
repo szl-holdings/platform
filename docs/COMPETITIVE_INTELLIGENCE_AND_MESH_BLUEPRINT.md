@@ -248,7 +248,7 @@ SZL's model adapter layer could theoretically incorporate DSPy-optimized prompts
 - AIP Logic: AI-powered workflows with approval gates
 - AIP Agents: autonomous agents operating on the ontology
 - Object Storage: managed data infrastructure
-- Government-cleared deployment (FedRAMP, IL4/IL5/IL6)
+- Government-cleared deployment (StateRAMP, IL4/IL5/IL6)
 
 **Integration patterns:**
 - Proprietary API, limited external interoperability

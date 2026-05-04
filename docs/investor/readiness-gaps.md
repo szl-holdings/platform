@@ -53,7 +53,7 @@ SZL Holdings does not inflate its current state to improve how it presents to in
 
 ### 4. No SOC 2 Certification
 
-**Gap:** SZL Holdings has no formal compliance certifications. SOC 2, FedRAMP, ISO 27001 — none of these are in place.
+**Gap:** SZL Holdings has no formal compliance certifications. SOC 2, StateRAMP, ISO 27001 — none of these are in place.
 
 **Context:** SOC 2 Type I is typically achieved 6–9 months into a structured audit process. It requires documented controls, evidence collection, and a third-party auditor engagement. None of that is possible pre-revenue.
 

@@ -79,7 +79,7 @@ const copy = {
         'This week we shipped per-user decision history for every Quick Action surfaced through APEX, our governed action layer. When an executive approves or rejects an AI-recommended action — on the dashboard, on mobile, anywhere — we now record who decided, when, against what evidence, and under which policy. That history is queryable per user, per organization, and per action type, ordered chronologically by the decision timestamp itself rather than the side effect of the action.',
         'The detail that took the most care was the smallest: ordering by COALESCE(approved_at, rejected_at) DESC. A rejected action and an approved one are both decisions; both deserve the same treatment in the timeline. Most audit systems quietly drop the rejections. Ours does not.',
         'The default scope is the user themselves. A super_admin can read across the org for incident review, but no other role can. This is enforced in the route, in the storage layer, and in the policy package — three independent gates so a single mistake cannot leak someone else\'s decision history. We wrote seven tests against that contract before we wrote the screen.',
-        'Why does this matter for a Series A pitch? Because the failure mode for "AI for executives" is invisible decisions. If the model recommends, the human clicks, and nothing is recorded with attribution, you have built faster bureaucracy, not better governance. Investors who have seen the inside of a regulated enterprise know exactly what that costs.',
+        'Why does this matter for a growth capital pitch? Because the failure mode for "AI for executives" is invisible decisions. If the model recommends, the human clicks, and nothing is recorded with attribution, you have built faster bureaucracy, not better governance. Investors who have seen the inside of a regulated enterprise know exactly what that costs.',
         'Per-user history is unglamorous infrastructure. So is the underlying covenant policy that gates the action in the first place, and the proof chain that ties it back to the original signal. Together they are the difference between a demo and a production system.',
         'On the user side, the new screen lives in the mobile shell at /quick-actions-history and on the web command surface inside APEX. Each row shows the recommendation, the decision, the actor, the timestamp, the policy that allowed it, and a deep link to the full proof chain.',
         'We are pausing for a short funding window. When we resume, the next layer is the SZL Agent Mesh — a single contract for how every artifact participates in the same decision loop. The audit trail we shipped this week is the substrate it will sit on.',
@@ -107,7 +107,7 @@ const copy = {
         '',
         'Default scope: the user themselves. Cross-org review: super_admin only, three independent gates, seven tests pinning the contract.',
         '',
-        'Boring infrastructure. Series A conviction is built on it.',
+        'Boring infrastructure. growth capital conviction is built on it.',
       ],
       cta: 'If you are building governance into AI tools for the enterprise, I want to compare notes.',
     },
@@ -170,7 +170,7 @@ const copy = {
   // -------- POST 3: Boring security --------
   'boring-security': {
     medium: {
-      title: 'The Boring Security Work That Earns Series A Conviction',
+      title: 'The Boring Security Work That Earns growth capital Conviction',
       body: [
         'There is a kind of work that does not show up in a demo and does not survive a feature roadmap. It is the work that makes the difference between a startup that can sell to a regulated enterprise and one that cannot. We did three weeks of it, and I want to write it down because it is exactly the kind of thing investors do not ask about — and exactly the thing they should.',
         'First: cross-tenant data isolation. Every API route now scopes by organization identifier. Cross-org access returns 404, not 403, so an attacker cannot enumerate organizations they do not belong to. We wrote the property test that asserts this for the entire route table. It runs in CI on every commit. We did not announce this because it is the floor, not a feature.',
@@ -178,18 +178,18 @@ const copy = {
         'Third: full-history credential scan. We ran gitleaks across every commit, every branch, every reflog. We tuned the allowlist after the first real CI run so the signal is actionable. We documented the rotation runbook for Firebase and Google Play credentials, including the exact CLI invocations, because the runbook that lives in someone\'s head fails the audit. This work is recorded in KNOWN-GAPS.md, which is a document we are proud to send to a customer.',
         'Why this matters: the failure mode for AI-assisted operations platforms is exactly the failure mode for any multi-tenant SaaS — boring tenant leakage, boring credential exposure, boring audit gaps. Layer AI on top of those failure modes and the blast radius is larger, not smaller. The structural answer is the same as the answer for any serious enterprise platform: deny by default, scope by organization, record everything with attribution, rotate on a schedule, and write the test before you write the feature.',
         'Sentra is the SZL artifact that turns this posture into a product surface for the customer. Sentra, the brand we run it under, gives security leaders a command center for cyber posture, recovery readiness, and live incidents — not a SIEM dashboard, but the operating surface where the recommended next action is governed and recorded. We hold ourselves to the same posture. The platform that runs Sentra is built the way Sentra tells customers to build.',
-        'When we resume after the funding pause, the next investment is the Agent Mesh — a unified contract for how every artifact participates in the same governed loop. That contract starts with the security primitives we hardened these last three weeks. It is the load-bearing floor. Series A conviction is built on it.',
+        'When we resume after the funding pause, the next investment is the Agent Mesh — a unified contract for how every artifact participates in the same governed loop. That contract starts with the security primitives we hardened these last three weeks. It is the load-bearing floor. growth capital conviction is built on it.',
       ],
     },
     substack: {
-      subject: 'The boring security work that earns Series A conviction',
+      subject: 'The boring security work that earns growth capital conviction',
       body: [
         'Three weeks of unglamorous work I want to record:',
         '1) Cross-tenant data isolation across every API route. Cross-org access returns 404, not 403. Property test asserts the contract on every commit.',
         '2) Historical IP-hash backfill in the audit log. Per-org salt. 300 lines of test for 40 lines of migration, and that ratio is correct.',
         '3) Full-history gitleaks scan across every commit, branch, reflog. Allowlist tuned. Firebase + Google Play rotation runbook written down because the runbook that lives in someone\'s head fails the audit.',
         'This is the structural posture. Deny by default, scope by org, record with attribution, rotate on a schedule, test before feature. We hold ourselves to the same posture our cyber resilience product (Sentra, on the Sentra surface) tells customers to hold.',
-        'Series A conviction is built on this floor.',
+        'growth capital conviction is built on this floor.',
       ],
     },
     linkedin: {
@@ -319,7 +319,7 @@ const copy = {
         'Lyte is the loop applied to enterprise decision intelligence — signals from business systems, recommendations to operators, governed actions back into those systems. Terra is the loop applied to real estate. Vessels is the loop applied to maritime. Sentra is the loop applied to cyber posture and incident response. FORGE is the execution fabric every other artifact runs on. Counsel is the loop applied to legal exposure. Carlota Jo is the loop applied to private advisory and household operations — yes, the same primitives apply, because the failure modes are the same: too many open threads, no record of who decided what, no continuity between advisor and principal.',
         'The Unified Command surface is the operator\'s view of all of it together. It is the cross-domain workspace where a CFO can look at a Lyte signal next to a Counsel obligation and a Sentra exposure on the same screen, with the same evidence model behind each one. Two participants viewing live in the screenshot at the top of this post is not a stage prop; it is the actual collaborative session model the surface uses.',
         'What we have not built yet — and have been deliberate about not over-promising — is the Agent Mesh. That is the unified contract for how every artifact registers its agents, exposes its actions, and participates in the same governed loop. We mapped it, scoped it into five phases, and parked Phase 0 (the audit) as the first task to file when we resume. We did not start it yet because the right time to design the mesh is after the security floor is hardened and after the audit-trail substrate is in place. Both of those happened in the last three weeks.',
-        'We are pausing here for a short funding window. The platform stays up. The decision loop stays recorded. The deferred work is documented. Series A conversations are open; the artifact set on the screen is the demo, the architecture documents are the diligence pack, and the audit-trail history we shipped this week is the receipts.',
+        'We are pausing here for a short funding window. The platform stays up. The decision loop stays recorded. The deferred work is documented. growth capital conversations are open; the artifact set on the screen is the demo, the architecture documents are the diligence pack, and the audit-trail history we shipped this week is the receipts.',
         'If you want to talk, the contact path is on the SZL Holdings portfolio dashboard. We will be back in a few weeks.',
       ],
     },
@@ -331,7 +331,7 @@ const copy = {
         'Every step instrumented. Every decision attributed. Every recommendation cited. Every consequential action requires human confirmation. Same sequence in every artifact. That is what makes SZL Holdings one company.',
         'Unified Command is the cross-domain workspace where a CFO can look at a Lyte signal next to a Counsel obligation and a Sentra exposure on the same screen, same evidence model behind each.',
         'What we have not built yet: the Agent Mesh — the unified contract for how every artifact participates in the same loop. Mapped, scoped, parked. First task to file when we resume.',
-        'Pausing for a short funding window. Platform stays up. Decision loop stays recorded. Series A conversations are open.',
+        'Pausing for a short funding window. Platform stays up. Decision loop stays recorded. growth capital conversations are open.',
       ],
     },
     linkedin: {
@@ -352,7 +352,7 @@ const copy = {
         '',
         'Unified Command is the cross-domain workspace. A CFO looks at a Lyte signal next to a Counsel obligation and a Sentra exposure on the same screen with the same evidence model behind each.',
       ],
-      cta: 'Pausing for a short funding window. Platform stays up. Series A conversations are open. Contact path on the portfolio dashboard.',
+      cta: 'Pausing for a short funding window. Platform stays up. growth capital conversations are open. Contact path on the portfolio dashboard.',
     },
     x: [
       'most common investor question: is SZL one product or six?',

@@ -1,7 +1,7 @@
-# Public Readiness Scorecard — Series A Investor Perspective
+# Public Readiness Scorecard — growth capital Investor Perspective
 
 **Produced:** Phase D, April 2026  
-**Evaluator lens:** Technical Series A investor doing a 30-minute GitHub due diligence walk.
+**Evaluator lens:** Technical growth capital investor doing a 30-minute GitHub due diligence walk.
 
 ---
 

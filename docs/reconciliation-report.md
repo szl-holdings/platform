@@ -17,7 +17,7 @@ The codebase shows three structural drifts that matter for any platform-registry
 2. **API surface is centralised but un-scoped per artifact.** All 256 route files live in `artifacts/api-server`. There is no machine-readable mapping from artifact → owned routes → claimed capabilities, which makes per-artifact health, RBAC, and observability decisions impossible to enforce automatically.
 3. **Auth / data-source posture is inconsistent.** Some artifacts use the shared `@szl-holdings/replit-auth-web` (Carlota Jo, Counsel), some hand-roll a local `useAuth` (Pulse), and one (SZL Holdings) installs a redirect helper directly. Live-vs-mock data status is documented per artifact in prose but not asserted in CI for most surfaces.
 
-Most of these gaps are **already covered by in-flight tasks** (#2068 Series A launch readiness, #2306 codebase consolidation, #2307 exhaustive consolidation sweep, #2302 operational audit, #2308 platform cohesion). The genuinely uncovered gaps are: a typed artifact registry, per-artifact route ownership, and CI-enforced lifecycle status. The recommended #1 proof-point migration is **Pulse**, with **Counsel** and **Sentra** as #2 and #3 — small enough to migrate end-to-end in one task, representative enough to surface every required pattern, and currently healthy.
+Most of these gaps are **already covered by in-flight tasks** (#2068 growth capital launch readiness, #2306 codebase consolidation, #2307 exhaustive consolidation sweep, #2302 operational audit, #2308 platform cohesion). The genuinely uncovered gaps are: a typed artifact registry, per-artifact route ownership, and CI-enforced lifecycle status. The recommended #1 proof-point migration is **Pulse**, with **Counsel** and **Sentra** as #2 and #3 — small enough to migrate end-to-end in one task, representative enough to surface every required pattern, and currently healthy.
 
 ---
 
@@ -105,7 +105,7 @@ Mapping each finding to the project task list (PROPOSED / PENDING / IN_PROGRESS 
 | Finding | Covering task(s) | Status |
 |---|---|---|
 | A1 — APP_STATUS marks Lyte/PRISM as archived but they are live | Task #2302 (Operational audit & smoke test across every artifact) | Covers — re-baseline expected |
-| A2 — `01_ability_matrix.json` has empty live_state column | Task #2068 (P0 Series A launch readiness, includes `verify-claims` CI gate); Task #2306 (codebase consolidation) | Covers, partial — gate is strict but matrix still under-populated |
+| A2 — `01_ability_matrix.json` has empty live_state column | Task #2068 (P0 growth capital launch readiness, includes `verify-claims` CI gate); Task #2306 (codebase consolidation) | Covers, partial — gate is strict but matrix still under-populated |
 | A3 — No single registry file for artifacts | **GAP** — none of #2306 / #2307 / #2308 explicitly proposes a typed artifact registry as a single source of truth |
 | A4 — Three competing capability manifests | Task #2307 (Exhaustive consolidation sweep — dedupe DB tables, packages, seeds, docs, and backlog) | Covers — included in "docs" sweep |
 | B1–B4 — Inconsistent auth primitives | Task #2306 (codebase efficiency consolidation — dedupe API clients, claims, UI primitives) | Covers — UI primitives explicitly named |

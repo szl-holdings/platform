@@ -89,7 +89,7 @@
 | Top 25 risks and gaps | `audit/final/top-25-risks-and-gaps.md` |
 | What was fixed (this document) | `audit/final/what-was-fixed.md` |
 | What remains unverified | `audit/final/what-remains-unverified.md` |
-| Series A surface scorecard | `audit/final/series-a-surface-scorecard.md` |
+| growth capital surface scorecard | `audit/final/series-a-surface-scorecard.md` |
 | CHANGELOG.md updated | `CHANGELOG.md` |
 
 ---

@@ -4,7 +4,7 @@
     "position": 1,
     "filepath": "src/pages/slides/S01Cover.tsx",
     "title": "Governed Decision Infrastructure",
-    "description": "Series A pitch deck cover — Aegis, 2026",
+    "description": "growth capital pitch deck cover — Aegis, 2026",
     "speakerNotes": "Open with the thesis in one line: Aegis builds the governance layer that makes AI decisions accountable.\n\nBeat: pause for two seconds. Let the cover land.\n\nThen: 'For the next twelve minutes I'm going to show you a category, a product, and a market — and a real platform you can click on today.'"
   },
   {
@@ -100,7 +100,7 @@
     "position": 13,
     "filepath": "src/pages/slides/S09Ask.tsx",
     "title": "The Ask",
-    "description": "Series A — use of funds, team plan, and the opportunity",
-    "speakerNotes": "The ask in one breath: 'We are raising a Series A to harden the platform, ship two more verticals, and land the first ten enterprise logos.'\n\nUse of funds: 55% engineering, 25% go-to-market, 15% security and compliance, 5% operating runway.\n\nClose with the line of the deck: 'Every AI decision will eventually need an audit trail. We're already shipping the one that survives.'\n\nThen stop talking. Let them ask the next question."
+    "description": "growth capital — use of funds, team plan, and the opportunity",
+    "speakerNotes": "The ask in one breath: 'We are raising a growth capital to harden the platform, ship two more verticals, and land the first ten enterprise logos.'\n\nUse of funds: 55% engineering, 25% go-to-market, 15% security and compliance, 5% operating runway.\n\nClose with the line of the deck: 'Every AI decision will eventually need an audit trail. We're already shipping the one that survives.'\n\nThen stop talking. Let them ask the next question."
   }
 ]

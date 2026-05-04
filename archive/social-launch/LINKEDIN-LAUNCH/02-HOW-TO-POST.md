@@ -1,6 +1,6 @@
 # How to publish — 20 minutes, end-to-end
 
-Series A launches don't fail because the post is bad. They fail because the operator publishes at the wrong hour, in the wrong order, without the first-comment trick. Don't be that founder.
+growth capital launches don't fail because the post is bad. They fail because the operator publishes at the wrong hour, in the wrong order, without the first-comment trick. Don't be that founder.
 
 ---
 

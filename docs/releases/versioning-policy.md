@@ -48,7 +48,7 @@ Individual artifact versioning is managed in each artifact's `package.json`, but
 | Revenue activation | v0.2.0 | Stripe billing active, first paid plan |
 | First commercial deployment | v1.0.0 | First enterprise customer deployed |
 | SOC 2 Type I | v1.1.0 (estimated) | Compliance certification achieved |
-| FedRAMP Moderate (Aegis) | v2.0.0 (estimated) | Government sector readiness |
+| StateRAMP Moderate (Aegis) | v2.0.0 (estimated) | Government sector readiness |
 
 ---
 

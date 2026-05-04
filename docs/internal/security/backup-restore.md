@@ -61,7 +61,7 @@ SZL Holdings operates a policy of explicit, documented gap disclosure. Security 
 |--------|-------------|------------|-------------------|--------|
 | GAP-001 | SOC 2 Type II certification not yet obtained | Medium | Initiate audit after first revenue | 12–18 months post-revenue |
 | GAP-002 | Redis-backed session store not yet implemented (in-memory sessions) | Medium | Add Redis when scaling beyond single instance | Revenue activation phase |
-| GAP-003 | FedRAMP readiness (Aegis) not yet initiated | Low (pre-gov contracts) | Begin after DoD/Fed contract engagement | 18–24 months |
+| GAP-003 | StateRAMP readiness (Aegis) not yet initiated | Low (pre-gov contracts) | Begin after DoD/Fed contract engagement | 18–24 months |
 | GAP-004 | Automated backup validation (restore testing) not yet scheduled | Low | Add quarterly restore drill | Next operational cycle |
 | GAP-005 | External uptime monitoring (e.g., Better Uptime) not yet configured | Low | Configure before first enterprise pilot | Pre-commercial launch |
 | GAP-006 | Sentry or equivalent error tracking not yet wired in production | Low | Add Sentry DSN to production environment | Next quarter |
@@ -85,7 +85,7 @@ SZL Holdings operates a policy of explicit, documented gap disclosure. Security 
 
 When sharing this document during investor, lender, or enterprise diligence, the following statement should accompany it:
 
-> SZL Holdings maintains a living known-gap register as part of its commitment to transparent operational governance. The gaps documented above are real, known, and tracked with planned resolution timelines. None of the open gaps represent active vulnerabilities in the current demonstration environment. The most significant gaps (SOC 2, FedRAMP) are appropriate to our current stage and are planned for resolution as the business scales to contracted revenue.
+> SZL Holdings maintains a living known-gap register as part of its commitment to transparent operational governance. The gaps documented above are real, known, and tracked with planned resolution timelines. None of the open gaps represent active vulnerabilities in the current demonstration environment. The most significant gaps (SOC 2, StateRAMP) are appropriate to our current stage and are planned for resolution as the business scales to contracted revenue.
 
 ---
 

@@ -43,7 +43,7 @@ Beginning the compliance track is required for enterprise sales in regulated ver
 - SOC 2 Type I audit preparation (6–9 months)
 - Penetration testing engagement
 - Formal security policy documentation (beyond current engineering practices)
-- FedRAMP readiness scoping (Aegis — longer track)
+- StateRAMP readiness scoping (Aegis — longer track)
 
 ### Objective 4: Go-to-Market
 

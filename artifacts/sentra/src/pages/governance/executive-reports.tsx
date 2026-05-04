@@ -84,7 +84,7 @@ const REPORTS: Report[] = [
     id: 'control_gap',
     title: 'Control-Gap Memo',
     description:
-      'Mapping of current control coverage against NIST CSF / FedRAMP baseline. Gaps, owners, timelines, and compensating controls.',
+      'Mapping of current control coverage against NIST CSF / StateRAMP baseline. Gaps, owners, timelines, and compensating controls.',
     cadence: 'Monthly',
     lastGenerated: '12d ago',
     status: 'current',

@@ -9,7 +9,7 @@ const mockRow = {
   founderEmail: 'founder@secure.co',
   founderName: 'Alice Test',
   sector: 'SaaS',
-  stage: 'Series A',
+  stage: 'growth capital',
   convictionScore: 75,
   scoreTeam: 80,
   scoreMarket: 70,

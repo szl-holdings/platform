@@ -28,7 +28,7 @@ bottleneck is premature.
 | Reports to | Founder |
 | Owns | Inbound triage; partner Slack Connect channels; onboarding execution; pipeline doc updates; release notification |
 | Does NOT own | Pricing decisions, contract redlines, release approval |
-| Profile | Operator — has run customer-success or sales-ops at a Series A startup |
+| Profile | Operator — has run customer-success or sales-ops at a growth capital startup |
 | Outsource alternative | Fractional COO / chief of staff (1099) for 6–12 months |
 | Decision rule | Hire full-time if pipeline coverage justifies; outsource if pipeline coverage is volatile |
 
@@ -77,7 +77,7 @@ hire here breaks the codebase culture.
 | Reports to | Founder |
 | Owns | Visual + interaction design across canonical surfaces |
 | Outsource alternative | Project-based contractor for specific surface refreshes |
-| Decision rule | Outsource until designer is full-time billable on internal work — usually post-Series A |
+| Decision rule | Outsource until designer is full-time billable on internal work — usually post-growth capital |
 
 ## Role 6 — Marketing / Demand
 

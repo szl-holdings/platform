@@ -1,4 +1,4 @@
-# Series A Readiness — SZL Holdings
+# growth capital Readiness — SZL Holdings
 
 **Version:** 1.0 · **Last updated:** April 2026
 **Audience:** Founder, board, prospective investors, advisors
@@ -8,7 +8,7 @@
 
 ## What This Document Is
 
-A single, candid assessment of SZL Holdings' readiness to raise a Series A. It is the document the founder uses to decide *when* to enter the round — and the document a prospective lead investor receives before diligence.
+A single, candid assessment of SZL Holdings' readiness to raise a growth capital. It is the document the founder uses to decide *when* to enter the round — and the document a prospective lead investor receives before diligence.
 
 It is honest about what is ready and what is not. The same document goes to the friendliest investor and to the most skeptical.
 
@@ -16,9 +16,9 @@ It is honest about what is ready and what is not. The same document goes to the 
 
 ## Headline Posture
 
-**Status (as of April 2026):** **Pre-Series A**, on a deliberate path to be Series A-ready by **Q4 2026 / Q1 2027**.
+**Status (as of April 2026):** **Pre-growth capital**, on a deliberate path to be growth capital-ready by **Q4 2026 / Q1 2027**.
 
-We are not raising a Series A on April 2026 metrics. We are raising on:
+We are not raising a growth capital on April 2026 metrics. We are raising on:
 
 1. ≥ 6 named design partners with at least 4 in active production
 2. Cohort 1 conversion rate ≥ 67%
@@ -32,9 +32,9 @@ The plan is to enter the round when at least 6 of these are met.
 
 ---
 
-## What "Series A-Ready" Means for Us
+## What "growth capital-Ready" Means for Us
 
-Investor Series A readiness is not just ARR. It is the combination of metrics, narrative, and proof that the category is real and the company is its credible builder.
+Investor growth capital readiness is not just ARR. It is the combination of metrics, narrative, and proof that the category is real and the company is its credible builder.
 
 ### The five dimensions
 
@@ -50,7 +50,7 @@ Investor Series A readiness is not just ARR. It is the combination of metrics, n
 
 ---
 
-## Series A Round Construction
+## growth capital Round Construction
 
 ### Plan
 
@@ -126,7 +126,7 @@ Target trigger date: Q4 2026.
 | Incident response | ✅ [INCIDENT_RESPONSE.md](../operations/incident-response.md) |
 | AI governance | ✅ [AI_GOVERNANCE.md](../architecture/ai-governance.md) |
 | Known gaps register | ✅ [KNOWN-GAPS.md](../operations/known-gaps.md) |
-| SOC 2 Type I underway | 🟡 Post-Series A initiation |
+| SOC 2 Type I underway | 🟡 Post-growth capital initiation |
 | External penetration test | 🟡 Planned post-funding |
 | External AI red-team report | 🟡 Planned post-SOC 2 |
 | Technical diligence packet | ✅ [TECHNICAL_DILIGENCE_PACKET.md](technical-diligence-packet.md) |
@@ -230,7 +230,7 @@ We have runway through Q3 2027 at current burn. We *want* to raise in Q1 2027 to
 
 ---
 
-## Series A Pitch Themes
+## growth capital Pitch Themes
 
 ### Theme 1: Category Creation
 

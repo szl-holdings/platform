@@ -2,7 +2,7 @@
 
 **Date:** April 18, 2026  
 **Auditor:** Platform Engineering  
-**Scope:** Full-stack readiness for (1) investor demo, (2) Series A close, (3) first paying tenant  
+**Scope:** Full-stack readiness for (1) investor demo, (2) growth capital close, (3) first paying tenant  
 **Status:** AUTHORITATIVE for release decisions
 
 ---
@@ -12,7 +12,7 @@
 | Gate | Status | Notes |
 |------|--------|-------|
 | Investor Demo Readiness | ✅ **READY** (with one fix) | Configure `MAPBOX_ACCESS_TOKEN` before demo |
-| Series A Deck / Investor Hub | ✅ **READY** | Aegis pitch deck live at `/aegis/` |
+| growth capital Deck / Investor Hub | ✅ **READY** | Aegis pitch deck live at `/aegis/` |
 | Pilot / POC Readiness | ✅ **CONDITIONAL** | 4 blockers to address |
 | First Paying Tenant | ⚠️ **NOT YET** | Billing, email, job queue, token scoping required |
 | General Commercial Availability | ❌ **NOT YET** | Multiple HIGH gaps remain |
@@ -151,7 +151,7 @@ Rationale: Map views in Vessels and Terra are blank without this token. Everythi
 
 ---
 
-### Gate 2: Series A Investor Hub / Pitch Deck
+### Gate 2: growth capital Investor Hub / Pitch Deck
 
 **PASS.** Aegis pitch deck at `/aegis/` is fully functional. szl-holdings landing page, Trust Center, and legal pages are live. No action required.
 

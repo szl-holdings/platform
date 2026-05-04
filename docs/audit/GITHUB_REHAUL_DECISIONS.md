@@ -1,6 +1,6 @@
 # GitHub Rehaul — Decision Log
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 This file records every substantive decision made during the rehaul, with rationale. Decisions marked **DEFERRED** require owner action.
 
@@ -46,7 +46,7 @@ This file records every substantive decision made during the rehaul, with ration
 | DD-004 | `build_carousel.py` + `build_video.sh` + `pyproject.toml` | Move to `scripts/media/` | ✅ Completed (Task #2857) — scripts updated to reference new archive paths |
 | DD-005 | `elite-layer/` | Investigate and document | ✅ Completed (Task #2900) — added `elite-layer/README.md` documenting that this folder holds release-governance contracts (M-01 go/no-go criteria, M-02 release checklist, launch council agenda, post-release review template) and feedback schemas, kept at root because `docs/RELEASE_GATES.md` and the elite reports under `docs/reports/elite/` link to its files by stable path |
 | DD-006 | `content/` | Investigate and document | ✅ Completed (Task #2900) — added `content/README.md` documenting that this folder is the source of public-facing markdown (Academy, help center, demos, integrations catalog, trust center, changelog, launch series) consumed by in-product surfaces and the launch publishing pipeline; intentionally separate from internal-contributor `docs/` |
-| DD-007 | `audit/` (root-level) | Keep at root and document (revised from "move to `docs/audit/`") | ✅ Completed (Task #2900) — kept at root and documented; added a "Why this lives at the repo root" section to `audit/README.md`. The folder is a frozen, machine-consumable Zero-Gap audit artifact referenced by name from `scripts/audit/`, `scripts/public-mirror/`, `audit/verify.sh`, and `audit/source-of-truth.json`; `docs/audit/` is the separate home for the Series A GitHub Rehaul narrative reports |
+| DD-007 | `audit/` (root-level) | Keep at root and document (revised from "move to `docs/audit/`") | ✅ Completed (Task #2900) — kept at root and documented; added a "Why this lives at the repo root" section to `audit/README.md`. The folder is a frozen, machine-consumable Zero-Gap audit artifact referenced by name from `scripts/audit/`, `scripts/public-mirror/`, `audit/verify.sh`, and `audit/source-of-truth.json`; `docs/audit/` is the separate home for the growth capital GitHub Rehaul narrative reports |
 | DD-008 | `GITHUB_SETTINGS_APPLIED.json` | Move to `docs/github/` | ✅ Completed (Task #2857) |
 
 ---
@@ -65,4 +65,4 @@ This file records every substantive decision made during the rehaul, with ration
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

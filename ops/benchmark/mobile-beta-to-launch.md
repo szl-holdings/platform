@@ -60,7 +60,7 @@
 
 ---
 
-## Phase 4: Public Beta (Post-Series A)
+## Phase 4: Public Beta (Post-growth capital)
 
 | Task | Owner | Status |
 |------|-------|--------|

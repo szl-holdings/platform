@@ -71,7 +71,7 @@ These are not failures — they are known external dependencies. Each is documen
 
 ---
 
-## Action Required Before Series A Diligence
+## Action Required Before growth capital Diligence
 
 | Item | Action | Estimated Effort |
 |---|---|---|

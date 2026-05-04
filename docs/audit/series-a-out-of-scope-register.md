@@ -1,7 +1,7 @@
-# Series A Out-of-Scope Register
+# growth capital Out-of-Scope Register
 
 **Date:** April 16, 2026  
-**Scope:** Items explicitly evaluated and excluded from the Series A Wave 1–2 audit scope  
+**Scope:** Items explicitly evaluated and excluded from the growth capital Wave 1–2 audit scope  
 **Purpose:** Prevent scope creep and provide a clear record of what is intentionally deferred
 
 ---
@@ -84,8 +84,8 @@
 ### OOS-010 — Database Schema Review for 569 Tables
 
 **Decision:** Out of scope for Waves 1–2.  
-**Reason:** A full schema audit (relationships, normalization, performance) is a significant technical undertaking requiring hands-on database analysis. Not a security or inventory concern in the Series A context.  
-**Deferred to:** Post-Series A technical deep-dive if required by investors.
+**Reason:** A full schema audit (relationships, normalization, performance) is a significant technical undertaking requiring hands-on database analysis. Not a security or inventory concern in the growth capital context.  
+**Deferred to:** Post-growth capital technical deep-dive if required by investors.
 
 ---
 

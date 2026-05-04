@@ -97,7 +97,7 @@ Aegis serves six primary operator types. Each persona has distinct goals, workfl
 **Role**: Owns the organization's cyber resilience program: frameworks, controls, risk register, and improvement trajectory.
 
 **Primary Goals**
-- Track control status against frameworks (NIST, CIS, FedRAMP)
+- Track control status against frameworks (NIST, CIS, StateRAMP)
 - Identify risk trends, not just current incidents
 - Drive remediation ownership and due-date discipline
 - Report resilience trajectory to CISO and board

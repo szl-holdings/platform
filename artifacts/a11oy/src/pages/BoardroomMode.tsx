@@ -104,7 +104,7 @@ const INITIAL_DATA: BoardroomData = {
       ],
       sections: [
         { title: 'Cyber Threat Response', metric: 'CONTAINED', metricLabel: 'CVE-2025-4891 Status', bullets: ['CVE-2025-4891 zero-day contained — patch applied across 847 endpoints', 'Threat actor attribution: nation-state TTPs — CISA notification filed', 'Zero trust boundary: 100% enforced — no lateral movement detected'] },
-        { title: 'Compliance Posture', metric: '98%', metricLabel: 'CMMC Compliance Score', bullets: ['CMMC Level 2 audit: 98% — 2 items in remediation', 'FedRAMP authorization package: in preparation', 'Insider threat monitoring: 0 anomalies'] },
+        { title: 'Compliance Posture', metric: '98%', metricLabel: 'CMMC Compliance Score', bullets: ['CMMC Level 2 audit: 98% — 2 items in remediation', 'StateRAMP authorization package: in preparation', 'Insider threat monitoring: 0 anomalies'] },
       ],
       evalDisposition: 'pass', evalComposite: 0.87, modelUsed: 'gpt-4-turbo',
       approvalStatement: 'Approved by CISO. Eval composite: 87%. Proof chain verified. Classified appendix excluded from this version.',

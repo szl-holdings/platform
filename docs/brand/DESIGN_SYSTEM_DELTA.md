@@ -1,6 +1,6 @@
 # Design System Delta
 
-> Changes applied and recommended during the Series A GitHub Rehaul · April 2026
+> Changes applied and recommended during the growth capital GitHub Rehaul · April 2026
 
 This document records design system improvements identified in the UI audit, distinguishing between changes applied in this pass and recommended future improvements.
 
@@ -92,4 +92,4 @@ Current canonical design tokens are defined in `@workspace/shared-ui/src/tokens/
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

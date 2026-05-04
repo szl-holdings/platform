@@ -1,7 +1,7 @@
 {
   "version": "1.3",
   "produced": "2026-04-20",
-  "phase": "Phase D — Series A Hardening",
+  "phase": "Phase D — growth capital Hardening",
   "description": "Curated set of verified public screenshots for use in the main README, org profile, and investor materials.",
   "regeneratedAt": "2026-04-20T22:14:00Z",
   "regenerationNotes": "All 6 README curated screenshots regenerated from live app processes. The 5 web captures were taken via scripts/capture-screenshots.sh (Playwright + chromium) against the live artifact dev servers; the mobile capture was taken via Playwright pointing at the Expo Metro web bundle (artifacts/szl-holdings-mobile on localhost:8085). PNG sources live in media/screenshots/<artifact>/ and are resized to JPEG (quality 90) into assets/readme/products/.",

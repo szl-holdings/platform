@@ -164,10 +164,10 @@ export const APP_INTEGRATIONS: Record<
       'microsoft-graph',
     ],
     description:
-      'PARAGON control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks.',
+      'PARAGON control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, StateRAMP, and CMMC frameworks.',
     liveFeeds: [
       'NIST CSF 2.0 Framework',
-      'FedRAMP Marketplace',
+      'StateRAMP Marketplace',
       'CMMC Maturity Model',
       'CISA KEV (Patch Compliance)',
       'Microsoft SharePoint Compliance Evidence Library',
@@ -180,7 +180,7 @@ export const APP_INTEGRATIONS: Record<
       'PARAGON Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command.',
     liveFeeds: [
       'USAspending.gov Federal Contracts',
-      'FedRAMP Authorized Products',
+      'StateRAMP Authorized Products',
       'SAM.gov Contract Pipeline',
     ],
     doctrineRole: 'OBSERVE',

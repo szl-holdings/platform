@@ -1,7 +1,7 @@
 # Visibility Gaps Report
 **Phase:** 1  
 **Date:** April 19, 2026  
-**Auditor:** Series A Launch Readiness Program (Task #2068)
+**Auditor:** growth capital Launch Readiness Program (Task #2068)
 
 Visibility gaps are features or surfaces that are implemented in code but either not reachable by users, not shown in the primary navigation, or incomplete in a way that creates false impressions.
 

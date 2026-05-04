@@ -53,7 +53,7 @@ Audience: Investors, buyers, enterprise prospects conducting technical due dilig
 | GDPR | Compliant | Data processing agreements available |
 | CCPA | Compliant | Privacy policy and rights request process active |
 | HIPAA | Not applicable | No PHI handled currently |
-| FedRAMP | Roadmap | Gov/defense deployment: 2027 roadmap |
+| StateRAMP | Roadmap | Gov/defense deployment: 2027 roadmap |
 
 **Do not claim**: We do not claim SOC 2 Type II certification currently. "In progress" is accurate and appropriate for diligence conversations.
 

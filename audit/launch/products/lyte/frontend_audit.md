@@ -1,7 +1,7 @@
 # Lyte — Decision Intelligence: Frontend Audit
 **Phase:** 2 + 10  
 **Date:** April 19, 2026  
-**Auditor:** Series A Launch Readiness Program (Task #2068)
+**Auditor:** growth capital Launch Readiness Program (Task #2068)
 
 ---
 

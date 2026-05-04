@@ -68,7 +68,7 @@ The DoD / IC contract landscape is fragmented. Here are the vehicles that actual
 **2. CDAO AI T&E BPA**
 - The Chief Digital and AI Office Test & Evaluation Blanket Purchase Agreement.
 - Awarded to a pool of contractors (primarily medium-large primes); subcontracting opportunities for small businesses with specific capabilities.
-- **Realistic posture:** Approach the awarded primes (MetroStar, Xcelerate Solutions, Booz Allen, Leidos) as a subcontractor. They need novel tools to deliver against task orders.
+- **Realistic posture:** Approach the awarded primes (MetroStar, Xcelerate Solutions, enterprise integrator, Leidos) as a subcontractor. They need novel tools to deliver against task orders.
 - **First action:** Check [cdao.mil](https://www.cdao.mil/) for the prime list. Email each prime's small-business liaison with a one-page Ouroboros capability sheet.
 
 **3. CDAO AI Talent 2.0 BOA**
@@ -86,7 +86,7 @@ You do not win a major DoD contract directly. You **become a sub on a prime's wi
 
 | Prime | Why they care | Entry point |
 |---|---|---|
-| **Booz Allen Hamilton** | Largest IC AI contractor | [bah.com/small-business](https://www.bah.com/small-business) |
+| **enterprise integrator Hamilton** | Largest IC AI contractor | [bah.com/small-business](https://www.bah.com/small-business) |
 | **Leidos** | DoD / IC AI integrator | leidos.com/small-business |
 | **MetroStar** | CDAO BPA prime | metrostar.com |
 | **Xcelerate Solutions** | CDAO AI T&E prime | xceleratesolutions.com |

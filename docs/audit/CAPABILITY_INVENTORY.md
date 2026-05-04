@@ -2,7 +2,7 @@
 
 **Date:** April 18, 2026  
 **Auditor:** Platform Engineering  
-**Status:** AUTHORITATIVE — synthesized from Series A audit + launch-readiness audit  
+**Status:** AUTHORITATIVE — synthesized from growth capital audit + launch-readiness audit  
 **Machine-readable:** `docs/audit/capability-inventory.json`
 
 ---

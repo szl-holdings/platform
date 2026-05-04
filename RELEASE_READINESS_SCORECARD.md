@@ -31,7 +31,7 @@ The Moonshot program (Phases 1–7) has taken the platform from a 3/10 release-r
 | Revenue path | 2 / 10 | Stripe in test mode; live key not configured |
 | External data | 4 / 10 | NOAA/GDELT/Open-Meteo routes exist; Mapbox key, AIS API key, Resend key not configured |
 
-**Overall: 7 / 10 — Investor Demo Ready. Not yet Series A Ready.**
+**Overall: 7 / 10 — Investor Demo Ready. Not yet growth capital Ready.**
 
 ---
 

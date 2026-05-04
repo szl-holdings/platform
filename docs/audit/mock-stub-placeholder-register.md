@@ -173,4 +173,4 @@ The following UI surfaces are built but not yet wired to live data or back-end A
 
 ---
 
-*Part of Series A Cleanup — Phase 1 audit. April 2026.*
+*Part of growth capital Cleanup — Phase 1 audit. April 2026.*

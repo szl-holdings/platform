@@ -84,7 +84,7 @@ Domain packs are governed vertical extensions of the SZL Holdings platform. Each
 | Technical evaluator | /architecture | Stack, integration surface, eight-layer architecture |
 | Security reviewer | /trust | Controls, AI governance, proof chain, audit trail |
 | Design partner | /design-partner | Work directly with founding team |
-| Investor | /investor | Market thesis, moat, data room, Series A path |
+| Investor | /investor | Market thesis, moat, data room, growth capital path |
 
 ---
 

@@ -1,6 +1,6 @@
 # Frontier Doctrine — Public Architectural Patterns Mapped to SZL's 10 Layers
 
-**Version:** 1.1 · **Date:** April 17, 2026 · **Status:** Strategy reference for Series A diligence and Foundation 07+ planning.
+**Version:** 1.1 · **Date:** April 17, 2026 · **Status:** Strategy reference for growth capital diligence and Foundation 07+ planning.
 
 ## Implementation status legend
 
@@ -177,7 +177,7 @@ We **steal architectural patterns, not branding**. We do not borrow product name
 
 ## Cross-cutting innovations (where SZL is genuinely novel)
 
-These are the differentiators safe to claim in Series A diligence because no single vendor packages them together. Each is tagged by current state so we don't overstate.
+These are the differentiators safe to claim in growth capital diligence because no single vendor packages them together. Each is tagged by current state so we don't overstate.
 
 1. **[Partially shipped]** **Evidence-on-every-edge.** Constellation schema models provenance/freshness/confidence on edges. Palantir doesn't enforce this by default. Runtime enforcement lands with F07.
 2. **[Planned]** **Tier-aware planners.** Alloy planner rewrites the available tool set per Guardian tier — governance changes the *shape* of the plan, not just whether it executes. Today we gate execution; planner-time gating is F06/F07.

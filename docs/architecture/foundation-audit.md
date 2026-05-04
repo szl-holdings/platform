@@ -151,11 +151,11 @@ The monorepo contains **19 packages** under `packages/`, **40 lib packages** und
 | `artifacts/terra` | Terra — Real Estate Intelligence | web | Yes | Active | 6fe12df2 — feat: onboarding experience | `graphql-client`, `prism-bus` |
 | `artifacts/vessels` | Vessels Maritime Intelligence | web | Yes | Active | 6fe12df2 — feat: onboarding experience | `graphql-client`, `observability`, `prism-bus`, `replit-auth-web`, `services`, `offline-engine` |
 | `artifacts/cortex-mobile` | CORTEX Mobile | mobile | **No** | **DEFERRED** — `DEFERRED.md` present | 130ff9af — Mobile Beta Honest Pass (Phase K) | — |
-| `artifacts/firestorm` | Firestorm | — | **No** | **ARCHIVED** — `ARCHIVED.md` present | 12ccda0b — Series A Cleanup Phase 2 | — |
+| `artifacts/firestorm` | Firestorm | — | **No** | **ARCHIVED** — `ARCHIVED.md` present | 12ccda0b — growth capital Cleanup Phase 2 | — |
 | `artifacts/imperium` | Imperium | — | **No** | **ARCHIVED + DEPRECATED** | 4f477e48 — feat(ops): Mobile, infrastructure | — |
 | `artifacts/lyte-command-center` | Lyte Command Center | — | **No** | **ARCHIVED + DEPRECATED** | 4f477e48 — feat(ops): Mobile, infrastructure | — |
-| `artifacts/prism-counsel` | Counsel | — | **No** | **DEPRECATED** | 12ccda0b — Series A Cleanup Phase 2 | — |
-| `artifacts/stephen-site` | Stephen Site | — | **No** | **DEPRECATED** — replaced by `career` slug in `lib/config` | 12ccda0b — Series A Cleanup Phase 2 | — |
+| `artifacts/prism-counsel` | Counsel | — | **No** | **DEPRECATED** | 12ccda0b — growth capital Cleanup Phase 2 | — |
+| `artifacts/stephen-site` | Stephen Site | — | **No** | **DEPRECATED** — replaced by `career` slug in `lib/config` | 12ccda0b — growth capital Cleanup Phase 2 | — |
 
 ---
 

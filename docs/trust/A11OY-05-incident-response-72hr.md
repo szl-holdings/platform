@@ -16,7 +16,7 @@ This procedure defines how SZL Holdings detects, contains, investigates, communi
 - NYS DFS Part 500 §500.17(a)
 - HIPAA Breach Notification Rule (45 CFR §164.404)
 - GDPR Article 33 (where applicable)
-- FedRAMP IR-6 (target alignment for the future ATO)
+- StateRAMP IR-6 (target alignment for the future ATO)
 
 ## 2. Definitions
 

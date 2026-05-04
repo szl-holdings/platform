@@ -1,7 +1,7 @@
 # Operations Readiness — SZL Holdings Platform
 
 **Version:** 1.0 · **Date:** 2026-04-20  
-**Audience:** Series A diligence, investors, enterprise evaluators, engineering  
+**Audience:** growth capital diligence, investors, enterprise evaluators, engineering  
 **Prepared by:** Stephen Lutar, Founder & CEO  
 
 ---

@@ -1,5 +1,5 @@
 # Final Blockers
-**SZL Holdings — Series A Launch Readiness Program**  
+**SZL Holdings — growth capital Launch Readiness Program**  
 **Date:** April 19, 2026  
 **Program:** Task #2068 — Phase 12 Final Output
 
@@ -119,7 +119,7 @@ Option B — Azure Monitor:
 | LC-003 | Dependency review workflow exists; full verification pending | ✅ Accept for design-partner phase |
 | LC-004 | Webhook SSRF validation absent | ✅ Accept for design-partner phase; Sprint 3 |
 | LC-005 | MFA single-factor only | ✅ Accept; plan for enterprise tier |
-| LC-006 | SOC 2 Type II audit not engaged | Plan engagement post Series A close |
+| LC-006 | SOC 2 Type II audit not engaged | Plan engagement post growth capital close |
 
 **Founder sign-off table:**
 
@@ -151,4 +151,4 @@ Option B — Azure Monitor:
 | OpenAPI portal at `/api/docs` | P3 | Sprint 4 |
 | Redis cache configuration | P3 | Sprint 4 |
 | Lighthouse CI performance guard | P2 | Sprint 4 |
-| SOC 2 Type II audit engagement | P2 | Post Series A |
+| SOC 2 Type II audit engagement | P2 | Post growth capital |

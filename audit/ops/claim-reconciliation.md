@@ -99,7 +99,7 @@ Each claim is evaluated against:
 
 ## Verified Safe Claims for Investor Presentation
 
-The following are fully verified and safe to present to Series A investors:
+The following are fully verified and safe to present to growth capital investors:
 
 - ✅ Governed decision infrastructure connecting observability to execution
 - ✅ 11-role RBAC with org-scoped tenant isolation and deny-by-default auth

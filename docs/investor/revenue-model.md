@@ -220,7 +220,7 @@ This is a planning estimate; actual mix will reflect demand by domain. We do not
 | Founder + AE motion productive at $2M+ ARR per AE by Year 2 | Medium |
 | Pack attachment grows from 1.0 to 2.4 average over 3 years | Medium-high (product-led) |
 | Gross margin reaches 75% by 2028 | Medium-high (cloud and AI cost trajectory) |
-| Series A funded by Q4 2026 to support 2027 plan | Required input |
+| growth capital funded by Q4 2026 to support 2027 plan | Required input |
 | Sales team scale-up does not require Series B before 2028 | Medium (cash position dependent) |
 
 ---
@@ -248,7 +248,7 @@ This is a planning estimate; actual mix will reflect demand by domain. We do not
 | Expansion motion | [EXPANSION_MOTION.md](../sales/expansion-motion.md) |
 | Enterprise deal design | [ENTERPRISE_DEAL_DESIGN.md](../sales/enterprise-deal-design.md) |
 | Go-to-market motion | [GO_TO_MARKET_MOTION.md](../sales/go-to-market.md) |
-| Series A readiness | [SERIES_A_READINESS.md](series-a-readiness.md) |
+| growth capital readiness | [SERIES_A_READINESS.md](series-a-readiness.md) |
 | Investor narrative | [INVESTOR_NARRATIVE.md](investor-narrative.md) |
 | North star metrics | [NORTH_STAR_METRICS.md](../sales/north-star-metrics.md) |
 | Executive scorecard | [EXECUTIVE_SCORECARD.md](../sales/executive-scorecard.md) |

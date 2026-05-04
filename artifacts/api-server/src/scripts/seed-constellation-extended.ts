@@ -461,14 +461,14 @@ export async function seedConstellationExtended() {
       labels: ['portfolio', 'vessels', 'monitored'],
       name: 'Vessels Maritime Intelligence — Portfolio Entity',
       description:
-        'SZL Holdings portfolio company. $2.8M ARR. 14 customers. NRR 119% TTM. Series A.',
+        'SZL Holdings portfolio company. $2.8M ARR. 14 customers. NRR 119% TTM. growth capital.',
       provenanceSourceId: 'venture-vessels-maritime',
       provenanceSourceType: 'holdings_ventures',
       provenanceSourceLabel: 'Holdings Venture Registry',
       freshness: daysAgo(0),
       confidence: 0.99,
       sensitivityTier: 'confidential',
-      extensions: { arr: 2_800_000, customers: 14, nrr: 1.19, stage: 'Series A' },
+      extensions: { arr: 2_800_000, customers: 14, nrr: 1.19, stage: 'growth capital' },
     },
     {
       id: IDS.entity_prism,

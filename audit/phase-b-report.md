@@ -1,4 +1,4 @@
-# Series A Hardening — Phase B Report
+# growth capital Hardening — Phase B Report
 ## Code Quality & Database Audit
 
 **Generated:** 2026-04-20  

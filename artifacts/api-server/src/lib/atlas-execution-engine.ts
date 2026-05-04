@@ -724,7 +724,7 @@ const DOMAIN_POLICIES: Policy[] = [
     ],
     isActive: true,
     priority: 1000,
-    complianceFramework: 'FedRAMP',
+    complianceFramework: 'StateRAMP',
     createdAt: Date.now(),
     updatedAt: Date.now(),
   },

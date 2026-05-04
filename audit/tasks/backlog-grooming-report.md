@@ -1,6 +1,6 @@
 # Backlog Grooming Report
 **Date:** April 20, 2026
-**Task:** #2674 — Series A gap: groom the 940+ task backlog
+**Task:** #2674 — growth capital gap: groom the 940+ task backlog
 
 ---
 

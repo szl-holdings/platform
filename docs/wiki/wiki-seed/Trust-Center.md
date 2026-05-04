@@ -64,7 +64,7 @@ Alloy includes pre-configured compliance workflow templates for regulated indust
 | Financial services | 4-eye approval, trade execution, audit documentation |
 | Healthcare | HIPAA-aligned access controls, PHI handling policies |
 | Security operations | SOC workflow governance, escalation chains |
-| Government | FedRAMP-aligned controls (Aegis, Phase 2 roadmap) |
+| Government | StateRAMP-aligned controls (Aegis, Phase 2 roadmap) |
 
 ---
 

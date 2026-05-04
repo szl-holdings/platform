@@ -486,9 +486,9 @@ resp = client.agents.run(
   },
   {
     name: 'a11oy Sovereign Cloud',
-    desc: 'Air-gapped, FedRAMP High deployment for defense and intelligence workloads. ITAR-compliant, IL5-certified, with hardware security modules and zero-trust architecture.',
+    desc: 'Air-gapped, StateRAMP High deployment for defense and intelligence workloads. ITAR-compliant, IL5-certified, with hardware security modules and zero-trust architecture.',
     status: 'GA',
-    features: ['FedRAMP High', 'IL5 certified', 'ITAR compliant', 'HSM key management', 'Air-gapped option', 'Zero-trust'],
+    features: ['StateRAMP High', 'IL5 certified', 'ITAR compliant', 'HSM key management', 'Air-gapped option', 'Zero-trust'],
     code: `from a11oy.cloud import SovereignCloud
 
 client = SovereignCloud(
@@ -521,7 +521,7 @@ const GLASSWING_SECURITY = {
     { name: 'Glasswing Trust Portal', desc: 'Public-facing transparency surface — per-agent system cards, adversarial robustness scores, 90-day transparency reports, and constitution snapshots. Every claim backed by a Mythos Doctrine Open Spec artifact.', metric: '6 agents public', status: 'Published' },
   ],
   certifications: [
-    'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'FedRAMP High', 'IL5', 'ITAR',
+    'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'StateRAMP High', 'IL5', 'ITAR',
     'HIPAA', 'PCI DSS Level 1', 'GDPR', 'CCPA', 'CSA STAR Level 2', 'NIST 800-53',
   ],
 };
@@ -1214,7 +1214,7 @@ Message msg = client.messages().create(MessageCreateParams.builder()
                 { name: 'document-synthesis', type: 'Built-in', tools: 5, desc: 'Read documents, extract key points, generate summaries. Citation-backed. Multi-format: PDF, DOCX, HTML, Markdown.' },
                 { name: 'deployment-ops', type: 'Built-in', tools: 7, desc: 'CI/CD pipeline management, container orchestration, rollback triggers. Production-safe with approval gates.' },
                 { name: 'threat-modeling', type: 'Sovereign', tools: 6, desc: 'STRIDE analysis, attack surface mapping, MITRE ATT&CK classification. Automated threat model generation with governance.' },
-                { name: 'compliance-audit', type: 'Sovereign', tools: 9, desc: 'SOC 2, ISO 27001, HIPAA, FedRAMP evidence collection. Automated control testing with proof chain on every finding.' },
+                { name: 'compliance-audit', type: 'Sovereign', tools: 9, desc: 'SOC 2, ISO 27001, HIPAA, StateRAMP evidence collection. Automated control testing with proof chain on every finding.' },
                 { name: 'maritime-intel', type: 'Domain', tools: 12, desc: 'AIS tracking, dark vessel detection, sanctions screening, voyage risk assessment. SZL-governed maritime intelligence.' },
                 { name: 'legal-discovery', type: 'Domain', tools: 8, desc: 'Document review, privilege detection, timeline construction, deposition analysis. Attorney-client privilege safeguards.' },
                 { name: 'real-estate-diligence', type: 'Domain', tools: 10, desc: 'Property valuation, cap rate analysis, distress detection, market comps. Governed data access with audit trail.' },

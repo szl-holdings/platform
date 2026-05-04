@@ -29,7 +29,7 @@
 - **Company** dropdown now includes Design Partners and Investor Relations as named items.
 - **Resources** dropdown rationalised: Insights, Docs, FAQ, ROI Calculator, Roadmap, Case Studies.
 - **Demo** remains the primary CTA button (highlighted).
-- Dropdown items now include context notes in mono font (e.g., "Operator command layer", "Governed extensions", "Series A path") to aid first-touch navigation.
+- Dropdown items now include context notes in mono font (e.g., "Operator command layer", "Governed extensions", "growth capital path") to aid first-touch navigation.
 - Mobile menu rebuilt with the same audience-aware priority ordering.
 
 ### 3. Audience Paths Section (new section, landing.tsx)

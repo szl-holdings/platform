@@ -1,4 +1,4 @@
-# Security Findings — Series A Audit
+# Security Findings — growth capital Audit
 
 **Date:** April 16, 2026
 **Auditor:** Automated scan + manual review
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The platform is in strong shape for a pre-commercial Series A context. No critical secret exposures were found. The main findings are process gaps (unpinned CI actions, missing SHA pins) and coverage gaps (Zod validation at 12% of routes, route security matrix not yet automated). All findings are documented, categorized, and have active remediation tasks.
+The platform is in strong shape for a pre-commercial growth capital context. No critical secret exposures were found. The main findings are process gaps (unpinned CI actions, missing SHA pins) and coverage gaps (Zod validation at 12% of routes, route security matrix not yet automated). All findings are documented, categorized, and have active remediation tasks.
 
 ---
 

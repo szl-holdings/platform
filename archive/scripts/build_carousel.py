@@ -213,7 +213,7 @@ def slide_cta(n, total):
 
     rows = [
         ("Design partner", "10 enterprise pilots. Defense, maritime, real estate, financial services."),
-        ("Series A", "Now raising. Operator-led. Evidence-first. No theater."),
+        ("growth capital", "Now raising. Operator-led. Evidence-first. No theater."),
         ("Hiring", "Founding engineers. Distributed systems, governance, applied ML."),
     ]
     ry = 580

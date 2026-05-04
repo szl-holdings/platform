@@ -12,7 +12,7 @@
 
 "Command" reads as either (a) a NORAD knockoff or (b) tech-startup grandiosity. Neither is what a state CIO wants to hand to a legislative oversight committee.
 
-The replacement vocabulary is **regulated monitoring** vocabulary: words that already live in NIST, NYS DFS Part 500, FedRAMP, HIPAA, SOC 2, and ISO 27001 documents.
+The replacement vocabulary is **regulated monitoring** vocabulary: words that already live in NIST, NYS DFS Part 500, StateRAMP, HIPAA, SOC 2, and ISO 27001 documents.
 
 ## 2. Vocabulary substitution table
 
@@ -54,7 +54,7 @@ The vocabulary swap is necessary; it is not sufficient. Many *claims* across the
 | "Predicts the future" | "Surfaces probabilistic forecasts with documented model and evaluation methodology" |
 | "Plugs into anything" | "Integrates with the listed source and destination connectors" |
 | "Bank-grade security" | "AWS GovCloud (US) deployment available; SOC 2 Type II report planned 2027-Q4" |
-| "FedRAMP-authorized" anywhere it is currently said | "Not yet FedRAMP-authorized; roadmap published" |
+| "StateRAMP-authorized" anywhere it is currently said | "Not yet StateRAMP-authorized; roadmap published" |
 
 ## 4. Page-by-page rewrite priority list
 

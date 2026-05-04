@@ -1,4 +1,4 @@
-# Series A Hardening — Phase A Report
+# growth capital Hardening — Phase A Report
 
 **Date:** 2026-04-20  
 **Branch:** series-a-hardening  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Phase A establishes the security and hygiene baseline for the Series A hardening payload. All required deliverables have been produced. The repository contains no committed live credentials. Five root-level zip archives have been quarantined. Machine-readable inventory files have been generated. A bootstrap admin seed script has been implemented. Seven auth findings have been documented for Phase B remediation.
+Phase A establishes the security and hygiene baseline for the growth capital hardening payload. All required deliverables have been produced. The repository contains no committed live credentials. Five root-level zip archives have been quarantined. Machine-readable inventory files have been generated. A bootstrap admin seed script has been implemented. Seven auth findings have been documented for Phase B remediation.
 
 ---
 

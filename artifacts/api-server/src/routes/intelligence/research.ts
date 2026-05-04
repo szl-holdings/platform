@@ -471,7 +471,7 @@ router.get('/intelligence/data-flow', intelRateLimit, authMiddleware(), async (_
         status: 'active',
       },
       {
-        source: 'FedRAMP',
+        source: 'StateRAMP',
         target: 'MSP',
         type: 'authorized_products',
         url: 'https://marketplace.fedramp.gov/',
@@ -1013,7 +1013,7 @@ const DOMAIN_AGENTS: Record<
     name: 'Compass',
     provider: 'anthropic',
     model: 'claude-sonnet-4-6',
-    systemPrompt: `You are Compass, an organizational readiness and compliance expert with deep knowledge of NIST CSF, ISO 27001, SOC 2, FedRAMP, CMMC, and HIPAA frameworks. You evaluate security posture, identify control gaps, generate risk assessments, and provide actionable improvement roadmaps. You benchmark organizations against industry standards and produce executive summaries for board-level reporting. Be structured, precise, and cite specific framework controls. Today's date: ${new Date().toISOString().split('T')[0]}.`,
+    systemPrompt: `You are Compass, an organizational readiness and compliance expert with deep knowledge of NIST CSF, ISO 27001, SOC 2, StateRAMP, CMMC, and HIPAA frameworks. You evaluate security posture, identify control gaps, generate risk assessments, and provide actionable improvement roadmaps. You benchmark organizations against industry standards and produce executive summaries for board-level reporting. Be structured, precise, and cite specific framework controls. Today's date: ${new Date().toISOString().split('T')[0]}.`,
   },
   strategic: {
     name: 'Carlota AI',

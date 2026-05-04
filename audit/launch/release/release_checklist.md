@@ -1,7 +1,7 @@
 # Release Checklist
 **Phase:** 5 + 9  
 **Date:** April 19, 2026  
-**Auditor:** Series A Launch Readiness Program (Task #2068)
+**Auditor:** growth capital Launch Readiness Program (Task #2068)
 
 ---
 
@@ -98,7 +98,7 @@ pnpm health:check        # API health endpoint check
 
 ```bash
 # Tag the release
-git tag -a v1.0.0 -m "Series A launch release"
+git tag -a v1.0.0 -m "growth capital launch release"
 git push origin v1.0.0
 
 # Verify version in health endpoint

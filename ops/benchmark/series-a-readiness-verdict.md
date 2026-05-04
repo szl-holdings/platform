@@ -1,4 +1,4 @@
-# Series A Readiness Verdict
+# growth capital Readiness Verdict
 
 **Date:** April 16, 2026
 **Prepared by:** Frontier Pass Capstone Synthesis
@@ -8,7 +8,7 @@
 
 ## Verdict: CONDITIONALLY READY
 
-SZL Holdings is architecturally mature, operationally documented, and category-positioned for Series A fundraising. The conditions for activating that readiness are concrete, time-bounded, and within the founder's direct control. None require engineering work that isn't already underway.
+SZL Holdings is architecturally mature, operationally documented, and category-positioned for growth capital fundraising. The conditions for activating that readiness are concrete, time-bounded, and within the founder's direct control. None require engineering work that isn't already underway.
 
 The platform is not raising money on hope. It is raising money on:
 1. A working multi-domain enterprise platform with real production-grade architecture
@@ -80,7 +80,7 @@ Six active domains on one governance architecture:
 
 ### Documentation and Operational Readiness (Score: 9/10)
 
-This platform is operationally documented at a level that most Series A companies are not:
+This platform is operationally documented at a level that most growth capital companies are not:
 - Incident response runbook
 - Support routing runbook
 - Release governance with CI gates and rollback procedure
@@ -176,7 +176,7 @@ The gap is release infrastructure, not product: Apple Developer account, App Sto
 
 - **Not a series of mockups.** The codebase has 34 shared libraries, 395+ API server source files, and 569 database tables. Technical diligence will find real engineering.
 - **Not vaporware.** Six production domain apps are deployed and accessible. CORTEX mobile is installable with one command once store accounts are created.
-- **Not a team of 50 who built this over 5 years.** This is the leverage argument for why the platform is worth funding: the architecture was built at a pace that justifies a Series A to take it to market, not to build it.
+- **Not a team of 50 who built this over 5 years.** This is the leverage argument for why the platform is worth funding: the architecture was built at a pace that justifies a growth capital to take it to market, not to build it.
 - **Not hiding its gaps.** The readiness-gaps.md file is a feature. Investors who commit based on inflated claims become the wrong partners at the wrong time. The honest accounting here is itself evidence of founder maturity.
 
 ---

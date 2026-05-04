@@ -35,9 +35,9 @@ export const AEGIS_GOLDEN_QUERIES: GoldenQuery[] = [
   },
   {
     queryId: 'aegis-q005',
-    query: 'Show me the FedRAMP authorization status for the primary cloud infrastructure.',
+    query: 'Show me the StateRAMP authorization status for the primary cloud infrastructure.',
     relevantChunkIds: ['aegis-chunk-010', 'aegis-chunk-011'],
-    exactMatchBoostTerms: ['FedRAMP', 'regulation'],
+    exactMatchBoostTerms: ['StateRAMP', 'regulation'],
     metadata: { domain: 'security', entityTypes: ['control'], queryType: 'natural_language' },
   },
   {
@@ -106,9 +106,9 @@ export const AEGIS_GOLDEN_QUERIES: GoldenQuery[] = [
   },
   {
     queryId: 'aegis-q014',
-    query: 'POA&M items overdue for FedRAMP continuous monitoring',
+    query: 'POA&M items overdue for StateRAMP continuous monitoring',
     relevantChunkIds: ['aegis-chunk-011', 'aegis-chunk-019'],
-    exactMatchBoostTerms: ['FedRAMP', 'POA&M'],
+    exactMatchBoostTerms: ['StateRAMP', 'POA&M'],
     metadata: { domain: 'security', entityTypes: ['control'], queryType: 'natural_language' },
   },
   {
@@ -225,15 +225,15 @@ export const AEGIS_MOCK_CORPUS = new Map<string, { text: string; boostTerms: str
   [
     'aegis-chunk-010',
     {
-      text: 'FedRAMP Moderate authorization — primary cloud infrastructure (AWS GovCloud us-east-1): authorization issued 2023-09-12. ATO valid through 2026-09-11. Last continuous monitoring report: 2024-05-01.',
-      boostTerms: ['FedRAMP', 'regulation', 'continuous monitoring'],
+      text: 'StateRAMP Moderate authorization — primary cloud infrastructure (AWS GovCloud us-east-1): authorization issued 2023-09-12. ATO valid through 2026-09-11. Last continuous monitoring report: 2024-05-01.',
+      boostTerms: ['StateRAMP', 'regulation', 'continuous monitoring'],
     },
   ],
   [
     'aegis-chunk-011',
     {
-      text: 'FedRAMP authorization status: 14 controls in POA&M. 3 high-risk POA&M items require remediation before Q3 2024 continuous monitoring review. Controls affected: SC-7 (boundary protection), AU-6 (audit review).',
-      boostTerms: ['FedRAMP', 'regulation', 'POA&M'],
+      text: 'StateRAMP authorization status: 14 controls in POA&M. 3 high-risk POA&M items require remediation before Q3 2024 continuous monitoring review. Controls affected: SC-7 (boundary protection), AU-6 (audit review).',
+      boostTerms: ['StateRAMP', 'regulation', 'POA&M'],
     },
   ],
   [
@@ -288,8 +288,8 @@ export const AEGIS_MOCK_CORPUS = new Map<string, { text: string; boostTerms: str
   [
     'aegis-chunk-019',
     {
-      text: 'FedRAMP POA&M aging report 2024-06-30: 6 items overdue, 3 within 30 days of milestone, 5 on track. Overdue items concentrated in SC-7 boundary protection family. Escalated to authorising official.',
-      boostTerms: ['FedRAMP', 'POA&M'],
+      text: 'StateRAMP POA&M aging report 2024-06-30: 6 items overdue, 3 within 30 days of milestone, 5 on track. Overdue items concentrated in SC-7 boundary protection family. Escalated to authorising official.',
+      boostTerms: ['StateRAMP', 'POA&M'],
     },
   ],
   [

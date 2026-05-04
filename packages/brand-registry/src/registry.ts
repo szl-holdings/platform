@@ -40,12 +40,12 @@ export const registry: BrandRegistry = {
       asOf: '2021-Q2',
     },
     seriesA: {
-      label: 'Series A',
+      label: 'growth capital',
       value: '$14.5M',
       asOf: '2022-Q2',
     },
     seriesAValuation: {
-      label: 'Series A pre-money valuation',
+      label: 'growth-round pre-money valuation',
       value: '$62M',
       asOf: '2022-Q2',
     },
@@ -84,7 +84,7 @@ export const registry: BrandRegistry = {
       detail: 'Angel investors; founding team of four engineers and operators.',
     },
     {
-      round: 'Series A',
+      round: 'growth capital',
       amount: '$14.5M',
       date: 'Q2 2022',
       detail:
@@ -203,7 +203,7 @@ export const registry: BrandRegistry = {
       oneLiner:
         'Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence.',
       description:
-        'Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.',
+        'Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Integrates government contract intelligence, StateRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.',
       status: 'live',
       doctrineRole: 'OBSERVE',
       link: '/aegis/ops/dashboard',

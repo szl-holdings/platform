@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-20  
 **Scope:** All artifacts in the monorepo  
-**Reviewer:** Series A Hardening — Phase A  
+**Reviewer:** growth capital Hardening — Phase A  
 **Methodology:** Static code review of `artifacts/api-server/src/`, `lib/auth/`, `lib/db/`, mobile artifact (`artifacts/szl-holdings-mobile/`), and Vite frontend artifacts.
 
 ---
@@ -243,7 +243,7 @@ state as of Task 2686.
 
 **Date:** 2026-04-20
 **Scope:** Full auth surface re-verification across all artifacts; sign-on consolidation; secret hygiene; CI security hardening; bootstrap admin provisioning.
-**Reviewer:** Series A Hardening — Phase 9
+**Reviewer:** growth capital Hardening — Phase 9
 **Reference documents:**
 - `audit/auth/auth-surface-map.md` — complete auth surface inventory
 - `audit/auth/sign-on-consolidation-plan.md` — consolidation target state and verification checklist

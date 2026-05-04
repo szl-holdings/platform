@@ -35,7 +35,7 @@
 
 **Status: DONE — renamed `inca.ts` → `aegis-intel.ts` on 2026-04-23.**
 
-**AI Research Lab brand decision (Task #1439):** The brand name "INCA AI Research" has been **renamed to "AI Research Lab"** (Task #1439, 2026-04-23). "INCA" appears in the brand registry's `deprecatedStrings` list, confirming the Series A rebrand intended to retire it. The slug (`inca`), route mount path (`/inca`), and `appSlug` values are unchanged — only the display name is updated across `lib/config`, `lib/services`, `lib/shared-ui`, `lib/observability`, `packages/config`, and `artifacts/api-server`.
+**AI Research Lab brand decision (Task #1439):** The brand name "INCA AI Research" has been **renamed to "AI Research Lab"** (Task #1439, 2026-04-23). "INCA" appears in the brand registry's `deprecatedStrings` list, confirming the growth capital rebrand intended to retire it. The slug (`inca`), route mount path (`/inca`), and `appSlug` values are unchanged — only the display name is updated across `lib/config`, `lib/services`, `lib/shared-ui`, `lib/observability`, `packages/config`, and `artifacts/api-server`.
 
 ---
 

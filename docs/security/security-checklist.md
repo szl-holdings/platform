@@ -1,7 +1,7 @@
 # SZL Holdings — Security Checklist (API & Credentials)
 
 **Last updated:** 2026-04-18
-**Audience:** Enterprise architects, Series A technical advisors, security reviewers, compliance officers
+**Audience:** Enterprise architects, growth capital technical advisors, security reviewers, compliance officers
 **Scope:** `artifacts/api-server` — multi-tenant Express/Node.js API
 
 **Related:** [ACCESS-CONTROL-MATRIX.md](access-control-matrix.md) · [KNOWN-GAPS.md](../operations/known-gaps.md) · [DEPLOYMENT-GUIDE.md](../operations/deployment-guide.md)

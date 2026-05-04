@@ -424,7 +424,7 @@ function buildFinanceTerminalFallback(body: FinanceTerminalBody): Record<string,
     ] : [],
     risk_flags: [
       { flag: 'Concentration risk', severity: 'medium', note: 'Top 3 clients represent ~58% of ARR.' },
-      { flag: 'No audited financials', severity: 'medium', note: 'Compiled financials only. Series A+ will require GAAP audit.' },
+      { flag: 'No audited financials', severity: 'medium', note: 'Compiled financials only. growth capital+ will require GAAP audit.' },
     ],
     ai_narrative: `${entity} presents a credible, capital-efficient growth profile with above-market revenue growth (34% YoY) and healthy EBITDA margins (28%). The ownership structure is stable with majority family-trust control and well-structured management incentives. Primary risk vector is client concentration, which is addressable through pipeline diversification.`,
     data_source: 'fallback (FINCEPT_MCP_ENDPOINT not configured)',

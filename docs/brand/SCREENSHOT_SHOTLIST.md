@@ -101,4 +101,4 @@ See `docs/governance/SCREENSHOT_POLICY.md` for full policy.
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

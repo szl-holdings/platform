@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Date:** April 16, 2026  
 **Authority:** Stephen Lutar, Founder  
-**Audience:** Technical diligence reviewers, Series A investors, enterprise prospects
+**Audience:** Technical diligence reviewers, growth capital investors, enterprise prospects
 
 ---
 
@@ -219,7 +219,7 @@ API server exposes `/api/health`, `/api/healthz`, `/api/health/live`, `/api/heal
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | April 16, 2026 | Initial baseline — Series A pre-launch |
+| 1.0 | April 16, 2026 | Initial baseline — growth capital pre-launch |
 
 ---
 

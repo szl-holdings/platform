@@ -1,6 +1,6 @@
 # Public Surface Audit
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 Evaluation of everything visible to an investor, evaluator, or security researcher who accesses the public GitHub repository.
 
@@ -97,4 +97,4 @@ The CI badge row in the README links to live GitHub Actions. An investor can see
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

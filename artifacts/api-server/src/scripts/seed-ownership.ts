@@ -24,7 +24,7 @@ function daysAgo(n: number) {
 const SCENARIO_NAMES = [
   'Baseline — Founding Structure (Pre-Seed)',
   'Scenario A — Current Operating Structure',
-  'Scenario B — Series A Pro Forma',
+  'Scenario B — growth capital Pro Forma',
   'Scenario C — ESOP Expansion Variant',
   'Certification Template — SBA 8(a) Compliant',
 ];
@@ -122,20 +122,20 @@ export async function seedOwnership() {
         updatedAt: daysAgo(14),
       },
       {
-        name: 'Scenario B — Series A Pro Forma',
+        name: 'Scenario B — growth capital Pro Forma',
         description:
-          'Pro forma cap table assuming $8M Series A at $32M pre-money. Models dilution impact and post-money ownership for LP pitch materials.',
+          'Pro forma cap table assuming $8M growth capital at $32M pre-money. Models dilution impact and post-money ownership for LP pitch materials.',
         isTemplate: false,
         isActive: false,
         isPreferred: false,
         status: 'under_review',
         certificationFitSummary:
-          'Post-Series A majority ownership drops to 47.2% — falls below SBA 8(a) 51% threshold. WOSB certification would be at risk. Recommend structuring investor rights to preserve certification eligibility.',
+          'Post-growth capital majority ownership drops to 47.2% — falls below SBA 8(a) 51% threshold. WOSB certification would be at risk. Recommend structuring investor rights to preserve certification eligibility.',
         fundraisingFitScore: 92,
         bankFitScore: 73,
         investorClarityScore: 95,
         notes:
-          'Series A model. Currently under review by outside counsel. Do not use for external distribution until approved.',
+          'growth capital model. Currently under review by outside counsel. Do not use for external distribution until approved.',
         metadata: {
           version: 2,
           effectiveDate: '2026-07-01',
@@ -149,7 +149,7 @@ export async function seedOwnership() {
       {
         name: 'Scenario C — ESOP Expansion Variant',
         description:
-          'Variant of Scenario A with expanded employee option pool from 12% to 18% for Series A recruiting competitiveness. Models double-trigger acceleration and 4-year vesting.',
+          'Variant of Scenario A with expanded employee option pool from 12% to 18% for growth capital recruiting competitiveness. Models double-trigger acceleration and 4-year vesting.',
         isTemplate: false,
         isActive: false,
         isPreferred: false,
@@ -160,7 +160,7 @@ export async function seedOwnership() {
         bankFitScore: 88,
         investorClarityScore: 82,
         notes:
-          'Created for Series A negotiations. Contingent on Series A closing. Not yet board-approved.',
+          'Created for growth capital negotiations. Contingent on growth capital closing. Not yet board-approved.',
         metadata: {
           version: 1,
           optionPoolTarget: 0.18,
@@ -193,7 +193,7 @@ export async function seedOwnership() {
 
   const scenarioA = scenarios.find((s) => s.isActive)!;
   const scenarioBaseline = scenarios.find((s) => s.name.includes('Baseline'))!;
-  const scenarioB = scenarios.find((s) => s.name.includes('Series A Pro Forma'))!;
+  const scenarioB = scenarios.find((s) => s.name.includes('growth capital Pro Forma'))!;
   const scenarioC = scenarios.find((s) => s.name.includes('ESOP'))!;
 
   const allocations: (typeof ownershipAllocationsTable.$inferInsert)[] = [
@@ -268,7 +268,7 @@ export async function seedOwnership() {
       citizenshipConfirmed: true,
       notes: 'Pre-seed founding position.',
     },
-    // Scenario B — Series A
+    // Scenario B — growth capital
     {
       scenarioId: scenarioB.id,
       personName: 'Stephen Lewis',
@@ -279,7 +279,7 @@ export async function seedOwnership() {
       isMajorityOwner: false,
       citizenshipConfirmed: true,
       notes:
-        'Post Series A — diluted from 51%. Certification risk flagged. Review board control structure.',
+        'Post growth capital — diluted from 51%. Certification risk flagged. Review board control structure.',
     },
     {
       scenarioId: scenarioB.id,
@@ -293,14 +293,14 @@ export async function seedOwnership() {
     },
     {
       scenarioId: scenarioB.id,
-      personName: 'Series A Investor',
+      personName: 'growth capital Investor',
       role: 'minority_owner',
       equityPct: '22.220',
       votingRightsPct: '19.000',
       isControlling: false,
       isMajorityOwner: false,
       citizenshipConfirmed: false,
-      notes: 'Series A lead — Board seat included. Standard Series A protections.',
+      notes: 'growth capital lead — Board seat included. Standard growth capital protections.',
     },
     {
       scenarioId: scenarioB.id,
@@ -398,11 +398,11 @@ export async function seedOwnership() {
       hasHiringFiringAuthority: true,
       hasStrategicVeto: false,
       controlDescription:
-        'Post Series A — CEO authority maintained for day-to-day. Board composition changes: 2 founders + 1 Series A investor + 1 independent. Strategic decisions now require board majority.',
+        'Post growth capital — CEO authority maintained for day-to-day. Board composition changes: 2 founders + 1 growth capital investor + 1 independent. Strategic decisions now require board majority.',
     },
     {
       scenarioId: scenarioB.id,
-      personName: 'Series A Investor',
+      personName: 'growth capital Investor',
       hasDayToDayControl: false,
       hasLongTermDecisionAuthority: false,
       hasHiringFiringAuthority: false,

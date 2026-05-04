@@ -1,6 +1,6 @@
 # ATLAS Spatial Runtime — Investor Moat Analysis
 
-**For:** Series A investors and strategic evaluators  
+**For:** growth capital investors and strategic evaluators  
 **Date:** April 2026  
 **Classification:** Confidential — Investor Distribution Only
 
@@ -120,9 +120,9 @@ Each of these components is non-trivial. The integration between them — the fa
 
 ---
 
-## Series A Relevance
+## growth capital Relevance
 
-ATLAS positions the Series A thesis as follows:
+ATLAS positions the growth capital thesis as follows:
 
 **Not "we built an AI feature."** Every SaaS company is adding AI features. AI features are commoditized.
 

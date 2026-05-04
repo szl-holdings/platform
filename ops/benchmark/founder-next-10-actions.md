@@ -1,4 +1,4 @@
-# Founder's Next 10 Actions — Series A Readiness
+# Founder's Next 10 Actions — growth capital Readiness
 
 **Date:** April 16, 2026
 **Purpose:** The prioritized, actionable, concrete list of what the founder must do in the next 30 days to close the gap between current state and investor-ready launch. These are ordered by urgency and blocking dependencies.
@@ -104,7 +104,7 @@
 
 ---
 
-### Action 6: Prepare the Series A Pitch Deck (Day 5–10 — 8 hours)
+### Action 6: Prepare the growth capital Pitch Deck (Day 5–10 — 8 hours)
 
 **Why now:** You cannot have investor conversations without a pitch deck. Everything else is preparation for the conversation — the deck is the conversation.
 
@@ -216,7 +216,7 @@ For each investor:
 | GitHub Release v0.2.0 | Published with substantive release notes |
 | CORTEX on physical device | Yes — demoed biometric auth + 2 domains |
 | Mapbox + Stripe + Email active | Yes — all three configured |
-| Series A pitch deck | 9 slides, practiced 3× |
+| growth capital pitch deck | 9 slides, practiced 3× |
 | Financial model | 3-scenario model with defensible assumptions |
 | Investor target list | 20 firms, warm intro paths identified |
 | Meetings scheduled | 5 first conversations on calendar |

@@ -1,4 +1,4 @@
-# Final Action Checklist — Series A Hardening
+# Final Action Checklist — growth capital Hardening
 ## Mandatory Manual Steps Outside the Repository
 
 **Date:** 2026-04-21  
@@ -277,7 +277,7 @@ scripts/capture-screenshots.sh
 
 ---
 
-## LOW PRIORITY — Nice to Have Before Series A Close
+## LOW PRIORITY — Nice to Have Before growth capital Close
 
 ### [ ] M-17 — PGP Key for Security Contact
 

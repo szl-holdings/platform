@@ -102,7 +102,7 @@ See [SECURITY.md](../../SECURITY.md) for the full disclosure policy and severity
 |-----------|--------|
 | SOC 2 Type II | Roadmap — Phase 3 |
 | HIPAA | Architecture-ready; formal track in Phase 3 |
-| FedRAMP (Aegis) | Readiness track in Phase 2 roadmap |
+| StateRAMP (Aegis) | Readiness track in Phase 2 roadmap |
 | Financial services | Compliance templates available in Alloy |
 
 ---

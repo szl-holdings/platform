@@ -4,7 +4,7 @@
 
 ## Why standards matter
 
-Styra didn't sell software. Styra sold OPA — a standard. Once OPA was the policy runtime in CNCF, every cloud-native deployment had a default. The acquirer (FedRAMP-adjacent buyers, eventually) paid for the moat the standard created, not the code.
+Styra didn't sell software. Styra sold OPA — a standard. Once OPA was the policy runtime in CNCF, every cloud-native deployment had a default. The acquirer (StateRAMP-adjacent buyers, eventually) paid for the moat the standard created, not the code.
 
 Ouroboros has the same shape. Ten primitives, public-domain math, falsifiable claims. The standards-track play is the substrate move that makes the runtime acquirable at Tier 3+ pricing.
 

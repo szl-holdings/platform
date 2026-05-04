@@ -126,7 +126,7 @@ Threshold:
 
 ---
 
-## Quadrant 7: Series A Readiness
+## Quadrant 7: growth capital Readiness
 
 | Item | Status | Quarter target |
 |------|:------:|----------------|
@@ -213,7 +213,7 @@ The board signs off on next year's scorecard at the Q4 board meeting.
 | North star metrics | [NORTH_STAR_METRICS.md](north-star-metrics.md) |
 | Revenue model | [REVENUE_MODEL.md](../investor/revenue-model.md) |
 | Design partner scorecard | [DESIGN_PARTNER_SCORECARD.md](../product/design-partner-scorecard.md) |
-| Series A readiness | [SERIES_A_READINESS.md](../investor/series-a-readiness.md) |
+| growth capital readiness | [SERIES_A_READINESS.md](../investor/series-a-readiness.md) |
 | Land & expand | [LAND_AND_EXPAND.md](land-and-expand.md) |
 | Pilot playbook | [PILOT_PLAYBOOK.md](pilot-playbook.md) |
 | Investor narrative | [INVESTOR_NARRATIVE.md](../investor/investor-narrative.md) |

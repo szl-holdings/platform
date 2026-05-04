@@ -24,7 +24,7 @@ Amaru uses a four-level classification aligned to federal practice and translate
 | **A — Public** | "Public" | Press releases, public datasets (Census, FRED, BLS), product documentation | Any allowed destination; no encryption-in-transit override required (still TLS 1.2+) |
 | **B — Internal / Business Confidential** | "Sensitive but Unclassified — non-CUI" | Internal pricing, organizational metrics, anonymized analytics | TLS 1.3 in transit; AES-256 at rest; role-restricted destinations |
 | **C — Sensitive PII / PHI** | PII per OMB M-17-12; PHI per HIPAA | Employee SSN, customer SSN, medical records, financial account numbers, biometric identifiers | TLS 1.3 in transit; AES-256 at rest with customer-managed keys (CMK); destination must be on the customer's PII allowlist; field-level tokenization where the destination supports it |
-| **D — Controlled Unclassified Information (CUI)** | NARA CUI Registry categories | CUI Specified and CUI Basic per the NARA registry; e.g., Privacy/SSN, Tax, Procurement, Critical Infrastructure | Routed only to FedRAMP-authorized or otherwise accreditation-approved destinations; SZL deployment must be the "A11oy US" (GovCloud) posture per `A11OY-04-us-data-residency.md`; CUI marking preserved through the entire pipeline |
+| **D — Controlled Unclassified Information (CUI)** | NARA CUI Registry categories | CUI Specified and CUI Basic per the NARA registry; e.g., Privacy/SSN, Tax, Procurement, Critical Infrastructure | Routed only to StateRAMP-authorized or otherwise accreditation-approved destinations; SZL deployment must be the "A11oy US" (GovCloud) posture per `A11OY-04-us-data-residency.md`; CUI marking preserved through the entire pipeline |
 
 The scheme is intentionally one-to-one with NIST SP 800-171 and the NARA CUI Registry to avoid the common vendor mistake of inventing parallel terminology that confuses procurement officers.
 
@@ -67,7 +67,7 @@ The classification metadata is itself anchored in the evidence ledger so a downs
 | A | Customer-defined allowlist |
 | B | Customer-defined allowlist; non-A11oy-US deployments allowed |
 | C | Customer-defined allowlist + must declare PII-handling capability + must be in customer's residency boundary |
-| D | Must be FedRAMP-authorized (or accreditation-approved by the customer's authorizing official) **and** in A11oy-US posture **and** declared CUI-capable |
+| D | Must be StateRAMP-authorized (or accreditation-approved by the customer's authorizing official) **and** in A11oy-US posture **and** declared CUI-capable |
 
 Attempts to route to a non-conforming destination are blocked at `aef-policy-guard`, logged as `policy_violation`, and surface to the operator.
 

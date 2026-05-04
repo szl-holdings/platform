@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-20
 **Scope:** All authentication surfaces across the SZL Holdings monorepo
-**Author:** Series A Hardening — Phase 9 Security Hardening & Sign-On Consolidation
+**Author:** growth capital Hardening — Phase 9 Security Hardening & Sign-On Consolidation
 **Status:** COMPLETE — consolidation achieved in Phase B (Task 2686) and verified in Phase 9.
 
 ---

@@ -464,7 +464,7 @@ test.describe('SZL Holdings — Investors Hub', () => {
     expect(hasError).toBe(false);
 
     const heading = page
-      .locator(":text('Investor'), :text('Series A'), :text('Governed'), :text('SZL Holdings')")
+      .locator(":text('Investor'), :text('growth capital'), :text('Governed'), :text('SZL Holdings')")
       .first();
     await expect(heading).toBeVisible({ timeout: 15000 });
   });

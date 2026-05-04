@@ -1,7 +1,7 @@
 # Investor Confidence Checklist — SZL Holdings
 **Date:** April 3, 2026  
 **Status:** Current  
-**Audience:** Series A / seed-stage investors, family offices, strategic partners
+**Audience:** growth capital / seed-stage investors, family offices, strategic partners
 
 ---
 

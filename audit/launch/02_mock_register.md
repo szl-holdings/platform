@@ -1,7 +1,7 @@
 # Mock, Stub, and Fake Data Register
 **Phase:** 1  
 **Date:** April 19, 2026  
-**Auditor:** Series A Launch Readiness Program (Task #2068)
+**Auditor:** growth capital Launch Readiness Program (Task #2068)
 
 This register catalogs every identified mock, stub, fake loader, hard-coded value, and placeholder in production paths, with disposition and recommended action.
 

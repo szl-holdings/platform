@@ -1,4 +1,4 @@
-# Manual Next Steps — Series A Readiness
+# Manual Next Steps — growth capital Readiness
 ## Items Requiring Action Outside the Repository
 
 **Produced:** Phase D, April 2026
@@ -248,7 +248,7 @@ gh workflow run secret-scan-scheduled.yml --repo szl-holdings/szl-holdings-platf
 
 ---
 
-## LOW PRIORITY — Nice to Have Before Series A Close
+## LOW PRIORITY — Nice to Have Before growth capital Close
 
 ### M-15: Add PGP Key for Security Contact
 
@@ -258,7 +258,7 @@ gh workflow run secret-scan-scheduled.yml --repo szl-holdings/szl-holdings-platf
 
 **Action:** Generate a PGP key pair for `security@szlholdings.com`. Publish the public key on Keybase or keys.openpgp.org. Update `SECURITY.md` with the key ID and fingerprint.
 
-**Why:** A PGP key demonstrates security maturity to researchers. It is not required for a Series A but removes a minor credibility gap.
+**Why:** A PGP key demonstrates security maturity to researchers. It is not required for a growth capital but removes a minor credibility gap.
 
 ---
 

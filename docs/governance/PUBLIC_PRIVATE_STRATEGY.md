@@ -6,7 +6,7 @@
 
 ## Decision
 
-The SZL Holdings platform repository is **public by design** for investor review purposes during the Series A fundraising process. This is a deliberate, time-bound decision — not a permanent open-source commitment.
+The SZL Holdings platform repository is **public by design** for investor review purposes during the growth capital fundraising process. This is a deliberate, time-bound decision — not a permanent open-source commitment.
 
 ---
 
@@ -48,7 +48,7 @@ The SZL Holdings platform repository is **public by design** for investor review
 
 ## Post-Series-A Review
 
-After Series A closes, the org should evaluate:
+After growth capital closes, the org should evaluate:
 1. Whether to maintain public visibility or move to private + investor access via GitHub team
 2. Whether to establish a separate public-facing documentation site (docs.szlholdings.com) and make the repo private
 3. Whether to open-source any non-core components (e.g., a shared UI library) for community/employer branding benefit

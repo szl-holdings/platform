@@ -28,7 +28,7 @@ The product surface a buyer evaluates today is materially larger than the origin
 | Operations Lead | VP Operations, COO | 50–500 employees | Signal noise, approval gridlock, no real-time operational view |
 | CFO / Finance | CFO, VP Finance | 50–500 employees | Execution accountability gaps, financial workflow visibility |
 | PMO | Program Director, PMO Lead | Enterprise | Project signal correlation, risk surfacing |
-| Founder / CEO | CEO | Series A–C startups | Organizational health visibility without 5 separate dashboards |
+| Founder / CEO | CEO | growth capital–C startups | Organizational health visibility without 5 separate dashboards |
 
 ### Aegis — Secondary Target (Pipeline)
 
@@ -117,6 +117,6 @@ Traditional maritime software is operational management (maintenance schedules, 
 |---------|------------|
 | Salesforce AppExchange | Lyte connector to Salesforce CRM data — immediate buyer context for Salesforce users |
 | Jira Marketplace | Lyte integration with Atlassian project data — signal ingestion from Jira workflows |
-| Azure Marketplace | Enterprise sales channel for Aegis (FedRAMP track) and Vessels |
+| Azure Marketplace | Enterprise sales channel for Aegis (StateRAMP track) and Vessels |
 | Maritime brokers / trading houses | Vessels pilot access through maritime network relationships |
 | Security MSPs | Aegis Command module — MSP partner channel |

@@ -54,10 +54,10 @@ const VENDOR_RISKS: VendorRisk[] = [
   { id: 'VR-002', vendor: 'Anthropic API', category: 'AI/ML Provider', riskScore: 28, oauthScopes: 3, dataAccess: 'Prompt + Response', lastAttestation: '2026-04-24', complianceCerts: ['SOC2', 'ISO27001'], status: 'approved' },
   { id: 'VR-003', vendor: 'AIS Live Data', category: 'Maritime Intel', riskScore: 41, oauthScopes: 5, dataAccess: 'Vessel Positions + ETA', lastAttestation: '2026-04-20', complianceCerts: ['SOC2'], status: 'approved' },
   { id: 'VR-004', vendor: 'Bloomberg Terminal API', category: 'Financial Data', riskScore: 22, oauthScopes: 6, dataAccess: 'Market Data + News', lastAttestation: '2026-04-22', complianceCerts: ['SOC2', 'ISO27001', 'FINRA'], status: 'approved' },
-  { id: 'VR-005', vendor: 'Salesforce CRM', category: 'CRM/Sales', riskScore: 38, oauthScopes: 12, dataAccess: 'Contacts + Deals + Pipeline', lastAttestation: '2026-04-18', complianceCerts: ['SOC2', 'ISO27001', 'FedRAMP'], status: 'approved' },
+  { id: 'VR-005', vendor: 'Salesforce CRM', category: 'CRM/Sales', riskScore: 38, oauthScopes: 12, dataAccess: 'Contacts + Deals + Pipeline', lastAttestation: '2026-04-18', complianceCerts: ['SOC2', 'ISO27001', 'StateRAMP'], status: 'approved' },
   { id: 'VR-006', vendor: 'GitHub Copilot', category: 'Dev Tools', riskScore: 45, oauthScopes: 8, dataAccess: 'Source Code + Repos', lastAttestation: '2026-04-15', complianceCerts: ['SOC2'], status: 'review' },
   { id: 'VR-007', vendor: 'Unknown MCP Server', category: 'Agent Tools', riskScore: 92, oauthScopes: 0, dataAccess: 'Unrestricted Tool Access', lastAttestation: '—', complianceCerts: [], status: 'blocked' },
-  { id: 'VR-008', vendor: 'AWS Bedrock', category: 'AI/ML Provider', riskScore: 25, oauthScopes: 4, dataAccess: 'Inference Only', lastAttestation: '2026-04-23', complianceCerts: ['SOC2', 'ISO27001', 'FedRAMP', 'HIPAA'], status: 'approved' },
+  { id: 'VR-008', vendor: 'AWS Bedrock', category: 'AI/ML Provider', riskScore: 25, oauthScopes: 4, dataAccess: 'Inference Only', lastAttestation: '2026-04-23', complianceCerts: ['SOC2', 'ISO27001', 'StateRAMP', 'HIPAA'], status: 'approved' },
 ];
 
 const ATTESTATION_PIPELINE = [

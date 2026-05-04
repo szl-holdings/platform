@@ -1,6 +1,6 @@
 # Repository Structure Audit
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 ---
 
@@ -123,4 +123,4 @@ Contains archived deliverables and phase materials. Source retained per disposit
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

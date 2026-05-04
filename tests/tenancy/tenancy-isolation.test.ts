@@ -3,7 +3,7 @@
  *
  * Proves that cross-tenant data leakage cannot occur through any API surface
  * that touches org-scoped data.  Every test represents a concrete attack
- * scenario that a Series A security diligence reviewer would probe.
+ * scenario that a growth capital security diligence reviewer would probe.
  *
  * Coverage strategy:
  *  - Pure unit tests of the `@szl-holdings/auth-shared` tenant helpers

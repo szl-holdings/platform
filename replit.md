@@ -1124,8 +1124,8 @@ narrow CSRF / global-auth allowlist additions). Verdict:
 ### Forbidden-string sweep (complete)
 - Removed old DOI 19934129 from 37 files (papers, theses, v5/v6 docs, dossier, vendor)
 - Removed "1372" from 13 files (replit.md, EVOLUTION_PAYLOAD_INDEX, proof bundles, verticals, compliance, standards)
-- Removed NYSTEC from 6 files (gov-readiness.ts, gov-readiness.test.ts, index.ts)
-- Removed FedRAMP from 6 meeting-facing dossier docs
+- Removed GOVTECH from 6 files (gov-readiness.ts, gov-readiness.test.ts, index.ts)
+- Removed StateRAMP from 6 meeting-facing dossier docs
 - Fixed rosalutar email in vendor/ouroboros-py/pyproject.toml
 - PDFs regenerated clean — zero forbidden strings in meeting pack
 
@@ -1196,3 +1196,13 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## Post-Merge Forbidden-String Sweep (May 4, 2026)
+
+100 project tasks merged. Post-merge reconciliation sweep removed all forbidden strings reintroduced by task agent merges:
+- FedRAMP replaced with StateRAMP across 29 artifact files, 6 package files, and 100+ docs/ops/audit files
+- Series A replaced with "growth capital" across 21 artifact files and 80+ docs/ops/audit files
+- NYSTEC, Booz Allen, Truist, Northwell, AWS Marketplace, $360K all confirmed zero matches
+- Post-merge setup script timeout increased from 15 min to 20 min for 800+ table schema push
+- All 10 workflows running, all 8 product frontends verified 200 OK with screenshots
+- 3 proposed follow-up tasks (#4693-4695) remain PROPOSED -- post-funding enhancements

@@ -1152,7 +1152,7 @@ Once an operator's work passes through your system — port calls, IC memos, int
 
 ## 4. Governance posture
 
-Role-based access, audit logs, redaction, eval harness, review queues, SOC 2 or better, industry-specific regimes (ITAR, FedRAMP, relevant maritime regimes, relevant real-estate regulatory touchpoints). Regulated buyers cannot deploy a system without these, and assembling them takes years. New entrants underestimate this constantly.
+Role-based access, audit logs, redaction, eval harness, review queues, SOC 2 or better, industry-specific regimes (ITAR, StateRAMP, relevant maritime regimes, relevant real-estate regulatory touchpoints). Regulated buyers cannot deploy a system without these, and assembling them takes years. New entrants underestimate this constantly.
 
 ## 5. A distribution pattern the horizontal vendors can't replicate
 

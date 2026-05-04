@@ -204,4 +204,4 @@ All documents in `docs/audit/`:
 
 ---
 
-*Audit completed: April 18, 2026. Next review target: Q2 2026 (before Series A external close).*
+*Audit completed: April 18, 2026. Next review target: Q2 2026 (before growth capital external close).*

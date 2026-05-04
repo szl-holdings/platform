@@ -34,7 +34,7 @@ async function generateAudio(line) {
       modalities: ['text', 'audio'],
       audio: { voice: 'alloy', format: 'mp3' },
       messages: [
-        { role: 'system', content: 'You are a professional narrator for a Series A technology demo video. Speak in a calm, authoritative, measured tone — like a premium brand announcement from Apple or Anthropic. Read the text exactly as written. Do not add, omit, or rephrase any words. Pace: deliberate, confident, with natural pauses at periods.' },
+        { role: 'system', content: 'You are a professional narrator for a growth capital technology demo video. Speak in a calm, authoritative, measured tone — like a premium brand announcement from Apple or Anthropic. Read the text exactly as written. Do not add, omit, or rephrase any words. Pace: deliberate, confident, with natural pauses at periods.' },
         { role: 'user', content: `Read this narration exactly: "${line.text}"` },
       ],
     }),

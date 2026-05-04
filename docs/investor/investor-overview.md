@@ -95,7 +95,7 @@ Seeking investment for:
 
 We are not claiming:
 - Paying customers (none yet)
-- Certified compliance (SOC 2, FedRAMP — on roadmap)
+- Certified compliance (SOC 2, StateRAMP — on roadmap)
 - Live production deployments with real user data
 - Validated product-market fit (architecture is validated; commercial fit requires first customers)
 

@@ -93,7 +93,7 @@ Every governed decision can be exported as a structured receipt — PDF or JSON 
 ## Implementation Priority
 
 1. **Trust center page** on flagship site with security posture summary (P0)
-2. **GitHub repo** visibility for governance primitive libraries (P0 for Series A)
+2. **GitHub repo** visibility for governance primitive libraries (P0 for growth capital)
 3. **NDA-gated document sharing** for sensitive compliance artifacts (P1)
 4. **Decision receipt export** as PDF/JSON for enterprise buyers (P1)
 5. **Real-time control monitoring** dashboard for internal ops (P2)

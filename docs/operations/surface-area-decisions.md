@@ -4,7 +4,7 @@
 **Date:** April 16, 2026  
 **Scope:** `.archive/`, `backups/`, `attached_assets/`, `project-export.zip`, `seed-data/`, `demo-assets/`
 
-This document records explicit keep/quarantine/delete decisions for all non-primary-runtime material found in the monorepo root. These decisions were made as part of the Series A Audit (Waves 3–4) surface area reduction.
+This document records explicit keep/quarantine/delete decisions for all non-primary-runtime material found in the monorepo root. These decisions were made as part of the growth capital Audit (Waves 3–4) surface area reduction.
 
 ---
 

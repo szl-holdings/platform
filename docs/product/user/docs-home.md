@@ -46,7 +46,7 @@ Welcome to the SZL Holdings platform documentation. Use this index to find what 
 - [Privacy Overview](../../security/privacy-overview.md) — Data handling and retention
 
 ### For Investors & Evaluators
-- [Investor Narrative](../../investor/investor-narrative.md) — Series A thesis and platform story
+- [Investor Narrative](../../investor/investor-narrative.md) — growth capital thesis and platform story
 - [Technical Diligence Packet](../../investor/technical-diligence-packet.md) — Full technical reference for diligence
 
 ---

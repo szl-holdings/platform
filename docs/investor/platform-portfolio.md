@@ -79,7 +79,7 @@ Enterprise cybersecurity and managed services command. Three unified workspaces 
 
 **Capability highlights:**
 - Sentinel AI agent for threat analysis and triage
-- FedRAMP readiness track (Phase 4 roadmap)
+- StateRAMP readiness track (Phase 4 roadmap)
 - INCA model governance — experiment tracking, ensemble evaluation
 - MSP Command: managed services operations for security providers
 

@@ -1,4 +1,4 @@
-# Final Delivery Report — Series A GitHub Rehaul
+# Final Delivery Report — growth capital GitHub Rehaul
 
 > SZL Holdings Platform · April 21, 2026
 
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-A full top-to-bottom GitHub hygiene, security, governance, documentation, and public surface rehaul has been completed. The SZL Holdings monorepo now presents as an investor-reviewable, enterprise-grade, Series A-ready platform.
+A full top-to-bottom GitHub hygiene, security, governance, documentation, and public surface rehaul has been completed. The SZL Holdings monorepo now presents as an investor-reviewable, enterprise-grade, growth capital-ready platform.
 
 **Files created:** 28 new documentation files + 1 code improvement
 **Files removed:** 1 (`nohup.out` — empty runtime artifact)
@@ -23,7 +23,7 @@ A full top-to-bottom GitHub hygiene, security, governance, documentation, and pu
 | Phase 1 — Discovery & Inventory | ✅ Complete — 7 audit docs |
 | Phase 2 — Security & Hygiene | ✅ Complete — `nohup.out` removed, `SUPPORT.md` created, 6 governance docs, `.gitignore` verified |
 | Phase 3 — Root cleanup | ✅ Documented — safe items documented in matrix; deferred items require owner approval |
-| Phase 4 — README & public surface | ✅ Verified — README already Series A quality; no changes needed; links audited |
+| Phase 4 — README & public surface | ✅ Verified — README already growth capital quality; no changes needed; links audited |
 | Phase 5 — Screenshot architecture | ✅ Architecture established — directories and shot list created; capture deferred to task #2856 |
 | Phase 6 — UI consistency | ✅ Partial — `SectionErrorBoundary` sanitized (concrete code change); full improvements documented in `docs/brand/DESIGN_SYSTEM_DELTA.md` for next sprint |
 | Phase 7 — Operability & quality gate | ✅ Complete — `pnpm validate` passes; gate documented; pre-existing test failures noted and contextualized |
@@ -195,5 +195,5 @@ The API server test failures (`guardian-engine`, `autonomy-store`, `atlas-execut
 
 ---
 
-*Series A GitHub Rehaul — Completed April 21, 2026*
+*growth capital GitHub Rehaul — Completed April 21, 2026*
 *Executed by: Replit Agent — task #2832*

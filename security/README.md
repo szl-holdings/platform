@@ -1,6 +1,6 @@
 # Security Artifacts — SZL Holdings Platform
 
-This directory contains canonical security artifacts for the SZL Holdings platform. These documents are maintained for Series A technical diligence, SOC 2 evidence collection, and ongoing vulnerability management.
+This directory contains canonical security artifacts for the SZL Holdings platform. These documents are maintained for growth capital technical diligence, SOC 2 evidence collection, and ongoing vulnerability management.
 
 ---
 
@@ -63,7 +63,7 @@ The SBOM script writes `security/sbom-latest.json` and archives a timestamped co
 
 The `license-report.md` should be refreshed:
 - After any `pnpm add` or `pnpm update` operation
-- Before each Series A due diligence meeting
+- Before each growth capital due diligence meeting
 - Quarterly as part of the security review cycle
 
 The CI `security-reports` job regenerates the license report on every push to `main` using the inline Node.js scanner in `.github/workflows/security.yml`.

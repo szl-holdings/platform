@@ -1,7 +1,7 @@
 # Technical Diligence Packet — SZL Holdings Platform
 
 **Version:** 1.0 · **Date:** April 2026  
-**Audience:** Series A technical advisors, enterprise architects, engineering leaders, CISOs  
+**Audience:** growth capital technical advisors, enterprise architects, engineering leaders, CISOs  
 **Classification:** Confidential — NDA required
 
 > This document is the primary technical reference for diligence review. It consolidates architecture, tenancy model, trust/governance controls, deployment approach, operational procedures, AI oversight, observability, and known gaps into a single evaluable record. Supporting documentation is cross-referenced throughout.

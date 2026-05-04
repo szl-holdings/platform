@@ -214,7 +214,7 @@ The operating rhythm is failing if:
 - Monthly cadence adds: customer success, hires, ops formalization
 - Add: 1-on-1s with first 2-3 hires (weekly)
 
-### Scale phase (50+ customers, post-Series A)
+### Scale phase (50+ customers, post-growth capital)
 - Founder transitions from doing to enabling
 - Daily and weekly cadence delegates to ops/CS leads
 - Founder maintains: monthly review, quarterly review, annual offsite, top 10 customer relationships

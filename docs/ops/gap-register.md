@@ -3,7 +3,7 @@
 **Date:** April 19, 2026  
 **Derived from:** `artifacts/audit/platform-capability-manifest.json`  
 **Owner:** Platform Engineering  
-**Audience:** Founder, Engineering Leads, Series A investors conducting technical diligence
+**Audience:** Founder, Engineering Leads, growth capital investors conducting technical diligence
 
 > **Consistency rule:** Any capability marked `live` in the manifest does not appear here. Every non-live capability that carries P0–P2 severity is listed below. P3 and informational items appear in the final section.
 
@@ -36,7 +36,7 @@
 ---
 
 ### P0-002 — Route Authentication Matrix Not Enforced by CI
-**Tracking:** GAP-002 (Security Audit), Series A gap register  
+**Tracking:** GAP-002 (Security Audit), growth capital gap register  
 **Product:** API Server  
 **Status: ✅ CLOSED** — `route-security-matrix` CI job confirmed present in `.github/workflows/ci.yml` blocking the `ci-gate` job. Runs `--strict-auth` on every PR; fails if any route file is missing auth classification.  
 **Note:** This is a CI process gap, not a capability gap. The RBAC capability (CAP-003) is `live`; the gap is that the `route-security-matrix.ts --strict` script exists but is not yet wired into the CI pipeline, meaning new unauthenticated routes can be merged without detection.  

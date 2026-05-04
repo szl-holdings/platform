@@ -15,7 +15,7 @@ This is the documentation root for the SZL Holdings platform. All documentation 
 | [**operations/**](operations/INDEX.md) | Runbooks, deployment, incident response, release management, testing |
 | [**product/**](product/INDEX.md) | Product overview, features, surfaces, roadmap, packaging, user guides |
 | [**sales/**](sales/INDEX.md) | GTM strategy, demos, sales motion, customer success, positioning |
-| [**investor/**](investor/INDEX.md) | Series A materials, diligence packets, business model, commercial readiness |
+| [**investor/**](investor/INDEX.md) | growth capital materials, diligence packets, business model, commercial readiness |
 | [**audit/launch/**](audit/launch/INDEX.md) | Launch blockers, go/no-go criteria, analytics plan, operational readiness |
 
 ---

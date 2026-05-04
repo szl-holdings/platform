@@ -57,7 +57,7 @@ const complianceFrameworks = [
   { name: 'SOC 2 Type II', score: 91, controls: 65, passing: 60, status: 'Compliant' },
   { name: 'NIST 800-53', score: 79, controls: 1000, passing: 790, status: 'In Progress' },
   { name: 'CMMC 2.0', score: 71, controls: 110, passing: 78, status: 'In Progress' },
-  { name: 'FedRAMP Moderate', score: 74, controls: 323, passing: 239, status: 'Assessment' },
+  { name: 'StateRAMP Moderate', score: 74, controls: 323, passing: 239, status: 'Assessment' },
   { name: 'ISO 27001:2022', score: 82, controls: 93, passing: 76, status: 'In Progress' },
   { name: 'NIS2 / BSI', score: 68, controls: 42, passing: 29, status: 'Remediation' },
 ];
@@ -109,7 +109,7 @@ const RISK_REGISTER = [
   },
   {
     id: 'RR-002',
-    title: 'Regulatory Non-Compliance — NIS2 / FedRAMP Gaps',
+    title: 'Regulatory Non-Compliance — NIS2 / StateRAMP Gaps',
     category: 'Compliance Risk',
     likelihood: 'High',
     impact: 'High',
@@ -607,7 +607,7 @@ export default function ExecutiveRisk() {
               pages: 29,
             },
             {
-              title: 'FedRAMP Moderate — SSP v2.1',
+              title: 'StateRAMP Moderate — SSP v2.1',
               desc: 'System Security Plan — current revision for 3PAO assessment submission',
               type: 'PDF',
               status: 'In Review',

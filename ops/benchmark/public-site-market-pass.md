@@ -11,7 +11,7 @@
 - Hero: Bold category claim ("The OS for the modern enterprise")
 - Social proof: Government + Fortune 500 logos
 - Product surfaces: Foundry, AIP, Apollo
-- Trust: FedRAMP, SOC 2, ITAR compliance badges
+- Trust: StateRAMP, SOC 2, ITAR compliance badges
 - Conversion: "Request a demo" (enterprise sales funnel)
 
 ### Anduril (anduril.com)
@@ -86,7 +86,7 @@
 
 ---
 
-## Series A Polish Checklist
+## growth capital Polish Checklist
 
 - [ ] Remove all placeholder/demo data labels from public surfaces
 - [ ] Ensure all six primitives are consistently named across site

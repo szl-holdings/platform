@@ -1,7 +1,7 @@
 # Investor Proof Summary — SZL Holdings Platform
 
 **Date:** 2026-04-25  
-**Prepared for:** Series A due diligence / investor evaluation  
+**Prepared for:** growth capital due diligence / investor evaluation  
 **Platform:** SZL Holdings — Governed Autonomy Infrastructure  
 
 ---

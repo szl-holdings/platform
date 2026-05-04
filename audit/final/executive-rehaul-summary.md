@@ -106,7 +106,7 @@ The open items above are known, documented, and scoped. None of them break the c
 
 ---
 
-## Next 10 Actions (If More Work Remains Before Series A)
+## Next 10 Actions (If More Work Remains Before growth capital)
 
 1. Register `/api/sentra/risks` route (2–4 hours)
 2. Add Mapbox token placeholder UI to DOMAINE/Terra (2 hours)

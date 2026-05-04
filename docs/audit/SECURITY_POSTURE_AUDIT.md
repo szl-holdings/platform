@@ -1,12 +1,12 @@
 # Security Posture Audit
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 ---
 
 ## Executive Summary
 
-The SZL Holdings repository has a strong, multi-layered security posture for a pre-Series A platform. Defense-in-depth is present at the secret-scanning layer (gitleaks CI + GitHub native + push protection), the dependency layer (Dependabot + dependency-review workflow), the code analysis layer (CodeQL), and the application layer (RBAC, org scoping, audit trail).
+The SZL Holdings repository has a strong, multi-layered security posture for a pre-growth capital platform. Defense-in-depth is present at the secret-scanning layer (gitleaks CI + GitHub native + push protection), the dependency layer (Dependabot + dependency-review workflow), the code analysis layer (CodeQL), and the application layer (RBAC, org scoping, audit trail).
 
 **Overall security posture: Strong for stage. No critical gaps found.**
 
@@ -102,4 +102,4 @@ The SZL Holdings repository has a strong, multi-layered security posture for a p
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

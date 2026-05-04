@@ -64,7 +64,7 @@ The current trust center contains some claims that require tightening:
 - [ ] Add "in progress" for SOC 2 Type II
 - [ ] Add "aligned" not "certified" for ISO 27001
 - [ ] Add GDPR/CCPA compliance with DPA availability note
-- [ ] Remove or qualify any FedRAMP claims
+- [ ] Remove or qualify any StateRAMP claims
 
 **`/trust/ai-governance`**
 - [ ] Document HITL requirements (where enforced, which actions require approval)

@@ -185,9 +185,9 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
 | [investor/platform-thesis.md](investor/platform-thesis.md) | Platform thesis and investment narrative — start here | 2026-04 |
-| [investor/investor-narrative.md](investor/investor-narrative.md) | Series A investor narrative: category, moat, flywheel | 2026-04 |
+| [investor/investor-narrative.md](investor/investor-narrative.md) | growth capital investor narrative: category, moat, flywheel | 2026-04 |
 | [investor/investor-overview.md](investor/investor-overview.md) | Investor overview: executive summary of the opportunity | 2026-04 |
-| [investor/series-a-readiness.md](investor/series-a-readiness.md) | Series A readiness: what's ready, what's open | 2026-04 |
+| [investor/series-a-readiness.md](investor/series-a-readiness.md) | growth capital readiness: what's ready, what's open | 2026-04 |
 | [investor/technical-diligence-packet.md](investor/technical-diligence-packet.md) | Technical diligence packet: architecture, stack, security, scale | 2026-04 |
 | [investor/audit-investor-readiness.md](investor/audit-investor-readiness.md) | Investor readiness audit: commercial document coherence review | 2026-04 |
 | [investor/moat-map.md](investor/moat-map.md) | Platform moat map: structural advantages and defensibility | 2026-04 |
@@ -201,7 +201,7 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 | [investor/product-readiness.md](investor/product-readiness.md) | Product readiness assessment for investors | 2026-04 |
 | [investor/readiness-gaps.md](investor/readiness-gaps.md) | Honest gap register from investor perspective | 2026-04 |
 | [investor/data-room-index.md](investor/data-room-index.md) | Data room index: all materials available for diligence | 2026-04 |
-| [investor/funding-use-outline.md](investor/funding-use-outline.md) | Use of proceeds: how Series A capital will be deployed | 2026-04 |
+| [investor/funding-use-outline.md](investor/funding-use-outline.md) | Use of proceeds: how growth capital capital will be deployed | 2026-04 |
 | [investor/go-to-market.md](investor/go-to-market.md) | GTM strategy from investor perspective | 2026-04 |
 | [investor/atlas-spatial-runtime-moat.md](investor/atlas-spatial-runtime-moat.md) | ATLAS spatial runtime moat analysis | 2026-04 |
 

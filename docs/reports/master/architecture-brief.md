@@ -180,7 +180,7 @@ Retrieval currently synchronous. For scale: async retrieval with streaming respo
 | Bundle sizes 500KB–1.7MB | P1 | Code splitting, lazy loading (Mapbox is main offender) |
 | Retrieval not tenant-partitioned | P0 | tenantId addition to retrieval queries |
 | No message queue | P2 | Required for async workflow at scale |
-| Single-region deployment | P2 | Multi-region post Series A |
+| Single-region deployment | P2 | Multi-region post growth capital |
 | Load testing not done | P1 | Required before commercial launch |
 
 ---

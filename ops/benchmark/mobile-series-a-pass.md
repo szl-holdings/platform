@@ -1,14 +1,14 @@
-# Mobile Series A Pass
+# Mobile growth capital Pass
 
 **Last updated:** April 2026
-**Purpose:** Define what mobile presence signals to Series A investors
+**Purpose:** Define what mobile presence signals to growth capital investors
 
 ---
 
 ## What Investors Look For in Mobile
 
 ### The Signal
-A mobile app at Series A signals: "This team builds for real operators, not just demo audiences." It does not need to be feature-complete. It needs to be real, usable, and governed.
+A mobile app at growth capital signals: "This team builds for real operators, not just demo audiences." It does not need to be feature-complete. It needs to be real, usable, and governed.
 
 ### Competitive Mobile Patterns
 - **Palantir Mobile:** Limited to specific government deployments; not publicly available
@@ -35,7 +35,7 @@ A mobile app at Series A signals: "This team builds for real operators, not just
 
 ---
 
-## Series A Mobile Quality Bar
+## growth capital Mobile Quality Bar
 
 ### Must Have (Before Fundraise)
 1. **Builds successfully** — `eas build` produces installable artifacts
@@ -74,7 +74,7 @@ Total demo time: 2-3 minutes
 
 ---
 
-## App Store Readiness (Post-Series A)
+## App Store Readiness (Post-growth capital)
 
 | Artifact | Spec | Priority |
 |----------|------|----------|

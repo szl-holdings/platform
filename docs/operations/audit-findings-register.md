@@ -575,10 +575,10 @@ Priority order for remediation:
 - **Concern:** Is the platform actually production-grade or is this a demo? → All diligence docs (TECHNICAL_DILIGENCE_PACKET.md, TENANCY-MODEL.md, AUDIT_FINDINGS_REGISTER.md) are honest about functional-alpha status with no fabricated production readiness.
 - **Finding RT-014:** TECHNICAL_DILIGENCE_PACKET.md is complete and honest. The self-disclosure of open gaps (Vessels schema, adminGuard timing, conversations table) demonstrates engineering rigor — this is a trust-builder, not a detractor, if positioned correctly.
 
-**5 — Series A Investor**
+**5 — growth capital Investor**
 - **Concern:** "Show me ARR, NRR, logo count." → Correctly documented as pre-commercial. SERIES_A_READINESS.md is honest about the gap.
 - **Concern:** "What is the moat?" → Six platform primitives, cross-domain governance, and decision memory via Outcome Graph are well-documented in MOAT_MAP.md.
-- **Finding RT-015:** The biggest investor risk is not the technology — it is the absence of signed design partners. This is the single highest-leverage human action: get one paying or design-partner customer before the Series A process begins. No engineering change can substitute for this.
+- **Finding RT-015:** The biggest investor risk is not the technology — it is the absence of signed design partners. This is the single highest-leverage human action: get one paying or design-partner customer before the growth capital process begins. No engineering change can substitute for this.
 
 **6 — Future VP Engineering**
 - **Concern:** "What is the test coverage?" → Honest: sparse E2E, good unit coverage on critical paths, WCAG untested, mobile E2E absent.
@@ -619,7 +619,7 @@ Priority order for remediation:
 | RT-012 | P1 (existing) | Of three P1 gaps from Phase 2–3, AF-001 and AF-003/007 are now resolved (Tasks #2693, #1048); SEC-007 (SSRF on webhooks) remains open | ⚠️ Partial — SEC-007 only |
 | RT-013 | P1 (existing) | No onboarding wizard — highest-friction operator UX gap | ⚠️ Open — FLOW-001 |
 | RT-014 | INFO | TECHNICAL_DILIGENCE_PACKET.md passes diligence honesty test | INFO — pass |
-| RT-015 | STRATEGIC | No signed design partners — highest pre-Series A risk (non-technical) | ⚠️ Open — founder action |
+| RT-015 | STRATEGIC | No signed design partners — highest pre-growth capital risk (non-technical) | ⚠️ Open — founder action |
 | RT-016 | P1 (existing) | New VP Eng will find zero operational instrumentation in production | ⚠️ Open — LB-002/003/006 |
 | RT-017 | P2 | Counsel deprecation inconsistency — sales vs. demo docs misaligned | ⚠️ Open — before legal-buyer sales |
 | RT-018 | P1 (existing) | SRE day-0 is blind — no OTEL, Sentry, or uptime monitoring | ⚠️ Open — LB-002/003/006 |

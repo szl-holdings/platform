@@ -391,7 +391,7 @@ export default function ExecutiveBoardView() {
   const displayControlGroups = controlGroups ?? [
     { framework: 'NIST CSF', implemented: 84, partial: 22, total: 120, score: 70 },
     { framework: 'CIS Controls', implemented: 41, partial: 12, total: 56, score: 73 },
-    { framework: 'FedRAMP Moderate', implemented: 67, partial: 31, total: 110, score: 61 },
+    { framework: 'StateRAMP Moderate', implemented: 67, partial: 31, total: 110, score: 61 },
   ];
 
   const usingLiveIncidents = liveIncidents.length > 0;
@@ -742,7 +742,7 @@ export default function ExecutiveBoardView() {
             <CheckCircle2 className="w-3.5 h-3.5 text-[#c9b787]" />
             <p className="text-[11px] text-white/50">
               Posture improved 9.1% over 6 months. Incident count trending down. MTTR improving.
-              Controls gap remains on FedRAMP Moderate.
+              Controls gap remains on StateRAMP Moderate.
             </p>
           </div>
         </div>

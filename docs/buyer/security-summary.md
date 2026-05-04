@@ -91,7 +91,7 @@ Audit logs are append-only. They cannot be modified or deleted by any platform u
 |--------------|--------|-------|
 | SOC 2 Type I | Not yet | On roadmap — post-funding milestone |
 | SOC 2 Type II | Not yet | 12–18 months post-revenue |
-| FedRAMP | Not yet | Aegis-specific — 18–24 months |
+| StateRAMP | Not yet | Aegis-specific — 18–24 months |
 | ISO 27001 | Not yet | Planned after SOC 2 |
 | GDPR | Practices aligned | Not formally certified |
 

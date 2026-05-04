@@ -30,14 +30,14 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 **Strategy Matrices**
 - `audit/strategy/active-vs-defer-matrix.md` — Artifact-by-artifact classification: Flagship, Supporting, Internal Only, Deferred, Archived, Concept. Defines public claim surface.
 - `audit/strategy/public-focus-recommendation.md` — Investor messaging hierarchy: Tier 1 (lead with), Tier 2 (domain-specific), Tier 3 (explicit disclosure), Tier 4 (do not demo). Core messaging discipline.
-- `audit/strategy/non-core-scope-reduction-plan.md` — Concrete scope reduction actions: immediate (hours), medium-term (30 days), and deferred (post-Series A).
+- `audit/strategy/non-core-scope-reduction-plan.md` — Concrete scope reduction actions: immediate (hours), medium-term (30 days), and deferred (post-growth capital).
 
 **Final Readiness Scorecards**
 - `audit/final/executive-rehaul-summary.md` — Single executive summary of all Rehaul phases 1–9: what was verified, what was fixed, what remains open. Platform verdict: **Operational Alpha**.
 - `audit/final/top-25-risks-and-gaps.md` — Brutally honest enumeration of the 25 highest-risk items ranked by severity × diligence likelihood. Each item has severity, status, and mitigation plan.
 - `audit/final/what-was-fixed.md` — Complete record of every fix applied across the Rehaul program (visual, CI, bugs, architecture, CI phase 9).
-- `audit/final/what-remains-unverified.md` — Honest accounting of claims and features that have NOT been independently verified in this cycle. Includes action required before Series A diligence.
-- `audit/final/series-a-surface-scorecard.md` — Per-artifact 1–5 scoring across three lenses (Enterprise Buyer, Technical Diligence, Investor Signal). Overall platform score: **4.1/5 — Fundable at Series A with honest alpha positioning.**
+- `audit/final/what-remains-unverified.md` — Honest accounting of claims and features that have NOT been independently verified in this cycle. Includes action required before growth capital diligence.
+- `audit/final/series-a-surface-scorecard.md` — Per-artifact 1–5 scoring across three lenses (Enterprise Buyer, Technical Diligence, Investor Signal). Overall platform score: **4.1/5 — Fundable at growth capital with honest alpha positioning.**
 
 ---
 
@@ -309,7 +309,7 @@ This is the first formal public release of the SZL Holdings platform ecosystem.
 - Command workspace: MSP operations, client SLA management
 - Intelligence workspace: AI research (INCA), model registry, experiment tracking
 - STIX/TAXII protocol layer
-- FedRAMP readiness track (Aegis — Phase 2 roadmap)
+- StateRAMP readiness track (Aegis — Phase 2 roadmap)
 
 **Terra — Real Estate Intelligence**
 - NYC distress property data pipeline (multiple public data sources)

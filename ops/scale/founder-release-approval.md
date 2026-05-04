@@ -151,5 +151,5 @@ It looks heavy. It is intentionally so. The cost of a bad release at
 founder-stage is high — partner trust is unrecoverable. The 10 minutes
 to fill out the template are the cheapest insurance available.
 
-The approval template is the same one used for Series A diligence —
+The approval template is the same one used for growth capital diligence —
 buyers review it as evidence of a controlled release process.

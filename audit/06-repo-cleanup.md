@@ -70,7 +70,7 @@ The following specific claims appear in README, org profile, landing pages, dash
 | "Authentication providers: Replit Auth, Clerk" | `platform-facts.md` | Remove Clerk unless it is actively wired | **BROKEN** — PARTIALLY VERIFIED: Clerk not found in active auth flow |
 | "40+ connector integrations" | `PRODUCT_MATRIX.md` (Lyte) | Remove — unverified claim | **UNVERIFIED** — not confirmed in any audit scan |
 | "Session store: Redis (enterprise production)" | `PLATFORM_CANONICAL.md` | Change to: "In-memory (all environments); Redis not yet activated" | **BROKEN** — PARTIALLY VERIFIED: Redis not activated per `OPEN_RISKS_AND_NEXT_10.md` |
-| "FedRAMP readiness track" | `PRODUCT_MATRIX.md` (Aegis) | Remove or qualify as "roadmap" | **UNVERIFIED** — no FedRAMP work found in codebase |
+| "StateRAMP readiness track" | `PRODUCT_MATRIX.md` (Aegis) | Remove or qualify as "roadmap" | **UNVERIFIED** — no StateRAMP work found in codebase |
 | "STIX/TAXII protocol layer" | `PRODUCT_MATRIX.md` | Move to "PARTIALLY VERIFIED" language | **UNVERIFIED** — code pattern not confirmed in this audit |
 | "MITRE ATT&CK v14 detection coverage" | `PRODUCT_MATRIX.md` | Qualify — coverage claim unverified | **UNVERIFIED** — routes present; coverage not measured |
 | "AIS telemetry integration" | `PRODUCT_MATRIX.md` (Vessels) | Add disclosure: AIS is simulated; weather/NOAA real | **PARTIALLY VERIFIED** — simulation noted in `OPEN_RISKS_AND_NEXT_10.md`; NOAA/GDELT routes present |

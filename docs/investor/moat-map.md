@@ -1,7 +1,7 @@
 # Moat Map — SZL Holdings Platform
 
 **Version:** 2.0 · **Date:** April 2026  
-**Audience:** Series A investors, strategic advisors, enterprise evaluators  
+**Audience:** growth capital investors, strategic advisors, enterprise evaluators  
 **Classification:** Confidential — NDA required
 
 > **Product naming:** For the canonical product map (which names resolve to which artifacts), see [app-moats.md](../architecture/app-moats.md). This document retains the full moat analysis with code evidence. See [docs/CANONICAL_INDEX.md](../CANONICAL_INDEX.md).

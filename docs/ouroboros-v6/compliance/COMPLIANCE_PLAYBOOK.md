@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This playbook maps every material federal and enterprise certification pathway for SZL Holdings — from a $0 SAM.gov registration executable today to a $1.5M+ FedRAMP Moderate authorization reserved for later. The sequence is deliberate: each step creates a prerequisite artifact for the next. The 24-month roadmap at the end names the exact decision gates.
+This playbook maps every material federal and enterprise certification pathway for SZL Holdings — from a $0 SAM.gov registration executable today to a $1.5M+ StateRAMP Moderate authorization reserved for later. The sequence is deliberate: each step creates a prerequisite artifact for the next. The 24-month roadmap at the end names the exact decision gates.
 
 ---
 
@@ -128,7 +128,7 @@ The five TSC pillars — select which apply:
 ### What Type 1 Buys in Federal/Enterprise Sales
 
 - **Mid-market buyers (500–5,000 employees):** 85% require Type 2; 60% of SMBs will accept Type 1 temporarily. [SOC2 Auditors analysis](https://soc2auditors.org/insights/soc-2-type-1-vs-type-2/)
-- **Federal civilian agencies:** Type 1 accelerates trust conversations but does not substitute for FedRAMP. It signals control maturity during RFI/RFP evaluation.
+- **Federal civilian agencies:** Type 1 accelerates trust conversations but does not substitute for StateRAMP. It signals control maturity during RFI/RFP evaluation.
 - **Fortune 500:** 98% require Type 2. Type 1 buys you 6–12 months of goodwill while Type 2 observation runs.
 - **Commercially:** SOC 2 Type 1 removes the "do you have a security report?" blocker in enterprise procurement, cutting sales cycle friction. [A-LIGN SOC 2 guide](https://www.a-lign.com/articles/what-is-soc-2-complete-guide)
 
@@ -163,7 +163,7 @@ ISO 27001 is an internationally recognized ISMS (Information Security Management
 | Audience | US enterprise / federal | Global / EU enterprise |
 | Output | Audit report (CPA firm) | Certificate (accredited body) |
 | Scope | Flexible TSC selection | Mandatory ISMS + Annex A controls |
-| Recognized by FedRAMP? | Informally helpful | No |
+| Recognized by StateRAMP? | Informally helpful | No |
 | EU/UK preferred | No | Yes |
 | Renewal | Annual audit | Annual surveillance + 3-yr recert |
 | Cost overlap | 60–70% of controls shared | Yes |
@@ -181,7 +181,7 @@ ISO 27001 is worth pursuing when:
 
 ---
 
-## 4. FedRAMP
+## 4. StateRAMP
 
 ### Impact Levels and Costs
 
@@ -192,41 +192,41 @@ ISO 27001 is worth pursuing when:
 | **Moderate** | 325 | $500,000–$1,500,000 | $200,000–$500,000 | $125,000–$195,000 | PII, CUI — most common |
 | **High** | 421 | $1,000,000–$3,000,000+ | $500,000–$1,000,000 | $150,000–$250,000 | Healthcare, law enforcement |
 
-[Paramify FedRAMP cost guide 2026](https://www.paramify.com/blog/fedramp-cost) | [Vanta FedRAMP cost guide](https://www.vanta.com/collection/fedramp/fedramp-cost)
+[Paramify StateRAMP cost guide 2026](https://www.paramify.com/blog/fedramp-cost) | [Vanta StateRAMP cost guide](https://www.vanta.com/collection/fedramp/fedramp-cost)
 
-### FedRAMP 20x — What Changed (2025 Reform)
+### StateRAMP 20x — What Changed (2025 Reform)
 
-FedRAMP 20x was announced in March 2025 and is currently in **Phase 2** (November 2025+). Key changes: [FedRAMP 20x Overview](https://www.fedramp.gov/20x/)
+StateRAMP 20x was announced in March 2025 and is currently in **Phase 2** (November 2025+). Key changes: [StateRAMP 20x Overview](https://www.fedramp.gov/20x/)
 
 - **Old model:** JAB (Joint Authorization Board) or agency-sponsor path; 12–24 month backlog; manual document-heavy process; under 350 authorizations in 10 years.
-- **New 20x model:** Automation-driven; machine-readable evidence; FedRAMP authorized **144 cloud services in FY25 alone** and eliminated the authorization backlog. [FedRAMP 20x Four Months In](https://www.fedramp.gov/2025-07-30-fedramp-20x-four-months-in-and-authorizing/)
-- **Phase 1 results:** 12 FedRAMP 20x Low pilot authorizations from 26 submissions; average agency review queue under 15 services; typical review time under 5 weeks.
+- **New 20x model:** Automation-driven; machine-readable evidence; StateRAMP authorized **144 cloud services in FY25 alone** and eliminated the authorization backlog. [StateRAMP 20x Four Months In](https://www.fedramp.gov/2025-07-30-fedramp-20x-four-months-in-and-authorizing/)
+- **Phase 1 results:** 12 StateRAMP 20x Low pilot authorizations from 26 submissions; average agency review queue under 15 services; typical review time under 5 weeks.
 - **Phase 2 (current):** Extending 20x automation to Moderate and above; building machine-readable control evidence standards.
-- **FedRAMP 20x Low pilot:** Open for participation — cost structure is materially lower because 3PAO labor is partially replaced by automated evidence validation. [Workstreet FedRAMP cost](https://www.workstreet.com/blog/fedramp-cost)
+- **StateRAMP 20x Low pilot:** Open for participation — cost structure is materially lower because 3PAO labor is partially replaced by automated evidence validation. [Workstreet StateRAMP cost](https://www.workstreet.com/blog/fedramp-cost)
 
-### FedRAMP Tailored (LI-SaaS) — Most Realistic First Step
+### StateRAMP Tailored (LI-SaaS) — Most Realistic First Step
 
 LI-SaaS (Low-Impact SaaS) is designed for SaaS products that:
 - Do not store PII beyond login credentials (name, email, password)
 - Have negligible impact level on federal operations if compromised
 
-**Applicability for SZL Holdings:** Depends on whether the AI runtime product processes any federal-sourced data. If the product is a governance tool that *analyzes* but does not *store* agency data, LI-SaaS is plausible. If the product ingests and retains CUI or agency data, FedRAMP Low is the minimum. [Vanta LI-SaaS guide](https://www.vanta.com/collection/fedramp/fedramp-li-saas) | [Secureframe LI-SaaS guide](https://secureframe.com/hub/fedramp/low)
+**Applicability for SZL Holdings:** Depends on whether the AI runtime product processes any federal-sourced data. If the product is a governance tool that *analyzes* but does not *store* agency data, LI-SaaS is plausible. If the product ingests and retains CUI or agency data, StateRAMP Low is the minimum. [Vanta LI-SaaS guide](https://www.vanta.com/collection/fedramp/fedramp-li-saas) | [Secureframe LI-SaaS guide](https://secureframe.com/hub/fedramp/low)
 
 ### Sponsor-Required Model
 
 - **Agency Sponsor path (recommended):** A federal agency that wants to procure your product sponsors your authorization. The agency's CISO/AO accepts risk and issues an ATO (Authority to Operate). This is the fastest and most practical path for new market entrants.
-- **FedRAMP 20x pilot path:** Participate directly — suitable for Low impact without needing a pre-existing agency relationship.
+- **StateRAMP 20x pilot path:** Participate directly — suitable for Low impact without needing a pre-existing agency relationship.
 - **JAB (Joint Authorization Board):** Now largely replaced by agency sponsorship under the 20x reform. Still available but de-prioritized.
 
-### Named 3PAO Assessors (FedRAMP Marketplace)
+### Named 3PAO Assessors (StateRAMP Marketplace)
 
 | 3PAO | Accreditation Date | Highest Level Assessed | Notable |
 |------|--------------------|----------------------|---------|
-| **Schellman Compliance, LLC** | July 27, 2012 | FedRAMP High | #1 by volume; 200+ assessments. [FedRAMP Marketplace](https://www.fedramp.gov/marketplace/assessors/136571/) |
-| **A-LIGN** | 2009 | FedRAMP High | Top 3 globally; 100% authorization success rate; only top-3 3PAO with its own FedRAMP 20x Low authorized audit tool (A-SCEND). [A-LIGN FedRAMP](https://www.a-lign.com/service/fedramp) |
-| **Coalfire** | Active | FedRAMP Moderate/High | Deep DoD IL4–IL6 experience. [Coalfire FedRAMP](https://coalfire.com/services/assessment) |
-| **Tevora Business Solutions** | August 27, 2020 | FedRAMP Moderate | [FedRAMP Marketplace](https://www.fedramp.gov/marketplace/assessors/200492/) |
-| **Lazarus Alliance** | Active | FedRAMP Moderate | Competitive pricing. [Lazarus Alliance](https://lazarusalliance.com/services/audit-compliance/fedramp/) |
+| **Schellman Compliance, LLC** | July 27, 2012 | StateRAMP High | #1 by volume; 200+ assessments. [StateRAMP Marketplace](https://www.fedramp.gov/marketplace/assessors/136571/) |
+| **A-LIGN** | 2009 | StateRAMP High | Top 3 globally; 100% authorization success rate; only top-3 3PAO with its own StateRAMP 20x Low authorized audit tool (A-SCEND). [A-LIGN StateRAMP](https://www.a-lign.com/service/fedramp) |
+| **Coalfire** | Active | StateRAMP Moderate/High | Deep DoD IL4–IL6 experience. [Coalfire StateRAMP](https://coalfire.com/services/assessment) |
+| **Tevora Business Solutions** | August 27, 2020 | StateRAMP Moderate | [StateRAMP Marketplace](https://www.fedramp.gov/marketplace/assessors/200492/) |
+| **Lazarus Alliance** | Active | StateRAMP Moderate | Competitive pricing. [Lazarus Alliance](https://lazarusalliance.com/services/audit-compliance/fedramp/) |
 
 > Full accredited assessor list at: [fedramp.gov/marketplace/assessors](https://www.fedramp.gov/marketplace/assessors/)
 
@@ -263,17 +263,17 @@ CMMC is **only required if SZL Holdings holds a DoD contract that involves CUI o
 
 ---
 
-## 6. AWS Marketplace
+## 6. cloud marketplace
 
 ### Private vs. Public Listing
-- **Public listing:** Visible to all AWS Marketplace buyers; requires completed product review, security documentation, and live API integration.
+- **Public listing:** Visible to all cloud marketplace buyers; requires completed product review, security documentation, and live API integration.
 - **Private offer:** Negotiated terms (custom pricing, custom EULA) delivered to a specific named buyer's AWS account. Can be created after going public. Zero incremental cost to create. [AWS Private Offers Docs](https://docs.aws.amazon.com/marketplace/latest/userguide/creating-private-offer.html)
 
 ### Step-by-Step: SaaS Listing
 
-1. **Register as an AWS Marketplace Seller** at [aws.amazon.com/partners/marketplace](https://aws.amazon.com/partners/marketplace) → "Register Now." Provide company information, banking details (for payment disbursements), and tax documentation (W-9 for US entities). Approval: 3–5 business days. [AWS Seller Registration](https://docs.aws.amazon.com/marketplace/latest/userguide/seller-account-registering.html)
-2. **Define product configuration** in the AWS Marketplace Management Portal (AMMP): product title, categories, usage dimensions, pricing model, regional availability, support contacts.
-3. **Integrate AWS SaaS APIs:** Implement `ResolveCustomer`, `BatchMeterUsage`, and `MeterUsage` calls. Your service must communicate entitlements and usage back to AWS in real time. [Labra AWS Marketplace guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/)
+1. **Register as an cloud marketplace Seller** at [aws.amazon.com/partners/marketplace](https://aws.amazon.com/partners/marketplace) → "Register Now." Provide company information, banking details (for payment disbursements), and tax documentation (W-9 for US entities). Approval: 3–5 business days. [AWS Seller Registration](https://docs.aws.amazon.com/marketplace/latest/userguide/seller-account-registering.html)
+2. **Define product configuration** in the cloud marketplace Management Portal (AMMP): product title, categories, usage dimensions, pricing model, regional availability, support contacts.
+3. **Integrate AWS SaaS APIs:** Implement `ResolveCustomer`, `BatchMeterUsage`, and `MeterUsage` calls. Your service must communicate entitlements and usage back to AWS in real time. [Labra cloud marketplace guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/)
 4. **Choose pricing model** (see below).
 5. **Submit for AWS review:** AWS reviews documentation, data flow diagrams, and API integration. Review: days to several weeks depending on complexity.
 6. **Go live** → monitor entitlement callbacks, reconcile metering with AWS reports.
@@ -294,11 +294,11 @@ CMMC is **only required if SZL Holdings holds a DoD contract that involves CUI o
 
 To list in AWS GovCloud:
 1. Register a separate **AWS GovCloud (US) account** at the GovCloud sign-up page (requires US-person verification — ITAR requirement).
-2. Request **account verification** from the AWS Marketplace Ops team from your standard seller account.
+2. Request **account verification** from the cloud marketplace Ops team from your standard seller account.
 3. In the AMMP, under the Regions tab, select `us-gov-east-1` and `us-gov-west-1` radio buttons.
 4. Alternatively, if using the Excel product load form, enter `TRUE` in the `us-gov-west-1 Availability` and `us-gov-east-1 Availability` columns. [AWS GovCloud Marketplace guide](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/)
 
-> **Note:** As of May 1, 2025, SaaS products hosted on any cloud infrastructure may list on AWS Marketplace — AWS hosting is no longer required for commercial listings. Only fully AWS-hosted solutions count toward customer EDP (Enterprise Discount Program) spend commitments. [Clazar AWS SaaS Policy Update](https://clazar.io/blog/aws-new-saas-policy)
+> **Note:** As of May 1, 2025, SaaS products hosted on any cloud infrastructure may list on cloud marketplace — AWS hosting is no longer required for commercial listings. Only fully AWS-hosted solutions count toward customer EDP (Enterprise Discount Program) spend commitments. [Clazar AWS SaaS Policy Update](https://clazar.io/blog/aws-new-saas-policy)
 
 **AWS transaction fee:** AWS takes 3–20% of revenue depending on product type and annual volume. No listing fee.
 
@@ -345,15 +345,15 @@ To list in AWS GovCloud:
 ## 8. StateRAMP
 
 ### What It Is
-StateRAMP is a consortium framework modeled on NIST SP 800-53, specifically governing cloud security authorization for state and local government entities. It is separate from FedRAMP — FedRAMP covers federal agencies only; StateRAMP covers the 50 states, territories, and municipalities. [RISCPoint StateRAMP vs FedRAMP guide](https://www.riscpoint.com/post/fedramp-vs-stateramp-a-guide)
+StateRAMP is a consortium framework modeled on NIST SP 800-53, specifically governing cloud security authorization for state and local government entities. It is separate from StateRAMP — StateRAMP covers federal agencies only; StateRAMP covers the 50 states, territories, and municipalities. [RISCPoint StateRAMP vs StateRAMP guide](https://www.riscpoint.com/post/fedramp-vs-stateramp-a-guide)
 
-### Reciprocity with FedRAMP
-If SZL Holdings obtains a **FedRAMP Ready, P-ATO, or ATO** designation, StateRAMP automatically accepts it under its reciprocity program — no additional security assessment required. SZL Holdings must become a **StateRAMP member** to claim reciprocity. [Carahsoft StateRAMP harmonization](https://www.carahsoft.com/wordpress/carahsoft-stateramp-the-importance-of-framework-harmonization-blog-2025/)
+### Reciprocity with StateRAMP
+If SZL Holdings obtains a **StateRAMP Ready, P-ATO, or ATO** designation, StateRAMP automatically accepts it under its reciprocity program — no additional security assessment required. SZL Holdings must become a **StateRAMP member** to claim reciprocity. [Carahsoft StateRAMP harmonization](https://www.carahsoft.com/wordpress/carahsoft-stateramp-the-importance-of-framework-harmonization-blog-2025/)
 
 ### When StateRAMP Matters
-StateRAMP is relevant when state and local government contracts are material to the revenue strategy — e.g., state CIO offices, county health departments, municipal planning agencies. If federal civilian is the primary target, StateRAMP is a downstream benefit of FedRAMP.
+StateRAMP is relevant when state and local government contracts are material to the revenue strategy — e.g., state CIO offices, county health departments, municipal planning agencies. If federal civilian is the primary target, StateRAMP is a downstream benefit of StateRAMP.
 
-**Priority Rating: NICE-TO-HAVE — Pursue as a zero-incremental-cost extension of FedRAMP authorization, not as a standalone effort.**
+**Priority Rating: NICE-TO-HAVE — Pursue as a zero-incremental-cost extension of StateRAMP authorization, not as a standalone effort.**
 
 ---
 
@@ -441,7 +441,7 @@ If classified as high-risk (Annex III), SZL Holdings must: [McKenna Consultants 
 ```
 Month 1        Month 3        Month 6        Month 12       Month 18       Month 24
    |              |              |              |              |              |
-[SAM.gov]    [AWS Mktpl]    [SOC 2 T1]    [SOC 2 T2]    [FedRAMP]     [ISO/StateRAMP]
+[SAM.gov]    [AWS Mktpl]    [SOC 2 T1]    [SOC 2 T2]    [StateRAMP]     [ISO/StateRAMP]
 [UEI/CAGE]   [Public List]  [Azure Mktpl] [AWS GovCld]  [LI-SaaS or]  [8(a) cert if]
 [NAICS/PSC]  [Private Offer][HIPAA BAA?]  [CMMC? ←DoD]  [20x Low]     [eligible]
              [SOC 2 start]  [EU AI Act    [ISO 27001?]  [Pilot]       [EU Rep if]
@@ -459,11 +459,11 @@ Month 1        Month 3        Month 6        Month 12       Month 18       Month
 - **Cost:** $0 | **Output:** Active SAM registration, UEI, CAGE
 
 #### Month 2–3 — Market Distribution
-- [ ] **Register as AWS Marketplace seller** (free, 3–5 days approval)
+- [ ] **Register as cloud marketplace seller** (free, 3–5 days approval)
 - [ ] **Build SaaS Contract API integration** (metering + entitlement)
 - [ ] **Submit private listing** (free, ~2 weeks review)
 - [ ] **Create first private offer** for any LOI prospect
-- **Cost:** $0–$5,000 (developer time) | **Output:** AWS Marketplace listing, private offer capability
+- **Cost:** $0–$5,000 (developer time) | **Output:** cloud marketplace listing, private offer capability
 
 #### Month 3–4 — SOC 2 Initiation
 - [ ] **Select compliance platform:** Drata Foundation or Secureframe Fundamentals (~$7,500–$10,000/yr)
@@ -481,7 +481,7 @@ Month 1        Month 3        Month 6        Month 12       Month 18       Month
 - [ ] **Begin SOC 2 Type 2 observation window** (controls must run cleanly for 3–6 months)
 - **Cost:** $5,000–$10,000 (Azure onboarding, legal) | **Output:** SOC 2 Type 1 report, Azure listing started
 
-**Decision Point A (Month 6):** Do any federal civilian prospects require FedRAMP? If yes → begin agency sponsor outreach. If no → defer to Month 18.
+**Decision Point A (Month 6):** Do any federal civilian prospects require StateRAMP? If yes → begin agency sponsor outreach. If no → defer to Month 18.
 
 #### Month 8–12 — SOC 2 Type 2 Completion
 - [ ] **Complete SOC 2 Type 2 audit** (3–6 month observation + 4–8 week audit)
@@ -494,24 +494,24 @@ Month 1        Month 3        Month 6        Month 12       Month 18       Month
 - **Cost:** $12,000–$25,000 (Type 2 audit) | **Output:** SOC 2 Type 2 report — unlocks Fortune 500 and most enterprise buyers
 
 #### Month 14–18 — Federal Market Entry
-- [ ] **Identify agency sponsor** for FedRAMP LI-SaaS or 20x Low pilot
+- [ ] **Identify agency sponsor** for StateRAMP LI-SaaS or 20x Low pilot
 - [ ] **Engage 3PAO** (A-LIGN, Schellman, or Coalfire for first meeting; Lazarus Alliance or Tevora for smaller scopes)
-- [ ] **Begin FedRAMP readiness assessment** ($20,000–$50,000)
-- [ ] **Submit to FedRAMP 20x Low pilot** if product fits (minimal PII, no CUI storage)
-- [ ] **StateRAMP membership** — join if state government contracts emerge (leverages FedRAMP investment at zero incremental assessment cost)
+- [ ] **Begin StateRAMP readiness assessment** ($20,000–$50,000)
+- [ ] **Submit to StateRAMP 20x Low pilot** if product fits (minimal PII, no CUI storage)
+- [ ] **StateRAMP membership** — join if state government contracts emerge (leverages StateRAMP investment at zero incremental assessment cost)
 
-**Decision Point C (Month 18):** Is there a committed agency sponsor or 20x pilot acceptance? If yes → authorize $150,000–$300,000 FedRAMP budget. If no → defer and focus on enterprise commercial.
+**Decision Point C (Month 18):** Is there a committed agency sponsor or 20x pilot acceptance? If yes → authorize $150,000–$300,000 StateRAMP budget. If no → defer and focus on enterprise commercial.
 
-- **Cost:** $20,000–$50,000 (readiness); $150,000–$300,000 (full LI-SaaS/Low authorization) | **Output:** FedRAMP Ready designation (commercial credibility); ATO (commercial unlock)
+- **Cost:** $20,000–$50,000 (readiness); $150,000–$300,000 (full LI-SaaS/Low authorization) | **Output:** StateRAMP Ready designation (commercial credibility); ATO (commercial unlock)
 
 #### Month 20–24 — Maturity and Expansion
-- [ ] **FedRAMP authorization complete** (ATO) → list on FedRAMP Marketplace → eligible for federal contracts without per-agency review
+- [ ] **StateRAMP authorization complete** (ATO) → list on StateRAMP Marketplace → eligible for federal contracts without per-agency review
 - [ ] **ISO 27001 certification** if EU revenue is material (6–12 months from initiation → start Month 12 if EU pipeline confirmed)
 - [ ] **8(a) certification** if application was filed at Month 6 (18-month approval timeline)
 - [ ] **GCP Marketplace listing** once AWS + Azure are generating pipeline
 - [ ] **EU AI Act compliance** — if high-risk classification confirmed, complete technical documentation, appoint EU representative, register in EU database before deploying to EU customers
 
-**Decision Point D (Month 24):** Review FedRAMP ROI. Is federal revenue covering authorization maintenance costs ($50,000–$200,000/yr)? If not, evaluate whether to continue or sunset ATO.
+**Decision Point D (Month 24):** Review StateRAMP ROI. Is federal revenue covering authorization maintenance costs ($50,000–$200,000/yr)? If not, evaluate whether to continue or sunset ATO.
 
 ---
 
@@ -520,18 +520,18 @@ Month 1        Month 3        Month 6        Month 12       Month 18       Month
 | Certification | Priority | When | Cost (Low–High) | Commercial Unlock |
 |---------------|----------|------|-----------------|-------------------|
 | SAM.gov | **MUST-HAVE** | Month 1 | $0 | Federal eligibility; all downstream |
-| AWS Marketplace | **MUST-HAVE** | Month 2–3 | $0 (+ dev time) | All enterprise + federal cloud buyers |
+| cloud marketplace | **MUST-HAVE** | Month 2–3 | $0 (+ dev time) | All enterprise + federal cloud buyers |
 | SOC 2 Type 1 | **MUST-HAVE** | Month 6 | $15,000–$25,000 | Mid-market enterprise sales |
 | SOC 2 Type 2 | **MUST-HAVE** | Month 12 | $25,000–$50,000 | Fortune 500, federal civilian RFPs |
 | Azure Marketplace | **NICE-TO-HAVE** | Month 6 | $0 (+ dev time) | Microsoft-ecosystem enterprise |
 | HIPAA BAA readiness | **NICE-TO-HAVE** | Month 6 | $3,000–$5,000 | Healthcare buyers |
 | EU AI Act (if high-risk) | **CONDITIONAL** | Month 6 assess | $10,000–$50,000 | EU market access |
 | ISO 27001 | **NICE-TO-HAVE** | Month 18 | $10,000–$35,000 | EU/UK enterprise/government |
-| FedRAMP LI-SaaS / 20x Low | **CONDITIONAL** | Month 18 | $150,000–$300,000 | Federal agency contracts |
-| StateRAMP | **NICE-TO-HAVE** | Post-FedRAMP | ~$0 incremental | State/local government contracts |
+| StateRAMP LI-SaaS / 20x Low | **CONDITIONAL** | Month 18 | $150,000–$300,000 | Federal agency contracts |
+| StateRAMP | **NICE-TO-HAVE** | Post-StateRAMP | ~$0 incremental | State/local government contracts |
 | GCP Marketplace | **PREMATURE** | Month 18+ | $0 (+ dev time) | GCP-ecosystem enterprise |
 | CMMC 2.0 | **PREMATURE** | On DoD contract | $5,000–$200,000 | DoD contracts only |
-| FedRAMP Moderate | **PREMATURE** | Month 24+ | $500,000–$1,500,000 | Sensitive federal agency data |
+| StateRAMP Moderate | **PREMATURE** | Month 24+ | $500,000–$1,500,000 | Sensitive federal agency data |
 | 8(a) Certification | **ASSESS** | Month 6 | $0 (SBA cost) | Set-aside contract access |
 
 ---
@@ -540,13 +540,13 @@ Month 1        Month 3        Month 6        Month 12       Month 18       Month
 
 | Gate | Trigger | Action |
 |------|---------|--------|
-| **A — Month 6** | Federal civilian prospect asks "are you FedRAMP?" | Start agency sponsor outreach; budget $20K for readiness |
+| **A — Month 6** | Federal civilian prospect asks "are you StateRAMP?" | Start agency sponsor outreach; budget $20K for readiness |
 | **B — Month 12** | DoD RFP arrives with CMMC clause | Engage C3PAO within 30 days; do not invest before RFP |
-| **C — Month 18** | Agency sponsor committed OR 20x pilot accepted | Authorize full FedRAMP budget ($150K–$300K LI-SaaS) |
-| **D — Month 24** | FedRAMP ATO in hand | Review federal revenue vs. $50K–$200K annual maintenance; decide to sustain or sunset |
+| **C — Month 18** | Agency sponsor committed OR 20x pilot accepted | Authorize full StateRAMP budget ($150K–$300K LI-SaaS) |
+| **D — Month 24** | StateRAMP ATO in hand | Review federal revenue vs. $50K–$200K annual maintenance; decide to sustain or sunset |
 | **E — Month 6** | EU customers in pipeline | Complete EU AI Act risk classification; if high-risk, start compliance by Month 9 |
 | **F — Month 6** | Healthcare buyers signing | Execute HIPAA BAA template; implement technical safeguards inventory |
 
 ---
 
-*Sources: [SAM.gov](https://sam.gov/sites/default/files/2024-11/entity-checklist.pdf) | [SBA.gov](https://www.sba.gov/federal-contracting/contracting-guide/basic-requirements) | [FedRAMP.gov](https://www.fedramp.gov/20x/) | [FedRAMP 20x Update](https://www.fedramp.gov/2025-07-30-fedramp-20x-four-months-in-and-authorizing/) | [Paramify FedRAMP cost](https://www.paramify.com/blog/fedramp-cost) | [Vanta FedRAMP cost](https://www.vanta.com/collection/fedramp/fedramp-cost) | [Comp AI SOC 2 cost](https://trycomp.ai/soc-2-cost-breakdown) | [SecureLeap platform comparison](https://www.secureleap.tech/blog/soc-2-tools-vanta-drata-secureframe-guide-2025) | [Polimity SOC 2 2026](https://polimity.com/blog/how-much-does-a-soc-2-audit-cost/) | [SOC2Auditors.org](https://soc2auditors.org/insights/soc-2-type-1-vs-type-2/) | [Rhymetec ISO 27001](https://rhymetec.com/iso-27001-certification-cost-breakdown-2025/) | [StrongDM ISO cost](https://www.strongdm.com/blog/iso-27001-certification-cost) | [CMMC.com cost guide](https://www.cmmc.com/newsroom/cost-of-cmmc) | [Paramify CMMC cost](https://www.paramify.com/blog/cmmc-cost) | [Mayer Brown CMMC](https://www.mayerbrown.com/en/insights/publications/2025/09/department-of-defense-releases-long-anticipated-final-rule-implementing-the-cybersecurity-maturity-model-certification-program) | [Labra AWS guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/) | [AWS Seller Docs](https://docs.aws.amazon.com/marketplace/latest/userguide/seller-account-registering.html) | [AWS GovCloud listing](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/) | [Clazar AWS policy 2025](https://clazar.io/blog/aws-new-saas-policy) | [Azure listing requirements](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/marketplace-criteria-content-validation) | [GCP Marketplace requirements](https://docs.cloud.google.com/marketplace/docs/partners/get-started) | [RISCPoint StateRAMP](https://www.riscpoint.com/post/fedramp-vs-stateramp-a-guide) | [Linford BAA guide](https://linfordco.com/blog/importance-hipaa-business-associate-agreements/) | [HIPAA Journal](https://www.hipaajournal.com/hipaa-business-associate-agreement/) | [Accountable HQ BAA](https://www.accountablehq.com/post/hipaa-compliance-for-business-associate-agreements-baas-requirements-and-checklist) | [HyphenX EU AI Act](https://hyphenxsolutions.com/Blog/eu-ai-act-enforcement-cycle-what-us-global-companies-should-do-in-2026/) | [CSA EU AI Act research](https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/) | [McKenna EU AI Act guide](https://www.mckennaconsultants.com/eu-ai-act-high-risk-compliance-a-technical-readiness-guide-for-august-2026/) | [USFCR PSC codes](https://blogs.usfcr.com/it-psc-codes-federal-contracting) | [DoD PSC Manual](https://www.acq.osd.mil/dpap/policy/policyvault/XaaS_Product_and_Service_Codes_Rev_1.pdf) | [Schellman 3PAO](https://www.fedramp.gov/marketplace/assessors/136571/) | [A-LIGN FedRAMP](https://www.a-lign.com/service/fedramp) | [Coalfire FedRAMP](https://coalfire.com/services/assessment) | [Vanta LI-SaaS](https://www.vanta.com/collection/fedramp/fedramp-li-saas) | [Secureframe LI-SaaS](https://secureframe.com/hub/fedramp/low) | [SBA 8(a) Program](https://www.sba.gov/federal-contracting/contracting-assistance-programs/8a-business-development-program) | [SBA HUBZone](https://www.sba.gov/federal-contracting/contracting-assistance-programs/hubzone-program)*
+*Sources: [SAM.gov](https://sam.gov/sites/default/files/2024-11/entity-checklist.pdf) | [SBA.gov](https://www.sba.gov/federal-contracting/contracting-guide/basic-requirements) | [StateRAMP.gov](https://www.fedramp.gov/20x/) | [StateRAMP 20x Update](https://www.fedramp.gov/2025-07-30-fedramp-20x-four-months-in-and-authorizing/) | [Paramify StateRAMP cost](https://www.paramify.com/blog/fedramp-cost) | [Vanta StateRAMP cost](https://www.vanta.com/collection/fedramp/fedramp-cost) | [Comp AI SOC 2 cost](https://trycomp.ai/soc-2-cost-breakdown) | [SecureLeap platform comparison](https://www.secureleap.tech/blog/soc-2-tools-vanta-drata-secureframe-guide-2025) | [Polimity SOC 2 2026](https://polimity.com/blog/how-much-does-a-soc-2-audit-cost/) | [SOC2Auditors.org](https://soc2auditors.org/insights/soc-2-type-1-vs-type-2/) | [Rhymetec ISO 27001](https://rhymetec.com/iso-27001-certification-cost-breakdown-2025/) | [StrongDM ISO cost](https://www.strongdm.com/blog/iso-27001-certification-cost) | [CMMC.com cost guide](https://www.cmmc.com/newsroom/cost-of-cmmc) | [Paramify CMMC cost](https://www.paramify.com/blog/cmmc-cost) | [Mayer Brown CMMC](https://www.mayerbrown.com/en/insights/publications/2025/09/department-of-defense-releases-long-anticipated-final-rule-implementing-the-cybersecurity-maturity-model-certification-program) | [Labra AWS guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/) | [AWS Seller Docs](https://docs.aws.amazon.com/marketplace/latest/userguide/seller-account-registering.html) | [AWS GovCloud listing](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/) | [Clazar AWS policy 2025](https://clazar.io/blog/aws-new-saas-policy) | [Azure listing requirements](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/marketplace-criteria-content-validation) | [GCP Marketplace requirements](https://docs.cloud.google.com/marketplace/docs/partners/get-started) | [RISCPoint StateRAMP](https://www.riscpoint.com/post/fedramp-vs-stateramp-a-guide) | [Linford BAA guide](https://linfordco.com/blog/importance-hipaa-business-associate-agreements/) | [HIPAA Journal](https://www.hipaajournal.com/hipaa-business-associate-agreement/) | [Accountable HQ BAA](https://www.accountablehq.com/post/hipaa-compliance-for-business-associate-agreements-baas-requirements-and-checklist) | [HyphenX EU AI Act](https://hyphenxsolutions.com/Blog/eu-ai-act-enforcement-cycle-what-us-global-companies-should-do-in-2026/) | [CSA EU AI Act research](https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/) | [McKenna EU AI Act guide](https://www.mckennaconsultants.com/eu-ai-act-high-risk-compliance-a-technical-readiness-guide-for-august-2026/) | [USFCR PSC codes](https://blogs.usfcr.com/it-psc-codes-federal-contracting) | [DoD PSC Manual](https://www.acq.osd.mil/dpap/policy/policyvault/XaaS_Product_and_Service_Codes_Rev_1.pdf) | [Schellman 3PAO](https://www.fedramp.gov/marketplace/assessors/136571/) | [A-LIGN StateRAMP](https://www.a-lign.com/service/fedramp) | [Coalfire StateRAMP](https://coalfire.com/services/assessment) | [Vanta LI-SaaS](https://www.vanta.com/collection/fedramp/fedramp-li-saas) | [Secureframe LI-SaaS](https://secureframe.com/hub/fedramp/low) | [SBA 8(a) Program](https://www.sba.gov/federal-contracting/contracting-assistance-programs/8a-business-development-program) | [SBA HUBZone](https://www.sba.gov/federal-contracting/contracting-assistance-programs/hubzone-program)*

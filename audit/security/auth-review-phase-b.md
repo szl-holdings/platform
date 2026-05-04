@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-20  
 **Scope:** Unified auth package creation, tenancy isolation tests, CSRF round-trip test coverage.  
-**Reviewer:** Series A Hardening — Phase B  
+**Reviewer:** growth capital Hardening — Phase B  
 **Preceding audit:** `audit/security/auth-review.md` (Phase A)
 
 ---

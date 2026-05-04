@@ -34,7 +34,7 @@ SZL Holdings (Corporate)
 
 | Dimension | Detail |
 |-----------|--------|
-| **Audience** | Series A investors · Enterprise evaluators · Strategic partners · Press |
+| **Audience** | growth capital investors · Enterprise evaluators · Strategic partners · Press |
 | **Primary job** | Convert informed evaluation into a conversation |
 | **Story it tells** | "SZL Holdings is the company that built the governed decision infrastructure layer. Here is the full platform, the trust posture, the team, and the investment case." |
 | **Tone** | Authoritative · Sparse · Evidence-forward |
@@ -71,7 +71,7 @@ SZL Holdings (Corporate)
 | **Key surfaces** | SOC command · MITRE ATT&CK map · SOAR playbooks · XDR console · Sentinel AI · Threat intelligence feeds |
 | **Call to action** | Design partner entry for security verticals · MSP managed services contract |
 | **Narrative risk** | `firestorm` path still exists and creates brand confusion. The canonical path is `/aegis/`. Once `firestorm` is redirected (301 → `/aegis/`), this risk resolves. |
-| **FedRAMP note** | FedRAMP readiness is referenced in product documentation. Do not claim FedRAMP compliance without verified roadmap and third-party assessment. |
+| **StateRAMP note** | StateRAMP readiness is referenced in product documentation. Do not claim StateRAMP compliance without verified roadmap and third-party assessment. |
 
 ---
 

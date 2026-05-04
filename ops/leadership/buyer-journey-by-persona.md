@@ -20,7 +20,7 @@ This is a *map*, not a script. Personas overlap in real engagements. But each su
 | 2 | **Technical evaluator** (Head of Platform / Chief Architect / Principal Engineer) | Architectural diligence — is this real, will it integrate, will it scale | `/architecture`, `/docs` | Architecture review session; integration scoping |
 | 3 | **Security reviewer** (CISO / Head of GRC / Compliance Officer) | Can this pass our security and audit posture | `/trust`, `/trust/security`, `/trust/ai` | Security questionnaire; controls walk-through |
 | 4 | **Design partner candidate** (Operator owning the workflow + sponsor) | Wants to be early, wants influence, wants proof | `/design-partner` | Founder-led qualification call; pilot scoping |
-| 5 | **Investor / advisor** (Series A lead, strategic, or board candidate) | Diligence on the company, the founder, and the category thesis | `/investor`, `/founder`, `/leadership` | Founder conversation; data room |
+| 5 | **Investor / advisor** (growth capital lead, strategic, or board candidate) | Diligence on the company, the founder, and the category thesis | `/investor`, `/founder`, `/leadership` | Founder conversation; data room |
 
 ## 3. Journey by persona
 

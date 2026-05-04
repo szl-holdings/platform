@@ -108,7 +108,7 @@ SZL Holdings (szlholdings.com)
 
 ### Phase 4 (Planned): Scale
 - Live AIS data feed integration (Vessels)
-- Aegis FedRAMP readiness track
+- Aegis StateRAMP readiness track
 - Terra national coverage expansion
 - SOC 2 Type II preparation
 

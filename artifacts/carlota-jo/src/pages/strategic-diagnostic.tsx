@@ -870,7 +870,7 @@ Return ONLY valid JSON, no markdown, no explanation.`;
                       className={fieldClass}
                       value={form.recentWins}
                       onChange={update('recentWins')}
-                      placeholder="e.g. Closed $2M Series A, landed enterprise anchor client"
+                      placeholder="e.g. Closed $2M growth capital, landed enterprise anchor client"
                     />
                   </div>
                 </div>

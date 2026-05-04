@@ -16,7 +16,7 @@ Trigger this flow if any of:
 
 - Buyer is a Fortune 1000 enterprise or government / quasi-government
 - Buyer has a procurement function that will run a separate process
-- Buyer requires SOC 2 / ISO 27001 / FedRAMP-equivalent diligence
+- Buyer requires SOC 2 / ISO 27001 / StateRAMP-equivalent diligence
 - Buyer requires a Master Service Agreement on their paper
 - Initial deal size is targeted >$250k ARR
 

@@ -2,7 +2,7 @@
 
 **Purpose:** Structured script for investor and enterprise executive demonstrations — a 45-minute walkthrough showing the platform thesis in motion.
 
-**Audience:** Series A investors, enterprise CXO evaluators, strategic partners
+**Audience:** growth capital investors, enterprise CXO evaluators, strategic partners
 **Duration:** 45–60 minutes (full); 20 minutes (condensed)
 **Format:** Presenter-led with live platform
 

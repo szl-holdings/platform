@@ -151,7 +151,7 @@ Paragraph-level chunking with a compact 384-token target and 48-token overlap. S
 
 ### Exact-Match Boost Terms
 
-CVE IDs, incident IDs, MITRE ATT&CK technique IDs (e.g., T1078), control IDs, CMMC references, FedRAMP references, critical severity flags, attack vector terms, lateral movement references, ransomware family names.
+CVE IDs, incident IDs, MITRE ATT&CK technique IDs (e.g., T1078), control IDs, CMMC references, StateRAMP references, critical severity flags, attack vector terms, lateral movement references, ransomware family names.
 
 ### Score Thresholds
 

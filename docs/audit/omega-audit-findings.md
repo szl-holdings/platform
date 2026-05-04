@@ -44,7 +44,7 @@ This audit covers all 7 web artifacts (szl-holdings, carlota-jo, stephen-site, t
 
 | Location | Issue |
 |---|---|
-| `artifacts/szl-holdings/src/data/milestones.json` | Specific funding figures ($2.4M seed, $14.5M Series A, $62M valuation) — requires founder confirmation of accuracy |
+| `artifacts/szl-holdings/src/data/milestones.json` | Specific funding figures ($2.4M seed, $14.5M growth capital, $62M valuation) — requires founder confirmation of accuracy |
 | `artifacts/szl-holdings/src/data/insights.ts` | Annual Letter cites "$180M+ deployed capital", "142% ARR growth" — verify or add framing before broad publication |
 | `artifacts/szl-holdings/src/data/ventures.ts` | Product metrics ("< 4 min signal detection", "2.4M+ signals/day") presented as production stats — should be labeled as benchmarks/targets |
 | `artifacts/szl-holdings/src/data/case-studies.ts` | Illustrative scenario metrics ($340K leakage, 34-day lead) — label as "Illustrative scenario" if pages become broadly public |

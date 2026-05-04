@@ -58,7 +58,7 @@ export default function S09Ask() {
               marginBottom: '2vh',
             }}
           >
-            Series A — The Ask
+            growth capital — The Ask
           </div>
           <div
             style={{
@@ -104,7 +104,7 @@ export default function S09Ask() {
                 marginBottom: '1vh',
               }}
             >
-              Series A
+              growth capital
             </div>
             <div
               style={{
@@ -395,7 +395,7 @@ export default function S09Ask() {
               Stephen Lutar, Founder
             </div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1vw', color: '#0cc8d9' }}>
-              CONDITIONALLY READY — Series A
+              CONDITIONALLY READY — growth capital
             </div>
           </div>
         </div>

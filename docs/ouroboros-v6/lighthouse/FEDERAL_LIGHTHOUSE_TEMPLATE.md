@@ -26,7 +26,7 @@ The three outcomes required of every Lighthouse Pilot are: (1) a public or relea
 - Receipt sink defined: the S3 bucket, CloudWatch log group, or equivalent sink where Λ receipts are written is provisioned before Day 1; access credentials are shared with the SZL Holdings integration engineer.
 - SLA targets agreed: maximum acceptable latency overhead from Ouroboros instrumentation (target: <5 ms per receipt at p99) and availability expectations for the receipt sink are stated in the Data Use Agreement.
 - Success criteria signed: the definition of a successful pilot — minimum receipt volume, Λ axis coverage, and readout quality threshold — is signed by both the program owner and Stephen Lutar before kickoff.
-- Authority to Operate (ATO) path stated: the program office identifies whether the pilot qualifies for LI-SaaS tailored authorization, an agency-sponsored FedRAMP Low path, or an internal authority-to-test (ATT) memo issued by the program's ISSO.
+- Authority to Operate (ATO) path stated: the program office identifies whether the pilot qualifies for LI-SaaS tailored authorization, an agency-sponsored StateRAMP Low path, or an internal authority-to-test (ATT) memo issued by the program's ISSO.
 - Privacy assessment completed: the agency's Privacy Officer or ISSO confirms that the AI workflow does not process PII beyond what is already covered by an existing Privacy Impact Assessment (PIA); if new PII exposure is introduced, a new PIA is completed before instrumentation.
 - Counterparty NDA in place: a mutual NDA covering Ouroboros source code, the program's workflow architecture, and any non-public training data is executed before any technical access is granted.
 - Data Use Agreement signed: a formal DUA specifying permitted uses of Λ receipt data, retention limits, and destruction procedures is executed before the receipt sink is provisioned.
@@ -54,7 +54,7 @@ The three outcomes required of every Lighthouse Pilot are: (1) a public or relea
 | Week 12 | Weekly read-out #6; final 30-day Λ distribution analysis; identify statistical anomalies for executive readout | Stephen Lutar | Statistical analysis report |
 | Week 13 | Executive readout preparation: synthesize 90-day Λ trace into plain-language narrative with operational recommendations | Stephen Lutar | Executive readout deck v1.0 |
 | Week 14 (final week of Month 3) | Executive readout delivered to program office; case study revision based on feedback; public Λ-trace dataset prepared for release | Stephen Lutar + Program Owner | Final executive readout; case study v2.0; Λ-trace dataset |
-| Post-pilot | Case study cleared by PA office and submitted to conference or journal; Λ-trace dataset published (Zenodo DOI); FedRAMP LI-SaaS or 20x Low pilot application filed if agency sponsor agrees | Stephen Lutar | Published case study; Zenodo dataset DOI; FedRAMP application (conditional) |
+| Post-pilot | Case study cleared by PA office and submitted to conference or journal; Λ-trace dataset published (Zenodo DOI); StateRAMP LI-SaaS or 20x Low pilot application filed if agency sponsor agrees | Stephen Lutar | Published case study; Zenodo dataset DOI; StateRAMP application (conditional) |
 
 ---
 
@@ -119,7 +119,7 @@ Contact pattern: `osd.pentagon.ousd-r-e.mbx.cdao-general@mail.mil` (CDAO general
 
 - [SAM.gov Entity Registration Checklist](https://sam.gov/sites/default/files/2024-11/entity-checklist.pdf)
 - [SBA Basic Requirements for Federal Contracting](https://www.sba.gov/federal-contracting/contracting-guide/basic-requirements)
-- [FedRAMP 20x Overview](https://www.fedramp.gov/20x/)
-- [Vanta FedRAMP LI-SaaS Guide](https://www.vanta.com/collection/fedramp/fedramp-li-saas)
-- [Paramify FedRAMP Cost Guide 2026](https://www.paramify.com/blog/fedramp-cost)
+- [StateRAMP 20x Overview](https://www.fedramp.gov/20x/)
+- [Vanta StateRAMP LI-SaaS Guide](https://www.vanta.com/collection/fedramp/fedramp-li-saas)
+- [Paramify StateRAMP Cost Guide 2026](https://www.paramify.com/blog/fedramp-cost)
 - [USFCR PSC Code Guide](https://blogs.usfcr.com/it-psc-codes-federal-contracting)

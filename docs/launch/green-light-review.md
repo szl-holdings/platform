@@ -2,10 +2,10 @@
 
 **Version:** 1.0 · **Date:** April 2026  
 **Owner:** Stephen Lutar (Founder)  
-**Audience:** Founder, executive team, Series A investors, design partner leads  
+**Audience:** Founder, executive team, growth capital investors, design partner leads  
 **Purpose:** Final pre-launch diligence pass from 6 distinct stakeholder perspectives
 
-This document synthesizes the platform's readiness for design-partner / public beta launch. It reviews the platform through six distinct lenses — enterprise buyer, security reviewer, operator, technical reviewer, Series A investor, and future VP Engineering — and surfaces the honest gaps that remain.
+This document synthesizes the platform's readiness for design-partner / public beta launch. It reviews the platform through six distinct lenses — enterprise buyer, security reviewer, operator, technical reviewer, growth capital investor, and future VP Engineering — and surfaces the honest gaps that remain.
 
 ---
 
@@ -135,7 +135,7 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 ---
 
-## Perspective 5 — Series A Investor
+## Perspective 5 — growth capital Investor
 
 *"Is this a fundable company at the level implied by the architecture?"*
 
@@ -157,13 +157,13 @@ This document synthesizes the platform's readiness for design-partner / public b
 
 **No revenue:** Pre-revenue. This is expected at this stage, but the path to first revenue via design partner → paying customer needs a timeline.
 
-**Founder as sole technical contributor (to date):** Single point of technical dependency. Hiring plan and technical team building are investor concerns at Series A.
+**Founder as sole technical contributor (to date):** Single point of technical dependency. Hiring plan and technical team building are investor concerns at growth capital.
 
-**SOC 2 timeline:** Investors will ask. The Q3–Q4 2026 target is credible; it should be in the Series A narrative.
+**SOC 2 timeline:** Investors will ask. The Q3–Q4 2026 target is credible; it should be in the growth capital narrative.
 
 **AI governance regulatory risk:** The EU AI Act compliance posture is a strength, not a weakness — but investors may probe the cost and complexity of staying compliant as regulations evolve.
 
-**Investor verdict:** Series A investable thesis with strong platform architecture, coherent category, and defensible differentiation. Pre-revenue with no external design partners limits the round at this exact moment. The next 60–90 days of design partner signing and first revenue are the key milestones to close the Series A narrative.
+**Investor verdict:** growth capital investable thesis with strong platform architecture, coherent category, and defensible differentiation. Pre-revenue with no external design partners limits the round at this exact moment. The next 60–90 days of design partner signing and first revenue are the key milestones to close the growth capital narrative.
 
 ---
 
@@ -205,7 +205,7 @@ This document synthesizes the platform's readiness for design-partner / public b
 | Security posture | ⚠️ Conditional | LB-001 (Firebase credential rotation) is the only hard blocker |
 | Operator usability | ✅ Design-partner ready | Seeded data → needs CS-assisted live data setup |
 | Technical credibility | ✅ Strong | Error tracking and OTEL exporter are open items |
-| Investor narrative | ✅ Series A ready thesis | Pre-revenue; design partner signing is the next milestone |
+| Investor narrative | ✅ growth capital ready thesis | Pre-revenue; design partner signing is the next milestone |
 | Engineering scalability | ✅ Strong foundation | Test coverage and schema governance are VP Engineering priorities |
 
 **Overall green-light verdict:**

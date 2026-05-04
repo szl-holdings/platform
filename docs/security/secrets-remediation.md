@@ -1,4 +1,4 @@
-# Secrets Remediation Report — Series A Audit
+# Secrets Remediation Report — growth capital Audit
 
 **Date:** April 16, 2026  
 **Auditor:** Platform Engineering (automated scan + manual review)  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-A full secrets audit was conducted on April 16, 2026 as part of the Series A preparation. **No real secrets or credentials were found in source-controlled files.** All secrets are correctly stored in Replit Secrets (the platform's native secret store). Two non-secret values are present in `.replit [userenv.shared]` and are correctly classified as public/non-sensitive.
+A full secrets audit was conducted on April 16, 2026 as part of the growth capital preparation. **No real secrets or credentials were found in source-controlled files.** All secrets are correctly stored in Replit Secrets (the platform's native secret store). Two non-secret values are present in `.replit [userenv.shared]` and are correctly classified as public/non-sensitive.
 
 **Remediation actions required: 0 critical, 0 high.**  
 **Documentation improvements made: 3.**
@@ -203,4 +203,4 @@ This is an appropriate reference — no credential values are embedded. The refe
 
 ---
 
-_This report covers Series A Wave 1–2 scope. Future secrets audits should re-run this scan and update findings. Next review: before first paying tenant onboarding._
+_This report covers growth capital Wave 1–2 scope. Future secrets audits should re-run this scan and update findings. Next review: before first paying tenant onboarding._

@@ -1,7 +1,7 @@
 # Test Summary — Phase C: Testing, Debug & Verification
 
 **Generated:** 2026-04-21 (extended investigation through pool-exhaustion root cause)
-**Phase:** Series A Hardening — Phase C
+**Phase:** growth capital Hardening — Phase C
 
 ---
 

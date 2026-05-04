@@ -44,7 +44,7 @@ These are not scripts to read. They are the language patterns the message has be
 
 ---
 
-## Context 2 — Investor Calls (Pre-Seed / Seed / Series A)
+## Context 2 — Investor Calls (Pre-Seed / Seed / growth capital)
 
 ### Opener (first 90 seconds)
 

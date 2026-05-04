@@ -1685,7 +1685,7 @@ router.get('/trust', (_req: Request, res: Response) => {
       },
       roadmapToEnterprise: {
         status: 'roadmap',
-        description: 'Enterprise deployment requires SOC 2 Type II, HIPAA attestation for healthcare, FedRAMP for defense/gov.',
+        description: 'Enterprise deployment requires SOC 2 Type II, HIPAA attestation for healthcare, StateRAMP for defense/gov.',
         milestones: ['Phase 3: Sovereign Execution Lab (current)', 'Phase 4: VPC-isolated deployment', 'Phase 5: Air-gapped / on-premises posture', 'Phase 6: Compliance certification program'],
       },
     },

@@ -217,7 +217,7 @@ See `lib/config/src/index.ts` (`APP_INTEGRATIONS`) for the authoritative connect
 | INCA (AI Research) | arXiv, Semantic Scholar, PapersWithCode, HuggingFace Hub |
 | Carlota Jo | World Bank Open Data, BLS Employment, HBR RSS, Microsoft Outlook/Calendar |
 | Alloy | HuggingFace Hub, Microsoft SharePoint, Teams Webhooks |
-| Rosie (MSP) | USAspending.gov, FedRAMP Products, SAM.gov |
+| Rosie (MSP) | USAspending.gov, StateRAMP Products, SAM.gov |
 
 ---
 
@@ -246,4 +246,4 @@ See `lib/config/src/index.ts` (`APP_INTEGRATIONS`) for the authoritative connect
 
 ---
 
-*This document is part of the Series A Cleanup — Phase 1: Platform Audit & Canonical Inventory. April 2026.*
+*This document is part of the growth capital Cleanup — Phase 1: Platform Audit & Canonical Inventory. April 2026.*

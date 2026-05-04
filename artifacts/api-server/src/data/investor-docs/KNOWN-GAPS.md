@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-16 (rev 7 — Final)  
 **Owner:** Engineering / DevOps  
-**Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
+**Audience:** Enterprise architects, growth capital technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
 
@@ -28,7 +28,7 @@ Architecture concerns — tenant isolation, auth hardening, encryption, network 
 
 ---
 
-### For Series A Technical Advisors / Investor Diligence
+### For growth capital Technical Advisors / Investor Diligence
 Risk exposure, compliance posture, diligence readiness.
 
 | Gap ID | Description | Severity | Status |
@@ -45,7 +45,7 @@ Risk exposure, compliance posture, diligence readiness.
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ⚠️ Open — Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | P2 | ⚠️ Open — Sprint 4 |
 
-**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. Remaining open items (P1–P2, High/Med) are scoped, have remediation owners, and do not represent critical blockers for Series A close. KG010 (E2E regression testing) is now resolved — Playwright suite covers login, dashboard, approval, and billing flows wired into CI. The two highest remaining enterprise risks are the absence of automated SAST (KG011) and dependency review (KG012).
+**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. Remaining open items (P1–P2, High/Med) are scoped, have remediation owners, and do not represent critical blockers for growth capital close. KG010 (E2E regression testing) is now resolved — Playwright suite covers login, dashboard, approval, and billing flows wired into CI. The two highest remaining enterprise risks are the absence of automated SAST (KG011) and dependency review (KG012).
 
 ---
 
@@ -137,7 +137,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG029 | Integration connector test stub in alloy-integrations | API / Quality | Minor UX gap | `routes/alloy-integrations.ts:345` returns hardcoded "Test not implemented for this integration type" for unsupported integrations — implement per-type test logic or document which types are testable |
 | KG032 | `lib/observability/src/collector.ts` seeds simulated data in constructor | Observability / Analytics | Domain app dashboards display synthetic data | Wire live API signals to replace `seedSimulatedData()` call (OBS-008) |
 | KG033 | `OBSERVABILITY_ARCHITECTURE.md` covers decision-fabric surfaces only; no single doc covers production infra observability (OTEL config, logging pipeline, metrics, alerting) | Docs / Observability | Onboarding friction for new VP/Platform lead | Add §Production Infrastructure Observability section to OBSERVABILITY_ARCHITECTURE.md (OBS-006) |
-| RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
+| RD-001 | SOC 2 Type II / StateRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
 | RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
 ---
@@ -196,7 +196,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 >
 > **April 2026 Phase 10–13 audit note (FINAL):** Trust Center, diligence, docs, commercial/demo coherence, and 9-perspective adversarial red-team review completed. TD-004 fixed: TRUST_CENTER_INDEX.md model transparency corrected (HuggingFace/Qwen3-8B reference removed; multi-provider stack documented). 9 new actionable gaps added (RT-003, RT-005–RT-011, RT-017). 4 additional observations confirmed existing P1 gaps (no new P0/P1 security findings discovered). All commercial docs (DEMO_STRATEGY.md, EXECUTIVE_DEMO.md, OPERATOR_DEMO.md, TECHNICAL_DEMO.md, SALES_NARRATIVE.md, OBJECTION_HANDLING.md, CUSTOMER_SUCCESS_PLAYBOOK.md, GO_TO_MARKET_MOTION.md, PROOF_OF_VALUE_PLAYBOOK.md, DESIGN_PARTNER_PROGRAM.md) passed commercial coherence audit — no fabricated readiness claims found. Full red-team findings in AUDIT_FINDINGS_REGISTER.md § Phase 10–13. Final executive summary with go/no-go recommendation in EXECUTIVE_LAUNCH_SUMMARY.md.
 >
-> **April 2026 Phase 10–11 Category Leadership & Final Diligence audit note:** Seven stakeholder lens diligence review conducted (enterprise security architect, platform buyer, AI governance stakeholder, operator lead, Series A technical advisor, VP Engineering, category-savvy product strategist). Key findings and resolutions: (1) TD-007: "Five primitives" inconsistency in 6 investor docs — resolved, all updated to "six primitives" with Event Fabric listed. (2) TD-008: Category naming inconsistency — canonical name established as "Governed Decision Infrastructure"; CATEGORY_POSITIONING.md updated to v2.1 with three new "why alternatives are insufficient" sections (observability, copilots, automation without proof/policy). (3) TD-009, TD-010: Residual primitive count errors in platform-thesis.md and investor-overview.md evaluation path — resolved. (4) MOAT_MAP.md updated to v2.0. (5) INVESTOR_NARRATIVE.md updated to v3.0 with Forge, Decision Fabric, and OS category framing. (6) TECHNICAL_DILIGENCE_PACKET.md footer updated to reflect complete 13-phase audit. Net P2 change: +4 gaps added, all 4 resolved. No new P0/P1 findings.
+> **April 2026 Phase 10–11 Category Leadership & Final Diligence audit note:** Seven stakeholder lens diligence review conducted (enterprise security architect, platform buyer, AI governance stakeholder, operator lead, growth capital technical advisor, VP Engineering, category-savvy product strategist). Key findings and resolutions: (1) TD-007: "Five primitives" inconsistency in 6 investor docs — resolved, all updated to "six primitives" with Event Fabric listed. (2) TD-008: Category naming inconsistency — canonical name established as "Governed Decision Infrastructure"; CATEGORY_POSITIONING.md updated to v2.1 with three new "why alternatives are insufficient" sections (observability, copilots, automation without proof/policy). (3) TD-009, TD-010: Residual primitive count errors in platform-thesis.md and investor-overview.md evaluation path — resolved. (4) MOAT_MAP.md updated to v2.0. (5) INVESTOR_NARRATIVE.md updated to v3.0 with Forge, Decision Fabric, and OS category framing. (6) TECHNICAL_DILIGENCE_PACKET.md footer updated to reflect complete 13-phase audit. Net P2 change: +4 gaps added, all 4 resolved. No new P0/P1 findings.
 
 ---
 
@@ -270,7 +270,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - `PRIVACY_OVERVIEW.md` — GDPR/CCPA privacy framework overview
 - `AI_GOVERNANCE.md` — buyer-facing AI governance posture
 - `COMPANY_FACT_SHEET.md` — concise company overview for press/investors
-- `SERIES_A_READINESS.md` — honest Series A readiness assessment
+- `SERIES_A_READINESS.md` — honest growth capital readiness assessment
 - `DOCS_HOME.md` — documentation home page
 - `GETTING_STARTED.md` — developer and operator quick start
 - `END_USER_GUIDE.md` — end-user operational guide

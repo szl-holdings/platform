@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-20
 **Scope:** All artifacts and services in the monorepo that expose authenticated surfaces
-**Reviewer:** Series A Hardening — Phase 9 Security Hardening & Sign-On Consolidation
+**Reviewer:** growth capital Hardening — Phase 9 Security Hardening & Sign-On Consolidation
 **Methodology:** Static review of route files, middleware chains, auth context implementations, and mobile token handling across all registered artifacts.
 
 ---

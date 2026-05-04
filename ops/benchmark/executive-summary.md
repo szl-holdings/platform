@@ -1,14 +1,14 @@
-# Executive Summary — Series A Frontier Pass Capstone
+# Executive Summary — growth capital Frontier Pass Capstone
 
 **Date:** April 16, 2026
-**Scope:** Full synthesis of the Series A Frontier Pass — all phases of platform build-out, market benchmarking, competitive research, and launch readiness preparation
+**Scope:** Full synthesis of the growth capital Frontier Pass — all phases of platform build-out, market benchmarking, competitive research, and launch readiness preparation
 **Audience:** Founder, investors, diligence reviewers
 
 ---
 
 ## What the Frontier Pass Accomplished
 
-The Series A Frontier Pass was a structured program of parallel work streams designed to take the SZL Holdings platform from "technically functional" to "investor-ready." It covered five dimensions:
+The growth capital Frontier Pass was a structured program of parallel work streams designed to take the SZL Holdings platform from "technically functional" to "investor-ready." It covered five dimensions:
 
 1. **Market benchmark research** — deep competitive analysis against Palantir, Anduril, Vanta, Drata, Stripe, Chainguard, Linear, Rippling, Vercel, Cloudflare, and domain-specific peers
 2. **Platform build-out** — 8 advanced Aegis security modules, Vessels commercial intelligence modules, CORTEX mobile feature completion, Command portal unification
@@ -106,7 +106,7 @@ See `founder-next-10-actions.md` for full execution plan with timelines. Summary
 2. **Publish GitHub Release v0.2.0** (Day 1–2 — P0 investor signal)
 3. **Create Apple Developer + Google Play accounts** (Day 2 — P0 for CORTEX demo)
 4. **Configure Firebase credentials and build CORTEX on a physical device** (Day 3–5 — P0 investor demo)
-5. **Prepare Series A pitch deck** (Day 5–10 — P0 fundraising)
+5. **Prepare growth capital pitch deck** (Day 5–10 — P0 fundraising)
 6. **Activate Stripe billing** (Day 7 — 1-day configuration task)
 7. **Configure Mapbox and email API keys** (Day 7 — quick unblocks)
 8. **Draft financial projections with advisor support** (Day 10 — P0 for investor conversations)
@@ -126,7 +126,7 @@ See `founder-next-10-actions.md` for full execution plan with timelines. Summary
 - Trust GTM, diligence self-serve map, and security language
 - Platform coherence, attribution model, and action taxonomy
 - Observability surface, repo quality standard, and release discipline
-- Mobile Series A strategy and CORTEX beta-to-launch plan
+- Mobile growth capital strategy and CORTEX beta-to-launch plan
 - Final capstone deliverables (this document and 5 companions)
 
 **Frontier Build Documentation (16 documents in /ops/frontier/, /ops/mobile/, /ops/infra/, /ops/cleanup/)**
@@ -138,7 +138,7 @@ See `founder-next-10-actions.md` for full execution plan with timelines. Summary
 
 ---
 
-## Series A Readiness Verdict
+## growth capital Readiness Verdict
 
 **CONDITIONALLY READY.**
 

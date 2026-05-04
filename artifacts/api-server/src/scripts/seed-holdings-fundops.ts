@@ -50,7 +50,7 @@ export async function seedHoldingsFundops() {
           'AI-powered maritime fleet management, cargo logistics, and real-time vessel intelligence platform for global shipping operations.',
         sector: 'Maritime Technology',
         status: 'active',
-        stage: 'Series A',
+        stage: 'growth capital',
         founded: '2022',
         website: 'https://vessels.szlholdings.com',
         color: '#06b6d4',
@@ -78,7 +78,7 @@ export async function seedHoldingsFundops() {
           'Business observability and AI-driven operational intelligence platform — signal detection, anomaly tracking, and executive decision support.',
         sector: 'Enterprise Software',
         status: 'growth',
-        stage: 'Series A',
+        stage: 'growth capital',
         founded: '2021',
         website: 'https://lyte.szlholdings.com',
         color: '#4d8fcc',
@@ -153,8 +153,8 @@ export async function seedHoldingsFundops() {
       },
       {
         ventureId: ventures[0].id,
-        title: 'Series A — $4.2M Raised',
-        description: 'Closed Series A round led by Maritime Ventures Partners.',
+        title: 'growth capital — $4.2M Raised',
+        description: 'Closed growth capital round led by Maritime Ventures Partners.',
         date: '2025-01-10',
         category: 'fundraising',
         icon: 'TrendingUp',
@@ -640,7 +640,7 @@ export async function seedHoldingsFundops() {
       },
       {
         slug: 'investor-pitch-deck-series-a',
-        name: 'Pitch Deck — Series A Round',
+        name: 'Pitch Deck — growth capital Round',
         artifactType: 'investor_packet',
         version: 4,
         status: 'under_review',
@@ -667,7 +667,7 @@ export async function seedHoldingsFundops() {
       },
       {
         slug: 'use-of-funds-series-a',
-        name: 'Use of Funds — Series A $12M',
+        name: 'Use of Funds — growth capital $12M',
         artifactType: 'other',
         version: 1,
         status: 'complete',
@@ -696,11 +696,11 @@ export async function seedHoldingsFundops() {
         title: 'SZL Holdings — Revenue-Based Financing Inquiry',
         lenderType: 'other',
         targetAmount: '1200000',
-        useOfFunds: 'ARR-backed working capital — bridge to Series A close',
+        useOfFunds: 'ARR-backed working capital — bridge to growth capital close',
         status: 'drafting',
         completionPct: 30,
         targetSubmitDate: daysAhead(60),
-        notes: 'Exploring RBF as bridge to Series A. ARR of $840K MRR supports this facility size.',
+        notes: 'Exploring RBF as bridge to growth capital. ARR of $840K MRR supports this facility size.',
       },
     ])
     .returning();
@@ -759,7 +759,7 @@ export async function seedHoldingsFundops() {
     .insert(investorPacketsTable)
     .values([
       {
-        title: 'SZL Holdings — Series A Investment Round',
+        title: 'SZL Holdings — growth capital Investment Round',
         investorType: 'series_a',
         targetAmount: '$12,000,000',
         raiseStructure:
@@ -936,7 +936,7 @@ export async function seedHoldingsFundops() {
       notes: 'Revised upward after Vessels enterprise contract signed.',
     },
     {
-      title: 'Use of Funds Model — $12M Series A',
+      title: 'Use of Funds Model — $12M growth capital',
       modelType: 'use_of_funds',
       status: 'approved',
       version: 1,
@@ -948,7 +948,7 @@ export async function seedHoldingsFundops() {
 
   await db.insert(useOfFundsVersionsTable).values([
     {
-      title: 'Series A — $12M Use of Funds',
+      title: 'growth capital — $12M Use of Funds',
       packetType: 'investor',
       packetId: investorPackets[0].id,
       version: 1,
@@ -984,12 +984,12 @@ export async function seedHoldingsFundops() {
     .insert(diligenceChecklistsTable)
     .values([
       {
-        title: 'Series A Investor Diligence Checklist',
+        title: 'growth capital Investor Diligence Checklist',
         checklistType: 'investor',
         packetType: 'investor',
         status: 'active',
         completionPct: 68,
-        notes: 'Standard Series A data room package. Currently in active investor diligence.',
+        notes: 'Standard growth capital data room package. Currently in active investor diligence.',
       },
       {
         title: 'Commercial Lender Diligence Checklist',
@@ -1139,9 +1139,9 @@ export async function seedHoldingsFundops() {
       sortOrder: 4,
     },
     {
-      holderName: 'Series A Investors (reserved)',
+      holderName: 'growth capital Investors (reserved)',
       holderType: 'investor',
-      shareClass: 'Preferred — Series A',
+      shareClass: 'Preferred — growth capital',
       sharesPlaceholder: '2,200,000 (post-money estimate)',
       ownershipPct: '~22% post-money',
       vestingSchedule: 'N/A',
@@ -1341,7 +1341,7 @@ export async function seedFundNavLpReports() {
         tvpi: '1.3100',
         dpi: '0.0900',
         rvpi: '1.2200',
-        notes: 'Q4 2024 close — pre-Vessels Series A allocation',
+        notes: 'Q4 2024 close — pre-Vessels growth capital allocation',
       },
       {
         navDate: '2025-03-31',
@@ -1357,7 +1357,7 @@ export async function seedFundNavLpReports() {
         tvpi: '1.4800',
         dpi: '0.1800',
         rvpi: '1.3000',
-        notes: 'Q1 2025 mark — Vessels Series A close',
+        notes: 'Q1 2025 mark — Vessels growth capital close',
       },
       {
         navDate: '2025-06-30',
@@ -1580,7 +1580,7 @@ export async function seedFundNavLpReports() {
         carryRate: '0.2000',
         managementFeeRate: '0.0200',
         narrativeSummary:
-          'Vessels Series A closed at $4.2M. Fund NAV crossed $60M for the first time.',
+          'Vessels growth capital closed at $4.2M. Fund NAV crossed $60M for the first time.',
         approvedBy: 'Stephen L.',
         approvedAt: new Date('2025-04-12'),
         distributedAt: new Date('2025-04-14'),

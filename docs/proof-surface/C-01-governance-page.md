@@ -46,7 +46,7 @@ These tiles are not decorative — they're the page demonstrating its own claim 
 
 A clean list, alphabetical by document ID, with last-reviewed date and downloadable link, of every document in Track A:
 
-- A11OY-01 — FedRAMP Authorization Disclosure
+- A11OY-01 — StateRAMP Authorization Disclosure
 - A11OY-02 — CMMC 2.0 / NIST SP 800-171 Rev. 3 Gap Assessment
 - A11OY-03 — Bias Testing Methodology
 - A11OY-04 — US Data Residency Policy
@@ -77,7 +77,7 @@ A simple 3×N table mapping each Empire APEX gap (from the April 2026 pre-briefi
 
 | Product | Empire APEX gap | Closing document | Status |
 |---|---|---|---|
-| A11oy | FedRAMP authorization disclosure | A11OY-01 | Published |
+| A11oy | StateRAMP authorization disclosure | A11OY-01 | Published |
 | A11oy | CMMC / NIST SP 800-171 | A11OY-02 | Published |
 | A11oy | Bias testing methodology | A11OY-03 | Published |
 | A11oy | US-only data residency | A11OY-04 | Published |
@@ -197,7 +197,7 @@ The page must be statically rendered (Next.js `getStaticProps` equivalent or Vit
 
 The whole point of this page is honesty under load. We will not:
 
-- Display green "compliant" badges for things we have not yet completed (e.g., FedRAMP).
+- Display green "compliant" badges for things we have not yet completed (e.g., StateRAMP).
 - Show metrics without dating them.
 - Surface user-personal information from the ledger; only aggregate counts.
 - Hide gaps. Open findings are shown as a count and reconciled monthly.

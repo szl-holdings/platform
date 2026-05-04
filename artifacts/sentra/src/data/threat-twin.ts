@@ -289,7 +289,7 @@ export const assetTwins: AssetTwin[] = [
     criticalVulnCount: 0,
     patchStatus: 'current',
     lastSeenAt: minsAgo(10),
-    complianceFrameworks: ['SOC 2', 'FedRAMP'],
+    complianceFrameworks: ['SOC 2', 'StateRAMP'],
     tags: ['aws', 'vpc', 'prod'],
     anomalyFlags: [],
     externalDataConnectors: [

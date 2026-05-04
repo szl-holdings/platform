@@ -70,7 +70,7 @@
 
 ## Week 4 — Investor Package & Quality Gate
 
-**Goal:** Series A investor package ready; CI gate includes integration tests.
+**Goal:** growth capital investor package ready; CI gate includes integration tests.
 
 | # | Action | Owner | Effort | Priority |
 |---|--------|-------|--------|----------|
@@ -108,11 +108,11 @@
 Items explicitly deferred (see individual audit files):
 
 - OTel / distributed tracing (Q3 2026)
-- Agent eval infrastructure (Q3 2026; Series A hire)
+- Agent eval infrastructure (Q3 2026; growth capital hire)
 - Azure Bicep production deployment (pre-revenue; deferred)
 - National expansion (Terra) — roadmap
 - CORTEX deep linking for push notifications — backlog
-- FedRAMP certification — roadmap
+- StateRAMP certification — roadmap
 
 ---
 

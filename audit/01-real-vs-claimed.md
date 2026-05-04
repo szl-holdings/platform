@@ -103,7 +103,7 @@
 | "Mapbox GL JS" | `PLATFORM_OVERVIEW.md` | PARTIALLY VERIFIED | `GOOGLE_MAPS_API_KEY` used 13× in code; Mapbox also referenced; Terra requires token |
 | "OTel / distributed tracing" | Multiple docs | UNVERIFIED | Spec complete; instrumentation not implemented |
 | "Sentry error monitoring" | `OPEN_RISKS_AND_NEXT_10.md` | UNVERIFIED | DSN not configured |
-| "FedRAMP readiness track (Aegis)" | `PRODUCT_MATRIX.md` | UNVERIFIED | No FedRAMP documentation or compliance evidence in repo |
+| "StateRAMP readiness track (Aegis)" | `PRODUCT_MATRIX.md` | UNVERIFIED | No StateRAMP documentation or compliance evidence in repo |
 | "STIX/TAXII protocol layer (Aegis)" | `PRODUCT_MATRIX.md` | PARTIALLY VERIFIED | Route files present; actual protocol implementation not verified |
 | "MITRE ATT&CK v14 detection coverage (Aegis)" | `PRODUCT_MATRIX.md` | PARTIALLY VERIFIED | MITRE ATT&CK data source referenced; coverage claim unverified |
 | "40+ connector integrations (Lyte)" | `PRODUCT_MATRIX.md` | UNVERIFIED | No connector count in any machine-readable manifest |

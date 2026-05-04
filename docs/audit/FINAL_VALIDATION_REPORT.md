@@ -1,6 +1,6 @@
 # Final Validation Report
 
-> Series A GitHub Rehaul · April 2026
+> growth capital GitHub Rehaul · April 2026
 
 Summary of quality gate status across all checks relevant to the rehaul and the broader platform readiness.
 
@@ -88,4 +88,4 @@ The following items require manual action in the GitHub UI:
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

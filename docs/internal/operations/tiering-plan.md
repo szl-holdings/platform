@@ -83,7 +83,7 @@ Tier 3 artifacts are built, operational, and maintained. They demonstrate ecosys
 
 | Artifact | Platform | Readiness | Deferred Until |
 |----------|----------|-----------|---------------|
-| **Aegis** (`aegis`) | Defense & Intelligence web | Functional Alpha | Lyte/Alloy reach Pilot Ready and first commercial revenue exists. FedRAMP track requires dedicated compliance work. High capability, high market complexity. |
+| **Aegis** (`aegis`) | Defense & Intelligence web | Functional Alpha | Lyte/Alloy reach Pilot Ready and first commercial revenue exists. StateRAMP track requires dedicated compliance work. High capability, high market complexity. |
 | **Terra** (`terra`) | Real Estate Intelligence web | Functional Alpha | Lyte/Alloy commercial validation; NYC data pipeline validated with real broker use case. NYC expansion opportunity is real but requires dedicated sales motion. |
 | **Carlota Jo** (`carlota-jo`) | Advisory web app | Functional Alpha | Advisory revenue can be activated with minimal technical investment. Maintained as near-term revenue pathway; no feature investment. |
 | **SZL Holdings Founder** (route in `szl-holdings`) | Founder site | GA | Content live at `/founder` within the szl-holdings app. No separate artifact needed. |

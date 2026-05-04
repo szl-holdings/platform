@@ -161,7 +161,7 @@ These are not committed roadmap items — they are directional hypotheses for bo
 | Legal matter command | Counsel (deprecated) | High-stakes decisions; existing codebase; needs revival with design partner |
 | Healthcare operations | (TBD) | Regulatory risk, decision accountability requirements |
 | Financial services risk | (TBD) | Trade-off decisions with measurable compliance risk |
-| Government / defense | Aegis extension | FedRAMP track already referenced; high barrier, high value |
+| Government / defense | Aegis extension | StateRAMP track already referenced; high barrier, high value |
 
 ---
 

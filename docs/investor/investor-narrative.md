@@ -1,7 +1,7 @@
 # Investor Narrative — SZL Holdings
 
 **Version:** 3.0 · **Date:** April 2026  
-**Audience:** Series A investors, strategic investors, board candidates  
+**Audience:** growth capital investors, strategic investors, board candidates  
 **Classification:** Confidential — NDA required
 
 ---

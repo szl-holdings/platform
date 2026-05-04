@@ -1,6 +1,6 @@
 # Archive / Delete / Privatize Matrix
 
-> Series A GitHub Rehaul · April 2026
+> growth capital GitHub Rehaul · April 2026
 
 Every path evaluated for action during the rehaul pass. Actions marked **NEEDS OWNER APPROVAL** are not auto-executed.
 
@@ -44,7 +44,7 @@ Columns: Path · Action · Risk · Reason · Owner Approval Needed
 | `GITHUB_SETTINGS_APPLIED.json` | Move to `docs/github/GITHUB_SETTINGS_APPLIED.json` | None | Metadata JSON; not product code | **Yes — confirm no tooling reads root path** |
 | `elite-layer/` | ✅ Documented in place (Task #2900) | None | Holds release-governance contracts (`release-governance/`) and feedback schemas (`feedback/`) referenced by stable path from `docs/RELEASE_GATES.md` and elite reports — see `elite-layer/README.md` | **No — resolved** |
 | `content/` | ✅ Documented in place (Task #2900) | None | Source markdown for public-facing surfaces (Academy, help, demos, integrations catalog, trust center, changelog, launch series) consumed by in-product viewers and the launch publishing pipeline — see `content/README.md` | **No — resolved** |
-| `audit/` (root-level) | ✅ Documented in place (Task #2900) | None | Frozen Zero-Gap audit artifact referenced by automation in `scripts/audit/`, `scripts/public-mirror/`, `audit/verify.sh`, and `audit/source-of-truth.json`; intentionally distinct from the Series A rehaul narrative under `docs/audit/` — see updated `audit/README.md` | **No — resolved** |
+| `audit/` (root-level) | ✅ Documented in place (Task #2900) | None | Frozen Zero-Gap audit artifact referenced by automation in `scripts/audit/`, `scripts/public-mirror/`, `audit/verify.sh`, and `audit/source-of-truth.json`; intentionally distinct from the growth capital rehaul narrative under `docs/audit/` — see updated `audit/README.md` | **No — resolved** |
 | `01-thursday-intro.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |
 | `02-sunday-deep-dive.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |
 | `03-monday-operator-lens.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |
@@ -81,9 +81,9 @@ Columns: Path · Action · Risk · Reason · Owner Approval Needed
 
 | Path / Repo | Action | Rationale |
 |-------------|--------|-----------|
-| Entire repository | Keep public (current state) | Series A investor access; see `docs/governance/PUBLIC_PRIVATE_STRATEGY.md` |
+| Entire repository | Keep public (current state) | growth capital investor access; see `docs/governance/PUBLIC_PRIVATE_STRATEGY.md` |
 | Any test/stale org repos | Review and archive | Owner must audit org repo list |
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

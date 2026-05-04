@@ -2,7 +2,7 @@
 
 > SZL Holdings GitHub & Public Presence · April 2026
 
-A plan to build and demonstrate the social proof signals that matter to enterprise buyers, technical evaluators, and Series A investors.
+A plan to build and demonstrate the social proof signals that matter to enterprise buyers, technical evaluators, and growth capital investors.
 
 ---
 
@@ -40,7 +40,7 @@ These signals are available immediately to any evaluator who lands on the reposi
 
 ## Phase 2 — Content and Thought Leadership
 
-Recommended actions for the 60 days following Series A close:
+Recommended actions for the 60 days following growth capital close:
 
 | Action | Channel | Effort | Expected Return |
 |--------|---------|--------|----------------|
@@ -56,7 +56,7 @@ Recommended actions for the 60 days following Series A close:
 
 | Action | Timing | Rationale |
 |--------|--------|-----------|
-| Open-source a shared component (e.g., design tokens, audit trail schema) | After Series A | Community goodwill, hiring signal |
+| Open-source a shared component (e.g., design tokens, audit trail schema) | After growth capital | Community goodwill, hiring signal |
 | GitHub Discussions enabled | When community exists | Q&A for evaluators |
 | Developer newsletter / digest | When team bandwidth allows | Retention and awareness |
 | Conference talk on AI governance | Within 12 months | Thought leadership, press |

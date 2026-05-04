@@ -81,7 +81,7 @@ export default function S01Cover() {
             marginBottom: '3vh',
           }}
         >
-          Series A — 2026
+          growth capital — 2026
         </div>
         <div
           style={{

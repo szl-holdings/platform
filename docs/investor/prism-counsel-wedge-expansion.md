@@ -1,6 +1,6 @@
 # Counsel — Wedge & Expansion
 
-**For:** Series A investors and strategic evaluators
+**For:** growth capital investors and strategic evaluators
 **Date:** April 2026
 **Classification:** Confidential — Investor Distribution Only
 

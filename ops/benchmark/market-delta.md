@@ -1,7 +1,7 @@
 # Market Delta — Before/After Positioning Improvement
 
 **Date:** April 16, 2026
-**Purpose:** Quantify and document the positioning improvement achieved through the Series A Frontier Pass
+**Purpose:** Quantify and document the positioning improvement achieved through the growth capital Frontier Pass
 
 ---
 

@@ -117,8 +117,8 @@ const FRAMEWORKS = [
   },
   {
     id: 'fedramp',
-    name: 'FedRAMP Moderate',
-    shortName: 'FedRAMP',
+    name: 'StateRAMP Moderate',
+    shortName: 'StateRAMP',
     color: '#8a8a8a',
     score: 74,
     controls: 323,
@@ -179,13 +179,13 @@ const CROSS_MAPPING = [
   },
   {
     control: 'Multi-Factor Authentication',
-    frameworks: ['NIST IA-2', 'SOC 2 CC6.7', 'ISO A.8.5', 'FedRAMP IA-2', 'CMMC IA.L2-3.5.3'],
+    frameworks: ['NIST IA-2', 'SOC 2 CC6.7', 'ISO A.8.5', 'StateRAMP IA-2', 'CMMC IA.L2-3.5.3'],
     status: 'implemented',
     evidence: 3,
   },
   {
     control: 'Vulnerability Scanning',
-    frameworks: ['NIST RA-5', 'SOC 2 CC7.1', 'ISO A.8.8', 'CMMC RA.L2-3.11.2', 'FedRAMP RA-5'],
+    frameworks: ['NIST RA-5', 'SOC 2 CC7.1', 'ISO A.8.8', 'CMMC RA.L2-3.11.2', 'StateRAMP RA-5'],
     status: 'partial',
     evidence: 2,
   },
@@ -197,7 +197,7 @@ const CROSS_MAPPING = [
   },
   {
     control: 'System & Comm. Protection',
-    frameworks: ['NIST SC-7', 'SOC 2 CC6.6', 'ISO A.8.22', 'FedRAMP SC-7', 'CMMC SC.L2-3.13.1'],
+    frameworks: ['NIST SC-7', 'SOC 2 CC6.6', 'ISO A.8.22', 'StateRAMP SC-7', 'CMMC SC.L2-3.13.1'],
     status: 'partial',
     evidence: 1,
   },
@@ -221,7 +221,7 @@ export default function FrameworkScorecards() {
             <Shield className="w-5 h-5 text-[#c9b787]" /> Framework Scorecards
           </h1>
           <p className="text-[#c9b787]/50 text-xs mt-0.5">
-            Government-grade compliance across NIST 800-53, CSF 2.0, SOC 2, CMMC, FedRAMP, ISO
+            Government-grade compliance across NIST 800-53, CSF 2.0, SOC 2, CMMC, StateRAMP, ISO
             27001, NIS2/BSI
           </p>
         </motion.div>
@@ -527,7 +527,7 @@ export default function FrameworkScorecards() {
                 {[
                   {
                     name: 'System Security Plan (SSP)',
-                    desc: 'FedRAMP/NIST 800-53 template',
+                    desc: 'StateRAMP/NIST 800-53 template',
                     status: 'Ready',
                   },
                   {

@@ -74,7 +74,7 @@ In the demo environment, personas are configured via the demo toolbar at the bot
 
 ### Full Platform Demo (60–75 minutes)
 
-Best for: Series A investors, strategic partners, enterprise executive evaluators
+Best for: growth capital investors, strategic partners, enterprise executive evaluators
 
 | Time | Section | Platform | Persona |
 |------|---------|----------|---------|

@@ -685,7 +685,7 @@ const INVESTOR_DOC_MANIFEST: Record<string, InvestorDocMeta> = {
   "founder-summary": {
     filename: "FOUNDER-SUMMARY.md",
     title: "Founder Executive Summary",
-    subtitle: "Founder narrative, investment thesis, and Series A rationale",
+    subtitle: "Founder narrative, investment thesis, and growth capital rationale",
   },
   "launch-readiness": {
     filename: "LAUNCH-READINESS-SCORECARD.md",
@@ -750,7 +750,7 @@ const INVESTOR_DOC_MANIFEST: Record<string, InvestorDocMeta> = {
   "technical-due-diligence": {
     filename: "TECHNICAL-DUE-DILIGENCE-PACKET.md",
     title: "Technical Due Diligence Packet",
-    subtitle: "Structured technical due diligence for Series A investors and institutional evaluators",
+    subtitle: "Structured technical due diligence for growth capital investors and institutional evaluators",
   },
 };
 

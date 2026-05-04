@@ -1,6 +1,6 @@
 # GitHub Rehaul — Repository Inventory
 
-> Series A readiness audit · April 2026 · Phase 1 of 11
+> growth capital readiness audit · April 2026 · Phase 1 of 11
 
 ---
 
@@ -10,7 +10,7 @@
 
 | File | Status | Notes |
 |------|--------|-------|
-| `README.md` | Keep | Main public-facing README — Series A quality |
+| `README.md` | Keep | Main public-facing README — growth capital quality |
 | `CHANGELOG.md` | Keep | Conventional-commits format, up to date |
 | `CONTRIBUTING.md` | Keep | Proprietary contribution policy |
 | `CODE_OF_CONDUCT.md` | Keep | Contributor Covenant, professional framing |
@@ -155,4 +155,4 @@
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

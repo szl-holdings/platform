@@ -3,7 +3,7 @@
 **Produced by:** Pathfinder (Task #3489 — A11oy Operationalization Sweep)  
 **Date:** 2026-04-25  
 **Scored against:** `docs/A11OY_RELEASE_DOCTRINE.md` nine-category model  
-**Release target:** Next investor demo / Series A diligence
+**Release target:** Next investor demo / growth capital diligence
 
 ---
 

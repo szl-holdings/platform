@@ -6,7 +6,7 @@
 
 ## Current State
 
-The organization currently has one public repository: `szl-holdings-platform`. This is intentional for the Series A phase — a single well-maintained repository is stronger than multiple fragmented or partially-maintained public repos.
+The organization currently has one public repository: `szl-holdings-platform`. This is intentional for the growth capital phase — a single well-maintained repository is stronger than multiple fragmented or partially-maintained public repos.
 
 ---
 
@@ -21,7 +21,7 @@ The organization currently has one public repository: `szl-holdings-platform`. T
 | Security surface | Fewer public repos = smaller public attack surface |
 | Discovery | A single pinned repo on the org profile is clearer than a scattered portfolio |
 
-**Recommendation:** Maintain a single public flagship repository during Series A. Do not create additional public repos unless there is a clear strategic reason.
+**Recommendation:** Maintain a single public flagship repository during growth capital. Do not create additional public repos unless there is a clear strategic reason.
 
 ---
 

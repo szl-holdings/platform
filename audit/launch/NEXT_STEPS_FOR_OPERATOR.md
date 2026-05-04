@@ -1,5 +1,5 @@
 # Next Steps for Operator
-**SZL Holdings — Series A Launch Readiness Program**  
+**SZL Holdings — growth capital Launch Readiness Program**  
 **Date:** April 19, 2026  
 **Audience:** Stephen Lutar (Founder) and any technical operator executing the publish  
 **Purpose:** Exact 10-step sequence to go live on Replit

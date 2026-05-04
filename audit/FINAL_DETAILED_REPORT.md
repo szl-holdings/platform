@@ -1,4 +1,4 @@
-# Final Detailed Report — Series A Hardening
+# Final Detailed Report — growth capital Hardening
 ## SZL Holdings Platform — Phase-by-Phase Coverage
 
 **Date:** 2026-04-21  

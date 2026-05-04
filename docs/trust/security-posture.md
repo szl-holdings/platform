@@ -149,7 +149,7 @@ The full technical gap register is maintained at [`docs/known-gaps.md`](../known
 | Zod input validation (21 of 170 top-level routes covered) | Systematic expansion to high-traffic routes | Active remediation |
 | SOC 2 Type II certification | Initiate after first revenue | 12–18 months post-revenue |
 | Redis for session store (currently in-memory) | Add Redis when scaling beyond single instance | Revenue activation phase |
-| FedRAMP readiness (Aegis) | Begin after DoD/Fed contract engagement | 18–24 months |
+| StateRAMP readiness (Aegis) | Begin after DoD/Fed contract engagement | 18–24 months |
 | Automated backup validation (restore testing) | Quarterly restore drill | Next operational cycle |
 | External uptime monitoring | Configure before first enterprise pilot | Pre-commercial launch |
 | Sentry or equivalent error tracking in production | Add Sentry DSN to production environment | Next quarter |

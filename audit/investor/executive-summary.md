@@ -1,8 +1,8 @@
 # Executive Summary — SZL Holdings Platform
-## Series A Investor Brief
+## growth capital Investor Brief
 
 **Produced:** Phase D, April 2026
-**Audience:** Series A investors, technical due diligence reviewers, enterprise evaluators
+**Audience:** growth capital investors, technical due diligence reviewers, enterprise evaluators
 **Scope:** Platform thesis, architecture credibility, product status, trust posture, and readiness gaps
 
 ---

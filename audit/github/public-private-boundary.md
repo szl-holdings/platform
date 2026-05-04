@@ -7,7 +7,7 @@
 
 ## Principle
 
-The public surface exists to communicate credibility to a technical Series A investor — not to expose implementation details, financial assumptions, or competitive intelligence. The default is private; everything that goes public must earn its place.
+The public surface exists to communicate credibility to a technical growth capital investor — not to expose implementation details, financial assumptions, or competitive intelligence. The default is private; everything that goes public must earn its place.
 
 ---
 

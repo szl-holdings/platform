@@ -21,17 +21,17 @@
 
 | # | Risk / Gap | Severity | Status | Mitigation / Plan |
 |---|---|---|---|---|
-| 1 | **No production customers** | HIGH | Open | Expected at pre-Series A. Design partner conversations in progress. Frame as intentional: building with diligence before scale. |
+| 1 | **No production customers** | HIGH | Open | Expected at pre-growth capital. Design partner conversations in progress. Frame as intentional: building with diligence before scale. |
 | 2 | **A11oy Phase 2 incomplete** (workcell engine) | HIGH | In Progress | Core product roadmap. Phase 1 shipped and demo-able. Phase 2 timeline: v1.2.0. |
 | 3 | **`/api/sentra/risks` missing route** | HIGH | Open | TENAX demo-breaking. Fix estimated at 2–4 hours. Prioritize before next demo. |
 | 4 | **No live AIS telemetry (SEXTANT)** | MEDIUM | Known | AIS requires $15–40K/year provider. Disclosed in docs. Not misrepresented. |
 | 5 | **Terra maps blank (Mapbox token)** | MEDIUM | Open | Mapbox token provisioning pending. Add graceful placeholder UI. |
-| 6 | **Redis session store not in production** | MEDIUM | Open | Running in-memory sessions in production. Security and scalability risk. Provision before Series A. |
+| 6 | **Redis session store not in production** | MEDIUM | Open | Running in-memory sessions in production. Security and scalability risk. Provision before growth capital. |
 | 7 | **No enterprise SSO / SCIM 2.0** | MEDIUM | Roadmap | Required for regulated-industry enterprise buyers. Target: v1.2.0. |
 | 8 | **Integration tests not in CI** | MEDIUM | Open | Tests written but not registered as CI steps. Reduces automated confidence. Fix: register `pnpm test:integration` in CI. |
-| 9 | **Sentry error tracking not active in production** | LOW | Open | No production error visibility. Risk: silent failures undetected. Provision before Series A. |
+| 9 | **Sentry error tracking not active in production** | LOW | Open | No production error visibility. Risk: silent failures undetected. Provision before growth capital. |
 | 10 | **FORGE badge counts not wired** | MEDIUM | Open | FORGE (Command) feels broken to a demo viewer. Move to internal-only classification pending fix. |
-| 11 | **SOC 2 Type 1 not started** | HIGH | Roadmap | Required for regulated-industry customers. 6+ months evidence collection. Start immediately post-Series A. |
+| 11 | **SOC 2 Type 1 not started** | HIGH | Roadmap | Required for regulated-industry customers. 6+ months evidence collection. Start immediately post-growth capital. |
 | 12 | **No revenue activated (most domain packs)** | HIGH | Roadmap | Stripe infrastructure exists. Carlota Jo and Counsel are the revenue path. Activate post-design partner. |
 | 13 | **Stripe billing not GA for all surfaces** | MEDIUM | In Progress | Active for subset (Vessels, Lyte, Terra, Carlota Jo). Full rollout pending. |
 | 14 | **Seeded/demo data in most surfaces** | MEDIUM | Known | Disclosed in `docs/APP_STATUS.md`. Not misrepresented. Acceptable at alpha. |
@@ -42,16 +42,16 @@
 | 19 | **`command` and `mockup-sandbox` workflow monitoring false-negatives** | LOW | Known | Apps serve correctly; platform marks FAILED due to `waitForPort` mismatch. Documented. |
 | 20 | **No OpenAPI developer portal** | MEDIUM | Roadmap | API spec exists. Portal not shipped. Required for ecosystem/partner play. |
 | 21 | **Expo package version warnings** | LOW | Known | netinfo, expo-glass-effect, expo-image-picker have version warnings. Non-breaking. Fix before App Store submission. |
-| 22 | **No formal incident response tested** | MEDIUM | Open | `INCIDENT_RESPONSE.md` and runbooks exist. No actual incident drill run. Schedule a tabletop before Series A close. |
+| 22 | **No formal incident response tested** | MEDIUM | Open | `INCIDENT_RESPONSE.md` and runbooks exist. No actual incident drill run. Schedule a tabletop before growth capital close. |
 | 23 | **Brand screenshot freshness** | LOW | Managed | Screenshots verified 2026-04-25. Catalog in `audit/screenshot-catalog.md`. Must re-capture after any major UI change. |
 | 24 | **Source-of-truth.json metric drift** | LOW | Monitored | `verify-source-of-truth.yml` workflow catches drift. Manual verification required after large refactors. |
-| 25 | **Team composition not publicly stated** | MEDIUM | Strategic | Founder-led. No public team page. Investors will ask. Prepare team section before Series A pitch. |
+| 25 | **Team composition not publicly stated** | MEDIUM | Strategic | Founder-led. No public team page. Investors will ask. Prepare team section before growth capital pitch. |
 
 ---
 
 ## Risk Clusters
 
-**Most likely to be raised in a Series A technical diligence call:**
+**Most likely to be raised in a growth capital technical diligence call:**
 - Risks #3, #6, #8, #11, #1 (no customers)
 
 **Most likely to surface in an enterprise security review:**

@@ -129,7 +129,7 @@ function generateMockDeepDive(entity: string): EntityDeepDive {
       {
         flag: 'No audited financials',
         severity: 'medium',
-        note: 'Company uses compiled (not audited) financials. Series A+ round will likely require GAAP audit.',
+        note: 'Company uses compiled (not audited) financials. growth capital+ round will likely require GAAP audit.',
       },
     ],
     ai_narrative: `${entity} presents a credible, capital-efficient growth profile with above-market revenue growth (34% YoY) and healthy EBITDA margins for its stage (28%). The ownership structure is stable — majority family-trust control with strategic co-investor alignment and a well-structured management incentive pool. The primary risk vector is client concentration, which is addressable through the pipeline diversification initiatives visible in the filing amendments. The AGPL compliance posture for Fincept Terminal is properly managed via isolation proxy — no licensing risk exposure detected. Overall, the entity scores positively on governance structure, capital efficiency, and growth trajectory. Recommend further diligence on the secured credit facility terms and the pipeline-to-ARR conversion rate.`,

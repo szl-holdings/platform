@@ -152,7 +152,7 @@ API access is separate from seat licenses.
 - **Public pricing page:** Not planned for design-partner stage. All pricing is conversation-based.
 - **Freemium or self-serve trial:** Not appropriate for this buyer profile or sales motion.
 - **Usage-based billing:** May be introduced later for API/data volume; not in scope now.
-- **Marketplace listing:** Future consideration for Azure or AWS Marketplace.
+- **Marketplace listing:** Future consideration for Azure or cloud marketplace.
 
 ---
 

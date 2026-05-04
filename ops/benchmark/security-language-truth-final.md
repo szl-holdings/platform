@@ -69,7 +69,7 @@ Inspired by Chainguard's approach — their "zero known CVEs" claim is backed by
 
 | Competitor | Security Claim Style | SZL Approach |
 |-----------|---------------------|-------------|
-| Palantir | "Built for classified environments" — backed by FedRAMP, ITAR | Claim specific implementations, not environment certifications |
+| Palantir | "Built for classified environments" — backed by StateRAMP, ITAR | Claim specific implementations, not environment certifications |
 | Vanta | "Automate compliance" — backed by continuous monitoring | SZL proves *decisions*, not just *controls* |
 | Chainguard | "Zero known CVEs" — backed by automated scanning + SBOM | SZL should adopt measurable claims: "100% of AI outputs have proof records" |
 

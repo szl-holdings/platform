@@ -124,7 +124,7 @@ These are the seven primary use cases Aegis is built to serve. Each use case map
 **Problem**: Cyber resilience is not a state — it is a trajectory. Organizations that pass their audit today may be degrading. Without trend visibility tied to real incident data, resilience is theater.
 
 **How Aegis Handles It**
-- Framework scorecards show current control status against NIST CSF, CIS, FedRAMP
+- Framework scorecards show current control status against NIST CSF, CIS, StateRAMP
 - Risk register captures residual risk with remediation owners and due dates
 - Trend lines show MTTR, escalation rate, control degradation, and SLA compliance over 30/90 days
 - Hardening controls track implementation status with audit trail

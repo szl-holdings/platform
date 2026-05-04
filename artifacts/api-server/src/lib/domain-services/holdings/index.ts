@@ -58,7 +58,7 @@ export function getTrustCenterStatus(): TrustCenterStatus {
         expiry: 'Mar 2027',
       },
       { name: 'GDPR', status: 'compliant', scope: 'EU Data Protection', expiry: 'Ongoing' },
-      { name: 'FedRAMP', status: 'in-progress', scope: 'US Federal Cloud', expiry: 'Q3 2026' },
+      { name: 'StateRAMP', status: 'in-progress', scope: 'US Federal Cloud', expiry: 'Q3 2026' },
       {
         name: 'ITAR',
         status: 'compliant',

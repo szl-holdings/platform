@@ -2,7 +2,7 @@
 
 **Status:** AUTHORITATIVE  
 **Effective date:** April 16, 2026  
-**Audience:** Series A investors, technical due diligence reviewers, enterprise buyers, internal team
+**Audience:** growth capital investors, technical due diligence reviewers, enterprise buyers, internal team
 
 ---
 
@@ -124,7 +124,7 @@ The SZL Holdings platform upholds the following honesty standards for all invest
 
 ## Investor Session Protocol
 
-For Series A investor sessions:
+For growth capital investor sessions:
 - Use the live development environment (Replit workspace) — it is the canonical demo surface
 - Authenticate with the demo org account (credentials in Replit Secrets via SECRETS_SETUP.md)
 - Surfaces in Bucket 1 are demonstrated as live

@@ -60,7 +60,7 @@ integrations = ["github:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
-timeoutMs = 900000
+timeoutMs = 1200000
 
 [nix]
 channel = "stable-25_05"

@@ -172,7 +172,7 @@ From raw signal through routing logic through human approval through executed ou
 | Multi-tenancy | All queries scoped by org_id — cross-tenant access architecturally prevented |
 | Data security | TLS 1.3, HMAC-signed WebSocket tickets (5-min TTL), encryption at rest |
 
-> No SOC 2, HIPAA, FedRAMP, or ISO certifications claimed. Compliance readiness is a planned roadmap item.
+> No SOC 2, HIPAA, StateRAMP, or ISO certifications claimed. Compliance readiness is a planned roadmap item.
 
 ---
 

@@ -108,17 +108,17 @@ The library ships with a catalog of pre-built guardrails ([Guardrail Catalog](ht
 
 **NVIDIA AI Enterprise** is the commercial software layer bundling NIM, NeMo Guardrails, Morpheus (security AI), and RAPIDS. Available on:
 
-- **AWS Marketplace** / Amazon SageMaker JumpStart ([NVIDIA NIM on AWS](https://blogs.nvidia.com/blog/nim-microservices-aws-inference/))
+- **cloud marketplace** / Amazon SageMaker JumpStart ([NVIDIA NIM on AWS](https://blogs.nvidia.com/blog/nim-microservices-aws-inference/))
 - **Azure Marketplace** / Azure AI Foundry ([Microsoft Marketplace](https://marketplace.microsoft.com/en-us/product/nvidia.nvidia-nims))
 - **GCP, OCI, and on-prem** deployments
 
 ### Federal Posture
 
-- **"Government Ready" designation** for AI Enterprise software meeting FedRAMP High / equivalent sovereign cloud security requirements, including FIPS 140-3 cryptographic module compliance. ([NVIDIA security baseline](https://docs.nvidia.com/ai-enterprise/planning-resource/ai-software-regulated-environments-white-paper/latest/security-baseline.html))
+- **"Government Ready" designation** for AI Enterprise software meeting StateRAMP High / equivalent sovereign cloud security requirements, including FIPS 140-3 cryptographic module compliance. ([NVIDIA security baseline](https://docs.nvidia.com/ai-enterprise/planning-resource/ai-software-regulated-environments-white-paper/latest/security-baseline.html))
 - **NVIDIA AI Factory for Government** reference design unveiled at GTC Washington D.C. (Oct 2025), providing a full-stack validated design for federal agencies. ([NVIDIA government blog](https://blogs.nvidia.com/blog/us-technology-leaders-ai-factory-design-government/))
 - **Leidos partnership** — Leidos uses NVIDIA AI Enterprise software + VAST AI OS to process trillions of daily security events via NVIDIA Morpheus and BlueField DPUs. ([VAST Data press release](https://www.vastdata.com/press-releases/vast-federal-and-leidos-introduce-agentic-cybersecurity-with-nvidia-ai))
 - **OCI Government Regions** — NVIDIA B300 Blackwell Ultra GPUs available in OCI government cloud for U.S. DoD workloads. ([Oracle announcement](https://www.oracle.com/news/announcement/blog/oracle-expands-ai-infrastructure-options-for-us-government-customers-2026-03-31/))
-- NVIDIA does **not** independently hold FedRAMP ATO; it relies on cloud marketplace authorizations (AWS GovCloud, Azure Government, OCI).
+- NVIDIA does **not** independently hold StateRAMP ATO; it relies on cloud marketplace authorizations (AWS GovCloud, Azure Government, OCI).
 
 ### What NIM Cannot Do (Gaps)
 
@@ -183,13 +183,13 @@ Mitigation actions are tiered by severity: enhanced monitoring → restricted ac
 
 ## 4. Google Cloud Federal Compliance + Vertex AI Governance
 
-**FedRAMP scope doc:** [https://docs.cloud.google.com/architecture/security/fedramp-dod-compliance-scope](https://docs.cloud.google.com/architecture/security/fedramp-dod-compliance-scope)
+**StateRAMP scope doc:** [https://docs.cloud.google.com/architecture/security/fedramp-dod-compliance-scope](https://docs.cloud.google.com/architecture/security/fedramp-dod-compliance-scope)
 
 ### Federal Authorizations
 
-- **FedRAMP High** — 100+ Google Cloud services authorized, including **Vertex AI**, Agent Assist, Vertex AI Vector Search, and Looker. ([FedScoop](https://fedscoop.com/google-earns-fedramp-high-authorization-for-more-than-100-additional-commercial-services/))
+- **StateRAMP High** — 100+ Google Cloud services authorized, including **Vertex AI**, Agent Assist, Vertex AI Vector Search, and Looker. ([FedScoop](https://fedscoop.com/google-earns-fedramp-high-authorization-for-more-than-100-additional-commercial-services/))
 - **DoD IL2 / IL4 / IL5** — formal provisional authorizations in place; IL5 achieved for **Gemini for Government** platform ([Google Cloud blog](https://cloud.google.com/blog/topics/public-sector/reflecting-on-a-year-of-transformation-and-mission-impact-together))
-- Individual LLMs are **not** independently FedRAMP-authorized; the service wrapper (Generative AI on Vertex AI, Vertex AI Inference) carries the ATO. ([FedRAMP implementation guide](https://docs.cloud.google.com/architecture/fedramp-implementation-guide))
+- Individual LLMs are **not** independently StateRAMP-authorized; the service wrapper (Generative AI on Vertex AI, Vertex AI Inference) carries the ATO. ([StateRAMP implementation guide](https://docs.cloud.google.com/architecture/fedramp-implementation-guide))
 - **CDAO contract (Dec 2025)** — Chief Digital and Artificial Intelligence Office selected Google Cloud's AI platform for unclassified GenAI workflows across the DoD. ([Google Cloud press corner](https://www.googlecloudpresscorner.com/2025-12-09-Chief-Digital-and-Artificial-Intelligence-Office-Selects-Google-Clouds-AI-to-Power-GenAI-mil))
 
 ### Vertex AI Governance Features
@@ -268,8 +268,8 @@ The platform claims to cut manual oversight by 35% through real-time dashboards.
 
 ### Federal Authorizations (April 2026)
 
-- **FedRAMP Moderate (April 1, 2026):** IBM announced 11 AI and automation software solutions received FedRAMP authorization, including **watsonx.governance**, **watsonx.data**, **watsonx.data Intelligence**, and **watsonx Orchestrate**, enabled by IBM's strategic collaboration with **AWS**. ([IBM newsroom](https://newsroom.ibm.com/2026-04-01-IBM-Expands-FedRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx))
-- **FedRAMP High path:** Not yet achieved for watsonx; IBM's traditional software products (Z, Power) have High ATOs but the watsonx SaaS stack is currently at Moderate.
+- **StateRAMP Moderate (April 1, 2026):** IBM announced 11 AI and automation software solutions received StateRAMP authorization, including **watsonx.governance**, **watsonx.data**, **watsonx.data Intelligence**, and **watsonx Orchestrate**, enabled by IBM's strategic collaboration with **AWS**. ([IBM newsroom](https://newsroom.ibm.com/2026-04-01-IBM-Expands-StateRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx))
+- **StateRAMP High path:** Not yet achieved for watsonx; IBM's traditional software products (Z, Power) have High ATOs but the watsonx SaaS stack is currently at Moderate.
 
 ### EU AI Act + NIST Compliance Accelerators
 
@@ -284,7 +284,7 @@ The platform claims to cut manual oversight by 35% through real-time dashboards.
 | Essentials (SaaS) | Resource unit consumption | From ~$0.60/resource unit; up to 200 resource units, 1K records/evaluation |
 | Standard | Per VPC (on-prem) or SaaS | ~$38K/year baseline |
 | Enterprise | Custom quote | $10K–$25K/month SaaS or custom |
-| AWS Marketplace | BYOL or subscription | Marketplace listing |
+| cloud marketplace | BYOL or subscription | Marketplace listing |
 
 ([IBM pricing page](https://www.ibm.com/products/watsonx-governance/pricing), [redresscompliance.com](https://redresscompliance.com/ibm-watsonx-licensing-guide.html), [blog.exceeds.ai](https://blog.exceeds.ai/ibm-watsonx-governance-features-comparison/))
 
@@ -600,12 +600,12 @@ These are engineering abstractions. None is grounded in a philosophical theory o
 | Competitor | OSS | License | Closed-form Λ | Receipt-per-decision | 9-axis Honesty | Math Proof | Federal ATO | Pricing |
 |---|---|---|---|---|---|---|---|---|
 | NVIDIA NeMo Guardrails | ✓ | Apache 2.0 | ✗ | ✗ | ✗ | ✗ | Via marketplace | Free core |
-| NVIDIA NIM / AI Enterprise | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | Gov Ready / FedRAMP via cloud | Subscription |
+| NVIDIA NIM / AI Enterprise | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | Gov Ready / StateRAMP via cloud | Subscription |
 | Google FSF v3 | ✗ | Policy doc | ✗ | ✗ | ✗ | ✗ | N/A (policy only) | N/A |
-| Google Vertex AI | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | FedRAMP High, IL5 | Pay-per-use |
+| Google Vertex AI | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | StateRAMP High, IL5 | Pay-per-use |
 | Google Model Card Toolkit | ✓ | Apache 2.0 | ✗ | ✗ | ✗ | ✗ | None | Free |
-| IBM watsonx.governance | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | FedRAMP Moderate | $38K+/yr |
-| IBM AI Factsheets | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | FedRAMP Moderate | Bundled |
+| IBM watsonx.governance | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | StateRAMP Moderate | $38K+/yr |
+| IBM AI Factsheets | ✗ | Commercial | ✗ | ✗ | ✗ | ✗ | StateRAMP Moderate | Bundled |
 | Anthropic RSP v3 / CAI | ✗ | Policy/prop. | ✗ | ✗ | ✗ | ✗ | None | N/A |
 | OpenAI Preparedness FW v2 | ✗ | Policy doc | ✗ | ✗ | ✗ | ✗ | None | N/A |
 | Guardrails AI | ✓ | Apache 2.0 | ✗ | ✗ | ✗ | ✗ | None | Free / Enterprise |
@@ -623,7 +623,7 @@ Based on the gap analysis, the following differentiation vectors are mathematica
 
 2. **Receipts as compliance artifacts:** Position per-decision receipts as the auditable evidence layer that satisfies EU AI Act Article 13 (transparency) and Article 17 (quality management system) *at the inference level*, not just the model level. IBM's watsonx.governance compliance accelerators operate at the model-card level; Ouroboros operates at the token level.
 
-3. **FedRAMP differentiation:** NVIDIA and Google achieve FedRAMP High for infrastructure; IBM is at Moderate for watsonx. A FedRAMP High ATO for the Ouroboros runtime with verifiable per-decision receipts would be the first mathematically provable trust scalar with a government clearance — a category of one.
+3. **StateRAMP differentiation:** NVIDIA and Google achieve StateRAMP High for infrastructure; IBM is at Moderate for watsonx. A StateRAMP High ATO for the Ouroboros runtime with verifiable per-decision receipts would be the first mathematically provable trust scalar with a government clearance — a category of one.
 
 4. **Philosophy-to-compliance bridge:** The 91 classical-philosophy-rooted primitives can be directly mapped to NIST AI RMF trust dimensions (Map, Measure, Manage, Govern) in a way no competitor's operational vocabulary supports. This positions Ouroboros as the semantic substrate for AI governance, not merely another monitor.
 

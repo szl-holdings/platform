@@ -33,7 +33,7 @@ const CERTS: Cert[] = [
   { name: 'NIST AI RMF 1.0', framework: 'NIST', status: 'in-place', scope: 'Govern · Map · Measure · Manage', refresh: 'Quarterly self-attestation', evidence: 'Compass dashboard' },
   { name: 'CSA AI Trustworthy Pledge', framework: 'CSA AICM', status: 'attested', scope: 'Agentic profile control set', refresh: 'Annual self-assessment', evidence: 'Public Trust Portal' },
   { name: 'HIPAA technical safeguards', framework: 'HHS 45 CFR 164.312', status: 'in-place', scope: 'PHI-handling tenants only', refresh: 'BAA on file · annual review', evidence: 'Trust Exchange · BAA' },
-  { name: 'FedRAMP Moderate alignment', framework: 'FedRAMP', status: 'in-progress', scope: 'GovCloud isolation tenancy', refresh: '3PAO assessment Q4 2026', evidence: 'Sovereign tenancy briefing' },
+  { name: 'StateRAMP Moderate alignment', framework: 'StateRAMP', status: 'in-progress', scope: 'GovCloud isolation tenancy', refresh: '3PAO assessment Q4 2026', evidence: 'Sovereign tenancy briefing' },
 ];
 
 type ControlDomain = {

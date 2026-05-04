@@ -55,7 +55,7 @@
 | task-756 | Truth audit & security credential hygiene (Phases 0-1) | **duplicate** | This task (task-1786) supersedes the truth audit scope; credential hygiene overlaps with task-530 |
 | task-758 | Product architecture cleanup & enterprise professionalization (Phases 8-9) | **still-needed** | mockup-sandbox public path (P3-006); leftover backup files (P2-012) |
 | task-760 | API platform hardening & observability (Phases 8-9) | **still-needed** | Zod coverage (P0-002); integration tests not in CI; observability stub |
-| task-765 | Series A one-of-one tightening pass | **needs-scope** | Broad scope; should be directed at specific gaps from this audit |
+| task-765 | growth capital one-of-one tightening pass | **needs-scope** | Broad scope; should be directed at specific gaps from this audit |
 | task-812 | Seed realistic tenant health data so the scorecard dashboard shows something meaningful | **still-needed** | Seed data is confirmed as demo-fixture; realistic tenant health is a demo enabler |
 | task-820 | Add email delivery to scheduled reports (actually send reports on the schedule) | **still-needed** | No email delivery confirmed; SendGrid/Resend wired but not live |
 | task-830 | Send real email and SMS alerts when users get notifications | **still-needed** | Twilio/SendGrid are stubs; not confirmed live |
@@ -93,13 +93,13 @@
 | task-648 | [SUPERSEDED] Connect 8 new Strategic Command modules to live data | Superseded; gap still open as P1-005 — file new task |
 | task-772 | [SUPERSEDED] Competitive research + homepage rewrite | Superseded |
 | task-773 | [SUPERSEDED] Build flagship Decision Theater experience | Superseded; Decision Theater exists |
-| task-775 | [SUPERSEDED] Competitive benchmark research & Series A strategy | Superseded |
-| task-785 | [SUPERSEDED] Series A: Category Narrative & Portfolio Coherence | Superseded |
-| task-786 | [SUPERSEDED] Series A: Operating Loop & Attribution Model | Superseded |
-| task-787 | [SUPERSEDED] Series A: Public Flagship & Trust GTM Pass | Superseded |
-| task-788 | [SUPERSEDED] Series A: Operator Command Differentiation | Superseded |
-| task-789 | [SUPERSEDED] Series A: API Integration-Grade Pass | Superseded |
-| task-791 | [SUPERSEDED] Series A: Mobile Beta Honest Pass | Superseded |
+| task-775 | [SUPERSEDED] Competitive benchmark research & growth capital strategy | Superseded |
+| task-785 | [SUPERSEDED] growth capital: Category Narrative & Portfolio Coherence | Superseded |
+| task-786 | [SUPERSEDED] growth capital: Operating Loop & Attribution Model | Superseded |
+| task-787 | [SUPERSEDED] growth capital: Public Flagship & Trust GTM Pass | Superseded |
+| task-788 | [SUPERSEDED] growth capital: Operator Command Differentiation | Superseded |
+| task-789 | [SUPERSEDED] growth capital: API Integration-Grade Pass | Superseded |
+| task-791 | [SUPERSEDED] growth capital: Mobile Beta Honest Pass | Superseded |
 | task-793 | [SUPERSEDED] SZL Scale, Close, and Operate Pass | Superseded |
 | task-794 | [SUPERSEDED] Commercial company buildout | Superseded |
 | task-795 | [SUPERSEDED] Category Leadership — Strategic Foundations | Superseded |

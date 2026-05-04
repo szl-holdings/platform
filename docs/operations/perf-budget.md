@@ -26,7 +26,7 @@ Targets serve as a shared yardstick so any PR that regresses performance is caug
 | Category | Warning threshold (current) | Hard-fail threshold (Q3 2026) | Rationale |
 |----------|:---------------------------:|:-----------------------------:|-----------|
 | Performance | ≥ 70 | ≥ 80 | Investor demo environments use fast networks; 80 is achievable with code splitting |
-| Accessibility | ≥ 85 | ≥ 90 | WCAG 2.1 AA baseline; Series A diligence floor |
+| Accessibility | ≥ 85 | ≥ 90 | WCAG 2.1 AA baseline; growth capital diligence floor |
 | Best Practices | ≥ 90 | ≥ 95 | HTTPS, no deprecated APIs, CSP headers |
 | SEO | ≥ 85 | ≥ 90 | Public-facing marketing pages need indexability |
 
@@ -133,6 +133,6 @@ Target: wire into a nightly CI job with a dedicated test database by Q3 2026.
 | Review type | Frequency | Trigger |
 |-------------|-----------|---------|
 | Score drift check | Every PR (automated) | Lighthouse CI |
-| Budget target review | Quarterly | Team lead + Series A milestone |
+| Budget target review | Quarterly | Team lead + growth capital milestone |
 | Load test re-baseline | Before each major release | Platform engineering |
 | CWV field data review | Monthly | After production monitoring is in place |

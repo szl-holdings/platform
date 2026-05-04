@@ -49,7 +49,7 @@ The following 10 actions would move the platform to investor-demoable state:
 
 ---
 
-## What Would Make This "8/10" (Series A Ready)
+## What Would Make This "8/10" (growth capital Ready)
 
 All 10 above, plus:
 

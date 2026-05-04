@@ -22,10 +22,10 @@ The 24-month roadmap, the capital plan, and the Mercy McInnis ask are all writte
 
 | File | What it is |
 | --- | --- |
-| [compliance/COMPLIANCE_PLAYBOOK.md](compliance/COMPLIANCE_PLAYBOOK.md) | 553-line research baseline. SAM.gov, SOC 2, FedRAMP, CMMC 2.0, AWS Marketplace, HIPAA BAA, EU AI Act. |
+| [compliance/COMPLIANCE_PLAYBOOK.md](compliance/COMPLIANCE_PLAYBOOK.md) | 553-line research baseline. SAM.gov, SOC 2, StateRAMP, CMMC 2.0, cloud marketplace, HIPAA BAA, EU AI Act. |
 | [compliance/EXECUTABLE_ROADMAP.md](compliance/EXECUTABLE_ROADMAP.md) | 2,344-word founder-readable execution plan. Month-by-month. Gates A through F. Phase 1 ~$5K, Phase 2 $30-40K, Phase 3 gated. |
 
-Decision: SAM.gov first (free, in flight). SOC 2 Type 2 second ($20-40K, 9-14 months). AWS Marketplace third (free, ops effort). Defer FedRAMP until contract-in-hand. Defer CMMC until DoD prime engagement. Defer ISO 27001 until EU pipeline materializes.
+Decision: SAM.gov first (free, in flight). SOC 2 Type 2 second ($20-40K, 9-14 months). cloud marketplace third (free, ops effort). Defer StateRAMP until contract-in-hand. Defer CMMC until DoD prime engagement. Defer ISO 27001 until EU pipeline materializes.
 
 ### Gap 2 — Guardrails / agentic-safety SKU
 
@@ -78,7 +78,7 @@ The argument: learned safety models inherit the failure modes of the systems the
 
 | File | What it is |
 | --- | --- |
-| [marketplace/AWS_MARKETPLACE_KIT.md](marketplace/AWS_MARKETPLACE_KIT.md) | 1,798 words. Phase 1 private offer to 3 named accounts (Booz Allen, Truist, Northwell). Phase 2 public. Phase 3 GovCloud. Listing copy ready to paste. |
+| [marketplace/AWS_MARKETPLACE_KIT.md](marketplace/AWS_MARKETPLACE_KIT.md) | 1,798 words. Phase 1 private offer to 3 named accounts (enterprise integrator, regional bank partner, health system partner). Phase 2 public. Phase 3 GovCloud. Listing copy ready to paste. |
 
 SaaS Contract chosen over SaaS Subscription: annual ARR is more predictable and matches an enterprise sales motion better than usage-metered subscriptions for a guardrails product.
 
@@ -109,7 +109,7 @@ The hosted control plane that turns the runtime into a SaaS endpoint.
 
 Three things this payload does not do, listed for honesty.
 
-1. The pricing tiers in the AWS Marketplace listing copy and platform spec are marked CONFIRM. Founder needs to set them before the listing goes live.
+1. The pricing tiers in the cloud marketplace listing copy and platform spec are marked CONFIRM. Founder needs to set them before the listing goes live.
 2. The patent-floor numbers from the prior valuation pass ($7M-$30M defensive IP floor) assume a provisional patent has been filed. It has not. v3 may ship to Zenodo. v4 and v5 hold until the provisional is filed.
 3. The Mercy May 6 meeting is the gating event for the federal lighthouse path. The follow-up script is written. The script needs Mercy to say yes.
 

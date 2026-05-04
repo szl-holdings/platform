@@ -127,7 +127,7 @@ const STAGES = [
       { label: 'Coverage', value: '100%', sub: 'Every executed action' },
       { label: 'Replay', value: 'Full fidelity', sub: 'Step · eval · approval' },
     ],
-    highlight: 'Built for SOC 2 Type II, HIPAA, GDPR, and FedRAMP readiness on the roadmap.',
+    highlight: 'Built for SOC 2 Type II, HIPAA, GDPR, and StateRAMP readiness on the roadmap.',
     type: 'compliance',
   },
   {
@@ -189,7 +189,7 @@ const STAGES = [
     body: 'We are raising a $4M seed round to fund 18 months of product development, 3 pilot enterprise customers, and a team of 6. The capital funds: SOC 2 certification, production deployment layer, and enterprise connector library expansion.',
     metrics: [
       { label: 'Raising', value: '$4M', sub: 'Seed round' },
-      { label: 'Runway', value: '18 months', sub: 'To Series A' },
+      { label: 'Runway', value: '18 months', sub: 'To growth capital' },
       { label: 'Use of Funds', value: 'Product + GTM', sub: '60% product, 40% GTM' },
     ],
     highlight: 'A11oy is not a chatbot — it is the governed execution operating system for the enterprise.',

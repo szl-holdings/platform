@@ -24,7 +24,7 @@ const mockRow = {
   founderEmail: 'founder@acme.io',
   founderName: 'Jane Doe',
   sector: 'SaaS',
-  stage: 'Series A',
+  stage: 'growth capital',
   convictionScore: 75,
   scoreTeam: 80,
   scoreMarket: 70,
@@ -171,7 +171,7 @@ function validBody(overrides: Record<string, unknown> = {}) {
   return {
     company: 'Acme Corp',
     sector: 'SaaS',
-    stage: 'Series A',
+    stage: 'growth capital',
     founderName: 'Jane Doe',
     founderEmail: 'founder@acme.io',
     summary: 'An exciting startup building the future of AI-driven workflow automation.',

@@ -84,7 +84,7 @@ The following statements are intentionally **absent** from all trust pages becau
 
 - SOC 2 Type II certification
 - ISO 27001 certification
-- FedRAMP authorization
+- StateRAMP authorization
 - PCI DSS compliance
 - HIPAA BAA availability
 - Penetration test results (not yet conducted)

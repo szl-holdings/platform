@@ -11,7 +11,7 @@
 
 | Severity | Meaning |
 |----------|---------|
-| **CRITICAL** | Blocks Series A close or live tenant onboarding |
+| **CRITICAL** | Blocks growth capital close or live tenant onboarding |
 | **HIGH** | Must resolve before commercial availability |
 | **MEDIUM** | Should resolve before broad GTM |
 | **LOW** | Quality improvement; does not block revenue |

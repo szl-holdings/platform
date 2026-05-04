@@ -1,4 +1,4 @@
-# LinkedIn Launch Post — SZL Holdings (Series A, public launch)
+# LinkedIn Launch Post — SZL Holdings (growth capital, public launch)
 
 > Two posts: the **17-slide carousel** (primary) and the **52-second video** (T+24h follow-up). Posting playbook is in `02-HOW-TO-POST.md`.
 
@@ -15,7 +15,7 @@ Today, SZL Holdings ships nine production surfaces on one governed substrate —
 405 passing tests, a 12-step end-to-end smoke, and a cross-domain entity graph
 linking real estate, maritime, legal, security, and finance into one audit trail.
 
-We're raising our Series A.
+We're raising our growth capital.
 
 The bet: enterprises don't need another AI copilot.
 They need an audit trail for every decision a model touches.
@@ -36,7 +36,7 @@ What's live in this carousel ↓
   14     The cross-cutting API surface — briefings, drift, deployments, graph
   15     The numbers — 30 days, 9 surfaces, 17 artifacts, 405 tests, 0 hallucinations
   16     Guardian — 8 policy tiers gating every model call + Eval OS continuous gates
-  17     Work with us — design partner, Series A, hiring
+  17     Work with us — design partner, growth capital, hiring
 
 Under the hood:
 • Constellation — cross-domain entity graph, every edge carries provenance
@@ -120,7 +120,7 @@ Six primitives:
 →  medium.com/@stephen_38454
 →  szlholdings.substack.com
 
-Series A is open. 10 design-partner slots. stephen@szlholdings.com.
+growth capital is open. 10 design-partner slots. stephen@szlholdings.com.
 
 #SeriesA  #EnterpriseAI  #AIGovernance  #DecisionInfrastructure
 #Founders  #B2BSaaS  #DeepTech  #BuildInPublic
@@ -169,4 +169,4 @@ you'll want to see this.
 | 14 | `14-api-surface.jpg` | **NEW** Cross-cutting API — `/briefings`, `/drift`, `/deployments`, `/domains/:d/graph` |
 | 15 | `15-numbers.jpg` | **NEW** 30 days · 9 surfaces · 17 artifacts · 120+ tables · 405 tests · 0 hallucinations |
 | 16 | `16-gates.jpg` | **NEW** Guardian's 8 policy tiers + Eval OS continuous gates |
-| 17 | `17-cta.jpg` | CTA — design partner / Series A / hiring + every handle |
+| 17 | `17-cta.jpg` | CTA — design partner / growth capital / hiring + every handle |

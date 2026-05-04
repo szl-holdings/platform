@@ -21,7 +21,7 @@
 ### What Is Roadmap
 - SOC 2 Type II certification
 - HIPAA attestation
-- FedRAMP Authorization
+- StateRAMP Authorization
 - VPC-isolated deployment option
 - Air-gapped on-premises option
 - Hardware security module (HSM) for Proof Ledger signing

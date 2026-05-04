@@ -20,7 +20,7 @@ This document defines the launch bar — the standard the SZL Holdings platform 
 **What this is NOT:**
 - Generally Available (GA) launch with broad self-serve sign-up
 - SOC 2 Type II certified production deployment
-- FedRAMP or regulated-industry deployment
+- StateRAMP or regulated-industry deployment
 
 ---
 

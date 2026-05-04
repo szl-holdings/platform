@@ -67,7 +67,7 @@ See `ops/frontier/manual-actions-remaining.md` for the complete list.
 | Early design partner | Ready | Auth, RBAC, multi-tenant onboarding |
 | Enterprise customer | 6–8 weeks | Azure migration + production hardening |
 | App Store / Play Store | 4–6 weeks | Firebase, TestFlight setup, screenshots |
-| Series A data room | Ready | Fact sheet, press kit, platform docs |
+| growth capital data room | Ready | Fact sheet, press kit, platform docs |
 
 ---
 

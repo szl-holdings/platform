@@ -217,7 +217,7 @@ const compliance = [
   { framework: 'NIST CSF 2.0', score: 84, status: 'Mature', route: '/cr/scorecards' },
   { framework: 'ISO 27001:2022', score: 82, status: 'Compliant', route: '/cr/scorecards' },
   { framework: 'CMMC 2.0 L2', score: 76, status: 'In Progress', route: '/cr/scorecards' },
-  { framework: 'FedRAMP Moderate', score: 74, status: 'Assessment', route: '/cr/scorecards' },
+  { framework: 'StateRAMP Moderate', score: 74, status: 'Assessment', route: '/cr/scorecards' },
   { framework: 'NIS2 / DORA', score: 71, status: 'Remediation', route: '/cr/scorecards' },
   { framework: 'PCI DSS 4.0', score: 88, status: 'Compliant', route: '/cr/scorecards' },
   { framework: 'HIPAA Security', score: 86, status: 'Compliant', route: '/cr/scorecards' },

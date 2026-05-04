@@ -97,7 +97,7 @@ export const PLATFORM_READINESS: Readonly<Record<GovPlatformId, PlatformReadines
         }),
       ]),
       gaps: Object.freeze([
-        'FedRAMP authorization not yet held — disclose as roadmap with FedRAMP 20x or CSP partnership path.',
+        'StateRAMP authorization not yet held — disclose as roadmap with StateRAMP 20x or CSP partnership path.',
         'CMMC documentation: NIST SP 800-171 gap assessment needed if A11oy will handle CUI.',
         'Bias testing evidence: documented bias audit plan or results required.',
         'Data residency statement: explicit confirmation that data stays on US-controlled infrastructure.',

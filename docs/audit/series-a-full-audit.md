@@ -1,4 +1,4 @@
-# Series A Full Audit — Complete Inventory
+# growth capital Full Audit — Complete Inventory
 
 **Date:** April 16, 2026  
 **Auditor:** Platform Engineering  
@@ -269,4 +269,4 @@
 
 ---
 
-_This document is the foundational Series A audit artifact. For gap analysis see `docs/audit/series-a-gap-register.md`. For out-of-scope items see `docs/audit/series-a-out-of-scope-register.md`._
+_This document is the foundational growth capital audit artifact. For gap analysis see `docs/audit/series-a-gap-register.md`. For out-of-scope items see `docs/audit/series-a-out-of-scope-register.md`._

@@ -218,7 +218,7 @@ All required launch documents are created or updated. One minor accuracy issue i
 | **Pre-launch (legal)** | Before any commercial engagement | Legal review of Privacy Policy, ToS, design-partner agreements |
 | **Sprint 3** | 30 days post-launch | KG011 (CodeQL), KG012 (dep review), KG020b (SSRF), KG027/KG028 (if not done pre-launch) |
 | **Sprint 4** | 90 days post-launch | KG010 (E2E), KG019 (Lighthouse CI), KG023 (SLI/SLO), KG024 (bundle sizes) |
-| **Phase 3 / post-funding** | Post-revenue | SOC 2 Type II, ISO 27001, FedRAMP evaluation |
+| **Phase 3 / post-funding** | Post-revenue | SOC 2 Type II, ISO 27001, StateRAMP evaluation |
 
 ---
 

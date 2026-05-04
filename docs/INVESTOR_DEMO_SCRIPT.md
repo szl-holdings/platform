@@ -68,7 +68,7 @@ Click Approve to demonstrate.
 
 ## Step 9: Proof Ledger (COMPLIANCE)
 
-> "Every executed action produces a Proof Packet — SHA-256 hash chain, all reasoning steps, tool calls, approvals, eval scores. Append-only. No post-hoc revision. Built for SOC 2, HIPAA, and FedRAMP readiness."
+> "Every executed action produces a Proof Packet — SHA-256 hash chain, all reasoning steps, tool calls, approvals, eval scores. Append-only. No post-hoc revision. Built for SOC 2, HIPAA, and StateRAMP readiness."
 
 ---
 
@@ -86,7 +86,7 @@ Click Generate New Board Packet.
 
 > "We land with one domain — maritime, legal, revenue — prove ROI in 90 days, expand to 3–5 domains. ACV: $200K to $2M. TAM: $14B in enterprise governance and AI operations."
 >
-> "We are raising $4M seed to fund 3 pilot customers, SOC 2 certification, and the production deployment layer. 18 months to Series A."
+> "We are raising $4M seed to fund 3 pilot customers, SOC 2 certification, and the production deployment layer. 18 months to growth capital."
 >
 > "The Proof Ledger is our sales proof — every ROI claim is hash-chained. A11oy is the governed execution operating system for the enterprise."
 

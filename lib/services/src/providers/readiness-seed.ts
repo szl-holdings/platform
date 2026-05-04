@@ -93,9 +93,9 @@ export const mockPrograms: Program[] = [
   },
   {
     id: 'p_2',
-    name: 'FedRAMP Cloud Modernization',
+    name: 'StateRAMP Cloud Modernization',
     description:
-      'Migration of on-premises infrastructure to FedRAMP-authorized cloud environments (AWS GovCloud, Azure Government). Includes ATO package preparation, continuous monitoring per NIST SP 800-137, and legacy system decommissioning.',
+      'Migration of on-premises infrastructure to StateRAMP-authorized cloud environments (AWS GovCloud, Azure Government). Includes ATO package preparation, continuous monitoring per NIST SP 800-137, and legacy system decommissioning.',
     overallScore: 61.8,
     targetScore: 85,
     status: 'active',
@@ -270,7 +270,7 @@ export const mockMilestones: Milestone[] = [
   {
     id: 'm_7',
     programId: 'p_1',
-    title: 'ATO Package Submission (FedRAMP Moderate)',
+    title: 'ATO Package Submission (StateRAMP Moderate)',
     description:
       'Prepare and submit Authorization to Operate (ATO) package including SSP, SAR, POA&M, and continuous monitoring plan to 3PAO for independent assessment.',
     status: 'pending',
@@ -301,7 +301,7 @@ export const mockRisks: Risk[] = [
     likelihood: 'very_likely',
     status: 'open',
     mitigation:
-      'Engage Booz Allen Hamilton for interim ZTA consulting. Activate SANS cyber workforce development pipeline. Negotiate retention bonuses for remaining senior staff. Accelerate knowledge transfer documentation per NIST NICE framework.',
+      'Engage enterprise integrator Hamilton for interim ZTA consulting. Activate SANS cyber workforce development pipeline. Negotiate retention bonuses for remaining senior staff. Accelerate knowledge transfer documentation per NIST NICE framework.',
     owner: 'CISO Office / Dr. Elena Vasquez',
     createdAt: new Date(today.getTime() - 3 * 86400000).toISOString(),
   },
@@ -427,9 +427,9 @@ export const mockAlerts: Alert[] = [
     id: 'a_6',
     programId: 'p_1',
     type: 'general',
-    title: 'FedRAMP PMO Guidance Update',
+    title: 'StateRAMP PMO Guidance Update',
     message:
-      'FedRAMP PMO released updated Rev 5 baselines incorporating NIST SP 800-53r5 controls. 12 additional controls now required for Moderate baseline. Impact assessment in progress by compliance team.',
+      'StateRAMP PMO released updated Rev 5 baselines incorporating NIST SP 800-53r5 controls. 12 additional controls now required for Moderate baseline. Impact assessment in progress by compliance team.',
     severity: 'info',
     isRead: true,
     createdAt: new Date(today.getTime() - 8 * 86400000).toISOString(),

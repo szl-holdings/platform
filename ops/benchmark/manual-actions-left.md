@@ -91,7 +91,7 @@ None of these can be automated. All require founder action and, in most cases, c
 | GDPR Data Protection Impact Assessment (DPIA) | Legal counsel | P2 | 8 hours | $1–3K |
 | Review open-source license for governance primitive publication | Legal counsel | P1 | 2 hours | $500 |
 | Begin SOC 2 Type I audit readiness preparation | Compliance advisor | P2 | Ongoing | $15–30K |
-| FedRAMP readiness assessment (Aegis-specific) | Compliance advisor | P2 | Post-revenue | $50–150K |
+| StateRAMP readiness assessment (Aegis-specific) | Compliance advisor | P2 | Post-revenue | $50–150K |
 
 ---
 
@@ -99,12 +99,12 @@ None of these can be automated. All require founder action and, in most cases, c
 
 | Action | Owner | Priority | Est. Time |
 |--------|-------|---------|-----------|
-| Prepare 9-slide Series A pitch deck | Founder | P0 | 8 hours |
+| Prepare 9-slide growth capital pitch deck | Founder | P0 | 8 hours |
 | Draft financial model and 3-year projections | Founder + advisor | P0 | 8 hours |
 | Prepare NDA-gated diligence packet | Founder | P0 | 4 hours |
-| Identify 20 target Series A investors | Founder | P0 | 4 hours |
+| Identify 20 target growth capital investors | Founder | P0 | 4 hours |
 | Draft investor update email template | Founder | P1 | 2 hours |
-| Identify and engage Series A lead counsel | Founder | P1 | 4 hours |
+| Identify and engage growth capital lead counsel | Founder | P1 | 4 hours |
 | Identify technical advisor to vouch for architecture | Founder | P1 | Ongoing |
 | Schedule 3 practice pitches before investor conversations | Founder | P1 | 2 hours scheduling |
 | Schedule first 5 investor meetings | Founder | P0 | 4 hours |

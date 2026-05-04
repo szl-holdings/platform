@@ -32,7 +32,7 @@ const dealRow = {
   pipelineId: PIPELINE_ID,
   company: 'Acme Corp',
   sector: 'SaaS',
-  stage: 'Series A',
+  stage: 'growth capital',
   submittedAt: new Date('2026-04-01T10:00:00Z'),
   attachments: [
     {

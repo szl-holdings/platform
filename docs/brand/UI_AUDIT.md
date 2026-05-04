@@ -1,6 +1,6 @@
 # UI Consistency Audit
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 Audit of the visual consistency, design system adherence, and enterprise-grade presentation quality across all active SZL Holdings surfaces.
 
@@ -110,4 +110,4 @@ Each active surface was evaluated against the SZL Holdings design standards:
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

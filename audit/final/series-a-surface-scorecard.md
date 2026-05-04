@@ -1,7 +1,7 @@
-# Series A Surface Scorecard
+# growth capital Surface Scorecard
 
 **Date:** 2026-04-27  
-**Audience:** Investor technical diligence, Series A lead  
+**Audience:** Investor technical diligence, growth capital lead  
 **Purpose:** Single-page readiness score for each product surface from three lens: enterprise buyer, technical diligence, investor.
 
 ---
@@ -178,7 +178,7 @@ Each surface is scored 1–5 on three lenses:
 | Enterprise Buyer (platform as a whole) | 3.5/5 | Carlota Jo is GA and revenue-ready. The platform thesis needs 1–2 more GA surfaces. |
 | Technical Diligence | 4.2/5 | CI is real, code is clean, architecture is sound. Known gaps are documented and fixable. |
 | Investor Signal | 4.5/5 | Strong differentiated thesis. Proven execution. Honest alpha documentation. |
-| **Overall Platform** | **4.1/5** | **Fundable at Series A with honest alpha positioning.** |
+| **Overall Platform** | **4.1/5** | **Fundable at growth capital with honest alpha positioning.** |
 
 ---
 

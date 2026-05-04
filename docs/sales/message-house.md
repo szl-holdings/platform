@@ -111,7 +111,7 @@ SZL Holdings is not a portfolio of domain-specific point solutions. It is a gove
 
 ## Audience Variants
 
-### For Series A Investors
+### For growth capital Investors
 **Lead with:** Category creation + platform thesis + domain-pack extensibility flywheel.  
 **Core message:** "SZL Holdings creates a new category — governed decision infrastructure. The domain-pack model means every new vertical multiplies the platform's value. Outcome Graph creates a data flywheel no point solution can replicate."  
 **Key proof points:** Architecture scale, primitives as moat, extensibility without rebuilding governance.

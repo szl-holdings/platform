@@ -76,7 +76,7 @@ Capital deployment priorities (in order):
 1. **Infrastructure:** Azure production deployment, Redis session store, CDN
 2. **Revenue activation:** Stripe billing live for Lyte, Aegis, Vessels, Terra
 3. **Enterprise sales infrastructure:** Demo environment, sales documentation, customer success
-4. **Compliance:** SOC 2 Type II audit process, FedRAMP track for Aegis
+4. **Compliance:** SOC 2 Type II audit process, StateRAMP track for Aegis
 5. **Team:** First engineering hire, enterprise sales hire
 
 ---

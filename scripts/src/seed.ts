@@ -3192,8 +3192,8 @@ async function seed() {
     },
     {
       ventureId: ventures[0].id,
-      title: 'Series A Close',
-      description: 'Closed $8M Series A led by Maritime Capital Partners',
+      title: 'growth capital Close',
+      description: 'Closed $8M growth capital led by Maritime Capital Partners',
       date: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       category: 'funding',
     },

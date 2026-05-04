@@ -218,10 +218,10 @@ router.get(
             },
           );
           clearTimeout(timer);
-          if (!res.ok) throw new Error(`FedRAMP GitHub HTTP ${res.status}`);
+          if (!res.ok) throw new Error(`StateRAMP GitHub HTTP ${res.status}`);
           const csv = await res.text();
           const rows = csv.trim().split('\n');
-          if (rows.length < 2) throw new Error('Empty FedRAMP CSV');
+          if (rows.length < 2) throw new Error('Empty StateRAMP CSV');
           const headers = rows[0].split(',').map((h) => h.replace(/"/g, '').trim());
           const parsed = rows
             .slice(1)
@@ -247,7 +247,7 @@ router.get(
               };
             })
             .filter((p) => p.productName.length > 0);
-          if (parsed.length === 0) throw new Error('No valid FedRAMP rows parsed');
+          if (parsed.length === 0) throw new Error('No valid StateRAMP rows parsed');
           return parsed;
         } catch {
           return [];
@@ -259,7 +259,7 @@ router.get(
           )
         : products;
       sendSuccess(res, {
-        source: 'FedRAMP Marketplace — Authorized Products',
+        source: 'StateRAMP Marketplace — Authorized Products',
         url: 'https://marketplace.fedramp.gov/',
         count: filtered.length,
         products: filtered,
@@ -267,7 +267,7 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, 'Failed to fetch FedRAMP products');
+      handleRouteError(res, err, 'Failed to fetch StateRAMP products');
     }
   },
 );

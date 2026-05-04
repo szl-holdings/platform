@@ -56,7 +56,7 @@ export const aegisSecurityIncident: DomainProfile = {
     'control ID',
     'regulation',
     'CMMC',
-    'FedRAMP',
+    'StateRAMP',
     'critical severity',
     'attack vector',
     'lateral movement',

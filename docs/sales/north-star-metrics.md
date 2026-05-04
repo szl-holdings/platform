@@ -184,7 +184,7 @@ We will not change the North Star to make a quarter look better. The number tell
 | Executive scorecard | [EXECUTIVE_SCORECARD.md](executive-scorecard.md) |
 | Revenue model | [REVENUE_MODEL.md](../investor/revenue-model.md) |
 | Design partner scorecard | [DESIGN_PARTNER_SCORECARD.md](../product/design-partner-scorecard.md) |
-| Series A readiness | [SERIES_A_READINESS.md](../investor/series-a-readiness.md) |
+| growth capital readiness | [SERIES_A_READINESS.md](../investor/series-a-readiness.md) |
 | Investor narrative | [INVESTOR_NARRATIVE.md](../investor/investor-narrative.md) |
 | Land & expand | [LAND_AND_EXPAND.md](land-and-expand.md) |
 | Pilot playbook | [PILOT_PLAYBOOK.md](pilot-playbook.md) |

@@ -1,6 +1,6 @@
 # Screenshot Audit
 
-> Series A readiness audit · April 2026
+> growth capital readiness audit · April 2026
 
 ---
 
@@ -86,4 +86,4 @@ The current `assets/readme/` screenshots are the primary public-facing visuals. 
 
 ---
 
-*Generated: April 21, 2026 — Series A GitHub Rehaul*
+*Generated: April 21, 2026 — growth capital GitHub Rehaul*

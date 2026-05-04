@@ -108,7 +108,7 @@ It must be accurate, specific, and honest about current state. Overstating contr
 | Penetration test | Not yet conducted. | Pre-production launch |
 | GDPR assessment | Not yet formally assessed. | Pre-EU customer acquisition |
 | HIPAA | Not targeted currently. | Only if healthcare vertical pursued |
-| FedRAMP | Not targeted currently. | Only if federal vertical pursued |
+| StateRAMP | Not targeted currently. | Only if federal vertical pursued |
 
 Disclosing "not yet" with a roadmap date is more credible than silence on these items.
 

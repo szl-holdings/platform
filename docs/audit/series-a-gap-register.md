@@ -1,8 +1,8 @@
-# Series A Gap Register
+# growth capital Gap Register
 
 **Date:** April 16, 2026  
 **Maintained by:** Platform Engineering  
-**Scope:** All gaps identified during the Series A Wave 1–2 audit  
+**Scope:** All gaps identified during the growth capital Wave 1–2 audit  
 **Status:** Living document — update as gaps close or new gaps are identified
 
 ---
@@ -11,7 +11,7 @@
 
 | Severity | Definition |
 |----------|-----------|
-| **CRITICAL** | Blocks Series A close or live tenant onboarding |
+| **CRITICAL** | Blocks growth capital close or live tenant onboarding |
 | **HIGH** | Must resolve before general commercial availability |
 | **MEDIUM** | Should resolve before broad go-to-market |
 | **LOW** | Quality improvement; does not block revenue |

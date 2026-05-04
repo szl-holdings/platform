@@ -130,7 +130,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 
 ### .replit Shared Config — Status
 
-> **Provenance:** Credential remediation (secret removal from `.replit`, `.gitignore` updates, mobile credential templateization) was performed in commit `f034456c` (Series A Cleanup — Phase 3: Security, CI & Test Hardening). This audit verifies the current state post-remediation.
+> **Provenance:** Credential remediation (secret removal from `.replit`, `.gitignore` updates, mobile credential templateization) was performed in commit `f034456c` (growth capital Cleanup — Phase 3: Security, CI & Test Hardening). This audit verifies the current state post-remediation.
 
 | Secret | Status | Risk | Notes |
 |--------|--------|------|-------|

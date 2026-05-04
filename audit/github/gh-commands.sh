@@ -3,7 +3,7 @@
 # gh-commands.sh — Safe GitHub CLI Commands for SZL Holdings Org Management
 # =============================================================================
 #
-# Phase D — Series A Readiness Reset
+# Phase D — growth capital Readiness Reset
 # Produced: April 2026
 #
 # IMPORTANT SAFETY NOTES:

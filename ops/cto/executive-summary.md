@@ -34,7 +34,7 @@ SZL Holdings is positioned at the intersection of these pressures with a multi-d
 
 In a structured demo, the product story is clear: "One platform, eight intelligence domains, one unified command center." The demo script (`ops/cto/founder-demo-script.md`) delivers the core narrative in under 7 minutes. Buyer personas have distinct entry points (defense buyer sees Aegis first; real estate buyer sees Terra first; maritime buyer sees Vessels first).
 
-The gap: self-serve discoverability is weak. A buyer landing on the homepage without a demo invitation may not immediately understand what they are buying. This is acceptable at the current stage (all sales are founder-led) but becomes a constraint at Series A scale.
+The gap: self-serve discoverability is weak. A buyer landing on the homepage without a demo invitation may not immediately understand what they are buying. This is acceptable at the current stage (all sales are founder-led) but becomes a constraint at growth capital scale.
 
 **Action:** Prioritize clarity of the SZL Holdings homepage value proposition within the first 30 days post-launch.
 

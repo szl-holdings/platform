@@ -1,7 +1,7 @@
 # SZL Holdings — Repo Truth Discovery
 **Phase:** 0  
 **Date:** April 19, 2026  
-**Auditor:** Series A Launch Readiness Program (Task #2068)  
+**Auditor:** growth capital Launch Readiness Program (Task #2068)  
 **Status:** Final — evidence drawn from live repo walk
 
 ---

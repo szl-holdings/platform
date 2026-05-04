@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This report audits the ATLAS Spatial Runtime initiative — specifically the export-ready abstractions, feature flags, documentation, tests, seed data, and investor narrative materials delivered as part of this initiative. The platform is now demo-ready, production-safe, and Series A presentable for the ATLAS capability.
+This report audits the ATLAS Spatial Runtime initiative — specifically the export-ready abstractions, feature flags, documentation, tests, seed data, and investor narrative materials delivered as part of this initiative. The platform is now demo-ready, production-safe, and growth capital presentable for the ATLAS capability.
 
 ---
 
@@ -68,7 +68,7 @@ Five feature flags added to `artifacts/api-server/src/lib/platform-flags.ts`:
 | ATLAS Architecture | `docs/architecture/atlas-spatial-runtime.md` | Engineers, CTOs |
 | Buyer Overview | `docs/buyer/atlas-spatial-runtime-overview.md` | Buyers, COOs, CISOs |
 | Trust Controls | `docs/trust/atlas-spatial-runtime-controls.md` | CISOs, compliance |
-| Investor Moat | `docs/investor/atlas-spatial-runtime-moat.md` | Series A investors |
+| Investor Moat | `docs/investor/atlas-spatial-runtime-moat.md` | growth capital investors |
 | Demo Walkthrough | `docs/demo/atlas-spatial-runtime-demo.md` | Demo facilitators, sales |
 
 ---

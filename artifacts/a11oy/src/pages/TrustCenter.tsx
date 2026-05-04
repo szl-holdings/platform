@@ -170,11 +170,11 @@ const TRUST_DATA: TrustData = {
     },
     roadmapToEnterprise: {
       status: 'roadmap',
-      description: 'A11oy is on a clear path from the current governed environment to full enterprise-grade production deployment with SOC 2 certification, HIPAA attestation, and FedRAMP authorization.',
+      description: 'A11oy is on a clear path from the current governed environment to full enterprise-grade production deployment with SOC 2 certification, HIPAA attestation, and StateRAMP authorization.',
       milestones: [
         'SOC 2 Type II — audit engagement Q3 2026',
         'HIPAA attestation — healthcare vertical expansion',
-        'FedRAMP Authorization — defense/gov posture',
+        'StateRAMP Authorization — defense/gov posture',
         'ISO 27001 — international enterprise expansion',
         'VPC-isolated deployment — customer cloud boundary',
         'Air-gapped on-premises — defense/classified deployment',
@@ -267,7 +267,7 @@ export function TrustCenter() {
         {[
           { category: 'Built & Active', status: 'LIVE' as const, items: ['Proof Ledger with SHA-256 hash chain', 'Policy gate (Covenant Layer) on all actions', 'Signal Mesh — multi-domain ingestion', 'MirrorEval 2.0 — 14-dimension scoring', 'Human approval gate — structural guarantee', 'Connector Firewall — default deny', 'Workcell replay — full audit trail', 'Business twin registry — 7 twins active', '15 named skills — fully operational', 'Boardroom synthesis — 5 packets generated'] },
           { category: 'Governed Environment', status: 'DEMO' as const, items: ['Live domain connector calls (simulated)', 'Real-time AIS vessel tracking (seeded)', 'Live CRM pipeline sync (seeded)', 'Production LLM inference (simulated)', 'Real matter management integration', 'Real vendor SLA data', 'Live Bloomberg market feed', 'Real court docket sync'] },
-          { category: 'Roadmap', status: 'ROADMAP' as const, items: ['SOC 2 Type II certification', 'HIPAA attestation', 'FedRAMP Authorization', 'VPC-isolated deployment', 'Air-gapped on-premises posture', 'Local model inference (Llama 3)', 'ISO 27001 certification', 'CMMC Level 3 (defense)'] },
+          { category: 'Roadmap', status: 'ROADMAP' as const, items: ['SOC 2 Type II certification', 'HIPAA attestation', 'StateRAMP Authorization', 'VPC-isolated deployment', 'Air-gapped on-premises posture', 'Local model inference (Llama 3)', 'ISO 27001 certification', 'CMMC Level 3 (defense)'] },
         ].map(col => (
           <Card key={col.category}>
             <div className="flex items-center gap-2 mb-3">

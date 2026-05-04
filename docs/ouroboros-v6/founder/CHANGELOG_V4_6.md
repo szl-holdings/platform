@@ -388,7 +388,7 @@ folder: evolution/
 - evolution/research/COMPETITOR_STACKS.md (634 lines, 73 inline URLs) — NVIDIA NeMo, NIM, Google FSF v3, IBM watsonx, Anthropic, OpenAI, Guardrails AI, Microsoft Presidio, Llama Guard 4
 - evolution/standards/REGULATORY_MAPPING.md (555 lines, 51 KB) — NIST AI RMF, EU AI Act Articles 9/12/13/14/15, FISMA + 800-53, DoD CDAO RAI tenets, HIPAA + 21 CFR Part 11, SR 11-7 + DORA, ISO 42001, GDPR Art 22, Colorado SB 24-205, ITAR/EAR
 - evolution/vendors/INTEGRATION_TARGETS.md (504 lines) — 15 vendor profiles, named partner programs, BD contact patterns, 100-word outreach drafts each
-- evolution/compliance/COMPLIANCE_PLAYBOOK.md (553 lines) — SAM.gov, SOC 2, FedRAMP (LI-SaaS through High), CMMC 2.0, AWS/Azure/GCP Marketplaces, StateRAMP, HIPAA BAA, EU AI Act with 24-month roadmap and decision gates A-F
+- evolution/compliance/COMPLIANCE_PLAYBOOK.md (553 lines) — SAM.gov, SOC 2, StateRAMP (LI-SaaS through High), CMMC 2.0, AWS/Azure/GCP Marketplaces, StateRAMP, HIPAA BAA, EU AI Act with 24-month roadmap and decision gates A-F
 - evolution/verticals/{federal,healthcare,finance}_onepager.md — three vertical one-pagers
 - evolution/standards/{NIST_COMMENT_SUBMISSION,STANDARDS_POSTURE_BRIEF,CLOSED_FORM_DEFENSE}.md — public comment, body engagement strategy, position paper
 - evolution/marketplace/AWS_MARKETPLACE_KIT.md — listing strategy + ready-to-paste copy + 6-month roadmap

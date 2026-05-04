@@ -1,7 +1,7 @@
 # SZL Holdings — Open Risks and Next 10 Priorities
 
 **Date:** April 2026
-**Context:** Post Series A Cleanup (Phases 1–4). This document captures the remaining open risks and the 10 highest-impact priorities for the next engineering and business phase.
+**Context:** Post growth capital Cleanup (Phases 1–4). This document captures the remaining open risks and the 10 highest-impact priorities for the next engineering and business phase.
 
 ---
 
@@ -24,7 +24,7 @@
 **Severity:** Medium
 **Description:** The observability specification is complete, but OTel instrumentation is not implemented. When production issues occur, diagnosis relies on Pino logs — no distributed traces, no correlation across service boundaries.
 **Mitigation:** Implement Priority 1 OTel instrumentation from `docs/OBSERVABILITY_SPEC.md`. Start with API server and Alloy workflow engine.
-**Owner:** Engineering (post-Series A hire: DevOps engineer)
+**Owner:** Engineering (post-growth capital hire: DevOps engineer)
 **Timeline:** Q3 2026
 
 ---
@@ -43,11 +43,11 @@
 ### Risk 4: Single Point of Failure — Founder as Sole Engineer
 
 **Classification:** Team / Operational
-**Severity:** High (pre-Series A); Medium (post-hire)
+**Severity:** High (pre-growth capital); Medium (post-hire)
 **Description:** All code knowledge, architectural decisions, and operational procedures currently reside with the founder. There is no bus factor redundancy.
-**Mitigation:** Series A engineering hires (3–5 engineers). Architecture specification docs produced in this phase reduce the knowledge transfer risk. Decision Ledger and architecture docs make the system legible to incoming engineers.
+**Mitigation:** growth capital engineering hires (3–5 engineers). Architecture specification docs produced in this phase reduce the knowledge transfer risk. Decision Ledger and architecture docs make the system legible to incoming engineers.
 **Owner:** Founder
-**Timeline:** Series A close → immediate hiring
+**Timeline:** growth capital close → immediate hiring
 
 ---
 
@@ -78,8 +78,8 @@
 **Classification:** AI Governance
 **Severity:** Medium
 **Description:** The agent eval spec is complete, but the eval runner, eval dataset store, and model promotion gate are not implemented. Agent governance is documented but not automated.
-**Mitigation:** Implement eval infrastructure per `docs/AGENT_EVAL_AND_REPLAY.md`. Priority for Series A engineering team.
-**Owner:** Engineering (post-Series A)
+**Mitigation:** Implement eval infrastructure per `docs/AGENT_EVAL_AND_REPLAY.md`. Priority for growth capital engineering team.
+**Owner:** Engineering (post-growth capital)
 **Timeline:** Q3 2026
 
 ---
@@ -190,7 +190,7 @@ Listed in priority order — highest impact per unit of effort first.
 
 **Why:** Distributed tracing is essential for diagnosing production issues at enterprise scale.
 **Effort:** 1–2 weeks
-**Owner:** DevOps engineer (Series A hire)
+**Owner:** DevOps engineer (growth capital hire)
 **Files:** `artifacts/api-server/src/`, `lib/workflow-engine/`
 **Reference:** `docs/OBSERVABILITY_SPEC.md` — Priority 1 instrumentation section
 
@@ -200,7 +200,7 @@ Listed in priority order — highest impact per unit of effort first.
 
 **Why:** Agent governance is documented but not automated. A promotion gate is only as good as its enforcement.
 **Effort:** 2–4 weeks
-**Owner:** Engineering (Series A hire)
+**Owner:** Engineering (growth capital hire)
 **Files:** `lib/pulse-evals/`, `lib/ai-engine/`
 **Reference:** `docs/AGENT_EVAL_AND_REPLAY.md`
 
@@ -210,7 +210,7 @@ Listed in priority order — highest impact per unit of effort first.
 
 **Why:** Manual testing is not scalable. Automated integration tests protect against regressions as the team grows.
 **Effort:** 1–3 days
-**Owner:** DevOps engineer (Series A hire)
+**Owner:** DevOps engineer (growth capital hire)
 **Reference:** Existing task in backlog
 
 ---

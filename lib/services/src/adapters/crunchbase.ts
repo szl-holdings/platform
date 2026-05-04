@@ -68,7 +68,7 @@ const MOCK_ORGS: CrunchbaseOrganization[] = [
     headquartersLocation: "New York, New York, United States",
     website: null, linkedin: null, twitter: null,
     employeeCount: "11-50", totalFundingUsd: 12000000,
-    lastFundingType: "Series A", lastFundingDate: "2022-06-15", lastFundingAmount: 8000000,
+    lastFundingType: "growth capital", lastFundingDate: "2022-06-15", lastFundingAmount: 8000000,
     numberOfFundingRounds: 2, investors: ["Andreessen Horowitz", "Y Combinator"],
     ipo: null, acquisitions: 0, acquisitions_by: 0, rankOrg: 48821,
   },

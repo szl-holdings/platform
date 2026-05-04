@@ -69,10 +69,10 @@ The monorepo contains 14 registered artifacts + archived surfaces + concept-only
 | Item | Why Deferred |
 |---|---|
 | Full SEXTANT live AIS | Requires $15–40K/year AIS provider subscription. Defer to post-revenue. |
-| DOMAINE live MLS/CoStar | Requires enterprise data agreement. Defer to Series A close. |
+| DOMAINE live MLS/CoStar | Requires enterprise data agreement. Defer to growth capital close. |
 | TENAX case management integration | Requires third-party SOAR/SIEM wiring. Defer to GA. |
 | FORGE full wiring | Requires API server badge count endpoints. 2–3 sprint effort. Defer to v1.1.0. |
-| SOC 2 Type 1 audit | Requires 6+ months of evidence collection. Defer to post-Series A. |
+| SOC 2 Type 1 audit | Requires 6+ months of evidence collection. Defer to post-growth capital. |
 | Enterprise SSO/SCIM | Requires design partner commitment. Defer to first enterprise pilot. |
 
 ---

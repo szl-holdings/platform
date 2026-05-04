@@ -5,11 +5,11 @@
 
 ---
 
-## What Investors Look For (2025-2026 Series A)
+## What Investors Look For (2025-2026 growth capital)
 
 Based on current benchmarks:
 
-> "In a Seed round, investors bet on the founder. In a Series A, they bet on the engine."
+> "In a Seed round, investors bet on the founder. In a growth capital, they bet on the engine."
 
 ### Technical Diligence Checklist
 
@@ -87,7 +87,7 @@ Based on current benchmarks:
 
 ## Investor Experience Quality Bar
 
-Based on how top Series A companies present their repos:
+Based on how top growth capital companies present their repos:
 
 | Quality Signal | Benchmark | SZL Status |
 |---------------|-----------|------------|

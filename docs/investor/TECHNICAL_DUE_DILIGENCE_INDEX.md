@@ -1,6 +1,6 @@
 # Technical Due Diligence Index
 
-> SZL Holdings · Series A Package · April 2026
+> SZL Holdings · growth capital Package · April 2026
 
 This index maps common technical due diligence questions to the authoritative documentation sources in this repository. All documents listed are in the public repository unless marked **[Internal]**.
 
@@ -88,4 +88,4 @@ This index maps common technical due diligence questions to the authoritative do
 
 ---
 
-*SZL Holdings · Series A Technical Due Diligence Package · April 2026*
+*SZL Holdings · growth capital Technical Due Diligence Package · April 2026*

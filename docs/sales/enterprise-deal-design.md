@@ -25,7 +25,7 @@ Unlike Starter and Pro, Enterprise pricing is **built up**, not packaged. The or
 
 | Component | Description | Pricing |
 |-----------|-------------|---------|
-| Enterprise platform fee | Base license; multi-tenant, unlimited seats | Negotiated; starts at $360K/yr |
+| Enterprise platform fee | Base license; multi-tenant, unlimited seats | Negotiated; starts at target raise/yr |
 | Domain packs | Per pack | Per [PRICING_PACKAGING.md](../investor/pricing-packaging.md) |
 | Implementation | Standard implementation; up to 80 hours included | $50K+; built into Year 1 |
 | Custom integration | Per SOW | $1,500/day, 10-day minimum |
@@ -244,7 +244,7 @@ Government deals require additional considerations:
 |------|----------|
 | Procurement vehicle | GSA / cooperative purchasing investigated for FY27 |
 | Security clearance | Not required for current platform; air-gapped roadmap |
-| FedRAMP | Roadmap (post-revenue) |
+| StateRAMP | Roadmap (post-revenue) |
 | FISMA | Roadmap (post-revenue) |
 | ITAR | Customer-controlled environment for ITAR-regulated workloads (FY27) |
 

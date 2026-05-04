@@ -59,7 +59,7 @@ This claim is accurate, defensible, and differentiated. Do not soften it.
 
 **Lead with the platform, not the features.** The 8 domain verticals are proof of the platform's breadth. The platform thesis (A11oy) is the investment case.
 
-**Do not claim "production" for anything that isn't.** Alpha status is honest and credible at Series A. "Production" claims that are wrong destroy credibility in diligence.
+**Do not claim "production" for anything that isn't.** Alpha status is honest and credible at growth capital. "Production" claims that are wrong destroy credibility in diligence.
 
 ---
 

@@ -1,6 +1,6 @@
 # Repository Signal Summary
 
-> SZL Holdings · Series A · April 2026
+> SZL Holdings · growth capital · April 2026
 
 A concise summary of the signals an investor or technical evaluator will observe when reviewing this GitHub repository. Intended as a quick-reference supplement to the Technical Due Diligence Index.
 
@@ -76,4 +76,4 @@ A concise summary of the signals an investor or technical evaluator will observe
 
 ---
 
-*SZL Holdings · Series A Repository Signal Summary · April 2026*
+*SZL Holdings · growth capital Repository Signal Summary · April 2026*

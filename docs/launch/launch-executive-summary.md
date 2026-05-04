@@ -30,7 +30,7 @@ SZL Holdings has completed all documentation, go-to-market strategy, and pre-lau
 | Enterprise buyer readiness | ⚠️ Conditional | No external customer references; SOC 2 targeted Q3–Q4 2026 |
 | Operator usability | ✅ Green | Design-partner ready with CS-assisted onboarding |
 | Technical credibility | ✅ Green | 2,816 endpoints, 798 tables, all P0 security gaps resolved |
-| Investor narrative | ✅ Green | Series A thesis complete; pre-revenue is expected at this stage |
+| Investor narrative | ✅ Green | growth capital thesis complete; pre-revenue is expected at this stage |
 | Engineering scalability | ✅ Green | Strong foundation; test coverage and schema governance are VP Engineering priorities |
 
 **Overall verdict:** CONDITIONAL GO for design-partner launch. Resolve or formally accept LB-001 before any public or partner-facing access.
@@ -179,4 +179,4 @@ The goal of Phases 8–11 was to ensure that all external-facing assets tell the
 
 ---
 
-*This document is the capstone of Phases 8–11. The next work is execution: signing design partners, delivering first revenue, and hitting the milestones that close the Series A narrative.*
+*This document is the capstone of Phases 8–11. The next work is execution: signing design partners, delivering first revenue, and hitting the milestones that close the growth capital narrative.*

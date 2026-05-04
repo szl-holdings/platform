@@ -1,8 +1,8 @@
 # Risk Register — SZL Holdings Platform
-## Series A Investor Readiness
+## growth capital Investor Readiness
 
 **Produced:** Phase D, April 2026
-**Scope:** All material risks relevant to a Series A investment decision — technical, operational, commercial, regulatory, and public-surface risks.
+**Scope:** All material risks relevant to a growth capital investment decision — technical, operational, commercial, regulatory, and public-surface risks.
 **Classification:** HONEST — this document is not a marketing artifact. It is written for investor due diligence.
 
 ---
@@ -86,7 +86,7 @@
 
 **Description:** Stripe billing is live for a subset of domain packs (Vessels, Lyte, Terra, Carlota Jo) but is not fully activated across all surfaces. The platform does not yet have recurring revenue from paying customers.
 
-**Impact:** Pre-revenue status is the most material fact for a Series A investor. The platform is investor-funded and founder-operated at this stage.
+**Impact:** Pre-revenue status is the most material fact for a growth capital investor. The platform is investor-funded and founder-operated at this stage.
 
 **Mitigation:** Revenue activation plan is in `docs/investor/go-to-market.md`. Design partner conversations are the primary commercial motion before first ARR.
 
@@ -122,9 +122,9 @@
 
 **Description:** The platform is founder-built by Stephen Lutar. There is no current second technical co-founder or equivalent engineering lead.
 
-**Impact:** Key-person risk is a material concern for Series A investors. Loss or incapacitation of the founder would materially affect development velocity.
+**Impact:** Key-person risk is a material concern for growth capital investors. Loss or incapacitation of the founder would materially affect development velocity.
 
-**Mitigation:** The platform architecture, documentation, and decision doctrine (`docs/doctrine/szl-doctrine.md`) are explicitly designed to reduce key-person dependency — all decisions are documented, all architecture is written, all conventions are codified. A Series A hire plan includes a VP Engineering or CTO co-hire.
+**Mitigation:** The platform architecture, documentation, and decision doctrine (`docs/doctrine/szl-doctrine.md`) are explicitly designed to reduce key-person dependency — all decisions are documented, all architecture is written, all conventions are codified. A growth capital hire plan includes a VP Engineering or CTO co-hire.
 
 **Status:** Acknowledged; addressed in investor thesis.
 
@@ -134,7 +134,7 @@
 
 **Description:** There are no current design partners or paying customers with documented case studies or testimonials.
 
-**Impact:** Reduces the strength of the commercial thesis. A Series A without customer proof requires the investor to rely on the platform thesis and technical quality alone.
+**Impact:** Reduces the strength of the commercial thesis. A growth capital without customer proof requires the investor to rely on the platform thesis and technical quality alone.
 
 **Mitigation:** Design partner conversations are the priority for Q2 2026. The platform is demo-ready and investor-demonstrable. The investor pitch deck (`artifacts/aegis/`) contains the go-to-market narrative.
 
@@ -186,11 +186,11 @@
 
 **Description:** The platform processes signals from maritime, real estate, legal, and financial domains. Some signal sources (OFAC, SEC EDGAR, STIX/TAXII) involve regulated data. Data residency requirements for enterprise customers vary by jurisdiction.
 
-**Impact:** Enterprise customers in regulated jurisdictions (GDPR, HIPAA, FedRAMP) may have additional procurement requirements.
+**Impact:** Enterprise customers in regulated jurisdictions (GDPR, HIPAA, StateRAMP) may have additional procurement requirements.
 
-**Mitigation:** Azure deployment supports data residency configurations. FedRAMP readiness track is documented as a Phase 2 roadmap item for Aegis. GDPR considerations are addressed in the architecture (no PII in signal normalization by default).
+**Mitigation:** Azure deployment supports data residency configurations. StateRAMP readiness track is documented as a Phase 2 roadmap item for Aegis. GDPR considerations are addressed in the architecture (no PII in signal normalization by default).
 
-**Status:** Architecturally addressed; formal certification is a post-Series A priority.
+**Status:** Architecturally addressed; formal certification is a post-growth capital priority.
 
 ---
 
@@ -228,6 +228,6 @@
 
 ---
 
-*This register is updated at each major audit phase. Next review: post-Series A close or first design partner contract.*
+*This register is updated at each major audit phase. Next review: post-growth capital close or first design partner contract.*
 *For the manual action checklist, see `audit/investor/manual-next-steps.md`.*
 *For the full readiness scorecard, see `audit/investor/public-readiness-scorecard.md`.*

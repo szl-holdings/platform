@@ -170,7 +170,7 @@ We never sell to one without addressing the other two. A successful close requir
 ### Disqualifiers
 
 - "We need on-prem only" — Sovereign tier roadmap (FY27); set expectations
-- "We need full SOC 2 / FedRAMP today" — not us in 2026; nurture with roadmap
+- "We need full SOC 2 / StateRAMP today" — not us in 2026; nurture with roadmap
 - "Send me the SOC 2 report" (when we don't have one) — be honest; many will respect the answer
 
 ---

@@ -1,16 +1,16 @@
-# Final Executive Summary — Series A Hardening
+# Final Executive Summary — growth capital Hardening
 ## SZL Holdings Platform
 
 **Date:** 2026-04-21  
-**Audience:** Leadership, Series A investors, enterprise evaluators  
-**Scope:** Complete Series A hardening reset — Phases A through 12  
+**Audience:** Leadership, growth capital investors, enterprise evaluators  
+**Scope:** Complete growth capital hardening reset — Phases A through 12  
 **Status:** Reset complete. Manual checklist items remain. See `audit/FINAL_ACTION_CHECKLIST.md`.
 
 ---
 
 ## 1. Executive Summary
 
-The SZL Holdings platform has completed a full Series A hardening reset across twelve sequential phases. The codebase is clean, the security posture is structural (not policy-based), the design system is unified, the auth surface is consolidated and formally verified, the AI architecture covers all seven required layers, and the public GitHub surface is investor-ready at an 8/10 readiness score.
+The SZL Holdings platform has completed a full growth capital hardening reset across twelve sequential phases. The codebase is clean, the security posture is structural (not policy-based), the design system is unified, the auth surface is consolidated and formally verified, the AI architecture covers all seven required layers, and the public GitHub surface is investor-ready at an 8/10 readiness score.
 
 The platform builds the **governed decision layer** — the infrastructure between signal detection and action execution — addressing the accountability gap that neither dashboards nor AI copilots close. The architecture is differentiated by six platform primitives: Proof Chain, Covenant Policy, Outcome Graph, Decision Simulation, Workflow Engine, and Event Fabric. These are structural constraints, not features.
 
@@ -235,7 +235,7 @@ Full risk register: `audit/investor/risk-register.md`
 | Risk | Severity | Status |
 |------|----------|--------|
 | Pre-revenue (no paying customers) | **High** | Active design partner outreach — Q2 2026 priority |
-| Single founder / key-person risk | **High** | Disclosed; architecture and doctrine documented to reduce dependency; Series A hire plan includes VP Engineering |
+| Single founder / key-person risk | **High** | Disclosed; architecture and doctrine documented to reduce dependency; growth capital hire plan includes VP Engineering |
 | No customer proof points | **High** | Active outreach; platform demo-ready |
 | Enterprise SSO / SCIM 2.0 not GA | Medium | In progress — architecture in place |
 | In-memory session store (single instance only) | Medium | Redis session store planned; documented in CHANGELOG Unreleased |
@@ -245,7 +245,7 @@ Full risk register: `audit/investor/risk-register.md`
 | Screenshot currency | Low | Regeneration planned after UI redesign merge |
 | No Sentry error tracking in production | Low | Planned; pino structured logging provides baseline |
 | CORTEX mobile app not in stores | Low | Pre-submission; MDM distribution not affected |
-| Regulatory certification path | Medium | Architecturally addressed; formal certification post-Series A |
+| Regulatory certification path | Medium | Architecturally addressed; formal certification post-growth capital |
 | `restricted` memory in external prompts | Medium | Guardrail gap identified; enforcement not yet wired |
 
 ---

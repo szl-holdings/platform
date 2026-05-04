@@ -57,7 +57,7 @@ Speaker note: This is the slide where a procurement counselor switches from list
 | Small Business size standard | Self-certify under 541511 ($34M revenue ceiling) |
 | Set-aside eligibility | TBD — discuss SDVOSB / 8(a) / WOSB / HUBZone applicability |
 | Cybersecurity posture | CMMC Level 1 self-assessment in progress; targeting Level 2 within 12 months |
-| FedRAMP | Not yet; deployment model is on-prem / customer-cloud first |
+| StateRAMP | Not yet; deployment model is on-prem / customer-cloud first |
 | ITAR / EAR | Self-classification in progress for the Oppenheimer dual-use review module |
 
 Speaker note: This is the slide Mercy will spend the most time on. Bring printed copies. Take her notes seriously.

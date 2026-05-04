@@ -35,7 +35,7 @@ These are specific strings/numbers that appear in public-facing surfaces (landin
 | 16 | "RBAC roles: 11" | `platform-facts.md` | 12 platformRole + 4 rolesTable (dual system) | Update and note dual system | **BROKEN** — VERIFIED: 12 enum values confirmed |
 | 17 | "Authentication providers: Replit Auth, Clerk" | `platform-facts.md` | Replit Auth only | Remove Clerk | **BROKEN** — PARTIALLY VERIFIED: Clerk library not found wired in auth flow |
 | 18 | "Session store: Redis (enterprise production)" | `PLATFORM_CANONICAL.md` | In-memory (all environments) | Correct | **BROKEN** — PARTIALLY VERIFIED: Redis not activated per `OPEN_RISKS_AND_NEXT_10.md` |
-| 19 | "FedRAMP readiness track" | `PRODUCT_MATRIX.md` | Unverified / roadmap only | Remove or move to roadmap | **UNVERIFIED** — no FedRAMP certification work found in codebase |
+| 19 | "StateRAMP readiness track" | `PRODUCT_MATRIX.md` | Unverified / roadmap only | Remove or move to roadmap | **UNVERIFIED** — no StateRAMP certification work found in codebase |
 | 20 | "AIS telemetry integration" | `PRODUCT_MATRIX.md` | AIS is simulated, not live | Add honest disclosure | **PARTIALLY VERIFIED** — AIS route present; live feed unconfirmed; `OPEN_RISKS_AND_NEXT_10.md` notes simulated |
 | 21 | "MITRE ATT&CK v14 detection coverage" | `PRODUCT_MATRIX.md` | Coverage claim unverified | Qualify | **UNVERIFIED** — routes exist; actual detection coverage not measured in this audit |
 | 22 | "Live NYC distress data pipeline" | `PRODUCT_MATRIX.md` | Live polling unverified | Qualify | **UNVERIFIED** — route exists; live-ness not confirmed (server not running) |
@@ -53,7 +53,7 @@ These are phrases that constitute marketing hype without verifiable proof in the
 | "Compounding system" | `PLATFORM_OVERVIEW.md` | Replace with specific proof: "Alloy execution fabric shared across all domains" |
 | "Signal-to-action lifecycle" | Marketing copy | Acceptable if backed by a demo; otherwise remove |
 | "Intelligence-informed, not intuition-only" | Carlota Jo description | Acceptable claim; ensure it's backed by a data integration |
-| "Series A credible" | Internal docs | Remove from any public surface |
+| "growth capital credible" | Internal docs | Remove from any public surface |
 | Any count statistic that is not verifiable in a running system | Dashboards, widgets, stats displays | Replace with qualitative statements or remove until verified |
 
 ---

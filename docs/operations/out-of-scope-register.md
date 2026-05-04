@@ -236,7 +236,7 @@ For the full gap register with detailed remediation tracking, see `docs/audit/se
 
 ---
 
-### OOS-014 — SOC 2 Type II / FedRAMP Readiness
+### OOS-014 — SOC 2 Type II / StateRAMP Readiness
 
 | Field | Detail |
 |---|---|
@@ -245,10 +245,10 @@ For the full gap register with detailed remediation tracking, see `docs/audit/se
 | **Why deferred** | Post-revenue, post-first-enterprise-contract work |
 | **Current State** | Security controls in place; not formally audited (RD-001) |
 | **Severity** | High — sales blocker for certain enterprise segments |
-| **Recommended Action** | Initiate audit prep after Series A close and first enterprise signed |
-| **Bring In Scope?** | Post-Series A |
+| **Recommended Action** | Initiate audit prep after growth capital close and first enterprise signed |
+| **Bring In Scope?** | Post-growth capital |
 | **Owner Suggestion** | Compliance Lead / CISO |
-| **Launch Impact** | Not blocking for Series A close or pilot launch |
+| **Launch Impact** | Not blocking for growth capital close or pilot launch |
 
 ---
 
@@ -264,7 +264,7 @@ For the full gap register with detailed remediation tracking, see `docs/audit/se
 | **Recommended Action** | Conduct load testing with realistic concurrent users before enterprise SLA commitment |
 | **Bring In Scope?** | Before first enterprise SLA |
 | **Owner Suggestion** | Infrastructure / DevOps |
-| **Launch Impact** | Not blocking for Series A or pilot |
+| **Launch Impact** | Not blocking for growth capital or pilot |
 
 ---
 
@@ -328,7 +328,7 @@ For the full gap register with detailed remediation tracking, see `docs/audit/se
 | **Recommended Action** | Clarify product roadmap: build domain-specific apps or remove from public surface documentation |
 | **Bring In Scope?** | Yes — before first external product evaluation |
 | **Owner Suggestion** | Product / Founder |
-| **Launch Impact** | Not blocking for Series A; may affect product narrative |
+| **Launch Impact** | Not blocking for growth capital; may affect product narrative |
 
 ---
 

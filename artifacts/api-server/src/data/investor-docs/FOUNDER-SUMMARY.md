@@ -2,7 +2,7 @@
 
 **Prepared:** April 2026
 **Author:** Stephen Lutar, Founder
-**For:** Series A investors, strategic partners, institutional evaluators
+**For:** growth capital investors, strategic partners, institutional evaluators
 
 ---
 
@@ -40,15 +40,15 @@ That platform needs to be architectural from the start — not assembled after t
 
 ---
 
-## What the Series A Funds
+## What the growth capital Funds
 
 **Engineering team:** Three to five engineers to accelerate velocity without sacrificing architecture quality. Priority hires: one senior full-stack engineer, one data/integration engineer for live feed activation, one DevOps engineer for observability and CI infrastructure.
 
 **Live data activation:** AIS data feed integration for Vessels (commercial agreement + integration sprint), SIEM connector integrations for Aegis, and Stripe live-mode activation for billing.
 
-**First enterprise revenue:** The infrastructure supports multi-tenant enterprise deployments. The first customer is a commercial milestone, not an engineering one. Series A marketing and sales budget funds the GTM motion.
+**First enterprise revenue:** The infrastructure supports multi-tenant enterprise deployments. The first customer is a commercial milestone, not an engineering one. growth capital marketing and sales budget funds the GTM motion.
 
-**Compliance readiness:** SOC 2 Type II and FedRAMP readiness tracks for Aegis open the government and regulated enterprise buyer segments.
+**Compliance readiness:** SOC 2 Type II and StateRAMP readiness tracks for Aegis open the government and regulated enterprise buyer segments.
 
 ---
 
@@ -82,8 +82,8 @@ If you're evaluating SZL Holdings, I'm happy to open the codebase, walk through 
 | Domain packs | Five built; all demoable |
 | Governance model | Implemented and enforced |
 | Billing infrastructure | Built; awaiting live activation |
-| First enterprise customer | Pre-pipeline; Series A funds GTM |
-| Team | Founder + advisors; Series A funds first hires |
+| First enterprise customer | Pre-pipeline; growth capital funds GTM |
+| Team | Founder + advisors; growth capital funds first hires |
 | Revenue | Pre-revenue by choice — billing activation is configuration, not engineering |
 
 ---

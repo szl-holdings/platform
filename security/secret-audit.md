@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-20 (Phase 9 — Security Hardening & Sign-On Consolidation)
 **Previous version:** Phase A (2026-04-20)
-**Auditor:** Series A Hardening — Phase 9
+**Auditor:** growth capital Hardening — Phase 9
 **Tool:** `scripts/qa/scan-secrets.js` (internal) + `.gitleaks.toml` policy + manual tree review
 
 ## Phase 9 Update Summary
@@ -23,7 +23,7 @@ Phase A findings and remediation history are preserved below.
 # Secret Audit — Phase A
 
 **Date:** 2026-04-20  
-**Auditor:** Series A Hardening — Phase A automated + manual review  
+**Auditor:** growth capital Hardening — Phase A automated + manual review  
 **Tool:** `scripts/qa/scan-secrets.js` (internal) + `.gitleaks.toml` policy
 
 ---

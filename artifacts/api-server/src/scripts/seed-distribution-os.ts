@@ -368,7 +368,7 @@ export async function seedDistributionOS() {
         pillarId: pillars[4]?.id,
         authorId: authors[0]?.id,
         articleType: 'operator-checklist',
-        targetAudience: 'Engineering leaders, CTOs, security teams at Series A/B companies',
+        targetAudience: 'Engineering leaders, CTOs, security teams at growth capital/B companies',
         thesis:
           'Series B companies fail at security not from sophisticated attacks — from the same 10 preventable mistakes.',
         summary:

@@ -26,7 +26,7 @@ const KERNELS: Record<string, Kernel> = {
         'Invariants: ≤ 12 slides; every claim links to a source; no fabricated statistics.',
       examples: [
         {
-          description: 'Series A investor deck from 3-sentence brief',
+          description: 'growth capital investor deck from 3-sentence brief',
           output: `Brief: "We automate governed AI execution for enterprise ops teams."
 → Slide 1: The Problem — Manual oversight can't scale at AI speed
 → Slide 2: The Solution — NEXUS: Governed Agentic AI

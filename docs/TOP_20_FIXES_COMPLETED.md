@@ -1,13 +1,13 @@
 # SZL Holdings — Top 20 Fixes Completed
 
-**Period:** Q4 2025 – Q2 2026 (Series A Cleanup Phases 1–4)
-**Purpose:** Document the most impactful engineering and product improvements made during the Series A cleanup, demonstrating the platform's progression from concept to investor-grade infrastructure.
+**Period:** Q4 2025 – Q2 2026 (growth capital Cleanup Phases 1–4)
+**Purpose:** Document the most impactful engineering and product improvements made during the growth capital cleanup, demonstrating the platform's progression from concept to investor-grade infrastructure.
 
 ---
 
 ## Summary
 
-The Series A cleanup phases addressed the gap between "ambitious concept repo" and "credible enterprise platform." These 20 fixes represent the highest-impact improvements made across runtime coherence, security, product clarity, governance, and documentation.
+The growth capital cleanup phases addressed the gap between "ambitious concept repo" and "credible enterprise platform." These 20 fixes represent the highest-impact improvements made across runtime coherence, security, product clarity, governance, and documentation.
 
 ---
 
@@ -177,7 +177,7 @@ The Series A cleanup phases addressed the gap between "ambitious concept repo" a
 
 **What:** `docs/EXECUTIVE_DEMO_SCRIPT.md` — a structured 45-minute investor demo script with setup checklist, domain-by-domain walkthrough, and Q&A preparation.
 
-**Impact:** Every investor demo follows a consistent, high-quality narrative. Weak demos are the most common Series A failure mode. This eliminates the improvised demo risk.
+**Impact:** Every investor demo follows a consistent, high-quality narrative. Weak demos are the most common growth capital failure mode. This eliminates the improvised demo risk.
 
 ---
 
@@ -194,7 +194,7 @@ The Series A cleanup phases addressed the gap between "ambitious concept repo" a
 
 ## Net Assessment
 
-The Series A cleanup moved the platform from:
+The growth capital cleanup moved the platform from:
 - **Before:** Ambitious multi-domain architecture with strong foundational code but no formal documentation, no positioning clarity, and several security and governance gaps.
 - **After:** A coherent, documented, security-hardened, investor-grade platform with clear positioning, complete architecture specs, and operational readiness materials.
 

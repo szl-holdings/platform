@@ -407,9 +407,9 @@ A `docker-compose.yml` ships with the LaaS distribution and provisions the full 
 
 A Helm chart (`szl-holdings/laas`) is published to the SZL Holdings Helm repository. It deploys all LaaS components as Kubernetes Deployments with configurable replica counts, resource limits, horizontal pod autoscaling, and liveness/readiness probes. The chart supports external Postgres (RDS, Cloud SQL, Azure Database for PostgreSQL) and external KMS (AWS KMS via IRSA, GCP KMS via Workload Identity). Ingress configuration supports nginx, AWS ALB, and GCP Cloud Load Balancing. All secrets are managed via Kubernetes Secrets or External Secrets Operator integration with AWS Secrets Manager or HashiCorp Vault.
 
-### 6.3 AWS Marketplace SaaS Contract Listing
+### 6.3 cloud marketplace SaaS Contract Listing
 
-The LaaS hosted service is listed on AWS Marketplace as a SaaS Contract product. Customers subscribe directly in the AWS Marketplace console; their AWS account ID is used to provision a tenant record and a dedicated KMS CMK in the LaaS AWS account via AWS KMS multi-region keys. Metering uses the AWS Marketplace Metering Service (BatchMeterUsage) to report receipt count per billing period. The listing uses the SaaS Contract pricing model for base tiers and SaaS Subscription overage for receipts beyond the plan quota. The GovCloud listing (us-gov-east-1, us-gov-west-1) requires a separate GovCloud seller account registration and US-person ITAR verification per the [AWS GovCloud Marketplace guide](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/).
+The LaaS hosted service is listed on cloud marketplace as a SaaS Contract product. Customers subscribe directly in the cloud marketplace console; their AWS account ID is used to provision a tenant record and a dedicated KMS CMK in the LaaS AWS account via AWS KMS multi-region keys. Metering uses the cloud marketplace Metering Service (BatchMeterUsage) to report receipt count per billing period. The listing uses the SaaS Contract pricing model for base tiers and SaaS Subscription overage for receipts beyond the plan quota. The GovCloud listing (us-gov-east-1, us-gov-west-1) requires a separate GovCloud seller account registration and US-person ITAR verification per the [AWS GovCloud Marketplace guide](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/).
 
 ### 6.4 Azure Marketplace
 
@@ -428,7 +428,7 @@ All pricing figures below are marked CONFIRM pending market validation. Metering
 | Tier | Monthly Receipt Quota | Additional Receipts | Monthly Base | Annual Prepay | Features |
 |------|-----------------------|--------------------|----|----|----|
 | **Starter** | 10,000 receipts/month | $CONFIRM per 1,000 | $CONFIRM/month | $CONFIRM/year | Single tenant, single policy, 30-day receipt retention, email support, Docker Compose deployment |
-| **Pro** | 100,000 receipts/month | $CONFIRM per 1,000 | $CONFIRM/month | $CONFIRM/year | Single tenant, up to 10 policies, 365-day receipt retention, API support SLA, Kubernetes Helm chart, AWS Marketplace listing, audit export |
+| **Pro** | 100,000 receipts/month | $CONFIRM per 1,000 | $CONFIRM/month | $CONFIRM/year | Single tenant, up to 10 policies, 365-day receipt retention, API support SLA, Kubernetes Helm chart, cloud marketplace listing, audit export |
 | **Enterprise** | Custom capacity reservation | Custom overage rate | Custom quote | Custom quote | Unlimited policies, custom retention up to 2,555 days, dedicated KMS CMK, OIDC SSO, BAA-eligible, FIPS-140-3 mode, private VPC deployment, all marketplace listings, named support contact |
 
 Capacity reservations for Enterprise are available in blocks of 1M receipts/month with a committed annual contract. Burst capacity above the reservation is metered at the custom overage rate. Multi-tenant SaaS reseller arrangements (SI partners deploying LaaS for their own customers) are priced under a separate Partner Program agreement at $CONFIRM wholesale rate per 1,000 receipts.
@@ -451,7 +451,7 @@ The LaaS architecture is designed to support HIPAA Business Associate Agreement 
 
 ### FIPS-140-3 Path
 
-Enterprise tenants requiring FIPS-140-3 validated cryptographic modules (required for some federal deployments and state-level health data contexts) can deploy LaaS in FIPS mode. In FIPS mode, the receipt sealer uses only FIPS-140-3 validated KMS operations (AWS KMS in GovCloud regions provides FIPS-140-3 validated HSMs). The API gateway TLS configuration is restricted to FIPS-approved cipher suites (TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256). FIPS mode is available exclusively on the Enterprise tier and is required for any deployment targeting FedRAMP LI-SaaS or 20x Low authorization.
+Enterprise tenants requiring FIPS-140-3 validated cryptographic modules (required for some federal deployments and state-level health data contexts) can deploy LaaS in FIPS mode. In FIPS mode, the receipt sealer uses only FIPS-140-3 validated KMS operations (AWS KMS in GovCloud regions provides FIPS-140-3 validated HSMs). The API gateway TLS configuration is restricted to FIPS-approved cipher suites (TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256). FIPS mode is available exclusively on the Enterprise tier and is required for any deployment targeting StateRAMP LI-SaaS or 20x Low authorization.
 
 ---
 
@@ -469,7 +469,7 @@ Enterprise tenants requiring FIPS-140-3 validated cryptographic modules (require
 | M8 | Dashboard Compliance panel | NIST AI RMF coverage map, EU AI Act Art. 12 meter, SR 11-7 streak, audit export, regulatory context filter | 3 | M7, REGULATORY_MAPPING.md clause table |
 | M9 | Dashboard Forensics panel | Receipt detail view, chain walk, tampering check, primitive failure histogram, axis-by-axis Λ trace | 2 | M7 |
 | M10 | Kubernetes Helm chart | szl-holdings/laas chart; HPA; external Postgres/KMS support; ingress configs | 2 | M6 |
-| M11 | AWS Marketplace listing | Metering API integration; SaaS Contract + Subscription pricing; GovCloud listing track initiated | 3 | M10, SAM.gov registration complete |
+| M11 | cloud marketplace listing | Metering API integration; SaaS Contract + Subscription pricing; GovCloud listing track initiated | 3 | M10, SAM.gov registration complete |
 | M12 | Enterprise security hardening | FIPS-140-3 mode; OIDC SSO; BAA template executed with AWS; SOC 2 Type 1 evidence collection begins | 2 | M11 |
 
 Total estimated build time: 27 engineer-weeks. With a single senior full-stack engineer and part-time DevOps support, this maps to approximately 7–9 calendar months from M1 kickoff to M12 delivery. Azure Marketplace and GCP Marketplace listings follow M11 at 2 additional weeks each.
@@ -482,15 +482,15 @@ Total estimated build time: 27 engineer-weeks. With a single senior full-stack e
 - [NVIDIA NeMo Guardrails Rail Types](https://docs.nvidia.com/nemo/guardrails/latest/about/rail-types.html)
 - [NVIDIA NIM for Developers](https://developer.nvidia.com/nim)
 - [IBM watsonx.governance Product Page](https://www.ibm.com/products/watsonx-governance)
-- [IBM FedRAMP Authorization Announcement April 2026](https://newsroom.ibm.com/2026-04-01-IBM-Expands-FedRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx)
+- [IBM StateRAMP Authorization Announcement April 2026](https://newsroom.ibm.com/2026-04-01-IBM-Expands-StateRAMP-Portfolio-with-Authorization-of-11-Software-Solutions,-Including-watsonx)
 - [EU AI Act Article 12 — Record Keeping](https://artificialintelligenceact.eu/article/12/)
 - [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
 - [NIST AI 600-1 Generative AI Profile](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf)
 - [AWS GovCloud Marketplace Guide](https://aws.amazon.com/blogs/awsmarketplace/make-software-available-aws-govcloud-us-aws-marketplace/)
 - [AWS Private Offers Documentation](https://docs.aws.amazon.com/marketplace/latest/userguide/creating-private-offer.html)
-- [Labra AWS Marketplace SaaS Listing Guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/)
+- [Labra cloud marketplace SaaS Listing Guide](https://labra.io/how-to-list-your-saas-on-aws-marketplace-step-by-step-guide-for-2025/)
 - [Azure Marketplace SaaS Offer Creation Guide](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/create-new-saas-offer)
 - [GCP Marketplace Partner Get-Started](https://docs.cloud.google.com/marketplace/docs/partners/get-started)
-- [FedRAMP 20x Overview](https://www.fedramp.gov/20x/)
+- [StateRAMP 20x Overview](https://www.fedramp.gov/20x/)
 - [Ouroboros v1 — Zenodo DOI 10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281)
 - [Ouroboros v2 — Zenodo DOI 10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)

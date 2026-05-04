@@ -73,7 +73,7 @@
 | **AI Integration** | Sentinel agent, INCA model governance, ensemble evaluation |
 | **Data State** | Mix of seeded data and simulated threat scenarios |
 | **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
-| **What's Needed for GA** | Live SIEM connector, FedRAMP audit track, commercial billing |
+| **What's Needed for GA** | Live SIEM connector, StateRAMP audit track, commercial billing |
 
 ### Terra — Real Estate Intelligence
 
@@ -206,6 +206,6 @@ The gap between current state and General Availability is primarily:
 1. **Data activation** — Live AIS feeds, live connector data for Lyte, expanded Terra coverage
 2. **Billing activation** — Stripe configuration and pricing structure finalization
 3. **Commercial deployment** — First paying customer deployment and the operational learnings that follow
-4. **Compliance** — SOC 2, FedRAMP (Aegis-specific), and other certifications are post-revenue milestones
+4. **Compliance** — SOC 2, StateRAMP (Aegis-specific), and other certifications are post-revenue milestones
 
 None of these gaps represent architectural risk. The infrastructure is built for them.

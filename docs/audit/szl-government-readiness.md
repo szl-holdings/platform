@@ -29,7 +29,7 @@ New York is one of the most active states for government AI adoption right now:
 - **NIST AI RMF (Govern, Map, Measure, Manage)**: The authoritative federal AI risk management framework, increasingly referenced in procurement as a baseline expectation for AI contractors.
 - **DoD Responsible AI Tenets**: Responsible, Equitable, Traceable, Reliable, Governable — the five principles contractors must align to for DoD work.
 - **GSA GSAR 552.239-7001 (Proposed)**: Requires traceability, model routing rationale, RAG source attribution, human oversight mechanisms, 72-hour incident reporting, and NIST AI RMF documentation.
-- **FedRAMP**: Cloud-hosted AI tools used in federal systems require FedRAMP authorization at appropriate baselines.
+- **StateRAMP**: Cloud-hosted AI tools used in federal systems require StateRAMP authorization at appropriate baselines.
 - **CMMC 2.0**: Contractors touching Controlled Unclassified Information (CUI) must comply with NIST SP 800-171 requirements — no AI exemption.
 
 ***
@@ -53,7 +53,7 @@ A11oy is the orchestration control plane of the SZL Holdings platform — the ag
 | Primary-source hash chain (Katzilla) | Meets GSA RAG source attribution requirement |
 
 ### Gaps to Address Before Tuesday
-1. **FedRAMP Status**: A11oy is not yet FedRAMP authorized. For federal work, this must be disclosed as a roadmap item with a clear path (FedRAMP 20x or CSP partnership).
+1. **StateRAMP Status**: A11oy is not yet StateRAMP authorized. For federal work, this must be disclosed as a roadmap item with a clear path (StateRAMP 20x or CSP partnership).
 2. **CMMC Documentation**: If A11oy will handle any CUI, NIST SP 800-171 gap assessment is needed.
 3. **Bias Testing Evidence**: Government buyers now require documented bias testing. Need a bias audit plan or results.
 4. **Data Residency Statement**: Government clients need explicit confirmation that data does not leave US-controlled infrastructure.
@@ -212,7 +212,7 @@ This is the single most important prerequisite for any government contract. You 
 
 ### 30-Day Roadmap (Post-Meeting)
 - [ ] Begin SAM.gov registration if not already active
-- [ ] Engage a FedRAMP consultant to assess authorization path
+- [ ] Engage a StateRAMP consultant to assess authorization path
 - [ ] Draft bias testing methodology for A11oy and Sentra
 - [ ] Draft NIST AI RMF alignment documentation (can reference this audit)
 - [ ] Draft privacy impact assessment for Amaru

@@ -82,4 +82,4 @@ Point to an active workflow.
 > "The billing infrastructure is built and running in test mode. Live billing activates when we onboard the first paying tenant — the switch is a secrets configuration, not a code change."
 
 **"How many tenants are on the platform?"**  
-> "We're in the design-partner phase — three partners are integrated, running on the platform, giving structured feedback. Commercial launch is tied to the Series A close."
+> "We're in the design-partner phase — three partners are integrated, running on the platform, giving structured feedback. Commercial launch is tied to the growth capital close."

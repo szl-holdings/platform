@@ -64,7 +64,7 @@ fast answers beat dressed-up slow answers in enterprise diligence.
 | HIPAA | Not BAA-eligible today | DPA + field encryption supports the path; full BAA on roadmap |
 | GDPR | DPA template ready; data subject request flow documented | Counsel-prepared DPA |
 | CCPA | Same as GDPR | Same |
-| FedRAMP | No | Not on near-term roadmap |
+| StateRAMP | No | Not on near-term roadmap |
 | PCI DSS | Stripe handles cardholder data; SZL is out of scope for cardholder data | Stripe attestation |
 
 ### Operations

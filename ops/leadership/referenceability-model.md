@@ -100,7 +100,7 @@ Aim for, by Day 365 of commercial motion:
 | Stage 4 (private reference) | 5-7 | Cover every domain pack with at least one reference per pack |
 | Stage 5 (public reference) | 1-2 | One anchor case study per fundraise / category-defining moment |
 
-A portfolio of 5+ private references and 1-2 public references is sufficient to support a Series A motion and an enterprise sales pipeline of ~50 active conversations.
+A portfolio of 5+ private references and 1-2 public references is sufficient to support a growth capital motion and an enterprise sales pipeline of ~50 active conversations.
 
 ---
 

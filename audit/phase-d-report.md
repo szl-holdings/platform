@@ -1,6 +1,6 @@
 # Phase D Report — Public GitHub, Screenshots & Investor Readiness
 
-**Phase:** Series A Hardening — Phase D  
+**Phase:** growth capital Hardening — Phase D  
 **Date:** April 20, 2026  
 **Executor:** Automated via Replit Agent + GitHub Integration
 
@@ -167,7 +167,7 @@ The three cautions are:
 2. **Release notes** — no public GitHub release created yet; recommend `v1.0.0-alpha`
 3. **Org profile coherence** — fixed in this phase (org README updated and pushed)
 
-The platform's trust, architecture, and security posture are genuinely strong and above Series A baseline expectations for a technical investor review.
+The platform's trust, architecture, and security posture are genuinely strong and above growth capital baseline expectations for a technical investor review.
 
 ---
 

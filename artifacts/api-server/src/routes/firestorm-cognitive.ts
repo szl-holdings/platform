@@ -507,7 +507,7 @@ router.get(
         'SOC 2 Type II',
         'ISO 27001',
         'CMMC 2.0',
-        'FedRAMP Moderate',
+        'StateRAMP Moderate',
       ];
 
       const controlsWithEvidence = controls.map((ctrl, i) => {

@@ -1,13 +1,13 @@
 # Investor — Index
 
-Series A materials, diligence packets, business model, and commercial readiness.
+growth capital materials, diligence packets, business model, and commercial readiness.
 
 | Document | Description |
 |----------|-------------|
 | [platform-thesis.md](platform-thesis.md) | **Start here** — Platform thesis and investment narrative |
-| [investor-narrative.md](investor-narrative.md) | Series A investor narrative: category creation, moat, flywheel |
+| [investor-narrative.md](investor-narrative.md) | growth capital investor narrative: category creation, moat, flywheel |
 | [investor-overview.md](investor-overview.md) | Investor overview: executive summary of the opportunity |
-| [series-a-readiness.md](series-a-readiness.md) | Series A readiness assessment: what's ready, what's open |
+| [series-a-readiness.md](series-a-readiness.md) | growth capital readiness assessment: what's ready, what's open |
 | [technical-diligence-packet.md](technical-diligence-packet.md) | Technical diligence packet: architecture, stack, security, scale |
 | [audit-investor-readiness.md](audit-investor-readiness.md) | Investor readiness audit: commercial document coherence review |
 | [moat-map.md](moat-map.md) | Platform moat map: structural advantages and defensibility |
@@ -23,7 +23,7 @@ Series A materials, diligence packets, business model, and commercial readiness.
 | [product-readiness.md](product-readiness.md) | Product readiness assessment for investors |
 | [readiness-gaps.md](readiness-gaps.md) | Honest gap register from investor perspective |
 | [data-room-index.md](data-room-index.md) | Data room index: all materials available for diligence |
-| [funding-use-outline.md](funding-use-outline.md) | Use of proceeds: how Series A capital will be deployed |
+| [funding-use-outline.md](funding-use-outline.md) | Use of proceeds: how growth capital capital will be deployed |
 | [prism-counsel-platform-story.md](prism-counsel-platform-story.md) | Counsel platform story |
 | [prism-counsel-wedge-expansion.md](prism-counsel-wedge-expansion.md) | Counsel wedge and expansion thesis |
 | [prism-counsel-why-now.md](prism-counsel-why-now.md) | Counsel why-now rationale |
