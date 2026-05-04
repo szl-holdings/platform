@@ -125,16 +125,52 @@ router.get('/healthz', async (_req, res) => {
       storage: { status: 'ok', mode: hasCloudStorage ? 'cloud' : 'local' },
       auth: { status: authStatus, mode: hasSessionSecret ? 'configured' : 'missing_secret' },
       ai: { status: 'ok', mode: hasAiKey ? 'live' : 'mock' },
-      huggingface: (() => {
-        const hfToken = !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY);
+      huggingface: await (async () => {
+        const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
         const gates = getGateSummary();
         const hfGateResult = checkInferenceGates(process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+
+        // Live connectivity probe — only attempted when a credential is set
+        // AND gates are open. Otherwise we skip the network call (would
+        // either be unauthenticated or governance-blocked anyway).
+        let connectivity: {
+          status: 'ok' | 'unreachable' | 'unauthorized' | 'skipped';
+          latencyMs?: number;
+          httpStatus?: number;
+          error?: string;
+        } = { status: 'skipped' };
+        if (hfToken && hfGateResult.allowed) {
+          const probeStart = Date.now();
+          try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 3_000);
+            const probe = await fetch('https://huggingface.co/api/whoami-v2', {
+              method: 'GET',
+              headers: { Authorization: `Bearer ${hfToken}` },
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+            connectivity = {
+              status: probe.ok ? 'ok' : probe.status === 401 ? 'unauthorized' : 'unreachable',
+              latencyMs: Date.now() - probeStart,
+              httpStatus: probe.status,
+            };
+          } catch (err) {
+            connectivity = {
+              status: 'unreachable',
+              latencyMs: Date.now() - probeStart,
+              error: err instanceof Error ? err.message : String(err),
+            };
+          }
+        }
+
         return {
           status: hfToken && hfGateResult.allowed ? 'ok' : hfToken ? 'gates_blocked' : 'unconfigured',
           tokenConfigured: gates.hfTokenConfigured,
           liveInferenceEnabled: gates.liveInferenceEnabled,
           productionApproved: gates.productionApproved,
           failedGates: hfGateResult.failedGates,
+          connectivity,
         };
       })(),
       errorTracking: {

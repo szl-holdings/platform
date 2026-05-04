@@ -14,74 +14,31 @@
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
 import { checkInferenceGates } from '../a11oy/runtime/router/model-router';
+import {
+  callHfTaskWithGovernance,
+  type HfTaskCallResult,
+} from '@szl-holdings/ai-engine/providers/hf-task-router';
 
 const router: IRouter = Router();
 
 const HF_API_BASE = 'https://api-inference.huggingface.co/models';
-const TIMEOUT_MS = 25_000;
 
 function getHfToken(): string | undefined {
   return process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY;
 }
 
-function hfHeaders(): Record<string, string> {
-  const token = getHfToken();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  return headers;
-}
-
-async function hfPost<T = unknown>(model: string, body: unknown): Promise<T> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const res = await fetch(`${HF_API_BASE}/${model}`, {
-      method: 'POST',
-      headers: hfHeaders(),
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw Object.assign(new Error(`HF API ${res.status}: ${text.slice(0, 300)}`), {
-        statusCode: res.status === 503 ? 503 : 502,
-      });
-    }
-    return (await res.json()) as T;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 /**
- * Governed task-inference invoker — the per-task analogue of the chat-model
- * router's routeModelCallWithFailover. Enforces the 5-gate governance check
- * for the primary model and every fallback, calls the live HF inference
- * endpoint, and on failure walks the configured fallback chain. NEVER
- * substitutes mock data: if every attempt fails (governance or live), the
- * last error propagates to handleRouteError which surfaces it as a 403/502.
+ * Thin local wrapper around the shared `callHfTaskWithGovernance` so all
+ * domain routes use ONE governance + failover implementation (defined in
+ * `lib/ai-engine/src/providers/hf-task-router.ts`). When `fallbackModels` is
+ * omitted the shared router walks the configured chain in HF_TASK_FAILOVERS.
  */
 async function routeHfTaskCall<T = unknown>(
   primaryModel: string,
   body: unknown,
-  fallbackModels: string[] = [],
-): Promise<{ result: T; modelUsed: string }> {
-  const models = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
-  let lastError: Error | null = null;
-  for (const model of models) {
-    const gate = checkInferenceGates(model);
-    if (!gate.allowed) {
-      lastError = new Error(`governance_gate_blocked:${model}:${gate.failedGates.join(',')}`);
-      continue;
-    }
-    try {
-      const result = await hfPost<T>(model, body);
-      return { result, modelUsed: model };
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-    }
-  }
-  throw lastError ?? new Error('failover_chain_exhausted');
+  fallbackModels?: string[],
+): Promise<HfTaskCallResult<T>> {
+  return callHfTaskWithGovernance<T>(primaryModel, body, { fallbackModels });
 }
 
 // ---------------------------------------------------------------------------
@@ -387,14 +344,15 @@ router.post('/hf-intelligence/vessels/decode-ais', async (req: Request, res: Res
       'flag of convenience',
     ];
 
+    // AIS classification model is operator-configurable via HF_AIS_MODEL so
+    // the routing decision lives in env/config, not in code. Falls back to
+    // the registry-configured zero-shot classifier when unset.
+    const aisModel = process.env.HF_AIS_MODEL || 'facebook/bart-large-mnli';
     type ZeroShotResult = { labels: string[]; scores: number[] };
-    const aisCall = await routeHfTaskCall<ZeroShotResult>(
-      'facebook/bart-large-mnli',
-      {
-        inputs: classificationText,
-        parameters: { candidate_labels: behaviourLabels, multi_label: true },
-      },
-    );
+    const aisCall = await routeHfTaskCall<ZeroShotResult>(aisModel, {
+      inputs: classificationText,
+      parameters: { candidate_labels: behaviourLabels, multi_label: true },
+    });
     const classification = aisCall.result;
 
     const anomalyFlags = classification.labels

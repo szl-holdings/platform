@@ -74,3 +74,9 @@ export function enforceInferenceGates(modelId: string): void {
     throw new Error(`governance_gate_blocked:${modelId}:${result.failedGates.join(',')}`);
   }
 }
+
+/** True when an error originated from the shared 5-gate governance check. */
+export function isGovernanceGateError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.startsWith('governance_gate_blocked');
+}

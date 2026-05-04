@@ -37,6 +37,7 @@
     "./providers/gemini/image": "./src/providers/gemini/image/index.ts",
     "./providers/openai": "./src/providers/openai/index.ts",
     "./providers/inference-gates": "./src/providers/inference-gates.ts",
+    "./providers/hf-task-router": "./src/providers/hf-task-router.ts",
     "./providers/openai/batch": "./src/providers/openai/batch/index.ts",
     "./providers/openai/image": "./src/providers/openai/image/index.ts",
     "./providers/openai/audio": "./src/providers/openai/audio/index.ts",
