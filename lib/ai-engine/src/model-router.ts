@@ -20,6 +20,7 @@ import {
 } from './providers/hf-client.js';
 import { type RouteClass, type RouteResult, routeModel } from './providers/hf-router.js';
 import { resolveModelForAgent } from './fine-tuning/model-registry-extension.js';
+import { resolveViaPassport } from './passport-resolver.js';
 
 /**
  * Dispatch a chat completion to the OpenAI API directly.
@@ -184,6 +185,22 @@ export interface ModelRouterTelemetry {
    * forcing the router to throw — callers decide what to do.
    */
   reflexiveConfidenceBelowFloor?: boolean;
+  /**
+   * Model Passport id that governed this call. Set when the passport resolver
+   * is installed (api-server boot) and a matching active passport was found.
+   * Absent when routing falls back to the static lane→model map.
+   */
+  passportId?: string;
+  /**
+   * SHA-256 digest (first 32 hex chars) of the Ed25519 signature from the
+   * governing passport. Carried in every audit log row so proof of which
+   * exact policy envelope governed a decision can be verified offline.
+   */
+  passportSignatureDigest?: string;
+  /** Quantization tier from the governing passport (e.g. 'hosted', 'int8'). */
+  passportQuantTier?: string;
+  /** Autonomy tier declared in the governing passport's policy envelope. */
+  passportAutonomyTier?: string;
 }
 
 export type TelemetryHandler = (telemetry: ModelRouterTelemetry) => void | Promise<void>;
@@ -353,6 +370,14 @@ export interface RouterCallOptions {
   taskId?: string;
   useFallback?: boolean;
   agentId?: string;
+  /** Passport id governing this call — attached by the passport-resolver middleware at api-server level. */
+  _passportId?: string;
+  /** Ed25519 signature digest from the governing passport — forwarded to telemetry for audit trails. */
+  _passportSignatureDigest?: string;
+  /** Quant tier from the governing passport (e.g. 'hosted', 'int8'). */
+  _passportQuantTier?: string;
+  /** Autonomy tier from the governing passport's policy envelope. */
+  _passportAutonomyTier?: string;
 }
 
 export interface RouterCallResult {
@@ -383,6 +408,44 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
       new Error(policyCheck.reason ?? `Route class '${routeClass}' not allowed`),
       { code: 'POLICY_DENIED', routeClass },
     );
+  }
+
+  // ── Passport-governed routing (primary selection) ──────────────────────
+  // Attempt to resolve a signed, active Model Passport for this lane before
+  // falling through to the static hf-router map. When a passport is found its
+  // declared provider + model override the static defaults, so callers always
+  // get the policy-approved model. Operator overrides (overrideModel,
+  // fine-tuned resolution, strategy overrides) still take precedence over the
+  // passport — the passport is the baseline, not a hard lock.
+  // The call is intentionally non-blocking on error: if the resolver throws or
+  // the DB is unreachable, routing falls back silently to the static map.
+  let _resolvedPassportId: string | undefined;
+  let _resolvedPassportDigest: string | undefined;
+  let _resolvedPassportQuantTier: string | undefined;
+  let _resolvedPassportAutonomyTier: string | undefined;
+  let _passportDerivedModel: string | undefined;
+  let _passportDerivedProvider: string | undefined;
+  let _passportDowngradeLadder: Array<{ passportId: string; displayName: string; reason: string }> = [];
+
+  if (!overrideModel) {
+    try {
+      const passportResult = await resolveViaPassport({
+        lane: routeClass,
+        tenantId: tenantToggles?.tenantId,
+        budgetUsdPerCall: tenantToggles?.maxCostPerCallUsd,
+      });
+      if (passportResult) {
+        _resolvedPassportId = passportResult.passportId;
+        _resolvedPassportDigest = passportResult.signatureDigest;
+        _passportDerivedModel = passportResult.model;
+        _passportDerivedProvider = passportResult.provider;
+        _passportDowngradeLadder = passportResult.downgradeLadder;
+        _resolvedPassportQuantTier = passportResult.quantTier;
+        _resolvedPassportAutonomyTier = passportResult.autonomyTier;
+      }
+    } catch {
+      // Resolver failures MUST NOT break routing. Fall through to static map.
+    }
   }
 
   const baseRoute = routeModel(routeClass);
@@ -478,7 +541,16 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   // line up. Falls back to the original routeClass on any guard failure.
   const effectiveRouteClass = (strategyOverride.lane ?? routeClass) as RouteClass;
 
-  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? strategyOverride.model ?? tenantToggles?.overrideModel?.[effectiveRouteClass] ?? tenantToggles?.overrideModel?.[routeClass];
+  // Precedence: fine-tuned > explicit override > strategy > tenant override > passport > static map
+  const modelOverride =
+    resolvedFineTunedModel ??
+    overrideModel ??
+    strategyOverride.model ??
+    tenantToggles?.overrideModel?.[effectiveRouteClass] ??
+    tenantToggles?.overrideModel?.[routeClass] ??
+    _passportDerivedModel;
+
+  const providerOverride = resolvedFineTunedProvider ?? _passportDerivedProvider;
 
   const route = {
     ...routeModel(effectiveRouteClass, {
@@ -487,7 +559,7 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
       ...(overrideTemperature !== undefined ? { temperature: overrideTemperature } : {}),
     }),
     // Reflect the effective provider in the route for telemetry and policy checks.
-    ...(resolvedFineTunedProvider !== undefined ? { provider: resolvedFineTunedProvider } : {}),
+    ...(providerOverride !== undefined ? { provider: providerOverride } : {}),
   };
 
   // Apply allowedProviders policy against the effective resolved provider, not
@@ -505,6 +577,14 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   const start = Date.now();
   let completion: HFCompletionResult;
   let usedFallback = false;
+
+  // Updated to the downgraded route on failure/budget-breach; cost and telemetry
+  // use this so audit records name the model that actually produced the response.
+  let effectiveRoute = route;
+  let _effectivePassportId: string | undefined;
+  let _effectivePassportDigest: string | undefined;
+  let _effectivePassportQuantTier: string | undefined;
+  let _effectivePassportAutonomyTier: string | undefined;
 
   const _chatOpts = {
     ...(tools !== undefined ? { tools } : {}),
@@ -525,12 +605,44 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     try {
       completion = await dispatchCompletion(route);
     } catch (primaryErr) {
-      const fallbackRoute = routeModel('background_batch', (modelOverride !== undefined ? { model: modelOverride } : {}));
-      try {
-        completion = await dispatchCompletion(fallbackRoute);
-        usedFallback = true;
-      } catch {
-        throw primaryErr;
+      // Walk passport downgrade ladder before background_batch sentinel.
+      let didDowngradeFallback = false;
+      for (const rung of _passportDowngradeLadder) {
+        try {
+          const downgradedPassport = await resolveViaPassport({
+            lane: routeClass,
+            passportId: rung.passportId,
+            tenantId: tenantToggles?.tenantId,
+          }).catch(() => null);
+
+          if (downgradedPassport) {
+            const downgradedRoute = {
+              ...routeModel(effectiveRouteClass, { model: downgradedPassport.model }),
+              provider: downgradedPassport.provider,
+            };
+            completion = await dispatchCompletion(downgradedRoute);
+            effectiveRoute = downgradedRoute;
+            _effectivePassportId = downgradedPassport.passportId;
+            _effectivePassportDigest = downgradedPassport.signatureDigest;
+            _effectivePassportQuantTier = downgradedPassport.quantTier;
+            _effectivePassportAutonomyTier = downgradedPassport.autonomyTier;
+            usedFallback = true;
+            didDowngradeFallback = true;
+            break;
+          }
+        } catch {
+          // Try next rung.
+        }
+      }
+
+      if (!didDowngradeFallback) {
+        const fallbackRoute = routeModel('background_batch', (modelOverride !== undefined ? { model: modelOverride } : {}));
+        try {
+          completion = await dispatchCompletion(fallbackRoute);
+          usedFallback = true;
+        } catch {
+          throw primaryErr;
+        }
       }
     }
   } else {
@@ -539,15 +651,54 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
 
   const latencyMs = Date.now() - start;
   const totalTokens = completion.usage?.totalTokens ?? 0;
-  const costUsd = estimateCost(route.model, totalTokens);
+  let costUsd = estimateCost(effectiveRoute.model, totalTokens);
 
+  // On budget breach, walk the downgrade ladder before throwing.
   if (tenantToggles?.maxCostPerCallUsd != null && costUsd > tenantToggles.maxCostPerCallUsd) {
-    throw Object.assign(
-      new Error(
-        `Cost ceiling exceeded: ${costUsd.toFixed(6)} USD > ${tenantToggles.maxCostPerCallUsd} USD limit`,
-      ),
-      { code: 'COST_CEILING_EXCEEDED' },
-    );
+    let budgetResolved = false;
+    for (const rung of _passportDowngradeLadder) {
+      try {
+        const budgetPassport = await resolveViaPassport({
+          lane: routeClass,
+          passportId: rung.passportId,
+          tenantId: tenantToggles?.tenantId,
+          budgetUsdPerCall: tenantToggles.maxCostPerCallUsd,
+        }).catch(() => null);
+
+        if (budgetPassport) {
+          const budgetRoute = {
+            ...routeModel(effectiveRouteClass, { model: budgetPassport.model }),
+            provider: budgetPassport.provider,
+          };
+          const budgetCompletion = await dispatchCompletion(budgetRoute);
+          const budgetTotalTokens = budgetCompletion.usage?.totalTokens ?? 0;
+          const budgetCostUsd = estimateCost(budgetRoute.model, budgetTotalTokens);
+          if (budgetCostUsd <= tenantToggles.maxCostPerCallUsd) {
+            completion = budgetCompletion;
+            effectiveRoute = budgetRoute;
+            costUsd = budgetCostUsd;
+            _effectivePassportId = budgetPassport.passportId;
+            _effectivePassportDigest = budgetPassport.signatureDigest;
+            _effectivePassportQuantTier = budgetPassport.quantTier;
+            _effectivePassportAutonomyTier = budgetPassport.autonomyTier;
+            usedFallback = true;
+            budgetResolved = true;
+            break;
+          }
+        }
+      } catch {
+        // Try next rung.
+      }
+    }
+
+    if (!budgetResolved) {
+      throw Object.assign(
+        new Error(
+          `Cost ceiling exceeded: ${costUsd.toFixed(6)} USD > ${tenantToggles.maxCostPerCallUsd} USD limit`,
+        ),
+        { code: 'COST_CEILING_EXCEEDED' },
+      );
+    }
   }
 
   // ── Post-dispatch reflexive confidence floor check ────────────────────
@@ -573,10 +724,20 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     }
   }
 
+  // Prefer effective (downgraded) passport over primary; fall back to caller pre-resolved.
+  const passportId =
+    _effectivePassportId ?? _resolvedPassportId ?? options._passportId;
+  const passportSignatureDigest =
+    _effectivePassportDigest ?? _resolvedPassportDigest ?? options._passportSignatureDigest;
+  const passportQuantTier =
+    _effectivePassportQuantTier ?? _resolvedPassportQuantTier ?? options._passportQuantTier;
+  const passportAutonomyTier =
+    _effectivePassportAutonomyTier ?? _resolvedPassportAutonomyTier ?? options._passportAutonomyTier;
+
   const telemetry: ModelRouterTelemetry = {
     routeClass,
-    model: route.model,
-    provider: route.provider,
+    model: effectiveRoute.model,
+    provider: effectiveRoute.provider,
     promptTokens: completion.usage?.promptTokens ?? 0,
     completionTokens: completion.usage?.completionTokens ?? 0,
     totalTokens,
@@ -595,6 +756,10 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     ...(strategyRetrievalDepth !== undefined ? { reflexiveRetrievalDepth: strategyRetrievalDepth } : {}),
     ...(strategyMinConfidence !== undefined ? { reflexiveMinConfidence: strategyMinConfidence } : {}),
     ...(confidenceBelowFloor ? { reflexiveConfidenceBelowFloor: true } : {}),
+    ...(passportId !== undefined ? { passportId } : {}),
+    ...(passportSignatureDigest !== undefined ? { passportSignatureDigest } : {}),
+    ...(passportQuantTier !== undefined ? { passportQuantTier } : {}),
+    ...(passportAutonomyTier !== undefined ? { passportAutonomyTier } : {}),
   };
 
   void emitTelemetry(telemetry);

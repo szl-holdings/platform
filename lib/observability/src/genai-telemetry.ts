@@ -35,6 +35,10 @@ export interface GenAIModelCallSpan {
   correlationId?: string;
   tenantId?: number | string;
   orgId?: number | null;
+  passportId?: string;
+  passportSignatureDigest?: string;
+  passportQuantTier?: string;
+  passportAutonomyTier?: string;
   timestamp: number;
   metadata?: Record<string, unknown>;
 }

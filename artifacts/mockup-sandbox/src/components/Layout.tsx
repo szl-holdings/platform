@@ -84,6 +84,13 @@ const NAV_ITEMS: Array<{
     group: 'control',
   },
   {
+    id: 'passport-registry',
+    label: 'Passports',
+    icon: Globe,
+    description: 'Model Passport Registry — signed model identity & governance',
+    group: 'control',
+  },
+  {
     id: 'kernel',
     label: 'Kernel',
     icon: Cpu,

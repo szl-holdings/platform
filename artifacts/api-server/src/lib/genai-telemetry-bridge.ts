@@ -34,6 +34,10 @@ export function registerGenAITelemetryBridge(): void {
         tenantId: telemetry.tenantId,
         orgId: null,
         timestamp: Date.now(),
+        ...(telemetry.passportId !== undefined ? { passportId: telemetry.passportId } : {}),
+        ...(telemetry.passportSignatureDigest !== undefined ? { passportSignatureDigest: telemetry.passportSignatureDigest } : {}),
+        ...(telemetry.passportQuantTier !== undefined ? { passportQuantTier: telemetry.passportQuantTier } : {}),
+        ...(telemetry.passportAutonomyTier !== undefined ? { passportAutonomyTier: telemetry.passportAutonomyTier } : {}),
         metadata: {
           packSlug: telemetry.packSlug,
           taskId: telemetry.taskId,

@@ -95,6 +95,7 @@
     "@szl-holdings/scene-export": "workspace:*",
     "@szl-holdings/schemas": "workspace:*",
     "@szl-holdings/services": "workspace:*",
+    "@szl-holdings/model-passport": "workspace:*",
     "@szl-holdings/signal-mesh": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",

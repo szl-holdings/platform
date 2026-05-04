@@ -630,6 +630,9 @@ importers:
       '@szl-holdings/intelligence-feeds':
         specifier: workspace:*
         version: link:../../lib/intelligence-feeds
+      '@szl-holdings/model-passport':
+        specifier: workspace:*
+        version: link:../../packages/model-passport
       '@szl-holdings/monte-carlo':
         specifier: workspace:*
         version: link:../../lib/monte-carlo
@@ -4018,6 +4021,16 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/model-passport:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   packages/nexus-mcp:
     dependencies:

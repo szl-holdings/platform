@@ -11,6 +11,7 @@ import {
   prismCounselPilotOneResolvers,
   prismCounselPilotOneTypeDefs,
 } from './domains/prism-counsel-pilot-one.js';
+import { modelPassportsResolvers, modelPassportsTypeDefs } from './domains/model-passports.js';
 import { proofChainResolvers, proofChainTypeDefs } from './domains/proof-chain.js';
 import { stephenResolvers, stephenTypeDefs } from './domains/stephen.js';
 import { terraResolvers, terraTypeDefs } from './domains/terra.js';
@@ -46,6 +47,7 @@ export const typeDefs = [
   prismCounselPilotOneTypeDefs,
   approvalsTypeDefs,
   proofChainTypeDefs,
+  modelPassportsTypeDefs,
 ];
 
 function mergeResolversSimple(...resolverMaps: Record<string, Record<string, unknown>>[]) {
@@ -88,4 +90,5 @@ export const resolvers = mergeResolversSimple(
   prismCounselPilotOneResolvers as Record<string, Record<string, unknown>>,
   approvalsResolvers as Record<string, Record<string, unknown>>,
   proofChainResolvers as Record<string, Record<string, unknown>>,
+  modelPassportsResolvers as Record<string, Record<string, unknown>>,
 );

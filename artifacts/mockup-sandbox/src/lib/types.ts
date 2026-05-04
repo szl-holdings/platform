@@ -15,7 +15,8 @@ export type Page =
   | 'audit'
   | 'marketplace'
   | 'eval-layer'
-  | 'kernel';
+  | 'kernel'
+  | 'passport-registry';
 
 export interface PraxisStatus {
   activeSwarms: number;

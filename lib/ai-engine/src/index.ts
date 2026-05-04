@@ -943,3 +943,11 @@ export {
   type KnowledgeDensityMetric,
   selfDistillingKB,
 } from './karpathy/index.js';
+export {
+  registerPassportResolver,
+  getPassportResolver,
+  resolveViaPassport,
+  type PassportResolverFn,
+  type PassportResolverInput,
+  type PassportResolverOutput,
+} from './passport-resolver.js';

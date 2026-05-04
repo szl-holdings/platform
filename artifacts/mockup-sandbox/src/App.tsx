@@ -19,6 +19,7 @@ import Research from './pages/Research';
 import Skills from './pages/Skills';
 import TokensGovernance from './pages/TokensGovernance';
 import KernelDashboard from './pages/KernelDashboard';
+import PassportRegistry from './pages/PassportRegistry';
 
 const VALID_PAGES: Page[] = [
   'home',
@@ -37,6 +38,7 @@ const VALID_PAGES: Page[] = [
   'audit',
   'marketplace',
   'kernel',
+  'passport-registry',
 ];
 
 function getInitialPage(): Page {
@@ -83,6 +85,7 @@ function AppInner() {
       {page === 'eval-layer' && <EvalLayer />}
       {page === 'audit' && <AuditTrail />}
       {page === 'kernel' && <KernelDashboard />}
+      {page === 'passport-registry' && <PassportRegistry />}
     </Layout>
   );
 }

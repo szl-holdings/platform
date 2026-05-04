@@ -53,6 +53,11 @@ export const GENAI_ATTRS = {
 
   TENANT_ID: 'gen_ai.tenant.id',
   ORG_ID: 'gen_ai.org.id',
+
+  PASSPORT_ID: 'gen_ai.passport.id',
+  PASSPORT_SIGNATURE_DIGEST: 'gen_ai.passport.signature_digest',
+  PASSPORT_QUANT_TIER: 'gen_ai.passport.quant_tier',
+  PASSPORT_AUTONOMY_TIER: 'gen_ai.passport.autonomy_tier',
 } as const;
 
 export type GenAIAttrKey = (typeof GENAI_ATTRS)[keyof typeof GENAI_ATTRS];
@@ -111,6 +116,10 @@ export interface GenAIModelCallContract {
   correlationId?: string;
   tenantId?: string;
   orgId?: string;
+  passportId?: string;
+  passportSignatureDigest?: string;
+  passportQuantTier?: string;
+  passportAutonomyTier?: string;
   metadata?: Record<string, unknown>;
   timestamp: number;
 }

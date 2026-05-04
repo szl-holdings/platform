@@ -209,3 +209,4 @@ export * from './sre_observability';
 export * from './capability_fabric';
 export * from './runtime_config';
 export * from './os_layer';
+export * from './model_passports';

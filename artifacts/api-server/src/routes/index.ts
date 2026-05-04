@@ -632,4 +632,14 @@ router.use(lazyMatch("/runtime-config", () => import("./runtime-config"), "runti
 // GET /lexicon/v1/openapi.json
 router.use(lazyMatch("/lexicon", () => import("./lexicon"), "lexicon"));
 
+// Model Passport Registry — signed per-model-variant identity and governance artifacts.
+// GET    /model-passports             — list passports (filter by lane, tier, state, tenant)
+// GET    /model-passports/:id         — fetch one passport by id
+// POST   /model-passports             — register a new passport (ops/admin only)
+// POST   /model-passports/resolve     — resolve best passport for lane + budget + SLA + tenant
+// POST   /model-passports/:id/verify  — re-verify signature + provenance hash live
+// PATCH  /model-passports/:id/state   — lifecycle state transition (ops/admin, approver for high-risk)
+// POST   /model-passports/seed        — seed passports for current allow-listed models (admin only)
+router.use(lazyMatch("/model-passports", () => import("./model-passports"), "model-passports"));
+
 export default router;

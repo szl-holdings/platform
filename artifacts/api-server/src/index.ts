@@ -105,6 +105,17 @@ initializeAlloyDomainEventSubscriptions();
 registerGenAITelemetryBridge();
 registerInferenceLogBridge();
 
+// ── Model Passport resolver ─────────────────────────────────────────────────
+// Installs the live-DB-backed passport resolver into the ai-engine model router
+// so that every routerCall consults the signed passport registry for primary
+// model selection and the downgrade ladder on failure. Passports in 'draft',
+// 'proposed', 'deprecated', or 'revoked' state are never returned by the
+// resolver — only 'active' passports with verified Ed25519 signatures govern
+// routing. Falls back transparently to the static lane→model map when no
+// active passport matches.
+import { installPassportResolver } from './lib/passport-resolver-runtime.js';
+installPassportResolver();
+
 // Wire the cognitive-observability BatchingExporter so that agent-layer metrics
 // (step traces, latency, cost, error rates, approval wait times) are flushed to
 // the OTEL Collector rather than accumulating in memory.
