@@ -164,6 +164,9 @@ router.post('/hf-intelligence/legal/analyze', async (req: Request, res: Response
     ];
 
     type ZeroShotResult = { labels: string[]; scores: number[]; sequence: string };
+    // Spec mandates legal-bert as the primary classifier. The zero-shot
+    // request shape (candidate_labels) is honored by both legal-bert and the
+    // bart-large-mnli fallback, so the chain is response-compatible.
     const call = await routeHfTaskCall<ZeroShotResult>(
       'nlpaueb/legal-bert-base-uncased',
       {
@@ -447,10 +450,12 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
     // (batched/some models). Handle both safely.
     type LabelScore = { label: string; score: number };
     type FinBertResult = LabelScore[] | LabelScore[][];
+    // No failover configured for FinBERT — bart-large-mnli is zero-shot and
+    // returns an incompatible response shape, so a mis-parsed fallback would
+    // be worse than a clean error. See HF_TASK_FAILOVERS in hf-task-router.
     const finbertCall = await routeHfTaskCall<FinBertResult>(
       'ProsusAI/finbert',
       { inputs: propertyDesc + (marketContext ? ` Market: ${marketContext}` : '') },
-      ['facebook/bart-large-mnli'],
     );
     const rawFinbert = finbertCall.result;
     const finbertScores: LabelScore[] = Array.isArray(rawFinbert[0])

@@ -28,12 +28,20 @@ const HF_API_BASE = 'https://api-inference.huggingface.co/models';
  * own model conventions. Operators may override the primary at the call site
  * (or via env) and the chain will still be honored.
  */
+/**
+ * Failover entries MUST be task/response-shape compatible with the primary,
+ * because the caller's response parsing runs uniformly across primary +
+ * fallbacks. Mixing tasks (e.g. text-classification → zero-shot) would
+ * corrupt the response shape and is therefore explicitly disallowed here.
+ *
+ * Currently the only compatible chain we ship is for embeddings (both bge
+ * variants are sentence-transformer feature-extraction with comparable
+ * output shapes). Single-shot models without a compatible peer have no
+ * fallback configured — failures will surface as the original error rather
+ * than silently mis-parsing an incompatible response.
+ */
 export const HF_TASK_FAILOVERS: Record<string, string[]> = {
-  // Legal-domain BERT → general-purpose zero-shot as fallback
-  'nlpaueb/legal-bert-base-uncased': ['facebook/bart-large-mnli'],
-  // Financial sentiment → general zero-shot
-  'ProsusAI/finbert': ['facebook/bart-large-mnli'],
-  // Embeddings: bge-large → bge-m3
+  // Embeddings: bge-large → bge-m3 (both feature-extraction, number[][] shape)
   'BAAI/bge-large-en-v1.5': ['BAAI/bge-m3'],
 };
 
