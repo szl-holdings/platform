@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
@@ -8,7 +9,6 @@ import {
 } from 'recharts';
 
 const GOLD = '#c9b787';
-const API = '/api/a11oy';
 
 type ReasoningVerdict = 'PROVEN' | 'UNPROVEN' | 'VIOLATED';
 
@@ -175,19 +175,11 @@ function ModelRadar({ models }: { models: Array<{ model: string; avgComposite: n
 }
 
 export function MirrorEval() {
-  const [data, setData] = useState<EvalsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: apiData, loading } = useApiData<EvalsData>('/pages/mirror-eval', DEMO_EVALS_DATA);
+  const data = apiData;
   const [selected, setSelected] = useState<EvalResult | null>(null);
   const [filterDisp, setFilterDisp] = useState('all');
   const [regressionView, setRegressionView] = useState<'7d' | '30d'>('7d');
-
-  useEffect(() => {
-    fetch(`${API}/evals/sovereign`)
-      .then(r => r.json())
-      .then(d => { if (d.ok) setData(d.data); else setData(DEMO_EVALS_DATA); })
-      .catch(() => setData(DEMO_EVALS_DATA))
-      .finally(() => setLoading(false));
-  }, []);
 
   const filtered = data?.evals.filter(e => filterDisp === 'all' || e.disposition === filterDisp) ?? [];
   const regressionData = regressionView === '7d' ? REGRESSION_7D : REGRESSION_30D.map((d, i) => ({ ...d, label: `D${i + 1}` }));
@@ -203,7 +195,7 @@ export function MirrorEval() {
 
       {loading ? (
         <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading eval dashboard…</div>
-      ) : data ? (
+      ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
             <KpiCard label="TOTAL EVALS" value={String(data.summary.total)} sub={`v${data.version}`} accent="#8a8a8a" />
@@ -473,8 +465,6 @@ export function MirrorEval() {
             </div>
           </div>
         </>
-      ) : (
-        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Eval dashboard unavailable.</div>
       )}
 
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>

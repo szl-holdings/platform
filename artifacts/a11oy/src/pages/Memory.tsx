@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, ActionButton } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
-const SESSION_MEMORIES = [
+const DEMO_SESSION_MEMORIES = [
   { id: 'sm-001', key: 'mv_cascade_active_context', value: 'Active voyage: ETA deviation 18h, port standby recommended, demurrage exposure $42K', operator: 'Cascade Navigator', workcell: 'WC-0041', ts: '2026-04-25T04:00:00Z', ttl: '4h', accessCount: 12, provenanceHash: 'sha256:sm01a1', decayScore: 0.92, reinforcementScore: 0.88 },
   { id: 'sm-002', key: 'talbot_active_deadline', value: 'Discovery deadline T-48h, 340 docs outstanding, escalation pending GC approval', operator: 'Counsel Sentinel', workcell: 'WC-0042', ts: '2026-04-25T02:30:00Z', ttl: '4h', accessCount: 8, provenanceHash: 'sha256:sm02b2', decayScore: 0.85, reinforcementScore: 0.76 },
   { id: 'sm-003', key: 'tg_ember_active_iocs', value: 'Current IOC set: 3 C2 beacons, 2 lateral movement indicators, 1 exfil pattern', operator: 'Guardian', workcell: 'WC-0043', ts: '2026-04-25T18:42:00Z', ttl: '2h', accessCount: 24, provenanceHash: 'sha256:sm03c3', decayScore: 0.98, reinforcementScore: 0.95 },
   { id: 'sm-004', key: 'q2_pipeline_snapshot', value: 'Pipeline velocity: 14.1 deals/week (22.5% below baseline), 3 at-risk deals flagged', operator: 'Pipeline Oracle', workcell: 'WC-0044', ts: '2026-04-25T01:00:00Z', ttl: '4h', accessCount: 6, provenanceHash: 'sha256:sm04d4', decayScore: 0.72, reinforcementScore: 0.65 },
 ];
 
-const BANK_MEMORIES = [
+const DEMO_BANK_MEMORIES = [
   { id: 'bm-001', key: 'cascade_delay_pattern', value: 'ETA deviation >30h triggers port standby recommendation. Historical success rate: 88%. 12 prior cases.', operator: 'Cascade Navigator', consolidatedFrom: ['sm-prev-001', 'sm-prev-012', 'sm-prev-023'], consolidatedAt: '2026-04-20T00:00:00Z', proofHash: 'sha256:bm01a1', accessCount: 47, version: 3, decayScore: 0.94, reinforcementScore: 0.91 },
   { id: 'bm-002', key: 'talbot_opposing_counsel_pattern', value: 'Opposing counsel has filed late 3 of last 5 cases. Early escalation pattern yields 40% better outcomes.', operator: 'Counsel Sentinel', consolidatedFrom: ['sm-prev-002', 'sm-prev-014'], consolidatedAt: '2026-04-18T00:00:00Z', proofHash: 'sha256:bm02b2', accessCount: 23, version: 2, decayScore: 0.88, reinforcementScore: 0.82 },
   { id: 'bm-003', key: 'tg_ember_fingerprint', value: 'TG-Ember APT: C2 on 443/8080, exfil via DNS-over-HTTPS. YARA rules v4.2 active. 24 prior incidents.', operator: 'Guardian', consolidatedFrom: ['sm-prev-003', 'sm-prev-015', 'sm-prev-027', 'sm-prev-038'], consolidatedAt: '2026-04-22T00:00:00Z', proofHash: 'sha256:bm03c3', accessCount: 92, version: 4, decayScore: 0.97, reinforcementScore: 0.96 },
@@ -27,7 +28,7 @@ const RESTRICTED_MEMORIES = [
   { key: 'acquisition_target_valuation', restriction: 'Material Non-Public', authority: 'pol-mnpi-001', operator: 'DOMAINE Analyst', reason: 'Pre-announcement acquisition valuation — MNPI wall enforced' },
 ];
 
-const CONSOLIDATION_EVENTS = [
+const DEMO_CONSOLIDATION_EVENTS = [
   { id: 'ce-001', from: 'Session Memory (WC-0038)', to: 'Memory Bank', key: 'cascade_delay_pattern', action: 'Merged 3 session observations into bank entry', proofHash: 'sha256:ce01a1', ts: '2026-04-20T00:00:00Z', delta: '+2 cases added to historical record' },
   { id: 'ce-002', from: 'Session Memory (WC-0039)', to: 'Memory Bank', key: 'tg_ember_fingerprint', action: 'Updated TG-Ember IOC set with 4 new indicators', proofHash: 'sha256:ce02b2', ts: '2026-04-22T00:00:00Z', delta: '+4 IOCs, YARA rules updated to v4.2' },
   { id: 'ce-003', from: 'Session Memory (WC-0040)', to: 'Memory Bank', key: 'mirror_eval_baseline', action: 'Refreshed baseline metrics from latest eval run', proofHash: 'sha256:ce03c3', ts: '2026-04-21T00:00:00Z', delta: 'Pass rate updated: 94.2% → 94.2% (stable)' },
@@ -50,7 +51,7 @@ const DEMO_WORKCELLS = [
   { id: 'WC-0043', label: 'TG-Ember — Cyber Incident', domain: 'cyber', color: '#f5f5f5' },
 ];
 
-const RETRIEVAL_TRACES: Record<string, Array<{ step: string; source: string; size: string; content: string; latency: string }>> = {
+const DEMO_RETRIEVAL_TRACES: Record<string, Array<{ step: string; source: string; size: string; content: string; latency: string }>> = {
   'WC-0041': [
     { step: 'Query Session Memory', source: 'Session Layer', size: '12 KB', content: 'Active context: Horizon Star charter party terms, last 4 AIS pings, voyage plan', latency: '3ms' },
     { step: 'Query Memory Bank', source: 'Bank Layer', size: '48 KB', content: 'Historical ETA deviations for Cascade Navigator (88 records), Port Klang capacity data', latency: '28ms' },
@@ -91,6 +92,11 @@ function fmt(ts: string) {
 }
 
 export function Memory() {
+  const { data } = useApiData<{ sessionMemories: typeof DEMO_SESSION_MEMORIES; bankMemories: typeof DEMO_BANK_MEMORIES; consolidationEvents: typeof DEMO_CONSOLIDATION_EVENTS; retrievalTraces: typeof DEMO_RETRIEVAL_TRACES }>('/pages/memory', { sessionMemories: DEMO_SESSION_MEMORIES, bankMemories: DEMO_BANK_MEMORIES, consolidationEvents: DEMO_CONSOLIDATION_EVENTS, retrievalTraces: DEMO_RETRIEVAL_TRACES });
+  const SESSION_MEMORIES = data.sessionMemories;
+  const BANK_MEMORIES = data.bankMemories;
+  const CONSOLIDATION_EVENTS = data.consolidationEvents;
+  const RETRIEVAL_TRACES = data.retrievalTraces;
   const [activeTab, setActiveTab] = useState<'vault' | 'consolidation' | 'trace' | 'governance'>('vault');
   const [memoryLayer, setMemoryLayer] = useState<'session' | 'bank'>('session');
   const [selectedWorkcell, setSelectedWorkcell] = useState<string>(DEMO_WORKCELLS[0].id);

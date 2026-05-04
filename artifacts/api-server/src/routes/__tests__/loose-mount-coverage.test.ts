@@ -159,6 +159,8 @@ const ALLOWED_PUBLIC_MOUNTS: Record<string, string> = {
     'Public — A11oy Fabric API read-only enterprise execution fabric',
   'a11oyCognitiveRuntimeRouter':
     'Public (demo surface) — A11oy Cognitive Runtime API; tenant resolved from X-Tenant-Id header; handler-level scoping; no session auth required in demo mode.',
+  'a11oyAgenticPagesRouter':
+    'Public — A11oy Agentic Pages read-only seed data for 9 frontend pages',
   'replay-attestation':
     'Public — replay attestation, governance stats, and .well-known attestation keys; no per-tenant session required',
   'sentra-threat-feeds':

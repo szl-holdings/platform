@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -18,7 +19,7 @@ interface SecurityAgent {
   recentActions: { time: string; action: string; verdict?: string; proofHash?: string }[];
 }
 
-const SEC_AGENTS: SecurityAgent[] = [
+const DEMO_SEC_AGENTS: SecurityAgent[] = [
   {
     id: 'sec-triage', name: 'Alert Triage Agent', role: 'Autonomous alert investigation — prioritizes, investigates, and renders verdicts on security alerts with full evidence trail.',
     status: 'investigating', model: 'claude-3.5-sonnet (air-gapped)', trustScore: 985, actionsToday: 47, proofChainEntries: 47, humanGateRequired: true,
@@ -63,8 +64,10 @@ const VERDICT_COLORS: Record<string, string> = {
 };
 
 export function GovernedSecurityAgents() {
-  const [selectedAgent, setSelectedAgent] = useState<string>(SEC_AGENTS[0].id);
-  const agent = SEC_AGENTS.find(a => a.id === selectedAgent)!;
+  const { data } = useApiData<{ agents: SecurityAgent[] }>('/pages/security-agents', { agents: DEMO_SEC_AGENTS });
+  const SEC_AGENTS = data.agents;
+  const [selectedAgent, setSelectedAgent] = useState<string>(SEC_AGENTS[0]?.id ?? '');
+  const agent = SEC_AGENTS.find(a => a.id === selectedAgent) ?? SEC_AGENTS[0];
 
   const totalActions = SEC_AGENTS.reduce((a, s) => a + s.actionsToday, 0);
   const totalProofs = SEC_AGENTS.reduce((a, s) => a + s.proofChainEntries, 0);

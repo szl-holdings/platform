@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -18,7 +19,7 @@ interface OptTarget {
   history: number[];
 }
 
-const OPT_TARGETS: OptTarget[] = [
+const DEMO_OPT_TARGETS: OptTarget[] = [
   { id: 'opt-routing', name: 'Routing Accuracy', category: 'Performance', currentValue: 94.2, baselineValue: 88.0, targetValue: 97.0, unit: '%', delta: 6.2, locked: false, history: [88.0, 89.1, 90.3, 91.2, 92.0, 93.1, 94.2] },
   { id: 'opt-governance', name: 'Governance Precision', category: 'Safety', currentValue: 97.8, baselineValue: 94.0, targetValue: 99.0, unit: '%', delta: 3.8, locked: false, history: [94.0, 94.8, 95.5, 96.2, 96.9, 97.4, 97.8] },
   { id: 'opt-latency', name: 'End-to-End Latency', category: 'Performance', currentValue: 840, baselineValue: 1200, targetValue: 600, unit: 'ms', delta: -360, locked: false, history: [1200, 1120, 1040, 960, 900, 860, 840] },
@@ -27,7 +28,7 @@ const OPT_TARGETS: OptTarget[] = [
   { id: 'opt-resource', name: 'Resource Efficiency', category: 'Cost', currentValue: 89.4, baselineValue: 72.0, targetValue: 95.0, unit: '%', delta: 17.4, locked: false, history: [72.0, 75.8, 79.2, 82.6, 85.4, 87.8, 89.4] },
 ];
 
-const REWARD_SIGNALS = [
+const DEMO_REWARD_SIGNALS = [
   { week: 'W1', predicted: 0.82, actual: 0.84, reward: 0.02 },
   { week: 'W2', predicted: 0.84, actual: 0.83, reward: -0.01 },
   { week: 'W3', predicted: 0.85, actual: 0.87, reward: 0.02 },
@@ -38,7 +39,7 @@ const REWARD_SIGNALS = [
   { week: 'W8', predicted: 0.92, actual: 0.94, reward: 0.02 },
 ];
 
-const POLICY_GRADIENTS = [
+const DEMO_POLICY_GRADIENTS = [
   { parameter: 'Maritime delay threshold', from: '24h', to: '18h', gradient: +0.08, status: 'applied' },
   { parameter: 'Threat escalation confidence', from: '0.95', to: '0.90', gradient: +0.12, status: 'applied' },
   { parameter: 'Pipeline churn alert sensitivity', from: '15%', to: '12%', gradient: +0.05, status: 'pending' },
@@ -50,8 +51,12 @@ const POLICY_GRADIENTS = [
 const GRADIENT_COLORS: Record<string, string> = { applied: '#22c55e', pending: GOLD, locked: '#ef4444' };
 
 export function SelfOptimization() {
+  const { data } = useApiData<{ targets: OptTarget[]; rewardSignals: typeof DEMO_REWARD_SIGNALS; policyGradients: typeof DEMO_POLICY_GRADIENTS }>('/pages/optimization', { targets: DEMO_OPT_TARGETS, rewardSignals: DEMO_REWARD_SIGNALS, policyGradients: DEMO_POLICY_GRADIENTS });
+  const REWARD_SIGNALS = data.rewardSignals;
+  const POLICY_GRADIENTS = data.policyGradients;
   const [activeTab, setActiveTab] = useState<'targets' | 'rewards' | 'gradients'>('targets');
-  const [targets, setTargets] = useState(OPT_TARGETS);
+  const [targets, setTargets] = useState(data.targets);
+  useEffect(() => { setTargets(data.targets); }, [data.targets]);
 
   const toggleLock = (id: string) => {
     setTargets(prev => prev.map(t => t.id === id ? { ...t, locked: !t.locked } : t));

@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityDot, VerticalBadge, SeverityBadge } from '../components/ui';
 import { SEED_SIGNALS } from '@workspace/a11oy-fabric';
 import { KnowledgeGraphViz } from '../components/KnowledgeGraphViz';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -15,7 +16,7 @@ const VERTICAL_LABELS: Record<string, string> = {
   'aegis-defense': 'PARAGON Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 
-const LAYERS = [
+const DEMO_LAYERS = [
   { label: 'Ingestion', status: 'ok', latency: '12ms avg', throughput: '2,400/hr' },
   { label: 'Normalization', status: 'ok', latency: '8ms avg', throughput: '2,400/hr' },
   { label: 'Deduplication', status: 'ok', latency: '4ms avg', throughput: '2,200/hr' },
@@ -24,7 +25,7 @@ const LAYERS = [
   { label: 'Knowledge Graph', status: 'ok', latency: '18ms avg', throughput: '840 entities/hr' },
 ];
 
-const SOURCES = [
+const DEMO_SOURCES = [
   { name: 'AIS Vessel Feed', domain: 'Maritime', status: 'demo', rate: '24/hr' },
   { name: 'Port Authority API', domain: 'Maritime', status: 'demo', rate: '8/hr' },
   { name: 'CRM Webhook', domain: 'Revenue', status: 'demo', rate: '36/hr' },
@@ -42,7 +43,7 @@ interface KGEntity {
   connections: { target: string; relation: string; strength: number }[];
 }
 
-const KG_ENTITIES: KGEntity[] = [
+const DEMO_KG_ENTITIES: KGEntity[] = [
   {
     id: 'kg-cascade', label: 'MV Cascade', type: 'Vessel', vertical: 'vessels-maritime',
     properties: { IMO: '9876543', Flag: 'Singapore', DWT: '82,000', Status: 'En Route' },
@@ -90,7 +91,7 @@ const KG_ENTITIES: KGEntity[] = [
   },
 ];
 
-const SEMANTIC_RESULTS = [
+const DEMO_SEMANTIC_RESULTS = [
   { query: 'What entities are connected to MV Cascade?', results: ['Tanjung Pelepas Port', 'Demurrage Contract #4421', 'SZL Holdings', 'TG-Ember Campaign'] },
   { query: 'Cross-domain connections involving legal and maritime?', results: ['Talbot v. Meridian ↔ MV Cascade (demurrage-related)', 'Meridian Holdings ↔ Counsel Sentinel (contract reviewed)'] },
   { query: 'Threat actors targeting SZL infrastructure?', results: ['TG-Ember Campaign → SZL Holdings Network (targeting, strength: 0.92)'] },
@@ -104,6 +105,11 @@ const REL_COLORS: Record<string, string> = {
 };
 
 export function SignalMesh() {
+  const { data } = useApiData<{ layers: typeof DEMO_LAYERS; sources: typeof DEMO_SOURCES; kgEntities: KGEntity[]; semanticResults: typeof DEMO_SEMANTIC_RESULTS }>('/pages/signal-mesh', { layers: DEMO_LAYERS, sources: DEMO_SOURCES, kgEntities: DEMO_KG_ENTITIES, semanticResults: DEMO_SEMANTIC_RESULTS });
+  const LAYERS = data.layers;
+  const SOURCES = data.sources;
+  const KG_ENTITIES = data.kgEntities;
+  const SEMANTIC_RESULTS = data.semanticResults;
   const [activeView, setActiveView] = useState<'signals' | 'knowledge' | 'search'>('signals');
   const [filterVertical, setFilterVertical] = useState('all');
   const [filterSeverity, setFilterSeverity] = useState('all');

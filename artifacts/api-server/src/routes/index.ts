@@ -31,6 +31,7 @@ import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
+import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
@@ -247,6 +248,10 @@ router.use(internalA11oyRouter);
 // (PrecisionAI, WeaponizedIntel, AgentZeroTrust, AtlasShield, SwarmOrchestrator, PlaybookEngine).
 // GET /api/internal/a11oy/defense/{precision-ai|weaponized-intel|agent-zero-trust|atlas-shield|swarm-orchestrator|playbook-engine}.
 router.use(internalA11oyDefenseRouter);
+
+// A11oy Agentic Pages API — seed data endpoints for the 9 agentic frontend pages
+// (A2A Interop, Agent Identity, Self-Optimization, Security Agents, Gateway, Proof Ledger, Memory, Signal Mesh).
+router.use('/a11oy', a11oyAgenticPagesRouter);
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.

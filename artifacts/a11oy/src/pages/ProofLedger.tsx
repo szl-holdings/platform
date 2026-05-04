@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -35,7 +36,7 @@ interface ProofChain {
   nodes: ProofNode[];
 }
 
-const CHAINS: ProofChain[] = [
+const DEMO_CHAINS: ProofChain[] = [
   {
     id: 'chain-001',
     title: 'MV Cascade Port Standby — Full Proof Chain',
@@ -145,7 +146,9 @@ function fmt(ts: string) {
 }
 
 export function ProofLedger() {
-  const [selectedChain, setSelectedChain] = useState(CHAINS[0].id);
+  const { data } = useApiData<{ chains: ProofChain[] }>('/pages/proof-ledger', { chains: DEMO_CHAINS });
+  const CHAINS = data.chains;
+  const [selectedChain, setSelectedChain] = useState(CHAINS[0]?.id ?? '');
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff'>('chain');
   const [replayStep, setReplayStep] = useState(0);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -32,7 +33,7 @@ const TRUST_TIERS: Record<string, { color: string; label: string; range: string 
   untrusted: { color: '#7f1d1d', label: 'UNTRUSTED', range: '0-199' },
 };
 
-const AGENTS: AgentIdentity[] = [
+const DEMO_AGENTS: AgentIdentity[] = [
   {
     id: 'aid-cascade', name: 'Cascade Navigator', spiffeUri: 'spiffe://a11oy.szl/agents/cascade-navigator', certFingerprint: 'SHA256:9f:3a:b2:c1:d4:e5:f6:a7:b8:c9:d1:e2:f3:a4:b5:c6', certIssued: '2026-03-01T00:00:00Z', certExpires: '2027-03-01T00:00:00Z', trustScore: 970, trustTier: 'sovereign', behaviorBaseline: 94.2, currentBehavior: 96.8, driftPct: 0.4, driftStatus: 'stable',
     capabilities: ['eta-monitoring', 'port-cost-analysis', 'route-optimization', 'demurrage-calc'],
@@ -107,7 +108,7 @@ const AGENTS: AgentIdentity[] = [
 const RISK_COLORS: Record<string, string> = { Critical: '#ef4444', High: '#f97316', Medium: GOLD, Low: '#22c55e' };
 const DRIFT_COLORS: Record<string, string> = { stable: '#22c55e', watch: '#f97316', drift: '#ef4444' };
 
-const TRUST_EDGES: { from: string; to: string; relation: string; strength: number }[] = [
+const DEMO_TRUST_EDGES: { from: string; to: string; relation: string; strength: number }[] = [
   { from: 'aid-cascade', to: 'aid-guardian', relation: 'sanctions-verification', strength: 0.95 },
   { from: 'aid-cascade', to: 'aid-counsel', relation: 'demurrage-clause-interp', strength: 0.88 },
   { from: 'aid-counsel', to: 'aid-guardian', relation: 'privilege-gate-review', strength: 0.82 },
@@ -132,6 +133,9 @@ const TOPO_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 export function AgentIdentityRegistry() {
+  const { data } = useApiData<{ agents: AgentIdentity[]; trustEdges: { from: string; to: string; relation: string; strength: number }[] }>('/pages/identity', { agents: DEMO_AGENTS, trustEdges: DEMO_TRUST_EDGES });
+  const AGENTS = data.agents;
+  const TRUST_EDGES = data.trustEdges;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'registry' | 'topology'>('registry');
   const selected = AGENTS.find(a => a.id === selectedId);

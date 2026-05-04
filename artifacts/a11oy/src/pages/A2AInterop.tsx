@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { useApiData } from '../hooks/useApiData';
 
 const GOLD = '#c9b787';
 
@@ -20,16 +21,6 @@ interface AgentCard {
   origin: 'internal' | 'external';
 }
 
-const AGENT_CARDS: AgentCard[] = [
-  { id: 'ac-cascade', name: 'Cascade Navigator', description: 'Maritime domain specialist — ETA monitoring, port cost analysis, route optimization, demurrage calculation.', vertical: 'vessels-maritime', version: '2.4.1', capabilities: ['eta-monitoring', 'port-cost-analysis', 'route-optimization', 'demurrage-calc'], inputModes: ['application/json', 'text/plain'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/cascade-navigator', status: 'registered', trustScore: 970, origin: 'internal' },
-  { id: 'ac-counsel', name: 'Counsel Sentinel', description: 'Legal domain specialist — deadline tracking, document status, matter monitoring, risk scoring.', vertical: 'prism-counsel', version: '2.3.0', capabilities: ['deadline-tracking', 'doc-review', 'matter-monitoring', 'risk-scoring'], inputModes: ['application/json', 'text/plain'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/counsel-sentinel', status: 'registered', trustScore: 990, origin: 'internal' },
-  { id: 'ac-guardian', name: 'Guardian', description: 'Defense domain specialist — threat intelligence, posture assessment, incident triage, perimeter hardening.', vertical: 'aegis-defense', version: '3.1.0', capabilities: ['threat-intel', 'posture-assessment', 'incident-triage', 'perimeter-hardening'], inputModes: ['application/json', 'application/stix+json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP', 'SPIFFE'], endpoint: 'a11oy://agents/guardian', status: 'registered', trustScore: 990, origin: 'internal' },
-  { id: 'ac-pipeline', name: 'Pipeline Oracle', description: 'Revenue domain specialist — pipeline analysis, deal scoring, forecast modeling, CRM monitoring.', vertical: 'lyte-revenue', version: '2.1.0', capabilities: ['pipeline-analysis', 'deal-scoring', 'forecast-modeling', 'churn-prediction'], inputModes: ['application/json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/pipeline-oracle', status: 'registered', trustScore: 910, origin: 'internal' },
-  { id: 'ac-terra', name: 'DOMAINE Analyst', description: 'Real estate domain specialist — cap rate tracking, portfolio analysis, valuation modeling.', vertical: 'terra-real-estate', version: '1.8.2', capabilities: ['cap-rate-tracking', 'portfolio-analysis', 'valuation-modeling', 'comp-analysis'], inputModes: ['application/json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS'], endpoint: 'a11oy://agents/terra-analyst', status: 'registered', trustScore: 880, origin: 'internal' },
-  { id: 'ac-ext-visa', name: 'Visa Risk Agent', description: 'External financial risk assessment agent — transaction scoring, fraud pattern detection.', vertical: 'finance', version: '1.0.0', capabilities: ['txn-risk-scoring', 'fraud-detection', 'merchant-risk'], inputModes: ['application/json'], outputModes: ['application/json'], authSchemes: ['OAuth2', 'mTLS'], endpoint: 'https://agents.visa.com/risk-agent/v1', status: 'discovered', trustScore: 720, origin: 'external' },
-  { id: 'ac-ext-mandiant', name: 'Mandiant Threat Intel', description: 'External threat intelligence agent — IOC enrichment, threat actor profiling, campaign attribution.', vertical: 'security', version: '2.1.0', capabilities: ['ioc-enrichment', 'threat-profiling', 'campaign-attribution'], inputModes: ['application/stix+json', 'application/json'], outputModes: ['application/stix+json'], authSchemes: ['OAuth2', 'API-Key'], endpoint: 'https://api.mandiant.com/a2a/v1', status: 'negotiating', trustScore: 810, origin: 'external' },
-];
-
 interface A2ATask {
   id: string;
   from: string;
@@ -41,7 +32,17 @@ interface A2ATask {
   proofHash: string | null;
 }
 
-const A2A_TASKS: A2ATask[] = [
+const DEMO_AGENT_CARDS: AgentCard[] = [
+  { id: 'ac-cascade', name: 'Cascade Navigator', description: 'Maritime domain specialist — ETA monitoring, port cost analysis, route optimization, demurrage calculation.', vertical: 'vessels-maritime', version: '2.4.1', capabilities: ['eta-monitoring', 'port-cost-analysis', 'route-optimization', 'demurrage-calc'], inputModes: ['application/json', 'text/plain'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/cascade-navigator', status: 'registered', trustScore: 970, origin: 'internal' },
+  { id: 'ac-counsel', name: 'Counsel Sentinel', description: 'Legal domain specialist — deadline tracking, document status, matter monitoring, risk scoring.', vertical: 'prism-counsel', version: '2.3.0', capabilities: ['deadline-tracking', 'doc-review', 'matter-monitoring', 'risk-scoring'], inputModes: ['application/json', 'text/plain'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/counsel-sentinel', status: 'registered', trustScore: 990, origin: 'internal' },
+  { id: 'ac-guardian', name: 'Guardian', description: 'Defense domain specialist — threat intelligence, posture assessment, incident triage, perimeter hardening.', vertical: 'aegis-defense', version: '3.1.0', capabilities: ['threat-intel', 'posture-assessment', 'incident-triage', 'perimeter-hardening'], inputModes: ['application/json', 'application/stix+json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP', 'SPIFFE'], endpoint: 'a11oy://agents/guardian', status: 'registered', trustScore: 990, origin: 'internal' },
+  { id: 'ac-pipeline', name: 'Pipeline Oracle', description: 'Revenue domain specialist — pipeline analysis, deal scoring, forecast modeling, CRM monitoring.', vertical: 'lyte-revenue', version: '2.1.0', capabilities: ['pipeline-analysis', 'deal-scoring', 'forecast-modeling', 'churn-prediction'], inputModes: ['application/json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS', 'DPoP'], endpoint: 'a11oy://agents/pipeline-oracle', status: 'registered', trustScore: 910, origin: 'internal' },
+  { id: 'ac-terra', name: 'DOMAINE Analyst', description: 'Real estate domain specialist — cap rate tracking, portfolio analysis, valuation modeling.', vertical: 'terra-real-estate', version: '1.8.2', capabilities: ['cap-rate-tracking', 'portfolio-analysis', 'valuation-modeling', 'comp-analysis'], inputModes: ['application/json'], outputModes: ['application/json', 'application/a11oy-proof+json'], authSchemes: ['mTLS'], endpoint: 'a11oy://agents/terra-analyst', status: 'registered', trustScore: 880, origin: 'internal' },
+  { id: 'ac-ext-visa', name: 'Visa Risk Agent', description: 'External financial risk assessment agent — transaction scoring, fraud pattern detection.', vertical: 'finance', version: '1.0.0', capabilities: ['txn-risk-scoring', 'fraud-detection', 'merchant-risk'], inputModes: ['application/json'], outputModes: ['application/json'], authSchemes: ['OAuth2', 'mTLS'], endpoint: 'https://agents.visa.com/risk-agent/v1', status: 'discovered', trustScore: 720, origin: 'external' },
+  { id: 'ac-ext-mandiant', name: 'Mandiant Threat Intel', description: 'External threat intelligence agent — IOC enrichment, threat actor profiling, campaign attribution.', vertical: 'security', version: '2.1.0', capabilities: ['ioc-enrichment', 'threat-profiling', 'campaign-attribution'], inputModes: ['application/stix+json', 'application/json'], outputModes: ['application/stix+json'], authSchemes: ['OAuth2', 'API-Key'], endpoint: 'https://api.mandiant.com/a2a/v1', status: 'negotiating', trustScore: 810, origin: 'external' },
+];
+
+const DEMO_A2A_TASKS: A2ATask[] = [
   { id: 'task-001', from: 'Cascade Navigator', to: 'Guardian', action: 'Verify vessel sanctions clearance for MV Cascade', status: 'completed', submittedAt: '2026-04-25T04:00:00Z', completedAt: '2026-04-25T04:02:12Z', proofHash: 'sha256:a1b2c3' },
   { id: 'task-002', from: 'Pipeline Oracle', to: 'Counsel Sentinel', action: 'Review contract terms for Meridian renewal', status: 'working', submittedAt: '2026-04-25T09:30:00Z', completedAt: null, proofHash: null },
   { id: 'task-003', from: 'Guardian', to: 'Mandiant Threat Intel', action: 'Enrich IOC set for TG-Ember campaign', status: 'input-required', submittedAt: '2026-04-25T18:45:00Z', completedAt: null, proofHash: null },
@@ -64,6 +65,9 @@ const ORIGIN_STYLE: Record<string, { color: string; bg: string }> = {
 };
 
 export function A2AInterop() {
+  const { data } = useApiData<{ agentCards: AgentCard[]; tasks: A2ATask[] }>('/pages/a2a', { agentCards: DEMO_AGENT_CARDS, tasks: DEMO_A2A_TASKS });
+  const AGENT_CARDS = data.agentCards;
+  const A2A_TASKS = data.tasks;
   const [activeTab, setActiveTab] = useState<'cards' | 'tasks' | 'topology'>('cards');
   const [selectedCard, setSelectedCard] = useState<AgentCard | null>(null);
   const [filterOrigin, setFilterOrigin] = useState('all');
