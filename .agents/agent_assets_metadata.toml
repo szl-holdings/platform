@@ -899,3 +899,9 @@ id = "LkNpHK5nDuh6qpBtNLtyq"
 uri = "file://dossier/SZL_Holdings_Empire_APEX_Briefing.md"
 type = "text"
 title = "Operational Briefing -- Detailed Technical Brief"
+
+[[outputs]]
+id = "-YToCAU0qVpR89jjl5fMG"
+uri = "file://dossier/SZL_Holdings_APEX_Meeting_Pack.zip"
+type = "unspecified"
+title = "SZL Holdings -- APEX Meeting Pack (6 PDFs)"
