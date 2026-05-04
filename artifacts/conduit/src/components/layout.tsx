@@ -3,13 +3,19 @@ import { Link, useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import {
   Activity,
+  Brain,
   Cable,
   Cpu,
+  Database,
+  Eye,
+  FlaskConical,
   FolderSync,
   History,
+  Layers,
   LayoutTemplate,
   Settings,
   Menu,
+  Shield,
   Sparkles,
   ExternalLink,
 } from 'lucide-react';
@@ -63,6 +69,42 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
           {navItems.map((item) => {
             const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                aria-label={!isSidebarOpen ? item.name : undefined}
+                aria-current={isActive ? 'page' : undefined}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium text-sm",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} aria-hidden="true" />
+                {isSidebarOpen && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
+
+          {isSidebarOpen && (
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                Sovereign AI Hub
+              </p>
+            </div>
+          )}
+          {[
+            { name: 'AI Hub', href: '/sovereign-ai-hub', icon: Shield },
+            { name: 'Model Fleet', href: '/sovereign-ai-hub/model-fleet', icon: Layers },
+            { name: 'Inference', href: '/sovereign-ai-hub/inference', icon: Eye },
+            { name: 'Distillery', href: '/sovereign-ai-hub/distillery', icon: FlaskConical },
+            { name: 'PRAXIS', href: '/sovereign-ai-hub/praxis', icon: Sparkles },
+            { name: 'Data Estate', href: '/sovereign-ai-hub/data-estate', icon: Database },
+            { name: 'Cognitive', href: '/sovereign-ai-hub/cognitive', icon: Brain },
+          ].map((item) => {
+            const isActive = location === item.href || (location.startsWith(item.href) && item.href !== '/sovereign-ai-hub');
             return (
               <Link
                 key={item.name}

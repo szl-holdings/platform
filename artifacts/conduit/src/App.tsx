@@ -17,6 +17,13 @@ import ConvergentSync from '@/pages/convergent-sync';
 import CodexLoop from '@/pages/codex-loop';
 import OuroborosPage from '@/pages/ouroboros';
 import ConduitSigil from '@/pages/sigil';
+import SovereignAiHub from '@/pages/sovereign-ai-hub/index';
+import ModelFleetConsole from '@/pages/sovereign-ai-hub/model-fleet';
+import InferenceObservatory from '@/pages/sovereign-ai-hub/inference';
+import DomainDistillery from '@/pages/sovereign-ai-hub/distillery';
+import PraxisPlayground from '@/pages/sovereign-ai-hub/praxis';
+import DataEstateCatalog from '@/pages/sovereign-ai-hub/data-estate';
+import CognitiveInsights from '@/pages/sovereign-ai-hub/cognitive';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +53,13 @@ function AppContent() {
         <Route path="/codex-loop" component={CodexLoop} />
         <Route path="/ouroboros" component={OuroborosPage} />
         <Route path="/sigil" component={ConduitSigil} />
+        <Route path="/sovereign-ai-hub" component={SovereignAiHub} />
+        <Route path="/sovereign-ai-hub/model-fleet" component={ModelFleetConsole} />
+        <Route path="/sovereign-ai-hub/inference" component={InferenceObservatory} />
+        <Route path="/sovereign-ai-hub/distillery" component={DomainDistillery} />
+        <Route path="/sovereign-ai-hub/praxis" component={PraxisPlayground} />
+        <Route path="/sovereign-ai-hub/data-estate" component={DataEstateCatalog} />
+        <Route path="/sovereign-ai-hub/cognitive" component={CognitiveInsights} />
         <Route>
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Page not found
