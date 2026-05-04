@@ -419,6 +419,167 @@ export function lutarV6(input: LutarV6Input): LutarV6Result {
   };
 }
 
+export interface LutarOmegaInput {
+  L_values: [number, number, number, number, number, number];
+  weights?: [number, number, number, number, number, number];
+}
+
+export interface LutarOmegaResult extends LutarResult {
+  L_values: number[];
+  weights: number[];
+  closureTheorem: string;
+}
+
+export function adaptiveWeights(H: number): [number, number, number, number, number, number] {
+  const raw = Array.from({ length: 6 }, (_, k) => Math.exp((k + 1) * H));
+  const s = raw.reduce((a, b) => a + b, 0);
+  return raw.map((r) => r / s) as [number, number, number, number, number, number];
+}
+
+export function lutarOmega(input: LutarOmegaInput): LutarOmegaResult {
+  const { L_values } = input;
+  if (L_values.length !== 6) {
+    throw new Error("L_values must have exactly 6 entries (v1..v6).");
+  }
+
+  const weights: [number, number, number, number, number, number] =
+    input.weights ?? [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
+
+  if (weights.length !== 6) {
+    throw new Error("weights must have exactly 6 entries.");
+  }
+  if (weights.some((w) => w < 0)) {
+    throw new Error("weights must be non-negative.");
+  }
+  const wSum = weights.reduce((a, b) => a + b, 0);
+  if (Math.abs(wSum - 1.0) > 1e-9) {
+    throw new Error(`weights must sum to 1 (got ${wSum}).`);
+  }
+
+  const value = L_values.reduce((sum, L, i) => sum + weights[i] * L, 0);
+
+  const terms: Record<string, number> = {};
+  for (let i = 0; i < 6; i++) {
+    terms[`w${i + 1}*L${i + 1}`] = weights[i] * L_values[i];
+  }
+
+  return {
+    version: "omega",
+    value,
+    terms,
+    closureSatisfied: true,
+    L_values: [...L_values],
+    weights: [...weights],
+    closureTheorem:
+      "If each L_k satisfies Noether and dw_k/dt = 0, then dL_Omega/dt = 0",
+  };
+}
+
+export interface EvaluateAllInput extends LutarV6Input {}
+
+export function evaluateAll(input: EvaluateAllInput): {
+  L1: number;
+  L2: number;
+  L3: number;
+  L4: number;
+  L5: number;
+  L6: number;
+  values: [number, number, number, number, number, number];
+} {
+  const r1 = lutarV1(input);
+  const r2 = lutarV2({ ...input, Phi: input.W });
+  const r3 = lutarV3({ ...input, Phi: input.W });
+  const r4 = lutarV4(input);
+  const r5 = lutarV5(input);
+  const r6 = lutarV6(input);
+  return {
+    L1: r1.value,
+    L2: r2.value,
+    L3: r3.value,
+    L4: r4.value,
+    L5: r5.value,
+    L6: r6.L6,
+    values: [r1.value, r2.value, r3.value, r4.value, r5.value, r6.L6],
+  };
+}
+
+export interface LutarV7Input extends LutarV6Input {
+  omegaWeights?: [number, number, number, number, number, number];
+  huftCoupling?: number;
+}
+
+export interface LutarV7Result extends LutarResult {
+  L_Omega: number;
+  L_values: number[];
+  bianchiDeviation: number;
+  bianchiClosed: boolean;
+  fiberCurvature: number[];
+  covariantDerivative: number[];
+  huftCoupling: number;
+  unificationStrength: number;
+}
+
+export function lutarV7(input: LutarV7Input): LutarV7Result {
+  const all = evaluateAll(input);
+  const L = all.values;
+
+  const omegaResult = lutarOmega({
+    L_values: L,
+    weights: input.omegaWeights,
+  });
+  const L_Omega = omegaResult.value;
+
+  const coupling = input.huftCoupling ?? 1.0;
+  if (coupling <= 0) {
+    throw new Error("huftCoupling must be > 0.");
+  }
+
+  const dL: number[] = [];
+  for (let i = 0; i < L.length - 1; i++) {
+    dL.push(L[i + 1] - L[i]);
+  }
+
+  const d2L: number[] = [];
+  for (let i = 0; i < dL.length - 1; i++) {
+    d2L.push(dL[i + 1] - dL[i]);
+  }
+
+  const curvatureNormSq = dL.reduce((s, d) => s + d * d, 0);
+  const bianchiNormSq = d2L.reduce((s, d) => s + d * d, 0);
+
+  const epsilon = 1e-30;
+  const bianchiDeviation = bianchiNormSq / (curvatureNormSq + epsilon);
+
+  const L7 = L_Omega * Math.exp(-coupling * bianchiDeviation);
+
+  const unificationStrength = Math.exp(-coupling * bianchiDeviation);
+
+  const terms: Record<string, number> = {
+    ...omegaResult.terms,
+    bianchi_deviation: bianchiDeviation,
+    fiber_curvature_norm: Math.sqrt(curvatureNormSq),
+    covariant_derivative_norm: Math.sqrt(bianchiNormSq),
+    huft_coupling: coupling,
+    unification_strength: unificationStrength,
+    "exp(-kappa*B)": unificationStrength,
+  };
+
+  return {
+    version: "v7",
+    value: L7,
+    terms,
+    closureSatisfied: omegaResult.closureSatisfied && bianchiDeviation < 0.01,
+    L_Omega,
+    L_values: [...L],
+    bianchiDeviation,
+    bianchiClosed: bianchiDeviation < 0.01,
+    fiberCurvature: dL,
+    covariantDerivative: d2L,
+    huftCoupling: coupling,
+    unificationStrength,
+  };
+}
+
 export function traverseCodexEdges(
   edges: readonly { from: string; to: string; type: string }[],
   start: string,

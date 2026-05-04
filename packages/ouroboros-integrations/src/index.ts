@@ -3,8 +3,8 @@
  * primitives into the deployable products.
  *
  * A11oy Orchestrator is the top-level entry point. It ingests everything:
- *   - Supreme Knowledge Codex v10 (HOLOGRAPHIC-TWISTOR-CYCLIC)
- *   - Lutar Formula Family (v1-v6)
+ *   - Supreme Knowledge Codex v11 (UNIFIED-OPERATIONAL)
+ *   - Lutar Formula Family (v1-v7 + Omega)
  *   - Guardrails pipeline (14 rails, tamper-evident v2.0.0 receipts)
  *   - Lambda Engine (9-axis evaluation + Adaptive Depth Routing)
  *   - Convergence Pulse (real-time trust heartbeat)
@@ -105,6 +105,10 @@ export {
   lutarV4,
   lutarV5,
   lutarV6,
+  lutarOmega,
+  lutarV7,
+  adaptiveWeights,
+  evaluateAll,
   twistorProject,
   bekensteinBound,
   bekensteinCheck,
@@ -129,6 +133,11 @@ export {
   type LutarV4Input,
   type LutarV5Input,
   type LutarV6Input,
+  type LutarOmegaInput,
+  type LutarV7Input,
   type LutarResult,
   type LutarV6Result,
+  type LutarOmegaResult,
+  type LutarV7Result,
+  type EvaluateAllInput,
 } from "./lutar-formulas.js";

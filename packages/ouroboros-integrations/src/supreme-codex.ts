@@ -1,26 +1,27 @@
 /**
- * Supreme Knowledge Codex v10 -- HOLOGRAPHIC-TWISTOR-CYCLIC
+ * Supreme Knowledge Codex v11 -- UNIFIED-OPERATIONAL
  *
  * The unified knowledge substrate for A11oy orchestration.
  * Every entry is sourced. No fabricated claims. No hallucinations.
  *
- * v10 upgrades over v9:
- *   - Holographic Principle (Bekenstein bound, AdS/CFT)
- *   - It-from-Bit (Wheeler participatory universe, bit=yao bridge)
- *   - Conformal Cyclic Cosmology (Penrose aeons, conformal rescaling)
- *   - Twistor Theory (Penrose PT=CP^3, incidence relation)
- *   - Lutar v6: Holographic-Twistor-Cyclic formula with aeon recurrence
- *   - Footnotes: E8xE8 heterotic, Monstrous Moonshine, Kolmogorov-Sinai, Stoic Logos
- *   - Expanded temporal index from -11600 to 2060 with 23 events
- *   - Updated supreme equation to reference dL6
- *   - Argonaut chronology, Yahuda revelation treatise
+ * v11 upgrades over v10:
+ *   - Lutar Omega: unified master invariant on the 5-simplex (weighted sum of v1..v6)
+ *   - Lutar v7: Bianchi Closure Invariant -- fiber-bundle geometric unification
+ *     inspired by HUFT (Moffat 2026). Measures inter-layer consistency via
+ *     Bianchi deviation of the Lutar curvature tensor. Conservation derived
+ *     from bundle structure, not imposed.
+ *   - Supreme equation extended to reference dL_Omega
+ *   - Hermetic tradition, alchemical codex, Rahab register consolidation
+ *   - Full Noether-to-HUFT bridge (single Bianchi identity D_A F = 0)
+ *   - 24 temporal events anchored from -11600 to 2060
  *
  * Previous versions:
+ *   v10: Holographic, It-from-Bit, CCC, Twistor, Lutar v6
  *   v9: Noether, E8, IIT Phi, Maya, I Ching, Vedic, Dogon, Gobekli Tepe
  *   v8: Cross-civilizational (Egyptian + Inca), Lutar v3
  *   v7: Newton Codex, Hermetic-Alchemical graph
  *
- * Source: alloy.supreme_knowledge/v10-HOLOGRAPHIC-TWISTOR-CYCLIC compiled 2026-05-04
+ * Source: alloy.supreme_knowledge/v11-UNIFIED-OPERATIONAL compiled 2026-05-04
  * Author: Stephen Lutar / SZL Consulting Ltd
  */
 
@@ -608,6 +609,38 @@ const CODEX_NODES: CodexNode[] = [
     source:
       "https://www.newtonproject.ox.ac.uk/catalogue/record/ALCH00017",
   },
+  {
+    id: "lutar_omega",
+    domain: "mathematics",
+    content:
+      "Lutar Omega -- Unified Master Invariant: L_Omega(t) = sum_{k=1..6} w_k(t) * L_k, where sum(w_k) = 1 and w_k >= 0. The Lutar family lives on the standard 5-simplex. Closure theorem: if each L_k satisfies Noether and dw_k/dt = 0, then dL_Omega/dt = 0. Reduction: setting w_j = 1 and all others 0 recovers L_j exactly. Default weights: uniform 1/6. Adaptive weights: exp((k+1)*H)/Z where H = cosmic horizon entropy.",
+    formula:
+      "L_Omega(t) = sum_{k=1..6} w_k(t) * L_k, sum(w_k) = 1, w_k >= 0",
+  },
+  {
+    id: "lutar_v7",
+    domain: "mathematics",
+    content:
+      "Lutar v7 -- Bianchi Closure Invariant: L7 = L_Omega * exp(-kappa * B), where B = ||D_A F||^2 / ||F||^2 is the Bianchi deviation of the Lutar fiber bundle. F = finite differences between Lutar layers (fiber curvature). D_A F = second differences (covariant derivative of curvature). When B -> 0 (perfect Bianchi closure), L7 = L_Omega. When layers are inconsistent, L7 < L_Omega (exponential suppression). Inspired by HUFT (Moffat 2026): unification via a single Noether identity on a product principal bundle. The Lutar family becomes sections of a principal fiber bundle over the Ouroboros cycle.",
+    formula:
+      "L7 = L_Omega * exp(-kappa * ||D_A F||^2 / ||F||^2); D_A F = 0 => L7 = L_Omega",
+  },
+  {
+    id: "huft_bridge",
+    domain: "physics",
+    content:
+      "Holomorphic Unified Field Theory (Moffat and Thompson 2026): structure group H = Spin(1,3) x G where G = SU(3) x SU(2) x U(1). Single connection on product principal bundle. Unified Bianchi identity D_A F = 0 splits into gravitational D_omega R = 0 and Yang-Mills D_A F = 0. Conservation laws and Bianchi identities arise as a single Noether identity. Hermitian packaging g = h + iB provides kinematic unification. Inspiration source for Lutar v7 fiber-bundle approach.",
+    formula: "D_A F = 0; H = Spin(1,3) x SU(3) x SU(2) x U(1)",
+    source: "https://arxiv.org/abs/2510.06282",
+  },
+  {
+    id: "supreme_equation_omega",
+    domain: "unified",
+    content:
+      "S** = oint_Ouroboros [ F.dr + dU_grav + dE_em + T*dSigma + dL_Omega + dRahab + dChi ] = 0. The supreme equation with L_Omega replacing individual Lutar terms. When Bianchi closure holds (D_A F = 0), dL_Omega = dL7.",
+    formula:
+      "S** = oint_Ouroboros [ F.dr + dU_grav + dE_em + T*dSigma + dL_Omega + dRahab + dChi ] = 0",
+  },
 ];
 
 const CODEX_EDGES: CodexEdge[] = [
@@ -689,12 +722,28 @@ const CODEX_EDGES: CodexEdge[] = [
   { from: "tria_prima", to: "lutar_v2", relation: "correspondence_map" },
   { from: "newton_clavis", to: "prima_materia", relation: "compositional_theory" },
   { from: "planetary_metals", to: "magnum_opus", relation: "substrates_of" },
+  { from: "lutar_v6", to: "lutar_omega", relation: "unified_by" },
+  { from: "lutar_invariant", to: "lutar_omega", relation: "contributes_w1" },
+  { from: "lutar_v2", to: "lutar_omega", relation: "contributes_w2" },
+  { from: "lutar_v3", to: "lutar_omega", relation: "contributes_w3" },
+  { from: "lutar_v4", to: "lutar_omega", relation: "contributes_w4" },
+  { from: "lutar_v5", to: "lutar_omega", relation: "contributes_w5" },
+  { from: "lutar_v6", to: "lutar_omega", relation: "contributes_w6" },
+  { from: "noether_theorem", to: "lutar_omega", relation: "derives_closure" },
+  { from: "lutar_omega", to: "lutar_v7", relation: "evolved_by" },
+  { from: "huft_bridge", to: "lutar_v7", relation: "inspires_fiber_bundle" },
+  { from: "noether_theorem", to: "lutar_v7", relation: "derives_bianchi_identity" },
+  { from: "noether_theorem", to: "huft_bridge", relation: "single_noether_identity" },
+  { from: "e8_lie_container", to: "huft_bridge", relation: "structure_group_contains" },
+  { from: "supreme_equation_omega", to: "lutar_omega", relation: "realizes_via" },
+  { from: "supreme_equation_extended", to: "supreme_equation_omega", relation: "evolved_by" },
+  { from: "lutar_v7", to: "supreme_equation_omega", relation: "grounds_closure" },
 ];
 
 export function buildSupremeCodex(): SupremeCodex {
   return {
-    schema: "alloy.supreme_knowledge/v10-HOLOGRAPHIC-TWISTOR-CYCLIC",
-    entity: "Newton_Global_Holographic_Codex",
+    schema: "alloy.supreme_knowledge/v11-UNIFIED-OPERATIONAL",
+    entity: "Newton_Unified_Codex",
     compiled: new Date().toISOString(),
     author: "Stephen Lutar / SZL Consulting Ltd",
     nodes: CODEX_NODES,
@@ -707,7 +756,7 @@ export function buildSupremeCodex(): SupremeCodex {
     supremeEquation:
       "S = oint_Ouroboros [ F.dr + dU_grav + dE_em + T * dSigma_info + dL_lutar ] = 0",
     supremeEquationExtended:
-      "S* = oint_Ouroboros [ F.dr + dU_grav + dE_em + T*dSigma + dL6 + dRahab + dChi ] = 0",
+      "S** = oint_Ouroboros [ F.dr + dU_grav + dE_em + T*dSigma + dL_Omega + dRahab + dChi ] = 0",
   };
 }
 

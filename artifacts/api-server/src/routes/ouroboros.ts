@@ -49,6 +49,10 @@ import {
   lutarV4,
   lutarV5,
   lutarV6,
+  lutarOmega,
+  lutarV7,
+  adaptiveWeights,
+  evaluateAll,
   twistorProject,
   bekensteinBound,
   bekensteinCheck,
@@ -522,6 +526,68 @@ router.post('/lutar/v6', (req: Request, res: Response) => {
   } catch (e) {
     return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
   }
+});
+
+const LutarOmegaSchema = z.object({
+  L_values: z.tuple([z.number(), z.number(), z.number(), z.number(), z.number(), z.number()]),
+  weights: z.tuple([z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0)]).optional(),
+});
+
+router.post('/lutar/omega', (req: Request, res: Response) => {
+  const parsed = LutarOmegaSchema.safeParse(req.body);
+  if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
+  try {
+    return res.json(lutarOmega(parsed.data));
+  } catch (e) {
+    return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
+  }
+});
+
+const LutarV7Schema = LutarV6Schema.extend({
+  omegaWeights: z.tuple([z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0), z.number().min(0)]).optional(),
+  huftCoupling: z.number().positive().default(1.0),
+});
+
+router.post('/lutar/v7', (req: Request, res: Response) => {
+  const parsed = LutarV7Schema.safeParse(req.body);
+  if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
+  try {
+    return res.json(lutarV7(parsed.data));
+  } catch (e) {
+    return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
+  }
+});
+
+router.post('/lutar/evaluate-all', (req: Request, res: Response) => {
+  const parsed = LutarV6Schema.safeParse(req.body);
+  if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
+  try {
+    const all = evaluateAll(parsed.data);
+    const omega = lutarOmega({ L_values: all.values });
+    const aw = adaptiveWeights(0.1);
+    const omegaAdaptive = lutarOmega({ L_values: all.values, weights: aw });
+    return res.json({
+      ...all,
+      omega: omega.value,
+      omegaAdaptive: omegaAdaptive.value,
+      adaptiveWeights: aw,
+      author: "Stephen Lutar / SZL Consulting Ltd",
+    });
+  } catch (e) {
+    return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
+  }
+});
+
+router.get('/lutar/adaptive-weights', (req: Request, res: Response) => {
+  const H = parseFloat(req.query.H as string);
+  if (isNaN(H)) return jsonError(res, 400, 'INVALID_INPUT', 'H (horizon entropy) must be a number');
+  const weights = adaptiveWeights(H);
+  return res.json({
+    H,
+    weights,
+    formula: "w_k = exp((k+1)*H) / Z, Z = sum exp((k+1)*H)",
+    sumCheck: weights.reduce((a, b) => a + b, 0),
+  });
 });
 
 router.get('/lutar/noether-check', (req: Request, res: Response) => {
