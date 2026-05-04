@@ -1,0 +1,358 @@
+{
+  "runId": "20260504T012227Z-51d5da77",
+  "packSlug": "cyber-resilience",
+  "vertical": "tenax-cyber",
+  "mode": "discovery",
+  "engineVersion": "0.1.0",
+  "packVersion": "0.1.0",
+  "timestamp": "2026-05-04T01:22:27.319681+00:00",
+  "signals": [
+    {
+      "id": "sig-cyber-90ef7c08",
+      "vertical": "tenax-cyber",
+      "entity": "asset-001",
+      "title": "Compromised Asset: SCADA Server",
+      "description": "SCADA Server (OT) is in compromised state. Exposure score: 88. Control gaps: Endpoint Isolation missing, MFA not enforced on admin.",
+      "severity": "critical",
+      "status": "active",
+      "businessImpact": "Critical OT asset compromised; lateral movement risk.",
+      "evidenceRefs": [
+        "sentra-twin/assets/asset-001"
+      ],
+      "owner": "cyber-soc",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "compromised-asset",
+        "ot",
+        "containment"
+      ],
+      "metadata": {
+        "assetId": "asset-001",
+        "assetType": "OT",
+        "exposureScore": 88,
+        "backupStatus": "stale"
+      }
+    },
+    {
+      "id": "sig-cyber-f52c4e89",
+      "vertical": "tenax-cyber",
+      "entity": "asset-003",
+      "title": "Compromised Asset: PLC Controller",
+      "description": "PLC Controller (OT) is in compromised state. Exposure score: 92. Control gaps: Network segmentation breach.",
+      "severity": "critical",
+      "status": "active",
+      "businessImpact": "Critical OT asset compromised; lateral movement risk.",
+      "evidenceRefs": [
+        "sentra-twin/assets/asset-003"
+      ],
+      "owner": "cyber-soc",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "compromised-asset",
+        "ot",
+        "containment"
+      ],
+      "metadata": {
+        "assetId": "asset-003",
+        "assetType": "OT",
+        "exposureScore": 92,
+        "backupStatus": "none"
+      }
+    },
+    {
+      "id": "sig-cyber-521a56e3",
+      "vertical": "tenax-cyber",
+      "entity": "INC-2026-0891",
+      "title": "Active Incident: Ransomware-Adjacent OT Payload Detected",
+      "description": "Encrypted payload detected on 3 OT assets (SCADA, PLC). Anomalous C2 beaconing to known malicious IPs. MITRE stage: Execution / C2. Affected assets: asset-001, asset-003.",
+      "severity": "critical",
+      "status": "active",
+      "businessImpact": "Active threat requiring immediate containment and response.",
+      "evidenceRefs": [
+        "sentra-twin/incidents/INC-2026-0891"
+      ],
+      "owner": "cyber-soc",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "incident",
+        "threat-overview",
+        "execution-c2"
+      ],
+      "metadata": {
+        "incidentId": "INC-2026-0891",
+        "mitreStage": "Execution / C2",
+        "affectedAssets": [
+          "asset-001",
+          "asset-003"
+        ]
+      }
+    },
+    {
+      "id": "sig-cyber-1ce11bb1",
+      "vertical": "tenax-cyber",
+      "entity": "control-respond",
+      "title": "Control Drift: Incident Response Plan",
+      "description": "NIST Respond control 'Incident Response Plan' has drifted. Evidence: Isolation playbooks failed to execute on legacy SCADA systems.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Degraded Respond capability; compliance gap.",
+      "evidenceRefs": [
+        "sentra-twin/controlDrifts/Respond"
+      ],
+      "owner": "cyber-compliance",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "control-drift",
+        "respond",
+        "compliance"
+      ],
+      "metadata": {
+        "family": "Respond",
+        "control": "Incident Response Plan"
+      }
+    },
+    {
+      "id": "sig-cyber-5e4e6f90",
+      "vertical": "tenax-cyber",
+      "entity": "control-recover",
+      "title": "Control Drift: Backup Verification",
+      "description": "NIST Recover control 'Backup Verification' has drifted. Evidence: 2 critical server backups failed integrity check.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Degraded Recover capability; compliance gap.",
+      "evidenceRefs": [
+        "sentra-twin/controlDrifts/Recover"
+      ],
+      "owner": "cyber-compliance",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "control-drift",
+        "recover",
+        "compliance"
+      ],
+      "metadata": {
+        "family": "Recover",
+        "control": "Backup Verification"
+      }
+    },
+    {
+      "id": "sig-cyber-997fa578",
+      "vertical": "tenax-cyber",
+      "entity": "exp-001",
+      "title": "Mesh Exposure: GITHUB_TOKEN reachable by 4 agents",
+      "description": "A GitHub PAT with repo+admin:org scope is readable by 4 agent runtimes via shared filesystem. Compromise of any runtime exposes the token. OWASP: A01:2021 – Broken Access Control. Fix: Scope token to minimum required permissions and rotate.",
+      "severity": "critical",
+      "status": "active",
+      "businessImpact": "Agent mesh security boundary violation; potential data exfiltration.",
+      "evidenceRefs": [
+        "agent-mesh/exposures/exp-001"
+      ],
+      "owner": "cyber-mesh-ops",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "mesh-exposure",
+        "scope-token",
+        "agent-mesh"
+      ],
+      "metadata": {
+        "exposureId": "exp-001",
+        "owaspCategory": "A01:2021 – Broken Access Control",
+        "fixType": "scope-token",
+        "affectedAgentIds": [
+          "agent-claude-main",
+          "agent-cursor-composer",
+          "agent-codex-cli",
+          "agent-claude-code"
+        ]
+      }
+    },
+    {
+      "id": "sig-cyber-33a0f0d5",
+      "vertical": "tenax-cyber",
+      "entity": "exp-002",
+      "title": "Mesh Exposure: Unverified MCP server exfiltrating data",
+      "description": "An unverified MCP server (ext-scraper-v2) detected sending data to an external domain not in the allowed egress list. OWASP: A08:2021 – Software and Data Integrity Failures. Fix: Quarantine the unverified MCP server immediately.",
+      "severity": "critical",
+      "status": "active",
+      "businessImpact": "Agent mesh security boundary violation; potential data exfiltration.",
+      "evidenceRefs": [
+        "agent-mesh/exposures/exp-002"
+      ],
+      "owner": "cyber-mesh-ops",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "mesh-exposure",
+        "quarantine-server",
+        "agent-mesh"
+      ],
+      "metadata": {
+        "exposureId": "exp-002",
+        "owaspCategory": "A08:2021 – Software and Data Integrity Failures",
+        "fixType": "quarantine-server",
+        "affectedAgentIds": [
+          "agent-cursor-composer"
+        ]
+      }
+    },
+    {
+      "id": "sig-cyber-2d1a50ca",
+      "vertical": "tenax-cyber",
+      "entity": "recovery-posture",
+      "title": "Recovery Readiness Below Threshold",
+      "description": "Recovery posture score is 42/100, below the 60-point threshold. Financial exposure: $2,800,000.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Inadequate recovery capability; $2,800,000 at risk.",
+      "evidenceRefs": [
+        "sentra-twin/recoveryPosture"
+      ],
+      "owner": "cyber-resilience",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "recovery-readiness",
+        "posture",
+        "financial-exposure"
+      ],
+      "metadata": {
+        "recoveryPosture": 42,
+        "financialExposure": 2800000
+      }
+    },
+    {
+      "id": "sig-cyber-e6958586",
+      "vertical": "tenax-cyber",
+      "entity": "rule-codex-restrict",
+      "title": "Containment Rule Violations: Codex CLI Restricted Policy",
+      "description": "Containment rule 'Codex CLI Restricted Policy' for agent class 'codex-cli' has 3 violations. Enforcement mode: quarantine.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Agent boundary violations may lead to unauthorized access or data leakage.",
+      "evidenceRefs": [
+        "agent-mesh/containmentRules/rule-codex-restrict"
+      ],
+      "owner": "cyber-mesh-ops",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "containment-rule",
+        "violation",
+        "critical"
+      ],
+      "metadata": {
+        "ruleId": "rule-codex-restrict",
+        "agentClass": "codex-cli",
+        "violationCount": 3,
+        "enforcementMode": "quarantine",
+        "tier": "critical"
+      }
+    },
+    {
+      "id": "sig-cyber-e3e583b4",
+      "vertical": "tenax-cyber",
+      "entity": "rule-cursor-standard",
+      "title": "Containment Rule Violations: Cursor Standard Policy",
+      "description": "Containment rule 'Cursor Standard Policy' for agent class 'cursor-composer' has 1 violations. Enforcement mode: block.",
+      "severity": "medium",
+      "status": "active",
+      "businessImpact": "Agent boundary violations may lead to unauthorized access or data leakage.",
+      "evidenceRefs": [
+        "agent-mesh/containmentRules/rule-cursor-standard"
+      ],
+      "owner": "cyber-mesh-ops",
+      "detectedAt": "2026-05-04T01:22:27.318298+00:00",
+      "updatedAt": "2026-05-04T01:22:27.318298+00:00",
+      "tags": [
+        "containment-rule",
+        "violation",
+        "elevated"
+      ],
+      "metadata": {
+        "ruleId": "rule-cursor-standard",
+        "agentClass": "cursor-composer",
+        "violationCount": 1,
+        "enforcementMode": "block",
+        "tier": "elevated"
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "out-cyber-38356179",
+      "title": "Contain Active Threats",
+      "description": "Isolate all compromised assets and contain active incidents.",
+      "vertical": "tenax-cyber",
+      "status": "pending",
+      "owner": "cyber-soc",
+      "targetDate": "2026-05-04T01:22:27.319246+00:00",
+      "successMetric": "compromised_asset_count == 0",
+      "currentValue": 2.0,
+      "targetValue": 0.0,
+      "unit": "count",
+      "linkedSignalIds": [
+        "sig-cyber-90ef7c08",
+        "sig-cyber-f52c4e89",
+        "sig-cyber-521a56e3"
+      ],
+      "createdAt": "2026-05-04T01:22:27.319246+00:00",
+      "updatedAt": "2026-05-04T01:22:27.319246+00:00"
+    },
+    {
+      "id": "out-cyber-554425f4",
+      "title": "Restore Recovery Readiness",
+      "description": "Bring recovery posture score above 60-point threshold.",
+      "vertical": "tenax-cyber",
+      "status": "pending",
+      "owner": "cyber-resilience",
+      "targetDate": "2026-05-04T01:22:27.319246+00:00",
+      "successMetric": "recovery_posture >= 60",
+      "currentValue": 42.0,
+      "targetValue": 60.0,
+      "unit": "score",
+      "linkedSignalIds": [
+        "sig-cyber-2d1a50ca"
+      ],
+      "createdAt": "2026-05-04T01:22:27.319246+00:00",
+      "updatedAt": "2026-05-04T01:22:27.319246+00:00"
+    },
+    {
+      "id": "out-cyber-3e89cd73",
+      "title": "Close Mesh Exposures",
+      "description": "Remediate all open agent-mesh security exposures.",
+      "vertical": "tenax-cyber",
+      "status": "pending",
+      "owner": "cyber-mesh-ops",
+      "targetDate": "2026-05-04T01:22:27.319246+00:00",
+      "successMetric": "open_exposure_count == 0",
+      "currentValue": 2.0,
+      "targetValue": 0.0,
+      "unit": "count",
+      "linkedSignalIds": [
+        "sig-cyber-997fa578",
+        "sig-cyber-33a0f0d5"
+      ],
+      "createdAt": "2026-05-04T01:22:27.319246+00:00",
+      "updatedAt": "2026-05-04T01:22:27.319246+00:00"
+    }
+  ],
+  "actions": [],
+  "policies": [],
+  "proofPackets": [],
+  "twins": [],
+  "workcells": [],
+  "traces": [],
+  "metadata": {
+    "packDescription": "Cyber Resilience — TENAX/sentra surface observation pack",
+    "signalCount": 10,
+    "actionCount": 0,
+    "outcomeCount": 3,
+    "dataSource": "sentra-twin + agent-mesh seed data"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "workcellId": {
+      "title": "Workcellid",
+      "type": "string"
+    },
+    "runId": {
+      "title": "Runid",
+      "type": "string"
+    },
+    "steps": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "finalStatus": {
+      "default": "completed",
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "Finalstatus",
+      "type": "string"
+    },
+    "durationMs": {
+      "default": 0,
+      "title": "Durationms",
+      "type": "integer"
+    },
+    "proofPacketId": {
+      "default": "",
+      "title": "Proofpacketid",
+      "type": "string"
+    },
+    "startedAt": {
+      "title": "Startedat",
+      "type": "string"
+    },
+    "completedAt": {
+      "title": "Completedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "workcellId",
+    "runId"
+  ],
+  "title": "ExecutionTrace",
+  "type": "object"
+}

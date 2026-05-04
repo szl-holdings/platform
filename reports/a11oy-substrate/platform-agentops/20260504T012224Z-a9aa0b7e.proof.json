@@ -1,0 +1,20 @@
+{
+  "runId": "20260504T012224Z-a9aa0b7e",
+  "packSlug": "platform-agentops",
+  "engineVersion": "0.1.0",
+  "packVersion": "0.1.0",
+  "timestamp": "2026-05-04T01:22:24.632939+00:00",
+  "inputFingerprint": "4d0c588fe0dbd652347e5bba91f8f5406365fd329d10b677f6ac91f815a3d723",
+  "entityIds": [
+    "sig-plat-4f3e1ac9",
+    "sig-plat-a147b4aa",
+    "sig-plat-edfdb232",
+    "sig-plat-5d7719b2",
+    "sig-plat-8a16991e",
+    "out-plat-c1dc9612",
+    "out-plat-8723375b"
+  ],
+  "reportHash": "0d97e0b06dd71d24e3b6072d44d0d8576d08dad4d65692cdeda75b5abe73370e",
+  "chainHash": "d70d4de6ef9775550318f754cd7f399f70cb4fb60783c8b29220f8e3a8d61e54",
+  "previousChainHash": null
+}

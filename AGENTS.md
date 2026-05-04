@@ -456,16 +456,22 @@ The substrate runs **alongside** the TS fabric — it does not replace it.
 The TS `Vertical` enum is unchanged; the Python substrate defines a
 superset taxonomy in its own contract.
 
-CLI:
+**Package:** `a11oy-fabric-py` (hatchling, pydantic 2, structlog, opentelemetry-api)
 
-```bash
-python -m a11oy_fabric_py list-packs
-python -m a11oy_fabric_py run --pack platform-agentops --mode discovery --out reports/a11oy-substrate/
-python -m a11oy_fabric_py verify reports/a11oy-substrate/
-```
+**CLI:** `python -m a11oy_fabric_py {list-packs, run, verify}`
+
+**JSON artifacts:** `reports/a11oy-substrate/<pack-slug>/<run-id>.json` + `.proof.json`
+
+**JSON schemas:** `reports/a11oy-substrate/_schema/<Entity>.schema.json`
+
+**Reference packs:**
+- `platform-agentops` (vertical `alloy-core`) — substrate self-observation
+- `cyber-resilience` (vertical `tenax-cyber`) — TENAX/sentra surface
+
+**Tests:** `pytest lib/a11oy-fabric-py/tests/ -v`
 
 See `lib/a11oy-fabric-py/README.md` for the full contract, the
 discovery/governed two-plane execution model, the JSON-artifact
-convention, and the recipe for plugging in the seven follow-up vertical
-packs (Pulse, Finance/Fincept, Lyte/KORA, Terra, Vessels, PRISM Counsel,
-Marketing/Growth).
+convention, PCPR format, and the recipe for plugging in the seven
+follow-up vertical packs (Pulse, Finance/Fincept, Lyte/KORA, Terra,
+Vessels, PRISM Counsel, Marketing/Growth).

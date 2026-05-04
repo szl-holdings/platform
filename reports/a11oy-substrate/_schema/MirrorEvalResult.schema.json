@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "targetId": {
+      "title": "Targetid",
+      "type": "string"
+    },
+    "targetType": {
+      "enum": [
+        "action",
+        "workcell",
+        "signal"
+      ],
+      "title": "Targettype",
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "pass",
+        "fail",
+        "warn",
+        "abstain"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "score": {
+      "title": "Score",
+      "type": "number"
+    },
+    "dimensions": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Dimensions",
+      "type": "array"
+    },
+    "flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "evaluatorModel": {
+      "default": "substrate-mirror-v1",
+      "title": "Evaluatormodel",
+      "type": "string"
+    },
+    "evaluatedAt": {
+      "title": "Evaluatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "targetId",
+    "targetType",
+    "verdict",
+    "score"
+  ],
+  "title": "MirrorEvalResult",
+  "type": "object"
+}

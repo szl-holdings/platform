@@ -93,6 +93,16 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport.
 - **Gateway adapter:** `lib/ai-engine/src/alloy-model-gateway.ts` (`AlloyModelGateway`) as the single sanctioned path to the Qwen endpoint, enforcing validation, redaction, audit events, approvals, and budgets.
 
+## Python Substrate Engine
+- **Package:** `lib/a11oy-fabric-py/` — A11oy Fabric Python substrate engine (hatchling, pydantic 2, structlog, opentelemetry-api)
+- **CLI:** `python -m a11oy_fabric_py {list-packs, run, verify}`
+- **JSON artifacts:** `reports/a11oy-substrate/<pack-slug>/<run-id>.json` + `.proof.json`
+- **JSON schemas:** `reports/a11oy-substrate/_schema/<Entity>.schema.json`
+- **Reference packs:** `platform-agentops` (alloy-core), `cyber-resilience` (tenax-cyber)
+- **Tests:** `pytest lib/a11oy-fabric-py/tests/ -v` (50 tests)
+- **Two-plane model:** discovery (read-only) and governed (gated mutation) execution modes
+- **PCPR:** Proof-Carrying Pack Runs — sha256 hash-chained proof artifacts alongside every report
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

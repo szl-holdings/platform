@@ -1,0 +1,112 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "vertical": {
+      "enum": [
+        "lyte-revenue",
+        "vessels-maritime",
+        "terra-real-estate",
+        "aegis-defense",
+        "prism-counsel",
+        "carlota-jo",
+        "alloy-core",
+        "sentra-cyber",
+        "firestorm-ops",
+        "nuro-forge",
+        "meridian-infra",
+        "constellation-graph",
+        "tenax-cyber",
+        "pulse-health",
+        "fincept-finance",
+        "growth-marketing"
+      ],
+      "title": "Vertical",
+      "type": "string"
+    },
+    "entity": {
+      "title": "Entity",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "acknowledged",
+        "resolved",
+        "escalated",
+        "suppressed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "businessImpact": {
+      "title": "Businessimpact",
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "owner": {
+      "title": "Owner",
+      "type": "string"
+    },
+    "detectedAt": {
+      "title": "Detectedat",
+      "type": "string"
+    },
+    "updatedAt": {
+      "title": "Updatedat",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "vertical",
+    "entity",
+    "title",
+    "description",
+    "severity",
+    "status",
+    "businessImpact",
+    "owner"
+  ],
+  "title": "BusinessSignal",
+  "type": "object"
+}

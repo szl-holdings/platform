@@ -1,0 +1,192 @@
+{
+  "runId": "20260504T012224Z-a9aa0b7e",
+  "packSlug": "platform-agentops",
+  "vertical": "alloy-core",
+  "mode": "discovery",
+  "engineVersion": "0.1.0",
+  "packVersion": "0.1.0",
+  "timestamp": "2026-05-04T01:22:24.632939+00:00",
+  "signals": [
+    {
+      "id": "sig-plat-4f3e1ac9",
+      "vertical": "alloy-core",
+      "entity": "substrate-engine",
+      "title": "Workcell Health Degradation",
+      "description": "3 of 12 workcells report error status in the last 24h cycle. Failure rate exceeds 25% SLO threshold.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Degraded autonomous execution capacity; manual fallback required for affected verticals.",
+      "evidenceRefs": [
+        "workcell-metrics/24h-summary"
+      ],
+      "owner": "platform-sre",
+      "detectedAt": "2026-05-04T01:22:24.631112+00:00",
+      "updatedAt": "2026-05-04T01:22:24.631112+00:00",
+      "tags": [
+        "workcell",
+        "health",
+        "slo-breach"
+      ],
+      "metadata": {
+        "failedCount": 3,
+        "totalCount": 12,
+        "sloThreshold": 0.25
+      }
+    },
+    {
+      "id": "sig-plat-a147b4aa",
+      "vertical": "alloy-core",
+      "entity": "model-router",
+      "title": "Model Router Latency Spike",
+      "description": "P95 model-router latency exceeded 2000ms for the last 30 minutes. Likely cause: cold-start on fallback model pool.",
+      "severity": "medium",
+      "status": "active",
+      "businessImpact": "Increased end-to-end workcell execution time; potential timeout cascades.",
+      "evidenceRefs": [
+        "model-router/latency-histogram"
+      ],
+      "owner": "platform-ml",
+      "detectedAt": "2026-05-04T01:22:24.631112+00:00",
+      "updatedAt": "2026-05-04T01:22:24.631112+00:00",
+      "tags": [
+        "model-router",
+        "latency",
+        "performance"
+      ],
+      "metadata": {
+        "p95Ms": 2150,
+        "baselineP95Ms": 450,
+        "windowMinutes": 30
+      }
+    },
+    {
+      "id": "sig-plat-edfdb232",
+      "vertical": "alloy-core",
+      "entity": "covenant-engine",
+      "title": "Policy Enforcement Counter Anomaly",
+      "description": "Block-enforcement triggers increased 4x over baseline in the last 6 hours. May indicate a misconfigured policy or an adversarial probe.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Legitimate actions may be falsely blocked; review policy rule set.",
+      "evidenceRefs": [
+        "covenant/enforcement-counters"
+      ],
+      "owner": "platform-governance",
+      "detectedAt": "2026-05-04T01:22:24.631112+00:00",
+      "updatedAt": "2026-05-04T01:22:24.631112+00:00",
+      "tags": [
+        "covenant",
+        "policy",
+        "enforcement",
+        "anomaly"
+      ],
+      "metadata": {
+        "blockCount": 47,
+        "baselineBlockCount": 12,
+        "windowHours": 6
+      }
+    },
+    {
+      "id": "sig-plat-5d7719b2",
+      "vertical": "alloy-core",
+      "entity": "mirror-eval",
+      "title": "Mirror Eval Verdict Drift",
+      "description": "Mirror eval 'fail' verdicts rose from 5% to 18% of total evaluations. Evaluator model may need recalibration.",
+      "severity": "medium",
+      "status": "active",
+      "businessImpact": "Reduced confidence in autonomous action execution; increased human-review queue.",
+      "evidenceRefs": [
+        "mirror-eval/verdict-distribution"
+      ],
+      "owner": "platform-ml",
+      "detectedAt": "2026-05-04T01:22:24.631112+00:00",
+      "updatedAt": "2026-05-04T01:22:24.631112+00:00",
+      "tags": [
+        "mirror-eval",
+        "drift",
+        "quality"
+      ],
+      "metadata": {
+        "failRate": 0.18,
+        "baselineFailRate": 0.05,
+        "evalCount": 200
+      }
+    },
+    {
+      "id": "sig-plat-8a16991e",
+      "vertical": "alloy-core",
+      "entity": "tool-budget",
+      "title": "Tool-Call Budget Burn Rate Warning",
+      "description": "3 workcells consumed >80% of their tool-call budget in the first quarter of their execution window. Runaway loop risk.",
+      "severity": "high",
+      "status": "active",
+      "businessImpact": "Potential cost overrun and execution stall if budgets exhaust early.",
+      "evidenceRefs": [
+        "workcell/budget-burn-report"
+      ],
+      "owner": "platform-cost",
+      "detectedAt": "2026-05-04T01:22:24.631112+00:00",
+      "updatedAt": "2026-05-04T01:22:24.631112+00:00",
+      "tags": [
+        "tool-budget",
+        "cost",
+        "runaway"
+      ],
+      "metadata": {
+        "affectedWorkcells": 3,
+        "burnThreshold": 0.8,
+        "windowQuartile": 1
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "out-plat-c1dc9612",
+      "title": "Restore Workcell Fleet Health",
+      "description": "Bring workcell error rate below 25% SLO threshold.",
+      "vertical": "alloy-core",
+      "status": "pending",
+      "owner": "platform-sre",
+      "targetDate": "2026-05-04T01:22:24.632571+00:00",
+      "successMetric": "workcell_error_rate < 0.25",
+      "currentValue": 0.25,
+      "targetValue": 0.1,
+      "unit": "ratio",
+      "linkedSignalIds": [
+        "sig-plat-4f3e1ac9"
+      ],
+      "createdAt": "2026-05-04T01:22:24.632571+00:00",
+      "updatedAt": "2026-05-04T01:22:24.632571+00:00"
+    },
+    {
+      "id": "out-plat-8723375b",
+      "title": "Stabilize Mirror Eval Quality",
+      "description": "Reduce mirror-eval fail rate to baseline levels.",
+      "vertical": "alloy-core",
+      "status": "pending",
+      "owner": "platform-ml",
+      "targetDate": "2026-05-04T01:22:24.632571+00:00",
+      "successMetric": "mirror_eval_fail_rate < 0.08",
+      "currentValue": 0.18,
+      "targetValue": 0.05,
+      "unit": "ratio",
+      "linkedSignalIds": [
+        "sig-plat-5d7719b2"
+      ],
+      "createdAt": "2026-05-04T01:22:24.632571+00:00",
+      "updatedAt": "2026-05-04T01:22:24.632571+00:00"
+    }
+  ],
+  "actions": [],
+  "policies": [],
+  "proofPackets": [],
+  "twins": [],
+  "workcells": [],
+  "traces": [],
+  "metadata": {
+    "packDescription": "Platform / AgentOps — substrate self-observation pack",
+    "signalCount": 5,
+    "actionCount": 0,
+    "outcomeCount": 2
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "runId": "20260504T012227Z-51d5da77",
+  "packSlug": "cyber-resilience",
+  "engineVersion": "0.1.0",
+  "packVersion": "0.1.0",
+  "timestamp": "2026-05-04T01:22:27.319681+00:00",
+  "inputFingerprint": "7baf9a3e94d9624407ccf7ee4307b20ee1cc59ff9b9c55edc093bded1f9cfe88",
+  "entityIds": [
+    "sig-cyber-90ef7c08",
+    "sig-cyber-f52c4e89",
+    "sig-cyber-521a56e3",
+    "sig-cyber-1ce11bb1",
+    "sig-cyber-5e4e6f90",
+    "sig-cyber-997fa578",
+    "sig-cyber-33a0f0d5",
+    "sig-cyber-2d1a50ca",
+    "sig-cyber-e6958586",
+    "sig-cyber-e3e583b4",
+    "out-cyber-38356179",
+    "out-cyber-554425f4",
+    "out-cyber-3e89cd73"
+  ],
+  "reportHash": "47b6e623575bcca40bae54a9884bf854428e4fb5e0443f2154fc7beb9d220132",
+  "chainHash": "86c22b920efe39f900feaf9540c3e5342c3e8d3b9c40418c819e76f16b2ef537",
+  "previousChainHash": null
+}

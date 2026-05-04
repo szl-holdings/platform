@@ -1,0 +1,131 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "signal_ingestion",
+        "state_transition",
+        "action_execution",
+        "policy_evaluation",
+        "mirror_eval",
+        "human_approval"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "entityId": {
+      "title": "Entityid",
+      "type": "string"
+    },
+    "entityType": {
+      "enum": [
+        "signal",
+        "action",
+        "outcome",
+        "workcell",
+        "policy"
+      ],
+      "title": "Entitytype",
+      "type": "string"
+    },
+    "hash": {
+      "title": "Hash",
+      "type": "string"
+    },
+    "previousHash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previoushash"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "policyEvaluationId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policyevaluationid"
+    },
+    "approvalRecordId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approvalrecordid"
+    },
+    "witnessedBy": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Witnessedby",
+      "type": "array"
+    },
+    "issuedAt": {
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "vertical": {
+      "anyOf": [
+        {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "global",
+          "type": "string"
+        }
+      ],
+      "default": "global",
+      "title": "Vertical"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "entityId",
+    "entityType",
+    "hash"
+  ],
+  "title": "ProofPacket",
+  "type": "object"
+}

@@ -1,90 +1,57 @@
-"""A11oy Python Substrate Engine.
+"""A11oy Fabric — Python substrate engine for vertical intelligence packs."""
 
-Runs alongside the TypeScript fabric at lib/a11oy-fabric/. Defines the
-pydantic contract every vertical pack implements and emits deterministic
-JSON + Proof-Carrying Pack Run (PCPR) artifacts under
-reports/a11oy-substrate/<pack-slug>/<run-id>.{json,proof.json}.
-"""
-
-from __future__ import annotations
+__version__ = "0.1.0"
 
 from .models import (
     ActionBrief,
+    ApprovalRequirement,
     BusinessSignal,
     BusinessTwin,
     CovenantPolicy,
     ExecutionTrace,
+    FabricStatus,
+    MirrorEvalDimension,
     MirrorEvalResult,
     Outcome,
+    PCPRProof,
     PackRunReport,
+    PolicyCondition,
     ProofPacket,
+    VerificationResult,
     Workcell,
+    SCHEMA_EXPORTS,
 )
-from .pack import VerticalPack, PackContext, PackRegistry, get_registry
-from .layers import (
-    ActionRail,
-    CausalCore,
-    CovenantLayer,
-    CoverageGraph,
-    InMemoryActionRail,
-    InMemoryCausalCore,
-    InMemoryCovenantLayer,
-    InMemoryCoverageGraph,
-    InMemoryProofLedger,
-    InMemorySignalMesh,
-    InMemoryStateEngine,
-    ProofLedger,
-    SignalMesh,
-    StateEngine,
-    default_layer_bundle,
-)
-from .proof import (
-    ProofChain,
-    ProofRecord,
-    build_proof_chain,
-    verify_proof_chain,
-)
-from .types import (
-    ENGINE_VERSION,
-    PYTHON_VERTICAL_IDS,
-    SUBSTRATE_REPORTS_ROOT,
+from .pack import (
+    PackRegistry,
+    VerticalPack,
+    get_pack,
+    get_registry,
+    list_packs,
+    register_pack,
 )
 
 __all__ = [
-    "ENGINE_VERSION",
-    "PYTHON_VERTICAL_IDS",
-    "SUBSTRATE_REPORTS_ROOT",
     "ActionBrief",
-    "ActionRail",
+    "ApprovalRequirement",
     "BusinessSignal",
     "BusinessTwin",
-    "CausalCore",
-    "CovenantLayer",
     "CovenantPolicy",
-    "CoverageGraph",
     "ExecutionTrace",
-    "InMemoryActionRail",
-    "InMemoryCausalCore",
-    "InMemoryCovenantLayer",
-    "InMemoryCoverageGraph",
-    "InMemoryProofLedger",
-    "InMemorySignalMesh",
-    "InMemoryStateEngine",
+    "FabricStatus",
+    "MirrorEvalDimension",
     "MirrorEvalResult",
     "Outcome",
-    "PackContext",
+    "PCPRProof",
     "PackRegistry",
     "PackRunReport",
-    "ProofChain",
-    "ProofLedger",
+    "PolicyCondition",
     "ProofPacket",
-    "ProofRecord",
-    "SignalMesh",
-    "StateEngine",
+    "SCHEMA_EXPORTS",
+    "VerificationResult",
     "VerticalPack",
     "Workcell",
-    "build_proof_chain",
-    "default_layer_bundle",
+    "get_pack",
     "get_registry",
-    "verify_proof_chain",
+    "list_packs",
+    "register_pack",
 ]

@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "runId": {
+      "title": "Runid",
+      "type": "string"
+    },
+    "packSlug": {
+      "title": "Packslug",
+      "type": "string"
+    },
+    "engineVersion": {
+      "title": "Engineversion",
+      "type": "string"
+    },
+    "packVersion": {
+      "title": "Packversion",
+      "type": "string"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "inputFingerprint": {
+      "title": "Inputfingerprint",
+      "type": "string"
+    },
+    "entityIds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Entityids",
+      "type": "array"
+    },
+    "reportHash": {
+      "title": "Reporthash",
+      "type": "string"
+    },
+    "chainHash": {
+      "title": "Chainhash",
+      "type": "string"
+    },
+    "previousChainHash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previouschainhash"
+    }
+  },
+  "required": [
+    "runId",
+    "packSlug",
+    "engineVersion",
+    "packVersion",
+    "inputFingerprint",
+    "reportHash",
+    "chainHash"
+  ],
+  "title": "PCPRProof",
+  "type": "object"
+}

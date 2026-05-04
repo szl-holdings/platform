@@ -1,0 +1,124 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "vertical": {
+      "enum": [
+        "lyte-revenue",
+        "vessels-maritime",
+        "terra-real-estate",
+        "aegis-defense",
+        "prism-counsel",
+        "carlota-jo",
+        "alloy-core",
+        "sentra-cyber",
+        "firestorm-ops",
+        "nuro-forge",
+        "meridian-infra",
+        "constellation-graph",
+        "tenax-cyber",
+        "pulse-health",
+        "fincept-finance",
+        "growth-marketing"
+      ],
+      "title": "Vertical",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "in_progress",
+        "achieved",
+        "missed",
+        "blocked"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "owner": {
+      "title": "Owner",
+      "type": "string"
+    },
+    "targetDate": {
+      "title": "Targetdate",
+      "type": "string"
+    },
+    "successMetric": {
+      "title": "Successmetric",
+      "type": "string"
+    },
+    "currentValue": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Currentvalue"
+    },
+    "targetValue": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Targetvalue"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "linkedSignalIds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Linkedsignalids",
+      "type": "array"
+    },
+    "createdAt": {
+      "title": "Createdat",
+      "type": "string"
+    },
+    "updatedAt": {
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description",
+    "vertical",
+    "status",
+    "owner",
+    "targetDate",
+    "successMetric"
+  ],
+  "title": "Outcome",
+  "type": "object"
+}

@@ -1,0 +1,104 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "vertical": {
+      "anyOf": [
+        {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "global",
+          "type": "string"
+        }
+      ],
+      "title": "Vertical"
+    },
+    "enforcement": {
+      "enum": [
+        "block",
+        "warn",
+        "log",
+        "require_approval"
+      ],
+      "title": "Enforcement",
+      "type": "string"
+    },
+    "conditions": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Conditions",
+      "type": "array"
+    },
+    "approvalRequirements": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approvalrequirements"
+    },
+    "active": {
+      "default": true,
+      "title": "Active",
+      "type": "boolean"
+    },
+    "version": {
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "createdAt": {
+      "title": "Createdat",
+      "type": "string"
+    },
+    "updatedAt": {
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "vertical",
+    "enforcement"
+  ],
+  "title": "CovenantPolicy",
+  "type": "object"
+}

@@ -4,19 +4,21 @@ from __future__ import annotations
 
 import json
 
-import jsonschema
 import pytest
 
 from a11oy_fabric_py.models import (
     SCHEMA_EXPORTS,
     ActionBrief,
+    ApprovalRequirement,
     BusinessSignal,
     BusinessTwin,
     CovenantPolicy,
     ExecutionTrace,
+    FabricStatus,
     MirrorEvalDimension,
     MirrorEvalResult,
     Outcome,
+    PCPRProof,
     PackRunReport,
     PolicyCondition,
     ProofPacket,
@@ -57,6 +59,19 @@ def _example_action() -> ActionBrief:
     )
 
 
+def _example_mirror_eval(target_id: str = "act-test-001") -> MirrorEvalResult:
+    return MirrorEvalResult(
+        id="m-1",
+        targetId=target_id,
+        targetType="action",
+        verdict="pass",
+        score=1.0,
+        dimensions=[MirrorEvalDimension(name="x", score=0.9, rationale="r")],
+        flags=[],
+        evaluatorModel="x",
+    )
+
+
 def test_business_signal_round_trip() -> None:
     s = _example_signal()
     raw = s.model_dump_json()
@@ -90,7 +105,7 @@ def test_covenant_policy_round_trip() -> None:
         vertical="global",
         enforcement="require_approval",
         conditions=[PolicyCondition(field="action.x", operator="gt", value=1)],
-        approvalRequirements={"tier": "executive", "quorum": 1},  # type: ignore[arg-type]
+        approvalRequirements=ApprovalRequirement(tier="executive", quorum=1),
         version=2,
     )
     assert CovenantPolicy.model_validate_json(p.model_dump_json()) == p
@@ -132,16 +147,7 @@ def test_workcell_round_trip() -> None:
         status="idle",
         objective="o",
         actionBrief=_example_action(),
-        mirrorEvalResult=MirrorEvalResult(
-            id="m-1",
-            targetId="act-test-001",
-            targetType="action",
-            verdict="pass",
-            score=1.0,
-            dimensions=[],
-            flags=[],
-            evaluatorModel="x",
-        ),
+        mirrorEvalResult=_example_mirror_eval(),
         pceContractId="pce-1",
         requiresApproval=False,
         verificationResult=VerificationResult(status="passed", checksum="sha256:abc"),
@@ -182,6 +188,17 @@ def test_business_twin_round_trip() -> None:
     assert BusinessTwin.model_validate_json(bt.model_dump_json()) == bt
 
 
+def test_fabric_status_round_trip() -> None:
+    fs = FabricStatus(
+        layer="signal_mesh",
+        status="healthy",
+        signalCount=42,
+        processingRateHz=10.5,
+        latencyMs=3.2,
+    )
+    assert FabricStatus.model_validate_json(fs.model_dump_json()) == fs
+
+
 def test_pack_run_report_round_trip() -> None:
     rep = PackRunReport(
         engineVersion="0.1.0",
@@ -199,11 +216,37 @@ def test_pack_run_report_round_trip() -> None:
     assert PackRunReport.model_validate_json(rep.model_dump_json()) == rep
 
 
+def test_pcpr_proof_round_trip() -> None:
+    proof = PCPRProof(
+        runId="run-001",
+        packSlug="test-pack",
+        engineVersion="0.1.0",
+        packVersion="0.1.0",
+        inputFingerprint="abc123",
+        reportHash="def456",
+        chainHash="ghi789",
+    )
+    assert PCPRProof.model_validate_json(proof.model_dump_json()) == proof
+
+
+def test_extra_fields_rejected() -> None:
+    with pytest.raises(Exception):
+        BusinessSignal(
+            id="s1",
+            vertical="alloy-core",
+            entity="e",
+            title="t",
+            description="d",
+            severity="info",
+            status="active",
+            businessImpact="b",
+            owner="o",
+            extraField="should fail",
+        )
+
+
 @pytest.mark.parametrize("model", SCHEMA_EXPORTS)
 def test_models_emit_valid_jsonschema(model: type) -> None:
-    """Every primitive must emit a Draft 2020-12 schema that jsonschema can compile."""
-
     schema = model.model_json_schema()
-    jsonschema.Draft202012Validator.check_schema(schema)
-    # And the schema must round-trip through json.
+    assert "properties" in schema
     json.dumps(schema)

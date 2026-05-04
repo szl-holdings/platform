@@ -1,0 +1,143 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "vertical": {
+      "enum": [
+        "lyte-revenue",
+        "vessels-maritime",
+        "terra-real-estate",
+        "aegis-defense",
+        "prism-counsel",
+        "carlota-jo",
+        "alloy-core",
+        "sentra-cyber",
+        "firestorm-ops",
+        "nuro-forge",
+        "meridian-infra",
+        "constellation-graph",
+        "tenax-cyber",
+        "pulse-health",
+        "fincept-finance",
+        "growth-marketing"
+      ],
+      "title": "Vertical",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "recommended",
+        "pending_approval",
+        "approved",
+        "executing",
+        "completed",
+        "rejected",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "recommendedBy": {
+      "title": "Recommendedby",
+      "type": "string"
+    },
+    "assignedTo": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assignedto"
+    },
+    "priority": {
+      "enum": [
+        "urgent",
+        "high",
+        "normal",
+        "low"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "estimatedImpact": {
+      "title": "Estimatedimpact",
+      "type": "string"
+    },
+    "requiresApproval": {
+      "default": true,
+      "title": "Requiresapproval",
+      "type": "boolean"
+    },
+    "approvalTier": {
+      "default": "operator",
+      "enum": [
+        "auto",
+        "operator",
+        "executive",
+        "board"
+      ],
+      "title": "Approvaltier",
+      "type": "string"
+    },
+    "linkedSignalIds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Linkedsignalids",
+      "type": "array"
+    },
+    "linkedOutcomeIds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Linkedoutcomeids",
+      "type": "array"
+    },
+    "proofPacketId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proofpacketid"
+    },
+    "createdAt": {
+      "title": "Createdat",
+      "type": "string"
+    },
+    "updatedAt": {
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description",
+    "vertical",
+    "status",
+    "recommendedBy",
+    "priority",
+    "estimatedImpact"
+  ],
+  "title": "ActionBrief",
+  "type": "object"
+}

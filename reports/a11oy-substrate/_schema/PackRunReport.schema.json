@@ -1,0 +1,1073 @@
+{
+  "$defs": {
+    "ActionBrief": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "vertical": {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "title": "Vertical",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "recommended",
+            "pending_approval",
+            "approved",
+            "executing",
+            "completed",
+            "rejected",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "recommendedBy": {
+          "title": "Recommendedby",
+          "type": "string"
+        },
+        "assignedTo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assignedto"
+        },
+        "priority": {
+          "enum": [
+            "urgent",
+            "high",
+            "normal",
+            "low"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "estimatedImpact": {
+          "title": "Estimatedimpact",
+          "type": "string"
+        },
+        "requiresApproval": {
+          "default": true,
+          "title": "Requiresapproval",
+          "type": "boolean"
+        },
+        "approvalTier": {
+          "default": "operator",
+          "enum": [
+            "auto",
+            "operator",
+            "executive",
+            "board"
+          ],
+          "title": "Approvaltier",
+          "type": "string"
+        },
+        "linkedSignalIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Linkedsignalids",
+          "type": "array"
+        },
+        "linkedOutcomeIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Linkedoutcomeids",
+          "type": "array"
+        },
+        "proofPacketId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proofpacketid"
+        },
+        "createdAt": {
+          "title": "Createdat",
+          "type": "string"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "vertical",
+        "status",
+        "recommendedBy",
+        "priority",
+        "estimatedImpact"
+      ],
+      "title": "ActionBrief",
+      "type": "object"
+    },
+    "BusinessSignal": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "vertical": {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "title": "Vertical",
+          "type": "string"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "acknowledged",
+            "resolved",
+            "escalated",
+            "suppressed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "businessImpact": {
+          "title": "Businessimpact",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "detectedAt": {
+          "title": "Detectedat",
+          "type": "string"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "vertical",
+        "entity",
+        "title",
+        "description",
+        "severity",
+        "status",
+        "businessImpact",
+        "owner"
+      ],
+      "title": "BusinessSignal",
+      "type": "object"
+    },
+    "BusinessTwin": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "vertical": {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "title": "Vertical",
+          "type": "string"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "entityType": {
+          "title": "Entitytype",
+          "type": "string"
+        },
+        "currentState": {
+          "additionalProperties": true,
+          "title": "Currentstate",
+          "type": "object"
+        },
+        "lastSignalId": {
+          "default": "",
+          "title": "Lastsignalid",
+          "type": "string"
+        },
+        "signalCount": {
+          "default": 0,
+          "title": "Signalcount",
+          "type": "integer"
+        },
+        "activeOutcomes": {
+          "default": 0,
+          "title": "Activeoutcomes",
+          "type": "integer"
+        },
+        "pendingActions": {
+          "default": 0,
+          "title": "Pendingactions",
+          "type": "integer"
+        },
+        "coverageScore": {
+          "default": 0.0,
+          "title": "Coveragescore",
+          "type": "number"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "vertical",
+        "entity",
+        "entityType"
+      ],
+      "title": "BusinessTwin",
+      "type": "object"
+    },
+    "CovenantPolicy": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "vertical": {
+          "anyOf": [
+            {
+              "enum": [
+                "lyte-revenue",
+                "vessels-maritime",
+                "terra-real-estate",
+                "aegis-defense",
+                "prism-counsel",
+                "carlota-jo",
+                "alloy-core",
+                "sentra-cyber",
+                "firestorm-ops",
+                "nuro-forge",
+                "meridian-infra",
+                "constellation-graph",
+                "tenax-cyber",
+                "pulse-health",
+                "fincept-finance",
+                "growth-marketing"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "global",
+              "type": "string"
+            }
+          ],
+          "title": "Vertical"
+        },
+        "enforcement": {
+          "enum": [
+            "block",
+            "warn",
+            "log",
+            "require_approval"
+          ],
+          "title": "Enforcement",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "approvalRequirements": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approvalrequirements"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "createdAt": {
+          "title": "Createdat",
+          "type": "string"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "vertical",
+        "enforcement"
+      ],
+      "title": "CovenantPolicy",
+      "type": "object"
+    },
+    "ExecutionTrace": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workcellId": {
+          "title": "Workcellid",
+          "type": "string"
+        },
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "finalStatus": {
+          "default": "completed",
+          "enum": [
+            "completed",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Finalstatus",
+          "type": "string"
+        },
+        "durationMs": {
+          "default": 0,
+          "title": "Durationms",
+          "type": "integer"
+        },
+        "proofPacketId": {
+          "default": "",
+          "title": "Proofpacketid",
+          "type": "string"
+        },
+        "startedAt": {
+          "title": "Startedat",
+          "type": "string"
+        },
+        "completedAt": {
+          "title": "Completedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workcellId",
+        "runId"
+      ],
+      "title": "ExecutionTrace",
+      "type": "object"
+    },
+    "MirrorEvalResult": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "targetId": {
+          "title": "Targetid",
+          "type": "string"
+        },
+        "targetType": {
+          "enum": [
+            "action",
+            "workcell",
+            "signal"
+          ],
+          "title": "Targettype",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "abstain"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "dimensions": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "flags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Flags",
+          "type": "array"
+        },
+        "evaluatorModel": {
+          "default": "substrate-mirror-v1",
+          "title": "Evaluatormodel",
+          "type": "string"
+        },
+        "evaluatedAt": {
+          "title": "Evaluatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetId",
+        "targetType",
+        "verdict",
+        "score"
+      ],
+      "title": "MirrorEvalResult",
+      "type": "object"
+    },
+    "Outcome": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "vertical": {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "title": "Vertical",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "in_progress",
+            "achieved",
+            "missed",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "targetDate": {
+          "title": "Targetdate",
+          "type": "string"
+        },
+        "successMetric": {
+          "title": "Successmetric",
+          "type": "string"
+        },
+        "currentValue": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currentvalue"
+        },
+        "targetValue": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Targetvalue"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "linkedSignalIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Linkedsignalids",
+          "type": "array"
+        },
+        "createdAt": {
+          "title": "Createdat",
+          "type": "string"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "vertical",
+        "status",
+        "owner",
+        "targetDate",
+        "successMetric"
+      ],
+      "title": "Outcome",
+      "type": "object"
+    },
+    "ProofPacket": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "signal_ingestion",
+            "state_transition",
+            "action_execution",
+            "policy_evaluation",
+            "mirror_eval",
+            "human_approval"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "entityId": {
+          "title": "Entityid",
+          "type": "string"
+        },
+        "entityType": {
+          "enum": [
+            "signal",
+            "action",
+            "outcome",
+            "workcell",
+            "policy"
+          ],
+          "title": "Entitytype",
+          "type": "string"
+        },
+        "hash": {
+          "title": "Hash",
+          "type": "string"
+        },
+        "previousHash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previoushash"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "title": "Payload",
+          "type": "object"
+        },
+        "policyEvaluationId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policyevaluationid"
+        },
+        "approvalRecordId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approvalrecordid"
+        },
+        "witnessedBy": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Witnessedby",
+          "type": "array"
+        },
+        "issuedAt": {
+          "title": "Issuedat",
+          "type": "string"
+        },
+        "vertical": {
+          "anyOf": [
+            {
+              "enum": [
+                "lyte-revenue",
+                "vessels-maritime",
+                "terra-real-estate",
+                "aegis-defense",
+                "prism-counsel",
+                "carlota-jo",
+                "alloy-core",
+                "sentra-cyber",
+                "firestorm-ops",
+                "nuro-forge",
+                "meridian-infra",
+                "constellation-graph",
+                "tenax-cyber",
+                "pulse-health",
+                "fincept-finance",
+                "growth-marketing"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "global",
+              "type": "string"
+            }
+          ],
+          "default": "global",
+          "title": "Vertical"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "entityId",
+        "entityType",
+        "hash"
+      ],
+      "title": "ProofPacket",
+      "type": "object"
+    },
+    "Workcell": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "vertical": {
+          "enum": [
+            "lyte-revenue",
+            "vessels-maritime",
+            "terra-real-estate",
+            "aegis-defense",
+            "prism-counsel",
+            "carlota-jo",
+            "alloy-core",
+            "sentra-cyber",
+            "firestorm-ops",
+            "nuro-forge",
+            "meridian-infra",
+            "constellation-graph",
+            "tenax-cyber",
+            "pulse-health",
+            "fincept-finance",
+            "growth-marketing"
+          ],
+          "title": "Vertical",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "idle",
+            "running",
+            "paused",
+            "error",
+            "completed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "objective": {
+          "title": "Objective",
+          "type": "string"
+        },
+        "signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signals",
+          "type": "array"
+        },
+        "contextPack": {
+          "additionalProperties": true,
+          "title": "Contextpack",
+          "type": "object"
+        },
+        "agentSequence": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Agentsequence",
+          "type": "array"
+        },
+        "actionBrief": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionBrief"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mirrorEvalResult": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MirrorEvalResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pceContractId": {
+          "default": "",
+          "title": "Pcecontractid",
+          "type": "string"
+        },
+        "requiresApproval": {
+          "default": true,
+          "title": "Requiresapproval",
+          "type": "boolean"
+        },
+        "mockExecutionResult": {
+          "additionalProperties": true,
+          "title": "Mockexecutionresult",
+          "type": "object"
+        },
+        "verificationResult": {
+          "additionalProperties": true,
+          "title": "Verificationresult",
+          "type": "object"
+        },
+        "proofPacketId": {
+          "default": "",
+          "title": "Proofpacketid",
+          "type": "string"
+        },
+        "executionTraceId": {
+          "default": "",
+          "title": "Executiontraceid",
+          "type": "string"
+        },
+        "createdAt": {
+          "title": "Createdat",
+          "type": "string"
+        },
+        "updatedAt": {
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "vertical",
+        "status",
+        "objective"
+      ],
+      "title": "Workcell",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "runId": {
+      "title": "Runid",
+      "type": "string"
+    },
+    "packSlug": {
+      "title": "Packslug",
+      "type": "string"
+    },
+    "vertical": {
+      "title": "Vertical",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "demo",
+        "governed",
+        "autonomous",
+        "supervised",
+        "discovery"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "engineVersion": {
+      "title": "Engineversion",
+      "type": "string"
+    },
+    "packVersion": {
+      "title": "Packversion",
+      "type": "string"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/BusinessSignal"
+      },
+      "title": "Signals",
+      "type": "array"
+    },
+    "outcomes": {
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      },
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/ActionBrief"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "policies": {
+      "items": {
+        "$ref": "#/$defs/CovenantPolicy"
+      },
+      "title": "Policies",
+      "type": "array"
+    },
+    "proofPackets": {
+      "items": {
+        "$ref": "#/$defs/ProofPacket"
+      },
+      "title": "Proofpackets",
+      "type": "array"
+    },
+    "twins": {
+      "items": {
+        "$ref": "#/$defs/BusinessTwin"
+      },
+      "title": "Twins",
+      "type": "array"
+    },
+    "workcells": {
+      "items": {
+        "$ref": "#/$defs/Workcell"
+      },
+      "title": "Workcells",
+      "type": "array"
+    },
+    "traces": {
+      "items": {
+        "$ref": "#/$defs/ExecutionTrace"
+      },
+      "title": "Traces",
+      "type": "array"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "runId",
+    "packSlug",
+    "vertical",
+    "mode",
+    "engineVersion",
+    "packVersion"
+  ],
+  "title": "PackRunReport",
+  "type": "object"
+}

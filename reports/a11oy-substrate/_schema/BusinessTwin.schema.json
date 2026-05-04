@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "vertical": {
+      "enum": [
+        "lyte-revenue",
+        "vessels-maritime",
+        "terra-real-estate",
+        "aegis-defense",
+        "prism-counsel",
+        "carlota-jo",
+        "alloy-core",
+        "sentra-cyber",
+        "firestorm-ops",
+        "nuro-forge",
+        "meridian-infra",
+        "constellation-graph",
+        "tenax-cyber",
+        "pulse-health",
+        "fincept-finance",
+        "growth-marketing"
+      ],
+      "title": "Vertical",
+      "type": "string"
+    },
+    "entity": {
+      "title": "Entity",
+      "type": "string"
+    },
+    "entityType": {
+      "title": "Entitytype",
+      "type": "string"
+    },
+    "currentState": {
+      "additionalProperties": true,
+      "title": "Currentstate",
+      "type": "object"
+    },
+    "lastSignalId": {
+      "default": "",
+      "title": "Lastsignalid",
+      "type": "string"
+    },
+    "signalCount": {
+      "default": 0,
+      "title": "Signalcount",
+      "type": "integer"
+    },
+    "activeOutcomes": {
+      "default": 0,
+      "title": "Activeoutcomes",
+      "type": "integer"
+    },
+    "pendingActions": {
+      "default": 0,
+      "title": "Pendingactions",
+      "type": "integer"
+    },
+    "coverageScore": {
+      "default": 0.0,
+      "title": "Coveragescore",
+      "type": "number"
+    },
+    "updatedAt": {
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "vertical",
+    "entity",
+    "entityType"
+  ],
+  "title": "BusinessTwin",
+  "type": "object"
+}

@@ -12,23 +12,48 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .types import (
-    ActionPriority,
-    ActionStatus,
-    ApprovalTier,
-    EntityType,
-    ExecutionMode,
-    FabricLayerName,
-    MirrorEvalVerdict,
-    OutcomeStatus,
-    PolicyEnforcement,
-    ProofPacketKind,
-    SignalSeverity,
-    SignalStatus,
-    Vertical,
-    VerticalOrGlobal,
-    WorkcellStatus,
-)
+Vertical = Literal[
+    "lyte-revenue",
+    "vessels-maritime",
+    "terra-real-estate",
+    "aegis-defense",
+    "prism-counsel",
+    "carlota-jo",
+    "alloy-core",
+    "sentra-cyber",
+    "firestorm-ops",
+    "nuro-forge",
+    "meridian-infra",
+    "constellation-graph",
+    "tenax-cyber",
+    "pulse-health",
+    "fincept-finance",
+    "growth-marketing",
+]
+
+VerticalOrGlobal = Vertical | Literal["global"]
+ActionPriority = Literal["urgent", "high", "normal", "low"]
+ApprovalTier = Literal["auto", "operator", "executive", "board"]
+SignalSeverity = Literal["critical", "high", "medium", "low", "info"]
+SignalStatus = Literal["active", "acknowledged", "resolved", "escalated", "suppressed"]
+OutcomeStatus = Literal["pending", "in_progress", "achieved", "missed", "blocked"]
+ActionStatus = Literal[
+    "recommended", "pending_approval", "approved", "executing",
+    "completed", "rejected", "failed",
+]
+PolicyEnforcement = Literal["block", "warn", "log", "require_approval"]
+WorkcellStatus = Literal["idle", "running", "paused", "error", "completed"]
+ProofPacketKind = Literal[
+    "signal_ingestion", "state_transition", "action_execution",
+    "policy_evaluation", "mirror_eval", "human_approval",
+]
+EntityType = Literal["signal", "action", "outcome", "workcell", "policy"]
+FabricLayerName = Literal[
+    "coverage_graph", "signal_mesh", "state_engine", "causal_core",
+    "action_rail", "covenant_layer", "proof_ledger",
+]
+MirrorEvalVerdict = Literal["pass", "fail", "warn", "abstain"]
+ExecutionMode = Literal["demo", "governed", "autonomous", "supervised", "discovery"]
 
 
 def _utcnow() -> str:
@@ -43,7 +68,43 @@ class _FabricModel(BaseModel):
     )
 
 
-# ── Core primitives ─────────────────────────────────────────────────────────
+class PolicyCondition(_FabricModel):
+    field: str
+    operator: Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"]
+    value: Any
+
+
+class ApprovalRequirement(_FabricModel):
+    tier: Literal["operator", "executive", "board"]
+    quorum: int | None = None
+
+
+class MirrorEvalDimension(_FabricModel):
+    name: str
+    score: float
+    rationale: str
+
+
+class AgentSequenceStep(_FabricModel):
+    agentId: str
+    role: str
+    action: str
+
+
+class VerificationResult(_FabricModel):
+    status: Literal["passed", "failed"]
+    checksum: str
+
+
+class TraceStep(_FabricModel):
+    stepId: str
+    name: str
+    tool: str
+    input: dict[str, Any] = Field(default_factory=dict)
+    output: dict[str, Any] = Field(default_factory=dict)
+    durationMs: int
+    status: Literal["ok", "error", "skipped"]
+    timestamp: str
 
 
 class BusinessSignal(_FabricModel):
@@ -99,17 +160,6 @@ class ActionBrief(_FabricModel):
     updatedAt: str = Field(default_factory=_utcnow)
 
 
-class PolicyCondition(_FabricModel):
-    field: str
-    operator: Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"]
-    value: Any
-
-
-class ApprovalRequirement(_FabricModel):
-    tier: Literal["operator", "executive", "board"]
-    quorum: int | None = None
-
-
 class CovenantPolicy(_FabricModel):
     id: str
     name: str
@@ -139,12 +189,6 @@ class ProofPacket(_FabricModel):
     vertical: VerticalOrGlobal
 
 
-class MirrorEvalDimension(_FabricModel):
-    name: str
-    score: float
-    rationale: str
-
-
 class MirrorEvalResult(_FabricModel):
     id: str
     targetId: str
@@ -153,19 +197,8 @@ class MirrorEvalResult(_FabricModel):
     score: float
     dimensions: list[MirrorEvalDimension] = Field(default_factory=list)
     flags: list[str] = Field(default_factory=list)
-    evaluatorModel: str
+    evaluatorModel: str = "substrate-mirror-v1"
     evaluatedAt: str = Field(default_factory=_utcnow)
-
-
-class AgentSequenceStep(_FabricModel):
-    agentId: str
-    role: str
-    action: str
-
-
-class VerificationResult(_FabricModel):
-    status: Literal["passed", "failed"]
-    checksum: str
 
 
 class Workcell(_FabricModel):
@@ -187,17 +220,6 @@ class Workcell(_FabricModel):
     executionTraceId: str
     createdAt: str = Field(default_factory=_utcnow)
     updatedAt: str = Field(default_factory=_utcnow)
-
-
-class TraceStep(_FabricModel):
-    stepId: str
-    name: str
-    tool: str
-    input: dict[str, Any] = Field(default_factory=dict)
-    output: dict[str, Any] = Field(default_factory=dict)
-    durationMs: int
-    status: Literal["ok", "error", "skipped"]
-    timestamp: str
 
 
 class ExecutionTrace(_FabricModel):
@@ -235,15 +257,7 @@ class FabricStatus(_FabricModel):
     lastHeartbeat: str = Field(default_factory=_utcnow)
 
 
-# ── Pack-run wrapper ────────────────────────────────────────────────────────
-# This is the JSON artifact emitted to reports/a11oy-substrate/<pack-slug>/.
-# Downstream consumers (TS fabric, future a11oy UI, external tooling) typecheck
-# against the JSON Schema for this model.
-
-
 class PackRunReport(_FabricModel):
-    """Top-level deterministic JSON artifact for a single pack run."""
-
     schemaVersion: Literal["1.0"] = "1.0"
     engineVersion: str
     packSlug: str
@@ -251,21 +265,35 @@ class PackRunReport(_FabricModel):
     vertical: Vertical
     runId: str
     mode: ExecutionMode
-    startedAt: str
-    completedAt: str
-    inputFingerprint: str
+    timestamp: str = Field(default_factory=_utcnow)
+    startedAt: str = Field(default_factory=_utcnow)
+    completedAt: str = Field(default_factory=_utcnow)
+    inputFingerprint: str = ""
     signals: list[BusinessSignal] = Field(default_factory=list)
     outcomes: list[Outcome] = Field(default_factory=list)
     actions: list[ActionBrief] = Field(default_factory=list)
     policies: list[CovenantPolicy] = Field(default_factory=list)
     twins: list[BusinessTwin] = Field(default_factory=list)
     proofPackets: list[ProofPacket] = Field(default_factory=list)
+    workcells: list[Workcell] = Field(default_factory=list)
+    traces: list[ExecutionTrace] = Field(default_factory=list)
     fabricStatus: list[FabricStatus] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-# Convenience tuple of every primitive whose JSON Schema is exported under
-# reports/a11oy-substrate/_schema/.
+class PCPRProof(_FabricModel):
+    runId: str
+    packSlug: str
+    engineVersion: str
+    packVersion: str
+    timestamp: str = Field(default_factory=_utcnow)
+    inputFingerprint: str
+    entityIds: list[str] = Field(default_factory=list)
+    reportHash: str
+    chainHash: str
+    previousChainHash: str | None = None
+
+
 SCHEMA_EXPORTS: tuple[type[_FabricModel], ...] = (
     BusinessSignal,
     Outcome,
@@ -278,4 +306,5 @@ SCHEMA_EXPORTS: tuple[type[_FabricModel], ...] = (
     BusinessTwin,
     FabricStatus,
     PackRunReport,
+    PCPRProof,
 )
