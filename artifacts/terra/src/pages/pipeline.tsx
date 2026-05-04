@@ -1,8 +1,10 @@
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import { ArrowRight, Building2, Clock, MapPin, TrendingUp, User, Zap } from 'lucide-react';
 import { A11oySignalMesh } from '@/components/a11oy-signal-mesh';
-import { deals } from '@/data/portfolio';
+import { deals as staticDeals } from '@/data/portfolio';
+import { api } from '@/lib/api';
 
 const stages = [
   {
@@ -33,24 +35,86 @@ function formatCurrency(n: number) {
   return `$${(n / 1e3).toFixed(0)}K`;
 }
 
-const activeDeals = deals.filter((d) => d.stage !== 'closed');
-const totalPipelineValue = activeDeals.reduce((sum, d) => sum + d.value, 0);
-const weightedValue = activeDeals.reduce((sum, d) => sum + d.value * (d.probability / 100), 0);
-const avgDaysInStage = activeDeals.length
-  ? Math.round(activeDeals.reduce((s, d) => s + d.daysInStage, 0) / activeDeals.length)
-  : 0;
-const avgProbability = activeDeals.length
-  ? Math.round(activeDeals.reduce((s, d) => s + d.probability, 0) / activeDeals.length)
-  : 0;
+interface PipelineDeal {
+  id: string;
+  name: string;
+  type: 'acquisition' | 'disposition';
+  stage: string;
+  value: number;
+  capRate: number;
+  property_type: string;
+  city: string;
+  state: string;
+  contact: string;
+  daysInStage: number;
+  probability: number;
+}
 
-const stageVelocity = stages.map((s) => {
-  const sd = deals.filter((d) => d.stage === s.key);
-  const avg = sd.length ? Math.round(sd.reduce((a, d) => a + d.daysInStage, 0) / sd.length) : 0;
-  const val = sd.reduce((a, d) => a + d.value, 0);
-  return { ...s, count: sd.length, avgDays: avg, totalValue: val };
-});
+const CRM_TO_PIPELINE_STAGE: Record<string, string> = {
+  lead: 'sourcing',
+  qualified: 'sourcing',
+  showing: 'sourcing',
+  offer: 'underwriting',
+  negotiation: 'underwriting',
+  accepted: 'due-diligence',
+  inspection: 'due-diligence',
+  financing: 'due-diligence',
+  'under-contract': 'closing',
+  'clear-to-close': 'closing',
+  closed: 'closed',
+};
+
+function normalizeStageToPipeline(raw: string): string {
+  const key = raw.toLowerCase().trim();
+  return CRM_TO_PIPELINE_STAGE[key] ?? key;
+}
+
+function mapApiDealToLocal(d: Record<string, unknown>): PipelineDeal {
+  const price = typeof d.price === 'number' ? d.price : (typeof d.askingPrice === 'number' ? d.askingPrice : 0);
+  return {
+    id: String(d.id ?? ''),
+    name: String(d.address ?? 'Unknown Property'),
+    type: (String(d.type ?? 'acquisition') as 'acquisition' | 'disposition'),
+    stage: normalizeStageToPipeline(String(d.stage ?? 'sourcing')),
+    value: price,
+    capRate: 5.5,
+    property_type: String(d.type ?? 'Mixed-Use'),
+    city: String(d.borough ?? d.county ?? ''),
+    state: d.zipCode ? 'NY' : '',
+    contact: String(d.clientName ?? d.ownerName ?? '—'),
+    daysInStage: typeof d.daysInStage === 'number' ? d.daysInStage : 0,
+    probability: typeof d.probability === 'number' ? d.probability : 50,
+  };
+}
 
 export default function PipelinePage() {
+  const { data: apiData, isLoading, isError } = useStandardQuery({
+    queryKey: ['terra-pipeline-deals'],
+    queryFn: () => api.deals.list(),
+    staleTime: 30_000,
+  });
+
+  const apiReachable = !isLoading && !isError && apiData;
+  const apiDeals = apiReachable ? (apiData.deals ?? []).map(mapApiDealToLocal) : null;
+  const deals: PipelineDeal[] = apiDeals ?? staticDeals;
+
+  const activeDeals = deals.filter((d) => d.stage !== 'closed');
+  const totalPipelineValue = activeDeals.reduce((sum, d) => sum + d.value, 0);
+  const weightedValue = activeDeals.reduce((sum, d) => sum + d.value * (d.probability / 100), 0);
+  const avgDaysInStage = activeDeals.length
+    ? Math.round(activeDeals.reduce((s, d) => s + d.daysInStage, 0) / activeDeals.length)
+    : 0;
+  const avgProbability = activeDeals.length
+    ? Math.round(activeDeals.reduce((s, d) => s + d.probability, 0) / activeDeals.length)
+    : 0;
+
+  const stageVelocity = stages.map((s) => {
+    const sd = deals.filter((d) => d.stage === s.key);
+    const avg = sd.length ? Math.round(sd.reduce((a, d) => a + d.daysInStage, 0) / sd.length) : 0;
+    const val = sd.reduce((a, d) => a + d.value, 0);
+    return { ...s, count: sd.length, avgDays: avg, totalValue: val };
+  });
+
   return (
     <div className="p-6 space-y-6 overflow-auto">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -64,7 +128,7 @@ export default function PipelinePage() {
               border: '1px solid rgba(184,148,60,0.15)',
             }}
           >
-            CoStar-Grade Analytics
+            {apiReachable ? 'Live Data' : 'CoStar-Grade Analytics'}
           </span>
         </div>
         <p className="text-sm text-terra-text-secondary mt-1">
@@ -189,7 +253,7 @@ export default function PipelinePage() {
               border: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            CoStar-grade
+            {apiReachable ? 'live' : 'CoStar-grade'}
           </span>
         </div>
         <div className="grid grid-cols-5 gap-3">
@@ -290,7 +354,7 @@ export default function PipelinePage() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-3 h-3 text-terra-text-muted" />
-                        {deal.city}, {deal.state}
+                        {deal.city}{deal.state ? `, ${deal.state}` : ''}
                       </div>
                       <div className="flex items-center gap-1.5">
                         <User className="w-3 h-3 text-terra-text-muted" />

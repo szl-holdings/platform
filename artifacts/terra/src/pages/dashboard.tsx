@@ -28,8 +28,8 @@ import { Link } from 'wouter';
 import { A11oySignalMesh } from '@/components/a11oy-signal-mesh';
 import { TerraSiblingMeshPanel } from '@/components/sibling-mesh';
 import { AgentAvatar, RiskBadge, StageBadge } from '@/components/brokerage-ui';
-import { agents } from '@/data/brokerage';
-import { properties } from '@/data/portfolio';
+import { agents as staticAgents } from '@/data/brokerage';
+import { properties as staticProperties, type Property } from '@/data/portfolio';
 import { useMapboxToken } from '@/hooks/use-mapbox-token';
 import { metricDisplay, TERRA_PORTFOLIO_AUM } from '@/lib/claims';
 
@@ -199,7 +199,23 @@ export default function TerraIntelligence() {
     refetchInterval: 120_000,
   });
 
-  const dataMode: 'live' | 'demo' = !dealsError && dealsData?.dataMode === 'live' ? 'live' : 'demo';
+  const { data: propsData, isError: propsError } = useStandardQuery({
+    queryKey: ['terra-dashboard-properties'],
+    queryFn: () =>
+      fetch(`${API}/terra/properties?limit=50`)
+        .then((r) => {
+          if (!r.ok) throw new Error(`API error ${r.status}`);
+          return r.json();
+        })
+        .then((d) => d.data ?? d),
+    staleTime: 120_000,
+    retry: 1,
+  });
+
+  const dealsApiOk = !dealsError && dealsData !== undefined;
+  const propsApiOk = !propsError && propsData !== undefined;
+  const apiReachable = dealsApiOk || propsApiOk;
+  const dataMode: 'live' | 'demo' = apiReachable ? 'live' : 'demo';
 
   const liveDeals: Record<string, unknown>[] =
     Array.isArray(dealsData?.deals) && dealsData.deals.length > 0 ? dealsData.deals : [];
@@ -263,6 +279,37 @@ export default function TerraIntelligence() {
   const topDeals = liveDeals
     .sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0))
     .slice(0, 5);
+  const agents = staticAgents;
+  const coerceNum = (v: unknown): number => {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (typeof v === 'string') { const n = Number(v); return isFinite(n) ? n : 0; }
+    return 0;
+  };
+  const apiProperties: Property[] | null = Array.isArray(propsData?.properties) && propsData.properties.length > 0
+    ? propsData.properties.map((p: Record<string, unknown>) => ({
+        id: String(p.id ?? ''),
+        name: String(p.address ?? p.name ?? ''),
+        address: String(p.address ?? ''),
+        city: String(p.city ?? ''),
+        state: String(p.state ?? ''),
+        zipCode: String(p.zipCode ?? p.zip_code ?? ''),
+        type: String(p.propertyType ?? p.property_type ?? 'mixed-use'),
+        value: coerceNum(p.assessedValue ?? p.assessed_value ?? p.value),
+        units: coerceNum(p.units),
+        sqft: coerceNum(p.sqft),
+        yearBuilt: coerceNum(p.yearBuilt ?? p.year_built) || null,
+        latitude: coerceNum(p.latitude) || null,
+        longitude: coerceNum(p.longitude) || null,
+        occupancy: coerceNum(p.occupancy ?? p.occupancyRate ?? p.occupancy_rate),
+        monthlyRevenue: 0,
+        annualNOI: 0,
+        capRate: 0,
+        purchasePrice: 0,
+        purchaseDate: '',
+        status: 'performing' as const,
+      }))
+    : null;
+  const properties = apiProperties ?? staticProperties;
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
   const { token: mapToken, isLoading: mapTokenLoading } = useMapboxToken();
   const [showMap, setShowMap] = useState(false);

@@ -285,7 +285,7 @@ router.get(
   authMiddleware({ required: false }),
   async (_req, res) => {
     try {
-      const sectors = [
+      const sectorBenchmarks = [
         {
           sector: 'Industrial',
           ytdReturn: 18.4,
@@ -341,8 +341,64 @@ router.get(
           topMarkets: ['Florida', 'Texas', 'Southeast'],
         },
       ];
+
+      let dbOverlay: Record<string, { count: number; avgCapRate: number | null; avgVacancy: number | null }> = {};
+      try {
+        const rows = await db
+          .select({
+            propertyType: terraCommercialPropertiesTable.propertyType,
+            count: sql<number>`COUNT(*)::int`,
+            avgCapRate: sql<string | null>`AVG(CAST(cap_rate AS NUMERIC))`,
+            avgVacancy: sql<string | null>`AVG(CAST(market_vacancy_rate AS NUMERIC))`,
+          })
+          .from(terraCommercialPropertiesTable)
+          .where(eq(terraCommercialPropertiesTable.isActive, true))
+          .groupBy(terraCommercialPropertiesTable.propertyType);
+
+        for (const r of rows) {
+          if (r.propertyType) {
+            dbOverlay[r.propertyType.toLowerCase()] = {
+              count: r.count,
+              avgCapRate: r.avgCapRate ? Number(Number(r.avgCapRate).toFixed(2)) : null,
+              avgVacancy: r.avgVacancy ? Number(Number(r.avgVacancy).toFixed(2)) : null,
+            };
+          }
+        }
+      } catch {
+        dbOverlay = {};
+      }
+
+      const sectorTypeMap: Record<string, string[]> = {
+        'Industrial': ['industrial', 'warehouse', 'logistics'],
+        'Multifamily': ['multifamily', 'apartment', 'residential'],
+        'Retail (Grocery-Anchored)': ['retail', 'grocery'],
+        'Office (CBD)': ['office'],
+        'Data Centers': ['data center', 'datacenter'],
+        'Self-Storage': ['self-storage', 'storage'],
+      };
+
+      const sectors = sectorBenchmarks.map((s) => {
+        const typeKeys = sectorTypeMap[s.sector] ?? [];
+        const matched = typeKeys.flatMap((k) => dbOverlay[k] ? [dbOverlay[k]] : []);
+        const totalCount = matched.reduce((sum, m) => sum + m.count, 0);
+        const dbCapRates = matched.filter((m) => m.avgCapRate !== null).map((m) => m.avgCapRate!);
+        const dbVacancies = matched.filter((m) => m.avgVacancy !== null).map((m) => m.avgVacancy!);
+
+        return {
+          ...s,
+          portfolioProperties: totalCount || undefined,
+          portfolioAvgCapRate: dbCapRates.length
+            ? Number((dbCapRates.reduce((a, b) => a + b, 0) / dbCapRates.length).toFixed(2))
+            : undefined,
+          portfolioAvgVacancy: dbVacancies.length
+            ? Number((dbVacancies.reduce((a, b) => a + b, 0) / dbVacancies.length).toFixed(2))
+            : undefined,
+        };
+      });
+
       sendSuccess(res, {
-        source: 'Terra Market Analytics — REIT + Census + BLS Composite',
+        source: 'Terra Market Analytics — REIT + Census + BLS Composite' +
+          (Object.keys(dbOverlay).length > 0 ? ' + Portfolio DB' : ''),
         sectors,
         generatedAt: new Date().toISOString(),
       });

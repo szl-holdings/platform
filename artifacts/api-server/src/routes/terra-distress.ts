@@ -145,12 +145,14 @@ router.get(
         },
         conversionActions: {
           convertToLead: {
-            endpoint: '/api/crm/leads',
-            payload: { source: 'distress-engine', propertyId: property.id },
+            endpoint: '/api/terra/convert/distress-to-lead',
+            payload: { propertyId: property.externalId ?? String(property.id) },
+            description: 'Create a CRM lead from this distress property',
           },
           convertToDeal: {
-            endpoint: '/api/pipeline/deals',
-            payload: { source: 'distress-engine', propertyId: property.id },
+            endpoint: '/api/terra/convert/lead-to-deal',
+            requiresLeadId: true,
+            description: 'Promote an existing lead to a deal (requires convertToLead first)',
           },
           assignAgent: { endpoint: '/api/lyte/assignments', payload: { propertyId: property.id } },
           triggerOutreach: {

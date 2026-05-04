@@ -1,3 +1,4 @@
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { color as dsColor } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion as m } from 'framer-motion';
@@ -6,6 +7,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { api } from '../lib/api';
 
 interface Lease {
   id: string;
@@ -250,7 +252,30 @@ const CREDIT_COLORS: Record<string, string> = {
 export default function RentRollPage() {
   const [uploading, setUploading] = useState(false);
   const [sortBy, setSortBy] = useState<'tenant' | 'gap' | 'expiry'>('gap');
-  const prop = PROPERTIES[0];
+
+  const { data: apiData, isLoading, isError } = useStandardQuery({
+    queryKey: ['terra-rent-roll'],
+    queryFn: () => api.rentRoll.list(),
+    staleTime: 30_000,
+  });
+
+  const apiReachable = !isLoading && !isError && apiData;
+  const allProperties = apiReachable && apiData.properties.length > 0
+    ? apiData.properties.map((p) => ({
+        ...p,
+        totalSqft: p.leases.reduce((s, l) => s + l.sqft, 0),
+        occupiedSqft: p.leases.filter((l) => l.status !== 'vacant').reduce((s, l) => s + l.sqft, 0),
+        leases: p.leases.map((l) => ({
+          ...l,
+          rentPerSqft: l.sqft > 0 ? l.monthlyRent / l.sqft : 0,
+          marketRent: l.sqft > 0 ? (l.monthlyRent / l.sqft) * 1.05 : 0,
+          leaseStart: '',
+          escalation: '',
+          securityDeposit: 0,
+        })),
+      }))
+    : PROPERTIES;
+  const prop = allProperties[0];
 
   const occupancyRate = Math.round((prop.occupiedUnits / prop.totalUnits) * 100);
   const wale = useMemo(() => {

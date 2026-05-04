@@ -751,6 +751,114 @@ export const api = {
         '/terra/sourcing/adapters',
       ),
   },
+  deals: {
+    list: (params?: { stage?: string; q?: string }) => {
+      const qs = new URLSearchParams();
+      if (params?.stage) qs.set('stage', params.stage);
+      if (params?.q) qs.set('q', params.q);
+      const query = qs.toString();
+      return apiFetch<{
+        count: number;
+        fetchedAt: string;
+        dataMode: string;
+        deals: Array<{
+          id: string;
+          address: string;
+          borough: string | null;
+          county: string | null;
+          zipCode: string | null;
+          stage: string;
+          type: string;
+          price: number | null;
+          askingPrice: number | null;
+          arv: number | null;
+          probability: number | null;
+          riskLevel: string | null;
+          ownerName: string | null;
+          clientName: string | null;
+          daysInStage: number;
+          estimatedCloseDate: string | null;
+          nextAction: string | null;
+          createdAt: string;
+        }>;
+      }>(`/terra/pipeline/deals${query ? `?${query}` : ''}`);
+    },
+  },
+  leads: {
+    list: (params?: { stage?: string; source?: string; q?: string }) => {
+      const qs = new URLSearchParams();
+      if (params?.stage) qs.set('stage', params.stage);
+      if (params?.source) qs.set('source', params.source);
+      if (params?.q) qs.set('q', params.q);
+      const query = qs.toString();
+      return apiFetch<{
+        count: number;
+        fetchedAt: string;
+        dataMode: string;
+        leads: Array<{
+          id: string;
+          firstName: string;
+          lastName: string;
+          email: string | null;
+          phone: string | null;
+          type: string;
+          source: string;
+          stage: string;
+          score: number;
+          conversionProbability: number;
+          ownerName: string | null;
+          lastContact: string | null;
+          nextFollowUp: string | null;
+          nextAction: string | null;
+          tags: string[];
+          notes: string | null;
+          createdAt: string;
+        }>;
+      }>(`/terra/crm/leads${query ? `?${query}` : ''}`);
+    },
+  },
+  rentRoll: {
+    list: () =>
+      apiFetch<{ properties: Array<{
+        id: string;
+        name: string;
+        address: string;
+        totalUnits: number;
+        occupiedUnits: number;
+        grossPotentialRent: number;
+        effectiveGrossIncome: number;
+        vacancyLoss: number;
+        leases: Array<{
+          id: string;
+          tenant: string;
+          suite: string;
+          sqft: number;
+          monthlyRent: number;
+          leaseEnd: string;
+          status: 'active' | 'expiring' | 'month-to-month' | 'vacant';
+          creditScore: 'A' | 'B' | 'C' | 'D';
+          paymentHistory: string;
+          markToMarketGap: number;
+        }>;
+      }>; dataMode: string }>('/terra/rent-roll'),
+  },
+  properties: {
+    list: (limit = 50) =>
+      apiFetch<{ properties: Array<{
+        id: number;
+        address: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        propertyType: string;
+        value: number | null;
+        units: number | null;
+        sqft: number | null;
+        yearBuilt: number | null;
+        latitude: number | null;
+        longitude: number | null;
+      }>; count: number }>(`/terra/properties?limit=${limit}`),
+  },
   portfolio: {
     climateRisk: () =>
       apiFetch<{ properties: PortfolioClimateProperty[]; dataMode: string; generatedAt: string }>(

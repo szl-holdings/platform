@@ -74,6 +74,7 @@ import {
 } from './routes/intelligence/index.js';
 import { scheduleSentraFeedRefresh } from './routes/sentra-threat-feeds.js';
 import { seedTerraPortfolioModules } from './routes/terra-portfolio-intel';
+import { seedTerraDemo, seedTerraOperatingModules } from './lib/terra-seed';
 import { registerAllPrismJobHandlers } from './services/prism-job-handlers';
 import { startPrismJobPoller } from './services/prism-queue';
 import './lib/cross-app-notification-relay.js';
@@ -799,6 +800,8 @@ export async function bootstrap(
         { name: 'seedLyteActions', fn: seedLyteActions },
         { name: 'seedLyteSurfaces', fn: seedLyteSurfaces },
         { name: 'seedTerraPortfolioModules', fn: seedTerraPortfolioModules },
+        { name: 'seedTerraDemo', fn: seedTerraDemo },
+        { name: 'seedTerraOperatingModules', fn: seedTerraOperatingModules },
         { name: 'seedBillingData', fn: seedBillingData },
         { name: 'seedA11oyCognitive', fn: seedA11oyCognitive },
       );

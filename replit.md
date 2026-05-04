@@ -113,6 +113,31 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Maritime Data:** MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather
 - **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar
 - **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
+
+## Terra — Real Estate Intelligence
+Terra is the real estate intelligence platform at `/terra/`.
+
+**Data Architecture:**
+- Core brokerage data seeded via `seedTerraDemo()` in boot chain (brokerages, agents, properties, listings, inquiries, transactions)
+- Operating module seed data via independent `seedTerraOperatingModules()` boot task (6 leases, 3 tax appeals, 3 tenant applications, 2 1031 exchanges, 2 pro-forma projects, 2 construction projects, 4 deals, 3 leads) — runs independently with per-table idempotent guards
+- NYC Open Data ingestion pipeline populates `terra_distress_properties` (5500+ records) and `terra_distress_alerts` from ACRIS, HPD, DOB, 311, and tax lien sale datasets
+- Market intelligence endpoint (`/terra/market-intelligence`) uses real DB aggregates via `computeDbMarketSignals()`
+- Sector performance endpoint blends REIT benchmark constants with portfolio DB aggregates from `terra_commercial_properties`
+
+**API Endpoints (all in `artifacts/api-server/src/routes/`):**
+- CRM: `/terra/pipeline/deals`, `/terra/crm/leads`, `/terra/convert/distress-to-lead`, `/terra/convert/lead-to-deal` (terra-crm/)
+- Operating modules: `/terra/leases`, `/terra/tax-appeals`, `/terra/tenant-applications`, `/terra/exchanges-1031`, `/terra/pro-forma-projects`, `/terra/construction-projects`, `/terra/waterfall-structures`, `/terra/rent-roll` (terra-modules.ts)
+- Market: `/terra/market-intelligence`, `/terra/sector-performance` (terra.ts)
+- Distress: `/terra/distress/*` (terra-distress.ts)
+- Sourcing: `/terra/sourcing/*` (terra-sourcing.ts)
+- Properties: `/terra/properties` (terra.ts)
+- Broker: `/terra/broker/listings`, `/terra/broker/inquiries` (terra-broker.ts)
+
+**Frontend → API Wiring (all in `artifacts/terra/src/pages/`):**
+- Pages wired to live API with static fallback on transport error: dashboard (deals, alerts, properties), pipeline (deals with CRM→pipeline stage mapping), lease-abstraction, rent-roll, tax-appeal, tenant-screening, market (market-intelligence + mortgage + BLS), deals, leads, distress-engine, investor-mode
+- Pages using static reference data: analytics, portfolio-performance, property-map-page, alerts-page, lender-report, property-detail (these display portfolio summaries and reference visualizations)
+- Dashboard agents sidebar uses static brokerage reference data (no `/terra/agents` API endpoint exists)
+
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
 - **Government Data:** NYSTEC Pre-briefing, Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
