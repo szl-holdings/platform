@@ -1,4 +1,4 @@
-import { type IRouter, type Request, type Response, Router } from 'express';
+import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { randomUUID, createHash } from 'node:crypto';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';
@@ -112,6 +112,211 @@ const proofPackets: GatewayProofPacket[] = [];
 const rateLimitWindows = new Map<string, { windowStart: number; count: number }>();
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
+
+function extractBearerKey(req: Request): string | null {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7).trim() || null;
+  }
+  return null;
+}
+
+export function validateGatewayApiKey(rawKey: string): GatewayApiKey | null {
+  const keyHash = createHash('sha256').update(rawKey).digest('hex');
+  return [...apiKeys.values()].find(k => k.keyHash === keyHash && !k.revokedAt) ?? null;
+}
+
+export function gatewayApiKeyGate(req: Request, res: Response, next: NextFunction): void {
+  const bearerKey = extractBearerKey(req);
+  if (!bearerKey) {
+    next();
+    return;
+  }
+  const matchedKey = validateGatewayApiKey(bearerKey);
+  if (!matchedKey) {
+    res.status(401).json({ error: 'Invalid or revoked gateway API key' });
+    return;
+  }
+  const rl = checkRateLimit(matchedKey.id, matchedKey.rateLimit);
+  if (!rl.allowed) {
+    const rateLimitedCall: GatewayToolCall = {
+      callId: `gc-call-${randomUUID().slice(0, 8)}`,
+      connectionId: 'rate-limited',
+      agentName: req.headers['x-agent-name'] as string ?? 'unknown',
+      toolName: 'mcp-transport',
+      parameters: {},
+      riskLevel: 'low',
+      riskClasses: [],
+      disposition: 'rate_limited',
+      approvalId: null,
+      proofPacketId: null,
+      resultHash: null,
+      latencyMs: 0,
+      timestamp: new Date().toISOString(),
+    };
+    const rateLimitProof = generateGatewayProof(rateLimitedCall, {
+      connectionId: 'rate-limited',
+      agentName: rateLimitedCall.agentName,
+      agentType: 'generic',
+      apiKeyId: matchedKey.id,
+      tenantId: matchedKey.tenantId,
+      connectedAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      status: 'active',
+      toolCallCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0,
+      proofPacketCount: 0,
+    });
+    rateLimitedCall.proofPacketId = rateLimitProof.packetId;
+    toolCalls.push(rateLimitedCall);
+    res.status(429).json({
+      error: 'Rate limit exceeded',
+      remaining: rl.remaining,
+      resetAt: new Date(rl.resetAt).toISOString(),
+    });
+    return;
+  }
+  matchedKey.lastUsedAt = new Date().toISOString();
+  req.gatewayApiKey = matchedKey;
+
+  let existingConn = [...connections.values()].find(
+    c => c.apiKeyId === matchedKey.id && c.status !== 'disconnected',
+  );
+  if (!existingConn) {
+    existingConn = {
+      connectionId: `gc-auto-${randomUUID().slice(0, 8)}`,
+      agentName: req.headers['x-agent-name'] as string ?? matchedKey.label,
+      agentType: detectAgentType(req.headers['user-agent'] ?? ''),
+      apiKeyId: matchedKey.id,
+      tenantId: matchedKey.tenantId,
+      connectedAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      status: 'active',
+      toolCallCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0,
+      proofPacketCount: 0,
+    };
+    connections.set(existingConn.connectionId, existingConn);
+  }
+  existingConn.lastActivityAt = new Date().toISOString();
+  req.gatewayConnection = existingConn;
+
+  next();
+}
+
+function detectAgentType(userAgent: string): ExternalConnection['agentType'] {
+  const ua = userAgent.toLowerCase();
+  if (ua.includes('claude') || ua.includes('anthropic')) return 'claude-desktop';
+  if (ua.includes('cursor')) return 'cursor';
+  if (ua.includes('vscode') || ua.includes('visual studio')) return 'vscode-copilot';
+  if (ua.includes('codex') || ua.includes('openai')) return 'codex';
+  return 'generic';
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      gatewayApiKey?: GatewayApiKey;
+      gatewayConnection?: ExternalConnection;
+    }
+  }
+}
+
+export function recordGatewayMcpCall(
+  connection: ExternalConnection,
+  apiKey: GatewayApiKey,
+  toolName: string,
+  parameters: Record<string, unknown>,
+): { disposition: string; proofPacketId: string; approvalId: string | null } {
+  const riskLevel = classifyToolRisk(toolName);
+  const riskClasses = classifyRisk({
+    riskLevel,
+    isDestructive: isDestructiveAction(toolName),
+    vertical: 'operational',
+  });
+  const policyEval = evaluatePolicies({
+    actionId: `gw-${randomUUID().slice(0, 8)}`,
+    riskClasses,
+    vertical: 'operational',
+    riskLevel,
+  });
+  const needsApproval = riskLevel === 'medium' || riskLevel === 'high' || riskLevel === 'critical';
+  if (!apiKey.scopes.includes('tools:execute')) {
+    const blockedCall: GatewayToolCall = {
+      callId: `gc-call-${randomUUID().slice(0, 8)}`,
+      connectionId: connection.connectionId,
+      agentName: connection.agentName,
+      toolName,
+      parameters,
+      riskLevel,
+      riskClasses,
+      disposition: 'blocked',
+      approvalId: null,
+      proofPacketId: null,
+      resultHash: null,
+      latencyMs: 0,
+      timestamp: new Date().toISOString(),
+    };
+    const blockedProof = generateGatewayProof(blockedCall, connection);
+    blockedCall.proofPacketId = blockedProof.packetId;
+    toolCalls.push(blockedCall);
+    return { disposition: 'blocked', proofPacketId: blockedProof.packetId, approvalId: null };
+  }
+
+  const call: GatewayToolCall = {
+    callId: `gc-call-${randomUUID().slice(0, 8)}`,
+    connectionId: connection.connectionId,
+    agentName: connection.agentName,
+    toolName,
+    parameters,
+    riskLevel,
+    riskClasses,
+    disposition: needsApproval ? 'pending_approval' : 'allowed',
+    approvalId: null,
+    proofPacketId: null,
+    resultHash: needsApproval
+      ? null
+      : createHash('sha256').update(`result-${Date.now()}`).digest('hex').slice(0, 16),
+    latencyMs: 0,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (needsApproval) {
+    const approval: GatewayApproval = {
+      approvalId: `gw-apr-${randomUUID().slice(0, 8)}`,
+      callId: call.callId,
+      connectionId: call.connectionId,
+      agentName: call.agentName,
+      toolName: call.toolName,
+      parameters: call.parameters,
+      riskLevel: call.riskLevel,
+      riskClasses: call.riskClasses,
+      requiredTier: policyEval.approvalTier ?? (riskLevel === 'critical' ? 'executive' : 'operator'),
+      status: 'pending',
+      reviewedBy: null,
+      reviewedAt: null,
+      reviewNote: null,
+      proofPacketId: null,
+      createdAt: call.timestamp,
+    };
+    call.approvalId = approval.approvalId;
+    approvals.set(approval.approvalId, approval);
+  }
+
+  connection.toolCallCount++;
+  const proof = generateGatewayProof(call, connection);
+  call.proofPacketId = proof.packetId;
+  connection.proofPacketCount++;
+  toolCalls.push(call);
+
+  return {
+    disposition: call.disposition,
+    proofPacketId: proof.packetId,
+    approvalId: call.approvalId,
+  };
+}
 
 const TOOL_RISK_MAP: Record<string, GatewayRiskLevel> = {
   'knowledge.search': 'low',
@@ -338,7 +543,7 @@ function seedDemoData(): void {
       isDestructive: isDestructiveAction(toolName),
       vertical: 'operational',
     });
-    const needsApproval = riskLevel === 'high' || riskLevel === 'critical';
+    const needsApproval = riskLevel === 'medium' || riskLevel === 'high' || riskLevel === 'critical';
     const disposition = needsApproval && i % 5 === 0 ? 'pending_approval' as const : 'allowed' as const;
 
     const call: GatewayToolCall = {
@@ -455,7 +660,7 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
   approval.status = 'approved';
-  approval.reviewedBy = (req as any).user?.email ?? 'operator';
+  approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? null;
   const call = toolCalls.find(c => c.callId === approval.callId);
@@ -478,7 +683,7 @@ router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Respo
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
   approval.status = 'rejected';
-  approval.reviewedBy = (req as any).user?.email ?? 'operator';
+  approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? req.body?.reason ?? null;
   const call = toolCalls.find(c => c.callId === approval.callId);
@@ -581,21 +786,33 @@ router.delete('/api-keys/:id', authMiddleware(), (req: Request, res: Response) =
 
 router.post('/tool-call', (req: Request, res: Response) => {
   const start = Date.now();
-  const { toolName, parameters, apiKey, agentName } = req.body ?? {};
+  const { toolName, parameters, agentName } = req.body ?? {};
   if (!toolName || typeof toolName !== 'string') {
     return res.status(400).json({ error: 'toolName is required' });
   }
-  if (!apiKey || typeof apiKey !== 'string') {
-    return res.status(401).json({ error: 'apiKey is required — generate one via POST /api/mcp-governed-gateway/api-keys' });
+
+  const bearerKey = extractBearerKey(req);
+  const rawKey = bearerKey ?? req.body?.apiKey;
+  if (!rawKey || typeof rawKey !== 'string') {
+    return res.status(401).json({
+      error: 'API key required via Authorization: Bearer header — generate one via POST /api/mcp-governed-gateway/api-keys',
+    });
   }
 
-  const keyHash = createHash('sha256').update(apiKey).digest('hex');
-  const matchedKey = [...apiKeys.values()].find(k => k.keyHash === keyHash && !k.revokedAt);
+  const matchedKey = validateGatewayApiKey(rawKey);
   if (!matchedKey) return res.status(401).json({ error: 'Invalid or revoked API key' });
+
+  if (!matchedKey.scopes.includes('tools:execute')) {
+    return res.status(403).json({
+      error: 'API key does not have tools:execute scope',
+      requiredScope: 'tools:execute',
+      currentScopes: matchedKey.scopes,
+    });
+  }
 
   const rl = checkRateLimit(matchedKey.id, matchedKey.rateLimit);
   if (!rl.allowed) {
-    toolCalls.push({
+    const rateLimitedCall: GatewayToolCall = {
       callId: `gc-call-${randomUUID().slice(0, 8)}`,
       connectionId: 'rate-limited',
       agentName: agentName ?? 'unknown',
@@ -609,11 +826,29 @@ router.post('/tool-call', (req: Request, res: Response) => {
       resultHash: null,
       latencyMs: Date.now() - start,
       timestamp: new Date().toISOString(),
-    });
+    };
+    const rateLimitProofConn: ExternalConnection = {
+      connectionId: 'rate-limited',
+      agentName: rateLimitedCall.agentName,
+      agentType: 'generic',
+      apiKeyId: matchedKey.id,
+      tenantId: matchedKey.tenantId,
+      connectedAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      status: 'active',
+      toolCallCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0,
+      proofPacketCount: 0,
+    };
+    const rateLimitProof = generateGatewayProof(rateLimitedCall, rateLimitProofConn);
+    rateLimitedCall.proofPacketId = rateLimitProof.packetId;
+    toolCalls.push(rateLimitedCall);
     return res.status(429).json({
       error: 'Rate limit exceeded',
       remaining: rl.remaining,
       resetAt: new Date(rl.resetAt).toISOString(),
+      proofPacketId: rateLimitProof.packetId,
     });
   }
   matchedKey.lastUsedAt = new Date().toISOString();
@@ -630,22 +865,35 @@ router.post('/tool-call', (req: Request, res: Response) => {
     vertical: 'operational',
     riskLevel,
   });
-  const needsApproval = riskLevel === 'high' || riskLevel === 'critical';
+  const needsApproval = riskLevel === 'medium' || riskLevel === 'high' || riskLevel === 'critical';
 
-  let connId = 'anonymous';
-  const existingConn = matchedKey
-    ? [...connections.values()].find(c => c.apiKeyId === matchedKey!.id && c.status !== 'disconnected')
-    : undefined;
-  if (existingConn) {
-    connId = existingConn.connectionId;
-    existingConn.lastActivityAt = new Date().toISOString();
-    existingConn.toolCallCount++;
+  let existingConn = [...connections.values()].find(
+    c => c.apiKeyId === matchedKey.id && c.status !== 'disconnected',
+  );
+  if (!existingConn) {
+    existingConn = {
+      connectionId: `gc-auto-${randomUUID().slice(0, 8)}`,
+      agentName: agentName ?? matchedKey.label,
+      agentType: detectAgentType(req.headers['user-agent'] ?? ''),
+      apiKeyId: matchedKey.id,
+      tenantId: matchedKey.tenantId,
+      connectedAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      status: 'active',
+      toolCallCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0,
+      proofPacketCount: 0,
+    };
+    connections.set(existingConn.connectionId, existingConn);
   }
+  existingConn.lastActivityAt = new Date().toISOString();
+  existingConn.toolCallCount++;
 
   const call: GatewayToolCall = {
     callId: `gc-call-${randomUUID().slice(0, 8)}`,
-    connectionId: connId,
-    agentName: agentName ?? 'unknown',
+    connectionId: existingConn.connectionId,
+    agentName: agentName ?? existingConn.agentName,
     toolName,
     parameters: parameters ?? {},
     riskLevel,
@@ -661,6 +909,11 @@ router.post('/tool-call', (req: Request, res: Response) => {
   };
 
   if (needsApproval) {
+    const approvalTier = riskLevel === 'critical'
+      ? 'executive'
+      : riskLevel === 'high'
+        ? 'operator'
+        : policyEval.approvalTier ?? 'operator';
     const approval: GatewayApproval = {
       approvalId: `gw-apr-${randomUUID().slice(0, 8)}`,
       callId: call.callId,
@@ -670,7 +923,7 @@ router.post('/tool-call', (req: Request, res: Response) => {
       parameters: call.parameters,
       riskLevel: call.riskLevel,
       riskClasses: call.riskClasses,
-      requiredTier: policyEval.approvalTier ?? (riskLevel === 'critical' ? 'executive' : 'operator'),
+      requiredTier: approvalTier,
       status: 'pending',
       reviewedBy: null,
       reviewedAt: null,
@@ -683,47 +936,33 @@ router.post('/tool-call', (req: Request, res: Response) => {
   }
 
   call.latencyMs = Date.now() - start;
-  const conn = connections.get(call.connectionId);
-  const proofConn = conn ?? {
-    connectionId: call.connectionId,
-    agentName: call.agentName,
-    agentType: 'generic' as const,
-    apiKeyId: matchedKey.id,
-    tenantId: matchedKey.tenantId,
-    connectedAt: new Date().toISOString(),
-    lastActivityAt: new Date().toISOString(),
-    status: 'active' as const,
-    toolCallCount: 1,
-    approvedCount: 0,
-    rejectedCount: 0,
-    proofPacketCount: 0,
-  };
-  const proof = generateGatewayProof(call, proofConn);
+  const proof = generateGatewayProof(call, existingConn);
   call.proofPacketId = proof.packetId;
-  if (conn) conn.proofPacketCount++;
+  existingConn.proofPacketCount++;
   toolCalls.push(call);
 
-  const responsePayload: Record<string, unknown> = {
+  const responsePayload = {
     callId: call.callId,
     disposition: call.disposition,
     riskLevel: call.riskLevel,
     riskClasses: call.riskClasses,
     proofPacketId: call.proofPacketId,
     latencyMs: call.latencyMs,
+    resultHash: needsApproval ? undefined : call.resultHash,
+    message: needsApproval
+      ? `Tool call queued for ${call.riskLevel === 'critical' ? 'executive' : 'operator'} approval`
+      : undefined,
     governance: {
       pceGateApplied: true,
       covenantChecked: true,
-      proofGenerated: !!call.proofPacketId,
+      proofGenerated: true,
       approvalRequired: needsApproval,
       approvalId: call.approvalId,
-      approvalTier: needsApproval ? (policyEval.approvalTier ?? 'operator') : null,
+      approvalTier: needsApproval
+        ? (call.riskLevel === 'critical' ? 'executive' : 'operator')
+        : null,
     },
   };
-  if (needsApproval) {
-    responsePayload.message = `Tool call queued for ${policyEval.approvalTier ?? 'operator'} approval`;
-  } else {
-    responsePayload.resultHash = call.resultHash;
-  }
   res.status(needsApproval ? 202 : 200).json(responsePayload);
 });
 

@@ -21,6 +21,7 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
+import { gatewayApiKeyGate, recordGatewayMcpCall } from './mcp-governed-gateway';
 
 const router = Router();
 
@@ -1446,8 +1447,18 @@ function buildTenantCtx(user: AuthenticatedUser | undefined) {
 
 // ── NexusMcpServer factory ─────────────────────────────────────────────────
 
-function createAlloyMcpServer(user: AuthenticatedUser | undefined): NexusMcpServer {
-  const ctx = buildTenantCtx(user);
+interface GatewayContext {
+  apiKey: { id: string; tenantId: string; scopes: string[] };
+  connection: { connectionId: string; agentName: string; agentType: string; apiKeyId: string; tenantId: string; connectedAt: string; lastActivityAt: string; status: string; toolCallCount: number; approvedCount: number; rejectedCount: number; proofPacketCount: number };
+}
+
+function createAlloyMcpServer(
+  user: AuthenticatedUser | undefined,
+  gatewayCtx?: GatewayContext,
+): NexusMcpServer {
+  const ctx = gatewayCtx
+    ? { ...buildTenantCtx(user), tenantId: gatewayCtx.apiKey.tenantId, actorId: `gateway:${gatewayCtx.connection.agentName}` }
+    : buildTenantCtx(user);
 
   const server = new NexusMcpServer({
     name: SERVER_NAME,
@@ -1490,6 +1501,32 @@ function createAlloyMcpServer(user: AuthenticatedUser | undefined): NexusMcpServ
       capturedTool.description,
       capturedTool.inputSchema,
       async (args) => {
+        if (gatewayCtx) {
+          if (!gatewayCtx.apiKey.scopes.includes('tools:execute')) {
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify({ error: 'API key does not have tools:execute scope', requiredScope: 'tools:execute' }) }],
+              isError: true,
+            };
+          }
+          const govResult = recordGatewayMcpCall(
+            gatewayCtx.connection as Parameters<typeof recordGatewayMcpCall>[0],
+            gatewayCtx.apiKey as Parameters<typeof recordGatewayMcpCall>[1],
+            capturedTool.name,
+            args,
+          );
+          if (govResult.disposition === 'blocked') {
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify({ error: 'Tool call blocked by governance policy', disposition: 'blocked', proofPacketId: govResult.proofPacketId }) }],
+              isError: true,
+            };
+          }
+          if (govResult.disposition === 'pending_approval') {
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify({ status: 'pending_approval', message: 'Tool call requires human approval before execution', approvalId: govResult.approvalId, proofPacketId: govResult.proofPacketId }) }],
+              isError: false,
+            };
+          }
+        }
         return executeTool(capturedTool.name, args, user);
       },
     );
@@ -1614,7 +1651,7 @@ router.get('/mcp/prompts', authMiddleware({ required: false }), (_req: Request, 
 // Creates a per-session SSEServerTransport backed by a fresh NexusMcpServer
 // instance scoped to the authenticated user's tenant context.
 
-router.get('/mcp/sse', authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), async (req: Request, res: Response) => {
   const sessionId = randomUUID();
   const transport = new SSEServerTransport('/api/mcp/message', res);
   sseSessions.set(sessionId, transport);
@@ -1625,7 +1662,10 @@ router.get('/mcp/sse', authMiddleware({ required: false }), async (req: Request,
 
   res.setHeader('X-Session-Id', sessionId);
 
-  const mcpServer = createAlloyMcpServer(req.user);
+  const gwCtx = req.gatewayApiKey && req.gatewayConnection
+    ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+    : undefined;
+  const mcpServer = createAlloyMcpServer(req.user, gwCtx);
   await mcpServer.connect(transport);
 });
 
@@ -1633,6 +1673,7 @@ router.get('/mcp/sse', authMiddleware({ required: false }), async (req: Request,
 
 router.post(
   '/mcp/message',
+  gatewayApiKeyGate,
   authMiddleware({ required: false }),
   async (req: Request, res: Response) => {
     const sessionId = String(req.query['sessionId'] ?? '');
@@ -1654,6 +1695,7 @@ router.post(
 
 router.post(
   '/mcp',
+  gatewayApiKeyGate,
   authMiddleware({ required: false }),
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
@@ -1677,7 +1719,10 @@ router.post(
       }
     };
 
-    const mcpServer = createAlloyMcpServer(req.user);
+    const gwCtx = req.gatewayApiKey && req.gatewayConnection
+      ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+      : undefined;
+    const mcpServer = createAlloyMcpServer(req.user, gwCtx);
     await mcpServer.connect(transport);
     await transport.handleRequest(req, res, req.body);
   },
@@ -1687,6 +1732,7 @@ router.post(
 
 router.get(
   '/mcp/stream',
+  gatewayApiKeyGate,
   authMiddleware({ required: false }),
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;

@@ -126,7 +126,7 @@ interface ConnectInstructions {
   transports: string[];
   endpoints: Record<string, string>;
   authentication: Record<string, string>;
-  clients: Record<string, any>;
+  clients: Record<string, { name: string; configFile?: string; config?: Record<string, unknown>; note?: string; command?: string }>;
 }
 
 const SERVERS: McpServer[] = [
