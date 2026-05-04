@@ -29,7 +29,8 @@
     "graphql-ws": "^6.0.8",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.1",
-    "urql": "^5.0.1"
+    "urql": "^5.0.1",
+    "@szl/a11oy-runtime": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

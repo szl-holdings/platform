@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
+    "./types/sovereign-mesh": "./src/types/sovereign-mesh.ts",
     "./data": "./src/data/index.ts"
   },
   "scripts": {

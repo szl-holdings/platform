@@ -322,6 +322,11 @@ router.use(lazyMatch("/marketplace", () => import("./marketplace"), "marketplace
 // Public GET endpoints (demo surface) — mounted BEFORE guardianPolicyCheck.
 router.use(lazyMatch("/v1/os", () => import("./os-layer-api"), "os-layer-api"));
 
+// Sovereign Agent Mesh — governed micro-agent swarms with trust scoring,
+// crew composition, and proof-carrying inter-agent communication.
+// Public read-only demo surface — mounted BEFORE guardianPolicyCheck.
+router.use("/sovereign-mesh", lazyMount(() => import("./sovereign-mesh"), "sovereign-mesh"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 

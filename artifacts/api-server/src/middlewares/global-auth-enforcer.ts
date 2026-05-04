@@ -404,6 +404,8 @@ const PUBLIC_PREFIXES = [
   // an in-memory simulation store. Public so the Command geo-intel map and
   // the Vessels satellite RF dashboard can hydrate without a session.
   "/api/rf-intel/",
+  "/api/sovereign-mesh/",
+  "/api-server/sovereign-mesh/",
   // Crisis Arena — strictly public surfaces only: leaderboard ranking,
   // platform summary, and sanitized architect public profiles.
   // All engagement, submission, triage, award, and graduate endpoints require

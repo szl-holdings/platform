@@ -1,6 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import type {
+  FieldAgent,
+  CrewComposition,
+  AgentActivityEntry,
+  MeshSummary,
+} from '@szl/a11oy-runtime/types/sovereign-mesh';
 
 const T = {
   bg: '#0a0a0a', surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -23,6 +29,8 @@ interface ExternalAgent {
   governanceAdapter: string;
   description: string;
 }
+
+type SovereignCrew = CrewComposition & { agents?: FieldAgent[] };
 
 const EXTERNAL_AGENTS: ExternalAgent[] = [
   {
@@ -212,8 +220,376 @@ const GOVERNANCE_TERMINAL = [
   { type: 'system', text: '  Refactor complete. Awaiting human approval for merge.' },
 ];
 
+const SMAPI = '/api/sovereign-mesh';
+
+const tierColor = (tier: string) => {
+  switch (tier) {
+    case 'sovereign': return '#c9b787';
+    case 'elevated': return '#7bc987';
+    case 'standard': return '#87b0c9';
+    case 'provisional': return '#c9a067';
+    case 'untrusted': return '#c96767';
+    default: return T.muted;
+  }
+};
+
+const statusDot = (s: string) => {
+  switch (s) {
+    case 'active': return '#7bc987';
+    case 'idle': return T.dim;
+    case 'paused': return '#c9a067';
+    case 'error': return '#c96767';
+    case 'terminated': return T.muted;
+    default: return T.muted;
+  }
+};
+
+const activityIcon = (type: string) => {
+  switch (type) {
+    case 'tool_call': return '⚙';
+    case 'message_sent': return '↗';
+    case 'message_received': return '↙';
+    case 'proof_generated': return '⬡';
+    case 'trust_updated': return '◈';
+    case 'crew_joined': return '⊕';
+    case 'crew_left': return '⊖';
+    case 'status_change': return '◉';
+    case 'error': return '⚠';
+    default: return '·';
+  }
+};
+
+const relTime = (iso: string) => {
+  const d = Date.now() - new Date(iso).getTime();
+  if (d < 60000) return 'just now';
+  if (d < 3600000) return `${Math.floor(d / 60000)}m ago`;
+  if (d < 86400000) return `${Math.floor(d / 3600000)}h ago`;
+  return `${Math.floor(d / 86400000)}d ago`;
+};
+
+function SovereignMeshTab() {
+  const [summary, setSummary] = useState<MeshSummary | null>(null);
+  const [agents, setAgents] = useState<FieldAgent[]>([]);
+  const [crews, setCrews] = useState<SovereignCrew[]>([]);
+  const [activity, setActivity] = useState<AgentActivityEntry[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<'agents' | 'crews' | 'activity' | 'trust'>('agents');
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      const [sRes, aRes, cRes, actRes] = await Promise.all([
+        fetch(`${SMAPI}/summary`), fetch(`${SMAPI}/agents`),
+        fetch(`${SMAPI}/crews`), fetch(`${SMAPI}/activity?limit=50`),
+      ]);
+      if (sRes.ok) setSummary(await sRes.json());
+      if (aRes.ok) setAgents(await aRes.json());
+      if (cRes.ok) setCrews(await cRes.json());
+      if (actRes.ok) setActivity(await actRes.json());
+    } catch { /* network error — keep stale data */ }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); const iv = setInterval(load, 12000); return () => clearInterval(iv); }, [load]);
+
+  const sel = agents.find(a => a.id === selectedAgent);
+
+  if (loading && !summary) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-xs font-mono" style={{ color: T.muted }}>Loading sovereign mesh...</div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {summary && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+          <KpiCard label="FIELD AGENTS" value={summary.totalAgents} sub={`${summary.activeAgents} active`} accent={T.accent} />
+          <KpiCard label="AVG TRUST" value={summary.avgTrustScore} sub="mesh score" accent={T.accent} />
+          <KpiCard label="CREWS" value={summary.totalCrews} sub={`${summary.activeCrews} active`} accent={T.dim} />
+          <KpiCard label="PROOF PACKETS" value={summary.totalProofPackets} sub="generated" accent={T.dim} />
+          <KpiCard label="TOTAL COST" value={`$${summary.totalCostUsd.toFixed(2)}`} sub={`${summary.uptimePercent}% uptime`} accent={T.accent} />
+        </div>
+      )}
+
+      <div className="flex gap-1 mb-5">
+        {(['agents', 'crews', 'activity', 'trust'] as const).map(t => (
+          <button key={t} onClick={() => setSubTab(t)} className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest rounded transition-all" style={{ background: subTab === t ? 'rgba(201,183,135,0.08)' : 'transparent', color: subTab === t ? T.accent : T.muted, border: `1px solid ${subTab === t ? 'rgba(201,183,135,0.15)' : 'transparent'}` }}>
+            {t === 'agents' ? 'Field Agents' : t === 'crews' ? 'Crew Swarms' : t === 'activity' ? 'Activity Stream' : 'Trust Engine'}
+          </button>
+        ))}
+      </div>
+
+      {subTab === 'agents' && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-2">
+            {agents.map(ag => (
+              <button key={ag.id} onClick={() => setSelectedAgent(ag.id)} className="w-full text-left rounded-lg p-4 transition-all" style={{ background: selectedAgent === ag.id ? 'rgba(201,183,135,0.05)' : T.surface, border: `1px solid ${selectedAgent === ag.id ? 'rgba(201,183,135,0.2)' : T.border}` }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: statusDot(ag.status) }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-medium" style={{ color: T.text }}>{ag.name}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent, border: '1px solid rgba(201,183,135,0.1)' }}>{ag.template}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: ag.status === 'active' ? 'rgba(123,201,135,0.08)' : 'rgba(255,255,255,0.03)', color: ag.status === 'active' ? '#7bc987' : T.dim }}>{ag.status}</span>
+                    </div>
+                    <div className="text-[10px] font-mono mt-0.5" style={{ color: T.dim }}>
+                      Trust: {ag.trustScore.overall} ({ag.trustScore.tier}) · {ag.tasksCompleted} tasks · ${ag.totalCostUsd.toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-[11px] font-mono font-medium" style={{ color: tierColor(ag.trustScore.tier) }}>{ag.trustScore.tier}</div>
+                    <div className="text-[9px] font-mono" style={{ color: T.muted }}>{ag.config.model.split('/').pop()}</div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div>
+            {sel ? (
+              <div className="rounded-lg p-5 sticky top-4 space-y-4" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <div className="w-2 h-2 rounded-full" style={{ background: statusDot(sel.status) }} />
+                    <span className="text-sm font-medium" style={{ color: T.text }}>{sel.name}</span>
+                  </div>
+                  <div className="text-[10px] font-mono" style={{ color: T.dim }}>{sel.template} · {sel.config.model}</div>
+                </div>
+
+                <div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1.5" style={{ color: T.muted }}>Trust Score Breakdown</div>
+                  <div className="space-y-1.5">
+                    {[
+                      { k: 'Overall', v: sel.trustScore.overall },
+                      { k: 'Accuracy', v: sel.trustScore.rollingAccuracy },
+                      { k: 'Approval Rate', v: sel.trustScore.approvalRate },
+                      { k: 'Cost Efficiency', v: sel.trustScore.costEfficiency },
+                      { k: 'Uptime', v: sel.trustScore.uptimeReliability },
+                      { k: 'Proof Completeness', v: sel.trustScore.proofCompleteness },
+                    ].map(({ k, v }) => (
+                      <div key={k} className="flex items-center gap-2">
+                        <span className="text-[9px] font-mono w-28 flex-shrink-0" style={{ color: T.dim }}>{k}</span>
+                        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div className="h-full rounded-full transition-all" style={{ width: `${v}%`, background: v >= 90 ? '#7bc987' : v >= 70 ? T.accent : '#c96767' }} />
+                        </div>
+                        <span className="text-[9px] font-mono w-8 text-right" style={{ color: v >= 90 ? '#7bc987' : v >= 70 ? T.accent : '#c96767' }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-[9px] font-mono mt-2" style={{ color: T.muted }}>
+                    Tier: <span style={{ color: tierColor(sel.trustScore.tier) }}>{sel.trustScore.tier.toUpperCase()}</span> · Window: {sel.trustScore.historyWindow} runs
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1.5" style={{ color: T.muted }}>Capabilities</div>
+                  <div className="flex flex-wrap gap-1">
+                    {sel.capabilities.map(c => (
+                      <span key={c} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent, border: '1px solid rgba(201,183,135,0.1)' }}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1.5" style={{ color: T.muted }}>MCP Servers</div>
+                  <div className="flex flex-wrap gap-1">
+                    {sel.config.mcpServers.map(s => (
+                      <span key={s} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', color: T.dim, border: `1px solid ${T.border}` }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1.5" style={{ color: T.muted }}>Governance Bindings</div>
+                  <div className="space-y-0.5">
+                    {sel.config.covenantBindings.map(c => (
+                      <div key={c} className="text-[9px] font-mono" style={{ color: T.dim }}>⬡ {c}</div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: `1px solid ${T.border}` }}>
+                  <div><div className="text-[9px] font-mono" style={{ color: T.muted }}>Tasks Done</div><div className="text-base font-bold font-mono" style={{ color: T.text }}>{sel.tasksCompleted}</div></div>
+                  <div><div className="text-[9px] font-mono" style={{ color: T.muted }}>Errors</div><div className="text-base font-bold font-mono" style={{ color: sel.tasksErrored > 0 ? '#c96767' : T.dim }}>{sel.tasksErrored}</div></div>
+                  <div><div className="text-[9px] font-mono" style={{ color: T.muted }}>Total Cost</div><div className="text-base font-bold font-mono" style={{ color: T.accent }}>${sel.totalCostUsd.toFixed(2)}</div></div>
+                  <div><div className="text-[9px] font-mono" style={{ color: T.muted }}>Proof Packets</div><div className="text-base font-bold font-mono" style={{ color: T.dim }}>{sel.proofPacketIds.length}</div></div>
+                </div>
+
+                <div className="text-[9px] font-mono" style={{ color: T.muted }}>
+                  Spawned {relTime(sel.spawnedAt)} · Last active {relTime(sel.lastActiveAt)}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg p-8 text-center" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                <div className="text-xs" style={{ color: T.muted }}>Select a field agent to inspect</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {subTab === 'crews' && (
+        <div className="space-y-4">
+          <SectionTitle>Micro-Swarm Crews</SectionTitle>
+          <p className="text-xs mb-4" style={{ color: T.dim }}>
+            Crews are dynamically composed micro-swarms of field agents, assembled to pursue a shared objective with a designated planner agent coordinating execution.
+          </p>
+          {crews.map(crew => {
+            const crewAgents = crew.agents || crew.agentIds.map(id => agents.find(a => a.id === id)).filter(Boolean) as FieldAgent[];
+            const plannerAgent = crewAgents.find(a => a.id === crew.plannerAgentId);
+            return (
+              <Card key={crew.id}>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium" style={{ color: T.text }}>{crew.name}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: crew.status === 'active' ? 'rgba(123,201,135,0.08)' : 'rgba(255,255,255,0.03)', color: crew.status === 'active' ? '#7bc987' : T.dim }}>{crew.status}</span>
+                    </div>
+                    <div className="text-[10px] mt-0.5" style={{ color: T.dim }}>{crew.objective}</div>
+                  </div>
+                  {crew.proofPacketId && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent }}>⬡ proof-anchored</span>
+                  )}
+                </div>
+
+                <div className="text-[9px] font-mono uppercase tracking-wider mb-2" style={{ color: T.muted }}>
+                  Agents ({crewAgents.length}) · Planner: {plannerAgent?.name ?? crew.plannerAgentId}
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {crewAgents.map(ag => (
+                    <div key={ag.id} className="rounded p-2.5 flex items-center gap-2" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${ag.id === crew.plannerAgentId ? 'rgba(201,183,135,0.2)' : T.border}` }}>
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: statusDot(ag.status) }} />
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-medium truncate" style={{ color: T.text }}>
+                          {ag.name} {ag.id === crew.plannerAgentId && <span style={{ color: T.accent }}>★</span>}
+                        </div>
+                        <div className="text-[9px] font-mono" style={{ color: T.dim }}>{ag.template} · trust {ag.trustScore.overall}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[9px] font-mono mt-2" style={{ color: T.muted }}>
+                  Formed {relTime(crew.formedAt)}{crew.completedAt ? ` · Completed ${relTime(crew.completedAt)}` : ''}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {subTab === 'activity' && (
+        <div>
+          <SectionTitle>Proof-Carrying Activity Stream</SectionTitle>
+          <p className="text-xs mb-4" style={{ color: T.dim }}>
+            Every action, message, and state change across the sovereign mesh is logged with proof hashes for full audit trail reconstruction.
+          </p>
+          <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+            <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+              {activity.map(act => (
+                <div key={act.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.01] transition-colors">
+                  <span className="text-sm mt-0.5 w-5 text-center flex-shrink-0" style={{ color: act.type === 'error' ? '#c96767' : act.type === 'proof_generated' ? T.accent : T.dim }}>{activityIcon(act.type)}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-medium" style={{ color: T.text }}>{act.agentName}</span>
+                      <span className="text-[9px] font-mono px-1 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.03)', color: T.muted }}>{act.type.replace(/_/g, ' ')}</span>
+                    </div>
+                    <div className="text-[10px] mt-0.5" style={{ color: T.dim }}>{act.detail}</div>
+                    {act.proofHash && (
+                      <div className="text-[9px] font-mono mt-0.5" style={{ color: T.accent }}>⬡ {act.proofHash}</div>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono flex-shrink-0" style={{ color: T.muted }}>{relTime(act.timestamp)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {subTab === 'trust' && (
+        <div className="space-y-6">
+          <SectionTitle>Trust Score Engine</SectionTitle>
+          <p className="text-xs mb-4" style={{ color: T.dim }}>
+            Every field agent earns trust through performance — rolling accuracy, approval rates, cost efficiency, uptime reliability, and proof completeness. Trust tiers gate tool access and approval requirements.
+          </p>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Trust Tier Definitions</div>
+            <div className="grid sm:grid-cols-5 gap-2">
+              {(['untrusted', 'provisional', 'standard', 'elevated', 'sovereign'] as const).map(tier => {
+                const count = agents.filter(a => a.trustScore.tier === tier).length;
+                return (
+                  <div key={tier} className="rounded p-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${count > 0 ? tierColor(tier) + '33' : T.border}` }}>
+                    <div className="text-[11px] font-mono font-medium mb-1" style={{ color: tierColor(tier) }}>{tier.toUpperCase()}</div>
+                    <div className="text-lg font-bold font-mono" style={{ color: count > 0 ? T.text : T.muted }}>{count}</div>
+                    <div className="text-[9px] font-mono" style={{ color: T.muted }}>agents</div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Agent Trust Leaderboard</div>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Agent', 'Template', 'Overall', 'Accuracy', 'Approval', 'Cost Eff.', 'Uptime', 'Proof', 'Tier'].map(h => (
+                      <th key={h} className="text-left px-3 py-2 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...agents].sort((a, b) => b.trustScore.overall - a.trustScore.overall).map(ag => (
+                    <tr key={ag.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td className="px-3 py-2.5 font-medium" style={{ color: T.text }}>{ag.name}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.template}</td>
+                      <td className="px-3 py-2.5 font-mono font-medium" style={{ color: T.accent }}>{ag.trustScore.overall}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.trustScore.rollingAccuracy}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.trustScore.approvalRate}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.trustScore.costEfficiency}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.trustScore.uptimeReliability}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{ag.trustScore.proofCompleteness}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: tierColor(ag.trustScore.tier), background: tierColor(ag.trustScore.tier) + '12', border: `1px solid ${tierColor(ag.trustScore.tier)}22` }}>{ag.trustScore.tier}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Trust Score Formula</div>
+            <pre className="font-mono text-[11px] leading-relaxed overflow-x-auto" style={{ color: T.dim }}>
+{`TrustScore = weighted_average(
+  rolling_accuracy    × 0.25,   // correctness of agent outputs
+  approval_rate       × 0.20,   // human approval percentage
+  cost_efficiency     × 0.15,   // cost vs. quality ratio
+  uptime_reliability  × 0.20,   // availability and response time
+  proof_completeness  × 0.20,   // proof chain coverage
+)
+
+Tier Assignment:
+  sovereign  ≥ 95  → unrestricted tool access, no approval required
+  elevated   ≥ 80  → 20 tools, no approval required
+  standard   ≥ 60  → 10 tools, approval required
+  provisional ≥ 40 → 5 tools, approval required
+  untrusted  < 40  → 2 tools, approval required, sandboxed`}
+            </pre>
+          </Card>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function AgentMesh() {
-  const [tab, setTab] = useState<'mesh' | 'routing' | 'terminal' | 'governance'>('mesh');
+  const [tab, setTab] = useState<'mesh' | 'sovereign' | 'routing' | 'terminal' | 'governance'>('mesh');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const harnessed = EXTERNAL_AGENTS.filter(a => a.status === 'harnessed').length;
@@ -237,22 +613,26 @@ export function AgentMesh() {
         status="LIVE"
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <KpiCard label="EXTERNAL AGENTS" value={EXTERNAL_AGENTS.length} sub="registered" accent={T.accent} />
-        <KpiCard label="HARNESSED" value={harnessed} sub="governed" accent={T.accent} />
-        <KpiCard label="TASKS ROUTED" value={totalTasksRouted.toLocaleString()} sub="total" accent={T.accent} />
-        <KpiCard label="AVG TRUST" value={avgTrust} sub="mesh score" accent={T.dim} />
-        <KpiCard label="ROUTING RULES" value={ROUTING_RULES.length} sub="active" accent={T.dim} />
-        <KpiCard label="GOVERNANCE" value="FULL" sub="proof chain" accent={T.accent} />
-      </div>
+      {tab !== 'sovereign' && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+          <KpiCard label="EXTERNAL AGENTS" value={EXTERNAL_AGENTS.length} sub="registered" accent={T.accent} />
+          <KpiCard label="HARNESSED" value={harnessed} sub="governed" accent={T.accent} />
+          <KpiCard label="TASKS ROUTED" value={totalTasksRouted.toLocaleString()} sub="total" accent={T.accent} />
+          <KpiCard label="AVG TRUST" value={avgTrust} sub="mesh score" accent={T.dim} />
+          <KpiCard label="ROUTING RULES" value={ROUTING_RULES.length} sub="active" accent={T.dim} />
+          <KpiCard label="GOVERNANCE" value="FULL" sub="proof chain" accent={T.accent} />
+        </div>
+      )}
 
       <div className="flex gap-1 mb-6">
-        {(['mesh', 'routing', 'terminal', 'governance'] as const).map(t => (
+        {(['mesh', 'sovereign', 'routing', 'terminal', 'governance'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-md transition-all" style={{ background: tab === t ? 'rgba(201,183,135,0.1)' : 'transparent', color: tab === t ? T.accent : T.muted, border: `1px solid ${tab === t ? 'rgba(201,183,135,0.2)' : 'transparent'}` }}>
-            {t}
+            {t === 'sovereign' ? '⬡ Sovereign Mesh' : t}
           </button>
         ))}
       </div>
+
+      {tab === 'sovereign' && <SovereignMeshTab />}
 
       {tab === 'mesh' && (
         <>

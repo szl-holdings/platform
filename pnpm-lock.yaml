@@ -410,6 +410,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl/a11oy-runtime':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-runtime
       '@urql/exchange-graphcache':
         specifier: ^9.0.0
         version: 9.0.0(graphql@16.13.2)
@@ -696,6 +699,9 @@ importers:
       '@szl-holdings/worldline':
         specifier: workspace:*
         version: link:../../lib/worldline
+      '@szl/a11oy-runtime':
+        specifier: workspace:*
+        version: link:../../packages/a11oy-runtime
       '@szl/alloy':
         specifier: workspace:*
         version: link:../../packages/szl-alloy
