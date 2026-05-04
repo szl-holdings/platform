@@ -69,16 +69,30 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
     },
   ];
 
-  // Inference (text_classification, feature_extraction) is gated by the
-  // shared 5-condition governance check used by the router and hf-client.
-  // `search_models` hits the public Hub catalog and is NOT inference, so it
-  // bypasses the gate.
+  /**
+   * Returns true when no HF credential is configured. Per task contract, the
+   * connector adapter falls back to a clearly-labeled demo response only when
+   * credentials are explicitly absent. When credentials are present the call
+   * goes live and any 5-gate governance failure throws (no silent fallback).
+   */
+  private credentialsAbsent(): boolean {
+    return !(process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN);
+  }
 
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {
     const headers = { ...this.getAuthHeaders(), 'Content-Type': 'application/json' };
 
     if (toolName === 'text_classification') {
       const model = (input.model as string) ?? 'distilbert-base-uncased-finetuned-sst-2-english';
+      if (this.credentialsAbsent()) {
+        return {
+          label: 'demo',
+          score: 0,
+          mode: 'MOCKED_DEMO_MODE',
+          reason: 'HUGGINGFACE_API_KEY not configured — set credentials to enable live inference',
+          model,
+        };
+      }
       enforceInferenceGates(model);
       const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
         method: 'POST',
@@ -95,6 +109,14 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
 
     if (toolName === 'feature_extraction') {
       const model = (input.model as string) ?? 'sentence-transformers/all-MiniLM-L6-v2';
+      if (this.credentialsAbsent()) {
+        return {
+          embedding: [],
+          mode: 'MOCKED_DEMO_MODE',
+          reason: 'HUGGINGFACE_API_KEY not configured — set credentials to enable live inference',
+          model,
+        };
+      }
       enforceInferenceGates(model);
       const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
         method: 'POST',

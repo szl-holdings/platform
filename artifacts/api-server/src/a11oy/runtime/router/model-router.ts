@@ -383,9 +383,11 @@ export async function routeModelCallWithFailover(req: ModelRequest, fallbackMode
     }
   }
 
-  // If every attempt was gate-blocked, surface that — never silently mock.
-  if (allBlockedByGate && lastError) throw lastError;
-  return callMock(req);
+  // Per governance spec: failover MUST end in a terminal error after every
+  // configured model has failed — never silently fall back to mock data.
+  // This applies to both gate-blocked and live API failures.
+  if (lastError) throw lastError;
+  throw new Error('failover_chain_exhausted: no models attempted');
 }
 
 export function getProviderStatuses(): ProviderStatus[] {

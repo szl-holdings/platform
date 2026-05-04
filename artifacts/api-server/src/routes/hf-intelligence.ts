@@ -13,7 +13,7 @@
 
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
-import { checkInferenceGates, type GateCheckResult } from '../a11oy/runtime/router/model-router';
+import { checkInferenceGates } from '../a11oy/runtime/router/model-router';
 
 const router: IRouter = Router();
 
@@ -29,21 +29,6 @@ function hfHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
-}
-
-function enforceGates(model: string, res: Response): GateCheckResult | null {
-  const result = checkInferenceGates(model);
-  if (!result.allowed) {
-    res.status(403).json({
-      error: 'governance_gate_blocked',
-      model,
-      failedGates: result.failedGates,
-      gates: result.gates,
-      message: `Inference blocked for model "${model}": gates [${result.failedGates.join(', ')}] not satisfied. Set HF_ENABLE_LIVE_INFERENCE=1 and HF_PRODUCTION_APPROVED=1 to activate.`,
-    });
-    return null;
-  }
-  return result;
 }
 
 async function hfPost<T = unknown>(model: string, body: unknown): Promise<T> {
@@ -66,6 +51,37 @@ async function hfPost<T = unknown>(model: string, body: unknown): Promise<T> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Governed task-inference invoker — the per-task analogue of the chat-model
+ * router's routeModelCallWithFailover. Enforces the 5-gate governance check
+ * for the primary model and every fallback, calls the live HF inference
+ * endpoint, and on failure walks the configured fallback chain. NEVER
+ * substitutes mock data: if every attempt fails (governance or live), the
+ * last error propagates to handleRouteError which surfaces it as a 403/502.
+ */
+async function routeHfTaskCall<T = unknown>(
+  primaryModel: string,
+  body: unknown,
+  fallbackModels: string[] = [],
+): Promise<{ result: T; modelUsed: string }> {
+  const models = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
+  let lastError: Error | null = null;
+  for (const model of models) {
+    const gate = checkInferenceGates(model);
+    if (!gate.allowed) {
+      lastError = new Error(`governance_gate_blocked:${model}:${gate.failedGates.join(',')}`);
+      continue;
+    }
+    try {
+      const result = await hfPost<T>(model, body);
+      return { result, modelUsed: model };
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastError ?? new Error('failover_chain_exhausted');
 }
 
 // ---------------------------------------------------------------------------
@@ -137,42 +153,46 @@ router.post('/hf-intelligence/legal/analyze', async (req: Request, res: Response
       return sendBadRequest(res, "'text' is required (min 10 chars)");
     }
 
-    const primaryModel = task === 'summarize' ? 'facebook/bart-large-cnn' : task === 'ner' ? 'dslim/bert-base-NER' : 'facebook/bart-large-mnli';
-    if (!enforceGates(primaryModel, res)) return;
-
     const truncated = text.slice(0, 1500);
     const startMs = Date.now();
 
     if (task === 'summarize') {
       type SumResult = Array<{ summary_text: string }> | { summary_text: string };
-      // Gates already passed — propagate live API errors instead of silently
-      // returning extractive fallback. Operators must see real failures.
-      const result = await hfPost<SumResult>('facebook/bart-large-cnn', {
+      const call = await routeHfTaskCall<SumResult>('facebook/bart-large-cnn', {
         inputs: truncated,
         parameters: { max_length: 180, min_length: 40 },
       });
-      const summary = Array.isArray(result) ? result[0]?.summary_text : result.summary_text;
+      const summary = Array.isArray(call.result) ? call.result[0]?.summary_text : call.result.summary_text;
       return sendSuccess(res, {
         task: 'summarize',
         summary,
         latencyMs: Date.now() - startMs,
-        model: 'facebook/bart-large-cnn',
+        model: call.modelUsed,
       });
     }
 
     if (task === 'ner') {
       type NerToken = { word: string; entity: string; score: number; start: number; end: number };
-      const raw = await hfPost<NerToken[] | NerToken[][]>('dslim/bert-base-NER', { inputs: truncated });
-      const entities: NerToken[] = Array.isArray(raw[0]) ? (raw as NerToken[][])[0]! : (raw as NerToken[]);
+      const call = await routeHfTaskCall<NerToken[] | NerToken[][]>(
+        'dslim/bert-base-NER',
+        { inputs: truncated },
+      );
+      const entities: NerToken[] = Array.isArray(call.result[0])
+        ? (call.result as NerToken[][])[0]!
+        : (call.result as NerToken[]);
       return sendSuccess(res, {
         task: 'ner',
         entities,
         latencyMs: Date.now() - startMs,
-        model: 'dslim/bert-base-NER',
+        model: call.modelUsed,
       });
     }
 
-    // Default: zero-shot clause classification
+    // Default: zero-shot clause classification.
+    // Primary model is the legal-domain BERT mandated by the task spec
+    // (nlpaueb/legal-bert-base-uncased, capability='classification' in the
+    // model registry). When that model is unavailable we fall back through
+    // the configured chain to the general-purpose zero-shot classifier.
     const candidateLabels = [
       'indemnification',
       'limitation of liability',
@@ -187,10 +207,15 @@ router.post('/hf-intelligence/legal/analyze', async (req: Request, res: Response
     ];
 
     type ZeroShotResult = { labels: string[]; scores: number[]; sequence: string };
-    const classification: ZeroShotResult = await hfPost<ZeroShotResult>('facebook/bart-large-mnli', {
-      inputs: truncated,
-      parameters: { candidate_labels: candidateLabels, multi_label: false },
-    });
+    const call = await routeHfTaskCall<ZeroShotResult>(
+      'nlpaueb/legal-bert-base-uncased',
+      {
+        inputs: truncated,
+        parameters: { candidate_labels: candidateLabels, multi_label: false },
+      },
+      ['facebook/bart-large-mnli'],
+    );
+    const classification = call.result;
 
     const topLabel = classification.labels[0];
     const topScore = classification.scores[0];
@@ -207,7 +232,7 @@ router.post('/hf-intelligence/legal/analyze', async (req: Request, res: Response
         ? [`High confidence ${topLabel} clause — review carefully`]
         : [],
       latencyMs: Date.now() - startMs,
-      model: 'facebook/bart-large-mnli',
+      model: call.modelUsed,
     });
   } catch (err) {
     handleRouteError(res, err, 'Legal NLP analysis failed');
@@ -229,8 +254,6 @@ router.post('/hf-intelligence/threat/correlate', async (req: Request, res: Respo
       return sendBadRequest(res, "'indicators' array is required");
     }
 
-    if (!enforceGates('facebook/bart-large-mnli', res)) return;
-
     const startMs = Date.now();
     const combinedText = indicators.join(' | ') + (context ? ` Context: ${context}` : '');
     const truncated = combinedText.slice(0, 1000);
@@ -249,26 +272,30 @@ router.post('/hf-intelligence/threat/correlate', async (req: Request, res: Respo
     ];
 
     type ZeroShotResult = { labels: string[]; scores: number[]; sequence: string };
-    const classification: ZeroShotResult = await hfPost<ZeroShotResult>('facebook/bart-large-mnli', {
-      inputs: truncated,
-      parameters: { candidate_labels: threatLabels, multi_label: true },
-    });
+    const correlateCall = await routeHfTaskCall<ZeroShotResult>(
+      'facebook/bart-large-mnli',
+      {
+        inputs: truncated,
+        parameters: { candidate_labels: threatLabels, multi_label: true },
+      },
+    );
+    const classification = correlateCall.result;
 
-    // NER enrichment runs through the SAME 5-gate enforcement; failures
-    // (including governance gate blocks) propagate so operators see real
-    // errors instead of silent degradation. Skip only when the input is
-    // too short to produce meaningful entities.
+    // NER enrichment also runs through routeHfTaskCall — failures (including
+    // governance gate blocks) propagate via handleRouteError. Skip only when
+    // the input is too short to produce meaningful entities.
     type NerToken = { word: string; entity: string; score: number };
     let nerEntities: NerToken[] = [];
+    let nerModelUsed = 'dslim/bert-base-NER';
     if (combinedText.length > 10) {
-      const nerGate = checkInferenceGates('dslim/bert-base-NER');
-      if (!nerGate.allowed) {
-        throw new Error(`governance_gate_blocked:dslim/bert-base-NER:${nerGate.failedGates.join(',')}`);
-      }
-      const raw = await hfPost<NerToken[] | NerToken[][]>('dslim/bert-base-NER', {
-        inputs: truncated,
-      });
-      nerEntities = Array.isArray(raw[0]) ? (raw as NerToken[][])[0]! : (raw as NerToken[]);
+      const nerCall = await routeHfTaskCall<NerToken[] | NerToken[][]>(
+        'dslim/bert-base-NER',
+        { inputs: truncated },
+      );
+      nerEntities = Array.isArray(nerCall.result[0])
+        ? (nerCall.result as NerToken[][])[0]!
+        : (nerCall.result as NerToken[]);
+      nerModelUsed = nerCall.modelUsed;
     }
 
     const threatActors = nerEntities
@@ -288,7 +315,7 @@ router.post('/hf-intelligence/threat/correlate', async (req: Request, res: Respo
       threatActors,
       overallRisk: correlations[0]!.score > 0.6 ? 'critical' : correlations[0]!.score > 0.4 ? 'high' : 'medium',
       latencyMs: Date.now() - startMs,
-      models: ['facebook/bart-large-mnli', 'dslim/bert-base-NER'],
+      models: [correlateCall.modelUsed, nerModelUsed],
     });
   } catch (err) {
     handleRouteError(res, err, 'Threat correlation failed');
@@ -329,8 +356,6 @@ router.post('/hf-intelligence/vessels/decode-ais', async (req: Request, res: Res
       return sendBadRequest(res, "At least one of 'rawMessage', 'mmsi', or 'vesselName' is required");
     }
 
-    if (!enforceGates('facebook/bart-large-mnli', res)) return;
-
     const startMs = Date.now();
 
     // Decode NMEA AIS if raw message provided
@@ -363,10 +388,14 @@ router.post('/hf-intelligence/vessels/decode-ais', async (req: Request, res: Res
     ];
 
     type ZeroShotResult = { labels: string[]; scores: number[] };
-    const classification: ZeroShotResult = await hfPost<ZeroShotResult>('facebook/bart-large-mnli', {
-      inputs: classificationText,
-      parameters: { candidate_labels: behaviourLabels, multi_label: true },
-    });
+    const aisCall = await routeHfTaskCall<ZeroShotResult>(
+      'facebook/bart-large-mnli',
+      {
+        inputs: classificationText,
+        parameters: { candidate_labels: behaviourLabels, multi_label: true },
+      },
+    );
+    const classification = aisCall.result;
 
     const anomalyFlags = classification.labels
       .map((l, i) => ({ label: l, score: classification.scores[i] ?? 0 }))
@@ -383,7 +412,7 @@ router.post('/hf-intelligence/vessels/decode-ais', async (req: Request, res: Res
       anomalyFlags,
       riskLevel: anomalyFlags.length > 2 ? 'critical' : anomalyFlags.length > 0 ? 'elevated' : 'normal',
       latencyMs: Date.now() - startMs,
-      model: 'facebook/bart-large-mnli',
+      model: aisCall.modelUsed,
     });
   } catch (err) {
     handleRouteError(res, err, 'AIS decode and classification failed');
@@ -438,8 +467,6 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
       return sendBadRequest(res, "'address' or 'sqft' is required");
     }
 
-    if (!enforceGates('facebook/bart-large-mnli', res)) return;
-
     const startMs = Date.now();
 
     const propertyDesc = [
@@ -454,13 +481,28 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
       .filter(Boolean)
       .join('. ');
 
-    // Classify market sentiment using FinBERT
-    const sentimentLabels = ['bullish market', 'bearish market', 'stable market', 'volatile market'];
-    type ZeroShotResult = { labels: string[]; scores: number[] };
-    const sentiment: ZeroShotResult = await hfPost<ZeroShotResult>('facebook/bart-large-mnli', {
-      inputs: propertyDesc + (marketContext ? ` Market: ${marketContext}` : ''),
-      parameters: { candidate_labels: sentimentLabels, multi_label: false },
-    });
+    // Classify market sentiment using ProsusAI/finbert (financial sentiment).
+    // Routed through routeHfTaskCall so the 5-gate governance check runs and
+    // the configured failover chain is honored before returning an error.
+    type FinBertResult = Array<Array<{ label: string; score: number }>>;
+    const finbertCall = await routeHfTaskCall<FinBertResult>(
+      'ProsusAI/finbert',
+      { inputs: propertyDesc + (marketContext ? ` Market: ${marketContext}` : '') },
+      ['facebook/bart-large-mnli'],
+    );
+    // FinBERT returns [{label:'positive'|'neutral'|'negative', score}]; normalise
+    // into the same shape the rest of the route expects.
+    const finbertScores = finbertCall.result[0] ?? [];
+    const labelMap: Record<string, string> = {
+      positive: 'bullish market',
+      negative: 'bearish market',
+      neutral: 'stable market',
+    };
+    const ranked = [...finbertScores].sort((a, b) => b.score - a.score);
+    const sentiment = {
+      labels: ranked.map((r) => labelMap[r.label.toLowerCase()] ?? r.label),
+      scores: ranked.map((r) => r.score),
+    };
 
     // Derive a valuation range from structured inputs
     const baseRate = propertyType?.toLowerCase().includes('commercial') ? 250 : 180;
@@ -494,7 +536,7 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
         })),
       },
       latencyMs: Date.now() - startMs,
-      model: 'facebook/bart-large-mnli',
+      model: finbertCall.modelUsed,
     });
   } catch (err) {
     handleRouteError(res, err, 'Property valuation failed');
@@ -517,13 +559,11 @@ router.post('/hf-intelligence/summarize', async (req: Request, res: Response) =>
       return sendBadRequest(res, "'text' is required (min 50 chars)");
     }
 
-    if (!enforceGates('facebook/bart-large-cnn', res)) return;
-
     const truncated = text.slice(0, 3000);
     const startMs = Date.now();
 
     type SumResult = Array<{ summary_text: string }> | { summary_text: string };
-    const result: SumResult = await hfPost<SumResult>('facebook/bart-large-cnn', {
+    const sumCall = await routeHfTaskCall<SumResult>('facebook/bart-large-cnn', {
       inputs: truncated,
       parameters: {
         max_length: Math.min(maxLength, 400),
@@ -532,7 +572,9 @@ router.post('/hf-intelligence/summarize', async (req: Request, res: Response) =>
       },
     });
 
-    const summary = Array.isArray(result) ? result[0]?.summary_text ?? '' : result.summary_text;
+    const summary = Array.isArray(sumCall.result)
+      ? sumCall.result[0]?.summary_text ?? ''
+      : sumCall.result.summary_text;
     const compressionRatio = summary.length / text.length;
 
     return sendSuccess(res, {
@@ -541,7 +583,7 @@ router.post('/hf-intelligence/summarize', async (req: Request, res: Response) =>
       summaryLength: summary.length,
       compressionRatio: Math.round(compressionRatio * 100) / 100,
       latencyMs: Date.now() - startMs,
-      model: 'facebook/bart-large-cnn',
+      model: sumCall.modelUsed,
     });
   } catch (err) {
     handleRouteError(res, err, 'Summarization failed');
@@ -563,16 +605,16 @@ router.post('/hf-intelligence/embed', async (req: Request, res: Response) => {
       return sendBadRequest(res, 'Maximum 64 texts per request');
     }
 
-    if (!enforceGates('BAAI/bge-large-en-v1.5', res)) return;
-
     const truncated = texts.map((t) => String(t).slice(0, 512));
     const startMs = Date.now();
 
     type EmbedResult = number[][] | number[];
-    const raw = await hfPost<EmbedResult>('BAAI/bge-large-en-v1.5', {
-      inputs: truncated,
-      options: { wait_for_model: true },
-    });
+    const embedCall = await routeHfTaskCall<EmbedResult>(
+      'BAAI/bge-large-en-v1.5',
+      { inputs: truncated, options: { wait_for_model: true } },
+      ['BAAI/bge-m3'],
+    );
+    const raw = embedCall.result;
     // HF returns either number[] (single) or number[][] (batch)
     const embeddings: number[][] = Array.isArray(raw[0])
       ? (raw as number[][])
@@ -580,7 +622,7 @@ router.post('/hf-intelligence/embed', async (req: Request, res: Response) => {
 
     return sendSuccess(res, {
       embeddings,
-      model: 'BAAI/bge-large-en-v1.5',
+      model: embedCall.modelUsed,
       dimensions: embeddings[0]?.length ?? 0,
       count: embeddings.length,
       latencyMs: Date.now() - startMs,
