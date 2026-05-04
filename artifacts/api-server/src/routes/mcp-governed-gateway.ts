@@ -298,12 +298,17 @@ export function recordGatewayMcpCall(
     disposition: needsApproval ? 'pending_approval' : 'allowed',
     approvalId: null,
     proofPacketId: null,
-    resultHash: needsApproval
-      ? null
-      : createHash('sha256').update(`result-${Date.now()}`).digest('hex').slice(0, 16),
+    resultHash: null,
     latencyMs: 0,
     timestamp: new Date().toISOString(),
   };
+
+  if (!needsApproval) {
+    call.resultHash = createHash('sha256')
+      .update(JSON.stringify({ callId: call.callId, toolName, parameters, ts: call.timestamp }))
+      .digest('hex')
+      .slice(0, 16);
+  }
 
   if (needsApproval) {
     const approval: GatewayApproval = {
@@ -797,7 +802,10 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
   approval.reviewNote = req.body?.note ?? null;
   if (call) {
     call.disposition = 'allowed';
-    call.resultHash = createHash('sha256').update(`approved-result-${call.callId}-${Date.now()}`).digest('hex').slice(0, 16);
+    call.resultHash = createHash('sha256')
+      .update(JSON.stringify({ callId: call.callId, toolName: call.toolName, parameters: call.parameters, approvedAt: approval.reviewedAt }))
+      .digest('hex')
+      .slice(0, 16);
     const conn = connections.get(call.connectionId);
     if (conn) {
       conn.approvedCount++;
@@ -1064,12 +1072,17 @@ router.post('/tool-call', (req: Request, res: Response) => {
     disposition: needsApproval ? 'pending_approval' : 'allowed',
     approvalId: null,
     proofPacketId: null,
-    resultHash: needsApproval
-      ? null
-      : createHash('sha256').update(`result-${Date.now()}`).digest('hex').slice(0, 16),
+    resultHash: null,
     latencyMs: 0,
     timestamp: new Date().toISOString(),
   };
+
+  if (!needsApproval) {
+    call.resultHash = createHash('sha256')
+      .update(JSON.stringify({ callId: call.callId, toolName, parameters: parameters ?? {}, ts: call.timestamp }))
+      .digest('hex')
+      .slice(0, 16);
+  }
 
   if (needsApproval) {
     const approvalTier = riskLevel === 'critical'

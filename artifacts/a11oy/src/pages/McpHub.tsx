@@ -264,6 +264,137 @@ function useGatewayData<T>(endpoint: string, interval = 15000): { data: T | null
   return { data, loading };
 }
 
+function ApiKeyManager({ onKeysChanged, keys }: { onKeysChanged: () => void; keys: GatewayApiKeyEntry[] }) {
+  const [creating, setCreating] = useState(false);
+  const [newLabel, setNewLabel] = useState('');
+  const [newRateLimit, setNewRateLimit] = useState('120');
+  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState<string | null>(null);
+
+  const handleCreate = useCallback(async () => {
+    if (!newLabel.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch(`${API_BASE}/mcp-governed-gateway/api-keys`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: newLabel.trim(), rateLimit: parseInt(newRateLimit, 10) || 120 }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCreatedKey(data.key);
+        setNewLabel('');
+        setNewRateLimit('120');
+        onKeysChanged();
+      }
+    } catch { /* ignore */ }
+    setCreating(false);
+  }, [newLabel, newRateLimit, onKeysChanged]);
+
+  const handleRevoke = useCallback(async (keyId: string) => {
+    setRevoking(keyId);
+    try {
+      const res = await fetch(`${API_BASE}/mcp-governed-gateway/api-keys/${keyId}`, { method: 'DELETE' });
+      if (res.ok) onKeysChanged();
+    } catch { /* ignore */ }
+    setRevoking(null);
+  }, [onKeysChanged]);
+
+  return (
+    <div className="space-y-4">
+      <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(201,183,135,0.03)', border: '1px solid rgba(201,183,135,0.08)' }}>
+        <h4 className="text-xs font-semibold mb-3" style={{ color: '#c9b787' }}>Generate API Key</h4>
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <label className="text-[10px] block mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Label</label>
+            <input
+              value={newLabel}
+              onChange={e => setNewLabel(e.target.value)}
+              placeholder="e.g. Claude Desktop — Dev"
+              className="w-full px-3 py-1.5 text-xs rounded-lg bg-black/30 outline-none"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
+            />
+          </div>
+          <div className="w-24">
+            <label className="text-[10px] block mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Rate Limit</label>
+            <input
+              value={newRateLimit}
+              onChange={e => setNewRateLimit(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs rounded-lg bg-black/30 outline-none font-mono"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
+            />
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={creating || !newLabel.trim()}
+            className="px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+            style={{
+              backgroundColor: newLabel.trim() ? 'rgba(201,183,135,0.15)' : 'rgba(255,255,255,0.03)',
+              color: newLabel.trim() ? '#c9b787' : 'rgba(255,255,255,0.2)',
+              border: `1px solid ${newLabel.trim() ? 'rgba(201,183,135,0.3)' : 'rgba(255,255,255,0.06)'}`,
+            }}
+          >
+            {creating ? 'Creating...' : 'Generate'}
+          </button>
+        </div>
+        {createdKey && (
+          <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}>
+            <div className="text-[10px] mb-1 font-semibold" style={{ color: 'rgba(34,197,94,0.8)' }}>Key Generated — Copy and store securely</div>
+            <div className="flex items-center gap-2">
+              <code className="text-xs font-mono flex-1 select-all" style={{ color: 'rgba(34,197,94,0.9)' }}>{createdKey}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(createdKey); }}
+                className="text-[10px] px-2 py-1 rounded font-mono"
+                style={{ color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => setCreatedKey(null)}
+                className="text-[10px] px-2 py-1 rounded font-mono"
+                style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="grid grid-cols-[1fr_120px_120px_80px_80px_80px] px-3 py-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+          <span>Label</span><span>Prefix</span><span>Tenant</span><span>Limit</span><span>Status</span><span>Actions</span>
+        </div>
+        {keys.map(k => (
+          <div key={k.id} className="grid grid-cols-[1fr_120px_120px_80px_80px_80px] px-3 py-2.5 items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{k.label}</span>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(201,183,135,0.7)' }}>{k.prefix}...</span>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>{k.tenantId}</span>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>{k.rateLimit}/m</span>
+            <span className="text-[10px] font-mono" style={{ color: k.revoked ? 'rgba(239,68,68,0.8)' : 'rgba(34,197,94,0.8)' }}>
+              {k.revoked ? 'revoked' : 'active'}
+            </span>
+            <div>
+              {!k.revoked ? (
+                <button
+                  onClick={() => handleRevoke(k.id)}
+                  disabled={revoking === k.id}
+                  className="text-[9px] px-2 py-1 rounded font-mono transition-colors hover:brightness-110"
+                  style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: 'rgba(239,68,68,0.8)', border: '1px solid rgba(239,68,68,0.15)' }}
+                >
+                  {revoking === k.id ? '...' : 'Revoke'}
+                </button>
+              ) : (
+                <span className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>{'\u2014'}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GatewayMonitor() {
   const [gwTab, setGwTab] = useState<'connections' | 'calls' | 'approvals' | 'proofs' | 'keys' | 'connect'>('connections');
   const [refreshKey, setRefreshKey] = useState(0);
@@ -489,22 +620,8 @@ function GatewayMonitor() {
       )}
 
       {gwTab === 'keys' && (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="grid grid-cols-[1fr_120px_120px_100px_80px_100px] px-3 py-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-            <span>Label</span><span>Prefix</span><span>Tenant</span><span>Rate Limit</span><span>Status</span><span>Created</span>
-          </div>
-          {(keysData?.keys ?? []).map(k => (
-            <div key={k.id} className="grid grid-cols-[1fr_120px_120px_100px_80px_100px] px-3 py-2.5 items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{k.label}</span>
-              <span className="text-[10px] font-mono" style={{ color: 'rgba(201,183,135,0.7)' }}>{k.prefix}...</span>
-              <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>{k.tenantId}</span>
-              <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>{k.rateLimit}/min</span>
-              <span className="text-[10px] font-mono" style={{ color: k.revoked ? 'rgba(239,68,68,0.8)' : 'rgba(34,197,94,0.8)' }}>
-                {k.revoked ? 'revoked' : 'active'}
-              </span>
-              <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>{timeAgo(k.createdAt)}</span>
-            </div>
-          ))}
+        <div>
+          <ApiKeyManager onKeysChanged={() => setRefreshKey(k => k + 1)} keys={keysData?.keys ?? []} />
         </div>
       )}
 

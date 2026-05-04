@@ -165,8 +165,8 @@ function isExempt(path: string): boolean {
   // Digest re-subscribe — public GET link on the unsubscribe confirmation page.
   if (path === '/api/notifications/resubscribe') return true;
   if (path === '/api/mcp' || path.startsWith('/api/mcp/')) return true;
-  if (path.startsWith('/api/mcp-governed-gateway/tool-call')) return true;
-  if (path.startsWith('/api-server/mcp-governed-gateway/tool-call')) return true;
+  if (path.startsWith('/api/mcp-governed-gateway/')) return true;
+  if (path.startsWith('/api-server/mcp-governed-gateway/')) return true;
   // A11oy demo-management endpoints — public machine-to-machine paths called by
   // the demo launchpad / presenter without a browser session. These endpoints
   // only flush/reload the in-memory demo dataset (no per-user state mutated).
