@@ -57,6 +57,9 @@ If a secret may have been exposed (committed to git, logged, leaked in a bug rep
 | `ANTHROPIC_API_KEY` | Replit Secrets | Azure Key Vault | Annually + on exposure |
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | Replit Secrets | Azure Key Vault | Annually + on exposure |
 | `HUGGINGFACE_API_KEY` | Replit Secrets | Azure Key Vault | Annually |
+| `HF_TOKEN` | Replit Secrets | Azure Key Vault | Annually (alias of `HUGGINGFACE_API_KEY`) |
+
+> **Hugging Face Xet transport:** Xet is HF's chunk-deduplicated upload/download protocol used by `huggingface_hub>=0.32.0` (pinned in Python substrate workers). It does **not** require a separate secret — `HF_TOKEN` or `HUGGINGFACE_API_KEY` authenticates both standard Hub API calls and Xet transfers. No new secret needs to be provisioned for Xet. See `docs/operations/xet-developer-guide.md` for the full developer workflow.
 
 ### Payment & Integrations
 

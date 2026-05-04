@@ -45,6 +45,7 @@ Last updated: 2026-04-03
 | Service | Provider | Purpose | Data Access | Notes |
 |---------|----------|---------|-------------|-------|
 | HuggingFace Inference API | HuggingFace | AI model inference (Qwen3-8B) | Query text sent to API | Primary AI provider |
+| HuggingFace Hub / Xet | HuggingFace | Model & dataset file transport (chunk-deduplicated Xet protocol) | Model weight bytes during download | No new credential — reuses `HF_TOKEN` / `HUGGINGFACE_API_KEY`; no PII transmitted |
 | OpenAI API | OpenAI | Fallback AI inference | Query text sent to API | Fallback only |
 | Anthropic API | Anthropic | Fallback AI inference | Query text sent to API | Fallback only |
 

@@ -37,6 +37,18 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExpor
 from opentelemetry.trace import SpanKind, StatusCode
 from pydantic import BaseModel, Field
 
+# ─── Hugging Face Xet startup check ──────────────────────────────────────────
+# huggingface_hub>=0.32.0 (pinned in requirements.txt) pulls in hf_xet
+# transitively. This non-fatal check confirms the Xet backend is importable
+# so operators can verify Xet is active at startup. If the import fails (e.g.
+# during a pip install --no-deps dry-run), the worker continues normally.
+try:
+    import hf_xet as _hf_xet  # noqa: F401
+    print(f"[xet] hf_xet {_hf_xet.__version__} loaded — Hugging Face Xet transport active")
+except Exception as _xet_err:
+    print(f"[xet] WARNING: hf_xet not importable ({_xet_err}). "
+          "Ensure huggingface_hub>=0.32.0 is installed. Hub downloads will fall back to HTTP.")
+
 # ─── OpenTelemetry Setup ───────────────────────────────────────────────────────
 
 _resource = Resource.create({"service.name": "szl-substrate-python-worker", "service.version": "1.0.0"})

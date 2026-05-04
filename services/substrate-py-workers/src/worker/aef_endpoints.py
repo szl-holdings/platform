@@ -26,6 +26,20 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+# ─── Hugging Face Xet startup check ──────────────────────────────────────────
+# huggingface_hub>=0.32.0 (pinned in requirements.txt) pulls in hf_xet
+# transitively. This non-fatal check confirms the Xet backend is importable
+# so operators can verify Xet is active at startup. If the import fails (e.g.
+# during a pip install --no-deps dry-run), the worker continues normally.
+_log_xet = structlog.get_logger("xet-check")
+try:
+    import hf_xet as _hf_xet  # noqa: F401
+    _log_xet.info("hf_xet_active", version=_hf_xet.__version__,
+                  note="Hugging Face Xet transport available for Hub downloads")
+except Exception as _xet_err:
+    _log_xet.warning("hf_xet_unavailable", error=str(_xet_err),
+                     note="Ensure huggingface_hub>=0.32.0 is installed; Hub downloads fall back to HTTP")
+
 log = structlog.get_logger(__name__)
 
 aef_router = APIRouter(prefix="/aef", tags=["AEF"])

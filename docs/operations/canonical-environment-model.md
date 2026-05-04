@@ -93,7 +93,7 @@ The SZL Holdings platform operates in three environments. Each environment is is
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP fallback |
 | `OBJECT_STORAGE_BUCKET_ID` | File storage — falls back to local |
 | `ADMIN_PIN` | CMS admin access |
-| `HUGGINGFACE_API_KEY` | HuggingFace inference (optional AI provider) |
+| `HUGGINGFACE_API_KEY` | HuggingFace inference (optional AI provider). Also authenticates Hugging Face Xet chunk-deduplicated transport — no separate Xet credential is required; see `docs/operations/xet-developer-guide.md`. |
 | `MAPBOX_ACCESS_TOKEN` | Map tiles for Terra / Vessels |
 
 ---

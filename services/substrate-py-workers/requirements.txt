@@ -13,6 +13,10 @@ pdfminer.six>=20231228
 pytesseract>=0.3.10
 Pillow>=11.3.0
 pdf2image>=1.17.0
+# huggingface_hub>=0.32.0 pulls in hf_xet transitively, enabling the Xet
+# chunk-deduplicated transport for all Hub model/dataset downloads.
+# No new credential required — existing HF_TOKEN / HUGGINGFACE_API_KEY is reused.
+huggingface_hub>=0.32.0
 pytest>=8.4.0
 pytest-asyncio>=0.23.0
 pytest-xdist>=3.5.0

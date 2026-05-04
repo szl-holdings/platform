@@ -58,8 +58,8 @@ All AI providers are accessed via the Replit AI proxy integration. At least one 
 | `ANTHROPIC_API_KEY` | Conditional | Direct Anthropic API key (legacy / fallback) |
 | `GEMINI_API_KEY` | Conditional | Direct Gemini API key (legacy / fallback) |
 | `AI_EXECUTION_MODE` | Optional | Override AI execution mode (`live` / `demo`) |
-| `HF_TOKEN` | Conditional | HuggingFace API token (for fine-tuning / model evals) |
-| `HUGGINGFACE_API_KEY` | Conditional | HuggingFace API key (alternative to HF_TOKEN) |
+| `HF_TOKEN` | Conditional | HuggingFace API token (for fine-tuning / model evals). Also authenticates Hugging Face Xet uploads/downloads — no separate Xet credential required. |
+| `HUGGINGFACE_API_KEY` | Conditional | HuggingFace API key (alternative to `HF_TOKEN`). Recognised by both `hf_xet` and `git-xet`; either variable is sufficient. |
 
 ---
 

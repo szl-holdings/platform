@@ -32,5 +32,6 @@ Runbooks, deployment, incident response, release management, testing, and enviro
 | [workspace-guide.md](workspace-guide.md) | Replit workspace guide for developers |
 | [replit-operations.md](replit-operations.md) | Replit-specific operational procedures |
 | [codex-handoff.md](codex-handoff.md) | Codex/AI agent handoff guide and context |
+| [xet-developer-guide.md](xet-developer-guide.md) | Hugging Face Xet setup: git-xet install, .gitattributes model patterns, startup checks |
 
-*Last reviewed: 2026-04-20*
+*Last reviewed: 2026-05-04*

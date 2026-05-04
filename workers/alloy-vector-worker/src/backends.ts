@@ -88,6 +88,13 @@ export class DeterministicCpuBackend implements EmbeddingBackend {
  * The model is downloaded from the Hugging Face Hub on first use and cached on
  * disk under `${cacheDir}` (defaults to `~/.cache/huggingface` via the
  * transformers.js library). All inference runs CPU-only — no GPU dependency.
+ *
+ * Hugging Face Xet note: there is no `hf_xet` npm package. Xet is a Hub-side
+ * transport protocol (chunk-deduplicated uploads/downloads) that operates
+ * entirely on the server. When models hosted on the Hub are downloaded here via
+ * @huggingface/transformers, the Hub automatically serves files over Xet if the
+ * repo is Xet-enabled — no client-side code change is needed in this worker.
+ * Authentication reuses the existing HF_TOKEN / HUGGINGFACE_API_KEY env var.
  */
 export class LocalCpuBackend implements EmbeddingBackend {
   readonly kind: BackendKind = 'local-cpu';
