@@ -5,12 +5,18 @@
 
 ---
 
+## Branch Naming Note
+
+The repository's default branch is **`master`** (not `main`). All references in this guide use `master` because that is the actual configured default branch on GitHub. If you rename the default branch to `main` in the future (Settings → Branches → Rename), update branch protection rules and CI workflows accordingly.
+
+---
+
 ## Status of Automated Steps (Already Completed)
 
 | Step | Status | Details |
 |------|--------|---------|
 | Feature branch pushed | Done | `release/github-alignment-2026-05` — full workspace sync |
-| Pull request opened | Done | PR #92 against `master` |
+| Pull request opened | Done | PR #92 against `master` (the repo's default branch) |
 | Repository description | Done | Updated via API to reflect current platform scope |
 | Repository topics | Done | 20 topics set (enterprise-ai, agentic-ai, ai-governance, etc.) |
 | Website URL | Done | Points to https://szlholdings.com |
@@ -77,10 +83,10 @@ Signal detection → AI recommendation → human approval → cryptographic proo
 
 ### 5. Configure Branch Protection Rules
 
-Requires repository admin access:
+Requires repository admin access. Protects the default branch (`master`) from unreviewed changes.
 
 1. Go to **Settings** → **Branches** → **Add branch protection rule**
-2. Branch name pattern: `master`
+2. Branch name pattern: `master` (the repository's default branch — see Branch Naming Note above)
 3. Recommended settings:
    - **Require a pull request before merging** — enforces code review
    - **Require status checks to pass before merging** — select CI, CodeQL, and Security checks once they run
