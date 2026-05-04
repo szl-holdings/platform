@@ -1,4 +1,5 @@
 import type { RouteResult } from './hf-router.js';
+import { enforceInferenceGates } from './inference-gates.js';
 
 export interface HFChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -47,6 +48,10 @@ export async function chatCompletion(
     signal?: AbortSignal;
   },
 ): Promise<HFCompletionResult> {
+  // 5-gate governance check (registry, license, sensitivity, env, creds).
+  // When the api-server is the host it registers a registry-aware checker
+  // so all five gates apply; otherwise the shared module fails closed.
+  enforceInferenceGates(route.model);
   const start = Date.now();
   const body: Record<string, unknown> = {
     model: route.model,
@@ -155,6 +160,8 @@ export async function audioInference(
   modelId: string,
   options?: { contentType?: string; signal?: AbortSignal },
 ): Promise<HFAudioInferenceResult> {
+  // 5-gate governance check applies to ALL HF inference, including audio.
+  enforceInferenceGates(modelId);
   const start = Date.now();
   const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   const headers: Record<string, string> = {

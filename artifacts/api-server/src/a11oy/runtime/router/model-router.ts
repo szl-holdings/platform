@@ -328,6 +328,11 @@ function callMock(req: ModelRequest): ModelResponse {
   };
 }
 
+function isGovernanceGateError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.startsWith('governance_gate_blocked');
+}
+
 export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> {
   const provider = resolveProvider();
   try {
@@ -340,7 +345,10 @@ export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> 
       case 'local': return await callLocal(req);
       default: return callMock(req);
     }
-  } catch {
+  } catch (err) {
+    // Per governance spec: gate blocks must NEVER silently fall back to mock.
+    // Surface the structured error so callers can return a 403 to operators.
+    if (isGovernanceGateError(err)) throw err;
     return callMock(req);
   }
 }
@@ -365,14 +373,18 @@ export async function routeModelCallWithFailover(req: ModelRequest, fallbackMode
   const modelsToTry = [primaryModel, ...fallbackModels.filter(m => m !== primaryModel)];
 
   let lastError: Error | null = null;
+  let allBlockedByGate = true;
   for (const model of modelsToTry) {
     try {
       return await tryCall(model);
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
+      if (!isGovernanceGateError(err)) allBlockedByGate = false;
     }
   }
 
+  // If every attempt was gate-blocked, surface that — never silently mock.
+  if (allBlockedByGate && lastError) throw lastError;
   return callMock(req);
 }
 

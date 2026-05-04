@@ -116,6 +116,20 @@ export function sendServiceUnavailable(res: Response, message = 'Service tempora
 }
 
 export function handleRouteError(res: Response, err: unknown, fallbackMessage: string) {
+  // Governance gate blocks must surface as structured 403 responses regardless
+  // of which call site threw them. Pattern: governance_gate_blocked:<model>:<gates>
+  if (err instanceof Error && err.message.startsWith('governance_gate_blocked:')) {
+    const parts = err.message.split(':');
+    const model = parts[1] ?? 'unknown';
+    const failedGates = (parts.slice(2).join(':') || '').split(',').filter(Boolean);
+    res.status(403).json({
+      error: 'governance_gate_blocked',
+      model,
+      failedGates,
+      message: `Inference blocked for model "${model}": gates [${failedGates.join(', ')}] not satisfied.`,
+    });
+    return;
+  }
   if (err instanceof InvalidIdError) {
     sendBadRequest(res, 'Invalid ID parameter');
     return;

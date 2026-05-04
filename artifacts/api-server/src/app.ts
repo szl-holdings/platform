@@ -19,6 +19,15 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from './lib/api-response';
 import { checkInferenceGates, getGateSummary } from './a11oy/runtime/router/model-router';
+import { setInferenceGateChecker } from '@szl-holdings/ai-engine/providers/inference-gates';
+
+// Register the registry-aware 5-gate checker so every HF entry point in
+// lib/ai-engine (hf-client, connector adapter) enforces the SAME gates as
+// the in-process router. Defense in depth: fails closed without this.
+setInferenceGateChecker((modelId) => {
+  const r = checkInferenceGates(modelId);
+  return { allowed: r.allowed, model: r.model, failedGates: r.failedGates, gates: r.gates };
+});
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';

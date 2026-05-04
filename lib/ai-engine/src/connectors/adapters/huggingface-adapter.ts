@@ -1,4 +1,5 @@
 import { type ConnectorAuthConfig, type ConnectorRateLimitConfig, type ConnectorToolDefinition, BaseConnectorAdapter } from '../connector-interface.js';
+import { enforceInferenceGates } from '../../providers/inference-gates.js';
 
 export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
   connectorId = 'huggingface';
@@ -68,16 +69,25 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
     },
   ];
 
+  // Inference (text_classification, feature_extraction) is gated by the
+  // shared 5-condition governance check used by the router and hf-client.
+  // `search_models` hits the public Hub catalog and is NOT inference, so it
+  // bypasses the gate.
+
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {
     const headers = { ...this.getAuthHeaders(), 'Content-Type': 'application/json' };
 
     if (toolName === 'text_classification') {
       const model = (input.model as string) ?? 'distilbert-base-uncased-finetuned-sst-2-english';
+      enforceInferenceGates(model);
       const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ inputs: input.inputs }),
       });
+      if (!resp.ok) {
+        throw new Error(`hf_classification_error:${resp.status}`);
+      }
       const data = (await resp.json()) as Array<Array<{ label: string; score: number }>>;
       const top = data[0]?.[0];
       return { label: top?.label ?? 'unknown', score: top?.score ?? 0 };
@@ -85,11 +95,15 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
 
     if (toolName === 'feature_extraction') {
       const model = (input.model as string) ?? 'sentence-transformers/all-MiniLM-L6-v2';
+      enforceInferenceGates(model);
       const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ inputs: input.inputs }),
       });
+      if (!resp.ok) {
+        throw new Error(`hf_feature_extraction_error:${resp.status}`);
+      }
       const data = (await resp.json()) as number[][];
       return { embedding: data[0] ?? [] };
     }
