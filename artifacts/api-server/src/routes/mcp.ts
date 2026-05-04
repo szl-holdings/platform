@@ -21,7 +21,7 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, recordGatewayMcpCall } from './mcp-governed-gateway';
+import { gatewayApiKeyGate, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
 
 const router = Router();
 
@@ -1651,7 +1651,7 @@ router.get('/mcp/prompts', authMiddleware({ required: false }), (_req: Request, 
 // Creates a per-session SSEServerTransport backed by a fresh NexusMcpServer
 // instance scoped to the authenticated user's tenant context.
 
-router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), requireAuthOrGatewayKey, async (req: Request, res: Response) => {
   const sessionId = randomUUID();
   const transport = new SSEServerTransport('/api/mcp/message', res);
   sseSessions.set(sessionId, transport);
@@ -1675,6 +1675,7 @@ router.post(
   '/mcp/message',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
+  requireAuthOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = String(req.query['sessionId'] ?? '');
     const transport = sseSessions.get(sessionId);
@@ -1697,6 +1698,7 @@ router.post(
   '/mcp',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
+  requireAuthOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
@@ -1734,6 +1736,7 @@ router.get(
   '/mcp/stream',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
+  requireAuthOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
     if (!sessionId) {

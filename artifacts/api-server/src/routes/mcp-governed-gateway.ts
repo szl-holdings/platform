@@ -132,6 +132,7 @@ export function gatewayApiKeyGate(req: Request, res: Response, next: NextFunctio
     next();
     return;
   }
+  req.gatewayKeyPresented = true;
   const matchedKey = validateGatewayApiKey(bearerKey);
   if (!matchedKey) {
     res.status(401).json({ error: 'Invalid or revoked gateway API key' });
@@ -220,8 +221,23 @@ declare global {
     interface Request {
       gatewayApiKey?: GatewayApiKey;
       gatewayConnection?: ExternalConnection;
+      gatewayKeyPresented?: boolean;
     }
   }
+}
+
+export function requireAuthOrGatewayKey(req: Request, res: Response, next: NextFunction): void {
+  if (req.gatewayApiKey) {
+    next();
+    return;
+  }
+  if (req.user) {
+    next();
+    return;
+  }
+  res.status(401).json({
+    error: 'Authentication required — provide a gateway API key via Authorization: Bearer header, or authenticate via session',
+  });
 }
 
 export function recordGatewayMcpCall(
@@ -597,7 +613,9 @@ function seedDemoData(): void {
   }
 }
 
-seedDemoData();
+if (process.env.NODE_ENV !== 'production') {
+  seedDemoData();
+}
 
 router.get('/stats', (_req: Request, res: Response) => {
   const activeConnections = [...connections.values()].filter(c => c.status === 'active').length;
@@ -729,7 +747,7 @@ router.get('/rate-limits', (_req: Request, res: Response) => {
   res.json({ rateLimits: limits });
 });
 
-router.get('/api-keys', (_req: Request, res: Response) => {
+router.get('/api-keys', authMiddleware(), (_req: Request, res: Response) => {
   const keys = [...apiKeys.values()].map(k => ({
     id: k.id,
     prefix: k.prefix,

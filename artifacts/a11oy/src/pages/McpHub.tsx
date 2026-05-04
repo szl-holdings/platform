@@ -480,7 +480,7 @@ function GatewayMonitor() {
             </div>
           </div>
 
-          {Object.entries(connectData.clients).map(([key, client]: [string, any]) => (
+          {Object.entries(connectData.clients).map(([key, client]) => (
             <div key={key} className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{client.name}</span>
