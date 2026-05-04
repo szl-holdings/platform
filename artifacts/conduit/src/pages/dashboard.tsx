@@ -32,15 +32,15 @@ import {
 function getStatusIcon(status: string) {
   switch (status) {
     case 'success':
-      return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      return <CheckCircle2 className="w-4 h-4 text-[#5a8a6e]" />;
     case 'failed':
-      return <XCircle className="w-4 h-4 text-red-500" />;
+      return <XCircle className="w-4 h-4 text-[#b85450]" />;
     case 'running':
-      return <RefreshCcw className="w-4 h-4 text-yellow-500 animate-spin" />;
+      return <RefreshCcw className="w-4 h-4 text-[#c9b787] animate-spin" />;
     case 'partial':
-      return <CheckCircle2 className="w-4 h-4 text-orange-500" />;
+      return <CheckCircle2 className="w-4 h-4 text-[#d4a853]" />;
     default:
-      return <Clock className="w-4 h-4 text-muted-foreground" />;
+      return <Clock className="w-4 h-4 text-[#666]" />;
   }
 }
 
@@ -49,22 +49,22 @@ function UsageGauge({ label, value, max, unit, color }: { label: string; value: 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
-        <span className="text-xs font-mono text-muted-foreground">{pct.toFixed(1)}%</span>
+        <span className="text-xs font-mono uppercase tracking-widest text-[#8a8a8a]">{label}</span>
+        <span className="text-xs font-mono text-[#666]">{pct.toFixed(1)}%</span>
       </div>
-      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+      <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-lg font-mono font-bold text-foreground">{value.toLocaleString()}</span>
-        <span className="text-xs text-muted-foreground">/ {max.toLocaleString()} {unit}</span>
+        <span className="text-lg font-mono font-bold text-[#f5f5f5]">{value.toLocaleString()}</span>
+        <span className="text-xs text-[#666]">/ {max.toLocaleString()} {unit}</span>
       </div>
     </div>
   );
 }
 
 function AnomalyScore({ score, trend }: { score: number; trend: 'stable' | 'rising' | 'falling' }) {
-  const color = score < 30 ? '#4ade80' : score < 60 ? '#facc15' : score < 85 ? '#fb923c' : '#ef4444';
+  const color = score < 30 ? '#5a8a6e' : score < 60 ? '#c9b787' : score < 85 ? '#d4a853' : '#b85450';
   const trendIcon = trend === 'rising' ? '↗' : trend === 'falling' ? '↘' : '→';
   return (
     <div className="flex items-center gap-3">
@@ -126,19 +126,19 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
         <div>
-          <p className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">CONDUIT · COMPUTE · USAGE</p>
-          <h1 className="text-2xl font-display font-bold tracking-tight">Compute Usage</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time pipeline telemetry, resource utilization, and anomaly detection.</p>
+          <p className="label-mono mb-1">AMARU · COMPUTE · USAGE</p>
+          <h1 className="text-2xl font-display font-bold tracking-tight text-[#f5f5f5]">Compute Usage</h1>
+          <p className="text-sm text-[#8a8a8a] mt-1">Real-time pipeline telemetry, resource utilization, and anomaly detection.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/compute">
-            <Button variant="outline" className="gap-2 font-mono text-xs">
+            <Button variant="outline" className="gap-2 font-mono text-xs border-[rgba(255,255,255,0.08)] text-[#8a8a8a] hover:text-[#c9b787] hover:border-[rgba(201,183,135,0.3)]">
               <Cpu className="w-4 h-4" />
               ORCHESTRATION
             </Button>
           </Link>
           <Link href="/syncs/new">
-            <Button className="gap-2 font-mono text-xs">
+            <Button className="gap-2 font-mono text-xs bg-[#c9b787] text-[#0a0a0a] hover:bg-[#a89868]">
               <Plus className="w-4 h-4" />
               NEW SYNC
             </Button>
@@ -148,34 +148,34 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="conduit-stat p-4 space-y-1 stagger-1">
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Active Syncs</span>
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666]">Active Syncs</span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-mono font-bold">{stats?.activeSyncs || 0}</span>
-            <span className="text-xs text-muted-foreground font-mono">/ {stats?.totalSyncs || 0}</span>
+            <span className="text-2xl font-mono font-bold text-[#f5f5f5]">{stats?.activeSyncs || 0}</span>
+            <span className="text-xs text-[#666] font-mono">/ {stats?.totalSyncs || 0}</span>
           </div>
-          <Activity className="w-3.5 h-3.5 text-primary opacity-60" />
+          <Activity className="w-3.5 h-3.5 text-[#c9b787] opacity-60" />
         </div>
         <div className="conduit-stat p-4 space-y-1 stagger-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Success Rate</span>
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666]">Success Rate</span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-mono font-bold text-green-400">
+            <span className="text-2xl font-mono font-bold text-[#5a8a6e]">
               {stats?.successRate ? (stats.successRate * 100).toFixed(1) : '0.0'}%
             </span>
           </div>
-          <CheckCircle2 className="w-3.5 h-3.5 text-green-500 opacity-60" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-[#5a8a6e] opacity-60" />
         </div>
         <div className="conduit-stat p-4 space-y-1 stagger-3">
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Total Runs</span>
-          <span className="text-2xl font-mono font-bold">{stats?.totalRuns?.toLocaleString() || 0}</span>
-          <PlayCircle className="w-3.5 h-3.5 text-primary opacity-60" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666]">Total Runs</span>
+          <span className="text-2xl font-mono font-bold text-[#f5f5f5]">{stats?.totalRuns?.toLocaleString() || 0}</span>
+          <PlayCircle className="w-3.5 h-3.5 text-[#c9b787] opacity-60" />
         </div>
         <div className="conduit-stat p-4 space-y-1 stagger-4">
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Rows Written</span>
-          <span className="text-2xl font-mono font-bold">{stats?.totalRowsWritten?.toLocaleString() || 0}</span>
-          <Database className="w-3.5 h-3.5 text-primary opacity-60" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666]">Rows Written</span>
+          <span className="text-2xl font-mono font-bold text-[#f5f5f5]">{stats?.totalRowsWritten?.toLocaleString() || 0}</span>
+          <Database className="w-3.5 h-3.5 text-[#c9b787] opacity-60" />
         </div>
-        <div className="conduit-stat p-4 space-y-1 stagger-4 border-l-2 border-l-yellow-500/30">
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Anomaly</span>
+        <div className="conduit-stat p-4 space-y-1 stagger-4 border-l-2 border-l-[rgba(201,183,135,0.3)]">
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#666]">Anomaly</span>
           <AnomalyScore score={23} trend="stable" />
         </div>
       </div>
@@ -184,69 +184,69 @@ export default function Dashboard() {
         <div className="lg:col-span-3 conduit-card p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-mono font-semibold uppercase tracking-wider">Pipeline Throughput</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">24h rolling window · rows/hr + latency</p>
+              <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-[#f5f5f5]">Pipeline Throughput</h2>
+              <p className="text-xs text-[#666] mt-0.5">24h rolling window · rows/hr + latency</p>
             </div>
-            <Badge variant="default" className="text-[10px] font-mono">LIVE</Badge>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(201,183,135,0.3)] text-[#c9b787] bg-[rgba(201,183,135,0.06)]">LIVE</span>
           </div>
           <div className="h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={THROUGHPUT_DATA} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorThroughput" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#c9b787" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#c9b787" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono"
+                <XAxis dataKey="hour" stroke="#555" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono" />
+                <YAxis stroke="#555" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono"
                   tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
                 <Tooltip content={({ active, payload }) => {
                   if (active && payload?.length) {
                     return (
-                      <div className="bg-card border border-border rounded p-2 text-xs font-mono shadow-xl">
-                        <p className="text-foreground font-bold">{Number(payload[0].value).toLocaleString()} rows</p>
-                        <p className="text-muted-foreground">{payload[0].payload.latency}ms avg</p>
+                      <div className="rounded p-2 text-xs font-mono shadow-xl" style={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p className="text-[#f5f5f5] font-bold">{Number(payload[0].value).toLocaleString()} rows</p>
+                        <p className="text-[#8a8a8a]">{payload[0].payload.latency}ms avg</p>
                       </div>
                     );
                   }
                   return null;
                 }} />
-                <Area type="monotone" dataKey="rows" stroke="hsl(var(--primary))" strokeWidth={1.5} fillOpacity={1} fill="url(#colorThroughput)" />
+                <Area type="monotone" dataKey="rows" stroke="#c9b787" strokeWidth={1.5} fillOpacity={1} fill="url(#colorThroughput)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="conduit-card p-5 space-y-4">
-          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider">Resource Utilization</h2>
-          <UsageGauge label="GPU Compute" value={74} max={100} unit="%" color="#06b6d4" />
+          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-[#f5f5f5]">Resource Utilization</h2>
+          <UsageGauge label="GPU Compute" value={74} max={100} unit="%" color="#c9b787" />
           <UsageGauge label="Memory" value={12.4} max={16} unit="GB" color="#a78bfa" />
-          <UsageGauge label="Storage I/O" value={340} max={500} unit="MB/s" color="#4ade80" />
-          <UsageGauge label="Network" value={89} max={100} unit="Gbps" color="#facc15" />
+          <UsageGauge label="Storage I/O" value={340} max={500} unit="MB/s" color="#5a8a6e" />
+          <UsageGauge label="Network" value={89} max={100} unit="Gbps" color="#d4a853" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="conduit-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider">Compute Nodes</h2>
-            <Link href="/compute" className="text-xs text-primary flex items-center gap-1 font-mono hover:underline">
+            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-[#f5f5f5]">Compute Nodes</h2>
+            <Link href="/compute" className="text-xs text-[#c9b787] flex items-center gap-1 font-mono hover:underline">
               ALL <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="space-y-2">
             {COMPUTE_NODES.map(n => (
-              <div key={n.name} className="flex items-center justify-between p-2.5 rounded bg-muted/30 border border-border/50">
+              <div key={n.name} className="flex items-center justify-between p-2.5 rounded border" style={{ background: '#121212', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center gap-2.5">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[#5a8a6e] animate-pulse" />
                   <div>
-                    <p className="text-xs font-mono font-bold">{n.name}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">{n.type} · {n.vram}</p>
+                    <p className="text-xs font-mono font-bold text-[#f5f5f5]">{n.name}</p>
+                    <p className="text-[10px] text-[#666] font-mono">{n.type} · {n.vram}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-mono font-bold" style={{ color: n.util > 80 ? '#fb923c' : '#4ade80' }}>
+                  <span className="text-sm font-mono font-bold" style={{ color: n.util > 80 ? '#d4a853' : '#5a8a6e' }}>
                     {n.util}%
                   </span>
                 </div>
@@ -257,21 +257,21 @@ export default function Dashboard() {
 
         <div className="lg:col-span-2 conduit-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider">Write Volume</h2>
-            <Badge variant="default" className="text-[10px] font-mono">Last 50 runs</Badge>
+            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-[#f5f5f5]">Write Volume</h2>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(255,255,255,0.08)] text-[#8a8a8a]">Last 50 runs</span>
           </div>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <XAxis dataKey="name" hide />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono"
+                <YAxis stroke="#555" fontSize={10} tickLine={false} axisLine={false} fontFamily="JetBrains Mono"
                   tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v} />
                 <Tooltip content={({ active, payload }) => {
                   if (active && payload?.length) {
                     return (
-                      <div className="bg-card border border-border rounded p-2 text-xs font-mono shadow-xl">
-                        <p className="font-bold">{payload[0].value} rows</p>
-                        <p className="text-muted-foreground capitalize">{payload[0].payload.status}</p>
+                      <div className="rounded p-2 text-xs font-mono shadow-xl" style={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p className="font-bold text-[#f5f5f5]">{payload[0].value} rows</p>
+                        <p className="text-[#8a8a8a] capitalize">{payload[0].payload.status}</p>
                       </div>
                     );
                   }
@@ -279,7 +279,7 @@ export default function Dashboard() {
                 }} />
                 <Bar dataKey="rows" radius={[2, 2, 0, 0]}>
                   {chartData.map((d, i) => (
-                    <Cell key={i} fill={d.status === 'success' ? 'hsl(var(--primary))' : d.status === 'failed' ? '#ef4444' : '#facc15'} fillOpacity={0.7} />
+                    <Cell key={i} fill={d.status === 'success' ? '#c9b787' : d.status === 'failed' ? '#b85450' : '#d4a853'} fillOpacity={0.7} />
                   ))}
                 </Bar>
               </BarChart>
@@ -289,33 +289,33 @@ export default function Dashboard() {
       </div>
 
       <div className="conduit-card flex flex-col">
-        <div className="p-5 border-b border-border flex items-center justify-between">
+        <div className="p-5 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider">Recent Pipeline Activity</h2>
+            <Zap className="w-4 h-4 text-[#c9b787]" />
+            <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-[#f5f5f5]">Recent Pipeline Activity</h2>
           </div>
-          <Link href="/runs" className="text-xs text-primary hover:underline flex items-center gap-1 font-mono">
+          <Link href="/runs" className="text-xs text-[#c9b787] hover:underline flex items-center gap-1 font-mono">
             ALL RUNS <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
-        <div className="divide-y divide-border/50">
+        <div className="divide-y divide-[rgba(255,255,255,0.04)]">
           {!stats?.recentRuns?.length ? (
-            <div className="p-8 flex flex-col items-center justify-center text-muted-foreground text-center">
+            <div className="p-8 flex flex-col items-center justify-center text-[#8a8a8a] text-center">
               <Server className="w-8 h-8 mb-2 opacity-30" />
               <p className="text-sm font-mono">No recent sync runs.</p>
-              <p className="text-xs text-muted-foreground mt-1">Create a sync to start moving data.</p>
+              <p className="text-xs text-[#666] mt-1">Create a sync to start moving data.</p>
             </div>
           ) : (
             stats.recentRuns.slice(0, 6).map((run) => (
               <Link key={run.id} href={`/runs/${run.id}`}>
-                <div className="flex items-center justify-between px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer group">
+                <div className="flex items-center justify-between px-5 py-3 hover:bg-[rgba(255,255,255,0.02)] transition-colors cursor-pointer group">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="shrink-0">{getStatusIcon(run.status)}</div>
                     <div className="min-w-0">
-                      <p className="text-sm font-mono font-medium truncate group-hover:text-primary transition-colors">
+                      <p className="text-sm font-mono font-medium truncate group-hover:text-[#c9b787] transition-colors text-[#f5f5f5]">
                         {run.syncName || run.sync?.name || 'Unknown Sync'}
                       </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2 font-mono">
+                      <p className="text-[10px] text-[#666] mt-0.5 flex items-center gap-2 font-mono">
                         <span>{formatDate(run.startedAt)}</span>
                         <span className="opacity-40">·</span>
                         <span>{formatDuration(run.durationMs)}</span>
@@ -323,7 +323,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-4 flex items-center gap-3">
-                    <span className="text-xs font-mono text-muted-foreground">{run.rowsWritten.toLocaleString()} rows</span>
+                    <span className="text-xs font-mono text-[#8a8a8a]">{run.rowsWritten.toLocaleString()} rows</span>
                     <Badge variant={run.status as any} className="capitalize text-[10px] font-mono">
                       {run.status}
                     </Badge>

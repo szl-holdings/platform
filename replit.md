@@ -24,7 +24,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Continuum Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolving into a Proof-Carrying Agentic Execution Platform.
 - **SIGIL (SZL Integrated Governance & Invariant Layer):** A runtime trust framework composing four independent runtime axes (Provenance, Containment, Coherence, Convergence) through a closed-form weighted geometric mean for verifiable and monotonic trust scores.
 
-**UI/UX and Design System:** The Governed-Intelligence Design Language v3 provides a single source of truth for visual design. Default theme is warm-light (cream base #FAF7F2, gold #c9b787 primary accent, cool-slate secondaries). Dark theme available. All authenticated product surfaces are evidence-first, unified by a One-of-One Platform Shell. Typography: Space Grotesk display, Inter body, JetBrains Mono system text.
+**UI/UX and Design System:** The Governed-Intelligence Design Language v3 provides a single source of truth for visual design. All product surfaces now use a unified dark theme aligned to A11oy's design language: #0a0a0a background, gold #c9b787 primary accent, #0e0e0e/#121212/#141414 surface layers, #f5f5f5 primary text, #8a8a8a subtle text, #5a8a6e success, #b85450 error, #d4a853 warning. Typography: Space Grotesk display, Inter body, JetBrains Mono system text. Design inspired by Lambda.ai (bold monospace labels, minimal hero), Anthropic (editorial density), and OpenAI (product card grids).
 
 **API Layers:** The platform offers REST API, GraphQL API (Apollo Server), and an MCP Gateway. An OS-Layer API (`/api/v1/os/*`) provides live data for Decision Center.
 

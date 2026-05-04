@@ -125,7 +125,7 @@ const queryClient = new QueryClient({
 });
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
-const SENTRA_BRAND_ACCENT = '#f5f5f5';
+const SENTRA_BRAND_ACCENT = '#c9b787';
 
 type LazyComp = ReturnType<typeof lazy>;
 type IconComp = ComponentType<{ className?: string }>;
@@ -548,14 +548,14 @@ function SentraSidebarContent({
         <div className="flex items-center gap-2.5">
           <div
             className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(245,245,245,0.06)', border: '1px solid rgba(245,245,245,0.10)' }}
+            style={{ background: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.25)' }}
           >
-            <Shield className="w-4 h-4 text-[#f5f5f5]" />
+            <Shield className="w-4 h-4 text-[#c9b787]" />
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
               <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">Sentra</h1>
-              <p className="text-[10px] truncate font-mono uppercase tracking-wider text-[#f5f5f5]/40">
+              <p className="text-[10px] truncate font-mono uppercase tracking-wider text-[#666]">
                 Cyber Resilience
               </p>
             </div>
@@ -568,31 +568,31 @@ function SentraSidebarContent({
             <div
               className="rounded-lg px-3 py-2.5"
               style={{
-                background: 'rgba(245,245,245,0.03)',
-                border: '1px solid rgba(245,245,245,0.06)',
+                background: 'rgba(201,183,135,0.03)',
+                border: '1px solid rgba(201,183,135,0.1)',
               }}
             >
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[9px] font-mono uppercase tracking-wider text-[#f5f5f5]/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#5a8a6e] animate-pulse" style={{ boxShadow: '0 0 6px rgba(90,138,110,0.5)' }} />
+                <span className="text-[9px] font-mono uppercase tracking-wider text-[#666]">
                   a11oy orchestrated
                 </span>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-white/35">Active agents</span>
-                  <span className="text-[9px] font-mono text-emerald-400">12 online</span>
+                  <span className="text-[10px] text-[#666]">Active agents</span>
+                  <span className="text-[9px] font-mono text-[#5a8a6e]">12 online</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-white/35">Threat posture</span>
-                  <span className="text-[9px] font-mono text-[#f5f5f5]">Guarded</span>
+                  <span className="text-[10px] text-[#666]">Threat posture</span>
+                  <span className="text-[9px] font-mono text-[#c9b787]">Guarded</span>
                 </div>
               </div>
             </div>
             <UsageIndicator
               featureKey="agent_runs"
               label="Agent usage"
-              accentColor="#f5f5f5"
+              accentColor="#c9b787"
               billingHref={`${BASE}/account/billing`}
             />
             <button
@@ -966,7 +966,7 @@ function AppShell({
     return (
       <>
         <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
-        <Suspense fallback={<div style={{ height: '100vh', background: '#09090b' }} />}>
+        <Suspense fallback={<div style={{ height: '100vh', background: '#0a0a0a' }} />}>
           <main id="main-content" tabIndex={-1}>
             <SentraLandingPage />
           </main>
@@ -985,7 +985,7 @@ function AppShell({
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: '#09090b' }}>
+    <div className="flex flex-col h-screen" style={{ background: '#0a0a0a' }}>
       <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
       <SharedDashboardShell
         sidebar={
@@ -1002,7 +1002,7 @@ function AppShell({
           onMouseEnter: () => setSidebarHovered(true),
           onMouseLeave: () => setSidebarHovered(false),
         }}
-        theme={{ sidebarBg: '#09090b', pageBg: '#09090b', headerBg: 'rgba(9,9,11,0.92)' }}
+        theme={{ sidebarBg: '#0e0e0e', pageBg: '#0a0a0a', headerBg: 'rgba(10,10,10,0.92)' }}
         accentColor={accent}
         topbar={
           <div className="flex items-center gap-3 w-full md:hidden">

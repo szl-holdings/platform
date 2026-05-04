@@ -65,7 +65,7 @@ function PatternOfLifePanel() {
         </h2>
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
-          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">
+          <span className="text-[9px] font-mono text-[#666] uppercase tracking-wider">
             Pattern of Life · Live
           </span>
         </div>
@@ -93,13 +93,13 @@ function PatternOfLifePanel() {
           return (
             <div
               key={e.name}
-              className="grid grid-cols-12 gap-2 items-center py-2 border-b border-slate-800/60 last:border-0"
+              className="grid grid-cols-12 gap-2 items-center py-2 border-b border-[rgba(255,255,255,0.06)] last:border-0"
             >
               <div className="col-span-3">
-                <div className="text-[11px] font-mono text-slate-300 truncate">{e.name}</div>
-                <div className="text-[9px] text-slate-600 uppercase">{e.type}</div>
+                <div className="text-[11px] font-mono text-[#e0e0e0] truncate">{e.name}</div>
+                <div className="text-[9px] text-[#555] uppercase">{e.type}</div>
               </div>
-              <div className="col-span-3 text-[10px] text-slate-500 font-mono">
+              <div className="col-span-3 text-[10px] text-[#666] font-mono">
                 {e.normalTraffic}
               </div>
               <div
@@ -116,7 +116,7 @@ function PatternOfLifePanel() {
                 {e.current}
               </div>
               <div className="col-span-2 flex flex-col gap-1">
-                <div className="w-full h-1 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-1 rounded-full bg-[#1a1a1a] overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${barColor}`}
                     style={{ width: barWidth }}
@@ -130,7 +130,7 @@ function PatternOfLifePanel() {
           );
         })}
       </div>
-      <div className="text-[9px] font-mono text-slate-600">
+      <div className="text-[9px] font-mono text-[#555]">
         Baseline computed over rolling 30-day window · Antigena autonomous response: ENABLED
       </div>
     </div>
@@ -144,7 +144,7 @@ function NLThreatQueryBar() {
     <div className="sentra-panel p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Search className="w-4 h-4 text-[#f5f5f5]/60" />
-        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#666]">
           Threat Intelligence Query
         </span>
         <span
@@ -166,7 +166,7 @@ function NLThreatQueryBar() {
           onFocus={() => setActive(true)}
           onBlur={() => setActive(false)}
           placeholder="Ask in plain English — e.g. 'show assets with unusual outbound activity this week'"
-          className="flex-1 bg-transparent text-xs text-slate-300 placeholder:text-slate-600 outline-none"
+          className="flex-1 bg-transparent text-xs text-[#e0e0e0] placeholder:text-[#555] outline-none"
           style={{
             background: 'rgba(201,183,135,0.03)',
             border: `1px solid ${active ? 'rgba(201,183,135,0.25)' : 'rgba(201,183,135,0.08)'}`,
@@ -191,7 +191,7 @@ function NLThreatQueryBar() {
           <button
             key={ex}
             onClick={() => setQuery(ex)}
-            className="text-[9px] font-mono text-slate-600 hover:text-slate-400 transition-colors px-2 py-1 rounded"
+            className="text-[9px] font-mono text-[#555] hover:text-[#8a8a8a] transition-colors px-2 py-1 rounded"
             style={{
               background: 'rgba(255,255,255,0.025)',
               border: '1px solid rgba(255,255,255,0.05)',
@@ -210,10 +210,10 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in">
       <header>
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-3xl font-display font-bold text-slate-100">Cyber Resilience Command</h1>
+          <h1 className="text-3xl font-display font-bold text-[#f5f5f5]">Cyber Resilience Command</h1>
           <DataProvenance source="seed" label="Demo Data" />
         </div>
-        <p className="text-slate-400 mt-1">Operational status and posture overview</p>
+        <p className="text-[#8a8a8a] mt-1">Operational status and posture overview</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -243,7 +243,7 @@ export default function Dashboard() {
             <span className="text-sm font-medium">Recovery Posture</span>
           </div>
           <div className="text-4xl font-display font-bold">{sentraTwin.recoveryPosture}%</div>
-          <div className="w-full bg-slate-800 h-1 mt-3 rounded-full overflow-hidden">
+          <div className="w-full bg-[#1a1a1a] h-1 mt-3 rounded-full overflow-hidden">
             <div
               className="bg-[#8a8a8a] h-full transition-all duration-1000"
               style={{ width: `${sentraTwin.recoveryPosture}%` }}
@@ -274,7 +274,7 @@ export default function Dashboard() {
           </h2>
           <div className="flex items-end gap-3">
             <div className="text-4xl font-display font-bold text-[#8a8a8a]">4.2h</div>
-            <div className="text-xs text-slate-500 mb-1.5">
+            <div className="text-xs text-[#666] mb-1.5">
               estimated mean time to recover (MTTR)
             </div>
           </div>
@@ -287,10 +287,10 @@ export default function Dashboard() {
             ].map((s) => (
               <div key={s.label} className="space-y-1">
                 <div className="flex justify-between text-[10px]">
-                  <span className="text-slate-400">{s.label}</span>
-                  <span className="font-mono text-slate-500">{s.estimate}</span>
+                  <span className="text-[#8a8a8a]">{s.label}</span>
+                  <span className="font-mono text-[#666]">{s.estimate}</span>
                 </div>
-                <div className="w-full h-1 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-1 rounded-full bg-[#1a1a1a] overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{ width: `${s.progress}%`, background: s.color }}
@@ -299,7 +299,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <div className="text-[9px] font-mono text-slate-600">
+          <div className="text-[9px] font-mono text-[#555]">
             Agent-verified · Updated on each control state change
           </div>
         </div>
@@ -320,8 +320,8 @@ export default function Dashboard() {
                     {incident.severity.toUpperCase()}
                   </span>
                 </div>
-                <p className="text-sm text-slate-400 mb-4">{incident.description}</p>
-                <div className="flex items-center gap-6 text-[11px] font-mono text-slate-500">
+                <p className="text-sm text-[#8a8a8a] mb-4">{incident.description}</p>
+                <div className="flex items-center gap-6 text-[11px] font-mono text-[#666]">
                   <div className="flex items-center gap-2">
                     <Zap className="w-3 h-3" />
                     STAGE: {incident.mitreStage}
@@ -342,25 +342,25 @@ export default function Dashboard() {
             Financial Exposure
           </h2>
           <div className="space-y-6">
-            <div className="text-5xl font-display font-bold text-slate-100">
+            <div className="text-5xl font-display font-bold text-[#f5f5f5]">
               ${(sentraTwin.financialExposure / 1000000).toFixed(1)}M
             </div>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[#8a8a8a]">
               Estimated cost avoidance via recommended isolation and recovery actions.
             </p>
 
-            <div className="space-y-3 pt-4 border-t border-slate-800">
+            <div className="space-y-3 pt-4 border-t border-[rgba(255,255,255,0.06)]">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Ransomware Impact</span>
-                <span className="text-slate-300">$1.8M</span>
+                <span className="text-[#666]">Ransomware Impact</span>
+                <span className="text-[#e0e0e0]">$1.8M</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Operational Downtime</span>
-                <span className="text-slate-300">$850K</span>
+                <span className="text-[#666]">Operational Downtime</span>
+                <span className="text-[#e0e0e0]">$850K</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Data Recovery Costs</span>
-                <span className="text-slate-300">$150K</span>
+                <span className="text-[#666]">Data Recovery Costs</span>
+                <span className="text-[#e0e0e0]">$150K</span>
               </div>
             </div>
           </div>
