@@ -47,6 +47,7 @@ const PATH_TO_CATEGORY: Array<{ prefix: string; category: string }> = [
   { prefix: '/recommendations', category: 'continuum' },
   { prefix: '/models', category: 'ai' },
   { prefix: '/prompts', category: 'ai' },
+  { prefix: '/hf-jobs', category: 'compute' },
 ];
 
 /**

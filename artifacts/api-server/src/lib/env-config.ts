@@ -48,6 +48,13 @@ export const ENV_CONFIG = {
     operatorRoles: ['super_admin', 'ops', 'operator'] as string[],
   },
 
+  hfJobs: {
+    token: _env.HF_TOKEN ?? _env.HUGGINGFACE_API_KEY ?? '',
+    namespace: _env.HF_NAMESPACE ?? '',
+    apiBase: _env.HF_API_BASE ?? 'https://huggingface.co',
+    configured: Boolean(_env.HF_TOKEN ?? _env.HUGGINGFACE_API_KEY),
+  },
+
   features: {
     alloyOrchestration: _env.FEATURE_ALLOY_ORCHESTRATION ?? true,
     alloyGovernance: _env.FEATURE_ALLOY_GOVERNANCE ?? true,

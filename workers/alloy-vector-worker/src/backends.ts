@@ -298,5 +298,9 @@ export function createDefaultBackend(): EmbeddingBackend {
   if (backendEnv === 'future-azure') return new FutureAzureBackend();
   if (backendEnv === 'deterministic-cpu') return new DeterministicCpuBackend();
 
+  if (process.env.SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL !== '1') {
+    return new DeterministicCpuBackend();
+  }
+
   return new LocalCpuBackend();
 }

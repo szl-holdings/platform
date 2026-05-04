@@ -14,6 +14,7 @@
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendBadRequest, sendServiceUnavailable, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
+import { checkInferenceGates, type GateCheckResult } from '../a11oy/runtime/router/model-router';
 
 const router: IRouter = Router();
 
@@ -29,6 +30,21 @@ function hfHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
+}
+
+function enforceGates(model: string, res: Response): GateCheckResult | null {
+  const result = checkInferenceGates(model);
+  if (!result.allowed) {
+    res.status(403).json({
+      error: 'governance_gate_blocked',
+      model,
+      failedGates: result.failedGates,
+      gates: result.gates,
+      message: `Inference blocked for model "${model}": gates [${result.failedGates.join(', ')}] not satisfied. Set HF_ENABLE_LIVE_INFERENCE=1 and HF_PRODUCTION_APPROVED=1 to activate.`,
+    });
+    return null;
+  }
+  return result;
 }
 
 async function hfPost<T = unknown>(model: string, body: unknown): Promise<T> {
@@ -97,10 +113,13 @@ const MODEL_CATALOG = [
 ];
 
 router.get('/hf-intelligence/models', (_req: Request, res: Response) => {
+  const gateStatus = checkInferenceGates('catalog-check');
   sendSuccess(res, {
     models: MODEL_CATALOG,
     tokenConfigured: !!getHfToken(),
     inferenceBase: HF_API_BASE,
+    governanceGates: gateStatus.gates,
+    liveInferenceActive: gateStatus.allowed,
   });
 });
 
@@ -118,6 +137,9 @@ router.post('/hf-intelligence/legal/analyze', async (req: Request, res: Response
     if (!text || text.trim().length < 10) {
       return sendBadRequest(res, "'text' is required (min 10 chars)");
     }
+
+    const primaryModel = task === 'summarize' ? 'facebook/bart-large-cnn' : task === 'ner' ? 'dslim/bert-base-NER' : 'facebook/bart-large-mnli';
+    if (!enforceGates(primaryModel, res)) return;
 
     const truncated = text.slice(0, 1500);
     const startMs = Date.now();
@@ -229,6 +251,8 @@ router.post('/hf-intelligence/threat/correlate', async (req: Request, res: Respo
       return sendBadRequest(res, "'indicators' array is required");
     }
 
+    if (!enforceGates('facebook/bart-large-mnli', res)) return;
+
     const startMs = Date.now();
     const combinedText = indicators.join(' | ') + (context ? ` Context: ${context}` : '');
     const truncated = combinedText.slice(0, 1000);
@@ -333,6 +357,8 @@ router.post('/hf-intelligence/vessels/decode-ais', async (req: Request, res: Res
     if (!rawMessage && !mmsi && !vesselName) {
       return sendBadRequest(res, "At least one of 'rawMessage', 'mmsi', or 'vesselName' is required");
     }
+
+    if (!enforceGates('facebook/bart-large-mnli', res)) return;
 
     const startMs = Date.now();
 
@@ -450,6 +476,8 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
       return sendBadRequest(res, "'address' or 'sqft' is required");
     }
 
+    if (!enforceGates('facebook/bart-large-mnli', res)) return;
+
     const startMs = Date.now();
 
     const propertyDesc = [
@@ -533,6 +561,8 @@ router.post('/hf-intelligence/summarize', async (req: Request, res: Response) =>
       return sendBadRequest(res, "'text' is required (min 50 chars)");
     }
 
+    if (!enforceGates('facebook/bart-large-cnn', res)) return;
+
     const truncated = text.slice(0, 3000);
     const startMs = Date.now();
 
@@ -584,6 +614,8 @@ router.post('/hf-intelligence/embed', async (req: Request, res: Response) => {
     if (texts.length > 64) {
       return sendBadRequest(res, 'Maximum 64 texts per request');
     }
+
+    if (!enforceGates('BAAI/bge-large-en-v1.5', res)) return;
 
     const truncated = texts.map((t) => String(t).slice(0, 512));
     const startMs = Date.now();

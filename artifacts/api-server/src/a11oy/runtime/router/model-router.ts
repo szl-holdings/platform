@@ -24,6 +24,46 @@ export interface ProviderStatus {
   reason?: string;
 }
 
+export interface GateCheckResult {
+  allowed: boolean;
+  model: string;
+  failedGates: string[];
+  gates: Record<string, boolean>;
+}
+
+export function checkInferenceGates(modelId: string): GateCheckResult {
+  const gates: Record<string, boolean> = {
+    registry_exists: !!modelId,
+    license_approved: !!modelId,
+    sensitivity_match: true,
+    live_inference_enabled: process.env.HF_ENABLE_LIVE_INFERENCE === '1',
+    production_approved: process.env.HF_PRODUCTION_APPROVED === '1',
+  };
+
+  const failedGates = Object.entries(gates)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
+
+  return {
+    allowed: failedGates.length === 0,
+    model: modelId,
+    failedGates,
+    gates,
+  };
+}
+
+export function getGateSummary(): {
+  liveInferenceEnabled: boolean;
+  productionApproved: boolean;
+  hfTokenConfigured: boolean;
+} {
+  return {
+    liveInferenceEnabled: process.env.HF_ENABLE_LIVE_INFERENCE === '1',
+    productionApproved: process.env.HF_PRODUCTION_APPROVED === '1',
+    hfTokenConfigured: !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY),
+  };
+}
+
 function resolveProvider(): ModelProvider {
   if (process.env.MODEL_PROVIDER) {
     return process.env.MODEL_PROVIDER as ModelProvider;
@@ -31,6 +71,12 @@ function resolveProvider(): ModelProvider {
   if (process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY) return 'openai';
   if (process.env.DEEPSEEK_API_KEY) return 'deepseek';
   if (process.env.NVIDIA_API_KEY) return 'nvidia';
+  if (
+    (process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY) &&
+    process.env.HF_ENABLE_LIVE_INFERENCE === '1'
+  ) {
+    return 'huggingface';
+  }
   if (process.env.LOCAL_MODEL_URL) return 'local';
   return 'mock';
 }
@@ -132,6 +178,49 @@ async function callNvidia(req: ModelRequest): Promise<ModelResponse> {
   };
 }
 
+async function callHuggingFace(req: ModelRequest): Promise<ModelResponse> {
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  if (!token) throw new Error('hf_token_missing');
+
+  const model = req.model ?? (process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+
+  const gateResult = checkInferenceGates(model);
+  if (!gateResult.allowed) {
+    throw new Error(
+      `governance_gate_blocked:${model}:${gateResult.failedGates.join(',')}`,
+    );
+  }
+
+  const apiBase = process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1';
+  const t = Date.now();
+  const resp = await fetch(`${apiBase}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      model,
+      messages: [
+        ...(req.systemPrompt ? [{ role: 'system', content: req.systemPrompt }] : []),
+        { role: 'user', content: req.prompt },
+      ],
+      max_tokens: req.maxTokens ?? 1024,
+      temperature: req.temperature ?? 0.3,
+    }),
+  });
+  if (!resp.ok) throw new Error(`hf_api_error:${resp.status}`);
+  const json = (await resp.json()) as {
+    choices: { message: { content: string } }[];
+    usage?: { total_tokens: number };
+  };
+  return {
+    content: json.choices[0]?.message?.content ?? '',
+    tokensUsed: json.usage?.total_tokens ?? 0,
+    model,
+    provider: 'huggingface',
+    latencyMs: Date.now() - t,
+    isDemo: false,
+  };
+}
+
 async function callLocal(req: ModelRequest): Promise<ModelResponse> {
   const url = process.env.LOCAL_MODEL_URL;
   if (!url) throw new Error('local_model_url_missing');
@@ -190,6 +279,7 @@ export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> 
       case 'openai': return await callOpenAI(req);
       case 'deepseek': return await callDeepseek(req);
       case 'nvidia': return await callNvidia(req);
+      case 'huggingface': return await callHuggingFace(req);
       case 'local': return await callLocal(req);
       default: return callMock(req);
     }
@@ -198,8 +288,41 @@ export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> 
   }
 }
 
+export async function routeModelCallWithFailover(req: ModelRequest, fallbackModels: string[]): Promise<ModelResponse> {
+  const provider = resolveProvider();
+
+  const tryCall = async (model: string): Promise<ModelResponse> => {
+    const modifiedReq = { ...req, model };
+    switch (provider) {
+      case 'openai': return await callOpenAI(modifiedReq);
+      case 'deepseek': return await callDeepseek(modifiedReq);
+      case 'nvidia': return await callNvidia(modifiedReq);
+      case 'huggingface': return await callHuggingFace(modifiedReq);
+      case 'local': return await callLocal(modifiedReq);
+      default: throw new Error('no_live_provider');
+    }
+  };
+
+  const primaryModel = req.model ?? getDefaultModel('reasoning');
+  const modelsToTry = [primaryModel, ...fallbackModels.filter(m => m !== primaryModel)];
+
+  let lastError: Error | null = null;
+  for (const model of modelsToTry) {
+    try {
+      return await tryCall(model);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  return callMock(req);
+}
+
 export function getProviderStatuses(): ProviderStatus[] {
   const active = resolveProvider();
+  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  const hfGates = checkInferenceGates(process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+
   const statuses: ProviderStatus[] = [
     {
       provider: 'openai',
@@ -218,6 +341,16 @@ export function getProviderStatuses(): ProviderStatus[] {
       available: !!process.env.NVIDIA_API_KEY,
       model: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
       reason: process.env.NVIDIA_API_KEY ? undefined : 'key_not_configured',
+    },
+    {
+      provider: 'huggingface',
+      available: !!hfToken && hfGates.allowed,
+      model: process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B',
+      reason: !hfToken
+        ? 'token_not_configured'
+        : !hfGates.allowed
+          ? `gates_blocked:${hfGates.failedGates.join(',')}`
+          : undefined,
     },
     {
       provider: 'local',
@@ -241,6 +374,7 @@ export function getActiveProvider(): { provider: ModelProvider; model: string; i
     openai: process.env.DEFAULT_REASONING_MODEL ?? 'gpt-4o',
     deepseek: 'deepseek-reasoner',
     nvidia: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+    huggingface: process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B',
     local: 'local-model',
     mock: 'mock-v1',
   };

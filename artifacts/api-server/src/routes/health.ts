@@ -6,6 +6,7 @@ import { getBackupHealthStatus } from '../lib/backup-service';
 import { tokenHasScope, verifyInternalHeader } from '../lib/internal-tokens';
 import { Sentry } from '../lib/sentry';
 import { adminGuard } from '../middlewares/admin-guard';
+import { checkInferenceGates, getGateSummary } from '../a11oy/runtime/router/model-router';
 
 /**
  * Apply a lightweight diagnostics guard in production environments.
@@ -124,6 +125,18 @@ router.get('/healthz', async (_req, res) => {
       storage: { status: 'ok', mode: hasCloudStorage ? 'cloud' : 'local' },
       auth: { status: authStatus, mode: hasSessionSecret ? 'configured' : 'missing_secret' },
       ai: { status: 'ok', mode: hasAiKey ? 'live' : 'mock' },
+      huggingface: (() => {
+        const hfToken = !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY);
+        const gates = getGateSummary();
+        const hfGateResult = checkInferenceGates(process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+        return {
+          status: hfToken && hfGateResult.allowed ? 'ok' : hfToken ? 'gates_blocked' : 'unconfigured',
+          tokenConfigured: gates.hfTokenConfigured,
+          liveInferenceEnabled: gates.liveInferenceEnabled,
+          productionApproved: gates.productionApproved,
+          failedGates: hfGateResult.failedGates,
+        };
+      })(),
       errorTracking: {
         status: sentryInitialized ? 'ok' : sentryDsnConfigured ? 'degraded' : 'unconfigured',
         provider: 'sentry',

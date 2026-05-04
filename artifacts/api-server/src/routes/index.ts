@@ -382,6 +382,11 @@ router.use(lazyMatch("/ai-gateway", () => import("./ai-gateway"), "ai-gateway"))
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
 
+// HuggingFace Jobs — governed external compute backend for agents.
+// Owns /hf-jobs/runs, /hf-jobs/schedules, /hf-jobs/flavors, /hf-jobs/summary.
+// Auth-gated; mutating routes pass through Guardian and write to the action ledger.
+router.use(lazyMatch("/hf-jobs", () => import("./hf-jobs"), "hf-jobs"));
+
 // HuggingFace ML Intelligence — legal NLP, threat correlation, AIS decode, property valuation,
 // summarization (bart-large-cnn), and improved RAG embeddings (bge-large-en-v1.5).
 // Public endpoints — no auth required for demo surfaces.

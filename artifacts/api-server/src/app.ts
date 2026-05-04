@@ -18,6 +18,7 @@ import swaggerUi from 'swagger-ui-express';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from './lib/api-response';
+import { checkInferenceGates, getGateSummary } from './a11oy/runtime/router/model-router';
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';
@@ -386,6 +387,18 @@ app.get('/api/health', async (_req: Request, res: Response) => {
         mode: hasSessionSecret ? 'configured' : 'missing_secret',
       },
       ai: { status: probes.ai.status, latencyMs: aiLatencyMs, mode: aiMode },
+      huggingface: (() => {
+        const hfToken = !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY);
+        const gates = getGateSummary();
+        const hfGateResult = checkInferenceGates(process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+        return {
+          status: hfToken && hfGateResult.allowed ? 'ok' : hfToken ? 'gates_blocked' : 'unconfigured',
+          tokenConfigured: gates.hfTokenConfigured,
+          liveInferenceEnabled: gates.liveInferenceEnabled,
+          productionApproved: gates.productionApproved,
+          failedGates: hfGateResult.failedGates,
+        };
+      })(),
     },
     platform: {
       apps: platformApps,

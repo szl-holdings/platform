@@ -52,6 +52,7 @@ export const NAMED_JOB_TYPES = {
   TRACES_RETENTION_PRUNE: "traces_retention_prune",
   OUTCOME_GRAPH_CALIBRATION: "outcome_graph_calibration",
   EXPORT_JOB_PROCESSOR: "export_job_processor",
+  HF_JOBS_STATUS_SYNC: "hf_jobs_status_sync",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -183,6 +184,50 @@ registerEntry({
     'Archives raw analytics_events rows older than the configured retention window (default 90 days, override via ANALYTICS_RETENTION_DAYS env var) into the analytics_events_cold table as compressed JSONB bundles, preserving aggregated rollup metadata. Hot-tier events are deleted after a successful archive batch. Batches of 500 rows keep lock contention minimal on busy tables. Aggregated rollup records (time-bucketed counts stored as properties) are never pruned.',
   schedule: 'daily',
   enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.HF_JOBS_STATUS_SYNC,
+  name: 'HF Jobs Status Sync',
+  description:
+    'Polls HuggingFace Jobs API for active and recently completed runs across the org namespace. Syncs status transitions (queued → running → succeeded/failed/timeout) into the agent run timeline and trace graph. Updates the scheduled-jobs registry view with HF schedule metadata. Remote HF entries are clearly labeled as external compute.',
+  schedule: 'hourly',
+  enabled: true,
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.HF_JOBS_STATUS_SYNC, async (job) => {
+  const start = Date.now();
+  let synced = 0;
+  let transitioned = 0;
+  logger.info({ jobId: job.id }, 'hf_jobs_status_sync: starting');
+  try {
+    const { listJobs } = await import('../services/hf-jobs-adapter.js');
+    const runs = await listJobs();
+    synced = runs.length;
+
+    for (const run of runs) {
+      if (run.status === 'running' || run.status === 'queued') {
+        const { watchJob } = await import('../services/hf-jobs-poller.js');
+        watchJob({ jobId: run.jobId, namespace: run.namespace ?? '', lastStatus: run.status });
+        transitioned++;
+      }
+    }
+
+    logger.info(
+      { jobId: job.id, synced, transitioned, durationMs: Date.now() - start },
+      'hf_jobs_status_sync: completed',
+    );
+    serverTelemetry.recordBusinessEvent('scheduled_job.hf_jobs_status_sync.completed', {
+      synced,
+      transitioned,
+      durationMs: Date.now() - start,
+    });
+  } catch (err) {
+    logger.error({ jobId: job.id, err }, 'hf_jobs_status_sync: failed');
+    serverTelemetry.recordBusinessEvent('scheduled_job.hf_jobs_status_sync.failed', {
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - start,
+    });
+  }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, async (job) => {

@@ -292,17 +292,25 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     return process.env.HUGGINGFACE_API_KEY;
   }
 
+  private get liveInferenceEnabled(): boolean {
+    return process.env.HF_ENABLE_LIVE_INFERENCE === '1';
+  }
+
+  private get productionApproved(): boolean {
+    return process.env.HF_PRODUCTION_APPROVED === '1';
+  }
+
   override get status(): ServiceStatus {
+    if (this.apiKey && this.liveInferenceEnabled && this.productionApproved) return "LIVE_CONFIGURED";
     if (this.apiKey) return "LIVE_CONFIGURED";
     if (this._freeTierAvailable === true) return "LIVE_CONFIGURED";
-    if (this._freeTierAvailable === false) return "MOCKED_DEMO_MODE";
-    return "LIVE_CONFIGURED";
+    return "MOCKED_DEMO_MODE";
   }
 
   override get isLive(): boolean {
-    if (this.apiKey) return true;
-    if (this._freeTierAvailable === false) return false;
-    return true;
+    if (this.apiKey && this.liveInferenceEnabled) return true;
+    if (this._freeTierAvailable === true && this.liveInferenceEnabled) return true;
+    return false;
   }
 
   override get presentEnvVars(): string[] {
@@ -549,9 +557,12 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       };
       this.setCache(cacheKey, result, CACHE_TTL.textGeneration);
       return result;
-    } catch {
-      this.trackRuntimeTier("textGeneration", "mock");
-      return this.mockTextGen(prompt);
+    } catch (err) {
+      if (!this.liveInferenceEnabled) {
+        this.trackRuntimeTier("textGeneration", "mock");
+        return this.mockTextGen(prompt);
+      }
+      throw err;
     }
   }
 
@@ -576,10 +587,13 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const result: HFReasoningResult = { text: rawText, model, tier, cached: false, steps };
       this.setCache(cacheKey, result, CACHE_TTL.reasoning);
       return result;
-    } catch {
-      this.trackRuntimeTier("reasoning", "mock");
-      const mockText = `[Mixtral Reasoning] Analysis of "${prompt.slice(0, 40)}...": Step 1: Identify key variables and constraints. Step 2: Cross-reference with available intelligence data. Step 3: Evaluate multiple hypotheses against evidence. Conclusion: Based on systematic analysis, the most likely scenario involves continued operational activity with moderate risk escalation.`;
-      return { text: mockText, model: "mock-hf-model", tier: "mock", cached: false, steps: options?.steps ? ["Step 1: Identify variables", "Step 2: Cross-reference data", "Step 3: Evaluate hypotheses"] : undefined };
+    } catch (err) {
+      if (!this.liveInferenceEnabled) {
+        this.trackRuntimeTier("reasoning", "mock");
+        const mockText = `[Mixtral Reasoning] Analysis of "${prompt.slice(0, 40)}...": Step 1: Identify key variables and constraints. Step 2: Cross-reference with available intelligence data. Step 3: Evaluate multiple hypotheses against evidence. Conclusion: Based on systematic analysis, the most likely scenario involves continued operational activity with moderate risk escalation.`;
+        return { text: mockText, model: "mock-hf-model", tier: "mock", cached: false, steps: options?.steps ? ["Step 1: Identify variables", "Step 2: Cross-reference data", "Step 3: Evaluate hypotheses"] : undefined };
+      }
+      throw err;
     }
   }
 

@@ -27,6 +27,28 @@ function isDemoMode(): boolean {
   return process.env.A11OY_DEMO_MODE !== 'false';
 }
 
+type LiveExecutorFn = (input: Record<string, unknown>, demo: boolean) => Promise<ToolResult>;
+
+const LIVE_EXECUTORS: Record<string, () => Promise<LiveExecutorFn>> = {
+  submitHfJob: async () => {
+    const { executeSubmitHfJob } = await import('../../../services/hf-jobs-executor.js');
+    return executeSubmitHfJob;
+  },
+  submitHfScheduledJob: async () => {
+    const { executeSubmitHfScheduledJob } = await import('../../../services/hf-jobs-executor.js');
+    return executeSubmitHfScheduledJob;
+  },
+};
+
+async function executeTool(toolId: string, input: Record<string, unknown>, demo: boolean): Promise<ToolResult> {
+  const loader = LIVE_EXECUTORS[toolId];
+  if (loader) {
+    const executor = await loader();
+    return executor(input, demo);
+  }
+  return executeToolMock(toolId, input, demo);
+}
+
 export async function runApprovedTool(opts: ApprovedRunOpts): Promise<ApprovedRunResult> {
   const tool = getTool(opts.toolId);
   if (!tool) {
@@ -65,7 +87,7 @@ export async function runApprovedTool(opts: ApprovedRunOpts): Promise<ApprovedRu
       };
     }
 
-    const toolResult = executeToolMock(opts.toolId, opts.input, demo);
+    const toolResult = await executeTool(opts.toolId, opts.input, demo);
     return {
       ok: true,
       toolResult,
@@ -73,7 +95,7 @@ export async function runApprovedTool(opts: ApprovedRunOpts): Promise<ApprovedRu
     };
   }
 
-  const toolResult = executeToolMock(opts.toolId, opts.input, demo);
+  const toolResult = await executeTool(opts.toolId, opts.input, demo);
   return { ok: true, toolResult };
 }
 
