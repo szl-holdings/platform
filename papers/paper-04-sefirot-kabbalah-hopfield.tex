@@ -1,0 +1,163 @@
+# Sefirot Continual Learning with Kabbalah-Tiered Memory and Hopfield-Amaru Associative Retrieval
+
+**Author:** Stephen Paul Lutar Jr.
+**Affiliation:** SZL Consulting Ltd
+**ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
+**Contact:** stephenlutar2@gmail.com
+**Date:** 4 May 2026
+**Version:** v7
+**Companion papers:** v1--v6 (see References)
+**Reference implementation:** [github.com/szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) -- `packages/ouroboros-integrations/src/sovereign-engine.ts` (SCL, KTM, HAAM, OCM classes)
+**License:** CC BY 4.0
+
+---
+
+## Abstract
+
+We present a continual learning framework that structures knowledge persistence according to the ten Sefirot of Kabbalistic theology, from Keter (Crown, highest abstraction) through Malkhut (Kingdom, operational grounding). Each Sefira defines a memory tier with distinct retention policies, learning rates, and Elastic Weight Consolidation (EWC) penalties. The Kabbalah-Tiered Memory (KTM) implements a three-level storage hierarchy: Core (identity-critical, immutable), Working (session-scoped, LRU-evicted), and Episodic (time-decaying, Ebbinghaus-curve). We extend this with Hopfield-Amaru Associative Memory (HAAM), implementing modern Hopfield networks (Ramsauer et al., 2020; Hopfield 2024 Nobel) with exponential capacity and ceque-indexed pattern slots. The Ouroboros Conformal Memory (OCM) provides a circular buffer with conformal rescaling for long-range context persistence. This paper continues the thesis lineage from v3 (trust aggregation) through v6 (safety guardrails), addressing the memory and continual learning substrate.
+
+This paper does **not** claim empirical superiority over standard continual learning methods on Split-CIFAR or Permuted-MNIST. The contribution is the formal architecture.
+
+---
+
+## 1. Motivation and Continuity from v3--v6
+
+The v3--v6 papers established trust aggregation, energy-mass-information signatures, knowledge retrieval, and safety guardrails. All of these systems require a *memory substrate* that persists knowledge across sessions while preventing catastrophic forgetting. The present paper addresses this requirement.
+
+Catastrophic forgetting remains a central challenge in continual learning (Kirkpatrick et al., 2017). Existing approaches --- EWC, progressive neural networks, experience replay --- treat memory as a homogeneous resource. We propose that the Kabbalistic Sefirot provide a natural hierarchical decomposition of knowledge importance.
+
+---
+
+## 2. Sefirot Continual Learning (SCL)
+
+### 2.1 Sefirot Tiers
+
+The ten Sefirot are organized into three pillars (Right/Mercy, Left/Severity, Center/Harmony) and ten tiers:
+
+| Tier | Sefira | Pillar | Learning Rate \( \eta \) |
+|---|---|---|---|
+| 1 | Keter (Crown) | Center | 0.001 |
+| 2 | Chokmah (Wisdom) | Right | 0.005 |
+| 3 | Binah (Understanding) | Left | 0.01 |
+| 4 | Chesed (Loving-kindness) | Right | 0.02 |
+| 5 | Gevurah (Severity) | Left | 0.03 |
+| 6 | Tiferet (Beauty) | Center | 0.05 |
+| 7 | Netzach (Victory) | Right | 0.08 |
+| 8 | Hod (Splendor) | Left | 0.10 |
+| 9 | Yesod (Foundation) | Center | 0.15 |
+| 10 | Malkhut (Kingdom) | Center | 0.20 |
+
+The forgetting budget at Hermetic temperature \( H \):
+
+\[
+B(H) = \sum_{s=1}^{10} \eta_s \cdot e^{-s/H} \cdot \text{tier\_weight}(s)
+\]
+
+### 2.2 Elastic Weight Consolidation per Sefira
+
+For each Sefira \( s \) with Fisher information matrix \( F_s \) and parameter shift \( \Delta\theta_s \):
+
+\[
+\Omega_{\text{EWC}}^{(s)} = \frac{\lambda_s}{2} \sum_i F_{s,ii} (\Delta\theta_{s,i})^2
+\]
+
+where \( \lambda_s = 1/\eta_s \) ensures higher Sefirot (lower learning rates) receive stronger consolidation penalties. This connects to the v3 Lutar Invariant's zero-pinning axiom: identity-critical knowledge in Keter has \( \lambda_1 = 1000 \), effectively immutable.
+
+---
+
+## 3. Kabbalah-Tiered Memory (KTM)
+
+Three memory tiers:
+
+1. **Core:** Immutable identity-critical knowledge. Capacity: 64 entries. Never evicted. Maps to Keter-Chokmah-Binah (Sefirot 1--3).
+2. **Working:** Session-scoped active context. Capacity: 256 entries. LRU eviction. Maps to Chesed-Tiferet (Sefirot 4--6).
+3. **Episodic:** Time-decaying experience traces. Capacity: 1024 entries. Ebbinghaus decay: \( R(t) = e^{-t/S} \) where \( S \) is memory strength. Maps to Netzach-Malkhut (Sefirot 7--10).
+
+Cross-tier promotion occurs when episodic memories exceed the working-memory threshold, and working memories persisting across sessions are candidates for core promotion.
+
+---
+
+## 4. Hopfield-Amaru Associative Memory (HAAM)
+
+### 4.1 Classical and Modern Hopfield Energy
+
+Classical Hopfield energy (Hopfield, 1982):
+
+\[
+E_{\text{classical}}(\mathbf{x}) = -\frac{1}{2} \sum_{\mu=1}^{P} (\mathbf{x} \cdot \boldsymbol{\xi}^\mu)^2
+\]
+
+Modern Hopfield energy (Ramsauer et al., 2020):
+
+\[
+E_{\text{modern}}(\mathbf{x}) = -\text{lse}(\beta \, \Xi^T \mathbf{x}) + \frac{1}{2}\|\mathbf{x}\|^2 + \text{const}
+\]
+
+where \( \text{lse} \) is the log-sum-exp function and \( \beta \) is inverse temperature.
+
+**Capacity theorem:** The modern Hopfield network has storage capacity \( P = O(2^{d/2}) \) for patterns in \( \mathbb{R}^d \), compared to \( P = O(d) \) for the classical network.
+
+### 4.2 Amaru Cascade Extension
+
+HAAM extends the modern Hopfield network with:
+
+1. **Ceque-indexed slots:** Each pattern is assigned to one of 41 ceque lines based on its content hash, enabling structured retrieval by ceque sector. This connects to the v4 ICRC sub-formulas.
+2. **Attention-like retrieval:** The update rule \( \mathbf{x}_{\text{new}} = \Xi \cdot \text{softmax}(\beta \, \Xi^T \mathbf{x}) \) mirrors the transformer attention mechanism (Vaswani et al., 2017). HAAM provides a biologically plausible precursor to attention.
+3. **Conformal integration:** Retrieved patterns feed into the OCM conformal rescaling, allowing the memory system to operate across conformal scales (v4, Section 2).
+
+---
+
+## 5. Ouroboros Conformal Memory (OCM)
+
+The OCM provides a circular session-keyed buffer:
+
+\[
+\text{OCM}(\text{session}, k, v) = \text{conformal\_rescale}\left(\frac{v}{\|v\|}, \Omega(k)\right)
+\]
+
+where \( \Omega(k) = \text{hash}(k) \bmod 7 + 1 \) determines the conformal scale factor, cycling through seven levels corresponding to the seven Hermetic principles (v6, Section 2).
+
+---
+
+## 6. Integration with the Thesis Lineage
+
+| Version | Component | Role in Memory |
+|---|---|---|
+| v3 | Lutar Invariant | Trust scoring of memory entries |
+| v4 | Omega Formalism | Noether closure for memory consistency |
+| v5 | Prisca-GraphRAG | Retrieval from memory stores |
+| v6 | HCG/NJE | Guard on memory-influenced outputs |
+| v7 (this) | SCL/KTM/HAAM/OCM | Memory substrate |
+
+---
+
+## 7. What this paper does and does not claim
+
+**Claims:**
+1. The Sefirot tier structure is well-defined and maps to a principled continual learning hierarchy.
+2. The EWC penalty scaling \( \lambda_s = 1/\eta_s \) ensures monotonic importance ordering.
+3. The HAAM capacity theorem follows from Ramsauer et al. (2020).
+4. All components are implemented in the public reference implementation.
+
+**Non-claims:**
+- No empirical comparison on standard continual learning benchmarks.
+- No claim that the Kabbalistic labeling has operational meaning beyond structural analogy.
+- No claim of deployed production use.
+
+---
+
+## 8. Conclusion
+
+The Sefirot-tiered continual learning framework provides a principled, hierarchically structured approach to catastrophic forgetting prevention. HAAM provides exponential-capacity associative retrieval with ceque-indexed structure, and OCM maintains conformal session context. The framework extends the v3--v6 thesis lineage to the memory substrate layer.
+
+---
+
+## References
+
+1. Kirkpatrick, J. et al. (2017). Overcoming catastrophic forgetting in neural networks. *PNAS*, 114(13):3521--3526.
+2. Hopfield, J.J. (1982). Neural networks and physical systems with emergent collective computational abilities. *PNAS*, 79(8):2554--2558.
+3. Ramsauer, H. et al. (2020). Hopfield networks is all you need. *ICLR 2021*.
+4. Vaswani, A. et al. (2017). Attention is all you need. *NeurIPS*.
+5. Scholem, G. (1974). *Kabbalah*. Keter Publishing.
+6. Ebbinghaus, H. (1885). *Ueber das Gedaechtniss*.
+7. Lutar, S.P. (2026a--f). Ouroboros Thesis series v1--v6. See companion papers.
