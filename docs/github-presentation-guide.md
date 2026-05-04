@@ -136,7 +136,7 @@ After merging the PR, visit https://github.com/szl-holdings/szl-holdings-platfor
 These were set via the GitHub API and can be modified in **Settings** → **General**:
 
 **Description:**
-> Governed AI decision infrastructure for high-consequence enterprise operations. Signal detection → AI recommendation → human approval → cryptographic proof — across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. TypeScript monorepo, 14 artifacts, React + Express + PostgreSQL.
+> Governed AI decision infrastructure for high-consequence enterprise operations. Signal detection → AI recommendation → human approval → cryptographic proof — across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. TypeScript monorepo, React + Express + PostgreSQL.
 
 **Topics (20):**
 enterprise-ai, agentic-ai, ai-governance, workflow-automation, human-in-the-loop, typescript, react, postgresql, pnpm-monorepo, decision-intelligence, proof-chain, cybersecurity, real-estate-tech, maritime-tech, govtech, vite, express, drizzle-orm, multi-tenant, audit-trail
