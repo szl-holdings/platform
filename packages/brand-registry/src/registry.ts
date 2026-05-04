@@ -101,18 +101,18 @@ export const registry: BrandRegistry = {
 
   products: [
     {
-      id: 'lyte',
-      name: 'Lyte',
-      tagline: 'Decision Intelligence Platform',
+      id: 'a11oy',
+      name: 'A11oy',
+      tagline: 'Brand Orchestration & Decision Intelligence',
       category: 'Decision Intelligence',
       oneLiner:
-        'Governed decision intelligence that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs.',
+        'Governed decision intelligence and brand orchestration layer that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs.',
       description:
-        'Governed decision intelligence platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Built on the PRAXIS framework — Pulse, Risk, Action, eXecution, Intelligence, Signals.',
+        'Governed decision intelligence and brand orchestration platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Consolidates the former Lyte Decision Intelligence capability with the A11oy orchestration layer.',
       status: 'live',
       doctrineRole: 'OBSERVE',
-      link: '/command/operations/',
-      color: '#f59e0b',
+      link: '/a11oy/',
+      color: '#c9b787',
     },
     {
       id: 'continuum',
@@ -213,7 +213,7 @@ export const registry: BrandRegistry = {
 
   boilerplate: {
     aboutSzl:
-      'SZL Holdings is a technology holding company building a governed portfolio of enterprise intelligence platforms. Founded in 2021, our six operating platforms — Lyte, Counsel, Aegis, Vessels, Terra, and Carlota Jo — share a common execution fabric, compounding intelligence across every vertical. Every AI agent we deploy advises; humans confirm; the proof chain records everything.',
+      'SZL Holdings is a technology holding company building a governed portfolio of enterprise intelligence platforms. Founded in 2021, our operating platforms -- A11oy, Counsel, Aegis, Vessels, Terra, and Carlota Jo -- share a common execution fabric, compounding intelligence across every vertical. Every AI agent we deploy advises; humans confirm; the proof chain records everything.',
     footerRightsReserved: 'All rights reserved.',
     footerTagline: 'Governed Autonomy',
     governancePhilosophy: 'AI agents advise; humans confirm; the proof chain records everything.',

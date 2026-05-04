@@ -32,7 +32,7 @@ export const APP_VERSION = '0.1.0';
 export const PLATFORM_APPS = [
   { slug: 'szl-holdings', name: 'SZL Holdings', icon: 'Building2', color: '#8b5cf6' },
   { slug: 'continuum', name: 'Counsel — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
-  { slug: 'lyte', name: 'KORA Command Center', icon: 'ShoppingBag', color: '#a855f7' },
+  { slug: 'a11oy', name: 'A11oy — Decision Intelligence', icon: 'Sparkles', color: '#c9b787' },
   { slug: 'vessels', name: 'SEXTANT Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
   { slug: 'beacon', name: 'DOMAINE', icon: 'BarChart3', color: '#0ea5e9' },
   { slug: 'rosie', name: 'PARAGON Operations', icon: 'AlertTriangle', color: '#ef4444' },
@@ -118,17 +118,17 @@ export const APP_INTEGRATIONS: Record<
     ],
     doctrineRole: 'OBSERVE',
   },
-  lyte: {
-    connectors: ['stripe', 'hubspot', 'gmail', 'storage', 'posthog', 'shipping', 'bls'],
+  a11oy: {
+    connectors: ['ai', 'stripe', 'hubspot', 'gmail', 'storage', 'posthog', 'shipping', 'bls'],
     description:
-      'Commerce command center uses BLS live unemployment rate, GitHub trending repositories, and live tech news from TechCrunch + The Verge RSS feeds.',
+      'A11oy brand orchestration and decision intelligence layer. Consolidates former Lyte decision intelligence with BLS live unemployment rate, GitHub trending repositories, and live tech news feeds.',
     liveFeeds: [
       'BLS Unemployment Rate API (live, LNS14000000)',
       'GitHub Public API — Trending Repositories',
       'TechCrunch Live RSS',
       'The Verge Live RSS',
     ],
-    doctrineRole: 'EXECUTE',
+    doctrineRole: 'OBSERVE',
   },
   continuum: {
     connectors: ['ai', 'storage', 'monitoring', 'microsoft-graph'],

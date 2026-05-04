@@ -1,26 +1,21 @@
 /**
- * Lyte — Alloy Agentic RAG client.
+ * A11oy Decision Intelligence -- Agentic RAG client.
  *
- * Replaces ad-hoc decision intelligence RAG calls with the unified
- * Alloy Agentic RAG platform. One SDK, one API.
+ * Consolidated from former Lyte Decision Intelligence into A11oy.
+ * Uses the unified Alloy Agentic RAG platform. One SDK, one API.
  */
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import type { AgenticRagRequest, AgenticRagResponse } from '@szl-holdings/alloy-client';
 
-export interface LyteDecisionInput {
+export interface DecisionIntelligenceInput {
   query: string;
   decisionContext?: string;
   sessionId?: string;
   orgId?: number;
 }
 
-/**
- * Run an agentic RAG query for Lyte decision intelligence.
- * Uses CoT decomposition to break the decision query into parallel
- * evidence-gathering tasks and synthesises a decision-ready answer.
- */
-export async function runLyteAgenticRag(
-  input: LyteDecisionInput,
+export async function runDecisionIntelligenceRag(
+  input: DecisionIntelligenceInput,
 ): Promise<AgenticRagResponse> {
   const fullQuery = input.decisionContext
     ? `${input.query}\n\nDecision context: ${input.decisionContext}`
@@ -29,7 +24,7 @@ export async function runLyteAgenticRag(
   const request: AgenticRagRequest = {
     query: fullQuery,
     context: {
-      domain: 'lyte',
+      domain: 'a11oy',
       sessionId: input.sessionId,
       orgId: input.orgId,
     },
@@ -47,6 +42,6 @@ export async function runLyteAgenticRag(
   });
 }
 
-export async function getLyteAgenticRagTrace(runId: string): Promise<unknown> {
+export async function getDecisionIntelligenceRagTrace(runId: string): Promise<unknown> {
   return apiFetch<unknown>(`/alloy/agentic-rag/runs/${runId}/trace`);
 }

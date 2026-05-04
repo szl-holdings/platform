@@ -62,7 +62,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 - **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs.
 - **Cognitive Reflexivity Engine:** A self-observing, self-improving governed cognition layer that closes the loop from telemetry to self-model adaptation.
 - **Ouroboros Integrations & Lambda Engine:** Unified 9-axis Lutar Invariant pipeline orchestrated by A11oy. Includes Adaptive Depth Routing.
-- **A11oy Orchestrator:** The unified control plane for guard decisions, Lambda Engine, and model routing.
+- **A11oy Orchestrator:** The unified control plane for guard decisions, Lambda Engine, model routing, and Decision Intelligence (consolidated from former Lyte platform).
 - **Convergence Pulse:** Real-time Lambda-9 trust heartbeat.
 - **Sovereign Engine v22-44 (XI-COMPLETE):** All 44 SZL original innovations fully operational in TypeScript, including A11oy Propeller Drive (APD), SOTA Agentic Router (SAR), Language Arbitrage Engine (LAE, A_lang formula), PagedAttention KV Cache (PKC), Ultra Router with Speculative Decoding (URS), and Xi Unification Invariant with Multi-Agent Council (XUC -- Xi = L_Omega * P_Lambda * sigmoid(A_lang) * 1/(1+H_dialog), 7-agent handoff roster, council deliberation).
 - **Ouroboros Thesis Papers:** Consolidated arXiv-format papers (v1-v12) detailing the Lutar Omega Formalism, Prisca-GraphRAG, Hermetic AI Safety, Sefirot-Kabbalah Hopfield, Free-Energy Predictive Coding, Tawa SAE Interpretability, EPR-Bell Sacred Geometry, Chinchilla-Lutar Scaling/Grokking/Bifurcation, and Propeller-Drive SOTA Routing.

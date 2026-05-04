@@ -24,10 +24,6 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/lyte-command-center: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "artifacts/counsel: web"
 
 [[workflows.workflow.tasks]]
@@ -53,18 +49,6 @@ args = "artifacts/conduit: web"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "api-integration-tests"
-
-[[workflows.workflow]]
-name = "artifacts/lyte-command-center: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
-waitForPort = 9090
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow]]
 name = "artifacts/counsel: web"
