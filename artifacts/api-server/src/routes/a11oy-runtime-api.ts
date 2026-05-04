@@ -33,7 +33,9 @@ import {
 } from '../a11oy/runtime/workcells/engine.js';
 import { listTraces, getTrace, exportTrace } from '../a11oy/runtime/tracing/store.js';
 import { listSkills, getSkill, executeSkill } from '../a11oy/skills/index.js';
-import { getProviderStatuses, getActiveProvider } from '../a11oy/runtime/router/model-router.js';
+import { getProviderStatuses, getActiveProvider, getGateSummary } from '../a11oy/runtime/router/model-router.js';
+import { getBridgeStatus, startHealthCheckLoop } from '../a11oy/runtime/substrate-worker-bridge.js';
+import { listModelEntries, getModelEntry, getRegistrySummary, checkHfLiveRoutingGate } from '../a11oy/runtime/model-registry.js';
 import { generatePlan } from '../a11oy/runtime/operator/planner.js';
 import {
   createRun,
@@ -887,7 +889,74 @@ router.get('/a11oy/operator/runs/:id/audit', (req: Request, res: Response) => {
   ok(res, run.auditLog, { runId: run.runId, total: run.auditLog.length });
 });
 
+router.get('/orchestrator/python-worker/status', (_req: Request, res: Response) => {
+  const bridge = getBridgeStatus();
+  const gateSummary = getGateSummary();
+  ok(res, {
+    workerUrl: bridge.workerUrl,
+    configured: bridge.configured,
+    health: bridge.healthy ? 'healthy' : 'unhealthy',
+    ready: bridge.ready,
+    capabilities: bridge.capabilities,
+    activeClaims: bridge.activeClaims,
+    safetyGates: {
+      ...bridge.safetyGates,
+      hfLiveInferenceEnabled: gateSummary.liveInferenceEnabled,
+      hfProductionApproved: gateSummary.productionApproved,
+    },
+    livePythonStagesPermitted: bridge.livePythonStagesPermitted,
+    lastHealthCheck: bridge.lastHealthCheck,
+    lastError: bridge.lastError,
+  });
+});
+
+router.get('/a11oy/models/registry', (req: Request, res: Response) => {
+  const { provider, capability } = req.query as Record<string, string>;
+  const entries = listModelEntries({ provider, capability });
+  const summary = getRegistrySummary();
+  ok(res, entries, { ...summary, total: entries.length });
+});
+
+router.get('/a11oy/models/registry/:id', (req: Request, res: Response) => {
+  const entry = getModelEntry(req.params.id);
+  if (!entry) return err(res, 404, 'not_found', `Model "${req.params.id}" not found in registry.`);
+  const hfGate = entry.provider === 'huggingface' ? checkHfLiveRoutingGate(entry.modelId) : null;
+  ok(res, { ...entry, hfGateResult: hfGate });
+});
+
+router.get('/a11oy/control-tower/status', (_req: Request, res: Response) => {
+  const bridge = getBridgeStatus();
+  const modelSummary = getRegistrySummary();
+  const { provider, model, isDemo } = getActiveProvider();
+  const gateSummary = getGateSummary();
+  const providers = getProviderStatuses();
+
+  ok(res, {
+    workerBridge: {
+      status: bridge.configured ? (bridge.healthy ? 'connected' : 'disconnected') : 'not-configured',
+      configured: bridge.configured,
+      healthy: bridge.healthy,
+      ready: bridge.ready,
+      livePythonStagesPermitted: bridge.livePythonStagesPermitted,
+      capabilities: bridge.capabilities,
+      activeClaims: bridge.activeClaims,
+    },
+    modelRouter: {
+      activeProvider: provider,
+      activeModel: model,
+      isDemo,
+      providers,
+      gateSummary,
+    },
+    modelRegistry: modelSummary,
+    safetyGates: bridge.safetyGates,
+  });
+});
+
+startHealthCheckLoop();
+
 logger.debug('[a11oy-runtime-api] Phase 2 runtime routes registered — operators, tools, MirrorEval, PCE gate, Workcells, Skills all active');
 logger.debug('[a11oy-runtime-api] Operator Runtime routes registered — /operator/plan, /operator/runs, step approve/reject/execute, replay');
+logger.debug('[a11oy-runtime-api] Orchestrator routes registered — /orchestrator/python-worker/status, /a11oy/models/registry, /a11oy/control-tower/status');
 
 export default router;

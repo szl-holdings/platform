@@ -1,4 +1,5 @@
 import type { ModelProvider } from '../types.js';
+import { checkHfLiveRoutingGate } from '../model-registry.js';
 
 export interface ModelRequest {
   prompt: string;
@@ -32,12 +33,14 @@ export interface GateCheckResult {
 }
 
 export function checkInferenceGates(modelId: string): GateCheckResult {
+  const registryGate = checkHfLiveRoutingGate(modelId);
+
   const gates: Record<string, boolean> = {
-    registry_exists: !!modelId,
-    license_approved: !!modelId,
-    sensitivity_match: true,
-    live_inference_enabled: process.env.HF_ENABLE_LIVE_INFERENCE === '1',
-    production_approved: process.env.HF_PRODUCTION_APPROVED === '1',
+    registry_exists: registryGate.conditions.registry_record_exists,
+    license_approved: registryGate.conditions.license_approved,
+    sensitivity_match: registryGate.conditions.sensitivity_match,
+    live_inference_enabled: registryGate.conditions.hf_live_inference_enabled,
+    production_approved: registryGate.conditions.hf_production_approved,
   };
 
   const failedGates = Object.entries(gates)

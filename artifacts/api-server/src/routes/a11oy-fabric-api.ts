@@ -6,6 +6,16 @@ import {
   SEED_POLICIES,
   SEED_PROOF_PACKETS,
 } from '@workspace/a11oy-fabric/seed';
+import {
+  findApprovalByAction,
+  createApprovalRecord,
+  approveAction as approveApprovalRecord,
+  runPCEGate,
+} from '../a11oy/runtime/governance/pce-gate.js';
+import {
+  getWorkcell,
+  advanceWorkcell,
+} from '../a11oy/runtime/workcells/engine.js';
 
 const router = Router();
 
@@ -52,17 +62,6 @@ function ok<T>(res: Response, data: T, meta?: Record<string, unknown>) {
   res.json({ ok: true, data, meta: { ...meta, timestamp: now(), mode: 'demo', phase: 'Phase 1 — Foundation' } });
 }
 
-function notImplemented(res: Response, operation: string) {
-  res.status(501).json({
-    ok: false,
-    error: {
-      type: 'not_implemented',
-      message: `Operation "${operation}" is not yet available.`,
-      retryable: false,
-      suggestion: 'This mutating endpoint will be implemented in the A11oy Phase 2 agent runtime. Read-side endpoints are fully operational.',
-    },
-  });
-}
 
 router.get('/a11oy/now', (_req: Request, res: Response) => {
   const bySeverity = SEED_SIGNALS.reduce<Record<string, number>>((acc, s) => {
@@ -116,8 +115,71 @@ router.get('/a11oy/actions', (_req: Request, res: Response) => {
   ok(res, ACTIONS, { total: ACTIONS.length });
 });
 
-router.post('/a11oy/actions/:id/approve', (req: Request, res: Response) => notImplemented(res, `approve action ${req.params.id}`));
-router.post('/a11oy/actions/:id/execute', (req: Request, res: Response) => notImplemented(res, `execute action ${req.params.id}`));
+router.post('/a11oy/actions/:id/approve', async (req: Request, res: Response) => {
+  try {
+    const action = ACTIONS.find(a => a.id === req.params.id);
+    if (!action) {
+      res.status(404).json({ ok: false, error: { type: 'not_found', message: `Action "${req.params.id}" not found.`, retryable: false } });
+      return;
+    }
+    if (!action.requiresApproval) {
+      res.status(400).json({ ok: false, error: { type: 'validation', message: 'This action does not require approval.', retryable: false } });
+      return;
+    }
+    if (action.status === 'approved') {
+      res.status(409).json({ ok: false, error: { type: 'conflict', message: 'Action is already approved.', retryable: false } });
+      return;
+    }
+    const { approvedBy } = req.body as { approvedBy?: string };
+    if (!approvedBy) {
+      res.status(400).json({ ok: false, error: { type: 'validation', message: 'approvedBy is required.', retryable: false } });
+      return;
+    }
+    let approval = findApprovalByAction(action.id);
+    if (!approval) {
+      approval = createApprovalRecord({ actionId: action.id, tier: action.approvalTier });
+    }
+    const updated = approveApprovalRecord(approval.approvalId, approvedBy);
+    action.status = 'approved';
+    ok(res, { actionId: action.id, status: 'approved', approvalRecord: updated });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-fabric] POST /actions/:id/approve error');
+    res.status(500).json({ ok: false, error: { type: 'execution', message: 'Approval failed.', retryable: true } });
+  }
+});
+
+router.post('/a11oy/actions/:id/execute', async (req: Request, res: Response) => {
+  try {
+    const action = ACTIONS.find(a => a.id === req.params.id);
+    if (!action) {
+      res.status(404).json({ ok: false, error: { type: 'not_found', message: `Action "${req.params.id}" not found.`, retryable: false } });
+      return;
+    }
+    if (action.requiresApproval && action.status !== 'approved') {
+      res.status(403).json({ ok: false, error: { type: 'approval_required', message: `Action requires approval (tier: ${action.approvalTier}) before execution.`, retryable: false } });
+      return;
+    }
+    const approval = findApprovalByAction(action.id);
+    const pceResult = await runPCEGate({
+      actionId: action.id,
+      originSignalIds: action.linkedSignalIds,
+      vertical: action.vertical,
+      riskLevel: action.priority === 'urgent' ? 'critical' : 'medium',
+      isDestructive: false,
+      approvalRecordId: approval?.approvalId,
+    });
+    if (!pceResult.allowed) {
+      const statusCode = pceResult.errorType === 'approval_required' ? 403 : 400;
+      res.status(statusCode).json({ ok: false, error: { type: pceResult.errorType ?? 'policy', message: pceResult.blockedReason ?? 'PCE gate blocked execution.', retryable: false } });
+      return;
+    }
+    action.status = 'executing';
+    ok(res, { actionId: action.id, status: 'executing', pceContractId: pceResult.contract?.contractId, mode: pceResult.contract?.mode });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-fabric] POST /actions/:id/execute error');
+    res.status(500).json({ ok: false, error: { type: 'execution', message: 'Execution failed.', retryable: true } });
+  }
+});
 
 router.get('/a11oy/proof', (_req: Request, res: Response) => {
   ok(res, SEED_PROOF_PACKETS, { total: SEED_PROOF_PACKETS.length });
@@ -153,7 +215,27 @@ router.get('/a11oy/workcells/:id', (req: Request, res: Response) => {
   ok(res, wc);
 });
 
-router.post('/a11oy/workcells/:id/run', (req: Request, res: Response) => notImplemented(res, `run workcell ${req.params.id}`));
+router.post('/a11oy/workcells/:id/run', async (req: Request, res: Response) => {
+  try {
+    const runtimeWc = getWorkcell(req.params.id);
+    if (!runtimeWc) {
+      const fabricWc = WORKCELLS.find(w => w.id === req.params.id);
+      if (!fabricWc) {
+        res.status(404).json({ ok: false, error: { type: 'not_found', message: `Workcell "${req.params.id}" not found.`, retryable: false } });
+        return;
+      }
+    }
+    const advanced = await advanceWorkcell(req.params.id);
+    if (!advanced) {
+      res.status(404).json({ ok: false, error: { type: 'not_found', message: `Workcell "${req.params.id}" could not be advanced.`, retryable: false } });
+      return;
+    }
+    ok(res, advanced);
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-fabric] POST /workcells/:id/run error');
+    res.status(500).json({ ok: false, error: { type: 'execution', message: 'Workcell run failed.', retryable: true } });
+  }
+});
 
 logger.debug('[a11oy-fabric-api] routes registered — %d signals loaded from @workspace/a11oy-fabric', SEED_SIGNALS.length);
 

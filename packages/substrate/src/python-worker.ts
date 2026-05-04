@@ -191,6 +191,64 @@ export interface RegisteredWorker {
 //   Body: StageClaimMessage
 //   Response: StageResultMessage | StageErrorMessage
 
+function isFallbackGateOpen(stageType: string): boolean {
+  if (stageType === 'Retrieve') {
+    return process.env.SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC === '1';
+  }
+  if (stageType === 'Reason' || stageType === 'Embed') {
+    return process.env.SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL === '1';
+  }
+  return false;
+}
+
+function validateResultEnvelope(
+  body: Record<string, unknown>,
+  _stageId: string,
+): string | null {
+  if (body.type !== 'stage.result') {
+    return `Expected type 'stage.result', got '${body.type}'`;
+  }
+  if (typeof body.workerId !== 'string' || !body.workerId) {
+    return `Missing or invalid 'workerId'`;
+  }
+  if (typeof body.runId !== 'string' || !body.runId) {
+    return `Missing or invalid 'runId'`;
+  }
+  if (typeof body.stageId !== 'string' || !body.stageId) {
+    return `Missing or invalid 'stageId'`;
+  }
+  if (typeof body.confidence !== 'number' || body.confidence < 0 || body.confidence > 1) {
+    return `Missing or invalid 'confidence' (must be number 0..1), got ${body.confidence}`;
+  }
+  if (typeof body.durationMs !== 'number' || body.durationMs < 0) {
+    return `Missing or invalid 'durationMs', got ${body.durationMs}`;
+  }
+  if (body.output === undefined) {
+    return `Missing 'output' field`;
+  }
+  if (!Array.isArray(body.evidenceIds)) {
+    return `Missing or invalid 'evidenceIds' (must be array)`;
+  }
+  const meta = body.metadata as Record<string, unknown> | undefined;
+  if (!meta || typeof meta !== 'object') {
+    return `Missing 'metadata' object`;
+  }
+  if (typeof meta.provenance !== 'string' || !meta.provenance) {
+    return `Missing or invalid 'metadata.provenance'`;
+  }
+  if (!Array.isArray(meta.models) || meta.models.length === 0) {
+    return `Missing or invalid 'metadata.models' (must be non-empty array)`;
+  }
+  if (typeof meta.mode !== 'string') {
+    return `Missing 'metadata.mode'`;
+  }
+  if (typeof meta.replayHash !== 'string') {
+    return `Missing 'metadata.replayHash'`;
+  }
+  // metadata.failureReason is optional — only present on partial/degraded results
+  return null;
+}
+
 class SubstratePythonWorkerChannel implements PythonWorkerChannel {
   private readonly workers = new Map<string, RegisteredWorker>();
   private readonly pendingClaims = new Map<
@@ -201,6 +259,45 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
       timer: ReturnType<typeof setTimeout>;
     }
   >();
+
+  async checkWorkerHealthAndReadiness(
+    workerUrl: string,
+  ): Promise<{ healthy: boolean; ready: boolean }> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5_000);
+
+      const [healthResp, readyResp] = await Promise.allSettled([
+        fetch(`${workerUrl}/health`, { signal: controller.signal }),
+        fetch(`${workerUrl}/ready`, { signal: controller.signal }),
+      ]);
+
+      clearTimeout(timeout);
+
+      let healthy = false;
+      if (healthResp.status === 'fulfilled' && healthResp.value.ok) {
+        const data = (await healthResp.value.json()) as {
+          status: string;
+          workerId: string;
+          activeClaims: number;
+          maxConcurrency: number;
+          draining: boolean;
+          uptimeSeconds: number;
+        };
+        healthy = data.status === 'ok' || data.status === 'degraded';
+      }
+
+      let ready = false;
+      if (readyResp.status === 'fulfilled' && readyResp.value.ok) {
+        const data = (await readyResp.value.json()) as { ready: boolean; reason?: string | null };
+        ready = data.ready;
+      }
+
+      return { healthy, ready };
+    } catch {
+      return { healthy: false, ready: false };
+    }
+  }
 
   registerWorker(msg: WorkerRegisterMessage): void {
     this.workers.set(msg.workerId, {
@@ -257,67 +354,105 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
       );
     }
 
-    // ── Real HTTP dispatch (when FastAPI worker is configured) ──────────────
-    // The FastAPI reference worker exposes POST /claim per the wire protocol.
-    // In live mode, HTTP failures propagate (fail closed). In non-live modes
-    // (dry-run, replay, counterfactual), the channel falls back to in-process
-    // simulation so development environments remain functional.
+    // ── Real HTTP dispatch (protocol-aligned with protocol.py v1.0) ────────
+    // When SUBSTRATE_PYTHON_WORKER_URL is set, dispatches via HTTP to the
+    // FastAPI worker. The protocol uses version '1.0', budget schema
+    // { escalateAt, requireHumanBelow }, and separate /health + /ready
+    // endpoints per protocol.py.
+    //
+    // Live-mode fail-closed enforcement: if ANY step in this path fails
+    // (health check, readiness, HTTP dispatch, envelope validation), live mode
+    // throws immediately. No catch block may swallow errors in live mode.
+    // Simulation fallback is ONLY permitted for non-live modes.
     if (workerUrl) {
-      const claimMessage = makeClaimMessage({ ...opts, workerId: 'substrate-ts-engine' });
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-      try {
-        const response = await fetch(`${workerUrl}/claim`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Protocol-Version': PYTHON_WORKER_PROTOCOL_VERSION,
-          },
-          body: JSON.stringify(claimMessage),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          const text = await response.text().catch(() => '(no body)');
-          throw new Error(`HTTP ${response.status}: ${text}`);
-        }
-
-        const body = (await response.json()) as StageResultMessage | StageErrorMessage;
-
-        if (body.type === 'stage.error') {
-          const errMsg = body as StageErrorMessage;
-          throw new Error(`Worker error [${errMsg.errorCode}]: ${errMsg.errorMessage}`);
-        }
-
-        return body as StageResultMessage;
-      } catch (err) {
-        clearTimeout(timeout);
-        const reason =
-          err instanceof Error && err.name === 'AbortError'
-            ? `timed out after ${timeoutMs}ms`
-            : err instanceof Error
-              ? err.message
-              : String(err);
-
-        // In live mode: fail closed — rethrow so the engine marks the stage failed
-        // rather than producing a decision from fabricated simulation data.
+      const healthOk = await this.checkWorkerHealthAndReadiness(workerUrl);
+      if (!healthOk.healthy || !healthOk.ready) {
         if (isLive) {
           throw new Error(
-            `[substrate/python-worker] Live-mode HTTP dispatch to '${workerUrl}/claim' failed ` +
-              `for stage '${opts.stageId}': ${reason}`,
+            `[substrate/python-worker] Live-mode stage '${opts.stageId}' requires a healthy and ` +
+              `ready Python worker. Health: ${healthOk.healthy}, Ready: ${healthOk.ready}. ` +
+              `Worker at '${workerUrl}' failed pre-dispatch checks.`,
           );
         }
-        // fall through to in-process simulation
+        // Non-live: fall through to in-process simulation
+      } else {
+        const claimMessage = makeClaimMessage({ ...opts, workerId: 'substrate-ts-engine' });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const response = await fetch(`${workerUrl}/claim`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Protocol-Version': PYTHON_WORKER_PROTOCOL_VERSION,
+            },
+            body: JSON.stringify(claimMessage),
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeout);
+
+          if (!response.ok) {
+            const text = await response.text().catch(() => '(no body)');
+            const httpErr = new Error(
+              `[substrate/python-worker] Worker HTTP ${response.status} for stage '${opts.stageId}': ${text}`,
+            );
+            if (isLive) throw httpErr;
+            // Non-live: fall through to simulation
+          } else {
+            const body = await response.json();
+
+            if (body.type === 'stage.error') {
+              const errMsg = body as StageErrorMessage;
+              const workerErr = new Error(
+                `[substrate/python-worker] Worker error [${errMsg.errorCode}]: ${errMsg.errorMessage}`,
+              );
+              if (isLive) throw workerErr;
+              // Non-live: fall through to simulation
+            } else {
+              const validationError = validateResultEnvelope(body, opts.stageId);
+              if (validationError) {
+                if (isLive) {
+                  throw new Error(
+                    `[substrate/python-worker] Live-mode envelope validation failed for ` +
+                      `stage '${opts.stageId}': ${validationError}`,
+                  );
+                }
+                // Non-live: fall through to simulation
+              } else {
+                return body as StageResultMessage;
+              }
+            }
+          }
+        } catch (err) {
+          clearTimeout(timeout);
+          if (isLive) {
+            const reason =
+              err instanceof Error && err.name === 'AbortError'
+                ? `timed out after ${timeoutMs}ms`
+                : err instanceof Error
+                  ? err.message
+                  : String(err);
+            throw new Error(
+              `[substrate/python-worker] Live-mode dispatch to '${workerUrl}/claim' failed ` +
+                `for stage '${opts.stageId}': ${reason}`,
+            );
+          }
+          // Non-live: fall through to in-process simulation
+        }
       }
     }
 
     // ── In-process simulation fallback ───────────────────────────────────────
-    // Used in non-live modes when SUBSTRATE_PYTHON_WORKER_URL is not set, or
-    // when the remote worker is unreachable. Logs a debug note.
-    if (!workerUrl) {
+    // Only permitted for non-live modes when the stage-type-specific env gate
+    // is open. Live mode never reaches here (thrown above).
+    if (!isFallbackGateOpen(opts.stageType)) {
+      throw new Error(
+        `[substrate/python-worker] Deterministic fallback for stage type '${opts.stageType}' ` +
+          `is not permitted. Set the appropriate env gate ` +
+          `(SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC or SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL).`,
+      );
     }
 
     const claimKey = `${opts.runId}:${opts.stageId}`;
