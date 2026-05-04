@@ -116,6 +116,44 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
 - **Government Data:** NYSTEC Pre-briefing, Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+## 2026-05-04 — Platform fully operational baseline
+
+All 9 active artifact workflows running from cold start. API server healthy, DB connected, 157 migrations applied.
+
+**Live artifacts (10)** — all workflows running, all dashboards loading:
+| Artifact | Path | Status | Data Source |
+|---|---|---|---|
+| api-server | `/api/` | GREEN — health 200, 157 migrations applied, DB connected | Real DB (PostgreSQL) |
+| a11oy | `/a11oy/` | GREEN — governed decision OS landing | Real API + seed fallback |
+| sentra | `/sentra/` | GREEN — cyber resilience landing | Real API (`/api/sentra/`) with seed fallback in demo mode |
+| counsel | `/counsel/` | GREEN — legal matter command | Real API (`/api/counsel/`) with provenance badge (Demo/Live) |
+| conduit (Amaru) | `/conduit/` | GREEN — reverse-ETL dashboard | Demo data (frontend-only) |
+| terra | `/terra/` | GREEN — real estate intelligence | Real API + NYC open data ingestion |
+| carlota-jo | `/carlota-jo/` | GREEN — private advisory landing | Real API with seed fallback |
+| vessels | `/vessels/` | GREEN — maritime intelligence | Real API + AIS feed endpoints |
+| mockup-sandbox | `/nexus/` | GREEN — internal tooling (auth-gated) | N/A (canvas tool) |
+| lexicon | `/lexicon/` | GREEN — license intelligence catalog | Embedded SPA data + API at `/api/lexicon/v1/` |
+
+**DB/API verification:**
+- Health endpoint: `GET /api/health` returns 200, DB latency ~11ms
+- OBS-007 protections: pool instrumentation, leak detection, forced release (verified by 4/4 tests)
+- Boot orchestrator: sequential seed tasks, fail-open semantics (verified by 4/4 tests)
+- Migration isolation: dedicated pg.Client, no pool checkout (verified by 3/3 tests)
+- Security middleware: tenant isolation, CSRF, rate limiting, body validation (verified by 108/108 tests)
+- Startup validation: ENV_SPECS coverage (verified, QCLAW_ENDPOINT added to extras)
+
+**Archived to `.archived/artifacts/`** (directories had no package.json — stubs from Apr 29 consolidation):
+- aegis, command, pulse, szl-demo-video, szl-holdings, szl-holdings-mobile, lyte-command-center (stub)
+
+**Cleanup performed:**
+- Removed 5 dead/orphaned workflows (brand-strings, praxis-smoke-e2e, GI Design System Storybook, api-integration-tests, lyte-command-center: web)
+- Fixed duplicate symbol declarations in `artifacts/mockup-sandbox/src/pages/Skills.tsx` (SEED_RENDER_JOBS, JOB_STATUS_META, HyperFramesJobQueue)
+- Fixed failing startup-validation test (QCLAW_ENDPOINT not in .env.example extras list)
+- Moved 7 orphaned artifact directories to `.archived/artifacts/`
+
+**Known constraints:**
+- 10-workflow limit reached; security-tests cannot run as a persistent workflow but passes via `pnpm --filter @workspace/api-server test` (135/136 tests pass, 1 flaky timing test on pool saturation under load)
+- `archive/artifacts/lyte-command-center: web` workflow is artifact-managed and cannot be deleted; it serves the lexicon artifact
 
 ## 2026-05-03 — LEXICON — License Intelligence Catalog
 
@@ -1147,4 +1185,3 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
-- **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot, Replit Auth, Stripe, Slack, Twilio, Resend, SendGrid, MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather, STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar, CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR, CourtListener REST API

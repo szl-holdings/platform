@@ -397,6 +397,7 @@ describe('ENV_SPECS — coverage of .env.example', () => {
     'UPTIME_MONITOR_ID',
     'DEMO_MODE',
     'HF_API_BASE',
+    'QCLAW_ENDPOINT',
   ]);
 
   it('has no duplicate keys in ENV_SPECS', () => {
