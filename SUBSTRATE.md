@@ -21,16 +21,61 @@ Models larger than available VRAM use SSD-offloaded KV cache and
 layer-by-layer GPU loading to run at full fp16/bf16 precision without
 quantization.
 
+## Quantization
+
+When VRAM is limited, load models with reduced precision:
+
+```bash
+# 4-bit quantization (~30% of normal VRAM, requires bitsandbytes)
+curl -X POST http://localhost:8070/v1/models/load \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
+  -d '{"model_id": "llama-3.3-70b-instruct", "quantization": "4bit"}'
+
+# 8-bit quantization (~55% of normal VRAM)
+curl -X POST http://localhost:8070/v1/models/load \
+  -d '{"model_id": "llama-3.3-70b-instruct", "quantization": "8bit"}'
+```
+
+## PEFT / LoRA Adapter Support
+
+Hot-swap adapters onto a loaded base model without reloading the weights:
+
+```bash
+# Load adapter
+curl -X POST http://localhost:8070/v1/adapters/load \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model_id": "llama-3.1-8b-instruct", "adapter_path": "/path/to/adapter", "adapter_name": "my-lora"}'
+
+# List all active adapters
+curl http://localhost:8070/v1/adapters
+
+# Unload adapter
+curl -X POST http://localhost:8070/v1/adapters/unload \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
+  -d '{"model_id": "llama-3.1-8b-instruct", "adapter_name": "my-lora"}'
+```
+
+The `/health` endpoint includes an `active_adapters` count. Requires
+`peft>=0.14.0` in the GPU dependency set.
+
 ## Model Download
 
 Models are stored in `SUBSTRATE_MODELS_DIR` (default `~/.substrate/models`).
-Use the hot-load API to download and load models on demand:
+Download progress is tracked and surfaced via the `/health` endpoint under
+`download_progress`. Downloads resume automatically if interrupted; the HuggingFace
+`transformers` cache handles checksum validation.
 
 ```bash
 curl -X POST http://localhost:8070/v1/models/load \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
   -d '{"model_id": "llama-3.3-70b-instruct"}'
+```
+
+Monitor progress:
+```bash
+curl http://localhost:8070/health | python3 -m json.tool | grep -A5 download_progress
 ```
 
 ## Service Startup
@@ -52,13 +97,34 @@ and testing the Command dashboard and AI Control Plane without GPU hardware.
 ```bash
 cd apps/substrate-inference
 pip install -r requirements.txt
-pip install ollm                    # oLLM engine (requires CUDA)
+pip install torch>=2.5.0 transformers>=4.47.0 accelerate>=1.2.0 safetensors>=0.5.0
+pip install peft>=0.14.0 bitsandbytes>=0.44.0   # for adapter + quantization support
+pip install flash-attn>=2.7.0                    # optional FlashAttention-2
+pip install ollm                                 # oLLM engine (requires CUDA)
 python -m src.main
 ```
 
 The engine auto-detects GPU availability. When `torch.cuda.is_available()`
 and the `ollm` package are importable, the service operates in **LIVE** mode
 and delegates inference to `ollm.AutoInference`.
+
+On startup, if `SUBSTRATE_DEFAULT_MODEL` is set the model is pre-loaded and
+the cache is warmed before any traffic is served. On shutdown, all models are
+cleanly unloaded and the SSD KV cache is flushed.
+
+### Smoke Test
+
+After starting the service, run the smoke test to verify all modes:
+
+```bash
+cd apps/substrate-inference
+# First load a model (the test uses llama-3.1-8b-instruct by default)
+python scripts/smoke_test.py --base-url http://localhost:8070 --api-key $SUBSTRATE_API_KEY
+```
+
+This tests: health, models list, single completion, streaming completion,
+multimodal inference, and adapter load/unload. STUB mode responses count as
+PASS with a `[STUB]` label.
 
 ## Environment Variables
 
@@ -70,7 +136,7 @@ and delegates inference to `ollm.AutoInference`.
 | `SUBSTRATE_CACHE_DIR`         | `~/.substrate/cache`       | SSD cache directory for KV cache offload         |
 | `SUBSTRATE_MAX_CONCURRENT`    | `4`                        | Maximum concurrent inference requests            |
 | `SUBSTRATE_DEFAULT_MODEL`     | (none)                     | Model to auto-load on startup                    |
-| `SUBSTRATE_API_KEY`           | (none)                     | API key protecting model load/unload endpoints   |
+| `SUBSTRATE_API_KEY`           | (none)                     | API key protecting model load/unload/adapter endpoints |
 | `SUBSTRATE_ALLOWED_ORIGINS`   | `localhost:5000,8070`      | Comma-separated CORS allowed origins             |
 | `SUBSTRATE_BIND_HOST`         | `127.0.0.1`               | Bind host (set to `0.0.0.0` for network access)  |
 | `VITE_SUBSTRATE_API_KEY`      | (none)                     | API key for Command dashboard (Vite env)         |
@@ -120,9 +186,9 @@ The default fallback chain includes:
 
 - **Localhost-only binding** by default (`SUBSTRATE_BIND_HOST=127.0.0.1`).
   Set to `0.0.0.0` only for trusted networks or behind a reverse proxy.
-- **API key authentication** protects model load/unload endpoints when
+- **API key authentication** protects model load/unload and adapter endpoints when
   `SUBSTRATE_API_KEY` is set. Read-only endpoints (`/health`, `/v1/models`,
-  `/v1/chat/completions`) remain open for inference clients.
+  `/v1/adapters`, `/v1/chat/completions`) remain open for inference clients.
 - **CORS** restricted to localhost origins by default. Configure
   `SUBSTRATE_ALLOWED_ORIGINS` for cross-origin access from other services.
 
@@ -167,13 +233,36 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 
 ## API Endpoints
 
-| Method | Path                    | Auth     | Description                        |
-|--------|-------------------------|----------|------------------------------------|
-| POST   | `/v1/chat/completions`  | No       | Chat completion (streaming SSE)    |
-| GET    | `/v1/models`            | No       | List available models              |
-| POST   | `/v1/models/load`       | API Key  | Hot-load a model into GPU memory   |
-| POST   | `/v1/models/unload`     | API Key  | Unload a model from GPU memory     |
-| GET    | `/health`               | No       | GPU/VRAM status and service health |
+| Method | Path                    | Auth     | Description                                     |
+|--------|-------------------------|----------|-------------------------------------------------|
+| POST   | `/v1/chat/completions`  | No       | Chat completion (real streaming SSE)            |
+| GET    | `/v1/models`            | No       | List available models                           |
+| POST   | `/v1/models/load`       | API Key  | Hot-load a model into GPU memory (+ quantization) |
+| POST   | `/v1/models/unload`     | API Key  | Unload a model from GPU memory                  |
+| POST   | `/v1/adapters/load`     | API Key  | Load a PEFT/LoRA adapter onto a base model      |
+| POST   | `/v1/adapters/unload`   | API Key  | Unload a PEFT/LoRA adapter                      |
+| GET    | `/v1/adapters`          | No       | List all active adapters                        |
+| GET    | `/health`               | No       | GPU stats, inference health, download progress  |
+
+## Health Response Fields
+
+The `/health` endpoint now includes:
+
+- `active_adapters` — count of currently loaded PEFT adapters
+- `download_progress` — per-model download status (`percent`, `complete`, `error`)
+- `inference_health` — per-model lightweight inference test result (`pass`, `latency_ms`)
+
+## CUDA Error Recovery
+
+In LIVE mode, inference calls are wrapped with CUDA/OOM detection. On a GPU
+out-of-memory or CUDA error the engine:
+
+1. Catches the exception before it crashes the process
+2. Calls `engine.unload()` on the offending model (deletes tensors, clears refs)
+3. Calls `torch.cuda.empty_cache()` to reclaim VRAM
+4. Returns a structured `500` error to the caller
+
+The service continues running for other loaded models.
 
 ## Architecture
 
@@ -188,6 +277,7 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 │  ┌───────────▼───────────────┐  │
 │  │ substrate-adapters        │  │
 │  │  SubstrateEndpointManager │  │
+│  │  loadAdapter / listAdapters│  │
 │  └───────────┬───────────────┘  │
 └──────────────┼──────────────────┘
                │ HTTP (OpenAI-compat)
@@ -195,25 +285,33 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 │  Python Service                 │
 │  apps/substrate-inference/      │
 │  ┌───────────────────────────┐  │
-│  │ FastAPI (src/main.py)      │  │
+│  │ FastAPI (src/main.py)     │  │
 │  │  /v1/chat/completions     │  │
 │  │  /v1/models, /health      │  │
-│  │  SSE streaming support    │  │
+│  │  /v1/adapters/*           │  │
+│  │  Real SSE streaming       │  │
+│  │  Startup/shutdown hooks   │  │
 │  └───────────┬───────────────┘  │
 │              │                  │
 │  ┌───────────▼───────────────┐  │
-│  │ SubstrateRuntime           │  │
+│  │ SubstrateRuntime          │  │
 │  │  engine/runtime.py        │  │
-│  │  Auto-detects LIVE/STUB   │  │
+│  │  Adapter load/unload      │  │
+│  │  Quantization support     │  │
+│  │  Download progress        │  │
+│  │  Inference health checks  │  │
 │  └───────────┬───────────────┘  │
 │              │ (LIVE mode only) │
 │  ┌───────────▼───────────────┐  │
 │  │ oLLM (vendored)           │  │
 │  │  engine/ollm/             │  │
 │  │  AutoInference            │  │
+│  │  TextIteratorStreamer      │  │
+│  │  PEFT/LoRA adapters       │  │
+│  │  bitsandbytes quant       │  │
+│  │  CUDA error recovery      │  │
 │  │  FlashAttention-2         │  │
 │  │  SSD KV Cache Offload     │  │
-│  │  Layer-by-Layer Loading   │  │
 │  └───────────────────────────┘  │
 └─────────────────────────────────┘
 ```

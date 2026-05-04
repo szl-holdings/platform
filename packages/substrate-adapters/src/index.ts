@@ -1,4 +1,6 @@
 export type {
+  SubstrateAdapterInfo,
+  SubstrateAdapterLoadRequest,
   SubstrateChatMessage,
   SubstrateCompletionRequest,
   SubstrateCompletionResult,

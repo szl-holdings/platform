@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -59,6 +61,9 @@ class ModelLoadRequest(BaseModel):
     model_id: str = Field(..., description="Model ID to load into GPU memory")
     cpu_offload_layers: int = Field(0, ge=0, description="Number of layers to offload to CPU")
     ssd_cache_dir: str | None = Field(None, description="SSD cache directory for KV cache offload")
+    quantization: Literal["none", "4bit", "8bit"] = Field(
+        "none", description="Quantization mode: none (full precision), 4bit, or 8bit"
+    )
 
 
 class ModelLoadResponse(BaseModel):
@@ -94,6 +99,17 @@ class ChatCompletionChunk(BaseModel):
     choices: list[StreamChoice]
 
 
+class InferenceHealthResult(BaseModel):
+    model_id: str
+    pass_: bool = Field(..., alias="pass")
+    latency_ms: float = 0
+    error: str | None = None
+    stub: bool = False
+
+    class Config:
+        populate_by_name = True
+
+
 class HealthResponse(BaseModel):
     status: str = "ok"
     loaded_models: list[str] = []
@@ -103,3 +119,37 @@ class HealthResponse(BaseModel):
     uptime: float = 0
     version: str = "1.0.0"
     engine: str = "oLLM/Substrate"
+    active_adapters: int = 0
+    download_progress: dict = {}
+    inference_health: list[InferenceHealthResult] = []
+
+
+class AdapterLoadRequest(BaseModel):
+    model_id: str = Field(..., description="ID of the loaded base model to attach the adapter to")
+    adapter_path: str = Field(..., description="Local path or HuggingFace repo ID for the PEFT adapter")
+    adapter_name: str = Field(..., description="Unique name to identify this adapter")
+
+
+class AdapterUnloadRequest(BaseModel):
+    model_id: str = Field(..., description="ID of the loaded base model")
+    adapter_name: str = Field(..., description="Name of the adapter to unload")
+
+
+class AdapterInfo(BaseModel):
+    name: str
+    path: str
+    base_model_id: str
+    stub: bool = False
+
+
+class AdapterListResponse(BaseModel):
+    object: str = "list"
+    data: list[AdapterInfo]
+
+
+class AdapterResponse(BaseModel):
+    status: str
+    message: str
+    adapter_name: str
+    model_id: str
+    stub: bool = False

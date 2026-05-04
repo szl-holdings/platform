@@ -65,6 +65,26 @@ export interface SubstrateHealthStatus {
   avgLatencyMs: number;
   uptime: number;
   engine?: string;
+  activeAdapters?: number;
+  downloadProgress?: Record<string, {
+    bytesDownloaded: number;
+    bytesTotal: number;
+    percent: number;
+    complete: boolean;
+    error: string | null;
+  }>;
+}
+
+export interface SubstrateAdapterInfo {
+  name: string;
+  path: string;
+  baseModelId: string;
+}
+
+export interface SubstrateAdapterLoadRequest {
+  modelId: string;
+  adapterPath: string;
+  adapterName: string;
 }
 
 interface SubstrateHealthApiResponse {
@@ -81,6 +101,14 @@ interface SubstrateHealthApiResponse {
   avg_latency_ms: number;
   uptime: number;
   engine: string;
+  active_adapters?: number;
+  download_progress?: Record<string, {
+    bytes_downloaded: number;
+    bytes_total: number;
+    percent: number;
+    complete: boolean;
+    error: string | null;
+  }>;
 }
 
 function mapHealthResponse(raw: SubstrateHealthApiResponse): SubstrateHealthStatus {
@@ -90,6 +118,20 @@ function mapHealthResponse(raw: SubstrateHealthApiResponse): SubstrateHealthStat
     initializing: 'initializing',
     degraded: 'degraded',
   };
+
+  const downloadProgress: SubstrateHealthStatus['downloadProgress'] = {};
+  if (raw.download_progress) {
+    for (const [mid, p] of Object.entries(raw.download_progress)) {
+      downloadProgress[mid] = {
+        bytesDownloaded: p.bytes_downloaded,
+        bytesTotal: p.bytes_total,
+        percent: p.percent,
+        complete: p.complete,
+        error: p.error,
+      };
+    }
+  }
+
   return {
     status: statusMap[raw.status] ?? 'offline',
     loadedModels: raw.loaded_models ?? [],
@@ -106,6 +148,8 @@ function mapHealthResponse(raw: SubstrateHealthApiResponse): SubstrateHealthStat
     avgLatencyMs: raw.avg_latency_ms ?? 0,
     uptime: raw.uptime ?? 0,
     engine: raw.engine,
+    activeAdapters: raw.active_adapters ?? 0,
+    downloadProgress: Object.keys(downloadProgress).length > 0 ? downloadProgress : undefined,
   };
 }
 
@@ -342,6 +386,96 @@ class SubstrateEndpointManager {
       return { success: true, message: 'Model unloaded' };
     } catch (err) {
       return { success: false, message: String(err) };
+    }
+  }
+
+  async loadAdapter(req: SubstrateAdapterLoadRequest): Promise<{ success: boolean; message: string; stub?: boolean }> {
+    const baseUrl = resolveBaseUrl().replace(/\/v1\/?$/, '');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'User-Agent': 'szl-holdings-substrate-adapters/1.0',
+    };
+    const apiKey = typeof process !== 'undefined' ? process.env?.SUBSTRATE_API_KEY : undefined;
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    try {
+      const response = await fetch(`${baseUrl}/v1/adapters/load`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model_id: req.modelId,
+          adapter_path: req.adapterPath,
+          adapter_name: req.adapterName,
+        }),
+        signal: AbortSignal.timeout(120_000),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return { success: false, message: `Adapter load failed: ${errText.slice(0, 300)}` };
+      }
+
+      const result = (await response.json()) as { status: string; message?: string; stub?: boolean };
+      logger.info({ modelId: req.modelId, adapterName: req.adapterName, status: result.status }, 'Adapter load requested');
+      return { success: true, message: result.message ?? 'Adapter loaded', stub: result.stub };
+    } catch (err) {
+      return { success: false, message: String(err) };
+    }
+  }
+
+  async unloadAdapter(modelId: string, adapterName: string): Promise<{ success: boolean; message: string; stub?: boolean }> {
+    const baseUrl = resolveBaseUrl().replace(/\/v1\/?$/, '');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'User-Agent': 'szl-holdings-substrate-adapters/1.0',
+    };
+    const apiKey = typeof process !== 'undefined' ? process.env?.SUBSTRATE_API_KEY : undefined;
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    try {
+      const response = await fetch(`${baseUrl}/v1/adapters/unload`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ model_id: modelId, adapter_name: adapterName }),
+        signal: AbortSignal.timeout(30_000),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return { success: false, message: `Adapter unload failed: ${errText.slice(0, 300)}` };
+      }
+
+      const result = (await response.json()) as { status: string; message?: string; stub?: boolean };
+      logger.info({ modelId, adapterName }, 'Adapter unloaded');
+      return { success: true, message: result.message ?? 'Adapter unloaded', stub: result.stub };
+    } catch (err) {
+      return { success: false, message: String(err) };
+    }
+  }
+
+  async listAdapters(): Promise<SubstrateAdapterInfo[]> {
+    const baseUrl = resolveBaseUrl().replace(/\/v1\/?$/, '');
+    try {
+      const response = await fetch(`${baseUrl}/v1/adapters`, {
+        method: 'GET',
+        headers: { 'User-Agent': 'szl-holdings-substrate-adapters/1.0' },
+        signal: AbortSignal.timeout(10_000),
+      });
+
+      if (!response.ok) {
+        logger.warn({ status: response.status }, 'Failed to list adapters');
+        return [];
+      }
+
+      const data = (await response.json()) as {
+        data: Array<{ name: string; path: string; base_model_id: string }>;
+      };
+      return (data.data ?? []).map((a) => ({
+        name: a.name,
+        path: a.path,
+        baseModelId: a.base_model_id,
+      }));
+    } catch (err) {
+      logger.error({ error: String(err) }, 'listAdapters failed');
+      return [];
     }
   }
 }

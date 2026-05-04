@@ -2,11 +2,14 @@
 Substrate Edge Inference Service — FastAPI application wrapping the oLLM engine.
 
 Provides OpenAI-compatible API endpoints for local GPU inference:
-  POST /v1/chat/completions  — Chat completion (with streaming SSE support)
-  GET  /v1/models            — List available models
-  POST /v1/models/load       — Hot-load a model into GPU memory (auth required)
-  POST /v1/models/unload     — Unload a model from GPU memory (auth required)
-  GET  /health               — GPU/VRAM status and service health
+  POST /v1/chat/completions       — Chat completion (with streaming SSE support)
+  GET  /v1/models                 — List available models
+  POST /v1/models/load            — Hot-load a model into GPU memory (auth required)
+  POST /v1/models/unload          — Unload a model from GPU memory (auth required)
+  POST /v1/adapters/load          — Load a PEFT/LoRA adapter (auth required)
+  POST /v1/adapters/unload        — Unload a PEFT/LoRA adapter (auth required)
+  GET  /v1/adapters               — List all active adapters
+  GET  /health                    — GPU/VRAM status and service health
 
 Environment variables:
   SUBSTRATE_INFERENCE_PORT    — Port to listen on (default: 8070)
@@ -15,7 +18,8 @@ Environment variables:
   SUBSTRATE_MAX_CONCURRENT    — Max concurrent inference requests (default: 4)
   SUBSTRATE_DEFAULT_MODEL     — Default model to load on startup (optional)
   SUBSTRATE_API_KEY           — API key for model management endpoints (optional; when set,
-                                 /v1/models/load and /v1/models/unload require it via
+                                 /v1/models/load, /v1/models/unload, /v1/adapters/load,
+                                 and /v1/adapters/unload require it via
                                  Authorization: Bearer <key> header)
   SUBSTRATE_ALLOWED_ORIGINS   — Comma-separated CORS origins (default: localhost only)
   SUBSTRATE_BIND_HOST         — Host to bind to (default: 127.0.0.1 for localhost-only)
@@ -23,6 +27,7 @@ Environment variables:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -31,11 +36,16 @@ from contextlib import asynccontextmanager
 
 import structlog
 import uvicorn
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 from .models import (
+    AdapterInfo,
+    AdapterListResponse,
+    AdapterLoadRequest,
+    AdapterResponse,
+    AdapterUnloadRequest,
     ChatCompletionChoice,
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -43,6 +53,7 @@ from .models import (
     CompletionUsage,
     GpuInfo,
     HealthResponse,
+    InferenceHealthResult,
     ModelInfo,
     ModelListResponse,
     ModelLoadRequest,
@@ -149,6 +160,7 @@ async def lifespan(app: FastAPI):
     )
 
     if DEFAULT_MODEL and DEFAULT_MODEL in MODEL_REGISTRY:
+        log.info("default_model_preloading", model=DEFAULT_MODEL)
         try:
             await runtime.load_model(DEFAULT_MODEL)
             log.info("default_model_loaded", model=DEFAULT_MODEL)
@@ -156,7 +168,11 @@ async def lifespan(app: FastAPI):
             log.error("default_model_load_failed", model=DEFAULT_MODEL, error=str(exc))
 
     yield
-    log.info("substrate_inference_shutdown")
+
+    log.info("substrate_inference_shutdown_start")
+    if runtime is not None:
+        await runtime.unload_all_models()
+    log.info("substrate_inference_shutdown_complete")
 
 
 app = FastAPI(
@@ -193,7 +209,7 @@ def _messages_to_dicts(messages: list[ChatMessage]) -> list[dict]:
 
 
 @app.post("/v1/chat/completions")
-async def chat_completions(request: ChatCompletionRequest):
+async def chat_completions(request: ChatCompletionRequest, http_request: Request):
     if runtime is None:
         raise HTTPException(status_code=503, detail="Engine not initialized")
 
@@ -210,8 +226,22 @@ async def chat_completions(request: ChatCompletionRequest):
     messages = _messages_to_dicts(request.messages)
 
     if request.stream:
+        import threading
+        disconnect_event = threading.Event()
+
+        async def _watch_disconnect():
+            try:
+                while not await http_request.is_disconnected():
+                    await asyncio.sleep(0.5)
+                disconnect_event.set()
+                log.info("sse_client_disconnected", model_id=model_id)
+            except Exception:
+                disconnect_event.set()
+
+        asyncio.create_task(_watch_disconnect())
+
         return StreamingResponse(
-            _stream_sse(model_id, messages, request),
+            _stream_sse(model_id, messages, request, disconnect_event),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -220,14 +250,39 @@ async def chat_completions(request: ChatCompletionRequest):
             },
         )
 
-    result = await runtime.complete(
-        model_id=model_id,
-        messages=messages,
-        temperature=request.temperature,
-        max_tokens=request.max_tokens,
-        top_p=request.top_p,
-        stop=request.stop,
-    )
+    try:
+        result = await runtime.complete(
+            model_id=model_id,
+            messages=messages,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            top_p=request.top_p,
+            stop=request.stop,
+        )
+    except RuntimeError as exc:
+        err = str(exc)
+        if "out of memory" in err.lower() or "cuda" in err.lower() or "oom" in err.lower():
+            log.error("inference_cuda_oom", model_id=model_id, error=err)
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "cuda_oom",
+                    "message": f"CUDA out-of-memory during inference for model '{model_id}'. "
+                               "Reduce max_tokens, load a quantized model, or free GPU memory.",
+                    "detail": err,
+                },
+            )
+        log.error("inference_runtime_error", model_id=model_id, error=err)
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "inference_failed", "message": err},
+        )
+    except Exception as exc:
+        log.error("inference_unexpected_error", model_id=model_id, error=str(exc))
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "inference_error", "message": str(exc)},
+        )
 
     completion_id = f"substrate-{uuid.uuid4().hex[:12]}"
     return ChatCompletionResponse(
@@ -249,38 +304,78 @@ async def chat_completions(request: ChatCompletionRequest):
     )
 
 
-async def _stream_sse(model_id: str, messages: list[dict], request: ChatCompletionRequest):
+async def _stream_sse(model_id: str, messages: list[dict], request: ChatCompletionRequest, disconnect_event=None):
+    """
+    SSE generator for streaming chat completions.
+
+    All inference exceptions (including CUDA OOM) are caught and emitted as
+    a final structured SSE error event before the [DONE] frame so clients
+    can detect failures without relying on HTTP status codes (which are
+    already committed once streaming starts).
+    """
     completion_id = f"substrate-{uuid.uuid4().hex[:12]}"
     created = int(time.time())
 
-    async for chunk in runtime.stream_complete(
-        model_id=model_id,
-        messages=messages,
-        temperature=request.temperature,
-        max_tokens=request.max_tokens,
-        top_p=request.top_p,
-        stop=request.stop,
-    ):
-        delta: dict = {}
-        if chunk.get("content"):
-            delta["content"] = chunk["content"]
-        if chunk.get("role"):
-            delta["role"] = chunk["role"]
+    try:
+        async for chunk in runtime.stream_complete(
+            model_id=model_id,
+            messages=messages,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            top_p=request.top_p,
+            stop=request.stop,
+            disconnect_event=disconnect_event,
+        ):
+            if disconnect_event is not None and disconnect_event.is_set():
+                break
 
-        sse_data = {
+            delta: dict = {}
+            if chunk.get("content"):
+                delta["content"] = chunk["content"]
+            if chunk.get("role"):
+                delta["role"] = chunk["role"]
+
+            sse_data = {
+                "id": completion_id,
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": model_id,
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": delta,
+                        "finish_reason": chunk.get("finish_reason"),
+                    }
+                ],
+            }
+            yield f"data: {json.dumps(sse_data)}\n\n"
+
+    except RuntimeError as exc:
+        err = str(exc)
+        error_type = "cuda_oom" if (
+            "out of memory" in err.lower() or "cuda" in err.lower() or "oom" in err.lower()
+        ) else "inference_failed"
+        log.error("stream_inference_error", model_id=model_id, error_type=error_type, error=err)
+        error_event = {
             "id": completion_id,
             "object": "chat.completion.chunk",
             "created": created,
             "model": model_id,
-            "choices": [
-                {
-                    "index": 0,
-                    "delta": delta,
-                    "finish_reason": chunk.get("finish_reason"),
-                }
-            ],
+            "error": {"type": error_type, "message": err},
+            "choices": [],
         }
-        yield f"data: {json.dumps(sse_data)}\n\n"
+        yield f"data: {json.dumps(error_event)}\n\n"
+    except Exception as exc:
+        log.error("stream_unexpected_error", model_id=model_id, error=str(exc))
+        error_event = {
+            "id": completion_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model_id,
+            "error": {"type": "inference_error", "message": str(exc)},
+            "choices": [],
+        }
+        yield f"data: {json.dumps(error_event)}\n\n"
 
     yield "data: [DONE]\n\n"
 
@@ -327,6 +422,7 @@ async def load_model(request: ModelLoadRequest, _: None = Depends(_require_api_k
             model_id=request.model_id,
             cpu_offload_layers=request.cpu_offload_layers,
             ssd_cache_dir=request.ssd_cache_dir or CACHE_DIR,
+            quantization=request.quantization,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -335,6 +431,7 @@ async def load_model(request: ModelLoadRequest, _: None = Depends(_require_api_k
         "model_loaded",
         model_id=request.model_id,
         cpu_offload_layers=request.cpu_offload_layers,
+        quantization=request.quantization,
         engine_mode=runtime.mode.value,
     )
 
@@ -365,6 +462,81 @@ async def unload_model(request: ModelLoadRequest, _: None = Depends(_require_api
     )
 
 
+@app.post("/v1/adapters/load")
+async def load_adapter(request: AdapterLoadRequest, _: None = Depends(_require_api_key)) -> AdapterResponse:
+    if runtime is None:
+        raise HTTPException(status_code=503, detail="Engine not initialized")
+
+    if not runtime.is_loaded(request.model_id):
+        raise HTTPException(
+            status_code=503,
+            detail=f"Base model '{request.model_id}' is not loaded. Load the model first.",
+        )
+
+    try:
+        result = await runtime.load_adapter(
+            model_id=request.model_id,
+            adapter_path=request.adapter_path,
+            adapter_name=request.adapter_name,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return AdapterResponse(
+        status=result.get("status", "loaded"),
+        message=f"Adapter '{request.adapter_name}' loaded onto model '{request.model_id}'",
+        adapter_name=request.adapter_name,
+        model_id=request.model_id,
+        stub=result.get("stub", False),
+    )
+
+
+@app.post("/v1/adapters/unload")
+async def unload_adapter(request: AdapterUnloadRequest, _: None = Depends(_require_api_key)) -> AdapterResponse:
+    if runtime is None:
+        raise HTTPException(status_code=503, detail="Engine not initialized")
+
+    if not runtime.is_loaded(request.model_id):
+        raise HTTPException(
+            status_code=503,
+            detail=f"Base model '{request.model_id}' is not loaded",
+        )
+
+    try:
+        result = await runtime.unload_adapter(
+            model_id=request.model_id,
+            adapter_name=request.adapter_name,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return AdapterResponse(
+        status=result.get("status", "unloaded"),
+        message=f"Adapter '{request.adapter_name}' unloaded from model '{request.model_id}'",
+        adapter_name=request.adapter_name,
+        model_id=request.model_id,
+        stub=result.get("stub", False),
+    )
+
+
+@app.get("/v1/adapters")
+async def list_adapters() -> AdapterListResponse:
+    if runtime is None:
+        return AdapterListResponse(data=[])
+
+    adapters_raw = await runtime.list_adapters()
+    adapters = [
+        AdapterInfo(
+            name=a.get("name", ""),
+            path=a.get("path", ""),
+            base_model_id=a.get("base_model_id", ""),
+            stub=a.get("stub", False),
+        )
+        for a in adapters_raw
+    ]
+    return AdapterListResponse(data=adapters)
+
+
 @app.get("/health")
 async def health() -> HealthResponse:
     uptime = time.monotonic() - _start_time if _start_time else 0
@@ -384,6 +556,21 @@ async def health() -> HealthResponse:
         temperature=gpu_raw.get("temperature"),
     )
 
+    active_adapters = runtime.get_active_adapters_count()
+    download_progress = runtime.get_download_progress()
+
+    inference_health_raw = await runtime.run_inference_health_checks()
+    inference_health = [
+        InferenceHealthResult(**{
+            "model_id": mid,
+            "pass": check.get("pass", False),
+            "latency_ms": check.get("latency_ms", 0),
+            "error": check.get("error"),
+            "stub": check.get("stub", False),
+        })
+        for mid, check in inference_health_raw.items()
+    ]
+
     return HealthResponse(
         status="ok" if runtime.loaded_model_ids else "idle",
         loaded_models=runtime.loaded_model_ids,
@@ -392,6 +579,9 @@ async def health() -> HealthResponse:
         avg_latency_ms=round(runtime.avg_latency_ms, 2),
         uptime=round(uptime, 1),
         engine=f"oLLM/Substrate ({runtime.mode.value})",
+        active_adapters=active_adapters,
+        download_progress=download_progress,
+        inference_health=inference_health,
     )
 
 
