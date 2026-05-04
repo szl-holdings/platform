@@ -348,7 +348,7 @@ export async function getGatewayLiveSummary(
   return {
     endpoint: GATEWAY_ENDPOINT,
     status: 'online',
-    protocolVersion: '2024-11-05',
+    protocolVersion: '2025-11-25',
     uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
     callsLast24h: stats.calls,
     blockedLast24h: stats.blocked,
@@ -552,7 +552,7 @@ router.get('/mcp-gateway/config', authMiddleware(), requireRole('super_admin', '
     return sendSuccess(res, {
       endpoint: GATEWAY_ENDPOINT,
       status: 'online' as const,
-      protocolVersion: '2024-11-05',
+      protocolVersion: '2025-11-25',
       uptimeSeconds: uptime,
       stats,
       rules,

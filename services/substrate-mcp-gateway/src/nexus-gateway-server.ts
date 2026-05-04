@@ -44,7 +44,7 @@ export function getGatewayServer(): PRAXISMcpServer {
     enableInstructions: true,
     enableDiscovery: true,
     enableResourceSubscription: true,
-    enableRoots: false,
+    enableRoots: true,
     instructions: buildTenantInstructions({
       tenantId: 'substrate-gateway',
       domain: 'analytics',

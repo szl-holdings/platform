@@ -25,7 +25,12 @@ The platform is built as a pnpm monorepo, known as the Continuum Business Observ
 
 **UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) serves as the single source of truth for visual design, encompassing accent palette, typography, spacing, and UI components. All authenticated product surfaces are evidence-first, employing a pure dark theme with a single warm accent. A One-of-One Platform Shell unifies user interfaces across applications.
 
-**API Layers:** The platform provides REST API, GraphQL API (Apollo Server), and an MCP Gateway.
+**API Layers:** The platform provides REST API, GraphQL API (Apollo Server), and an MCP Gateway (protocol version 2025-11-25 with Roots, Sampling, and Elicitation capabilities).
+
+**MCP 2025-11-25 Governed Protocol Evolution:** The Substrate MCP Gateway implements three new protocol capabilities:
+- **Domain Roots** (`domain-roots.ts`): Tenant-scoped file-system boundary declarations per domain pack (Sentra, Vessels, Terra, Counsel, Pulse, Command). Operator-only mutations with `roots_list_changed` notifications.
+- **Governed Sampling** (`governed-sampling.ts`): Model preference routing through AI Control Plane, Covenant Policy gates, iteration cap (10), and Proof Chain logging for every sampling session. Tenant-scoped session visibility.
+- **Governed Elicitation** (`governed-elicitation.ts`): Form mode with JSON Schema validation and URL mode with HTTPS enforcement and session binding. Schema-validated accept actions. Tenant-scoped flow access control.
 
 **Zero-Trust Authentication:** The API server implements robust security with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging. Architectural guardrail tests enforce comprehensive authentication coverage.
 

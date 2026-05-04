@@ -52,7 +52,7 @@ router.get('/internal/a11oy/readiness', (_req: Request, res: Response) => {
     fabricLayers: { total: FABRIC_LAYERS.length, healthy: FABRIC_LAYERS.length - degradedLayers, degraded: degradedLayers },
     proofChain: { available: true, packetCount: SEED_PROOF_PACKETS.length, lastWrite: minus(3 * 60 * 1000) },
     storage: { mode: 'database', healthy: true },
-    mcpGateway: { reachable: true, protocolVersion: '2024-11-05' },
+    mcpGateway: { reachable: true, protocolVersion: '2025-11-25' },
     checkedAt: now(),
   });
 });
@@ -110,7 +110,7 @@ router.get('/internal/a11oy/mcp/readiness', async (_req: Request, res: Response)
     ok(res, {
       gatewayStatus: 'online',
       endpoint: process.env.MCP_GATEWAY_ENDPOINT ?? 'https://mcp-gateway.sentra.szl.local/v1/proxy',
-      protocolVersion: '2024-11-05',
+      protocolVersion: '2025-11-25',
       uptimeSeconds: 0,
       workflowCount: 3,
       authMode: 'containment-rules',

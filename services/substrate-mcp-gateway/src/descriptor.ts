@@ -22,6 +22,9 @@ export const CAPABILITIES = {
   resources: { subscribe: true, listChanged: true },
   prompts: { listChanged: false },
   logging: {},
+  roots: { listChanged: true },
+  sampling: { tools: true },
+  elicitation: { form: true, url: true },
   extensions: {
     'szl/governed-autonomy': { version: '1.0', description: 'Policy-gated approval gates and evidence-chain enforcement' },
     'szl/counterfactual-replay': { version: '1.0', description: 'Counterfactual run replay for governance audit' },
@@ -409,6 +412,181 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       },
       required: ['targetAgentId', 'taskDescription'],
       additionalProperties: false,
+    },
+  },
+  {
+    name: 'roots_list',
+    description:
+      'List available domain roots (file-system boundaries) visible to the current tenant. ' +
+      'MCP 2025-11-25 roots capability. Each root represents a domain data boundary ' +
+      '(e.g. Sentra threat pipeline, Vessels fleet ops, Terra distress pipeline). ' +
+      'Roots are tenant-scoped: agents see only their authorized domains.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'roots_enable_domain',
+    description:
+      'Enable a domain pack, making its roots available to authorized tenants. ' +
+      'Emits notifications/roots/list_changed to connected clients.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        domain: { type: 'string', description: 'Domain pack identifier (e.g. sentra, vessels, terra, counsel, pulse, command)' },
+      },
+      required: ['domain'],
+    },
+  },
+  {
+    name: 'roots_disable_domain',
+    description:
+      'Disable a domain pack, removing its roots from all tenants. ' +
+      'Emits notifications/roots/list_changed to connected clients.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        domain: { type: 'string', description: 'Domain pack identifier to disable' },
+      },
+      required: ['domain'],
+    },
+  },
+  {
+    name: 'roots_domain_status',
+    description: 'Get the enabled/disabled status of all domain packs.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'sampling_create_message',
+    description:
+      'Create a governed sampling request (MCP 2025-11-25 sampling/createMessage). ' +
+      'Routes model preferences through the AI Control Plane, enforces Covenant Policy ' +
+      'gates for high-risk requests, and logs every sampling event to the Proof Chain. ' +
+      'Supports multi-turn tool loops with a configurable iteration cap (default 10).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        messages: {
+          type: 'array',
+          description: 'Conversation messages to send to the model',
+          items: {
+            type: 'object',
+            properties: {
+              role: { type: 'string', enum: ['user', 'assistant'] },
+              content: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['text', 'image', 'resource'] },
+                  text: { type: 'string' },
+                  data: { type: 'string' },
+                  mimeType: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        modelPreferences: {
+          type: 'object',
+          description: 'Model selection preferences routed through AI Control Plane',
+          properties: {
+            hints: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } },
+            costPriority: { type: 'number', description: '0-1 cost optimization weight' },
+            speedPriority: { type: 'number', description: '0-1 speed optimization weight' },
+            intelligencePriority: { type: 'number', description: '0-1 intelligence optimization weight' },
+          },
+        },
+        systemPrompt: { type: 'string', description: 'System prompt prepended to the conversation' },
+        includeContext: { type: 'string', enum: ['none', 'thisServer', 'allServers'], description: 'Context inclusion scope' },
+        maxTokens: { type: 'number', description: 'Maximum tokens for the response. Default: 4096' },
+        metadata: { type: 'object', description: 'Caller-supplied metadata attached to the sampling session' },
+      },
+      required: ['messages'],
+    },
+  },
+  {
+    name: 'sampling_list_sessions',
+    description: 'List governed sampling sessions with optional active-only filter.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'number', description: 'Max sessions to return. Default: 50' },
+        activeOnly: { type: 'boolean', description: 'If true, only return active sessions' },
+      },
+    },
+  },
+  {
+    name: 'sampling_get_session',
+    description: 'Get details of a specific governed sampling session by ID.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sessionId: { type: 'string', description: 'UUID of the sampling session' },
+      },
+      required: ['sessionId'],
+    },
+  },
+  {
+    name: 'elicitation_create',
+    description:
+      'Create a governed elicitation flow (MCP 2025-11-25 elicitation/create). ' +
+      'Supports two modes: form (structured JSON Schema input from the user) and ' +
+      'url (redirect the user to an HTTPS URL for authentication or data entry). ' +
+      'Form mode validates responses against the provided schema. URL mode enforces ' +
+      'HTTPS and session binding. All events are logged to the Proof Chain.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', description: 'Human-readable message explaining what information is needed' },
+        requestedSchema: {
+          type: 'object',
+          description: 'JSON Schema for form-mode elicitation. Properties must use primitive types (string, number, integer, boolean).',
+        },
+        url: { type: 'string', description: 'HTTPS URL for url-mode elicitation' },
+        mode: { type: 'string', enum: ['form', 'url'], description: 'Elicitation mode. Auto-detected from url presence if omitted.' },
+        metadata: { type: 'object', description: 'Caller-supplied metadata' },
+      },
+      required: ['message'],
+    },
+  },
+  {
+    name: 'elicitation_resolve',
+    description:
+      'Resolve a pending elicitation flow by accepting, declining, or cancelling it. ' +
+      'For form-mode accept actions, the content is validated against the original schema.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        flowId: { type: 'string', description: 'UUID of the elicitation flow to resolve' },
+        action: { type: 'string', enum: ['accept', 'decline', 'cancel'], description: 'Resolution action' },
+        content: { type: 'object', description: 'Response content (required for accept action with form mode)' },
+      },
+      required: ['flowId', 'action'],
+    },
+  },
+  {
+    name: 'elicitation_list',
+    description: 'List governed elicitation flows with optional pending-only filter.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'number', description: 'Max flows to return. Default: 50' },
+        pendingOnly: { type: 'boolean', description: 'If true, only return pending flows' },
+      },
+    },
+  },
+  {
+    name: 'elicitation_get',
+    description: 'Get details of a specific governed elicitation flow by ID.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        flowId: { type: 'string', description: 'UUID of the elicitation flow' },
+      },
+      required: ['flowId'],
     },
   },
 ];

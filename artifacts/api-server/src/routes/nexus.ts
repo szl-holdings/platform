@@ -4004,4 +4004,29 @@ router.get('/sovereign-ai', async (_req, res) => {
   }
 });
 
+// ── MCP 2025-11-25 Governed Protocol Dashboard ──────────────────────────────
+
+router.get('/nexus/mcp/protocol-status', authMiddleware({ required: false }), (_req: Request, res: Response) => {
+  sendSuccess(res, {
+    protocolVersion: '2025-11-25',
+    capabilities: {
+      roots: { listChanged: true, description: 'Domain-pack roots with tenant-scoped visibility and dynamic enable/disable' },
+      sampling: { tools: true, description: 'Governed sampling with AI Control Plane routing, Covenant Policy gates, and Proof Chain logging' },
+      elicitation: { form: true, url: true, description: 'Structured form and URL elicitation with schema validation, HTTPS enforcement, and session binding' },
+    },
+    tools: {
+      roots: ['roots_list', 'roots_enable_domain', 'roots_disable_domain', 'roots_domain_status'],
+      sampling: ['sampling_create_message', 'sampling_list_sessions', 'sampling_get_session'],
+      elicitation: ['elicitation_create', 'elicitation_resolve', 'elicitation_list', 'elicitation_get'],
+    },
+    governance: {
+      proofChain: true,
+      covenantPolicy: true,
+      tenantScoping: true,
+      iterationCap: 10,
+    },
+    checkedAt: new Date().toISOString(),
+  });
+});
+
 export default router;

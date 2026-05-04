@@ -56,6 +56,28 @@ import { getMcpApp } from './mcp-apps/apps.js';
 import { emitRunEvent, emitToolListChanged } from './run-events.js';
 import { getCurrentTenantId } from './request-context.js';
 import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
+import {
+  listRoots,
+  enableDomainPack,
+  disableDomainPack,
+  getDomainPackStatus,
+} from './domain-roots.js';
+import {
+  handleSamplingCreate,
+  getActiveSamplingSessions,
+  getAllSamplingSessions,
+  getSamplingSession,
+  type SamplingCreateRequest,
+} from './governed-sampling.js';
+import {
+  handleElicitationCreate,
+  resolveElicitation,
+  getActiveElicitationFlows,
+  getAllElicitationFlows,
+  getElicitationFlow,
+  type ElicitationCreateRequest,
+  type ElicitationResult,
+} from './governed-elicitation.js';
 
 // ─── Start PRAXIS Convergence Bridge ──────────────────────────────────────────
 // Subscribe to Prism Bus cross-domain correlation events and buffer them
@@ -674,6 +696,28 @@ async function dispatchTool(
       return handleDisableServer(rawParams);
     case 'agent_delegate':
       return handleAgentDelegate(rawParams, actorId);
+    case 'roots_list':
+      return handleRootsList();
+    case 'roots_enable_domain':
+      return handleRootsEnableDomain(rawParams);
+    case 'roots_disable_domain':
+      return handleRootsDisableDomain(rawParams);
+    case 'roots_domain_status':
+      return handleRootsDomainStatus();
+    case 'sampling_create_message':
+      return handleSamplingCreateMessage(rawParams);
+    case 'sampling_list_sessions':
+      return handleSamplingListSessions(rawParams);
+    case 'sampling_get_session':
+      return handleSamplingGetSession(rawParams);
+    case 'elicitation_create':
+      return handleElicitationCreateFlow(rawParams);
+    case 'elicitation_resolve':
+      return handleElicitationResolve(rawParams);
+    case 'elicitation_list':
+      return handleElicitationList(rawParams);
+    case 'elicitation_get':
+      return handleElicitationGet(rawParams);
     default: {
       const manifest = defaultToolRegistry.getToolDetails(toolName);
       if (manifest) {
@@ -1795,4 +1839,209 @@ export function handlePromptGet(
     default:
       return { error: `Unknown prompt: ${name}` };
   }
+}
+
+// ── Roots Handlers ──────────────────────────────────────────────────────────
+
+function handleRootsList(): ToolResult {
+  const tenantId = getCurrentTenantId();
+  const roots = listRoots(tenantId);
+  return ok({
+    count: roots.length,
+    tenantScope: tenantId ?? 'global',
+    roots: roots.map((r) => ({
+      uri: r.uri,
+      name: r.name,
+      domain: r.domain,
+      description: r.description,
+      tenantScoped: r.tenantScoped,
+    })),
+  });
+}
+
+const DomainActionSchema = z.object({
+  domain: z.string().min(1),
+});
+
+function handleRootsEnableDomain(rawParams: unknown): ToolResult {
+  const parsed = DomainActionSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  try {
+    enableDomainPack(parsed.data.domain);
+    return ok({ domain: parsed.data.domain, enabled: true, message: `Domain pack '${parsed.data.domain}' enabled.` });
+  } catch (e) {
+    return err(e instanceof Error ? e.message : String(e));
+  }
+}
+
+function handleRootsDisableDomain(rawParams: unknown): ToolResult {
+  const parsed = DomainActionSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  try {
+    disableDomainPack(parsed.data.domain);
+    return ok({ domain: parsed.data.domain, enabled: false, message: `Domain pack '${parsed.data.domain}' disabled.` });
+  } catch (e) {
+    return err(e instanceof Error ? e.message : String(e));
+  }
+}
+
+function handleRootsDomainStatus(): ToolResult {
+  const status = getDomainPackStatus();
+  return ok({ domains: status });
+}
+
+// ── Governed Sampling Handlers ──────────────────────────────────────────────
+
+const SamplingCreateSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.object({
+      type: z.enum(['text', 'image', 'resource']),
+      text: z.string().optional(),
+      data: z.string().optional(),
+      mimeType: z.string().optional(),
+    }),
+  })).min(1),
+  modelPreferences: z.object({
+    hints: z.array(z.object({ name: z.string().optional() })).optional(),
+    costPriority: z.number().min(0).max(1).optional(),
+    speedPriority: z.number().min(0).max(1).optional(),
+    intelligencePriority: z.number().min(0).max(1).optional(),
+  }).optional(),
+  systemPrompt: z.string().optional(),
+  includeContext: z.enum(['none', 'thisServer', 'allServers']).optional(),
+  maxTokens: z.number().int().positive().default(4096),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+async function handleSamplingCreateMessage(rawParams: unknown): Promise<ToolResult> {
+  const parsed = SamplingCreateSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const result = await handleSamplingCreate(parsed.data as SamplingCreateRequest);
+  return ok({
+    role: result.role,
+    content: result.content,
+    model: result.model,
+    stopReason: result.stopReason,
+  });
+}
+
+const SessionListSchema = z.object({
+  limit: z.number().int().positive().default(50),
+  activeOnly: z.boolean().default(false),
+});
+
+function handleSamplingListSessions(rawParams: unknown): ToolResult {
+  const parsed = SessionListSchema.safeParse(rawParams ?? {});
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const sessions = parsed.data.activeOnly
+    ? getActiveSamplingSessions()
+    : getAllSamplingSessions(parsed.data.limit);
+  return ok({ count: sessions.length, sessions });
+}
+
+const SessionGetSchema = z.object({
+  sessionId: z.string().uuid(),
+});
+
+function handleSamplingGetSession(rawParams: unknown): ToolResult {
+  const parsed = SessionGetSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const session = getSamplingSession(parsed.data.sessionId);
+  if (!session) return err(`Sampling session '${parsed.data.sessionId}' not found`);
+  return ok(session);
+}
+
+// ── Governed Elicitation Handlers ───────────────────────────────────────────
+
+const ElicitationCreateSchema = z.object({
+  message: z.string().min(1),
+  requestedSchema: z.object({
+    type: z.literal('object'),
+    properties: z.record(z.object({
+      type: z.enum(['string', 'number', 'integer', 'boolean']),
+      description: z.string().optional(),
+      enum: z.array(z.string()).optional(),
+      oneOf: z.array(z.object({ const: z.string(), title: z.string() })).optional(),
+      format: z.string().optional(),
+      minimum: z.number().optional(),
+      maximum: z.number().optional(),
+      default: z.unknown().optional(),
+    })),
+    required: z.array(z.string()).optional(),
+  }).optional(),
+  url: z.string().url().optional(),
+  mode: z.enum(['form', 'url']).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+function handleElicitationCreateFlow(rawParams: unknown): ToolResult {
+  const parsed = ElicitationCreateSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  try {
+    const flow = handleElicitationCreate(parsed.data as ElicitationCreateRequest);
+    return ok({
+      flowId: flow.id,
+      mode: flow.mode,
+      status: flow.status,
+      message: flow.message,
+      schema: flow.schema,
+      url: flow.url,
+      proofHash: flow.proofHash,
+      createdAt: flow.createdAt,
+    });
+  } catch (e) {
+    return err(e instanceof Error ? e.message : String(e));
+  }
+}
+
+const ElicitationResolveSchema = z.object({
+  flowId: z.string().uuid(),
+  action: z.enum(['accept', 'decline', 'cancel']),
+  content: z.record(z.unknown()).optional(),
+});
+
+function handleElicitationResolve(rawParams: unknown): ToolResult {
+  const parsed = ElicitationResolveSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  try {
+    const flow = resolveElicitation(parsed.data.flowId, {
+      action: parsed.data.action,
+      content: parsed.data.content,
+    } as ElicitationResult);
+    return ok({
+      flowId: flow.id,
+      status: flow.status,
+      response: flow.response,
+      completedAt: flow.completedAt,
+    });
+  } catch (e) {
+    return err(e instanceof Error ? e.message : String(e));
+  }
+}
+
+const ElicitationListSchema = z.object({
+  limit: z.number().int().positive().default(50),
+  pendingOnly: z.boolean().default(false),
+});
+
+function handleElicitationList(rawParams: unknown): ToolResult {
+  const parsed = ElicitationListSchema.safeParse(rawParams ?? {});
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const flows = parsed.data.pendingOnly
+    ? getActiveElicitationFlows()
+    : getAllElicitationFlows(parsed.data.limit);
+  return ok({ count: flows.length, flows });
+}
+
+const ElicitationGetSchema = z.object({
+  flowId: z.string().uuid(),
+});
+
+function handleElicitationGet(rawParams: unknown): ToolResult {
+  const parsed = ElicitationGetSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+  const flow = getElicitationFlow(parsed.data.flowId);
+  if (!flow) return err(`Elicitation flow '${parsed.data.flowId}' not found`);
+  return ok(flow);
 }

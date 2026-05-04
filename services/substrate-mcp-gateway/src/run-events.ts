@@ -21,7 +21,14 @@ export type RunEventType =
   | 'approval_required'
   | 'approval_granted'
   | 'approval_rejected'
-  | 'tool_list_changed';
+  | 'tool_list_changed'
+  | 'roots_list_changed'
+  | 'sampling_started'
+  | 'sampling_completed'
+  | 'elicitation_created'
+  | 'elicitation_accepted'
+  | 'elicitation_declined'
+  | 'elicitation_cancelled';
 
 export interface RunLifecycleEvent {
   type: RunEventType;
