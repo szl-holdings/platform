@@ -52,7 +52,7 @@ interface GatewayStats {
   totalProofs: number;
   totalKeys: number;
   riskBreakdown: { low: number; medium: number; high: number; critical: number };
-  dispositionBreakdown: { allowed: number; blocked: number; pending_approval: number; rate_limited: number };
+  dispositionBreakdown: { allowed: number; blocked: number; pending_approval: number; rate_limited: number; execution_failed: number };
   avgLatencyMs: number;
   governanceMode: string;
   protocolVersion: string;
@@ -234,6 +234,7 @@ function DispositionBadge({ disposition }: { disposition: string }) {
     blocked: { bg: 'rgba(239,68,68,0.1)', fg: 'rgba(239,68,68,0.8)' },
     pending_approval: { bg: 'rgba(245,158,11,0.1)', fg: 'rgba(245,158,11,0.8)' },
     rate_limited: { bg: 'rgba(168,85,247,0.1)', fg: 'rgba(168,85,247,0.8)' },
+    execution_failed: { bg: 'rgba(239,68,68,0.15)', fg: 'rgba(239,68,68,0.9)' },
   };
   const c = colors[disposition] ?? colors.allowed!;
   return (

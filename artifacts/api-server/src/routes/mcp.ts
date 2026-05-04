@@ -21,7 +21,7 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, requireAuthOrGatewayKey } from './mcp-governed-gateway';
+import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, requireAuthOrGatewayKey, updateGatewayCallPostExecution } from './mcp-governed-gateway';
 
 const router = Router();
 
@@ -1542,6 +1542,10 @@ function createAlloyMcpServer(
               isError: false,
             };
           }
+          const execResult = await executeTool(capturedTool.name, args, user);
+          const resultText = execResult.content?.map((c: { text?: string }) => c.text ?? '').join('') ?? '';
+          updateGatewayCallPostExecution(govResult.callId, resultText, execResult.isError ? resultText : undefined);
+          return execResult;
         }
         return executeTool(capturedTool.name, args, user);
       },

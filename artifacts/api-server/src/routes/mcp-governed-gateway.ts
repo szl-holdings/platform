@@ -61,7 +61,7 @@ interface GatewayToolCall {
   parameters: Record<string, unknown>;
   riskLevel: GatewayRiskLevel;
   riskClasses: RiskClass[];
-  disposition: 'allowed' | 'blocked' | 'pending_approval' | 'rate_limited';
+  disposition: 'allowed' | 'blocked' | 'pending_approval' | 'rate_limited' | 'execution_failed';
   approvalId: string | null;
   proofPacketId: string | null;
   resultHash: string | null;
@@ -464,7 +464,7 @@ export async function recordGatewayMcpCall(
   apiKey: GatewayApiKey,
   toolName: string,
   parameters: Record<string, unknown>,
-): Promise<{ disposition: string; proofPacketId: string; approvalId: string | null }> {
+): Promise<{ disposition: string; proofPacketId: string; approvalId: string | null; callId: string }> {
   const riskLevel = classifyToolRisk(toolName);
   const riskClasses = classifyRisk({
     riskLevel,
@@ -499,7 +499,7 @@ export async function recordGatewayMcpCall(
     blockedCall.proofPacketId = blockedProof.packetId;
     toolCalls.push(blockedCall);
     persistToolCall(blockedCall).catch(() => {});
-    return { disposition: 'blocked', proofPacketId: blockedProof.packetId, approvalId: null };
+    return { disposition: 'blocked', proofPacketId: blockedProof.packetId, approvalId: null, callId: blockedCall.callId };
   }
 
   const call: GatewayToolCall = {
@@ -553,7 +553,30 @@ export async function recordGatewayMcpCall(
     disposition: call.disposition,
     proofPacketId: proof.packetId,
     approvalId: call.approvalId,
+    callId: call.callId,
   };
+}
+
+export function updateGatewayCallPostExecution(
+  callId: string,
+  result: unknown,
+  error?: string,
+): void {
+  const call = toolCalls.find(c => c.callId === callId);
+  if (!call) return;
+  if (error) {
+    call.disposition = 'execution_failed';
+  }
+  call.resultHash = createHash('sha256')
+    .update(JSON.stringify(result ?? { error }))
+    .digest('hex')
+    .slice(0, 16);
+  const conn = connections.get(call.connectionId);
+  if (conn) {
+    const updatedProof = generateGatewayProof(call, conn);
+    call.proofPacketId = updatedProof.packetId;
+  }
+  persistToolCallUpdate(call).catch(() => {});
 }
 
 export function recordGatewayLifecycleEvent(
@@ -943,8 +966,8 @@ router.get('/stats', authMiddleware(), (req: Request, res: Response) => {
   }).length;
   const riskBreakdown = { low: 0, medium: 0, high: 0, critical: 0 };
   for (const c of tenantCalls) riskBreakdown[c.riskLevel]++;
-  const dispositionBreakdown = { allowed: 0, blocked: 0, pending_approval: 0, rate_limited: 0 };
-  for (const c of tenantCalls) dispositionBreakdown[c.disposition]++;
+  const dispositionBreakdown: Record<string, number> = { allowed: 0, blocked: 0, pending_approval: 0, rate_limited: 0, execution_failed: 0 };
+  for (const c of tenantCalls) dispositionBreakdown[c.disposition] = (dispositionBreakdown[c.disposition] ?? 0) + 1;
   const avgLatency = totalCalls > 0
     ? Math.round(tenantCalls.reduce((s, c) => s + c.latencyMs, 0) / totalCalls)
     : 0;
