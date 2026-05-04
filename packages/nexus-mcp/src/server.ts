@@ -571,6 +571,30 @@ export class PRAXISMcpServer {
     }
   }
 
+  /** Notify connected MCP clients that the roots list has changed (MCP 2025-11-25). */
+  async sendRootsChangedNotification(): Promise<void> {
+    try {
+      await this._sdk.server.notification({
+        method: 'notifications/roots/list_changed',
+        params: {},
+      });
+    } catch {
+      // Client may not be connected or may not support roots
+    }
+  }
+
+  /** Notify connected MCP clients that an elicitation flow has completed (MCP 2025-11-25). */
+  async sendElicitationCompleteNotification(flowId: string, status: string): Promise<void> {
+    try {
+      await this._sdk.server.notification({
+        method: 'notifications/elicitation/complete',
+        params: { flowId, status },
+      });
+    } catch {
+      // Client may not be connected or may not support elicitation notifications
+    }
+  }
+
   /** Subscribe to discovery notifications (for SSE fan-out transport) */
   onDiscoveryNotification(listener: (type: DiscoveryEventType) => void): () => void {
     this._externalNotifyListeners.add(listener);

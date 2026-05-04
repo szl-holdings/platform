@@ -327,6 +327,12 @@ export function createHttpTransport(): express.Router {
       if (event.type === 'tool_list_changed') {
         void getGatewayServer().notifyListChanged('tools/list_changed');
       }
+      if (event.type === 'roots_list_changed') {
+        void getGatewayServer().sendRootsChangedNotification();
+      }
+      if (event.type === 'elicitation_complete' && event.runId) {
+        void getGatewayServer().sendElicitationCompleteNotification(event.runId, event.status ?? 'completed');
+      }
     });
 
     const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((_event: SubstrateRuntimeEvent) => {

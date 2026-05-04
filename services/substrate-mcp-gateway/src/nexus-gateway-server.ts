@@ -22,6 +22,8 @@ import {
 } from './handlers.js';
 import { buildPRAXISEnvelopes, setResourceUpdateCallback } from './nexus-fabric.js';
 import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
+import { listRoots } from './domain-roots.js';
+import { setSamplingBridge } from './governed-sampling.js';
 
 // ─── Singleton PRAXISMcpServer ─────────────────────────────────────────────────
 
@@ -34,6 +36,11 @@ let _server: PRAXISMcpServer | null = null;
 export function getGatewayServer(): PRAXISMcpServer {
   if (_server) return _server;
 
+  const domainRoots = listRoots('substrate-gateway').map((r) => ({
+    uri: r.uri,
+    name: r.name,
+  }));
+
   _server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
     version: GATEWAY_VERSION,
@@ -45,10 +52,15 @@ export function getGatewayServer(): PRAXISMcpServer {
     enableDiscovery: true,
     enableResourceSubscription: true,
     enableRoots: true,
+    roots: domainRoots,
     instructions: buildTenantInstructions({
       tenantId: 'substrate-gateway',
       domain: 'analytics',
     }),
+  });
+
+  setSamplingBridge({
+    requestSampling: (params) => _server!.requestSampling(params),
   });
 
   // ── Register domain Apps ─────────────────────────────────────────────────────

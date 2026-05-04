@@ -1980,17 +1980,27 @@ function handleElicitationCreateFlow(rawParams: unknown): ToolResult {
   if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
   try {
     const flow = handleElicitationCreate(parsed.data as ElicitationCreateRequest);
-    return ok({
+    const response: Record<string, unknown> = {
       flowId: flow.id,
       mode: flow.mode,
       status: flow.status,
       message: flow.message,
       schema: flow.schema,
       url: flow.url,
+      sessionBound: flow.sessionBound,
       proofHash: flow.proofHash,
+      proofPersistedToWal: flow.proofPersistedToWal,
+      expiresAt: flow.expiresAt,
       createdAt: flow.createdAt,
-    });
+    };
+    if (flow.sessionToken) {
+      response.sessionToken = flow.sessionToken;
+    }
+    return ok(response);
   } catch (e) {
+    if (e && typeof e === 'object' && 'code' in e && (e as { code: number }).code === -32042) {
+      return err(e instanceof Error ? e.message : String(e));
+    }
     return err(e instanceof Error ? e.message : String(e));
   }
 }
@@ -1999,6 +2009,7 @@ const ElicitationResolveSchema = z.object({
   flowId: z.string().uuid(),
   action: z.enum(['accept', 'decline', 'cancel']),
   content: z.record(z.unknown()).optional(),
+  sessionToken: z.string().optional(),
 });
 
 function handleElicitationResolve(rawParams: unknown): ToolResult {
@@ -2008,6 +2019,7 @@ function handleElicitationResolve(rawParams: unknown): ToolResult {
     const flow = resolveElicitation(parsed.data.flowId, {
       action: parsed.data.action,
       content: parsed.data.content,
+      sessionToken: parsed.data.sessionToken,
     } as ElicitationResult);
     return ok({
       flowId: flow.id,

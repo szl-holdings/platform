@@ -4374,9 +4374,22 @@ router.get('/nexus/mcp/protocol-status', authMiddleware({ required: false }), (_
   sendSuccess(res, {
     protocolVersion: '2025-11-25',
     capabilities: {
-      roots: { listChanged: true, description: 'Domain-pack roots with tenant-scoped visibility and dynamic enable/disable' },
-      sampling: { tools: true, description: 'Governed sampling with AI Control Plane routing, Covenant Policy gates, and Proof Chain logging' },
-      elicitation: { form: true, url: true, description: 'Structured form and URL elicitation with schema validation, HTTPS enforcement, and session binding' },
+      roots: {
+        listChanged: true,
+        notifications: ['notifications/roots/list_changed'],
+        description: 'Domain-pack roots with tenant-scoped ACL, operator-only mutations, protocol-level roots/list handling via PRAXISMcpServer, and roots_list_changed notifications bridged to connected clients',
+      },
+      sampling: {
+        tools: true,
+        bridgedToSdk: true,
+        description: 'Governed sampling routed through PRAXISMcpServer.requestSampling() which calls server.createMessage() on connected clients. Covenant Policy gates, model preference routing via AI Control Plane, iteration cap (10), and immutable Proof Chain WAL persistence',
+      },
+      elicitation: {
+        form: true,
+        url: true,
+        notifications: ['notifications/elicitation/complete'],
+        description: 'Form mode with JSON Schema validation (required content on accept). URL mode with HTTPS enforcement, domain allowlist, anti-phishing controls, session-binding tokens, and TTL expiration. All flows persisted to Proof Chain WAL',
+      },
     },
     tools: {
       roots: ['roots_list', 'roots_enable_domain', 'roots_disable_domain', 'roots_domain_status'],
@@ -4384,10 +4397,14 @@ router.get('/nexus/mcp/protocol-status', authMiddleware({ required: false }), (_
       elicitation: ['elicitation_create', 'elicitation_resolve', 'elicitation_list', 'elicitation_get'],
     },
     governance: {
-      proofChain: true,
+      proofChainWal: true,
       covenantPolicy: true,
       tenantScoping: true,
+      operatorAuthorization: true,
+      sessionBindingTokens: true,
+      urlDomainAllowlist: true,
       iterationCap: 10,
+      elicitationTtlMinutes: 15,
     },
     checkedAt: new Date().toISOString(),
   });

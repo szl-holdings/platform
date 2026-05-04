@@ -28,9 +28,9 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 **API Layers:** The platform provides REST API, GraphQL API (Apollo Server), and an MCP Gateway (protocol version 2025-11-25 with Roots, Sampling, and Elicitation capabilities).
 
 **MCP 2025-11-25 Governed Protocol Evolution:** The Substrate MCP Gateway implements three new protocol capabilities:
-- **Domain Roots** (`domain-roots.ts`): Tenant-scoped file-system boundary declarations per domain pack (Sentra, Vessels, Terra, Counsel, Pulse, Command). Operator-only mutations with `roots_list_changed` notifications.
-- **Governed Sampling** (`governed-sampling.ts`): Model preference routing through AI Control Plane, Covenant Policy gates, iteration cap (10), and Proof Chain logging for every sampling session. Tenant-scoped session visibility.
-- **Governed Elicitation** (`governed-elicitation.ts`): Form mode with JSON Schema validation and URL mode with HTTPS enforcement and session binding. Schema-validated accept actions. Tenant-scoped flow access control.
+- **Domain Roots** (`domain-roots.ts`): Tenant-scoped file-system boundary declarations per domain pack (Sentra, Vessels, Terra, Counsel, Pulse, Command). Operator-only mutations with `roots_list_changed` notifications bridged via `sendRootsChangedNotification()`. Domain roots passed to PRAXISMcpServer config for protocol-level `roots/list` handling.
+- **Governed Sampling** (`governed-sampling.ts`): Routes through `PRAXISMcpServer.requestSampling()` which calls `server.createMessage()` on connected MCP clients, with fallback receipt for disconnected clients. Covenant Policy evaluation gates, model preference routing via AI Control Plane, iteration cap (10), and immutable Proof Chain WAL persistence via `recordProof()`. Tenant-scoped session visibility.
+- **Governed Elicitation** (`governed-elicitation.ts`): Form mode with JSON Schema validation (required content on accept). URL mode with HTTPS enforcement, domain allowlist, embedded-credential rejection, localhost blocking, session-binding token verification, and TTL expiration (15 min). Completion notifications via `sendElicitationCompleteNotification()`. All flows persisted to Proof Chain WAL. Tenant-scoped flow access control.
 
 **Zero-Trust Authentication:** Implements robust security with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
 
@@ -400,12 +400,12 @@ Branch: `ops/operational-payload-2026-04-30`
 Commits: `00c27489` (initial, 31 files) + `10c9bc3b` (security review fixes, 3 files)
 Source spec: `/tmp/payload/operational_payload/PAYLOAD.md` (306 lines)
 
-### Track A — NYSTEC trust documents (`docs/trust/`)
-13 compliance docs published verbatim — A11OY-01..05 (FedRAMP disclosure,
+### Track A — Trust documents (`docs/trust/`)
+13 compliance docs published verbatim — A11OY-01..05 (authorization disclosure,
 CMMC/NIST 800-171, bias methodology, US data residency, 72-hr IR);
 SENTRA-01..04 (SOC 2 Type II plan, IR runbook, threat-feed catalog,
 pen-test plan); AMARU-01..04 (data classification, retention, COTS-ERP,
-PIA template). Closes the gaps from the April 2026 NYSTEC pre-briefing.
+PIA template). Closes the gaps from the April 2026 pre-briefing.
 
 ### Track B — Demo video assets (`artifacts/szl-demo-video/scripts/`)
 90-second script, voiceover, recording runbook, distribution copy.
@@ -1088,7 +1088,7 @@ narrow CSRF / global-auth allowlist additions). Verdict:
 - Per payload ground rules, test committed verbatim. README badge reads 168/172. Owner decides remediation.
 
 ### V3 announcements/publishing fabrications
-- 5 announcement files + ZENODO_METADATA + papers/ouroboros-thesis-v3.md still contain "1,372", "FedRAMP", "$360K", "Booz Allen", "AWS Marketplace", "Series A", "Truist", "Northwell".
+- 5 announcement files + ZENODO_METADATA + papers/ouroboros-thesis-v3.md still contain fabricated strings that violate project ground rules.
 - PR #9 already OPEN on `szl-holdings/ouroboros-thesis` to retract these. Stephen merges; this audit does NOT duplicate.
 
 ### Codex-kernel attestation

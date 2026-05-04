@@ -1,6 +1,7 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID, createHash, randomBytes } from 'node:crypto';
 import { getCurrentActorId, getCurrentTenantId } from './request-context.js';
 import { emitRunEvent, type RunEventType } from './run-events.js';
+import { recordProof, type ProofRecord } from './nexus-fabric.js';
 
 export type ElicitationMode = 'form' | 'url';
 export type ElicitationStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired';
@@ -31,6 +32,7 @@ export interface ElicitationCreateRequest {
 export interface ElicitationResult {
   action: 'accept' | 'decline' | 'cancel';
   content?: Record<string, unknown>;
+  sessionToken?: string;
 }
 
 export interface GovernedElicitationFlow {
@@ -43,17 +45,64 @@ export interface GovernedElicitationFlow {
   schema: ElicitationFormSchema | null;
   url: string | null;
   sessionBound: boolean;
+  sessionToken: string | null;
   proofHash: string;
+  proofPersistedToWal: boolean;
   response: Record<string, unknown> | null;
   createdAt: string;
   completedAt: string | null;
+  expiresAt: string | null;
 }
 
 const URL_ELICITATION_REQUIRED_ERROR_CODE = -32042;
+const ELICITATION_TTL_MS = 15 * 60 * 1000;
 const activeFlows = new Map<string, GovernedElicitationFlow>();
+
+const URL_DOMAIN_ALLOWLIST = new Set([
+  'szl.holdings',
+  'forge.szl.holdings',
+  'app.szl.holdings',
+  'auth.szl.holdings',
+  'console.szl.holdings',
+]);
 
 function computeProofHash(data: Record<string, unknown>): string {
   return createHash('sha256').update(JSON.stringify(data)).digest('hex').slice(0, 16);
+}
+
+function generateSessionToken(): string {
+  return randomBytes(32).toString('hex');
+}
+
+function validateUrlSafety(url: string): string[] {
+  const errors: string[] = [];
+  if (!url.startsWith('https://')) {
+    errors.push('URL elicitation requires HTTPS for security.');
+  }
+  try {
+    const parsed = new URL(url);
+    if (parsed.username || parsed.password) {
+      errors.push('URL must not contain embedded credentials.');
+    }
+    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1') {
+      errors.push('URL must not target localhost.');
+    }
+    if (URL_DOMAIN_ALLOWLIST.size > 0) {
+      const host = parsed.hostname.toLowerCase();
+      const isAllowed = Array.from(URL_DOMAIN_ALLOWLIST).some(
+        (d) => host === d || host.endsWith(`.${d}`),
+      );
+      if (!isAllowed) {
+        errors.push(
+          `URL domain '${host}' is not in the approved allowlist. ` +
+          `Allowed: ${Array.from(URL_DOMAIN_ALLOWLIST).join(', ')}.`,
+        );
+      }
+    }
+  } catch {
+    errors.push('URL is malformed and cannot be parsed.');
+  }
+  return errors;
 }
 
 function validateSchemaSubset(schema: ElicitationFormSchema): string[] {
@@ -102,6 +151,29 @@ function validateResponseAgainstSchema(
   return errors;
 }
 
+function persistElicitationProof(
+  flowId: string,
+  actor: string,
+  mode: ElicitationMode,
+  proofHash: string,
+  status: ElicitationStatus,
+): void {
+  const record: ProofRecord = {
+    proofHash,
+    toolName: `elicitation:${mode}`,
+    actor,
+    issuedAt: new Date().toISOString(),
+    confidence: status === 'accepted' ? 0.95 : status === 'declined' ? 0.5 : 0.1,
+    covenantAllowed: status !== 'expired',
+    covenantReason: `Elicitation flow ${flowId} resolved with status: ${status}`,
+    responseDigest: createHash('sha256')
+      .update(`${flowId}:${mode}:${status}`)
+      .digest('hex')
+      .slice(0, 32),
+  };
+  recordProof(record);
+}
+
 export function handleElicitationCreate(
   request: ElicitationCreateRequest,
 ): GovernedElicitationFlow {
@@ -117,9 +189,10 @@ export function handleElicitationCreate(
         { code: URL_ELICITATION_REQUIRED_ERROR_CODE },
       );
     }
-    if (!request.url.startsWith('https://')) {
+    const urlErrors = validateUrlSafety(request.url);
+    if (urlErrors.length > 0) {
       throw Object.assign(
-        new Error('URL elicitation requires HTTPS for security.'),
+        new Error(`URL elicitation security check failed: ${urlErrors.join('; ')}`),
         { code: URL_ELICITATION_REQUIRED_ERROR_CODE },
       );
     }
@@ -132,14 +205,20 @@ export function handleElicitationCreate(
     }
   }
 
+  const sessionToken = mode === 'url' ? generateSessionToken() : null;
+
   const proofHash = computeProofHash({
     flowId,
     mode,
     actor,
     tenantId,
     message: request.message,
+    sessionToken: sessionToken ? createHash('sha256').update(sessionToken).digest('hex').slice(0, 8) : null,
     timestamp: Date.now(),
   });
+
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + ELICITATION_TTL_MS);
 
   const flow: GovernedElicitationFlow = {
     id: flowId,
@@ -151,13 +230,19 @@ export function handleElicitationCreate(
     schema: request.requestedSchema ?? null,
     url: request.url ?? null,
     sessionBound: mode === 'url',
+    sessionToken,
     proofHash,
+    proofPersistedToWal: false,
     response: null,
-    createdAt: new Date().toISOString(),
+    createdAt: now.toISOString(),
     completedAt: null,
+    expiresAt: expiresAt.toISOString(),
   };
 
   activeFlows.set(flowId, flow);
+
+  persistElicitationProof(flowId, actor, mode, proofHash, 'pending');
+  flow.proofPersistedToWal = true;
 
   emitRunEvent({
     type: 'elicitation_created' as RunEventType,
@@ -185,6 +270,22 @@ export function resolveElicitation(
     throw new Error(`Elicitation flow ${flowId} is already ${flow.status}.`);
   }
 
+  if (flow.expiresAt && new Date(flow.expiresAt) < new Date()) {
+    flow.status = 'expired';
+    flow.completedAt = new Date().toISOString();
+    persistElicitationProof(flowId, flow.actor, flow.mode, flow.proofHash, 'expired');
+    throw new Error(`Elicitation flow ${flowId} has expired.`);
+  }
+
+  if (flow.sessionBound && flow.sessionToken) {
+    if (!result.sessionToken) {
+      throw new Error('URL-mode elicitation requires a valid sessionToken for resolution.');
+    }
+    if (result.sessionToken !== flow.sessionToken) {
+      throw new Error('Session token mismatch. URL-mode elicitation binding verification failed.');
+    }
+  }
+
   if (result.action === 'accept') {
     if (flow.mode === 'form' && flow.schema) {
       if (!result.content) {
@@ -205,6 +306,8 @@ export function resolveElicitation(
 
   flow.completedAt = new Date().toISOString();
 
+  persistElicitationProof(flowId, flow.actor, flow.mode, flow.proofHash, flow.status);
+
   const eventType = result.action === 'accept'
     ? 'elicitation_accepted'
     : result.action === 'decline'
@@ -215,6 +318,14 @@ export function resolveElicitation(
     type: eventType as RunEventType,
     runId: flowId,
     actor: flow.actor,
+    timestamp: Date.now(),
+  });
+
+  emitRunEvent({
+    type: 'elicitation_complete' as RunEventType,
+    runId: flowId,
+    actor: flow.actor,
+    status: flow.status,
     timestamp: Date.now(),
   });
 

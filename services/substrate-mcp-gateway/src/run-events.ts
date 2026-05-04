@@ -28,7 +28,8 @@ export type RunEventType =
   | 'elicitation_created'
   | 'elicitation_accepted'
   | 'elicitation_declined'
-  | 'elicitation_cancelled';
+  | 'elicitation_cancelled'
+  | 'elicitation_complete';
 
 export interface RunLifecycleEvent {
   type: RunEventType;
