@@ -37,6 +37,107 @@ function isDemoMode(): boolean {
   return process.env.A11OY_DEMO_MODE !== 'false';
 }
 
+async function persistPolicyEvaluation(result: PolicyEvaluation): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyPolicyEvaluationsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyPolicyEvaluationsTable).values({
+      evalId: result.evalId,
+      policyIds: result.policyIds,
+      actionId: result.actionId,
+      riskClass: result.riskClass,
+      passed: result.passed,
+      requiresApproval: result.requiresApproval,
+      approvalTier: result.approvalTier ?? null,
+      violations: result.violations,
+      evaluatedAt: new Date(result.evaluatedAt),
+    }).onConflictDoUpdate({
+      target: a11oyPolicyEvaluationsTable.evalId,
+      set: {
+        passed: result.passed,
+        requiresApproval: result.requiresApproval,
+        approvalTier: result.approvalTier ?? null,
+        violations: result.violations,
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function persistApprovalRecord(record: ApprovalRecord): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyApprovalRecordsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyApprovalRecordsTable).values({
+      approvalId: record.approvalId,
+      actionId: record.actionId,
+      tier: record.tier as 'auto' | 'operator' | 'executive' | 'board',
+      status: record.status,
+      approvedBy: record.approvedBy ?? null,
+      approvedAt: record.approvedAt ? new Date(record.approvedAt) : null,
+      rejectedReason: record.rejectedReason ?? null,
+      createdAt: new Date(record.createdAt),
+    }).onConflictDoUpdate({
+      target: a11oyApprovalRecordsTable.approvalId,
+      set: {
+        status: record.status,
+        approvedBy: record.approvedBy ?? null,
+        approvedAt: record.approvedAt ? new Date(record.approvedAt) : null,
+        rejectedReason: record.rejectedReason ?? null,
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function persistPceContract(contract: PCEContract): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyPceContractsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyPceContractsTable).values({
+      contractId: contract.contractId,
+      actionId: contract.actionId,
+      workcellId: contract.workcellId ?? null,
+      originSignalIds: contract.originSignalIds,
+      causalChainIds: contract.causalChainIds ?? [],
+      policyEvaluationId: contract.policyEvaluationId ?? null,
+      approvalRecordId: contract.approvalRecordId ?? null,
+      mirrorEvalId: contract.mirrorEvalId ?? null,
+      executionTraceId: contract.executionTraceId ?? null,
+      proofPacketId: contract.proofPacketId ?? null,
+      mode: contract.mode,
+      isVerified: contract.isVerified,
+      evidenceCoverage: String(contract.evidenceCoverage ?? 0),
+      createdAt: new Date(contract.createdAt),
+      verifiedAt: contract.verifiedAt ? new Date(contract.verifiedAt) : null,
+    }).onConflictDoUpdate({
+      target: a11oyPceContractsTable.contractId,
+      set: {
+        executionTraceId: contract.executionTraceId ?? null,
+        proofPacketId: contract.proofPacketId ?? null,
+        isVerified: contract.isVerified,
+        verifiedAt: contract.verifiedAt ? new Date(contract.verifiedAt) : null,
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function persistProofPacket(packet: ProofPacketRecord): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyProofPacketsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyProofPacketsTable).values({
+      packetId: packet.packetId,
+      contractId: packet.contractId,
+      actionId: packet.actionId,
+      entityId: packet.entityId,
+      hash: packet.hash,
+      previousHash: packet.previousHash ?? null,
+      payload: packet.payload as Record<string, unknown>,
+      witnessedBy: packet.witnessedBy,
+      issuedAt: new Date(packet.issuedAt),
+    }).onConflictDoNothing();
+  } catch { /* non-fatal */ }
+}
+
 export function classifyRisk(opts: {
   riskLevel: string;
   isDestructive: boolean;
@@ -88,6 +189,7 @@ export function evaluatePolicies(opts: {
   };
 
   policyEvaluations.set(evalId, result);
+  void persistPolicyEvaluation(result);
   return result;
 }
 
@@ -103,6 +205,7 @@ export function createApprovalRecord(opts: {
     createdAt: new Date().toISOString(),
   };
   approvalRecords.set(record.approvalId, record);
+  void persistApprovalRecord(record);
   return record;
 }
 
@@ -112,6 +215,7 @@ export function approveAction(approvalId: string, approvedBy: string): ApprovalR
   record.status = 'approved';
   record.approvedBy = approvedBy;
   record.approvedAt = new Date().toISOString();
+  void persistApprovalRecord(record);
   return record;
 }
 
@@ -120,6 +224,7 @@ export function rejectAction(approvalId: string, reason: string): ApprovalRecord
   if (!record) return undefined;
   record.status = 'rejected';
   record.rejectedReason = reason;
+  void persistApprovalRecord(record);
   return record;
 }
 
@@ -226,8 +331,6 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
       actionId: input.actionId,
       tier: policyEval.approvalTier ?? 'operator',
     });
-    // Publish approval-required event so the Control Tower receives it in real time.
-    // Fire-and-forget: import is async to avoid circular-dependency issues.
     import('../../../lib/pubsub-bridge.js').then(({ pubsub, ALLOY_EVENTS }) => {
       void pubsub.publish(ALLOY_EVENTS.APPROVAL_REQUIRED, {
         alloyApprovalRequired: {
@@ -277,6 +380,7 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
   };
 
   pceContracts.set(contract.contractId, contract);
+  void persistPceContract(contract);
 
   return { allowed: true, contract };
 }
@@ -294,6 +398,8 @@ export async function verifyPCEContract(contractId: string): Promise<{ verified:
 
   const proofPacket = generateProofPacket(contract);
   contract.proofPacketId = proofPacket.packetId;
+
+  void persistPceContract(contract);
 
   return { verified: true };
 }
@@ -331,6 +437,7 @@ export function generateProofPacket(contract: PCEContract): ProofPacketRecord {
   };
 
   proofPackets.set(packet.packetId, packet);
+  void persistProofPacket(packet);
   return packet;
 }
 
@@ -344,7 +451,10 @@ export function listPCEContracts(limit = 50): PCEContract[] {
 
 export function attachTraceToContract(contractId: string, traceId: string): void {
   const contract = pceContracts.get(contractId);
-  if (contract) contract.executionTraceId = traceId;
+  if (contract) {
+    contract.executionTraceId = traceId;
+    void persistPceContract(contract);
+  }
 }
 
 export function getProofPacket(packetId: string): ProofPacketRecord | undefined {
@@ -361,4 +471,24 @@ export function listApprovalRecords(limit = 50): ApprovalRecord[] {
 
 export function getPolicyEvaluation(evalId: string): PolicyEvaluation | undefined {
   return policyEvaluations.get(evalId);
+}
+
+export function hydratePceGateStores(opts: {
+  contracts?: PCEContract[];
+  approvals?: ApprovalRecord[];
+  packets?: ProofPacketRecord[];
+  policyEvals?: PolicyEvaluation[];
+}): void {
+  for (const c of opts.contracts ?? []) {
+    if (!pceContracts.has(c.contractId)) pceContracts.set(c.contractId, c);
+  }
+  for (const a of opts.approvals ?? []) {
+    if (!approvalRecords.has(a.approvalId)) approvalRecords.set(a.approvalId, a);
+  }
+  for (const p of opts.packets ?? []) {
+    if (!proofPackets.has(p.packetId)) proofPackets.set(p.packetId, p);
+  }
+  for (const e of opts.policyEvals ?? []) {
+    if (!policyEvaluations.has(e.evalId)) policyEvaluations.set(e.evalId, e);
+  }
 }

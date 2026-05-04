@@ -212,6 +212,35 @@ export interface AgentPerformanceRecord {
 
 export const agentPerformanceStore = new Map<string, AgentPerformanceRecord>();
 
+export async function persistAgentPerformance(record: AgentPerformanceRecord): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { agentPerformanceSnapshotsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(agentPerformanceSnapshotsTable).values({
+      agentId: record.agentId,
+      domain: record.domain,
+      totalDecisions: record.totalDecisions,
+      acceptedDecisions: record.acceptedDecisions,
+      avgConfidence: String(record.avgConfidence),
+      avgLatencyMs: String(record.avgLatencyMs),
+      totalTokenCost: record.totalTokenCost,
+      proposedOptimizations: record.proposedOptimizations as unknown as Record<string, unknown>[],
+      lastUpdated: new Date(record.lastUpdated),
+    }).onConflictDoUpdate({
+      target: agentPerformanceSnapshotsTable.agentId,
+      set: {
+        totalDecisions: record.totalDecisions,
+        acceptedDecisions: record.acceptedDecisions,
+        avgConfidence: String(record.avgConfidence),
+        avgLatencyMs: String(record.avgLatencyMs),
+        totalTokenCost: record.totalTokenCost,
+        proposedOptimizations: record.proposedOptimizations as unknown as Record<string, unknown>[],
+        lastUpdated: new Date(record.lastUpdated),
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
 export function getOrCreatePerf(agentId: string, domain: string): AgentPerformanceRecord {
   if (!agentPerformanceStore.has(agentId)) {
     agentPerformanceStore.set(agentId, {
@@ -227,6 +256,21 @@ export function getOrCreatePerf(agentId: string, domain: string): AgentPerforman
     });
   }
   return agentPerformanceStore.get(agentId)!;
+}
+
+export function updatePerf(agentId: string, domain: string, updates: Partial<AgentPerformanceRecord>): void {
+  const existing = getOrCreatePerf(agentId, domain);
+  Object.assign(existing, updates, { lastUpdated: new Date().toISOString() });
+  agentPerformanceStore.set(agentId, existing);
+  void persistAgentPerformance(existing);
+}
+
+export function hydrateAgentPerformanceStore(records: AgentPerformanceRecord[]): void {
+  for (const rec of records) {
+    if (!agentPerformanceStore.has(rec.agentId)) {
+      agentPerformanceStore.set(rec.agentId, rec);
+    }
+  }
 }
 
 export function toRiskLevel(humanRisk: string): RiskLevel {

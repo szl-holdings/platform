@@ -28,6 +28,7 @@ import {
   evaluatePolicies,
   getOrCreatePerf,
   makeEvidenceRef,
+  persistAgentPerformance,
   riskLevelToDepth,
   toRiskLevel,
 } from './shared';
@@ -307,6 +308,7 @@ router.post(
         alloyPerf.totalDecisions;
       alloyPerf.totalTokenCost += result.totalCostUsd;
       alloyPerf.lastUpdated = new Date().toISOString();
+      void persistAgentPerformance(alloyPerf);
 
       sendSuccess(res, {
         layer: 'decide',
@@ -387,6 +389,7 @@ router.post(
         (alloyPerf.avgLatencyMs * (alloyPerf.totalDecisions - 1) + durationMs) /
         alloyPerf.totalDecisions;
       alloyPerf.lastUpdated = new Date().toISOString();
+      void persistAgentPerformance(alloyPerf);
 
       sendSuccess(res, {
         layer: 'decide',

@@ -56,16 +56,14 @@ async function runAgentViaSdkIfOptIn(
     return null;
   }
 
-  // Keep the conversation store in sync so context is preserved across turns
-  // and any fallback to the hand-rolled loop sees the full history.
   const messages = getOrCreateConversation(conversationId, agentType);
   messages.push({ role: 'user', content: userMessage });
   messages.push({ role: 'assistant', content: output });
+  void persistConversationMessages(conversationId, agentType, [
+    { role: 'user', content: userMessage },
+    { role: 'assistant', content: output },
+  ]);
 
-  // Emit the same captureTrace / autoEnqueueTrace / evaluator hooks that the
-  // hand-rolled loop emits. This preserves end-to-end SZL observability for
-  // SDK-path runs — the SDK's SzlTracingProcessor records span-level details,
-  // while this trace record holds the top-level governance audit entry.
   const latencyMs = Date.now() - startMs;
   const confidence = computeConfidenceProxy(output, false);
   const trace = captureTrace({
@@ -156,7 +154,7 @@ interface ConversationMessage {
 
 const conversationStore = new LRUCache<
   string,
-  { messages: ConversationMessage[]; lastAccess: number }
+  { messages: ConversationMessage[]; lastAccess: number; dbConversationId?: number }
 >({ max: 200 });
 const MAX_CONVERSATIONS = 200;
 const CONVERSATION_TTL = 30 * 60 * 1000;
@@ -168,6 +166,62 @@ function cleanExpiredConversations() {
       conversationStore.delete(id);
     }
   }
+}
+
+async function ensureDbConversation(conversationId: string, agentType: AgentType): Promise<number | undefined> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { conversations } = await import('@szl-holdings/db/schema');
+    const { eq } = await import('drizzle-orm');
+
+    const existing = await db
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.title, `agent:${agentType}:${conversationId}`))
+      .limit(1);
+
+    if (existing.length > 0) return existing[0]!.id;
+
+    const inserted = await db.insert(conversations).values({
+      title: `agent:${agentType}:${conversationId}`,
+    }).returning({ id: conversations.id });
+
+    return inserted[0]?.id;
+  } catch {
+    return undefined;
+  }
+}
+
+async function persistConversationMessages(
+  conversationId: string,
+  agentType: AgentType,
+  newMessages: Array<{ role: string; content: string }>,
+): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { messages } = await import('@szl-holdings/db/schema');
+
+    const cached = conversationStore.get(conversationId);
+    let dbConversationId = cached?.dbConversationId;
+
+    if (!dbConversationId) {
+      dbConversationId = await ensureDbConversation(conversationId, agentType);
+      if (cached && dbConversationId) {
+        cached.dbConversationId = dbConversationId;
+        conversationStore.set(conversationId, cached);
+      }
+    }
+
+    if (!dbConversationId) return;
+
+    for (const msg of newMessages) {
+      await db.insert(messages).values({
+        conversationId: dbConversationId,
+        role: msg.role,
+        content: msg.content,
+      });
+    }
+  } catch { /* non-fatal */ }
 }
 
 function getOrCreateConversation(
@@ -197,7 +251,62 @@ function getOrCreateConversation(
   const config = AGENT_CONFIGS[agentType];
   const messages: ConversationMessage[] = [{ role: 'system', content: config.systemPrompt }];
   conversationStore.set(conversationId, { messages, lastAccess: Date.now() });
+
+  // Load history from DB asynchronously
+  void loadConversationFromDb(conversationId, agentType);
+
   return messages;
+}
+
+async function loadConversationFromDb(conversationId: string, agentType: AgentType): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { conversations, messages: messagesTable } = await import('@szl-holdings/db/schema');
+    const { eq, asc } = await import('drizzle-orm');
+
+    const conv = await db
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.title, `agent:${agentType}:${conversationId}`))
+      .limit(1);
+
+    if (conv.length === 0) return;
+    const dbConvId = conv[0]!.id;
+
+    const dbMessages = await db
+      .select()
+      .from(messagesTable)
+      .where(eq(messagesTable.conversationId, dbConvId))
+      .orderBy(asc(messagesTable.createdAt))
+      .limit(50);
+
+    if (dbMessages.length === 0) return;
+
+    const cached = conversationStore.get(conversationId);
+    if (!cached) return;
+
+    // Only restore from DB if no user messages have been added during the async gap.
+    // If the caller already pushed a user message, overwriting would drop it.
+    const hasUserMessages = cached.messages.some((m) => m.role === 'user');
+    if (hasUserMessages) {
+      cached.dbConversationId = dbConvId;
+      conversationStore.set(conversationId, cached);
+      return;
+    }
+
+    const config = AGENT_CONFIGS[agentType];
+    const history: ConversationMessage[] = [
+      { role: 'system', content: config.systemPrompt },
+      ...dbMessages
+        .filter((m) => m.role !== 'system')
+        .map((m) => ({ role: m.role as ConversationMessage['role'], content: m.content })),
+    ];
+
+    cached.messages.length = 0;
+    history.forEach((m) => cached.messages.push(m));
+    cached.dbConversationId = dbConvId;
+    conversationStore.set(conversationId, cached);
+  } catch { /* non-fatal */ }
 }
 
 export async function runDomainAgentChat(
@@ -212,8 +321,6 @@ export async function runDomainAgentChat(
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
 
-  // Resolve whether a fine-tuned model is available for this agent.
-  // Falls back silently to the base model config on any resolution error.
   let effectiveModel = modelConfig.model;
   try {
     const resolution = await resolveModelForAgent(agentType, modelConfig.model, {
@@ -224,6 +331,7 @@ export async function runDomainAgentChat(
   } catch {}
 
   messages.push({ role: 'user', content: userMessage });
+  void persistConversationMessages(conversationId, agentType, [{ role: 'user', content: userMessage }]);
 
   const ai = services.ai;
   const startMs = Date.now();
@@ -314,6 +422,7 @@ export async function runDomainAgentChat(
 
     if (!toolCall) {
       messages.push({ role: 'assistant', content: responseText });
+      void persistConversationMessages(conversationId, agentType, [{ role: 'assistant', content: responseText }]);
       emitTrace(responseText, result, false);
       return responseText;
     }
@@ -333,6 +442,7 @@ export async function runDomainAgentChat(
   const fallback =
     "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
   messages.push({ role: 'assistant', content: fallback });
+  void persistConversationMessages(conversationId, agentType, [{ role: 'assistant', content: fallback }]);
   if (lastCompletion) {
     emitTrace(fallback, lastCompletion, true);
   }
@@ -349,7 +459,6 @@ export async function streamDomainAgentChat(
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
 
-  // Resolve fine-tuned model for this agent (same as non-streaming path).
   let effectiveStreamModel = modelConfig.model;
   try {
     const resolution = await resolveModelForAgent(agentType, modelConfig.model, {
@@ -360,6 +469,7 @@ export async function streamDomainAgentChat(
   } catch {}
 
   messages.push({ role: 'user', content: userMessage });
+  void persistConversationMessages(conversationId, agentType, [{ role: 'user', content: userMessage }]);
 
   const ai = services.ai;
   const startMs = Date.now();
@@ -403,6 +513,7 @@ export async function streamDomainAgentChat(
     }
 
     messages.push({ role: 'assistant', content: fullResponse });
+    void persistConversationMessages(conversationId, agentType, [{ role: 'assistant', content: fullResponse }]);
 
     const streamTrace = captureTrace({
       domain,

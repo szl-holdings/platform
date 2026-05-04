@@ -473,6 +473,190 @@ export async function initDurablePersistence(): Promise<void> {
       logger.warn({ err }, "[persistence] Action Engine DB adapter init failed — staying in-memory");
     }
 
+    // ----- A11oy PCE Runtime: hydrate all governance/runtime stores -----
+    try {
+      const {
+        a11oyPceContractsTable,
+        a11oyApprovalRecordsTable,
+        a11oyProofPacketsTable,
+        a11oyPolicyEvaluationsTable,
+        a11oyMirrorEvalResultsTable,
+        a11oyExecutionTracesTable,
+        a11oyWorkcellsTable,
+        a11oyOperatorRunsTable,
+        agentPerformanceSnapshotsTable,
+      } = await import("@szl-holdings/db/schema");
+
+      const PCE_HYDRATE_LIMIT = parseInt(process.env.PCE_HYDRATE_LIMIT ?? "500", 10);
+
+      const [
+        contractRows,
+        approvalRows,
+        packetRows,
+        policyEvalRows,
+        mirrorEvalRows,
+        traceRows,
+        workcellRows,
+        runRows,
+        perfRows,
+      ] = await Promise.all([
+        db.select().from(a11oyPceContractsTable).orderBy(desc(a11oyPceContractsTable.createdAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyApprovalRecordsTable).orderBy(desc(a11oyApprovalRecordsTable.createdAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyProofPacketsTable).orderBy(desc(a11oyProofPacketsTable.issuedAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyPolicyEvaluationsTable).orderBy(desc(a11oyPolicyEvaluationsTable.evaluatedAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyMirrorEvalResultsTable).orderBy(desc(a11oyMirrorEvalResultsTable.evaluatedAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyExecutionTracesTable).orderBy(desc(a11oyExecutionTracesTable.startedAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyWorkcellsTable).orderBy(desc(a11oyWorkcellsTable.updatedAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(a11oyOperatorRunsTable).orderBy(desc(a11oyOperatorRunsTable.createdAt)).limit(PCE_HYDRATE_LIMIT).catch(() => []),
+        db.select().from(agentPerformanceSnapshotsTable).limit(1000).catch(() => []),
+      ]);
+
+      // PCE Gate stores
+      const { hydratePceGateStores } = await import("../a11oy/runtime/governance/pce-gate.js");
+      hydratePceGateStores({
+        contracts: contractRows.map((r) => ({
+          contractId: r.contractId,
+          actionId: r.actionId,
+          workcellId: r.workcellId ?? undefined,
+          originSignalIds: (r.originSignalIds as string[]) ?? [],
+          causalChainIds: (r.causalChainIds as string[]) ?? [],
+          policyEvaluationId: r.policyEvaluationId ?? undefined,
+          approvalRecordId: r.approvalRecordId ?? undefined,
+          mirrorEvalId: r.mirrorEvalId ?? undefined,
+          executionTraceId: r.executionTraceId ?? undefined,
+          proofPacketId: r.proofPacketId ?? undefined,
+          mode: (r.mode as "demo" | "governed") ?? "demo",
+          isVerified: r.isVerified,
+          evidenceCoverage: r.evidenceCoverage ? Number(r.evidenceCoverage) : 0,
+          createdAt: r.createdAt.toISOString(),
+          verifiedAt: r.verifiedAt?.toISOString(),
+        })),
+        approvals: approvalRows.map((r) => ({
+          approvalId: r.approvalId,
+          actionId: r.actionId,
+          tier: r.tier as "auto" | "operator" | "executive" | "board",
+          status: r.status as "pending" | "approved" | "rejected",
+          approvedBy: r.approvedBy ?? undefined,
+          approvedAt: r.approvedAt?.toISOString(),
+          rejectedReason: r.rejectedReason ?? undefined,
+          createdAt: r.createdAt.toISOString(),
+        })),
+        packets: packetRows.map((r) => ({
+          packetId: r.packetId,
+          contractId: r.contractId,
+          actionId: r.actionId,
+          entityId: r.entityId,
+          hash: r.hash,
+          previousHash: r.previousHash ?? undefined,
+          payload: (r.payload as Record<string, unknown>) ?? {},
+          witnessedBy: (r.witnessedBy as string[]) ?? [],
+          issuedAt: r.issuedAt.toISOString(),
+        })),
+        policyEvals: policyEvalRows.map((r) => ({
+          evalId: r.evalId,
+          policyIds: (r.policyIds as string[]) ?? [],
+          actionId: r.actionId,
+          riskClass: r.riskClass,
+          passed: r.passed,
+          requiresApproval: r.requiresApproval,
+          approvalTier: r.approvalTier as "auto" | "operator" | "executive" | "board" | undefined,
+          violations: (r.violations as string[]) ?? [],
+          evaluatedAt: r.evaluatedAt.toISOString(),
+        })),
+      });
+
+      // Mirror eval store
+      const { hydrateMirrorEvalStore } = await import("../a11oy/runtime/evals/mirror-eval.js");
+      hydrateMirrorEvalStore(mirrorEvalRows.map((r) => ({
+        evalId: r.evalId,
+        targetId: r.targetId,
+        targetType: r.targetType as "action" | "workcell" | "signal" | "pce",
+        disposition: r.disposition as import("../a11oy/runtime/types.js").MirrorEvalDisposition,
+        overallScore: r.overallScore ? Number(r.overallScore) : 0,
+        scores: (r.scores as Record<string, unknown>[]) ?? [],
+        flags: (r.flags as string[]) ?? [],
+        evaluatedAt: r.evaluatedAt.toISOString(),
+        evaluatorVersion: r.evaluatorVersion ?? "1.0.0",
+      })));
+
+      // Execution trace store
+      const { hydrateTracingStore } = await import("../a11oy/runtime/tracing/store.js");
+      hydrateTracingStore(traceRows);
+
+      // Workcell store
+      const { hydrateWorkcellStore } = await import("../a11oy/runtime/workcells/engine.js");
+      hydrateWorkcellStore(workcellRows.map((r) => ({
+        id: r.workcellId,
+        name: r.name,
+        description: r.description ?? "",
+        vertical: r.vertical,
+        phase: r.phase as import("../a11oy/runtime/types.js").WorkcellPhase,
+        operatorId: r.operatorId,
+        tools: (r.tools as string[]) ?? [],
+        approvalTier: r.approvalTier as "auto" | "operator" | "executive",
+        maxRunDurationMs: r.maxRunDurationMs,
+        pceContractId: r.pceContractId ?? undefined,
+        approvalRecordId: r.approvalRecordId ?? undefined,
+        traceId: r.traceId ?? undefined,
+        proofPacketId: r.proofPacketId ?? undefined,
+        lastError: r.lastError ?? undefined,
+        originSignalIds: (r.originSignalIds as string[]) ?? [],
+        history: (r.history as Array<{ phase: import("../a11oy/runtime/types.js").WorkcellPhase; timestamp: string; note?: string }>) ?? [],
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+      })));
+
+      // Operator run store
+      const { hydrateRunStore } = await import("../a11oy/runtime/operator/run-store.js");
+      hydrateRunStore(runRows.map((r) => ({
+        runId: r.runId,
+        intent: r.intent,
+        vertical: r.vertical,
+        requestedBy: r.requestedBy,
+        status: r.status as import("../a11oy/runtime/operator/run-store.js").RunStatus,
+        plan: (r.plan as import("../a11oy/runtime/operator/run-store.js").PlanStep[]) ?? [],
+        auditLog: (r.auditLog as import("../a11oy/runtime/operator/run-store.js").AuditEntry[]) ?? [],
+        currentStepIndex: r.currentStepIndex,
+        planSummary: r.planSummary,
+        estimatedSideEffects: (r.estimatedSideEffects as string[]) ?? [],
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        completedAt: r.completedAt?.toISOString(),
+        error: r.error ?? undefined,
+      })));
+
+      // Agent performance store
+      const { hydrateAgentPerformanceStore } = await import("../routes/control-tower/shared.js");
+      hydrateAgentPerformanceStore(perfRows.map((r) => ({
+        agentId: r.agentId,
+        domain: r.domain,
+        totalDecisions: r.totalDecisions,
+        acceptedDecisions: r.acceptedDecisions,
+        avgConfidence: r.avgConfidence ? Number(r.avgConfidence) : 0,
+        avgLatencyMs: r.avgLatencyMs ? Number(r.avgLatencyMs) : 0,
+        totalTokenCost: r.totalTokenCost,
+        proposedOptimizations: (r.proposedOptimizations as import("../routes/control-tower/shared.js").AgentPerformanceRecord["proposedOptimizations"]) ?? [],
+        lastUpdated: r.lastUpdated.toISOString(),
+      })));
+
+      logger.info(
+        {
+          contracts: contractRows.length,
+          approvals: approvalRows.length,
+          packets: packetRows.length,
+          policyEvals: policyEvalRows.length,
+          mirrorEvals: mirrorEvalRows.length,
+          traces: traceRows.length,
+          workcells: workcellRows.length,
+          runs: runRows.length,
+          agentPerf: perfRows.length,
+        },
+        "[persistence] A11oy PCE runtime stores hydrated from PostgreSQL",
+      );
+    } catch (err) {
+      logger.warn({ err }, "[persistence] A11oy PCE runtime hydration failed — stores remain in-memory");
+    }
+
     logger.info(
       {
         tracesLoaded,

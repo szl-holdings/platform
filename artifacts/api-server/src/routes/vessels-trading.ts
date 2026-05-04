@@ -696,9 +696,34 @@ router.delete(
   validateBody(bodyShape({})),
   tradingLimit,
   authMiddleware({ required: false }),
-  (req, res) => {
+  async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
+
+      // Try DB first
+      try {
+        const { eq: eqOp } = await import('drizzle-orm');
+        const existing = await db
+          .select({ id: commodityTradingOrdersTable.id, status: commodityTradingOrdersTable.status })
+          .from(commodityTradingOrdersTable)
+          .where(eqOp(commodityTradingOrdersTable.id, id))
+          .limit(1);
+        if (existing.length > 0) {
+          if (existing[0]!.status === 'filled') {
+            res.status(400).json({ error: 'Cannot cancel filled order' });
+            return;
+          }
+          await db
+            .update(commodityTradingOrdersTable)
+            .set({ status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date() })
+            .where(eqOp(commodityTradingOrdersTable.id, id));
+          sendSuccess(res, { message: 'Order cancelled', orderId: id });
+          return;
+        }
+      } catch (_dbErr) {
+        // fall through to in-memory
+      }
+
       const idx = sessionOrders.findIndex((o) => o.id === id);
       const demoIdx = DEMO_ORDERS.findIndex((o) => o.id === id);
       if (idx >= 0) {

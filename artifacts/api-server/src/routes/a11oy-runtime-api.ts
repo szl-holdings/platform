@@ -40,7 +40,9 @@ import { generatePlan } from '../a11oy/runtime/operator/planner.js';
 import {
   createRun,
   getRun,
+  fetchRun,
   listRuns,
+  listRunsFromDb,
   approveStep,
   rejectStep,
   recordStepExecution,
@@ -776,13 +778,13 @@ router.post('/a11oy/operator/runs', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/a11oy/operator/runs', (_req: Request, res: Response) => {
-  const runs = listRuns(50);
+router.get('/a11oy/operator/runs', async (_req: Request, res: Response) => {
+  const runs = await listRunsFromDb(50);
   ok(res, runs, { total: runs.length });
 });
 
-router.get('/a11oy/operator/runs/:id', (req: Request, res: Response) => {
-  const run = getRun(req.params.id);
+router.get('/a11oy/operator/runs/:id', async (req: Request, res: Response) => {
+  const run = await fetchRun(req.params.id);
   if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
   ok(res, run);
 });
@@ -818,7 +820,7 @@ router.post('/a11oy/operator/runs/:id/steps/:stepId/execute', async (req: Reques
     const { executedBy } = req.body as {
       executedBy?: string;
     };
-    const run = getRun(req.params.id);
+    const run = await fetchRun(req.params.id);
     if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
     const step = run.plan.find((s) => s.stepId === req.params.stepId);
     if (!step) return err(res, 404, 'not_found', `Step "${req.params.stepId}" not found.`);
@@ -883,8 +885,8 @@ router.get('/a11oy/operator/runs/:id/replay', (req: Request, res: Response) => {
   ok(res, replay, { replayable: true });
 });
 
-router.get('/a11oy/operator/runs/:id/audit', (req: Request, res: Response) => {
-  const run = getRun(req.params.id);
+router.get('/a11oy/operator/runs/:id/audit', async (req: Request, res: Response) => {
+  const run = await fetchRun(req.params.id);
   if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
   ok(res, run.auditLog, { runId: run.runId, total: run.auditLog.length });
 });

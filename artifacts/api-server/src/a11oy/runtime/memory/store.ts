@@ -1,11 +1,10 @@
+import { defaultMemoryStore } from '@workspace/memory-fabric';
+import type { MemoryEntry as FabricEntry } from '@workspace/memory-fabric';
 import type { MemoryEntry } from '../types.js';
 import { randomUUID } from 'node:crypto';
 
 const SENSITIVE_PATTERNS = [/api[_-]?key/i, /secret/i, /password/i, /token/i, /credential/i, /ssn/i, /bearer/i];
-const MAX_ENTRIES = 2000;
 const FRESHNESS_DECAY_RATE = 0.01;
-
-const store = new Map<string, MemoryEntry>();
 
 function isSensitiveKey(key: string): boolean {
   return SENSITIVE_PATTERNS.some((p) => p.test(key));
@@ -38,6 +37,65 @@ export function computeFreshness(updatedAt: string, expiresAt?: string): number 
   return Math.max(0, 1 - FRESHNESS_DECAY_RATE * ageDays);
 }
 
+function toFabricEntry(entry: MemoryEntry): FabricEntry {
+  return {
+    id: entry.memoryId,
+    tier: 'session',
+    key: `${entry.vertical}:${entry.entityId}`,
+    value: entry.content,
+    domain: entry.vertical || 'platform',
+    provenance: {
+      source: 'a11oy-runtime',
+      method: 'agent',
+      createdAt: entry.createdAt,
+    },
+    freshness: {
+      lastUpdatedAt: entry.updatedAt,
+      isStale: false,
+    },
+    confidence: 1,
+    sensitivity: entry.isSensitive ? 'confidential' : 'internal',
+    retention: {
+      policy: entry.expiresAt ? 'session-scoped' : 'persistent',
+      expiresAt: entry.expiresAt,
+      pinned: false,
+    },
+    tags: entry.tags,
+    scopeId: `domain:${entry.vertical}`,
+    linkedEntities: [],
+    linkedTraces: [],
+    linkedActions: [],
+    metadata: {
+      vertical: entry.vertical,
+      entityId: entry.entityId,
+      isSensitive: entry.isSensitive,
+      provenanceSource: 'a11oy-runtime',
+    },
+  };
+}
+
+function fromFabricEntry(e: FabricEntry): MemoryEntry {
+  const meta = (e.metadata ?? {}) as Record<string, unknown>;
+  const updatedAt = e.freshness.lastUpdatedAt;
+  return {
+    memoryId: e.id,
+    vertical: (meta.vertical as string) ?? e.domain,
+    entityId: (meta.entityId as string) ?? '',
+    content: (e.value as Record<string, unknown>) ?? {},
+    tags: e.tags ?? [],
+    isSensitive: e.sensitivity === 'confidential',
+    freshnessScore: computeFreshness(updatedAt, e.retention?.expiresAt),
+    createdAt: e.provenance.createdAt,
+    updatedAt,
+    expiresAt: e.retention?.expiresAt,
+  };
+}
+
+function isA11oyEntry(e: FabricEntry): boolean {
+  const meta = (e.metadata ?? {}) as Record<string, unknown>;
+  return (meta.provenanceSource as string) === 'a11oy-runtime';
+}
+
 export function store_write(opts: {
   vertical: string;
   entityId: string;
@@ -46,9 +104,6 @@ export function store_write(opts: {
   isSensitive?: boolean;
   ttlMs?: number;
 }): MemoryEntry {
-  if (store.size >= MAX_ENTRIES) {
-    compact();
-  }
   const now = new Date().toISOString();
   const expiresAt = opts.ttlMs ? new Date(Date.now() + opts.ttlMs).toISOString() : undefined;
   const entry: MemoryEntry = {
@@ -63,15 +118,16 @@ export function store_write(opts: {
     updatedAt: now,
     expiresAt,
   };
-  store.set(entry.memoryId, entry);
+  defaultMemoryStore.put(toFabricEntry(entry));
   return entry;
 }
 
 export function store_read(memoryId: string): MemoryEntry | undefined {
-  const entry = store.get(memoryId);
-  if (!entry) return undefined;
-  entry.freshnessScore = computeFreshness(entry.updatedAt, entry.expiresAt);
-  return entry;
+  const e = defaultMemoryStore.get(memoryId);
+  if (!e || !isA11oyEntry(e)) return undefined;
+  const result = fromFabricEntry(e);
+  result.freshnessScore = computeFreshness(result.updatedAt, result.expiresAt);
+  return result;
 }
 
 export function store_query(opts: {
@@ -82,50 +138,64 @@ export function store_query(opts: {
   limit?: number;
 }): MemoryEntry[] {
   const now = Date.now();
-  let results = [...store.values()].filter((e) => {
-    if (e.expiresAt && new Date(e.expiresAt).getTime() < now) return false;
-    if (opts.vertical && e.vertical !== opts.vertical) return false;
-    if (opts.entityId && e.entityId !== opts.entityId) return false;
-    if (opts.tags?.length) {
-      const has = opts.tags.every((t) => e.tags.includes(t));
-      if (!has) return false;
-    }
-    const freshness = computeFreshness(e.updatedAt, e.expiresAt);
-    if (opts.minFreshness !== undefined && freshness < opts.minFreshness) return false;
-    return true;
-  });
-  results = results.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  let results = defaultMemoryStore
+    .list({ tags: opts.tags?.length ? opts.tags : undefined })
+    .filter((e) => {
+      if (!isA11oyEntry(e)) return false;
+      if (e.retention?.expiresAt && new Date(e.retention.expiresAt).getTime() < now) return false;
+      const meta = (e.metadata ?? {}) as Record<string, unknown>;
+      if (opts.vertical && (meta.vertical as string) !== opts.vertical) return false;
+      if (opts.entityId && (meta.entityId as string) !== opts.entityId) return false;
+      return true;
+    })
+    .map(fromFabricEntry);
+  if (opts.minFreshness !== undefined) {
+    const minF = opts.minFreshness;
+    results = results.filter((e) => computeFreshness(e.updatedAt, e.expiresAt) >= minF);
+  }
+  results.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   return results.slice(0, opts.limit ?? 50);
 }
 
-export function store_update(memoryId: string, patch: Partial<Pick<MemoryEntry, 'content' | 'tags'>>): MemoryEntry | undefined {
-  const entry = store.get(memoryId);
-  if (!entry) return undefined;
+export function store_update(
+  memoryId: string,
+  patch: Partial<Pick<MemoryEntry, 'content' | 'tags'>>,
+): MemoryEntry | undefined {
+  const existing = defaultMemoryStore.get(memoryId);
+  if (!existing || !isA11oyEntry(existing)) return undefined;
+  const entry = fromFabricEntry(existing);
   if (patch.content) entry.content = redactContent(patch.content);
   if (patch.tags) entry.tags = patch.tags;
   entry.updatedAt = new Date().toISOString();
   entry.freshnessScore = 1;
+  defaultMemoryStore.put(toFabricEntry(entry));
   return entry;
 }
 
 export function compact(): void {
-  const entries = [...store.values()].sort(
-    (a, b) => computeFreshness(a.updatedAt, a.expiresAt) - computeFreshness(b.updatedAt, b.expiresAt),
-  );
-  const toRemove = Math.floor(entries.length * 0.2);
-  for (let i = 0; i < toRemove; i++) {
-    store.delete(entries[i].memoryId);
-  }
+  defaultMemoryStore.evictExpired();
 }
 
 export function listEntries(limit = 50): MemoryEntry[] {
-  return [...store.values()].slice(-limit).reverse();
+  return defaultMemoryStore
+    .list()
+    .filter(isA11oyEntry)
+    .slice(-limit)
+    .reverse()
+    .map(fromFabricEntry);
 }
 
 export function getStats() {
+  const a11oyCount = defaultMemoryStore.list().filter(isA11oyEntry).length;
   return {
-    totalEntries: store.size,
-    maxEntries: MAX_ENTRIES,
-    utilizationPct: Math.round((store.size / MAX_ENTRIES) * 100),
+    totalEntries: a11oyCount,
+    maxEntries: 2000,
+    utilizationPct: Math.round((a11oyCount / 2000) * 100),
   };
+}
+
+export function hydrateMemoryStore(_entries: MemoryEntry[]): void {
+  // No-op: defaultMemoryStore (memory-fabric / PostgresMemoryStore) owns hydration
+  // from memoryRecordsTable on boot. A11oy entries written with provenanceSource='a11oy-runtime'
+  // are visible via defaultMemoryStore.list() and store_query() immediately after fabric hydrate().
 }

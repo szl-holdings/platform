@@ -44,6 +44,45 @@ const VALID_TRANSITIONS: Partial<Record<WorkcellPhase, WorkcellPhase[]>> = {
   archived: [],
 };
 
+async function persistWorkcell(wc: WorkcellEntity): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyWorkcellsTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyWorkcellsTable).values({
+      workcellId: wc.id,
+      name: wc.name,
+      description: wc.description,
+      vertical: wc.vertical,
+      phase: wc.phase,
+      operatorId: wc.operatorId,
+      tools: wc.tools,
+      approvalTier: wc.approvalTier,
+      maxRunDurationMs: wc.maxRunDurationMs,
+      pceContractId: wc.pceContractId ?? null,
+      approvalRecordId: wc.approvalRecordId ?? null,
+      traceId: wc.traceId ?? null,
+      proofPacketId: wc.proofPacketId ?? null,
+      lastError: wc.lastError ?? null,
+      originSignalIds: wc.originSignalIds,
+      history: wc.history as unknown as Array<{ phase: string; timestamp: string; note?: string }>,
+      createdAt: new Date(wc.createdAt),
+      updatedAt: new Date(wc.updatedAt),
+    }).onConflictDoUpdate({
+      target: a11oyWorkcellsTable.workcellId,
+      set: {
+        phase: wc.phase,
+        pceContractId: wc.pceContractId ?? null,
+        approvalRecordId: wc.approvalRecordId ?? null,
+        traceId: wc.traceId ?? null,
+        proofPacketId: wc.proofPacketId ?? null,
+        lastError: wc.lastError ?? null,
+        history: wc.history as unknown as Array<{ phase: string; timestamp: string; note?: string }>,
+        updatedAt: new Date(wc.updatedAt),
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
 export function createWorkcell(opts: {
   name: string;
   description?: string;
@@ -78,6 +117,7 @@ export function createWorkcell(opts: {
   };
 
   workcells.set(wc.id, wc);
+  void persistWorkcell(wc);
   return wc;
 }
 
@@ -92,6 +132,7 @@ export function transition(workcellId: string, toPhase: WorkcellPhase, note?: st
   wc.updatedAt = new Date().toISOString();
   wc.history.push({ phase: toPhase, timestamp: wc.updatedAt, note });
 
+  void persistWorkcell(wc);
   return wc;
 }
 
@@ -263,10 +304,13 @@ export function replayWorkcell(workcellId: string): WorkcellEntity | undefined {
   return clone;
 }
 
+export function hydrateWorkcellStore(loaded: WorkcellEntity[]): void {
+  for (const wc of loaded) {
+    if (!workcells.has(wc.id)) workcells.set(wc.id, wc);
+  }
+}
+
 // ─── Demo Seed ────────────────────────────────────────────────────────────────
-// Pre-populate the in-memory store with the canonical demo workcell entries so
-// that CLI replay, advance, and approve calls work against the standard IDs
-// without requiring a prior `POST /api/a11oy/workcells` call in the session.
 
 const DEMO_WORKCELLS: Array<{
   id: string;
@@ -304,6 +348,7 @@ function seedDemoWorkcells(): void {
         history: [{ phase: seed.phase, timestamp: now }],
       };
       workcells.set(wc.id, wc);
+      void persistWorkcell(wc);
     }
   }
 }

@@ -15,10 +15,34 @@ interface Trace {
 const MAX_TRACES = 500;
 const traces = new Map<string, Trace>();
 
+async function persistTrace(trace: Trace): Promise<void> {
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { a11oyExecutionTracesTable } = await import('@szl-holdings/db/schema');
+    await db.insert(a11oyExecutionTracesTable).values({
+      traceId: trace.traceId,
+      runId: trace.runId,
+      entityId: trace.entityId,
+      entityType: trace.entityType,
+      entries: trace.entries as unknown as Record<string, unknown>[],
+      status: trace.status,
+      startedAt: new Date(trace.startedAt),
+      completedAt: trace.completedAt ? new Date(trace.completedAt) : null,
+    }).onConflictDoUpdate({
+      target: a11oyExecutionTracesTable.traceId,
+      set: {
+        entries: trace.entries as unknown as Record<string, unknown>[],
+        status: trace.status,
+        completedAt: trace.completedAt ? new Date(trace.completedAt) : null,
+      },
+    });
+  } catch { /* non-fatal */ }
+}
+
 export function createTrace(opts: { runId?: string; entityId: string; entityType: string }): string {
   const traceId = `trace-${randomUUID().slice(0, 8)}`;
   const runId = opts.runId ?? `run-${randomUUID().slice(0, 8)}`;
-  traces.set(traceId, {
+  const trace: Trace = {
     traceId,
     runId,
     entityId: opts.entityId,
@@ -26,11 +50,13 @@ export function createTrace(opts: { runId?: string; entityId: string; entityType
     entries: [],
     startedAt: new Date().toISOString(),
     status: 'running',
-  });
+  };
+  traces.set(traceId, trace);
   if (traces.size > MAX_TRACES) {
     const oldest = traces.keys().next().value;
     if (oldest) traces.delete(oldest);
   }
+  void persistTrace(trace);
   return traceId;
 }
 
@@ -38,6 +64,7 @@ export function appendEntry(traceId: string, entry: Omit<TraceEntry, 'traceId'>)
   const trace = traces.get(traceId);
   if (!trace) return;
   trace.entries.push({ ...entry, traceId });
+  void persistTrace(trace);
 }
 
 export function completeTrace(traceId: string, status: 'completed' | 'failed'): void {
@@ -45,6 +72,7 @@ export function completeTrace(traceId: string, status: 'completed' | 'failed'): 
   if (!trace) return;
   trace.status = status;
   trace.completedAt = new Date().toISOString();
+  void persistTrace(trace);
 }
 
 export function getTrace(traceId: string): Trace | undefined {
@@ -109,4 +137,30 @@ export function buildTraceEntry(
     timestamp: new Date().toISOString(),
     metadata: opts?.metadata ?? {},
   };
+}
+
+export function hydrateTracingStore(loaded: Array<{
+  traceId: string;
+  runId: string;
+  entityId: string;
+  entityType: string;
+  entries: unknown;
+  status: string;
+  startedAt: Date;
+  completedAt: Date | null;
+}>): void {
+  for (const row of loaded) {
+    if (!traces.has(row.traceId)) {
+      traces.set(row.traceId, {
+        traceId: row.traceId,
+        runId: row.runId,
+        entityId: row.entityId,
+        entityType: row.entityType,
+        entries: Array.isArray(row.entries) ? (row.entries as TraceEntry[]) : [],
+        startedAt: row.startedAt.toISOString(),
+        completedAt: row.completedAt?.toISOString(),
+        status: row.status as Trace['status'],
+      });
+    }
+  }
 }

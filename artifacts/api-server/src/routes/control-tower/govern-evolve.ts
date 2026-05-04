@@ -31,6 +31,7 @@ import {
   CONTROL_TOWER_AGENT_REGISTRY,
   evaluatePolicies,
   getOrCreatePerf,
+  persistAgentPerformance,
   POLICIES,
   REGISTERED_AGENT_IDS,
 } from './shared';
@@ -454,6 +455,7 @@ router.post(
       perf.proposedOptimizations.unshift(proposal);
       if (perf.proposedOptimizations.length > 20) perf.proposedOptimizations.length = 20;
       perf.lastUpdated = new Date().toISOString();
+      void persistAgentPerformance(perf);
       sendSuccess(res, {
         layer: 'evolve',
         proposal,
@@ -483,10 +485,13 @@ router.patch(
         return;
       }
       let found = false;
+      let affectedPerf: import('./shared').AgentPerformanceRecord | undefined;
       for (const perf of agentPerformanceStore.values()) {
         const proposal = perf.proposedOptimizations.find((p) => p.id === proposalId);
         if (proposal) {
           proposal.status = status;
+          perf.lastUpdated = new Date().toISOString();
+          affectedPerf = perf;
           found = true;
           break;
         }
@@ -495,6 +500,7 @@ router.patch(
         sendNotFound(res, 'Proposal');
         return;
       }
+      if (affectedPerf) void persistAgentPerformance(affectedPerf);
       sendSuccess(res, { proposalId, status, updatedAt: new Date().toISOString() });
     } catch (err) {
       handleRouteError(res, err, 'control-tower/evolve/propose/:proposalId');
