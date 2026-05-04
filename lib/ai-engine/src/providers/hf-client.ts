@@ -143,7 +143,52 @@ export async function chatCompletionWithFallback(
   throw lastError || new Error('All models failed');
 }
 
-// structuredCompletion() has been removed.
-// Use governedStructuredCall() from '@szl-holdings/ai-engine' for all structured inference.
-// governedStructuredCall() accepts a Zod schema, validates output via .safeParse(),
-// records refusals as first-class governance events, and writes to the Proof Chain.
+export interface HFAudioInferenceResult {
+  text: string;
+  model: string;
+  provider: string;
+  latencyMs: number;
+}
+
+export async function audioInference(
+  audioBuffer: Buffer,
+  modelId: string,
+  options?: { contentType?: string; signal?: AbortSignal },
+): Promise<HFAudioInferenceResult> {
+  const start = Date.now();
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  const headers: Record<string, string> = {
+    'Content-Type': options?.contentType || 'audio/wav',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch(
+      `https://api-inference.huggingface.co/models/${modelId}`,
+      {
+        method: 'POST',
+        headers,
+        body: audioBuffer as unknown as BodyInit,
+        signal: options?.signal || controller.signal,
+      },
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`HF audio inference ${response.status}: ${errorText.slice(0, 300)}`);
+    }
+
+    const data = (await response.json()) as { text?: string };
+    return {
+      text: data.text ?? '',
+      model: modelId,
+      provider: 'huggingface',
+      latencyMs: Date.now() - start,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}

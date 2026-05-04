@@ -223,6 +223,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/agent-mesh/state",
   "/api/agent-mesh/index",
   "/api/agent-mesh/scan",
+  "/api/hf/hub/status",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -282,6 +283,14 @@ const PUBLIC_PREFIXES = [
   // retained for the legacy fetch in szl-holdings/trust-center.
   // HuggingFace ML Intelligence — POST inference endpoints. All are public demo surfaces.
   "/api/hf-intelligence/",
+  // Unified HuggingFace Hub — read-only search endpoints only. Model/dataset/space
+  // search is public so the demo frontend can display results without a session.
+  // Mutating routes (POST/DELETE /pinned, POST /inference) are NOT included here
+  // and require authenticated sessions to prevent HF_TOKEN quota abuse and ensure
+  // tenant isolation on pinned items. The status endpoint uses PUBLIC_EXACT_PATHS.
+  "/api/hf/hub/models",
+  "/api/hf/hub/datasets",
+  "/api/hf/hub/spaces",
   // PRAXIS Tool Bridge — marketing-audit, seo-audit, and finance-terminal are
   // public audit execution endpoints called from Carlota Jo, KORA, and the NEXUS
   // Bridge without a browser session. No per-user authenticated state is read or

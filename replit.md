@@ -35,11 +35,17 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference.
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
-- **Precision Evolution Runtime (PER):** Governed, evidence-gated system for continuously evolving agent policies.
-- **PRAXIS – Unified Agentic AI Layer:** Internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
-- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, with capabilities like Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, and Self-Optimization Engine.
-- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline.
-- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products. Key capabilities include dual planner modes (ReAct, CoT-decompose), three MCP server classes, specialist agents, two-tier memory, evidence merging, and AggregatorTrace instrumentation.
+- **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
+- **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
+- **Continuum — Business Observability Fabric (formerly Alloy):** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents. A continuous, governed view of every signal and decision flowing through the business.
+- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline and knowledge collections.
+- **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer wired across all SZL products (Sentra, Counsel, Pulse, Command, Lyte, Terra, Vessels, and mobile). Key capabilities: dual planner modes (ReAct, CoT-decompose), three MCP server classes (LocalData, SearchEngine, CloudEngine), three specialist agents (knowledge, web-research, cloud-ops), two-tier memory (short-term + long-term), Reciprocal Rank Fusion + cross-encoder evidence merging, and full AggregatorTrace instrumentation. API routes at `/alloy/agentic-rag` (POST /run, GET /runs/:id, GET /runs/:id/trace, POST /run/stream, GET /specialists, GET /mcp-classes). Central SDK re-export via `@szl-holdings/alloy-client`. 46 vitest tests. Research dossier at `docs/alloy-agentic-rag/RESEARCH.md`; architecture at `docs/alloy-agentic-rag/ARCHITECTURE.md`.
+- **Hugging Face Unified Ecosystem (first-class HF capability):** HF elevated from "LLM backend" to a unified platform surface across:
+  - `artifacts/api-server/src/routes/hf-hub.ts` — Unified HF Hub API: model/dataset/space search, model cards, dataset row preview, Space metadata, pinned-item CRUD (DB-backed via `hf_pinned_items` table, tenant-scoped by userId), multimodal inference proxy (text/image/audio routed through `@szl-holdings/ai-engine` HF client), and token health/status. Mounted at `/hf/hub/*` BEFORE `/hf` in `routes/index.ts` to ensure prefix-match ordering.
+  - `lib/db/src/schema/hf_pinned.ts` — DB schema for `hf_pinned_items` table with userId/orgId tenant scoping, kind/hfId indexing. Migration: `0048_hf_pinned_items.sql`.
+  - Backend: `PATCH /api/ai/prompts/:id/versions/:versionId/hf-model` endpoint in `prompt-registry.ts`; `GET /api/ai/prompts/with-versions` endpoint returning full versions array with versionId and modelHints; `hfModel` field added to `PromptVersion.modelHints` in `packages/prompt-registry/src/registry.ts`.
+  - HF token: `process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY` — absent → 503 with `HF_TOKEN_MISSING` code rather than crash.
+  - Frontend pages (nuro-forge/hub.tsx, admin-command-center.tsx, prompt-registry.tsx, pulse.tsx, core-command.tsx) were in the archived `szl-holdings` artifact; HF integration surfaces are available via the API layer for any live frontend to consume.
 - **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with metadata.
 
 **Key Technical Implementations:**
@@ -237,6 +243,8 @@ v6 surfaces are exposed live on the api-server (auth-gated) at
 `/api/ouroboros/v6/{manifest,services,halts,routing,permissions,sandbox,
 agent-registry/schema}`, plus pure POST decision endpoints
 `/v6/permissions/check` and `/v6/agent-registry/check`. Ouroboros tests:
+**105/105 passing** (added 46 new pinning tests). Module + canonical
+JSON pushed to `szl-holdings/ouroboros`.
 **104/104 passing** (was 70 at v4). v6 module + canonical JSON pushed to
 `szl-holdings/ouroboros`.
 
@@ -1144,3 +1152,4 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
+- **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot

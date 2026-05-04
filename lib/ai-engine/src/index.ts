@@ -278,12 +278,27 @@ export {
   routeUniversalPrompt,
 } from './capability-fabric.js';
 export {
+  audioInference,
   chatCompletion,
   chatCompletionWithFallback,
+  type HFAudioInferenceResult,
   type HFChatMessage,
   type HFCompletionResult,
   type HFToolDef,
 } from './providers/hf-client.js';
+export {
+  checkTokenHealth,
+  type DatasetDetail,
+  getDatasetDetail,
+  getModelCard,
+  getSpaceDetail,
+  hasToken as hfHasToken,
+  type HubSearchOptions,
+  searchDatasets,
+  searchModels,
+  searchSpaces,
+  type TokenHealthResult,
+} from './providers/hf-hub-client.js';
 export {
   type CovenantRule,
   type CovenantVerdict,

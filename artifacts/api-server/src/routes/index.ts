@@ -383,6 +383,15 @@ router.use(lazyMatch("/praxis-tools", () => import("./praxis-tools"), "praxis-to
 router.use(lazyMatch("/ai-gateway", () => import("./ai-gateway"), "ai-gateway"));
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
+
+// Unified Hugging Face Hub — model/dataset/space search, pinned registry,
+// multimodal inference proxy, and token health. All HF traffic from every
+// frontend flows through this single surface so auth, retries, and cost
+// telemetry are centralised. MUST be mounted BEFORE /hf so the more-
+// specific /hf/hub/* prefix matches first (Express uses first-match routing).
+router.use(lazyMatch("/hf/hub", () => import("./hf-hub"), "hf-hub"));
+
+// HF status / whoami / subsystem health check — mounted after /hf/hub.
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
 
 // HuggingFace Jobs — governed external compute backend for agents.

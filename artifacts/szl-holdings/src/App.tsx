@@ -234,6 +234,7 @@ const NuroForgePrompts = lazy(() => import("@/pages/nuro-forge/prompts"));
 const NuroForgeObservatory = lazy(() => import("@/pages/nuro-forge/observatory"));
 const NuroForgeBlueprints = lazy(() => import("@/pages/nuro-forge/blueprints"));
 const NuroForgeSelfHealing = lazy(() => import("@/pages/nuro-forge/self-healing"));
+const NuroForgeHub = lazy(() => import("@/pages/nuro-forge/hub"));
 const PromptRegistryPage = lazy(() => import("@/pages/prompt-registry"));
 
 const RevenueFusionPage = lazy(() => import("@/pages/revenue-fusion"));
@@ -1386,6 +1387,9 @@ function App() {
             </Route>
             <Route path="/nuro-forge/self-healing">
               <Suspense fallback={<PageLoader />}><NuroForgeSelfHealing /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/hub">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NuroForgeHub /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Support portal routes ── */}

@@ -24,6 +24,7 @@ export interface PromptVersion {
     maxTokens?: number;
     temperature?: number;
     topP?: number;
+    hfModel?: string;
   };
   status: PromptStatus;
   createdAt: string;

@@ -442,6 +442,55 @@ router.get('/ai/prompts', authMiddleware, validateQuery(listQuerySchema), (req, 
 });
 
 /**
+ * GET /ai/prompts/with-versions
+ * List all prompts including the full versions array (versionId, version, status, modelHints).
+ * Used by the Prompt Registry UI to display per-version HF model bindings.
+ */
+router.get('/ai/prompts/with-versions', authMiddleware, validateQuery(listQuerySchema), (req, res) => {
+  try {
+    const { domain, routeClass, status } = req.query as Record<string, string | undefined>;
+    const prompts = promptRegistry.list({
+      domain: domain ?? undefined,
+      routeClass: routeClass ?? undefined,
+      status: status as PromptStatus | undefined,
+    });
+
+    const data = prompts.map((p) => {
+      const activeVersion = p.activeVersionId
+        ? p.versions.find((v) => v.versionId === p.activeVersionId)
+        : null;
+      return {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        domain: p.domain,
+        routeClass: p.routeClass,
+        activeVersionId: p.activeVersionId,
+        activeVersion: activeVersion?.version ?? null,
+        versionCount: p.versions.length,
+        status: promptRegistry.getEffectiveStatus(p),
+        tags: p.tags,
+        updatedAt: p.updatedAt,
+        createdAt: p.createdAt,
+        versions: p.versions.map((v) => ({
+          versionId: v.versionId,
+          version: v.version,
+          status: v.status,
+          createdAt: v.createdAt,
+          template: v.template,
+          systemPrompt: v.systemPrompt,
+          modelHints: v.modelHints,
+        })),
+      };
+    });
+
+    sendSuccess(res, data);
+  } catch (err) {
+    handleRouteError(res, err);
+  }
+});
+
+/**
  * GET /ai/prompts/:id
  * Full prompt definition including all versions, eval metadata, and version comparisons.
  */
@@ -601,6 +650,50 @@ router.post(
         sampleCount: report.totalCases,
         passedCases: report.passedCases,
         failedCases: report.failedCases,
+      });
+    } catch (err) {
+      handleRouteError(res, err);
+    }
+  },
+);
+
+/**
+ * PATCH /ai/prompts/:id/versions/:versionId/hf-model
+ * Body: { hfModel: string }
+ * Attaches (or clears when empty string) a Hugging Face model to a specific prompt version's
+ * modelHints. Requires admin or platform_operator role.
+ */
+router.patch(
+  '/ai/prompts/:id/versions/:versionId/hf-model',
+  authMiddleware,
+  validateBody(bodyShape({ hfModel: z.unknown().optional() })),
+  (req, res) => {
+    try {
+      if (!requireRegistryWrite(req, res)) return;
+
+      const { id, versionId } = req.params;
+      const { hfModel } = req.body as { hfModel?: string };
+
+      const prompt = promptRegistry.get(id);
+      if (!prompt) return sendNotFound(res, 'Prompt not found');
+
+      const version = prompt.versions.find((v) => v.versionId === versionId);
+      if (!version) return sendNotFound(res, 'Version not found');
+
+      const normalized = typeof hfModel === 'string' ? hfModel.trim() : '';
+      version.modelHints = {
+        ...version.modelHints,
+        hfModel: normalized || undefined,
+      };
+      (prompt as { updatedAt: string }).updatedAt = new Date().toISOString();
+
+      sendSuccess(res, {
+        id,
+        versionId,
+        hfModel: version.modelHints.hfModel ?? null,
+        message: version.modelHints.hfModel
+          ? `HF model "${version.modelHints.hfModel}" bound to version ${versionId}`
+          : `HF model detached from version ${versionId}`,
       });
     } catch (err) {
       handleRouteError(res, err);
