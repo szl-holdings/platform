@@ -136,6 +136,9 @@ router.use("/mission-runbooks", lazyMount(() => import("./v1-mission-runbooks"),
 // Public API v1 — developer-facing versioned REST surface with OpenAPI spec.
 router.use(lazyMatch(["/v1", "/v1/api-keys", "/v1/openapi.json"], () => import("./public-api-v1"), "public-api-v1"));
 
+// LaaS v1 — Lambda-as-a-Service public guard endpoint (POST /v1/guard, GET /v1/guard/pulse|axes|health).
+router.use(lazyMatch("/v1/guard", () => import("./v1-guard"), "v1-guard"));
+
 // Cross-platform intelligence — read-only (auth-gated in production).
 crossPlatform.register(router);
 

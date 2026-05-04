@@ -202,6 +202,9 @@ function isExempt(path: string): boolean {
   // Carlota Jo, KORA (lyte-command-center), and the NEXUS Bridge without a
   // browser session. CSRF double-submit is not applicable.
   if (path.startsWith('/api/praxis-tools/') || path.startsWith('/praxis-tools/')) return true;
+  // LaaS v1 guard — public Lambda-as-a-Service endpoint. Stateless, Zod-validated,
+  // no PII or session. Receipts returned to caller; no server-side persistence.
+  if (path === '/api/v1/guard' || path.startsWith('/api/v1/guard/')) return true;
   return false;
 }
 

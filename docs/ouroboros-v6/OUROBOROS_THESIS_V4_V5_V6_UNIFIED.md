@@ -2,6 +2,15 @@
 
 ## The Lutar Invariant: A Closed-Form Trust Law for Autonomous AI Runtimes, with Operational Proof
 
+> "That which is above is as that which is below, and that which is below is as that which is above, to accomplish the miracles of the One Thing."
+> -- Emerald Tablet of Hermes Trismegistus
+
+> "O: X -> X, O(x) = T^n(x) where T is transformation and n closes the cycle; fixed-point: O(x) = x."
+> -- The Ouroboros Operator
+
+> "I feign no hypotheses -- laws are drawn from phenomena."
+> -- Isaac Newton, General Scholium, Principia 2nd ed. (1713)
+
 **Author:** Stephen P. Lutar
 **ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
 **Affiliation:** SZL Holdings
