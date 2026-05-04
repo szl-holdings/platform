@@ -1425,21 +1425,43 @@ router.get('/sovereign/ultra/modes', (_req: Request, res: Response) => {
 // Xi Unification + Multi-Agent Council (innovation 44)
 // ---------------------------------------------------------------------------
 
+const xiHistoryEntry = z.object({ role: z.string(), content: z.string() });
+const xiRouteSchema = z.object({
+  prompt: z.string().max(4096).default('default xi query'),
+  history: z.array(xiHistoryEntry).max(64).default([]),
+  maxOut: z.number().int().min(1).max(32000).default(800),
+  mode: z.string().max(32).default('chat'),
+  require: z.array(z.string().max(64)).max(16).default(['chat']),
+});
+const xiCouncilSchema = z.object({
+  question: z.string().max(4096).optional(),
+  prompt: z.string().max(4096).optional(),
+  history: z.array(xiHistoryEntry).max(64).default([]),
+});
+const xiEntropySchema = z.object({
+  prompt: z.string().max(4096).default(''),
+  history: z.array(xiHistoryEntry).max(64).default([]),
+});
+
 router.post('/sovereign/xi/route', (req: Request, res: Response) => {
-  const prompt = req.body?.prompt ?? 'default xi query';
-  const history = req.body?.history ?? [];
-  const maxOut = req.body?.maxOut ?? 800;
-  const mode = req.body?.mode ?? 'chat';
-  const require = req.body?.require ?? ['chat'];
-  const result = chatUltra.route(prompt, history, Number(maxOut), String(mode), require);
-  return res.json(result);
+  try {
+    const p = xiRouteSchema.parse(req.body ?? {});
+    const result = chatUltra.route(p.prompt, p.history, p.maxOut, p.mode, p.require);
+    return res.json(result);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message ?? 'Invalid request' });
+  }
 });
 
 router.post('/sovereign/xi/council', (req: Request, res: Response) => {
-  const question = req.body?.question ?? req.body?.prompt ?? 'default council question';
-  const history = req.body?.history ?? [];
-  const result = chatUltra.council(question, history);
-  return res.json(result);
+  try {
+    const p = xiCouncilSchema.parse(req.body ?? {});
+    const question = p.question ?? p.prompt ?? 'default council question';
+    const result = chatUltra.council(question, p.history);
+    return res.json(result);
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message ?? 'Invalid request' });
+  }
 });
 
 router.get('/sovereign/xi/agents', (_req: Request, res: Response) => {
@@ -1451,17 +1473,21 @@ router.get('/sovereign/xi/modes', (_req: Request, res: Response) => {
 });
 
 router.post('/sovereign/xi/entropy', (req: Request, res: Response) => {
-  const history = req.body?.history ?? [];
-  const prompt = req.body?.prompt ?? '';
-  const result = chatUltra.route(prompt, history, 800, 'chat', ['chat']);
-  return res.json({
-    xi: result.xi,
-    lOmega: result.lOmega,
-    pLambda: result.pLambda,
-    aLangMean: result.aLangMean,
-    agent: result.agent,
-    persona: result.persona,
-  });
+  try {
+    const p = xiEntropySchema.parse(req.body ?? {});
+    const result = chatUltra.route(p.prompt, p.history, 800, 'chat', ['chat']);
+    return res.json({
+      xi: result.xi,
+      lOmega: result.lOmega,
+      pLambda: result.pLambda,
+      aLangMean: result.aLangMean,
+      dialogEntropy: result.dialogEntropy,
+      agent: result.agent,
+      persona: result.persona,
+    });
+  } catch (e: any) {
+    return res.status(400).json({ error: e.message ?? 'Invalid request' });
+  }
 });
 
 router.get('/health', (_req: Request, res: Response) => {
