@@ -70,13 +70,45 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
   ];
 
   /**
-   * Returns true when no HF credential is configured. Per task contract, the
-   * connector adapter falls back to a clearly-labeled demo response only when
-   * credentials are explicitly absent. When credentials are present the call
-   * goes live and any 5-gate governance failure throws (no silent fallback).
+   * Returns the active HF credential (HUGGINGFACE_API_KEY preferred, then
+   * HF_TOKEN), or undefined when neither is set. Used by both the credential
+   * presence check and the per-call Authorization header so the two paths can
+   * never disagree about whether the adapter has credentials.
    */
+  private hfToken(): string | undefined {
+    return process.env.HUGGINGFACE_API_KEY ?? process.env.HF_TOKEN;
+  }
+
+  /** Demo-fallback gate: only when no HF credential is set at all. */
   private credentialsAbsent(): boolean {
-    return !(process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN);
+    return !this.hfToken();
+  }
+
+  /**
+   * Override the base bearer-header builder so the Authorization header is
+   * always derived from the same source as `credentialsAbsent()`. The base
+   * class only inspects `envVarNames[0]`, which would silently drop
+   * `HF_TOKEN`-only configurations.
+   */
+  protected override getAuthHeaders(): Record<string, string> {
+    const token = this.hfToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  /**
+   * Normalise HF text-classification responses into a single
+   * Array<{label, score}>. The Inference API returns a nested array
+   * `[[{label, score}, ...]]` for some models and a flat `[{label, score}, ...]`
+   * for others depending on whether the input is batched. Callers must not
+   * have to guess.
+   */
+  private flattenClassification(
+    raw: unknown,
+  ): Array<{ label: string; score: number }> {
+    if (!Array.isArray(raw)) return [];
+    const first = raw[0];
+    if (Array.isArray(first)) return first as Array<{ label: string; score: number }>;
+    return raw as Array<{ label: string; score: number }>;
   }
 
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {
@@ -89,7 +121,7 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
           label: 'demo',
           score: 0,
           mode: 'MOCKED_DEMO_MODE',
-          reason: 'HUGGINGFACE_API_KEY not configured — set credentials to enable live inference',
+          reason: 'HUGGINGFACE_API_KEY/HF_TOKEN not configured — set credentials to enable live inference',
           model,
         };
       }
@@ -102,8 +134,8 @@ export class HuggingFaceConnectorAdapter extends BaseConnectorAdapter {
       if (!resp.ok) {
         throw new Error(`hf_classification_error:${resp.status}`);
       }
-      const data = (await resp.json()) as Array<Array<{ label: string; score: number }>>;
-      const top = data[0]?.[0];
+      const flat = this.flattenClassification(await resp.json());
+      const top = flat[0];
       return { label: top?.label ?? 'unknown', score: top?.score ?? 0 };
     }
 

@@ -484,15 +484,20 @@ router.post('/hf-intelligence/property/value', async (req: Request, res: Respons
     // Classify market sentiment using ProsusAI/finbert (financial sentiment).
     // Routed through routeHfTaskCall so the 5-gate governance check runs and
     // the configured failover chain is honored before returning an error.
-    type FinBertResult = Array<Array<{ label: string; score: number }>>;
+    // HF text-classification returns either a flat `[{label,score},...]`
+    // (single input, common shape) OR a nested `[[{label,score},...]]`
+    // (batched/some models). Handle both safely.
+    type LabelScore = { label: string; score: number };
+    type FinBertResult = LabelScore[] | LabelScore[][];
     const finbertCall = await routeHfTaskCall<FinBertResult>(
       'ProsusAI/finbert',
       { inputs: propertyDesc + (marketContext ? ` Market: ${marketContext}` : '') },
       ['facebook/bart-large-mnli'],
     );
-    // FinBERT returns [{label:'positive'|'neutral'|'negative', score}]; normalise
-    // into the same shape the rest of the route expects.
-    const finbertScores = finbertCall.result[0] ?? [];
+    const rawFinbert = finbertCall.result;
+    const finbertScores: LabelScore[] = Array.isArray(rawFinbert[0])
+      ? (rawFinbert as LabelScore[][])[0] ?? []
+      : (rawFinbert as LabelScore[]);
     const labelMap: Record<string, string> = {
       positive: 'bullish market',
       negative: 'bearish market',

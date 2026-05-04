@@ -373,13 +373,11 @@ export async function routeModelCallWithFailover(req: ModelRequest, fallbackMode
   const modelsToTry = [primaryModel, ...fallbackModels.filter(m => m !== primaryModel)];
 
   let lastError: Error | null = null;
-  let allBlockedByGate = true;
   for (const model of modelsToTry) {
     try {
       return await tryCall(model);
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      if (!isGovernanceGateError(err)) allBlockedByGate = false;
     }
   }
 
