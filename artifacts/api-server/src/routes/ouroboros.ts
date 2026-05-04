@@ -102,6 +102,12 @@ import {
   RedTeamHarness,
   RED_TEAM_ATTACK_CATEGORIES,
   CondorMambaSSM,
+  EPRBellValidator,
+  HopfieldAmaruMemory,
+  PredictiveCodingEngine,
+  SacredGeometryEngine,
+  CognitiveMapNavigator,
+  DynamicalBifurcationDetector,
   INNOVATION_MANIFEST,
   PRISCA_LINEAGES,
   type Modality,
@@ -121,7 +127,7 @@ const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
 // Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse.
 const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
 
-// Process-local Sovereign Engine v15 — all 14 SZL innovations.
+// Process-local Sovereign Engine v19 -- all 34 SZL innovations.
 const sovereign = new SovereignEngine();
 
 // ---------------------------------------------------------------------------
@@ -1062,6 +1068,96 @@ router.post('/sovereign/mamba/sequence', (req: Request, res: Response) => {
   const ssm = new CondorMambaSSM(stateSize ?? 8);
   const toks: number[] = Array.isArray(tokens) ? tokens.map(Number) : Array.from({ length: 10 }, (_, i) => i * 0.1);
   return res.json(ssm.processSequence(toks));
+});
+
+router.post('/sovereign/epr/chsh', (req: Request, res: Response) => {
+  const { a, aPrime, b, bPrime, data } = req.body ?? {};
+  const angles = (a != null)
+    ? { a, aPrime, b, bPrime }
+    : EPRBellValidator.maxViolationAngles();
+  return res.json(EPRBellValidator.chsh(
+    angles.a, angles.aPrime, angles.b, angles.bPrime, data ?? [],
+  ));
+});
+
+router.get('/sovereign/epr/singlet', (_req: Request, res: Response) => {
+  return res.json({
+    state: EPRBellValidator.singletState(),
+    classicalBound: EPRBellValidator.CLASSICAL_BOUND,
+    tsirelsonBound: EPRBellValidator.TSIRELSON_BOUND,
+    maxViolationAngles: EPRBellValidator.maxViolationAngles(),
+  });
+});
+
+router.post('/sovereign/hopfield/store', (req: Request, res: Response) => {
+  const { id, content, dim } = req.body ?? {};
+  if (!id || !content) return res.status(400).json({ error: 'id and content required' });
+  const haam = new HopfieldAmaruMemory(dim ?? 8);
+  const pat = haam.store(id, content);
+  return res.json({ stored: pat.id, cequeSlot: pat.cequeSlot, dim: haam.dim });
+});
+
+router.post('/sovereign/hopfield/retrieve', (req: Request, res: Response) => {
+  const { patterns, query, dim } = req.body ?? {};
+  if (!Array.isArray(patterns) || !query) {
+    return res.status(400).json({ error: 'patterns[] and query required' });
+  }
+  const haam = new HopfieldAmaruMemory(dim ?? 8);
+  for (const p of patterns) haam.store(p.id ?? p, p.content ?? p);
+  return res.json(haam.retrieve(query));
+});
+
+router.post('/sovereign/predictive-coding/infer', (req: Request, res: Response) => {
+  const { observation, layers, dim, iterations, lr } = req.body ?? {};
+  const pcem = new PredictiveCodingEngine(layers ?? 3, dim ?? 8);
+  const obs = Array.isArray(observation) ? observation.map(Number) : new Array(dim ?? 8).fill(0.5);
+  return res.json(pcem.infer(obs, iterations ?? 10, lr ?? 0.1));
+});
+
+router.post('/sovereign/sacred-geometry/coherence', (req: Request, res: Response) => {
+  const { values } = req.body ?? {};
+  if (!Array.isArray(values)) return res.status(400).json({ error: 'values[] required' });
+  return res.json(SacredGeometryEngine.coherence(values));
+});
+
+router.get('/sovereign/sacred-geometry/constants', (_req: Request, res: Response) => {
+  return res.json({
+    phi: SacredGeometryEngine.PHI,
+    vesicaPiscis: SacredGeometryEngine.VESICA_PISCIS,
+    flowerCircles: SacredGeometryEngine.FLOWER_CIRCLES,
+    seedOfLife: SacredGeometryEngine.SEED_OF_LIFE,
+    metatronVertices: SacredGeometryEngine.METATRON_VERTICES,
+    metatronEdges: SacredGeometryEngine.metatronsCubeEdges(),
+    packingDensity: SacredGeometryEngine.flowerOfLifePackingDensity(),
+    fibonacci20: SacredGeometryEngine.fibonacci(20),
+    platonicDuals: SacredGeometryEngine.platonicDualMap(),
+  });
+});
+
+router.post('/sovereign/cognitive-map/navigate', (req: Request, res: Response) => {
+  const { nodes, edges, start, goal } = req.body ?? {};
+  if (!Array.isArray(nodes) || !Array.isArray(edges) || !start || !goal) {
+    return res.status(400).json({ error: 'nodes[], edges[], start, goal required' });
+  }
+  const cmn = new CognitiveMapNavigator();
+  for (const n of nodes) cmn.addNode(n.id, n.x ?? 0, n.y ?? 0, n.cellType ?? 'place');
+  for (const e of edges) cmn.connect(e.from, e.to);
+  return res.json(cmn.navigate(start, goal));
+});
+
+router.post('/sovereign/bifurcation/observe', (req: Request, res: Response) => {
+  const { observations } = req.body ?? {};
+  if (!Array.isArray(observations)) {
+    return res.status(400).json({ error: 'observations[] required' });
+  }
+  const dsbd = new DynamicalBifurcationDetector();
+  const results = observations.map((o: any) =>
+    dsbd.observe(o.step ?? 0, o.param ?? 0, o.derivative ?? 0, o.oscillation ?? 0),
+  );
+  return res.json({
+    observations: results,
+    upcomingBifurcation: dsbd.detectUpcoming(),
+  });
 });
 
 router.get('/health', (_req: Request, res: Response) => {
