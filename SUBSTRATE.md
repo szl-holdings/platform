@@ -1,19 +1,86 @@
-# Substrate Edge Inference — Configuration Guide
+# Substrate Fleet — Architecture & Configuration Guide
 
-Substrate Edge Inference integrates the open-source oLLM library into the SZL
-Holdings ecosystem, enabling air-gapped, zero-cost local GPU inference for
-80B+ parameter models on consumer hardware.
+The substrate fleet is the GPU compute plane for the SZL Holdings AI pipeline.
+It consists of two services that together form a governed, auto-scaling Python
+backend. The TypeScript API server delegates to it via a thin bridge.
+
+> Full operations reference: `docs/operations/substrate-fleet.md`
+> Deploy: `./scripts/deploy-substrate.sh`
+> Runbooks: `infra/runbooks/`
+
+---
+
+## Fleet Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          TypeScript API Server                            │
+│                                                                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │  substrate-worker-bridge.ts  ← THIN PASS-THROUGH ONLY               │ │
+│  │                                                                      │ │
+│  │  Responsibilities:  protocol, auth, timeout, fail-closed, logging    │ │
+│  │  NOT here:          model selection, batching, ranking, cache warm   │ │
+│  └─────────────────────────┬────────────────────────────────────────────┘ │
+└────────────────────────────┼───────────────────────────────────────────────┘
+                              │ POST /claim  (stageType=*)
+                              ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│             substrate-py-workers  (port 8090)  ← HEAVYWEIGHT BACKEND     │
+│                                                                            │
+│  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────────────┐ │
+│  │  model_router   │  │ evidence_ranker   │  │  Stage handlers         │ │
+│  │  (source of     │  │ TF-IDF / BM25 /  │  │  retrieval, ocr,        │ │
+│  │  truth for      │  │ cross-encoder     │  │  geospatial,            │ │
+│  │  provider &     │  │ ranking           │  │  eval_grading           │ │
+│  │  model select.) │  └──────────────────┘  └─────────────────────────┘ │
+│  └────────┬────────┘                                                       │
+│           │ stageType=ModelRoute delegation                                │
+│  ┌────────▼───────────────────────────────────────────────────────────┐   │
+│  │  AutoscalingPolicy — /metrics endpoint                              │   │
+│  │  Emits: scale-out / scale-in / hold                                 │   │
+│  │  KEDA polls this endpoint and adjusts replicas                      │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────┘
+                              │ (when MODEL_PROVIDER=substrate)
+                              ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│           substrate-inference  (port 8070)                                │
+│   oLLM GPU engine — OpenAI-compatible API                                  │
+│                                                                            │
+│   GET  /health   (liveness  — always 200 while running)                   │
+│   GET  /ready    (readiness — 503 until model loaded + queue clear)       │
+│   POST /v1/chat/completions  (streaming SSE supported)                    │
+│   GET  /v1/models            (list available models)                      │
+│   POST /v1/models/load       (hot-load model into GPU VRAM, auth req'd)  │
+│   POST /v1/models/unload     (unload model, auth req'd)                   │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Responsibility boundaries
+
+| Concern | Owned by |
+|---|---|
+| Model / provider selection | `model_router.py` (Python) |
+| Per-stage batching | `substrate-py-workers` (Python) |
+| Evidence ranking | `evidence_ranker.py` (Python) |
+| Stage execution (retrieval, OCR, geo, eval) | `substrate-py-workers` (Python) |
+| GPU inference | `substrate-inference` (Python) |
+| Protocol, timeout, fail-closed | `substrate-worker-bridge.ts` (TypeScript) |
+| Orchestration / run lifecycle | API server `a11oy` runtime (TypeScript) |
+
+---
 
 ## GPU Requirements
 
-| Model               | Min VRAM | Recommended VRAM | SSD Offload |
-|---------------------|----------|------------------|-------------|
-| Llama 3.1 8B        | 6 GB     | 8 GB             | No          |
-| Gemma3 12B          | 8 GB     | 12 GB            | No          |
-| GPT-OSS 20B         | 8 GB     | 16 GB            | Yes         |
-| Voxtral Small 24B   | 8 GB     | 16 GB            | Yes         |
-| Llama 3.3 70B       | 8 GB     | 24 GB            | Yes         |
-| Qwen3-Next 80B      | 8 GB     | 24 GB            | Yes         |
+| Model | Min VRAM | Recommended VRAM | SSD Offload |
+|---|---|---|---|
+| Llama 3.1 8B | 6 GB | 8 GB | No |
+| Gemma3 12B | 8 GB | 12 GB | No |
+| GPT-OSS 20B | 8 GB | 16 GB | Yes |
+| Voxtral Small 24B | 8 GB | 16 GB | Yes |
+| Llama 3.3 70B | 8 GB | 24 GB | Yes |
+| Qwen3-Next 80B | 8 GB | 24 GB | Yes |
 
 **Supported GPUs:** NVIDIA (CUDA 12+), AMD (ROCm 6+), Apple Silicon (MPS).
 
@@ -66,11 +133,103 @@ Download progress is tracked and surfaced via the `/health` endpoint under
 `download_progress`. Downloads resume automatically if interrupted; the HuggingFace
 `transformers` cache handles checksum validation.
 
+---
+
+## Local Development
+
+### GPU host (full stack)
+
 ```bash
+cp .env.substrate.example .env.substrate
+$EDITOR .env.substrate
+
+docker compose -f docker-compose.gpu.yml up
+```
+
+### No GPU (CPU stub fallback — same API contracts)
+
+```bash
+docker compose -f docker-compose.gpu.yml -f docker-compose.cpu-stub.yml up
+```
+
+### Without Docker (Python directly)
+
+```bash
+# Inference service
+cd apps/substrate-inference
+pip install -r requirements.txt
+PORT=8070 python -m src.main
+
+# Workers (separate terminal)
+cd services/substrate-py-workers
+pip install -r requirements.txt
+PORT=8090 python -m worker.main
+```
+
+---
+
+## Autoscaling
+
+Autoscaling operates at two layers:
+
+1. **AutoscalingPolicy (Python, in-process)** — evaluates `active_claims` and
+   idle time. Emits recommendations at `/metrics`. No cloud calls.
+
+2. **KEDA / VMSS (Azure)** — polls `/metrics` and scales Container App replicas:
+   - Scale-out when `availableSlots < SCALE_OUT_QUEUE_DEPTH` (default 3)
+   - Scale-in via KEDA cooldown after `SCALE_IN_IDLE_SECONDS` (default 120)
+   - Min replicas: `MIN_WORKERS` (default 1)
+   - Max replicas: `MAX_WORKERS` (default 10)
+
+Simulate locally (no cloud):
+
+```bash
+python -m worker.autoscaling_sim
+# or: pytest services/substrate-py-workers/tests/test_autoscaling_sim.py -v
+```
+
+---
+
+## Governance & Fail-Closed Contract
+
+The TypeScript bridge enforces these rules without exception:
+
+| Mode | Worker unreachable | Worker not ready |
+|---|---|---|
+| `live` | **Explicit error** (fail-closed, no fabrication) | **Explicit error** |
+| `dry-run` | Deterministic fallback (if gate open) | Deterministic fallback |
+| `replay` | Deterministic fallback (if gate open) | Deterministic fallback |
+| `counterfactual` | Deterministic fallback (if gate open) | Deterministic fallback |
+
+Gate environment variables that control fallback permission:
+
+| Gate | Variable |
+|---|---|
+| Allow synthetic retrieval | `SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC=1` |
+| Allow dev-mode embeddings | `SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL=1` |
+
+---
+
+## Model API
+
+```bash
+# List available models
+curl http://localhost:8070/v1/models | python3 -m json.tool
+
+# Load a model into GPU memory
 curl -X POST http://localhost:8070/v1/models/load \
-  -H "Content-Type: application/json" \
   -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
-  -d '{"model_id": "llama-3.3-70b-instruct"}'
+  -H "Content-Type: application/json" \
+  -d '{"model_id": "llama-3.1-8b-instruct"}'
+
+# Run inference
+curl -X POST http://localhost:8070/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama-3.1-8b-instruct",
+    "messages": [{"role": "user", "content": "Summarise the key risk factors."}],
+    "max_tokens": 512
+  }'
 ```
 
 Monitor progress:
@@ -79,18 +238,16 @@ curl http://localhost:8070/health | python3 -m json.tool | grep -A5 download_pro
 ```
 
 ## Service Startup
+---
 
-### Development (no GPU)
+## Production Deployment
 
 ```bash
-cd apps/substrate-inference
-pip install -r requirements.txt
-python -m src.main
+./scripts/deploy-substrate.sh
 ```
 
-The service starts on port 8070 in **STUB** mode — all API contracts work
-identically, but responses are labelled as stubs. This allows developing
-and testing the Command dashboard and AI Control Plane without GPU hardware.
+See `docs/operations/substrate-fleet.md` for the full go-live checklist and
+`infra/runbooks/` for step-by-step operational runbooks.
 
 ### Production (with GPU)
 
@@ -324,3 +481,20 @@ The service continues running for other loaded models.
 The Command dashboard at `/infrastructure/substrate` polls the health and
 models endpoints to display real-time GPU status and model state. Load/unload
 buttons call the FastAPI endpoints directly.
+---
+
+## Security
+
+- **API key** (`SUBSTRATE_API_KEY`) protects `/v1/models/load` and `/unload`.
+  Inference and health endpoints are open to the internal VNet only (NSG).
+- **NSG** (`substrate-nsg`) blocks all external inbound traffic. Only the API
+  server's egress CIDRs are permitted on the substrate ports (8070, 8090).
+- **Key Vault** stores `SUBSTRATE_API_KEY` as a secret; Container Apps pull it
+  at runtime via managed identity — the plaintext never touches deployment logs.
+
+---
+
+## Multimodal Support
+
+- **Image + Text:** Gemma3-12B — `"modalities": ["text", "image"]`
+- **Audio + Text:** Voxtral-Small-24B — `"modalities": ["text", "audio"]`

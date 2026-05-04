@@ -55,6 +55,24 @@
     },
     "evalDatabaseUrlSecretUri": {
       "value": ""
+    },
+    "deploySubstrateFleet": {
+      "value": false
+    },
+    "substrateImageTag": {
+      "value": ""
+    },
+    "maxWorkerReplicas": {
+      "value": 10
+    },
+    "minWorkerReplicas": {
+      "value": 1
+    },
+    "scaleOutQueueDepth": {
+      "value": 3
+    },
+    "apiServerEgressCidrs": {
+      "value": []
     }
   }
 }

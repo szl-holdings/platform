@@ -71,6 +71,11 @@ function resolveProvider(): ModelProvider {
   if (process.env.MODEL_PROVIDER) {
     return process.env.MODEL_PROVIDER as ModelProvider;
   }
+  // Substrate GPU inference takes priority when configured — local GPU beats cloud.
+  // Gate mirrors model_router.py check_substrate_gate(): both SUBSTRATE_INFERENCE_URL
+  // and SUBSTRATE_API_KEY must be set. Python remains source-of-truth for selection
+  // logic; this TS gate only decides whether to hand off to the substrate path.
+  if (process.env.SUBSTRATE_INFERENCE_URL && process.env.SUBSTRATE_API_KEY) return 'substrate';
   if (process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY) return 'openai';
   if (process.env.DEEPSEEK_API_KEY) return 'deepseek';
   if (process.env.NVIDIA_API_KEY) return 'nvidia';
@@ -224,6 +229,54 @@ async function callHuggingFace(req: ModelRequest): Promise<ModelResponse> {
   };
 }
 
+/**
+ * callSubstrate — delegates to the on-prem GPU inference engine.
+ *
+ * The inference app exposes an OpenAI-compatible /v1/chat/completions endpoint,
+ * so this function is structurally identical to callOpenAI/callDeepseek but
+ * targets SUBSTRATE_INFERENCE_URL and authenticates with SUBSTRATE_API_KEY.
+ *
+ * Model selection within the substrate fleet is governed by Python
+ * model_router.py (called via the bridge); the default here is only used when
+ * the bridge is unavailable (dry-run / test contexts).
+ */
+async function callSubstrate(req: ModelRequest): Promise<ModelResponse> {
+  const url = process.env.SUBSTRATE_INFERENCE_URL;
+  const key = process.env.SUBSTRATE_API_KEY;
+  if (!url || !key) throw new Error('substrate_not_configured');
+  const model = req.model ?? process.env.SUBSTRATE_DEFAULT_MODEL ?? 'llama-3.3-70b-instruct';
+  const t = Date.now();
+  const resp = await fetch(`${url}/v1/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        ...(req.systemPrompt ? [{ role: 'system', content: req.systemPrompt }] : []),
+        { role: 'user', content: req.prompt },
+      ],
+      max_tokens: req.maxTokens ?? 1024,
+      temperature: req.temperature ?? 0.3,
+    }),
+  });
+  if (!resp.ok) throw new Error(`substrate_api_error:${resp.status}`);
+  const json = (await resp.json()) as {
+    choices: { message: { content: string } }[];
+    usage: { total_tokens: number };
+  };
+  return {
+    content: json.choices[0]?.message?.content ?? '',
+    tokensUsed: json.usage?.total_tokens ?? 0,
+    model,
+    provider: 'substrate',
+    latencyMs: Date.now() - t,
+    isDemo: false,
+  };
+}
+
 async function callLocal(req: ModelRequest): Promise<ModelResponse> {
   const url = process.env.LOCAL_MODEL_URL;
   if (!url) throw new Error('local_model_url_missing');
@@ -279,6 +332,7 @@ export async function routeModelCall(req: ModelRequest): Promise<ModelResponse> 
   const provider = resolveProvider();
   try {
     switch (provider) {
+      case 'substrate': return await callSubstrate(req);
       case 'openai': return await callOpenAI(req);
       case 'deepseek': return await callDeepseek(req);
       case 'nvidia': return await callNvidia(req);
@@ -297,6 +351,7 @@ export async function routeModelCallWithFailover(req: ModelRequest, fallbackMode
   const tryCall = async (model: string): Promise<ModelResponse> => {
     const modifiedReq = { ...req, model };
     switch (provider) {
+      case 'substrate': return await callSubstrate(modifiedReq);
       case 'openai': return await callOpenAI(modifiedReq);
       case 'deepseek': return await callDeepseek(modifiedReq);
       case 'nvidia': return await callNvidia(modifiedReq);
@@ -325,8 +380,15 @@ export function getProviderStatuses(): ProviderStatus[] {
   const active = resolveProvider();
   const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   const hfGates = checkInferenceGates(process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B');
+  const substrateConfigured = !!(process.env.SUBSTRATE_INFERENCE_URL && process.env.SUBSTRATE_API_KEY);
 
   const statuses: ProviderStatus[] = [
+    {
+      provider: 'substrate',
+      available: substrateConfigured,
+      model: process.env.SUBSTRATE_DEFAULT_MODEL ?? 'llama-3.3-70b-instruct',
+      reason: substrateConfigured ? undefined : 'SUBSTRATE_INFERENCE_URL or SUBSTRATE_API_KEY not configured',
+    },
     {
       provider: 'openai',
       available: !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY),
@@ -374,6 +436,7 @@ export function getProviderStatuses(): ProviderStatus[] {
 export function getActiveProvider(): { provider: ModelProvider; model: string; isDemo: boolean } {
   const provider = resolveProvider();
   const modelMap: Record<ModelProvider, string> = {
+    substrate: process.env.SUBSTRATE_DEFAULT_MODEL ?? 'llama-3.3-70b-instruct',
     openai: process.env.DEFAULT_REASONING_MODEL ?? 'gpt-4o',
     deepseek: 'deepseek-reasoner',
     nvidia: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',

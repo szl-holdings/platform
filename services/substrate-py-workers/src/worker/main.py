@@ -147,6 +147,10 @@ async def claim_stage(claim: StageClaimMessage) -> JSONResponse:
         duration_ms = int((time.monotonic() - start_ms) * 1000)
         confidence = float(output.get("confidence", 0.9)) if isinstance(output, dict) else 0.9
 
+        import hashlib, json as _json
+        _input_hash = hashlib.sha256(
+            _json.dumps(claim.model_dump().get("input", {}), sort_keys=True, default=str).encode()
+        ).hexdigest()[:16]
         result = StageResultMessage(
             workerId=WORKER_ID,
             runId=claim.runId,
@@ -155,7 +159,15 @@ async def claim_stage(claim: StageClaimMessage) -> JSONResponse:
             confidence=confidence,
             durationMs=duration_ms,
             otelSpanId=span_id,
-            metadata={"stageType": claim.stageType, "mode": claim.mode},
+            evidenceIds=list(output.get("evidenceIds", [])) if isinstance(output, dict) else [],
+            metadata={
+                "stageType": claim.stageType,
+                "mode": claim.mode,
+                # Required by the TS bridge's validateResultEnvelope()
+                "provenance": f"python-worker:{claim.stageType}:{WORKER_ID}",
+                "models": [WORKER_ID],
+                "replayHash": f"{claim.stageType}-{_input_hash}",
+            },
         )
         log.info(
             "stage_completed",

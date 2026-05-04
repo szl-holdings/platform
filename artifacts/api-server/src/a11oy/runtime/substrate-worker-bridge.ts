@@ -86,6 +86,12 @@ function isFallbackGateOpen(stageType: string): boolean {
   if (stageType === 'Reason' || stageType === 'Embed') {
     return process.env.SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL === '1';
   }
+  // Routing/ranking utility stages use dry-run mode in non-live contexts and
+  // never require a live inference engine — open gate so bridge helpers work
+  // in dev/test environments when worker is running but not fully configured.
+  if (stageType === 'model_route' || stageType === 'evidence_rank') {
+    return true;
+  }
   return false;
 }
 
@@ -170,6 +176,16 @@ function isHealthy(): boolean {
 
 function isReady(): boolean {
   return cachedReadiness?.ready ?? false;
+}
+
+/** Whether SUBSTRATE_PYTHON_WORKER_URL is configured (worker URL is present). */
+export function isWorkerConfigured(): boolean {
+  return !!getWorkerUrl();
+}
+
+/** Whether the last health check reported the worker as ready (readiness probe passed). */
+export function isWorkerReady(): boolean {
+  return isReady();
 }
 
 export async function checkWorkerHealth(): Promise<{ healthy: boolean; ready: boolean }> {
@@ -458,4 +474,115 @@ export function stopHealthCheckLoop(): void {
     clearInterval(healthCheckTimer);
     healthCheckTimer = null;
   }
+}
+
+// ── Typed helpers for Python-owned logic ──────────────────────────────────────
+// These keep the bridge genuinely thin: callers get a typed result without
+// needing to construct raw StageClaimRequests or know the stageType strings.
+// All model selection, evidence ranking, and batching happen in Python.
+
+export interface ModelRouteResult {
+  provider: string;
+  model: string;
+  isDemo: boolean;
+  reason: string;
+  failedGates: string[];
+}
+
+export interface EvidenceItem {
+  id: string;
+  text: string;
+  score?: number;
+  [key: string]: unknown;
+}
+
+export interface EvidenceRankResult {
+  ranked: Array<{ id: string; score: number; rank: number; text: string }>;
+  methodUsed: string;
+  query: string;
+}
+
+/**
+ * Ask the Python worker to select the model/provider for a given role.
+ * Python model_router.py is the source of truth; this replaces TS-side
+ * provider resolution for callers that want Python-governed selection.
+ *
+ * Falls back to a local default when the worker is unavailable (non-live modes).
+ */
+export async function routeModelViaPython(opts: {
+  runId: string;
+  traceId: string;
+  role?: 'reasoning' | 'fast' | 'long_context';
+  model?: string;
+  mode?: StageMode;
+}): Promise<{ ok: true; result: ModelRouteResult } | { ok: false; error: string }> {
+  const result = await dispatchStageClaim({
+    runId: opts.runId,
+    workflowId: `model-route-${opts.runId}`,
+    stageId: `model-route-${randomUUID()}`,
+    stageType: 'model_route',
+    stageConfig: { stageKind: 'model_route' },
+    input: { role: opts.role ?? 'reasoning', model: opts.model },
+    traceId: opts.traceId,
+    mode: opts.mode ?? 'dry-run',
+  });
+
+  if (!result.ok) return result;
+
+  const out = result.result.output as Record<string, unknown>;
+  return {
+    ok: true,
+    result: {
+      provider: String(out.provider ?? 'mock'),
+      model: String(out.model ?? 'mock-v1'),
+      isDemo: Boolean(out.is_demo ?? true),
+      reason: String(out.reason ?? ''),
+      failedGates: Array.isArray(out.failed_gates) ? (out.failed_gates as string[]) : [],
+    },
+  };
+}
+
+/**
+ * Ask the Python worker to rank evidence items by relevance to a query.
+ * Python evidence_ranker.py uses TF-IDF / BM25 / cross-encoder progressively.
+ * TS callers should not implement their own ranking — call this instead.
+ */
+export async function rankEvidenceViaPython(opts: {
+  runId: string;
+  traceId: string;
+  query: string;
+  evidence: EvidenceItem[];
+  topK?: number;
+  method?: 'auto' | 'tfidf' | 'bm25' | 'cross-encoder';
+  mode?: StageMode;
+}): Promise<{ ok: true; result: EvidenceRankResult } | { ok: false; error: string }> {
+  const result = await dispatchStageClaim({
+    runId: opts.runId,
+    workflowId: `evidence-rank-${opts.runId}`,
+    stageId: `evidence-rank-${randomUUID()}`,
+    stageType: 'evidence_rank',
+    stageConfig: { stageKind: 'evidence_rank' },
+    input: {
+      query: opts.query,
+      evidence: opts.evidence,
+      top_k: opts.topK ?? 10,
+      method: opts.method ?? 'auto',
+    },
+    traceId: opts.traceId,
+    mode: opts.mode ?? 'dry-run',
+  });
+
+  if (!result.ok) return result;
+
+  const out = result.result.output as Record<string, unknown>;
+  return {
+    ok: true,
+    result: {
+      ranked: Array.isArray(out.ranked)
+        ? (out.ranked as EvidenceRankResult['ranked'])
+        : [],
+      methodUsed: String(out.method_used ?? 'unknown'),
+      query: String(out.query ?? opts.query),
+    },
+  };
 }

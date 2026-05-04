@@ -1,6 +1,7 @@
 import type { OperatorId, OperatorOutput, TraceEntry } from '../types.js';
 import { createTrace, appendEntry, completeTrace, buildTraceEntry } from '../tracing/store.js';
 import { routeModelCall } from '../router/model-router.js';
+import { routeModelViaPython, isWorkerConfigured, isWorkerReady } from '../substrate-worker-bridge.js';
 import { randomUUID } from 'node:crypto';
 
 export interface OperatorContext {
@@ -21,7 +22,23 @@ export abstract class BaseOperator {
 
   protected async callModel(prompt: string, systemPrompt?: string): Promise<{ content: string; tokensUsed: number; costEstimateUsd: number; latencyMs: number }> {
     const t = Date.now();
-    const resp = await routeModelCall({ prompt, systemPrompt, maxTokens: 512, temperature: 0.2 });
+    // When the Python worker bridge is configured and ready, ask Python to select
+    // the model/provider (model_router.py is source-of-truth for selection logic).
+    // The result overrides the local resolveProvider() chain in model-router.ts.
+    // Falls back to local TS routing if the bridge is unavailable or returns an error.
+    let overrideModel: string | undefined;
+    if (isWorkerConfigured() && isWorkerReady() && this.runId) {
+      const routeResult = await routeModelViaPython({
+        runId: this.runId,
+        traceId: this.traceId ?? `trace-${this.runId}`,
+        role: 'reasoning',
+        mode: 'dry-run',
+      });
+      if (routeResult.ok && !routeResult.result.isDemo) {
+        overrideModel = routeResult.result.model;
+      }
+    }
+    const resp = await routeModelCall({ prompt, systemPrompt, maxTokens: 512, temperature: 0.2, model: overrideModel });
     const latencyMs = Date.now() - t;
     const costEstimateUsd = resp.tokensUsed * 0.000002;
 

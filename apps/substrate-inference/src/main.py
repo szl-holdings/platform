@@ -539,6 +539,7 @@ async def list_adapters() -> AdapterListResponse:
 
 @app.get("/health")
 async def health() -> HealthResponse:
+    """Liveness probe — always 200 while the process is running."""
     uptime = time.monotonic() - _start_time if _start_time else 0
 
     if runtime is None:
@@ -585,11 +586,66 @@ async def health() -> HealthResponse:
     )
 
 
+@app.get("/ready")
+async def ready():
+    """
+    Readiness probe — returns 503 when the engine is not yet initialised,
+    when the default model has not finished loading, or when the queue is
+    saturated.  Load balancers should stop routing to this instance on 503.
+    """
+    from fastapi.responses import JSONResponse
+
+    uptime = time.monotonic() - _start_time if _start_time else 0
+
+    if runtime is None:
+        return JSONResponse(
+            status_code=503,
+            content={"ready": False, "reason": "engine_initialising", "uptime": round(uptime, 1)},
+        )
+
+    gpu_raw = runtime.get_gpu_info()
+    gpu_available = gpu_raw.get("vram_total_mb", 0) > 0 or runtime.mode.value == "stub"
+
+    # If a default model is configured, require it to be loaded before becoming ready
+    if DEFAULT_MODEL and not runtime.is_loaded(DEFAULT_MODEL):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "ready": False,
+                "reason": f"default_model_not_loaded:{DEFAULT_MODEL}",
+                "uptime": round(uptime, 1),
+            },
+        )
+
+    if runtime.queue_depth >= MAX_CONCURRENT:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "ready": False,
+                "reason": "queue_saturated",
+                "queue_depth": runtime.queue_depth,
+                "max_concurrent": MAX_CONCURRENT,
+                "uptime": round(uptime, 1),
+            },
+        )
+
+    return {
+        "ready": True,
+        "gpu_available": gpu_available,
+        "loaded_models": runtime.loaded_model_ids,
+        "queue_depth": runtime.queue_depth,
+        "engine_mode": runtime.mode.value,
+        "uptime": round(uptime, 1),
+    }
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("SUBSTRATE_INFERENCE_PORT", "8070"))
+    # Support both PORT (container-standard) and SUBSTRATE_INFERENCE_PORT (legacy)
+    port = int(os.environ.get("PORT", os.environ.get("SUBSTRATE_INFERENCE_PORT", "8070")))
     uvicorn.run(
         "src.main:app",
         host=BIND_HOST,
         port=port,
         reload=False,
+        log_config=None,  # structlog handles all logging
     )

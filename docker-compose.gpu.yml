@@ -1,0 +1,136 @@
+version: "3.9"
+
+# ─── Substrate Fleet — GPU Compose Stack ─────────────────────────────────────
+# Boot the full substrate fleet on a GPU host:
+#   docker compose -f docker-compose.gpu.yml up
+#
+# CPU-stub fallback (no GPU required):
+#   docker compose -f docker-compose.gpu.yml -f docker-compose.cpu-stub.yml up
+#
+# Environment variables (copy .env.substrate.example → .env.substrate):
+#   SUBSTRATE_API_KEY, ACR_LOGIN_SERVER, GIT_SHA, etc.
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+volumes:
+  model-cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SUBSTRATE_MODELS_DIR:-/data/substrate/models}
+  ssd-kvcache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SUBSTRATE_CACHE_DIR:-/data/substrate/cache}
+
+networks:
+  substrate-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+services:
+
+  # ── Substrate Inference (oLLM GPU engine) ───────────────────────────────────
+  substrate-inference:
+    build:
+      context: apps/substrate-inference
+      dockerfile: Dockerfile
+      target: runtime
+    image: ${ACR_LOGIN_SERVER:-substrate-inference}:${GIT_SHA:-latest}
+    container_name: substrate-inference
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - substrate-net
+    ports:
+      - "${SUBSTRATE_INFERENCE_PORT:-8070}:8070"
+    environment:
+      PORT: "8070"
+      SUBSTRATE_INFERENCE_PORT: "8070"
+      SUBSTRATE_BIND_HOST: "0.0.0.0"
+      SUBSTRATE_MODELS_DIR: /data/models
+      SUBSTRATE_CACHE_DIR: /data/cache
+      SUBSTRATE_MAX_CONCURRENT: "${SUBSTRATE_MAX_CONCURRENT:-4}"
+      SUBSTRATE_DEFAULT_MODEL: "${SUBSTRATE_DEFAULT_MODEL:-}"
+      SUBSTRATE_API_KEY: "${SUBSTRATE_API_KEY:?SUBSTRATE_API_KEY must be set}"
+      SUBSTRATE_ALLOWED_ORIGINS: "${SUBSTRATE_ALLOWED_ORIGINS:-http://localhost:5000}"
+    volumes:
+      - model-cache:/data/models
+      - ssd-kvcache:/data/cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          memory: "${INFERENCE_MEMORY_LIMIT:-48g}"
+    healthcheck:
+      test: ["CMD", "python3.11", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8070/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  # ── Substrate Python Workers (stage execution fleet) ─────────────────────────
+  substrate-py-workers:
+    build:
+      context: services/substrate-py-workers
+      dockerfile: Dockerfile
+      target: runtime
+    image: ${ACR_LOGIN_SERVER:-substrate-py-workers}:${GIT_SHA:-latest}
+    container_name: substrate-py-workers
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - substrate-net
+    ports:
+      - "${WORKER_PORT:-8090}:8090"
+    environment:
+      PORT: "8090"
+      WORKER_ID: "${WORKER_ID:-py-worker-compose}"
+      WORKER_MAX_CONCURRENCY: "${WORKER_MAX_CONCURRENCY:-4}"
+      WORKER_DRAIN_TIMEOUT_S: "${WORKER_DRAIN_TIMEOUT_S:-60}"
+      WORKER_HEARTBEAT_INTERVAL_S: "${WORKER_HEARTBEAT_INTERVAL_S:-5}"
+      SCALE_OUT_QUEUE_DEPTH: "${SCALE_OUT_QUEUE_DEPTH:-3}"
+      SCALE_IN_IDLE_SECONDS: "${SCALE_IN_IDLE_SECONDS:-120}"
+      MAX_WORKERS: "${MAX_WORKERS:-10}"
+      MIN_WORKERS: "${MIN_WORKERS:-1}"
+      # SUBSTRATE_INFERENCE_URL tells model_router.py where the GPU inference
+      # engine lives. This is the correct gate variable — not SUBSTRATE_PYTHON_WORKER_URL
+      # (which is the TS API server's env var pointing outward to this worker).
+      SUBSTRATE_INFERENCE_URL: "http://substrate-inference:8070"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-}"
+      SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC: "${SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC:-0}"
+      SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL: "${SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL:-0}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          memory: "${WORKER_MEMORY_LIMIT:-16g}"
+    depends_on:
+      substrate-inference:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+      interval: 20s
+      timeout: 8s
+      start_period: 30s
+      retries: 3
+    stop_grace_period: 70s

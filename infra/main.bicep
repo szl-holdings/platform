@@ -49,6 +49,28 @@ param alertEmailAddress string = 'ops@szlholdings.com'
 @description('Optional webhook URL for alerting')
 param alertWebhookUrl string = ''
 
+@description('Deploy the substrate GPU fleet (inference + worker Container Apps). Set to true once Azure GPU quota is confirmed.')
+param deploySubstrateFleet bool = false
+
+@description('Image tag for substrate fleet images (defaults to apiImageTag)')
+param substrateImageTag string = ''
+
+@description('API key for the substrate inference service (required when deploySubstrateFleet=true)')
+@secure()
+param substrateApiKey string = ''
+
+@description('Maximum Python worker replicas for autoscaling')
+param maxWorkerReplicas int = 10
+
+@description('Minimum Python worker replicas (keep at 1 to avoid cold starts)')
+param minWorkerReplicas int = 1
+
+@description('Queue depth threshold that triggers KEDA scale-out')
+param scaleOutQueueDepth int = 3
+
+@description('API server egress CIDRs for the substrate NSG allow-list (leave empty to allow all VNet traffic)')
+param apiServerEgressCidrs array = []
+
 var uniqueSuffix = uniqueString(resourceGroup().id, baseName)
 var vaultName = '${baseName}-kv-${take(uniqueSuffix, 6)}'
 var pgServerName = '${baseName}-pg-${take(uniqueSuffix, 6)}'
@@ -278,6 +300,46 @@ module evalRunner 'modules/eval-runner.bicep' = if (deployEvalRunner) {
   }
 }
 
+// ── Substrate GPU Fleet ────────────────────────────────────────────────────────
+// Gated by deploySubstrateFleet=true. When false, the existing deployment is
+// entirely unaffected — no substrate resources are created or modified.
+var resolvedSubstrateImageTag = !empty(substrateImageTag) ? substrateImageTag : apiImageTag
+
+module substrateNsg 'modules/substrate-nsg.bicep' = if (deploySubstrateFleet) {
+  name: 'substrate-nsg'
+  params: {
+    location: location
+    nsgName: '${baseName}-substrate-nsg'
+    apiServerEgressCidrs: apiServerEgressCidrs
+    logAnalyticsId: logAnalytics.id
+    // vnetName lets the module create a dedicated 'substrate' subnet in the
+    // existing VNet and associate the NSG at creation time (enforced immediately).
+    vnetName: vnetName
+  }
+}
+
+module substrateFleet 'modules/substrate-gpu.bicep' = if (deploySubstrateFleet) {
+  name: 'substrate-fleet'
+  params: {
+    baseName: baseName
+    location: location
+    caeId: containerApp.outputs.caeId
+    logAnalyticsId: logAnalytics.id
+    acrLoginServer: acrLoginServer
+    acrName: acrName
+    imageTag: resolvedSubstrateImageTag
+    substrateApiKey: substrateApiKey
+    keyVaultId: keyVault.outputs.vaultId
+    minWorkerReplicas: minWorkerReplicas
+    maxWorkerReplicas: maxWorkerReplicas
+    scaleOutQueueDepth: scaleOutQueueDepth
+    // Pass API server egress CIDRs so both Container Apps ingresses are IP-restricted.
+    // Empty by default (dev/test); set in prod parameter file to lock down public endpoints.
+    allowedIngressCidrs: apiServerEgressCidrs
+  }
+  dependsOn: [substrateNsg]
+}
+
 output apiUrl string = 'https://${containerApp.outputs.fqdn}'
 output keyVaultUrl string = keyVault.outputs.vaultUri
 output storageAccountName string = storageName
@@ -289,3 +351,5 @@ output logAnalyticsWorkspaceId string = logAnalytics.id
 output serviceBusConnectionString string = serviceBus.outputs.connectionString
 output docIntelligenceEndpoint string = docIntelligence.outputs.endpoint
 output prismBlobEndpoint string = prismBlobStorage.outputs.primaryBlobEndpoint
+output substrateInferenceFqdn string = deploySubstrateFleet ? substrateFleet.outputs.inferenceAppFqdn : ''
+output substrateWorkerFqdn string = deploySubstrateFleet ? substrateFleet.outputs.workerAppFqdn : ''

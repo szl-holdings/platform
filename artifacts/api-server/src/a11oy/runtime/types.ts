@@ -10,7 +10,7 @@ export type OperatorId =
   | 'evaluator'
   | 'code';
 
-export type ModelProvider = 'openai' | 'deepseek' | 'nvidia' | 'huggingface' | 'local' | 'mock';
+export type ModelProvider = 'substrate' | 'openai' | 'deepseek' | 'nvidia' | 'huggingface' | 'local' | 'mock';
 
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
