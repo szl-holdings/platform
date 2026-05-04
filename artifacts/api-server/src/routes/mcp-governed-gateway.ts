@@ -791,45 +791,30 @@ export function getToolGovernanceMetadata(toolName: string): {
 }
 
 function seedDemoData(): void {
-  const demoKeys: GatewayApiKey[] = [
-    {
-      id: 'gk-alpha',
-      keyHash: createHash('sha256').update('szl_gw_alpha_demo').digest('hex'),
-      prefix: 'szl_gw_alph',
-      label: 'Engineering Team — Claude Desktop',
+  const demoKeyDefs = [
+    { id: 'gk-alpha', label: 'Engineering Team — Claude Desktop', scopes: ['tools:read', 'tools:execute', 'resources:read'] as string[], rateLimit: 120, agoDays: 7 },
+    { id: 'gk-bravo', label: 'Security Ops — Cursor', scopes: ['tools:read', 'tools:execute'] as string[], rateLimit: 60, agoDays: 3 },
+    { id: 'gk-charlie', label: 'Research Team — VS Code Copilot', scopes: ['tools:read', 'resources:read'] as string[], rateLimit: 200, agoDays: 14 },
+  ];
+  const generatedKeys: string[] = [];
+  for (const def of demoKeyDefs) {
+    const rawKey = `szl_gw_${randomUUID().replace(/-/g, '').slice(0, 24)}`;
+    generatedKeys.push(rawKey);
+    const key: GatewayApiKey = {
+      id: def.id,
+      keyHash: createHash('sha256').update(rawKey).digest('hex'),
+      prefix: rawKey.slice(0, 11),
+      label: def.label,
       tenantId: 'meridian-prime',
-      scopes: ['tools:read', 'tools:execute', 'resources:read'],
-      rateLimit: 120,
-      createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+      scopes: def.scopes,
+      rateLimit: def.rateLimit,
+      createdAt: new Date(Date.now() - def.agoDays * 86400000).toISOString(),
       lastUsedAt: new Date(Date.now() - 180000).toISOString(),
       revokedAt: null,
-    },
-    {
-      id: 'gk-bravo',
-      keyHash: createHash('sha256').update('szl_gw_bravo_demo').digest('hex'),
-      prefix: 'szl_gw_brav',
-      label: 'Security Ops — Cursor',
-      tenantId: 'meridian-prime',
-      scopes: ['tools:read', 'tools:execute'],
-      rateLimit: 60,
-      createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-      lastUsedAt: new Date(Date.now() - 600000).toISOString(),
-      revokedAt: null,
-    },
-    {
-      id: 'gk-charlie',
-      keyHash: createHash('sha256').update('szl_gw_charlie_demo').digest('hex'),
-      prefix: 'szl_gw_char',
-      label: 'Research Team — VS Code Copilot',
-      tenantId: 'meridian-prime',
-      scopes: ['tools:read', 'resources:read'],
-      rateLimit: 200,
-      createdAt: new Date(Date.now() - 14 * 86400000).toISOString(),
-      lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
-      revokedAt: null,
-    },
-  ];
-  for (const k of demoKeys) apiKeys.set(k.id, k);
+    };
+    apiKeys.set(key.id, key);
+  }
+  logger.info({ keyPrefixes: generatedKeys.map(k => k.slice(0, 11) + '...') }, '[mcp-governed-gateway] Demo gateway keys generated (check logs for prefixes — use /api/mcp-governed-gateway/keys to manage)');
 
   const demoConnections: ExternalConnection[] = [
     {
@@ -950,7 +935,7 @@ function seedDemoData(): void {
   }
 }
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.SEED_DEMO_GATEWAY === 'true') {
   seedDemoData();
 }
 
