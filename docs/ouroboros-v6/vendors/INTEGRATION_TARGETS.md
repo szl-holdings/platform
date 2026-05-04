@@ -52,7 +52,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -81,7 +81,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -110,7 +110,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -139,7 +139,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -168,7 +168,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -201,7 +201,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -230,7 +230,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -259,7 +259,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -288,7 +288,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -321,7 +321,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -350,7 +350,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -379,7 +379,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -412,7 +412,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -441,7 +441,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---
@@ -470,7 +470,7 @@
 >
 > Best,
 > **Stephen P. Lutar**
-> SZL Holdings · rosalutar@gmail.com · ORCID 0009-0001-0110-4173
+> SZL Holdings · stephenlutar2@gmail.com · ORCID 0009-0001-0110-4173
 > Runtime: @szl-holdings/ouroboros
 
 ---

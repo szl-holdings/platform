@@ -4,7 +4,7 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, state/federal procurement evaluators, prime contractors
+**Audience:** Empire APEX, state/federal procurement evaluators, prime contractors
 **Classification:** Public (intended for buyer-facing publication at `szlholdings.com/trust/fedramp`)
 
 ---

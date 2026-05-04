@@ -140,7 +140,29 @@ Terra is the real estate intelligence platform at `/terra/`.
 
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
-- **Government Data:** NYSTEC Pre-briefing, Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+- **Government Data:** Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+## 2026-05-04 — Empire APEX Meeting Pack (complete dossier)
+
+Comprehensive meeting pack for May 6, 2026 session with Mercy McInnis (Empire APEX Accelerator):
+
+**New documents created:**
+- `dossier/APEX_Meeting_Script.md` — 30-minute meeting flow with slide-by-slide talking points
+- `dossier/APEX_Business_Proposal.md` — formal proposal covering platform, alignment, metrics, 90-day roadmap
+- `dossier/APEX_Live_Demo_Guide.md` — tab-by-tab Teams screen share walkthrough with emergency fallback
+- `dossier/APEX_DOSSIER_INDEX.md` — consolidated package index with pre-meeting checklist
+- `docs/ouroboros-v6/founder/MERCY_SCRIPT_MEMORIZE.md` — verbatim script for rehearsal (referenced by MERCY_CHECKLIST.md)
+
+**Updated documents:**
+- `dossier/SZL_Holdings_Capability_Statement.md` — 44 innovations, corrected DOI, security test count
+- `dossier/SZL_Holdings_Empire_APEX_Briefing.md` — cleaned forbidden strings
+- `docs/ouroboros-v6/founder/MERCY_DECK.md` — fixed email, removed forbidden strings
+- `docs/ouroboros-v6/founder/MERCY_CHECKLIST.md` — corrected DOI, cleaned forbidden strings
+- `SOURCE_OF_TRUTH.md` — added sovereign engine innovations (44) and security tests (126)
+
+**Forbidden-string sweep:** Removed all instances of forbidden strings from meeting-facing documents, dossier, replit.md, government readiness audit, trust docs, founder docs, sales docs, and vendor docs. Old email (rosalutar) replaced with stephenlutar2 across all founder/business/vendor docs.
+
+**Screenshots captured (9):** All 7 product surfaces + A11oy Decision Intelligence + A11oy Product Showcase saved to `screenshots/01-a11oy.jpg` through `screenshots/09-a11oy-solutions.jpg`.
+
 ## 2026-05-04 — Platform fully operational baseline
 
 All 9 active artifact workflows running from cold start. API server healthy, DB connected, 157 migrations applied.
@@ -273,9 +295,9 @@ on top of v4:
 - **Agent registry**: `AGENT_REGISTRY_REQUIRED_FIELDS` (8 fields) +
   `validateAgentRegistryEntry(entry)` returning missing-fields list.
 
-## 2026-04-30 — SZL Government Procurement Readiness (NYSTEC pre-briefing)
+## 2026-04-30 — SZL Government Procurement Readiness (Empire APEX pre-briefing)
 
-`@workspace/ouroboros` now operationalizes the April 30, 2026 NYSTEC
+`@workspace/ouroboros` now operationalizes the April 30, 2026 Empire APEX
 pre-briefing audit (Empire APEX Accelerator, Mercy McInnis) covering
 A11oy, Sentra, and Amaru against federal and NY State AI procurement
 requirements. Source of truth:
@@ -322,7 +344,7 @@ personal profile. **0 open Dependabot alerts** across the entire
 organization at completion.
 
 ### READMEs upgraded (11 of 11)
-Investor-grade rewrites with NYSTEC scorecards, NIST AI RMF / DoD /
+Investor-grade rewrites with Empire APEX scorecards, NIST AI RMF / DoD /
 GSAR alignment matrices, and a shared footer linking back to the
 runtime + thesis + audit doc:
 - `szl-holdings/.github` (org profile, was 71B → 6.1KB)
@@ -511,8 +533,8 @@ operating-doctrine, aegis-public) preserved per spec.
 ### Track E — `paper/ARXIV_SUBMISSION_CHECKLIST.md`
 arXiv submission plan for the deterministic-replay paper.
 
-### Track F — `sales/F-01-nystec-pilot-pitch-email.md`, `sales/F-02-pilot-sow-template.md`
-NYSTEC pitch email + pilot SOW template (no commercial terms filled).
+### Track F — `sales/F-01-apex-pilot-pitch-email.md`, `sales/F-02-pilot-sow-template.md`
+Empire APEX pitch email + pilot SOW template (no commercial terms filled).
 
 ### Follow-up (not in this PR)
 1. Generate Ed25519 attestation keypair; publish public half via `.well-known`. **DONE in Phase 2 below.**

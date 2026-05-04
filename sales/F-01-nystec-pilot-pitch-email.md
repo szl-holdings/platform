@@ -1,7 +1,7 @@
-# Track F-01 — NYSTEC Pilot Pitch (Email + Sequence)
+# Track F-01 — Empire APEX Pilot Pitch (Email + Sequence)
 
 **Document ID:** PILOT-F-01
-**Audience:** NYSTEC engagement contact, NYS ITS partner contacts, candidate state agencies (DOH, DFS, OGS, DTF, DCJS, ITS internal)
+**Audience:** Empire APEX engagement contact, NYS ITS partner contacts, candidate state agencies (DOH, DFS, OGS, DTF, DCJS, ITS internal)
 **Goal:** Land a paid pilot in the $25k–$75k range that gives SZL Holdings a defensible reference customer.
 **Cadence:** 5-touch sequence over 21 days. No more, no less.
 
@@ -30,11 +30,11 @@ All pilots include the trust documentation package, the demo video, and the publ
 
 ## 3. Email 1 — Cold open (T+0)
 
-> Subject: [Agency name] · 90-second NYSTEC walkthrough + a paid pilot offer
+> Subject: [Agency name] · 90-second Empire APEX walkthrough + a paid pilot offer
 >
 > [First name],
 >
-> The April NYSTEC pre-briefing flagged thirteen documentation gaps across our portfolio (A11oy, Sentra, Amaru). All thirteen are now closed in writing, dated, and published at szlholdings.com/governance.
+> The April Empire APEX pre-briefing flagged thirteen documentation gaps across our portfolio (A11oy, Sentra, Amaru). All thirteen are now closed in writing, dated, and published at szlholdings.com/governance.
 >
 > We also stood up a public replay-attestation endpoint at szlholdings.com/replay-attestation. It lets anyone replay any production public agent run back to its primary federal source and get a signed hash. To my knowledge, no other AI vendor in your evaluation pipeline has this surface today.
 >
@@ -60,7 +60,7 @@ All pilots include the trust documentation package, the demo video, and the publ
 >
 > Following up — wanted to drop two artifacts in your inbox without expecting a response:
 >
-> 1. **NYSTEC alignment summary** (one page, attached): the 13 gaps, the 13 documents, status on each. It's the easiest way for [Agency]'s privacy / security / procurement leads to see whether we're worth a deeper look.
+> 1. **Empire APEX alignment summary** (one page, attached): the 13 gaps, the 13 documents, status on each. It's the easiest way for [Agency]'s privacy / security / procurement leads to see whether we're worth a deeper look.
 >
 > 2. **Pilot SOW draft** (also attached): 90 days, fixed price $[X], scoped to [data category]. Fully written so your contracts team can mark it up rather than start from scratch.
 >
@@ -134,11 +134,11 @@ Attachments: `nystec-alignment-onepager.pdf`, `pilot-sow-draft-[agency].pdf`
 
 | Tier | Org | Why | Door |
 |---|---|---|---|
-| 1 | NYS Office of Information Technology Services (ITS) | Substrate for all NYS agencies; if NYSTEC blesses one engagement, ITS is the procurement vehicle | Direct via NYSTEC contact |
+| 1 | NYS Office of Information Technology Services (ITS) | Substrate for all NYS agencies; if Empire APEX blesses one engagement, ITS is the procurement vehicle | Direct via Empire APEX contact |
 | 1 | NYS Department of Financial Services | DFS Part 500 is exactly Sentra's posture; NY DFS is the most-respected state regulator | Industry contacts; LinkedIn |
-| 2 | NYS Department of Health | Amaru COTS-ERP scenario lives here; HIPAA + state privacy law overlap | NYSTEC introduction |
-| 2 | NYS Department of Taxation and Finance | Federal Register / NYS Register monitoring is high-value for them | NYSTEC introduction |
-| 2 | NYS Office of General Services | Procurement vehicle; sets the precedent for other agencies | NYSTEC introduction |
+| 2 | NYS Department of Health | Amaru COTS-ERP scenario lives here; HIPAA + state privacy law overlap | Empire APEX introduction |
+| 2 | NYS Department of Taxation and Finance | Federal Register / NYS Register monitoring is high-value for them | Empire APEX introduction |
+| 2 | NYS Office of General Services | Procurement vehicle; sets the precedent for other agencies | Empire APEX introduction |
 | 3 | Cuomo-era cyber-resilience initiatives at NYC | Sentra fit; civic-tech network | LinkedIn / NYC CTO office |
 | 3 | CT / NJ / MA peer-state ITS | Halo effect from a NYS reference | After NYS lands |
 | 3 | Federal — small agency for a CUI-bearing pilot | A11oy-US (GovCloud) deployment proof | After NYS lands; via prime |

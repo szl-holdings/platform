@@ -2,7 +2,7 @@
 **SZL Holdings | Stephen P. Lutar | ORCID 0009-0001-0110-4173**
 **Product:** `@szl-holdings/ouroboros` v6.1.0 | No-cost 90-day pilot
 **DOIs:** [10.5281/zenodo.19867281](https://doi.org/10.5281/zenodo.19867281) · [10.5281/zenodo.19934129](https://doi.org/10.5281/zenodo.19934129)
-**Post-Meeting Reference:** Mercy McInnis, Procurement Counselor, Empire APEX Accelerator (NYSTEC/DoD) — Teams meeting May 6, 2026
+**Post-Meeting Reference:** Mercy McInnis, Procurement Counselor, Empire APEX Accelerator (Empire APEX/DoD) — Teams meeting May 6, 2026
 
 ---
 
@@ -94,7 +94,7 @@ Thank you again for everything the Empire APEX Accelerator is doing for early-st
 
 Stephen Lutar
 SZL Holdings
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID: 0009-0001-0110-4173
 
 ---
@@ -111,7 +111,7 @@ Contact pattern: `afwerx@us.af.mil` (general contact); technical submissions via
 
 The CDAO is the senior DoD official responsible for AI governance, data strategy, and responsible AI implementation across the department. The CDAO RAI Working Group coordinates the DoD RAI Strategy and the DoD AI Ethics Principles across all services and defense agencies.
 
-Contact pattern: `osd.pentagon.ousd-r-e.mbx.cdao-general@mail.mil` (CDAO general mailbox); public engagement via [ai.mil](https://www.ai.mil); RAI Working Group public-facing outputs are published at [ai.mil/docs](https://www.ai.mil/docs/). For a direct introduction, request a referral through Mercy McInnis (NYSTEC/DoD) to a CDAO RAI staff member, or engage through the CDAO's published responsible AI self-assessment guide feedback channels. The Ouroboros Λ-trace methodology is directly aligned with the CDAO's Test and Evaluation framework for AI systems and should be framed as a validation-layer contribution, not a product pitch.
+Contact pattern: `osd.pentagon.ousd-r-e.mbx.cdao-general@mail.mil` (CDAO general mailbox); public engagement via [ai.mil](https://www.ai.mil); RAI Working Group public-facing outputs are published at [ai.mil/docs](https://www.ai.mil/docs/). For a direct introduction, request a referral through Mercy McInnis (Empire APEX/DoD) to a CDAO RAI staff member, or engage through the CDAO's published responsible AI self-assessment guide feedback channels. The Ouroboros Λ-trace methodology is directly aligned with the CDAO's Test and Evaluation framework for AI systems and should be framed as a validation-layer contribution, not a product pitch.
 
 ---
 

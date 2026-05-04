@@ -211,7 +211,7 @@ I did not run the full platform suite — installing 1.1 GB of deps and resolvin
 ### 5.3 Claims the user might be tempted to add but the audit does NOT support (❌ do not add)
 1. ❌ "The platform validates Λ in production." — the platform doesn't import Λ.
 2. ❌ "v4 validator registry / v6 16-service runtime are implemented as runnable services." — they're TypeScript constants with schema-regression tests. Type B, not Type A. Already correctly excluded from v3 claims.
-3. ❌ "Audited by NYSTEC." — was procurement counseling, not audit. Already correctly stated in v3 §7 #3.
+3. ❌ "Audited by Empire APEX." — was procurement counseling, not audit. Already correctly stated in v3 §7 #3.
 4. ❌ "Used by [any government agency]." — no such evidence. Empire APEX engagement was counseling.
 5. ❌ "Production users / customers." — no evidence in any repo.
 

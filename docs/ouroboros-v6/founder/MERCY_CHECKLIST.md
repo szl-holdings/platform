@@ -94,7 +94,7 @@ Tuesday, May 6, 2026 · 10:00 AM ET · Microsoft Teams
 |                                                  |
 |  A. What should I do this week?                  |
 |  B. What should I bring next meeting?            |
-|  C. Who else at APEX/NYSTEC should I talk to?    |
+|  C. Who else at APEX should I talk to?            |
 |                                                  |
 +--------------------------------------------------+
 ```
@@ -105,7 +105,7 @@ Tuesday, May 6, 2026 · 10:00 AM ET · Microsoft Teams
 - Business proposal PDF
 - Deck PDF (only if asked to share screen)
 - GitHub: github.com/szl-holdings
-- Zenodo DOI: 10.5281/zenodo.19934129
+- Zenodo DOI: 10.5281/zenodo.19944926
 
 ## What you don't need
 

@@ -4,14 +4,14 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, customer security teams, federal sponsors
+**Audience:** Empire APEX, customer security teams, federal sponsors
 **Classification:** Public (catalog); per-feed contractual terms private
 
 ---
 
 ## 1. Purpose
 
-NYSTEC and most government / regulated buyers expect a documented, current, formal catalog of the threat-intelligence feeds their security product consumes — not a marketing claim. This document is that catalog.
+Empire APEX and most government / regulated buyers expect a documented, current, formal catalog of the threat-intelligence feeds their security product consumes — not a marketing claim. This document is that catalog.
 
 It lists every feed Sentra ingests, what tier it occupies, what the licensing posture is, and how Sentra reconciles overlapping signals.
 

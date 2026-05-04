@@ -203,7 +203,7 @@ PAST PERFORMANCE
 
 POINTS OF CONTACT
 Stephen P. Lutar, Founder
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID: 0009-0001-0110-4173
 GitHub: github.com/szl-holdings/ouroboros
 ```

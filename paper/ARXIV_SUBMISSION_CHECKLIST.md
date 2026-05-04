@@ -10,7 +10,7 @@
 
 Three reasons, in order of business value:
 
-1. **Citation surface.** A preprint with a stable arXiv ID becomes a citable artifact. NYSTEC reviewers, prime contractors, and academic collaborators can reference it. Without it, the thesis is just a blog post.
+1. **Citation surface.** A preprint with a stable arXiv ID becomes a citable artifact. Empire APEX reviewers, prime contractors, and academic collaborators can reference it. Without it, the thesis is just a blog post.
 2. **Priority date.** Posting establishes a public, dated technical disclosure — useful if any of the methods later become patentable or contested.
 3. **Distribution.** arXiv pushes preprints to Google Scholar, Semantic Scholar, ConnectedPapers, and a few hundred mailing lists. Free distribution to the precise audience that values the work.
 
@@ -100,7 +100,7 @@ If this is your first cs.LG submission and you don't have a co-author with categ
 
 - [ ] Tweet/X post linking the preprint with one sentence + the abstract image
 - [ ] LinkedIn post — founder voice — ~200 words, with the link and one anchor takeaway
-- [ ] Email NYSTEC contact with the link
+- [ ] Email Empire APEX contact with the link
 - [ ] Add the arXiv link to `/governance` and `/research`
 - [ ] Add the link to the GitHub repo's `README.md`
 - [ ] Open a `notify-listees` issue on the repo to track who has been told
@@ -134,4 +134,4 @@ The v3 manuscript already addresses the v2 issues (broken equation, fake referen
 - arXiv ID assigned (`arXiv:NNNN.NNNNN`).
 - Preprint PDF compiles cleanly from public source.
 - Linked on `/governance`, `/research`, repo README, social channels.
-- One email sent to NYSTEC contact and to first 5 design-partner candidates with the link and a one-sentence ask.
+- One email sent to Empire APEX contact and to first 5 design-partner candidates with the link and a one-sentence ask.

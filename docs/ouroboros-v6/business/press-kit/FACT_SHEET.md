@@ -49,7 +49,7 @@ These non-claims are public at [docs/NOT_THIS.md](../../ouroboros-unified-payloa
 
 ## Press contacts
 
-- Email: rosalutar@gmail.com
+- Email: stephenlutar2@gmail.com
 - Substack: [szlholdings.substack.com](https://szlholdings.substack.com)
 - Medium: [@stephen_38454](https://medium.com/@stephen_38454)
 - ORCID: [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)

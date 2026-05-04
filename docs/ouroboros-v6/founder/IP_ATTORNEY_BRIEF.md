@@ -2,7 +2,7 @@
 ### Stephen P. Lutar · May 1, 2026 · ATTORNEY-CLIENT PRIVILEGED ON RECEIPT
 
 **For:** Counsel of record (TBD) — registered USPTO patent agent or attorney
-**From:** Stephen P. Lutar, sole inventor, rosalutar@gmail.com, ORCID 0009-0001-0110-4173
+**From:** Stephen P. Lutar, sole inventor, stephenlutar2@gmail.com, ORCID 0009-0001-0110-4173
 **Re:** Ouroboros runtime trust system; 60 method primitives; Lutar Invariant Λ family; trademark, provisional patent, ITAR/EAR posture
 **Posture:** Time-critical. Read the timeline section first.
 
@@ -127,5 +127,5 @@ All on request, all under attorney-client privilege upon engagement:
 The v2 window is closed. The v4.6 window is open and small. I want a provisional filed before the next public publication. I want trademarks filed this week. I want an ITAR/EAR letter on the dual-use module. I am ready to engage and pay.
 
 Stephen P. Lutar
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID 0009-0001-0110-4173

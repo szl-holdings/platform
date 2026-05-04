@@ -1,7 +1,7 @@
 # Stephen P. Lutar
 
 Founder, SZL Holdings • Author, Ouroboros Thesis (v1, v2, v3)
-Email: rosalutar@gmail.com • ORCID: [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173) • GitHub: [szl-holdings](https://github.com/szl-holdings)
+Email: stephenlutar2@gmail.com • ORCID: [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173) • GitHub: [szl-holdings](https://github.com/szl-holdings)
 Substack: [szlholdings.substack.com](https://szlholdings.substack.com) • Medium: [@stephen_38454](https://medium.com/@stephen_38454)
 
 ## Summary

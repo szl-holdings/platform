@@ -26,7 +26,7 @@
 **Does not claim:**
 
 - A formal-logic proof in Lean / Coq — only numerical witnesses on finite test points.
-- Third-party audit — the NYSTEC / Empire APEX engagement was procurement counseling, not certification.
+- Third-party audit — the Empire APEX engagement was procurement counseling, not certification.
 - Deployed product — the seven SZL Holdings product repos (A11oy, Amaru, Sentra, Counsel, Terra, Vessels, Carlota Jo) are README-stage placeholders.
 - Platform consumption — a fresh-clone audit on 2 May 2026 confirmed that the platform monorepo `szl-holdings/szl-holdings-platform` does not yet declare `@szl-holdings/ouroboros` as a dependency in any `package.json`.
 - Empirical comparison study — none performed.

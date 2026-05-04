@@ -2,7 +2,7 @@
 
 **One-page brief for buyers, investors, and design partners.**
 Version: May 2026
-Contact: Stephen P. Lutar — rosalutar@gmail.com — [github.com/szl-holdings](https://github.com/szl-holdings)
+Contact: Stephen P. Lutar — stephenlutar2@gmail.com — [github.com/szl-holdings](https://github.com/szl-holdings)
 
 ## What it is
 

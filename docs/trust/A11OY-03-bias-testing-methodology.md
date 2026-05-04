@@ -4,7 +4,7 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, NYS Office of Information Technology Services, NYC AEDT-impacted buyers, civil-rights-sensitive procurements
+**Audience:** Empire APEX, NYS Office of Information Technology Services, NYC AEDT-impacted buyers, civil-rights-sensitive procurements
 **Classification:** Public; aligned to NIST AI RMF 1.0 (MANAGE-2.3) and NYC Local Law 144 audit principles
 
 ---

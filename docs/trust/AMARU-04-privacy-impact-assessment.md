@@ -4,7 +4,7 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, agency privacy officers, customers subject to E-Government Act §208 / GDPR DPIA / state privacy law obligations
+**Audience:** Empire APEX, agency privacy officers, customers subject to E-Government Act §208 / GDPR DPIA / state privacy law obligations
 **Classification:** Public template; per-customer instances under NDA
 
 ---

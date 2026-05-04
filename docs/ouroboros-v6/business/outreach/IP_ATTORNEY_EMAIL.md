@@ -28,4 +28,4 @@ Booking link or three windows that work for you?
 
 — Stephen
 Stephen P. Lutar
-rosalutar@gmail.com • [github.com/szl-holdings](https://github.com/szl-holdings)
+stephenlutar2@gmail.com • [github.com/szl-holdings](https://github.com/szl-holdings)

@@ -2,7 +2,7 @@
 
 **Document ID:** COPY-D-01
 **Audience:** Anyone touching customer-facing copy on `szlholdings.com`, in product, in pitch decks, in emails
-**Goal:** Replace "command" / "AGI" / generic-AI vocabulary with regulated-monitoring vocabulary that NYSTEC, primes, and government buyers can accept without internal pushback.
+**Goal:** Replace "command" / "AGI" / generic-AI vocabulary with regulated-monitoring vocabulary that Empire APEX, primes, and government buyers can accept without internal pushback.
 
 ---
 
@@ -60,7 +60,7 @@ The vocabulary swap is necessary; it is not sufficient. Many *claims* across the
 
 Pages identified from `artifacts/szl-holdings/src/pages/` master list, prioritized by buyer visibility:
 
-### P0 — touched in the first NYSTEC walkthrough
+### P0 — touched in the first Empire APEX walkthrough
 
 - `landing.tsx` — primary marketing landing
 - `solutions.tsx` — primary buyer landing for products
@@ -138,7 +138,7 @@ CTAs: "Watch the 90-second demo" → `/demo` · "Read our governance posture" �
 
 ### 5.6 `contact.tsx` — replacement form-side copy
 
-> "Procurement officers, prime contractors, and NYSTEC reviewers — please include your agency or prime in the subject line so we can route to the right document set. We will respond within one business day with the relevant trust documents and a calendar link for a 30-minute walkthrough."
+> "Procurement officers, prime contractors, and Empire APEX reviewers — please include your agency or prime in the subject line so we can route to the right document set. We will respond within one business day with the relevant trust documents and a calendar link for a 30-minute walkthrough."
 
 ## 6. Rewriting steps (for the team or for Replit)
 

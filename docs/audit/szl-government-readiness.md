@@ -1,7 +1,7 @@
 # SZL Holdings — A11oy, Sentra & Amaru: Exhaustive Audit & Government Readiness Report
 
 **Prepared by:** Stephen P. Lutar Jr. / SZL Consulting LTD  
-**Meeting:** Empire APEX Accelerator – NYSTEC (Mercy McInnis, Procurement Counselor)  
+**Meeting:** Empire APEX Accelerator (Mercy McInnis, Procurement Counselor)  
 **Date:** April 30, 2026  
 **Classification:** Pre-Briefing — Government Sales Readiness
 
@@ -15,8 +15,8 @@ SZL Holdings operates three interconnected AI-powered platforms — A11oy (the o
 
 ## Government Procurement Context
 
-### Empire APEX Accelerator & NYSTEC
-The Empire APEX Accelerator, managed by NYSTEC, provides free government contract counseling to businesses in New York State to help them compete for federal, state, and local government contracts. Since 2020, the program has assisted over 1,100 clients and aided in the award of more than 6,300 contracts totaling over $345 million. The meeting with Mercy McInnis is a counseling session designed to help SZL position for government contract pursuit.
+### Empire APEX Accelerator
+The Empire APEX Accelerator, provides free government contract counseling to businesses in New York State to help them compete for federal, state, and local government contracts. Since 2020, the program has assisted over 1,100 clients and aided in the award of more than 6,300 contracts totaling over $345 million. The meeting with Mercy McInnis is a counseling session designed to help SZL position for government contract pursuit.
 
 ### New York State AI Procurement Climate (2026)
 New York is one of the most active states for government AI adoption right now:
@@ -84,7 +84,7 @@ Sentra is the governed security and threat intelligence pack within the A11oy ec
 ### Best-Fit Government Use Cases
 - **Cybersecurity monitoring** for state/local agencies (NY Joint Security Operations Center covers 95,000 computers)
 - **Regulatory signal monitoring** via primary-source Katzilla datasets (Federal Register, FEMA, CourtListener)
-- **Threat analysis support** for DoD/defense subcontracting through NYSTEC network
+- **Threat analysis support** for DoD/defense subcontracting through the APEX network
 - **Audit support services** — Sentra's receipt and trace outputs can serve as audit evidence
 
 ### Gaps to Address Before Tuesday
@@ -208,7 +208,7 @@ This is the single most important prerequisite for any government contract. You 
 - [ ] Ask about NY DIGIT agency vendor registration process
 - [ ] Ask about set-aside programs (small business, 8(a), HUBZone)
 - [ ] Ask about specific RFPs or upcoming opportunities the APEX program is tracking
-- [ ] Ask about cyber/IT opportunities through NYSTEC's DoD network
+- [ ] Ask about cyber/IT opportunities through the DoD network
 
 ### 30-Day Roadmap (Post-Meeting)
 - [ ] Begin SAM.gov registration if not already active

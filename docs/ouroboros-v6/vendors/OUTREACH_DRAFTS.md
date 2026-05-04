@@ -35,7 +35,7 @@ Can you connect us with the integrations team who reviews `langchain-community` 
 Best,
 Stephen P. Lutar
 SZL Holdings
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID: 0009-0001-0110-4173
 Runtime: @szl-holdings/ouroboros
 GitHub: github.com/szl-holdings/ouroboros
@@ -126,7 +126,7 @@ We would welcome a technical review from your safety or integrations team. We ca
 Best,
 Stephen P. Lutar
 SZL Holdings
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID: 0009-0001-0110-4173
 Runtime: @szl-holdings/ouroboros
 GitHub: github.com/szl-holdings/ouroboros
@@ -234,7 +234,7 @@ Our mathematical model is peer-reviewed: DOIs 10.5281/zenodo.19867281 and 10.528
 Best,
 Stephen P. Lutar
 SZL Holdings
-rosalutar@gmail.com
+stephenlutar2@gmail.com
 ORCID: 0009-0001-0110-4173
 Runtime: @szl-holdings/ouroboros
 GitHub: github.com/szl-holdings/ouroboros

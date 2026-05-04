@@ -22,8 +22,10 @@
 | RBAC roles | **11** | Cross-document consistency (README + docs) |
 | Ouroboros vitest test calls | **133** | `grep -rhE "^\s*(it\|test)\(" packages/ouroboros/src --include='*.test.ts' \| wc -l` |
 | Codex-kernel vitest test calls | **29** | `grep -rhE "^\s*(it\|test)\(" packages/codex-kernel/src --include='*.test.ts' \| wc -l` |
+| Sovereign engine innovations | **44** | Count of entries in INNOVATION_MANIFEST in `packages/ouroboros-integrations/src/sovereign-engine.ts` |
+| Security tests passing | **126** | `pnpm --filter @workspace/api-server test` (security suite) |
 
-**Last verified:** 2026-05-03
+**Last verified:** 2026-05-04
 **Audit trail:** `audit/source-of-truth.json`
 **Note:** Re-verification on 2026-05-03 produced material deltas from the 2026-04-28 baseline. DB tables grew 798 → 848 (+50). API endpoints grew 2,816 → 5,524 (+2,708) following recent route-system expansion. Registered artifacts dropped 14 → 9 (vestigial artifact.toml files were removed in the 2026-04-25 cleanup; the canonical count is now `find artifacts -name artifact.toml`). Ouroboros tests revised to a literal call count of 133 (the earlier "150" figure was a declared-suite count and is no longer authoritative). Verticals dropped 8 → 7: KORA (Decision Intelligence) consolidated into A11oy as a unified Orchestration + Decision Intelligence surface; the `/lyte/` archive directory is retained but is no longer a standalone product line.
 

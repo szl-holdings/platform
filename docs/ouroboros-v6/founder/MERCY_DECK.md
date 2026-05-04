@@ -1,7 +1,7 @@
 # Mercy Deck — Ouroboros + SZL Holdings
-### For Mercy McInnis · Procurement Counselor · Empire APEX Accelerator (NYSTEC)
+### For Mercy McInnis · Procurement Counselor · Empire APEX Accelerator
 ### Meeting: Tuesday, May 6, 2026 · 10:00 AM ET · Microsoft Teams
-### Stephen P. Lutar · SZL Holdings · rosalutar@gmail.com
+### Stephen P. Lutar · SZL Holdings · stephenlutar2@gmail.com
 
 10 slides. 12 minutes. Leave 18 for her questions.
 

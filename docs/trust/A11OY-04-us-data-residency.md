@@ -4,7 +4,7 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, US public-sector buyers, healthcare customers, data-sovereignty-sensitive procurements
+**Audience:** Empire APEX, US public-sector buyers, healthcare customers, data-sovereignty-sensitive procurements
 **Classification:** Public
 
 ---

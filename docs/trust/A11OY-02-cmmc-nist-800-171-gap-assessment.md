@@ -4,7 +4,7 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, prime contractors handling CUI, DoD subcontracting officers
+**Audience:** Empire APEX, prime contractors handling CUI, DoD subcontracting officers
 **Classification:** Public summary; full control workbook provided under NDA
 
 ---
@@ -50,7 +50,7 @@ This document is SZL Holdings' self-assessment of A11oy against NIST SP 800-171 
 
 ## 5. Top 5 gaps to a clean Level 2 self-attestation
 
-These are the controls SZL Holdings is committing to close in the next 90 days as part of the NYSTEC documentation track:
+These are the controls SZL Holdings is committing to close in the next 90 days as part of the Empire APEX documentation track:
 
 1. **03.01.16 / 03.01.20** — Formal mobile and external-system connection policy. Current state: implicit. Target: written policy + technical enforcement via `aef-policy-guard` egress allowlist.
 2. **03.05.07** — PKI for service-to-service auth between A11oy components. Current state: shared secrets + JWTs. Target: short-lived mTLS with rotated CA, deployed to staging by D+45.

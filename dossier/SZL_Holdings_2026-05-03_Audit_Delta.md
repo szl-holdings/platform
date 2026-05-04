@@ -1,6 +1,6 @@
 # SZL Holdings — May 3, 2026 deep audit delta
 
-This document records concrete state changes made on 2026-05-03 in preparation for the May 6, 2026 Empire APEX session with NYSTEC counselor Mercy McInnis.
+This document records concrete state changes made on 2026-05-03 in preparation for the May 6, 2026 Empire APEX session with counselor Mercy McInnis.
 
 ## 1. Zenodo DOI — root cause and correction
 
@@ -117,7 +117,7 @@ A scoped search of the public npm registry for `scope:szl-holdings` returns 348 
 
 These cannot be done from inside the development environment:
 
-1. **Forged-author commits in `ouroboros-thesis` git history.** Four commits in the history list `rosalutar@gmail.com` as author: `29de9e27b`, `2159e47aa`, `2fa3a6e50`, `84fbd4eac`. Removing them requires `git filter-repo` followed by a force-push from a local clone. The platform sandbox blocks destructive git operations, so this cannot be executed remotely.
+1. **Forged-author commits in `ouroboros-thesis` git history.** Four commits in the history list `stephenlutar2@gmail.com` as author: `29de9e27b`, `2159e47aa`, `2fa3a6e50`, `84fbd4eac`. Removing them requires `git filter-repo` followed by a force-push from a local clone. The platform sandbox blocks destructive git operations, so this cannot be executed remotely.
 
 2. **Republishing the v3 paper to Zenodo as a fresh deposit** (optional). The current 19983066 record is valid and citable; a re-deposit is only needed if the operator wants a single contiguous record under the original 19951520 reservation, which is no longer recoverable.
 

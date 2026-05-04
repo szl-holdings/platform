@@ -1,6 +1,6 @@
 # Changelog — v4.6
 
-Author: Stephen P. Lutar. ORCID 0009-0001-0110-4173. rosalutar@gmail.com.
+Author: Stephen P. Lutar. ORCID 0009-0001-0110-4173. stephenlutar2@gmail.com.
 Date: v4.6 release.
 
 v4.6 adds 40 primitives (21-60) across 10 new modules. All 612 TypeScript tests are green. Python SDK snapshot: 107+ tests green; Python ports for v4.6 modules are running in parallel with a target of 240+ Python tests post-port. No existing primitive, test, or interface was removed or modified.

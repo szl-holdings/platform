@@ -4,14 +4,14 @@
 **Version:** 1.0
 **Owner:** Stephen P. Lutar Jr., SZL Holdings
 **Last reviewed:** 2026-04-30
-**Audience:** NYSTEC, government finance/HR/procurement modernization buyers, prime integrators
+**Audience:** Empire APEX, government finance/HR/procurement modernization buyers, prime integrators
 **Classification:** Public
 
 ---
 
 ## 1. Purpose
 
-NYSTEC and most state-level modernization programs ask "how does your tool integrate with our COTS ERP" because most agency back offices run on a commercial-off-the-shelf ERP (Oracle, SAP, Workday, Infor, Tyler, Microsoft Dynamics). A vendor's answer to this question is often vague. This document is Amaru's specific answer.
+Empire APEX and most state-level modernization programs ask "how does your tool integrate with our COTS ERP" because most agency back offices run on a commercial-off-the-shelf ERP (Oracle, SAP, Workday, Infor, Tyler, Microsoft Dynamics). A vendor's answer to this question is often vague. This document is Amaru's specific answer.
 
 ## 2. Position
 

@@ -2,7 +2,7 @@
 
 **Document ID:** PROOF-C-01
 **Target route:** `/governance` on `artifacts/szl-holdings/`
-**Purpose:** A single public, unauthenticated page where any procurement officer, NYSTEC reviewer, prime contractor, journalist, or researcher can read and download SZL Holdings' actual governance posture and audit evidence, *without an NDA*.
+**Purpose:** A single public, unauthenticated page where any procurement officer, Empire APEX reviewer, prime contractor, journalist, or researcher can read and download SZL Holdings' actual governance posture and audit evidence, *without an NDA*.
 
 This page is the customer-facing index of the work in Track A and the entry point for the work in Track C-02.
 
@@ -71,11 +71,11 @@ Each document has:
 
 Three short paragraphs (≤ 250 words) explaining what a replay attestation is, why SZL builds them, and how a reviewer can use them. End with a prominent button: "Try a replay now" → `/replay-attestation`.
 
-### 2.5 NYSTEC alignment summary
+### 2.5 Empire APEX alignment summary
 
-A simple 3×N table mapping each NYSTEC gap (from the April 2026 pre-briefing) to the document that closes it and the current status:
+A simple 3×N table mapping each Empire APEX gap (from the April 2026 pre-briefing) to the document that closes it and the current status:
 
-| Product | NYSTEC gap | Closing document | Status |
+| Product | Empire APEX gap | Closing document | Status |
 |---|---|---|---|
 | A11oy | FedRAMP authorization disclosure | A11OY-01 | Published |
 | A11oy | CMMC / NIST SP 800-171 | A11OY-02 | Published |
