@@ -806,6 +806,18 @@ function buildPromptMessages(
   }
 }
 
+export async function executeToolForGateway(
+  toolName: string,
+  toolArgs: Record<string, unknown>,
+): Promise<{ result: unknown; error?: string }> {
+  try {
+    const result = await executeTool(toolName, toolArgs, undefined);
+    return { result };
+  } catch (err) {
+    return { result: null, error: String(err) };
+  }
+}
+
 async function executeTool(
   toolName: string,
   toolArgs: Record<string, unknown>,
@@ -1512,7 +1524,7 @@ function createAlloyMcpServer(
               isError: true,
             };
           }
-          const govResult = recordGatewayMcpCall(
+          const govResult = await recordGatewayMcpCall(
             gatewayCtx.connection as Parameters<typeof recordGatewayMcpCall>[0],
             gatewayCtx.apiKey as Parameters<typeof recordGatewayMcpCall>[1],
             capturedTool.name,

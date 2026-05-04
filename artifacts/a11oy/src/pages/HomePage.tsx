@@ -239,7 +239,7 @@ export function HomePage() {
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
         height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 clamp(1.5rem, 5vw, 4rem)',
-        background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(20px) saturate(1.2)',
+        background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(20px) saturate(1.2)',
         borderBottom: `1px solid ${T.borderSubtle}`,
       }}>
         <Link href={b('/')} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>

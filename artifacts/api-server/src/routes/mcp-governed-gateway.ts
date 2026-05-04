@@ -16,6 +16,7 @@ import {
   evaluatePolicies,
   type RiskClass,
 } from '../a11oy/runtime/governance/pce-gate';
+import { executeToolForGateway } from './mcp';
 
 const router: IRouter = Router();
 
@@ -458,12 +459,12 @@ export function requireAuthOrGatewayKey(req: Request, res: Response, next: NextF
   });
 }
 
-export function recordGatewayMcpCall(
+export async function recordGatewayMcpCall(
   connection: ExternalConnection,
   apiKey: GatewayApiKey,
   toolName: string,
   parameters: Record<string, unknown>,
-): { disposition: string; proofPacketId: string; approvalId: string | null } {
+): Promise<{ disposition: string; proofPacketId: string; approvalId: string | null }> {
   const riskLevel = classifyToolRisk(toolName);
   const riskClasses = classifyRisk({
     riskLevel,
@@ -517,13 +518,6 @@ export function recordGatewayMcpCall(
     latencyMs: 0,
     timestamp: new Date().toISOString(),
   };
-
-  if (!needsApproval) {
-    call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName, parameters }))
-      .digest('hex')
-      .slice(0, 16);
-  }
 
   if (needsApproval) {
     const approval: GatewayApproval = {
@@ -1006,7 +1000,7 @@ router.get('/approvals', authMiddleware(), (req: Request, res: Response) => {
   });
 });
 
-router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Response) => {
+router.post('/approvals/:id/approve', authMiddleware(), async (req: Request, res: Response) => {
   const approval = approvals.get(req.params.id!);
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
@@ -1015,14 +1009,24 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
   if (callerTenant && call && call.tenantId !== callerTenant) {
     return res.status(403).json({ error: 'Cannot approve resources outside your tenant' });
   }
-  approval.status = 'approved';
   approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? null;
+  let executionResult: unknown = null;
+  let executionError: string | undefined;
   if (call) {
-    call.disposition = 'allowed';
+    try {
+      const execOutcome = await executeToolForGateway(call.toolName, call.parameters);
+      executionResult = execOutcome.result;
+      executionError = execOutcome.error;
+    } catch (err) {
+      executionError = String(err);
+    }
+    const executionSucceeded = !executionError;
+    approval.status = 'approved';
+    call.disposition = executionSucceeded ? 'allowed' : 'execution_failed';
     call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName: call.toolName, parameters: call.parameters }))
+      .update(JSON.stringify(executionResult ?? { error: executionError }))
       .digest('hex')
       .slice(0, 16);
     const conn = connections.get(call.connectionId);
@@ -1033,10 +1037,13 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
       approval.proofPacketId = executionProof.packetId;
     }
     persistToolCallUpdate(call).catch(() => {});
+  } else {
+    approval.status = 'approved';
   }
   persistApproval(approval).catch(() => {});
-  logger.info({ approvalId: approval.approvalId, toolName: approval.toolName }, '[mcp-governed-gateway] Approval granted, deferred execution completed');
-  res.json({
+  const httpStatus = executionError ? 502 : 200;
+  logger.info({ approvalId: approval.approvalId, toolName: approval.toolName, hasError: !!executionError, disposition: call?.disposition }, '[mcp-governed-gateway] Approval granted, deferred execution completed');
+  res.status(httpStatus).json({
     approval,
     execution: call ? {
       callId: call.callId,
@@ -1044,6 +1051,8 @@ router.post('/approvals/:id/approve', authMiddleware(), (req: Request, res: Resp
       resultHash: call.resultHash,
       proofPacketId: call.proofPacketId,
       executedAt: approval.reviewedAt,
+      result: executionResult,
+      error: executionError,
     } : null,
   });
 });
@@ -1181,7 +1190,7 @@ router.delete('/api-keys/:id', authMiddleware(), (req: Request, res: Response) =
   res.json({ id: key.id, label: key.label, revokedAt: key.revokedAt });
 });
 
-router.post('/tool-call', (req: Request, res: Response) => {
+router.post('/tool-call', async (req: Request, res: Response) => {
   const start = Date.now();
   const { toolName, parameters, agentName } = req.body ?? {};
   if (!toolName || typeof toolName !== 'string') {
@@ -1306,13 +1315,6 @@ router.post('/tool-call', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   };
 
-  if (!needsApproval) {
-    call.resultHash = createHash('sha256')
-      .update(JSON.stringify({ callId: call.callId, toolName, parameters: parameters ?? {} }))
-      .digest('hex')
-      .slice(0, 16);
-  }
-
   if (needsApproval) {
     const approvalTier = riskLevel === 'critical'
       ? 'executive'
@@ -1339,8 +1341,48 @@ router.post('/tool-call', (req: Request, res: Response) => {
     call.approvalId = approval.approvalId;
     approvals.set(approval.approvalId, approval);
     persistApproval(approval, existingConn.tenantId).catch(() => {});
+
+    call.latencyMs = Date.now() - start;
+    const proof = generateGatewayProof(call, existingConn);
+    call.proofPacketId = proof.packetId;
+    existingConn.proofPacketCount++;
+    toolCalls.push(call);
+    persistToolCall(call).catch(() => {});
+
+    res.status(202).json({
+      callId: call.callId,
+      disposition: call.disposition,
+      riskLevel: call.riskLevel,
+      riskClasses: call.riskClasses,
+      proofPacketId: call.proofPacketId,
+      latencyMs: call.latencyMs,
+      message: `Tool call queued for ${approvalTier} approval`,
+      governance: {
+        pceGateApplied: true,
+        covenantChecked: true,
+        proofGenerated: true,
+        approvalRequired: true,
+        approvalId: call.approvalId,
+        approvalTier,
+      },
+    });
+    return;
   }
 
+  let executionResult: unknown = null;
+  let executionError: string | undefined;
+  try {
+    const execOutcome = await executeToolForGateway(toolName, parameters ?? {});
+    executionResult = execOutcome.result;
+    executionError = execOutcome.error;
+  } catch (err) {
+    executionError = String(err);
+  }
+
+  call.resultHash = createHash('sha256')
+    .update(JSON.stringify(executionResult ?? { error: executionError }))
+    .digest('hex')
+    .slice(0, 16);
   call.latencyMs = Date.now() - start;
   const proof = generateGatewayProof(call, existingConn);
   call.proofPacketId = proof.packetId;
@@ -1348,29 +1390,25 @@ router.post('/tool-call', (req: Request, res: Response) => {
   toolCalls.push(call);
   persistToolCall(call).catch(() => {});
 
-  const responsePayload = {
+  res.status(executionError ? 500 : 200).json({
     callId: call.callId,
     disposition: call.disposition,
     riskLevel: call.riskLevel,
     riskClasses: call.riskClasses,
     proofPacketId: call.proofPacketId,
     latencyMs: call.latencyMs,
-    resultHash: needsApproval ? undefined : call.resultHash,
-    message: needsApproval
-      ? `Tool call queued for ${call.riskLevel === 'critical' ? 'executive' : 'operator'} approval`
-      : undefined,
+    resultHash: call.resultHash,
+    result: executionResult,
+    error: executionError,
     governance: {
       pceGateApplied: true,
       covenantChecked: true,
       proofGenerated: true,
-      approvalRequired: needsApproval,
-      approvalId: call.approvalId,
-      approvalTier: needsApproval
-        ? (call.riskLevel === 'critical' ? 'executive' : 'operator')
-        : null,
+      approvalRequired: false,
+      approvalId: null,
+      approvalTier: null,
     },
-  };
-  res.status(needsApproval ? 202 : 200).json(responsePayload);
+  });
 });
 
 router.get('/connect-instructions', (_req: Request, res: Response) => {
