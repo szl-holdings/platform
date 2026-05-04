@@ -39,6 +39,7 @@ export interface GovernedElicitationFlow {
   id: string;
   mode: ElicitationMode;
   actor: string;
+  actorIdentity: string;
   tenantId: string;
   status: ElicitationStatus;
   message: string;
@@ -220,10 +221,13 @@ export function handleElicitationCreate(
   const now = new Date();
   const expiresAt = new Date(now.getTime() + ELICITATION_TTL_MS);
 
+  const actorIdentity = `${tenantId}:${actor}`;
+
   const flow: GovernedElicitationFlow = {
     id: flowId,
     mode,
     actor,
+    actorIdentity,
     tenantId,
     status: 'pending',
     message: request.message,
@@ -283,6 +287,13 @@ export function resolveElicitation(
     }
     if (result.sessionToken !== flow.sessionToken) {
       throw new Error('Session token mismatch. URL-mode elicitation binding verification failed.');
+    }
+    const resolverActor = getCurrentActorId();
+    const resolverIdentity = `${callerTenant ?? 'substrate-gateway'}:${resolverActor}`;
+    if (resolverIdentity !== flow.actorIdentity) {
+      throw new Error(
+        'Identity mismatch. The user resolving this URL-mode elicitation must match the initiating actor.',
+      );
     }
   }
 

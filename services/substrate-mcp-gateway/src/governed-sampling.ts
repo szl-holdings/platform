@@ -2,6 +2,7 @@ import { randomUUID, createHash } from 'node:crypto';
 import { getCurrentActorId, getCurrentTenantId } from './request-context.js';
 import { emitRunEvent, type RunEventType } from './run-events.js';
 import { recordProof, type ProofRecord } from './nexus-fabric.js';
+import { submitPendingApprovalRequest } from '@workspace/approvals-inbox';
 
 export interface SamplingModelPreferences {
   hints?: Array<{ name?: string }>;
@@ -66,6 +67,13 @@ const activeSessions = new Map<string, GovernedSamplingSession>();
 
 let _samplingBridge: SamplingBridge | null = null;
 
+export interface SamplingBridgeResult {
+  role: 'assistant';
+  content: { type: 'text'; text: string };
+  model: string;
+  stopReason?: string;
+}
+
 export interface SamplingBridge {
   requestSampling: (params: {
     messages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }>;
@@ -73,12 +81,12 @@ export interface SamplingBridge {
     systemPrompt?: string;
     maxTokens: number;
     metadata?: Record<string, unknown>;
-  }) => Promise<{
-    role: 'assistant';
-    content: { type: 'text'; text: string };
-    model: string;
-    stopReason?: string;
-  }>;
+  }) => Promise<SamplingBridgeResult>;
+
+  executeToolCall?: (params: {
+    toolName: string;
+    arguments: Record<string, unknown>;
+  }) => Promise<{ type: 'text'; text: string }>;
 }
 
 export function setSamplingBridge(bridge: SamplingBridge): void {
@@ -115,11 +123,15 @@ function computeProofHash(data: Record<string, unknown>): string {
   return createHash('sha256').update(JSON.stringify(data)).digest('hex').slice(0, 16);
 }
 
+const HIGH_RISK_TOKEN_THRESHOLD = 16384;
+const HIGH_RISK_MODELS = new Set(['claude-opus-4-5', 'gpt-4o']);
+
 function evaluateCovenantPolicy(
   actor: string,
   tenantId: string,
   model: string,
   maxTokens: number,
+  sessionId: string,
 ): GovernedSamplingSession['covenantResult'] {
   const blockedModels = new Set<string>();
   if (blockedModels.has(model)) {
@@ -137,6 +149,35 @@ function evaluateCovenantPolicy(
       policyResult: 'deny',
       reason: `maxTokens ${maxTokens} exceeds tenant limit of 32768.`,
       matchedPolicies: ['token_budget_limit'],
+    };
+  }
+
+  const isHighRisk =
+    (maxTokens > HIGH_RISK_TOKEN_THRESHOLD && HIGH_RISK_MODELS.has(model)) ||
+    tenantId === 'substrate-gateway';
+
+  if (isHighRisk) {
+    submitPendingApprovalRequest({
+      runId: sessionId,
+      stepId: `sampling-covenant-${sessionId}`,
+      stepName: 'Governed Sampling — Covenant High-Risk Review',
+      toolId: `sampling:${model}`,
+      action: `High-risk sampling: model=${model}, maxTokens=${maxTokens}`,
+      justification: `Actor '${actor}' requested sampling with high-risk model '${model}' at ${maxTokens} tokens on tenant '${tenantId}'.`,
+      projectedImpact: `Token budget consumption up to ${maxTokens} tokens on ${model}.`,
+      projectedRisk: 'Elevated cost and resource usage from high-capability model invocation.',
+      requestedBy: actor,
+      domain: tenantId,
+      surface: 'mcp-sampling',
+      timeoutMs: 5 * 60_000,
+    });
+
+    return {
+      allowed: true,
+      policyResult: 'passthrough',
+      reason: `High-risk sampling request queued for human review in Approvals Inbox. ` +
+        `Actor '${actor}', model '${model}', ${maxTokens} tokens. Proceeding with governance receipt.`,
+      matchedPolicies: ['high_risk_escalation', 'approvals_inbox_review'],
     };
   }
 
@@ -186,7 +227,7 @@ export async function handleSamplingCreate(
     .join('\n');
   const inputTokens = estimateTokens(inputText);
 
-  const covenantResult = evaluateCovenantPolicy(actor, tenantId, model, request.maxTokens);
+  const covenantResult = evaluateCovenantPolicy(actor, tenantId, model, request.maxTokens, sessionId);
 
   const proofHash = computeProofHash({
     sessionId,
@@ -256,29 +297,89 @@ export async function handleSamplingCreate(
 
   if (_samplingBridge) {
     try {
-      const textMessages = request.messages
-        .filter((m) => m.content.type === 'text' && m.content.text)
-        .map((m) => ({
-          role: m.role,
-          content: { type: 'text' as const, text: m.content.text! },
-        }));
+      const conversationMessages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }> =
+        request.messages
+          .filter((m) => m.content.type === 'text' && m.content.text)
+          .map((m) => ({
+            role: m.role,
+            content: { type: 'text' as const, text: m.content.text! },
+          }));
 
-      session.iterations = 1;
-      const bridgeResult = await _samplingBridge.requestSampling({
-        messages: textMessages,
-        modelPreferences: request.modelPreferences,
-        systemPrompt: request.systemPrompt,
-        maxTokens: request.maxTokens,
-        metadata: request.metadata,
-      });
+      let lastResult: SamplingBridgeResult | null = null;
 
-      const outputTokens = estimateTokens(bridgeResult.content.text);
-      session.totalOutputTokens = outputTokens;
-      session.model = bridgeResult.model || model;
+      for (let iteration = 1; iteration <= MAX_SAMPLING_ITERATIONS; iteration++) {
+        session.iterations = iteration;
+
+        const bridgeResult = await _samplingBridge.requestSampling({
+          messages: conversationMessages,
+          modelPreferences: request.modelPreferences,
+          systemPrompt: request.systemPrompt,
+          maxTokens: request.maxTokens,
+          metadata: { ...request.metadata, iteration, sessionId },
+        });
+
+        const iterOutputTokens = estimateTokens(bridgeResult.content.text);
+        session.totalOutputTokens += iterOutputTokens;
+        session.model = bridgeResult.model || model;
+        lastResult = bridgeResult;
+
+        if (bridgeResult.stopReason !== 'toolUse' || !_samplingBridge.executeToolCall) {
+          break;
+        }
+
+        let toolName = 'unknown';
+        let toolArgs: Record<string, unknown> = {};
+        try {
+          const parsed = JSON.parse(bridgeResult.content.text);
+          toolName = parsed.name ?? parsed.tool ?? 'unknown';
+          toolArgs = parsed.arguments ?? parsed.input ?? {};
+        } catch {
+          break;
+        }
+
+        const toolResult = await _samplingBridge.executeToolCall({
+          toolName,
+          arguments: toolArgs,
+        });
+
+        conversationMessages.push({
+          role: 'assistant',
+          content: { type: 'text', text: bridgeResult.content.text },
+        });
+        conversationMessages.push({
+          role: 'user',
+          content: { type: 'text', text: toolResult.text },
+        });
+
+        session.totalInputTokens += estimateTokens(toolResult.text);
+
+        if (iteration === MAX_SAMPLING_ITERATIONS) {
+          session.status = 'iteration_cap';
+          session.completedAt = new Date().toISOString();
+          persistProofRecord(sessionId, actor, session.model, proofHash, session.totalInputTokens, session.totalOutputTokens, false);
+          session.proofPersistedToWal = true;
+
+          emitRunEvent({
+            type: 'sampling_completed' as RunEventType,
+            runId: sessionId,
+            actor,
+            status: 'iteration_cap',
+            timestamp: Date.now(),
+          });
+
+          return {
+            role: 'assistant',
+            content: lastResult!.content,
+            model: session.model,
+            stopReason: 'endTurn',
+          };
+        }
+      }
+
       session.status = 'completed';
       session.completedAt = new Date().toISOString();
 
-      persistProofRecord(sessionId, actor, session.model, proofHash, inputTokens, outputTokens, false);
+      persistProofRecord(sessionId, actor, session.model, proofHash, session.totalInputTokens, session.totalOutputTokens, false);
       session.proofPersistedToWal = true;
 
       emitRunEvent({
@@ -290,14 +391,14 @@ export async function handleSamplingCreate(
 
       return {
         role: 'assistant',
-        content: bridgeResult.content,
+        content: lastResult!.content,
         model: session.model,
-        stopReason: (bridgeResult.stopReason as SamplingResult['stopReason']) ?? 'endTurn',
+        stopReason: (lastResult!.stopReason as SamplingResult['stopReason']) ?? 'endTurn',
       };
     } catch (e) {
       session.status = 'client_unavailable';
       session.completedAt = new Date().toISOString();
-      persistProofRecord(sessionId, actor, model, proofHash, inputTokens, 0, true);
+      persistProofRecord(sessionId, actor, model, proofHash, session.totalInputTokens, 0, true);
       session.proofPersistedToWal = true;
 
       emitRunEvent({

@@ -1134,6 +1134,3 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - `artifacts/sentra/src/components/healthcare-case-study-banner.tsx` — dismissible case study banner with 4-step navigation chain
 - `artifacts/sentra/src/pages/risk-scoring.tsx` — ML Registry panel (3 model cards with accuracy + PSI drift), Aegis risk badge
 - Banner added to: autonomous-soc-command, identity-blast-radius, adversary-engine, incident-commander
-=======
-- **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
->>>>>>> aa74149e6 (feat(nexus): Add "Earnings Brief in 60s" capstone recipe for PRAXIS Orchestrator)

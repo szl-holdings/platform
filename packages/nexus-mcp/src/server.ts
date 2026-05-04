@@ -192,7 +192,7 @@ export class PRAXISMcpServer {
       capabilities['elicitation'] = {};
     }
     if (config.enableRoots && config.roots && config.roots.length > 0) {
-      capabilities['roots'] = { listChanged: false };
+      capabilities['roots'] = { listChanged: true };
     }
 
     this._sdk = new McpServer(
