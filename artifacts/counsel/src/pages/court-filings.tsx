@@ -1,6 +1,7 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Activity,
   AlertTriangle,
   CheckCircle2,
   Clock,
@@ -12,9 +13,133 @@ import {
   RefreshCw,
   Scale,
   Send,
+  Wifi,
+  WifiOff,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
+
+// ---------------------------------------------------------------------------
+// Live Feed Health Panel
+// ---------------------------------------------------------------------------
+
+interface FeedHealth {
+  source: string;
+  status: 'healthy' | 'degraded' | 'error' | 'loading';
+  latencyMs?: number;
+  lastFetchedAt?: string;
+  itemCount?: number;
+  error?: string;
+}
+
+interface FeedHealthResponse {
+  feeds: FeedHealth[];
+  checkedAt: string;
+  healthyCount: number;
+  degradedCount: number;
+  errorCount: number;
+}
+
+const FEED_LABELS: Record<string, string> = {
+  courtlistener: 'CourtListener',
+  edgar: 'SEC EDGAR',
+  federal_register: 'Federal Register',
+  uspto_peds: 'USPTO PEDS',
+  state_ag: 'State AG',
+};
+
+function feedStatusColor(status: FeedHealth['status']) {
+  if (status === 'healthy') return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/8';
+  if (status === 'degraded') return 'text-amber-400 border-amber-500/30 bg-amber-500/8';
+  if (status === 'error') return 'text-red-400 border-red-500/30 bg-red-500/8';
+  return 'text-violet-400/50 border-violet-500/20 bg-violet-500/5';
+}
+
+function FeedHealthPanel() {
+  const { data, isLoading, refetch, isFetching } = useQuery<{ data: FeedHealthResponse }>({
+    queryKey: ['counsel-feed-health'],
+    queryFn: () => apiFetch<{ data: FeedHealthResponse }>('/counsel/feeds/health', { skipAuth: true }),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const health = data?.data ?? (data as unknown as FeedHealthResponse);
+  const feeds = health?.feeds ?? [];
+
+  return (
+    <div className="bg-zinc-900/40 border border-zinc-700/30 rounded-xl p-5 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-violet-400" />
+          <h2 className="text-sm font-medium text-zinc-200">Live Legal Feed Health</h2>
+          {health && (
+            <div className="flex items-center gap-1.5 ml-2">
+              <span className="text-[10px] font-mono text-emerald-400">{health.healthyCount ?? 0} healthy</span>
+              {(health.degradedCount ?? 0) > 0 && (
+                <span className="text-[10px] font-mono text-amber-400">{health.degradedCount} degraded</span>
+              )}
+              {(health.errorCount ?? 0) > 0 && (
+                <span className="text-[10px] font-mono text-red-400">{health.errorCount} error</span>
+              )}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          <RefreshCw className={`w-3 h-3 ${isFetching ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-5 gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-16 bg-zinc-800/50 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : feeds.length === 0 ? (
+        <div className="text-center py-4 text-zinc-500 text-xs">Feed health data unavailable</div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          {feeds.map((feed) => (
+            <div
+              key={feed.source}
+              className={`rounded-lg border px-3 py-2.5 ${feedStatusColor(feed.status)}`}
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                {feed.status === 'healthy' ? (
+                  <Wifi className="w-3 h-3" />
+                ) : feed.status === 'error' ? (
+                  <WifiOff className="w-3 h-3" />
+                ) : (
+                  <Activity className="w-3 h-3" />
+                )}
+                <span className="text-[10px] font-semibold truncate">
+                  {FEED_LABELS[feed.source] ?? feed.source}
+                </span>
+              </div>
+              <div className="text-[9px] font-mono opacity-70 uppercase tracking-wider">{feed.status}</div>
+              {feed.latencyMs != null && (
+                <div className="text-[9px] font-mono opacity-50 mt-0.5">{feed.latencyMs}ms</div>
+              )}
+              {feed.itemCount != null && (
+                <div className="text-[9px] font-mono opacity-50">{feed.itemCount} items</div>
+              )}
+              {feed.lastFetchedAt && (
+                <div className="text-[9px] font-mono opacity-40 mt-0.5 truncate">
+                  {new Date(feed.lastFetchedAt).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface CourtFiling {
   id: number;
@@ -482,6 +607,7 @@ export default function CourtFilingsPage() {
   return (
     <div className="min-h-screen bg-[#09090d] text-white">
       <div className="max-w-6xl mx-auto px-6 py-8">
+        <FeedHealthPanel />
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">

@@ -1,7 +1,7 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Briefcase, Clock, Database, Scale, ShieldAlert } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, Briefcase, Clock, Database, Download, RefreshCw, Scale, ShieldAlert, Zap } from 'lucide-react';
 
 interface Obligation {
   id: string;
@@ -51,12 +51,85 @@ function ProvenanceBadge({ provenance }: { provenance?: string }) {
   );
 }
 
+interface MatterBrief {
+  date: string;
+  headline: string;
+  metrics: {
+    totalMatters: number;
+    activeMatters: number;
+    escalatedMatters: number;
+    totalExposureM: number;
+    overdueObligations: number;
+    atRiskObligations: number;
+  };
+  topRisks: Array<{ matterId: string; name: string; pressureScore: number; estimatedExposureM: number | null; jurisdiction: string; nextDeadline: string }>;
+  aegisRiskBadge: { level: string; score: number; signals: string[] };
+  generatedAt: string;
+}
+
+function AegisRiskBadge({ badge }: { badge: MatterBrief['aegisRiskBadge'] }) {
+  const color =
+    badge.level === 'critical'
+      ? 'border-red-500/40 bg-red-500/10 text-red-300'
+      : badge.level === 'high'
+        ? 'border-orange-500/40 bg-orange-500/10 text-orange-300'
+        : badge.level === 'medium'
+          ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+          : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300';
+  return (
+    <div className={`rounded-xl border px-4 py-3 flex items-center gap-3 ${color}`}>
+      <ShieldAlert className="w-5 h-5 shrink-0" />
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-widest opacity-70">Aegis Risk</div>
+        <div className="text-sm font-bold uppercase">{badge.level} · {badge.score}/100</div>
+        {badge.signals.length > 0 && (
+          <div className="text-[10px] opacity-60 mt-0.5">{badge.signals.join(' · ')}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
+  const queryClient = useQueryClient();
+
   const { data, isLoading, error } = useQuery<MattersResponse>({
     queryKey: ['counsel-matters'],
     queryFn: () => apiFetch<MattersResponse>('/counsel/matters', { skipAuth: true }),
     staleTime: 30_000,
     retry: 2,
+  });
+
+  const { data: briefData, refetch: refetchBrief, isFetching: briefFetching } = useQuery<MatterBrief>({
+    queryKey: ['counsel-matter-brief'],
+    queryFn: () => apiFetch<MatterBrief>('/counsel/matter-brief', { skipAuth: true }),
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: () =>
+      apiFetch('/counsel/seed/cross-jurisdictional-securities', { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['counsel-matters'] });
+      queryClient.invalidateQueries({ queryKey: ['counsel-matter-brief'] });
+    },
+  });
+
+  const exportMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch<{ obligations: unknown[]; exportedAt: string }>(
+        '/counsel/obligations/export?format=json',
+        { skipAuth: true },
+      );
+      const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `obligations-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
   });
 
   const matters = data?.matters ?? [];
@@ -99,8 +172,69 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-violet-100">Legal Matter Command</h1>
           <p className="text-violet-400/60 text-sm">Real-time legal obligation and risk monitoring.</p>
         </div>
-        <ProvenanceBadge provenance={provenance} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <ProvenanceBadge provenance={provenance} />
+          <button
+            onClick={() => exportMutation.mutate()}
+            disabled={exportMutation.isPending}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-violet-500/20 bg-violet-500/5 text-xs text-violet-300 hover:bg-violet-500/15 disabled:opacity-50 transition-colors font-mono"
+          >
+            <Download className="w-3 h-3" />
+            Export Obligations
+          </button>
+          <button
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending || seedMutation.isSuccess}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-violet-500/20 bg-violet-500/5 text-xs text-violet-300 hover:bg-violet-500/15 disabled:opacity-50 transition-colors font-mono"
+          >
+            <Zap className="w-3 h-3" />
+            {seedMutation.isSuccess ? 'Case Study Seeded' : seedMutation.isPending ? 'Seeding…' : 'Seed Case Study'}
+          </button>
+        </div>
       </header>
+
+      {briefData && (
+        <div className="bg-[#0a0614] border border-violet-500/10 rounded-xl p-5 space-y-3">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-3.5 h-3.5 text-violet-400" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-violet-400/60">
+                  Daily Matter Brief · {briefData.date}
+                </span>
+                <button
+                  onClick={() => refetchBrief()}
+                  disabled={briefFetching}
+                  className="ml-auto text-[10px] text-violet-400/40 hover:text-violet-400/70 flex items-center gap-1"
+                >
+                  <RefreshCw className={`w-2.5 h-2.5 ${briefFetching ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              <p className="text-sm font-semibold text-violet-100">{briefData.headline}</p>
+            </div>
+            <AegisRiskBadge badge={briefData.aegisRiskBadge} />
+          </div>
+          {briefData.topRisks.length > 0 && (
+            <div className="pt-3 border-t border-violet-500/10">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-violet-400/50 mb-2">Top Risks</div>
+              <div className="flex flex-wrap gap-2">
+                {briefData.topRisks.map((r) => (
+                  <div
+                    key={r.matterId}
+                    className="px-3 py-1.5 rounded border border-red-500/20 bg-red-500/5 text-xs"
+                  >
+                    <span className="text-red-300 font-medium">{r.name}</span>
+                    <span className="text-violet-400/50 ml-2">
+                      P:{r.pressureScore}
+                      {r.estimatedExposureM != null ? ` · $${r.estimatedExposureM}M` : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {isLoading ? (

@@ -7,7 +7,8 @@ import {
   ProofEnvelope,
 } from '@szl-holdings/design-system';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { Activity, AlertTriangle, Clock, FileWarning, Scale } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Activity, AlertTriangle, CheckCircle2, Clock, FileWarning, Loader2, Scale, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 
 const ACCENT = '#8b5cf6';
@@ -76,8 +77,31 @@ function severityClass(sev: string): string {
   return 'text-violet-300 border-violet-500/40 bg-violet-500/10';
 }
 
+interface PCEExecuteResult {
+  allowed: boolean;
+  requiresApproval: boolean;
+  approvalTier?: string;
+  blockedReason?: string;
+  contractId?: string;
+  executedAt: string;
+}
+
 export default function DecisionCenter() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
+  const [pceResult, setPceResult] = useState<PCEExecuteResult | null>(null);
+
+  const pceMutation = useMutation({
+    mutationFn: async (payload: { matterId: string; actionId: string; actionDescription: string; signalIds: string[] }) => {
+      return apiFetch<{ data: PCEExecuteResult }>('/counsel/decision-center/execute', {
+        method: 'POST',
+        body: JSON.stringify({ ...payload, riskLevel: 'high' }),
+      });
+    },
+    onSuccess: (res) => {
+      const r = (res as unknown as { data: PCEExecuteResult }).data ?? (res as unknown as PCEExecuteResult);
+      setPceResult(r);
+    },
+  });
 
   const { data, isLoading, error } = useStandardQuery<NarrativePayload>({
     queryKey: ['narratives', 'counsel-deadline'],
@@ -191,6 +215,62 @@ export default function DecisionCenter() {
                     {recommendation.projectedRisk}
                   </p>
                 </div>
+              </div>
+
+              <div className="border-t border-violet-500/10 pt-4">
+                <div className="text-[10px] uppercase tracking-widest text-violet-400/60 mb-3 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3 h-3" />
+                  A11oy PCE Gate — Precision Consent Engine
+                </div>
+                {pceResult ? (
+                  <div className={`rounded-lg border p-4 ${pceResult.allowed ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      {pceResult.allowed ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-red-400" />
+                      )}
+                      <span className={`text-xs font-bold ${pceResult.allowed ? 'text-emerald-300' : 'text-red-300'}`}>
+                        {pceResult.allowed ? 'PCE GATE PASSED' : 'PCE GATE BLOCKED'}
+                      </span>
+                    </div>
+                    {pceResult.requiresApproval && (
+                      <p className="text-[11px] text-amber-300 mb-1">Approval required — tier: {pceResult.approvalTier ?? 'executive'}</p>
+                    )}
+                    {pceResult.blockedReason && (
+                      <p className="text-[11px] text-red-300/80">{pceResult.blockedReason}</p>
+                    )}
+                    {pceResult.contractId && (
+                      <p className="text-[10px] font-mono text-violet-400/50 mt-1">Contract: {pceResult.contractId}</p>
+                    )}
+                    <p className="text-[10px] text-violet-400/40 mt-1 font-mono">
+                      Evaluated {new Date(pceResult.executedAt).toLocaleTimeString()}
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() =>
+                      pceMutation.mutate({
+                        matterId: data?.id ?? 'counsel-decision',
+                        actionId: `counsel:decision:${recommendation.recommendationId}`,
+                        actionDescription: `${recommendation.suggestedAction} — ${recommendation.title}`,
+                        signalIds: signals.map((s) => s.signalId),
+                      })
+                    }
+                    disabled={pceMutation.isPending}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-violet-600/20 border border-violet-500/30 text-xs font-semibold text-violet-200 hover:bg-violet-600/35 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {pceMutation.isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    )}
+                    {pceMutation.isPending ? 'Evaluating through A11oy PCE…' : 'Execute via A11oy PCE Gate'}
+                  </button>
+                )}
+                {pceMutation.isError && (
+                  <p className="text-[11px] text-red-400 mt-2">PCE gate error — {(pceMutation.error as Error)?.message}</p>
+                )}
               </div>
             </div>
           </ProofEnvelope>

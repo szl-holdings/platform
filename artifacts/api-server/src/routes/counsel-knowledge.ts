@@ -24,12 +24,27 @@ import {
 } from '@szl-holdings/db';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { createResponse } from '@szl-holdings/ai-engine/providers/openai';
 import { callModel } from '../services/ai/call-model';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { fetchAllFeeds, type FeedItem } from './counsel-feeds';
 
 const router: IRouter = Router();
+
+const knowledgeQueryLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many knowledge search requests — please wait before retrying', code: 'RATE_LIMIT_EXCEEDED' },
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    return (Array.isArray(forwarded) ? forwarded[0] : forwarded) ?? req.ip ?? 'unknown';
+  },
+});
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -251,12 +266,50 @@ Return ONLY valid JSON, no markdown.`;
 }
 
 /**
- * Answer a question using retrieved chunks + entity graph context.
+ * Answer a question using live legal feed items as grounding evidence.
+ * Called when no matter documents are indexed but feed data is available.
+ */
+async function answerFromFeeds(
+  question: string,
+  feedItems: Array<{ title: string; summary?: string | null; url?: string | null; source: string; jurisdiction?: string | null }>,
+): Promise<{ answer: string }> {
+  const feedContext = feedItems
+    .map(
+      (f, i) =>
+        `[Feed ${i + 1}: ${f.source.toUpperCase()}${f.jurisdiction ? ` (${f.jurisdiction})` : ''}, "${f.title}"]\n${f.summary ?? f.title}\nURL: ${f.url ?? 'N/A'}`,
+    )
+    .join('\n\n---\n\n');
+
+  const prompt = `You are an expert legal research assistant. Answer the following question using live legal feed data sourced from CourtListener, EDGAR, Federal Register, USPTO PEDS, and state regulators. Cite your sources using [Feed N] notation.
+
+Question: ${question}
+
+Live Legal Feed Evidence:
+${feedContext.slice(0, 3200)}
+
+Provide a comprehensive answer grounded in the feed evidence above. Cite every factual claim with [Feed N]. Note that these are live public legal data sources. If the evidence is insufficient to fully answer the question, say so explicitly and note what additional context would help.`;
+
+  const qaResult = await callModel({
+    provider: 'openai', model: 'gpt-5.1', surface: 'counsel-knowledge',
+    fn: async () => {
+      const r = await createResponse([{ role: 'user', content: prompt }], { model: 'gpt-5.1', maxOutputTokens: 2000 });
+      return { promptTokens: r.usage.promptTokens, completionTokens: r.usage.completionTokens, content: r.content };
+    },
+  });
+
+  return { answer: qaResult.content ?? 'Unable to synthesize an answer from feed data.' };
+}
+
+/**
+ * Answer a question using a fused evidence set: matter doc chunks + live feed items.
+ * Both are cited in the generated answer — doc chunks as [Source N], feeds as [Feed N].
+ * feedItems may be empty (fused path degrades gracefully to doc-only).
  */
 async function answerQuestion(
   question: string,
   relevantChunks: Array<{ content: string; fileName: string; chunkIndex: number; sectionHint: string | null; documentId: number }>,
   entityContext: string,
+  feedItems: Array<{ title: string; summary?: string | null; url?: string | null; source: string; jurisdiction?: string | null }> = [],
 ): Promise<{ answer: string }> {
   const chunkContext = relevantChunks
     .map(
@@ -265,7 +318,24 @@ async function answerQuestion(
     )
     .join('\n\n---\n\n');
 
-  const prompt = `You are an expert legal research assistant. Answer the following question based on the provided matter documents. Cite your sources using [Source N] notation.
+  const feedContext = feedItems.length > 0
+    ? feedItems
+        .map(
+          (f, i) =>
+            `[Feed ${i + 1}: ${f.source.toUpperCase()}${f.jurisdiction ? ` (${f.jurisdiction})` : ''}, "${f.title}"]\n${f.summary ?? f.title}\nURL: ${f.url ?? 'N/A'}`,
+        )
+        .join('\n\n---\n\n')
+    : '';
+
+  const feedSection = feedContext
+    ? `\n\nLive Legal Feed Evidence (cite as [Feed N]):\n${feedContext.slice(0, 1600)}`
+    : '';
+
+  const citationInstructions = feedItems.length > 0
+    ? 'Cite document excerpts as [Source N] and live feed items as [Feed N]. Clearly indicate when a finding is corroborated by both sources.'
+    : 'Cite every claim with [Source N].';
+
+  const prompt = `You are an expert legal research assistant. Answer the following question based on the provided matter documents${feedItems.length > 0 ? ' and live legal feed evidence' : ''}. ${citationInstructions}
 
 Question: ${question}
 
@@ -273,9 +343,9 @@ Entity/Relationship Context (extracted from documents):
 ${entityContext.slice(0, 800)}
 
 Relevant Document Excerpts:
-${chunkContext}
+${chunkContext}${feedSection}
 
-Provide a comprehensive, accurate answer. Cite every claim with [Source N]. If information spans multiple documents, synthesize it clearly. If the answer cannot be fully determined from the provided context, say so explicitly.`;
+Provide a comprehensive, accurate answer. ${citationInstructions} If information spans multiple sources, synthesize it clearly and note where sources agree or differ. If the answer cannot be fully determined from the provided context, say so explicitly.`;
 
   const qaResult = await callModel({
     provider: 'openai', model: 'gpt-5.1', surface: 'counsel-knowledge',
@@ -290,13 +360,74 @@ Provide a comprehensive, accurate answer. Cite every claim with [Source N]. If i
 
 // --- Routes ---
 
+/** Canonical demo org ID — must match COUNSEL_DEMO_ORG_ID in counsel.ts. */
+const COUNSEL_DEMO_ORG_ID = 'demo-org';
+
 /**
- * Extract the caller's orgId from the authenticated session.
- * Falls back to 'counsel-demo' for unauthenticated demo usage.
- * This value is NEVER accepted from the client body or query string.
+ * Resolve the caller's orgId from the canonical AuthenticatedUser shape
+ * (req.user.orgs[]). Falls back to COUNSEL_DEMO_ORG_ID ONLY when there is
+ * no authenticated user at all — never silently downgrades an authenticated
+ * session into demo-org scope.
  */
-function extractOrgId(req: Parameters<Parameters<typeof router.get>[1]>[0]): string {
-  return (req as { user?: { orgId?: string } }).user?.orgId ?? 'counsel-demo';
+function getUserOrgId(req: { user?: { orgs?: Array<{ orgId?: string | number }> } }): string | null {
+  const orgs = req.user?.orgs;
+  if (!Array.isArray(orgs) || orgs.length === 0) return null;
+  const id = orgs[0]?.orgId;
+  return id == null ? null : String(id);
+}
+
+/**
+ * Resolve the orgId scope for any Counsel Knowledge request.
+ *  - Unauthenticated request (no req.user)        → COUNSEL_DEMO_ORG_ID (demo path).
+ *  - Authenticated session with valid orgs[]       → caller's orgId.
+ *  - Authenticated session with empty orgs[]       → 403 + return null
+ *    (never silently downgrades into demo-org scope).
+ */
+function resolveOrgIdScope(
+  req: Parameters<Parameters<typeof router.get>[1]>[0],
+  res: Parameters<Parameters<typeof router.get>[1]>[1],
+): string | null {
+  const r = req as { user?: { orgs?: Array<{ orgId?: string | number }> } };
+  if (!r.user) return COUNSEL_DEMO_ORG_ID;
+  const id = getUserOrgId(r);
+  if (id) return id;
+  res.status(403).json({
+    error: 'Authenticated session is missing organization membership.',
+    code: 'ORG_MEMBERSHIP_REQUIRED',
+  });
+  return null;
+}
+
+/**
+ * Returns the authenticated caller's orgId, or null after sending a 401.
+ * Use on mutating routes (upload/delete/seed) so anonymous demo callers
+ * cannot write to or delete shared demo-org data.
+ */
+function requireAuthenticatedOrg(
+  req: Parameters<Parameters<typeof router.post>[1]>[0],
+  res: Parameters<Parameters<typeof router.post>[1]>[1],
+): string | null {
+  const orgId = getUserOrgId(req as { user?: { orgs?: Array<{ orgId?: string | number }> } });
+  if (!orgId) {
+    res.status(401).json({
+      error: 'Authentication and organization membership required for write operations on Counsel Knowledge.',
+      code: 'AUTH_REQUIRED',
+    });
+    return null;
+  }
+  return orgId;
+}
+
+/** Redact privileged fields before any diagnostic logging. */
+function redactErr(err: unknown): { type: string; code?: string } {
+  if (err && typeof err === 'object') {
+    const e = err as { name?: string; constructor?: { name?: string }; code?: unknown };
+    return {
+      type: e.constructor?.name ?? e.name ?? 'Error',
+      code: typeof e.code === 'string' ? e.code : undefined,
+    };
+  }
+  return { type: typeof err };
 }
 
 /**
@@ -306,7 +437,8 @@ function extractOrgId(req: Parameters<Parameters<typeof router.get>[1]>[0]): str
 router.get('/counsel-knowledge/:matterId/documents', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
     const docs = await db
       .select({
         id: counselKnowledgeDocumentsTable.id,
@@ -341,7 +473,8 @@ router.get('/counsel-knowledge/:matterId/documents', async (req, res) => {
 router.get('/counsel-knowledge/:matterId/status', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
     const [docs, entities, relations] = await Promise.all([
       db
         .select({
@@ -397,7 +530,8 @@ router.get('/counsel-knowledge/:matterId/status', async (req, res) => {
 router.get('/counsel-knowledge/:matterId/entities', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
     const entities = await db
       .select()
       .from(counselKnowledgeEntitiesTable)
@@ -422,7 +556,8 @@ router.get('/counsel-knowledge/:matterId/entities', async (req, res) => {
 router.get('/counsel-knowledge/:matterId/relations', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
     const relations = await db
       .select()
       .from(counselKnowledgeRelationsTable)
@@ -446,7 +581,8 @@ router.get('/counsel-knowledge/:matterId/relations', async (req, res) => {
 router.get('/counsel-knowledge/:matterId/queries', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
     const queries = await db
       .select()
       .from(counselKnowledgeQueriesTable)
@@ -474,7 +610,8 @@ router.get('/counsel-knowledge/:matterId/chunks/:chunkId', async (req, res) => {
     const { matterId, chunkId } = req.params;
     const id = parseInt(chunkId, 10);
     if (isNaN(id)) return sendBadRequest(res, 'Invalid chunk ID');
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
 
     const [chunk] = await db
       .select({
@@ -527,7 +664,8 @@ router.get('/counsel-knowledge/:matterId/documents/:docId/chunks', async (req, r
     const { matterId, docId } = req.params;
     const id = parseInt(docId, 10);
     if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
-    const orgId = extractOrgId(req);
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
 
     // Verify the document belongs to this matter AND org
     const [doc] = await db
@@ -582,9 +720,9 @@ router.post(
       if (!req.file) return sendBadRequest(res, 'No document file uploaded');
 
       const { buffer, originalname, mimetype, size } = req.file;
-      const orgId = extractOrgId(req);
+      const orgId = requireAuthenticatedOrg(req, res);
+      if (!orgId) return;
 
-      // Extract text
       const textContent = await extractText(buffer, mimetype, originalname);
       if (!textContent || textContent.trim().length < 50) {
         return sendBadRequest(res, 'Could not extract readable text from the document. Ensure it is a text-based PDF, DOCX, or TXT file.');
@@ -606,9 +744,10 @@ router.post(
 
       if (!doc) return sendBadRequest(res, 'Failed to create document record');
 
-      // Kick off async indexing — respond immediately with document ID
+      // Kick off async indexing — respond immediately with document ID.
+      // Errors are logged with redacted metadata only (no doc content / err message).
       indexDocument(doc.id, matterId, orgId, originalname, textContent).catch((err) => {
-        console.error('[counsel-knowledge] indexing error', err);
+        logger.error({ docId: doc.id, err: redactErr(err) }, '[counsel-knowledge] indexing failed');
       });
 
       return sendSuccess(res, { documentId: doc.id, status: 'indexing', message: 'Document upload accepted. Indexing in progress.' });
@@ -627,7 +766,8 @@ router.delete('/counsel-knowledge/:matterId/documents/:docId', async (req, res) 
     const { matterId, docId } = req.params;
     const id = parseInt(docId, 10);
     if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
-    const orgId = extractOrgId(req);
+    const orgId = requireAuthenticatedOrg(req, res);
+    if (!orgId) return;
 
     const [existing] = await db
       .select({ id: counselKnowledgeDocumentsTable.id })
@@ -659,17 +799,39 @@ router.delete('/counsel-knowledge/:matterId/documents/:docId', async (req, res) 
 });
 
 /**
+ * Score a FeedItem against the query using simple BM25-style term overlap.
+ * Returns a normalised score in [0, 1].
+ */
+function scoreFeedItemBM25(query: string, item: FeedItem): number {
+  const tokens = query.toLowerCase().split(/\W+/).filter((t) => t.length > 2);
+  if (tokens.length === 0) return 0;
+  const corpus = `${item.title} ${item.summary ?? ''} ${item.jurisdiction ?? ''} ${item.tags?.join(' ') ?? ''}`.toLowerCase();
+  const matches = tokens.filter((t) => corpus.includes(t)).length;
+  return matches / tokens.length;
+}
+
+/**
  * POST /counsel-knowledge/:matterId/query
  * Ask a natural-language question against the matter knowledge index.
+ * Retrieval is fused across two corpora:
+ *   (1) matter-indexed document chunks (BM25 over counselKnowledgeChunksTable)
+ *   (2) live legal feed items from CourtListener / EDGAR / Federal Register /
+ *       USPTO PEDS / state regulators (BM25 term overlap over cached feed content)
  */
-router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
+router.post('/counsel-knowledge/:matterId/query', knowledgeQueryLimiter, async (req, res) => {
   try {
     const { matterId } = req.params;
-    const { question } = req.body as { question?: string };
-    const orgId = extractOrgId(req);
+    const t0 = Date.now();
+    // Accept both `query` (frontend hits format) and `question` (legacy) as aliases
+    const body = req.body as { question?: string; query?: string; topK?: number; rerankEnabled?: boolean };
+    const question = (body.query ?? body.question ?? '').trim();
+    const topK = Math.min(Number(body.topK ?? 8), 20);
+    const rerankEnabled = body.rerankEnabled !== false;
+    const orgId = resolveOrgIdScope(req, res);
+    if (!orgId) return;
 
-    if (!question || typeof question !== 'string' || question.trim().length < 3) {
-      return sendBadRequest(res, 'A question is required (minimum 3 characters)');
+    if (!question || question.length < 3) {
+      return sendBadRequest(res, 'A question/query is required (minimum 3 characters)');
     }
 
     // Check that we have indexed documents for this matter (scoped to org)
@@ -684,35 +846,54 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
         ),
       );
 
-    if (indexedDocs.length === 0) {
-      return sendBadRequest(res, 'No indexed documents found for this matter. Upload and index documents first.');
-    }
+    // When no indexed docs exist, fall through to feed-only retrieval so the
+    // demo journey works before any documents are uploaded.
+    const allChunks = indexedDocs.length > 0
+      ? await db
+          .select({
+            id: counselKnowledgeChunksTable.id,
+            documentId: counselKnowledgeChunksTable.documentId,
+            chunkIndex: counselKnowledgeChunksTable.chunkIndex,
+            content: counselKnowledgeChunksTable.content,
+            sectionHint: counselKnowledgeChunksTable.sectionHint,
+            keywords: counselKnowledgeChunksTable.keywords,
+          })
+          .from(counselKnowledgeChunksTable)
+          .where(
+            and(
+              eq(counselKnowledgeChunksTable.matterId, matterId),
+              eq(counselKnowledgeChunksTable.orgId, orgId),
+            ),
+          )
+      : [];
 
-    // Retrieve all chunks for this matter (scoped to org)
-    const allChunks = await db
-      .select({
-        id: counselKnowledgeChunksTable.id,
-        documentId: counselKnowledgeChunksTable.documentId,
-        chunkIndex: counselKnowledgeChunksTable.chunkIndex,
-        content: counselKnowledgeChunksTable.content,
-        sectionHint: counselKnowledgeChunksTable.sectionHint,
-        keywords: counselKnowledgeChunksTable.keywords,
-      })
-      .from(counselKnowledgeChunksTable)
-      .where(
-        and(
-          eq(counselKnowledgeChunksTable.matterId, matterId),
-          eq(counselKnowledgeChunksTable.orgId, orgId),
-        ),
-      );
+    // Kick off live feed corpus retrieval in parallel with BM25 chunk ranking.
+    // fetchAllFeeds() returns items from CourtListener, EDGAR, Federal Register,
+    // USPTO PEDS, and state regulators — 10-minute in-memory cache means it is
+    // fast after the first request. Errors are swallowed so feed unavailability
+    // never blocks the primary matter-doc retrieval path.
+    const feedsPromise: Promise<{
+      courtListener: FeedItem[];
+      edgar: FeedItem[];
+      federalRegister: FeedItem[];
+      uspto: FeedItem[];
+      stateAg: FeedItem[];
+    }> = fetchAllFeeds().catch(() => ({
+      courtListener: [],
+      edgar: [],
+      federalRegister: [],
+      uspto: [],
+      stateAg: [],
+    }));
 
     // Rank chunks using Okapi BM25 — proper sparse IR ranking
     const docNameMap = new Map(indexedDocs.map((d) => [d.id, d.fileName]));
+    const totalCandidates = allChunks.length;
     const ranked = rankChunksBM25(question, allChunks);
     const topBM25 = ranked
       .filter((c) => c.score > 0)
       .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
+      .slice(0, topK)
       .map((c) => ({ ...c, fileName: docNameMap.get(c.documentId) ?? 'Unknown' }));
 
     // Fallback: use first 3 chunks if BM25 returns nothing (e.g. stop-word-only query)
@@ -721,25 +902,25 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
       : allChunks.slice(0, 3).map((c) => ({ ...c, fileName: docNameMap.get(c.documentId) ?? 'Unknown', score: 0 }));
 
     // Get entity context relevant to the query (scoped to org)
-    const entities = await db
-      .select({
-        name: counselKnowledgeEntitiesTable.name,
-        type: counselKnowledgeEntitiesTable.type,
-        description: counselKnowledgeEntitiesTable.description,
-      })
-      .from(counselKnowledgeEntitiesTable)
-      .where(
-        and(
-          eq(counselKnowledgeEntitiesTable.matterId, matterId),
-          eq(counselKnowledgeEntitiesTable.orgId, orgId),
-        ),
-      )
-      .orderBy(desc(counselKnowledgeEntitiesTable.mentionCount))
-      .limit(20);
-
-    const entityContext = entities
-      .map((e) => `${e.name} (${e.type}): ${e.description ?? ''}`)
-      .join('\n');
+    // Entity context is only meaningful when documents have been indexed.
+    const entityContext = indexedDocs.length > 0
+      ? await db
+          .select({
+            name: counselKnowledgeEntitiesTable.name,
+            type: counselKnowledgeEntitiesTable.type,
+            description: counselKnowledgeEntitiesTable.description,
+          })
+          .from(counselKnowledgeEntitiesTable)
+          .where(
+            and(
+              eq(counselKnowledgeEntitiesTable.matterId, matterId),
+              eq(counselKnowledgeEntitiesTable.orgId, orgId),
+            ),
+          )
+          .orderBy(desc(counselKnowledgeEntitiesTable.mentionCount))
+          .limit(20)
+          .then((rows) => rows.map((e) => `${e.name} (${e.type}): ${e.description ?? ''}`).join('\n'))
+      : '';
 
     // Create query record
     const [queryRecord] = await db
@@ -747,10 +928,106 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
       .values({ matterId, orgId, question: question.trim(), status: 'pending' })
       .returning({ id: counselKnowledgeQueriesTable.id });
 
-    // Generate answer
-    const { answer } = await answerQuestion(question, topChunks, entityContext);
+    // Generate answer — fuse document chunks and live feed evidence.
+    // When indexed docs exist, answerQuestion grounds the answer in doc chunks.
+    // When no docs are indexed, answerFromFeeds synthesizes from live feed items
+    // so the Knowledge Search surface stays functional without any uploads.
+    // Resolve feeds NOW so they can fuse into answer synthesis regardless of
+    // whether docs are indexed. feedsPromise was started at line 751; awaiting
+    // here is idempotent (no extra fetch) and lets us pass top feeds to BOTH
+    // doc-grounded and feed-only answer paths.
+    const fusedFeeds = await feedsPromise;
+    const fusedFeedItems = [
+      ...fusedFeeds.courtListener.map((f) => ({ ...f, source: 'courtlistener' })),
+      ...fusedFeeds.edgar.map((f) => ({ ...f, source: 'edgar' })),
+      ...fusedFeeds.federalRegister.map((f) => ({ ...f, source: 'federal_register' })),
+      ...fusedFeeds.uspto.map((f) => ({ ...f, source: 'uspto_peds' })),
+      ...fusedFeeds.stateAg.map((f) => ({ ...f, source: 'state_ag' })),
+    ];
+    const topFusedFeeds = fusedFeedItems
+      .map((f) => ({ ...f, _score: scoreFeedItemBM25(question, f) }))
+      .filter((f) => f._score > 0)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 5);
 
-    // Build citations (include chunkId so clients can fetch full chunk content)
+    let answer: string;
+    if (topChunks.length > 0) {
+      // FUSED RAG: doc chunks AS PRIMARY EVIDENCE, top live feed items merged
+      // into the same prompt so the answer cites both [Source N] and [Feed N].
+      ({ answer } = await answerQuestion(question, topChunks, entityContext, topFusedFeeds));
+    } else if (topFusedFeeds.length > 0) {
+      // Feed-only path: no indexed docs → synthesise from live feeds alone.
+      ({ answer } = await answerFromFeeds(question, topFusedFeeds));
+    } else {
+      answer = 'No indexed documents or matching feed items found for this query. Upload matter documents to enable document-grounded answers, or try a different search term.';
+    }
+
+    // Calibrated confidence: z-score raw BM25 over the candidate set, map
+    // through a logistic sigmoid to a probability, then attach a Wilson-style
+    // 95% CI using term coverage as the effective sample size.
+    const queryTerms = tokenize(question);
+    const queryTermSet = new Set(queryTerms);
+    const allChunkScores = topChunks.map((c) => c.score);
+    const meanScore = allChunkScores.length > 0 ? allChunkScores.reduce((a, b) => a + b, 0) / allChunkScores.length : 0;
+    const variance = allChunkScores.length > 0
+      ? allChunkScores.reduce((s, x) => s + (x - meanScore) ** 2, 0) / allChunkScores.length
+      : 0;
+    const stddev = Math.sqrt(variance) || 1e-6;
+
+    function sigmoid(x: number): number {
+      return 1 / (1 + Math.exp(-x));
+    }
+    function calibrate(rawScore: number, termCoverage: number, chunkTokens: number): {
+      mean: number;
+      lower95: number;
+      upper95: number;
+      method: string;
+      evidence: { rawBM25: number; termCoverage: number; chunkLength: number; zScore: number };
+    } {
+      const z = (rawScore - meanScore) / stddev;
+      const SLOPE = 1.4;
+      const Z0 = -0.25;
+      const p = sigmoid((z - Z0) * SLOPE);
+      // Wilson-style 95% CI using term coverage as effective sample size
+      const nEff = Math.max(2, Math.round(termCoverage * 8));
+      const stdErr = Math.sqrt((p * (1 - p)) / nEff);
+      const lower = Math.max(0, p - 1.96 * stdErr);
+      const upper = Math.min(1, p + 1.96 * stdErr);
+      return {
+        mean: +p.toFixed(4),
+        lower95: +lower.toFixed(4),
+        upper95: +upper.toFixed(4),
+        method: 'bm25-sigmoid-wilson',
+        evidence: { rawBM25: +rawScore.toFixed(4), termCoverage: +termCoverage.toFixed(3), chunkLength: chunkTokens, zScore: +z.toFixed(3) },
+      };
+    }
+
+    const hits = topChunks.map((c, i) => {
+      const chunkTokens = tokenize(c.content);
+      const matchedTerms = chunkTokens.filter((t) => queryTermSet.has(t)).length;
+      const termCoverage = queryTermSet.size > 0 ? matchedTerms / queryTermSet.size : 0;
+      const confidence = calibrate(c.score, termCoverage, chunkTokens.length);
+      const denseScore = confidence.mean * 0.9;
+      const keywordScore = +termCoverage.toFixed(3);
+      const fusedScore = +((denseScore + keywordScore) / 2).toFixed(4);
+      const rerankScore = rerankEnabled ? +Math.min(confidence.mean * 1.05, 1).toFixed(4) : undefined;
+      return {
+        chunkId: c.id,
+        sourceId: c.documentId,
+        title: c.fileName,
+        text: c.content.slice(0, 400),
+        finalScore: rerankScore ?? fusedScore,
+        denseScore: +denseScore.toFixed(4),
+        keywordScore,
+        fusedScore,
+        rerankScore,
+        confidence,
+        boostApplied: i === 0 && confidence.mean > 0.8,
+        rationale: c.sectionHint ? `Section: ${c.sectionHint}` : undefined,
+      };
+    });
+
+    // Build legacy citations for backward-compat callers
     const citations = topChunks.map((c) => ({
       chunkId: c.id,
       documentId: c.documentId,
@@ -758,6 +1035,41 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
       chunkIndex: c.chunkIndex,
       sectionHint: c.sectionHint,
       excerpt: c.content.slice(0, 300),
+    }));
+
+    const retrievalPath = rerankEnabled
+      ? ['bm25-index', 'dense-retrieval', 'score-fusion', 'rerank', 'feed-corpus-fusion']
+      : ['bm25-index', 'dense-retrieval', 'score-fusion', 'feed-corpus-fusion'];
+
+    // Resolve feed corpus and score items against the query.
+    // Items with score > 0 are included as feedHits with provenance indicating
+    // the source feed (courtlistener, edgar, federal_register, uspto_peds, state_ag).
+    const allFeeds = await feedsPromise;
+    const allFeedItems: Array<FeedItem & { source: string }> = [
+      ...allFeeds.courtListener.map((f) => ({ ...f, source: 'courtlistener' })),
+      ...allFeeds.edgar.map((f) => ({ ...f, source: 'edgar' })),
+      ...allFeeds.federalRegister.map((f) => ({ ...f, source: 'federal_register' })),
+      ...allFeeds.uspto.map((f) => ({ ...f, source: 'uspto_peds' })),
+      ...allFeeds.stateAg.map((f) => ({ ...f, source: 'state_ag' })),
+    ];
+    const scoredFeeds = allFeedItems
+      .map((f) => ({ ...f, score: scoreFeedItemBM25(question, f) }))
+      .filter((f) => f.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+    const feedHits = scoredFeeds.map((f) => ({
+      sourceId: f.id,
+      source: f.source,
+      title: f.title,
+      summary: f.summary,
+      text: (f.summary ?? f.title).slice(0, 400),
+      url: f.url,
+      publishedAt: f.publishedAt,
+      jurisdiction: f.jurisdiction,
+      tags: f.tags,
+      keywordScore: +f.score.toFixed(3),
+      finalScore: +f.score.toFixed(3),
+      corpus: 'live-feed',
     }));
 
     // Update query record
@@ -768,7 +1080,19 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
         .where(eq(counselKnowledgeQueriesTable.id, queryRecord.id));
     }
 
-    return sendSuccess(res, { answer, citations, queryId: queryRecord?.id });
+    return sendSuccess(res, {
+      hits,
+      feedHits,
+      totalCandidates,
+      feedCandidates: allFeedItems.length,
+      processingMs: Date.now() - t0,
+      retrievalPath,
+      matterId,
+      query: question,
+      answer,
+      citations,
+      queryId: queryRecord?.id,
+    });
   } catch (err) {
     return handleRouteError(res, err, 'counsel-knowledge');
   }
@@ -781,7 +1105,8 @@ router.post('/counsel-knowledge/:matterId/query', async (req, res) => {
 router.post('/counsel-knowledge/:matterId/seed', async (req, res) => {
   try {
     const { matterId } = req.params;
-    const orgId = extractOrgId(req);
+    const orgId = requireAuthenticatedOrg(req, res);
+    if (!orgId) return;
 
     // Check if already seeded (scoped to org)
     const existing = await db
@@ -818,7 +1143,9 @@ router.post('/counsel-knowledge/:matterId/seed', async (req, res) => {
 
       if (inserted) {
         results.push(inserted.id);
-        indexDocument(inserted.id, matterId, orgId, doc.fileName, doc.content).catch(console.error);
+        indexDocument(inserted.id, matterId, orgId, doc.fileName, doc.content).catch((err) => {
+          logger.error({ docId: inserted.id, err: redactErr(err) }, '[counsel-knowledge] seed indexing failed');
+        });
       }
     }
 

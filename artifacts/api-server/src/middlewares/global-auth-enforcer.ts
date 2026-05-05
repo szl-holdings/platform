@@ -225,6 +225,20 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/agent-mesh/index",
   "/api/agent-mesh/scan",
   "/api/hf/hub/status",
+  // Counsel read-only surfaces — exact-match only so sub-paths (:id, /dispatch, etc.)
+  // remain auth-gated. Handler degrades gracefully to demo/empty payloads when no session.
+  "/api/counsel/matters",
+  "/api/counsel/forecast",
+  "/api/counsel/matter-brief",
+  "/api/counsel/obligations/export",
+  // Decision Center PCE gate — demo-mode execution (no org) suppresses all
+  // side effects (audit, signals). Org-scoped execution retains full audit trail.
+  // CSRF protection still applies (POST). Exact-match only.
+  "/api/counsel/decision-center/execute",
+  // Named case-study seed — POST that writes into 'demo-org'. Falls back to
+  // demo-org when no session, so investors can trigger the seed without login.
+  // CSRF still applies. Idempotent (no-ops if already seeded).
+  "/api/counsel/seed/cross-jurisdictional-securities",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -498,10 +512,11 @@ const PUBLIC_PREFIXES = [
   // Mutating routes (create/edit/archive KB articles) are under
   // /admin/kb-articles and remain protected by admin auth.
   "/api/support/knowledge",
-  // Counsel Knowledge Index — graph+vector RAG over matter documents.
-  // All endpoints (upload, status, query, seed) are public in the demo
-  // surface; the route handler scopes results per-matter via matterId.
-  // Mutating write routes remain covered by CSRF double-submit protection.
+  // Counsel Knowledge Index — RAG over matter documents.
+  // Read/query endpoints are public in the demo surface (matter-scoped
+  // by matterId). Mutating routes (upload, delete, seed) enforce
+  // requireAuthenticatedOrg() inside the handler, so anonymous callers
+  // cannot write to or delete shared demo-org data via this allowlist.
   "/api/counsel-knowledge/",
   // Helios sub-resource read-only paths — covers /mythos/search and
   // /mythos/nodes/:id (graph exploration) and /memos/:id (individual memo
@@ -552,6 +567,10 @@ const PUBLIC_PREFIXES = [
   "/api/a11oy/chat",
   "/api/a11oy/health",
   "/api/a11oy/conversations",
+  // Counsel live legal feeds — CourtListener, EDGAR, Federal Register, USPTO PEDS, State AG.
+  // Read-only GET endpoints; no tenant PII exposed. Public in demo mode so the
+  // Counsel frontend can render feed health and item lists without an auth session.
+  "/api/counsel/feeds",
 ];
 
 /**

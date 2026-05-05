@@ -137,6 +137,15 @@ router.use(lazyMatch("/disclosure", () => import("./disclosure"), "disclosure"))
 // Counsel — public matters CRUD.
 router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 
+// Counsel Live Legal Feeds — CourtListener, EDGAR, Federal Register, USPTO PEDS, State AG.
+// GET /counsel/feeds       — aggregated item list per source
+// GET /counsel/feeds/:src  — single-source items
+// GET /counsel/feeds/health — per-feed status, latency, freshness
+// Public (no auth) — whitelisted in global-auth-enforcer.ts.
+// Uses lazyMatch (no path prefix) so the full /counsel/feeds path is preserved
+// and counsel-feeds.ts route handlers (which include the /counsel prefix) match correctly.
+router.use(lazyMatch(["/counsel/feeds"], () => import("./counsel-feeds").then((m) => ({ default: m.router })), "counsel-feeds"));
+
 // Counsel Clause Genome — clause library, drafting agent, risk diff, and
 // matter-scoped clause links (/counsel/matters/:id/clauses).
 router.use(lazyMatch(["/counsel/clauses", "/counsel/matters"], () => import("./counsel-clauses"), "counsel-clauses"));

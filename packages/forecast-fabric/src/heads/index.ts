@@ -189,6 +189,33 @@ export const COUNSEL_HEADS: HeadDefinition[] = [
     horizons: ['7d', '14d', '30d'],
     alertThreshold: 0.7,
   },
+  {
+    name: 'counsel:obligation-cascade',
+    lane: 'counsel',
+    label: 'Obligation Cascade Risk',
+    description: 'Probability that one missed obligation triggers downstream failures (feature attribution cascade). Backed by Monte Carlo litigation outcome simulation.',
+    defaultAdapterId: 'monte-carlo-litigation',
+    horizons: ['7d', '14d', '30d'],
+    alertThreshold: 0.65,
+  },
+  {
+    name: 'counsel:settlement-likelihood',
+    lane: 'counsel',
+    label: 'Settlement Likelihood',
+    description: 'Monte Carlo posterior — probability of pre-trial settlement across litigation simulation paths. Backed by Monte Carlo litigation outcome simulation.',
+    defaultAdapterId: 'monte-carlo-litigation',
+    horizons: ['30d', '60d', '90d'],
+    alertThreshold: 0.4,
+  },
+  {
+    name: 'counsel:risk-exposure',
+    lane: 'counsel',
+    label: 'Financial Risk Exposure ($M)',
+    description: 'Per-matter total financial exposure distribution from PRISM Monte Carlo litigation cost model.',
+    defaultAdapterId: 'monte-carlo-litigation',
+    horizons: ['30d', '90d', '180d'],
+    alertThreshold: 5,
+  },
 ];
 
 export const CARLOTA_JO_HEADS: HeadDefinition[] = [
