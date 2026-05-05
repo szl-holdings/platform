@@ -100,6 +100,21 @@ export default function CounselLandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f5f5f5] overflow-x-hidden">
+      <div className="px-6 pt-6 max-w-[1200px] mx-auto">
+        <a
+          href="/conduit/"
+          className="block bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 hover:border-[#c9b787]/40 transition-colors"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">Activation Fabric</div>
+              <div className="text-white font-medium mt-1">Activated by Amaru — Andean Ouroboros</div>
+              <div className="text-xs text-white/50 mt-1">Counsel's matter, obligation, and exposure surfaces are activated by Amaru's 8-agent governance coalition.</div>
+            </div>
+            <span className="text-[#c9b787] text-sm font-mono">Open Amaru →</span>
+          </div>
+        </a>
+      </div>
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[420px] bg-white/[0.04] rounded-full blur-3xl" />

@@ -443,6 +443,21 @@ export function HomePage() {
             </div>
           </FadeIn>
 
+          <FadeIn>
+            <a href="/conduit/" target="_blank" rel="noopener noreferrer" style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+              padding: '1rem 1.25rem', marginBottom: '1.5rem',
+              borderRadius: 12, background: T.accentSoft,
+              border: `1px solid ${T.accentBorder}`, textDecoration: 'none', color: T.text,
+            }}>
+              <div>
+                <div style={{ fontSize: '0.6875rem', fontFamily: T.mono, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accentDim, marginBottom: 4 }}>Activated by Amaru — Andean Ouroboros</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 500 }}>The replay-grade governed loop. Sources → Models → Mappings → Destinations → Outcomes.</div>
+              </div>
+              <span style={{ fontFamily: T.mono, color: T.accent }}>↗</span>
+            </a>
+          </FadeIn>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
             {CAPABILITIES.map((cap, i) => (
               <FadeIn key={cap.title} delay={i * 0.08}>

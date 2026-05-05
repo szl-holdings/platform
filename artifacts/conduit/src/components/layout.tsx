@@ -19,11 +19,19 @@ import {
   Shield,
   Sparkles,
   ExternalLink,
-  ChevronRight,
+  Users,
+  GitBranch,
+  ListChecks,
+  Map,
+  Telescope,
+  Target,
+  Wand2,
+  Boxes,
+  Network,
 } from 'lucide-react';
 
-const navItems = [
-  { name: 'Dashboard', href: '/', icon: Activity },
+const coreItems = [
+  { name: 'Cockpit', href: '/', icon: Activity },
   { name: 'Compute', href: '/compute', icon: Cpu },
   { name: 'Connections', href: '/connections', icon: Cable },
   { name: 'Syncs', href: '/syncs', icon: FolderSync },
@@ -33,12 +41,24 @@ const navItems = [
   { name: 'Admin Usage', href: '/admin/usage', icon: Gauge },
 ];
 
+const fabricItems = [
+  { name: 'Sources', href: '/sources', icon: Database },
+  { name: 'Models', href: '/models', icon: Boxes },
+  { name: 'Destinations', href: '/destinations', icon: Network },
+  { name: 'Mappings', href: '/mappings', icon: GitBranch },
+  { name: 'Policies', href: '/policies', icon: ListChecks },
+  { name: 'Observability', href: '/observability', icon: Telescope },
+  { name: 'Outcomes', href: '/outcomes', icon: Target },
+  { name: 'Agents', href: '/agents', icon: Users },
+  { name: 'Roadmap', href: '/roadmap', icon: Map },
+];
+
 const sovereignItems = [
   { name: 'AI Hub', href: '/sovereign-ai-hub', icon: Shield },
   { name: 'Model Fleet', href: '/sovereign-ai-hub/model-fleet', icon: Layers },
   { name: 'Inference', href: '/sovereign-ai-hub/inference', icon: Eye },
   { name: 'Distillery', href: '/sovereign-ai-hub/distillery', icon: FlaskConical },
-  { name: 'PRAXIS', href: '/sovereign-ai-hub/praxis', icon: Sparkles },
+  { name: 'PRAXIS', href: '/sovereign-ai-hub/praxis', icon: Wand2 },
   { name: 'Data Estate', href: '/sovereign-ai-hub/data-estate', icon: Database },
   { name: 'Cognitive', href: '/sovereign-ai-hub/cognitive', icon: Brain },
 ];
@@ -66,11 +86,27 @@ function NavLink({ item, isActive, collapsed }: { item: { name: string; href: st
   );
 }
 
+function NavSection({ label, items, location, collapsed }: { label: string; items: ReadonlyArray<{ name: string; href: string; icon: React.ComponentType<{ className?: string }> }>; location: string; collapsed: boolean }) {
+  return (
+    <>
+      {!collapsed && (
+        <p className="px-3 pt-1 pb-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#555]">
+          {label}
+        </p>
+      )}
+      {items.map((item) => {
+        const isActive = item.href === '/' ? location === '/' : (location === item.href || location.startsWith(item.href + '/'));
+        return <NavLink key={item.name} item={item} isActive={isActive} collapsed={collapsed} />;
+      })}
+    </>
+  );
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
-  const breadcrumb = location === '/' ? 'Dashboard' : location.split('/').filter(Boolean).map(s => s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')).join(' / ');
+  const breadcrumb = location === '/' ? 'Cockpit' : location.split('/').filter(Boolean).map(s => s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ')).join(' / ');
 
   return (
     <div className="flex h-screen w-full overflow-hidden" style={{ background: '#0a0a0a', color: '#f5f5f5' }}>
@@ -101,28 +137,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-          {isSidebarOpen && (
-            <p className="px-3 pt-1 pb-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#555]">
-              Conduit Core
-            </p>
-          )}
-          {navItems.map((item) => {
-            const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
-            return <NavLink key={item.name} item={item} isActive={isActive} collapsed={!isSidebarOpen} />;
-          })}
-
+          <NavSection label="Amaru Core" items={coreItems} location={location} collapsed={!isSidebarOpen} />
           <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
-
-          {isSidebarOpen && (
-            <p className="px-3 pt-1 pb-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#555]">
-              Sovereign AI Hub
-            </p>
-          )}
-          {sovereignItems.map((item) => {
-            const isActive = location === item.href || (location.startsWith(item.href) && item.href !== '/sovereign-ai-hub');
-            return <NavLink key={item.name} item={item} isActive={isActive} collapsed={!isSidebarOpen} />;
-          })}
-
+          <NavSection label="Activation Fabric" items={fabricItems} location={location} collapsed={!isSidebarOpen} />
+          <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
+          <NavSection label="Sovereign AI Hub" items={sovereignItems} location={location} collapsed={!isSidebarOpen} />
           <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
 
           {isSidebarOpen && (

@@ -165,6 +165,19 @@ export default function ExecutiveOverview() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <a
+        href="/conduit/"
+        className="block bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 hover:border-[#c9b787]/40 transition-colors"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">Activation Fabric</div>
+            <div className="text-white font-medium mt-1">Activated by Amaru — Andean Ouroboros</div>
+            <div className="text-xs text-white/50 mt-1">Terra's KORA observability and workflow governance is activated by Amaru's 8-agent coalition.</div>
+          </div>
+          <span className="text-[#c9b787] text-sm font-mono">Open Amaru →</span>
+        </div>
+      </a>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">

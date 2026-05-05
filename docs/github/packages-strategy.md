@@ -12,7 +12,7 @@ SZL Holdings uses GitHub Packages as the authoritative artifact registry across 
 | Registry | Scope/Namespace | Status | Ecosystem |
 |----------|----------------|--------|-----------|
 | npm | `@szl-holdings` | **Active** — 22+ packages ready | TypeScript/JavaScript |
-| Container (ghcr.io) | `ghcr.io/szl-holdings/*` | **Active** — 7 images ready | Docker/OCI |
+| Container (ghcr.io) | `ghcr.io/szl-holdings/*` | **Active** — 6 images ready | Docker/OCI |
 | Maven | `com.szlholdings` | **Template ready** | Java/Kotlin |
 | NuGet | `SzlHoldings.*` | **Template ready** | .NET |
 | RubyGems | `szl-holdings-*` | **Template ready** | Ruby |
@@ -87,12 +87,11 @@ pnpm add @szl-holdings/shared-ui
 | Service | Image | Dockerfile |
 |---------|-------|-----------|
 | API Server | `ghcr.io/szl-holdings/api-server` | `artifacts/api-server/Dockerfile` |
-| SZL Holdings Web | `ghcr.io/szl-holdings/szl-holdings-web` | `artifacts/szl-holdings/Dockerfile` |
 | Vessels | `ghcr.io/szl-holdings/vessels` | `artifacts/vessels/Dockerfile` |
 | Terra | `ghcr.io/szl-holdings/terra` | `artifacts/terra/Dockerfile` |
-| Aegis | `ghcr.io/szl-holdings/aegis` | `artifacts/aegis/Dockerfile` |
+| Sentra | `ghcr.io/szl-holdings/sentra` | `artifacts/sentra/Dockerfile` |
+| Counsel | `ghcr.io/szl-holdings/counsel` | `artifacts/counsel/Dockerfile` |
 | Carlota Jo | `ghcr.io/szl-holdings/carlota-jo` | `artifacts/carlota-jo/Dockerfile` |
-| Command Portal | `ghcr.io/szl-holdings/command` | `artifacts/command/Dockerfile` |
 
 ### Image Tagging Strategy
 

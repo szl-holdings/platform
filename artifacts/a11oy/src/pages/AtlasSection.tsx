@@ -56,6 +56,20 @@ export function AtlasSection() {
         <p className="text-[var(--color-a11oy-text-sub)] mt-1">Brand health and orchestration overview for {currentOrg.toUpperCase()}.</p>
       </div>
 
+      <a
+        href="/conduit/"
+        className="block mb-6 bg-[var(--color-a11oy-card)] border border-[var(--color-a11oy-border)] rounded-lg p-4 hover:border-[var(--color-a11oy-blue)] transition-colors"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-a11oy-text-ghost)]">Activation Fabric</div>
+            <div className="text-[var(--color-a11oy-text)] font-medium mt-0.5">Amaru — Agentic Reverse ETL</div>
+            <div className="text-xs text-[var(--color-a11oy-text-sub)] mt-1">Andean Ouroboros · 8-agent coalition activates governed brand data into operational destinations.</div>
+          </div>
+          <span className="text-[var(--color-a11oy-blue)] text-sm font-mono">Open →</span>
+        </div>
+      </a>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {brands.map(brand => (
           <button
