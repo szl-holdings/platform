@@ -917,3 +917,57 @@ id = "yGA_5eFMm1nEKwJOkjEwd"
 uri = "file://.local/deliverables/ouroboros-thesis-v10.pdf"
 type = "pdf"
 title = "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT (11 pages)"
+
+[[outputs]]
+id = "rFEjaliyarQDFRMR_vQ6V"
+uri = "file://dossier/SZL_Holdings_APEX_Meeting_Pack_v2.zip"
+type = "unspecified"
+title = "SZL Holdings — APEX Meeting Pack v2 (full bundle, 1.4 MB)"
+
+[[outputs]]
+id = "3RcWhjayR3STd_62bSTlm"
+uri = "file://dossier/v2/pdf/APEX_v2_Investor_Pitch_Deck.pdf"
+type = "pdf"
+title = "Investor Pitch Deck v2 (16 slides)"
+
+[[outputs]]
+id = "krxnNLI2CYv4RDr0sUH1A"
+uri = "file://dossier/v2/pdf/APEX_v2_Operational_Briefing.pdf"
+type = "pdf"
+title = "Operational Briefing v2"
+
+[[outputs]]
+id = "z5gwxl7u35KW0D8vJ0xvq"
+uri = "file://dossier/v2/pdf/APEX_v2_Business_Proposal.pdf"
+type = "pdf"
+title = "Business Proposal v2"
+
+[[outputs]]
+id = "-9bakBzW_3npcR8Gm7s5_"
+uri = "file://dossier/v2/pdf/APEX_v2_Meeting_Script.pdf"
+type = "pdf"
+title = "Meeting Script v2 (Tue May 6, 10am ET)"
+
+[[outputs]]
+id = "MLuwSuKpJQEdtZYh3jlMD"
+uri = "file://dossier/v2/pdf/APEX_v2_Live_Demo_Guide.pdf"
+type = "pdf"
+title = "Live Demo Guide v2"
+
+[[outputs]]
+id = "g37Mk9IvKvq9HSL_oIL4t"
+uri = "file://dossier/v2/pdf/APEX_v2_Capability_Statement.pdf"
+type = "pdf"
+title = "Capability Statement v2"
+
+[[outputs]]
+id = "5BFraUk7QyXM5WJtNKn1Z"
+uri = "file://dossier/v2/pdf/APEX_v2_Audit_Delta_May5.pdf"
+type = "pdf"
+title = "Audit Delta — May 5, 2026"
+
+[[outputs]]
+id = "joUoHaNd71JTHTR55OPXh"
+uri = "file://dossier/v2/pdf/APEX_v2_DOSSIER_INDEX.pdf"
+type = "pdf"
+title = "Dossier Index v2"
