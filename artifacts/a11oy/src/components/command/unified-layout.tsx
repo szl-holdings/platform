@@ -95,7 +95,7 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
     { href: '/conduit/', label: 'Conduit — Reverse ETL', icon: Workflow, external: true },
     { href: '/counsel/', label: 'Counsel — Legal', icon: Scale, external: true },
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
-    { href: '/lyte-command-center/', label: 'KORA Command Center', icon: Zap, external: true },
+    { href: '/governance/lexicon', label: 'LEXICON — License Intelligence', icon: Zap, external: false },
     { href: '/stephen-site/', label: 'Stephen Site', icon: Globe, external: true },
   ],
 };

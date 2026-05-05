@@ -40,7 +40,7 @@ const ARTIFACT_ROUTE_MAP: Array<{ keywords: string[]; path: string; label: strin
   { keywords: ['pulse', 'briefing', 'executive briefing'], path: '/pulse/', label: 'Pulse', external: true },
   { keywords: ['a11oy', 'continuum', 'brand orchestration'], path: '/a11oy/', label: 'A11oy', external: true },
   { keywords: ['holdings', 'szl holdings', 'portfolio dashboard'], path: '/szl-holdings/', label: 'SZL Holdings', external: true },
-  { keywords: ['lyte', 'decision intelligence', 'command center'], path: '/lyte-command-center/', label: 'KORA', external: true },
+  { keywords: ['lexicon', 'license intelligence', 'license catalog'], path: '/governance/lexicon', label: 'LEXICON', external: false },
   // Internal Command routes
   { keywords: ['strategy', 'strategic overview'], path: '/strategy', label: 'Strategy', external: false },
   { keywords: ['operations', 'live operations', 'ops'], path: '/operations/live', label: 'Live Operations', external: false },

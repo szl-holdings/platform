@@ -20,14 +20,34 @@ import { parse } from 'yaml';
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from './lib/api-response';
 import { checkInferenceGates, getGateSummary } from './a11oy/runtime/router/model-router';
 import { setInferenceGateChecker } from '@szl-holdings/ai-engine/providers/inference-gates';
+import {
+  ensureLexiconEntryAndEnqueueReview,
+  seedLexiconFromRegistry,
+} from './routes/a11oy-lexicon-api';
 
 // Register the registry-aware 5-gate checker so every HF entry point in
 // lib/ai-engine (hf-client, connector adapter) enforces the SAME gates as
 // the in-process router. Defense in depth: fails closed without this.
+//
+// Lexicon hook (#4763): when the registry-side `license_approved` gate
+// fails — typically because the model is not in the operator registry — we
+// fire-and-forget enqueue a Lexicon review request so an operator can
+// approve/deny it. The gate stays failed for THIS call (fails closed) but
+// the next call after operator approval will pass.
 setInferenceGateChecker((modelId) => {
   const r = checkInferenceGates(modelId);
+  if (!r.gates.license_approved || !r.gates.registry_exists) {
+    void ensureLexiconEntryAndEnqueueReview({
+      targetId: modelId,
+      context: { source: 'inference_gate_checker', failedGates: r.failedGates },
+    }).catch(() => {});
+  }
   return { allowed: r.allowed, model: r.model, failedGates: r.failedGates, gates: r.gates };
 });
+
+// Seed the Lexicon catalog at boot so the dashboard renders something on a
+// fresh DB and the inference-gate hook always finds a row to update.
+void seedLexiconFromRegistry().catch(() => {});
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';
@@ -50,6 +70,7 @@ import { createHonoApp, createHonoExpressHandler } from './hono/index';
 import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
+import a11oyLexiconRouter from './routes/a11oy-lexicon-api';
 import { sentraProbeDetectionMiddleware } from './middlewares/sentra-probe-detection';
 
 const app: Express = express();
@@ -363,6 +384,11 @@ app.use('/api/a11oy', a11oyOrchestrationRouter);
 
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));
+
+// Lexicon — License Intelligence Catalog (#4763). Mounted AFTER authMiddleware
+// so `req.user` is populated for the inline admin checks on
+// approve/deny/risk-flag, while read endpoints remain accessible to anyone.
+app.use('/api/a11oy/lexicon', a11oyLexiconRouter);
 app.use(sessionRefreshPolicy());
 app.use(sentraProbeDetectionMiddleware);
 // Adaptive load shedder — runs before auth/rate-limit heavy paths so that

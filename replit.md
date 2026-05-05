@@ -34,9 +34,9 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
 - **NEXUS – Unified Agentic AI Layer (in A11oy):** Consolidated into A11oy under `/nexus/*` routes for Research, Memory, Skills, Orchestrator, and Home.
-- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric with Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, Governed Security Agents, and Zero-Trust Agent Identity + Model Provenance Graph.
-- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag`.
-- **Zero-Trust Agent Identity & Model Provenance:** Ed25519 cryptographic identity for every agent (public key, fingerprint, capability certificates, attestation status). Identity-aware HuggingFace client with access audit logging. Model Provenance Graph (`/a11oy/model-provenance`) visualizes full lineage. Agent reputation scoring based on deployment success, governance compliance, and cost efficiency.
+- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, Governed Security Agents, and Zero-Trust Agent Identity + Model Provenance Graph.
+- **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag`. Streams real Claude responses via SSE with PCE governance gate, MirrorEval scoring, proof-chain tagging, provenance envelope metadata, model lane selection, and conversation persistence in PostgreSQL.
+- **Zero-Trust Agent Identity & Model Provenance:** Ed25519 cryptographic identity for every agent (public key, fingerprint, capability certificates, attestation status). Identity-aware HuggingFace client with access audit logging. Model Provenance Graph (`/a11oy/model-provenance`) visualizes full lineage from base models through datasets, fine-tuning, evaluation, deployment, and agent access. Agent reputation scoring based on deployment success, governance compliance, and cost efficiency.
 - **Alloy Hub (`/a11oy/hub`):** Flagship enterprise AI hub with fleet exploration, model foundry, governance evidence stream, and three-tier pricing.
 - **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products.
 - **Hugging Face Unified Ecosystem:** First-class Hugging Face integration for model/dataset/space search, inference, and token management.
@@ -53,13 +53,16 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Unified Auth Mesh:** Backend-only authentication unification layer.
 - **Forecast & Anomaly Fabric:** Unified forecasting and anomaly detection services.
 - **Premium Data Fabric:** Adapter framework for data integration.
+- **Predictive Cap Rate Model:** ML-driven cap rate forecasting.
+- **Voyage Economics Calculator:** For maritime P&L calculations.
+- **Causal Scenario Backtesting & Monte Carlo Simulation Fabric:** For validating predictions and stochastic simulations.
+- **OpenAI Agents SDK Bridge:** Integration with OpenAI agents.
 - **CPS (Cyber Payload Standard):** A signed, versioned automation package format with five execution sections: detect/decide/act/approve/recover, featuring maturity modes, tiered approval gates, governance enforcement, and cryptographic proof bundle generation.
 - **Sentra Domain CRUD API (`/api/sentra/*`):** Provides in-memory map-based stores for various security and compliance domains.
 - **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, Hardware Root of Trust, and Adversarial ML Defense Console.
 - **Continuum ARGO — Field Intelligence Forge:** Fuses external signals with defensive doctrines.
 - **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, and self-healing.
 - **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, and Project Memory.
-- **OS-Layer API (`/api/v1/os/*`):** Live API endpoints for Decision Center data backed by PostgreSQL tables.
 - **A11oy Orchestrator:** The unified control plane for guard decisions, Lambda Engine execution, and model routing.
 - **Sovereign Agent Mesh:** Governed micro-agent swarms with trust-scored field agents, crew composition, MCP-based agent discovery, and proof-carrying inter-agent communication.
 - **Governance-Injecting MCP Gateway:** External agent access with PCE Gate enforcement and proof packets.
@@ -81,14 +84,15 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 
 **Claude Code Doctrine:**
 - **Skills v2:** All skills declare `scope`, `trust_tier_required`, `input_schema`, `output_schema`, `hooks_emitted`, `memory_tier` fields.
-- **Hook System:** Lifecycle events with JSON decision contracts (`allow | block | modify | route`).
+- **Hook System:** Lifecycle events with JSON decision contracts (`allow | block | modify | route`). Builtin hooks: Plan Mode Gate, Trust Tier Enforcer, Redaction Gate, Proof Sealer, Reward-Hacking Watchdog, Covenant Policy Gate.
 - **SubagentContract:** Every spawned subagent must declare `model`, `allowed_tools`, `blocked_tools`, `permission_mode`, `trust_tier`, `parent_proof_id`, `session_id`.
 - **Trust Tier Ladder:** 0=Read-only, 1=Plan-only, 2=Auto-approve-low-risk, 3=HITL-required, 4=Sovereign-air-gapped.
-- **Tiered Memory:** Working (ephemeral), Episodic (session-scoped), Semantic (long-term vector).
+- **Tiered Memory:** Working (ephemeral), Episodic (session-scoped), Semantic (long-term vector) with provenance, sensitivity, freshness tracking.
 - **Plan Lock:** Plans must be signed and locked (`planLocked = true`) before side-effecting tools may execute.
-- **OTel GenAI:** OpenTelemetry GenAI semantic conventions.
-- **OPA/Rego:** Policy bundles per hook.
+- **OTel GenAI:** OpenTelemetry GenAI semantic conventions for model call, subagent spawn, tool use.
+- **OPA/Rego:** Policy bundles per hook (`core:trust-tier`, `core:plan-mode`, `core:redaction`, `core:proof-chain`, `core:alignment`).
 - **Reward-Hacking Watchdog:** Detects goal substitution, eval gaming, sycophancy, scope creep.
+- **Session_id plumbing:** `sessionId` threaded through every `SubagentContract` and proof chain entry.
 
 **Model & Endpoint Policy:**
 - **Primary governed model:** Qwen 3.6-27B Reasoning (`Qwen/Qwen3-27B`).
@@ -118,4 +122,4 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Government Data:** Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
-- **Government Readiness:** NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+- **Government Data:** NYSTEC Pre-briefing, Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001

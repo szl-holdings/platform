@@ -229,6 +229,11 @@ const ArgoForge = lazy(() => import('./pages/argo/DistillationForge').then(m => 
 const AgentIdentityRegistry = lazy(() => import('./pages/AgentIdentityRegistry').then(m => ({ default: m.AgentIdentityRegistry })));
 const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m => ({ default: m.SelfOptimization })));
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
+const LexiconCatalog = lazy(() => import('./pages/governance/lexicon/Lexicon').then(m => ({ default: m.LexiconCatalog })));
+const LexiconPending = lazy(() => import('./pages/governance/lexicon/Lexicon').then(m => ({ default: m.LexiconPending })));
+const LexiconApproved = lazy(() => import('./pages/governance/lexicon/Lexicon').then(m => ({ default: m.LexiconApproved })));
+const LexiconDenied = lazy(() => import('./pages/governance/lexicon/Lexicon').then(m => ({ default: m.LexiconDenied })));
+const LexiconHistory = lazy(() => import('./pages/governance/lexicon/Lexicon').then(m => ({ default: m.LexiconHistory })));
 const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
 const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m => ({ default: m.KarpathyEvolution })));
 const NexusHome = lazy(() => import('./pages/nexus/NexusHome'));
@@ -525,6 +530,11 @@ export default function App() {
           <WithShell><PortfolioArchive /></WithShell>
         </Route>
         <Route path={`${base}/governance/hook-packs`} component={HookPacks} />
+        <Route path={`${base}/governance/lexicon`} component={LexiconCatalog} />
+        <Route path={`${base}/governance/lexicon/pending`} component={LexiconPending} />
+        <Route path={`${base}/governance/lexicon/approved`} component={LexiconApproved} />
+        <Route path={`${base}/governance/lexicon/denied`} component={LexiconDenied} />
+        <Route path={`${base}/governance/lexicon/history`} component={LexiconHistory} />
         <Route path={`${base}/governance`} component={Governance} />
         <Route path={`${base}/agents`} component={Agents} />
         <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />

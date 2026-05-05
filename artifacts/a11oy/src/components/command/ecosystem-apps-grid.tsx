@@ -18,12 +18,12 @@ export const ECOSYSTEM_APPS = [
     color: '#d4a054',
   },
   {
-    href: '/lyte-command-center/',
-    label: 'KORA Command Center',
+    href: '/governance/lexicon',
+    label: 'LEXICON — License Intelligence',
     description:
-      'AIOps observability hub — autonomous NOC, SLO tracking, and self-healing workflows',
+      'Operator-curated license catalog backing the inference governance gate',
     icon: Zap,
-    color: '#22c55e',
+    color: '#c9b787',
   },
   {
     href: '/stephen-site/',

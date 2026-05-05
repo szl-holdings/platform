@@ -1,5 +1,6 @@
 import type { ModelProvider } from '../types.js';
 import { checkHfLiveRoutingGate } from '../model-registry.js';
+import { getLexiconStatusSync } from '../../../routes/a11oy-lexicon-api.js';
 
 export interface ModelRequest {
   prompt: string;
@@ -35,9 +36,22 @@ export interface GateCheckResult {
 export function checkInferenceGates(modelId: string): GateCheckResult {
   const registryGate = checkHfLiveRoutingGate(modelId);
 
+  // license_approved is sourced exclusively from the Lexicon catalog (#4763).
+  // The operator-curated catalog is the SINGLE source of truth — the static
+  // registry's `licenseStatus` no longer participates in this gate. Behaviour:
+  //   - 'approved'              → passes
+  //   - 'denied' / 'risk_flagged' / 'pending_review' → fails (closed)
+  //   - 'unknown' (never seen)  → fails CLOSED. The gate hook simultaneously
+  //     auto-enqueues the model for operator review so the next attempt has
+  //     a decision to read; no model can silently bypass via static seed.
+  // The runtime model-registry's seed list is mirrored into Lexicon at boot
+  // by `seedLexiconFromRegistry`, so historically-approved models stay green
+  // until/unless an operator changes their state.
+  const lexiconStatus = getLexiconStatusSync(modelId);
+  const licenseApproved = lexiconStatus === 'approved';
   const gates: Record<string, boolean> = {
     registry_exists: registryGate.conditions.registry_record_exists,
-    license_approved: registryGate.conditions.license_approved,
+    license_approved: licenseApproved,
     sensitivity_match: registryGate.conditions.sensitivity_match,
     live_inference_enabled: registryGate.conditions.hf_live_inference_enabled,
     production_approved: registryGate.conditions.hf_production_approved,

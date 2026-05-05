@@ -1,7 +1,95 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
 import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription, useAegisIncidentUpdated } from '../graphql';
+
+const LEXICON_BASE =
+  `${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/api/a11oy/lexicon`;
+
+interface LexiconSummary {
+  total: number;
+  counts: { pending_review: number; approved: number; denied: number; risk_flagged: number };
+  pendingReviews: number;
+}
+
+function LexiconGovernanceTile() {
+  const [s, setS] = useState<LexiconSummary | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    let attempt = 0;
+    const tick = () => {
+      if (cancelled) return;
+      fetch(`${LEXICON_BASE}/summary`, { credentials: 'include' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: unknown) => {
+          if (cancelled) return;
+          // During API boot the gateway returns `{status:"starting"}` with HTTP 200.
+          // Only accept payloads that match LexiconSummary, otherwise retry.
+          if (
+            j &&
+            typeof j === 'object' &&
+            'counts' in (j as Record<string, unknown>)
+          ) {
+            setS(j as LexiconSummary);
+            return;
+          }
+          if (attempt++ < 8) setTimeout(tick, 1000);
+        })
+        .catch(() => {
+          if (attempt++ < 8) setTimeout(tick, 1000);
+        });
+    };
+    tick();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const counts = s?.counts ?? { pending_review: 0, approved: 0, denied: 0, risk_flagged: 0 };
+  const tileHref = `${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/governance/lexicon`;
+  return (
+    <a href={tileHref} className="block mb-6" data-testid="governance-tile-lexicon">
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div
+              className="text-[10px] font-mono uppercase tracking-widest mb-1"
+              style={{ color: '#c9b787' }}
+            >
+              LICENSE INTELLIGENCE · LEXICON
+            </div>
+            <div className="text-sm font-medium mb-1" style={{ color: 'var(--color-a11oy-text)' }}>
+              License Intelligence Catalog
+            </div>
+            <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              Operator-curated approval list backing the inference gate's `license_approved` check.
+              Unknown models auto-enqueue here for review.
+            </div>
+            <div className="flex flex-wrap gap-3 text-xs font-mono" data-testid="lexicon-tile-counts">
+              <span style={{ color: '#c9b787' }}>
+                PENDING <strong data-testid="lex-count-pending">{counts.pending_review}</strong>
+              </span>
+              <span style={{ color: '#86efac' }}>
+                APPROVED <strong data-testid="lex-count-approved">{counts.approved}</strong>
+              </span>
+              <span style={{ color: '#fca5a5' }}>
+                DENIED <strong data-testid="lex-count-denied">{counts.denied}</strong>
+              </span>
+              <span style={{ color: '#fcd34d' }}>
+                RISK <strong data-testid="lex-count-risk">{counts.risk_flagged}</strong>
+              </span>
+            </div>
+          </div>
+          <span
+            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded"
+            style={{ backgroundColor: 'rgba(201,183,135,0.15)', color: '#c9b787' }}
+          >
+            Open →
+          </span>
+        </div>
+      </Card>
+    </a>
+  );
+}
 
 const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 
@@ -110,6 +198,9 @@ export function Governance() {
         <KpiCard label="GATES TODAY" value={String(totalGatesToday)} sub="all passed or approved" accent="#c9b787" />
         <KpiCard label="BYPASS ATTEMPTS" value="0" sub="Zero-tolerance enforced" accent="#b08d52" />
       </div>
+
+      <LexiconGovernanceTile />
+
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div>

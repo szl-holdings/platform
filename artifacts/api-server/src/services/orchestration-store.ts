@@ -151,6 +151,21 @@ export function registerProduct(reg: ProductRegistration): RegisteredProduct {
       governanceClass: c.governanceClass ?? 'observation',
     };
   });
+  // Merge in any capabilities buffered by sub-modules that registered before
+  // this product booted (see `addProductCapability`).
+  const buffered = pendingCapabilities.get(reg.product) ?? [];
+  for (const c of buffered) {
+    if (!normalizedCapabilities.some((n) => n.id === c.id)) {
+      normalizedCapabilities.push(c);
+    }
+  }
+  // Preserve capabilities previously attached to the existing record (so
+  // re-registering a product doesn't drop sub-module advertisements).
+  for (const c of existing?.capabilities ?? []) {
+    if (!normalizedCapabilities.some((n) => n.id === c.id)) {
+      normalizedCapabilities.push(c);
+    }
+  }
   const next: RegisteredProduct = {
     ...reg,
     capabilities: normalizedCapabilities,
@@ -165,6 +180,35 @@ export function registerProduct(reg: ProductRegistration): RegisteredProduct {
   };
   products.set(reg.product, next);
   return next;
+}
+
+/**
+ * Idempotently attach a capability to a product. Used by sub-modules (e.g.
+ * Lexicon — task #4763) that want to advertise themselves as a child
+ * capability of a parent product without overwriting the product's full
+ * registration. Safe to call before the parent product has registered: the
+ * capability is buffered and applied on the next register call via the
+ * `pendingCapabilities` mechanism.
+ */
+const pendingCapabilities = new Map<A11oyProductId, ProductCapability[]>();
+
+export function addProductCapability(
+  product: A11oyProductId,
+  capability: ProductCapability,
+): void {
+  const existing = products.get(product);
+  if (existing) {
+    if (!existing.capabilities.some((c) => c.id === capability.id)) {
+      existing.capabilities = [...existing.capabilities, capability];
+      products.set(product, existing);
+    }
+    return;
+  }
+  // Parent not yet registered — buffer and re-apply on next registerProduct.
+  const buf = pendingCapabilities.get(product) ?? [];
+  if (!buf.some((c) => c.id === capability.id)) {
+    pendingCapabilities.set(product, [...buf, capability]);
+  }
 }
 
 export function listProducts(): RegisteredProduct[] {
