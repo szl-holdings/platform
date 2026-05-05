@@ -72,7 +72,7 @@ export default function ConduitSigil() {
         return (
                 <div className="p-8 space-y-8 max-w-5xl mx-auto">
                         <div>
-                                <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-400 mb-2">
+                                <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#c9b787] mb-2">
                                         SIGIL · SZL Integrated Governance &amp; Invariant Layer
                                 </div>
                                 <h1 className="text-4xl font-light tracking-tight text-slate-100">Σ — pipeline trust envelope.</h1>
@@ -83,14 +83,14 @@ export default function ConduitSigil() {
                                 </p>
                         </div>
 
-                        <div className="rounded-lg border border-cyan-900/50 bg-slate-900/60 p-8 flex items-center gap-8 backdrop-blur">
-                                <Sigma className="h-12 w-12 text-cyan-400" />
+                        <div className="rounded-lg border border-[rgba(201,183,135,0.2)] bg-[#0e0e0e] p-8 flex items-center gap-8 backdrop-blur">
+                                <Sigma className="h-12 w-12 text-[#c9b787]" />
                                 <div>
                                         <div className="text-7xl font-extralight tabular-nums text-slate-100">
                                                 {sigmaPct}
                                                 <span className="text-3xl text-slate-500">%</span>
                                         </div>
-                                        <div className="text-xs font-mono uppercase tracking-widest text-cyan-500 mt-1">
+                                        <div className="text-xs font-mono uppercase tracking-widest text-[#a89868] mt-1">
                                                 {report ? `min ≤ Σ ≤ max · floor ${(report.proof.minAxis * 100).toFixed(1)}% · ceil ${(report.proof.maxAxis * 100).toFixed(1)}%` : 'composing…'}
                                         </div>
                                 </div>
@@ -100,12 +100,12 @@ export default function ConduitSigil() {
                                 {AXES.map(({ key, label, sym, blurb }) => {
                                         const v = axes[key];
                                         return (
-                                                <div key={key} className="rounded-lg border border-slate-800 bg-slate-900/60 p-5 backdrop-blur">
+                                                <div key={key} className="rounded-lg border border-slate-800 bg-[#0e0e0e] p-5 backdrop-blur">
                                                         <div className="flex items-center justify-between mb-2">
                                                                 <span className="font-medium text-slate-100">
-                                                                        {label} <span className="font-mono text-cyan-500/80">({sym})</span>
+                                                                        {label} <span className="font-mono text-[#c9b787]/80">({sym})</span>
                                                                 </span>
-                                                                <span className="font-mono text-sm tabular-nums text-cyan-300">{(v * 100).toFixed(1)}%</span>
+                                                                <span className="font-mono text-sm tabular-nums text-[#c9b787]">{(v * 100).toFixed(1)}%</span>
                                                         </div>
                                                         <input
                                                                 type="range"
@@ -118,7 +118,7 @@ export default function ConduitSigil() {
                                                                         setAxes(next);
                                                                         void compose(next);
                                                                 }}
-                                                                className="w-full accent-cyan-400"
+                                                                className="w-full accent-[#c9b787]"
                                                         />
                                                         <div className="mt-2 text-xs text-slate-500">{blurb}</div>
                                                 </div>
@@ -127,8 +127,8 @@ export default function ConduitSigil() {
                         </div>
 
                         {report && (
-                                <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-5 backdrop-blur">
-                                        <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-500 mb-2">composition law</div>
+                                <div className="rounded-lg border border-slate-800 bg-[#0e0e0e] p-5 backdrop-blur">
+                                        <div className="text-[10px] font-mono uppercase tracking-widest text-[#a89868] mb-2">composition law</div>
                                         <div className="font-mono text-sm break-all text-slate-100">{report.proof.formula}</div>
                                         <div className="mt-2 text-xs text-slate-500">{report.proof.law}</div>
                                 </div>
@@ -139,7 +139,7 @@ export default function ConduitSigil() {
                                         type="button"
                                         onClick={() => { void anchorToA11oy(); }}
                                         disabled={anchored}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-[rgba(201,183,135,0.08)] border border-[rgba(201,183,135,0.3)] text-[#c9b787] hover:bg-[rgba(201,183,135,0.16)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                                 >
                                         <Anchor className="w-4 h-4" />
                                         {anchored ? 'Anchored to A11oy ledger' : 'Anchor Σ to A11oy ledger'}

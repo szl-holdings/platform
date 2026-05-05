@@ -13,6 +13,9 @@ import {
   Zap,
 } from 'lucide-react';
 
+const A11OY_GOLD = '#c9b787';
+const A11OY_GOLD_SUB = '#a89868';
+
 const HUB_SECTIONS = [
   {
     key: 'model-fleet',
@@ -20,7 +23,7 @@ const HUB_SECTIONS = [
     description: 'Browsable model cards with routing lanes, failover chains, cost/latency metrics, and lifecycle stages.',
     icon: Layers,
     href: '/sovereign-ai-hub/model-fleet',
-    color: '#6366f1',
+    color: A11OY_GOLD,
     stats: ['Multi-provider', 'Lifecycle governance', 'Cost tracking'],
   },
   {
@@ -29,7 +32,7 @@ const HUB_SECTIONS = [
     description: 'Live routing decisions, failover events, provider health, and cost optimization dashboard.',
     icon: Eye,
     href: '/sovereign-ai-hub/inference',
-    color: '#06b6d4',
+    color: A11OY_GOLD,
     stats: ['Real-time routing', 'Provider health', 'Cost efficiency'],
   },
   {
@@ -38,7 +41,7 @@ const HUB_SECTIONS = [
     description: 'Fine-tuning jobs, canary deployments, data quality gates, and model version comparisons.',
     icon: FlaskConical,
     href: '/sovereign-ai-hub/distillery',
-    color: '#f59e0b',
+    color: A11OY_GOLD_SUB,
     stats: ['Governed fine-tuning', 'Canary testing', 'Quality gates'],
   },
   {
@@ -47,7 +50,7 @@ const HUB_SECTIONS = [
     description: 'Cross-domain intelligence workspace — entity resolution, fusion queries, evidence threading.',
     icon: Sparkles,
     href: '/sovereign-ai-hub/praxis',
-    color: '#ec4899',
+    color: A11OY_GOLD,
     stats: ['Fusion cortex', 'Graph RAG', 'Evidence chains'],
   },
   {
@@ -56,7 +59,7 @@ const HUB_SECTIONS = [
     description: 'Domain datasets with freshness, record counts, cross-domain relationships, and feature store.',
     icon: Database,
     href: '/sovereign-ai-hub/data-estate',
-    color: '#10b981',
+    color: A11OY_GOLD_SUB,
     stats: ['6 domains', 'Feature store', 'Quality scoring'],
   },
   {
@@ -65,7 +68,7 @@ const HUB_SECTIONS = [
     description: 'Agent reasoning traces, cognitive loop visualization, skill heatmaps, and drift detection.',
     icon: Brain,
     href: '/sovereign-ai-hub/cognitive',
-    color: '#8b5cf6',
+    color: A11OY_GOLD,
     stats: ['8-phase loops', 'Skill utilization', 'Self-improvement'],
   },
 ];
@@ -78,8 +81,8 @@ export default function SovereignAiHub() {
           COMMAND · SOVEREIGN AI HUB
         </p>
         <h1 className="text-2xl font-display font-bold tracking-tight flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
-            <Shield className="w-5 h-5 text-indigo-400" />
+          <div className="w-8 h-8 rounded-lg bg-[rgba(201,183,135,0.1)] flex items-center justify-center border border-[rgba(201,183,135,0.3)]">
+            <Shield className="w-5 h-5 text-[#c9b787]" />
           </div>
           Sovereign AI Hub
         </h1>
@@ -92,17 +95,17 @@ export default function SovereignAiHub() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-            <Activity className="w-5 h-5 text-green-400" />
+          <div className="w-10 h-10 rounded-lg bg-[rgba(201,183,135,0.08)] flex items-center justify-center">
+            <Activity className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
             <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">System Status</p>
-            <p className="text-lg font-mono font-bold text-green-400">OPERATIONAL</p>
+            <p className="text-lg font-mono font-bold text-[#c9b787]">OPERATIONAL</p>
           </div>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-            <Cpu className="w-5 h-5 text-indigo-400" />
+          <div className="w-10 h-10 rounded-lg bg-[rgba(201,183,135,0.08)] flex items-center justify-center">
+            <Cpu className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
             <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">AI Primitives</p>
@@ -110,8 +113,8 @@ export default function SovereignAiHub() {
           </div>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-lg bg-[rgba(201,183,135,0.08)] flex items-center justify-center">
+            <Zap className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
             <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Governance</p>

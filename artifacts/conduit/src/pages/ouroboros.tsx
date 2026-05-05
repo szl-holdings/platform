@@ -46,10 +46,10 @@ interface ThresholdAudit {
 }
 
 const RECOMMENDATION_COLORS: Record<AmaruSignal['recommendation'], string> = {
-  CONTINUE: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10',
-  WATCH: 'text-amber-300 border-amber-500/40 bg-amber-500/10',
-  THROTTLE: 'text-orange-400 border-orange-500/40 bg-orange-500/10',
-  HALT: 'text-rose-400 border-rose-500/40 bg-rose-500/10',
+  CONTINUE: 'text-[#c9b787] border-[rgba(201,183,135,0.4)] bg-[rgba(201,183,135,0.1)]',
+  WATCH:    'text-[#c9b787] border-[rgba(201,183,135,0.3)] bg-[rgba(201,183,135,0.06)]',
+  THROTTLE: 'text-[#f5f5f5] border-[rgba(245,245,245,0.25)] bg-[rgba(245,245,245,0.06)]',
+  HALT:     'text-[#f5f5f5] border-[rgba(245,245,245,0.4)] bg-[rgba(245,245,245,0.12)]',
 };
 
 export default function OuroborosPage() {
@@ -109,67 +109,75 @@ export default function OuroborosPage() {
   }
 
   return (
-    <div className="px-6 py-8 max-w-6xl mx-auto space-y-8">
+    <div className="space-y-8 animate-fade-in-up">
       <div>
-        <div className="text-xs font-mono uppercase tracking-wider text-amber-400/80">
-          OUROBOROS · RMP 56–60 + 2/n TABLE
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#c9b787]">
+            OUROBOROS · RMP 56–60 + 2/n TABLE
+          </span>
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono"
+            style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.6)', border: '1px solid rgba(201,183,135,0.2)' }}
+          >
+            Governed by A11oy
+          </span>
         </div>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-2xl font-display font-semibold tracking-tight text-[#f5f5f5]">
           Seked Audit + Unit-Fraction Thresholds
         </h1>
-        <p className="mt-1 text-sm text-zinc-400 max-w-2xl">
+        <p className="mt-1 text-sm text-[#8a8a8a] max-w-2xl">
           Bounded saturation detection (Egyptian seked, c. 1650 BCE) and
-          inspectable threshold decomposition. Both primitives are
-          governed by A11oy and free of floating-point drift across
-          heterogeneous runtimes.
+          inspectable threshold decomposition — both primitives free of
+          floating-point drift across heterogeneous runtimes, governed by
+          A11oy approval tiers.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
-          <div className="text-sm font-semibold text-white">Seked slope audit</div>
-          <div className="mt-1 text-xs text-zinc-500">
+        <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0e0e0e] p-5">
+          <div className="text-sm font-semibold text-[#f5f5f5]">Seked slope audit</div>
+          <div className="mt-1 text-xs text-[#666]">
             Submit a (dx, dy) sample. The auditor maintains a rolling window
             and emits a recommendation: CONTINUE / WATCH / THROTTLE / HALT.
           </div>
           <div className="mt-4 space-y-3">
-            <label className="block text-xs text-zinc-400">
+            <label className="block text-xs text-[#8a8a8a]">
               Metric ID
               <input
                 value={metricId}
                 onChange={(e) => setMetricId(e.target.value)}
-                className="mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-sm text-white"
+                className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0a0a0a] px-3 py-1.5 text-sm text-[#f5f5f5]"
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-xs text-zinc-400">
+              <label className="block text-xs text-[#8a8a8a]">
                 Horizontal (dx)
                 <input
                   type="number"
                   value={horizontal}
                   onChange={(e) => setHorizontal(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-sm text-white font-mono"
+                  className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0a0a0a] px-3 py-1.5 text-sm text-[#f5f5f5] font-mono"
                 />
               </label>
-              <label className="block text-xs text-zinc-400">
+              <label className="block text-xs text-[#8a8a8a]">
                 Vertical (dy)
                 <input
                   type="number"
                   value={vertical}
                   onChange={(e) => setVertical(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-sm text-white font-mono"
+                  className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0a0a0a] px-3 py-1.5 text-sm text-[#f5f5f5] font-mono"
                 />
               </label>
             </div>
             <button
               onClick={observe}
               disabled={sekedLoading}
-              className="w-full rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-50"
+              className="w-full rounded-md bg-[#c9b787] px-3 py-2 text-sm font-medium text-[#0a0a0a] hover:bg-[#a89868] disabled:opacity-50"
             >
               {sekedLoading ? 'Sampling…' : 'Submit sample'}
             </button>
             {sekedError && (
-              <div className="rounded-md border border-rose-500/40 bg-rose-500/10 p-2 text-xs text-rose-300">
+              <div className="rounded-md border border-[rgba(245,245,245,0.3)] bg-[rgba(245,245,245,0.06)] p-2 text-xs text-[#f5f5f5]">
                 {sekedError}
               </div>
             )}
@@ -183,87 +191,87 @@ export default function OuroborosPage() {
               </div>
               <dl className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
-                  <dt className="text-zinc-500">verdict</dt>
-                  <dd className="text-white">{signal.reading.verdict}</dd>
+                  <dt className="text-[#666]">verdict</dt>
+                  <dd className="text-[#f5f5f5]">{signal.reading.verdict}</dd>
                 </div>
                 <div>
-                  <dt className="text-zinc-500">seked</dt>
-                  <dd className="text-amber-300">{signal.reading.seked.toFixed(3)}</dd>
+                  <dt className="text-[#666]">seked</dt>
+                  <dd className="text-[#c9b787]">{signal.reading.seked.toFixed(3)}</dd>
                 </div>
                 <div>
-                  <dt className="text-zinc-500">palms / cubit</dt>
-                  <dd className="text-white">
+                  <dt className="text-[#666]">palms / cubit</dt>
+                  <dd className="text-[#f5f5f5]">
                     {signal.reading.palms.toFixed(2)} / {signal.reading.cubits}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-zinc-500">slope (deg)</dt>
-                  <dd className="text-white">{signal.degrees.toFixed(2)}°</dd>
+                  <dt className="text-[#666]">slope (deg)</dt>
+                  <dd className="text-[#f5f5f5]">{signal.degrees.toFixed(2)}°</dd>
                 </div>
               </dl>
             </div>
           )}
         </div>
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
-          <div className="text-sm font-semibold text-white">Threshold decomposition</div>
-          <div className="mt-1 text-xs text-zinc-500">
+        <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0e0e0e] p-5">
+          <div className="text-sm font-semibold text-[#f5f5f5]">Threshold decomposition</div>
+          <div className="mt-1 text-xs text-[#666]">
             Decompose a rational threshold p/q into distinct unit fractions
             (RMP 2/n table) so it's inspectable by a human auditor.
           </div>
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-xs text-zinc-400">
+              <label className="block text-xs text-[#8a8a8a]">
                 p (numerator)
                 <input
                   type="number"
                   value={p}
                   onChange={(e) => setP(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-sm text-white font-mono"
+                  className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0a0a0a] px-3 py-1.5 text-sm text-[#f5f5f5] font-mono"
                 />
               </label>
-              <label className="block text-xs text-zinc-400">
+              <label className="block text-xs text-[#8a8a8a]">
                 q (denominator)
                 <input
                   type="number"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-sm text-white font-mono"
+                  className="mt-1 w-full rounded-md border border-[rgba(255,255,255,0.08)] bg-[#0a0a0a] px-3 py-1.5 text-sm text-[#f5f5f5] font-mono"
                 />
               </label>
             </div>
             <button
               onClick={inspect}
               disabled={auditLoading}
-              className="w-full rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-50"
+              className="w-full rounded-md bg-[#c9b787] px-3 py-2 text-sm font-medium text-[#0a0a0a] hover:bg-[#a89868] disabled:opacity-50"
             >
               {auditLoading ? 'Decomposing…' : 'Decompose threshold'}
             </button>
             {auditError && (
-              <div className="rounded-md border border-rose-500/40 bg-rose-500/10 p-2 text-xs text-rose-300">
+              <div className="rounded-md border border-[rgba(245,245,245,0.3)] bg-[rgba(245,245,245,0.06)] p-2 text-xs text-[#f5f5f5]">
                 {auditError}
               </div>
             )}
           </div>
           {audit && (
             <div className="mt-5 space-y-3">
-              <div className="rounded-md bg-zinc-950 p-3">
-                <div className="font-mono text-amber-300 text-sm">{audit.explanation}</div>
+              <div className="rounded-md bg-[#0a0a0a] p-3">
+                <div className="font-mono text-[#c9b787] text-sm">{audit.explanation}</div>
               </div>
               <dl className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
-                  <dt className="text-zinc-500">terms</dt>
-                  <dd className="text-white">{audit.decomposition.terms.length}</dd>
+                  <dt className="text-[#666]">terms</dt>
+                  <dd className="text-[#f5f5f5]">{audit.decomposition.terms.length}</dd>
                 </div>
                 <div>
-                  <dt className="text-zinc-500">exact</dt>
-                  <dd className={audit.decomposition.exact ? 'text-emerald-300' : 'text-rose-300'}>
+                  <dt className="text-[#666]">exact</dt>
+                  <dd className={audit.decomposition.exact ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}>
                     {String(audit.decomposition.exact)}
                   </dd>
                 </div>
                 <div className="col-span-2">
-                  <dt className="text-zinc-500">decomposition</dt>
-                  <dd className="text-white">
+                  <dt className="text-[#666]">decomposition</dt>
+                  <dd className="text-[#f5f5f5]">
                     {audit.decomposition.terms.map((t) => `1/${t}`).join(' + ') || '∅'}
                   </dd>
                 </div>
@@ -273,9 +281,9 @@ export default function OuroborosPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
-        <div className="text-sm font-semibold text-white">Why this matters for Amaru</div>
-        <p className="mt-2 text-sm text-zinc-400">
+      <div className="rounded-lg border border-[rgba(255,255,255,0.08)] bg-[#0e0e0e] p-5">
+        <div className="text-sm font-semibold text-[#f5f5f5]">Why this matters for Amaru</div>
+        <p className="mt-2 text-sm text-[#8a8a8a]">
           Amaru coordinates fleets of heterogeneous syncs across cost,
           throughput, and error-rate dimensions. The seked auditor refuses
           to blow up at vertical asymptotes — it returns HALT instead of
@@ -284,7 +292,7 @@ export default function OuroborosPage() {
           across runtimes that disagree on floating-point. Both primitives
           are governed by A11oy approval tiers.
         </p>
-        <div className="mt-3 text-xs font-mono text-amber-400/80">
+        <div className="mt-3 text-xs font-mono text-[#c9b787]">
           POST /api/ouroboros/amaru/observe-metric · POST /api/ouroboros/amaru/audit-threshold
         </div>
       </div>

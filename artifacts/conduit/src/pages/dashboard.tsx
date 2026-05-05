@@ -1,5 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'wouter';
+import { toast } from 'sonner';
+import { emitProof } from '@workspace/a11oy-orchestration/client';
 import {
   RELAY_DESTINATIONS,
   RELAY_MAPPINGS,
@@ -28,7 +30,7 @@ import {
   SeverityChip,
   Sparkline,
 } from '@/components/fabric/primitives';
-import { Badge } from '@/components/ui';
+import { Badge, Button } from '@/components/ui';
 
 export default function Dashboard() {
   const kpis = useMemo(
@@ -70,7 +72,6 @@ export default function Dashboard() {
     return buckets;
   }, []);
   const heat = useMemo(() => {
-    // Vertical × destination-category failure heatmap (last 200 events).
     const verticals = Array.from(new Set(RELAY_RUN_EVENTS.map((e) => e.verticalId))).slice(0, 7);
     const cats = Array.from(new Set(RELAY_DESTINATIONS.map((d) => d.category)));
     const grid: { vertical: string; category: string; count: number }[] = [];
@@ -86,6 +87,35 @@ export default function Dashboard() {
     return { verticals, cats, grid, max };
   }, []);
 
+  const [handoffPending, setHandoffPending] = useState(false);
+  async function handoffToA11oy() {
+    if (handoffPending) return;
+    setHandoffPending(true);
+    const refId = `amaru-cycle-${Date.now().toString(36)}`;
+    try {
+      const proof = await emitProof({
+        product: 'amaru',
+        kind: 'action_executed',
+        summary: `Amaru ouroboros cycle snapshot · ${kpis.activeSyncs} active syncs · LUTAR Σ ${(sigma.sigma * 100).toFixed(1)}%`,
+        deepLink: '/conduit/',
+        payload: {
+          cycleRefId: refId,
+          activeSyncs: kpis.activeSyncs,
+          recordsActivated24h: kpis.recordsActivated24h,
+          failedRecords24h: kpis.failedRecords24h,
+          lutarSigma: sigma.sigma,
+        },
+      });
+      toast.success(`Anchored to A11oy ledger · proof ${proof.id.slice(0, 12)}…`, {
+        description: 'Inspect the cycle in A11oy → Conductor → Recent Proofs.',
+      });
+    } catch (err) {
+      toast.error('A11oy handoff failed', { description: (err as Error).message });
+    } finally {
+      setHandoffPending(false);
+    }
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -98,6 +128,16 @@ export default function Dashboard() {
               Sovereign agentic activation. The serpent that holds the spine: discover sources, compose models,
               govern by policy, deliver with witness, and learn from outcomes — in one closed loop, replay-grade.
             </p>
+            <div className="mt-4">
+              <Button
+                onClick={handoffToA11oy}
+                disabled={handoffPending}
+                variant="outline"
+                className="gap-2 font-mono text-xs border-[rgba(201,183,135,0.25)] text-[#c9b787] hover:bg-[rgba(201,183,135,0.08)] hover:border-[rgba(201,183,135,0.4)]"
+              >
+                {handoffPending ? 'HANDING OFF…' : 'HANDOFF TO A11OY ↗'}
+              </Button>
+            </div>
           </div>
           <div className="conduit-card p-4 min-w-[260px]">
             <div className="label-mono text-[#c9b787] mb-1">LUTAR Σ — LIVE</div>

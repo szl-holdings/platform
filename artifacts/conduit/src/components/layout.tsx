@@ -64,7 +64,7 @@ const sovereignItems = [
 ];
 
 const externalNavItems = [
-  { name: 'A11oy Advisor', href: '/intelligence/', icon: Sparkles },
+  { name: 'A11oy Conductor', href: '/', icon: Sparkles },
 ];
 
 function NavLink({ item, isActive, collapsed }: { item: { name: string; href: string; icon: React.ComponentType<{ className?: string }> }; isActive: boolean; collapsed: boolean }) {
@@ -201,7 +201,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
            </div>
         </header>
         <div className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#0a0a0a' }}>
-          <div className="max-w-7xl mx-auto w-full animate-fade-in-up p-6">
+          <div className="mx-auto w-full max-w-[1440px] animate-fade-in-up px-6 py-6 lg:px-8 lg:py-8">
             {children}
           </div>
         </div>
