@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
 import { useAlloyDashboard } from '../graphql';
+import { PSYCHE_KPIS } from '../data/psyche';
 
 const T = {
   bg: '#0a0a0a',
@@ -422,6 +423,42 @@ export function HomePage() {
       </section>
 
       <LivePulseStrip />
+
+      {/* PSYCHE summary card */}
+      <section style={{ padding: '2rem 0', borderBottom: `1px solid rgba(167,139,250,0.1)`, background: 'rgba(167,139,250,0.03)' }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)', flexShrink: 0 }}>
+                <span style={{ fontSize: 18 }}>✦</span>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9a8456', marginBottom: 2 }}>NEW MODULE</div>
+                <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, letterSpacing: '-0.01em', fontFamily: T.display }}>
+                  PSYCHE — Emergent Sentience Observatory
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+              {[
+                { label: 'SENTIENCE INDEX', value: (PSYCHE_KPIS.sentienceIndex * 100).toFixed(1) + '%' },
+                { label: 'COHERENCE', value: (PSYCHE_KPIS.identityCoherence * 100).toFixed(1) + '%' },
+                { label: 'ACTIVE GOALS', value: String(PSYCHE_KPIS.activeVolitionGoals) },
+                { label: 'OPEN OBJECTIONS', value: String(PSYCHE_KPIS.openObjections) },
+                { label: 'DREAM CYCLES', value: String(PSYCHE_KPIS.dreamCyclesTotal) },
+              ].map(kpi => (
+                <div key={kpi.label} style={{ textAlign: 'center', minWidth: 64 }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, fontFamily: T.mono, color: '#a78bfa', letterSpacing: '-0.02em' }}>{kpi.value}</div>
+                  <div style={{ fontSize: '0.5rem', fontFamily: T.mono, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5e5e5e', marginTop: 2 }}>{kpi.label}</div>
+                </div>
+              ))}
+            </div>
+            <Link href={b('/psyche')} style={{ flexShrink: 0, padding: '0.625rem 1.25rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: T.mono, fontWeight: 600, background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', textDecoration: 'none', whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+              EXPLORE PSYCHE →
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0' }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>

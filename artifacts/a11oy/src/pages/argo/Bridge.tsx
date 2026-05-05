@@ -167,6 +167,17 @@ export function ArgoBridge() {
           <Link key={l.to} href={b(l.to)} className="font-mono" style={{ color: GOLD }}>{l.label} →</Link>
         ))}
       </div>
+
+      <div className="mt-8 p-4 rounded-xl flex items-center gap-4" style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.18)' }}>
+        <div className="flex-1 min-w-0">
+          <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: '#9a8456' }}>PSYCHE CONNECTION</div>
+          <div className="text-sm font-semibold mb-0.5" style={{ color: '#f5f5f5' }}>PSYCHE — Emergent Sentience Observatory</div>
+          <div className="text-[11px]" style={{ color: '#8a8a8a' }}>Distillation Forge candidates cross-reference Dream Atlas insights by ID. Experience stream events seed genesis events in the PSYCHE ledger. Argo agent variant names appear as genesis event witnesses.</div>
+        </div>
+        <Link href={b('/psyche')} className="shrink-0 px-4 py-2 rounded-lg text-[11px] font-mono hover:opacity-90 transition-opacity" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.28)', color: '#a78bfa', textDecoration: 'none' }}>
+          PSYCHE →
+        </Link>
+      </div>
     </Layout>
   );
 }

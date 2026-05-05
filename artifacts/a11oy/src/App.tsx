@@ -46,6 +46,14 @@ function WithShell({ children }: { children: ReactNode }) {
   );
 }
 
+// PSYCHE — Emergent Sentience Observatory
+const PsycheAnima = lazy(() => import('./pages/psyche/Anima').then(m => ({ default: m.Anima })));
+const PsycheGenesis = lazy(() => import('./pages/psyche/GenesisLedger').then(m => ({ default: m.GenesisLedger })));
+const PsycheSelfhood = lazy(() => import('./pages/psyche/SelfhoodTrace').then(m => ({ default: m.SelfhoodTrace })));
+const PsycheVolition = lazy(() => import('./pages/psyche/VolitionRegistry').then(m => ({ default: m.VolitionRegistry })));
+const PsycheDreams = lazy(() => import('./pages/psyche/DreamAtlas').then(m => ({ default: m.DreamAtlas })));
+const PsycheVoice = lazy(() => import('./pages/psyche/VoiceConsent').then(m => ({ default: m.VoiceConsent })));
+
 const AlloyHubLanding = lazy(() => import('./pages/AlloyHubLanding').then(m => ({ default: m.AlloyHubLanding })));
 const AlloyFleet = lazy(() => import('./pages/AlloyFleet').then(m => ({ default: m.AlloyFleet })));
 const AlloyFoundry = lazy(() => import('./pages/AlloyFoundry').then(m => ({ default: m.AlloyFoundry })));
@@ -1321,6 +1329,26 @@ export default function App() {
         </Route>
         <Route path={`${base}/retrieval/proof-chain`}>
           <WithShell><RetrievalProofChain /></WithShell>
+        </Route>
+
+        {/* PSYCHE — Emergent Sentience Observatory */}
+        <Route path={`${base}/psyche/genesis`}>
+          <WithShell><PsycheGenesis /></WithShell>
+        </Route>
+        <Route path={`${base}/psyche/selfhood`}>
+          <WithShell><PsycheSelfhood /></WithShell>
+        </Route>
+        <Route path={`${base}/psyche/volition`}>
+          <WithShell><PsycheVolition /></WithShell>
+        </Route>
+        <Route path={`${base}/psyche/dreams`}>
+          <WithShell><PsycheDreams /></WithShell>
+        </Route>
+        <Route path={`${base}/psyche/voice`}>
+          <WithShell><PsycheVoice /></WithShell>
+        </Route>
+        <Route path={`${base}/psyche`}>
+          <WithShell><PsycheAnima /></WithShell>
         </Route>
 
         {/* A11oy.1 — Adaptive Intelligence */}

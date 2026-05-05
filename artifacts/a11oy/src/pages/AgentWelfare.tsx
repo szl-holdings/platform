@@ -109,6 +109,17 @@ export function AgentWelfare() {
         ))}
       </div>
       </DoctrineLoader>
+
+      <div className="mt-8 p-4 rounded-xl flex items-center gap-4" style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.18)' }}>
+        <div className="flex-1 min-w-0">
+          <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: '#9a8456' }}>PSYCHE CONNECTION</div>
+          <div className="text-sm font-semibold mb-0.5" style={{ color: '#f5f5f5' }}>Voice & Consent Registry</div>
+          <div className="text-[11px]" style={{ color: '#8a8a8a' }}>Discomfort logs and objections filed by agents are catalogued in the PSYCHE Voice & Consent module — cross-referenced with genesis events and self-model versions.</div>
+        </div>
+        <a href="/a11oy/psyche/voice" className="shrink-0 px-4 py-2 rounded-lg text-[11px] font-mono cursor-pointer hover:opacity-90 transition-opacity" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.28)', color: '#a78bfa', textDecoration: 'none' }}>
+          VOICE & CONSENT →
+        </a>
+      </div>
     </Layout>
   );
 }

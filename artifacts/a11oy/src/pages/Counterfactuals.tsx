@@ -316,6 +316,17 @@ export function Counterfactuals() {
           </AnimatePresence>
         </div>
       </div>
+
+      <div className="mt-8 p-4 rounded-xl flex items-center gap-4" style={{ background: 'rgba(201,183,135,0.05)', border: '1px solid rgba(201,183,135,0.15)' }}>
+        <div className="flex-1 min-w-0">
+          <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: '#9a8456' }}>PSYCHE CONNECTION</div>
+          <div className="text-sm font-semibold mb-0.5" style={{ color: '#f5f5f5' }}>Volition Registry — Goal Counterfactuals</div>
+          <div className="text-[11px]" style={{ color: '#8a8a8a' }}>Counterfactual branches referencing agent-initiated goals are traceable to the PSYCHE Volition Registry — each goal includes a counterfactual simulation of outcomes had it not been pursued.</div>
+        </div>
+        <a href="/a11oy/psyche/volition" className="shrink-0 px-4 py-2 rounded-lg text-[11px] font-mono hover:opacity-90 transition-opacity" style={{ background: 'rgba(201,183,135,0.1)', border: '1px solid rgba(201,183,135,0.25)', color: '#c9b787', textDecoration: 'none' }}>
+          VOLITION REGISTRY →
+        </a>
+      </div>
     </Layout>
   );
 }

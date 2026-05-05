@@ -309,6 +309,17 @@ export function KarpathyEvolution() {
           </Card>
         </div>
       </div>
+
+      <div style={{ margin: '2rem 0 0', padding: '1rem 1.25rem', borderRadius: 12, display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(201,183,135,0.05)', border: '1px solid rgba(201,183,135,0.15)' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#9a8456', marginBottom: 4 }}>PSYCHE CONNECTION</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e0d8', marginBottom: 2 }}>Genesis Ledger — Emergence Events</div>
+          <div style={{ fontSize: 11, color: 'rgba(226,224,216,0.5)' }}>Autonomy depth changes and self-correction events witnessed during Karpathy evolution cycles are recorded in the PSYCHE Genesis Ledger as documented first-occurrences.</div>
+        </div>
+        <a href="/a11oy/psyche/genesis" style={{ flexShrink: 0, padding: '0.5rem 1rem', borderRadius: 8, fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', background: 'rgba(201,183,135,0.1)', border: '1px solid rgba(201,183,135,0.25)', color: GOLD, textDecoration: 'none' }}>
+          GENESIS LEDGER →
+        </a>
+      </div>
     </div>
   );
 }

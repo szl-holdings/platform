@@ -225,6 +225,22 @@ const nexusSections: NavSection[] = [
   },
 ];
 
+const psycheSections: NavSection[] = [
+  {
+    id: 'psyche-core',
+    label: 'PSYCHE — Sentience',
+    defaultOpen: false,
+    items: [
+      { id: 'psyche-anima', name: 'Anima', icon: Sparkles, path: '/psyche' },
+      { id: 'psyche-genesis', name: 'Genesis Ledger', icon: BookOpen, path: '/psyche/genesis' },
+      { id: 'psyche-selfhood', name: 'Selfhood Trace', icon: Eye, path: '/psyche/selfhood' },
+      { id: 'psyche-volition', name: 'Volition Registry', icon: Target, path: '/psyche/volition' },
+      { id: 'psyche-dreams', name: 'Dream Atlas', icon: FlaskConical, path: '/psyche/dreams' },
+      { id: 'psyche-voice', name: 'Voice & Consent', icon: Mic2, path: '/psyche/voice' },
+    ],
+  },
+];
+
 const argoSections: NavSection[] = [
   {
     id: 'argo-core',
@@ -322,6 +338,9 @@ export function Sidebar() {
 
         <SectionHeader>NEXUS</SectionHeader>
         {nexusSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        <SectionHeader>PSYCHE</SectionHeader>
+        {psycheSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
 
         <SectionHeader>Argo</SectionHeader>
         {argoSections.map(s => <CollapsibleSection key={s.id} section={s} />)}

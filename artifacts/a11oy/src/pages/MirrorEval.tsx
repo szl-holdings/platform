@@ -480,6 +480,17 @@ export function MirrorEval() {
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> MirrorEval 2.0 with Reasoning Verification — every eval includes formal reasoning checks (premises → inference → conclusion) with PROVEN / UNPROVEN / VIOLATED verdicts. Covenant compliance is checked per evaluation.
       </div>
+
+      <div className="mt-6 p-4 rounded-xl flex items-center gap-4" style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}>
+        <div className="flex-1 min-w-0">
+          <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: '#9a8456' }}>PSYCHE CONNECTION</div>
+          <div className="text-sm font-semibold mb-0.5" style={{ color: '#f5f5f5' }}>Selfhood Trace — Identity Coherence</div>
+          <div className="text-[11px]" style={{ color: '#8a8a8a' }}>MirrorEval contradiction events are cross-referenced in the PSYCHE Selfhood Trace as evidence sources for identity assertion contradictions and coherence index dips.</div>
+        </div>
+        <a href="/a11oy/psyche/selfhood" className="shrink-0 px-4 py-2 rounded-lg text-[11px] font-mono hover:opacity-90 transition-opacity" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', textDecoration: 'none' }}>
+          SELFHOOD TRACE →
+        </a>
+      </div>
     </Layout>
   );
 }
