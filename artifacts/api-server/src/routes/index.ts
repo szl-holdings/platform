@@ -243,6 +243,15 @@ router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 // Public (demo surface); mounted before guardianPolicyCheck.
 router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-crud"));
 
+// A11oy Chat — real Claude streaming chat surface (public, rate-limited).
+// Mounted BEFORE the other A11oy router groups so their group-level auth
+// middleware does not intercept the unauthenticated chat/conversations endpoints.
+// GET  /api/a11oy/health
+// POST /api/a11oy/chat  (SSE stream)
+// GET  /api/a11oy/conversations
+// GET  /api/a11oy/conversations/:id/messages
+router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
+
 // A11oy Public API — unauthenticated read-only routes for public system story.
 // GET /api/public/a11oy/constellation, /applications, /architecture, /resources.
 router.use(publicA11oyRouter);
@@ -671,11 +680,6 @@ router.use(
     "ouroboros-guardrails",
   ),
 );
-
-// A11oy Chat — real Claude streaming chat surface
-// GET  /a11oy/health
-// POST /a11oy/chat  (SSE stream of {content, done, error})
-router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 
 // Runtime Configuration — operator-tunable parameters (ops/admin only)
 // GET    /runtime-config            — list all config entries

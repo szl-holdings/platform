@@ -537,6 +537,9 @@ const PUBLIC_PREFIXES = [
   // endpoint backing the A11oy Doctrine pages. Public in demo mode (DB-backed,
   // no tenant PII). Write routes are CSRF-protected via global csrfMiddleware.
   "/api/doctrine/",
+  "/api/a11oy/chat",
+  "/api/a11oy/health",
+  "/api/a11oy/conversations",
 ];
 
 /**
