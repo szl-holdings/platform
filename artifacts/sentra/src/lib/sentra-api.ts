@@ -489,6 +489,231 @@ export async function listHunts(): Promise<{ hunts: HuntListItem[]; source: 'liv
   return { hunts, source: (body.source as 'live' | 'seed') ?? 'live' };
 }
 
+// ── Remediation Pipeline ────────────────────────────────────────────────────
+
+export type RemediationStage =
+  | 'ingested'
+  | 'contextualized'
+  | 'recommended'
+  | 'simulated'
+  | 'policy-gated'
+  | 'approved'
+  | 'executing'
+  | 'verifying'
+  | 'resolved'
+  | 'failed';
+
+export type RemediationOutcome = 'pending' | 'verified' | 'regressed' | 'failed' | 'risk-accepted';
+
+export interface RemediationRecommendation {
+  action: string;
+  type: 'patch' | 'config-change' | 'compensating-control' | 'accept-risk';
+  confidence: number;
+  rationale: string;
+  alternatives?: Array<{ action: string; type: string; confidence: number }>;
+  generatedAt: string;
+}
+
+export interface RemediationSimulation {
+  affectedSystemCount: number;
+  estimatedDowntimeMinutes: number;
+  blastRadius: 'low' | 'medium' | 'high';
+  dependencyImpact: string[];
+  rollbackPlan: string;
+  simulatedAt: string;
+}
+
+export interface RemediationPolicy {
+  requiredTier: 'auto' | 'operator' | 'executive';
+  tierReason: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  decision?: 'approved' | 'rejected';
+  rejectionReason?: string;
+}
+
+export interface RemediationExecution {
+  instructions: string;
+  dispatchedTo: string[];
+  startedAt: string;
+  completedAt?: string;
+  executor?: string;
+  result?: 'success' | 'partial' | 'failed';
+  notes?: string;
+}
+
+export interface RemediationVerification {
+  verifiedAt?: string;
+  verifiedBy?: string;
+  method: 'manual' | 'rescan' | 'automated';
+  vulnerabilityResolved: boolean;
+  regressionDetected: boolean;
+  notes?: string;
+}
+
+export interface RemediationTimelineEntry {
+  id: string;
+  stage: RemediationStage;
+  message: string;
+  actor: string;
+  timestamp: string;
+  proofId?: string;
+}
+
+export interface RemediationCase {
+  id: string;
+  cveId?: string | null;
+  title: string;
+  description: string;
+  severity: IncidentSeverity;
+  source: string;
+  sourceRef?: string | null;
+  affectedAsset?: string | null;
+  affectedAssets: string[];
+  stage: RemediationStage;
+  outcome: RemediationOutcome;
+  context: Record<string, unknown>;
+  recommendation?: RemediationRecommendation | null;
+  simulation?: RemediationSimulation | null;
+  policy?: RemediationPolicy | null;
+  execution?: RemediationExecution | null;
+  verification?: RemediationVerification | null;
+  proofChainIds: string[];
+  timeline: RemediationTimelineEntry[];
+  assignedTo?: string;
+  detectedAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
+export interface RemediationMetrics {
+  source: 'live' | 'seed';
+  total: number;
+  open: number;
+  resolved: number;
+  failed: number;
+  successRate: number;
+  meanTimeToRemediateSeconds: number | null;
+  byStage: Record<string, number>;
+  bySeverity: Record<string, number>;
+  approvalBottleneck: { pending: number; oldestAgeMinutes: number };
+  lastUpdated: string;
+}
+
+export async function listRemediationCases(): Promise<{
+  cases: RemediationCase[];
+  source: 'live' | 'seed';
+}> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/cases`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`${res.status}`);
+    const body = (await res.json()) as { cases: RemediationCase[]; source: 'live' | 'seed' };
+    return body;
+  } catch {
+    return { cases: [], source: 'seed' };
+  }
+}
+
+export async function getRemediationMetrics(): Promise<RemediationMetrics | null> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/metrics`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as RemediationMetrics;
+  } catch {
+    return null;
+  }
+}
+
+export async function ingestRemediationFinding(payload: {
+  cveId?: string;
+  title: string;
+  description: string;
+  severity: IncidentSeverity;
+  affectedAssets?: string[];
+  source?: string;
+  sourceRef?: string;
+  context?: Record<string, unknown>;
+  assignedTo?: string;
+}): Promise<{ ok: true; case: RemediationCase } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/cases`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true, case: (await res.json()) as RemediationCase };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+async function postCaseAction(
+  id: string,
+  action: string,
+  body?: Record<string, unknown>,
+): Promise<{ ok: true; case: RemediationCase } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/cases/${encodeURIComponent(id)}/${action}`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(body ?? {}),
+    });
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: err.error ?? `Request failed (${res.status})` };
+    }
+    return { ok: true, case: (await res.json()) as RemediationCase };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// Lifecycle actions: actor / approver / executor / verifier identities are
+// resolved server-side from the authenticated principal (req.user). The
+// frontend deliberately does not send those fields — that's enforced by the
+// API to prevent self-asserted authority.
+export const contextualizeRemediation = (id: string) => postCaseAction(id, 'contextualize');
+export const recommendRemediation = (id: string) => postCaseAction(id, 'recommend');
+export const simulateRemediation = (id: string) => postCaseAction(id, 'simulate');
+export const evaluatePolicyRemediation = (id: string) => postCaseAction(id, 'policy');
+export const approveRemediation = (
+  id: string,
+  decision: 'approved' | 'rejected',
+  reason?: string,
+) => postCaseAction(id, 'approve', { decision, reason });
+export const executeRemediation = (
+  id: string,
+  result: 'success' | 'partial' | 'failed',
+  notes?: string,
+) => postCaseAction(id, 'execute', { result, notes });
+export const verifyRemediation = (
+  id: string,
+  payload: {
+    method: 'manual' | 'rescan' | 'automated';
+    vulnerabilityResolved: boolean;
+    regressionDetected?: boolean;
+    notes?: string;
+  },
+) => postCaseAction(id, 'verify', payload);
+
+export async function seedRemediationDemo(): Promise<{ seeded: number; skipped: boolean } | null> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/seed-demo`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { seeded: number; skipped: boolean };
+  } catch {
+    return null;
+  }
+}
+
 // ── PQC & Hardware Trust ────────────────────────────────────────────────────
 
 export interface PqcStandardItem {

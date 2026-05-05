@@ -235,6 +235,11 @@ router.use(lazyMatch("/sentra/ml", () => import("./sentra-ml-scoring"), "sentra-
 // case study, Prism Bus event stream.
 router.use(lazyMatch("/sentra/a11oy", () => import("./sentra-a11oy"), "sentra-a11oy"));
 
+// Sentra Governed Vulnerability Remediation Pipeline — A11oy-governed
+// remediation lifecycle (ingest → context → recommend → simulate → policy
+// → execute → verify → outcome) closing the "Patching Gap".
+router.use(lazyMatch("/sentra/remediation", () => import("./sentra-remediation"), "sentra-remediation"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

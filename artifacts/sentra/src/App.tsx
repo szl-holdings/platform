@@ -179,6 +179,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/assets', label: 'Asset Risk Graph', icon: Cpu, comp: L(() => import('@/pages/asset-risk-graph')) },
       { path: '/recovery', label: 'Recovery Readiness', icon: RotateCcw, comp: L(() => import('@/pages/recovery-readiness')) },
       { path: '/incident', label: 'Incident Commander', icon: Activity, comp: L(() => import('@/pages/incident-commander')) },
+      { path: '/remediation', label: 'Remediation Pipeline', icon: Sparkles, comp: L(() => import('@/pages/remediation-pipeline')) },
       { path: '/exposure', label: 'Exposure Board', icon: BarChart3, comp: L(() => import('@/pages/exposure-board')) },
       { path: '/controls', label: 'Control Drift', icon: ShieldCheck, comp: L(() => import('@/pages/control-drift')) },
       { path: '/resilience', label: 'Resilience Scorecard', icon: Shield, comp: L(() => import('@/pages/resilience-scorecard')) },
