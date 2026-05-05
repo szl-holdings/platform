@@ -16,7 +16,10 @@ export type ModelCapability =
   | 'summarization'
   | 'tool_calling'
   | 'structured_output'
-  | 'long_context';
+  | 'long_context'
+  | 'citations'
+  | 'files_api'
+  | 'batch_api';
 
 export type ProviderName =
   | 'openai'
@@ -39,6 +42,19 @@ export interface ModelSpec {
   supportsExtendedThinking: boolean;
   supportsStructuredOutput: boolean;
   supportsVision: boolean;
+  /** True when the Anthropic prompt-caching API (cache_control breakpoints) is supported. */
+  supportsPromptCaching?: boolean;
+  /** True when this model supports the Anthropic Batch API (/v1/messages/batches). */
+  supportsBatchApi?: boolean;
+  /** True when this model can consume documents via the Anthropic Files API. */
+  supportsFilesApi?: boolean;
+  /** True when citations: { enabled: true } is supported on document blocks. */
+  supportsCitations?: boolean;
+  /**
+   * True for first-party Claude family models (Opus/Sonnet/Haiku).
+   * Used to group the Claude family under the "Mythos Tier" label in the Console.
+   */
+  mythosModel?: boolean;
 }
 
 export const MODEL_REGISTRY: Record<string, ModelSpec> = {
@@ -104,7 +120,7 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     supportsVision: true,
   },
 
-  // ── Anthropic ──────────────────────────────────────────────────────────────
+  // ── Anthropic — Mythos Tier ────────────────────────────────────────────────
   'claude-opus-4-7': {
     id: 'claude-opus-4-7',
     displayName: 'Claude Opus 4.7',
@@ -114,11 +130,16 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     inputCostPer1kTokens: 0.015,
     outputCostPer1kTokens: 0.075,
     avgLatencyMs: 2_200,
-    capabilities: ['reasoning', 'code', 'creative', 'long_context', 'structured_output'],
+    capabilities: ['reasoning', 'code', 'creative', 'long_context', 'structured_output', 'tool_calling', 'citations', 'files_api', 'batch_api'],
     tier: 'frontier',
     supportsExtendedThinking: true,
     supportsStructuredOutput: true,
     supportsVision: true,
+    supportsPromptCaching: true,
+    supportsBatchApi: true,
+    supportsFilesApi: true,
+    supportsCitations: true,
+    mythosModel: true,
   },
   'claude-sonnet-4-6': {
     id: 'claude-sonnet-4-6',
@@ -129,26 +150,56 @@ export const MODEL_REGISTRY: Record<string, ModelSpec> = {
     inputCostPer1kTokens: 0.003,
     outputCostPer1kTokens: 0.015,
     avgLatencyMs: 1_200,
-    capabilities: ['reasoning', 'code', 'tool_calling', 'structured_output'],
+    capabilities: ['reasoning', 'code', 'tool_calling', 'structured_output', 'citations', 'files_api', 'batch_api'],
     tier: 'standard',
+    supportsExtendedThinking: true,
+    supportsStructuredOutput: true,
+    supportsVision: true,
+    supportsPromptCaching: true,
+    supportsBatchApi: true,
+    supportsFilesApi: true,
+    supportsCitations: true,
+    mythosModel: true,
+  },
+  'claude-haiku-4-5': {
+    id: 'claude-haiku-4-5',
+    displayName: 'Claude Haiku 4.5',
+    provider: 'anthropic',
+    contextWindow: 200_000,
+    maxOutputTokens: 8_192,
+    inputCostPer1kTokens: 0.0008,
+    outputCostPer1kTokens: 0.004,
+    avgLatencyMs: 500,
+    capabilities: ['speed', 'extraction', 'summarization', 'tool_calling', 'structured_output', 'citations', 'files_api', 'batch_api'],
+    tier: 'fast',
     supportsExtendedThinking: false,
     supportsStructuredOutput: true,
     supportsVision: true,
+    supportsPromptCaching: true,
+    supportsBatchApi: true,
+    supportsFilesApi: true,
+    supportsCitations: true,
+    mythosModel: true,
   },
   'claude-3-5-sonnet-20241022': {
     id: 'claude-3-5-sonnet-20241022',
-    displayName: 'Claude 3.5 Sonnet',
+    displayName: 'Claude 3.5 Sonnet (Legacy)',
     provider: 'anthropic',
     contextWindow: 200_000,
     maxOutputTokens: 8_192,
     inputCostPer1kTokens: 0.003,
     outputCostPer1kTokens: 0.015,
     avgLatencyMs: 1_000,
-    capabilities: ['reasoning', 'code', 'tool_calling', 'structured_output'],
+    capabilities: ['reasoning', 'code', 'tool_calling', 'structured_output', 'citations', 'files_api', 'batch_api'],
     tier: 'standard',
     supportsExtendedThinking: false,
     supportsStructuredOutput: true,
     supportsVision: true,
+    supportsPromptCaching: true,
+    supportsBatchApi: true,
+    supportsFilesApi: true,
+    supportsCitations: true,
+    mythosModel: true,
   },
 
   // ── DeepSeek ───────────────────────────────────────────────────────────────

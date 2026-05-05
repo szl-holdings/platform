@@ -90,6 +90,7 @@ const BoardroomMode = lazy(() => import('./pages/BoardroomMode').then(m => ({ de
 const InvestorDemo = lazy(() => import('./pages/InvestorDemo').then(m => ({ default: m.InvestorDemo })));
 const FlexCacheRuntime = lazy(() => import('./pages/FlexCacheRuntime').then(m => ({ default: m.FlexCacheRuntime })));
 const Terminal = lazy(() => import('./pages/Terminal').then(m => ({ default: m.Terminal })));
+const Console = lazy(() => import('./pages/Console').then(m => ({ default: m.Console })));
 const Fabric = lazy(() => import('./pages/Fabric').then(m => ({ default: m.Fabric })));
 const FabricCockpit = lazy(() => import('./pages/fabric/FabricCockpit').then(m => ({ default: m.FabricCockpit })));
 const FabricVerticalsCommand = lazy(() => import('./pages/fabric/VerticalsCommand').then(m => ({ default: m.VerticalsCommand })));
@@ -451,7 +452,11 @@ export default function App() {
           <WithShell><FlexCacheRuntime /></WithShell>
         </Route>
         <Route path={`${base}/terminal`} component={Terminal} />
+        <Route path={`${base}/console`}>
+          <WithShell><Console /></WithShell>
+        </Route>
         <Route path={`${base}/praxis`} component={Praxis} />
+        <Route path={`${base}/nexus`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
         <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />

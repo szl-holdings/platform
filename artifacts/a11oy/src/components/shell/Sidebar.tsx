@@ -7,7 +7,7 @@ import {
   Globe, Crosshair, Activity, Radio, BarChart3, Map, Shield, Server,
   Cpu, Eye, Zap, Network, Settings, Users, Terminal, Layers,
   Briefcase, FileText, Target, GitBranch, Database, Lock,
-  GitFork, History, BookOpen
+  GitFork, History, BookOpen, SquareTerminal
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
@@ -28,6 +28,7 @@ interface NavSection {
 }
 
 const orchestrationItems: NavItem[] = [
+  { id: 'console', name: 'Console', icon: SquareTerminal, path: '/console' },
   { id: 'atlas', name: 'Atlas', icon: LayoutGrid, path: '/atlas' },
   { id: 'tokens', name: 'Tokens', icon: Palette, path: '/tokens' },
   { id: 'voice', name: 'Voice', icon: Mic2, path: '/voice' },

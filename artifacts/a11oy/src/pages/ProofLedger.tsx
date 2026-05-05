@@ -167,9 +167,28 @@ export function ProofLedger() {
 
   const { data: reliquaryAttestations } = useApiData<ReliquaryAttestation[]>('/reliquary/attestations', []);
 
+  // Deep-link: ?proofId=<encoded-id> — selects and highlights the matching chain
+  const deepLinkedProofId = typeof window !== 'undefined'
+    ? (new URLSearchParams(window.location.search).get('proofId') ?? null)
+    : null;
+  const resolvedProofId = deepLinkedProofId ? decodeURIComponent(deepLinkedProofId) : null;
+
+  // Default selection: first chain
   useEffect(() => {
     if (data?.chains?.[0]?.id && !selectedChain) setSelectedChain(data.chains[0].id);
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Deep-link selection: override default when proofId is present
+  useEffect(() => {
+    if (!resolvedProofId || !data?.chains) return;
+    const match = data.chains.find(
+      (c) =>
+        c.id === resolvedProofId ||
+        c.hash.includes(resolvedProofId) ||
+        c.nodes.some((n) => n.hash.includes(resolvedProofId) || n.id === resolvedProofId),
+    );
+    if (match) setSelectedChain(match.id);
+  }, [resolvedProofId, data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const attestations = attestationList ?? (Array.isArray(reliquaryAttestations) ? reliquaryAttestations : []);
 

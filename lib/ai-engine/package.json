@@ -51,7 +51,8 @@
     "./agent-tool-loop": "./src/agent-tool-loop.ts",
     "./tool-bridge": "./src/tool-bridge.ts",
     "./data-fabric": "./src/data-fabric/index.ts",
-    "./passport-resolver": "./src/passport-resolver.ts"
+    "./passport-resolver": "./src/passport-resolver.ts",
+    "./model-registry": "./src/model-registry.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

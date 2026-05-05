@@ -260,6 +260,13 @@ router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-cru
 // GET  /api/a11oy/conversations/:id/messages
 router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 
+// A11oy Console — Workbench BFF route.
+// GET  /api/a11oy/console/models
+// POST /api/a11oy/console/count-tokens
+// POST /api/a11oy/console/save-workcell
+// POST /api/a11oy/console/run  (SSE stream — PCE gate + MirrorEval + ProofLedger)
+router.use("/a11oy/console", lazyMount(() => import("./a11oy-console"), "a11oy-console"));
+
 // A11oy Public API — unauthenticated read-only routes for public system story.
 // GET /api/public/a11oy/constellation, /applications, /architecture, /resources.
 router.use(publicA11oyRouter);
