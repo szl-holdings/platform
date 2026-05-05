@@ -905,3 +905,15 @@ id = "-YToCAU0qVpR89jjl5fMG"
 uri = "file://dossier/SZL_Holdings_APEX_Meeting_Pack.zip"
 type = "unspecified"
 title = "SZL Holdings APEX Meeting Pack (6 PDFs -- CLEAN, no forbidden strings)"
+
+[[outputs]]
+id = "1wqWhg18XDKGT9n-Vag0i"
+uri = "file://.local/deliverables/ouroboros-thesis-v9.pdf"
+type = "pdf"
+title = "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL (17 pages)"
+
+[[outputs]]
+id = "yGA_5eFMm1nEKwJOkjEwd"
+uri = "file://.local/deliverables/ouroboros-thesis-v10.pdf"
+type = "pdf"
+title = "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT (11 pages)"
