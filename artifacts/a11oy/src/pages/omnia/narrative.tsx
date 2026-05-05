@@ -95,14 +95,14 @@ export default function OmniaNarrativePage() {
     headline: 'Portfolio operating within parameters — two elevated signals require attention',
     summary: 'The SZL Holdings portfolio is stable across 12 active domains.',
     paragraphs: [
-      { id: 'p-001', text: 'PARAGON has elevated the APT-41 threat cluster to HIGH confidence (0.92) following corroborated IOC matches across 14 indicators. Three downstream assets in the DOMAINE portfolio have been flagged for precautionary access review, with Property TER-8821 already restored to compliance following a prior governance action.', domain: 'aegis', entityRefs: ['e-apt41'], confidence: 0.92, deepLink: '/aegis' },
+      { id: 'p-001', text: 'Sentra has elevated the APT-41 threat cluster to HIGH confidence (0.92) following corroborated IOC matches across 14 indicators. Three downstream assets in the DOMAINE portfolio have been flagged for precautionary access review, with Property TER-8821 already restored to compliance following a prior governance action.', domain: 'aegis', entityRefs: ['e-apt41'], confidence: 0.92, deepLink: '/sentra' },
       { id: 'p-002', text: 'MV Stellarwind is tracking 14 nm off its planned route. The SEXTANT digital twin places the insurance tier breach probability at 82%, approaching the 85% notification threshold. No adverse weather or piracy risk detected in the current deviation zone.', domain: 'vessels', entityRefs: ['e-stellarwind'], confidence: 0.88, deepLink: '/vessels' },
       { id: 'p-003', text: 'DOMAINE property TER-4402 remains on covenant watch with a DSCR of 1.01x — marginally above the 1.0x floor. Legal matter CJL-2291 (Counsel) encumbers this asset. The 48-hour response deadline requires immediate attention from assigned counsel M. Okafor.', domain: 'terra', entityRefs: ['e-ter4402', 'e-cjl2291'], confidence: 0.87, deepLink: '/terra' },
       { id: 'p-004', text: 'The A11oy execution fabric is operational with 24 active workcells and 3 pending human-in-the-loop approvals. The signal mesh ingested 1,284 signals in the last hour across 47 sources. Two drift alerts are active in the design token layer.', domain: 'a11oy', entityRefs: ['e-a11oy-fabric'], confidence: 0.97, deepLink: '/a11oy' },
       { id: 'p-005', text: 'Aggregate portfolio NAV stands at $1.24B (+0.4% over 24h), composed of $841M real estate positions, $243M maritime assets, $112M liquid holdings, and $44M advisory fee income streams. OMNIA provenance traces all constituent values to originating signals via the A11oy proof ledger.', domain: 'holdings', entityRefs: ['e-portfolio-nav'], confidence: 0.96, deepLink: '/' },
     ],
     signals: [
-      { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: new Date(Date.now() - 45_000).toISOString(), deepLink: '/aegis' },
+      { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: new Date(Date.now() - 45_000).toISOString(), deepLink: '/sentra' },
       { id: 's-002', label: 'MV Stellarwind deviation — 82%', domain: 'vessels', severity: 'medium', timestamp: new Date(Date.now() - 3 * 60_000).toISOString(), deepLink: '/vessels' },
     ],
     generatedAt: new Date(Date.now() - 3 * 60_000).toISOString(),

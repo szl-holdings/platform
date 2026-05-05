@@ -34,7 +34,7 @@ export function InfrastructureTab({ rmmHealth }: Props) {
           <div style={{ color: TEXT.muted, fontSize: '12px' }}>Loading provider status…</div>
         ) : !rmm || rmm.providers.total === 0 ? (
           <div style={{ color: TEXT.muted, fontSize: '12px', padding: '0.75rem 0' }}>
-            No providers configured. Add one at <span style={{ color: '#d4a054', fontFamily: 'var(--font-mono)' }}>/ops/provider-settings</span> in Aegis.
+            No providers configured. Add one at <span style={{ color: '#d4a054', fontFamily: 'var(--font-mono)' }}>/ops/provider-settings</span> in Sentra.
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
@@ -101,10 +101,10 @@ export function InfrastructureTab({ rmmHealth }: Props) {
             {rmm.healing.pendingApprovals > 0 && (
               <div style={{ padding: '0.625rem 1rem', borderRadius: '0.5rem', background: 'rgba(212,160,84,0.08)', border: '1px solid rgba(212,160,84,0.2)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <AlertTriangle style={{ width: 14, height: 14, color: '#d4a054' }} />
-                <span style={{ fontSize: '12px', color: '#d4a054' }}>{rmm.healing.pendingApprovals} execution{rmm.healing.pendingApprovals > 1 ? 's' : ''} awaiting approval in Aegis RMM Console</span>
+                <span style={{ fontSize: '12px', color: '#d4a054' }}>{rmm.healing.pendingApprovals} execution{rmm.healing.pendingApprovals > 1 ? 's' : ''} awaiting approval in Sentra RMM Console</span>
               </div>
             )}
-            {Object.keys(rmm.healing.stats).length === 0 && <div style={{ fontSize: '12px', color: TEXT.muted }}>No healing executions recorded yet. Configure playbooks in the Aegis Ops Console.</div>}
+            {Object.keys(rmm.healing.stats).length === 0 && <div style={{ fontSize: '12px', color: TEXT.muted }}>No healing executions recorded yet. Configure playbooks in the Sentra Ops Console.</div>}
           </div>
         ) : <div style={{ color: TEXT.muted, fontSize: '12px' }}>Loading healing data…</div>}
       </div>

@@ -33,7 +33,7 @@ export const OPS_FEATURES: Record<string, OpsFeature> = {
     description:
       'Every firing alert across every platform, ranked by impact and ready for one-click action.',
     longDescription:
-      'The Alert Inbox replaces a tab-graveyard of monitoring tools with a single ranked queue. Alerts from Lyte (latency, errors), Aegis (security), Vessels (fleet), and every other domain land in one place — already enriched with context, owner, and the playbook that resolves them.',
+      'The Alert Inbox replaces a tab-graveyard of monitoring tools with a single ranked queue. Alerts from Lyte (latency, errors), Sentra (cyber), Vessels (fleet), and every other domain land in one place — already enriched with context, owner, and the playbook that resolves them.',
     icon: AlertTriangle,
     accent: '#ef4444',
     bgGradient: 'from-red-500/20',

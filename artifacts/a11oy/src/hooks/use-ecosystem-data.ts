@@ -19,7 +19,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
       ],
       alerts: { count: 2, severity: 'low' },
       sparkline: [82, 85, 88, 86, 90, 91],
-      link: '/aegis',
+      link: '/sentra',
     },
     {
       id: 'vessels',

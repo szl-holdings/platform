@@ -20,8 +20,8 @@ export function MarketingFooter() {
           <h4 className="text-white font-medium mb-4">Platforms</h4>
           <ul className="space-y-3">
             <li>
-              <Link href="/marketing/apps/aegis" className="hover:text-white transition-colors">
-                PARAGON
+              <Link href="/sentra/" className="hover:text-white transition-colors">
+                Sentra
               </Link>
             </li>
             <li>

@@ -100,16 +100,16 @@ export default function AegisPricingPage() {
 
       <div className="border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a href="/aegis/" className="flex items-center gap-2.5">
+          <a href="/sentra/" className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: 'rgba(245,245,245,0.2)', border: '1px solid rgba(245,245,245,0.3)' }}
             >
               <Shield className="w-3.5 h-3.5" style={{ color: ACCENT }} />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white">PARAGON</span>
+            <span className="text-sm font-semibold tracking-tight text-white">Sentra</span>
           </a>
-          <a href="/aegis/" className="text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <a href="/sentra/" className="text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
             ← Back to Platform
           </a>
         </div>

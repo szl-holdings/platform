@@ -333,6 +333,11 @@ export default function SentraLandingPage() {
             <span className="text-[10px] text-[#444]">Orchestrated by a11oy</span>
           </div>
         </div>
+        <div className="max-w-5xl mx-auto mt-4 pt-4 border-t border-[rgba(255,255,255,0.03)]">
+          <p className="text-[10px] text-[#333] font-mono tracking-wide text-center">
+            Provenance: Sentra absorbed Aegis (cyber/defense intelligence) — all former Aegis capabilities now live here.
+          </p>
+        </div>
       </footer>
 
       <ContactModal

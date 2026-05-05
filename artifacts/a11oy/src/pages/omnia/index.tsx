@@ -129,7 +129,7 @@ export default function OmniaHubPage() {
     headline: 'Portfolio operating within parameters — two elevated signals require attention',
     summary: 'The SZL Holdings portfolio is stable across 12 active domains. PARAGON has elevated an APT-41 cluster to HIGH, with downstream exposure flagged in DOMAINE. MV Stellarwind reports a 14 nm deviation — insurance tier breach at 82% threshold. OMNIA synthesis cycle running continuously.',
     signals: [
-      { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: new Date(Date.now() - 45_000).toISOString(), deepLink: '/aegis' },
+      { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: new Date(Date.now() - 45_000).toISOString(), deepLink: '/sentra' },
       { id: 's-002', label: 'MV Stellarwind deviation — 82% threshold', domain: 'vessels', severity: 'medium', timestamp: new Date(Date.now() - 3 * 60_000).toISOString(), deepLink: '/vessels' },
       { id: 's-003', label: 'CJL-2291 deadline in 48h', domain: 'counsel', severity: 'medium', timestamp: new Date(Date.now() - 60 * 60_000).toISOString(), deepLink: '/counsel' },
       { id: 's-004', label: 'TER-4402 covenant watch', domain: 'terra', severity: 'low', timestamp: new Date(Date.now() - 2 * 60_000).toISOString(), deepLink: '/terra' },

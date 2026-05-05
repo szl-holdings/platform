@@ -126,7 +126,7 @@ export const VERTICALS: readonly VerticalProfile[] = [
     connectedA11oyLayers: ['Signal Mesh', 'Chainlight', 'Proof Chain', 'Sentra', 'Pallas'],
     maturityStage: 'scaling',
     priorityLevel: 'critical',
-    route: '/aegis',
+    route: '/sentra',
     colorToken: '#f5f5f5',
     icon: '⬡',
     innovationSeed: {

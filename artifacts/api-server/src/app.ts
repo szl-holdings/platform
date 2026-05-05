@@ -249,6 +249,16 @@ app.get('/', (_req: Request, res: Response) => {
   res.status(200).send('OK');
 });
 
+// Aegis deprecation redirect — /aegis/* → /sentra/*
+// Aegis was consolidated into Sentra as the single cyber/defense surface.
+// All legacy /aegis/* paths issue a permanent (301) redirect to the
+// equivalent /sentra/* path so bookmarks and external links continue to work.
+app.use('/aegis', (req: Request, res: Response) => {
+  const remainder = req.path === '/' ? '' : req.path;
+  const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  res.redirect(301, `/sentra${remainder}${qs}`);
+});
+
 // --- Substrate MCP gateway proxy ---------------------------------------------
 // Proxies /mcp/* to the substrate-mcp-gateway sidecar (started by start.sh).
 // Mounted before session/csrf middleware so MCP traffic authenticates via
@@ -356,7 +366,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
   const platformApps = [
     { slug: 'szl-holdings', name: 'SZL Holdings Dashboard', type: 'command_surface' },
     { slug: 'command', name: 'Unified Command', type: 'command_surface' },
-    { slug: 'aegis', name: 'Aegis — Defense & Intelligence', type: 'domain_pack' },
+    { slug: 'sentra', name: 'Sentra — Cyber Resilience Command', type: 'domain_pack' },
     { slug: 'terra', name: 'Terra — Real Estate Intelligence', type: 'domain_pack' },
     { slug: 'vessels', name: 'Vessels — Maritime Intelligence', type: 'domain_pack' },
     { slug: 'carlota-jo', name: 'Carlota Jo Consulting', type: 'domain_pack' },

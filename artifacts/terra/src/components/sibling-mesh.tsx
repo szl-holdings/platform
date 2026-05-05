@@ -110,13 +110,13 @@ export function ConduitExportBadge({ scenario = 'sunbelt-multifamily-2026', prop
   );
 }
 
-interface AegisBadgeProps {
+interface SentraBadgeProps {
   assetClass?: string;
 }
 
-export function AegisTrustBadge({ assetClass = 'multifamily' }: AegisBadgeProps) {
+export function AegisTrustBadge({ assetClass = 'multifamily' }: SentraBadgeProps) {
   const { data, isError } = useQuery({
-    queryKey: ['aegis-trust-badge'],
+    queryKey: ['sentra-trust-badge'],
     queryFn: () =>
       fetch(`${API}/sentra/health`)
         .then((r) => (r.ok ? r.json() : null))
@@ -161,7 +161,7 @@ export function AegisTrustBadge({ assetClass = 'multifamily' }: AegisBadgeProps)
         </div>
         <div>
           <p style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.75)', margin: 0 }}>
-            Aegis Trust Badge
+            Sentra Trust Badge
           </p>
           <p style={{ fontSize: '9.5px', color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: 'monospace' }}>
             {assetClass} · compliance score {(trustScore * 100).toFixed(0)}%

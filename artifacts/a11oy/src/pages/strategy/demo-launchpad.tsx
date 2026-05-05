@@ -125,7 +125,7 @@ const ALL_STOPS: DemoStop[] = [
     domainColor: '#f87171',
     description:
       'Readable incident storyline: attack chain, MITRE mapping, affected assets, confidence.',
-    href: '/aegis/adversary-narrative-engine',
+    href: '/sentra/adversary-narrative-engine',
     external: true,
     time: 5,
     capability: 'Threat Intelligence',
@@ -965,9 +965,9 @@ export function DemoLaunchpad() {
                   status: 'LIVE',
                 },
                 {
-                  label: 'PARAGON — Cyber Resilience',
+                  label: 'Sentra — Cyber Resilience',
                   color: '#4ade80',
-                  href: '/aegis/',
+                  href: '/sentra/',
                   status: 'LIVE',
                 },
                 {
@@ -1055,9 +1055,9 @@ export function DemoLaunchpad() {
                 },
                 {
                   label: 'Adversary Narrative Engine',
-                  domain: 'PARAGON',
-                  color: '#f87171',
-                  href: '/aegis/adversary-narrative-engine',
+                  domain: 'Sentra',
+                  color: '#c9b787',
+                  href: '/sentra/adversary-narrative-engine',
                 },
                 {
                   label: 'Voyage Risk Twin',

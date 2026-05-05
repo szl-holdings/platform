@@ -809,7 +809,7 @@ function UnifiedLayoutInner({
           </div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {[
-              { label: "PARAGON", href: '/aegis/' },
+              { label: 'Sentra', href: '/sentra/' },
               { label: 'DOMAINE', href: '/terra/' },
               { label: 'SEXTANT', href: '/vessels/' },
               { label: 'Counsel', href: '/counsel/' },

@@ -651,7 +651,6 @@ export function EvidenceBenchPage() {
                   <option value="standard-v1">Standard Benchmark Suite (standard-v1)</option>
                   <option value="vessels-domain-v1">Vessels Domain Suite</option>
                   <option value="terra-domain-v1">Terra Domain Suite</option>
-                  <option value="aegis-domain-v1">Aegis Domain Suite</option>
                   <option value="sentra-domain-v1">Sentra Domain Suite</option>
                   <option value="counsel-domain-v1">Counsel Domain Suite</option>
                 </select>

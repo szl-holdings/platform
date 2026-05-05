@@ -253,7 +253,7 @@ async function buildSnapshot() {
           severity: prism.alertCount > 3 ? 'high' : prism.alertCount > 0 ? 'medium' : 'low',
         },
         sparkline: null,
-        link: '/aegis/',
+        link: '/sentra/',
       },
       {
         id: 'terra',

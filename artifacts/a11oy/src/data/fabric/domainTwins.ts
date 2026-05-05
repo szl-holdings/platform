@@ -109,7 +109,7 @@ export const DOMAIN_TWINS: readonly DomainTwin[] = [
     topSignals: ['Critical CVE-2026-3891 detected — 12 assets exposed', 'Identity anomaly — service account lateral movement attempt', 'Control drift — MFA bypass rate increased 3x in 7d'],
     topRisks: ['Unresolved critical vulnerability backlog at 14d MTTR', 'Access review overdue — 340 identities pending', 'Backup verification gap — 3 systems untested in 90d'],
     nextBestActions: ['Prioritize CVE-2026-3891 patch across exposed assets', 'Trigger emergency access review for dormant service accounts', 'Schedule backup recovery drill for untested systems'],
-    linkedRoutes: ['/aegis', '/fabric/risks', '/fabric/signals'],
+    linkedRoutes: ['/sentra', '/fabric/risks', '/fabric/signals'],
   },
   {
     id: 'twin-lyte',

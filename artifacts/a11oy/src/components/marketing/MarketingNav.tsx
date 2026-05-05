@@ -33,10 +33,10 @@ export function MarketingNav() {
                   KORA
                 </Link>
                 <Link
-                  href="/marketing/apps/aegis"
+                  href="/sentra/"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  PARAGON
+                  Sentra
                 </Link>
                 <Link
                   href="/marketing/apps/prism"
@@ -67,12 +67,6 @@ export function MarketingNav() {
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
                   Command
-                </Link>
-                <Link
-                  href="/aegis/"
-                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
-                >
-                  PARAGON
                 </Link>
               </div>
             </div>

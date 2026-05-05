@@ -165,8 +165,8 @@ const PIPELINE_STEPS = [
     label: 'Fleet Map — Live AIS',
     href: '/dashboard/fleet',
     icon: Map,
-    description: 'Extended AIS feed (Digitraffic + BarentsWatch + USCG NAIS) detects 4 vessels in the Central Mediterranean with anomalous behavior patterns. Aegis threat overlay surfaces geopolitical risk zones.',
-    findings: '4 vessels flagged · 2 AIS gaps >6h · Aegis risk overlay: elevated',
+    description: 'Extended AIS feed (Digitraffic + BarentsWatch + USCG NAIS) detects 4 vessels in the Central Mediterranean with anomalous behavior patterns. Sentra threat overlay surfaces geopolitical risk zones.',
+    findings: '4 vessels flagged · 2 AIS gaps >6h · Sentra risk overlay: elevated',
     status: 'complete',
   },
   {
@@ -513,7 +513,7 @@ export default function MedShadowFleetCaseStudy() {
         </div>
       </div>
 
-      {/* Cross-pollination: Aegis + Pulse + Conduit */}
+      {/* Cross-pollination: Sentra + Pulse + Conduit */}
       <div className="rounded-xl border p-6 space-y-4" style={{ background: BG.surface, borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="flex items-center gap-2">
           <Link2 className="w-4 h-4" style={{ color: ACCENT }} />
@@ -521,8 +521,8 @@ export default function MedShadowFleetCaseStudy() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-lg border p-4 space-y-2" style={{ background: BG.elevated, borderColor: `${ACCENT}20` }}>
-            <p className="text-xs font-semibold" style={{ color: ACCENT }}>Aegis Threat Overlay</p>
-            <p className="text-xs text-muted-foreground">Geopolitical risk zones from Sentra/Aegis are overlaid on the fleet map. The Central Mediterranean zone is currently elevated due to increased shadow-fleet activity and Libyan coastal instability.</p>
+            <p className="text-xs font-semibold" style={{ color: ACCENT }}>Sentra Threat Overlay</p>
+            <p className="text-xs text-muted-foreground">Geopolitical risk zones from Sentra are overlaid on the fleet map. The Central Mediterranean zone is currently elevated due to increased shadow-fleet activity and Libyan coastal instability.</p>
             <Link href="/dashboard/fleet">
               <a className="inline-flex items-center gap-1 text-[10px] font-mono hover:underline" style={{ color: ACCENT }}>
                 View Fleet Map <ArrowRight className="w-3 h-3" />

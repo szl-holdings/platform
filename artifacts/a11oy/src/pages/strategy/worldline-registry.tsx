@@ -54,7 +54,7 @@ const DOMAIN_CONFIG: Record<
   Domain,
   { label: string; color: string; icon: typeof Globe; appPath: string }
 > = {
-  aegis: { label: 'PARAGON — Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
+  aegis: { label: 'Sentra — Cyber Resilience', color: '#c9b787', icon: Shield, appPath: '/sentra' },
   terra: { label: "DOMAINE — Real Estate", color: '#10b981', icon: Globe, appPath: '/terra' },
   vessels: { label: 'SEXTANT — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
   continuum: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },

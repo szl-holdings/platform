@@ -298,7 +298,7 @@ export default function StsDetectionPage() {
                         variant="outline"
                         className="text-[9px] text-violet-400 bg-violet-500/10 border-violet-500/20"
                       >
-                        PARAGON Intel
+                        Sentra Intel
                       </Badge>
                     )}
                   </div>
@@ -398,7 +398,7 @@ export default function StsDetectionPage() {
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
                         <Eye className="w-3 h-3 text-violet-400" />
                         <span className="text-[10px] text-violet-300">
-                          PARAGON Threat Intelligence
+                          Sentra Threat Intelligence
                         </span>
                       </div>
                     )}

@@ -127,7 +127,7 @@ export function OverviewTab({ ov, cd }: Props) {
               { source: 'Platform signals', freshness: 'Live', status: 'healthy' },
               { source: 'Terra NYC ingestion', freshness: 'Scheduled (6h)', status: 'healthy' },
               { source: 'Vessel positions', freshness: '5m interval', status: 'healthy' },
-              { source: 'Aegis threat feed', freshness: 'Seeded', status: 'degraded' },
+              { source: 'Sentra threat feed', freshness: 'Seeded', status: 'degraded' },
             ].map((s) => (
               <div key={s.source} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', padding: '3px 0' }}>
                 <span style={{ color: TEXT.secondary }}>{s.source}</span>
