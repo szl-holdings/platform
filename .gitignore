@@ -193,3 +193,7 @@ screenshots/raw
 
 # Substrate fleet secrets (never commit)
 .env.substrate
+
+# FORGE signing keys — private key material; never commit
+.forge-skill-keys/
+**/forge-keys/ed25519-private.pem
