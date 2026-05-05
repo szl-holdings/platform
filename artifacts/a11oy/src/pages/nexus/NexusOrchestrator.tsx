@@ -1,12 +1,18 @@
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
+  ChevronDown,
   ChevronRight,
   Clock,
+  Copy,
+  ExternalLink,
+  FileVideo,
   Gauge,
   Lightbulb,
   Loader,
   Play,
+  Radio,
   RotateCw,
   Workflow,
   X,
@@ -230,6 +236,282 @@ const STEP_EXPLANATIONS: Record<
   },
 };
 
+interface StepLink {
+  label: string;
+  url: string;
+  icon: 'video' | 'pulse' | 'library';
+}
+
+interface ParsedStepPayload {
+  links: StepLink[];
+  fields: Array<{ key: string; value: string }>;
+}
+
+function parseStepPayload(step: OrchestrationStep): ParsedStepPayload {
+  const result: ParsedStepPayload = { links: [], fields: [] };
+  if (!step.rawPayload) return result;
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(step.rawPayload) as Record<string, unknown>;
+  } catch {
+    return result;
+  }
+
+  const get = (k: string) => (typeof parsed[k] === 'string' ? (parsed[k] as string) : undefined);
+
+  if (step.appSlug === 'video.render') {
+    const mp4 = get('mp4_url');
+    const thumb = get('thumbnail_url');
+    if (mp4) result.links.push({ label: 'Open rendered video (MP4)', url: mp4, icon: 'video' });
+    if (thumb) result.links.push({ label: 'Video thumbnail', url: thumb, icon: 'video' });
+  }
+  if (step.appSlug === 'publish.pulse') {
+    const cardId = get('card_id');
+    const surface = get('surface') ?? 'executive-briefing';
+    if (cardId) {
+      result.links.push({
+        label: `Open Pulse card · ${cardId}`,
+        url: `/pulse/${surface}/${cardId}`,
+        icon: 'pulse',
+      });
+    }
+  }
+  if (step.appSlug === 'publish.video-library') {
+    const entryId = get('entry_id');
+    const library = get('library') ?? 'szl-demo-video';
+    if (entryId) {
+      result.links.push({
+        label: `Open ${library} entry · ${entryId}`,
+        url: `/${library}/${entryId}`,
+        icon: 'library',
+      });
+    }
+  }
+
+  for (const [k, v] of Object.entries(parsed)) {
+    if (v === null || v === undefined) continue;
+    const val = typeof v === 'object' ? JSON.stringify(v) : String(v);
+    result.fields.push({ key: k, value: val });
+  }
+  return result;
+}
+
+function getPlanTraceId(plan: OrchestrationPlan): string {
+  return `trace_${plan.id.slice(0, 12)}`;
+}
+
+function getStepCounts(plan: OrchestrationPlan) {
+  const done = plan.steps.filter((s) => s.status === 'done').length;
+  const errored = plan.steps.filter((s) => s.status === 'error').length;
+  const running = plan.steps.filter((s) => s.status === 'running').length;
+  const pending = plan.steps.filter((s) => s.status === 'pending').length;
+  const totalDurationMs = plan.steps.reduce((sum, s) => sum + (s.durationMs ?? 0), 0);
+  return { done, errored, running, pending, totalDurationMs, degraded: errored > 0 };
+}
+
+function StepLinkButton({ link }: { link: StepLink }) {
+  const Icon = link.icon === 'video' ? FileVideo : link.icon === 'pulse' ? Radio : ExternalLink;
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-1 rounded border border-praxis-cyan/30 bg-praxis-cyan/5 text-praxis-cyan hover:bg-praxis-cyan/15 transition-colors"
+    >
+      <Icon className="w-3 h-3" />
+      {link.label}
+      <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+    </a>
+  );
+}
+
+function isSafeHttpUrl(value: string): boolean {
+  try {
+    const u = new URL(value, window.location.origin);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function StepResultPanel({ step }: { step: OrchestrationStep }) {
+  const parsed = parseStepPayload(step);
+  const safeLinks = parsed.links.filter((l) => isSafeHttpUrl(l.url));
+  const hasParsed = safeLinks.length > 0 || parsed.fields.length > 0 || Boolean(step.rawPayload);
+  return (
+    <div className="mt-2 pt-2 border-t border-praxis space-y-2">
+      {!hasParsed && step.output && (
+        <div className="bg-praxis-bg rounded p-2 text-[10px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          {step.output}
+        </div>
+      )}
+      {safeLinks.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {safeLinks.map((l) => (
+            <StepLinkButton key={l.url} link={l} />
+          ))}
+        </div>
+      )}
+      {parsed.fields.length > 0 && (
+        <div className="bg-[var(--gi-bg-base)] rounded p-2 border border-praxis">
+          <div className="text-[9px] font-mono text-praxis-cyan/70 mb-1 uppercase tracking-widest">
+            Result fields
+          </div>
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 text-[10px] font-mono">
+            {parsed.fields.map((f) => (
+              <FieldRow key={f.key} k={f.key} v={f.value} />
+            ))}
+          </dl>
+        </div>
+      )}
+      {step.rawPayload && (
+        <details className="text-[9px] font-mono">
+          <summary className="cursor-pointer text-muted-foreground/50 hover:text-muted-foreground">
+            Raw payload
+          </summary>
+          <pre className="mt-1 whitespace-pre-wrap break-words text-muted-foreground/70 max-h-48 overflow-y-auto bg-[var(--gi-bg-base)] rounded p-2 border border-praxis">
+            {step.rawPayload}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
+}
+
+function FieldRow({ k, v }: { k: string; v: string }) {
+  const isUrl = /^https?:\/\//.test(v);
+  return (
+    <>
+      <dt className="text-muted-foreground/50">{k}</dt>
+      <dd className="text-muted-foreground break-all">
+        {isUrl ? (
+          <a
+            href={v}
+            target="_blank"
+            rel="noreferrer"
+            className="text-praxis-cyan hover:underline inline-flex items-center gap-1"
+          >
+            {v}
+            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+          </a>
+        ) : (
+          v
+        )}
+      </dd>
+    </>
+  );
+}
+
+function AuditTrailPanel({ plan }: { plan: OrchestrationPlan }) {
+  const counts = getStepCounts(plan);
+  const traceId = getPlanTraceId(plan);
+  const [copied, setCopied] = useState(false);
+
+  async function copyTrace() {
+    try {
+      if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) return;
+      await navigator.clipboard.writeText(traceId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable — silently no-op */
+    }
+  }
+
+  return (
+    <div className="bg-praxis-surface border border-praxis-amber/20 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-praxis-amber" />
+          <h3 className="text-sm font-semibold">Audit Trail</h3>
+        </div>
+        {counts.degraded && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-praxis-amber/10 text-praxis-amber border border-praxis-amber/30">
+            <AlertTriangle className="w-3 h-3" />
+            DEGRADED · {counts.errored} step{counts.errored === 1 ? '' : 's'} failed
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-[10px] font-mono">
+        <div className="bg-praxis-bg rounded p-2">
+          <div className="text-muted-foreground/50 uppercase tracking-widest mb-0.5">Trace ID</div>
+          <button
+            onClick={copyTrace}
+            className="flex items-center gap-1.5 text-praxis-cyan hover:text-praxis-amber transition-colors text-left"
+            title="Copy trace ID"
+          >
+            <span className="break-all">{traceId}</span>
+            <Copy className="w-2.5 h-2.5 shrink-0 opacity-60" />
+            {copied && <span className="text-praxis-green">✓</span>}
+          </button>
+        </div>
+        <div className="bg-praxis-bg rounded p-2">
+          <div className="text-muted-foreground/50 uppercase tracking-widest mb-0.5">Plan ID</div>
+          <div className="text-muted-foreground break-all">{plan.id}</div>
+        </div>
+        <div className="bg-praxis-bg rounded p-2">
+          <div className="text-muted-foreground/50 uppercase tracking-widest mb-0.5">Started</div>
+          <div className="text-muted-foreground">{new Date(plan.createdAt).toLocaleTimeString()}</div>
+        </div>
+        <div className="bg-praxis-bg rounded p-2">
+          <div className="text-muted-foreground/50 uppercase tracking-widest mb-0.5">
+            Total step time
+          </div>
+          <div className="text-muted-foreground">{counts.totalDurationMs}ms</div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-3 text-[10px] font-mono">
+        <span className="text-praxis-green">✓ {counts.done} done</span>
+        {counts.errored > 0 && <span className="text-praxis-red">✗ {counts.errored} failed</span>}
+        {counts.running > 0 && <span className="text-praxis-cyan">↻ {counts.running} running</span>}
+        {counts.pending > 0 && <span className="text-muted-foreground/60">○ {counts.pending} pending</span>}
+        {plan.completedAt && (
+          <span className="text-muted-foreground/60">
+            · completed {new Date(plan.completedAt).toLocaleTimeString()}
+          </span>
+        )}
+      </div>
+
+      <div className="border-t border-praxis pt-3">
+        <div className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-2">
+          Step timings
+        </div>
+        <div className="space-y-1">
+          {plan.steps.map((s, i) => (
+            <div
+              key={s.id}
+              className="grid grid-cols-[2rem_1fr_max-content_max-content] items-center gap-2 text-[10px] font-mono"
+            >
+              <span className="text-muted-foreground/40">{(i + 1).toString().padStart(2, '0')}</span>
+              <span className="text-muted-foreground truncate">
+                {s.app} · <span className="text-muted-foreground/50">{s.action}</span>
+              </span>
+              <span
+                className={
+                  s.status === 'done'
+                    ? 'text-praxis-green'
+                    : s.status === 'error'
+                      ? 'text-praxis-red'
+                      : s.status === 'running'
+                        ? 'text-praxis-cyan'
+                        : 'text-muted-foreground/40'
+                }
+              >
+                {s.status}
+              </span>
+              <span className="text-muted-foreground/60 text-right w-16">
+                {s.durationMs !== undefined ? `${s.durationMs}ms` : '—'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
   const pct = (used / total) * 100;
   const color = pct >= 95 ? '#c96070' : pct >= 80 ? '#c9a85c' : '#5baa8a';
@@ -430,6 +712,9 @@ function StepCard({
 }) {
   const color = APP_COLORS[step.appSlug] ?? '#8896aa';
   const rl = RATE_LIMITS[step.appSlug];
+  const [expanded, setExpanded] = useState(false);
+  const hasResult =
+    step.status !== 'pending' && (Boolean(step.rawPayload) || Boolean(step.output));
   return (
     <div
       className={`rounded-lg border p-3 ${
@@ -507,14 +792,32 @@ function StepCard({
         </div>
       )}
 
-      <button
-        onClick={() => onExplain(step)}
-        className="mt-2 flex items-center gap-1 text-[9px] font-mono text-[#a3e635]/60 hover:text-[#a3e635] transition-colors"
-      >
-        <Lightbulb className="w-2.5 h-2.5" />
-        Explain this decision
-        <ChevronRight className="w-2.5 h-2.5" />
-      </button>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <button
+          onClick={() => onExplain(step)}
+          className="flex items-center gap-1 text-[9px] font-mono text-[#a3e635]/60 hover:text-[#a3e635] transition-colors"
+        >
+          <Lightbulb className="w-2.5 h-2.5" />
+          Explain this decision
+          <ChevronRight className="w-2.5 h-2.5" />
+        </button>
+        {hasResult && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="flex items-center gap-1 text-[9px] font-mono text-praxis-cyan/60 hover:text-praxis-cyan transition-colors"
+          >
+            {expanded ? (
+              <ChevronDown className="w-2.5 h-2.5" />
+            ) : (
+              <ChevronRight className="w-2.5 h-2.5" />
+            )}
+            {expanded ? 'Hide result' : 'Show result'}
+          </button>
+        )}
+      </div>
+
+      {expanded && hasResult && <StepResultPanel step={step} />}
     </div>
   );
 }
@@ -710,6 +1013,27 @@ export default function Orchestrator() {
               ))}
             </div>
 
+            {(() => {
+              const publishedLinks: StepLink[] = plan.steps
+                .filter((s) => s.status === 'done')
+                .flatMap((s) => parseStepPayload(s).links)
+                .filter((l) => isSafeHttpUrl(l.url));
+              if (publishedLinks.length === 0) return null;
+              return (
+                <div className="bg-praxis-surface border border-praxis-cyan/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ExternalLink className="w-4 h-4 text-praxis-cyan" />
+                    <h3 className="text-sm font-semibold text-praxis-cyan">Published Outputs</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {publishedLinks.map((l) => (
+                      <StepLinkButton key={l.url} link={l} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {plan.stitchedOutput && (
               <div className="bg-praxis-surface border border-praxis-green/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -721,6 +1045,8 @@ export default function Orchestrator() {
                 </div>
               </div>
             )}
+
+            {plan.steps.length > 0 && <AuditTrailPanel plan={plan} />}
           </div>
         )}
 
