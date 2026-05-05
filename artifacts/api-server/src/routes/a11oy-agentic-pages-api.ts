@@ -1,4 +1,16 @@
-import { Router, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
+import { services } from '@szl-holdings/services';
+import {
+  dbListAgentIdentities,
+  dbListHfAccessAudit,
+  dbListProvenanceNodes,
+  dbListProvenanceEdges,
+  dbListAgentReputation,
+  dbQueryLineage,
+  dbQueryProvenanceSemantic,
+  dbComputeAgentReputation,
+  dbInsertAgentReputation,
+} from '@szl-holdings/db';
 
 const router = Router();
 const now = () => new Date().toISOString();
@@ -440,6 +452,199 @@ router.get('/pages/mirror-eval', (_req, res) => {
     ],
     version: '2.1.0',
   });
+});
+
+router.get('/pages/identity-zero-trust', async (_req: Request, res: Response) => {
+  try {
+    const hf = services.huggingface;
+
+    const dbIdentities = await dbListAgentIdentities();
+    const dbAudit = await dbListHfAccessAudit({ limit: 100 });
+    const dbReputation = await dbListAgentReputation();
+
+    const liveAuditEntries = hf.getAccessAuditLog({ limit: 100 });
+
+    const dbAuditIds = new Set(dbAudit.map(e => e.externalId));
+    const mergedAudit = [
+      ...dbAudit.map(a => ({
+        id: a.externalId,
+        agentId: a.agentId,
+        agentName: a.agentName,
+        resourceUri: a.resourceUri,
+        resourceType: a.resourceType,
+        purpose: a.purpose,
+        identityToken: a.identityToken,
+        timestamp: a.accessedAt.toISOString(),
+        durationMs: a.durationMs,
+        success: a.success,
+        proofHash: a.proofHash,
+      })),
+      ...liveAuditEntries.filter(e => !dbAuditIds.has(e.id)),
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    const cryptoIdentities = dbIdentities.map(id => ({
+      agentId: id.agentId,
+      publicKey: id.publicKey,
+      publicKeyAlgorithm: id.publicKeyAlgorithm,
+      keyFingerprint: id.keyFingerprint,
+      capabilityCertificate: {
+        certId: id.certId,
+        issuedAt: id.certIssuedAt?.toISOString(),
+        expiresAt: id.certExpiresAt?.toISOString(),
+        issuer: id.certIssuer,
+        capabilities: id.capabilities,
+        maxAutonomy: id.maxAutonomy,
+        signatureHex: id.certSignatureHex,
+      },
+      attestationStatus: id.attestationStatus,
+      attestationVerification: hf.verifyAttestation(id.agentId),
+    }));
+
+    const reputationScores = dbReputation.map(r => ({
+      agentId: r.agentId,
+      agentName: r.agentName,
+      overallScore: r.overallScore,
+      successfulDeployments: r.successfulDeployments,
+      totalDeployments: r.totalDeployments,
+      evaluationPassRate: r.evaluationPassRate,
+      governanceComplianceRate: r.governanceComplianceRate,
+      costEfficiency: r.costEfficiency,
+      provenanceDepth: r.provenanceDepth,
+      computedAt: r.computedAt.toISOString(),
+    }));
+
+    ok(res, {
+      cryptoIdentities,
+      accessAuditLog: mergedAudit,
+      reputationScores,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to load zero-trust data' });
+  }
+});
+
+router.get('/pages/model-provenance', async (_req: Request, res: Response) => {
+  try {
+    const dbNodes = await dbListProvenanceNodes({ limit: 200 });
+    const dbEdges = await dbListProvenanceEdges({ limit: 200 });
+
+    const nodes = dbNodes.map(n => ({
+      id: n.nodeId,
+      kind: n.kind,
+      label: n.label,
+      description: n.description,
+      proofHash: n.proofHash,
+      metadata: n.metadata,
+      createdAt: n.nodeCreatedAt.toISOString(),
+    }));
+
+    const edges = dbEdges.map(e => ({
+      id: e.edgeId,
+      source: e.sourceNodeId,
+      target: e.targetNodeId,
+      relation: e.relation,
+      timestamp: e.edgeTimestamp.toISOString(),
+      proofHash: e.proofHash,
+      signerAgentId: e.signerAgentId,
+      signerFingerprint: e.signerFingerprint,
+      edgeSignatureHex: e.edgeSignatureHex,
+      metadata: e.metadata,
+    }));
+
+    ok(res, { nodes, edges });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to load provenance data' });
+  }
+});
+
+router.get('/pages/model-provenance/lineage/:nodeId', async (req: Request, res: Response) => {
+  try {
+    const { nodeId } = req.params;
+    const direction = (req.query.direction as string) === 'downstream' ? 'downstream' : 'upstream';
+    const maxDepth = Math.min(parseInt(req.query.maxDepth as string) || 10, 20);
+
+    const lineage = await dbQueryLineage(direction, nodeId!, maxDepth);
+
+    const nodes = lineage.nodes.map(n => ({
+      id: n.nodeId,
+      kind: n.kind,
+      label: n.label,
+      description: n.description,
+      proofHash: n.proofHash,
+      metadata: n.metadata,
+      createdAt: n.nodeCreatedAt.toISOString(),
+    }));
+
+    const edges = lineage.edges.map(e => ({
+      id: e.edgeId,
+      source: e.sourceNodeId,
+      target: e.targetNodeId,
+      relation: e.relation,
+      timestamp: e.edgeTimestamp.toISOString(),
+      proofHash: e.proofHash,
+      signerAgentId: e.signerAgentId,
+      signerFingerprint: e.signerFingerprint,
+      edgeSignatureHex: e.edgeSignatureHex,
+      metadata: e.metadata,
+    }));
+
+    ok(res, { nodes, edges, direction, rootNodeId: nodeId, maxDepth });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to query lineage' });
+  }
+});
+
+router.get('/pages/model-provenance/query', async (req: Request, res: Response) => {
+  try {
+    const q = (req.query.q as string) || '';
+    if (!q.trim()) {
+      return res.status(400).json({ ok: false, error: 'Query parameter "q" is required' });
+    }
+
+    const result = await dbQueryProvenanceSemantic(q);
+
+    const nodes = result.nodes.map(n => ({
+      id: n.nodeId,
+      kind: n.kind,
+      label: n.label,
+      description: n.description,
+      proofHash: n.proofHash,
+      metadata: n.metadata,
+      createdAt: n.nodeCreatedAt.toISOString(),
+    }));
+
+    const edges = result.edges.map(e => ({
+      id: e.edgeId,
+      source: e.sourceNodeId,
+      target: e.targetNodeId,
+      relation: e.relation,
+      timestamp: e.edgeTimestamp.toISOString(),
+      proofHash: e.proofHash,
+      signerAgentId: e.signerAgentId,
+      signerFingerprint: e.signerFingerprint,
+      edgeSignatureHex: e.edgeSignatureHex,
+      metadata: e.metadata,
+    }));
+
+    ok(res, { nodes, edges, interpretation: result.interpretation, query: q });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to query provenance' });
+  }
+});
+
+router.post('/pages/identity-zero-trust/recompute-reputation', async (_req: Request, res: Response) => {
+  try {
+    const identities = await dbListAgentIdentities();
+    const results = [];
+    for (const id of identities) {
+      const rep = await dbComputeAgentReputation(id.agentId, id.agentName);
+      await dbInsertAgentReputation(rep).catch(() => {});
+      results.push(rep);
+    }
+    ok(res, { recomputedScores: results });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Failed to recompute reputation' });
+  }
 });
 
 export default router;

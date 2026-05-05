@@ -16,6 +16,7 @@ import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/pr
 import { enforceBudgetForOrg, recordModelUsage } from '../services/ai/call-model';
 import { conversations, db, messages, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
+import { agentHfIdentity } from '../middlewares/zero-trust';
 import crypto from 'node:crypto';
 import { asc, desc, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
@@ -25,6 +26,8 @@ import { assertExternalUrl } from '../lib/ssrf-guard';
 import { authMiddleware } from '../middlewares/auth';
 
 const alloyChatRouter: IRouter = Router();
+
+alloyChatRouter.use(agentHfIdentity('a11oy'));
 
 /**
  * In-memory cache of Responses API response IDs per conversation.

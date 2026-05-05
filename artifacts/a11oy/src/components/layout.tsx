@@ -92,6 +92,7 @@ const NAV_GROUPS = [
       { href: '/agent-mesh',         label: 'Agent Mesh' },
       { href: '/a2a-interop',        label: 'A2A Interop' },
       { href: '/agent-identity',     label: 'Agent Identity' },
+      { href: '/model-provenance',  label: 'Model Provenance' },
       { href: '/self-optimization',  label: 'Self-Optimization' },
       { href: '/security-agents',    label: 'Security Agents' },
       { href: '/agent-viz',          label: 'Visualization' },

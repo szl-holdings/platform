@@ -6,6 +6,7 @@ import express, { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response';
 import { authMiddleware } from '../../middlewares/auth';
+import { agentHfIdentity } from '../../middlewares/zero-trust';
 
 type AnthropicMessageParam = {
   role: 'user' | 'assistant';
@@ -16,6 +17,8 @@ import { anyQuerySchema, listQuerySchema, validateBody, validateQuery } from '..
 import { aiRateLimit, intelRateLimit, } from './shared';
 
 const router = Router();
+
+router.use(agentHfIdentity('intelligence'));
 
 router.post(
   '/intelligence/ai/summarize',

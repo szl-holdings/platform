@@ -67,6 +67,7 @@ import { seedMspData } from './lib/seed-msp';
 import { seedPlatformData } from './lib/seed-platform';
 import { seedBillingData } from './seed/seed-billing';
 import { seedA11oyCognitive } from './lib/seed-a11oy-cognitive';
+import { seedA11oyZeroTrust } from './lib/seed-a11oy-zero-trust';
 import { seedDoctrineData } from './routes/doctrine-crud';
 import {
   prewarmIntelligenceCache,
@@ -818,6 +819,7 @@ export async function bootstrap(
         { name: 'seedTerraOperatingModules', fn: seedTerraOperatingModules },
         { name: 'seedBillingData', fn: seedBillingData },
         { name: 'seedA11oyCognitive', fn: seedA11oyCognitive },
+        { name: 'seedA11oyZeroTrust', fn: seedA11oyZeroTrust },
         { name: 'seedDoctrineData', fn: async () => {
           const { db, doctrineConstitutionsTable } = await import('@szl-holdings/db');
           const existing = await db.select().from(doctrineConstitutionsTable).limit(1);

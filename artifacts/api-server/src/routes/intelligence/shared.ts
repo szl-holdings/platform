@@ -7,6 +7,18 @@ import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
 import { logger } from '../../lib/logger';
 import { redisGet, redisSet } from '../../lib/redis-client.js';
+
+import { runWithAgentContext, type AgentContext } from '@szl-holdings/services';
+
+function buildAgentContext(domain: string, purpose: string): AgentContext {
+  const AGENT_MAP: Record<string, { agentId: string; agentName: string }> = {
+    vessels: { agentId: 'aid-cascade', agentName: 'Cascade Navigator' },
+    sentra: { agentId: 'aid-guardian', agentName: 'Guardian' },
+    intelligence: { agentId: 'aid-watchdog', agentName: 'Fabric Watchdog' },
+  };
+  const agent = AGENT_MAP[domain] ?? AGENT_MAP.intelligence!;
+  return { ...agent, purpose };
+}
 export type AnthropicMessageParam = {
   role: 'user' | 'assistant';
   content: string | { type: string; text: string }[];
@@ -648,17 +660,20 @@ async function fetchOfacSdnVessels(): Promise<
 export async function fetchAndEnrichSanctions(): Promise<SanctionVessel[]> {
   const raw = await fetchOfacSdnVessels();
   if (raw.length === 0) return [];
-  const enriched = await Promise.all(
-    raw.slice(0, 50).map(async (vessel) => {
-      try {
-        const ner = await services.huggingface.namedEntityRecognition(
-          `${vessel.name} flagged under ${vessel.flag} for ${vessel.reason}`,
-        );
-        return { ...vessel, entities: ner.entities.slice(0, 5), aiEnriched: true };
-      } catch {
-        return { ...vessel, entities: [], aiEnriched: false };
-      }
-    }),
-  );
-  return enriched;
+  const ctx = buildAgentContext('vessels', 'fetchAndEnrichSanctions');
+  return runWithAgentContext(ctx, async () => {
+    const enriched = await Promise.all(
+      raw.slice(0, 50).map(async (vessel) => {
+        try {
+          const ner = await services.huggingface.namedEntityRecognition(
+            `${vessel.name} flagged under ${vessel.flag} for ${vessel.reason}`,
+          );
+          return { ...vessel, entities: ner.entities.slice(0, 5), aiEnriched: true };
+        } catch {
+          return { ...vessel, entities: [], aiEnriched: false };
+        }
+      }),
+    );
+    return enriched;
+  });
 }

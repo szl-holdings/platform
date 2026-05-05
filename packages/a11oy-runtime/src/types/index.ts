@@ -346,3 +346,85 @@ export interface MemoryHealth {
   lastCompactionAt: string;
   policyAdherence: number;
 }
+
+export interface AgentCryptoIdentity {
+  agentId: string;
+  publicKey: string;
+  publicKeyAlgorithm: 'Ed25519';
+  keyFingerprint: string;
+  capabilityCertificate: {
+    certId: string;
+    issuedAt: string;
+    expiresAt: string;
+    issuer: string;
+    capabilities: string[];
+    maxAutonomy: AutonomyLevel;
+    signatureHex: string;
+  };
+  attestationStatus: 'valid' | 'expired' | 'revoked' | 'pending';
+}
+
+export type HFResourceType = 'model' | 'dataset' | 'space';
+
+export interface AgentHFAccessRecord {
+  id: string;
+  agentId: string;
+  agentName: string;
+  resourceUri: string;
+  resourceType: HFResourceType;
+  purpose: string;
+  identityToken: string;
+  timestamp: string;
+  durationMs: number;
+  success: boolean;
+  proofHash: string;
+}
+
+export type ProvenanceNodeKind =
+  | 'base_model'
+  | 'dataset'
+  | 'fine_tuned_model'
+  | 'evaluation'
+  | 'deployment'
+  | 'agent';
+
+export interface ProvenanceNode {
+  id: string;
+  kind: ProvenanceNodeKind;
+  label: string;
+  description: string;
+  proofHash: string;
+  metadata: Record<string, string>;
+  createdAt: string;
+}
+
+export type ProvenanceEdgeRelation =
+  | 'trained_on'
+  | 'evaluated_by'
+  | 'deployed_under'
+  | 'accessed_by'
+  | 'fine_tuned_from'
+  | 'derived_from';
+
+export interface ProvenanceEdge {
+  id: string;
+  source: string;
+  target: string;
+  relation: ProvenanceEdgeRelation;
+  timestamp: string;
+  proofHash: string;
+  metadata: Record<string, string>;
+}
+
+export interface AgentReputationScore {
+  agentId: string;
+  agentName: string;
+  overallScore: number;
+  successfulDeployments: number;
+  totalDeployments: number;
+  evaluationPassRate: number;
+  governanceComplianceRate: number;
+  costEfficiency: number;
+  provenanceDepth: number;
+  computedAt: string;
+}

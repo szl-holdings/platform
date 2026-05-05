@@ -51,6 +51,7 @@ export { type GoogleDoc, GoogleDocsAdapter } from './adapters/google-docs.js';
 export { type DriveFile, GoogleDriveAdapter } from './adapters/google-drive.js';
 export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from './adapters/hubspot.js';
 export {
+  type AgentContext,
   type HFChatMessage,
   type HFChatResult,
   type HFClassificationResult,
@@ -67,8 +68,10 @@ export {
   type HFTranscriptionResult,
   type HFTranslationResult,
   type HFZeroShotResult,
+  getAgentContext,
   HuggingFaceAdapter,
   type ModelTier,
+  runWithAgentContext,
 } from './adapters/huggingface.js';
 export {
   JiraAdapter,

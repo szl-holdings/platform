@@ -20,6 +20,7 @@
  */
 
 import type { NextFunction, Request, Response } from 'express';
+import { runWithAgentContext } from '@szl-holdings/services';
 import { logger } from '../lib/logger';
 import type { AuthenticatedUser } from './auth';
 
@@ -137,6 +138,7 @@ declare global {
       ztStepUpRequired?: boolean;
       ztApprovalContext?: ZtApprovalContext;
       ztDataLabels?: DataControlLabels;
+      ztAgentContext?: { agentId: string; agentName: string; purpose: string };
     }
   }
 }
@@ -761,6 +763,36 @@ export function resolveConnectorTrust(
   connectorId: string,
 ): (typeof CONNECTOR_TRUST_SCORES)[string] {
   return CONNECTOR_TRUST_SCORES[connectorId] ?? CONNECTOR_TRUST_SCORES.unknown;
+}
+
+// ─── Agent HF Identity Context Middleware ─────────────────────────────────────
+
+const ROUTE_DOMAIN_AGENT_MAP: Record<string, { agentId: string; agentName: string }> = {
+  vessels: { agentId: 'aid-cascade', agentName: 'Cascade Navigator' },
+  counsel: { agentId: 'aid-counsel', agentName: 'Counsel Sentinel' },
+  sentra: { agentId: 'aid-guardian', agentName: 'Guardian' },
+  conduit: { agentId: 'aid-pipeline', agentName: 'Pipeline Oracle' },
+  terra: { agentId: 'aid-terra', agentName: 'DOMAINE Analyst' },
+  a11oy: { agentId: 'aid-watchdog', agentName: 'Fabric Watchdog' },
+  intelligence: { agentId: 'aid-watchdog', agentName: 'Fabric Watchdog' },
+  continuum: { agentId: 'aid-pipeline', agentName: 'Pipeline Oracle' },
+};
+
+export function agentHfIdentity(domain: string) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const agent = ROUTE_DOMAIN_AGENT_MAP[domain];
+    if (agent) {
+      const purpose = `${req.method} ${req.path}`;
+      const ctx = { ...agent, purpose };
+      req.ztAgentContext = ctx;
+
+      runWithAgentContext(ctx, () => {
+        next();
+      });
+      return;
+    }
+    next();
+  };
 }
 
 // ─── Exported convenience ─────────────────────────────────────────────────────

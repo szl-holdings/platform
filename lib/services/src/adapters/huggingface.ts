@@ -1,4 +1,17 @@
+import { createHash, verify, createPublicKey } from 'node:crypto';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { ServiceAdapter, type ServiceStatus } from "../base.js";
+
+export type AgentContext = { agentId: string; agentName: string; purpose: string };
+const agentContextStorage = new AsyncLocalStorage<AgentContext>();
+
+export function runWithAgentContext<T>(ctx: AgentContext, fn: () => T): T {
+  return agentContextStorage.run(ctx, fn);
+}
+
+export function getAgentContext(): AgentContext | undefined {
+  return agentContextStorage.getStore();
+}
 
 export interface HFTextGenerationResult {
   text: string;
@@ -273,6 +286,22 @@ const MOCK_CLASSIFICATIONS = [
   { label: "medium", score: 0.45 },
 ];
 
+export type HFResourceType = 'model' | 'dataset' | 'space';
+
+export interface HFAccessAuditEntry {
+  id: string;
+  agentId: string;
+  agentName: string;
+  resourceUri: string;
+  resourceType: HFResourceType;
+  purpose: string;
+  identityToken: string;
+  timestamp: string;
+  durationMs: number;
+  success: boolean;
+  proofHash: string;
+}
+
 export class HuggingFaceAdapter extends ServiceAdapter {
   readonly name = "huggingface";
   readonly description =
@@ -285,6 +314,11 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   private _cacheMisses = 0;
   private readonly _chatSessions = new Map<string, ChatSession>();
   private readonly _runtimeTiers = new Map<string, ModelTier>();
+  private readonly _accessAuditLog: HFAccessAuditEntry[] = [];
+  private _activeAgentContext: AgentContext | null = null;
+  private readonly _registeredIdentities = new Map<string, { publicKey: string; fingerprint: string; capabilities: string[]; attestationStatus: 'valid' | 'expired' | 'revoked' | 'pending'; certSignatureHex?: string; certPayload?: string }>();
+  private _dbAuditPersister: ((entry: HFAccessAuditEntry) => Promise<void>) | null = null;
+  private static readonly MAX_AUDIT_LOG = 500;
   private static readonly MAX_CHAT_TURNS = 20;
   private static readonly CHAT_SESSION_TTL = 30 * 60 * 1000;
 
@@ -450,11 +484,158 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     this._cache.set(key, { data, expiry: Date.now() + ttlMs, accessedAt: Date.now() });
   }
 
-  private async callHF(model: string, body: unknown): Promise<unknown> {
+  setActiveAgentContext(context: { agentId: string; agentName: string; purpose: string } | null): void {
+    this._activeAgentContext = context;
+  }
+
+  getActiveAgentContext(): { agentId: string; agentName: string; purpose: string } | null {
+    return this._activeAgentContext;
+  }
+
+  registerIdentity(agentId: string, identity: { publicKey: string; fingerprint: string; capabilities: string[]; attestationStatus: 'valid' | 'expired' | 'revoked' | 'pending'; certSignatureHex?: string; certPayload?: string }): void {
+    this._registeredIdentities.set(agentId, identity);
+  }
+
+  verifyAttestation(agentId: string): { verified: boolean; reason: string; fingerprint?: string; cryptoVerified?: boolean } {
+    const identity = this._registeredIdentities.get(agentId);
+    if (!identity) {
+      return { verified: false, reason: `Agent ${agentId} not found in identity registry`, cryptoVerified: false };
+    }
+    if (identity.attestationStatus !== 'valid') {
+      return { verified: false, reason: `Agent ${agentId} attestation status is ${identity.attestationStatus}`, fingerprint: identity.fingerprint, cryptoVerified: false };
+    }
+    if (!identity.publicKey || !identity.publicKey.startsWith('ed25519:')) {
+      return { verified: false, reason: `Agent ${agentId} has no valid Ed25519 public key`, fingerprint: identity.fingerprint, cryptoVerified: false };
+    }
+    if (!identity.fingerprint.startsWith('SHA256:')) {
+      return { verified: false, reason: `Agent ${agentId} fingerprint format invalid`, fingerprint: identity.fingerprint, cryptoVerified: false };
+    }
+
+    const rawKeyB64 = identity.publicKey.replace('ed25519:', '');
+    let cryptoVerified = false;
+    let cryptoReason = '';
+    try {
+      const keyBuffer = Buffer.from(rawKeyB64, 'base64');
+      const pubKey = createPublicKey({
+        key: keyBuffer,
+        format: 'der',
+        type: 'spki',
+      });
+
+      if (identity.certSignatureHex && identity.certPayload) {
+        const sigBuffer = Buffer.from(identity.certSignatureHex, 'hex');
+        const payloadBuffer = Buffer.from(identity.certPayload, 'utf8');
+        cryptoVerified = verify(null, payloadBuffer, pubKey, sigBuffer);
+        cryptoReason = cryptoVerified
+          ? 'Ed25519 signature cryptographically verified against public key'
+          : 'Ed25519 signature verification FAILED — signature does not match payload';
+      } else {
+        const computedFingerprint = 'SHA256:' + createHash('sha256').update(keyBuffer).digest('base64url');
+        cryptoVerified = identity.fingerprint === computedFingerprint;
+        if (!cryptoVerified) {
+          const rawKeyOnly = keyBuffer.subarray(keyBuffer.length - 32);
+          const altFingerprint = 'SHA256:' + createHash('sha256').update(rawKeyOnly).digest('base64url');
+          cryptoVerified = identity.fingerprint === altFingerprint;
+        }
+        cryptoReason = cryptoVerified
+          ? 'Ed25519 key fingerprint cryptographically verified via SHA-256 digest'
+          : 'Ed25519 key fingerprint verification FAILED — computed digest does not match declared fingerprint';
+      }
+    } catch (err) {
+      cryptoReason = `Ed25519 crypto verification error: ${err instanceof Error ? err.message : String(err)}`;
+      cryptoVerified = false;
+    }
+
+    const verified = identity.attestationStatus === 'valid' && cryptoVerified;
+    const reason = !cryptoVerified
+      ? `Attestation REJECTED — ${cryptoReason}`
+      : identity.attestationStatus !== 'valid'
+        ? `Attestation REJECTED — status is ${identity.attestationStatus}`
+        : `Attestation valid — ${cryptoReason}`;
+
+    return { verified, reason, fingerprint: identity.fingerprint, cryptoVerified };
+  }
+
+  isAgentAuthorized(agentId: string, capability: string): boolean {
+    const identity = this._registeredIdentities.get(agentId);
+    if (!identity) return false;
+    if (identity.attestationStatus !== 'valid') return false;
+    return identity.capabilities.includes(capability) || identity.capabilities.includes('*');
+  }
+
+  setDbAuditPersister(persister: (entry: HFAccessAuditEntry) => Promise<void>): void {
+    this._dbAuditPersister = persister;
+  }
+
+  logAccess(entry: Omit<HFAccessAuditEntry, 'id' | 'timestamp' | 'proofHash'>): HFAccessAuditEntry {
+    const timestamp = new Date().toISOString();
+    const id = `hfa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const proofHash = `sha256:${createHash('sha256').update(JSON.stringify({ ...entry, timestamp })).digest('hex')}`;
+    const record: HFAccessAuditEntry = { ...entry, id, timestamp, proofHash };
+    this._accessAuditLog.unshift(record);
+    if (this._accessAuditLog.length > HuggingFaceAdapter.MAX_AUDIT_LOG) {
+      this._accessAuditLog.length = HuggingFaceAdapter.MAX_AUDIT_LOG;
+    }
+    if (this._dbAuditPersister) {
+      this._dbAuditPersister(record).catch(() => {});
+    }
+    return record;
+  }
+
+  getAccessAuditLog(filters?: {
+    agentId?: string;
+    resourceType?: HFResourceType;
+    since?: string;
+    limit?: number;
+  }): HFAccessAuditEntry[] {
+    let results = this._accessAuditLog;
+    if (filters?.agentId) results = results.filter(e => e.agentId === filters.agentId);
+    if (filters?.resourceType) results = results.filter(e => e.resourceType === filters.resourceType);
+    if (filters?.since) {
+      const sinceTs = new Date(filters.since).getTime();
+      results = results.filter(e => new Date(e.timestamp).getTime() >= sinceTs);
+    }
+    return results.slice(0, filters?.limit ?? 100);
+  }
+
+  private resolveAgentContext(explicit?: AgentContext): AgentContext | undefined {
+    return explicit ?? getAgentContext() ?? this._activeAgentContext ?? undefined;
+  }
+
+  private async callHF(model: string, body: unknown, auditContext?: AgentContext): Promise<unknown> {
+    const ctx = this.resolveAgentContext(auditContext);
+
+    if (this._registeredIdentities.size > 0 && !ctx?.agentId) {
+      console.warn(
+        `[zero-trust] HF call to ${model} has no agent identity context — ` +
+        `audit trail incomplete. Use agentHfIdentity() middleware or runWithAgentContext().`
+      );
+    }
+
+    if (ctx?.agentId) {
+      const attestation = this.verifyAttestation(ctx.agentId);
+      if (!attestation.verified) {
+        this.logAccess({
+          agentId: ctx.agentId,
+          agentName: ctx.agentName,
+          resourceUri: `hf://models/${model}`,
+          resourceType: 'model',
+          purpose: ctx.purpose,
+          identityToken: ctx.agentId,
+          durationMs: 0,
+          success: false,
+        });
+        throw new Error(`Attestation failed for agent ${ctx.agentId}: ${attestation.reason}`);
+      }
+    }
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) {
       headers.Authorization = `Bearer ${this.apiKey}`;
     }
+    if (ctx?.agentId) {
+      headers['X-Agent-Identity'] = ctx.agentId;
+    }
+    const startMs = Date.now();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
     try {
@@ -471,9 +652,33 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         if (response.status === 401 && !this.apiKey) {
           this._freeTierAvailable = false;
         }
+        if (ctx) {
+          this.logAccess({
+            agentId: ctx.agentId,
+            agentName: ctx.agentName,
+            resourceUri: `hf://models/${model}`,
+            resourceType: 'model',
+            purpose: ctx.purpose,
+            identityToken: ctx.agentId,
+            durationMs: Date.now() - startMs,
+            success: false,
+          });
+        }
         throw new Error(`HuggingFace API error: ${response.status}`);
       }
       if (!this.apiKey) this._freeTierAvailable = true;
+      if (ctx) {
+        this.logAccess({
+          agentId: ctx.agentId,
+          agentName: ctx.agentName,
+          resourceUri: `hf://models/${model}`,
+          resourceType: 'model',
+          purpose: ctx.purpose,
+          identityToken: ctx.agentId,
+          durationMs: Date.now() - startMs,
+          success: true,
+        });
+      }
       const contentType = response.headers.get("content-type") || "";
       if (contentType.includes("image")) {
         const buffer = await response.arrayBuffer();
@@ -508,7 +713,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     for (const { model, tier } of tiers) {
       try {
         const requestBody = typeof body === "function" ? body(model) : body;
-        const data = await this.callHF(model, requestBody);
+        const data = await this.callHF(model, requestBody, this._activeAgentContext ?? undefined);
         this.trackRuntimeTier(taskType, tier);
         return { data, model, tier };
       } catch (err: unknown) {
@@ -543,7 +748,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: prompt, parameters: { max_new_tokens: options?.maxTokens ?? 512, temperature: 0.7 } };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -662,7 +867,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: text, parameters: { max_length: options?.maxLength ?? 200, min_length: 30 } };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -700,7 +905,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: text };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -733,7 +938,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: text };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -771,7 +976,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
 
     if (options?.model) {
       try {
-        const data = await this.callHF(options.model, { inputs: text });
+        const data = await this.callHF(options.model, { inputs: text }, this._activeAgentContext ?? undefined);
         const arr = data as Array<{ translation_text: string }>;
         const result: HFTranslationResult = {
           translatedText: arr[0]?.translation_text ?? "",
@@ -794,7 +999,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
 
     for (const model of dynamicModels) {
       try {
-        const data = await this.callHF(model, { inputs: text });
+        const data = await this.callHF(model, { inputs: text }, this._activeAgentContext ?? undefined);
         const arr = data as Array<{ translation_text: string }>;
         const result: HFTranslationResult = {
           translatedText: arr[0]?.translation_text ?? "",
@@ -830,7 +1035,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: text, parameters: { candidate_labels: candidateLabels } };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -867,7 +1072,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: text };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -910,7 +1115,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: { question, context } };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -950,7 +1155,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: prompt };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -991,7 +1196,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const body = { inputs: inputText };
       let data: unknown, model: string, tier: ModelTier;
       if (options?.model) {
-        data = await this.callHF(options.model, body);
+        data = await this.callHF(options.model, body, this._activeAgentContext ?? undefined);
         model = options.model;
         tier = "primary";
       } else {
@@ -1195,13 +1400,41 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     prompt: string,
     options?: { model?: string; maxTokens?: number },
   ): AsyncGenerator<string, void, unknown> {
+    const ctx = this.resolveAgentContext();
+
+    if (this._registeredIdentities.size > 0 && !ctx?.agentId) {
+      console.warn(
+        `[zero-trust] HF stream has no agent identity context — ` +
+        `audit trail incomplete. Use agentHfIdentity() middleware or runWithAgentContext().`
+      );
+    }
+
+    if (ctx?.agentId) {
+      const attestation = this.verifyAttestation(ctx.agentId);
+      if (!attestation.verified) {
+        this.logAccess({
+          agentId: ctx.agentId,
+          agentName: ctx.agentName,
+          resourceUri: `hf://stream/${prompt.slice(0, 50)}`,
+          resourceType: 'model',
+          purpose: ctx.purpose,
+          identityToken: ctx.agentId,
+          durationMs: 0,
+          success: false,
+        });
+        throw new Error(`Attestation failed for agent ${ctx.agentId}: ${attestation.reason}`);
+      }
+    }
+
     const chain = MODEL_REGISTRY.textGeneration;
     const models = options?.model
       ? [options.model, chain.secondary, chain.tertiary]
       : [chain.primary, chain.secondary, chain.tertiary];
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
+    if (ctx?.agentId) headers['X-Agent-Identity'] = ctx.agentId;
 
+    const startMs = Date.now();
     for (const model of models) {
       try {
         const controller = new AbortController();
@@ -1225,7 +1458,17 @@ export class HuggingFaceAdapter extends ServiceAdapter {
             },
           );
 
-          if (!response.ok) throw new Error(`HF stream error: ${response.status}`);
+          if (!response.ok) {
+            if (ctx) {
+              this.logAccess({
+                agentId: ctx.agentId, agentName: ctx.agentName,
+                resourceUri: `hf://models/${model}`, resourceType: 'model',
+                purpose: ctx.purpose, identityToken: ctx.agentId,
+                durationMs: Date.now() - startMs, success: false,
+              });
+            }
+            throw new Error(`HF stream error: ${response.status}`);
+          }
 
           const reader = response.body?.getReader();
           if (!reader) throw new Error("No response body reader");
@@ -1299,6 +1542,14 @@ export class HuggingFaceAdapter extends ServiceAdapter {
                 yield trimmed;
               }
             }
+          }
+          if (ctx) {
+            this.logAccess({
+              agentId: ctx.agentId, agentName: ctx.agentName,
+              resourceUri: `hf://models/${model}`, resourceType: 'model',
+              purpose: ctx.purpose, identityToken: ctx.agentId,
+              durationMs: Date.now() - startMs, success: true,
+            });
           }
           return;
         } finally {

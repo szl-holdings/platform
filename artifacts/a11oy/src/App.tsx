@@ -196,6 +196,7 @@ const LineageGraph = lazy(() => import('./pages/reliquary/LineageGraph').then(m 
 const SnapshotReplay = lazy(() => import('./pages/reliquary/SnapshotReplay').then(m => ({ default: m.SnapshotReplay })));
 const SovereignMode = lazy(() => import('./pages/reliquary/SovereignMode').then(m => ({ default: m.SovereignMode })));
 const ReliquaryDoctrine = lazy(() => import('./pages/reliquary/ReliquaryDoctrine').then(m => ({ default: m.ReliquaryDoctrine })));
+const ModelProvenance = lazy(() => import('./pages/ModelProvenance').then(m => ({ default: m.ModelProvenance })));
 
 
 export default function App() {
@@ -357,6 +358,7 @@ export default function App() {
         <Route path={`${base}/playbook-engine`} component={PlaybookEngine} />
         <Route path={`${base}/a2a-interop`} component={A2AInterop} />
         <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
+        <Route path={`${base}/model-provenance`} component={ModelProvenance} />
         <Route path={`${base}/self-optimization`} component={SelfOptimization} />
         <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
         <Route path={`${base}/karpathy-evolution`}>

@@ -15,6 +15,7 @@ import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response
 import { logger } from '../../lib/logger';
 import { getRegistrySummary } from '../../lib/model-registry';
 import { authMiddleware } from '../../middlewares/auth';
+import { agentHfIdentity } from '../../middlewares/zero-trust';
 
 type AnthropicMessageParam = {
   role: 'user' | 'assistant';
@@ -36,6 +37,8 @@ import {
 } from './shared';
 
 const router = Router();
+
+router.use(agentHfIdentity('intelligence'));
 
 // ─── Proof-Chain Tagging Helper ───────────────────────────────────────────────
 // Fire-and-forget: tags AI-generated content in the proof chain without

@@ -447,3 +447,4 @@ _sweeperInterval?.unref?.();
 
 export * from "./schema";
 export * from "./repositories/cognitive-runtime.js";
+export * from "./repositories/zero-trust.js";

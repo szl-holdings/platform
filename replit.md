@@ -34,9 +34,10 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
 - **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
-- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents.
+- **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, Governed Security Agents, and Zero-Trust Agent Identity + Model Provenance Graph.
 - **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag`.
-- **Alloy Hub (`/a11oy/hub`):** Flagship enterprise AI hub with fleet exploration, model foundry, governance evidence stream.
+- **Zero-Trust Agent Identity & Model Provenance:** Ed25519 cryptographic identity for every agent (public key, fingerprint, capability certificates, attestation status). Identity-aware HuggingFace client with access audit logging (X-Agent-Identity header injection). Model Provenance Graph (`/a11oy/model-provenance`) visualizing full lineage from base models through datasets, fine-tuning, evaluation, deployment, and agent access. Agent reputation scoring based on deployment success, governance compliance, and cost efficiency. Types in `packages/a11oy-runtime/src/types/index.ts`, adapter extensions in `lib/services/src/adapters/huggingface.ts`, API routes at `/api/a11oy/pages/identity-zero-trust` and `/api/a11oy/pages/model-provenance`.
+- **Alloy Hub (`/a11oy/hub`):** Flagship enterprise AI hub with fleet exploration, model foundry, governance evidence stream, and three-tier pricing.
 - **Alloy Agentic RAG Platform (`@szl/alloy-agentic-rag`):** Unified agentic retrieval-augmented generation layer across all SZL products.
 - **Hugging Face Unified Ecosystem:** First-class Hugging Face integration for model/dataset/space search, inference, and token management.
 - **HF Hub Bridge — Governed Agent-Native Hub Operations:** PCE-gated HuggingFace Hub operations with risk classification, cost metering, and provenance tracking.
@@ -93,7 +94,7 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Authentication:** Replit Auth
 - **Payment Processing:** Stripe
 - **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, Elevenlabs, Substrate/oLLM
-- **Governed Compute:** HuggingFace Jobs (GPU/CPU compute backend for agent workloads)
+- **Governed Compute:** HuggingFace Jobs
 - **Communication:** Slack, Twilio, Resend, SendGrid
 - **Maritime Data:** MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather
 - **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, Shodan, GreyNoise, MalwareBazaar, NVD CVE, MITRE ATT&CK, CISA KEV

@@ -25,6 +25,23 @@ interface AgentIdentity {
   lastActivity: string;
 }
 
+interface CryptoIdentity {
+  agentId: string;
+  publicKey: string;
+  publicKeyAlgorithm: string;
+  keyFingerprint: string;
+  capabilityCertificate: {
+    certId: string;
+    issuedAt: string;
+    expiresAt: string;
+    issuer: string;
+    capabilities: string[];
+    maxAutonomy: string;
+    signatureHex: string;
+  };
+  attestationStatus: string;
+}
+
 const TRUST_TIERS: Record<string, { color: string; label: string; range: string }> = {
   sovereign: { color: '#22c55e', label: 'SOVEREIGN', range: '900-1000' },
   trusted: { color: GOLD, label: 'TRUSTED', range: '700-899' },
@@ -134,6 +151,7 @@ const TOPO_POSITIONS: Record<string, { x: number; y: number }> = {
 
 export function AgentIdentityRegistry() {
   const { data, loading, error } = useApiData<{ agents: AgentIdentity[]; trustEdges: { from: string; to: string; relation: string; strength: number }[] }>('/pages/identity', { agents: DEMO_AGENTS, trustEdges: DEMO_TRUST_EDGES });
+  const { data: ztData } = useApiData<{ cryptoIdentities: CryptoIdentity[] }>('/pages/identity-zero-trust', { cryptoIdentities: [] });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'registry' | 'topology'>('registry');
 
@@ -150,6 +168,7 @@ export function AgentIdentityRegistry() {
   const AGENTS = data.agents;
   const TRUST_EDGES = data.trustEdges;
   const selected = AGENTS.find(a => a.id === selectedId);
+  const selectedCrypto = ztData.cryptoIdentities.find(c => c.agentId === selectedId);
 
   return (
     <Layout>
@@ -338,6 +357,37 @@ export function AgentIdentityRegistry() {
                       <span className="font-mono px-1.5 py-0.5 rounded" style={{ color: DRIFT_COLORS[selected.driftStatus], backgroundColor: `${DRIFT_COLORS[selected.driftStatus]}15` }}>{selected.driftStatus}</span>
                     </div>
                   </div>
+
+                  {selectedCrypto && (
+                  <>
+                  <div>
+                    <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>ED25519 PUBLIC KEY</div>
+                    <div className="font-mono px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)', color: '#6b8aad', wordBreak: 'break-all', fontSize: 9 }}>{selectedCrypto.publicKey}</div>
+                  </div>
+                  <div>
+                    <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>KEY FINGERPRINT</div>
+                    <div className="font-mono px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)', color: 'var(--color-a11oy-text-ghost)', fontSize: 10 }}>{selectedCrypto.keyFingerprint}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>ATTESTATION</div>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: selectedCrypto.attestationStatus === 'valid' ? '#22c55e' : '#ef4444', backgroundColor: selectedCrypto.attestationStatus === 'valid' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>{selectedCrypto.attestationStatus.toUpperCase()}</span>
+                    </div>
+                    <div>
+                      <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>MAX AUTONOMY</div>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: `${GOLD}15` }}>{selectedCrypto.capabilityCertificate.maxAutonomy.replace(/_/g, ' ')}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>CAPABILITY CERTIFICATE</div>
+                    <div className="font-mono px-2 py-1.5 rounded text-[9px]" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                      <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>ID: <span style={{ color: GOLD }}>{selectedCrypto.capabilityCertificate.certId}</span></div>
+                      <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Issuer: <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{selectedCrypto.capabilityCertificate.issuer}</span></div>
+                      <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Sig: <span style={{ color: '#8a8a8a' }}>{selectedCrypto.capabilityCertificate.signatureHex.slice(0, 32)}...</span></div>
+                    </div>
+                  </div>
+                  </>
+                  )}
 
                   <div>
                     <div className="font-mono mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>AUTHORIZATION MATRIX</div>
