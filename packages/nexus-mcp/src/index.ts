@@ -21,6 +21,7 @@ export type {
   ProofChainWriter,
   AuditLogger,
   PRAXISMcpServerConfig,
+  CryptographicIdentityConfig,
   PRAXISTask,
   PRAXISApp,
   DiscoveryEventType,

@@ -100,6 +100,8 @@ import { runAlertRuleEvaluation } from './routes/ops-management';
 import { startSloComputationScheduler } from './lib/slo-engine';
 import { bootstrapChainState } from './routes/signal-chains';
 import { twinRegistry } from '@szl-holdings/ai-engine';
+import { initializePersistentCA, setDefaultCA, setPersistentCAStore } from '@szl-holdings/pqc-identity';
+import { DrizzlePersistentCAStore } from './lib/pqc-db-store';
 
 failFastOnInvalidConfig();
 validateMarketDataConfig();
@@ -505,6 +507,25 @@ export async function bootstrap(
       }
     }
 
+    try {
+      const pqcStore = new DrizzlePersistentCAStore();
+      setPersistentCAStore(pqcStore);
+      const ca = await initializePersistentCA('SZL Holdings Root CA v1', pqcStore);
+      setDefaultCA(ca);
+      const stats = ca.getStats();
+      logger.info(
+        { certs: stats.totalIssued, logSize: stats.transparencyLogSize },
+        '[pqc] Persistent CA initialized (DB-backed) — before HTTP handler',
+      );
+    } catch (pqcErr) {
+      if (process.env.NODE_ENV === 'production') {
+        logger.fatal({ err: pqcErr }, '[pqc] Persistent CA initialization failed — aborting in production');
+        process.exit(1);
+      } else {
+        logger.warn({ err: pqcErr }, '[pqc] Persistent CA initialization failed (dev — continuing with ephemeral CA)');
+      }
+    }
+
     // Schema is durable — open the live handler IMMEDIATELY so the server can
     // serve traffic while the rest of the post-migration init proceeds in the
     // background. Without this, slow optional inits (Guardian engine, durable
@@ -832,6 +853,9 @@ export async function bootstrap(
         '[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.',
       );
     }
+    // PQC Identity CA is initialized synchronously before the HTTP handler
+    // opens (see above) — no need to include it in the deferred seed chain.
+
     // Guardian, knowledge base, and ingestion-framework tasks are
     // operational (not demo) — always sequence them.
     seedTasks.push(

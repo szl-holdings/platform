@@ -59,6 +59,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **A11oy Orchestrator:** The unified control plane for guard decisions, Lambda Engine execution, and model routing.
 - **Sovereign Agent Mesh:** Governed micro-agent swarms with trust-scored field agents, crew composition, MCP-based agent discovery, and proof-carrying inter-agent communication.
 - **Governance-Injecting MCP Gateway:** External agent access with PCE Gate enforcement and proof packets.
+- **Post-Quantum Identity & Governance Gateway (`lib/pqc-identity/`):** Hybrid signing (Ed25519 + ML-DSA-65), DID-based identity (did:web for tenants, did:key for agents), self-rooted PKI/CA with certificate transparency Merkle log, cryptographic identity for MCP gateway responses, and public verification API at `/api/pqc/*`. Uses @noble/post-quantum for ML-DSA-65, @noble/curves for Ed25519, @noble/hashes for SHA-256. Signing mode configurable: hybrid (default), classical-only, or pqc-only.
 
 **Canonical Identity & Source of Truth:**
 The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`.

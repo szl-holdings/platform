@@ -46,6 +46,18 @@ export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 
 // ─── Approval Decision ────────────────────────────────────────────────────────
 
+export const HybridSignatureSchema = z.object({
+  alg: z.literal('hybrid-v1'),
+  ed25519: z.string().optional(),
+  mldsa65: z.string().optional(),
+  mode: z.enum(['hybrid', 'classical-only', 'pqc-only']),
+  publicKeys: z.object({
+    ed25519: z.string().optional(),
+    mldsa65: z.string().optional(),
+  }).optional(),
+});
+export type HybridSignature = z.infer<typeof HybridSignatureSchema>;
+
 export const ApprovalDecisionSchema = z.object({
   decisionId: z.string().uuid(),
   requestId: z.string().uuid(),
@@ -57,6 +69,12 @@ export const ApprovalDecisionSchema = z.object({
   signature: z.string().optional(),
   /** SPKI-DER hex-encoded Ed25519 public key used to produce this signature. */
   publicKeyHex: z.string().optional(),
+  /** Hybrid PQC signature (Ed25519 + ML-DSA-65) over the decision payload. */
+  hybridSignature: HybridSignatureSchema.optional(),
+  /** DID of the signer who produced the hybrid signature. */
+  signerDid: z.string().optional(),
+  /** Certificate thumbprint binding the signer's DID to their public keys. */
+  certThumbprint: z.string().optional(),
 });
 export type ApprovalDecision = z.infer<typeof ApprovalDecisionSchema>;
 

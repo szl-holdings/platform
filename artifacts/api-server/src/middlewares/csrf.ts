@@ -177,6 +177,7 @@ function isExempt(path: string): boolean {
   // Sentra EDR agent endpoints — machine-to-machine; agents authenticate via
   // long-lived bearer tokens issued at enrollment-token exchange time.
   // No browser session or cookie involved; CSRF double-submit not applicable.
+  if (path.startsWith('/api/pqc/')) return true;
   if (path === '/api/sentra/agents/heartbeat') return true;
   if (path === '/api/sentra/agents/exchange') return true;
   if (path === '/api/sentra/agents/poll') return true;

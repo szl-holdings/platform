@@ -30,6 +30,7 @@ import {
 import express from 'express';
 import { SERVER_INFO } from './descriptor.js';
 import { syncIdpConfigsFromDb, syncRevokedSubjectsFromDb } from './enterprise-auth.js';
+import { initPersistentCAForGateway } from './pqc-identity-init.js';
 import { createAuthorizationServerMetadata, createDiscoveryHandler, createHttpTransport } from './transport/http.js';
 import { startStdioTransport } from './transport/stdio.js';
 
@@ -77,6 +78,18 @@ function warnIfRegistryEmpty(log: (msg: string) => void): void {
 if (IS_PRODUCTION && !process.env.SUBSTRATE_GATEWAY_API_KEY) {
   process.exit(1);
 }
+
+async function bootstrap(): Promise<void> {
+  try {
+    await initPersistentCAForGateway();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[substrate-mcp-gateway] FATAL: Persistent CA initialization failed: ${msg}`);
+    if (IS_PRODUCTION) {
+      process.exit(1);
+    }
+    console.warn('[substrate-mcp-gateway] Non-production: continuing with ephemeral CA (trust will not persist across restarts)');
+  }
 
 if (IS_STDIO) {
   // stdio transport: stderr is the only safe place for diagnostic logs
@@ -145,3 +158,6 @@ if (IS_STDIO) {
     server.close(() => process.exit(0));
   });
 }
+}
+
+void bootstrap();

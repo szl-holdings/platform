@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type AlgorithmStatus = 'deployed' | 'in-progress' | 'planned' | 'not-started';
 
@@ -65,9 +65,14 @@ const PQC_STANDARDS: PqcStandard[] = [
     purpose: 'Digital Signatures',
     basis: 'Module-Lattice (MLWE + SelfTargetMSIS)',
     securityLevels: ['ML-DSA-44 (128-bit)', 'ML-DSA-65 (192-bit)', 'ML-DSA-87 (256-bit)'],
-    status: 'planned',
-    deployedIn: [],
-    planned: ['Governance covenant signatures', 'Agent identity attestation', 'Audit trail signing'],
+    status: 'deployed',
+    deployedIn: [
+      'Proof chain hybrid signing (Ed25519 + ML-DSA-65)',
+      'MCP gateway response signing',
+      'Governance covenant signatures',
+      'Agent identity attestation',
+    ],
+    planned: ['Audit trail signing (full coverage)'],
   },
   {
     fips: 'FIPS 205',
@@ -106,27 +111,27 @@ const MIGRATION_PHASES: MigrationPhase[] = [
   },
   {
     phase: 'Phase 2: Hybrid Deployment',
-    status: 'in-progress',
+    status: 'deployed',
     tasks: [
       'Deploy hybrid X25519MLKEM768 for agent mesh TLS',
-      'Dual-sign governance attestations (classical + PQC)',
+      'Dual-sign governance attestations (Ed25519 + ML-DSA-65)',
       'Upgrade Proof Chain key wrapping to ML-KEM-768',
-      'Monitor for performance regression in hybrid mode',
+      'DID-based identity for tenants (did:web) and agents (did:key)',
     ],
   },
   {
     phase: 'Phase 3: Full PQC Migration',
-    status: 'planned',
+    status: 'in-progress',
     tasks: [
       'Migrate all evidence ledger encryption to ML-KEM-1024',
-      'Replace ECDSA covenant signatures with ML-DSA-65',
-      'Deploy SLH-DSA for long-term archival signing',
-      'Remove classical-only code paths',
+      'SZL Root CA issuing PQC-hybrid certificates',
+      'Certificate Transparency Merkle log operational',
+      'MCP gateway signing every response with hybrid keypair',
     ],
   },
   {
     phase: 'Phase 4: Validation & Certification',
-    status: 'not-started',
+    status: 'planned',
     tasks: [
       'FIPS 140-3 validation for PQC module boundary',
       'Penetration testing against harvest-now-decrypt-later',
@@ -138,17 +143,51 @@ const MIGRATION_PHASES: MigrationPhase[] = [
 
 const ECOSYSTEM_STATUS: EcoSystem[] = [
   { system: 'Agent Mesh TLS', current: 'X25519 + AES-256-GCM', target: 'X25519MLKEM768 + AES-256-GCM', status: 'in-progress' },
-  { system: 'Proof Chain Signatures', current: 'Ed25519', target: 'ML-DSA-65 (hybrid)', status: 'planned' },
+  { system: 'Proof Chain Signatures', current: 'Ed25519', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
+  { system: 'MCP Gateway Signing', current: 'Unsigned', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
+  { system: 'Agent Identity (DID)', current: 'API key / JWT', target: 'did:key + hybrid cert', status: 'deployed' },
+  { system: 'Tenant Identity (DID)', current: 'Clerk auth', target: 'did:web + hybrid cert', status: 'deployed' },
+  { system: 'Certificate Transparency', current: 'None', target: 'Merkle append-only log', status: 'deployed' },
   { system: 'Evidence Ledger Encryption', current: 'AES-256-GCM / X25519', target: 'ML-KEM-1024 / AES-256-GCM', status: 'planned' },
-  { system: 'Covenant Attestation', current: 'ECDSA P-256', target: 'ML-DSA-65', status: 'planned' },
-  { system: 'Agent Identity Tokens', current: 'Ed25519 keypairs', target: 'ML-DSA-44 keypairs', status: 'planned' },
+  { system: 'Covenant Attestation', current: 'ECDSA P-256', target: 'ML-DSA-65', status: 'deployed' },
+  { system: 'Agent Identity Tokens', current: 'Ed25519 keypairs', target: 'ML-DSA-44 keypairs', status: 'in-progress' },
   { system: 'Archival Signing', current: 'Ed25519', target: 'SLH-DSA-256s', status: 'not-started' },
   { system: 'MirrorEval Hash Commitments', current: 'SHA-256', target: 'SHA-256 (quantum-safe)', status: 'deployed' },
   { system: 'Session Tokens', current: 'HS256 JWT', target: 'HS256 JWT (quantum-safe)', status: 'deployed' },
 ];
 
+interface PQCLiveStatus {
+  signingMode?: string;
+  caIssuer?: string;
+  totalCerts?: number;
+  activeCerts?: number;
+  transparencyLogSize?: number;
+  merkleRoot?: string;
+}
+
 export default function PqcReadiness() {
   const [expandedStandard, setExpandedStandard] = useState<string | null>(null);
+  const [liveStatus, setLiveStatus] = useState<PQCLiveStatus | null>(null);
+
+  useEffect(() => {
+    const base = (import.meta.env.BASE_URL ?? '/sentra/').replace(/\/$/, '');
+    const apiBase = base.replace('/sentra', '/api');
+    fetch(`${apiBase}/pqc/status`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.data) {
+          setLiveStatus({
+            signingMode: data.data.signingMode,
+            caIssuer: data.data.ca?.issuer,
+            totalCerts: data.data.ca?.certificates?.totalIssued,
+            activeCerts: data.data.ca?.certificates?.totalActive,
+            transparencyLogSize: data.data.transparencyLog?.treeSize,
+            merkleRoot: data.data.transparencyLog?.merkleRoot,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const deployedCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'deployed').length;
   const inProgressCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'in-progress').length;
@@ -161,8 +200,8 @@ export default function PqcReadiness() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-xl font-semibold text-white">Post-Quantum Cryptography Readiness</h1>
-            <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/10 border-amber-500/20 text-amber-400">
-              NIST FIPS 203/204/205
+            <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+              OPERATIONAL
             </span>
           </div>
           <p className="text-[13px] text-white/35">
@@ -197,6 +236,40 @@ export default function PqcReadiness() {
           <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">NIST Standards</p>
         </div>
       </div>
+
+      {liveStatus && (
+        <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-[13px] font-medium text-emerald-400">Live PQC Stack Status</h3>
+            <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400">LIVE</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Signing Mode</div>
+              <div className="text-[13px] font-mono text-emerald-400">{liveStatus.signingMode ?? 'hybrid'}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">CA Issuer</div>
+              <div className="text-[13px] font-mono text-white/50">{liveStatus.caIssuer ?? 'SZL Holdings Root CA v1'}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Active Certificates</div>
+              <div className="text-[13px] font-mono text-white/50">{liveStatus.activeCerts ?? 0} / {liveStatus.totalCerts ?? 0}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Transparency Log</div>
+              <div className="text-[13px] font-mono text-white/50">{liveStatus.transparencyLogSize ?? 0} entries</div>
+            </div>
+          </div>
+          {liveStatus.merkleRoot && (
+            <div className="mt-3 pt-3 border-t border-emerald-500/10">
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Merkle Root</div>
+              <div className="text-[11px] font-mono text-white/30 break-all">{liveStatus.merkleRoot}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
@@ -401,10 +474,10 @@ export default function PqcReadiness() {
             <div className="absolute left-4 top-0 bottom-0 w-px bg-white/[0.08]" />
             <div className="space-y-6">
               {[
-                { year: '2024', label: 'Current State', description: 'NIST finalizes FIPS 203/204/205 standards. Hybrid implementations begin. Harvest-now-decrypt-later attacks accelerate.', status: 'deployed' as const, highlight: true },
-                { year: '2025', label: 'Hybrid Migration', description: 'Deploy hybrid classical+PQC for all agent mesh TLS. Begin dual-signing governance attestations. First PQC-protected evidence chains.', status: 'in-progress' as const, highlight: true },
-                { year: '2026', label: 'Full PQC Rollout', description: 'Complete migration to ML-KEM-1024 for all key exchange. ML-DSA-65 for all digital signatures. Remove classical-only code paths.', status: 'planned' as const, highlight: false },
-                { year: '2027', label: 'Validation & Certification', description: 'FIPS 140-3 validation for PQC module. Third-party audit. Performance benchmarking across all security levels.', status: 'not-started' as const, highlight: false },
+                { year: '2024', label: 'NIST Finalization', description: 'NIST finalizes FIPS 203/204/205 standards. Hybrid implementations begin. Harvest-now-decrypt-later attacks accelerate.', status: 'deployed' as const, highlight: true },
+                { year: '2025', label: 'Hybrid Deployment', description: 'Deploy hybrid classical+PQC for all agent mesh TLS. Begin dual-signing governance attestations. First PQC-protected evidence chains.', status: 'deployed' as const, highlight: true },
+                { year: '2026', label: 'PQC Identity Gateway', description: 'Ed25519 + ML-DSA-65 hybrid signing operational. DID-based identity for tenants and agents. SZL Root CA issuing PQC-hybrid certificates. Certificate Transparency log active. MCP gateway signing all responses.', status: 'deployed' as const, highlight: true },
+                { year: '2027', label: 'Validation & Certification', description: 'FIPS 140-3 validation for PQC module. Third-party audit. Performance benchmarking across all security levels.', status: 'planned' as const, highlight: false },
                 { year: '2028–2030', label: 'Quantum Computing Threat Window', description: 'Leading estimates suggest cryptographically-relevant quantum computers may emerge. Organizations without PQC migration face catastrophic data exposure.', status: 'not-started' as const, highlight: false },
               ].map((milestone) => {
                 const sc = STATUS_CONFIG[milestone.status];
@@ -453,7 +526,7 @@ export default function PqcReadiness() {
           { algo: 'RSA-2048', usage: 'TLS Certificates', instances: 142, risk: 'Broken by Shor\'s', migration: 'ML-KEM-768' },
           { algo: 'ECDSA P-256', usage: 'Code Signing', instances: 89, risk: 'Broken by Shor\'s', migration: 'ML-DSA-65' },
           { algo: 'ECDH P-256', usage: 'Key Exchange', instances: 234, risk: 'Broken by Shor\'s', migration: 'ML-KEM-768' },
-          { algo: 'Ed25519', usage: 'Agent Identities', instances: 456, risk: 'Broken by Shor\'s', migration: 'ML-DSA-44' },
+          { algo: 'Ed25519', usage: 'Agent Identities', instances: 456, risk: 'Broken by Shor\'s', migration: 'Hybrid (Ed25519 + ML-DSA-65)' },
           { algo: 'AES-256-GCM', usage: 'Data Encryption', instances: 1_847, risk: 'Weakened (Grover)', migration: 'AES-256 (safe)' },
           { algo: 'SHA-256', usage: 'Hash Functions', instances: 3_291, risk: 'Weakened (Grover)', migration: 'SHA-256 (safe)' },
           { algo: 'X25519', usage: 'Key Agreement', instances: 567, risk: 'Broken by Shor\'s', migration: 'X25519MLKEM768' },

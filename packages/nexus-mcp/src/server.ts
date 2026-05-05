@@ -15,7 +15,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { EventEmitter } from 'node:events';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { z, type ZodRawShape } from 'zod';
 
 // ─── Governance Context ────────────────────────────────────────────────────────
@@ -84,6 +84,25 @@ export function errorContent(message: string, details?: unknown): ToolContent {
 
 // ─── Capability Config ────────────────────────────────────────────────────────
 
+export interface CryptographicIdentityConfig {
+  did: string;
+  certThumbprint: string;
+  certificate?: {
+    certId: string;
+    issuer: string;
+    subject: string;
+    subjectDid: string;
+    notBefore: number;
+    notAfter: number;
+    thumbprint: string;
+    publicKeys: { ed25519: string; mldsa65: string };
+  };
+  sign: (message: string) => { alg: string; ed25519?: string; mldsa65?: string; mode: string; publicKeys?: Record<string, string> };
+  signingMode: string;
+}
+
+export type IdentityEnforcementMode = 'log-only' | 'block' | 'quarantine';
+
 export interface PRAXISMcpServerConfig {
   name: string;
   version: string;
@@ -99,6 +118,15 @@ export interface PRAXISMcpServerConfig {
 
   /** Audit logger — appended to the immutable audit trail */
   auditLogger?: AuditLogger;
+
+  /** Cryptographic identity for hybrid PQC signing of responses */
+  cryptographicIdentity?: CryptographicIdentityConfig;
+
+  /** Tool names that require cryptographic identity (governance-critical tools) */
+  governanceTools?: string[];
+
+  /** Enforcement mode for identity requirements on governance tools (default: 'block') */
+  identityEnforcementMode?: IdentityEnforcementMode;
 
   /** Enable Sampling capability (server can request LLM completions from clients) */
   enableSampling?: boolean;
@@ -185,6 +213,30 @@ export class PRAXISMcpServer {
       logging: {},
     };
 
+    if (config.cryptographicIdentity) {
+      const cert = config.cryptographicIdentity.certificate;
+      capabilities['x-pqc-identity'] = {
+        signerDid: config.cryptographicIdentity.did,
+        certThumbprint: config.cryptographicIdentity.certThumbprint,
+        signingMode: config.cryptographicIdentity.signingMode,
+        protocolVersion: 'hybrid-v1',
+        ...(cert
+          ? {
+              certificate: {
+                certId: cert.certId,
+                issuer: cert.issuer,
+                subject: cert.subject,
+                subjectDid: cert.subjectDid,
+                notBefore: cert.notBefore,
+                notAfter: cert.notAfter,
+                thumbprint: cert.thumbprint,
+                publicKeys: cert.publicKeys,
+              },
+            }
+          : {}),
+      };
+    }
+
     if (config.enableSampling) {
       capabilities['sampling'] = { tools: true };
     }
@@ -252,6 +304,10 @@ export class PRAXISMcpServer {
       const start = Date.now();
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
       const typedArgs = rawArgs;
+
+      // --- Governance identity enforcement ---
+      const govCheck = self._enforceGovernanceIdentity(name);
+      if (govCheck.blocked && govCheck.result) return govCheck.result;
 
       // --- Guardian policy evaluation ---
       if (self._config.policyEvaluator) {
@@ -321,7 +377,13 @@ export class PRAXISMcpServer {
         userId: ctx.userId ?? null,
       });
 
-      return { content: result.content, isError: result.isError } as CallToolResult;
+      const identityMeta = self._buildIdentityMeta(name, outcome, latencyMs, typedArgs, result.content);
+
+      return {
+        content: result.content,
+        ...(result.isError ? { isError: true } : {}),
+        _meta: identityMeta,
+      } as CallToolResult;
     });
   }
 
@@ -371,6 +433,10 @@ export class PRAXISMcpServer {
     sdkRegisterRaw(name, { description, inputSchema: zodShape }, async (typedArgs, _extra) => {
       const start = Date.now();
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
+
+      // Governance identity enforcement
+      const govCheck = self._enforceGovernanceIdentity(name);
+      if (govCheck.blocked && govCheck.result) return govCheck.result;
 
       // Guardian policy
       if (self._config.policyEvaluator) {
@@ -454,10 +520,12 @@ export class PRAXISMcpServer {
         userId: ctx.userId ?? null,
       });
 
+      const identityMeta = self._buildIdentityMeta(name, outcome, latencyMs, typedArgs, content);
+
       return {
         content,
         ...(outcome === 'error' ? { isError: true } : {}),
-        ...(extraMeta ? { _meta: extraMeta } : {}),
+        _meta: { ...extraMeta, ...identityMeta },
       } as CallToolResult;
     });
   }
@@ -984,6 +1052,150 @@ export class PRAXISMcpServer {
         };
       },
     );
+  }
+
+  // ─── Cryptographic Identity ──────────────────────────────────────────────────
+
+  get cryptographicIdentity(): CryptographicIdentityConfig | undefined {
+    return this._config.cryptographicIdentity;
+  }
+
+  private _isGovernanceTool(toolName: string): boolean {
+    const govTools = this._config.governanceTools;
+    if (!govTools || govTools.length === 0) return false;
+    return govTools.includes(toolName);
+  }
+
+  private _enforceGovernanceIdentity(
+    toolName: string,
+  ): { blocked: boolean; result?: CallToolResult } {
+    if (!this._isGovernanceTool(toolName)) return { blocked: false };
+
+    const identity = this._config.cryptographicIdentity;
+    const mode = this._config.identityEnforcementMode ?? 'block';
+
+    if (identity) return { blocked: false };
+
+    const reason = `Governance tool "${toolName}" requires cryptographic identity but none is configured`;
+
+    void this._writeAuditLog({
+      action: 'governance_identity_enforcement',
+      resource: 'mcp_tool',
+      resourceId: toolName,
+      description: reason,
+      metadata: { enforcementMode: mode, toolName },
+      userId: null,
+    });
+
+    if (mode === 'block') {
+      return {
+        blocked: true,
+        result: {
+          content: errorContent(reason),
+          isError: true,
+          _meta: {
+            'x-pqc-identity': { signed: false, reason, enforcement: 'blocked' },
+          },
+        } as CallToolResult,
+      };
+    }
+
+    if (mode === 'quarantine') {
+      return {
+        blocked: true,
+        result: {
+          content: errorContent(`${reason} — quarantined for review`),
+          isError: true,
+          _meta: {
+            'x-pqc-identity': { signed: false, reason, enforcement: 'quarantined' },
+          },
+        } as CallToolResult,
+      };
+    }
+
+    return { blocked: false };
+  }
+
+  private _buildIdentityMeta(
+    toolName: string,
+    outcome: string,
+    latencyMs: number,
+    args?: Record<string, unknown>,
+    resultContent?: unknown,
+  ): Record<string, unknown> {
+    const identity = this._config.cryptographicIdentity;
+    const isGov = this._isGovernanceTool(toolName);
+    const mode = this._config.identityEnforcementMode ?? 'block';
+
+    if (!identity) {
+      if (isGov && mode !== 'log-only') {
+        throw new Error(
+          `Governance tool "${toolName}" requires cryptographic identity but none is configured — response blocked`,
+        );
+      }
+      return {
+        'x-pqc-identity': {
+          signed: false,
+          reason: 'No cryptographic identity configured',
+        },
+      };
+    }
+
+    const ts = Date.now();
+    const argsHash = createHash('sha256').update(JSON.stringify(args ?? {})).digest('hex');
+    const resultHash = createHash('sha256').update(JSON.stringify(resultContent ?? '')).digest('hex');
+
+    const canonicalEnvelope = {
+      toolName,
+      argsHash,
+      resultHash,
+      outcome,
+      latencyMs,
+      timestamp: ts,
+      signerDid: identity.did,
+      certThumbprint: identity.certThumbprint ?? '',
+    };
+    const signPayload = JSON.stringify(canonicalEnvelope);
+
+    try {
+      const signature = identity.sign(signPayload);
+      return {
+        'x-pqc-identity': {
+          signed: true,
+          signerDid: identity.did,
+          certThumbprint: identity.certThumbprint,
+          signingMode: identity.signingMode,
+          envelope: canonicalEnvelope,
+          signature,
+        },
+      };
+    } catch (err) {
+      const reason = `Signing failed: ${err instanceof Error ? err.message : String(err)}`;
+
+      if (isGov && mode !== 'log-only') {
+        void this._writeAuditLog({
+          action: 'governance_signing_failure',
+          resource: 'mcp_tool',
+          resourceId: toolName,
+          description: reason,
+          metadata: { enforcementMode: mode, toolName },
+          userId: null,
+        });
+
+        throw new Error(
+          `Governance tool "${toolName}" signing failed — unsigned response blocked: ${reason}`,
+        );
+      }
+
+      return {
+        'x-pqc-identity': {
+          signed: false,
+          signerDid: identity.did,
+          certThumbprint: identity.certThumbprint,
+          reason,
+        },
+      };
+    }
   }
 
   // ─── Private: Governance Writers ──────────────────────────────────────────────

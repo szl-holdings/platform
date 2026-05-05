@@ -67,6 +67,13 @@ router.use(lazyMatch("/newsletter", () => import("./newsletter"), "newsletter"))
 // Owns POST /v1/replay-attestation, GET /governance/stats, GET /.well-known/szl-attestation-keys.json.
 router.use(lazyMatch(["/v1/replay-attestation", "/governance/stats", "/.well-known/szl-attestation-keys.json"], () => import("./replay-attestation"), "replay-attestation"));
 
+// PQC Identity & Governance Gateway — public verification API.
+// GET  /pqc/status, /pqc/certificates, /pqc/transparency-log, /pqc/did.json
+// GET  /.well-known/did.json (W3C DID document for tenant did:web resolution)
+// POST /pqc/verify, /pqc/verify/signature, /pqc/verify/certificate, /pqc/verify/did
+// POST /pqc/transparency-log/inclusion-proof
+router.use(lazyMatch(["/pqc", "/.well-known/did.json"], () => import("./pqc-verification"), "pqc-verification"));
+
 // Email provider webhooks (bounces, complaints) + unsubscribe handler — public, unauthenticated.
 router.use(emailWebhooksRouter);
 

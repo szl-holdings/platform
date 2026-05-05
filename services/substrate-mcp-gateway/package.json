@@ -22,6 +22,8 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@szl-holdings/evidence-graph": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/pqc-identity": "workspace:*",
     "@szl/substrate": "workspace:*",
     "@szl/substrate-client": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",

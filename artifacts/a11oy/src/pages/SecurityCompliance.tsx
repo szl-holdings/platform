@@ -1,8 +1,10 @@
 import { Link } from 'wouter';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const API_BASE = BASE.replace('/a11oy', '/api');
 const link = (path: string) => `${BASE}${path}`;
 
 const T = {
@@ -125,8 +127,47 @@ const STATUS_LABELS: Record<Cert['status'], { label: string; status: 'ok' | 'inf
   roadmap: { label: 'ROADMAP', status: 'warn' },
 };
 
+interface PQCStatus {
+  signingMode?: string;
+  algorithms?: { classical: string; postQuantum: string; hybrid: string };
+  ca?: { certificates?: { totalActive: number } };
+}
+
 export function SecurityCompliance() {
   const attested = CERTS.filter((c) => c.status === 'attested' || c.status === 'in-place').length;
+  const [pqcStatus, setPqcStatus] = useState<PQCStatus | null>(null);
+  const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null);
+  const [verifyInput, setVerifyInput] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/pqc/status`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.data) setPqcStatus(data.data); })
+      .catch(() => {});
+  }, []);
+
+  const handleVerify = async () => {
+    if (!verifyInput.trim()) return;
+    setVerifyLoading(true);
+    setVerifyResult(null);
+    try {
+      const body: Record<string, string> = {};
+      if (verifyInput.startsWith('did:')) body.did = verifyInput;
+      else if (verifyInput.startsWith('cert-')) body.certId = verifyInput;
+      else body.certThumbprint = verifyInput;
+      const r = await fetch(`${API_BASE}/pqc/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await r.json();
+      setVerifyResult(data?.data ?? data);
+    } catch {
+      setVerifyResult({ error: 'Verification request failed' });
+    }
+    setVerifyLoading(false);
+  };
 
   return (
     <Layout>
@@ -141,7 +182,7 @@ export function SecurityCompliance() {
         <KpiCard label="ATTESTATIONS" value={`${attested}/${CERTS.length}`} sub="active or in-place" accent={T.accent} />
         <KpiCard label="P1 NOTIFY SLA" value="≤ 24h" sub="confirmed material" accent={T.accent} />
         <KpiCard label="CVE · CRITICAL" value="≤ 24h" sub="patch SLA" accent={T.accent} />
-        <KpiCard label="ENCRYPTION" value="HYBRID-PQC" sub="ML-KEM + AES-256-GCM" accent={T.accent} />
+        <KpiCard label="SIGNING" value={pqcStatus?.signingMode?.toUpperCase() ?? 'HYBRID-PQC'} sub="Ed25519 + ML-DSA-65" accent={T.accent} />
       </div>
 
       <Card className="mb-6">
@@ -234,6 +275,66 @@ export function SecurityCompliance() {
           </Card>
         ))}
       </div>
+
+      <SectionTitle>PQC Identity Verification</SectionTitle>
+      <Card className="mb-6">
+        <div style={{ padding: '1.25rem' }}>
+          <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0, marginBottom: '1rem' }}>
+            Verify a proof, certificate, or DID against the live PQC identity stack. Enter a DID (did:web:... or did:key:...), certificate ID (cert-...), or certificate thumbprint.
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <input
+              type="text"
+              value={verifyInput}
+              onChange={(e) => setVerifyInput(e.target.value)}
+              placeholder="did:key:z... or cert-... or thumbprint"
+              style={{
+                flex: 1, padding: '0.625rem 0.875rem',
+                background: 'rgba(255,255,255,0.04)', border: `1px solid ${T.border}`,
+                borderRadius: 8, color: T.text, fontFamily: T.mono, fontSize: '0.8125rem',
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={handleVerify}
+              disabled={verifyLoading || !verifyInput.trim()}
+              style={{
+                padding: '0.625rem 1.25rem', background: 'rgba(201,183,135,0.12)',
+                border: `1px solid rgba(201,183,135,0.3)`, borderRadius: 8,
+                fontFamily: T.mono, fontSize: '0.6875rem', color: T.accent,
+                textTransform: 'uppercase', letterSpacing: '0.12em', cursor: 'pointer',
+                opacity: verifyLoading ? 0.5 : 1,
+              }}
+            >
+              {verifyLoading ? 'Verifying...' : 'Verify'}
+            </button>
+          </div>
+          {verifyResult && (
+            <pre style={{
+              background: 'rgba(255,255,255,0.02)', border: `1px solid ${T.border}`,
+              borderRadius: 8, padding: '1rem', overflow: 'auto', maxHeight: '300px',
+              fontFamily: T.mono, fontSize: '0.75rem', color: T.textDim,
+            }}>
+              {JSON.stringify(verifyResult, null, 2)}
+            </pre>
+          )}
+        </div>
+      </Card>
+
+      {pqcStatus && (
+        <>
+          <SectionTitle>PQC Stack Status</SectionTitle>
+          <Card className="mb-6">
+            <div style={{ padding: '1.25rem' }}>
+              <InfoRow label="Signing mode" value={pqcStatus.signingMode ?? 'hybrid'} />
+              <InfoRow label="Classical algorithm" value={pqcStatus.algorithms?.classical ?? 'Ed25519'} />
+              <InfoRow label="Post-quantum algorithm" value={pqcStatus.algorithms?.postQuantum ?? 'ML-DSA-65 (FIPS 204)'} />
+              <InfoRow label="Hybrid scheme" value={pqcStatus.algorithms?.hybrid ?? 'Ed25519 + ML-DSA-65 concatenated'} />
+              <InfoRow label="Active certificates" value={String(pqcStatus.ca?.certificates?.totalActive ?? 0)} />
+            </div>
+          </Card>
+        </>
+      )}
 
       <SectionTitle>Sub-processors & Supply Chain</SectionTitle>
       <Card className="mb-6">

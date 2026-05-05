@@ -99,7 +99,7 @@ importers:
         version: 2.40.0
       '@openai/agents':
         specifier: ^0.0.15
-        version: 0.0.15(ws@8.20.0)(zod@4.3.6)
+        version: 0.0.15(ws@8.20.0)(zod@3.25.67)
       '@replit/connectors-sdk':
         specifier: ^0.3.0
         version: 0.3.0
@@ -278,7 +278,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   apps/alloy-ingestion-orchestrator:
     dependencies:
@@ -324,7 +324,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   apps/alloy-runtime-api:
     dependencies:
@@ -385,7 +385,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   artifacts/a11oy:
     dependencies:
@@ -696,6 +696,9 @@ importers:
       '@szl-holdings/policy-engine':
         specifier: workspace:*
         version: link:../../packages/policy-engine
+      '@szl-holdings/pqc-identity':
+        specifier: workspace:*
+        version: link:../../lib/pqc-identity
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -1162,7 +1165,7 @@ importers:
         version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       wouter:
         specifier: ^3.3.5
         version: 3.9.0(react@19.1.0)
@@ -1678,7 +1681,7 @@ importers:
         version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -2463,7 +2466,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   lib/forge-runtime:
     dependencies:
@@ -2737,6 +2740,22 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  lib/pqc-identity:
+    dependencies:
+      '@noble/curves':
+        specifier: ^2.2.0
+        version: 2.2.0
+      '@noble/hashes':
+        specifier: ^2.2.0
+        version: 2.2.0
+      '@noble/post-quantum':
+        specifier: ^0.6.1
+        version: 0.6.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
   lib/prism-bus:
     dependencies:
       '@szl-holdings/mcp-client':
@@ -2755,6 +2774,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      '@szl-holdings/pqc-identity':
+        specifier: workspace:*
+        version: link:../pqc-identity
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.18.0)(pg@8.20.0)
@@ -3119,7 +3141,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-contracts:
     dependencies:
@@ -3132,7 +3154,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-domain-profiles:
     dependencies:
@@ -3148,7 +3170,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-evals:
     dependencies:
@@ -3173,7 +3195,7 @@ importers:
         version: link:../../workers/alloy-vector-worker
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-evidence-ledger:
     dependencies:
@@ -3189,7 +3211,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-policy-guard:
     dependencies:
@@ -3205,7 +3227,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-retrieval-core:
     dependencies:
@@ -3218,7 +3240,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-sdk:
     dependencies:
@@ -3243,7 +3265,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-storage-adapters:
     dependencies:
@@ -3259,7 +3281,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/aef-workflow-runtime:
     dependencies:
@@ -3278,7 +3300,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agent-core:
     dependencies:
@@ -3325,7 +3347,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agents-evals:
     dependencies:
@@ -3356,7 +3378,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agents-prompts:
     dependencies:
@@ -3372,7 +3394,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agents-sdk-bridge:
     dependencies:
@@ -3406,7 +3428,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agents-tools:
     dependencies:
@@ -3428,7 +3450,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ai-control-plane:
     dependencies:
@@ -3466,7 +3488,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/alloy-agentic-rag:
     dependencies:
@@ -3512,7 +3534,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/alloy-crew:
     dependencies:
@@ -3553,7 +3575,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/approvals-inbox:
     dependencies:
@@ -3635,7 +3657,7 @@ importers:
         version: 4.21.0
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/cognitive-observability:
     dependencies:
@@ -3651,7 +3673,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/cognitive-reflexivity:
     dependencies:
@@ -3670,7 +3692,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/cognitive-runtime:
     dependencies:
@@ -3728,7 +3750,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/config:
     devDependencies:
@@ -3756,7 +3778,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/constellation:
     dependencies:
@@ -3784,7 +3806,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/continuum-embedding-api: {}
 
@@ -3802,7 +3824,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/db-migrations:
     dependencies:
@@ -3957,7 +3979,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/env:
     dependencies:
@@ -3992,7 +4014,7 @@ importers:
         version: 4.21.0
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/eval-os:
     dependencies:
@@ -4056,7 +4078,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/executive-briefing:
     dependencies:
@@ -4072,7 +4094,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/forecast-fabric:
     dependencies:
@@ -4085,7 +4107,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/guardian:
     dependencies:
@@ -4101,7 +4123,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/marketing:
     dependencies:
@@ -4158,7 +4180,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/model-passport:
     dependencies:
@@ -4175,6 +4197,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@3.25.76)
+      '@szl-holdings/pqc-identity':
+        specifier: workspace:*
+        version: link:../../lib/pqc-identity
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -4254,7 +4279,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/openusd-export:
     dependencies:
@@ -4298,7 +4323,7 @@ importers:
         version: 19.1.0
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-adapters:
     devDependencies:
@@ -4313,7 +4338,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-anchor:
     devDependencies:
@@ -4328,7 +4353,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-aristotle:
     devDependencies:
@@ -4337,7 +4362,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-bench:
     devDependencies:
@@ -4358,7 +4383,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-davinci:
     devDependencies:
@@ -4367,7 +4392,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-emerald:
     devDependencies:
@@ -4376,7 +4401,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-flashforge:
     devDependencies:
@@ -4385,7 +4410,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-fractional:
     devDependencies:
@@ -4394,7 +4419,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-gauss:
     devDependencies:
@@ -4406,7 +4431,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-guardrails:
     dependencies:
@@ -4419,7 +4444,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-horizon:
     dependencies:
@@ -4464,7 +4489,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-lara:
     devDependencies:
@@ -4473,7 +4498,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-newton:
     devDependencies:
@@ -4482,7 +4507,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-oppenheimer:
     devDependencies:
@@ -4491,7 +4516,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-resonance:
     devDependencies:
@@ -4506,7 +4531,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-theosophy:
     devDependencies:
@@ -4515,7 +4540,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-trithemius:
     devDependencies:
@@ -4524,7 +4549,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/ouroboros-verifier:
     devDependencies:
@@ -4539,7 +4564,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/planner:
     dependencies:
@@ -4564,7 +4589,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/platform-metrics-registry:
     dependencies:
@@ -4596,7 +4621,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/policy-guard:
     dependencies:
@@ -4644,7 +4669,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/replay-core:
     dependencies:
@@ -4657,7 +4682,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/retrieval-core:
     dependencies:
@@ -4717,7 +4742,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/schemas:
     dependencies:
@@ -4733,7 +4758,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/security-headers:
     devDependencies:
@@ -4755,7 +4780,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/shared-contracts:
     dependencies:
@@ -4816,7 +4841,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/speech-specialist:
     devDependencies:
@@ -4920,7 +4945,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/substrate-adapters:
     dependencies:
@@ -4974,7 +4999,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/szl-sdk:
     devDependencies:
@@ -4993,7 +5018,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/tokens:
     dependencies:
@@ -5052,7 +5077,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/tool-registry:
     dependencies:
@@ -5081,7 +5106,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/verifier:
     dependencies:
@@ -5100,7 +5125,7 @@ importers:
         version: 25.3.5
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/workflow-runtime:
     dependencies:
@@ -5150,7 +5175,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   platform/temporal:
     devDependencies:
@@ -5177,7 +5202,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   scripts:
     dependencies:
@@ -5316,12 +5341,18 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@3.25.76)
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../../lib/db
       '@szl-holdings/evidence-graph':
         specifier: workspace:*
         version: link:../../packages/evidence-graph
       '@szl-holdings/policy-engine':
         specifier: workspace:*
         version: link:../../packages/policy-engine
+      '@szl-holdings/pqc-identity':
+        specifier: workspace:*
+        version: link:../../lib/pqc-identity
       '@szl/substrate':
         specifier: workspace:*
         version: link:../../packages/substrate
@@ -5380,7 +5411,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   workers/alloy-rank-worker:
     dependencies:
@@ -5427,7 +5458,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: 'catalog:'
-        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   workers/alloy-vector-worker:
     dependencies:
@@ -7276,12 +7307,24 @@ packages:
     resolution: {integrity: sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@noble/ciphers@2.2.0':
+    resolution: {integrity: sha512-Z6pjIZ/8IJcCGzb2S/0Px5J81yij85xASuk1teLNeg75bfT07MV3a/O2Mtn1I2se43k3lkVEcFaR10N4cgQcZA==}
+    engines: {node: '>= 20.19.0'}
+
+  '@noble/curves@2.2.0':
+    resolution: {integrity: sha512-T/BoHgFXirb0ENSPBquzX0rcjXeM6Lo892a2jlYJkqk83LqZx0l1Of7DzlKJ6jkpvMrkHSnAcgb5JegL8SeIkQ==}
+    engines: {node: '>= 20.19.0'}
+
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
 
   '@noble/hashes@2.2.0':
     resolution: {integrity: sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==}
+    engines: {node: '>= 20.19.0'}
+
+  '@noble/post-quantum@0.6.1':
+    resolution: {integrity: sha512-+pormrDZwjRw05U8ADK4JpHejo87+gBd+muRBB/ozztH5yhDLMDF4jHQWN3NQQAsu1zBNPWTG0ZwVI0CR29H0A==}
     engines: {node: '>= 20.19.0'}
 
   '@nodable/entities@2.1.0':
@@ -17610,6 +17653,29 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
+  '@modelcontextprotocol/sdk@1.29.0(zod@3.25.67)':
+    dependencies:
+      '@hono/node-server': 1.19.14(hono@4.12.15)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1
+      content-type: 1.0.5
+      cors: 2.8.6
+      cross-spawn: 7.0.6
+      eventsource: 3.0.7
+      eventsource-parser: 3.0.8
+      express: 5.2.1
+      express-rate-limit: 8.3.1(express@5.2.1)
+      hono: 4.12.15
+      jose: 6.2.2
+      json-schema-typed: 8.0.2
+      pkce-challenge: 5.0.1
+      raw-body: 3.0.2
+      zod: 3.25.67
+      zod-to-json-schema: 3.25.2(zod@3.25.67)
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
       '@hono/node-server': 1.19.14(hono@4.12.15)
@@ -17656,9 +17722,21 @@ snapshots:
 
   '@noble/ciphers@1.3.0': {}
 
+  '@noble/ciphers@2.2.0': {}
+
+  '@noble/curves@2.2.0':
+    dependencies:
+      '@noble/hashes': 2.2.0
+
   '@noble/hashes@1.8.0': {}
 
   '@noble/hashes@2.2.0': {}
+
+  '@noble/post-quantum@0.6.1':
+    dependencies:
+      '@noble/ciphers': 2.2.0
+      '@noble/curves': 2.2.0
+      '@noble/hashes': 2.2.0
 
   '@nodable/entities@2.1.0': {}
 
@@ -17674,6 +17752,19 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
+  '@openai/agents-core@0.0.15(ws@8.20.0)(zod@3.25.67)':
+    dependencies:
+      '@openai/zod': zod@3.25.67
+      debug: 4.4.3
+      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
+    optionalDependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.67)
+      zod: 3.25.67
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - supports-color
+      - ws
+
   '@openai/agents-core@0.0.15(ws@8.20.0)(zod@3.25.76)':
     dependencies:
       '@openai/zod': zod@3.25.67
@@ -17687,18 +17778,17 @@ snapshots:
       - supports-color
       - ws
 
-  '@openai/agents-core@0.0.15(ws@8.20.0)(zod@4.3.6)':
+  '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@3.25.67)':
     dependencies:
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
       '@openai/zod': zod@3.25.67
       debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
-    optionalDependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
-      zod: 4.3.6
+      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color
       - ws
+      - zod
 
   '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@3.25.76)':
     dependencies:
@@ -17712,16 +17802,18 @@ snapshots:
       - ws
       - zod
 
-  '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@4.3.6)':
+  '@openai/agents-realtime@0.0.15(zod@3.25.67)':
     dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
       '@openai/zod': zod@3.25.67
+      '@types/ws': 8.18.1
       debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
+      ws: 8.20.0
     transitivePeerDependencies:
       - '@cfworker/json-schema'
+      - bufferutil
       - supports-color
-      - ws
+      - utf-8-validate
       - zod
 
   '@openai/agents-realtime@0.0.15(zod@3.25.76)':
@@ -17738,18 +17830,19 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@openai/agents-realtime@0.0.15(zod@4.3.6)':
+  '@openai/agents@0.0.15(ws@8.20.0)(zod@3.25.67)':
     dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
-      '@openai/zod': zod@3.25.67
-      '@types/ws': 8.18.1
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
+      '@openai/agents-openai': 0.0.15(ws@8.20.0)(zod@3.25.67)
+      '@openai/agents-realtime': 0.0.15(zod@3.25.67)
       debug: 4.4.3
-      ws: 8.20.0
+      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
       - supports-color
       - utf-8-validate
+      - ws
       - zod
 
   '@openai/agents@0.0.15(ws@8.20.0)(zod@3.25.76)':
@@ -17759,21 +17852,6 @@ snapshots:
       '@openai/agents-realtime': 0.0.15(zod@3.25.76)
       debug: 4.4.3
       openai: 5.23.2(ws@8.20.0)(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-      - ws
-      - zod
-
-  '@openai/agents@0.0.15(ws@8.20.0)(zod@4.3.6)':
-    dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
-      '@openai/agents-openai': 0.0.15(ws@8.20.0)(zod@4.3.6)
-      '@openai/agents-realtime': 0.0.15(zod@4.3.6)
-      debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
@@ -24616,15 +24694,15 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
+  openai@5.23.2(ws@8.20.0)(zod@3.25.67):
+    optionalDependencies:
+      ws: 8.20.0
+      zod: 3.25.67
+
   openai@5.23.2(ws@8.20.0)(zod@3.25.76):
     optionalDependencies:
       ws: 8.20.0
       zod: 3.25.76
-
-  openai@5.23.2(ws@8.20.0)(zod@4.3.6):
-    optionalDependencies:
-      ws: 8.20.0
-      zod: 4.3.6
 
   openai@6.33.0(ws@8.20.0)(zod@4.3.6):
     optionalDependencies:
@@ -26703,7 +26781,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitest@3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+  vitest@3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -26746,7 +26824,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+  vitest@3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -27047,6 +27125,11 @@ snapshots:
       archiver-utils: 5.0.2
       compress-commons: 6.0.2
       readable-stream: 4.7.0
+
+  zod-to-json-schema@3.25.2(zod@3.25.67):
+    dependencies:
+      zod: 3.25.67
+    optional: true
 
   zod-to-json-schema@3.25.2(zod@3.25.76):
     dependencies:

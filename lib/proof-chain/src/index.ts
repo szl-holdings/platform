@@ -8,6 +8,7 @@ import {
 } from '@szl-holdings/db';
 import { createHash } from 'node:crypto';
 import { and, desc, eq, } from 'drizzle-orm';
+import { tagAIContentWithIdentity } from './identity-signing.js';
 
 export type { ProofChain, ProofExportSafetyState, ProofReviewState, ProvenanceSourceClass };
 
@@ -28,6 +29,8 @@ export interface TagAIContentParams {
   serviceAttribution?: string;
   inputSources?: Array<{ type: string; id: string; label?: string }>;
   metadata?: Record<string, unknown>;
+  agentName?: string;
+  enablePqcSigning?: boolean;
 }
 
 export interface ReviewProofParams {
@@ -60,6 +63,42 @@ export async function tagAIContent(params: TagAIContentParams): Promise<ProofCha
   const initialReviewState: ProofReviewState = 'unreviewed';
   const exportSafety = deriveExportSafetyState(params.sourceClass, confidence, initialReviewState);
 
+  let mergedMetadata: Record<string, unknown> = params.metadata ?? {};
+
+  const agentName = params.agentName ?? 'system';
+  if (params.enablePqcSigning !== false) {
+    let previousEntryHash: string | undefined;
+    try {
+      const [lastEntry] = await db
+        .select({ metadata: proofChainTable.metadata })
+        .from(proofChainTable)
+        .orderBy(desc(proofChainTable.id))
+        .limit(1);
+      if (lastEntry?.metadata) {
+        const lastSig = (lastEntry.metadata as Record<string, unknown>).pqcSignature as
+          | { contentHash?: string }
+          | undefined;
+        if (lastSig?.contentHash) {
+          previousEntryHash = lastSig.contentHash;
+        }
+      }
+    } catch {
+    }
+
+    const identityResult = await tagAIContentWithIdentity({
+      contentId: params.contentId,
+      contentType: params.contentType,
+      sourceClass: params.sourceClass,
+      agentName,
+      previousEntryHash,
+      metadata: params.metadata,
+    });
+    mergedMetadata = {
+      ...mergedMetadata,
+      pqcSignature: identityResult,
+    };
+  }
+
   const [proof] = await db
     .insert(proofChainTable)
     .values({
@@ -80,7 +119,7 @@ export async function tagAIContent(params: TagAIContentParams): Promise<ProofCha
       correlationId: params.correlationId ?? null,
       serviceAttribution: params.serviceAttribution ?? null,
       inputSources: params.inputSources ?? [],
-      metadata: params.metadata ?? {},
+      metadata: mergedMetadata,
     })
     .returning();
 
@@ -222,3 +261,9 @@ export {
   hashArtifactContent,
   tagSpatialContent,
 } from './spatial-lineage.js';
+
+export {
+  tagAIContentWithIdentity,
+  verifyProofEntry,
+  canonicalStringify,
+} from './identity-signing.js';

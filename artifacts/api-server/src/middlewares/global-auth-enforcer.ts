@@ -213,6 +213,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   // public /governance ledger header. POST /api/v1/replay-attestation is
   // already covered by the /api/v1/ prefix entry below.
   "/api/.well-known/szl-attestation-keys.json",
+  "/api/.well-known/did.json",
   "/api/governance/stats",
   // Agent Mesh — genuinely-public read-only paths. Listed here (exact match
   // via Set.has) rather than in PUBLIC_PREFIXES (startsWith) to prevent any
@@ -398,6 +399,12 @@ const PUBLIC_PREFIXES = [
   // live incident/alert data and run the create→triage→resolve flow without
   // a session. Write routes are still covered by CSRF double-submit
   // protection (global csrfMiddleware in server.ts).
+  // PQC Identity & Governance Gateway — public verification API.
+  // All endpoints are read-only or stateless verification (no data writes).
+  // GET  /pqc/status, /pqc/certificates, /pqc/transparency-log
+  // POST /pqc/verify, /pqc/verify/signature, /pqc/verify/certificate, /pqc/verify/did
+  // POST /pqc/transparency-log/inclusion-proof
+  "/api/pqc/",
   "/api/sentra/",
   // RF Intelligence — satellite AIS correlation engine, anomaly detection,
   // and geo-intel surface. All endpoints are read-only GET routes backed by

@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { PRAXISMcpServer, buildTenantInstructions, createDomainApps, type TenantContext } from '@workspace/nexus-mcp';
 import { getCurrentActorId } from './request-context.js';
 import { GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
+import { initGatewayIdentity } from './pqc-identity-init.js';
 import {
   getAvailableTools,
   handleToolCall,
@@ -41,6 +42,8 @@ export function getGatewayServer(): PRAXISMcpServer {
     name: r.name,
   }));
 
+  const cryptographicIdentity = initGatewayIdentity();
+
   _server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
     version: GATEWAY_VERSION,
@@ -53,6 +56,17 @@ export function getGatewayServer(): PRAXISMcpServer {
     enableResourceSubscription: true,
     enableRoots: true,
     roots: domainRoots,
+    cryptographicIdentity,
+    governanceTools: [
+      'substrate_approve',
+      'substrate_reject',
+      'agent_delegate',
+      'enable_server',
+      'disable_server',
+      'roots_enable_domain',
+      'roots_disable_domain',
+    ],
+    identityEnforcementMode: 'block',
     instructions: buildTenantInstructions({
       tenantId: 'substrate-gateway',
       domain: 'analytics',
