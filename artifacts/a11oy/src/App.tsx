@@ -128,6 +128,7 @@ const AgentViz = lazy(() => import('./pages/AgentViz').then(m => ({ default: m.A
 const DevPlatform = lazy(() => import('./pages/DevPlatform').then(m => ({ default: m.DevPlatform })));
 const A11oyCode = lazy(() => import('./pages/A11oyCode').then(m => ({ default: m.A11oyCode })));
 const A11oyChat = lazy(() => import('./pages/A11oyChat').then(m => ({ default: m.A11oyChat })));
+const A11oyChatImprovements = lazy(() => import('./pages/A11oyChatImprovements').then(m => ({ default: m.A11oyChatImprovements })));
 const AgentMesh = lazy(() => import('./pages/AgentMesh').then(m => ({ default: m.AgentMesh })));
 const PluginHub = lazy(() => import('./pages/PluginHub').then(m => ({ default: m.PluginHub })));
 const DeepResearch = lazy(() => import('./pages/DeepResearch').then(m => ({ default: m.DeepResearch })));
@@ -496,7 +497,7 @@ export default function App() {
           <WithShell><Console /></WithShell>
         </Route>
         <Route path={`${base}/praxis`}>
-          <RedirectTo to={`${base}/nexus`} />
+          <RedirectTo to={`${base}/chat`} />
         </Route>
 
         {/* NEXUS — Unified Agentic AI Layer (consolidated into A11oy — Task #4310) */}
@@ -577,6 +578,9 @@ export default function App() {
         <Route path={`${base}/sdk`} component={DevPlatform} />
         <Route path={`${base}/a11oy-code`}>
           <WithShell><A11oyCode /></WithShell>
+        </Route>
+        <Route path={`${base}/chat/improvements`}>
+          <WithShell><A11oyChatImprovements /></WithShell>
         </Route>
         <Route path={`${base}/chat`}>
           <WithShell><A11oyChat /></WithShell>

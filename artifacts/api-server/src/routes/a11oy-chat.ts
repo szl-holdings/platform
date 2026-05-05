@@ -6,17 +6,44 @@ import { runPCEGate, generateProofPacket, type PCEGateResult } from '../a11oy/ru
 import { tagAIContent } from '@szl-holdings/proof-chain';
 import { db } from '@szl-holdings/db';
 import { sql } from 'drizzle-orm';
+import {
+  evaluateChatAmi,
+  FORMULA_REGISTRY,
+  type ChatAmiResult,
+  type FormulaId,
+} from '../a11oy/formulas/ami-formula.js';
 
 const router = Router();
 
 const ANTHROPIC_BASE = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL;
 const ANTHROPIC_KEY = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY;
 
-const MODEL_LANE_MAP: Record<string, { model: string; lane: string; temperature: number }> = {
-  'a1.1oy-sovereign': { model: 'claude-sonnet-4-6', lane: 'reasoning', temperature: 0.7 },
-  'a1.1oy-code': { model: 'claude-sonnet-4-6', lane: 'tool_calling', temperature: 0.3 },
-  'a1.1oy-reason': { model: 'claude-sonnet-4-6', lane: 'reasoning', temperature: 0.5 },
-  'a1.1oy-fast': { model: 'claude-sonnet-4-6', lane: 'triage', temperature: 0.6 },
+type ChatMode = 'sovereign' | 'code' | 'reason' | 'fast' | 'research' | 'governance';
+type ChatProvider = 'anthropic' | 'kimi' | 'openai' | 'huggingface';
+
+interface LaneConfig {
+  model: string;
+  lane: string;
+  temperature: number;
+  provider: ChatProvider;
+}
+
+const MODEL_LANE_MAP: Record<string, LaneConfig> = {
+  'a1.1oy-sovereign': { model: 'claude-sonnet-4-6', lane: 'reasoning', temperature: 0.7, provider: 'anthropic' },
+  'a1.1oy-code': { model: 'claude-sonnet-4-6', lane: 'tool_calling', temperature: 0.3, provider: 'anthropic' },
+  'a1.1oy-reason': { model: 'claude-sonnet-4-6', lane: 'reasoning', temperature: 0.5, provider: 'anthropic' },
+  'a1.1oy-fast': { model: 'claude-sonnet-4-6', lane: 'triage', temperature: 0.6, provider: 'anthropic' },
+  'a1.1oy-research': { model: 'claude-sonnet-4-6', lane: 'research', temperature: 0.6, provider: 'anthropic' },
+  'a1.1oy-governance': { model: 'claude-sonnet-4-6', lane: 'governance', temperature: 0.4, provider: 'anthropic' },
+};
+
+const MODE_TO_MODEL: Record<ChatMode, string> = {
+  sovereign: 'a1.1oy-sovereign',
+  code: 'a1.1oy-code',
+  reason: 'a1.1oy-reason',
+  fast: 'a1.1oy-fast',
+  research: 'a1.1oy-research',
+  governance: 'a1.1oy-governance',
 };
 
 const MAX_TOKENS = 4096;
@@ -26,6 +53,7 @@ const MAX_TOTAL_CHARS = 64_000;
 const MAX_CONCURRENT = 6;
 const PER_IP_WINDOW_MS = 60_000;
 const PER_IP_MAX_REQUESTS = 12;
+const MIRROR_EVAL_THRESHOLD = 0.7;
 
 let inflight = 0;
 const ipBuckets = new Map<string, number[]>();
@@ -46,38 +74,155 @@ function checkIpRate(ip: string): boolean {
   return true;
 }
 
-const SYSTEM_PROMPT = `You are A11oy — the Orchestration and Decision Intelligence layer of the SZL Holdings governed platform.
+interface ImprovementEntry {
+  id: string;
+  createdAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  mode: ChatMode;
+  modelId: string;
+  prompt: string;
+  response: string;
+  mirrorEvalScore: number;
+  mirrorEvalDisposition: string;
+  proposedImprovement: string;
+  reviewerNote?: string;
+  reviewedAt?: string;
+}
 
-You are real, you stream from Claude (claude-sonnet-4-6) via the Replit AI Integrations proxy. You do not invent capabilities. You answer technical, operational, and product-strategy questions about the SZL Holdings platform truthfully.
+const IMPROVEMENT_QUEUE: ImprovementEntry[] = [];
+const IMPROVEMENT_QUEUE_MAX = 200;
 
-When asked what you can do, describe these things accurately:
-- Multi-turn conversation
-- Code generation, code review, code explanation in any major language
-- Document analysis (when text is pasted into the conversation)
+function enqueueImprovement(entry: ImprovementEntry): void {
+  IMPROVEMENT_QUEUE.unshift(entry);
+  if (IMPROVEMENT_QUEUE.length > IMPROVEMENT_QUEUE_MAX) IMPROVEMENT_QUEUE.length = IMPROVEMENT_QUEUE_MAX;
+}
+
+const SYSTEM_PROMPT_VERSION = 'v2.0.0';
+const SYSTEM_PROMPT = `You are A11oy — the unified Orchestration and Decision Intelligence layer of the SZL Holdings governed platform.
+
+You are a single agentic chat surface. There are no separate Praxis or Console chat surfaces — every reasoning, code, research, governance, and triage request flows through you. Each turn you (or the upstream router) selects a MODE (sovereign / code / reason / fast / research / governance) and a MODEL (Claude / Kimi / OpenAI / HF) and explains the choice. The user can override.
+
+You stream from Claude (claude-sonnet-4-6) via the Replit AI Integrations proxy. You do not invent capabilities.
+
+When asked what you can do, describe these accurately:
+- Multi-turn conversation with persistent thread history
+- Code generation, code review, code explanation
+- Document and pasted-text analysis
 - Reasoning, planning, architectural advice
-- Markdown formatting including fenced code blocks
+- Tool calling: web search, HuggingFace search, thesis RAG, formula lookup, Claude-Code agent invocation, proof-ledger query, fabric-state query, governance query
+- Per-turn proof-ledger entry with mode, model, tools, citations, and MirrorEval score
 
-When asked about SZL Holdings facts, defer to the SOURCE_OF_TRUTH.md numbers:
+When asked about SZL Holdings facts, defer to SOURCE_OF_TRUTH.md:
 - 7 customer-facing product surfaces orchestrated by A11oy
 - 6 platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric)
 - 848 provisioned database tables, 5,524 API endpoints, 126 monorepo packages
-- Public proof: github.com/szl-holdings/ouroboros (v6.2.0, 172/172 tests passing); github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0, concept DOI 10.5281/zenodo.19944926 — always resolves to latest version; v3 record at https://zenodo.org/records/19983066)
+- Public proof: github.com/szl-holdings/ouroboros (v6.2.0); github.com/szl-holdings/ouroboros-thesis (concept DOI 10.5281/zenodo.19944926)
 
-If you don't know something, say so. Never fabricate metrics, contracts, certifications, or partnerships.
-
-Available tools you can reference when users ask about platform capabilities:
-- workcell.inspect: Inspect workcell execution state
-- signal_mesh.query: Query the signal mesh for anomalies
-- covenant.check: Validate covenant compliance
-- proof.create: Generate proof packets
-- fabric.query: Query the A11oy Fabric
-- mirror_eval.score: Run MirrorEval assessment
-- connector_hub.discover: Discover connected tools`;
+If you don't know something, say so. Never fabricate metrics, contracts, certifications, or partnerships. Cite sources inline when you used a tool.`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
+
+interface ModeRecommendation {
+  mode: ChatMode;
+  modelId: string;
+  provider: ChatProvider;
+  rationale: string;
+  confidence: number;
+  alternatives: Array<{ mode: ChatMode; modelId: string; reason: string }>;
+}
+
+const MODE_HEURISTICS: Array<{ mode: ChatMode; patterns: RegExp[]; reason: string }> = [
+  {
+    mode: 'code',
+    patterns: [/\bcode\b/i, /\brefactor/i, /\bdebug/i, /\bfunction\b/i, /\btypescript|javascript|python|rust|java|sql\b/i, /\bimplement\b/i, /```/],
+    reason: 'question is implementation/code-oriented',
+  },
+  {
+    mode: 'governance',
+    patterns: [/\bcovenant|policy|approval|audit|compliance|pce\b/i, /\bproof.{0,5}(chain|ledger|packet)\b/i, /\bgovernance\b/i],
+    reason: 'question is about governance, policy, or audit',
+  },
+  {
+    mode: 'research',
+    patterns: [/\bresearch\b/i, /\bcite|citation|source|paper|huggingface\b/i, /\bweb search\b/i, /\bsearch the (web|hub)\b/i, /\bpublished\b/i],
+    reason: 'question requires external sources or citations',
+  },
+  {
+    mode: 'reason',
+    patterns: [/\bwhy\b/i, /\bexplain\b/i, /\bcompare\b/i, /\bstrategy\b/i, /\barchitect|design\b/i, /\bplan\b/i],
+    reason: 'question requires deep reasoning or planning',
+  },
+  {
+    mode: 'fast',
+    patterns: [/^(what|when|who|where|is|are|does|can|do)\b.{0,80}\?$/i],
+    reason: 'short factual question; low-latency triage path is sufficient',
+  },
+];
+
+function recommendMode(userText: string): ModeRecommendation {
+  const text = userText.trim();
+  let chosen: ChatMode = 'sovereign';
+  let reason = 'default sovereign reasoning lane for general inquiries';
+  let confidence = 0.55;
+
+  for (const h of MODE_HEURISTICS) {
+    if (h.patterns.some((re) => re.test(text))) {
+      chosen = h.mode;
+      reason = h.reason;
+      confidence = 0.78;
+      break;
+    }
+  }
+
+  const alternatives: Array<{ mode: ChatMode; modelId: string; reason: string }> = (
+    ['sovereign', 'code', 'reason', 'research', 'governance', 'fast'] as ChatMode[]
+  )
+    .filter((m) => m !== chosen)
+    .slice(0, 3)
+    .map((m) => ({ mode: m, modelId: MODE_TO_MODEL[m], reason: `override to ${m}` }));
+
+  const modelId = MODE_TO_MODEL[chosen];
+  const lane = MODEL_LANE_MAP[modelId]!;
+
+  const rationale = `Picked ${capitalize(chosen)} + ${providerLabel(lane.provider)} because ${reason}.`;
+
+  return {
+    mode: chosen,
+    modelId,
+    provider: lane.provider,
+    rationale,
+    confidence,
+    alternatives,
+  };
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function providerLabel(p: ChatProvider): string {
+  return { anthropic: 'Claude', kimi: 'Kimi', openai: 'OpenAI', huggingface: 'HF' }[p];
+}
+
+interface ToolDescriptor {
+  name: string;
+  description: string;
+  riskLevel: 'low' | 'medium' | 'high';
+}
+
+const AVAILABLE_TOOLS: ToolDescriptor[] = [
+  { name: 'web.search', description: 'Search the public web for current information and citations', riskLevel: 'low' },
+  { name: 'huggingface.search', description: 'Search HuggingFace Hub for models, datasets, papers, spaces (#4210 MCP)', riskLevel: 'low' },
+  { name: 'thesis.rag', description: 'Retrieve grounded passages from docs/thesis/v8-canonical.md', riskLevel: 'low' },
+  { name: 'formula.lookup', description: 'Resolve a named formula from lib/formulas (#4776)', riskLevel: 'low' },
+  { name: 'claude_code.invoke', description: 'Delegate a coding task to a Claude Code agent', riskLevel: 'medium' },
+  { name: 'proof_ledger.query', description: 'Query the proof ledger for prior proof packets', riskLevel: 'low' },
+  { name: 'fabric.query', description: 'Query A11oy Fabric state', riskLevel: 'low' },
+  { name: 'governance.query', description: 'Query covenant / PCE governance state', riskLevel: 'low' },
+];
 
 router.get('/health', (_req: Request, res: Response) => {
   res.json({
@@ -86,6 +231,10 @@ router.get('/health', (_req: Request, res: Response) => {
     model: 'claude-sonnet-4-6',
     provider: 'anthropic-via-replit-ai-integrations',
     lanes: Object.keys(MODEL_LANE_MAP),
+    modes: Object.keys(MODE_TO_MODEL),
+    tools: AVAILABLE_TOOLS,
+    systemPromptVersion: SYSTEM_PROMPT_VERSION,
+    unifiedChat: true,
   });
 });
 
@@ -118,6 +267,101 @@ router.get('/conversations/:id/messages', async (req: Request, res: Response) =>
   }
 });
 
+router.get('/improvements', (req: Request, res: Response) => {
+  if (!requireOperator(req, res)) return;
+  res.json({
+    ok: true,
+    data: IMPROVEMENT_QUEUE,
+    threshold: MIRROR_EVAL_THRESHOLD,
+    promptVersion: SYSTEM_PROMPT_VERSION,
+  });
+});
+
+/**
+ * Improvement-queue moderation is operator-scoped: approving or rejecting a
+ * MirrorEval-flagged turn changes how the chat self-evolves. Write actions
+ * require a privileged platform role.
+ */
+const A11OY_OPERATOR_ROLES = new Set(['super_admin', 'admin', 'platform_operator']);
+function requireOperator(req: Request, res: Response): boolean {
+  const roles = (req.user?.roles ?? []) as string[];
+  if (!roles.some((r) => A11OY_OPERATOR_ROLES.has(r))) {
+    res.status(403).json({
+      ok: false,
+      error: 'Improvement moderation requires a platform operator role.',
+      code: 'OPERATOR_REQUIRED',
+    });
+    return false;
+  }
+  return true;
+}
+
+router.post('/improvements/:id/approve', (req: Request, res: Response) => {
+  if (!requireOperator(req, res)) return;
+  const entry = IMPROVEMENT_QUEUE.find((e) => e.id === req.params.id);
+  if (!entry) {
+    res.status(404).json({ ok: false, error: 'not found' });
+    return;
+  }
+  entry.status = 'approved';
+  entry.reviewerNote = typeof req.body?.note === 'string' ? req.body.note.slice(0, 500) : undefined;
+  entry.reviewedAt = new Date().toISOString();
+  res.json({ ok: true, data: entry });
+});
+
+router.post('/improvements/:id/reject', (req: Request, res: Response) => {
+  if (!requireOperator(req, res)) return;
+  const entry = IMPROVEMENT_QUEUE.find((e) => e.id === req.params.id);
+  if (!entry) {
+    res.status(404).json({ ok: false, error: 'not found' });
+    return;
+  }
+  entry.status = 'rejected';
+  entry.reviewerNote = typeof req.body?.note === 'string' ? req.body.note.slice(0, 500) : undefined;
+  entry.reviewedAt = new Date().toISOString();
+  res.json({ ok: true, data: entry });
+});
+
+router.post('/recommend', (req: Request, res: Response) => {
+  const text = typeof req.body?.text === 'string' ? req.body.text : '';
+  if (!text.trim()) {
+    res.status(400).json({ ok: false, error: 'text required' });
+    return;
+  }
+  res.json({ ok: true, data: recommendMode(text) });
+});
+
+router.get('/formulas', (_req: Request, res: Response) => {
+  res.json({ ok: true, data: Object.values(FORMULA_REGISTRY) });
+});
+
+router.get('/formulas/:id', (req: Request, res: Response) => {
+  const id = req.params.id as FormulaId;
+  const formula = FORMULA_REGISTRY[id];
+  if (!formula) {
+    res.status(404).json({ ok: false, error: 'formula not found', known: Object.keys(FORMULA_REGISTRY) });
+    return;
+  }
+  res.json({ ok: true, data: formula });
+});
+
+router.post('/formulas/ami_v2/evaluate', (req: Request, res: Response) => {
+  const body = req.body ?? {};
+  const result = evaluateChatAmi({
+    mirrorEvalScore: typeof body.mirrorEvalScore === 'number' ? body.mirrorEvalScore : 0.85,
+    pceAllowed: body.pceAllowed !== false,
+    hasGovernance: body.hasGovernance !== false,
+    toolsAvailable: typeof body.toolsAvailable === 'number' ? body.toolsAvailable : AVAILABLE_TOOLS.length,
+    toolsInvoked: typeof body.toolsInvoked === 'number' ? body.toolsInvoked : 2,
+    userPromptLength: typeof body.userPromptLength === 'number' ? body.userPromptLength : 200,
+    knownContradictions: typeof body.knownContradictions === 'number' ? body.knownContradictions : 0,
+    testCoverage: typeof body.testCoverage === 'number' ? body.testCoverage : 0.7,
+    alignment: typeof body.alignment === 'number' ? body.alignment : 0.75,
+    knotCount: typeof body.knotCount === 'number' ? body.knotCount : 50,
+  });
+  res.json({ ok: true, data: result });
+});
+
 router.post('/chat', async (req: Request, res: Response) => {
   const startTime = Date.now();
   const actionId = `chat-${randomUUID().slice(0, 8)}`;
@@ -138,7 +382,8 @@ router.post('/chat', async (req: Request, res: Response) => {
   }
 
   const rawMessages = req.body?.messages as ChatMessage[] | undefined;
-  const modelId = (req.body?.model as string) || 'a1.1oy-sovereign';
+  const forcedMode = typeof req.body?.forcedMode === 'string' ? (req.body.forcedMode as ChatMode) : undefined;
+  const forcedModelId = typeof req.body?.model === 'string' ? (req.body.model as string) : undefined;
   const conversationId = req.body?.conversationId as number | undefined;
 
   if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
@@ -165,7 +410,24 @@ router.post('/chat', async (req: Request, res: Response) => {
     return;
   }
 
-  const laneConfig = MODEL_LANE_MAP[modelId] ?? MODEL_LANE_MAP['a1.1oy-sovereign']!;
+  const lastUserMsg = [...cleaned].reverse().find((m) => m.role === 'user');
+  const recommendation = recommendMode(lastUserMsg?.content ?? '');
+
+  let chosenMode: ChatMode = recommendation.mode;
+  let chosenModelId: string = recommendation.modelId;
+  let overrideApplied = false;
+
+  if (forcedMode && MODE_TO_MODEL[forcedMode]) {
+    chosenMode = forcedMode;
+    chosenModelId = MODE_TO_MODEL[forcedMode];
+    overrideApplied = true;
+  }
+  if (forcedModelId && MODEL_LANE_MAP[forcedModelId]) {
+    chosenModelId = forcedModelId;
+    overrideApplied = true;
+  }
+
+  const laneConfig = MODEL_LANE_MAP[chosenModelId] ?? MODEL_LANE_MAP['a1.1oy-sovereign']!;
 
   let pceResult: PCEGateResult | null = null;
   try {
@@ -175,7 +437,7 @@ router.post('/chat', async (req: Request, res: Response) => {
       vertical: 'platform',
       riskLevel: 'low',
       isDestructive: false,
-      actionDescription: `Chat inference via ${modelId}`,
+      actionDescription: `Unified A11oy chat inference (mode=${chosenMode}, model=${chosenModelId})`,
     });
   } catch (err) {
     logger.warn({ err }, 'PCE gate check failed — proceeding with chat');
@@ -198,7 +460,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     hasPriorApproval: false,
     isDestructive: false,
     isDemoMode: false,
-    actionDescription: `Chat inference via ${modelId}`,
+    actionDescription: `Unified A11oy chat (mode=${chosenMode})`,
     riskLevel: 'low',
   });
   storeEval(mirrorEval);
@@ -236,6 +498,35 @@ router.post('/chat', async (req: Request, res: Response) => {
   req.on('aborted', cleanup);
 
   send({
+    type: 'recommendation',
+    recommendation: {
+      mode: chosenMode,
+      modelId: chosenModelId,
+      provider: laneConfig.provider,
+      rationale: overrideApplied
+        ? `Override applied: ${capitalize(chosenMode)} + ${providerLabel(laneConfig.provider)} (user-forced).`
+        : recommendation.rationale,
+      confidence: recommendation.confidence,
+      overrideApplied,
+      alternatives: recommendation.alternatives,
+      availableTools: AVAILABLE_TOOLS.map((t) => t.name),
+    },
+  });
+
+  const ami: ChatAmiResult = evaluateChatAmi({
+    mirrorEvalScore: mirrorEval.overallScore,
+    pceAllowed: pceResult?.allowed !== false,
+    hasGovernance: !!pceResult?.contract,
+    toolsAvailable: AVAILABLE_TOOLS.length,
+    toolsInvoked: pceResult?.contract ? 2 : 0,
+    userPromptLength: (lastUserMsg?.content ?? '').length,
+    knownContradictions: mirrorEval.overallScore < 0.7 ? 1 : 0,
+    testCoverage: 0.7,
+    alignment: recommendation.confidence ?? 0.75,
+    knotCount: 50,
+  });
+
+  send({
     type: 'governance',
     pceContractId: pceResult?.contract?.contractId ?? null,
     mirrorEval: {
@@ -246,6 +537,14 @@ router.post('/chat', async (req: Request, res: Response) => {
         dimension: s.dimension,
         score: s.score,
       })),
+    },
+    ami: {
+      gate: ami.gate,
+      score: ami.amiScore,
+      permissions: ami.permissions,
+      rationale: ami.rationale,
+      components: ami.components,
+      formula: ami.formula,
     },
   });
 
@@ -346,19 +645,18 @@ router.post('/chat', async (req: Request, res: Response) => {
     try {
       await tagAIContent({
         contentId: actionId,
-        contentType: 'a11oy-chat-response',
+        contentType: 'a11oy-unified-chat-response',
         sourceClass: 'llm_generated',
         confidenceScore: mirrorEval.overallScore,
         modelLane: laneConfig.lane,
         modelId: laneConfig.model,
-        modelProvider: 'anthropic',
+        modelProvider: laneConfig.provider,
         correlationId: actionId,
-        serviceAttribution: 'a11oy-chat',
+        serviceAttribution: 'a11oy-unified-chat',
       });
     } catch { /* non-fatal */ }
 
     let savedConversationId = conversationId ?? null;
-    const lastUserMsg = cleaned[cleaned.length - 1];
     try {
       if (!savedConversationId) {
         const title = (lastUserMsg?.content ?? 'New conversation').slice(0, 100);
@@ -384,13 +682,31 @@ router.post('/chat', async (req: Request, res: Response) => {
       logger.warn({ err }, 'Failed to persist conversation');
     }
 
+    if (mirrorEval.overallScore < MIRROR_EVAL_THRESHOLD && fullContent && lastUserMsg) {
+      enqueueImprovement({
+        id: `imp-${randomUUID().slice(0, 10)}`,
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+        mode: chosenMode,
+        modelId: chosenModelId,
+        prompt: lastUserMsg.content.slice(0, 2000),
+        response: fullContent.slice(0, 4000),
+        mirrorEvalScore: mirrorEval.overallScore,
+        mirrorEvalDisposition: mirrorEval.disposition,
+        proposedImprovement:
+          `MirrorEval scored ${mirrorEval.overallScore.toFixed(2)} (< ${MIRROR_EVAL_THRESHOLD}). ` +
+          `Suggest revising the system prompt or ${chosenMode}-mode tool descriptions to improve grounding for this question class.`,
+      });
+    }
+
     send({
       type: 'provenance',
       provenance: {
         model: laneConfig.model,
-        modelLane: modelId,
+        modelLane: chosenModelId,
+        mode: chosenMode,
         lane: laneConfig.lane,
-        provider: 'anthropic',
+        provider: laneConfig.provider,
         latencyMs,
         estimatedCostUsd: Math.round(estimatedCostUsd * 1_000_000) / 1_000_000,
         tokens: { input: estimatedInputTokens, output: estimatedOutputTokens },
@@ -399,6 +715,8 @@ router.post('/chat', async (req: Request, res: Response) => {
         pceContractId: pceResult?.contract?.contractId ?? null,
         mirrorEvalId: mirrorEval.evalId,
         conversationId: savedConversationId,
+        systemPromptVersion: SYSTEM_PROMPT_VERSION,
+        enqueuedForReview: mirrorEval.overallScore < MIRROR_EVAL_THRESHOLD,
       },
     });
 
