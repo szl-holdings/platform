@@ -75,6 +75,36 @@ export const LYTE_INCIDENT_UPDATED = gql`
   }
 `;
 
+export const LYTE_SIGNAL_UPDATED = gql`
+  subscription LyteSignalUpdated {
+    lyteSignalUpdated {
+      id
+      source
+      severity
+      title
+      status
+      createdAt
+    }
+  }
+`;
+
+export const LYTE_QUEUE_CHANGED = gql`
+  subscription LyteQueueChanged {
+    lyteQueueChanged {
+      id
+      entityType
+      entityId
+      priority
+      status
+      severity
+      title
+      assignee
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export function useLyteIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
   return useQuery(GET_LYTE_INCIDENTS, variables !== undefined ? { variables } : {});
 }
@@ -97,4 +127,12 @@ export function useUpdateLyteIncident() {
 
 export function useLyteIncidentUpdated() {
   return useSubscription(LYTE_INCIDENT_UPDATED);
+}
+
+export function useLyteSignalUpdated() {
+  return useSubscription(LYTE_SIGNAL_UPDATED);
+}
+
+export function useLyteQueueChanged() {
+  return useSubscription(LYTE_QUEUE_CHANGED);
 }

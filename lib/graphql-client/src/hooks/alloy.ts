@@ -92,6 +92,33 @@ export const ALLOY_WORKFLOW_RUN_UPDATED = gql`
   }
 `;
 
+export const ALLOY_APPROVAL_REQUIRED = gql`
+  subscription AlloyApprovalRequired($reviewerUserId: ID) {
+    alloyApprovalRequired(reviewerUserId: $reviewerUserId) {
+      id
+      workflowId
+      status
+      reason
+      requestedByUserId
+      expiresAt
+      createdAt
+    }
+  }
+`;
+
+export const ALLOY_WORKFLOW_STATUS_CHANGED = gql`
+  subscription AlloyWorkflowStatusChanged {
+    alloyWorkflowStatusChanged {
+      id
+      name
+      status
+      priority
+      domain
+      updatedAt
+    }
+  }
+`;
+
 export function useAlloyWorkflows(variables?: { limit?: number; offset?: number }) {
   return useQuery(GET_ALLOY_WORKFLOWS, variables !== undefined ? { variables } : {});
 }
@@ -118,6 +145,14 @@ export function useUpdateAlloyWorkflowRun() {
 
 export function useAlloyWorkflowRunUpdated(variables?: { workflowId?: string }) {
   return useSubscription(ALLOY_WORKFLOW_RUN_UPDATED, variables !== undefined ? { variables } : {});
+}
+
+export function useAlloyApprovalRequired(variables?: { reviewerUserId?: string }) {
+  return useSubscription(ALLOY_APPROVAL_REQUIRED, variables !== undefined ? { variables } : {});
+}
+
+export function useAlloyWorkflowStatusChanged() {
+  return useSubscription(ALLOY_WORKFLOW_STATUS_CHANGED);
 }
 
 export function useContinuumSignals(variables?: { limit?: number; offset?: number }) {

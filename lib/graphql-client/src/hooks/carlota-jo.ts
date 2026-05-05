@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 export const GET_CARLOTA_SERVICES = gql`
   query GetCarlotaServices($category: String, $isActive: Boolean, $limit: Int) {
@@ -69,6 +69,19 @@ export const CREATE_CARLOTA_INQUIRY = gql`
   }
 `;
 
+export const CARLOTA_INQUIRY_CREATED = gql`
+  subscription CarlotaInquiryCreated {
+    carlotaInquiryCreated {
+      id
+      name
+      service
+      message
+      status
+      createdAt
+    }
+  }
+`;
+
 export function useCarlotaServices(variables?: { category?: string; isActive?: boolean; limit?: number }) {
   return useQuery(GET_CARLOTA_SERVICES, variables !== undefined ? { variables } : {});
 }
@@ -87,4 +100,8 @@ export function useCarlotaInquiries(variables?: { status?: string; limit?: numbe
 
 export function useCreateCarlotaInquiry() {
   return useMutation(CREATE_CARLOTA_INQUIRY);
+}
+
+export function useCarlotaInquiryCreated() {
+  return useSubscription(CARLOTA_INQUIRY_CREATED);
 }

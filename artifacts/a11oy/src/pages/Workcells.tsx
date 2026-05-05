@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, VerdictBadge, VerticalBadge } from '../components/ui';
+import { useWorkflowRunSubscription } from '../graphql';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -20,6 +21,15 @@ const STATUS_COLORS: Record<string, string> = {
 export function Workcells() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterVertical, setFilterVertical] = useState<string>('all');
+  const [liveRunUpdate, setLiveRunUpdate] = useState<{ workflowId: string; status: string } | null>(null);
+
+  const { data: runUpdate } = useWorkflowRunSubscription();
+  useEffect(() => {
+    if (!runUpdate) return;
+    setLiveRunUpdate({ workflowId: runUpdate.workflowId, status: runUpdate.status });
+    const t = setTimeout(() => setLiveRunUpdate(null), 8000);
+    return () => clearTimeout(t);
+  }, [runUpdate]);
 
   const filtered = SEED_WORKCELLS.filter(w =>
     (filterStatus === 'all' || w.status === filterStatus) &&
@@ -38,6 +48,15 @@ export function Workcells() {
         subtitle="Every workcell is a governed, traceable execution context. Inspect signal inputs, agent sequences, PCE contracts, and proof packets."
         status="LIVE"
       />
+
+      {liveRunUpdate && (
+        <div
+          className="mb-4 px-4 py-2.5 rounded-lg border text-xs font-mono animate-pulse"
+          style={{ backgroundColor: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.3)', color: '#c9b787' }}
+        >
+          ⬤ LIVE — Workflow run {liveRunUpdate.workflowId.slice(0, 8)} updated: {liveRunUpdate.status}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <KpiCard label="RUNNING" value={running.length} sub="active cells" accent="#c9b787" />

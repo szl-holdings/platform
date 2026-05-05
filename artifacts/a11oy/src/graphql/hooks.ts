@@ -21,6 +21,7 @@ import {
   WORKFLOW_RUN_UPDATED_SUBSCRIPTION,
   APPROVAL_REQUIRED_SUBSCRIPTION,
   WORKFLOW_STATUS_CHANGED_SUBSCRIPTION,
+  AEGIS_INCIDENT_UPDATED_SUBSCRIPTION,
 } from './operations';
 
 export interface AlloyDashboardStats {
@@ -393,6 +394,25 @@ export function useWorkflowStatusSubscription() {
   });
   return {
     data: result.data?.alloyWorkflowStatusChanged ?? null,
+    error: result.error,
+  };
+}
+
+export interface AegisIncident {
+  id: string;
+  title: string;
+  severity: string;
+  status: string;
+  detectedAt: string | null;
+  createdAt: string;
+}
+
+export function useAegisIncidentUpdated() {
+  const [result] = useSubscription<{ aegisIncidentUpdated: AegisIncident }>({
+    query: AEGIS_INCIDENT_UPDATED_SUBSCRIPTION,
+  });
+  return {
+    data: result.data?.aegisIncidentUpdated ?? null,
     error: result.error,
   };
 }

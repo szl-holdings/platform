@@ -400,3 +400,16 @@ export const WORKFLOW_STATUS_CHANGED_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const AEGIS_INCIDENT_UPDATED_SUBSCRIPTION = gql`
+  subscription AegisIncidentUpdated {
+    aegisIncidentUpdated {
+      id
+      title
+      severity
+      status
+      detectedAt
+      createdAt
+    }
+  }
+`;

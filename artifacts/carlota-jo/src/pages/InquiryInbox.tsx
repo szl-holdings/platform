@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCarlotaInquiryCreated } from '@szl-holdings/graphql-client';
 import { motion } from 'framer-motion';
 import {
   CheckCircle,
@@ -11,7 +12,7 @@ import {
   RefreshCw,
   User,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { apiJson, apiJsonFull } from '@/lib/api';
 
@@ -320,9 +321,17 @@ export default function InquiryInbox() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['carlota-inquiries-inbox', page],
     queryFn: () => fetchInquiries(page, 50),
-    staleTime: 30_000,
-    refetchInterval: 30_000,
+    staleTime: 60_000,
+    refetchInterval: 60_000,
   });
+
+  const qc = useQueryClient();
+  const { data: newInquiry } = useCarlotaInquiryCreated();
+  useEffect(() => {
+    if (!newInquiry) return;
+    void qc.invalidateQueries({ queryKey: ['carlota-inquiries-inbox'] });
+    void qc.invalidateQueries({ queryKey: ['carlota-inquiries-count'] });
+  }, [newInquiry, qc]);
 
   const inquiries = data?.data ?? [];
   const total = data?.meta?.total ?? 0;

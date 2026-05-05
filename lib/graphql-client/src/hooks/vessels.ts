@@ -78,6 +78,20 @@ export const VESSEL_POSITION_UPDATED = gql`
   }
 `;
 
+export const VESSEL_SANCTIONS_HIT = gql`
+  subscription VesselSanctionsHit($vesselId: ID) {
+    vesselSanctionsHit(vesselId: $vesselId) {
+      vesselId
+      vesselName
+      imo
+      matchedLists
+      severity
+      detectedAt
+      notes
+    }
+  }
+`;
+
 export function useVessels(variables?: { status?: string; limit?: number; offset?: number }) {
   return useQuery(GET_VESSELS, variables !== undefined ? { variables } : {});
 }
@@ -100,4 +114,8 @@ export function useVesselEvents(variables?: { vesselId?: string; severity?: stri
 
 export function useVesselPositionUpdated(variables?: { vesselId?: string }) {
   return useSubscription(VESSEL_POSITION_UPDATED, variables !== undefined ? { variables } : {});
+}
+
+export function useVesselSanctionsHit(variables?: { vesselId?: string }) {
+  return useSubscription(VESSEL_SANCTIONS_HIT, variables !== undefined ? { variables } : {});
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
-import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription } from '../graphql';
+import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription, useAegisIncidentUpdated } from '../graphql';
 
 const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 
@@ -58,6 +58,7 @@ export function Governance() {
   const { data: allApprovals } = useAlloyApprovals({ limit: 50 });
   const { data: waitingWorkflows } = useAlloyWorkflows({ status: 'waiting_approval', limit: 10 });
   const { data: incomingApproval } = useApprovalSubscription();
+  const { data: aegisIncident } = useAegisIncidentUpdated();
   const [gateDecisions, setGateDecisions] = useState<Record<string, GateDecision>>({});
 
   const isLive = pendingApprovals.length > 0 || allApprovals.length > 0 || waitingWorkflows.length > 0;
@@ -83,6 +84,17 @@ export function Governance() {
           No material action executes without human approval. This is not a configuration option — it is a structural guarantee embedded in A11oy's execution fabric.
         </div>
       </div>
+
+      {aegisIncident && (
+        <div className="mb-4 p-3 rounded-lg border" style={{ backgroundColor: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.25)' }}>
+          <div className="text-[10px] font-mono uppercase tracking-wider mb-0.5" style={{ color: 'rgba(239,68,68,0.6)' }}>
+            Aegis / Firestorm — Security Incident
+          </div>
+          <div className="text-xs font-mono" style={{ color: '#fca5a5' }}>
+            [{aegisIncident.severity?.toUpperCase()}] {aegisIncident.title} · {aegisIncident.status}
+          </div>
+        </div>
+      )}
 
       {incomingApproval && (
         <div className="mb-4 p-3 rounded-lg border animate-pulse" style={{ backgroundColor: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.3)' }}>

@@ -1,15 +1,17 @@
+import { useEffect, useState } from 'react';
 import { ArrowRight, Brain, DollarSign, Search, TrendingUp, Zap } from 'lucide-react';
+import { useLyteSignalUpdated, useLyteQueueChanged, useLyteIncidentUpdated } from '@szl-holdings/graphql-client';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-const KPIS = [
-  { label: 'Portfolio Entities', value: '14', delta: '+2 this quarter', color: 'text-cyan-400' },
-  { label: 'Active Intel Feeds', value: '6', delta: '2 pending auth', color: 'text-emerald-400' },
-  { label: 'Avg ROI Signal', value: '2.3×', delta: 'vs 1.8× baseline', color: 'text-lime-400' },
-  { label: 'Open Alerts', value: '3', delta: '1 critical', color: 'text-amber-400' },
+const BASE_KPIS = [
+  { key: 'entities', label: 'Portfolio Entities', value: '14', delta: '+2 this quarter', color: 'text-cyan-400' },
+  { key: 'feeds', label: 'Active Intel Feeds', value: '6', delta: '2 pending auth', color: 'text-emerald-400' },
+  { key: 'roi', label: 'Avg ROI Signal', value: '2.3×', delta: 'vs 1.8× baseline', color: 'text-lime-400' },
+  { key: 'alerts', label: 'Open Alerts', value: '3', delta: '1 critical', color: 'text-amber-400' },
 ];
 
-const RECENT = [
+const BASE_RECENT = [
   { entity: 'Carlota Jo Consulting', type: 'Entity deep dive', time: '2h ago', status: 'complete' },
   { entity: 'SZL Holdings LLC', type: 'ROI lens', time: '4h ago', status: 'complete' },
   { entity: 'NEXUS Platform', type: 'Finance terminal', time: '1d ago', status: 'complete' },
@@ -17,6 +19,43 @@ const RECENT = [
 ];
 
 export default function Dashboard() {
+  const [alertCount, setAlertCount] = useState(3);
+  const [queueCount, setQueueCount] = useState(0);
+  const [liveSignal, setLiveSignal] = useState<{ title: string; severity: string } | null>(null);
+  const [liveIncident, setLiveIncident] = useState<{ id: string; severity: string; status: string } | null>(null);
+
+  const { data: signalData } = useLyteSignalUpdated();
+  const { data: queueData } = useLyteQueueChanged();
+  const { data: incidentData } = useLyteIncidentUpdated();
+
+  const signalUpdate = (signalData as { lyteSignalUpdated?: { id: string; title: string; severity: string } } | undefined)?.lyteSignalUpdated;
+  const queueUpdate = (queueData as { lyteQueueChanged?: { id: string; entityType: string; entityId: string; priority: string } } | undefined)?.lyteQueueChanged;
+  const incidentUpdate = (incidentData as { lyteIncidentUpdated?: { id: string; severity: string; status: string } } | undefined)?.lyteIncidentUpdated;
+
+  useEffect(() => {
+    if (!signalUpdate?.id) return;
+    setLiveSignal({ title: signalUpdate.title, severity: signalUpdate.severity });
+    setAlertCount((c) => c + 1);
+    const t = setTimeout(() => setLiveSignal(null), 8_000);
+    return () => clearTimeout(t);
+  }, [signalUpdate]);
+
+  useEffect(() => {
+    if (!queueUpdate?.id) return;
+    setQueueCount((c) => c + 1);
+  }, [queueUpdate]);
+
+  useEffect(() => {
+    if (!incidentUpdate?.id) return;
+    setLiveIncident({ id: incidentUpdate.id, severity: incidentUpdate.severity, status: incidentUpdate.status });
+    const t = setTimeout(() => setLiveIncident(null), 12_000);
+    return () => clearTimeout(t);
+  }, [incidentUpdate]);
+
+  const kpis = BASE_KPIS.map((k) =>
+    k.key === 'alerts' ? { ...k, value: String(alertCount) } : k,
+  );
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
       <div>
@@ -27,8 +66,34 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {liveSignal && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2 flex items-center gap-3 animate-pulse">
+          <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="text-xs text-amber-300 font-mono">
+            LIVE SIGNAL [{liveSignal.severity.toUpperCase()}] — {liveSignal.title}
+          </span>
+        </div>
+      )}
+
+      {liveIncident && (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-2 flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shrink-0" />
+          <span className="text-xs text-red-300 font-mono">
+            INCIDENT [{liveIncident.severity.toUpperCase()}] · {liveIncident.status} · ID {liveIncident.id.slice(0, 8)}
+          </span>
+        </div>
+      )}
+
+      {queueCount > 0 && (
+        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-4 py-2 flex items-center gap-3">
+          <span className="text-xs text-cyan-400 font-mono">
+            QUEUE — {queueCount} item{queueCount !== 1 ? 's' : ''} processed this session
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {KPIS.map((k) => (
+        {kpis.map((k) => (
           <div
             key={k.label}
             className="rounded-xl border border-[#1a2436] bg-[#0e1520] p-4 space-y-1"
@@ -98,7 +163,7 @@ export default function Dashboard() {
           <span className="text-xs text-[#e2e8f0] font-medium">Recent Activity</span>
         </div>
         <div className="divide-y divide-[#1a2436]">
-          {RECENT.map((r) => (
+          {BASE_RECENT.map((r) => (
             <div key={r.entity + r.type} className="px-5 py-3 flex items-center gap-3">
               <div
                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${r.status === 'complete' ? 'bg-emerald-400' : 'bg-amber-400'}`}

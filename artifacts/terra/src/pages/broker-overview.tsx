@@ -1,6 +1,8 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { useTerraDealUpdated, useTerraActionItemUpdated } from '@szl-holdings/graphql-client';
 import { type ActivationStep, ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Activity,
@@ -15,7 +17,7 @@ import {
   type TrendingUp,
   Users,
 } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
@@ -123,6 +125,19 @@ const SCORE_TEXT_COLORS: Record<string, string> = {
 export default function BrokerOverviewPage() {
   const { data, isLoading, error } = useOverview();
   const [, navigate] = useLocation();
+  const qc = useQueryClient();
+  const { data: dealData } = useTerraDealUpdated();
+  const dealUpdate = (dealData as { terraDealUpdated?: { id: string } } | undefined)?.terraDealUpdated;
+  const { data: actionData } = useTerraActionItemUpdated();
+  const actionUpdate = (actionData as { terraActionItemUpdated?: { id: string } } | undefined)?.terraActionItemUpdated;
+  useEffect(() => {
+    if (!dealUpdate?.id) return;
+    void qc.invalidateQueries({ queryKey: ['terra-broker-overview'] });
+  }, [dealUpdate, qc]);
+  useEffect(() => {
+    if (!actionUpdate?.id) return;
+    void qc.invalidateQueries({ queryKey: ['terra-broker-overview'] });
+  }, [actionUpdate, qc]);
 
   const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
 

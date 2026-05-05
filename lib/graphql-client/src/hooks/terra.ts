@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 export const GET_TERRA_DISTRESS_PROPERTIES = gql`
   query GetTerraDistressProperties($borough: String, $distressType: String, $limit: Int, $offset: Int) {
@@ -83,6 +83,32 @@ export const CREATE_TERRA_LEAD = gql`
   }
 `;
 
+export const TERRA_DEAL_UPDATED = gql`
+  subscription TerraDealUpdated {
+    terraDealUpdated {
+      id
+      address
+      stage
+      price
+      probability
+      distressPropertyId
+      createdAt
+    }
+  }
+`;
+
+export const TERRA_ACTION_ITEM_UPDATED = gql`
+  subscription TerraActionItemUpdated {
+    terraActionItemUpdated {
+      id
+      propertyId
+      status
+      recommendedAction
+      createdAt
+    }
+  }
+`;
+
 export function useTerraDistressProperties(variables?: { borough?: string; distressType?: string; limit?: number; offset?: number }) {
   return useQuery(GET_TERRA_DISTRESS_PROPERTIES, variables !== undefined ? { variables } : {});
 }
@@ -105,4 +131,12 @@ export function useUpdateTerraDeal() {
 
 export function useCreateTerraLead() {
   return useMutation(CREATE_TERRA_LEAD);
+}
+
+export function useTerraDealUpdated() {
+  return useSubscription(TERRA_DEAL_UPDATED);
+}
+
+export function useTerraActionItemUpdated() {
+  return useSubscription(TERRA_ACTION_ITEM_UPDATED);
 }

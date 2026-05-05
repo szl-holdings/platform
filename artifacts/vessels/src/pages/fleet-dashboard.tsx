@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { useVesselPositionUpdated } from '@szl-holdings/graphql-client';
 import { color } from '@szl-holdings/design-system';
 import { ActivityFeed } from '@szl-holdings/shared-ui/collaboration';
 import { ExportButton } from '@szl-holdings/shared-ui/data-export';
@@ -1090,6 +1091,27 @@ export default function FleetDashboard() {
   });
   const [, navigate] = useLocation();
 
+  const [positionOverrides, setPositionOverrides] = useState<Map<string, { lat: number; lng: number; speed: number; ts: string }>>(new Map());
+  const [livePositionVesselId, setLivePositionVesselId] = useState<string | null>(null);
+  const { data: positionData } = useVesselPositionUpdated();
+  const positionUpdate = positionData?.vesselPositionUpdated;
+  useEffect(() => {
+    if (!positionUpdate?.vesselId) return;
+    setPositionOverrides((prev) => {
+      const next = new Map(prev);
+      next.set(String(positionUpdate.vesselId), {
+        lat: positionUpdate.latitude,
+        lng: positionUpdate.longitude,
+        speed: positionUpdate.speed ?? 0,
+        ts: positionUpdate.recordedAt,
+      });
+      return next;
+    });
+    setLivePositionVesselId(String(positionUpdate.vesselId));
+    const t = setTimeout(() => setLivePositionVesselId(null), 10_000);
+    return () => clearTimeout(t);
+  }, [positionUpdate]);
+
   const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
 
   const handleNavigate = useCallback(
@@ -1177,6 +1199,12 @@ export default function FleetDashboard() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     LIVE
                   </span>
+                  {livePositionVesselId && (
+                    <span className="flex items-center gap-1 text-[9px] font-mono text-cyan-300 ml-1 animate-pulse">
+                      <Radio className="w-2.5 h-2.5" />
+                      POS #{livePositionVesselId}
+                    </span>
+                  )}
                   <ExportButton
                     data={roster.map((v) => ({
                       Name: v.name,
@@ -1473,7 +1501,11 @@ export default function FleetDashboard() {
           <div className="flex-1 relative overflow-hidden">
             {roster.length > 0 ? (
               <FleetMap
-                vessels={roster}
+                vessels={roster.map((v) => {
+                  const ov = positionOverrides.get(String(v.id));
+                  if (!ov) return v;
+                  return { ...v, latitude: String(ov.lat), longitude: String(ov.lng) };
+                })}
                 onVesselClick={setSelectedVessel}
                 selectedVesselId={selectedVessel?.id}
               />
