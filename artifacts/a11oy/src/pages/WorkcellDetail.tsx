@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'wouter';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
@@ -7,6 +7,130 @@ import { SEED_WORKCELLS, SEED_SIGNALS, SEED_PCE_CONTRACTS, SEED_PROOF_PACKETS } 
 import { DELEGATION_CHAINS } from '../data/complianceFabric';
 
 type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
+
+const MOCK_THINKING_STEPS = [
+  { phase: 'perceive', label: 'Perceive', content: 'Signal ingested from Signal Mesh. Parsing evidence pack and context. Checking prior decisions for this entity type...', tokens: 680, ms: 420 },
+  { phase: 'orient', label: 'Orient', content: 'Historical pattern retrieval complete. Cross-domain lesson applied: dual-signal requirement verified. Confidence preliminary: 0.88. Adjusting for evidence corroboration...', tokens: 920, ms: 590 },
+  { phase: 'plan', label: 'Plan', content: 'Primary recommendation pathway selected. Approval tier identified per covenant policy. Evidence pack assembled. Counterfactual branches evaluated...', tokens: 1140, ms: 720 },
+  { phase: 'execute', label: 'Execute', content: 'Action brief generated. MirrorEval pre-check running. Policy compliance verified against 3 covenant clauses. All evidence citations traceable...', tokens: 1080, ms: 660 },
+  { phase: 'verify', label: 'Verify', content: 'Verifier: all premises grounded. Inference chain valid. Conclusion certified. Covenant compliance: PASS. Proof packet sealed...', tokens: 720, ms: 450 },
+];
+
+const PHASE_COLORS: Record<string, string> = {
+  perceive: '#8a8a8a', orient: '#c9b787', plan: '#a78bfa', execute: '#38bdf8', verify: '#22c55e',
+};
+
+function ReasoningTracePanel() {
+  const [streaming, setStreaming] = useState(false);
+  const [revealedSteps, setRevealedSteps] = useState<number>(0);
+  const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
+
+  const startStream = () => {
+    setStreaming(true);
+    setRevealedSteps(0);
+    let step = 0;
+    const reveal = () => {
+      step++;
+      setRevealedSteps(step);
+      if (step < MOCK_THINKING_STEPS.length) {
+        timerRef.current = setTimeout(reveal, 600);
+      } else {
+        setStreaming(false);
+      }
+    };
+    timerRef.current = setTimeout(reveal, 300);
+  };
+
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>A11OY.1</span>
+          <span className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>Extended Thinking Surface</span>
+        </div>
+        {!streaming && revealedSteps === 0 && (
+          <button
+            onClick={startStream}
+            className="text-[10px] font-mono px-2 py-1 rounded"
+            style={{ background: 'rgba(201,183,135,0.12)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)' }}
+          >
+            REPLAY TRACE
+          </button>
+        )}
+        {streaming && (
+          <span className="text-[10px] font-mono animate-pulse" style={{ color: '#c9b787' }}>● STREAMING</span>
+        )}
+        {!streaming && revealedSteps > 0 && (
+          <button
+            onClick={() => { setRevealedSteps(0); setExpandedPhase(null); }}
+            className="text-[10px] font-mono"
+            style={{ color: 'var(--color-a11oy-text-ghost)' }}
+          >
+            RESET
+          </button>
+        )}
+      </div>
+
+      {revealedSteps === 0 && !streaming && (
+        <div className="text-center py-6">
+          <div className="text-xl mb-2" style={{ color: 'var(--color-a11oy-border)' }}>◎</div>
+          <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)', lineHeight: 1.6 }}>
+            Chain-of-thought reasoning captured at every phase of the cognitive loop. Stored alongside the proof packet.
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2">
+        {MOCK_THINKING_STEPS.slice(0, revealedSteps).map((step, i) => {
+          const phaseColor = PHASE_COLORS[step.phase] ?? '#8a8a8a';
+          const isExpanded = expandedPhase === step.phase;
+          const isStreaming = streaming && i === revealedSteps - 1;
+          return (
+            <button
+              key={step.phase}
+              onClick={() => setExpandedPhase(isExpanded ? null : step.phase)}
+              className="w-full text-left rounded p-2 transition-colors"
+              style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${isExpanded ? phaseColor + '44' : 'rgba(255,255,255,0.06)'}` }}
+            >
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: phaseColor }} />
+                  <span className="text-[11px] font-mono uppercase" style={{ color: phaseColor }}>{step.label}</span>
+                  {isStreaming && <span className="text-[9px] font-mono animate-pulse" style={{ color: phaseColor }}>●</span>}
+                </div>
+                <span className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{step.tokens} tok · {step.ms}ms</span>
+              </div>
+              {isExpanded && (
+                <p className="text-[11px] mt-1" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.7, fontFamily: "ui-monospace, 'SF Mono', monospace" }}>
+                  {step.content}
+                </p>
+              )}
+              {!isExpanded && (
+                <p className="text-[11px] truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{step.content.slice(0, 80)}…</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {revealedSteps > 0 && (
+        <div className="mt-3 pt-2 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <span className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+            {MOCK_THINKING_STEPS.slice(0, revealedSteps).reduce((a, s) => a + s.tokens, 0).toLocaleString()} total tokens
+          </span>
+          <Link href={`${BASE}/reasoning`} className="text-[9px] font-mono" style={{ color: '#c9b787', textDecoration: 'none' }}>
+            View Full Trace Library →
+          </Link>
+        </div>
+      )}
+    </Card>
+  );
+}
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
@@ -398,6 +522,12 @@ export function WorkcellDetail() {
               </Card>
             </div>
           )}
+
+          {/* Reasoning Trace — A11oy.1 Extended Thinking Surface */}
+          <div>
+            <SectionTitle>Reasoning Trace</SectionTitle>
+            <ReasoningTracePanel />
+          </div>
 
           {/* Replay link */}
           <div>

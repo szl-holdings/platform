@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 const API_BASE = '/api/a11oy';
 const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 
-export function useApiData<T>(endpoint: string, demoData?: T): { data: T | null; loading: boolean; error: string | null; source: 'api' | 'demo' } {
+export function useApiData<T>(endpoint: string, demoData?: T): { data: T | null; loading: boolean; error: string | null; source: 'api' | 'demo'; meta: unknown } {
   const [data, setData] = useState<T | null>(IS_DEMO && demoData !== undefined ? demoData : null);
+  const [meta, setMeta] = useState<unknown>(null);
   const [loading, setLoading] = useState(!IS_DEMO);
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<'api' | 'demo'>(IS_DEMO ? 'demo' : 'api');
@@ -23,6 +24,7 @@ export function useApiData<T>(endpoint: string, demoData?: T): { data: T | null;
         if (cancelled) return;
         if (d.ok) {
           setData(d.data);
+          setMeta(d.meta ?? null);
           setSource('api');
         } else {
           setError('API error — check server status');
@@ -37,5 +39,5 @@ export function useApiData<T>(endpoint: string, demoData?: T): { data: T | null;
     return () => { cancelled = true; };
   }, [endpoint]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { data, loading, error, source };
+  return { data, loading, error, source, meta };
 }

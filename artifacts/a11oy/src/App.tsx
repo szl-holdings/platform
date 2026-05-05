@@ -52,6 +52,11 @@ const AlloyFoundry = lazy(() => import('./pages/AlloyFoundry').then(m => ({ defa
 const AlloyGovernance = lazy(() => import('./pages/AlloyGovernance').then(m => ({ default: m.AlloyGovernance })));
 const AlloyPricing = lazy(() => import('./pages/AlloyPricing').then(m => ({ default: m.AlloyPricing })));
 const LoopReasoner = lazy(() => import('./pages/LoopReasoner').then(m => ({ default: m.LoopReasoner })));
+const AdaptiveGovernance = lazy(() => import('./pages/AdaptiveGovernance').then(m => ({ default: m.AdaptiveGovernance })));
+const ReasoningAudit = lazy(() => import('./pages/ReasoningAudit').then(m => ({ default: m.ReasoningAudit })));
+const EvalEvolution = lazy(() => import('./pages/EvalEvolution').then(m => ({ default: m.EvalEvolution })));
+const LessonGraph = lazy(() => import('./pages/LessonGraph').then(m => ({ default: m.LessonGraph })));
+const OperatorProfile = lazy(() => import('./pages/OperatorProfile').then(m => ({ default: m.OperatorProfile })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const NowBoard = lazy(() => import('./pages/NowBoard').then(m => ({ default: m.NowBoard })));
 const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ default: m.CommandSurface })));
@@ -1300,6 +1305,23 @@ export default function App() {
         </Route>
         <Route path={`${base}/retrieval/proof-chain`}>
           <WithShell><RetrievalProofChain /></WithShell>
+        </Route>
+
+        {/* A11oy.1 — Adaptive Intelligence */}
+        <Route path={`${base}/adaptive-governance`}>
+          <WithShell><AdaptiveGovernance /></WithShell>
+        </Route>
+        <Route path={`${base}/reasoning`}>
+          <WithShell><ReasoningAudit /></WithShell>
+        </Route>
+        <Route path={`${base}/eval-evolution`}>
+          <WithShell><EvalEvolution /></WithShell>
+        </Route>
+        <Route path={`${base}/lesson-graph`}>
+          <WithShell><LessonGraph /></WithShell>
+        </Route>
+        <Route path={`${base}/operator-profile`}>
+          <WithShell><OperatorProfile /></WithShell>
         </Route>
 
         {/* Marketing pages */}

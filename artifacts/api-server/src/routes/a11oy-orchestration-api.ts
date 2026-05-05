@@ -61,8 +61,11 @@ import {
   type ProofKind,
 } from '../services/orchestration-store.js';
 import { logger } from '../lib/logger.js';
+import adaptiveIntelligenceRouter from './a11oy-adaptive-intelligence.js';
 
 const router = Router();
+
+router.use('/', adaptiveIntelligenceRouter);
 
 // ── Identity ────────────────────────────────────────────────────────────────
 

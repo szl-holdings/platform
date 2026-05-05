@@ -148,6 +148,8 @@ const intelligenceItems: NavItem[] = [
   { id: 'chat', name: 'Chat', icon: MessageSquare, path: '/chat' },
   { id: 'sigil', name: 'SIGIL', icon: Sigma, path: '/sigil' },
   { id: 'lab', name: 'A11oy Lab', icon: Beaker, path: '/lab' },
+  { id: 'reasoning', name: 'Reasoning Audit', icon: Brain, path: '/reasoning' },
+  { id: 'lesson-graph', name: 'Lesson Graph', icon: GitFork, path: '/lesson-graph' },
 ];
 
 const platformItems: NavItem[] = [
@@ -157,9 +159,19 @@ const platformItems: NavItem[] = [
   { id: 'evolution', name: 'Evolution Runtime', icon: Zap, path: '/evolution' },
   { id: 'trust-center', name: 'Trust Center', icon: Lock, path: '/trust' },
   { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
+  { id: 'adaptive-governance', name: 'Adaptive Governance', icon: GitBranch, path: '/adaptive-governance' },
   { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
   { id: 'routing-weights', name: 'Routing Weights', icon: Sliders, path: '/routing-weights' },
   { id: 'codex', name: 'Codex', icon: Brain, path: '/codex' },
+];
+
+const evaluationItems: NavItem[] = [
+  { id: 'evals', name: 'MirrorEval', icon: Eye, path: '/evals' },
+  { id: 'eval-evolution', name: 'Eval Evolution', icon: Sparkles, path: '/eval-evolution' },
+];
+
+const operatorsItems: NavItem[] = [
+  { id: 'operator-profile', name: 'Operator Profiles', icon: Users, path: '/operator-profile' },
 ];
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -302,6 +314,16 @@ export function Sidebar() {
         <SectionHeader>Intelligence</SectionHeader>
         <nav className="flex flex-col gap-0.5">
           {intelligenceItems.map(item => <NavLink key={item.id} item={item} />)}
+        </nav>
+
+        <SectionHeader>Evaluation</SectionHeader>
+        <nav className="flex flex-col gap-0.5">
+          {evaluationItems.map(item => <NavLink key={item.id} item={item} />)}
+        </nav>
+
+        <SectionHeader>Operators</SectionHeader>
+        <nav className="flex flex-col gap-0.5">
+          {operatorsItems.map(item => <NavLink key={item.id} item={item} />)}
         </nav>
 
         <SectionHeader>Platform</SectionHeader>

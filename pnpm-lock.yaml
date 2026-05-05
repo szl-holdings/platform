@@ -876,12 +876,24 @@ importers:
       '@workspace/ouroboros':
         specifier: workspace:*
         version: link:../../packages/ouroboros
+      '@workspace/ouroboros-alloy':
+        specifier: workspace:*
+        version: link:../../packages/ouroboros-alloy
       '@workspace/ouroboros-guardrails':
         specifier: workspace:*
         version: link:../../packages/ouroboros-guardrails
+      '@workspace/ouroboros-horizon':
+        specifier: workspace:*
+        version: link:../../packages/ouroboros-horizon
       '@workspace/ouroboros-integrations':
         specifier: workspace:*
         version: link:../../packages/ouroboros-integrations
+      '@workspace/ouroboros-invariant':
+        specifier: workspace:*
+        version: link:../../packages/ouroboros-invariant
+      '@workspace/ouroboros-resonance':
+        specifier: workspace:*
+        version: link:../../packages/ouroboros-resonance
       '@workspace/planner':
         specifier: workspace:*
         version: link:../../packages/planner
