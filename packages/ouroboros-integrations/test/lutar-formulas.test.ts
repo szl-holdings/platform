@@ -7,6 +7,7 @@ import {
   lutarV5,
   lutarV6,
   lutarV7,
+  lutarV10Audit,
   lutarOmega,
   evaluateAll,
   adaptiveWeights,
@@ -345,5 +346,109 @@ describe("Ouroboros operator", () => {
 
   it("ouroboros n=k applies transform k times", () => {
     expect(ouroboros(0, (x) => x + 1, 5)).toBe(5);
+  });
+});
+
+describe("Lutar v10 — exhaustive-audit (Audit Closure Operator Λ₁₀)", () => {
+  it("v10 returns operational closure when all six artefacts present (default)", () => {
+    const r = lutarV10Audit(baseV6);
+    expect(r.version).toBe("v10");
+    expect(r.auditClosed).toBe(true);
+    expect(r.closureSatisfied).toBe(true);
+    expect(r.closureRatio).toBeCloseTo(1, 12);
+    expect(r.Sigma_audit).toBe(r.Sigma_full);
+    expect(r.missingArtifacts).toHaveLength(0);
+    expect(r.perLayer).toHaveLength(8);
+  });
+
+  it("v10 collapses ratio when any artefact is missing for a layer", () => {
+    // Mark thesis-coverage missing for v3 (index 2): A_v3 → 0
+    const r = lutarV10Audit({
+      ...baseV6,
+      audit: {
+        thesis: [true, true, false, true, true, true, true, true],
+      },
+    });
+    expect(r.auditClosed).toBe(false);
+    expect(r.closureRatio).toBeLessThan(1);
+    expect(r.perLayer[2].operational).toBe(false);
+    expect(r.perLayer[2].contribution).toBe(0);
+    expect(r.missingArtifacts).toContain("v3:THESIS");
+  });
+
+  it("v10 closure ratio equals exactly the operational L-fraction", () => {
+    // Drop v1 entirely (one missing dimension is enough)
+    const r = lutarV10Audit({
+      ...baseV6,
+      audit: {
+        code: [false, true, true, true, true, true, true, true],
+      },
+    });
+    const expectedRatio = (r.Sigma_full - r.perLayer[0].L) / r.Sigma_full;
+    expect(r.closureRatio).toBeCloseTo(expectedRatio, 12);
+  });
+
+  it("v10 reports missingArtifacts deterministically per layer × dimension", () => {
+    const r = lutarV10Audit({
+      ...baseV6,
+      audit: {
+        api: [true, true, true, true, true, false, true, true],
+        test: [true, true, true, true, true, false, true, true],
+      },
+    });
+    expect(r.missingArtifacts).toEqual(
+      expect.arrayContaining(["v6:API", "v6:TEST"]),
+    );
+    expect(r.perLayer[5].operational).toBe(false);
+  });
+
+  it("v10 per-layer carries each L_k from evaluate-all + omega + v7", () => {
+    const r = lutarV10Audit(baseV6);
+    expect(r.perLayer.map((p) => p.version)).toEqual([
+      "v1", "v2", "v3", "v4", "v5", "v6", "omega", "v7",
+    ]);
+    for (const p of r.perLayer) {
+      expect(Number.isFinite(p.L)).toBe(true);
+      expect(p.contribution).toBe(p.operational ? p.L : 0);
+    }
+  });
+
+  it("v10 theorem string is the canonical formal statement", () => {
+    const r = lutarV10Audit(baseV6);
+    expect(r.theorem).toContain("auditClosed");
+    expect(r.theorem).toContain("closureRatio = 1");
+  });
+
+  it("v10 fully-broken state (all six dims false for one layer) zeroes only that layer", () => {
+    const r = lutarV10Audit({
+      ...baseV6,
+      audit: {
+        code:    [true, true, true, true, false, true, true, true],
+        codex:   [true, true, true, true, false, true, true, true],
+        api:     [true, true, true, true, false, true, true, true],
+        test:    [true, true, true, true, false, true, true, true],
+        thesis:  [true, true, true, true, false, true, true, true],
+        surface: [true, true, true, true, false, true, true, true],
+      },
+    });
+    expect(r.perLayer[4].operational).toBe(false);
+    expect(r.perLayer[4].contribution).toBe(0);
+    // Other layers untouched
+    for (let i = 0; i < 8; i++) {
+      if (i === 4) continue;
+      expect(r.perLayer[i].operational).toBe(true);
+    }
+  });
+
+  it("v10 Sigma_audit + missing-fraction · Sigma_full = Sigma_full (conservation)", () => {
+    const r = lutarV10Audit({
+      ...baseV6,
+      audit: { surface: [true, true, true, true, true, true, true, false] },
+    });
+    const missingMass = r.Sigma_full - r.Sigma_audit;
+    // Relative tolerance — Sigma_full is dominated by L_v6 ~1e16; absolute
+    // floating-point noise is O(few units) which is ~1e-15 relative.
+    const rel = Math.abs(missingMass - r.perLayer[7].L) / Math.abs(r.perLayer[7].L);
+    expect(rel).toBeLessThan(1e-10);
   });
 });

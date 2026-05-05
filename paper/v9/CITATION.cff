@@ -1,0 +1,68 @@
+cff-version: 1.2.0
+message: "If you use this software, the Lutar Invariant family, or the Ouroboros Thesis v9, please cite as below."
+title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
+abstract: >-
+  Operational, source-grounded canonical thesis covering the full Lutar
+  Invariant family v1..v7 plus the unified master invariant L_Ω, with a
+  Bianchi-closed fiber-bundle formulation (HUFT-inspired) and a Holographic-
+  Twistor-Cyclic L₆ extension. Every formula is bound to a shipping API
+  endpoint, a typed knowledge-graph node (Supreme Knowledge Codex v11:
+  75 nodes, 94 edges, 43 sourced, 19 formula), guardrails contract tests,
+  and an A11oy surface (/thesis).
+type: software
+authors:
+  - family-names: Lutar
+    given-names: Stephen
+    name-particle: P.
+    affiliation: SZL Holdings
+    orcid: "https://orcid.org/0009-0001-0110-4173"
+identifiers:
+  - description: ORCID iD of the principal author
+    type: other
+    value: "https://orcid.org/0009-0001-0110-4173"
+repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
+url: "https://github.com/szl-holdings/ouroboros-thesis"
+keywords:
+  - ouroboros
+  - lutar-invariant
+  - holographic-principle
+  - twistor-theory
+  - bekenstein-bound
+  - conformal-cyclic-cosmology
+  - bianchi-identity
+  - fiber-bundle
+  - noether-closure
+  - prisca-sapientia
+  - ai-governance
+  - decision-intelligence
+  - supreme-knowledge-codex
+license: CC-BY-4.0
+version: "9.0.0"
+date-released: "2026-05-05"
+preferred-citation:
+  type: article
+  title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
+  authors:
+    - family-names: Lutar
+      given-names: Stephen
+      name-particle: P.
+      affiliation: SZL Holdings
+      orcid: "https://orcid.org/0009-0001-0110-4173"
+  year: 2026
+  month: 5
+  url: "https://github.com/szl-holdings/ouroboros-thesis"
+  abstract: >-
+    v9-UNIFIED-OPERATIONAL documents the post-v5 Lutar algebra — v6 (Holographic-
+    Twistor-Cyclic), Lutar Ω (Unified Master Invariant), and v7 (Bianchi Closure) —
+    binding every formula to a shipping API endpoint, a typed knowledge-graph node,
+    guardrails contract tests, and an A11oy surface, with zero unverified claims.
+references:
+  - type: article
+    title: "Holomorphic Unified Field Theory: Curvature, Bianchi Identity, and a Path to Quantization"
+    authors:
+      - family-names: Moffat
+        given-names: J. W.
+      - family-names: Toth
+        given-names: V. T.
+    year: 2026
+    url: "https://arxiv.org/abs/2510.06282"

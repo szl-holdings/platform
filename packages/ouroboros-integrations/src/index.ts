@@ -254,6 +254,7 @@ export {
   lutarV6,
   lutarOmega,
   lutarV7,
+  lutarV10Audit,
   adaptiveWeights,
   evaluateAll,
   twistorProject,

@@ -626,6 +626,14 @@ const CODEX_NODES: CodexNode[] = [
       "L7 = L_Omega * exp(-kappa * ||D_A F||^2 / ||F||^2); D_A F = 0 => L7 = L_Omega",
   },
   {
+    id: "lutar_v10",
+    domain: "mathematics",
+    content:
+      "Lutar v10 -- EXHAUSTIVE-AUDIT (Audit Closure Operator Lambda_10): a meta-invariant on the Lutar family. For each layer L_k in {v1..v6, omega, v7}, define the indicator product over six implementation artefacts: code (lutar-formulas.ts), codex (this file), api (ouroboros.ts route), test (lutar-formulas.test.ts), thesis (docs/thesis/v9..v10-canonical.md), surface (A11oy /thesis row). A_k = L_k * product of six indicators. Lambda_10 = sum A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every layer is operational across all six artefacts. The closure ratio quantifies operational drift. v10 introduces no new physical L-term -- it formalises the implementation contract that v9 stated informally and makes operational gaps machine-verifiable.",
+    formula:
+      "Lambda_10 = sum_k L_k * prod_j 1[j_k]; auditClosed iff closure_ratio = 1",
+  },
+  {
     id: "huft_bridge",
     domain: "physics",
     content:

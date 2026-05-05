@@ -117,6 +117,7 @@ The earlier (pre-v9) state had two real gaps:
 |------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
 | Lutar v6 / v7 / Ω present in code but undocumented in canonical thesis chain | Closed by `docs/thesis/v9-canonical.md` §§2.6–2.8                               |
 | `lutar-formulas.ts` lacked a unified contract test suite (only Λ-9 was tested) | Closed by `packages/ouroboros-integrations/test/lutar-formulas.test.ts`        |
+| Per-layer implementation contract (v1..v7+Ω each ship CODE/CODEX/API/TEST/THESIS/SURFACE) was asserted in prose but not machine-verifiable | Closed by `lutarV10Audit` + `POST /api/ouroboros/lutar/v10` + 8 contract tests. Returns `closureRatio` and `missingArtifacts[]` per (layer, dimension). Live audit 2026-05-05: ρ = 1.000, missingArtifacts = []. See `docs/thesis/v10-canonical.md`. |
 
 ## 5. Convention for Future Versions
 

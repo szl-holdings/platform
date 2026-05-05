@@ -1,6 +1,6 @@
 {
-  "title": "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀ over the Lutar Invariant Family (v1 → v7 + Ω)",
-  "description": "v10 of the Ouroboros thesis chain introduces the Audit Closure Operator Lambda_10, a machine-verifiable meta-invariant over the v1..v7+Omega Lutar family established in v9. For each layer L_k, A_k = L_k * product over six artefact-presence indicators (CODE, CODEX, API, TEST, THESIS, SURFACE); Lambda_10 = sum_k A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every artefact is present for every layer. Strictly inert in the all-operational limit and quantifies operational drift exactly otherwise. Shipping artefacts: lutarV10Audit (TypeScript), POST /api/ouroboros/lutar/v10, codex node lutar_v10, an 8-test contract suite, A11oy /thesis row v10, and Sentra /thesis mirror. v10 introduces no new physical L-term; it formalises the v9 implementation contract. Companion to szl-holdings/ouroboros-thesis.",
+  "title": "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)",
+  "description": "Operational, source-grounded canonical thesis covering the full Lutar Invariant family v1..v7 plus the unified master invariant L_Ω, with a Bianchi-closed fiber-bundle formulation (HUFT-inspired) and a Holographic-Twistor-Cyclic L₆ extension. Every formula is bound to a shipping API endpoint, a typed knowledge-graph node (Supreme Knowledge Codex v11: 75 nodes, 94 edges, 43 sourced, 19 formula nodes), guardrails contract tests, and an A11oy surface (/thesis). Companion to szl-holdings/ouroboros-thesis.",
   "creators": [
     {
       "name": "Lutar, Stephen P.",
@@ -12,15 +12,11 @@
   "access_right": "open",
   "license": "CC-BY-4.0",
   "language": "eng",
-  "version": "10.0.0",
+  "version": "9.0.0",
   "publication_date": "2026-05-05",
   "keywords": [
     "ouroboros",
     "lutar-invariant",
-    "audit-closure-operator",
-    "meta-invariant",
-    "software-contract",
-    "machine-verifiable",
     "holographic-principle",
     "twistor-theory",
     "bekenstein-bound",
@@ -57,8 +53,6 @@
     }
   ],
   "subjects": [
-    { "term": "Software Engineering" },
-    { "term": "Mathematical Software" },
     { "term": "Theoretical Physics" },
     { "term": "Mathematical Physics" },
     { "term": "Decision Theory" },

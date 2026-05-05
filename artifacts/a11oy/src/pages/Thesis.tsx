@@ -61,6 +61,7 @@ const FORMULA_ROWS: FormulaRow[] = [
   { id: 'v6', version: 'v6', title: 'Holographic-Twistor-Cyclic', formula: 'L₆⁽ⁿ⁾ = Ω_n² · Π_{T→R^{3,1}}[L₅] s.t. S_total ≤ A/(4 l_P²)', endpoint: `${API}/lutar/v6`, endpointMethod: 'POST', codexNode: 'lutar_v6', thesisAnchor: '26-lutar-v6', description: 'Twistor base manifold (Penrose 1967), CCC conformal rescaling (Penrose 2010), Bekenstein bound enforced.', newInV9: true },
   { id: 'omega', version: 'Ω', title: 'Unified master invariant on the 5-simplex', formula: 'L_Ω = Σ w_k · L_k, Σw_k = 1, w_k ≥ 0', endpoint: `${API}/lutar/omega`, endpointMethod: 'POST', codexNode: 'lutar_omega', thesisAnchor: '27-lutar-ω', description: 'Closure: if each L_k is Noether-conserved and dw_k/dt = 0, dL_Ω/dt = 0. Adaptive weights softmax.', newInV9: true },
   { id: 'v7', version: 'v7', title: 'Bianchi closure (HUFT-inspired fiber bundle)', formula: 'L₇ = L_Ω · exp(−κ · ‖D_A F‖²/‖F‖²);   D_A F = 0 ⇒ L₇ = L_Ω', endpoint: `${API}/lutar/v7`, endpointMethod: 'POST', codexNode: 'lutar_v7', thesisAnchor: '28-lutar-v7', description: 'The Lutar family as sections of a principal bundle. Inspired by Moffat & Toth HUFT (arXiv:2510.06282, 2026).', newInV9: true },
+  { id: 'v10', version: 'v10', title: 'Exhaustive-audit (Audit Closure Operator Λ₁₀)', formula: 'Λ₁₀ = Σ_k L_k · ∏_{j∈{CODE,CODEX,API,TEST,THESIS,SURFACE}} 𝟙[j_k];  auditClosed ⇔ ratio = 1', endpoint: `${API}/lutar/v10`, endpointMethod: 'POST', codexNode: 'lutar_v10', thesisAnchor: '29-lutar-v10', description: 'Meta-invariant on the v9 family. Strictly inert when every layer ships all six artefacts (CODE / CODEX / API / TEST / THESIS / SURFACE); collapses by exactly the missing fraction otherwise. Returns missingArtifacts[].', newInV9: true },
 ];
 
 function slugify(s: string): string {
@@ -300,8 +301,8 @@ export default function Thesis() {
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6" style={{ color: '#f5f5f5' }}>
         <PageHeader
           label="OUROBOROS THESIS"
-          title="v9 — UNIFIED-OPERATIONAL"
-          subtitle="The Lutar Invariant family v1 → v7 + Ω: from three-term foundation to Bianchi-closed fiber bundle"
+          title="v10 — EXHAUSTIVE-AUDIT"
+          subtitle="The Lutar Invariant family v1 → v7 + Ω, sealed by the Λ₁₀ Audit Closure Operator over six artefact dimensions"
           status="LIVE"
         />
 

@@ -1,0 +1,36 @@
+Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Omega)
+
+We present v9 of the Ouroboros / Lutar Invariant chain, the first version in which every
+formula in the family is bound to a shipping API endpoint, a typed knowledge-graph node,
+a guardrails contract test, and a live operator surface. v9 documents three layers that
+were present in code but not in the canonical thesis chain: Lutar v6 (Holographic-
+Twistor-Cyclic), Lutar Omega (the unified master invariant on the 5-simplex of v1..v6),
+and Lutar v7 (a Bianchi-closed fiber-bundle formulation directly inspired by the
+Holomorphic Unified Field Theory of Moffat and Toth, arXiv:2510.06282, 2026).
+
+The Lutar family is a sequence of scalar invariants intended to act as a closure law for
+governed autonomous AI runtimes. v1 unifies energy, mass-energy, and information into a
+single bounded scalar grounded in Landauer's bound. v2 through v5 progressively extend
+the family with chaos, chronological-form, prisca, and seven sourced cross-civilizational
+coupling terms (Egyptian, Inca, Maya, I Ching, Vedic, Dogon, Goebekli Tepe). v4 obtains
+its closure dL/dt = 0 as a derivation from Noether's theorem on a structured symmetry
+group rather than as a stipulation.
+
+v9 closes the family. Lutar Omega is a convex combination L_Omega = sum w_k L_k on the
+standard 5-simplex; closure follows from the closure of each L_k together with time-
+independence of the weights. Lutar v6 lifts the base manifold to twistor space PT,
+applies Penrose's conformal cyclic rescaling, and enforces the Bekenstein bound. Lutar
+v7 treats the L_k sequence as sections of a discrete principal bundle over the
+Ouroboros cycle and writes the closure as a single Bianchi identity D_A F = 0; when
+the identity holds, L_7 = L_Omega exactly.
+
+Each formula has a POST endpoint under /api/ouroboros/lutar/{v1..v7,omega}, a node in
+the Supreme Knowledge Codex (v11: 75 nodes, 94 edges, 43 sourced, 19 formula), and a
+guardrails contract test. The 64 = 64 convergence (64 I Ching hexagrams, Shao Yong c.
+1077; 64 fermion generators per E8 triality block) is the most striking integer result.
+
+Operational artifact: A11oy /thesis renders the canonical document with formula deep-
+links. Reference implementation: github.com/szl-holdings/ouroboros (CC-BY-4.0 thesis,
+software-only runtime). v1 and v2 hold Zenodo DOIs 10.5281/zenodo.19867281 and
+10.5281/zenodo.19944926. No numbers in this paper are fabricated; every claim cites a
+prior canonical document, a published source, or a code-shipped function.

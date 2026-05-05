@@ -51,6 +51,17 @@ Each canonical thesis document follows the same structural cadence:
 12. Source disclosure
 13. File index
 
+## v10 — EXHAUSTIVE-AUDIT (May 5, 2026)
+
+| Document                                          | Purpose                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `docs/thesis/v10-canonical.md`                    | Specification + closure theorem + live audit result                              |
+| `docs/thesis/v10-essay.md`                        | Long-form essay (~1500 words)                                                    |
+| `docs/thesis/v10-onepager.md`                     | One-pager / release notes                                                        |
+| `paper/v10/`                                      | arXiv-ready manuscript bundle (canonical, abstract, CITATION.cff, .zenodo.json, references.bib, ARXIV_SUBMISSION.md) |
+
+v10 introduces the **Audit Closure Operator Λ₁₀** as a meta-invariant on the v9 Lutar family. Λ₁₀ = Σ_k L_k · ∏_{j∈{CODE,CODEX,API,TEST,THESIS,SURFACE}} 𝟙[j_k]; auditClosed ⇔ closureRatio = 1. v10 is strictly inert when the chain is operational and quantifies drift by exactly the missing fraction otherwise. No new physical L-term. Shipping: `lutarV10Audit` exported from `@workspace/ouroboros-integrations`, `POST /api/ouroboros/lutar/v10`, codex node `lutar_v10`, 8 contract tests, A11oy `/thesis` row v10, Sentra `/thesis` mirror.
+
 ## Provenance policy
 
 - No numbers are fabricated.

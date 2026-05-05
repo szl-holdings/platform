@@ -1,0 +1,64 @@
+{
+  "title": "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀",
+  "description": "v10 of the Ouroboros thesis chain introduces the Audit Closure Operator Lambda_10, a machine-verifiable meta-invariant over the v1..v7+Omega Lutar family. For each layer L_k we define A_k = L_k * product over six artefact-presence indicators (CODE, CODEX, API, TEST, THESIS, SURFACE), with Lambda_10 = sum_k A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every artefact is present for every layer. The operator is strictly inert in the all-operational limit and quantifies operational drift exactly otherwise. Shipping artefacts: lutarV10Audit (TypeScript), POST /api/ouroboros/lutar/v10, codex node lutar_v10, and an 8-test contract suite. Companion to szl-holdings/ouroboros-thesis v9.",
+  "creators": [
+    {
+      "name": "Lutar, Stephen P.",
+      "affiliation": "SZL Holdings",
+      "orcid": "0009-0001-0110-4173"
+    }
+  ],
+  "upload_type": "publication",
+  "publication_type": "article",
+  "access_right": "open",
+  "license": "CC-BY-4.0",
+  "language": "eng",
+  "version": "10.0.0",
+  "publication_date": "2026-05-05",
+  "keywords": [
+    "ouroboros",
+    "lutar-invariant",
+    "audit-closure-operator",
+    "meta-invariant",
+    "software-contract",
+    "machine-verifiable",
+    "ai-governance",
+    "decision-intelligence",
+    "supreme-knowledge-codex"
+  ],
+  "communities": [
+    { "identifier": "open-science" }
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/szl-holdings/ouroboros-thesis",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://github.com/szl-holdings/szl-holdings-platform",
+      "relation": "isDerivedFrom",
+      "scheme": "url",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://arxiv.org/abs/2510.06282",
+      "relation": "cites",
+      "scheme": "url",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://orcid.org/0009-0001-0110-4173",
+      "relation": "isIdenticalTo",
+      "scheme": "url",
+      "resource_type": "other"
+    }
+  ],
+  "subjects": [
+    { "term": "Software Engineering" },
+    { "term": "Mathematical Software" },
+    { "term": "AI Governance" },
+    { "term": "Logic in Computer Science" }
+  ]
+}

@@ -354,6 +354,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/governance/incident-analytics', label: 'Incident Analytics', icon: BarChart3, comp: L(() => import('@/pages/governance/incident-analytics')) },
       { path: '/governance/agent-config', label: 'Agent Config', icon: SettingsIcon, comp: L(() => import('@/pages/governance/agent-config')) },
       { path: '/governance/ouroboros', label: 'Ouroboros Anchor', icon: Lock, comp: L(() => import('@/pages/ouroboros')) },
+      { path: '/thesis', label: 'Ouroboros Thesis (v9 + v10)', icon: BookOpen, comp: L(() => import('@/pages/thesis')) },
       { path: '/multi-fund', label: 'Multi-Fund View', icon: Layers, comp: L(() => import('@/pages/multi-fund-view')) },
       { path: '/reports', label: 'Reports', icon: FileText, comp: L(() => import('@/pages/reports-page')) },
       { path: '/pdf-export', label: 'PDF Export', icon: Presentation, comp: L(() => import('@/pages/aegis-pdf-export')) },

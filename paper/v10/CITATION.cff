@@ -1,18 +1,16 @@
 cff-version: 1.2.0
-message: "If you use this software, the Lutar Invariant family, the Audit Closure Operator Λ₁₀, or the Ouroboros Thesis v10, please cite as below."
-title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀ over the Lutar Invariant Family (v1 → v7 + Ω)"
+message: "If you use this software, the Audit Closure Operator Lambda_10, or the Ouroboros Thesis v10, please cite as below."
+title: "Ouroboros Thesis v10 — EXHAUSTIVE-AUDIT: The Audit Closure Operator Λ₁₀"
 abstract: >-
   v10 of the Ouroboros thesis chain introduces the Audit Closure Operator
   Lambda_10, a machine-verifiable meta-invariant over the v1..v7+Omega Lutar
-  family established in v9. For each layer L_k, A_k = L_k * product over six
-  artefact-presence indicators (CODE, CODEX, API, TEST, THESIS, SURFACE);
-  Lambda_10 = sum_k A_k. Closure theorem: Lambda_10 / sum L_k = 1 iff every
-  artefact is present for every layer. Strictly inert in the all-operational
-  limit and quantifies operational drift exactly otherwise. Shipping artefacts:
-  lutarV10Audit (TypeScript), POST /api/ouroboros/lutar/v10, codex node
-  lutar_v10, an 8-test contract suite, A11oy /thesis row v10, and Sentra
-  /thesis mirror. v10 introduces no new physical L-term; it formalises the
-  v9 implementation contract.
+  family. For each layer L_k define A_k = L_k * product over six artefact
+  indicators (CODE, CODEX, API, TEST, THESIS, SURFACE); Lambda_10 = sum A_k.
+  Closure theorem: Lambda_10 / sum L_k = 1 if and only if every artefact is
+  present for every layer. Strictly inert in the all-operational limit,
+  quantifies operational drift exactly by the missing fraction otherwise.
+  Implemented as lutarV10Audit, POST /api/ouroboros/lutar/v10, codex node
+  lutar_v10, and an 8-test guardrails suite.
 type: software
 authors:
   - family-names: Lutar
@@ -24,6 +22,9 @@ identifiers:
   - description: ORCID iD of the principal author
     type: other
     value: "https://orcid.org/0009-0001-0110-4173"
+  - description: Companion thesis (v9)
+    type: doi
+    value: "10.5281/zenodo.19944926"
 repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
 url: "https://github.com/szl-holdings/ouroboros-thesis"
 keywords:
@@ -33,14 +34,6 @@ keywords:
   - meta-invariant
   - software-contract
   - machine-verifiable
-  - holographic-principle
-  - twistor-theory
-  - bekenstein-bound
-  - conformal-cyclic-cosmology
-  - bianchi-identity
-  - fiber-bundle
-  - noether-closure
-  - prisca-sapientia
   - ai-governance
   - decision-intelligence
   - supreme-knowledge-codex
@@ -66,18 +59,14 @@ preferred-citation:
     family and is strictly inert in the all-operational limit.
 references:
   - type: article
-    title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)"
+    title: "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL"
     authors:
       - family-names: Lutar
         given-names: Stephen
         name-particle: P.
-        affiliation: SZL Holdings
-        orcid: "https://orcid.org/0009-0001-0110-4173"
     year: 2026
-    month: 5
-    url: "https://github.com/szl-holdings/ouroboros-thesis"
   - type: article
-    title: "Holomorphic Unified Field Theory: Curvature, Bianchi Identity, and a Path to Quantization"
+    title: "Holomorphic Unified Field Theory"
     authors:
       - family-names: Moffat
         given-names: J. W.

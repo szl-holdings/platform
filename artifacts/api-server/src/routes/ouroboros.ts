@@ -51,6 +51,7 @@ import {
   lutarV6,
   lutarOmega,
   lutarV7,
+  lutarV10Audit,
   adaptiveWeights,
   evaluateAll,
   twistorProject,
@@ -630,6 +631,32 @@ router.post('/lutar/v7', (req: Request, res: Response) => {
   if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
   try {
     return res.json(lutarV7(parsed.data));
+  } catch (e) {
+    return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
+  }
+});
+
+const LutarAuditFlagSchema = z.tuple([
+  z.boolean(), z.boolean(), z.boolean(), z.boolean(),
+  z.boolean(), z.boolean(), z.boolean(), z.boolean(),
+]).optional();
+
+const LutarV10AuditSchema = LutarV7Schema.extend({
+  audit: z.object({
+    code: LutarAuditFlagSchema,
+    codex: LutarAuditFlagSchema,
+    api: LutarAuditFlagSchema,
+    test: LutarAuditFlagSchema,
+    thesis: LutarAuditFlagSchema,
+    surface: LutarAuditFlagSchema,
+  }).optional(),
+});
+
+router.post('/lutar/v10', (req: Request, res: Response) => {
+  const parsed = LutarV10AuditSchema.safeParse(req.body);
+  if (!parsed.success) return jsonError(res, 400, 'INVALID_INPUT', parsed.error.message);
+  try {
+    return res.json(lutarV10Audit(parsed.data));
   } catch (e) {
     return jsonError(res, 400, 'VALIDATION_ERROR', (e as Error).message);
   }
