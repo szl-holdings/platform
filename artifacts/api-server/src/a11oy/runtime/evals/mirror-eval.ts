@@ -113,7 +113,72 @@ function computeDisposition(scores: MirrorEvalScore[], isDestructive: boolean, i
   return 'pass';
 }
 
-export function runMirrorEval(input: MirrorEvalInput): MirrorEvalResult {
+function scoreDisclosureSafety(input: MirrorEvalInput): MirrorEvalScore {
+  const description = (input.actionDescription ?? '').toLowerCase();
+  const isDisclosureAction =
+    description.includes('disclos') ||
+    description.includes('subprocessor') ||
+    description.includes('third-party') ||
+    description.includes('data sharing') ||
+    description.includes('agreement') ||
+    (input as MirrorEvalInput & { disclosureContext?: DisclosureContext }).disclosureContext !== undefined;
+
+  if (!isDisclosureAction) {
+    return {
+      dimension: 'disclosure_safety',
+      score: 1.0,
+      rationale: 'No third-party disclosure detected — dimension not applicable.',
+    };
+  }
+
+  const ctx = (input as MirrorEvalInput & { disclosureContext?: DisclosureContext })
+    .disclosureContext;
+
+  let score = 0.5;
+  const issues: string[] = [];
+
+  if (ctx?.hasLegalBasis) {
+    score += 0.2;
+  } else {
+    issues.push('no_legal_basis');
+  }
+
+  if (ctx?.recipientApproved) {
+    score += 0.15;
+  } else {
+    issues.push('recipient_not_approved');
+  }
+
+  if (ctx?.agreementActive) {
+    score += 0.15;
+  } else {
+    issues.push('no_active_agreement');
+  }
+
+  score = Math.min(1.0, score);
+
+  return {
+    dimension: 'disclosure_safety',
+    score: Math.round(score * 100) / 100,
+    rationale:
+      score >= 0.8
+        ? 'Disclosure has adequate legal basis, approved recipient, and active agreement.'
+        : score >= 0.6
+          ? `Disclosure partially compliant. Issues: ${issues.join(', ')}.`
+          : `Disclosure safety deficient: ${issues.join(', ')}. Executive review required.`,
+    flag: score < 0.6 ? 'disclosure_safety_deficient' : undefined,
+  };
+}
+
+export interface DisclosureContext {
+  hasLegalBasis: boolean;
+  recipientApproved: boolean;
+  agreementActive: boolean;
+  recipientId?: string;
+  agreementId?: string;
+}
+
+export function runMirrorEval(input: MirrorEvalInput & { disclosureContext?: DisclosureContext }): MirrorEvalResult {
   const evalId = `me-${randomUUID().slice(0, 8)}`;
 
   const scores: MirrorEvalScore[] = [
@@ -123,6 +188,7 @@ export function runMirrorEval(input: MirrorEvalInput): MirrorEvalResult {
     scoreReversibility(input),
     scoreCompliance(input),
     scoreContextFreshness(input),
+    scoreDisclosureSafety(input),
   ];
 
   const flags = scores.flatMap((s) => (s.flag ? [s.flag] : []));

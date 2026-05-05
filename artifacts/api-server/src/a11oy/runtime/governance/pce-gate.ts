@@ -14,7 +14,8 @@ export type RiskClass =
   | 'reputational'
   | 'regulatory'
   | 'operational'
-  | 'strategic';
+  | 'strategic'
+  | 'third_party_disclosure';
 
 const APPROVAL_MATRIX: Record<RiskClass, string> = {
   financial: 'executive',
@@ -26,6 +27,7 @@ const APPROVAL_MATRIX: Record<RiskClass, string> = {
   regulatory: 'executive',
   operational: 'operator',
   strategic: 'board',
+  third_party_disclosure: 'executive',
 };
 
 const pceContracts = new Map<string, PCEContract>();
@@ -138,10 +140,40 @@ async function persistProofPacket(packet: ProofPacketRecord): Promise<void> {
   } catch { /* non-fatal */ }
 }
 
+const DISCLOSURE_VERTICALS = new Set([
+  'disclosure',
+  'third-party-disclosure',
+  'data-sharing',
+  'legal-disclosure',
+  'privacy',
+  'gdpr',
+  'dpa',
+  'subprocessor',
+  'data-transfer',
+]);
+
+const DISCLOSURE_ACTION_KEYWORDS = [
+  'disclos',
+  'subprocessor',
+  'dpa',
+  'data sharing',
+  'data transfer',
+  'third-party',
+  'third_party',
+  'recipient',
+  'legal_agreement',
+  'legal-agreement',
+  'msa',
+  ' nda ',
+  'countersign',
+  'data_sharing',
+];
+
 export function classifyRisk(opts: {
   riskLevel: string;
   isDestructive: boolean;
   vertical: string;
+  action?: string;
 }): RiskClass[] {
   const classes: RiskClass[] = [];
   if (['financial', 'revenue'].includes(opts.vertical)) classes.push('financial');
@@ -151,6 +183,15 @@ export function classifyRisk(opts: {
   if (['vessels-maritime', 'maritime'].includes(opts.vertical)) classes.push('operational');
   if (['lyte-revenue'].includes(opts.vertical)) classes.push('customer_facing');
   if (opts.riskLevel === 'critical') classes.push('strategic');
+
+  const verticalLower = opts.vertical.toLowerCase();
+  const actionLower = (opts.action ?? '').toLowerCase();
+  const isDisclosureByVertical = DISCLOSURE_VERTICALS.has(verticalLower);
+  const isDisclosureByAction = DISCLOSURE_ACTION_KEYWORDS.some(
+    (kw) => actionLower.includes(kw) || verticalLower.includes(kw.trim()),
+  );
+  if (isDisclosureByVertical || isDisclosureByAction) classes.push('third_party_disclosure');
+
   if (classes.length === 0) classes.push('operational');
   return classes;
 }
@@ -249,6 +290,11 @@ export interface PCEGateInput {
   signals?: Record<string, unknown>[];
   actionDescription?: string;
   causalChainIds?: string[];
+  /** Optional: when the action involves a known third-party disclosure, supply these
+   * so runPCEGate can resolve the DisclosureContext from the DB for MirrorEval scoring. */
+  disclosureRecipientId?: string;
+  disclosureAgreementId?: string;
+  disclosureOrgId?: number;
 }
 
 export interface PCEGateResult {
@@ -288,6 +334,20 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
 
   const coverage = computeCoverage(contextPack);
 
+  // Resolve disclosure context from the DB when the action involves a known recipient.
+  // This grounds the MirrorEval disclosure_safety dimension in persisted registry data.
+  let disclosureContext: import('../evals/mirror-eval.js').DisclosureContext | undefined;
+  if (input.disclosureRecipientId && input.disclosureOrgId) {
+    try {
+      const { resolveDisclosureContext } = await import('../../lib/disclosure-eval.js');
+      disclosureContext = await resolveDisclosureContext(
+        input.disclosureRecipientId,
+        input.disclosureOrgId,
+        input.disclosureAgreementId,
+      );
+    } catch { /* non-fatal — eval continues without DB context */ }
+  }
+
   const mirrorEval = input.mirrorEvalResult ?? runMirrorEval({
     targetId: input.actionId,
     targetType: 'pce',
@@ -301,6 +361,7 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
     approvalTier: input.riskLevel === 'critical' ? 'executive' : 'operator',
     riskLevel: input.riskLevel,
     actionDescription: input.actionDescription,
+    disclosureContext,
   });
 
   storeEval(mirrorEval);
@@ -317,6 +378,7 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
     riskLevel: input.riskLevel,
     isDestructive: input.isDestructive,
     vertical: input.vertical,
+    action: input.actionDescription,
   });
 
   const policyEval = evaluatePolicies({

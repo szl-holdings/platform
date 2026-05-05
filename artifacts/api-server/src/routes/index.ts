@@ -126,6 +126,9 @@ router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"),
 // Public platform status page — unauthenticated. Owns /status, /uptime-history, /incidents (KG031).
 router.use(lazyMatch(["/status", "/uptime-history", "/incidents"], () => import("./public-status"), "public-status"));
 
+// Third-Party Legal Disclosure Registry — recipients, records, subprocessors, agreements, compliance controls.
+router.use(lazyMatch("/disclosure", () => import("./disclosure"), "disclosure"));
+
 // Counsel — public matters CRUD.
 router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 

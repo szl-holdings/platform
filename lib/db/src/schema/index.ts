@@ -220,3 +220,4 @@ export * from './pqc_identity';
 export * from './reliquary';
 export * from './model_foundry';
 export * from './operator_model_registry';
+export * from './disclosure';

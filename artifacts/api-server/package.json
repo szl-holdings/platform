@@ -78,6 +78,7 @@
     "@szl-holdings/decision-fabric": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/evidence-graph": "workspace:*",
+    "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/evolution-core": "workspace:*",
     "@szl-holdings/forge-runtime": "workspace:*",
     "@szl-holdings/intelligence-feeds": "workspace:*",

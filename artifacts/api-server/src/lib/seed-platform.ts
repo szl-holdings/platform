@@ -1142,6 +1142,11 @@ export async function seedPlatformData(): Promise<void> {
       ])
       .onConflictDoNothing(),
   );
+
+  // Disclosure registry seed — recipients, subprocessors, agreements,
+  // compliance framework controls, and control evidence.
+  const { seedDisclosureData } = await import('./seed-disclosure.js');
+  await seedDisclosureData(seedOrgId);
 }
 
 if (process.argv[1]?.includes('seed-platform')) {
