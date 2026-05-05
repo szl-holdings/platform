@@ -177,6 +177,13 @@ const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents
 const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
 const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m => ({ default: m.KarpathyEvolution })));
 const Praxis = lazy(() => import('./pages/Praxis').then(m => ({ default: m.Praxis })));
+const AtelierHub = lazy(() => import('./pages/atelier/AtelierHub').then(m => ({ default: m.AtelierHub })));
+const AtelierDetail = lazy(() => import('./pages/atelier/AtelierDetail').then(m => ({ default: m.AtelierDetail })));
+const AtelierNew = lazy(() => import('./pages/atelier/AtelierNew').then(m => ({ default: m.AtelierNew })));
+const AtelierLeaderboards = lazy(() => import('./pages/atelier/AtelierLeaderboards').then(m => ({ default: m.AtelierLeaderboards })));
+const AtelierManifesto = lazy(() => import('./pages/atelier/AtelierManifesto').then(m => ({ default: m.AtelierManifesto })));
+const AtelierMySpaces = lazy(() => import('./pages/atelier/AtelierMySpaces').then(m => ({ default: m.AtelierMySpaces })));
+const AtelierEmbedHost = lazy(() => import('./pages/atelier/AtelierEmbedHost').then(m => ({ default: m.AtelierEmbedHost })));
 const McpHub = lazy(() => import('./pages/McpHub').then(m => ({ default: m.McpHub })));
 const AgenticRag = lazy(() => import('./pages/AgenticRag').then(m => ({ default: m.AgenticRag })));
 const SubstrateCompute = lazy(() => import('./pages/SubstrateCompute').then(m => ({ default: m.SubstrateCompute })));
@@ -475,6 +482,28 @@ export default function App() {
         </Route>
         <Route path={`${base}/hub`}>
           <Suspense fallback={<Loader />}><AlloyHubLanding /></Suspense>
+        </Route>
+
+        <Route path={`${base}/embed/:slug`}>
+          <Suspense fallback={<Loader />}><AtelierEmbedHost /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/s/:slug`}>
+          <Suspense fallback={<Loader />}><AtelierDetail /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/new`}>
+          <Suspense fallback={<Loader />}><AtelierNew /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/leaderboards`}>
+          <Suspense fallback={<Loader />}><AtelierLeaderboards /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/my-spaces`}>
+          <Suspense fallback={<Loader />}><AtelierMySpaces /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier/manifesto`}>
+          <Suspense fallback={<Loader />}><AtelierManifesto /></Suspense>
+        </Route>
+        <Route path={`${base}/atelier`}>
+          <Suspense fallback={<Loader />}><AtelierHub /></Suspense>
         </Route>
 
         <Route>

@@ -1,6 +1,7 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { AtelierSpaceEmbed } from '../components/AtelierSpaceEmbed';
 import {
   Activity,
   AlertTriangle,
@@ -403,6 +404,24 @@ export default function CounselLandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0a0a0a' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#c9b787', marginBottom: 12, textTransform: 'uppercase' as const }}>
+              Live: Legal Discovery Agent
+            </p>
+            <h2 style={{ fontSize: 28, fontWeight: 700, color: '#f5f5f5', marginBottom: 12 }}>
+              Privilege-aware discovery, in a governed runtime.
+            </h2>
+            <p style={{ fontSize: 14, color: '#8a8a8a', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
+              Every discovery run produces a privilege log, deadline analysis, and a proof packet
+              before any document leaves the firewall.
+            </p>
+          </div>
+          <AtelierSpaceEmbed />
         </div>
       </section>
 

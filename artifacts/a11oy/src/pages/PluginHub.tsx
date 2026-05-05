@@ -205,6 +205,18 @@ export function PluginHub() {
             and outcome recording. No plugin bypasses the proof chain.
           </p>
         </div>
+
+        <div style={{ marginTop: '2rem', padding: '1.25rem 1.5rem', borderTop: `2px solid ${T.accent}`, background: 'rgba(201,183,135,0.04)', borderRadius: 8 }}>
+          <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accent, margin: '0 0 0.5rem' }}>Atelier</p>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: T.text, margin: '0 0 0.375rem', letterSpacing: '-0.01em' }}>Governed Agent Spaces — Browse Atelier</h3>
+          <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.textDim, margin: '0 0 0.75rem' }}>
+            Plugins compose into Spaces. Author, govern, and publish agent Spaces with constitution binding,
+            connector allowlists, and proof on every run.
+          </p>
+          <a href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/atelier`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontFamily: T.mono, fontWeight: 600, color: T.accent, textDecoration: 'none', letterSpacing: '0.06em' }}>
+            Open Atelier →
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -462,6 +462,15 @@ export function Praxis() {
                 </button>
               ))}
             </div>
+            <div style={{ margin: '0.5rem', padding: '0.875rem 1rem', borderTop: '2px solid #c9b787', background: 'rgba(201,183,135,0.04)', borderRadius: 6 }}>
+              <p style={{ fontSize: '0.5625rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9b787', margin: '0 0 0.375rem' }}>Atelier</p>
+              <p style={{ fontSize: '0.6875rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.45)', margin: '0 0 0.5rem' }}>
+                Publish governed AI Spaces — constitution, connectors, proof.
+              </p>
+              <a href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/atelier`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.6875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 600, color: '#c9b787', textDecoration: 'none', letterSpacing: '0.05em' }}>
+                Open Atelier →
+              </a>
+            </div>
           </div>
         )}
 

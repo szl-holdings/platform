@@ -234,6 +234,17 @@ export function SkillsLibrary() {
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)]" /> Governed Environment — all skill runs are proof-chained, eval-scored, and policy-gated. No destructive tool calls are made without human approval.
       </div>
+
+      <div style={{ marginTop: '1.5rem', padding: '1.25rem 1.5rem', borderTop: '2px solid #c9b787', background: 'rgba(201,183,135,0.04)', borderRadius: 8 }}>
+        <p style={{ fontSize: '0.625rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9b787', margin: '0 0 0.5rem' }}>Related · Atelier</p>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f5f5f5', margin: '0 0 0.375rem', letterSpacing: '-0.01em' }}>Skills compose into Atelier Spaces</h3>
+        <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: '#8a8a8a', margin: '0 0 0.75rem' }}>
+          Browse governed agent Spaces that bundle skills, connectors, and constitutions into publishable, proof-chained surfaces.
+        </p>
+        <a href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/atelier`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 600, color: '#c9b787', textDecoration: 'none', letterSpacing: '0.06em' }}>
+          Atelier Spaces →
+        </a>
+      </div>
     </Layout>
   );
 }

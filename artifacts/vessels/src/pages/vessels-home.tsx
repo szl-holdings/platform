@@ -4,6 +4,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { AtelierSpaceEmbed } from '../components/AtelierSpaceEmbed';
 import { useFleetExceptions, useVesselsDashboard } from '@/hooks/use-vessels-data';
 import {
   metricDisplay,
@@ -788,6 +789,31 @@ export default function VesselsHome() {
                 />
               </svg>
             </a>
+          </m.div>
+        </div>
+      </section>
+
+      {/* A11oy Atelier Embed */}
+      <section className="py-16 lg:py-20 border-t border-sky-500/10">
+        <div className="max-w-5xl mx-auto px-6">
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-sky-400/50 mb-3">
+              A11oy Atelier — Governed Agent Space
+            </p>
+            <h2 className="text-[1.5rem] sm:text-[2rem] font-bold tracking-tight text-sky-50 leading-[1.15] mb-4">
+              Live: Maritime Routing Agent
+            </h2>
+            <p className="text-sky-300/55 text-sm leading-relaxed mb-8 max-w-2xl">
+              Every Vessels routing decision runs through a constitutionally-bound A11oy Space — proof-chained, cross-domain-aware, and requiring VP Operations approval before any voyage plan change. Try it live below.
+            </p>
+            <div style={{ maxWidth: 700 }}>
+              <AtelierSpaceEmbed />
+            </div>
           </m.div>
         </div>
       </section>

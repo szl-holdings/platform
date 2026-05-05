@@ -1,5 +1,6 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { AtelierSpaceEmbed } from '../components/AtelierSpaceEmbed';
 import {
   ArrowRight,
   Bot,
@@ -272,6 +273,24 @@ export default function SentraLandingPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-24 border-t border-[rgba(255,255,255,0.04)]">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-emerald-400/70 mb-4">
+              Live: Cyber Threat Triage Agent
+            </p>
+            <h2 className="text-3xl font-display font-semibold tracking-tight text-[#f5f5f5] mb-4">
+              Governed containment in seconds.
+            </h2>
+            <p className="text-[15px] text-[#8a8a8a] max-w-xl mx-auto">
+              Every triage run carries a proof packet — CVE enrichment, SIEM correlation, and policy
+              attestation, all captured before containment executes.
+            </p>
+          </div>
+          <AtelierSpaceEmbed />
         </div>
       </section>
 

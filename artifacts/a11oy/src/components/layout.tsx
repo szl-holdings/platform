@@ -233,6 +233,16 @@ const NAV_GROUPS = [
       { href: '/karpathy-evolution', label: 'Karpathy Evolution' },
     ],
   },
+  {
+    label: 'ATELIER',
+    items: [
+      { href: '/atelier',              label: 'Browse Spaces' },
+      { href: '/atelier/leaderboards', label: 'Leaderboards' },
+      { href: '/atelier/my-spaces',    label: 'My Spaces' },
+      { href: '/atelier/new',          label: 'Create Space' },
+      { href: '/atelier/manifesto',    label: 'Manifesto' },
+    ],
+  },
 ];
 
 const TOKENS = {
