@@ -3,6 +3,12 @@ import * as api from './api';
 
 export const useStats = () => useQuery({ queryKey: ['stats'], queryFn: api.getStats });
 
+export const useAdminUsage = (params?: { plan?: string; org?: string; limit?: number; offset?: number }) =>
+  useQuery({
+    queryKey: ['admin-usage', params],
+    queryFn: () => api.getAdminUsage(params),
+  });
+
 export const useConnections = () => useQuery({ queryKey: ['connections'], queryFn: api.listConnections });
 export const useConnection = (id: string) => useQuery({ queryKey: ['connections', id], queryFn: () => api.getConnection(id), enabled: !!id });
 export const useCreateConnection = () => {

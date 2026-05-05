@@ -24,6 +24,7 @@ import DomainDistillery from '@/pages/sovereign-ai-hub/distillery';
 import PraxisPlayground from '@/pages/sovereign-ai-hub/praxis';
 import DataEstateCatalog from '@/pages/sovereign-ai-hub/data-estate';
 import CognitiveInsights from '@/pages/sovereign-ai-hub/cognitive';
+import AdminUsagePage from '@/pages/admin-usage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,7 @@ function AppContent() {
         <Route path="/sovereign-ai-hub/praxis" component={PraxisPlayground} />
         <Route path="/sovereign-ai-hub/data-estate" component={DataEstateCatalog} />
         <Route path="/sovereign-ai-hub/cognitive" component={CognitiveInsights} />
+        <Route path="/admin/usage" component={AdminUsagePage} />
         <Route>
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Page not found

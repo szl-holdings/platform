@@ -169,6 +169,46 @@ export interface SourcePreview {
 // ─── Stats ────────────────────────────────────────────────────────────────────
 export const getStats = () => apiFetch<ConduitStats>('/conduit/stats');
 
+// ─── Admin Usage ──────────────────────────────────────────────────────────────
+export interface AdminUsageAlertEntry {
+  meterKey: string;
+  threshold: number;
+  notifiedAt: string;
+}
+
+export interface AdminUsageRow {
+  orgId: number;
+  orgName: string;
+  orgSlug: string;
+  plan: string;
+  status: string;
+  members: number;
+  activeUsers: number;
+  apiCalls: number;
+  storageMB: number;
+  overages: { apiCalls: 'none' | 'warn' | 'over'; members: 'none' | 'warn' | 'over'; storage: 'none' | 'warn' | 'over' };
+  planLimits: { apiCalls: number | null; members: number | null; storageMB: number | null };
+  lastAlertSentAt: string | null;
+  alertThresholdsFired: AdminUsageAlertEntry[];
+}
+
+export interface AdminUsageResponse {
+  period: { from: string; to: string };
+  totals: { orgs: number; apiCalls: number; activeUsers: number; overageCount: number; warnCount: number };
+  rows: AdminUsageRow[];
+  pagination: { limit: number; offset: number; total: number; hasMore: boolean };
+}
+
+export const getAdminUsage = (params?: { plan?: string; org?: string; limit?: number; offset?: number }) => {
+  const q = new URLSearchParams();
+  if (params?.plan) q.set('plan', params.plan);
+  if (params?.org) q.set('org', params.org);
+  if (params?.limit != null) q.set('limit', String(params.limit));
+  if (params?.offset != null) q.set('offset', String(params.offset));
+  const qs = q.toString();
+  return apiFetch<AdminUsageResponse>(`/admin/usage${qs ? `?${qs}` : ''}`);
+};
+
 // ─── Connections ──────────────────────────────────────────────────────────────
 export const listConnections = () => apiFetch<Connection[]>('/conduit/connections');
 export const getConnection = (id: string) => apiFetch<Connection>(`/conduit/connections/${id}`);

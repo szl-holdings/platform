@@ -21,9 +21,10 @@ import {
   pool,
   quotaConfigsTable,
   usageEventsTable,
+  usageThresholdNotificationsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { and, count, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { and, count, eq, gte, ilike, lt, lte, or, sql } from 'drizzle-orm';
 import type { IRouter, Request, Response } from 'express';
 import {
   handleRouteError,
@@ -137,7 +138,14 @@ export function register(router: IRouter): void {
 
         const orgIds = orgs.map((o) => o.id);
 
-        const [memberCounts, activeUserCounts, usageTotals, quotaConfigs] = await Promise.all([
+        const periodStartForAlerts = new Date(
+          Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth(), 1),
+        );
+        const periodEndForAlerts = new Date(
+          Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth() + 1, 1),
+        );
+
+        const [memberCounts, activeUserCounts, usageTotals, quotaConfigs, alertNotifs] = await Promise.all([
           db
             .select({ orgId: orgMembersTable.orgId, count: count() })
             .from(orgMembersTable)
@@ -188,6 +196,22 @@ export function register(router: IRouter): void {
                 eq(quotaConfigsTable.product, 'platform'),
               ),
             ),
+
+          db
+            .select({
+              orgId: usageThresholdNotificationsTable.orgId,
+              meterKey: usageThresholdNotificationsTable.meterKey,
+              threshold: usageThresholdNotificationsTable.threshold,
+              notifiedAt: usageThresholdNotificationsTable.notifiedAt,
+            })
+            .from(usageThresholdNotificationsTable)
+            .where(
+              and(
+                sql`${usageThresholdNotificationsTable.orgId} = ANY(${orgIds})`,
+                gte(usageThresholdNotificationsTable.periodStart, periodStartForAlerts),
+                lt(usageThresholdNotificationsTable.periodStart, periodEndForAlerts),
+              ),
+            ),
         ]);
 
         const memberByOrg = new Map(memberCounts.map((r) => [r.orgId, Number(r.count)]));
@@ -200,6 +224,29 @@ export function register(router: IRouter): void {
           if (!quotaByOrg.has(qc.orgId)) quotaByOrg.set(qc.orgId, {});
           quotaByOrg.get(qc.orgId)![qc.featureKey] =
             qc.hardLimit != null ? Number(qc.hardLimit) : null;
+        }
+
+        type AlertFiredEntry = { meterKey: string; threshold: number; notifiedAt: string };
+        const alertsByOrg = new Map<
+          number,
+          { lastAlertSentAt: Date; entries: AlertFiredEntry[] }
+        >();
+        for (const n of alertNotifs) {
+          if (n.orgId == null) continue;
+          const existing = alertsByOrg.get(n.orgId);
+          const entry: AlertFiredEntry = {
+            meterKey: n.meterKey,
+            threshold: n.threshold,
+            notifiedAt: n.notifiedAt.toISOString(),
+          };
+          if (!existing) {
+            alertsByOrg.set(n.orgId, { lastAlertSentAt: n.notifiedAt, entries: [entry] });
+          } else {
+            existing.entries.push(entry);
+            if (n.notifiedAt > existing.lastAlertSentAt) {
+              existing.lastAlertSentAt = n.notifiedAt;
+            }
+          }
         }
 
         let storagePollWorked = false;
@@ -255,6 +302,14 @@ export function register(router: IRouter): void {
           const rawMembersOverride = overrides[QUOTA_FEATURE_KEYS.members] ?? null;
           const rawStorageMBOverride = overrides[QUOTA_FEATURE_KEYS.storageMB] ?? null;
 
+          const alertInfo = alertsByOrg.get(org.id);
+          const lastAlertSentAt = alertInfo ? alertInfo.lastAlertSentAt.toISOString() : null;
+          const alertThresholdsFired = alertInfo
+            ? [...alertInfo.entries].sort((a, b) =>
+                a.notifiedAt < b.notifiedAt ? 1 : a.notifiedAt > b.notifiedAt ? -1 : 0,
+              )
+            : [];
+
           return {
             orgId: org.id,
             orgName: org.name,
@@ -288,6 +343,8 @@ export function register(router: IRouter): void {
               storageMB:
                 effectiveLimits.storageMB === Infinity ? null : effectiveLimits.storageMB,
             },
+            lastAlertSentAt,
+            alertThresholdsFired,
           };
         });
 
