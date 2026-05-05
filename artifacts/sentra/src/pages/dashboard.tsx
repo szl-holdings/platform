@@ -10,9 +10,10 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-import { sentraTwin } from '@/data/sentra-twin';
-import { DataProvenance } from '@/lib/data-provenance';
+import { useCallback, useEffect, useState } from 'react';
+import { sentraTwin as fallbackTwin, type CyberAsset, type Incident, type ControlDrift } from '@/data/sentra-twin';
+import { listCyberTwinAssets, listCyberTwinIncidents, listCyberTwinControlDrifts, getCyberTwinPosture } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const BASELINE_ENTITIES = [
   {
@@ -206,12 +207,30 @@ function NLThreatQueryBar() {
 }
 
 export default function Dashboard() {
+  const assetFetcher = useCallback(() => listCyberTwinAssets(), []);
+  const incidentFetcher = useCallback(() => listCyberTwinIncidents(), []);
+  const driftFetcher = useCallback(() => listCyberTwinControlDrifts(), []);
+  const { data: assets, source } = useApiQuery<CyberAsset[]>(assetFetcher, 'assets', fallbackTwin.assets);
+  const { data: incidents } = useApiQuery<Incident[]>(incidentFetcher, 'incidents', fallbackTwin.incidents);
+  const { data: controlDrifts } = useApiQuery<ControlDrift[]>(driftFetcher, 'controlDrifts', fallbackTwin.controlDrifts);
+
+  const [posture, setPosture] = useState({ recoveryPosture: fallbackTwin.recoveryPosture, financialExposure: fallbackTwin.financialExposure });
+  useEffect(() => {
+    getCyberTwinPosture()
+      .then((res) => {
+        if (res && typeof res.recoveryPosture === 'number') {
+          setPosture({ recoveryPosture: res.recoveryPosture, financialExposure: res.financialExposure });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <header>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-3xl font-display font-bold text-[#f5f5f5]">Cyber Resilience Command</h1>
-          <DataProvenance source="seed" label="Demo Data" />
+          <SourceBadge source={source} />
         </div>
         <p className="text-[#8a8a8a] mt-1">Operational status and posture overview</p>
       </header>
@@ -222,7 +241,7 @@ export default function Dashboard() {
             <ShieldAlert className="w-5 h-5" />
             <span className="text-sm font-medium">Active Incidents</span>
           </div>
-          <div className="text-4xl font-display font-bold">{sentraTwin.incidents.length}</div>
+          <div className="text-4xl font-display font-bold">{incidents.length}</div>
           <div className="text-xs text-[#f5f5f5]/60 mt-2 font-mono">CRITICAL STATUS</div>
         </div>
 
@@ -232,7 +251,7 @@ export default function Dashboard() {
             <span className="text-sm font-medium">Assets at Risk</span>
           </div>
           <div className="text-4xl font-display font-bold">
-            {sentraTwin.assets.filter((a) => a.exposureScore > 70).length}
+            {assets.filter((a) => a.exposureScore > 70).length}
           </div>
           <div className="text-xs text-[#c9b787]/60 mt-2 font-mono">EXPOSURE &gt; 70</div>
         </div>
@@ -242,11 +261,11 @@ export default function Dashboard() {
             <RotateCcw className="w-5 h-5" />
             <span className="text-sm font-medium">Recovery Posture</span>
           </div>
-          <div className="text-4xl font-display font-bold">{sentraTwin.recoveryPosture}%</div>
+          <div className="text-4xl font-display font-bold">{posture.recoveryPosture}%</div>
           <div className="w-full bg-[#1a1a1a] h-1 mt-3 rounded-full overflow-hidden">
             <div
               className="bg-[#8a8a8a] h-full transition-all duration-1000"
-              style={{ width: `${sentraTwin.recoveryPosture}%` }}
+              style={{ width: `${posture.recoveryPosture}%` }}
             />
           </div>
         </div>
@@ -257,7 +276,7 @@ export default function Dashboard() {
             <span className="text-sm font-medium">Control Drift</span>
           </div>
           <div className="text-4xl font-display font-bold">
-            {sentraTwin.controlDrifts.filter((d) => d.status === 'drift_detected').length}
+            {controlDrifts.filter((d) => d.status === 'drift_detected').length}
           </div>
           <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
         </div>
@@ -312,7 +331,7 @@ export default function Dashboard() {
             Critical Incident Timeline
           </h2>
           <div className="space-y-6">
-            {sentraTwin.incidents.map((incident) => (
+            {incidents.map((incident) => (
               <div key={incident.id} className="sentra-card p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-[#f5f5f5]">{incident.title}</h3>
@@ -343,7 +362,7 @@ export default function Dashboard() {
           </h2>
           <div className="space-y-6">
             <div className="text-5xl font-display font-bold text-[#f5f5f5]">
-              ${(sentraTwin.financialExposure / 1000000).toFixed(1)}M
+              ${(posture.financialExposure / 1000000).toFixed(1)}M
             </div>
             <p className="text-sm text-[#8a8a8a]">
               Estimated cost avoidance via recommended isolation and recovery actions.

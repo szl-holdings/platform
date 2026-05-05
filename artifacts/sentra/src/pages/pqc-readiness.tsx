@@ -6,15 +6,19 @@ import {
   Clock,
   ExternalLink,
   Key,
+  Loader2,
   Lock,
   ShieldCheck,
   X,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { listPqcStandards, listPqcMigrationPhases, listPqcEcosystem, patchPqcStandard, patchPqcEcosystemItem } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 type AlgorithmStatus = 'deployed' | 'in-progress' | 'planned' | 'not-started';
 
 type PqcStandard = {
+  id: string;
   fips: string;
   name: string;
   formerly: string;
@@ -27,12 +31,14 @@ type PqcStandard = {
 };
 
 type MigrationPhase = {
+  id: string;
   phase: string;
   status: AlgorithmStatus;
   tasks: string[];
 };
 
 type EcoSystem = {
+  id: string;
   system: string;
   current: string;
   target: string;
@@ -48,6 +54,7 @@ const STATUS_CONFIG: Record<AlgorithmStatus, { label: string; icon: typeof Check
 
 const PQC_STANDARDS: PqcStandard[] = [
   {
+    id: 'pqc-001',
     fips: 'FIPS 203',
     name: 'ML-KEM',
     formerly: 'CRYSTALS-Kyber',
@@ -59,6 +66,7 @@ const PQC_STANDARDS: PqcStandard[] = [
     planned: ['Evidence ledger encryption', 'Covenant attestation key exchange'],
   },
   {
+    id: 'pqc-002',
     fips: 'FIPS 204',
     name: 'ML-DSA',
     formerly: 'CRYSTALS-Dilithium',
@@ -75,6 +83,7 @@ const PQC_STANDARDS: PqcStandard[] = [
     planned: ['Audit trail signing (full coverage)'],
   },
   {
+    id: 'pqc-003',
     fips: 'FIPS 205',
     name: 'SLH-DSA',
     formerly: 'SPHINCS+',
@@ -86,6 +95,7 @@ const PQC_STANDARDS: PqcStandard[] = [
     planned: ['Long-term evidence archival signatures', 'Root CA backup signatures'],
   },
   {
+    id: 'pqc-004',
     fips: 'FIPS 206 (draft)',
     name: 'FN-DSA',
     formerly: 'FALCON',
@@ -100,6 +110,7 @@ const PQC_STANDARDS: PqcStandard[] = [
 
 const MIGRATION_PHASES: MigrationPhase[] = [
   {
+    id: 'phase-001',
     phase: 'Phase 1: Inventory & Assessment',
     status: 'deployed',
     tasks: [
@@ -110,6 +121,7 @@ const MIGRATION_PHASES: MigrationPhase[] = [
     ],
   },
   {
+    id: 'phase-002',
     phase: 'Phase 2: Hybrid Deployment',
     status: 'deployed',
     tasks: [
@@ -120,6 +132,7 @@ const MIGRATION_PHASES: MigrationPhase[] = [
     ],
   },
   {
+    id: 'phase-003',
     phase: 'Phase 3: Full PQC Migration',
     status: 'in-progress',
     tasks: [
@@ -130,6 +143,7 @@ const MIGRATION_PHASES: MigrationPhase[] = [
     ],
   },
   {
+    id: 'phase-004',
     phase: 'Phase 4: Validation & Certification',
     status: 'planned',
     tasks: [
@@ -142,18 +156,18 @@ const MIGRATION_PHASES: MigrationPhase[] = [
 ];
 
 const ECOSYSTEM_STATUS: EcoSystem[] = [
-  { system: 'Agent Mesh TLS', current: 'X25519 + AES-256-GCM', target: 'X25519MLKEM768 + AES-256-GCM', status: 'in-progress' },
-  { system: 'Proof Chain Signatures', current: 'Ed25519', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
-  { system: 'MCP Gateway Signing', current: 'Unsigned', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
-  { system: 'Agent Identity (DID)', current: 'API key / JWT', target: 'did:key + hybrid cert', status: 'deployed' },
-  { system: 'Tenant Identity (DID)', current: 'Clerk auth', target: 'did:web + hybrid cert', status: 'deployed' },
-  { system: 'Certificate Transparency', current: 'None', target: 'Merkle append-only log', status: 'deployed' },
-  { system: 'Evidence Ledger Encryption', current: 'AES-256-GCM / X25519', target: 'ML-KEM-1024 / AES-256-GCM', status: 'planned' },
-  { system: 'Covenant Attestation', current: 'ECDSA P-256', target: 'ML-DSA-65', status: 'deployed' },
-  { system: 'Agent Identity Tokens', current: 'Ed25519 keypairs', target: 'ML-DSA-44 keypairs', status: 'in-progress' },
-  { system: 'Archival Signing', current: 'Ed25519', target: 'SLH-DSA-256s', status: 'not-started' },
-  { system: 'MirrorEval Hash Commitments', current: 'SHA-256', target: 'SHA-256 (quantum-safe)', status: 'deployed' },
-  { system: 'Session Tokens', current: 'HS256 JWT', target: 'HS256 JWT (quantum-safe)', status: 'deployed' },
+  { id: 'eco-001', system: 'Agent Mesh TLS', current: 'X25519 + AES-256-GCM', target: 'X25519MLKEM768 + AES-256-GCM', status: 'in-progress' },
+  { id: 'eco-002', system: 'Proof Chain Signatures', current: 'Ed25519', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
+  { id: 'eco-003', system: 'MCP Gateway Signing', current: 'Unsigned', target: 'Ed25519 + ML-DSA-65 (hybrid)', status: 'deployed' },
+  { id: 'eco-004', system: 'Agent Identity (DID)', current: 'API key / JWT', target: 'did:key + hybrid cert', status: 'deployed' },
+  { id: 'eco-005', system: 'Tenant Identity (DID)', current: 'Clerk auth', target: 'did:web + hybrid cert', status: 'deployed' },
+  { id: 'eco-006', system: 'Certificate Transparency', current: 'None', target: 'Merkle append-only log', status: 'deployed' },
+  { id: 'eco-007', system: 'Evidence Ledger Encryption', current: 'AES-256-GCM / X25519', target: 'ML-KEM-1024 / AES-256-GCM', status: 'planned' },
+  { id: 'eco-008', system: 'Covenant Attestation', current: 'ECDSA P-256', target: 'ML-DSA-65', status: 'deployed' },
+  { id: 'eco-009', system: 'Agent Identity Tokens', current: 'Ed25519 keypairs', target: 'ML-DSA-44 keypairs', status: 'in-progress' },
+  { id: 'eco-010', system: 'Archival Signing', current: 'Ed25519', target: 'SLH-DSA-256s', status: 'not-started' },
+  { id: 'eco-011', system: 'MirrorEval Hash Commitments', current: 'SHA-256', target: 'SHA-256 (quantum-safe)', status: 'deployed' },
+  { id: 'eco-012', system: 'Session Tokens', current: 'HS256 JWT', target: 'HS256 JWT (quantum-safe)', status: 'deployed' },
 ];
 
 interface PQCLiveStatus {
@@ -165,8 +179,16 @@ interface PQCLiveStatus {
   merkleRoot?: string;
 }
 
+const STATUS_TRANSITIONS: Record<AlgorithmStatus, AlgorithmStatus[]> = {
+  'not-started': ['planned'],
+  'planned': ['in-progress', 'not-started'],
+  'in-progress': ['deployed', 'planned'],
+  'deployed': ['in-progress'],
+};
+
 export default function PqcReadiness() {
   const [expandedStandard, setExpandedStandard] = useState<string | null>(null);
+  const [mutating, setMutating] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<PQCLiveStatus | null>(null);
 
   useEffect(() => {
@@ -189,10 +211,32 @@ export default function PqcReadiness() {
       .catch(() => {});
   }, []);
 
-  const deployedCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'deployed').length;
-  const inProgressCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'in-progress').length;
-  const totalSystems = ECOSYSTEM_STATUS.length;
-  const readinessScore = Math.round(((deployedCount * 1 + inProgressCount * 0.5) / totalSystems) * 100);
+  const stdFetcher = useCallback(() => listPqcStandards(), []);
+  const ecoFetcher = useCallback(() => listPqcEcosystem(), []);
+  const phaseFetcher = useCallback(() => listPqcMigrationPhases(), []);
+  const { data: apiStandards, source, reload: reloadStandards } = useApiQuery<PqcStandard[]>(stdFetcher, 'standards', PQC_STANDARDS);
+  const { data: apiEcosystem, reload: reloadEcosystem } = useApiQuery<EcoSystem[]>(ecoFetcher, 'ecosystem', ECOSYSTEM_STATUS);
+  const { data: apiPhases } = useApiQuery<MigrationPhase[]>(phaseFetcher, 'phases', MIGRATION_PHASES);
+
+  const handleStatusChange = async (type: 'standard' | 'ecosystem', id: string, newStatus: AlgorithmStatus) => {
+    setMutating(id);
+    try {
+      if (type === 'standard') {
+        await patchPqcStandard(id, { status: newStatus });
+        reloadStandards();
+      } else {
+        await patchPqcEcosystemItem(id, { status: newStatus });
+        reloadEcosystem();
+      }
+    } catch {} finally {
+      setMutating(null);
+    }
+  };
+
+  const deployedCount = apiEcosystem.filter((s) => s.status === 'deployed').length;
+  const inProgressCount = apiEcosystem.filter((s) => s.status === 'in-progress').length;
+  const totalSystems = apiEcosystem.length;
+  const readinessScore = totalSystems > 0 ? Math.round(((deployedCount * 1 + inProgressCount * 0.5) / totalSystems) * 100) : 0;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -208,13 +252,16 @@ export default function PqcReadiness() {
             Quantum-resistant cryptography migration status across the a11oy governance ecosystem
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/20">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="text-[10px] text-white/20">a11oy orchestrated</span>
+        <div className="flex items-center gap-3">
+          <SourceBadge source={source} />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/20">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[10px] text-white/20">a11oy orchestrated</span>
+          </div>
         </div>
       </div>
 
@@ -276,13 +323,13 @@ export default function PqcReadiness() {
           <Key className="w-3.5 h-3.5 text-white/30" /> NIST Post-Quantum Standards
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {PQC_STANDARDS.map((std) => {
+          {apiStandards.map((std) => {
             const statusConfig = STATUS_CONFIG[std.status];
-            const expanded = expandedStandard === std.fips;
+            const expanded = expandedStandard === std.id;
             return (
               <button
-                key={std.fips}
-                onClick={() => setExpandedStandard(expanded ? null : std.fips)}
+                key={std.id}
+                onClick={() => setExpandedStandard(expanded ? null : std.id)}
                 className={cn(
                   'text-left bg-white/[0.02] border rounded-xl p-5 transition-all',
                   expanded ? 'border-white/[0.12]' : 'border-white/[0.06] hover:border-white/[0.10]',
@@ -332,6 +379,29 @@ export default function PqcReadiness() {
                         ))}
                       </div>
                     )}
+                    {STATUS_TRANSITIONS[std.status].length > 0 && (
+                      <div className="pt-2 border-t border-white/[0.06]">
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-white/20 mb-1.5">Transition Status</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {STATUS_TRANSITIONS[std.status].map((next) => (
+                            <button
+                              key={next}
+                              type="button"
+                              disabled={mutating === std.id}
+                              onClick={(e) => { e.stopPropagation(); handleStatusChange('standard', std.id, next); }}
+                              className={cn(
+                                'text-[10px] px-2 py-1 rounded border transition-colors disabled:opacity-50',
+                                STATUS_CONFIG[next].color,
+                                'border-white/10 hover:border-white/20 bg-white/[0.03]',
+                              )}
+                            >
+                              {mutating === std.id ? <Loader2 className="w-3 h-3 animate-spin inline mr-1" /> : null}
+                              → {STATUS_CONFIG[next].label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </button>
@@ -351,21 +421,36 @@ export default function PqcReadiness() {
             <div className="col-span-4">Target (PQC)</div>
             <div className="col-span-2">Status</div>
           </div>
-          {ECOSYSTEM_STATUS.map((sys) => {
+          {apiEcosystem.map((sys) => {
             const statusConfig = STATUS_CONFIG[sys.status];
             return (
               <div
-                key={sys.system}
+                key={sys.id}
                 className="grid grid-cols-12 gap-3 items-center px-5 py-3 border-b border-white/[0.03]"
               >
                 <div className="col-span-3 text-[12px] text-white/60">{sys.system}</div>
                 <div className="col-span-3 text-[11px] font-mono text-white/30">{sys.current}</div>
                 <div className="col-span-4 text-[11px] font-mono text-white/45">{sys.target}</div>
-                <div className="col-span-2">
+                <div className="col-span-2 flex items-center gap-2">
                   <span className={cn('flex items-center gap-1 text-[10px] font-mono', statusConfig.color)}>
                     <statusConfig.icon className="w-3 h-3" />
                     {statusConfig.label}
                   </span>
+                  {STATUS_TRANSITIONS[sys.status].length > 0 && (
+                    <div className="flex gap-1">
+                      {STATUS_TRANSITIONS[sys.status].map((next) => (
+                        <button
+                          key={next}
+                          type="button"
+                          disabled={mutating === sys.id}
+                          onClick={() => handleStatusChange('ecosystem', sys.id, next)}
+                          className="text-[8px] px-1.5 py-0.5 rounded border border-white/10 text-white/40 hover:text-white/60 hover:border-white/20 transition-colors disabled:opacity-50"
+                        >
+                          {mutating === sys.id ? <Loader2 className="w-2.5 h-2.5 animate-spin inline" /> : `→ ${STATUS_CONFIG[next].label}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -378,11 +463,11 @@ export default function PqcReadiness() {
           <Lock className="w-3.5 h-3.5 text-white/30" /> Migration Roadmap
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {MIGRATION_PHASES.map((phase) => {
+          {apiPhases.map((phase) => {
             const statusConfig = STATUS_CONFIG[phase.status];
             return (
               <div
-                key={phase.phase}
+                key={phase.id}
                 className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5"
               >
                 <div className="flex items-center justify-between mb-3">

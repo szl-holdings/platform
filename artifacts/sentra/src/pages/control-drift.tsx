@@ -6,9 +6,10 @@ import {
 } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { Activity, CheckCircle2, FileText, ShieldAlert } from 'lucide-react';
-import { useState } from 'react';
-import { sentraTwin } from '@/data/sentra-twin';
-import { DataProvenance } from '@/lib/data-provenance';
+import { useCallback, useState } from 'react';
+import { sentraTwin as fallbackTwin, type ControlDrift as ControlDriftType } from '@/data/sentra-twin';
+import { listCyberTwinControlDrifts } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const ACCENT = '#f5f5f5';
 const DRIFT_EVIDENCE: EvidenceSource[] = [
@@ -33,20 +34,23 @@ const DRIFT_EVIDENCE: EvidenceSource[] = [
 export default function ControlDrift() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
 
-  const families = [
-    { name: 'Identify', status: 'compliant', count: 12, drift: 0 },
-    { name: 'Protect', status: 'compliant', count: 45, drift: 0 },
-    { name: 'Detect', status: 'remediation_pending', count: 18, drift: 1 },
-    { name: 'Respond', status: 'drift_detected', count: 8, drift: 2 },
-    { name: 'Recover', status: 'drift_detected', count: 14, drift: 1 },
-  ];
+  const fetcher = useCallback(() => listCyberTwinControlDrifts(), []);
+  const { data: controlDrifts, source } = useApiQuery<ControlDriftType[]>(fetcher, 'controlDrifts', fallbackTwin.controlDrifts);
+
+  const familyNames = ['Identify', 'Protect', 'Detect', 'Respond', 'Recover'] as const;
+  const families = familyNames.map((name) => {
+    const matching = controlDrifts.filter((d) => d.family === name);
+    const driftCount = matching.filter((d) => d.status === 'drift_detected').length;
+    const totalCount = matching.length || (name === 'Identify' ? 12 : name === 'Protect' ? 45 : name === 'Detect' ? 18 : name === 'Respond' ? 8 : 14);
+    return { name, status: driftCount > 0 ? 'drift_detected' : 'compliant', count: totalCount, drift: driftCount };
+  });
 
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-3xl font-display font-bold text-slate-100">Control Drift</h1>
-          <DataProvenance source="seed" label="Demo Data" />
+          <SourceBadge source={source} />
         </div>
         <p className="text-slate-400 mt-1">
           NIST CSF control family monitoring and drift detection
@@ -76,7 +80,7 @@ export default function ControlDrift() {
         <h2 className="text-lg font-display font-bold text-slate-200">Active Drift Indicators</h2>
 
         <div className="space-y-4">
-          {sentraTwin.controlDrifts.map((drift, i) => (
+          {controlDrifts.map((drift, i) => (
             <div key={i} className="sentra-panel p-6">
               <div className="flex justify-between items-start">
                 <div className="flex gap-4 flex-1">

@@ -1314,9 +1314,170 @@ export function seedAllDomainStores(): void {
   seedHuntFleet();
   seedSimulationRuns();
   seedEvidenceRecords();
+  seedCrisisScenarios();
+  seedMicrosystemIntegrity();
+  seedPhotonicSensors();
+  seedThreatHorizonVectors();
+  seedBioSubstrates();
 }
 
-seedAllDomainStores();
+export type SideChannelType = 'electromagnetic' | 'power' | 'timing' | 'cache' | 'acoustic';
+export type AttestationResult = 'pass' | 'fail' | 'degraded' | 'unavailable';
+export interface MicrosystemIntegrityRecord {
+  id: string;
+  device: string;
+  deviceType: 'plc' | 'rtu' | 'sensor' | 'gateway' | 'hmi' | 'edge_compute' | 'fpga';
+  firmwareVersion: string;
+  firmwareHash: string;
+  attestationResult: AttestationResult;
+  rootOfTrustType: 'tpm_2.0' | 'secure_enclave' | 'puf' | 'dice' | 'none';
+  lastAttestationAt: string;
+  sideChannelAlerts: Array<{ type: SideChannelType; detectedAt: string; confidence: number; description: string }>;
+  anomalyScore: number;
+  zone: string;
+  patchLevel: 'current' | 'behind' | 'critical_missing';
+}
+
+export type SensorHealth = 'optimal' | 'degraded' | 'calibration_needed' | 'offline' | 'compromised';
+export interface PhotonicSensorNode {
+  id: string;
+  name: string;
+  type: 'qkd_transmitter' | 'qkd_receiver' | 'photonic_switch' | 'fiber_tap_detector' | 'quantum_repeater' | 'photonic_interconnect';
+  location: string;
+  wavelength: string;
+  health: SensorHealth;
+  signalToNoiseRatio: number;
+  quantumBitErrorRate: number;
+  eavesdroppingDetected: boolean;
+  lastCalibrationAt: string;
+  driftPercentage: number;
+  linkedChannelId: string;
+  throughputGbps: number;
+}
+
+export type ThreatMaturity = 'theoretical' | 'lab_demonstrated' | 'weaponizable' | 'actively_exploited';
+export interface ThreatHorizonVector {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  maturity: ThreatMaturity;
+  yearsToWeaponization: number | null;
+  darpaProgram: string | null;
+  mitigationAvailable: boolean;
+  impactSeverity: 'catastrophic' | 'critical' | 'high' | 'medium' | 'low';
+  affectedSectors: string[];
+  lastUpdatedAt: string;
+  sources: string[];
+}
+
+export type BioIntegrity = 'nominal' | 'degraded' | 'contaminated' | 'expired' | 'compromised';
+export interface BioSubstrateAsset {
+  id: string;
+  name: string;
+  type: string;
+  substrate: string;
+  integrity: BioIntegrity;
+  temperatureCelsius: number;
+  temperatureRange: [number, number];
+  contaminationRisk: number;
+  dataExfiltrationVector: string | null;
+  encryptionMethod: string;
+  lastBioAssayAt: string;
+  operationalHours: number;
+  maxLifespanHours: number;
+  location: string;
+}
+
+export interface CrisisScenarioRecord {
+  id: string;
+  title: string;
+  subtitle: string;
+  category: string;
+  threatActor: string;
+  adversaryProfile: string;
+  sourceRef: string;
+  difficulty: string;
+  estimatedMinutes: number;
+  roles: string[];
+  mitreTags: Array<{ id: string; name: string; tactic: string }>;
+  background: string;
+  phases: Array<Record<string, unknown>>;
+}
+
+export const crisisScenarioStore = new Map<string, CrisisScenarioRecord>();
+
+function seedCrisisScenarios() {
+  const items: CrisisScenarioRecord[] = [
+    { id: 'apt28-ransomware-campaign', title: 'Operation Phantom Grid', subtitle: 'APT28 Ransomware with Data Exfiltration', category: 'ransomware', threatActor: 'APT28', adversaryProfile: 'GRU Unit 26165', sourceRef: 'MITRE ATT&CK G0007', difficulty: 'nation-state', estimatedMinutes: 45, roles: ['CISO', 'Legal', 'Comms', 'CEO'], mitreTags: [{ id: 'T1566.001', name: 'Spearphishing Attachment', tactic: 'Initial Access' }, { id: 'T1486', name: 'Data Encrypted for Impact', tactic: 'Impact' }], background: 'Your organization, a NATO-aligned logistics firm, has been targeted.', phases: [{ id: 'ph1-detection', order: 1, title: 'Initial Detection' }, { id: 'ph2-triage', order: 2, title: 'Incident Triage' }, { id: 'ph3-containment', order: 3, title: 'Containment' }] },
+    { id: 'apt41-supply-chain', title: 'Operation Shadow Pipe', subtitle: 'APT41 Supply Chain Compromise', category: 'supply-chain', threatActor: 'APT41', adversaryProfile: 'Chinese MSS-linked', sourceRef: 'MITRE ATT&CK G0096', difficulty: 'nation-state', estimatedMinutes: 50, roles: ['CISO', 'Legal', 'CEO'], mitreTags: [{ id: 'T1195.002', name: 'Supply Chain Compromise', tactic: 'Initial Access' }], background: 'A third-party software update has been compromised.', phases: [{ id: 'ph1', order: 1, title: 'Anomaly Detection' }, { id: 'ph2', order: 2, title: 'Root Cause' }, { id: 'ph3', order: 3, title: 'Quarantine' }] },
+    { id: 'lazarus-crypto', title: 'Operation Jade Harvest', subtitle: 'Lazarus Cryptocurrency Theft', category: 'bec', threatActor: 'Lazarus', adversaryProfile: 'DPRK RGB Bureau 121', sourceRef: 'MITRE ATT&CK G0032', difficulty: 'advanced', estimatedMinutes: 40, roles: ['CISO', 'Legal', 'Comms'], mitreTags: [{ id: 'T1204.002', name: 'User Execution', tactic: 'Execution' }], background: 'Anomalous cryptocurrency transfers detected.', phases: [{ id: 'ph1', order: 1, title: 'Alert Triage' }, { id: 'ph2', order: 2, title: 'Forensics' }] },
+    { id: 'muddywater-ot', title: 'Operation Turbine Breach', subtitle: 'MuddyWater OT/ICS Attack', category: 'ot-ics', threatActor: 'MuddyWater', adversaryProfile: 'Iran MOIS', sourceRef: 'MITRE ATT&CK G0069', difficulty: 'advanced', estimatedMinutes: 55, roles: ['CISO', 'CEO'], mitreTags: [{ id: 'T0855', name: 'Unauthorized Command Message', tactic: 'Impair Process Control' }], background: 'SCADA anomalies detected in industrial control systems.', phases: [{ id: 'ph1', order: 1, title: 'OT Alert' }, { id: 'ph2', order: 2, title: 'Network Isolation' }] },
+    { id: 'bec-wire-fraud', title: 'Operation Corner Office', subtitle: 'Business Email Compromise', category: 'bec', threatActor: 'CISA-Generic', adversaryProfile: 'Organized crime', sourceRef: 'FBI IC3-2024', difficulty: 'intermediate', estimatedMinutes: 30, roles: ['CISO', 'Legal', 'CEO'], mitreTags: [{ id: 'T1534', name: 'Internal Spearphishing', tactic: 'Lateral Movement' }], background: 'CFO received wire transfer instructions from compromised email.', phases: [{ id: 'ph1', order: 1, title: 'Email Analysis' }] },
+    { id: 'insider-threat', title: 'Operation Glass House', subtitle: 'Privileged Insider Data Theft', category: 'insider', threatActor: 'Insider', adversaryProfile: 'Privileged employee', sourceRef: 'CERT Insider Threat Center', difficulty: 'intermediate', estimatedMinutes: 35, roles: ['CISO', 'Legal', 'Comms'], mitreTags: [{ id: 'T1567', name: 'Exfiltration Over Web Service', tactic: 'Exfiltration' }], background: 'DLP alerts triggered by mass file downloads from a senior engineer.', phases: [{ id: 'ph1', order: 1, title: 'DLP Alert' }, { id: 'ph2', order: 2, title: 'Investigation' }] },
+    { id: 'cloud-account-compromise', title: 'Operation Cloud Breach', subtitle: 'Cloud Account Takeover', category: 'cloud', threatActor: 'CISA-Generic', adversaryProfile: 'Unknown threat actor', sourceRef: 'CISA Cloud Advisory', difficulty: 'intermediate', estimatedMinutes: 35, roles: ['CISO', 'Legal'], mitreTags: [{ id: 'T1078.004', name: 'Cloud Accounts', tactic: 'Initial Access' }], background: 'Anomalous cloud API calls detected from unfamiliar geolocation.', phases: [{ id: 'ph1', order: 1, title: 'API Anomaly' }] },
+    { id: 'vendor-breach-cascade', title: 'Operation Cascade Failure', subtitle: 'Third-Party Vendor Breach', category: 'supply-chain', threatActor: 'CISA-Generic', adversaryProfile: 'Unknown', sourceRef: 'NIST SP 800-161r1', difficulty: 'advanced', estimatedMinutes: 45, roles: ['CISO', 'Legal', 'CEO'], mitreTags: [{ id: 'T1199', name: 'Trusted Relationship', tactic: 'Initial Access' }], background: 'Critical vendor disclosed a breach affecting your data.', phases: [{ id: 'ph1', order: 1, title: 'Vendor Notification' }] },
+    { id: 'deepfake-social-eng', title: 'Operation Mirror Voice', subtitle: 'AI Deepfake Social Engineering', category: 'deepfake', threatActor: 'APT41', adversaryProfile: 'State-sponsored with AI capability', sourceRef: 'FBI PSA I-031224-PSA', difficulty: 'advanced', estimatedMinutes: 40, roles: ['CISO', 'Comms', 'CEO'], mitreTags: [{ id: 'T1598', name: 'Phishing for Information', tactic: 'Reconnaissance' }], background: 'CEO received a deepfake video call requesting urgent wire transfer.', phases: [{ id: 'ph1', order: 1, title: 'Deepfake Detection' }] },
+    { id: 'multi-vector-combined', title: 'Operation Hydra Strike', subtitle: 'Coordinated Multi-Vector Attack', category: 'multi-vector', threatActor: 'APT28', adversaryProfile: 'GRU combined operations', sourceRef: 'NSA/CISA Joint Advisory', difficulty: 'nation-state', estimatedMinutes: 60, roles: ['CISO', 'Legal', 'Comms', 'CEO'], mitreTags: [{ id: 'T1190', name: 'Exploit Public-Facing Application', tactic: 'Initial Access' }, { id: 'T1486', name: 'Data Encrypted for Impact', tactic: 'Impact' }], background: 'Simultaneous attacks on multiple vectors detected.', phases: [{ id: 'ph1', order: 1, title: 'Multi-Vector Alert' }, { id: 'ph2', order: 2, title: 'Prioritization' }, { id: 'ph3', order: 3, title: 'Coordinated Response' }] },
+  ];
+  for (const s of items) crisisScenarioStore.set(s.id, s);
+}
+
+export const microsystemIntegrityStore = new Map<string, MicrosystemIntegrityRecord>();
+export const photonicSensorStore = new Map<string, PhotonicSensorNode>();
+export const threatHorizonStore = new Map<string, ThreatHorizonVector>();
+export const bioSubstrateStore = new Map<string, BioSubstrateAsset>();
+
+function seedMicrosystemIntegrity() {
+  const items: MicrosystemIntegrityRecord[] = [
+    { id: 'mir-001', device: 'PLC-Reactor-1', deviceType: 'plc', firmwareVersion: '4.2.1-sec', firmwareHash: 'sha256:a3f8c1d...7e2b', attestationResult: 'pass', rootOfTrustType: 'tpm_2.0', lastAttestationAt: hoursAgo(2), sideChannelAlerts: [], anomalyScore: 12, zone: 'Zone 4 — Reactor Control', patchLevel: 'current' },
+    { id: 'mir-002', device: 'RTU-Substation-7', deviceType: 'rtu', firmwareVersion: '3.8.0', firmwareHash: 'sha256:e7d2b4f...1c9a', attestationResult: 'fail', rootOfTrustType: 'none', lastAttestationAt: hoursAgo(6), sideChannelAlerts: [{ type: 'electromagnetic', detectedAt: hoursAgo(4), confidence: 78, description: 'Anomalous EM emissions detected during key exchange — possible side-channel probe' }], anomalyScore: 84, zone: 'Zone 6 — Substation Grid', patchLevel: 'critical_missing' },
+    { id: 'mir-003', device: 'GW-Edge-Compute-02', deviceType: 'edge_compute', firmwareVersion: '2.1.4-hardened', firmwareHash: 'sha256:b4c9e1a...3d5f', attestationResult: 'pass', rootOfTrustType: 'secure_enclave', lastAttestationAt: hoursAgo(1), sideChannelAlerts: [], anomalyScore: 8, zone: 'Zone 3 — Edge Processing', patchLevel: 'current' },
+    { id: 'mir-004', device: 'HMI-Panel-A3', deviceType: 'hmi', firmwareVersion: '5.0.2', firmwareHash: 'sha256:f1a2b3c...8d4e', attestationResult: 'degraded', rootOfTrustType: 'dice', lastAttestationAt: hoursAgo(12), sideChannelAlerts: [{ type: 'timing', detectedAt: hoursAgo(8), confidence: 62, description: 'Timing variance in authentication handshake — potential oracle attack vector' }], anomalyScore: 56, zone: 'Zone 2 — Operator Floor', patchLevel: 'behind' },
+    { id: 'mir-005', device: 'FPGA-Accel-Node-1', deviceType: 'fpga', firmwareVersion: '1.0.3-bitstream', firmwareHash: 'sha256:9c8d7e6...2f1a', attestationResult: 'pass', rootOfTrustType: 'puf', lastAttestationAt: hoursAgo(3), sideChannelAlerts: [], anomalyScore: 5, zone: 'Zone 1 — Data Center', patchLevel: 'current' },
+    { id: 'mir-006', device: 'Sensor-Array-Temp-12', deviceType: 'sensor', firmwareVersion: '1.4.0', firmwareHash: 'sha256:d5e6f7a...0b1c', attestationResult: 'unavailable', rootOfTrustType: 'none', lastAttestationAt: daysAgo(30), sideChannelAlerts: [{ type: 'power', detectedAt: daysAgo(2), confidence: 45, description: 'Unusual power draw pattern during idle state — monitoring for DPA signature' }], anomalyScore: 41, zone: 'Zone 5 — Environmental', patchLevel: 'behind' },
+    { id: 'mir-007', device: 'PLC-Boiler-2', deviceType: 'plc', firmwareVersion: '4.1.0', firmwareHash: 'sha256:c2d3e4f...5a6b', attestationResult: 'fail', rootOfTrustType: 'tpm_2.0', lastAttestationAt: hoursAgo(1), sideChannelAlerts: [{ type: 'cache', detectedAt: hoursAgo(0.5), confidence: 91, description: 'Cache timing attack signature detected — Flush+Reload pattern on crypto routines' }], anomalyScore: 92, zone: 'Zone 4 — Boiler Control', patchLevel: 'critical_missing' },
+  ];
+  for (const r of items) microsystemIntegrityStore.set(r.id, r);
+}
+
+function seedPhotonicSensors() {
+  const items: PhotonicSensorNode[] = [
+    { id: 'psn-001', name: 'QKD-TX-Primary', type: 'qkd_transmitter', location: 'DC-East — Quantum Lab', wavelength: '1550nm C-Band', health: 'optimal', signalToNoiseRatio: 34.2, quantumBitErrorRate: 0.8, eavesdroppingDetected: false, lastCalibrationAt: daysAgo(3), driftPercentage: 0.3, linkedChannelId: 'qkd-ch-alpha', throughputGbps: 1.2 },
+    { id: 'psn-002', name: 'QKD-RX-Primary', type: 'qkd_receiver', location: 'DC-West — Quantum Lab', wavelength: '1550nm C-Band', health: 'optimal', signalToNoiseRatio: 31.8, quantumBitErrorRate: 1.1, eavesdroppingDetected: false, lastCalibrationAt: daysAgo(3), driftPercentage: 0.5, linkedChannelId: 'qkd-ch-alpha', throughputGbps: 1.2 },
+    { id: 'psn-003', name: 'Photonic-SW-Core-1', type: 'photonic_switch', location: 'DC-East — Rack 14', wavelength: '1310nm O-Band', health: 'degraded', signalToNoiseRatio: 22.1, quantumBitErrorRate: 3.4, eavesdroppingDetected: false, lastCalibrationAt: daysAgo(18), driftPercentage: 4.7, linkedChannelId: 'ph-backbone-01', throughputGbps: 25.6 },
+    { id: 'psn-004', name: 'Fiber-Tap-Det-Perimeter', type: 'fiber_tap_detector', location: 'Building Perimeter — MDF', wavelength: '1550nm C-Band', health: 'compromised', signalToNoiseRatio: 8.4, quantumBitErrorRate: 12.7, eavesdroppingDetected: true, lastCalibrationAt: daysAgo(1), driftPercentage: 18.3, linkedChannelId: 'fiber-perim-01', throughputGbps: 0.0 },
+    { id: 'psn-005', name: 'Q-Repeater-Mid-01', type: 'quantum_repeater', location: 'Relay Station — 42km Mark', wavelength: '1550nm C-Band', health: 'calibration_needed', signalToNoiseRatio: 18.9, quantumBitErrorRate: 5.2, eavesdroppingDetected: false, lastCalibrationAt: daysAgo(45), driftPercentage: 8.1, linkedChannelId: 'qkd-ch-alpha', throughputGbps: 0.8 },
+    { id: 'psn-006', name: 'PIC-Interconnect-Rack7', type: 'photonic_interconnect', location: 'DC-East — Rack 7', wavelength: '850nm VCSEL', health: 'optimal', signalToNoiseRatio: 28.5, quantumBitErrorRate: 0.4, eavesdroppingDetected: false, lastCalibrationAt: daysAgo(7), driftPercentage: 0.9, linkedChannelId: 'pic-rack-cluster', throughputGbps: 51.2 },
+  ];
+  for (const n of items) photonicSensorStore.set(n.id, n);
+}
+
+function seedThreatHorizonVectors() {
+  const items: ThreatHorizonVector[] = [
+    { id: 'thv-001', category: 'quantum_decryption', title: 'Cryptographically Relevant Quantum Computer (CRQC)', description: 'A fault-tolerant quantum computer capable of running Shor\'s algorithm to break RSA-2048 and ECDSA-P256.', maturity: 'lab_demonstrated', yearsToWeaponization: 7, darpaProgram: 'DARPA US2QC', mitigationAvailable: true, impactSeverity: 'catastrophic', affectedSectors: ['Financial Services', 'Government', 'Defense', 'Healthcare', 'Critical Infrastructure'], lastUpdatedAt: daysAgo(2), sources: ['NIST IR 8413', 'NSA CNSA 2.0', 'DARPA US2QC Program'] },
+    { id: 'thv-002', category: 'photonic_side_channel', title: 'Photonic Interconnect Eavesdropping via Fiber Bend Coupling', description: 'Exploitation of evanescent field leakage in bent optical fibers to intercept data.', maturity: 'lab_demonstrated', yearsToWeaponization: 3, darpaProgram: 'DARPA LUMOS', mitigationAvailable: true, impactSeverity: 'high', affectedSectors: ['Telecommunications', 'Data Centers', 'Defense'], lastUpdatedAt: daysAgo(8), sources: ['IEEE Photonics Journal 2025', 'DARPA LUMOS Reports'] },
+    { id: 'thv-003', category: 'bio_exploit', title: 'DNA Storage Payload Injection via Synthesis Contamination', description: 'Adversarial nucleotide sequences embedded during DNA synthesis that encode executable payloads.', maturity: 'lab_demonstrated', yearsToWeaponization: 5, darpaProgram: 'DARPA Safe Genes', mitigationAvailable: false, impactSeverity: 'critical', affectedSectors: ['Biotech', 'Defense', 'Healthcare'], lastUpdatedAt: daysAgo(15), sources: ['USENIX Security 2025', 'DARPA Safe Genes'] },
+    { id: 'thv-004', category: 'microsystem_supply_chain', title: 'Hardware Trojan Insertion at Untrusted Foundry', description: 'Insertion of malicious logic gates during semiconductor fabrication at untrusted foundries.', maturity: 'weaponizable', yearsToWeaponization: null, darpaProgram: 'DARPA SHIELD', mitigationAvailable: true, impactSeverity: 'catastrophic', affectedSectors: ['Defense', 'Critical Infrastructure', 'Automotive'], lastUpdatedAt: daysAgo(5), sources: ['DARPA SHIELD Final Report', 'NIST SP 800-161r1'] },
+    { id: 'thv-005', category: 'cryogenic_attack', title: 'Cold Boot Attack on Cryogenic Quantum Control Electronics', description: 'Physical attack exploiting data remanence in SRAM/DRAM of cryogenic control systems.', maturity: 'theoretical', yearsToWeaponization: 10, darpaProgram: 'DARPA ONISQ', mitigationAvailable: false, impactSeverity: 'high', affectedSectors: ['Quantum Computing', 'Defense', 'Research'], lastUpdatedAt: daysAgo(20), sources: ['CCC Quantum Security Workshop 2025'] },
+    { id: 'thv-006', category: 'ai_hardware_poisoning', title: 'Adversarial Weight Injection via Compromised AI Accelerator Firmware', description: 'Manipulation of neural network weights during inference by compromised firmware on AI accelerators.', maturity: 'weaponizable', yearsToWeaponization: null, darpaProgram: 'DARPA GARD', mitigationAvailable: true, impactSeverity: 'critical', affectedSectors: ['Defense', 'Autonomous Systems', 'Critical Infrastructure'], lastUpdatedAt: daysAgo(3), sources: ['DARPA GARD Phase 3', 'NDSS 2026'] },
+    { id: 'thv-007', category: 'quantum_decryption', title: 'Harvest Now, Decrypt Later (HNDL) Campaigns', description: 'State-sponsored actors intercepting and storing encrypted traffic for future quantum decryption.', maturity: 'actively_exploited', yearsToWeaponization: null, darpaProgram: null, mitigationAvailable: true, impactSeverity: 'critical', affectedSectors: ['Government', 'Defense', 'Financial Services', 'Telecommunications'], lastUpdatedAt: daysAgo(1), sources: ['NSA Cybersecurity Advisory 2025', 'CISA Quantum Readiness'] },
+    { id: 'thv-008', category: 'photonic_side_channel', title: 'QKD Channel Blinding Attack', description: 'Detector blinding attack on QKD single-photon detectors using bright illumination.', maturity: 'weaponizable', yearsToWeaponization: null, darpaProgram: 'DARPA QUIST', mitigationAvailable: true, impactSeverity: 'critical', affectedSectors: ['Telecommunications', 'Government', 'Defense'], lastUpdatedAt: daysAgo(10), sources: ['Nature Photonics 2024', 'ETSI QKD Security Proofs'] },
+  ];
+  for (const v of items) threatHorizonStore.set(v.id, v);
+}
+
+function seedBioSubstrates() {
+  const items: BioSubstrateAsset[] = [
+    { id: 'bsa-001', name: 'DNA-Store-Archive-Alpha', type: 'dna_storage', substrate: 'Synthetic oligonucleotide array', integrity: 'nominal', temperatureCelsius: -20, temperatureRange: [-25, -15], contaminationRisk: 3, dataExfiltrationVector: null, encryptionMethod: 'AES-256-GCM + PQC envelope', lastBioAssayAt: daysAgo(14), operationalHours: 8760, maxLifespanHours: 87600, location: 'Bio-Secure Vault — Sub-Level 2' },
+    { id: 'bsa-002', name: 'Protein-Compute-Node-1', type: 'protein_compute', substrate: 'Engineered enzyme cascade (lysate)', integrity: 'degraded', temperatureCelsius: 37.2, temperatureRange: [35, 39], contaminationRisk: 28, dataExfiltrationVector: 'Metabolic byproduct analysis could reveal computation patterns', encryptionMethod: 'Molecular obfuscation layer v2', lastBioAssayAt: daysAgo(3), operationalHours: 2160, maxLifespanHours: 4320, location: 'Bio-Compute Lab — Room 4C' },
+    { id: 'bsa-003', name: 'BioSensor-Grid-Perimeter', type: 'biosensor_array', substrate: 'Aptamer-functionalized graphene FET', integrity: 'nominal', temperatureCelsius: 22.1, temperatureRange: [18, 28], contaminationRisk: 5, dataExfiltrationVector: null, encryptionMethod: 'TLS 1.3 + CRYSTALS-Kyber hybrid', lastBioAssayAt: daysAgo(7), operationalHours: 4380, maxLifespanHours: 26280, location: 'Facility Perimeter — Bio-Chem Detection Ring' },
+    { id: 'bsa-004', name: 'Organic-Circuit-Prototype-2', type: 'organic_circuit', substrate: 'Conjugated polymer (P3HT/PCBM)', integrity: 'compromised', temperatureCelsius: 24.8, temperatureRange: [20, 30], contaminationRisk: 67, dataExfiltrationVector: 'UV fluorescence signature leaks gate state information', encryptionMethod: 'None — research prototype', lastBioAssayAt: hoursAgo(12), operationalHours: 720, maxLifespanHours: 2160, location: 'R&D Lab — Organic Electronics Wing' },
+    { id: 'bsa-005', name: 'Neural-Interface-Eval-Unit', type: 'neural_interface', substrate: 'MEA (multi-electrode array) on flexible substrate', integrity: 'nominal', temperatureCelsius: 36.8, temperatureRange: [36, 38], contaminationRisk: 8, dataExfiltrationVector: null, encryptionMethod: 'End-to-end neural signal encryption (NSE-1)', lastBioAssayAt: daysAgo(2), operationalHours: 1440, maxLifespanHours: 8760, location: 'Neurotech Eval Lab — Faraday Room' },
+    { id: 'bsa-006', name: 'MolSwitch-Logic-Gate-Array', type: 'molecular_switch', substrate: 'Rotaxane-based molecular machines', integrity: 'degraded', temperatureCelsius: 4.1, temperatureRange: [2, 8], contaminationRisk: 15, dataExfiltrationVector: 'Spectroscopic readout of switch states possible at close range', encryptionMethod: 'Physical isolation + Faraday cage', lastBioAssayAt: daysAgo(5), operationalHours: 3600, maxLifespanHours: 17520, location: 'Molecular Computing Lab — Clean Room B' },
+  ];
+  for (const b of items) bioSubstrateStore.set(b.id, b);
+}
 
 export const seedIds = new Set<string>();
 
@@ -1342,11 +1503,15 @@ export function recordSeedIds(): void {
     arenaArchitectsStore, arenaEngagementsStore, arenaSubmissionsStore,
     huntFleetStore, simulationRunsStore,
     evidenceRecordsStore,
+    crisisScenarioStore,
+    microsystemIntegrityStore, photonicSensorStore,
+    threatHorizonStore, bioSubstrateStore,
   ];
   for (const store of allStores) {
     for (const key of store.keys()) seedIds.add(key);
   }
 }
+seedAllDomainStores();
 recordSeedIds();
 
 export function itemSource(id: string): 'seed' | 'live' {

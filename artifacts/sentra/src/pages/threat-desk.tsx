@@ -5,12 +5,14 @@ import {
   RefreshCw,
   Shield,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  assetTwins,
+  assetTwins as fallbackAssets,
   type ThreatTwin,
-  threatTwins,
+  threatTwins as fallbackThreats,
 } from '@/data/threat-twin';
+import { listThreatTwinAssets, listThreatTwinThreats } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const ACCENT = 'hsl(220 72% 56%)';
 const ACCENT_DIM = 'hsl(220 72% 40%)';
@@ -147,6 +149,11 @@ function ThreatCard({
 }
 
 export default function ThreatDesk() {
+  const threatFetcher = useCallback(() => listThreatTwinThreats(), []);
+  const assetFetcher = useCallback(() => listThreatTwinAssets(), []);
+  const { data: threatTwins, source } = useApiQuery<ThreatTwin[]>(threatFetcher, 'threats', fallbackThreats);
+  const { data: assetTwins } = useApiQuery<typeof fallbackAssets>(assetFetcher, 'assets', fallbackAssets);
+
   const [selectedId, setSelectedId] = useState(threatTwins[0]?.id ?? null);
   const threat = threatTwins.find((t) => t.id === selectedId) ?? threatTwins[0];
   const affectedAssets = threat

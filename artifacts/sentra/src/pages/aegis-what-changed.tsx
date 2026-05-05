@@ -8,8 +8,10 @@ import {
   Shield,
   Target,
 } from 'lucide-react';
-import { useState } from 'react';
-import { type AegisWhatChangedEvent, aegisWhatChanged } from '@/data/threat-twin';
+import { useCallback, useState } from 'react';
+import { type AegisWhatChangedEvent, aegisWhatChanged as fallbackEvents } from '@/data/threat-twin';
+import { listThreatTwinActions } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const ACCENT = 'hsl(220 72% 56%)';
 
@@ -120,6 +122,9 @@ function EventCard({ event }: { event: AegisWhatChangedEvent }) {
 export default function AegisWhatChanged() {
   const [filter, setFilter] = useState('all');
   const [entityFilter, setEntityFilter] = useState('all');
+
+  const fetcher = useCallback(() => listThreatTwinActions(), []);
+  const { data: aegisWhatChanged, source } = useApiQuery<AegisWhatChangedEvent[]>(fetcher, 'actions', fallbackEvents);
 
   const filtered = aegisWhatChanged.filter((e) => {
     if (filter !== 'all' && e.severity !== filter) return false;

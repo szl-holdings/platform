@@ -1604,3 +1604,453 @@ export interface ConvergencePulse {
 export function getConvergencePulse() {
   return getJson<ConvergencePulse>('/ouroboros/a11oy/pulse');
 }
+// ── Generic CRUD helpers ────────────────────────────────────────────────────
+
+async function postJson<T>(path: string, body: unknown): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: err.error ?? `Request failed (${res.status})` };
+    }
+    return { ok: true, data: (await res.json()) as T };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+async function patchJson<T>(path: string, body: unknown): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method: 'PATCH',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true, data: (await res.json()) as T };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+async function deleteJson(path: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method: 'DELETE',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// ── Research Intelligence ───────────────────────────────────────────────────
+
+export function listResearchProjects() {
+  return getJson<{ projects: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/research/projects');
+}
+export function createResearchProject(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/research/projects', body);
+}
+export function patchResearchProject(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/research/projects/${encodeURIComponent(id)}`, body);
+}
+export function deleteResearchProject(id: string) {
+  return deleteJson(`/sentra/research/projects/${encodeURIComponent(id)}`);
+}
+
+export function listResearchExperiments() {
+  return getJson<{ experiments: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/research/experiments');
+}
+export function createResearchExperiment(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/research/experiments', body);
+}
+export function patchResearchExperiment(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/research/experiments/${encodeURIComponent(id)}`, body);
+}
+
+export function listResearchModels() {
+  return getJson<{ models: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/research/models');
+}
+export function createResearchModel(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/research/models', body);
+}
+export function patchResearchModel(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/research/models/${encodeURIComponent(id)}`, body);
+}
+
+export function listResearchInsights() {
+  return getJson<{ insights: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/research/insights');
+}
+export function createResearchInsight(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/research/insights', body);
+}
+
+// ── Threat Twin ─────────────────────────────────────────────────────────────
+
+export function listThreatTwinAssets() {
+  return getJson<{ assets: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/assets');
+}
+export function listThreatTwinThreats() {
+  return getJson<{ threats: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/threats');
+}
+export function listThreatTwinExposures() {
+  return getJson<{ exposures: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/exposures');
+}
+export function listThreatTwinReadiness() {
+  return getJson<{ readiness: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/readiness');
+}
+export function listThreatTwinActions() {
+  return getJson<{ actions: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/actions');
+}
+export function listThreatTwinActors() {
+  return getJson<{ actors: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/actors');
+}
+export function listThreatTwinIndicators() {
+  return getJson<{ indicators: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/indicators');
+}
+export function listThreatTwinContainment() {
+  return getJson<{ workflows: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-twin/containment-workflows');
+}
+export function patchThreatTwinThreat(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/threat-twin/threats/${encodeURIComponent(id)}`, body);
+}
+export function patchThreatTwinExposure(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/threat-twin/exposures/${encodeURIComponent(id)}`, body);
+}
+
+// ── Cyber Twin ──────────────────────────────────────────────────────────────
+
+export interface CyberTwinAsset {
+  id: string;
+  name: string;
+  type: 'OT' | 'IT' | 'IoT';
+  criticality: 'critical' | 'high' | 'medium' | 'low';
+  exposureScore: number;
+  backupStatus: 'current' | 'stale' | 'none';
+  lastBackupAt?: string;
+  controlGaps: string[];
+  status: 'active' | 'compromised' | 'isolated';
+}
+
+export interface CyberTwinIncident {
+  id: string;
+  title: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'active' | 'contained' | 'resolved';
+  mitreStage: string;
+  detectedAt: string;
+  description: string;
+  affectedAssets: string[];
+}
+
+export interface CyberTwinControlDrift {
+  id: string;
+  family: 'Identify' | 'Protect' | 'Detect' | 'Respond' | 'Recover';
+  control: string;
+  status: 'compliant' | 'drift_detected' | 'remediation_pending';
+  evidence: string;
+}
+
+export interface CyberTwinPosture {
+  recoveryPosture: number;
+  financialExposure: number;
+  totalAssets: number;
+  compromised: number;
+  activeIncidents: number;
+  driftsDetected: number;
+}
+
+export function listCyberTwinAssets() {
+  return getJson<{ assets: CyberTwinAsset[]; source: 'live' | 'seed' }>('/sentra/cyber-twin/assets');
+}
+export function listCyberTwinIncidents() {
+  return getJson<{ incidents: CyberTwinIncident[]; source: 'live' | 'seed' }>('/sentra/cyber-twin/incidents');
+}
+export function listCyberTwinControlDrifts() {
+  return getJson<{ controlDrifts: CyberTwinControlDrift[]; source: 'live' | 'seed' }>('/sentra/cyber-twin/control-drifts');
+}
+export function getCyberTwinPosture() {
+  return getJson<CyberTwinPosture>('/sentra/cyber-twin/posture');
+}
+export function patchCyberTwinAsset(id: string, body: Record<string, unknown>) {
+  return patchJson<CyberTwinAsset>(`/sentra/cyber-twin/assets/${encodeURIComponent(id)}`, body);
+}
+
+// ── Hunt Data ───────────────────────────────────────────────────────────────
+
+export function listHunts() {
+  return getJson<{ hunts: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/hunts');
+}
+export function patchHunt(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/hunt-data/hunts/${encodeURIComponent(id)}`, body);
+}
+export function listRemediationPlans() {
+  return getJson<{ plans: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/remediation-plans');
+}
+export function patchRemediationPlan(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/hunt-data/remediation-plans/${encodeURIComponent(id)}`, body);
+}
+export function listRedTeamScenarios() {
+  return getJson<{ scenarios: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/red-team-scenarios');
+}
+export function getHuntFleetSummary() {
+  return getJson<Record<string, unknown>>('/sentra/hunt-data/fleet/summary');
+}
+export function listHuntFleetAgents() {
+  return getJson<{ agents: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/fleet');
+}
+
+// ── PQC ─────────────────────────────────────────────────────────────────────
+
+export function listPqcStandards() {
+  return getJson<{ standards: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/standards');
+}
+export function listPqcMigrationPhases() {
+  return getJson<{ phases: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/migration-phases');
+}
+export function listPqcEcosystem() {
+  return getJson<{ ecosystem: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/ecosystem');
+}
+export function getPqcReadinessScore() {
+  return getJson<Record<string, unknown>>('/sentra/pqc/readiness-score');
+}
+export function patchPqcStandard(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/pqc/standards/${encodeURIComponent(id)}`, body);
+}
+export function patchPqcEcosystemItem(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/pqc/ecosystem/${encodeURIComponent(id)}`, body);
+}
+
+// ── Hardware Trust ──────────────────────────────────────────────────────────
+
+export function listHardwareTrustAnchors() {
+  return getJson<{ anchors: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hardware-trust/anchors');
+}
+export function listHardwareCompartments() {
+  return getJson<{ compartments: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hardware-trust/compartments');
+}
+export function listHardwareSupplyChain() {
+  return getJson<{ components: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hardware-trust/supply-chain');
+}
+export function getHardwareTrustSummary() {
+  return getJson<Record<string, unknown>>('/sentra/hardware-trust/summary');
+}
+export function patchHardwareTrustAnchor(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/hardware-trust/anchors/${encodeURIComponent(id)}`, body);
+}
+export function patchHardwareSupplyChainItem(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/hardware-trust/supply-chain/${encodeURIComponent(id)}`, body);
+}
+
+// ── Photonic ────────────────────────────────────────────────────────────────
+
+export function listPhotonicTiers() {
+  return getJson<{ tiers: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/photonic/tiers');
+}
+export function listPhotonicRoutingDecisions() {
+  return getJson<{ decisions: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/photonic/routing-decisions');
+}
+export function listPhotonicResearchSignals() {
+  return getJson<{ signals: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/photonic/research-signals');
+}
+export function getPhotonicSummary() {
+  return getJson<Record<string, unknown>>('/sentra/photonic/summary');
+}
+
+// ── DARPA MTO ───────────────────────────────────────────────────────────────
+
+export function listDarpaMtoDomains() {
+  return getJson<{ domains: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/darpa-mto/domains');
+}
+export function listDarpaMtoCyberAiRepos() {
+  return getJson<{ repos: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/darpa-mto/cyber-ai-repos');
+}
+export function getDarpaMtoSummary() {
+  return getJson<Record<string, unknown>>('/sentra/darpa-mto/summary');
+}
+
+// ── Crisis Arena ────────────────────────────────────────────────────────────
+
+export function listArenaArchitects() {
+  return getJson<{ architects: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-arena/architects');
+}
+export function listArenaEngagements() {
+  return getJson<{ engagements: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-arena/engagements');
+}
+export function listArenaSubmissions() {
+  return getJson<{ submissions: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-arena/submissions');
+}
+export function getArenaLeaderboard() {
+  return getJson<{ leaderboard: Record<string, unknown>[] }>('/sentra/crisis-arena/leaderboard');
+}
+export function getArenaSummary() {
+  return getJson<Record<string, unknown>>('/sentra/crisis-arena/summary');
+}
+export function listSimulationRuns() {
+  return getJson<{ simulations: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-arena/simulations');
+}
+export function createSimulationRun(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/crisis-arena/simulations', body);
+}
+export function patchSimulationRun(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/crisis-arena/simulations/${encodeURIComponent(id)}`, body);
+}
+
+// ── Agent Mesh ──────────────────────────────────────────────────────────────
+
+export function listAgentRuntimes() {
+  return getJson<{ runtimes: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/runtimes');
+}
+export function listMcpServers() {
+  return getJson<{ servers: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/mcp-servers');
+}
+export function listMeshSecrets() {
+  return getJson<{ secrets: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/secrets');
+}
+export function listMeshExposures() {
+  return getJson<{ exposures: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/exposures');
+}
+export function patchMeshExposure(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/exposures/${encodeURIComponent(id)}`, body);
+}
+export function listContainmentRules() {
+  return getJson<{ rules: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/containment-rules');
+}
+export function patchContainmentRule(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/containment-rules/${encodeURIComponent(id)}`, body);
+}
+export function createContainmentRule(body: Record<string, unknown>) {
+  return postJson<Record<string, unknown>>('/sentra/agent-mesh/containment-rules', body);
+}
+export function listGatewayEvents() {
+  return getJson<{ events: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/gateway-events');
+}
+export function listDriftSnapshots() {
+  return getJson<{ snapshots: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/drift-snapshots');
+}
+export function patchDriftSnapshot(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/drift-snapshots/${encodeURIComponent(id)}`, body);
+}
+export function listMeshResilience() {
+  return getJson<{ resilience: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/resilience');
+}
+export function getAgentMeshSummary() {
+  return getJson<Record<string, unknown>>('/sentra/agent-mesh/summary');
+}
+
+// ── Compliance & Governance ─────────────────────────────────────────────────
+
+export function listComplianceFrameworks() {
+  return getJson<{ frameworks: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/compliance/frameworks');
+}
+export function getComplianceSummary() {
+  return getJson<Record<string, unknown>>('/sentra/compliance/summary');
+}
+export function listEvidenceRecords() {
+  return getJson<{ evidence: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/compliance/evidence');
+}
+export function getEvidenceSummary() {
+  return getJson<Record<string, unknown>>('/sentra/compliance/evidence/summary');
+}
+export function listComplianceRisks() {
+  return getJson<{ risks: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/compliance/risks');
+}
+export function getComplianceRiskSummary() {
+  return getJson<Record<string, unknown>>('/sentra/compliance/risks/summary');
+}
+export function listVendorRisks() {
+  return getJson<{ vendors: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/compliance/vendors');
+}
+export function getVendorRiskSummary() {
+  return getJson<Record<string, unknown>>('/sentra/compliance/vendors/summary');
+}
+export function getGovernanceSummary() {
+  return getJson<Record<string, unknown>>('/sentra/governance/summary');
+}
+export function listRbacRoles() {
+  return getJson<{ roles: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/governance/rbac-roles');
+}
+export function listAuditLogs() {
+  return getJson<{ entries: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/governance/audit-logs');
+}
+export function listRetentionPolicies() {
+  return getJson<{ policies: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/governance/retention-policies');
+}
+export function listPolicyTemplates() {
+  return getJson<{ templates: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/governance/policy-templates');
+}
+
+// ── Vulnerabilities ─────────────────────────────────────────────────────────
+
+export function listVulnerabilities() {
+  return getJson<{ vulnerabilities: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/vulnerabilities');
+}
+export function getVulnerabilitiesSummary() {
+  return getJson<Record<string, unknown>>('/sentra/vulnerabilities/summary');
+}
+export function patchVulnerability(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/vulnerabilities/${encodeURIComponent(id)}`, body);
+}
+
+// ── Zero Trust ──────────────────────────────────────────────────────────────
+
+export function listZeroTrustPillars() {
+  return getJson<{ pillars: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/zero-trust/pillars');
+}
+export function getZeroTrustSummary() {
+  return getJson<Record<string, unknown>>('/sentra/zero-trust/summary');
+}
+
+export function listMicrosystemDevices() {
+  return getJson<{ devices: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/microsystem-integrity/devices');
+}
+export function patchMicrosystemDevice(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/microsystem-integrity/devices/${id}`, body);
+}
+export function getMicrosystemSummary() {
+  return getJson<Record<string, unknown>>('/sentra/microsystem-integrity/summary');
+}
+
+export function listPhotonicSensorNodes() {
+  return getJson<{ nodes: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/photonic-sensors/nodes');
+}
+export function patchPhotonicSensorNode(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/photonic-sensors/nodes/${id}`, body);
+}
+export function getPhotonicSensorSummary() {
+  return getJson<Record<string, unknown>>('/sentra/photonic-sensors/summary');
+}
+
+export function listThreatHorizonVectors() {
+  return getJson<{ vectors: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/threat-horizon/vectors');
+}
+export function patchThreatHorizonVector(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/threat-horizon/vectors/${id}`, body);
+}
+export function getThreatHorizonSummary() {
+  return getJson<Record<string, unknown>>('/sentra/threat-horizon/summary');
+}
+
+export function listBioSubstrateAssets() {
+  return getJson<{ assets: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/bio-substrate/assets');
+}
+export function patchBioSubstrateAsset(id: string, body: Record<string, unknown>) {
+  return patchJson<Record<string, unknown>>(`/sentra/bio-substrate/assets/${id}`, body);
+}
+export function getBioSubstrateSummary() {
+  return getJson<Record<string, unknown>>('/sentra/bio-substrate/summary');
+}
+
+export function listCrisisScenarios() {
+  return getJson<{ scenarios: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-scenarios');
+}

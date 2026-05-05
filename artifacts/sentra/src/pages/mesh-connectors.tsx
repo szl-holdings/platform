@@ -7,8 +7,10 @@ import {
   Pin,
   Server,
 } from 'lucide-react';
-import { useState } from 'react';
-import { type TrustState, agentMesh } from '@/data/agent-mesh';
+import { useCallback, useState } from 'react';
+import { type TrustState, type McpServer, type AgentRuntime, agentMesh as fallbackMesh } from '@/data/agent-mesh';
+import { listMcpServers, listAgentRuntimes } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const TRUST_STYLES: Record<TrustState, string> = {
   trusted: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
@@ -36,7 +38,11 @@ function TrustStateBadge({ state }: { state: TrustState }) {
 }
 
 export default function MeshConnectors() {
-  const { runtimes, mcpServers } = agentMesh;
+  const serverFetcher = useCallback(() => listMcpServers(), []);
+  const runtimeFetcher = useCallback(() => listAgentRuntimes(), []);
+  const { data: mcpServers, source } = useApiQuery<McpServer[]>(serverFetcher, 'servers', fallbackMesh.mcpServers);
+  const { data: runtimes } = useApiQuery<AgentRuntime[]>(runtimeFetcher, 'runtimes', fallbackMesh.runtimes);
+
   const [selectedMcp, setSelectedMcp] = useState<string | null>('mcp-unknown-ext');
 
   const selectedServer = mcpServers.find((m) => m.id === selectedMcp);
@@ -48,7 +54,10 @@ export default function MeshConnectors() {
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Connectors</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-display font-bold text-slate-100">Connectors</h1>
+          <SourceBadge source={source} />
+        </div>
         <p className="text-slate-400 mt-1">
           Inventory of every detected agent runtime and MCP server with trust classification
         </p>

@@ -24,8 +24,10 @@ import {
   Waves,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-import { DARPA_MTO_DOMAINS, CYBER_AI_REPOS, type ResearchDomain } from '@/data/darpa-mto-research';
+import { useCallback, useState } from 'react';
+import { DARPA_MTO_DOMAINS as fallbackDomains, CYBER_AI_REPOS as fallbackRepos, type ResearchDomain } from '@/data/darpa-mto-research';
+import { listDarpaMtoDomains, listDarpaMtoCyberAiRepos } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const STATUS_BADGE: Record<ResearchDomain['status'], { label: string; color: string }> = {
   incubation: { label: 'Incubation', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
@@ -204,14 +206,19 @@ export default function DarpaMtoHub() {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [showRepos, setShowRepos] = useState(false);
 
+  const domainFetcher = useCallback(() => listDarpaMtoDomains(), []);
+  const repoFetcher = useCallback(() => listDarpaMtoCyberAiRepos(), []);
+  const { data: DARPA_MTO_DOMAINS, source } = useApiQuery<ResearchDomain[]>(domainFetcher, 'domains', fallbackDomains);
+  const { data: CYBER_AI_REPOS } = useApiQuery<typeof fallbackRepos>(repoFetcher, 'repos', fallbackRepos);
+
   const domain = DARPA_MTO_DOMAINS.find((d) => d.id === selectedDomain);
 
   const activeDomains = DARPA_MTO_DOMAINS.filter((d) => d.status === 'active');
   const incubationDomains = DARPA_MTO_DOMAINS.filter((d) => d.status === 'incubation');
 
-  const avgTrl = Math.round(
+  const avgTrl = DARPA_MTO_DOMAINS.length > 0 ? Math.round(
     DARPA_MTO_DOMAINS.reduce((sum, d) => sum + d.trl, 0) / DARPA_MTO_DOMAINS.length * 10,
-  ) / 10;
+  ) / 10 : 0;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

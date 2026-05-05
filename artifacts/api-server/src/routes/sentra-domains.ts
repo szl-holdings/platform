@@ -37,6 +37,12 @@ import {
   huntFleetStore, simulationRunsStore,
   type EvidenceRecord,
   evidenceRecordsStore,
+  type CrisisScenarioRecord,
+  crisisScenarioStore,
+  type MicrosystemIntegrityRecord, type PhotonicSensorNode,
+  type ThreatHorizonVector, type BioSubstrateAsset,
+  microsystemIntegrityStore, photonicSensorStore,
+  threatHorizonStore, bioSubstrateStore,
   storeToArray, generateId, itemSource,
 } from '../services/sentra-domain-stores';
 
@@ -1091,5 +1097,160 @@ const arenaSubmissionCreateSchema = z.object({
 });
 const arenaSubmissionPatchSchema = arenaSubmissionCreateSchema.partial();
 crudRoutes('/sentra/crisis-arena/submissions', arenaSubmissionsStore, 'ArenaSubmission', 'submissions', arenaSubmissionCreateSchema, arenaSubmissionPatchSchema, 'sub');
+
+// ── Crisis Scenarios (read-only) ────────────────────────────────────────────
+
+router.get('/sentra/crisis-scenarios', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(crisisScenarioStore);
+    sendSuccess(res, { scenarios: items.map(i => ({ ...i, source: itemSource(i.id) })) });
+  } catch (err) { handleRouteError(res, err, 'Failed to list crisis scenarios'); }
+});
+
+// ── Microsystem Integrity ───────────────────────────────────────────────────
+
+const mirPatchSchema = z.object({
+  attestationResult: z.enum(['pass', 'fail', 'degraded', 'unavailable']).optional(),
+  patchLevel: z.enum(['current', 'behind', 'critical_missing']).optional(),
+  anomalyScore: z.number().min(0).max(100).optional(),
+}).passthrough();
+
+router.get('/sentra/microsystem-integrity/devices', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(microsystemIntegrityStore);
+    sendSuccess(res, { devices: items.map(i => ({ ...i, source: itemSource(i.id) })) });
+  } catch (err) { handleRouteError(res, err, 'Failed to list microsystem devices'); }
+});
+
+router.patch('/sentra/microsystem-integrity/devices/:id', validateBody(mirPatchSchema), (req: Request, res: Response) => {
+  try {
+    const existing = microsystemIntegrityStore.get(req.params.id as string);
+    if (!existing) { sendNotFound(res, 'MicrosystemDevice'); return; }
+    const validated = mirPatchSchema.parse(req.body);
+    const patched = { ...existing, ...validated };
+    microsystemIntegrityStore.set(existing.id, patched);
+    sendSuccess(res, { ...patched, source: itemSource(existing.id) });
+  } catch (err) { handleRouteError(res, err, 'Failed to update microsystem device'); }
+});
+
+router.get('/sentra/microsystem-integrity/summary', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(microsystemIntegrityStore);
+    const passing = items.filter(r => r.attestationResult === 'pass').length;
+    const failing = items.filter(r => r.attestationResult === 'fail').length;
+    const sideChannelTotal = items.reduce((a, r) => a + r.sideChannelAlerts.length, 0);
+    const avgAnomaly = items.length > 0 ? Math.round(items.reduce((a, r) => a + r.anomalyScore, 0) / items.length) : 0;
+    sendSuccess(res, { totalDevices: items.length, passing, failing, sideChannelTotal, avgAnomaly });
+  } catch (err) { handleRouteError(res, err, 'Failed to get microsystem summary'); }
+});
+
+// ── Photonic Sensors ────────────────────────────────────────────────────────
+
+const photonicSensorPatchSchema = z.object({
+  health: z.enum(['optimal', 'degraded', 'calibration_needed', 'offline', 'compromised']).optional(),
+  driftPercentage: z.number().min(0).optional(),
+  eavesdroppingDetected: z.boolean().optional(),
+}).passthrough();
+
+router.get('/sentra/photonic-sensors/nodes', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(photonicSensorStore);
+    sendSuccess(res, { nodes: items.map(i => ({ ...i, source: itemSource(i.id) })) });
+  } catch (err) { handleRouteError(res, err, 'Failed to list photonic sensor nodes'); }
+});
+
+router.patch('/sentra/photonic-sensors/nodes/:id', validateBody(photonicSensorPatchSchema), (req: Request, res: Response) => {
+  try {
+    const existing = photonicSensorStore.get(req.params.id as string);
+    if (!existing) { sendNotFound(res, 'PhotonicSensorNode'); return; }
+    const validated = photonicSensorPatchSchema.parse(req.body);
+    const patched = { ...existing, ...validated };
+    photonicSensorStore.set(existing.id, patched);
+    sendSuccess(res, { ...patched, source: itemSource(existing.id) });
+  } catch (err) { handleRouteError(res, err, 'Failed to update photonic sensor node'); }
+});
+
+router.get('/sentra/photonic-sensors/summary', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(photonicSensorStore);
+    const optimal = items.filter(n => n.health === 'optimal').length;
+    const compromised = items.filter(n => n.health === 'compromised').length;
+    const eavesdropping = items.filter(n => n.eavesdroppingDetected).length;
+    const avgQber = items.length > 0 ? Math.round(items.reduce((a, n) => a + n.quantumBitErrorRate, 0) / items.length * 10) / 10 : 0;
+    sendSuccess(res, { totalNodes: items.length, optimal, compromised, eavesdropping, avgQber });
+  } catch (err) { handleRouteError(res, err, 'Failed to get photonic sensor summary'); }
+});
+
+// ── Threat Horizon Vectors ──────────────────────────────────────────────────
+
+const thvPatchSchema = z.object({
+  maturity: z.enum(['theoretical', 'lab_demonstrated', 'weaponizable', 'actively_exploited']).optional(),
+  mitigationAvailable: z.boolean().optional(),
+  yearsToWeaponization: z.number().nullable().optional(),
+}).passthrough();
+
+router.get('/sentra/threat-horizon/vectors', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(threatHorizonStore);
+    sendSuccess(res, { vectors: items.map(i => ({ ...i, source: itemSource(i.id) })) });
+  } catch (err) { handleRouteError(res, err, 'Failed to list threat horizon vectors'); }
+});
+
+router.patch('/sentra/threat-horizon/vectors/:id', validateBody(thvPatchSchema), (req: Request, res: Response) => {
+  try {
+    const existing = threatHorizonStore.get(req.params.id as string);
+    if (!existing) { sendNotFound(res, 'ThreatHorizonVector'); return; }
+    const validated = thvPatchSchema.parse(req.body);
+    const patched = { ...existing, ...validated };
+    threatHorizonStore.set(existing.id, patched);
+    sendSuccess(res, { ...patched, source: itemSource(existing.id) });
+  } catch (err) { handleRouteError(res, err, 'Failed to update threat horizon vector'); }
+});
+
+router.get('/sentra/threat-horizon/summary', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(threatHorizonStore);
+    const activelyExploited = items.filter(v => v.maturity === 'actively_exploited').length;
+    const weaponizable = items.filter(v => v.maturity === 'weaponizable').length;
+    const noMitigation = items.filter(v => !v.mitigationAvailable).length;
+    sendSuccess(res, { totalVectors: items.length, activelyExploited, weaponizable, noMitigation });
+  } catch (err) { handleRouteError(res, err, 'Failed to get threat horizon summary'); }
+});
+
+// ── Bio-Substrate Assets ────────────────────────────────────────────────────
+
+const bioPatchSchema = z.object({
+  integrity: z.enum(['nominal', 'degraded', 'contaminated', 'expired', 'compromised']).optional(),
+  contaminationRisk: z.number().min(0).max(100).optional(),
+  temperatureCelsius: z.number().optional(),
+}).passthrough();
+
+router.get('/sentra/bio-substrate/assets', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(bioSubstrateStore);
+    sendSuccess(res, { assets: items.map(i => ({ ...i, source: itemSource(i.id) })) });
+  } catch (err) { handleRouteError(res, err, 'Failed to list bio-substrate assets'); }
+});
+
+router.patch('/sentra/bio-substrate/assets/:id', validateBody(bioPatchSchema), (req: Request, res: Response) => {
+  try {
+    const existing = bioSubstrateStore.get(req.params.id as string);
+    if (!existing) { sendNotFound(res, 'BioSubstrateAsset'); return; }
+    const validated = bioPatchSchema.parse(req.body);
+    const patched = { ...existing, ...validated };
+    bioSubstrateStore.set(existing.id, patched);
+    sendSuccess(res, { ...patched, source: itemSource(existing.id) });
+  } catch (err) { handleRouteError(res, err, 'Failed to update bio-substrate asset'); }
+});
+
+router.get('/sentra/bio-substrate/summary', (_req: Request, res: Response) => {
+  try {
+    const items = storeToArray(bioSubstrateStore);
+    const nominal = items.filter(a => a.integrity === 'nominal').length;
+    const compromised = items.filter(a => a.integrity === 'compromised').length;
+    const avgContamination = items.length > 0 ? Math.round(items.reduce((a, b) => a + b.contaminationRisk, 0) / items.length) : 0;
+    sendSuccess(res, { totalAssets: items.length, nominal, compromised, avgContamination });
+  } catch (err) { handleRouteError(res, err, 'Failed to get bio-substrate summary'); }
+});
 
 export default router;

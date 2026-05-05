@@ -7,14 +7,16 @@ import {
   Shield,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PageHeader, SeverityChip } from '@/lib/data-provenance';
 import {
-  hardwareProvenanceChains,
+  hardwareProvenanceChains as fallbackChains,
   type FoundryTrust,
   type HardwareProvenanceChain,
   type ProvenanceStatus,
 } from '@/data/quantum-resilience';
+import { listHardwareSupplyChain } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const trustColor: Record<FoundryTrust, string> = {
   trusted: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -134,6 +136,9 @@ function ProvenanceCard({ chain }: { chain: HardwareProvenanceChain }) {
 }
 
 export default function HardwareSupplyChain() {
+  const fetcher = useCallback(() => listHardwareSupplyChain(), []);
+  const { data: hardwareProvenanceChains, source } = useApiQuery<HardwareProvenanceChain[]>(fetcher, 'components', fallbackChains);
+
   const verified = hardwareProvenanceChains.filter((c) => c.provenanceStatus === 'verified').length;
   const risks = hardwareProvenanceChains.filter(
     (c) => c.provenanceStatus === 'counterfeit_risk' || c.tamperEvidence
@@ -141,19 +146,19 @@ export default function HardwareSupplyChain() {
   const untrusted = hardwareProvenanceChains.filter(
     (c) => c.foundryTrust === 'untrusted' || c.foundryTrust === 'sanctioned'
   ).length;
-  const avgHops =
+  const avgHops = hardwareProvenanceChains.length > 0 ?
     Math.round(
       hardwareProvenanceChains.reduce((a, c) => a + c.supplyChainHops, 0) /
         hardwareProvenanceChains.length
-    );
+    ) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Hardware Supply Chain Provenance"
         subtitle="Microelectronics provenance tracking from foundry to deployment"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

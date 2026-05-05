@@ -11,12 +11,14 @@ import {
   Shield,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  incidentReadiness,
+  incidentReadiness as fallbackReadiness,
   type ThreatApproval,
-  threatTwins,
+  threatTwins as fallbackThreats,
 } from '@/data/threat-twin';
+import { listThreatTwinReadiness, listThreatTwinThreats } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const ACCENT = 'hsl(220 72% 56%)';
 const ACCENT_DIM = 'hsl(220 72% 40%)';
@@ -229,8 +231,13 @@ export default function GovernanceReview() {
   const [statusFilter, setStatusFilter] = useState('pending');
   const [approvalStates, setApprovalStates] = useState<Record<string, string>>({});
 
+  const threatFetcher = useCallback(() => listThreatTwinThreats(), []);
+  const readinessFetcher = useCallback(() => listThreatTwinReadiness(), []);
+  const { data: threatTwins, source } = useApiQuery<typeof fallbackThreats>(threatFetcher, 'threats', fallbackThreats);
+  const { data: incidentReadiness } = useApiQuery<typeof fallbackReadiness>(readinessFetcher, 'readiness', fallbackReadiness);
+
   const allApprovals: FlatApproval[] = threatTwins.flatMap((t) =>
-    t.approvals.map((a) => ({ ...a, threatTitle: t.title })),
+    t.approvals.map((a: ThreatApproval) => ({ ...a, threatTitle: t.title })),
   );
 
   function handleAction(id: string, action: string) {

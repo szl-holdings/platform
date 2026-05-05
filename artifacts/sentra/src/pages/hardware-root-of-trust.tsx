@@ -3,12 +3,15 @@ import {
   Check,
   CircuitBoard,
   Cpu,
+  Loader2,
   Lock,
   Scan,
   Shield,
   ShieldCheck,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { listHardwareTrustAnchors, listHardwareCompartments, listHardwareSupplyChain as listHwSupplyChain, patchHardwareTrustAnchor, patchHardwareSupplyChainItem } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 type TrustAnchor = {
   id: string;
@@ -86,16 +89,57 @@ const TYPE_ICONS: Record<string, typeof Shield> = {
 
 type TabId = 'anchors' | 'compartments' | 'supply-chain';
 
+const ANCHOR_STATUS_TRANSITIONS: Record<TrustAnchor['status'], TrustAnchor['status'][]> = {
+  pending: ['provisioned', 'quarantined'],
+  provisioned: ['verified', 'quarantined'],
+  verified: ['quarantined'],
+  quarantined: ['pending'],
+};
+
+const SC_STATUS_TRANSITIONS: Record<SupplyChainComponent['attestationStatus'], SupplyChainComponent['attestationStatus'][]> = {
+  pending: ['attested', 'failed'],
+  attested: ['pending'],
+  failed: ['pending'],
+};
+
 export default function HardwareRootOfTrust() {
   const [activeTab, setActiveTab] = useState<TabId>('anchors');
   const [selectedAnchor, setSelectedAnchor] = useState<string | null>(null);
+  const [mutating, setMutating] = useState<string | null>(null);
 
-  const verifiedAnchors = TRUST_ANCHORS.filter((a) => a.status === 'verified').length;
-  const avgIntegrity = Math.round(TRUST_ANCHORS.reduce((sum, a) => sum + a.integrityScore, 0) / TRUST_ANCHORS.length * 10) / 10;
-  const cheriCompartments = COMPARTMENTS.filter((c) => c.cheriEnforced).length;
-  const attestedComponents = SUPPLY_CHAIN.filter((c) => c.attestationStatus === 'attested').length;
+  const anchorFetcher = useCallback(() => listHardwareTrustAnchors(), []);
+  const compFetcher = useCallback(() => listHardwareCompartments(), []);
+  const scFetcher = useCallback(() => listHwSupplyChain(), []);
+  const { data: apiAnchors, source, reload: reloadAnchors } = useApiQuery<TrustAnchor[]>(anchorFetcher, 'anchors', TRUST_ANCHORS);
+  const { data: apiCompartments } = useApiQuery<CapabilityCompartment[]>(compFetcher, 'compartments', COMPARTMENTS);
+  const { data: apiSupplyChain, reload: reloadSupplyChain } = useApiQuery<SupplyChainComponent[]>(scFetcher, 'components', SUPPLY_CHAIN);
 
-  const anchor = TRUST_ANCHORS.find((a) => a.id === selectedAnchor);
+  const handleAnchorStatusChange = async (id: string, newStatus: TrustAnchor['status']) => {
+    setMutating(id);
+    try {
+      await patchHardwareTrustAnchor(id, { status: newStatus, lastAttestation: new Date().toISOString() });
+      reloadAnchors();
+    } catch {} finally {
+      setMutating(null);
+    }
+  };
+
+  const handleScStatusChange = async (id: string, newStatus: SupplyChainComponent['attestationStatus']) => {
+    setMutating(id);
+    try {
+      await patchHardwareSupplyChainItem(id, { attestationStatus: newStatus });
+      reloadSupplyChain();
+    } catch {} finally {
+      setMutating(null);
+    }
+  };
+
+  const verifiedAnchors = apiAnchors.filter((a) => a.status === 'verified').length;
+  const avgIntegrity = apiAnchors.length > 0 ? Math.round(apiAnchors.reduce((sum, a) => sum + a.integrityScore, 0) / apiAnchors.length * 10) / 10 : 0;
+  const cheriCompartments = apiCompartments.filter((c) => c.cheriEnforced).length;
+  const attestedComponents = apiSupplyChain.filter((c) => c.attestationStatus === 'attested').length;
+
+  const anchor = apiAnchors.find((a) => a.id === selectedAnchor);
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -111,19 +155,22 @@ export default function HardwareRootOfTrust() {
             Hardware-enforced trust anchors, CHERI capability compartments, and supply chain attestation
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/20" aria-hidden="true">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="text-[10px] text-white/20">a11oy orchestrated</span>
+        <div className="flex items-center gap-3">
+          <SourceBadge source={source} />
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/20" aria-hidden="true">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[10px] text-white/20">a11oy orchestrated</span>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
-          <p className="text-2xl font-semibold text-emerald-400">{verifiedAnchors}/{TRUST_ANCHORS.length}</p>
+          <p className="text-2xl font-semibold text-emerald-400">{verifiedAnchors}/{apiAnchors.length}</p>
           <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">Trust Anchors Verified</p>
         </div>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
@@ -135,7 +182,7 @@ export default function HardwareRootOfTrust() {
           <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">CHERI Compartments</p>
         </div>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
-          <p className="text-2xl font-semibold text-white">{attestedComponents}/{SUPPLY_CHAIN.length}</p>
+          <p className="text-2xl font-semibold text-white">{attestedComponents}/{apiSupplyChain.length}</p>
           <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">Supply Chain Attested</p>
         </div>
       </div>
@@ -160,7 +207,7 @@ export default function HardwareRootOfTrust() {
 
       {activeTab === 'anchors' && !anchor && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {TRUST_ANCHORS.map((ta) => {
+          {apiAnchors.map((ta) => {
             const Icon = TYPE_ICONS[ta.type] ?? Shield;
             return (
               <button
@@ -209,6 +256,30 @@ export default function HardwareRootOfTrust() {
                 <p className="text-[13px] text-white/60">{new Date(anchor.lastAttestation).toLocaleString()}</p>
               </div>
             </div>
+            {ANCHOR_STATUS_TRANSITIONS[anchor.status].length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                <p className="text-[10px] font-mono text-white/20 uppercase tracking-wider mb-2">Actions</p>
+                <div className="flex gap-2 flex-wrap">
+                  {ANCHOR_STATUS_TRANSITIONS[anchor.status].map((next) => (
+                    <button
+                      key={next}
+                      type="button"
+                      disabled={mutating === anchor.id}
+                      onClick={() => handleAnchorStatusChange(anchor.id, next)}
+                      className={cn(
+                        'text-[10px] px-3 py-1.5 rounded border transition-colors disabled:opacity-50',
+                        next === 'quarantined' ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' :
+                        next === 'verified' ? 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10' :
+                        'border-white/10 text-white/50 hover:bg-white/[0.04]',
+                      )}
+                    >
+                      {mutating === anchor.id ? <Loader2 className="w-3 h-3 animate-spin inline mr-1" /> : null}
+                      {next === 'quarantined' ? 'Quarantine' : next === 'verified' ? 'Verify / Re-attest' : next === 'provisioned' ? 'Provision' : 'Reset to Pending'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -222,7 +293,7 @@ export default function HardwareRootOfTrust() {
             <div className="col-span-2">Memory Bounds</div>
             <div className="col-span-2">CHERI</div>
           </div>
-          {COMPARTMENTS.map((c) => (
+          {apiCompartments.map((c) => (
             <div key={c.id} className="grid grid-cols-12 gap-3 items-center px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.015] transition-colors">
               <div className="col-span-3">
                 <p className="text-[12px] text-white/60">{c.workcell}</p>
@@ -267,7 +338,7 @@ export default function HardwareRootOfTrust() {
             <div className="col-span-1">THz</div>
             <div className="col-span-2">Provenance</div>
           </div>
-          {SUPPLY_CHAIN.map((sc) => (
+          {apiSupplyChain.map((sc) => (
             <div key={sc.id} className="grid grid-cols-12 gap-3 items-center px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.015] transition-colors">
               <div className="col-span-3">
                 <p className="text-[12px] text-white/60">{sc.name}</p>
@@ -288,7 +359,29 @@ export default function HardwareRootOfTrust() {
               <div className="col-span-1">
                 {sc.thzInspected ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <span className="text-[10px] text-white/15">—</span>}
               </div>
-              <div className="col-span-2 text-[10px] text-white/25 leading-snug">{sc.provenance}</div>
+              <div className="col-span-2 flex items-center gap-1">
+                <span className="text-[10px] text-white/25 leading-snug truncate flex-1">{sc.provenance}</span>
+                {SC_STATUS_TRANSITIONS[sc.attestationStatus].length > 0 && (
+                  <div className="flex gap-1 shrink-0">
+                    {SC_STATUS_TRANSITIONS[sc.attestationStatus].map((next) => (
+                      <button
+                        key={next}
+                        type="button"
+                        disabled={mutating === sc.id}
+                        onClick={() => handleScStatusChange(sc.id, next)}
+                        className={cn(
+                          'text-[8px] px-1.5 py-0.5 rounded border transition-colors disabled:opacity-50',
+                          next === 'attested' ? 'border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10' :
+                          next === 'failed' ? 'border-red-500/20 text-red-400 hover:bg-red-500/10' :
+                          'border-white/10 text-white/40 hover:bg-white/[0.04]',
+                        )}
+                      >
+                        {mutating === sc.id ? <Loader2 className="w-2.5 h-2.5 animate-spin inline" /> : next === 'attested' ? 'Attest' : next === 'failed' ? 'Fail' : 'Reset'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

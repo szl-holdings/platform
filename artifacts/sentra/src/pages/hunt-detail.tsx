@@ -23,9 +23,11 @@ import {
   User,
   Wifi,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'wouter';
-import { HUNTS, type HuntNode } from '@/data/hunt-data';
+import { HUNTS as fallbackHunts, type Hunt, type HuntNode } from '@/data/hunt-data';
+import { listHunts } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 import { approveHunt, approveRemediation, dismissHunt } from '@/lib/sentra-api';
 
 const NODE_ICON: Record<HuntNode['type'], typeof ShieldAlert> = {
@@ -136,7 +138,7 @@ function NodeCard({ node, active, onClick }: { node: HuntNode; active: boolean; 
   );
 }
 
-function AttackPathVisualization({ hunt }: { hunt: (typeof HUNTS)[0] }) {
+function AttackPathVisualization({ hunt }: { hunt: Hunt }) {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const { nodes, edges } = hunt.attackPath;
@@ -253,6 +255,8 @@ function AttackPathVisualization({ hunt }: { hunt: (typeof HUNTS)[0] }) {
 
 export default function HuntDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const fetcher = useCallback(() => listHunts(), []);
+  const { data: HUNTS, source } = useApiQuery<Hunt[]>(fetcher, 'hunts', fallbackHunts);
   const hunt = HUNTS.find((h) => h.id === id);
   const [activeTab, setActiveTab] = useState<'path' | 'reasoning' | 'remediation'>('path');
   const [remApproved, setRemApproved] = useState(false);

@@ -16,11 +16,12 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'wouter';
 import {
   calculateLetterGrade,
-  CRISIS_SCENARIOS,
+  CRISIS_SCENARIOS as fallbackScenarios,
+  type CrisisScenario,
   getGradeColor,
   SCENARIO_CATEGORY_LABELS,
   THREAT_ACTOR_LABELS,
@@ -30,6 +31,8 @@ import {
   type Phase,
   type SimulationRecord,
 } from '@/data/crisis-scenarios';
+import { listCrisisScenarios } from '@/lib/sentra-api';
+import { useApiQuery } from '@/lib/use-api-query';
 
 type SimState = 'briefing' | 'running' | 'decision' | 'inject' | 'complete';
 
@@ -65,7 +68,11 @@ function PressureBar({ pct, label }: { pct: number; label: string }) {
 export default function CrisisSimulatorRun() {
   const params = useParams();
   const scenarioId = params.id as string;
-  const scenario = CRISIS_SCENARIOS.find((s) => s.id === scenarioId);
+  const scenarioFetcher = useCallback(() => listCrisisScenarios(), []);
+  const { data: apiScenarios } = useApiQuery<CrisisScenario[]>(scenarioFetcher, 'scenarios', fallbackScenarios);
+  const apiMatch = apiScenarios.find((s) => s.id === scenarioId);
+  const hasFullPhases = apiMatch?.phases?.[0] && 'decisionPoints' in apiMatch.phases[0];
+  const scenario = (hasFullPhases ? apiMatch : null) ?? fallbackScenarios.find((s) => s.id === scenarioId);
 
   const [simState, setSimState] = useState<SimState>('briefing');
   const [currentPhaseIdx, setCurrentPhaseIdx] = useState(0);

@@ -13,8 +13,10 @@ import {
   FileText,
   ShieldAlert,
 } from 'lucide-react';
-import { useState } from 'react';
-import { agentMesh, MESH_AGENT_DISPLAY_NAMES } from '@/data/agent-mesh';
+import { useCallback, useState } from 'react';
+import { agentMesh as fallbackMesh, MESH_AGENT_DISPLAY_NAMES, type MeshExposure } from '@/data/agent-mesh';
+import { listMeshExposures } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 import { queueFix, useMeshState } from '@/lib/mesh-store';
 
 const ACCENT = '#f5f5f5';
@@ -29,7 +31,8 @@ const SEVERITY_STYLES: Record<string, string> = {
 export default function MeshExposures() {
   const [autonomyModes, setAutonomyModes] = useState<Record<string, AutonomyMode>>({});
   const meshState = useMeshState();
-  const { exposures } = agentMesh;
+  const fetcher = useCallback(() => listMeshExposures(), []);
+  const { data: exposures, source } = useApiQuery<MeshExposure[]>(fetcher, 'exposures', fallbackMesh.exposures);
 
   function getMode(id: string): AutonomyMode {
     return autonomyModes[id] ?? 'recommend';
@@ -50,7 +53,10 @@ export default function MeshExposures() {
     <div className="space-y-8 animate-fade-in">
       <header className="flex justify-between items-end gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-slate-100">Exposures</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-display font-bold text-slate-100">Exposures</h1>
+            <SourceBadge source={source} />
+          </div>
           <p className="text-slate-400 mt-1">
             Prioritized findings with governed remediation — all fixes route through Guardian
           </p>

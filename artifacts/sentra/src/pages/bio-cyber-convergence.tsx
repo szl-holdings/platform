@@ -5,12 +5,15 @@ import {
   Shield,
   Thermometer,
 } from 'lucide-react';
+import { useCallback } from 'react';
 import { PageHeader } from '@/lib/data-provenance';
 import {
-  bioSubstrateAssets,
+  bioSubstrateAssets as fallbackAssets,
   type BioIntegrity,
   type BioSubstrateAsset,
 } from '@/data/quantum-resilience';
+import { listBioSubstrateAssets } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const integrityColor: Record<BioIntegrity, string> = {
   nominal: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -136,20 +139,23 @@ function SubstrateCard({ asset }: { asset: BioSubstrateAsset }) {
 }
 
 export default function BioCyberConvergence() {
+  const fetcher = useCallback(() => listBioSubstrateAssets(), []);
+  const { data: bioSubstrateAssets, source } = useApiQuery<BioSubstrateAsset[]>(fetcher, 'assets', fallbackAssets);
+
   const nominal = bioSubstrateAssets.filter((a) => a.integrity === 'nominal').length;
   const compromised = bioSubstrateAssets.filter((a) => a.integrity === 'compromised').length;
   const exfilVectors = bioSubstrateAssets.filter((a) => a.dataExfiltrationVector).length;
-  const avgContamination = Math.round(
+  const avgContamination = bioSubstrateAssets.length > 0 ? Math.round(
     bioSubstrateAssets.reduce((a, b) => a + b.contaminationRisk, 0) / bioSubstrateAssets.length
-  );
+  ) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Bio-Cyber Convergence Console"
         subtitle="Security monitoring for bio-electronic hybrid systems and organic circuits"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

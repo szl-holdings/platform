@@ -1,8 +1,10 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { ChevronDown, ChevronRight, Cpu, Database, Filter, RefreshCcw, Search, ShieldAlert } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EmptyState, PageHeader, SeverityChip } from '@/lib/data-provenance';
-import { sentraTwin, type CyberAsset } from '@/data/sentra-twin';
+import { sentraTwin as fallbackTwin, type CyberAsset } from '@/data/sentra-twin';
+import { listCyberTwinAssets } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 type FilterType = 'all' | 'OT' | 'IT' | 'IoT';
 type FilterCriticality = 'all' | 'critical' | 'high' | 'medium' | 'low';
@@ -181,7 +183,10 @@ export default function AssetRiskGraph() {
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [search, setSearch] = useState('');
 
-  const filtered = sentraTwin.assets.filter((a) => {
+  const assetFetcher = useCallback(() => listCyberTwinAssets(), []);
+  const { data: allAssets, source } = useApiQuery<CyberAsset[]>(assetFetcher, 'assets', fallbackTwin.assets);
+
+  const filtered = allAssets.filter((a) => {
     if (typeFilter !== 'all' && a.type !== typeFilter) return false;
     if (critFilter !== 'all' && a.criticality !== critFilter) return false;
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
@@ -192,19 +197,19 @@ export default function AssetRiskGraph() {
     return true;
   });
 
-  const atRisk = sentraTwin.assets.filter((a) => a.exposureScore > 70).length;
+  const atRisk = allAssets.filter((a) => a.exposureScore > 70).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Asset Risk Graph"
         subtitle="Critical infrastructure exposure and protection status"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
         actions={
           <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300 font-mono">
             <Database className="w-3 h-3" />
-            TOTAL: {sentraTwin.assets.length}
+            TOTAL: {allAssets.length}
           </div>
         }
       />
@@ -212,7 +217,7 @@ export default function AssetRiskGraph() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Total Assets</div>
-          <div className="text-2xl font-display font-bold text-slate-100">{sentraTwin.assets.length}</div>
+          <div className="text-2xl font-display font-bold text-slate-100">{allAssets.length}</div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">At Risk</div>
@@ -221,13 +226,13 @@ export default function AssetRiskGraph() {
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Compromised</div>
           <div className="text-2xl font-display font-bold text-[#f5f5f5]">
-            {sentraTwin.assets.filter((a) => a.status === 'compromised').length}
+            {allAssets.filter((a) => a.status === 'compromised').length}
           </div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Control Gaps</div>
           <div className="text-2xl font-display font-bold text-[#c9b787]">
-            {sentraTwin.assets.reduce((acc, a) => acc + a.controlGaps.length, 0)}
+            {allAssets.reduce((acc, a) => acc + a.controlGaps.length, 0)}
           </div>
         </div>
       </div>
@@ -306,7 +311,7 @@ export default function AssetRiskGraph() {
             </tbody>
           </table>
           <div className="px-5 py-3 border-t border-slate-800 text-[10px] text-slate-600 font-mono">
-            Showing {filtered.length} of {sentraTwin.assets.length} assets · Click a row to expand details
+            Showing {filtered.length} of {allAssets.length} assets · Click a row to expand details
           </div>
         </div>
       )}

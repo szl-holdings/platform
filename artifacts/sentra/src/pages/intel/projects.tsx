@@ -1,8 +1,10 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { ArrowRight, Filter, LayoutGrid, List, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'wouter';
-import { type Project, type ProjectStatus, projects } from '@/data/seed-data';
+import { type Project, type ProjectStatus, projects as fallbackProjects } from '@/data/seed-data';
+import { listResearchProjects } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const statusLabels: Record<ProjectStatus, string> = {
   research: 'Research',
@@ -172,7 +174,10 @@ export default function Projects() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
   const [domainFilter, setDomainFilter] = useState<string>('all');
 
-  const domains = useMemo(() => [...new Set(projects.map((p) => p.domain))], []);
+  const fetcher = useCallback(() => listResearchProjects(), []);
+  const { data: projects, source } = useApiQuery<Project[]>(fetcher, 'projects', fallbackProjects);
+
+  const domains = useMemo(() => [...new Set(projects.map((p) => p.domain))], [projects]);
 
   const filtered = useMemo(() => {
     return projects.filter((p) => {
@@ -196,11 +201,14 @@ export default function Projects() {
 
   return (
     <div className="p-6 lg:p-8 space-y-5 max-w-[1600px]">
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Project Pipeline</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Research initiatives tracked from hypothesis to deployed model
-        </p>
+      <div className="flex items-center gap-3">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Project Pipeline</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Research initiatives tracked from hypothesis to deployed model
+          </p>
+        </div>
+        <SourceBadge source={source} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

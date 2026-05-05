@@ -1,10 +1,22 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { DataProvenance } from '@/lib/data-provenance';
 import { Clock, Database, RotateCcw, } from 'lucide-react';
-import { sentraTwin } from '@/data/sentra-twin';
+import { sentraTwin as fallbackTwin } from '@/data/sentra-twin';
+import { listCyberTwinAssets, getCyberTwinPosture, type CyberTwinAsset } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function RecoveryReadiness() {
-  const posture = sentraTwin.recoveryPosture;
+  const assetFetcher = useCallback(() => listCyberTwinAssets(), []);
+  const { data: assets, source } = useApiQuery<CyberTwinAsset[]>(assetFetcher, 'assets', fallbackTwin.assets as CyberTwinAsset[]);
+
+  const [posture, setPosture] = useState(fallbackTwin.recoveryPosture);
+  useEffect(() => {
+    let cancelled = false;
+    getCyberTwinPosture().then((r) => {
+      if (!cancelled && r && typeof r.recoveryPosture === 'number') setPosture(r.recoveryPosture);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -12,7 +24,7 @@ export default function RecoveryReadiness() {
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-display font-bold text-slate-100">Recovery Readiness</h1>
-            <DataProvenance source="seed" label="Demo Data" />
+            <SourceBadge source={source} />
           </div>
           <p className="text-slate-400 mt-1">Verification of backup integrity and RTO/RPO targets</p>
         </div>
@@ -59,7 +71,7 @@ export default function RecoveryReadiness() {
           </div>
           <p className="text-sm text-slate-400 px-4">
             Current recovery posture is degraded due to stale backups on{' '}
-            {sentraTwin.assets.filter((a) => a.backupStatus === 'stale').length} critical servers.
+            {assets.filter((a) => a.backupStatus === 'stale').length} critical servers.
           </p>
         </div>
 
@@ -70,7 +82,7 @@ export default function RecoveryReadiness() {
               Backup Staleness Indicators
             </h2>
             <div className="space-y-4">
-              {sentraTwin.assets
+              {assets
                 .filter((a) => a.backupStatus !== 'current')
                 .map((asset) => (
                   <div key={asset.id} className="sentra-card p-4 flex justify-between items-center">

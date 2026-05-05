@@ -22,7 +22,7 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Line,
   LineChart,
@@ -32,7 +32,24 @@ import {
   YAxis,
 } from 'recharts';
 import { Link } from 'wouter';
-import { experiments, getResearchHealthScore, insights, models, projects } from '@/data/seed-data';
+import {
+  type Experiment,
+  type Insight,
+  type Model,
+  type Project,
+  experiments as fallbackExperiments,
+  getResearchHealthScore,
+  insights as fallbackInsights,
+  models as fallbackModels,
+  projects as fallbackProjects,
+} from '@/data/seed-data';
+import {
+  listResearchExperiments,
+  listResearchInsights,
+  listResearchModels,
+  listResearchProjects,
+} from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 function LiveClock() {
   return (
@@ -556,12 +573,21 @@ function ModelPerformanceCharts() {
 }
 
 export default function Dashboard() {
+  const projFetcher = useCallback(() => listResearchProjects(), []);
+  const expFetcher = useCallback(() => listResearchExperiments(), []);
+  const modelFetcher = useCallback(() => listResearchModels(), []);
+  const insightFetcher = useCallback(() => listResearchInsights(), []);
+  const { data: projects, source } = useApiQuery<Project[]>(projFetcher, 'projects', fallbackProjects);
+  const { data: experiments } = useApiQuery<Experiment[]>(expFetcher, 'experiments', fallbackExperiments);
+  const { data: models } = useApiQuery<Model[]>(modelFetcher, 'models', fallbackModels);
+  const { data: insights } = useApiQuery<Insight[]>(insightFetcher, 'insights', fallbackInsights);
+
   const healthScore = getResearchHealthScore();
   const activeProjects = projects.length;
   const runningExperiments = experiments.filter((e) => e.status === 'running').length;
   const deployedModels = models.filter((m) => m.status === 'production').length;
   const highImpactInsights = insights.filter((i) => i.impact === 'high').length;
-  const meanAcc = (projects.reduce((s, p) => s + p.accuracy, 0) / projects.length).toFixed(1);
+  const meanAcc = projects.length > 0 ? (projects.reduce((s, p) => s + p.accuracy, 0) / projects.length).toFixed(1) : '0';
 
   const recentExperiments = experiments
     .filter((e) => e.status === 'running' || e.status === 'completed')
@@ -622,7 +648,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DataStateBadge state="seeded" label="Seed Data" />
+          <SourceBadge source={source} />
           <LiveClock />
         </div>
       </div>

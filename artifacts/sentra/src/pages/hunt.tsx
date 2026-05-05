@@ -12,9 +12,11 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'wouter';
-import { HUNTS, type Hunt } from '@/data/hunt-data';
+import { HUNTS as fallbackHunts, type Hunt } from '@/data/hunt-data';
+import { listHunts } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const SEVERITY_CONFIG = {
   critical: {
@@ -153,6 +155,9 @@ export default function HuntPage() {
   const [filter, setFilter] = useState<'all' | Hunt['severity']>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const fetcher = useCallback(() => listHunts(), []);
+  const { data: HUNTS, source } = useApiQuery<Hunt[]>(fetcher, 'hunts', fallbackHunts);
+
   const filtered = filter === 'all' ? HUNTS : HUNTS.filter((h) => h.severity === filter);
 
   const handleRefresh = () => {
@@ -162,7 +167,7 @@ export default function HuntPage() {
 
   const criticalCount = HUNTS.filter((h) => h.severity === 'critical').length;
   const totalSignals = HUNTS.reduce((s, h) => s + h.signalCount, 0);
-  const avgFp = Math.round((HUNTS.reduce((s, h) => s + h.falsePositiveRate, 0) / HUNTS.length) * 100);
+  const avgFp = HUNTS.length > 0 ? Math.round((HUNTS.reduce((s, h) => s + h.falsePositiveRate, 0) / HUNTS.length) * 100) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -171,6 +176,7 @@ export default function HuntPage() {
           <div className="flex items-center gap-3">
             <Brain className="w-5 h-5 text-[#f5f5f5]/60" />
             <h1 className="text-2xl font-display font-bold text-slate-100">Threat Hunt</h1>
+            <SourceBadge source={source} />
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] uppercase tracking-wider">
               Agentic Proposer
             </span>

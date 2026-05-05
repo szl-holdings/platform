@@ -7,13 +7,15 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PageHeader, SeverityChip } from '@/lib/data-provenance';
 import {
-  microsystemIntegrityRecords,
+  microsystemIntegrityRecords as fallbackRecords,
   type AttestationResult,
   type MicrosystemIntegrityRecord,
 } from '@/data/quantum-resilience';
+import { listMicrosystemDevices } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const attestColor: Record<AttestationResult, string> = {
   pass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -141,24 +143,27 @@ function DeviceCard({ record }: { record: MicrosystemIntegrityRecord }) {
 }
 
 export default function MicrosystemIntegrity() {
+  const fetcher = useCallback(() => listMicrosystemDevices(), []);
+  const { data: microsystemIntegrityRecords, source } = useApiQuery<MicrosystemIntegrityRecord[]>(fetcher, 'devices', fallbackRecords);
+
   const passing = microsystemIntegrityRecords.filter((r) => r.attestationResult === 'pass').length;
   const failing = microsystemIntegrityRecords.filter((r) => r.attestationResult === 'fail').length;
   const sideChannelTotal = microsystemIntegrityRecords.reduce(
     (a, r) => a + r.sideChannelAlerts.length,
     0
   );
-  const avgAnomaly = Math.round(
+  const avgAnomaly = microsystemIntegrityRecords.length > 0 ? Math.round(
     microsystemIntegrityRecords.reduce((a, r) => a + r.anomalyScore, 0) /
       microsystemIntegrityRecords.length
-  );
+  ) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Microsystem Integrity Monitor"
         subtitle="Firmware attestation, hardware root of trust verification, and side-channel attack detection"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

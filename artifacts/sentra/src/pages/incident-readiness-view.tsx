@@ -1,5 +1,8 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Plug, Shield } from 'lucide-react';
-import { exposureTwins, incidentReadiness, threatTwins } from '@/data/threat-twin';
+import { useCallback } from 'react';
+import { exposureTwins as fallbackExposures, incidentReadiness as fallbackReadiness, threatTwins as fallbackThreats } from '@/data/threat-twin';
+import { listThreatTwinExposures, listThreatTwinReadiness, listThreatTwinThreats } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const _ACCENT = 'hsl(220 72% 56%)';
 
@@ -134,9 +137,16 @@ const EXTERNAL_SOURCES = [
 ];
 
 export default function IncidentReadinessView() {
-  const overallScore = Math.round(
+  const readinessFetcher = useCallback(() => listThreatTwinReadiness(), []);
+  const threatFetcher = useCallback(() => listThreatTwinThreats(), []);
+  const exposureFetcher = useCallback(() => listThreatTwinExposures(), []);
+  const { data: incidentReadiness, source } = useApiQuery<typeof fallbackReadiness>(readinessFetcher, 'readiness', fallbackReadiness);
+  const { data: threatTwins } = useApiQuery<typeof fallbackThreats>(threatFetcher, 'threats', fallbackThreats);
+  const { data: exposureTwins } = useApiQuery<typeof fallbackExposures>(exposureFetcher, 'exposures', fallbackExposures);
+
+  const overallScore = incidentReadiness.length > 0 ? Math.round(
     incidentReadiness.reduce((sum, a) => sum + a.score, 0) / incidentReadiness.length,
-  );
+  ) : 0;
   const overallColor = overallScore >= 80 ? '#40856a' : overallScore >= 60 ? '#c08a2c' : '#c04a2a';
   const criticalThreats = threatTwins.filter(
     (t) => t.severity === 'critical' && t.status !== 'closed',

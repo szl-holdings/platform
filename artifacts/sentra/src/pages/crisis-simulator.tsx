@@ -15,15 +15,18 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'wouter';
 import {
-  CRISIS_SCENARIOS,
+  CRISIS_SCENARIOS as fallbackScenarios,
   SCENARIO_CATEGORY_LABELS,
   THREAT_ACTOR_LABELS,
   type AttackCategory,
+  type CrisisScenario,
   type ThreatActor,
 } from '@/data/crisis-scenarios';
+import { listCrisisScenarios } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const CATEGORY_COLORS: Record<string, string> = {
   ransomware: 'text-red-400 border-red-500/30 bg-red-500/10',
@@ -76,6 +79,9 @@ export default function CrisisSimulator() {
   const [filters, setFilters] = useState<FilterState>({ category: 'all', actor: 'all', difficulty: 'all' });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
+  const fetcher = useCallback(() => listCrisisScenarios(), []);
+  const { data: CRISIS_SCENARIOS, source } = useApiQuery<CrisisScenario[]>(fetcher, 'scenarios', fallbackScenarios);
+
   const filtered = CRISIS_SCENARIOS.filter((s) => {
     if (filters.category !== 'all' && s.category !== filters.category) return false;
     if (filters.actor !== 'all' && s.threatActor !== filters.actor) return false;
@@ -95,6 +101,7 @@ export default function CrisisSimulator() {
             <span className="text-[10px] font-mono uppercase tracking-widest text-red-400">
               CLASSIFIED · SIMULATION MODE
             </span>
+            <SourceBadge source={source} />
           </div>
           <h1 className="text-3xl font-display font-bold text-slate-100">Crisis Simulation Engine</h1>
           <p className="text-slate-400 mt-1 max-w-2xl">

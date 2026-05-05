@@ -1,7 +1,9 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AlertTriangle, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
-import { type InsightCategory, insights } from '@/data/seed-data';
+import { useCallback, useState } from 'react';
+import { type InsightCategory, type Insight, insights as fallbackInsights } from '@/data/seed-data';
+import { listResearchInsights } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const categoryConfig: Record<
   InsightCategory,
@@ -123,6 +125,9 @@ export default function Insights() {
   const [categoryFilter, setCategoryFilter] = useState<InsightCategory | 'all'>('all');
   const [impactFilter, setImpactFilter] = useState<string>('all');
 
+  const fetcher = useCallback(() => listResearchInsights(), []);
+  const { data: insights, source } = useApiQuery<Insight[]>(fetcher, 'insights', fallbackInsights);
+
   const filtered = insights.filter((i) => {
     const matchCat = categoryFilter === 'all' || i.category === categoryFilter;
     const matchImpact = impactFilter === 'all' || i.impact === impactFilter;
@@ -139,11 +144,14 @@ export default function Insights() {
 
   return (
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px]">
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Research Insights</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Findings from experiment results, model evaluations, and cross-project analysis
-        </p>
+      <div className="flex items-center gap-3">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Research Insights</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Findings from experiment results, model evaluations, and cross-project analysis
+          </p>
+        </div>
+        <SourceBadge source={source} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

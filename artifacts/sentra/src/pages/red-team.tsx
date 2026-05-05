@@ -17,8 +17,10 @@ import {
   Target,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
-import { RED_TEAM_SCENARIOS, type RedTeamScenario } from '@/data/hunt-data';
+import { useCallback, useState } from 'react';
+import { RED_TEAM_SCENARIOS as fallbackScenarios, type RedTeamScenario } from '@/data/hunt-data';
+import { listRedTeamScenarios } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const CATEGORY_CONFIG: Record<RedTeamScenario['category'], { label: string; icon: typeof Flame; color: string }> = {
   ransomware: { label: 'Ransomware', icon: Flame, color: 'text-red-400' },
@@ -305,6 +307,9 @@ function ScenarioCard({ scenario }: { scenario: RedTeamScenario }) {
 }
 
 export default function RedTeamPage() {
+  const fetcher = useCallback(() => listRedTeamScenarios(), []);
+  const { data: RED_TEAM_SCENARIOS, source } = useApiQuery<RedTeamScenario[]>(fetcher, 'scenarios', fallbackScenarios);
+
   const totalScenarios = RED_TEAM_SCENARIOS.length;
   const totalRuns = RED_TEAM_SCENARIOS.reduce((s, sc) => s + sc.runCount, 0);
   const scenariosWithGaps = RED_TEAM_SCENARIOS.filter((sc) => sc.coverageGaps.length > 0 && sc.runCount > 0).length;
@@ -315,6 +320,7 @@ export default function RedTeamPage() {
         <div className="flex items-center gap-3 mb-1">
           <Crosshair className="w-5 h-5 text-[#f5f5f5]/60" />
           <h1 className="text-2xl font-display font-bold text-slate-100">Red-Team Scenario Library</h1>
+          <SourceBadge source={source} />
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 uppercase tracking-wider">
             Adversarial Simulation
           </span>

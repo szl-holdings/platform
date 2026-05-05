@@ -10,9 +10,11 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'wouter';
-import { REMEDIATION_PLANS, type RemediationPlan, type RemediationStep } from '@/data/hunt-data';
+import { REMEDIATION_PLANS as fallbackPlans, type RemediationPlan, type RemediationStep } from '@/data/hunt-data';
+import { listRemediationPlans } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 import { approveRemediation } from '@/lib/sentra-api';
 
 const STATUS_CONFIG: Record<RemediationPlan['status'], { label: string; color: string; bg: string; border: string }> = {
@@ -286,7 +288,8 @@ function PlanCard({ plan }: { plan: RemediationPlan }) {
 }
 
 export default function RemediationPlansPage() {
-  const [plans] = useState(REMEDIATION_PLANS);
+  const fetcher = useCallback(() => listRemediationPlans(), []);
+  const { data: plans, source } = useApiQuery<RemediationPlan[]>(fetcher, 'plans', fallbackPlans);
 
   const draftCount = plans.filter((p) => p.status === 'draft').length;
   const approvedCount = plans.filter((p) => p.status === 'approved').length;
@@ -298,6 +301,7 @@ export default function RemediationPlansPage() {
         <div className="flex items-center gap-3 mb-1">
           <ShieldCheck className="w-5 h-5 text-[#f5f5f5]/60" />
           <h1 className="text-2xl font-display font-bold text-slate-100">Remediation Plans</h1>
+          <SourceBadge source={source} />
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 uppercase tracking-wider">
             Agentic Operator
           </span>

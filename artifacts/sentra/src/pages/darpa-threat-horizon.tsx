@@ -6,13 +6,15 @@ import {
   Telescope,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PageHeader } from '@/lib/data-provenance';
 import {
-  threatHorizonVectors,
+  threatHorizonVectors as fallbackVectors,
   type ThreatHorizonVector,
   type ThreatMaturity,
 } from '@/data/quantum-resilience';
+import { listThreatHorizonVectors } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const maturityColor: Record<ThreatMaturity, string> = {
   theoretical: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
@@ -177,6 +179,9 @@ function VectorCard({ vector }: { vector: ThreatHorizonVector }) {
 export default function DarpaThreatHorizon() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
+  const fetcher = useCallback(() => listThreatHorizonVectors(), []);
+  const { data: threatHorizonVectors, source } = useApiQuery<ThreatHorizonVector[]>(fetcher, 'vectors', fallbackVectors);
+
   const activelyExploited = threatHorizonVectors.filter(
     (v) => v.maturity === 'actively_exploited'
   ).length;
@@ -207,8 +212,8 @@ export default function DarpaThreatHorizon() {
       <PageHeader
         title="DARPA Threat Horizon"
         subtitle="Strategic intelligence on emerging threat vectors from advanced R&D programs"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

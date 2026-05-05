@@ -10,7 +10,9 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { listPhotonicTiers, listPhotonicRoutingDecisions, listPhotonicResearchSignals } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 type ComputeTier = {
   id: string;
@@ -46,7 +48,7 @@ type ResearchSignal = {
   trl: number;
 };
 
-const TIERS: ComputeTier[] = [
+const FALLBACK_TIERS: ComputeTier[] = [
   {
     id: 'cpu-baseline',
     label: 'CPU Baseline',
@@ -88,7 +90,7 @@ const TIERS: ComputeTier[] = [
   },
 ];
 
-const ROUTING_TEMPLATES: Omit<RoutingDecision, 'id' | 'ts'>[] = [
+const FALLBACK_ROUTING_TEMPLATES: Omit<RoutingDecision, 'id' | 'ts'>[] = [
   { workload: 'NTLM relay candidate from CVE-2024-21412 alert', selectedTier: 'gpu-production', reason: 'Multi-step reasoning chain required (3+ tools)', latencyMs: 92 },
   { workload: 'Inline TLS handshake fingerprint scoring', selectedTier: 'photonic-experimental', reason: 'Sub-ms latency budget; classifier-only workload', latencyMs: 0.6 },
   { workload: 'Quarterly covenant audit (172 policies)', selectedTier: 'cpu-baseline', reason: 'Batch job; cost-sensitive; no latency target', latencyMs: 380 },
@@ -99,7 +101,7 @@ const ROUTING_TEMPLATES: Omit<RoutingDecision, 'id' | 'ts'>[] = [
   { workload: 'Quarterly governance posture rollup', selectedTier: 'cpu-baseline', reason: 'Long-running, non-interactive', latencyMs: 410 },
 ];
 
-const RESEARCH: ResearchSignal[] = [
+const FALLBACK_RESEARCH: ResearchSignal[] = [
   {
     id: 'mit-photonic-dnn-2024',
     source: 'MIT Lincoln Laboratory',
@@ -157,22 +159,32 @@ function makeDecision(template: Omit<RoutingDecision, 'id' | 'ts'>, idx: number)
   return { ...template, id: `RD-${String(idx).padStart(4, '0')}`, ts };
 }
 
-const PHOTONIC_TIER = TIERS.find((t) => t.id === 'photonic-experimental') ?? TIERS[2];
-const GPU_TIER = TIERS.find((t) => t.id === 'gpu-production') ?? TIERS[1];
-const PHOTONIC_SPEEDUP = Math.round(GPU_TIER.latencyP50Ms / PHOTONIC_TIER.latencyP50Ms);
-const PHOTONIC_ENERGY_REDUCTION = Math.round((GPU_TIER.energyMjPerInference / PHOTONIC_TIER.energyMjPerInference) * 10) / 10;
-
 export default function PhotonicInference() {
   const [activeTab, setActiveTab] = useState<TabId>('tiers');
+
+  const tierFetcher = useCallback(() => listPhotonicTiers(), []);
+  const researchFetcher = useCallback(() => listPhotonicResearchSignals(), []);
+  const { data: tiers, source } = useApiQuery<ComputeTier[]>(tierFetcher, 'tiers', FALLBACK_TIERS);
+  const { data: research } = useApiQuery<ResearchSignal[]>(researchFetcher, 'signals', FALLBACK_RESEARCH);
+
   const [decisions, setDecisions] = useState<RoutingDecision[]>(() =>
-    ROUTING_TEMPLATES.map((t, i) => makeDecision(t, i)),
+    FALLBACK_ROUTING_TEMPLATES.map((t, i) => makeDecision(t, i)),
   );
-  const decisionCounter = useRef<number>(ROUTING_TEMPLATES.length);
+  const decisionCounter = useRef<number>(FALLBACK_ROUTING_TEMPLATES.length);
+
+  useEffect(() => {
+    listPhotonicRoutingDecisions().then((res) => {
+      if (res && 'decisions' in res && Array.isArray(res.decisions) && res.decisions.length > 0) {
+        setDecisions(res.decisions as RoutingDecision[]);
+        decisionCounter.current = res.decisions.length;
+      }
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
       setDecisions((prev) => {
-        const template = ROUTING_TEMPLATES[Math.floor(Math.random() * ROUTING_TEMPLATES.length)];
+        const template = FALLBACK_ROUTING_TEMPLATES[Math.floor(Math.random() * FALLBACK_ROUTING_TEMPLATES.length)];
         decisionCounter.current += 1;
         const newId = `RD-${String(decisionCounter.current).padStart(4, '0')}`;
         const next = [...prev, { ...template, id: newId, ts: new Date().toISOString() }];
@@ -181,6 +193,12 @@ export default function PhotonicInference() {
     }, 6000);
     return () => clearInterval(id);
   }, []);
+
+  const photonicTier = tiers.find((t) => t.id === 'photonic-experimental') ?? tiers[2] ?? FALLBACK_TIERS[2];
+  const gpuTier = tiers.find((t) => t.id === 'gpu-production') ?? tiers[1] ?? FALLBACK_TIERS[1];
+  const photonicSpeedup = Math.round(gpuTier.latencyP50Ms / photonicTier.latencyP50Ms);
+  const photonicEnergyReduction = Math.round((gpuTier.energyMjPerInference / photonicTier.energyMjPerInference) * 10) / 10;
+
   const recentPhotonicShare = Math.round(
     (decisions.filter((d) => d.selectedTier === 'photonic-experimental').length / decisions.length) * 100,
   );
@@ -192,6 +210,7 @@ export default function PhotonicInference() {
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-[20px] font-medium text-white">Photonic Inference Tier</h1>
             <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border bg-purple-500/10 border-purple-500/20 text-purple-400">DARPA PRISM / PIPES / LUMOS</span>
+            <SourceBadge source={source} />
           </div>
           <p className="text-[13px] text-white/40">Hardware-class model routing for sub-millisecond threat inference and line-rate packet classification.</p>
         </div>
@@ -207,17 +226,17 @@ export default function PhotonicInference() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
           <div className="text-[10px] font-mono uppercase tracking-wider text-white/30 mb-1">Photonic latency p50</div>
-          <div className="text-[24px] font-light text-purple-400 leading-none">{PHOTONIC_TIER.latencyP50Ms}<span className="text-[12px] text-white/40 ml-1">ms</span></div>
-          <div className="text-[10px] text-white/30 mt-1">{PHOTONIC_SPEEDUP}× faster than GPU tier</div>
+          <div className="text-[24px] font-light text-purple-400 leading-none">{photonicTier.latencyP50Ms}<span className="text-[12px] text-white/40 ml-1">ms</span></div>
+          <div className="text-[10px] text-white/30 mt-1">{photonicSpeedup}× faster than GPU tier</div>
         </div>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
           <div className="text-[10px] font-mono uppercase tracking-wider text-white/30 mb-1">Photonic throughput</div>
-          <div className="text-[24px] font-light text-purple-400 leading-none">{PHOTONIC_TIER.throughputQps.toLocaleString()}<span className="text-[12px] text-white/40 ml-1">qps</span></div>
+          <div className="text-[24px] font-light text-purple-400 leading-none">{photonicTier.throughputQps.toLocaleString()}<span className="text-[12px] text-white/40 ml-1">qps</span></div>
           <div className="text-[10px] text-white/30 mt-1">Wire-speed classification</div>
         </div>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
           <div className="text-[10px] font-mono uppercase tracking-wider text-white/30 mb-1">Energy reduction</div>
-          <div className="text-[24px] font-light text-emerald-400 leading-none">{PHOTONIC_ENERGY_REDUCTION}<span className="text-[12px] text-white/40 ml-1">×</span></div>
+          <div className="text-[24px] font-light text-emerald-400 leading-none">{photonicEnergyReduction}<span className="text-[12px] text-white/40 ml-1">×</span></div>
           <div className="text-[10px] text-white/30 mt-1">vs GPU per inference</div>
         </div>
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
@@ -254,7 +273,7 @@ export default function PhotonicInference() {
 
       {activeTab === 'tiers' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {TIERS.map((tier) => {
+          {tiers.map((tier) => {
             const Icon = TIER_ICONS[tier.classification];
             return (
               <div key={tier.id} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5 space-y-3">
@@ -314,7 +333,7 @@ export default function PhotonicInference() {
           </div>
           <div className="divide-y divide-white/[0.04]">
             {[...decisions].reverse().map((d) => {
-              const tier = TIERS.find((t) => t.id === d.selectedTier);
+              const tier = tiers.find((t) => t.id === d.selectedTier);
               const tierClass = tier ? TIER_COLORS[tier.classification] : TIER_COLORS.baseline;
               return (
                 <div key={d.id} className="p-3 hover:bg-white/[0.02] transition-colors">
@@ -358,7 +377,7 @@ export default function PhotonicInference() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {RESEARCH.map((r) => (
+            {research.map((r) => (
               <div key={r.id} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">

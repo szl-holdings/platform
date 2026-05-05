@@ -2,7 +2,7 @@ import { ActivityFeed, CommentThread } from '@szl-holdings/shared-ui/collaborati
 import { ExportButton } from '@szl-holdings/shared-ui/data-export';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -12,7 +12,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { type Experiment, experiments, projects } from '@/data/seed-data';
+import { type Experiment, type Project, experiments as fallbackExperiments, projects as fallbackProjects } from '@/data/seed-data';
+import { listResearchExperiments, listResearchProjects } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const statusColors: Record<string, string> = {
   running: 'text-[#c9b787] bg-[#c9b787]/10',
@@ -25,10 +27,12 @@ function ExperimentRow({
   experiment,
   isExpanded,
   onToggle,
+  projects,
 }: {
   experiment: Experiment;
   isExpanded: boolean;
   onToggle: () => void;
+  projects: Project[];
 }) {
   const project = projects.find((p) => p.id === experiment.projectId);
   const lastMetric = experiment.metrics[experiment.metrics.length - 1];
@@ -192,7 +196,7 @@ function ExperimentRow({
   );
 }
 
-function ComparisonTable() {
+function ComparisonTable({ experiments, projects }: { experiments: Experiment[]; projects: Project[] }) {
   const completedExps = experiments.filter((e) => e.status === 'completed' && e.metrics.length > 0);
   return (
     <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5 overflow-x-auto">
@@ -245,6 +249,11 @@ export default function Experiments() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  const expFetcher = useCallback(() => listResearchExperiments(), []);
+  const projFetcher = useCallback(() => listResearchProjects(), []);
+  const { data: experiments, source } = useApiQuery<Experiment[]>(expFetcher, 'experiments', fallbackExperiments);
+  const { data: projects } = useApiQuery<Project[]>(projFetcher, 'projects', fallbackProjects);
+
   const filtered =
     statusFilter === 'all' ? experiments : experiments.filter((e) => e.status === statusFilter);
 
@@ -259,11 +268,14 @@ export default function Experiments() {
   return (
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Compare training runs and surface the experiments that advance model performance
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Compare training runs and surface the experiments that advance model performance
+            </p>
+          </div>
+          <SourceBadge source={source} />
         </div>
         <ExportButton
           data={experiments.map((e) => {
@@ -310,11 +322,12 @@ export default function Experiments() {
             experiment={exp}
             isExpanded={expandedId === exp.id}
             onToggle={() => setExpandedId(expandedId === exp.id ? null : exp.id)}
+            projects={projects}
           />
         ))}
       </div>
 
-      <ComparisonTable />
+      <ComparisonTable experiments={experiments} projects={projects} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ActivityFeed entityType="experiment" title="Research Activity Feed" limit={8} compact />

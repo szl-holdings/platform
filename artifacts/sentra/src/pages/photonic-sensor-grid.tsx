@@ -7,12 +7,15 @@ import {
   Wifi,
   XCircle,
 } from 'lucide-react';
+import { useCallback } from 'react';
 import { PageHeader } from '@/lib/data-provenance';
 import {
-  photonicSensorNodes,
+  photonicSensorNodes as fallbackNodes,
   type PhotonicSensorNode,
   type SensorHealth,
 } from '@/data/quantum-resilience';
+import { listPhotonicSensorNodes } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const healthColor: Record<SensorHealth, string> = {
   optimal: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -158,23 +161,26 @@ function SensorCard({ node }: { node: PhotonicSensorNode }) {
 }
 
 export default function PhotonicSensorGrid() {
+  const fetcher = useCallback(() => listPhotonicSensorNodes(), []);
+  const { data: photonicSensorNodes, source } = useApiQuery<PhotonicSensorNode[]>(fetcher, 'nodes', fallbackNodes);
+
   const optimal = photonicSensorNodes.filter((n) => n.health === 'optimal').length;
   const compromised = photonicSensorNodes.filter((n) => n.health === 'compromised').length;
   const eavesdropping = photonicSensorNodes.filter((n) => n.eavesdroppingDetected).length;
-  const avgQber =
+  const avgQber = photonicSensorNodes.length > 0 ?
     Math.round(
       (photonicSensorNodes.reduce((a, n) => a + n.quantumBitErrorRate, 0) /
         photonicSensorNodes.length) *
         10
-    ) / 10;
+    ) / 10 : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Photonic & Quantum Sensor Grid"
         subtitle="Photonic interconnect monitoring, QKD channel security, and sensor calibration tracking"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

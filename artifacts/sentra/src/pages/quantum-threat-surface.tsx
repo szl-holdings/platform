@@ -8,13 +8,15 @@ import {
   ShieldAlert,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PageHeader, SeverityChip } from '@/lib/data-provenance';
 import {
-  quantumCryptoInventory,
+  quantumCryptoInventory as fallbackInventory,
   type MigrationStatus,
   type QuantumCryptoInventory,
 } from '@/data/quantum-resilience';
+import { listPqcEcosystem } from '@/lib/sentra-api';
+import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
 
 const migrationColor: Record<MigrationStatus, string> = {
   migrated: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -123,19 +125,22 @@ function InventoryRow({ item }: { item: QuantumCryptoInventory }) {
 }
 
 export default function QuantumThreatSurface() {
+  const fetcher = useCallback(() => listPqcEcosystem(), []);
+  const { data: quantumCryptoInventory, source } = useApiQuery<QuantumCryptoInventory[]>(fetcher, 'ecosystem', fallbackInventory);
+
   const migrated = quantumCryptoInventory.filter((i) => i.migrationStatus === 'migrated').length;
   const inProgress = quantumCryptoInventory.filter((i) => i.migrationStatus === 'in_progress').length;
   const hndlCount = quantumCryptoInventory.filter((i) => i.harvestNowDecryptLaterRisk).length;
   const criticalCount = quantumCryptoInventory.filter((i) => i.quantumRiskLevel === 'critical').length;
-  const pct = Math.round((migrated / quantumCryptoInventory.length) * 100);
+  const pct = quantumCryptoInventory.length > 0 ? Math.round((migrated / quantumCryptoInventory.length) * 100) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         title="Quantum Threat Surface"
         subtitle="Post-quantum cryptography migration readiness and quantum attack timeline projections"
-        provenance="seed"
-        provenanceLabel="Demo Data"
+        provenance={source}
+        provenanceLabel={source === 'live' ? 'Live API' : 'Seed Data'}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
