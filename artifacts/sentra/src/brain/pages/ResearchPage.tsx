@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
-import { RESEARCH_LIBRARY, LEARNING_LOOP_STATS } from '../data/researchLibrary';
+import { useState, useMemo, useEffect } from 'react';
+import { LEARNING_LOOP_STATS } from '../data/researchLibrary';
 import type { ResearchOrg, ResearchTag } from '../data/researchLibrary';
+import { getMergedResearchLibrary } from '../data/mergedResearch';
 
 const ALL_ORGS: ResearchOrg[] = ['Anthropic', 'OpenAI', 'DeepMind', 'NIST', 'DARPA', 'NSA', 'Hugging Face', 'MIT', 'Stanford', 'MITRE', 'Oxford', 'NVIDIA'];
 const ALL_TAGS: ResearchTag[] = ['alignment', 'safety', 'governance', 'optimization', 'robustness', 'interpretability', 'multi-agent', 'constitutional-ai', 'red-teaming', 'rl', 'evaluation', 'autonomy', 'ising', 'quantum'];
@@ -27,10 +28,23 @@ export function ResearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showLearningLoop, setShowLearningLoop] = useState(false);
+  // Merged view (static seed + mutable evolved entries) is computed in
+  // component state, refreshed when the incident pipeline writes a new
+  // entry or when storage changes from another tab.
+  const [RESEARCH_LIBRARY, setLibrary] = useState(() => getMergedResearchLibrary());
+  useEffect(() => {
+    const refresh = () => setLibrary(getMergedResearchLibrary());
+    window.addEventListener('storage', refresh);
+    window.addEventListener('sentra-brain-updated', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('sentra-brain-updated', refresh);
+    };
+  }, []);
 
   const allYears = useMemo(() =>
     [...new Set(RESEARCH_LIBRARY.map(e => e.year))].sort((a, b) => b - a),
-  []);
+  [RESEARCH_LIBRARY]);
 
   const filteredEntries = useMemo(() => {
     return RESEARCH_LIBRARY.filter(e => {

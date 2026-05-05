@@ -382,7 +382,6 @@ router.get('/core/health', async (_req, res) => {
           },
           intelligence: { status: 'ok', version: '2.0.0' },
           beacon: { status: 'ok' },
-          rosie: { status: 'ok' },
           alloy: { status: 'ok' },
           lyte: { status: 'ok' },
         },

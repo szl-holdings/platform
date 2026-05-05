@@ -14,6 +14,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { sentraTwin as fallbackTwin, type CyberAsset, type Incident, type ControlDrift } from '@/data/sentra-twin';
 import { listCyberTwinAssets, listCyberTwinIncidents, listCyberTwinControlDrifts, getCyberTwinPosture } from '@/lib/sentra-api';
 import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
+import { GuardDogBrainPanel } from '@/components/GuardDogBrainPanel';
+import { IncidentPipelineCard } from '@/components/IncidentPipelineCard';
 
 const BASELINE_ENTITIES = [
   {
@@ -283,6 +285,10 @@ export default function Dashboard() {
       </div>
 
       <NLThreatQueryBar />
+
+      <GuardDogBrainPanel />
+
+      <IncidentPipelineCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <PatternOfLifePanel />

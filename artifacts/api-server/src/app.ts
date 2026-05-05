@@ -260,6 +260,38 @@ app.use('/aegis', (req: Request, res: Response) => {
   res.redirect(301, `/sentra${remainder}${qs}`);
 });
 
+// ROSIE deprecation redirect — /rosie/* → /sentra/brain/*
+// ROSIE was folded into Sentra as the "Guard Dog Brain" subsurface. The legacy
+// standalone artifact has been removed; all bookmarks and external links are
+// permanently redirected to the equivalent Sentra brain route. Old ROSIE
+// slugs are translated to their new Sentra brain equivalents:
+//   /             → /optimizer   (primary landing)
+//   /identity     → /constitution (the constitutional clauses page)
+//   /fabric       → /evolution    (the brain-evolution surface)
+//   /proof        → /proofs       (singular legacy → plural ledger page)
+//   /proof/:id    → /proofs/:id
+// All other slugs pass through 1:1 (e.g. /optimizer, /research, /bench).
+const ROSIE_SLUG_MAP: Record<string, string> = {
+  '': '/optimizer',
+  '/': '/optimizer',
+  '/identity': '/constitution',
+  '/fabric': '/evolution',
+  '/proof': '/proofs',
+};
+app.use('/rosie', (req: Request, res: Response) => {
+  const remainder = req.path === '/' ? '' : req.path;
+  const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  let target: string;
+  if (remainder in ROSIE_SLUG_MAP) {
+    target = ROSIE_SLUG_MAP[remainder];
+  } else if (remainder.startsWith('/proof/')) {
+    target = `/proofs/${remainder.slice('/proof/'.length)}`;
+  } else {
+    target = remainder;
+  }
+  res.redirect(301, `/sentra/brain${target}${qs}`);
+});
+
 // --- Substrate MCP gateway proxy ---------------------------------------------
 // Proxies /mcp/* to the substrate-mcp-gateway sidecar (started by start.sh).
 // Mounted before session/csrf middleware so MCP traffic authenticates via

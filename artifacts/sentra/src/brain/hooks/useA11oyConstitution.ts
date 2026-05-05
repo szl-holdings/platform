@@ -50,9 +50,10 @@ function adaptApiClause(raw: {
       existing?.optimizerImplication ??
       'Applies to all ROSIE optimizer runs per A11oy governance mandate.',
     // If the API returns a clause we already have a checkKind for, use it;
-    // otherwise default to 'recommendation-only' (always passes) so unknown
-    // clauses never silently skip evaluation.
-    checkKind: existing?.checkKind ?? 'recommendation-only',
+    // otherwise mark it 'unmapped-fail-closed' so the solver TREATS IT AS A
+    // HARD VIOLATION rather than silently passing. The operator extending
+    // ROSIE must add an executable check for new clauses before they certify.
+    checkKind: existing?.checkKind ?? 'unmapped-fail-closed',
     checkParam: existing?.checkParam,
   };
 }

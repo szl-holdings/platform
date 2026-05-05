@@ -195,20 +195,6 @@ export const registry: BrandRegistry = {
       status: 'development',
       color: '#8b5cf6',
     },
-    {
-      id: 'rosie',
-      name: 'Rosie',
-      tagline: 'Threat & Anomaly Visibility — Incident Command',
-      category: 'Security',
-      oneLiner:
-        'Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence.',
-      description:
-        'Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Integrates government contract intelligence, StateRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.',
-      status: 'live',
-      doctrineRole: 'OBSERVE',
-      link: '/aegis/ops/dashboard',
-      color: '#ef4444',
-    },
   ],
 
   boilerplate: {

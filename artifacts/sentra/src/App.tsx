@@ -236,6 +236,18 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'brain',
+    label: 'Guard Dog Brain',
+    items: [
+      { path: '/brain/optimizer',    label: 'Decision Optimizer',  icon: Sigma,        comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainOptimizerPage }))) },
+      { path: '/brain/research',     label: 'Research Library',    icon: FlaskConical, comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainResearchPage }))) },
+      { path: '/brain/proofs',       label: 'Proof Ledger',        icon: BookLock,     comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainProofsPage }))) },
+      { path: '/brain/constitution', label: 'Constitution',        icon: ShieldCheck,  comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainConstitutionPage }))) },
+      { path: '/brain/evolution',    label: 'Evolution Fabric',    icon: Dna,          comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainEvolutionPage }))) },
+      { path: '/brain/bench',        label: 'Evidence Bench',      icon: Microscope,   comp: L(() => import('@/pages/brain/brain-routes').then((m) => ({ default: m.BrainBenchPage }))), hideFromSidebar: true },
+    ],
+  },
+  {
     id: 'response',
     label: 'Response & Automation',
     items: [

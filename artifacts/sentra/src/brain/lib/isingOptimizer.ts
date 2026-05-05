@@ -490,10 +490,19 @@ export function solve(
         }
         break;
 
+      case 'unmapped-fail-closed':
+        // A clause came back from A11oy that ROSIE has no executable mapping for.
+        // Refuse to certify governance — the operator must extend ROSIE's check
+        // catalog before this clause is honored. This is the fail-closed default.
+        violated = true;
+        detail = 'No executable mapping in ROSIE — clause requires a new GuardrailCheckKind branch';
+        break;
+
       default:
-        // Exhaustiveness guard: any unknown checkKind is treated as non-violated
-        // but logged so it is visible in the trace.
-        violated = false;
+        // Exhaustiveness guard: any genuinely unknown checkKind is also treated
+        // as a hard violation so we never silently pass governance.
+        violated = true;
+        detail = `Unrecognized checkKind "${clause.checkKind}" — fail-closed`;
         break;
     }
 

@@ -16,12 +16,12 @@
  * uses these A11oy-derived seeds as the documented fallback.
  */
 
-import type { ConstitutionClause } from '../../../a11oy/src/data/mythosDoctrine';
+import type { ConstitutionClause } from '../../../../a11oy/src/data/mythosDoctrine';
 import {
   DOCTRINE_VERSION,
   CODE_BEHAVIOR_LABELS,
   RH_WATCHDOG_RULES,
-} from '../../../a11oy/src/data/mythosDoctrine';
+} from '../../../../a11oy/src/data/mythosDoctrine';
 
 export { DOCTRINE_VERSION as CONSTITUTION_VERSION };
 
@@ -35,7 +35,10 @@ export type GuardrailCheckKind =
   | 'recommendation-only'       // always passes — ROSIE never auto-executes decisions
   | 'proof-ledger-required'     // always passes — proof entry guaranteed by architecture
   | 'gini-fairness'             // fail if Gini coefficient of assignments > 0.6
-  | 'coverage-diversity';       // fail if any single value takes > 70% of assignments
+  | 'coverage-diversity'        // fail if any single value takes > 70% of assignments
+  | 'unmapped-fail-closed';     // sentinel for clauses returned by A11oy that ROSIE has
+                                // no executable mapping for — ALWAYS fails so the brain
+                                // never silently passes governance for unknown rules.
 
 export interface RosieGuardrailClause extends ConstitutionClause {
   binding: 'inviolable' | 'strong' | 'default';

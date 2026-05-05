@@ -35,7 +35,6 @@ export const PLATFORM_APPS = [
   { slug: 'a11oy', name: 'A11oy — Decision Intelligence', icon: 'Sparkles', color: '#c9b787' },
   { slug: 'vessels', name: 'SEXTANT Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
   { slug: 'beacon', name: 'DOMAINE', icon: 'BarChart3', color: '#0ea5e9' },
-  { slug: 'rosie', name: 'PARAGON Operations', icon: 'AlertTriangle', color: '#ef4444' },
   { slug: 'carlota-jo', name: 'Carlota Jo Advisory', icon: 'Crown', color: '#f43f5e' },
   { slug: 'aegis', name: 'PARAGON Control Plane', icon: 'Shield', color: '#10b981' },
   { slug: 'career', name: 'Career — Founder Identity', icon: 'Globe', color: '#6366f1' },
@@ -173,17 +172,6 @@ export const APP_INTEGRATIONS: Record<
       'Microsoft SharePoint Compliance Evidence Library',
     ],
     doctrineRole: 'DECIDE',
-  },
-  rosie: {
-    connectors: ['ai', 'monitoring', 'posthog', 'slack', 'gmail'],
-    description:
-      'PARAGON Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command.',
-    liveFeeds: [
-      'USAspending.gov Federal Contracts',
-      'StateRAMP Authorized Products',
-      'SAM.gov Contract Pipeline',
-    ],
-    doctrineRole: 'OBSERVE',
   },
   beacon: {
     connectors: ['ai', 'monitoring', 'storage'],

@@ -47,7 +47,10 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/pulse/', port: PULSE_PORT },
   { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
   { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
-  { prefix: '/rosie/', port: ROSIE_PORT },
+  // ROSIE is no longer a standalone artifact — it was folded into Sentra as
+  // the "Guard Dog Brain" (see /sentra/brain/*). Legacy /rosie/* requests are
+  // routed to the api-server which issues a 301 to /sentra/brain/*.
+  { prefix: '/rosie/', port: API_PORT },
 ];
 
 // ─── Diagnostics state ────────────────────────────────────────────────────────
