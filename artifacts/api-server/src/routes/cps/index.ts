@@ -26,6 +26,7 @@ import {
   type CpsPrincipal,
 } from '../../lib/domain-services/cps/index.js';
 import { FLAGSHIP_PAYLOADS } from '../../lib/domain-services/cps/payloads.js';
+import { checkPayloadMaturityGate } from '../../jobs/adversary-emulation-loop.js';
 
 for (const payload of FLAGSHIP_PAYLOADS) {
   registerPayload(payload);
@@ -161,6 +162,19 @@ router.post(
             'FORBIDDEN',
           );
           return;
+        }
+
+        if (maturityMode === 'supervised-auto' || maturityMode === 'autonomous') {
+          const gate = await checkPayloadMaturityGate(payloadId);
+          if (!gate.allowed) {
+            sendError(
+              res,
+              `Payload '${payloadId}' does not meet the adversary emulation maturity gate for '${maturityMode}' mode. Blockers: ${gate.blockers.join('; ')}`,
+              422,
+              'MATURITY_GATE_BLOCKED',
+            );
+            return;
+          }
         }
       }
 

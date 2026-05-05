@@ -96,6 +96,7 @@ import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
 import { runPulsePushDelivery } from './jobs/pulse-push-delivery';
+import { runAdversaryEmulationLoop } from './jobs/adversary-emulation-loop';
 import { runAlertRuleEvaluation } from './routes/ops-management';
 import { startSloComputationScheduler } from './lib/slo-engine';
 import { bootstrapChainState } from './routes/signal-chains';
@@ -830,6 +831,25 @@ export async function bootstrap(
       );
     }, PULSE_PUSH_INTERVAL_MS);
     pulsePushInterval.unref();
+
+    // Adversary emulation loop: runs weekly (every 7 days). Executes ATT&CK-mapped
+    // simulations against the three flagship CPS payloads, scores MTTD/MTTC/blast-radius/
+    // FP-burden/analyst-hours, persists scorecards, and emits Cyber Resilience Trend
+    // signals into the KORA/Lyte decision stream. Also alerts on regressions.
+    const EMULATION_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+    const emulationInterval = setInterval(() => {
+      runAdversaryEmulationLoop().catch((err) =>
+        logger.warn({ err }, '[emulation-loop] Weekly run error (non-fatal)'),
+      );
+    }, EMULATION_INTERVAL_MS);
+    emulationInterval.unref();
+    // Kick off an initial run 5 minutes after boot so the scorecard is populated
+    // without waiting a full week on first deployment.
+    setTimeout(() => {
+      runAdversaryEmulationLoop().catch((err) =>
+        logger.warn({ err }, '[emulation-loop] Boot-time initial run error (non-fatal)'),
+      );
+    }, 5 * 60 * 1000).unref();
 
     // Step 3b: Register all job handlers and agent schedules BEFORE starting the scheduler.
     // This ensures no durable job is dequeued before its handler exists (prevents dead-lettering

@@ -13,7 +13,7 @@ import {
   Shield,
   Target,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -232,8 +232,45 @@ const BOARD_KPIS = [
   },
 ];
 
+interface EmulationScorecard {
+  payloadId: string;
+  payloadName: string;
+  compositeConfidence: number;
+  detectionRate: number;
+  mttdSeconds: number;
+  mttcSeconds: number;
+  blastRadiusPrevented: number;
+  analystHoursSaved: number;
+  status: string;
+}
+
+interface EmulationRunSummary {
+  runId: string;
+  ranAt: string;
+  status: string;
+  overallCompositeScore: number | null;
+  weekOverWeekDelta: number | null;
+  rollingFourWeekAvg: number | null;
+  regressionCount: number;
+  scorecards: EmulationScorecard[];
+}
+
+const _rawBase = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const API_BASE = `${_rawBase}/../api`.replace(/\/[^/]+\/\.\.\//g, '/');
+
 export default function ExecutiveRisk() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'register' | 'reports'>('dashboard');
+  const [emulationRun, setEmulationRun] = useState<EmulationRunSummary | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/firestorm/emulation/runs?limit=1`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { runs?: EmulationRunSummary[] } | null) => {
+        const run = data?.runs?.[0];
+        if (run) setEmulationRun(run);
+      })
+      .catch(() => undefined);
+  }, []);
 
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-[1400px]">
@@ -503,6 +540,127 @@ export default function ExecutiveRisk() {
               ))}
             </div>
           </div>
+
+          {/* CPS Adversary Emulation Posture */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-primary" />
+                  CPS Adversary Emulation Posture
+                </CardTitle>
+                {emulationRun && (
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-full border font-mono font-bold ${
+                      emulationRun.status === 'pass'
+                        ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'
+                        : emulationRun.status === 'regression'
+                          ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'
+                          : 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20'
+                    }`}
+                  >
+                    {emulationRun.status?.toUpperCase() ?? 'PENDING'}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Weekly ATT&CK-mapped simulation across Identity Kill-Chain, Lateral Movement
+                Containment, and Data Exfiltration Guardrail payloads
+              </p>
+            </CardHeader>
+            <CardContent>
+              {!emulationRun ? (
+                <p className="text-xs text-muted-foreground py-3 text-center">
+                  No emulation data yet — first run scheduled at next weekly cadence.
+                </p>
+              ) : (
+                <>
+                  {emulationRun.regressionCount > 0 && (
+                    <div className="mb-3 p-2.5 rounded-lg border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#f5f5f5] shrink-0" />
+                      <p className="text-[11px] text-[#f5f5f5]/80">
+                        {emulationRun.regressionCount} payload
+                        {emulationRun.regressionCount !== 1 ? 's' : ''} regressed — review
+                        Resilience Scorecard.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-3 gap-3 mb-4 text-center">
+                    <div>
+                      <p
+                        className={`text-2xl font-bold font-mono ${(emulationRun.overallCompositeScore ?? 0) >= 0.75 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
+                      >
+                        {emulationRun.overallCompositeScore != null
+                          ? `${(emulationRun.overallCompositeScore * 100).toFixed(0)}%`
+                          : '—'}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Composite</p>
+                    </div>
+                    <div>
+                      <p
+                        className={`text-2xl font-bold font-mono ${emulationRun.weekOverWeekDelta == null ? 'text-muted-foreground' : emulationRun.weekOverWeekDelta >= 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
+                      >
+                        {emulationRun.weekOverWeekDelta != null
+                          ? `${emulationRun.weekOverWeekDelta >= 0 ? '+' : ''}${(emulationRun.weekOverWeekDelta * 100).toFixed(1)}%`
+                          : 'N/A'}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">WoW Delta</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-mono text-[#c9b787]">
+                        {emulationRun.rollingFourWeekAvg != null
+                          ? `${(emulationRun.rollingFourWeekAvg * 100).toFixed(0)}%`
+                          : '—'}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">4-Wk Avg</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {emulationRun.scorecards.map((sc) => (
+                      <div key={sc.payloadId}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[10px] text-muted-foreground truncate">
+                            {sc.payloadName}
+                          </span>
+                          <span
+                            className={`text-[10px] font-mono font-bold ml-2 ${sc.compositeConfidence >= 0.75 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
+                          >
+                            {(sc.compositeConfidence * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${sc.compositeConfidence * 100}%`,
+                              backgroundColor:
+                                sc.compositeConfidence >= 0.75 ? '#c9b787' : '#f5f5f5',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-border">
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                    <p className="text-[10px] text-muted-foreground">
+                      Last run:{' '}
+                      {new Date(emulationRun.ranAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}{' '}
+                      · {emulationRun.scorecards.length} ATT&CK payloads · Full detail in
+                      Resilience Scorecard
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 

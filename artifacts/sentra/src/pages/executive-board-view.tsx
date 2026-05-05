@@ -8,9 +8,32 @@ import {
   Lock,
   Minus,
   ShieldCheck,
+  Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api';
+
+const _rawBase = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const API_BASE = `${_rawBase}/../api`.replace(/\/[^/]+\/\.\.\//g, '/');
+
+interface EmulationPayloadScore {
+  payloadId: string;
+  payloadName: string;
+  compositeConfidence: number;
+  detectionRate: number;
+  status: string;
+}
+
+interface EmulationRunSummary {
+  runId: string;
+  ranAt: string;
+  status: string;
+  overallCompositeScore: number | null;
+  weekOverWeekDelta: number | null;
+  rollingFourWeekAvg: number | null;
+  regressionCount: number;
+  scorecards: EmulationPayloadScore[];
+}
 
 const FALLBACK_POSTURE_SCORE = 72;
 
@@ -250,6 +273,17 @@ function formatMttrEstimate(incident: LiveIncident): string {
 export default function ExecutiveBoardView() {
   const [period, setPeriod] = useState<'30d' | '90d'>('30d');
   const [showExportHint, setShowExportHint] = useState(false);
+  const [emulationRun, setEmulationRun] = useState<EmulationRunSummary | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/firestorm/emulation/runs?limit=1`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { runs?: EmulationRunSummary[] } | null) => {
+        const run = data?.runs?.[0];
+        if (run) setEmulationRun(run);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const { data: execPosture } = useStandardQuery<ExecPosturePayload>({
     queryKey: ['command-executive-posture'],
@@ -745,6 +779,133 @@ export default function ExecutiveBoardView() {
               Controls gap remains on StateRAMP Moderate.
             </p>
           </div>
+        </div>
+
+        {/* CPS Adversary Emulation Posture */}
+        <div className="bg-white/[0.025] border border-white/5 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-[#c9b787]" />
+              <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40">
+                CPS Adversary Emulation — Latest Run
+              </span>
+            </div>
+            {emulationRun && (
+              <span
+                className={cn(
+                  'text-[8px] font-mono px-1.5 py-0.5 rounded border uppercase',
+                  emulationRun.status === 'pass'
+                    ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                    : emulationRun.status === 'regression'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                      : 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+                )}
+              >
+                {emulationRun.status}
+              </span>
+            )}
+          </div>
+
+          {!emulationRun ? (
+            <p className="text-[11px] text-white/30 py-4 text-center">
+              No emulation data yet — first run scheduled at next weekly cadence.
+            </p>
+          ) : (
+            <>
+              {emulationRun.regressionCount > 0 && (
+                <div className="mb-4 p-3 rounded-lg border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-[#f5f5f5] shrink-0" />
+                  <p className="text-[11px] text-[#f5f5f5]/80">
+                    {emulationRun.regressionCount} payload
+                    {emulationRun.regressionCount !== 1 ? 's' : ''} regressed in the latest run —
+                    review Resilience Scorecard for coverage gaps.
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center">
+                  <div
+                    className="text-2xl font-bold font-mono tabular-nums"
+                    style={{
+                      color:
+                        (emulationRun.overallCompositeScore ?? 0) >= 0.75
+                          ? '#c9b787'
+                          : '#f5f5f5',
+                    }}
+                  >
+                    {emulationRun.overallCompositeScore != null
+                      ? `${(emulationRun.overallCompositeScore * 100).toFixed(0)}%`
+                      : '—'}
+                  </div>
+                  <div className="text-[9px] font-mono text-white/30 mt-0.5">Composite Score</div>
+                </div>
+                <div className="text-center">
+                  <div
+                    className="text-2xl font-bold font-mono tabular-nums"
+                    style={{
+                      color:
+                        emulationRun.weekOverWeekDelta == null
+                          ? 'rgba(255,255,255,0.3)'
+                          : emulationRun.weekOverWeekDelta >= 0
+                            ? '#c9b787'
+                            : '#f5f5f5',
+                    }}
+                  >
+                    {emulationRun.weekOverWeekDelta != null
+                      ? `${emulationRun.weekOverWeekDelta >= 0 ? '+' : ''}${(emulationRun.weekOverWeekDelta * 100).toFixed(1)}%`
+                      : 'N/A'}
+                  </div>
+                  <div className="text-[9px] font-mono text-white/30 mt-0.5">WoW Delta</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-[#c9b787]">
+                    {emulationRun.rollingFourWeekAvg != null
+                      ? `${(emulationRun.rollingFourWeekAvg * 100).toFixed(0)}%`
+                      : '—'}
+                  </div>
+                  <div className="text-[9px] font-mono text-white/30 mt-0.5">4-Week Avg</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {emulationRun.scorecards.map((sc) => (
+                  <div key={sc.payloadId}>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[10px] text-white/60 truncate">{sc.payloadName}</span>
+                      <span
+                        className="text-[10px] font-mono tabular-nums shrink-0 ml-2"
+                        style={{
+                          color: sc.compositeConfidence >= 0.75 ? '#c9b787' : '#f5f5f5',
+                        }}
+                      >
+                        {(sc.compositeConfidence * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${sc.compositeConfidence * 100}%`,
+                          backgroundColor: sc.compositeConfidence >= 0.75 ? '#c9b787' : '#f5f5f5',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-white/30 font-mono">
+                Last run:{' '}
+                {new Date(emulationRun.ranAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}{' '}
+                · {emulationRun.scorecards.length} CPS payloads scored · ATT&CK-mapped
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

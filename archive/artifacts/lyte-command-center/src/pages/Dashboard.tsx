@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Brain, DollarSign, Search, TrendingUp, Zap } from 'lucide-react';
+import { ArrowRight, Brain, DollarSign, Search, Shield, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import { useLyteSignalUpdated, useLyteQueueChanged, useLyteIncidentUpdated } from '@szl-holdings/graphql-client';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -18,6 +18,132 @@ const BASE_RECENT = [
   { entity: 'Vessels Maritime', type: 'Entity deep dive', time: '2d ago', status: 'stale' },
 ];
 
+interface CyberResilienceTile {
+  compositeScore: number;
+  weekOverWeekDelta: number | null;
+  rollingFourWeekAvg: number | null;
+  regressions: number;
+  payloads: Array<{ name: string; score: number; status: string }>;
+  ranAt: string;
+}
+
+function CyberResilienceTrend({ tile }: { tile: CyberResilienceTile }) {
+  const pct = Math.round(tile.compositeScore * 100);
+  const deltaVal = tile.weekOverWeekDelta;
+  const hasDelta = deltaVal != null;
+  const deltaUp = hasDelta && deltaVal! >= 0;
+  const DeltaIcon = deltaUp ? TrendingUp : TrendingDown;
+  const scoreColor =
+    pct >= 80 ? 'text-emerald-400' : pct >= 65 ? 'text-amber-400' : 'text-red-400';
+  const deltaColor = deltaUp ? 'text-emerald-400' : 'text-red-400';
+
+  return (
+    <div className="rounded-2xl border border-[#1a2436] bg-[#0e1520] p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-[#e2e8f0]">Cyber Resilience Trend</h2>
+            <p className="text-[10px] text-[#64748b] font-mono mt-0.5">ATT&CK Emulation · CPS Payloads</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`text-2xl font-bold font-mono ${scoreColor}`}>{pct}%</span>
+          {hasDelta && (
+            <div className={`flex items-center gap-1 text-[11px] font-mono ${deltaColor}`}>
+              <DeltaIcon className="w-3 h-3" />
+              WoW {deltaVal! >= 0 ? '+' : ''}{(deltaVal! * 100).toFixed(1)}%
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {[
+          { label: 'Composite', value: `${pct}%`, color: scoreColor },
+          { label: '4-Wk Avg', value: tile.rollingFourWeekAvg != null ? `${Math.round(tile.rollingFourWeekAvg * 100)}%` : '—', color: 'text-[#e2e8f0]' },
+          { label: 'Regressions', value: String(tile.regressions), color: tile.regressions > 0 ? 'text-red-400' : 'text-emerald-400' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="rounded-lg bg-[#0a0f18] border border-[#1a2436] px-3 py-2">
+            <p className={`text-sm font-bold font-mono ${color}`}>{value}</p>
+            <p className="text-[9px] text-[#64748b] mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {tile.payloads.length > 0 && (
+        <div className="flex flex-col gap-1.5 mb-4">
+          {tile.payloads.map(p => {
+            const s = Math.round(p.score * 100);
+            const c = s >= 80 ? 'text-emerald-400' : s >= 65 ? 'text-amber-400' : 'text-red-400';
+            const barColor = s >= 80 ? '#22c55e' : s >= 65 ? '#f59e0b' : '#ef4444';
+            return (
+              <div key={p.name} className="flex items-center gap-2">
+                <div className="w-28 text-[9px] text-[#64748b] truncate shrink-0">{p.name}</div>
+                <div className="flex-1 h-1.5 rounded-full bg-[#1a2436] overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${s}%`, background: barColor }} />
+                </div>
+                <span className={`text-[10px] font-mono w-8 text-right ${c}`}>{s}%</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-[9px] text-[#64748b]">
+          {tile.ranAt ? `Updated ${new Date(tile.ranAt).toLocaleDateString()}` : 'Awaiting first emulation run'}
+        </p>
+        <div className="flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded-md border border-cyan-500/20 text-cyan-400 bg-cyan-500/5">
+          <Shield className="w-2.5 h-2.5" /> KORA · Sentra
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function useCyberResilienceTile(): { tile: CyberResilienceTile | null; loading: boolean } {
+  const [tile, setTile] = useState<CyberResilienceTile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const apiBase = `${window.location.origin}/api`;
+    fetch(`${apiBase}/firestorm/emulation/runs?limit=1`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: unknown) => {
+        const runs = (data as { runs?: Array<{
+          ranAt: string;
+          overallCompositeScore: number | null;
+          weekOverWeekDelta: number | null;
+          rollingFourWeekAvg: number | null;
+          regressionCount: number;
+          scorecards: Array<{ payloadName: string; compositeConfidence: number; status: string }>;
+        }> } | null)?.runs ?? [];
+        if (runs.length > 0) {
+          const latest = runs[0];
+          setTile({
+            compositeScore: latest.overallCompositeScore ?? 0,
+            weekOverWeekDelta: latest.weekOverWeekDelta,
+            rollingFourWeekAvg: latest.rollingFourWeekAvg,
+            regressions: latest.regressionCount,
+            payloads: (latest.scorecards ?? []).map(sc => ({
+              name: sc.payloadName,
+              score: sc.compositeConfidence,
+              status: sc.status,
+            })),
+            ranAt: latest.ranAt,
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { tile, loading };
+}
+
 export default function Dashboard() {
   const [alertCount, setAlertCount] = useState(3);
   const [queueCount, setQueueCount] = useState(0);
@@ -27,6 +153,7 @@ export default function Dashboard() {
   const { data: signalData } = useLyteSignalUpdated();
   const { data: queueData } = useLyteQueueChanged();
   const { data: incidentData } = useLyteIncidentUpdated();
+  const { tile: cyberTile } = useCyberResilienceTile();
 
   const signalUpdate = (signalData as { lyteSignalUpdated?: { id: string; title: string; severity: string } } | undefined)?.lyteSignalUpdated;
   const queueUpdate = (queueData as { lyteQueueChanged?: { id: string; entityType: string; entityId: string; priority: string } } | undefined)?.lyteQueueChanged;
@@ -156,6 +283,38 @@ export default function Dashboard() {
           </div>
         </a>
       </div>
+
+      {cyberTile && (
+        <CyberResilienceTrend tile={cyberTile} />
+      )}
+
+      {!cyberTile && (
+        <div className="rounded-2xl border border-[#1a2436] bg-[#0e1520] p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-[#e2e8f0]">Cyber Resilience Trend</h2>
+              <p className="text-[10px] text-[#64748b] font-mono mt-0.5">ATT&CK Emulation · CPS Payloads</p>
+            </div>
+          </div>
+          <p className="text-sm text-[#64748b]">
+            Weekly emulation loop initializing — first scorecard will populate 5 minutes after API server boot.
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-[10px] font-mono px-2 py-1 rounded-md border border-cyan-500/20 text-cyan-400 bg-cyan-500/5">
+              identity.kill-chain
+            </span>
+            <span className="text-[10px] font-mono px-2 py-1 rounded-md border border-cyan-500/20 text-cyan-400 bg-cyan-500/5">
+              lateral.movement
+            </span>
+            <span className="text-[10px] font-mono px-2 py-1 rounded-md border border-cyan-500/20 text-cyan-400 bg-cyan-500/5">
+              exfiltration.guardrail
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-[#1a2436] bg-[#0e1520] overflow-hidden">
         <div className="px-5 py-3 border-b border-[#1a2436] flex items-center gap-2">

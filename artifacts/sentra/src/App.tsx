@@ -185,6 +185,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/exposure', label: 'Exposure Board', icon: BarChart3, comp: L(() => import('@/pages/exposure-board')) },
       { path: '/controls', label: 'Control Drift', icon: ShieldCheck, comp: L(() => import('@/pages/control-drift')) },
       { path: '/resilience', label: 'Resilience Scorecard', icon: Shield, comp: L(() => import('@/pages/resilience-scorecard')) },
+      { path: '/emulation-scorecard', label: 'Emulation Scorecards', icon: Shield, comp: L(() => import('@/pages/emulation-scorecard')) },
       { path: '/forecast', label: 'Forecast', icon: TrendingUp, comp: L(() => import('@/pages/forecast')) },
       { path: '/predictive-engine', label: 'Predictive Threat Engine', icon: Gauge, comp: L(() => import('@/pages/predictive-threat-engine')) },
     ],

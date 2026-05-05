@@ -166,6 +166,29 @@ export interface SentraRemediationApprovedEvent {
   };
 }
 
+export interface FirestormEmulationScorecardUpdatedEvent {
+  type: 'firestorm.emulation-scorecard-updated';
+  payload: {
+    runId: string;
+    overallCompositeScore: number;
+    weekOverWeekDelta: number | null;
+    rollingFourWeekAvg: number | null;
+    regressions: Array<{ payloadId: string; payloadName: string; delta: number }>;
+    scorecardSummary: Array<{
+      payloadId: string;
+      payloadName: string;
+      compositeConfidence: number;
+      status: string;
+      detectionRate: number;
+      mttdSeconds: number;
+      mttcSeconds: number;
+      blastRadiusPrevented: number;
+      analystHoursSaved: number;
+    }>;
+    severity: string;
+  };
+}
+
 // ─── Union of All Domain Events ────────────────────────────────────────────────
 
 export type DomainEvent =
@@ -190,7 +213,8 @@ export type DomainEvent =
   | AlloyWorkflowCreatedEvent
   | AlloyWorkflowRunUpdatedEvent
   | SentraHuntApprovedEvent
-  | SentraRemediationApprovedEvent;
+  | SentraRemediationApprovedEvent
+  | FirestormEmulationScorecardUpdatedEvent;
 
 export type DomainEventType = DomainEvent['type'];
 

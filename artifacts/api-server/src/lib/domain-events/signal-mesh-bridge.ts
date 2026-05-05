@@ -340,5 +340,24 @@ export function initSignalMeshBridge(): void {
     tags: ['remediation', 'sentra', 'threat-hunter'],
   }));
 
+  // ───────── Firestorm — Adversary Emulation (KORA Cyber Resilience Trend) ─────
+  bridge('firestorm.emulation-scorecard-updated', (p) => {
+    const score = p.overallCompositeScore;
+    const pct = Math.round(score * 100);
+    const delta = p.weekOverWeekDelta;
+    const deltaStr = delta != null ? ` · WoW ${delta >= 0 ? '+' : ''}${(delta * 100).toFixed(1)}%` : '';
+    return {
+      type: 'risk',
+      domain: 'security',
+      severity: clampSeverity(p.severity),
+      title: `Cyber Resilience Trend — Composite ${pct}%${deltaStr}`,
+      entityId: `emulation-run-${p.runId}`,
+      entityType: 'emulation-run',
+      rawPayload: { ...p },
+      source: 'system',
+      tags: ['cyber-resilience', 'emulation', 'att&ck', 'kora', 'cps'],
+    };
+  });
+
   logger.info('[signal-mesh-bridge] Domain events are now flowing into the signal mesh');
 }
