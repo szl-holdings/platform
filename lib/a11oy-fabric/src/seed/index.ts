@@ -6,3 +6,5 @@ export { SEED_TOOLS } from './tools.js';
 export { SEED_PCE_CONTRACTS } from './pceContracts.js';
 export { SEED_WORKCELLS } from './workcells.js';
 export { SEED_DEMO_SCENARIOS } from './demoScenarios.js';
+export { SEED_RATIONALE_ENVELOPES, type RationaleSeed } from './rationaleEnvelopes.js';
+export { SEED_ROUTING_WEIGHTS, type RoutingWeightSeed } from './routingWeights.js';
