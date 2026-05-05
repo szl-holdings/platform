@@ -373,12 +373,30 @@ export function ProofLedger() {
             Terminal hash: {chain.hash}
           </div>
 
-          <div className="grid grid-cols-4 gap-3 text-xs mb-6 p-3 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)' }}>
+          <div className="grid grid-cols-4 gap-3 text-xs mb-3 p-3 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)' }}>
             <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Algorithm</div><div className="font-mono" style={{ color: '#22c55e' }}>{chain.attestation.algorithm}</div></div>
             <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Signer</div><div className="font-mono" style={{ color: '#22c55e' }}>{chain.attestation.signer}</div></div>
             <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Timestamp</div><div className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{fmt(chain.attestation.timestamp)}</div></div>
             <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Nonce</div><div className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{chain.attestation.nonce}</div></div>
           </div>
+          {(() => {
+            const reasoningNode = chain.nodes.find(n => n.reasoningTrace);
+            if (!reasoningNode) return null;
+            return (
+              <div className="mb-6">
+                <a
+                  href={`${BASE_URL}/proof/envelope/env-${chain.id}-${reasoningNode.id}`}
+                  className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest px-3 py-1.5 rounded transition-all"
+                  style={{ background: 'rgba(201,183,135,0.07)', border: '1px solid rgba(201,183,135,0.3)', color: GOLD }}
+                >
+                  View rationale envelope →
+                </a>
+                <span className="ml-2 text-[10px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  structural attestation only — no key material
+                </span>
+              </div>
+            );
+          })()}
 
           <div className="relative">
             <div className="flex flex-col gap-0">

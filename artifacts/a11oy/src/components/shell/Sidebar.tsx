@@ -157,6 +157,8 @@ const platformItems: NavItem[] = [
   { id: 'trust-center', name: 'Trust Center', icon: Lock, path: '/trust' },
   { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
   { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
+  { id: 'routing-weights', name: 'Routing Weights', icon: Sigma, path: '/routing-weights' },
+  { id: 'codex', name: 'Codex', icon: Brain, path: '/codex' },
 ];
 
 function SectionHeader({ children }: { children: React.ReactNode }) {

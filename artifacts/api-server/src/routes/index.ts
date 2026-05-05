@@ -30,6 +30,8 @@ import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyDomainFabricRouter from "./a11oy-domain-fabric-api.js";
 import a11oyFabricRouter from "./a11oy-fabric-api";
+import { a11oyAttestationPublicRouter, a11oyAttestationProtectedRouter } from "./a11oy-attestation-api.js";
+import { a11oyCodexPublicRouter, a11oyCodexProtectedRouter } from "./a11oy-codex-api.js";
 import capabilityFabricRouter from "./capability-fabric";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
@@ -354,6 +356,13 @@ router.use(a11oyRuntimeRouter);
 // A11oy Fabric API — public read-side endpoints for the Live Enterprise Execution Fabric.
 // GET /a11oy/now, /signals, /outcomes, /actions, /proof, /governance, /verticals, /fabric, /workcells.
 router.use(a11oyFabricRouter);
+// A11oy Attestation — public reads (envelopes + routing weights snapshots).
+// Mutating endpoints are mounted AFTER guardianPolicyCheck below.
+router.use(a11oyAttestationPublicRouter);
+// A11oy Codex — searchable index of theses, formulas, codex payloads, ouroboros
+// docs, doctrines, findings. Corpus restricted to public-repo material (docs/,
+// attached_assets/, root *.md) — .local/* is intentionally excluded.
+router.use(a11oyCodexPublicRouter);
 router.use(capabilityFabricRouter);
 
 // Lyte market indicators — delayed/EOD macro feed backed by Alpha Vantage.
@@ -409,6 +418,13 @@ router.use(guardianPolicyCheck());
 // OS Layer Actions — auth-gated POST endpoints for recommendation actions.
 // Mounted AFTER guardianPolicyCheck to require authentication for state mutations.
 router.use(lazyMatch("/v1/os/recommendations", () => import("./os-layer-actions"), "os-layer-actions"));
+
+// A11oy Attestation — operator mutations (PUT /routing-weights/:dim,
+// POST /routing-weights/reset, POST /proof/envelope/:id/regenerate).
+// Mounted AFTER guardianPolicyCheck so operator-tunable controls require auth.
+router.use(a11oyAttestationProtectedRouter);
+// A11oy Codex — gated mutations (POST /a11oy/codex/rebuild).
+router.use(a11oyCodexProtectedRouter);
 
 // Pulse demo + briefing surfaces — owns multiple top-level prefixes.
 router.use(

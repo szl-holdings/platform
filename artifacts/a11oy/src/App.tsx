@@ -57,6 +57,10 @@ const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ 
 const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default: m.SignalMesh })));
 const ActionRail = lazy(() => import('./pages/ActionRail').then(m => ({ default: m.ActionRail })));
 const ProofLedger = lazy(() => import('./pages/ProofLedger').then(m => ({ default: m.ProofLedger })));
+const ProofEnvelope = lazy(() => import('./pages/ProofEnvelope'));
+const RoutingWeights = lazy(() => import('./pages/RoutingWeights'));
+const Codex = lazy(() => import('./pages/Codex'));
+const CodexEntry = lazy(() => import('./pages/CodexEntry'));
 const CodexReceipts = lazy(() => import('./pages/CodexReceipts').then(m => ({ default: m.CodexReceipts })));
 const PortfolioArchive = lazy(() => import('./pages/PortfolioArchive').then(m => ({ default: m.PortfolioArchive })));
 const Governance = lazy(() => import('./pages/Governance').then(m => ({ default: m.Governance })));
@@ -426,6 +430,10 @@ export default function App() {
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
         <Route path={`${base}/proof`} component={ProofLedger} />
+        <Route path={`${base}/proof/envelope/:envelopeId`} component={ProofEnvelope} />
+        <Route path={`${base}/routing-weights`} component={RoutingWeights} />
+        <Route path={`${base}/codex`} component={Codex} />
+        <Route path={`${base}/codex/:entryId`} component={CodexEntry} />
         <Route path={`${base}/codex-receipts`}>
           <WithShell><CodexReceipts /></WithShell>
         </Route>
