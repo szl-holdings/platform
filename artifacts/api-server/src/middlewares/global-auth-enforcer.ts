@@ -449,6 +449,11 @@ const PUBLIC_PREFIXES = [
   // authMiddleware() + denyIfReadOnly() guard in routes/doctrine-crud.ts and
   // are additionally protected by CSRF at the server level.
   "/api/a11oy/",
+  // Capability Fabric — proof-carrying capability routing.
+  // NOTE: GET endpoints and POST /route are public (see method-specific checks
+  // below the prefix list). PUT /weights mutates routing policy and requires
+  // an authenticated session — it is intentionally absent from this prefix list.
+  // "/api/capability-fabric/" is NOT listed here; see the method-specific block.
   // A11oy Reliquary — provenance-bound, content-addressed cache spine. Public prefix
   // bypasses this enforcer so route handlers can apply per-route governance: all
   // read-only GET routes are unrestricted; mutating POST routes (put, snapshot, attest,
@@ -818,6 +823,18 @@ export function globalAuthEnforcer(
     (path.startsWith("/api/booking/time-entries") ||
       path.startsWith("/api/booking/time-invoices"))
   ) {
+    next();
+    return;
+  }
+
+  // Capability Fabric — GET endpoints + POST /route are public demo surfaces.
+  // PUT /weights mutates routing policy and requires a valid session; it falls
+  // through to the 401 response at the bottom of this function.
+  if (req.method === "GET" && path.startsWith("/api/capability-fabric/")) {
+    next();
+    return;
+  }
+  if (req.method === "POST" && path === "/api/capability-fabric/route") {
     next();
     return;
   }

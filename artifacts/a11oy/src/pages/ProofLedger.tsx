@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { useApiData } from '../hooks/useApiData';
+
+const BASE_URL = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface ReliquaryAttestation {
   id: number;
@@ -12,6 +16,91 @@ interface ReliquaryAttestation {
   verificationResult?: string | null;
   createdAt: string;
 }
+
+interface CapabilityScoreBreakdown {
+  covenantAlignment: number;
+  trustScore: number;
+  riskPenalty: number;
+  costScore: number;
+  latencyScore: number;
+  historicalSuccessRate: number;
+  composite: number;
+}
+
+interface CapabilityCovenantCheck {
+  clause: string;
+  result: 'pass' | 'fail' | 'skip';
+  note: string;
+}
+
+interface CapabilityRunnerUp {
+  candidateId: string;
+  composite: number;
+  eliminationReason: string;
+}
+
+interface CapabilityGuardrailCheck {
+  check: string;
+  result: 'pass' | 'blocked';
+  note: string;
+}
+
+interface CapabilityCandidateSummary {
+  id: string;
+  displayName: string;
+  source: 'mesh' | 'connector' | 'mcp';
+  riskClass: string;
+  composite: number;
+  scoreBreakdown: CapabilityScoreBreakdown;
+}
+
+interface CapabilityProofPacket {
+  id: string;
+  goalText: string;
+  domain: string;
+  candidateCount: number;
+  chosenCapabilityId: string;
+  chosenCapabilityName: string;
+  chosenSource: 'mesh' | 'connector' | 'mcp';
+  rationale: {
+    chosen: string;
+    runnersUp: CapabilityRunnerUp[];
+    scoreBreakdown: Record<string, CapabilityScoreBreakdown>;
+    allCandidates: CapabilityCandidateSummary[];
+    covenantChecks: CapabilityCovenantCheck[];
+    weightsSnapshot: Record<string, number>;
+    attestation: string;
+    selectedAt: string;
+  };
+  guardrailEvidence: CapabilityGuardrailCheck[];
+  outcomeHash: string;
+  executionLatencyMs: number;
+  executionTrace: string;
+  executionOutput: Record<string, unknown>;
+  createdAt: string;
+  fromCapabilityFabric: true;
+}
+
+const CF_SOURCE_LABELS: Record<string, string> = {
+  mesh: 'Tool Mesh',
+  connector: 'Connector Hub',
+  mcp: 'MCP Gateway',
+};
+
+const CF_SOURCE_COLORS: Record<string, string> = {
+  mesh: '#c9b787',
+  connector: '#8a8a8a',
+  mcp: '#f5f5f5',
+};
+
+const CF_SCORE_LABELS: Record<string, string> = {
+  covenantAlignment: 'Covenant Alignment',
+  trustScore: 'Trust Score',
+  riskPenalty: 'Risk Class',
+  costScore: 'Cost Efficiency',
+  latencyScore: 'Latency Score',
+  historicalSuccessRate: 'Historical Success',
+};
 
 const GOLD = '#c9b787';
 
@@ -159,11 +248,14 @@ export function ProofLedger() {
   const { data, loading, error } = useApiData<{ chains: ProofChain[] }>('/pages/proof-ledger', { chains: DEMO_CHAINS });
   const [selectedChain, setSelectedChain] = useState('');
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff' | 'reliquary'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff' | 'reliquary' | 'capability-routing'>('chain');
+  const [fabricPackets, setFabricPackets] = useState<CapabilityProofPacket[]>([]);
+  const [selectedFabricPacket, setSelectedFabricPacket] = useState<CapabilityProofPacket | null>(null);
   const [replayStep, setReplayStep] = useState(0);
   const [verifyingId, setVerifyingId] = useState<number | null>(null);
   const [verifyResult, setVerifyResult] = useState<Record<number, { match: boolean; storedRoot: string; computedRoot: string } | null>>({});
   const [attestationList, setAttestationList] = useState<ReliquaryAttestation[] | null>(null);
+  const [showAllCandidates, setShowAllCandidates] = useState(false);
 
   const { data: reliquaryAttestations } = useApiData<ReliquaryAttestation[]>('/reliquary/attestations', []);
 
@@ -189,6 +281,17 @@ export function ProofLedger() {
     );
     if (match) setSelectedChain(match.id);
   }, [resolvedProofId, data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchFabricPackets = useCallback(async () => {
+    try {
+      const r = await fetch(`${BASE_URL}/api/capability-fabric/proof-packets?limit=20`);
+      if (r.ok) { const j = await r.json() as { ok: boolean; data: { packets: CapabilityProofPacket[] } }; setFabricPackets(j.data.packets ?? []); }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'capability-routing') void fetchFabricPackets();
+  }, [activeTab, fetchFabricPackets]);
 
   const attestations = attestationList ?? (Array.isArray(reliquaryAttestations) ? reliquaryAttestations : []);
 
@@ -241,9 +344,9 @@ export function ProofLedger() {
       </div>
 
       <div className="flex gap-1 mb-4 flex-wrap">
-        {(['chain', 'replay', 'diff', 'reliquary'] as const).map(tab => (
+        {(['chain', 'replay', 'diff', 'capability-routing', 'reliquary'] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} className="px-4 py-2 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all" style={{ background: activeTab === tab ? 'rgba(201,183,135,0.1)' : 'transparent', color: activeTab === tab ? GOLD : '#5e5e5e', border: `1px solid ${activeTab === tab ? 'rgba(201,183,135,0.2)' : 'transparent'}`, cursor: 'pointer' }}>
-            {tab === 'chain' ? 'Proof Chain' : tab === 'replay' ? 'Reasoning Replay' : tab === 'diff' ? 'Proof Diff' : 'Reliquary Cache'}
+            {tab === 'chain' ? 'Proof Chain' : tab === 'replay' ? 'Reasoning Replay' : tab === 'diff' ? 'Proof Diff' : tab === 'capability-routing' ? 'Capability Routing' : 'Reliquary Cache'}
           </button>
         ))}
       </div>
@@ -312,6 +415,38 @@ export function ProofLedger() {
                         {isExpanded && (
                           <div className="mt-3 pt-3 border-t space-y-3" style={{ borderColor: 'var(--color-a11oy-border)' }}>
                             <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{node.detail}</p>
+
+                            {node.kind === 'EXECUTION' && (
+                              <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.05)', border: '1px solid rgba(201,183,135,0.18)' }}>
+                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(201,183,135,0.15)', color: GOLD }}>⬡ CAPABILITY FABRIC</span>
+                                <span className="text-[9px] flex-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>This execution was routed via the Capability Fabric — trust, risk, cost, latency and policy scores evaluated across all candidates.</span>
+                                <button
+                                  onClick={async e => {
+                                    e.stopPropagation();
+                                    setActiveTab('capability-routing');
+                                    // Fetch packets if we haven't already, then auto-select the most recent
+                                    let packets = fabricPackets;
+                                    if (packets.length === 0) {
+                                      try {
+                                        const r = await fetch(`${BASE_URL}/api/capability-fabric/proof-packets?limit=20`);
+                                        if (r.ok) {
+                                          const j = await r.json() as { ok: boolean; data: { packets: CapabilityProofPacket[] } };
+                                          packets = j.data.packets ?? [];
+                                          setFabricPackets(packets);
+                                        }
+                                      } catch {}
+                                    }
+                                    if (packets.length > 0 && !selectedFabricPacket) {
+                                      setSelectedFabricPacket(packets[0]);
+                                    }
+                                  }}
+                                  className="text-[9px] font-mono px-2 py-1 rounded flex-shrink-0 transition-all"
+                                  style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.3)', background: 'rgba(201,183,135,0.07)', cursor: 'pointer' }}
+                                >
+                                  Why this? →
+                                </button>
+                              </div>
+                            )}
 
                             {node.reasoningTrace && (
                               <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
@@ -480,6 +615,250 @@ export function ProofLedger() {
           </>
         );
       })()}
+
+      {activeTab === 'capability-routing' && (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <SectionTitle>Capability Routing Proofs</SectionTitle>
+            <Link
+              href={`${BASE_URL}/capability-fabric`}
+              className="text-[10px] font-mono px-3 py-1.5 rounded transition-all"
+              style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.3)', background: 'rgba(201,183,135,0.06)' }}
+            >
+              Open Capability Fabric →
+            </Link>
+          </div>
+
+          {fabricPackets.length === 0 ? (
+            <Card>
+              <div className="text-center py-10">
+                <div className="text-2xl mb-3" style={{ color: 'rgba(201,183,135,0.25)' }}>⬡</div>
+                <div className="text-sm mb-2" style={{ color: '#8a8a8a' }}>No capability routing proofs yet</div>
+                <div className="text-xs mb-4" style={{ color: '#5e5e5e' }}>
+                  Route a capability on the Capability Fabric page to generate proof packets that appear here.
+                </div>
+                <Link
+                  href={`${BASE_URL}/capability-fabric`}
+                  className="text-xs font-mono px-4 py-2 rounded inline-block"
+                  style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.3)', background: 'rgba(201,183,135,0.08)' }}
+                >
+                  Go to Capability Fabric →
+                </Link>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="text-[9px] font-mono uppercase mb-3" style={{ color: '#5e5e5e' }}>
+                  {fabricPackets.length} routing proof{fabricPackets.length !== 1 ? 's' : ''} — click to inspect rationale
+                </div>
+                {fabricPackets.map(p => (
+                  <motion.button
+                    key={p.id}
+                    onClick={() => { setSelectedFabricPacket(selectedFabricPacket?.id === p.id ? null : p); setShowAllCandidates(false); }}
+                    className="w-full text-left p-3 rounded-lg transition-all"
+                    style={{ background: selectedFabricPacket?.id === p.id ? 'rgba(201,183,135,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${selectedFabricPacket?.id === p.id ? 'rgba(201,183,135,0.25)' : 'rgba(255,255,255,0.08)'}` }}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10px] font-mono truncate mb-1" style={{ color: selectedFabricPacket?.id === p.id ? GOLD : '#f5f5f5' }}>
+                          {p.goalText.length > 60 ? p.goalText.slice(0, 60) + '…' : p.goalText}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${CF_SOURCE_COLORS[p.chosenSource] ?? GOLD}12`, color: CF_SOURCE_COLORS[p.chosenSource] ?? GOLD }}>
+                            {CF_SOURCE_LABELS[p.chosenSource] ?? p.chosenSource}
+                          </span>
+                          <span className="text-[9px] font-mono truncate" style={{ color: '#8a8a8a' }}>{p.chosenCapabilityName}</span>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        <div className="text-[9px] font-mono" style={{ color: GOLD }}>
+                          {Math.round((p.rationale.scoreBreakdown[p.chosenCapabilityId]?.composite ?? 0) * 1000) / 10}
+                        </div>
+                        <div className="text-[8px] font-mono" style={{ color: '#5e5e5e' }}>score</div>
+                      </div>
+                    </div>
+                    <div className="text-[9px] font-mono" style={{ color: '#5e5e5e' }}>
+                      {p.id} · {new Date(p.createdAt).toLocaleTimeString()}
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {selectedFabricPacket ? (
+                  <motion.div
+                    key={selectedFabricPacket.id}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <div className="p-3 rounded-lg" style={{ background: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.2)' }}>
+                      <div className="text-[9px] font-mono uppercase mb-1" style={{ color: '#5e5e5e' }}>WHY THIS CAPABILITY?</div>
+                      <div className="text-sm font-medium mb-0.5" style={{ color: GOLD }}>{selectedFabricPacket.chosenCapabilityName}</div>
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${CF_SOURCE_COLORS[selectedFabricPacket.chosenSource] ?? GOLD}12`, color: CF_SOURCE_COLORS[selectedFabricPacket.chosenSource] ?? GOLD }}>
+                          {CF_SOURCE_LABELS[selectedFabricPacket.chosenSource] ?? selectedFabricPacket.chosenSource}
+                        </span>
+                        <span className="text-[9px] font-mono" style={{ color: '#8a8a8a' }}>{selectedFabricPacket.candidateCount} candidates evaluated</span>
+                        <span className="text-[9px] font-mono" style={{ color: '#8a8a8a' }}>{selectedFabricPacket.executionLatencyMs}ms</span>
+                      </div>
+                      <div className="text-[9px]" style={{ color: '#8a8a8a' }}>{selectedFabricPacket.goalText}</div>
+                    </div>
+
+                    <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="text-[9px] font-mono uppercase mb-2" style={{ color: '#5e5e5e' }}>Score Breakdown</div>
+                      {(() => {
+                        const sb = selectedFabricPacket.rationale.scoreBreakdown[selectedFabricPacket.chosenCapabilityId];
+                        const ws = selectedFabricPacket.rationale.weightsSnapshot;
+                        if (!sb) return <div className="text-[9px]" style={{ color: '#5e5e5e' }}>No breakdown available</div>;
+                        return (
+                          <>
+                            {Object.entries(CF_SCORE_LABELS).map(([k, label]) => {
+                              const val = (sb as Record<string, number>)[k] ?? 0;
+                              return (
+                                <div key={k} className="flex items-center gap-2">
+                                  <div className="w-28 text-[9px] font-mono flex-shrink-0" style={{ color: '#8a8a8a' }}>{label}</div>
+                                  <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                                    <div className="h-full rounded-full" style={{ width: `${Math.round(val * 100)}%`, background: GOLD }} />
+                                  </div>
+                                  <span className="text-[9px] font-mono w-6 text-right flex-shrink-0" style={{ color: GOLD }}>{Math.round(val * 100)}</span>
+                                  <span className="text-[8px] font-mono w-6 flex-shrink-0" style={{ color: '#5e5e5e' }}>×{Math.round((ws[k] ?? 0) * 100)}%</span>
+                                </div>
+                              );
+                            })}
+                            <div className="pt-2 flex justify-between items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                              <span className="text-[9px] font-mono" style={{ color: '#8a8a8a' }}>Composite</span>
+                              <span className="text-xs font-mono font-semibold" style={{ color: GOLD }}>{Math.round(sb.composite * 1000) / 10} / 100</span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Full candidate set — replay all candidates scored in this routing decision */}
+                    {(selectedFabricPacket.rationale.allCandidates?.length ?? 0) > 0 && (
+                      <div className="p-3 rounded-lg space-y-1.5" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-[9px] font-mono uppercase" style={{ color: '#5e5e5e' }}>
+                            Full Candidate Set — {selectedFabricPacket.rationale.allCandidates.length} evaluated
+                          </div>
+                          <div className="text-[8px] font-mono" style={{ color: '#5e5e5e' }}>Sorted by composite score</div>
+                        </div>
+                        {(showAllCandidates
+                          ? selectedFabricPacket.rationale.allCandidates
+                          : selectedFabricPacket.rationale.allCandidates.slice(0, 8)
+                        ).map((c, i) => {
+                          const isWinner = c.id === selectedFabricPacket.chosenCapabilityId;
+                          const srcColor = CF_SOURCE_COLORS[c.source] ?? GOLD;
+                          return (
+                            <div key={c.id} className="flex items-center gap-2 py-1 px-2 rounded" style={{ background: isWinner ? 'rgba(201,183,135,0.06)' : 'rgba(255,255,255,0.01)', border: `1px solid ${isWinner ? 'rgba(201,183,135,0.2)' : 'rgba(255,255,255,0.04)'}` }}>
+                              <span className="text-[8px] font-mono w-4 flex-shrink-0" style={{ color: '#5e5e5e' }}>#{i + 1}</span>
+                              <span className="text-[9px] font-mono px-1 py-0.5 rounded flex-shrink-0" style={{ background: `${srcColor}14`, color: srcColor, fontSize: '7px' }}>
+                                {CF_SOURCE_LABELS[c.source] ?? c.source}
+                              </span>
+                              <span className="text-[9px] font-mono flex-1 truncate" style={{ color: isWinner ? GOLD : '#8a8a8a' }}>{c.displayName}</span>
+                              {isWinner && <span className="text-[7px] font-mono px-1 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(201,183,135,0.15)', color: GOLD }}>CHOSEN</span>}
+                              <span className="text-[9px] font-mono flex-shrink-0 w-8 text-right" style={{ color: isWinner ? GOLD : '#5e5e5e' }}>{Math.round(c.composite * 1000) / 10}</span>
+                            </div>
+                          );
+                        })}
+                        {selectedFabricPacket.rationale.allCandidates.length > 8 && (
+                          <button
+                            onClick={() => setShowAllCandidates(v => !v)}
+                            className="w-full text-[9px] font-mono py-1 rounded mt-1"
+                            style={{ color: '#5e5e5e', border: '1px solid rgba(255,255,255,0.06)', background: 'transparent' }}
+                          >
+                            {showAllCandidates
+                              ? `Collapse (showing all ${selectedFabricPacket.rationale.allCandidates.length})`
+                              : `Show all ${selectedFabricPacket.rationale.allCandidates.length} candidates`}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedFabricPacket.rationale.runnersUp.length > 0 && (
+                      <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="text-[9px] font-mono uppercase mb-2" style={{ color: '#5e5e5e' }}>Elimination Rationale — Top 4 Runners-Up</div>
+                        {selectedFabricPacket.rationale.runnersUp.map(ru => (
+                          <div key={ru.candidateId} className="p-2 rounded text-[9px]" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                            <div className="flex justify-between mb-0.5">
+                              <span className="font-mono" style={{ color: '#8a8a8a' }}>{ru.candidateId}</span>
+                              <span className="font-mono" style={{ color: '#5e5e5e' }}>{Math.round(ru.composite * 1000) / 10}</span>
+                            </div>
+                            <div style={{ color: '#5e5e5e' }}>{ru.eliminationReason}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedFabricPacket.rationale.covenantChecks.length > 0 && (
+                      <div className="p-3 rounded-lg space-y-1.5" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="text-[9px] font-mono uppercase mb-2" style={{ color: '#5e5e5e' }}>Covenant Checks</div>
+                        {selectedFabricPacket.rationale.covenantChecks.map((cc, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-[9px] flex-shrink-0 mt-0.5" style={{ color: cc.result === 'pass' ? '#22c55e' : '#ef4444' }}>{cc.result === 'pass' ? '✓' : '✗'}</span>
+                            <div className="text-[9px]">
+                              <div className="font-mono mb-0.5" style={{ color: cc.result === 'pass' ? '#22c55e' : '#ef4444' }}>{cc.clause}</div>
+                              <div style={{ color: '#5e5e5e' }}>{cc.note}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="text-[9px] font-mono uppercase mb-2" style={{ color: '#5e5e5e' }}>Structural Attestation</div>
+                      <div className="font-mono text-[9px] break-all mb-1" style={{ color: GOLD }}>{selectedFabricPacket.rationale.attestation}</div>
+                      <div className="font-mono text-[9px] break-all" style={{ color: '#5e5e5e' }}>Outcome: {selectedFabricPacket.outcomeHash}</div>
+                      <div className="text-[8px] mt-1" style={{ color: '#5e5e5e' }}>SHA-256(chosen ∥ composite ∥ weights ∥ ts ∥ nonce)</div>
+                    </div>
+
+                    {selectedFabricPacket.executionTrace && (
+                      <div className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="text-[9px] font-mono uppercase mb-2" style={{ color: '#5e5e5e' }}>Execution Trace</div>
+                        <div className="font-mono text-[9px] leading-relaxed mb-2" style={{ color: '#f5f5f5', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{selectedFabricPacket.executionTrace}</div>
+                        {selectedFabricPacket.executionOutput && Object.keys(selectedFabricPacket.executionOutput).length > 0 && (
+                          <div className="pt-2 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <div className="text-[9px] font-mono uppercase mb-1" style={{ color: '#5e5e5e' }}>Output</div>
+                            {Object.entries(selectedFabricPacket.executionOutput).map(([k, v]) => (
+                              <div key={k} className="flex items-start gap-2 text-[9px] font-mono">
+                                <span style={{ color: '#8a8a8a', flexShrink: 0 }}>{k}:</span>
+                                <span style={{ color: GOLD, wordBreak: 'break-all' }}>{String(v)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="p-2 rounded text-[9px]" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.12)', color: '#5e5e5e' }}>
+                      <span className="font-mono" style={{ color: GOLD }}>CAPABILITY FABRIC PROOF — </span>
+                      Every routing decision generates an immutable structural proof. The Covenant Layer checked {selectedFabricPacket.rationale.covenantChecks.length} clauses, evaluated {selectedFabricPacket.candidateCount} candidates, and selected the highest-composite capability with full attestation.
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="cf-empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center justify-center min-h-[200px]"
+                  >
+                    <div className="text-center">
+                      <div className="text-xl mb-2" style={{ color: 'rgba(201,183,135,0.2)' }}>⬡</div>
+                      <div className="text-xs" style={{ color: '#5e5e5e' }}>Select a proof packet to see why this capability was chosen</div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </>
+      )}
 
       {activeTab === 'reliquary' && (() => (
         <>

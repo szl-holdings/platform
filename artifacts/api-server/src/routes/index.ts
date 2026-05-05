@@ -30,6 +30,7 @@ import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyDomainFabricRouter from "./a11oy-domain-fabric-api.js";
 import a11oyFabricRouter from "./a11oy-fabric-api";
+import capabilityFabricRouter from "./capability-fabric";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
@@ -343,6 +344,7 @@ router.use(a11oyRuntimeRouter);
 // A11oy Fabric API — public read-side endpoints for the Live Enterprise Execution Fabric.
 // GET /a11oy/now, /signals, /outcomes, /actions, /proof, /governance, /verticals, /fabric, /workcells.
 router.use(a11oyFabricRouter);
+router.use(capabilityFabricRouter);
 
 // Lyte market indicators — delayed/EOD macro feed backed by Alpha Vantage.
 // Public read endpoint; mounted before tenantScope group.

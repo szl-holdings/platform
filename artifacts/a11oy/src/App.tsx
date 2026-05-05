@@ -129,6 +129,7 @@ const ResourcesHub = lazy(() => import('./pages/ResourcesHub').then(m => ({ defa
 const ControlTower = lazy(() => import('./pages/ControlTower').then(m => ({ default: m.ControlTower })));
 const PipelineCanvas = lazy(() => import('./pages/PipelineCanvas').then(m => ({ default: m.PipelineCanvas })));
 const IntentRouter = lazy(() => import('./pages/IntentRouter').then(m => ({ default: m.IntentRouter })));
+const CapabilityFabric = lazy(() => import('./pages/CapabilityFabric').then(m => ({ default: m.CapabilityFabric })));
 const PlannerCanvas = lazy(() => import('./pages/PlannerCanvas').then(m => ({ default: m.PlannerCanvas })));
 const OntologyGraph = lazy(() => import('./pages/OntologyGraph').then(m => ({ default: m.OntologyGraph })));
 const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ default: m.LearningLoop })));
@@ -506,6 +507,7 @@ export default function App() {
         <Route path={`${base}/control-tower`} component={ControlTower} />
         <Route path={`${base}/pipeline`} component={PipelineCanvas} />
         <Route path={`${base}/intent-router`} component={IntentRouter} />
+        <Route path={`${base}/capability-fabric`} component={CapabilityFabric} />
         <Route path={`${base}/planner`} component={PlannerCanvas} />
         <Route path={`${base}/ontology`} component={OntologyGraph} />
         <Route path={`${base}/learning`} component={LearningLoop} />
