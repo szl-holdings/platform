@@ -13,6 +13,8 @@
 
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { sendSuccess } from '../lib/api-response';
+import { db, hfModelRegistryTable, hfFailoverChainsTable } from '@szl-holdings/db';
+import { desc, inArray } from 'drizzle-orm';
 
 const router: IRouter = Router();
 
@@ -241,10 +243,111 @@ async function checkAutoTrainApi(): Promise<{
   }
 }
 
+async function getPerModelGateStatus(): Promise<{
+  models: Array<{
+    modelId: string;
+    displayName: string;
+    lifecycleState: string;
+    gates: {
+      registryActive: boolean;
+      licenseApproved: boolean;
+      sensitivityMatch: boolean;
+      liveInferenceAllowed: boolean;
+      productionApproved: boolean;
+      allPass: boolean;
+    };
+    failoverChain: {
+      id: number;
+      lane: string;
+      primaryModelId: string;
+      fallbackModelIds: unknown;
+      isActive: boolean;
+    } | null;
+    lastInferenceAt: Date | null;
+    recentFailureCount: number;
+  }>;
+  summary: { total: number; active: number; blocked: number; fullyGated: number };
+  error?: string;
+}> {
+  try {
+    const entries = await db
+      .select()
+      .from(hfModelRegistryTable)
+      .orderBy(desc(hfModelRegistryTable.createdAt))
+      .limit(100);
+
+    if (entries.length === 0) {
+      return { models: [], summary: { total: 0, active: 0, blocked: 0, fullyGated: 0 } };
+    }
+
+    const chainIds = [...new Set(entries.map((e) => e.failoverChainId).filter(Boolean) as number[])];
+    const chains = chainIds.length > 0
+      ? await db
+          .select()
+          .from(hfFailoverChainsTable)
+          .where(inArray(hfFailoverChainsTable.id, chainIds))
+      : [];
+
+    const chainMap = new Map(chains.map((c) => [c.id, c]));
+
+    const models = entries.map((e) => {
+      const gateRegistryActive = e.lifecycleState === 'active';
+      const allPass =
+        gateRegistryActive &&
+        e.gateLicenseApproved &&
+        e.gateSensitivityMatch &&
+        e.gateLiveInferenceAllowed &&
+        e.gateProductionApproved;
+
+      const chain = e.failoverChainId ? chainMap.get(e.failoverChainId) : null;
+
+      return {
+        modelId: e.modelId,
+        displayName: e.displayName,
+        lifecycleState: e.lifecycleState,
+        gates: {
+          registryActive: gateRegistryActive,
+          licenseApproved: e.gateLicenseApproved,
+          sensitivityMatch: e.gateSensitivityMatch,
+          liveInferenceAllowed: e.gateLiveInferenceAllowed,
+          productionApproved: e.gateProductionApproved,
+          allPass,
+        },
+        failoverChain: chain
+          ? {
+              id: chain.id,
+              lane: chain.lane,
+              primaryModelId: chain.primaryModelId,
+              fallbackModelIds: chain.fallbackModelIds,
+              isActive: chain.isActive,
+            }
+          : null,
+        lastInferenceAt: e.lastInferenceAt,
+        recentFailureCount: e.recentFailureCount,
+      };
+    });
+
+    const active = models.filter((m) => m.lifecycleState === 'active').length;
+    const fullyGated = models.filter((m) => m.gates.allPass).length;
+    const blocked = models.filter((m) => m.lifecycleState === 'active' && !m.gates.allPass).length;
+
+    return {
+      models,
+      summary: { total: models.length, active, blocked, fullyGated },
+    };
+  } catch (err) {
+    return {
+      models: [],
+      summary: { total: 0, active: 0, blocked: 0, fullyGated: 0 },
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
 router.get('/hf/status', async (_req: Request, res: Response) => {
   const checkStart = Date.now();
 
-  const [inferenceApi, mcpProxy, connector, tokenValidity, embeddingBackend, autoTrainApi] =
+  const [inferenceApi, mcpProxy, connector, tokenValidity, embeddingBackend, autoTrainApi, perModelGateStatus] =
     await Promise.all([
       checkInferenceApi(),
       checkMcpProxy(),
@@ -252,6 +355,7 @@ router.get('/hf/status', async (_req: Request, res: Response) => {
       checkTokenValidity(),
       checkEmbeddingBackend(),
       checkAutoTrainApi(),
+      getPerModelGateStatus(),
     ]);
 
   const allHealthy =
@@ -297,6 +401,7 @@ router.get('/hf/status', async (_req: Request, res: Response) => {
         endpoint: HF_AUTOTRAIN_BASE,
       },
     },
+    modelRegistry: perModelGateStatus,
   });
 });
 

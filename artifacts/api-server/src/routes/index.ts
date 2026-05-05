@@ -491,7 +491,11 @@ router.use(lazyMatch("/a11oy/hub-operations", () => import("./a11oy-hub-operatio
 // specific /hf/hub/* prefix matches first (Express uses first-match routing).
 router.use(lazyMatch("/hf/hub", () => import("./hf-hub"), "hf-hub"));
 
-// HF status / whoami / subsystem health check — mounted after /hf/hub.
+// HF operator registry + failover chains + audit — mounted before /hf so
+// /hf/registry/* resolves before the catch-all /hf status route.
+router.use(lazyMatch("/hf/registry", () => import("./hf-registry"), "hf-registry"));
+
+// HF status / whoami / subsystem health check — mounted after /hf/hub and /hf/registry.
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
 
 // HuggingFace Jobs — governed external compute backend for agents.

@@ -18,6 +18,7 @@ import {
   callHfTaskWithGovernance,
   type HfTaskCallResult,
 } from '@szl-holdings/ai-engine/providers/hf-task-router';
+import { resolveHfFailoverChain } from '../lib/hf-failover-resolver';
 
 const router: IRouter = Router();
 
@@ -27,18 +28,31 @@ function getHfToken(): string | undefined {
   return process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY;
 }
 
+// Resolves fallback chain at inference time: caller override → DB chain → static.
+// null from resolver = not in registry (use static); [] = in registry, no fallbacks.
 /**
- * Thin local wrapper around the shared `callHfTaskWithGovernance` so all
- * domain routes use ONE governance + failover implementation (defined in
- * `lib/ai-engine/src/providers/hf-task-router.ts`). When `fallbackModels` is
- * omitted the shared router walks the configured chain in HF_TASK_FAILOVERS.
+ * Central inference dispatcher for all HF route handlers.
+ *
+ * The optional `fallbackModels` parameter is an internal escape hatch for
+ * direct callers that need to override the failover chain. Route handlers
+ * in this file do NOT pass it — all production calls resolve the chain from
+ * the operator-governed DB registry via `resolveHfFailoverChain`.
  */
 async function routeHfTaskCall<T = unknown>(
   primaryModel: string,
   body: unknown,
   fallbackModels?: string[],
 ): Promise<HfTaskCallResult<T>> {
-  return callHfTaskWithGovernance<T>(primaryModel, body, { fallbackModels });
+  if (fallbackModels !== undefined) {
+    return callHfTaskWithGovernance<T>(primaryModel, body, { fallbackModels });
+  }
+  const dbChain = await resolveHfFailoverChain(primaryModel);
+  return callHfTaskWithGovernance<T>(primaryModel, body, {
+    // null  → not in registry; pass undefined so shared router uses HF_TASK_FAILOVERS
+    // []    → in registry with no/retired chain; pass [] so no static override
+    // [...] → operator chain; pass it directly
+    fallbackModels: dbChain !== null ? dbChain : undefined,
+  });
 }
 
 // ---------------------------------------------------------------------------
