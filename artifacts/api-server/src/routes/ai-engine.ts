@@ -140,10 +140,34 @@ async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promis
   } catch {}
 }
 
-router.get('/ai/health', (_req, res) => {
+router.get('/ai/health', async (_req, res) => {
   const config = getRouteConfig();
   const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   const circuitBreakers = getCircuitBreakerMetrics();
+
+  let gateStatusSummary: {
+    totalModels: number;
+    openCount: number;
+    partialCount: number;
+    blockedCount: number;
+    globalLiveInferenceEnabled: boolean;
+    globalProductionApproved: boolean;
+  } | null = null;
+  try {
+    const { getGateStatusForAllModels } = await import('../a11oy/runtime/model-registry.js');
+    const allGates = await getGateStatusForAllModels();
+    gateStatusSummary = {
+      totalModels: allGates.length,
+      openCount: allGates.filter((g) => g.gateStatus === 'open').length,
+      partialCount: allGates.filter((g) => g.gateStatus === 'partial').length,
+      blockedCount: allGates.filter((g) => g.gateStatus === 'blocked').length,
+      globalLiveInferenceEnabled: process.env.HF_ENABLE_LIVE_INFERENCE === '1',
+      globalProductionApproved: process.env.HF_PRODUCTION_APPROVED === '1',
+    };
+  } catch {
+    // gate status is best-effort; don't block health check
+  }
+
   res.json({
     status: token ? 'configured' : 'no_token',
     provider: config.config.executionMode,
@@ -158,6 +182,7 @@ router.get('/ai/health', (_req, res) => {
       approvalForHighRisk: config.config.requireApprovalForHighRisk,
     },
     auditLogSize: auditLog.length,
+    governanceGates: gateStatusSummary,
     circuitBreakers: {
       summary: {
         openCount: circuitBreakers.openCount,

@@ -734,4 +734,17 @@ router.use(lazyMatch("/lexicon", () => import("./lexicon"), "lexicon"));
 // POST   /model-passports/seed        — seed passports for current allow-listed models (admin only)
 router.use(lazyMatch("/model-passports", () => import("./model-passports"), "model-passports"));
 
+// Governance Gate Configuration & Operator Model Registry API
+// GET    /governance/registry               — list all operator-registered models
+// POST   /governance/registry               — add a new HF model (admin only)
+// PATCH  /governance/registry/:id          — update model metadata (admin only)
+// DELETE /governance/registry/:id          — remove a model (admin only, non-seeded only)
+// GET    /governance/gates                  — read gate status for all models
+// GET    /governance/gates/:id             — read gate status for a specific model
+// PATCH  /governance/gates/:id             — update per-model gate conditions (admin only)
+// POST   /governance/gates/:id/bypass      — grant a time-limited gate bypass (admin only)
+// DELETE /governance/gates/:id/bypass/:bid — revoke a bypass (admin only)
+// GET    /governance/gates/:id/bypasses    — list bypass audit trail
+router.use(lazyMatch("/governance", () => import("./governance-gates"), "governance-gates"));
+
 export default router;

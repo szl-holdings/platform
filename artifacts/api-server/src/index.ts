@@ -725,6 +725,17 @@ export async function bootstrap(
       initConduitEngine();
     });
 
+    // Sync operator model registry + gate configs + active bypasses from DB
+    // into the runtime in-memory registry so checkHfLiveRoutingGate reads
+    // per-model overrides immediately (not just global env-var defaults).
+    await bootstrapStep('syncModelRegistryFromDb', async () => {
+      const { syncModelRegistryFromDb, expireStaleBypasses } = await import('./a11oy/runtime/model-registry.js');
+      await syncModelRegistryFromDb();
+      // Background sweeper: persistently deactivates expired bypass rows in DB every 5 min
+      // so governance audit state stays accurate even when governance read endpoints are idle.
+      setInterval(() => { void expireStaleBypasses(); }, 5 * 60 * 1000).unref();
+    });
+
     // Step 3: Start durable (PostgreSQL-backed) job queue
     await bootstrapStep('startDurableQueue', startDurableQueue);
 
