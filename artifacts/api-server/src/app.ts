@@ -50,6 +50,7 @@ import { createHonoApp, createHonoExpressHandler } from './hono/index';
 import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
+import { sentraProbeDetectionMiddleware } from './middlewares/sentra-probe-detection';
 
 const app: Express = express();
 
@@ -331,6 +332,7 @@ app.use('/api/a11oy', a11oyOrchestrationRouter);
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));
 app.use(sessionRefreshPolicy());
+app.use(sentraProbeDetectionMiddleware);
 // Adaptive load shedder — runs before auth/rate-limit heavy paths so that
 // low-priority background traffic (syncs, analytics) is rejected first under
 // high event-loop lag or pool saturation, before user-facing traffic is shed.

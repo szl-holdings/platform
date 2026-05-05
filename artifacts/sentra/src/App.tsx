@@ -88,6 +88,7 @@ import {
   Telescope,
   Smartphone,
   Waves,
+  Inbox,
 } from 'lucide-react';
 import {
   type ComponentType,
@@ -206,6 +207,9 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/identity-threat', label: 'Identity Threat', icon: Fingerprint, comp: L(() => import('@/pages/identity-threat')) },
       { path: '/identity-blast-radius', label: 'Identity Blast Radius', icon: ShieldAlert, comp: L(() => import('@/pages/identity-blast-radius')) },
       { path: '/ot-ics', label: 'OT / ICS', icon: Cpu, comp: L(() => import('@/pages/ot-ics-dashboard')) },
+      { path: '/sentinel-duel', label: 'Sentinel Duel', icon: Swords, comp: L(() => import('@/pages/sentinel-duel')) },
+      { path: '/response-queue', label: 'Response Queue', icon: Inbox, comp: L(() => import('@/pages/response-queue')) },
+      { path: '/evidence-ledger', label: 'Evidence Ledger', icon: BookLock, comp: L(() => import('@/pages/evidence-ledger')) },
     ],
   },
   {

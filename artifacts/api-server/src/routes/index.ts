@@ -247,6 +247,21 @@ router.use(lazyMatch("/sentra/a11oy", () => import("./sentra-a11oy"), "sentra-a1
 // → execute → verify → outcome) closing the "Patching Gap".
 router.use(lazyMatch("/sentra/remediation", () => import("./sentra-remediation"), "sentra-remediation"));
 
+// Sentra Active Defense Fabric — real telemetry ingestion, Sigma-style detection
+// engine, Active Response Engine (typed action library), Operational Deception
+// Grid (honey endpoints, canary tokens, tarpit), append-only hash-chained
+// Evidence Ledger, Sentinel-vs-Adversary duel agent, HITL operator controls.
+// /api/sentra/events          — telemetry ingest from middleware
+// /api/sentra/defense/*       — defense state + action execution
+// /api/sentra/response-queue  — HITL approval queue
+// /api/sentra/evidence-ledger — chain-of-custody ledger
+// /api/sentra/hitl/*          — operator toggle controls
+// /api/sentra/duel/*          — Sentinel agent duel sessions
+// /api/sentra/deception/*     — canary tokens + honey grid
+// /api/honey/*                — honey endpoints (trap attackers)
+router.use(lazyMatch("/sentra", () => import("./sentra-defense"), "sentra-defense"));
+router.use(lazyMatch("/honey", () => import("./sentra-defense"), "sentra-honey"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

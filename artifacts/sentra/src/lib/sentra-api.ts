@@ -1015,7 +1015,7 @@ export async function dismissHunt(
  * Distinct from `approveRemediation` (line ~683) which is the generic
  * case-action style approve/reject for the remediation pipeline.
  */
-export async function approveRemediationPlan(
+export async function approveHuntRemediationPlan(
   planId: string,
   payload: {
     huntId: string;
@@ -1841,9 +1841,6 @@ export function listHardwareCompartments() {
 export function listHardwareSupplyChain() {
   return getJson<{ components: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hardware-trust/supply-chain');
 }
-// Note: getHardwareTrustSummary() is defined above with the strongly-typed
-// HardwareTrustSummary shape.
-
 export function patchHardwareTrustAnchor(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/hardware-trust/anchors/${encodeURIComponent(id)}`, body);
 }
@@ -1916,9 +1913,6 @@ export function listMcpServers() {
 export function listMeshSecrets() {
   return getJson<{ secrets: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/secrets');
 }
-// Note: listMeshExposures() is defined above with the strongly-typed
-// MeshExposureItem[] shape.
-
 export function patchMeshExposure(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/exposures/${encodeURIComponent(id)}`, body);
 }
@@ -1940,9 +1934,6 @@ export function listDriftSnapshots() {
 export function patchDriftSnapshot(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/drift-snapshots/${encodeURIComponent(id)}`, body);
 }
-// Note: listMeshResilience() is defined above with the strongly-typed
-// MeshResilienceItem shape.
-
 export function getAgentMeshSummary() {
   return getJson<Record<string, unknown>>('/sentra/agent-mesh/summary');
 }
@@ -2052,4 +2043,210 @@ export function getBioSubstrateSummary() {
 
 export function listCrisisScenarios() {
   return getJson<{ scenarios: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/crisis-scenarios');
+}
+
+// ── Active Defense Fabric ────────────────────────────────────────────────────
+
+export interface SecurityEventRecord {
+  id: string;
+  eventType: string;
+  sourceIp?: string;
+  sessionId?: string;
+  userId?: string;
+  path?: string;
+  method?: string;
+  statusCode?: number;
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  payload: Record<string, unknown>;
+  detectedAt: string;
+}
+
+export interface DefenseState {
+  blockedIps: string[];
+  tarpittedIps: string[];
+  revokedSessions: string[];
+  quarantinedUsers: string[];
+  escalatedRateLimitIps: string[];
+}
+
+export interface LedgerEntry {
+  id: string;
+  sequenceNumber: number;
+  entryType: string;
+  actorType: string;
+  actorId?: string;
+  targetType?: string;
+  targetId?: string;
+  action: string;
+  outcome: string;
+  details: Record<string, unknown>;
+  previousHash: string | null;
+  entryHash: string;
+  linkedEventId?: string;
+  linkedIncidentId?: string;
+  createdAt: string;
+}
+
+export interface ResponseQueueItem {
+  id: string;
+  actionType: string;
+  category: string;
+  target: string;
+  targetType: string;
+  reason: string;
+  riskLevel: string;
+  status: string;
+  autoExecute: boolean;
+  linkedEventId?: string;
+  linkedIncidentId?: string;
+  requestedAt: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  details: Record<string, unknown>;
+}
+
+export interface HitlState {
+  globalKillSwitch: boolean;
+  categories: Record<string, {
+    category: string;
+    autoExecute: boolean;
+    requireApproval: boolean;
+    enabled: boolean;
+    description: string;
+  }>;
+  perActionOverrides: Record<string, boolean>;
+  lastUpdatedAt: string;
+  lastUpdatedBy: string;
+}
+
+export interface DuelSession {
+  id: string;
+  sessionKey: string;
+  attackerProfile: 'human' | 'scripted_automation' | 'llm_agent' | 'unknown';
+  attackerConfidence: number;
+  currentStrategy?: string;
+  counterMoveCount: number;
+  policyEstimate: Record<string, number>;
+  timeline: Array<{ ts: string; event: string; actor: 'sentinel' | 'attacker'; detail: string }>;
+  status: 'active' | 'resolved' | 'escaped';
+  startedAt: string;
+  updatedAt: string;
+}
+
+export interface CanaryToken {
+  id: string;
+  tokenType: string;
+  tokenValue: string;
+  location: string;
+  description?: string;
+  isActive: boolean;
+  triggerCount: number;
+  lastTriggeredAt?: string;
+  createdAt: string;
+}
+
+export function listSecurityEvents() {
+  return getJson<{ events: SecurityEventRecord[]; total: number; source: string }>('/sentra/events');
+}
+
+export function ingestSecurityEvent(body: {
+  eventType: string;
+  sourceIp?: string;
+  severity?: string;
+  path?: string;
+  method?: string;
+  payload?: Record<string, unknown>;
+}) {
+  return postJson<{ event: SecurityEventRecord; alert: Record<string, unknown> | null }>('/sentra/events', body);
+}
+
+export function getDefenseState() {
+  return getJson<{ state: DefenseState; source: string }>('/sentra/defense/state');
+}
+
+export function executeDefenseAction(body: {
+  actionType: string;
+  target: string;
+  targetType: string;
+  reason: string;
+  requestedBy?: string;
+  linkedEventId?: string;
+  linkedIncidentId?: string;
+}) {
+  return postJson<{ ok: boolean; actionType: string; target: string; outcome: string; message: string; queueId?: string }>('/sentra/defense/action', body);
+}
+
+export function listResponseQueue() {
+  return getJson<{ queue: ResponseQueueItem[]; total: number; source: string }>('/sentra/response-queue');
+}
+
+export function approveResponseQueueItem(id: string, approvedBy = 'operator', note?: string) {
+  return postJson<{ ok: boolean; id: string; approvedAt: string; approvedBy: string }>(
+    `/sentra/response-queue/${encodeURIComponent(id)}/approve`,
+    { approvedBy, note },
+  );
+}
+
+export function rejectResponseQueueItem(id: string, rejectedBy = 'operator', reason?: string) {
+  return postJson<{ ok: boolean; id: string; rejectedAt: string; rejectedBy: string }>(
+    `/sentra/response-queue/${encodeURIComponent(id)}/reject`,
+    { rejectedBy, reason },
+  );
+}
+
+export function listEvidenceLedger(limit = 50) {
+  return getJson<{ entries: LedgerEntry[]; total: number; source: string }>(`/sentra/evidence-ledger?limit=${limit}`);
+}
+
+export function verifyLedgerIntegrity() {
+  return postJson<{ valid: boolean; brokenAt?: number; checkedEntries: number }>('/sentra/evidence-ledger/verify', {});
+}
+
+export function getHitlControls() {
+  return getJson<HitlState>('/sentra/hitl/controls');
+}
+
+export function updateHitlControls(body: {
+  globalKillSwitch?: boolean;
+  category?: string;
+  autoExecute?: boolean;
+  requireApproval?: boolean;
+  enabled?: boolean;
+  updatedBy?: string;
+  actionId?: string;
+  actionOverride?: boolean;
+}) {
+  return patchJson<HitlState>('/sentra/hitl/controls', body);
+}
+
+export function listDuelSessions() {
+  return getJson<{ sessions: DuelSession[]; total: number; source: string }>('/sentra/duel/sessions');
+}
+
+export function getDuelSession(key: string) {
+  return getJson<DuelSession>(`/sentra/duel/sessions/${encodeURIComponent(key)}`);
+}
+
+export function engageSentinel(body: {
+  sessionKey: string;
+  sourceIp?: string;
+  path?: string;
+  requestsPerMinute?: number;
+  hasReasoningTraceMarkers?: boolean;
+  timingRegularity?: number;
+}) {
+  return postJson<{ session: DuelSession; counterMove: Record<string, unknown> | null }>('/sentra/duel/engage', body);
+}
+
+export function listCanaries() {
+  return getJson<{ canaries: CanaryToken[]; total: number; source: string }>('/sentra/deception/canaries');
+}
+
+export function registerCanary(body: {
+  tokenType: string;
+  tokenValue: string;
+  location: string;
+  description?: string;
+}) {
+  return postJson<CanaryToken>('/sentra/deception/canaries', body);
 }

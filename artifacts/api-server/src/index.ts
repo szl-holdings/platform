@@ -103,6 +103,7 @@ import { twinRegistry } from '@szl-holdings/ai-engine';
 import { initializePersistentCA, setDefaultCA, setPersistentCAStore } from '@szl-holdings/pqc-identity';
 import { DrizzlePersistentCAStore } from './lib/pqc-db-store';
 import { bootstrapPlatformIdentity } from './lib/identity-bootstrap';
+import { bootstrapSentraDefense } from './lib/sentra-defense-bootstrap';
 
 failFastOnInvalidConfig();
 validateMarketDataConfig();
@@ -496,6 +497,11 @@ export async function bootstrap(
     }
     if (migrationsComplete) {
       logger.info('[bootstrap] All migrations complete');
+      // Bootstrap Sentra Active Defense Fabric — registers DB-backed writers
+      // for the evidence ledger, response queue, and event bus so that all
+      // defense actions are persisted. Called after migrations so tables exist.
+      bootstrapSentraDefense();
+
       // Start the live OT/ICS protocol stream feed (synthetic mode) only when
       // explicitly enabled — this prevents simulated data from polluting
       // production telemetry if the feed is not yet connected to a real source.
