@@ -379,3 +379,4 @@ export function InfoRow({ label, value, mono = false }: { label: string; value: 
     </div>
   );
 }
+

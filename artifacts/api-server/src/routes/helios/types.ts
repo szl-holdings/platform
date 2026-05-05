@@ -46,6 +46,7 @@ export interface CapabilityProposal {
   estimatedEffort: string;
   createdAt: string;
   updatedAt: string;
+  statusReason?: string;
 }
 
 export interface Scanner {
@@ -59,6 +60,7 @@ export interface Scanner {
   signalsToday: number;
   totalSignals: number;
   errorMessage?: string;
+  requiresLicense?: boolean;
 }
 
 export interface RecalibrationMemo {

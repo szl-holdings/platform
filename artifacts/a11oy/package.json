@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@szl-holdings/formulas": "workspace:*",
+    "@szl-holdings/frontier-mythos": "workspace:*",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/billing-client": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",

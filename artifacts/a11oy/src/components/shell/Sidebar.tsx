@@ -12,6 +12,7 @@ import {
   Palette, Sigma, MessageSquare, Brain, Beaker,
   Box, Cog, Newspaper, KeyRound, Boxes, Wrench,
   Gauge, Search, DollarSign, Mic2,
+  Telescope, BookOpenCheck, Lightbulb, BarChart, FileStack, ScanLine, HeartPulse
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
@@ -299,6 +300,24 @@ const argoSections: NavSection[] = [
   },
 ];
 
+const frontierSections: NavSection[] = [
+  {
+    id: 'frontier-intelligence',
+    label: 'Frontier Intelligence',
+    defaultOpen: false,
+    items: [
+      { id: 'frontier-index', name: 'Frontier Overview', icon: Telescope, path: '/frontier' },
+      { id: 'frontier-feed', name: 'Signal Feed', icon: Radio, path: '/frontier/feed' },
+      { id: 'frontier-mythos', name: 'Mythos Index', icon: BookOpenCheck, path: '/frontier/mythos' },
+      { id: 'frontier-proposals', name: 'Capability Proposals', icon: Lightbulb, path: '/frontier/proposals' },
+      { id: 'frontier-benchmarks', name: 'Benchmark Scoreboard', icon: BarChart, path: '/frontier/benchmarks' },
+      { id: 'frontier-memos', name: 'Recalibration Memos', icon: FileStack, path: '/frontier/memos' },
+      { id: 'frontier-scanners', name: 'Scanner Network', icon: ScanLine, path: '/frontier/scanners' },
+      { id: 'frontier-system', name: 'System Health', icon: HeartPulse, path: '/frontier/system' },
+    ],
+  },
+];
+
 const reliquaryItems: NavItem[] = [
   { id: 'reliquary-vault', name: 'Vault Browser', icon: Database, path: '/reliquary/vault' },
   { id: 'reliquary-lineage', name: 'Lineage Graph', icon: GitFork, path: '/reliquary/lineage' },
@@ -432,6 +451,9 @@ export function Sidebar() {
 
         <SectionHeader>Argo</SectionHeader>
         {argoSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        <SectionHeader>Frontier Intelligence</SectionHeader>
+        {frontierSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
 
         <SectionHeader>Decision Intelligence</SectionHeader>
         <nav className="flex flex-col gap-0.5">

@@ -1,10 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
+  BarChart, Bar, XAxis, YAxis, Cell,
 } from 'recharts';
+import { COMPETITOR_LANES, DIMENSIONS, CAPABILITY_GAPS } from '@szl-holdings/frontier-mythos';
+import type { CompetitorLane } from '@szl-holdings/frontier-mythos';
+import { ResearchCitationPanel } from './frontier/ResearchCitationPanel';
+import type { Citation } from './frontier/ResearchCitationPanel';
 
 const API_BASE = '/api';
 
@@ -29,106 +34,29 @@ const GOLD = '#c9b787';
 const DIM = '#8a8a8a';
 const DEEP = '#0a0a0a';
 
-const DIMENSIONS = [
-  'Agentic Execution',
-  'Governance & Policy',
-  'Business Observability',
-  'Proof Chains',
-  'Enterprise Readiness',
-  'Multi-Domain Support',
-  'Human-in-the-Loop',
-  'Outcome Verification',
-];
+const LANE_INTERNAL_NAMES: Record<string, string> = {
+  'lane-a': 'OpenAI / GPT',
+  'lane-b': 'Anthropic / Claude',
+  'lane-c': 'Microsoft / Copilot',
+  'lane-d': 'Palantir',
+  'lane-e': 'Datadog / New Relic',
+};
 
-const COMPETITORS = [
-  {
-    id: 'a11oy',
-    name: 'A11oy',
-    color: '#c9b787',
-    tagline: 'Governed intelligence layer',
-    scores: [95, 98, 92, 97, 88, 95, 99, 96],
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI / GPT',
-    color: '#4a9eff',
-    tagline: 'Foundation model platform',
-    scores: [80, 28, 45, 15, 72, 65, 35, 20],
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic / Claude',
-    color: '#b07d4a',
-    tagline: 'Safety-focused model provider',
-    scores: [75, 40, 38, 20, 68, 58, 42, 25],
-  },
-  {
-    id: 'microsoft',
-    name: 'Microsoft / Copilot',
-    color: '#5b8dd9',
-    tagline: 'Enterprise productivity AI',
-    scores: [60, 55, 70, 10, 85, 72, 50, 18],
-  },
-  {
-    id: 'palantir',
-    name: 'Palantir',
-    color: '#7a7a7a',
-    tagline: 'Data integration & analytics',
-    scores: [55, 72, 82, 38, 90, 78, 60, 42],
-  },
-  {
-    id: 'datadog',
-    name: 'Datadog / New Relic',
-    color: '#8b5cf6',
-    tagline: 'Observability & monitoring',
-    scores: [20, 30, 88, 12, 82, 55, 25, 15],
-  },
-];
+const LANE_CITATIONS: Citation[] = COMPETITOR_LANES.filter(l => l.id !== 'a11oy').map(l => ({
+  id: `cite-lane-${l.id}`,
+  lab: LANE_INTERNAL_NAMES[l.id] ?? l.laneLabel,
+  kind: 'company' as const,
+  title: `${LANE_INTERNAL_NAMES[l.id] ?? l.laneLabel} — Internal capability assessment`,
+  sourceName: 'Internal Competitive Intelligence',
+  sourceUrl: '#',
+  excerpt: `This lane (${l.laneLabel}) is assessed as: ${l.archetype}. Scores across 8 dimensions are A11oy's internal analyst estimates based on public product documentation and market research. Not for external distribution.`,
+  date: 'May 2026',
+}));
 
-const CAPABILITY_GAPS = [
-  {
-    dimension: 'Proof Chains',
-    a11oy: 97,
-    nearest: 38,
-    nearestName: 'Palantir',
-    description: 'Cryptographic audit trail linking every recommendation, approval, and execution in an immutable chain. No competitor offers this natively.',
-  },
-  {
-    dimension: 'Human-in-the-Loop',
-    a11oy: 99,
-    nearest: 60,
-    nearestName: 'Palantir',
-    description: 'Constitutional mandate: no material action executes without human approval. This is structural, not configurable.',
-  },
-  {
-    dimension: 'Governance & Policy',
-    a11oy: 98,
-    nearest: 72,
-    nearestName: 'Palantir',
-    description: 'Policy gates enforced by a non-bypassable Covenant Layer at every execution boundary. Competitors rely on prompt-level guardrails.',
-  },
-  {
-    dimension: 'Outcome Verification',
-    a11oy: 96,
-    nearest: 42,
-    nearestName: 'Palantir',
-    description: 'Automated Verifier Agent confirms every executed action produced the intended outcome with cryptographic evidence.',
-  },
-];
-
-const POSITIONING_MATRIX = [
-  { name: 'A11oy', x: 92, y: 96, size: 14, color: '#c9b787', label: 'Governed\nIntelligence Layer' },
-  { name: 'OpenAI', x: 78, y: 22, size: 10, color: '#4a9eff', label: 'Foundation\nModels' },
-  { name: 'Anthropic', x: 72, y: 32, size: 9, color: '#b07d4a', label: 'Safety-first\nModels' },
-  { name: 'Microsoft', x: 58, y: 50, size: 11, color: '#5b8dd9', label: 'Productivity\nCopilot' },
-  { name: 'Palantir', x: 52, y: 70, size: 10, color: '#7a7a7a', label: 'Data\nIntegration' },
-  { name: 'Datadog', x: 18, y: 35, size: 9, color: '#8b5cf6', label: 'Observability\nOnly' },
-];
-
-function RadarViz({ competitors }: { competitors: typeof COMPETITORS }) {
+function RadarViz({ lanes }: { lanes: CompetitorLane[] }) {
   const data = DIMENSIONS.map((d, i) => {
     const entry: Record<string, string | number> = { dimension: d };
-    competitors.forEach(c => { entry[c.id] = c.scores[i]; });
+    lanes.forEach(c => { entry[c.id] = c.scores[i]; });
     return entry;
   });
 
@@ -140,10 +68,10 @@ function RadarViz({ competitors }: { competitors: typeof COMPETITORS }) {
           dataKey="dimension"
           tick={{ fill: '#8a8a8a', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
         />
-        {competitors.map(c => (
+        {lanes.map(c => (
           <Radar
             key={c.id}
-            name={c.name}
+            name={c.laneLabel}
             dataKey={c.id}
             stroke={c.color}
             fill={c.color}
@@ -164,33 +92,33 @@ function PositioningMatrix() {
         <div className="absolute right-4 top-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>More Governed →</div>
         <div className="absolute bottom-4 left-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Model-layer only</div>
         <div className="absolute bottom-4 right-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Enterprise-grade</div>
-        <div className="absolute top-1/2 left-4 text-xs font-mono -rotate-90 origin-left" style={{ color: 'var(--color-a11oy-text-ghost)', transform: 'rotate(-90deg) translateX(-50%)' }}>Agentic</div>
-        {POSITIONING_MATRIX.map(p => (
+        <div className="absolute top-1/2 left-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', transform: 'rotate(-90deg) translateX(-50%)' }}>Agentic</div>
+        {COMPETITOR_LANES.map(p => (
           <div
-            key={p.name}
+            key={p.id}
             className="absolute flex flex-col items-center"
             style={{
-              left: `${p.x}%`,
-              bottom: `${p.y}%`,
+              left: `${p.posX}%`,
+              bottom: `${p.posY}%`,
               transform: 'translate(-50%, 50%)',
             }}
           >
             <div
               className="rounded-full flex items-center justify-center font-mono font-bold"
               style={{
-                width: p.size * 3,
-                height: p.size * 3,
+                width: p.dotSize * 3,
+                height: p.dotSize * 3,
                 backgroundColor: `${p.color}22`,
                 border: `2px solid ${p.color}`,
                 color: p.color,
                 fontSize: 9,
-                boxShadow: p.name === 'A11oy' ? `0 0 20px ${p.color}44` : undefined,
+                boxShadow: p.id === 'a11oy' ? `0 0 20px ${p.color}44` : undefined,
               }}
             >
-              {p.name === 'A11oy' ? '⬡' : '●'}
+              {p.id === 'a11oy' ? '⬡' : '●'}
             </div>
             <div className="text-center mt-1" style={{ fontSize: 9, color: p.color, whiteSpace: 'nowrap', fontFamily: 'ui-monospace, monospace' }}>
-              {p.name}
+              {p.laneLabel}
             </div>
           </div>
         ))}
@@ -199,10 +127,10 @@ function PositioningMatrix() {
   );
 }
 
-function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest: number; nearestName: string; color: string }) {
+function GapBar({ a11oy, nearest, nearestLabel, color }: { a11oy: number; nearest: number; nearestLabel: string; color: string }) {
   const data = [
     { name: 'A11oy', value: a11oy, fill: '#c9b787' },
-    { name: nearestName, value: nearest, fill: color },
+    { name: nearestLabel, value: nearest, fill: color },
   ];
   return (
     <ResponsiveContainer width="100%" height={60}>
@@ -218,7 +146,7 @@ function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest
 }
 
 export function FrontierIntelligence() {
-  const [activeCompetitors, setActiveCompetitors] = useState<string[]>(['a11oy', 'openai', 'anthropic', 'palantir']);
+  const [activeCompetitors, setActiveCompetitors] = useState<string[]>(['a11oy', 'lane-a', 'lane-b', 'lane-d']);
   const [alerts, setAlerts] = useState<IntelAlert[]>([]);
   const [intelStatus, setIntelStatus] = useState<IntelStatus | null>(null);
   const [alertsLoading, setAlertsLoading] = useState(true);
@@ -263,10 +191,47 @@ export function FrontierIntelligence() {
     );
   };
 
-  const visibleCompetitors = COMPETITORS.filter(c => activeCompetitors.includes(c.id));
+  const visibleLanes = COMPETITOR_LANES.filter(c => activeCompetitors.includes(c.id));
+
+  const BASE_URL = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+  const FRONTIER_NAV = [
+    { label: 'Signal Feed', path: '/frontier/feed' },
+    { label: 'Mythos Index', path: '/frontier/mythos' },
+    { label: 'Capability Proposals', path: '/frontier/proposals' },
+    { label: 'Benchmarks', path: '/frontier/benchmarks' },
+    { label: 'Recalibration Memos', path: '/frontier/memos' },
+    { label: 'Scanners', path: '/frontier/scanners' },
+    { label: 'System Health', path: '/frontier/system' },
+  ];
 
   return (
     <Layout>
+      <div style={{
+        display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 24,
+        padding: '10px 14px', borderRadius: 8,
+        background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
+      }}>
+        <span style={{ fontSize: 10, fontFamily: 'ui-monospace, monospace', color: DEEP === '#0a0a0a' ? '#5e5e5e' : DEEP, letterSpacing: '0.1em', textTransform: 'uppercase', alignSelf: 'center', marginRight: 4 }}>
+          Frontier /
+        </span>
+        {FRONTIER_NAV.map(n => (
+          <Link
+            key={n.path}
+            href={`${BASE_URL}${n.path}`}
+            style={{
+              fontSize: 11, fontFamily: 'ui-monospace, monospace',
+              color: DIM, textDecoration: 'none',
+              padding: '4px 10px', borderRadius: 4,
+              border: `1px solid rgba(255,255,255,0.07)`,
+              background: 'transparent',
+              transition: 'color 0.15s, border-color 0.15s',
+            }}
+          >
+            {n.label}
+          </Link>
+        ))}
+      </div>
+
       <PageHeader
         label="FRONTIER INTELLIGENCE"
         title="Competitive Positioning Matrix"
@@ -303,7 +268,7 @@ export function FrontierIntelligence() {
           <SectionTitle>8-Dimension Capability Radar</SectionTitle>
           <Card>
             <div className="flex flex-wrap gap-2 mb-4">
-              {COMPETITORS.map(c => (
+              {COMPETITOR_LANES.map(c => (
                 <button
                   key={c.id}
                   onClick={() => toggleComp(c.id)}
@@ -317,11 +282,11 @@ export function FrontierIntelligence() {
                   }}
                 >
                   <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: c.color, flexShrink: 0, display: 'inline-block' }} />
-                  {c.name}
+                  {c.laneLabel}
                 </button>
               ))}
             </div>
-            <RadarViz competitors={visibleCompetitors} />
+            <RadarViz lanes={visibleLanes} />
             <div className="mt-3 text-xs text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
               Scores are analyst assessments based on published capabilities and public documentation. Toggle competitors above.
             </div>
@@ -329,8 +294,8 @@ export function FrontierIntelligence() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <SectionTitle>Competitor Profiles</SectionTitle>
-          {COMPETITORS.filter(c => c.id !== 'a11oy').map(c => {
+          <SectionTitle>Lane Profiles</SectionTitle>
+          {COMPETITOR_LANES.filter(c => c.id !== 'a11oy').map(c => {
             const avg = Math.round(c.scores.reduce((a, b) => a + b, 0) / c.scores.length);
             return (
               <div
@@ -343,10 +308,10 @@ export function FrontierIntelligence() {
                 onClick={() => toggleComp(c.id)}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium" style={{ color: c.color }}>{c.name}</span>
+                  <span className="text-sm font-medium" style={{ color: c.color }}>{c.laneLabel}</span>
                   <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>avg {avg}</span>
                 </div>
-                <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.tagline}</div>
+                <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.archetype}</div>
                 <div className="h-1 rounded-full" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
                   <div className="h-1 rounded-full" style={{ width: `${avg}%`, backgroundColor: c.color }} />
                 </div>
@@ -371,14 +336,14 @@ export function FrontierIntelligence() {
           <SectionTitle>Capability Gap Analysis</SectionTitle>
           <div className="flex flex-col gap-3">
             {CAPABILITY_GAPS.map((gap, i) => {
-              const nearestComp = COMPETITORS.find(c => c.name === gap.nearestName);
+              const nearestLane = COMPETITOR_LANES.find(c => c.id === gap.nearestLaneId);
               return (
                 <Card key={i}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-semibold" style={{ color: GOLD }}>{gap.dimension}</span>
-                    <span className="text-xs font-mono" style={{ color: GOLD }}>+{gap.a11oy - gap.nearest} pts lead</span>
+                    <span className="text-xs font-mono" style={{ color: GOLD }}>+{gap.a11oy - gap.nearestScore} pts lead</span>
                   </div>
-                  <GapBar a11oy={gap.a11oy} nearest={gap.nearest} nearestName={gap.nearestName} color={nearestComp?.color ?? DIM} />
+                  <GapBar a11oy={gap.a11oy} nearest={gap.nearestScore} nearestLabel={nearestLane?.laneLabel ?? 'Nearest'} color={nearestLane?.color ?? DIM} />
                   <p className="text-xs mt-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{gap.description}</p>
                 </Card>
               );
@@ -393,8 +358,8 @@ export function FrontierIntelligence() {
           <thead>
             <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
               <th className="text-left px-4 py-3 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 10, letterSpacing: '0.08em' }}>DIMENSION</th>
-              {COMPETITORS.map(c => (
-                <th key={c.id} className="text-center px-3 py-3 font-mono" style={{ color: c.color, fontSize: 10 }}>{c.name.split(' /')[0]}</th>
+              {COMPETITOR_LANES.map(c => (
+                <th key={c.id} className="text-center px-3 py-3 font-mono" style={{ color: c.color, fontSize: 10 }}>{c.laneLabel}</th>
               ))}
             </tr>
           </thead>
@@ -402,7 +367,7 @@ export function FrontierIntelligence() {
             {DIMENSIONS.map((dim, di) => (
               <tr key={dim} style={{ backgroundColor: di % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
                 <td className="px-4 py-2.5 font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{dim}</td>
-                {COMPETITORS.map(c => {
+                {COMPETITOR_LANES.map(c => {
                   const score = c.scores[di];
                   const isA11oy = c.id === 'a11oy';
                   return (
@@ -422,7 +387,7 @@ export function FrontierIntelligence() {
             ))}
             <tr style={{ backgroundColor: 'rgba(201,183,135,0.06)', borderTop: '2px solid rgba(201,183,135,0.2)' }}>
               <td className="px-4 py-3 font-mono text-xs font-bold" style={{ color: GOLD }}>AVG SCORE</td>
-              {COMPETITORS.map(c => {
+              {COMPETITOR_LANES.map(c => {
                 const avg = Math.round(c.scores.reduce((a, b) => a + b, 0) / c.scores.length);
                 return (
                   <td key={c.id} className="px-3 py-3 text-center font-mono font-bold" style={{ color: c.id === 'a11oy' ? GOLD : 'var(--color-a11oy-text-ghost)' }}>
@@ -512,6 +477,11 @@ export function FrontierIntelligence() {
           ))}
         </div>
       )}
+
+      <ResearchCitationPanel
+        citations={LANE_CITATIONS}
+        title="Intelligence Sources — Internal Competitive Research"
+      />
     </Layout>
   );
 }

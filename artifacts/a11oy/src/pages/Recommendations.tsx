@@ -241,6 +241,32 @@ export function Recommendations() {
           </Card>
 
           <div className="mt-5">
+            <SectionTitle>Frontier Signals</SectionTitle>
+            <div className="mb-4 p-3 rounded-lg border text-xs" style={{ background: 'rgba(201,183,135,0.04)', borderColor: 'rgba(201,183,135,0.15)' }}>
+              <div className="font-mono font-semibold mb-1.5" style={{ color: '#c9b787', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Frontier Intelligence → Recommendations
+              </div>
+              <div style={{ color: '#8a8a8a', lineHeight: 1.5, marginBottom: 10 }}>
+                High-impact signals from the Frontier scanner network inform recommendation priority and rationale. View the live signal feed to trace which external research drives each recommendation.
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Signal Feed', href: '/frontier/feed' },
+                  { label: 'Capability Proposals', href: '/frontier/proposals' },
+                  { label: 'Mythos Index', href: '/frontier/mythos' },
+                ].map(l => {
+                  const BASE_LINK = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+                  return (
+                    <a key={l.href} href={`${BASE_LINK}${l.href}`} style={{ color: '#c9b787', fontFamily: 'ui-monospace, monospace', fontSize: 11, textDecoration: 'none', padding: '3px 9px', borderRadius: 4, border: '1px solid rgba(201,183,135,0.25)', background: 'rgba(201,183,135,0.06)' }}>
+                      {l.label} →
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5">
             <SectionTitle>Operational Surfaces</SectionTitle>
             <div className="flex flex-col gap-2">
               {[

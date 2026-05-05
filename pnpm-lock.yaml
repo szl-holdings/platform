@@ -413,6 +413,9 @@ importers:
       '@szl-holdings/formulas':
         specifier: workspace:*
         version: link:../../lib/formulas
+      '@szl-holdings/frontier-mythos':
+        specifier: workspace:*
+        version: link:../../packages/frontier-mythos
       '@szl-holdings/omnia-shell':
         specifier: workspace:*
         version: link:../../packages/omnia-shell
@@ -3946,6 +3949,15 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/frontier-mythos:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/guardian:
     dependencies:
@@ -20181,7 +20193,7 @@ snapshots:
   '@types/compression@1.8.1':
     dependencies:
       '@types/express': 5.0.6
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/connect@3.4.38':
     dependencies:
@@ -20199,7 +20211,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/d3-array@3.2.2': {}
 
@@ -20418,7 +20430,7 @@ snapshots:
 
   '@types/nodemailer@7.0.11':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/pako@2.0.4': {}
 
@@ -20426,7 +20438,7 @@ snapshots:
 
   '@types/pdfkit@0.17.5':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/pg-pool@2.0.7':
     dependencies:
@@ -20530,13 +20542,13 @@ snapshots:
 
   '@types/web-push@3.6.4':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 22.19.17
 
   '@types/yargs-parser@21.0.3': {}
 

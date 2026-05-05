@@ -169,6 +169,14 @@ const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience')
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
 const FrontierEngine = lazy(() => import('./pages/Frontier').then(m => ({ default: m.Frontier })));
 const FrontierInbox = lazy(() => import('./pages/FrontierInbox').then(m => ({ default: m.FrontierInbox })));
+const FrontierFeed = lazy(() => import('./pages/frontier/FrontierFeed').then(m => ({ default: m.FrontierFeed })));
+const FrontierMythos = lazy(() => import('./pages/frontier/MythosIndex').then(m => ({ default: m.MythosIndex })));
+const FrontierProposals = lazy(() => import('./pages/frontier/CapabilityProposals').then(m => ({ default: m.CapabilityProposals })));
+const FrontierBenchmarks = lazy(() => import('./pages/frontier/BenchmarkScoreboard').then(m => ({ default: m.BenchmarkScoreboard })));
+const FrontierMemos = lazy(() => import('./pages/frontier/RecalibrationMemos').then(m => ({ default: m.RecalibrationMemos })));
+const FrontierScanners = lazy(() => import('./pages/frontier/ScannerAdmin').then(m => ({ default: m.ScannerAdmin })));
+const FrontierSystem = lazy(() => import('./pages/frontier/SystemHealth').then(m => ({ default: m.SystemHealth })));
+
 const QuantumIntelligence = lazy(() => import('./pages/QuantumIntelligence').then(m => ({ default: m.QuantumIntelligence })));
 const DarpaResilienceHub = lazy(() => import('./pages/DarpaResilienceHub').then(m => ({ default: m.DarpaResilienceHub })));
 const GardRobustness = lazy(() => import('./pages/GardRobustness').then(m => ({ default: m.GardRobustness })));
@@ -693,11 +701,18 @@ function AppInner() {
         <Route path={`${base}/learning`} component={LearningLoop} />
         <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
         <Route path={`${base}/adversarial`} component={AdversarialResilience} />
-        {/* Frontier Ingestion Engine — primary surface per task #4803.
-            The legacy Frontier Intelligence dashboard moved to
-            /frontier-intel to avoid path collision. */}
-        <Route path={`${base}/frontier`} component={FrontierEngine} />
+        {/* Frontier sub-routes must precede the /frontier root to avoid prefix matching */}
         <Route path={`${base}/frontier/inbox`} component={FrontierInbox} />
+        <Route path={`${base}/frontier/feed`} component={FrontierFeed} />
+        <Route path={`${base}/frontier/mythos`} component={FrontierMythos} />
+        <Route path={`${base}/frontier/proposals`} component={FrontierProposals} />
+        <Route path={`${base}/frontier/benchmarks`} component={FrontierBenchmarks} />
+        <Route path={`${base}/frontier/memos`} component={FrontierMemos} />
+        <Route path={`${base}/frontier/scanners`} component={FrontierScanners} />
+        <Route path={`${base}/frontier/system`} component={FrontierSystem} />
+        {/* Frontier Ingestion Engine — primary surface per task #4803.
+            Legacy Frontier Intelligence overview at /frontier-intel. */}
+        <Route path={`${base}/frontier`} component={FrontierEngine} />
         <Route path={`${base}/frontier-intel`} component={FrontierIntelligence} />
         <Route path={`${base}/quantum`} component={QuantumIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />

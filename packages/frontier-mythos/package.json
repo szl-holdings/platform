@@ -1,0 +1,17 @@
+{
+  "name": "@szl-holdings/frontier-mythos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared typed Frontier Intelligence Mythos Index — capability lanes, dimensions, and gap analysis. Single source of truth consumed by both the A11oy UI and doctrine generation. No competitor names in exported types.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

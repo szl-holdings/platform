@@ -1,3 +1,4 @@
+import { a2aTaskManager } from '@szl-holdings/ai-engine';
 import { Router } from 'express';
 import {
   BENCHMARK_SCORES,
@@ -10,6 +11,16 @@ import {
   SIGNALS,
 } from './data';
 import type { CapabilityProposal, Scanner } from './types';
+
+const AGENT_ID_MAP: Record<string, string> = {
+  'A11oy': 'alloy',
+  'Sentra': 'sentinel',
+  'Aegis': 'beacon',
+  'Counsel': 'inca',
+  'Vessels': 'compass',
+  'Lyte': 'helmsman',
+  'Zeus': 'zeus',
+};
 
 const router = Router();
 
@@ -124,7 +135,7 @@ router.get('/proposals', (req, res) => {
 
 router.patch('/proposals/:id/status', (req, res) => {
   const { id } = req.params;
-  const { status } = req.body as { status: 'accepted' | 'deferred' | 'rejected' };
+  const { status, reason } = req.body as { status: 'accepted' | 'deferred' | 'rejected'; reason?: string };
 
   if (!['accepted', 'deferred', 'rejected'].includes(status)) {
     res.status(400).json({ error: 'Invalid status' });
@@ -137,8 +148,83 @@ router.patch('/proposals/:id/status', (req, res) => {
     return;
   }
 
-  proposals[idx] = { ...proposals[idx], status, updatedAt: new Date().toISOString() };
+  proposals[idx] = {
+    ...proposals[idx],
+    status,
+    updatedAt: new Date().toISOString(),
+    ...(reason ? { statusReason: reason } : {}),
+  };
   res.json({ proposal: proposals[idx] });
+});
+
+// ── Promote proposal → A2A project task surface ───────────────────────────
+// Tracks proposalId → a2aTaskId so we can detect double-promotes.
+const promotedProposals = new Map<string, string>();
+
+router.post('/proposals/:id/promote', (req, res) => {
+  const { id } = req.params;
+  const idx = proposals.findIndex(p => p.id === id);
+  if (idx === -1) {
+    res.status(404).json({ error: 'Proposal not found' });
+    return;
+  }
+
+  const existingTaskId = promotedProposals.get(id);
+  if (existingTaskId) {
+    const existing = a2aTaskManager.getTask(existingTaskId);
+    const taskRef = `FI-${id.replace('prop-', '').padStart(3, '0')}`;
+    res.json({ task: { taskRef, taskId: existingTaskId, ...(existing ?? {}) }, alreadyPromoted: true });
+    return;
+  }
+
+  const proposal = proposals[idx];
+  const agentId = AGENT_ID_MAP[proposal.targetAgent] ?? 'alloy';
+  const taskRef = `FI-${id.replace('prop-', '').padStart(3, '0')}`;
+
+  const a2aTask = a2aTaskManager.createTask(
+    agentId,
+    {
+      query: `[${taskRef}] ${proposal.title}`,
+      context: {
+        proposalId: id,
+        description: proposal.description,
+        rationale: proposal.rationale,
+        priority: proposal.priority,
+        impactArea: proposal.impactArea,
+        signalIds: proposal.signalIds,
+        estimatedEffort: proposal.estimatedEffort,
+        source: 'frontier-intelligence',
+        taskRef,
+      },
+    },
+    'frontier-intelligence',
+    'A11oy Frontier',
+  );
+
+  promotedProposals.set(id, a2aTask.taskId);
+  proposals[idx] = { ...proposals[idx], status: 'accepted', updatedAt: new Date().toISOString() };
+
+  res.status(201).json({
+    task: {
+      taskRef,
+      taskId: a2aTask.taskId,
+      status: a2aTask.status,
+      agentId,
+      createdAt: a2aTask.createdAt,
+      title: proposal.title,
+      priority: proposal.priority,
+    },
+    proposal: proposals[idx],
+  });
+});
+
+router.get('/proposals/backlog', (_req, res) => {
+  const tasks = Array.from(promotedProposals.entries()).map(([proposalId, taskId]) => {
+    const task = a2aTaskManager.getTask(taskId);
+    const taskRef = `FI-${proposalId.replace('prop-', '').padStart(3, '0')}`;
+    return { taskRef, taskId, proposalId, ...(task ?? { status: 'unknown' }) };
+  });
+  res.json({ tasks, total: tasks.length });
 });
 
 // ── Benchmarks ────────────────────────────────────────────────────────────────

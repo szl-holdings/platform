@@ -255,6 +255,29 @@ export function LearningLoop() {
           );
         })}
       </div>
+
+      <div className="mt-4 px-4 py-3 rounded-lg text-[10px]" style={{ background: 'rgba(107,141,227,0.05)', border: '1px solid rgba(107,141,227,0.18)' }}>
+        <div style={{ color: '#6b8de3', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Frontier Intelligence → Learning Loop
+        </div>
+        <div style={{ color: '#8a8a8a', marginBottom: 8, lineHeight: 1.5 }}>
+          Benchmark deltas from the Frontier scanner feed into calibration drift detection. External evaluation frameworks (HELM, LiveBench) provide ground-truth performance signals that recalibrate acceptance thresholds.
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { label: 'Benchmark Scoreboard', href: '/frontier/benchmarks' },
+            { label: 'Recalibration Memos', href: '/frontier/memos' },
+            { label: 'Signal Feed', href: '/frontier/feed' },
+          ].map(l => {
+            const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+            return (
+              <a key={l.href} href={`${BASE}${l.href}`} style={{ color: '#6b8de3', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none', padding: '3px 9px', borderRadius: 4, border: '1px solid rgba(107,141,227,0.25)', background: 'rgba(107,141,227,0.06)' }}>
+                {l.label} →
+              </a>
+            );
+          })}
+        </div>
+      </div>
     </Layout>
   );
 }

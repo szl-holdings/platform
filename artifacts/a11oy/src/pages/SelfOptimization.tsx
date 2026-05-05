@@ -267,6 +267,29 @@ export function SelfOptimization() {
           );
         })}
       </div>
+
+      <div className="mt-4 px-4 py-3 rounded-lg text-[10px]" style={{ background: 'rgba(141,227,181,0.05)', border: '1px solid rgba(141,227,181,0.18)' }}>
+        <div style={{ color: '#8de3b5', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Frontier Intelligence → Self-Optimization
+        </div>
+        <div style={{ color: '#8a8a8a', marginBottom: 8, lineHeight: 1.5 }}>
+          Capability proposals from the Frontier queue inform optimization target selection — when external research identifies a gap in A11oy's capability stack, it surfaces as a proposed optimization objective here. Human approval is required before any proposal enters the optimization backlog.
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {[
+            { label: 'Capability Proposals', href: '/frontier/proposals' },
+            { label: 'Benchmark Scoreboard', href: '/frontier/benchmarks' },
+            { label: 'Frontier Overview', href: '/frontier' },
+          ].map(l => {
+            const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+            return (
+              <a key={l.href} href={`${BASE}${l.href}`} style={{ color: '#8de3b5', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none', padding: '3px 9px', borderRadius: 4, border: '1px solid rgba(141,227,181,0.25)', background: 'rgba(141,227,181,0.06)' }}>
+                {l.label} →
+              </a>
+            );
+          })}
+        </div>
+      </div>
     </Layout>
   );
 }
