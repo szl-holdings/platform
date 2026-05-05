@@ -139,6 +139,7 @@ const NAV_GROUPS = [
       { href: '/ai-gateway',   label: 'AI Gateway' },
       { href: '/connectors',   label: 'Agent Gateway' },
       { href: '/twins',        label: 'Twin Foundry' },
+      { href: '/model-foundry', label: 'Model Foundry' },
       { href: '/terminal',     label: 'Terminal' },
     ],
   },

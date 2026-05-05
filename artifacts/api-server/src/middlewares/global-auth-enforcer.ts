@@ -854,6 +854,20 @@ export function globalAuthEnforcer(
     return;
   }
 
+  // FORGE Model Foundry — non-production demo. We allow ONLY safe read-only
+  // GET endpoints without a session so the A11oy preview iframe can showcase
+  // catalogs, run lists, model cards, lineage, and cost summaries. All
+  // mutating POSTs (run launch, MirrorEval, covenant approve/reject) require
+  // a real authenticated session in every environment, including dev.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    req.method === "GET" &&
+    path.startsWith("/api/model-foundry")
+  ) {
+    next();
+    return;
+  }
+
   serverTelemetry.recordAuthFailure();
   sendUnauthorized(res, "This endpoint requires a valid session. Please log in.");
 }

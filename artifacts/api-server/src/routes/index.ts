@@ -589,6 +589,11 @@ router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
 // cross-domain proposals, drift-alerts, timeline, and approve/reject lifecycle.
 router.use(lazyMatch("/alloy-forge", () => import("./alloy-forge"), "alloy-forge"));
 
+// FORGE Model Foundry — governed fine-tuning pipeline.
+// Owns /model-foundry/* endpoints: families, runs, mirror-eval gate,
+// covenant approval, model card w/ proof packet, lineage, cost summary.
+router.use(lazyMatch("/model-foundry", () => import("./model-foundry"), "model-foundry"));
+
 // Unified Auth Mesh — API key CRUD and OAuth client_credentials endpoints
 router.use(apiKeysRouter);
 router.use(oauthRouter);
