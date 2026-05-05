@@ -8,7 +8,8 @@ import {
   Cpu, Eye, Zap, Network, Settings, Users, Terminal, Layers,
   Briefcase, FileText, Target, GitBranch, Database, Lock,
   GitFork, History, BookOpen, SquareTerminal, Sliders,
-  FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert
+  FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert,
+  Swords, Waves, Microscope, TrendingUp, FlaskRound
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
@@ -224,6 +225,22 @@ const nexusSections: NavSection[] = [
   },
 ];
 
+const argoSections: NavSection[] = [
+  {
+    id: 'argo-core',
+    label: 'Argo — Decision Engine',
+    defaultOpen: false,
+    items: [
+      { id: 'argo-bridge', name: 'Argo Bridge', icon: TrendingUp, path: '/argo' },
+      { id: 'argo-world-model', name: 'Lodestone World Model', icon: Globe, path: '/argo/world-model' },
+      { id: 'argo-arena', name: 'Self-Play Arena', icon: Swords, path: '/argo/arena' },
+      { id: 'argo-stream', name: 'Experience Stream', icon: Waves, path: '/argo/stream' },
+      { id: 'argo-ineffable', name: 'Ineffable Channel', icon: Microscope, path: '/argo/ineffable' },
+      { id: 'argo-forge', name: 'Distillation Forge', icon: FlaskRound, path: '/argo/forge' },
+    ],
+  },
+];
+
 const reliquaryItems: NavItem[] = [
   { id: 'reliquary-vault', name: 'Vault Browser', icon: Database, path: '/reliquary/vault' },
   { id: 'reliquary-lineage', name: 'Lineage Graph', icon: GitFork, path: '/reliquary/lineage' },
@@ -305,6 +322,9 @@ export function Sidebar() {
 
         <SectionHeader>NEXUS</SectionHeader>
         {nexusSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        <SectionHeader>Argo</SectionHeader>
+        {argoSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
 
         <SectionHeader>Decision Intelligence</SectionHeader>
         <nav className="flex flex-col gap-0.5">

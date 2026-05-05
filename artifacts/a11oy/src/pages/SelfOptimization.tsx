@@ -253,6 +253,20 @@ export function SelfOptimization() {
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Self-optimization is governed by A11oy doctrine — all threshold changes are logged to the Proof Ledger and subject to Covenant Layer review.
       </div>
+
+      <div className="mt-4 px-4 py-3 rounded-lg flex flex-wrap gap-4 items-center text-[10px]" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.12)' }}>
+        <span style={{ color: '#5e5e5e', fontFamily: "'JetBrains Mono', monospace" }}>Argo provides champion policies for self-optimization →</span>
+        {[
+          { label: 'Argo Bridge', href: '/argo' },
+          { label: 'Self-Play Arena', href: '/argo/arena' },
+          { label: 'Lodestone World Model', href: '/argo/world-model' },
+        ].map(l => {
+          const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+          return (
+            <a key={l.href} href={`${BASE}${l.href}`} style={{ color: '#c9b787', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none' }}>{l.label} →</a>
+          );
+        })}
+      </div>
     </Layout>
   );
 }

@@ -567,6 +567,60 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Argo — compact summary card */}
+      <section style={{ padding: 'clamp(3rem, 6vw, 5rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+          <FadeIn>
+            <a href={b('/argo')} style={{ textDecoration: 'none', display: 'block' }}>
+              <div
+                style={{
+                  background: T.surface,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 16,
+                  padding: 'clamp(1.5rem, 3vw, 2.25rem)',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: '2rem',
+                  alignItems: 'center',
+                  transition: 'border-color 0.2s, background 0.2s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = T.accentBorder; (e.currentTarget as HTMLDivElement).style.background = T.surfaceHover; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = T.border; (e.currentTarget as HTMLDivElement).style.background = T.surface; }}
+              >
+                <div>
+                  <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.accentDim, margin: '0 0 0.5rem' }}>
+                    FLAGSHIP MODULE · ARGO
+                  </p>
+                  <h3 style={{ fontSize: 'clamp(1.125rem, 2vw, 1.375rem)', fontWeight: 600, letterSpacing: '-0.02em', color: T.text, margin: '0 0 0.5rem', fontFamily: T.display }}>
+                    Experience-Era Decision Engine
+                  </h3>
+                  <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: T.textDim, margin: 0, maxWidth: '56ch' }}>
+                    Self-improving loop — MuZero-style world-model rollouts, self-play tournaments, latent reasoning channels, and nightly distillation into the Model Router's champion tiers.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '1.5rem', flexShrink: 0 }}>
+                  {[
+                    { label: 'CHAMPION POLICIES', value: '6', sub: 'one per domain' },
+                    { label: 'WORLD-MODEL ACC.', value: '89.1%', sub: '90-day avg' },
+                    { label: 'THROUGHPUT', value: '31.4', sub: 'events / sec' },
+                  ].map(kpi => (
+                    <div key={kpi.label} style={{ textAlign: 'center', minWidth: 80 }}>
+                      <div style={{ fontSize: '0.5rem', fontFamily: T.mono, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.textDim, marginBottom: '0.35rem' }}>{kpi.label}</div>
+                      <div style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', fontFamily: T.mono, fontWeight: 700, color: T.accent, lineHeight: 1 }}>{kpi.value}</div>
+                      <div style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.textDim, marginTop: '0.25rem' }}>{kpi.sub}</div>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0.5rem' }}>
+                    <span style={{ fontSize: '1rem', color: T.accentDim }}>→</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </FadeIn>
+        </div>
+      </section>
+
       <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.borderSubtle}` }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
           <FadeIn>

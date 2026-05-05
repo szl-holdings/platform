@@ -210,6 +210,12 @@ const AtlasShield = lazy(() => import('./pages/AtlasShield').then(m => ({ defaul
 const SwarmOrchestrator = lazy(() => import('./pages/SwarmOrchestrator').then(m => ({ default: m.SwarmOrchestrator })));
 const PlaybookEngine = lazy(() => import('./pages/PlaybookEngine').then(m => ({ default: m.PlaybookEngine })));
 const A2AInterop = lazy(() => import('./pages/A2AInterop').then(m => ({ default: m.A2AInterop })));
+const ArgoBridge = lazy(() => import('./pages/argo/Bridge').then(m => ({ default: m.ArgoBridge })));
+const ArgoWorldModel = lazy(() => import('./pages/argo/LodestoneWorldModel').then(m => ({ default: m.LodestoneWorldModel })));
+const ArgoArena = lazy(() => import('./pages/argo/SelfPlayArena').then(m => ({ default: m.SelfPlayArena })));
+const ArgoStream = lazy(() => import('./pages/argo/ExperienceStream').then(m => ({ default: m.ExperienceStream })));
+const ArgoIneffable = lazy(() => import('./pages/argo/IneffableChannel').then(m => ({ default: m.IneffableChannel })));
+const ArgoForge = lazy(() => import('./pages/argo/DistillationForge').then(m => ({ default: m.DistillationForge })));
 const AgentIdentityRegistry = lazy(() => import('./pages/AgentIdentityRegistry').then(m => ({ default: m.AgentIdentityRegistry })));
 const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m => ({ default: m.SelfOptimization })));
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
@@ -637,7 +643,13 @@ export default function App() {
         <Route path={`${base}/welfare`} component={AgentWelfare} />
         <Route path={`${base}/red-team`} component={RedTeam} />
         <Route path={`${base}/glasswing`} component={GlasswingPage} />
-        <Route path={`${base}/argo`} component={ArgoForgePage} />
+        <Route path={`${base}/argo/world-model`}><WithShell><ArgoWorldModel /></WithShell></Route>
+        <Route path={`${base}/argo/arena`}><WithShell><ArgoArena /></WithShell></Route>
+        <Route path={`${base}/argo/stream`}><WithShell><ArgoStream /></WithShell></Route>
+        <Route path={`${base}/argo/ineffable`}><WithShell><ArgoIneffable /></WithShell></Route>
+        <Route path={`${base}/argo/forge`}><WithShell><ArgoForge /></WithShell></Route>
+        <Route path={`${base}/argo`}><WithShell><ArgoBridge /></WithShell></Route>
+        <Route path={`${base}/argo-field-forge`} component={ArgoForgePage} />
         <Route path={`${base}/mythos-layer`} component={MythosLayerPage} />
         <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
         <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />

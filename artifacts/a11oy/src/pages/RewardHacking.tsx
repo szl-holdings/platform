@@ -79,6 +79,20 @@ export function RewardHacking() {
         ))}
       </div>
       </DoctrineLoader>
+
+      <div className="mt-4 px-4 py-3 rounded-lg flex flex-wrap gap-4 items-center text-[10px]" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.12)' }}>
+        <span style={{ color: '#5e5e5e', fontFamily: "'JetBrains Mono', monospace" }}>Argo adversarial probes complement reward-hacking detection →</span>
+        {[
+          { label: 'Self-Play Arena', href: '/argo/arena' },
+          { label: 'Ineffable Channel', href: '/argo/ineffable' },
+          { label: 'Argo Bridge', href: '/argo' },
+        ].map(l => {
+          const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+          return (
+            <a key={l.href} href={`${BASE}${l.href}`} style={{ color: '#c9b787', fontFamily: "'JetBrains Mono', monospace", textDecoration: 'none' }}>{l.label} →</a>
+          );
+        })}
+      </div>
     </Layout>
   );
 }
