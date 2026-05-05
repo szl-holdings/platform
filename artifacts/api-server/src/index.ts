@@ -102,6 +102,7 @@ import { bootstrapChainState } from './routes/signal-chains';
 import { twinRegistry } from '@szl-holdings/ai-engine';
 import { initializePersistentCA, setDefaultCA, setPersistentCAStore } from '@szl-holdings/pqc-identity';
 import { DrizzlePersistentCAStore } from './lib/pqc-db-store';
+import { bootstrapPlatformIdentity } from './lib/identity-bootstrap';
 
 failFastOnInvalidConfig();
 validateMarketDataConfig();
@@ -523,6 +524,29 @@ export async function bootstrap(
         process.exit(1);
       } else {
         logger.warn({ err: pqcErr }, '[pqc] Persistent CA initialization failed (dev — continuing with ephemeral CA)');
+      }
+    }
+
+    // Bootstrap the platform identity layer: mint/verify the platform-service DID
+    // and its hybrid signing key (Ed25519 + ML-DSA-65). Must run after PQC CA
+    // so the CA root is available if needed for future DID-bound cert issuance.
+    // Runs before HTTP handler opens so the platform DID is available for signing
+    // the very first audit event.
+    try {
+      const { platformServiceDid, bootstrapTimestamp } = await bootstrapPlatformIdentity();
+      logger.info(
+        { platformServiceDid, bootstrapTimestamp },
+        '[identity] Platform identity bootstrapped — hybrid audit chain signing active',
+      );
+    } catch (identityErr) {
+      if (process.env.NODE_ENV === 'production') {
+        logger.fatal({ err: identityErr }, '[identity] Platform identity bootstrap failed — aborting in production');
+        process.exit(1);
+      } else {
+        logger.warn(
+          { err: identityErr },
+          '[identity] Platform identity bootstrap failed (dev — audit events will be legacy_unsigned)',
+        );
       }
     }
 

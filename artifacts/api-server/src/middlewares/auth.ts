@@ -14,6 +14,12 @@ import {
 } from '../lib/internal-tokens';
 import { logger } from '../lib/logger';
 import { verifyMeshToken } from '../lib/mesh-jwt';
+import {
+  ensureApiKeyDid,
+  ensureInternalAgentDid,
+  ensureOAuthClientDid,
+  getPlatformServiceDid,
+} from '../lib/platform-did-registry';
 import { getSessionMinCreatedAt } from './session-policy';
 
 /**
@@ -35,6 +41,16 @@ export interface AuthenticatedUser {
    */
   roles: RoleName[];
   orgs: OrgMembership[];
+  /**
+   * Platform DID bound to this principal. Populated for machine/agent identities
+   * (M2M API keys, internal agents, registered agents). Absent for human sessions.
+   */
+  did?: string;
+  /**
+   * Actor kind for the identity layer. Distinguishes human users from service
+   * accounts, agents, and tenant machines.
+   */
+  actorKind?: 'human' | 'service' | 'agent' | 'tenant_machine';
 }
 
 /**
@@ -72,7 +88,7 @@ declare global {
  * via `requireInternalScope(...)`. This is the hardening the first
  * external-user launch requires.
  */
-function buildInternalAgentUser(ctx: InternalAgentContext): AuthenticatedUser {
+function buildInternalAgentUser(ctx: InternalAgentContext, agentDid?: string): AuthenticatedUser {
   const roles: RoleName[] = ['ops'];
   return {
     id: 0,
@@ -80,6 +96,10 @@ function buildInternalAgentUser(ctx: InternalAgentContext): AuthenticatedUser {
     email: null,
     roles,
     orgs: [],
+    actorKind: 'service',
+    // Each named internal agent gets its own distinct DID (did:plat:agent:{name}).
+    // Falls back to platform service DID if per-agent mint fails (DB outage).
+    did: agentDid ?? getPlatformServiceDid() ?? undefined,
   };
 }
 
@@ -255,6 +275,20 @@ async function resolveApiKeyBearer(token: string): Promise<{
       .where(eq(orgMembersTable.userId, user.id)),
   ]);
 
+  // Per-credential DID binding (G6): each API key gets did:plat:api_key:{id}.
+  // Fail closed if the DID has been revoked (independent of key active status).
+  // Fall back to platform service DID only on DB outage (non-fatal degradation).
+  const apiKeyDidResult = await ensureApiKeyDid(apiKey.id);
+  if (apiKeyDidResult?.revoked) {
+    logger.warn({ keyId: apiKey.id, did: apiKeyDidResult.did }, '[auth] API-key DID revoked — rejecting auth');
+    return null;
+  }
+  const resolvedDid = apiKeyDidResult?.did ?? (() => {
+    const fallback = getPlatformServiceDid();
+    if (!fallback) logger.warn({ keyId: apiKey.id }, '[auth] API-key bearer: DID unavailable (DB outage) and no platform DID — audit row lacks M2M binding');
+    return fallback ?? undefined;
+  })();
+
   // Update last_used_at asynchronously — don't block the request
   db.update(apiKeysTable)
     .set({ lastUsedAt: new Date() })
@@ -273,6 +307,8 @@ async function resolveApiKeyBearer(token: string): Promise<{
         orgName: m.orgName,
         role: m.role,
       })),
+      actorKind: 'tenant_machine' as const,
+      did: resolvedDid,
     },
     principal: {
       type: 'api_key',
@@ -308,6 +344,20 @@ async function resolveOAuthJwtBearer(token: string): Promise<{
 
   if (!oauthClient) return null;
 
+  // Per-credential DID binding (G6): each OAuth clientId gets did:plat:oauth_client:{id}.
+  // Fail closed if the DID has been revoked (independent of oauthClient.isActive).
+  // Fall back to platform service DID only on DB outage (non-fatal degradation).
+  const oauthDidResult = await ensureOAuthClientDid(payload.clientId);
+  if (oauthDidResult?.revoked) {
+    logger.warn({ clientId: payload.clientId, did: oauthDidResult.did }, '[auth] OAuth client DID revoked — rejecting auth');
+    return null;
+  }
+  const resolvedDid = oauthDidResult?.did ?? (() => {
+    const fallback = getPlatformServiceDid();
+    if (!fallback) logger.warn({ clientId: payload.clientId }, '[auth] OAuth client_credentials: DID unavailable (DB outage) and no platform DID — audit row lacks M2M binding');
+    return fallback ?? undefined;
+  })();
+
   // OAuth machine clients carry NO roles. Access is exclusively scope-based
   // (enforced by requireMeshScope). Granting even 'ops' unconditionally would
   // let any valid client bypass role-gated routes — that is privilege escalation.
@@ -318,6 +368,8 @@ async function resolveOAuthJwtBearer(token: string): Promise<{
       email: null,
       roles: [] as RoleName[],
       orgs: [],
+      actorKind: 'tenant_machine' as const,
+      did: resolvedDid,
     },
     principal: {
       type: 'oauth_client',
@@ -352,7 +404,19 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       // Priority 1: x-internal-token header
       const internalCtx = checkInternalToken(req);
       if (internalCtx) {
-        req.user = buildInternalAgentUser(internalCtx);
+        // G6: resolve per-agent DID (lazy-mint on first auth, revocation-checked on every call).
+        // ensureInternalAgentDid returns null only if the DB is down (non-fatal).
+        const agentDid = await ensureInternalAgentDid(internalCtx.name);
+        if (agentDid?.revoked) {
+          // The agent's DID has been explicitly revoked — fail closed.
+          sendError(res, 'Agent identity has been revoked', 401, 'AGENT_IDENTITY_REVOKED');
+          logger.warn(
+            { agentName: internalCtx.name, did: agentDid.did },
+            '[auth] Internal agent auth rejected — DID revoked',
+          );
+          return;
+        }
+        req.user = buildInternalAgentUser(internalCtx, agentDid?.did);
         req.isInternalAgent = true;
         req.internalAgent = internalCtx;
         req.meshPrincipal = {

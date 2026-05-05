@@ -4,6 +4,7 @@ import {
   isDemoMode as resolveIsDemoMode,
   resolveRuntimeMode,
 } from '@szl-holdings/platform-registry';
+import { decryptSecret, encryptSecret } from './crypto';
 import { logger } from './logger';
 
 interface EnvVarSpec {
@@ -143,6 +144,55 @@ export const ENV_SPECS: EnvVarSpec[] = [
       'Salt used to hash client IP addresses for privacy-preserving rate limiting and audit logs — required in production',
     sensitive: true,
     group: 'security',
+  },
+
+  // ── Machine/Agent Identity + Hybrid Audit Chain ──────────────────────────
+  {
+    key: 'KEY_CUSTODY_BACKEND',
+    required: false,
+    description:
+      'Key custody backend: "software-encrypted" (default, AES-256-GCM envelope encryption in DB) | "hsm-stub" (interface-only stub, throws NotConfigured)',
+    defaultValue: 'software-encrypted',
+    group: 'identity',
+  },
+  {
+    key: 'KEK_SOURCE',
+    required: false,
+    description:
+      'Key Encryption Key source: "env" (default, reads from SECRET_ENCRYPTION_KEY or SESSION_SECRET). KEK_SOURCE="file" is not yet implemented and will cause a hard startup failure.',
+    defaultValue: 'env',
+    group: 'identity',
+  },
+  {
+    key: 'SIGNING_SCHEME_VERSION',
+    required: false,
+    description:
+      'Hybrid signing scheme version tag written to audit_chain_events.scheme_version. Default: "hybrid-v1". Bump when rotating the canonical-payload format.',
+    defaultValue: 'hybrid-v1',
+    group: 'identity',
+  },
+  {
+    key: 'AUDIT_CHAIN_ROLLOUT',
+    required: false,
+    description:
+      'Hybrid-signature rollout mode: "warn" (default, log + continue on signing failure) | "enforce" (fail-closed: signing failure rejects the write)',
+    defaultValue: 'warn',
+    group: 'identity',
+  },
+  {
+    key: 'DID_WEBVH_LOG',
+    required: false,
+    description:
+      'Enable did:webvh history log writer: "on" | "off" (default). Writes key-rotation events to did_webvh_log table.',
+    defaultValue: 'off',
+    group: 'identity',
+  },
+  {
+    key: 'SIGNING_SCHEME_VERSION',
+    required: false,
+    description: 'Hybrid signing scheme version label embedded in signed audit rows (default: hybrid-v1)',
+    defaultValue: 'hybrid-v1',
+    group: 'identity',
   },
 
   {
@@ -1950,6 +2000,98 @@ export function validateStartupConfig(): ValidationResult {
       warnings.push(
         `ALLOY_INTERNAL_TOKEN is short (${alloyToken.length} chars) — use a 32+ character secret in production`,
       );
+    }
+  }
+
+  // ── Identity layer enum validation (hard fail on invalid values, any mode) ──
+  const keyCustodyBackend = process.env.KEY_CUSTODY_BACKEND;
+  if (keyCustodyBackend && !['software-encrypted', 'hsm-stub'].includes(keyCustodyBackend)) {
+    errors.push(
+      `KEY_CUSTODY_BACKEND="${keyCustodyBackend}" is not a recognised value. ` +
+      'Valid values: "software-encrypted" (default) | "hsm-stub". ' +
+      'Correct or unset KEY_CUSTODY_BACKEND before starting the server.',
+    );
+  }
+
+  const auditChainRollout = process.env.AUDIT_CHAIN_ROLLOUT;
+  if (auditChainRollout && !['warn', 'enforce'].includes(auditChainRollout)) {
+    errors.push(
+      `AUDIT_CHAIN_ROLLOUT="${auditChainRollout}" is not a recognised value. ` +
+      'Valid values: "warn" (default, log + continue) | "enforce" (fail-closed on signing error). ' +
+      'Correct or unset AUDIT_CHAIN_ROLLOUT before starting the server.',
+    );
+  }
+
+  const kekSource = process.env.KEK_SOURCE;
+  if (kekSource && kekSource !== 'env') {
+    // KEK_SOURCE=file is recognised in the schema but is not yet implemented.
+    // Fail closed rather than silently falling back to the env path — an operator
+    // who explicitly sets KEK_SOURCE=file expects file-based KEK material and
+    // would not want keys silently encrypted under a different KEK.
+    errors.push(
+      `KEK_SOURCE="${kekSource}" is not supported in this release. ` +
+      'Only "env" (default, reads SECRET_ENCRYPTION_KEY or SESSION_SECRET) is currently available. ' +
+      'Remove KEK_SOURCE or set it to "env" before starting the server.',
+    );
+  }
+
+  const didWebvhLog = process.env.DID_WEBVH_LOG;
+  if (didWebvhLog && !['on', 'off'].includes(didWebvhLog)) {
+    errors.push(
+      `DID_WEBVH_LOG="${didWebvhLog}" is not a recognised value. ` +
+      'Valid values: "off" (default) | "on" (write key-rotation history to did_webvh_log table). ' +
+      'Correct or unset DID_WEBVH_LOG before starting the server.',
+    );
+  }
+
+  // In software-encrypted mode, the KEK comes from SECRET_ENCRYPTION_KEY or SESSION_SECRET.
+  // Warn if neither is set and the software backend is active — keys can still be encrypted
+  // using a derived nonce but there will be no stable decryption key across restarts.
+  if (
+    (keyCustodyBackend === 'software-encrypted' || !keyCustodyBackend) &&
+    !process.env.SECRET_ENCRYPTION_KEY &&
+    !process.env.SESSION_SECRET
+  ) {
+    if (isProduction) {
+      errors.push(
+        'KEY_CUSTODY_BACKEND=software-encrypted requires SECRET_ENCRYPTION_KEY (preferred) or ' +
+        'SESSION_SECRET as the key-encryption key (KEK). Neither is set — platform identity keys ' +
+        'cannot be decrypted across restarts. Set SECRET_ENCRYPTION_KEY in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'Neither SECRET_ENCRYPTION_KEY nor SESSION_SECRET is set — platform identity key ' +
+        'encryption will use an ephemeral fallback that does not survive restarts. ' +
+        'Set one of these in Replit Secrets for persistent key custody.',
+      );
+    }
+  }
+
+  // G9: Proactively verify the KEK is actually derivable (not just declared).
+  // Attempt an AES-GCM encrypt-decrypt round-trip using the resolved key material.
+  // Failure here means the KEK cannot be constructed from the current env — catch this
+  // deterministically at startup rather than discovering it mid-signing at runtime.
+  if (keyCustodyBackend === 'software-encrypted' || !keyCustodyBackend) {
+    try {
+      const probe = '__kek_probe__';
+      const ciphertext = encryptSecret(probe);
+      const plaintext = decryptSecret(ciphertext);
+      if (plaintext !== probe) throw new Error('round-trip mismatch');
+      logger.debug('[startup] KEK reachability probe: OK');
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      if (isProduction) {
+        errors.push(
+          `KEK reachability probe failed: ${detail}. ` +
+          'The key-encryption key cannot be derived from the current environment. ' +
+          'Set SECRET_ENCRYPTION_KEY or SESSION_SECRET in Replit Secrets before restarting.',
+        );
+      } else {
+        warnings.push(
+          `KEK reachability probe failed (${detail}) — platform identity key custody may not survive ` +
+          'restarts. Set SECRET_ENCRYPTION_KEY or SESSION_SECRET to resolve.',
+        );
+      }
     }
   }
 

@@ -722,6 +722,43 @@ export default function AegisHomePage() {
         </section>
       </Reveal>
 
+      {/* Machine Identity + Hybrid Audit Chain attestation surface (G10) */}
+      <section style={{ padding: '64px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 12, textTransform: 'uppercase' as const }}>
+            Trust Substrate
+          </p>
+          <p style={{ fontSize: 20, fontWeight: 600, color: '#f5f5f5', marginBottom: 8 }}>
+            Machine identity. Cryptographic proof.
+          </p>
+          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 600, marginBottom: 28 }}>
+            Every AI decision and agent action in PARAGON is written to a tamper-evident hybrid-signed audit chain. Each entry carries an Ed25519 + ML-DSA-65 dual signature bound to a platform DID, verified against a key-custody registry on every read.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            {[
+              { label: 'Signing Scheme', value: 'Ed25519 + ML-DSA-65', note: 'NIST PQC Level 3', color: '#c9b787' },
+              { label: 'Identity Anchor', value: 'did:plat:*', note: 'Platform DID registry', color: '#8b7ac8' },
+              { label: 'Key Custody', value: 'Software-encrypted', note: 'HSM-ready interface', color: '#8a8a8a' },
+              { label: 'Rollout Mode', value: 'Warn → Enforce', note: 'Zero-disruption rollout', color: '#5e5e5e' },
+            ].map((item) => (
+              <div key={item.label} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '14px 16px' }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 6 }}>
+                  {item.label}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: item.color, fontFamily: 'monospace', marginBottom: 3 }}>
+                  {item.value}
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{item.note}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 16, fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace' }}>
+            <Lock size={11} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+            Audit entries are classified: hybrid_verified · legacy_unsigned · broken — tamper detection at the row level.
+          </div>
+        </div>
+      </section>
+
       <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
           <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>

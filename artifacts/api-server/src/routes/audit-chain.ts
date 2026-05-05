@@ -3,11 +3,14 @@
  *
  * Append-only, SHA-256 hash-chained audit log. Each event is linked to
  * the previous event via cryptographic hash, enabling tamper detection.
+ * New events additionally carry a hybrid (Ed25519 + ML-DSA-65) signature
+ * bound to the signing DID — legacy rows without signatures are classified
+ * as `legacy_unsigned` (not failures) on verify.
  *
  * Routes:
  *   GET  /audit-chain/events  — paginated event list (tenant-scoped)
- *   POST /audit-chain/events  — append a new event (auto-chains hash)
- *   GET  /audit-chain/verify  — verify chain integrity
+ *   POST /audit-chain/events  — append a new event (auto-chains hash + hybrid sig)
+ *   GET  /audit-chain/verify  — verify chain integrity + signature classification
  *   GET  /audit-chain/export  — export chain (?format=csv|json, default json)
  *   GET  /audit/query         — alias of /audit-chain/events for spec naming
  */
@@ -33,6 +36,12 @@ import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
 } from '../middlewares/sliding-window-limiter';
+import {
+  signAuditEvent,
+  verifyAuditRow,
+  handleSigningFailure,
+  type SignatureStatus,
+} from '../lib/audit-chain-signer';
 
 const router: IRouter = Router();
 
@@ -60,8 +69,6 @@ export function computeEventHash(
 }
 
 async function getLastEvent(orgId: number | null) {
-  // Use id desc (monotonic) rather than createdAt desc, which is non-deterministic
-  // when two events land in the same millisecond and produces broken chains.
   const conditions = orgId != null ? [eq(auditChainEventsTable.orgId, orgId)] : [];
   const [last] = await db
     .select({ id: auditChainEventsTable.id, eventHash: auditChainEventsTable.eventHash })
@@ -87,8 +94,6 @@ function buildListConditions(req: Request) {
   const search = req.query['search'] as string | undefined;
 
   const conditions: ReturnType<typeof eq>[] = [];
-  // Tenant scoping: always filter by caller's org. System events (orgId IS NULL)
-  // are intentionally excluded from per-tenant queries.
   if (orgId != null) {
     conditions.push(eq(auditChainEventsTable.orgId, orgId));
   }
@@ -135,8 +140,30 @@ async function handleListEvents(req: Request, res: Response): Promise<void> {
       db.select({ total: count() }).from(auditChainEventsTable).where(whereClause),
     ]);
 
+    const eventsWithStatus = await Promise.all(
+      events.map(async (ev) => ({
+        ...ev,
+        sigStatus: (await verifyAuditRow({
+          ed25519Sig: ev.ed25519Sig,
+          mldsa65Sig: ev.mldsa65Sig,
+          sigPublicKeyEd25519: ev.sigPublicKeyEd25519,
+          sigPublicKeyMldsa65: ev.sigPublicKeyMldsa65,
+          signingDid: ev.signingDid,
+          keyId: ev.keyId,
+          schemeVersion: ev.schemeVersion,
+          prevHash: ev.prevHash,
+          action: ev.action,
+          actorLabel: ev.actorLabel,
+          domain: ev.domain,
+          actionType: ev.actionType,
+          entityId: ev.entityId,
+          createdAt: ev.createdAt,
+        })).status,
+      })),
+    );
+
     sendSuccess(res, {
-      events,
+      events: eventsWithStatus,
       total: Number(totRow?.total ?? 0),
       limit,
       offset,
@@ -154,7 +181,6 @@ router.get(
   handleListEvents,
 );
 
-// Spec alias — same behavior, named to match #2915 "/api/audit/query".
 router.get(
   '/audit/query',
   authMiddleware({ required: false }),
@@ -188,25 +214,54 @@ router.post(
       const orgId = callerOrgId(req);
       const actorUserId = req.user?.id ?? null;
       const now = new Date();
+      const resolvedActorLabel = actorLabel ?? req.user?.displayName ?? 'system';
 
       const last = await getLastEvent(orgId);
       const prevHash = last?.eventHash ?? 'genesis';
 
       const eventHash = computeEventHash(prevHash, {
         action,
-        actor: actorLabel ?? req.user?.displayName ?? 'system',
+        actor: resolvedActorLabel,
         domain,
         actionType,
         entityId: entityId ?? null,
         createdAt: now.toISOString(),
       });
 
+      // Attempt hybrid signing. On failure, apply rollout flag behavior.
+      const actorDid = (req.user as (typeof req.user & { did?: string }) | undefined)?.did;
+      let sigResult = await signAuditEvent({
+        prevHash,
+        action,
+        actorLabel: resolvedActorLabel,
+        domain,
+        actionType,
+        entityId: entityId ?? null,
+        createdAt: now,
+        actorDid,
+      });
+
+      if (!sigResult) {
+        const { shouldAbort } = handleSigningFailure(
+          new Error('signAuditEvent returned null — platform DID not ready'),
+          { action, domain, actionType },
+        );
+        if (shouldAbort) {
+          res.status(503).json({
+            ok: false,
+            error: 'signing_required',
+            detail: 'AUDIT_CHAIN_ROLLOUT=enforce: signing is required but failed. Retry after platform identity bootstrap.',
+          });
+          return;
+        }
+      }
+
       const [inserted] = await db
         .insert(auditChainEventsTable)
         .values({
           orgId,
           actorUserId,
-          actorLabel: actorLabel ?? req.user?.displayName ?? 'system',
+          actorLabel: resolvedActorLabel,
           action,
           actionType,
           domain,
@@ -219,11 +274,26 @@ router.post(
           metadata: metadata ?? {},
           prevHash,
           eventHash,
+          // Signature columns — null if signing failed/unavailable (legacy_unsigned)
+          ed25519Sig: sigResult?.ed25519Sig ?? null,
+          mldsa65Sig: sigResult?.mldsa65Sig ?? null,
+          signingDid: sigResult?.signingDid ?? null,
+          keyId: sigResult?.keyId ?? null,
+          schemeVersion: sigResult?.schemeVersion ?? null,
+          sigPublicKeyEd25519: sigResult?.sigPublicKeyEd25519 ?? null,
+          sigPublicKeyMldsa65: sigResult?.sigPublicKeyMldsa65 ?? null,
         })
         .returning();
 
       logger.info(
-        { id: inserted.id, domain, actionType, eventHash: eventHash.substring(0, 16) + '...' },
+        {
+          id: inserted.id,
+          domain,
+          actionType,
+          eventHash: eventHash.substring(0, 16) + '...',
+          sigStatus: sigResult ? 'hybrid_signed' : 'unsigned',
+          signingDid: sigResult?.signingDid,
+        },
         '[AuditChain] Event appended',
       );
 
@@ -252,15 +322,26 @@ router.get(
 
       let intact = true;
       let brokenAt: number | null = null;
+      let hybridVerified = 0;
+      let legacyUnsigned = 0;
+      let broken = 0;
+      const brokenReasons: Array<{ id: number; reason: string }> = [];
+      // Λ-receipt aggregate (Ouroboros Thesis v3 four-axis envelope).
+      // meanLambda is the geometric-mean trust scalar across all signed rows in [0,1].
+      let lambdaSum = 0;
+      let lambdaCount = 0;
 
       for (let i = 0; i < events.length; i++) {
         const ev = events[i]!;
         const expectedPrev = i === 0 ? 'genesis' : events[i - 1]!.eventHash;
 
+        // 1. Hash chain integrity check
         if (ev.prevHash !== expectedPrev) {
           intact = false;
           brokenAt = ev.id;
-          break;
+          broken++;
+          brokenReasons.push({ id: ev.id, reason: 'prev_hash_mismatch' });
+          continue;
         }
 
         const recomputed = computeEventHash(ev.prevHash, {
@@ -274,16 +355,64 @@ router.get(
 
         if (recomputed !== ev.eventHash) {
           intact = false;
-          brokenAt = ev.id;
-          break;
+          if (brokenAt === null) brokenAt = ev.id;
+          broken++;
+          brokenReasons.push({ id: ev.id, reason: 'hash_mismatch' });
+          continue;
+        }
+
+        // 2. Hybrid signature check (async — performs registry cross-check G3/G4/G5)
+        const sigResult = await verifyAuditRow({
+          ed25519Sig: ev.ed25519Sig,
+          mldsa65Sig: ev.mldsa65Sig,
+          sigPublicKeyEd25519: ev.sigPublicKeyEd25519,
+          sigPublicKeyMldsa65: ev.sigPublicKeyMldsa65,
+          signingDid: ev.signingDid,
+          keyId: ev.keyId,
+          schemeVersion: ev.schemeVersion,
+          prevHash: ev.prevHash,
+          action: ev.action,
+          actorLabel: ev.actorLabel,
+          domain: ev.domain,
+          actionType: ev.actionType,
+          entityId: ev.entityId,
+          createdAt: ev.createdAt,
+        });
+
+        if (sigResult.status === 'hybrid_verified') {
+          hybridVerified++;
+        } else if (sigResult.status === 'legacy_unsigned') {
+          legacyUnsigned++;
+        } else {
+          broken++;
+          if (brokenAt === null) brokenAt = ev.id;
+          brokenReasons.push({ id: ev.id, reason: sigResult.reason ?? 'signature_invalid' });
+        }
+
+        if (sigResult.lambdaReceipt) {
+          lambdaSum += sigResult.lambdaReceipt.lambda;
+          lambdaCount++;
         }
       }
+
+      const meanLambda = lambdaCount > 0 ? lambdaSum / lambdaCount : null;
 
       sendSuccess(res, {
         intact,
         chainLength: events.length,
         brokenAt,
         verifiedAt: new Date().toISOString(),
+        summary: {
+          hybrid_verified: hybridVerified,
+          legacy_unsigned: legacyUnsigned,
+          broken,
+        },
+        // Λ-receipt aggregate (Ouroboros Thesis v3 four-axis envelope).
+        // axiomSet=lutar-v3-4axis: C·H·R·F geometric mean per row, averaged across chain.
+        lambdaReceipt: meanLambda !== null
+          ? { meanLambda, sampledRows: lambdaCount, axiomSet: 'lutar-v3-4axis' as const }
+          : null,
+        brokenReasons: brokenReasons.length > 0 ? brokenReasons : undefined,
       });
     } catch (err) {
       handleRouteError(res, err, 'Chain verification failed');
@@ -306,6 +435,8 @@ function eventsToCsv(rows: Array<typeof auditChainEventsTable.$inferSelect>): st
     'outcome',
     'prevHash',
     'eventHash',
+    'signingDid',
+    'schemeVersion',
   ] as const;
   const escape = (v: unknown): string => {
     if (v == null) return '';

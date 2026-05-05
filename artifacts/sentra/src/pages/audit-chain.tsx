@@ -600,6 +600,24 @@ function AuditEntryRow({
   );
 }
 
+interface HybridSigStatus {
+  platformServiceDid: string | null;
+  signingScheme: string;
+  rolloutMode: string;
+  hybridSigned: number;
+  legacyUnsigned: number;
+  checkedAt: string | null;
+  reachable: boolean;
+}
+
+// Ouroboros Thesis v3 four-axis Λ receipt — see docs/thesis/audit-chain-thesis-mapping.md
+interface LambdaReceiptStatus {
+  meanLambda: number;
+  sampledRows: number;
+  axiomSet: string;
+  intact: boolean;
+}
+
 export default function AuditChainPage() {
   const [search, setSearch] = useState('');
   const [filterRisk, setFilterRisk] = useState<RiskLevel | 'all'>('all');
@@ -608,6 +626,8 @@ export default function AuditChainPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [entries, setEntries] = useState<AuditEntry[]>(DEMO_ENTRIES);
   const [_chainValid, setChainValid] = useState<boolean | null>(null);
+  const [sigStatus, setSigStatus] = useState<HybridSigStatus | null>(null);
+  const [lambdaStatus, setLambdaStatus] = useState<LambdaReceiptStatus | null>(null);
 
   React.useEffect(() => {
     async function load() {
@@ -624,7 +644,49 @@ export default function AuditChainPage() {
         }
       } catch {}
     }
+    async function loadSigStatus() {
+      try {
+        const [summaryRes, custodyRes] = await Promise.all([
+          fetch('/api/identity-registry/audit-summary', { credentials: 'include' }),
+          fetch('/api/identity-registry/key-custody', { credentials: 'include' }),
+        ]);
+        const summary = summaryRes.ok ? ((await summaryRes.json()) as { data?: { hybrid_signed: number; legacy_unsigned: number; checkedAt: string } }).data : null;
+        const custody = custodyRes.ok ? ((await custodyRes.json()) as { data?: { platformServiceDid: string; custodyReachable: boolean } }).data : null;
+        setSigStatus({
+          platformServiceDid: custody?.platformServiceDid ?? null,
+          signingScheme: 'Ed25519 + ML-DSA-65 (hybrid)',
+          rolloutMode: 'warn',
+          hybridSigned: summary?.hybrid_signed ?? 0,
+          legacyUnsigned: summary?.legacy_unsigned ?? 0,
+          checkedAt: summary?.checkedAt ?? null,
+          reachable: custody?.custodyReachable ?? false,
+        });
+      } catch {}
+    }
+    async function loadLambdaReceipt() {
+      try {
+        const res = await fetch('/api/audit-chain/verify', { credentials: 'include' });
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          data?: {
+            intact?: boolean;
+            lambdaReceipt?: { meanLambda: number; sampledRows: number; axiomSet: string } | null;
+          };
+        };
+        const lr = json.data?.lambdaReceipt;
+        if (lr) {
+          setLambdaStatus({
+            meanLambda: lr.meanLambda,
+            sampledRows: lr.sampledRows,
+            axiomSet: lr.axiomSet,
+            intact: json.data?.intact ?? false,
+          });
+        }
+      } catch {}
+    }
     void load();
+    void loadSigStatus();
+    void loadLambdaReceipt();
   }, []);
 
   const filtered = useMemo(() => {
@@ -670,6 +732,143 @@ export default function AuditChainPage() {
           gap: '16px',
         }}
       >
+        {/* Hybrid Signature Status Badge (G10) */}
+        {sigStatus && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              padding: '12px 16px',
+              background: sigStatus.reachable ? `${ACCENT}0a` : 'rgba(245,80,80,0.07)',
+              border: `1px solid ${sigStatus.reachable ? `${ACCENT}30` : 'rgba(245,80,80,0.25)'}`,
+              borderRadius: '10px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <Zap size={14} style={{ color: sigStatus.reachable ? ACCENT : '#f55050' }} />
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: sigStatus.reachable ? ACCENT : '#f55050',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.6px',
+                }}
+              >
+                {sigStatus.reachable ? 'Hybrid Chain Signing Active' : 'Chain Signing Unavailable'}
+              </span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                flexWrap: 'wrap',
+                flex: 1,
+                fontSize: '10px',
+                color: 'rgba(255,255,255,0.45)',
+                fontFamily: 'monospace',
+              }}
+            >
+              {sigStatus.platformServiceDid && (
+                <span title="Platform service DID">DID: {sigStatus.platformServiceDid}</span>
+              )}
+              <span title="Signing algorithm pair">Scheme: {sigStatus.signingScheme}</span>
+              <span
+                style={{
+                  color: '#c9b787',
+                  background: '#c9b78718',
+                  border: '1px solid #c9b78730',
+                  borderRadius: '5px',
+                  padding: '1px 7px',
+                  fontWeight: 700,
+                }}
+              >
+                {sigStatus.hybridSigned.toLocaleString()} hybrid-signed
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {sigStatus.legacyUnsigned.toLocaleString()} legacy
+              </span>
+              {sigStatus.checkedAt && (
+                <span style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  checked {new Date(sigStatus.checkedAt).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/*
+          Λ-4 Receipt Badge (Ouroboros Thesis v3 four-axis envelope)
+          Renders the chain-wide trust scalar Λ = (C·H·R·F)^(1/4) computed by
+          /audit-chain/verify. Anchors: docs/thesis/audit-chain-thesis-mapping.md.
+        */}
+        {lambdaStatus && (
+          <div
+            data-testid="lambda-receipt-badge"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              padding: '12px 16px',
+              background: lambdaStatus.intact ? `${ACCENT}0a` : 'rgba(245,180,80,0.07)',
+              border: `1px solid ${lambdaStatus.intact ? `${ACCENT}30` : 'rgba(245,180,80,0.25)'}`,
+              borderRadius: '10px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <Shield size={14} style={{ color: lambdaStatus.intact ? ACCENT : '#f5b450' }} />
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: lambdaStatus.intact ? ACCENT : '#f5b450',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.6px',
+                }}
+              >
+                Ouroboros Λ-4 Receipt · {lambdaStatus.meanLambda.toFixed(4)}
+              </span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                flexWrap: 'wrap',
+                flex: 1,
+                fontSize: '10px',
+                color: 'rgba(255,255,255,0.45)',
+                fontFamily: 'monospace',
+              }}
+            >
+              <span title="Lutar Invariant axiom set (Ouroboros Thesis v3)">
+                Axioms: {lambdaStatus.axiomSet}
+              </span>
+              <span title="Four-axis form">Λ = (C·H·R·F)^(1/4)</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {lambdaStatus.sampledRows.toLocaleString()} rows sampled
+              </span>
+              <span
+                style={{
+                  color: lambdaStatus.meanLambda >= 0.85 ? ACCENT : '#f5b450',
+                  background: lambdaStatus.meanLambda >= 0.85 ? `${ACCENT}18` : 'rgba(245,180,80,0.15)',
+                  border: `1px solid ${lambdaStatus.meanLambda >= 0.85 ? `${ACCENT}30` : 'rgba(245,180,80,0.3)'}`,
+                  borderRadius: '5px',
+                  padding: '1px 7px',
+                  fontWeight: 700,
+                }}
+                title="Kuramoto-coherent threshold r ≥ 0.85"
+              >
+                {lambdaStatus.meanLambda >= 0.85 ? 'COHERENT' : 'DEGRADED'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Stats strip */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
           {[

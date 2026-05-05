@@ -107,6 +107,12 @@ export function register(router: IRouter): void {
   router.use('/audit-chain', _writeLimiter);
   router.use(lazyMatch('/audit-chain', () => import('../audit-chain'), 'audit-chain'));
 
+  // Identity Registry — operator surface for platform DID lifecycle and key custody.
+  // Owns /identity-registry/dids, /identity-registry/key-custody, /identity-registry/audit-summary.
+  router.use('/identity-registry', _readLimiter);
+  router.use('/identity-registry', _writeLimiter);
+  router.use(lazyMatch('/identity-registry', () => import('../identity-registry'), 'identity-registry'));
+
   router.use('/worldline', _writeLimiter);
   router.use(lazyMatch('/worldline', () => import('../worldline'), 'worldline'));
 }

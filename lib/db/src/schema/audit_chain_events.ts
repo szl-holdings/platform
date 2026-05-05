@@ -4,6 +4,9 @@ import type { z } from 'zod/v4';
 import { usersTable } from './auth';
 import { organizationsTable } from './organizations';
 
+// Signature status for a row (computed, not stored)
+export type AuditChainSigStatus = 'hybrid_verified' | 'legacy_unsigned' | 'broken';
+
 export type AuditChainActionType =
   | 'ai_decision'
   | 'agent_action'
@@ -60,6 +63,14 @@ export const auditChainEventsTable = pgTable(
     prevHash: text('prev_hash').notNull().default('genesis'),
     eventHash: text('event_hash').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
+    // Hybrid-signature columns (nullable — NULL = legacy_unsigned, populated = hybrid_verified)
+    ed25519Sig: text('ed25519_sig'),
+    mldsa65Sig: text('mldsa65_sig'),
+    signingDid: text('signing_did'),
+    keyId: text('key_id'),
+    schemeVersion: text('scheme_version'),
+    sigPublicKeyEd25519: text('sig_public_key_ed25519'),
+    sigPublicKeyMldsa65: text('sig_public_key_mldsa65'),
   },
   (table) => [
     index('audit_chain_org_idx').on(table.orgId),
@@ -67,6 +78,8 @@ export const auditChainEventsTable = pgTable(
     index('audit_chain_domain_idx').on(table.domain),
     index('audit_chain_risk_level_idx').on(table.riskLevel),
     index('audit_chain_created_at_idx').on(table.createdAt),
+    index('audit_chain_signing_did_idx').on(table.signingDid),
+    index('audit_chain_sig_scheme_idx').on(table.schemeVersion),
   ],
 );
 
