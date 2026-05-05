@@ -158,19 +158,6 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
       'Push notification deep linking pending',
     ],
   },
-  'mockup-sandbox': {
-    id: 'mockup-sandbox',
-    name: 'PRAXIS',
-    tagline: 'Internal AI research prototype',
-    description:
-      'Engineering and design prototype for AI-driven pattern absorption and orchestration. Not a customer-facing product.',
-    status: 'internal',
-    previewPath: '/nexus/',
-    audience: 'Engineering, design',
-    liveDataSources: [],
-    seedDataModules: ['all data is prototype fixture'],
-    knownBlockers: ['Not customer-facing; should not be in public preview path'],
-  },
   'szl-demo-video': {
     id: 'szl-demo-video',
     name: 'Demo Video',

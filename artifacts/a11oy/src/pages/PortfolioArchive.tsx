@@ -5,7 +5,8 @@
  *
  * As of the consolidation pass (2026-04-29), the live SZL surface
  * is intentionally narrowed to seven products + the shared
- * `api-server` backend + the canvas `mockup-sandbox` design surface.
+ * `api-server` backend. The former `mockup-sandbox` Praxis canvas was
+ * fully consolidated into a11oy's /nexus/* surface (Task #4310) and retired.
  * Everything below was archived rather than consolidated into a11oy
  * because (a) merging would dilute a11oy's brand-orchestration purpose
  * and (b) the archived assets do not carry a feature that isn't already
@@ -14,14 +15,13 @@
  *
  * Live set (kept):
  *   - amaru (conduit)   — replay-grade governed loop visible surface
- *   - a11oy             — brand orchestration layer (this app)
+ *   - a11oy             — brand orchestration layer (this app) + /nexus/* NEXUS surface
  *   - sentra            — cyber resilience + replay attestation
  *   - counsel           — legal matter command
  *   - terra             — real-estate intelligence
  *   - carlota-jo        — consulting + advisory
  *   - vessels           — maritime intelligence
  *   - api-server        — shared backend (kept; live frontends depend on it)
- *   - mockup-sandbox    — workspace canvas tool (kept; not a product)
  */
 
 import { useMemo, useState } from 'react';
@@ -171,7 +171,7 @@ const LIVE = [
   { slug: 'carlota-jo', title: 'Carlota Jo Consulting', purpose: 'Consulting + advisory', kept: 'vertical' },
   { slug: 'vessels', title: 'Vessels — Maritime Intelligence', purpose: 'Maritime operations', kept: 'vertical' },
   { slug: 'api-server', title: 'API Server', purpose: 'Shared backend (Express)', kept: 'live frontends depend on it' },
-  { slug: 'mockup-sandbox', title: 'NEXUS — Unified Agentic AI Layer', purpose: 'Canvas design tool', kept: 'workspace tool, not a product' },
+  { slug: 'mockup-sandbox', title: 'NEXUS — Unified Agentic AI Layer', purpose: 'Canvas design tool (retired)', kept: 'consolidated into a11oy /nexus/* — Task #4310' },
 ];
 
 type FilterKind = 'all' | ArchiveKind;

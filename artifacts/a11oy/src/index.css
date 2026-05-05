@@ -7,6 +7,18 @@
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
+  /* Nexus / Praxis sub-theme — aliased from gi-tokens so `praxis-*`
+     Tailwind utilities resolve correctly inside the A11oy shell. */
+  --color-praxis-cyan: var(--gi-accent-blue);
+  --color-praxis-green: var(--gi-accent-green);
+  --color-praxis-amber: var(--gi-accent-amber);
+  --color-praxis-red: var(--gi-accent-red);
+  --color-praxis-purple: var(--gi-accent-violet);
+  --color-praxis-bg: var(--gi-bg-base);
+  --color-praxis-surface: var(--gi-bg-surface);
+  --color-praxis-border: var(--gi-border-subtle);
+  --color-praxis-text: var(--gi-text-primary);
+
   --color-a11oy-navy:    #0a0a0a;
   --color-a11oy-deep:    #0e0e0e;
   --color-a11oy-surface: #121212;

@@ -801,11 +801,7 @@ app.use(globalAuthEnforcer);
 app.use(meshCallLogger());
 app.use('/api', router);
 
-const nexusDist = join(__dirname, '../../mockup-sandbox/dist/public');
-app.use('/nexus', express.static(nexusDist, { index: false }));
-app.use('/nexus', (_req: Request, res: Response) => {
-  res.sendFile(join(nexusDist, 'index.html'));
-});
+// /nexus/* is now served by A11oy (artifacts/a11oy) via the shared proxy — no static fallback needed here.
 
 let _graphqlHandler:
   | ((req: Request, res: Response, next: import('express').NextFunction) => void)

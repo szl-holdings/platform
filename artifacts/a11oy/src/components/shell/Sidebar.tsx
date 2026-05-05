@@ -7,7 +7,8 @@ import {
   Globe, Crosshair, Activity, Radio, BarChart3, Map, Shield, Server,
   Cpu, Eye, Zap, Network, Settings, Users, Terminal, Layers,
   Briefcase, FileText, Target, GitBranch, Database, Lock,
-  GitFork, History, BookOpen, SquareTerminal
+  GitFork, History, BookOpen, SquareTerminal,
+  FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
@@ -169,6 +170,48 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
+const nexusSections: NavSection[] = [
+  {
+    id: 'nexus-intelligence',
+    label: 'Intelligence',
+    items: [
+      { id: 'nexus-home', name: 'NEXUS Home', icon: Sparkles, path: '/nexus' },
+      { id: 'nexus-research', name: 'Research Swarm', icon: FlaskConical, path: '/nexus/research' },
+      { id: 'nexus-bridge', name: 'Protocol Bridge', icon: Network, path: '/nexus/bridge' },
+      { id: 'nexus-orchestrator', name: 'Orchestrator', icon: Workflow, path: '/nexus/orchestrator' },
+    ],
+  },
+  {
+    id: 'nexus-memory-skills',
+    label: 'Memory & Skills',
+    items: [
+      { id: 'nexus-memory', name: 'Memory', icon: Brain, path: '/nexus/memory' },
+      { id: 'nexus-skills', name: 'Skills Library', icon: Layers, path: '/nexus/skills' },
+      { id: 'nexus-marketplace', name: 'Marketplace', icon: ShieldCheck, path: '/nexus/marketplace' },
+      { id: 'nexus-ingest', name: 'Repo Ingest', icon: Download, path: '/nexus/ingest' },
+    ],
+  },
+  {
+    id: 'nexus-quality',
+    label: 'Quality & Audit',
+    items: [
+      { id: 'nexus-ai-quality', name: 'AI Quality', icon: Activity, path: '/nexus/ai-quality' },
+      { id: 'nexus-prompt-registry', name: 'Prompt Registry', icon: BookMarked, path: '/nexus/prompt-registry' },
+      { id: 'nexus-eval-console', name: 'Eval Console', icon: BarChart2, path: '/nexus/eval-console' },
+      { id: 'nexus-audit-trail', name: 'Audit Trail', icon: ShieldAlert, path: '/nexus/audit-trail' },
+    ],
+  },
+  {
+    id: 'nexus-design',
+    label: 'Design System',
+    items: [
+      { id: 'nexus-pattern-atlas', name: 'Pattern Atlas', icon: GitBranch, path: '/nexus/pattern-atlas' },
+      { id: 'nexus-design-system', name: 'Design System', icon: Palette, path: '/nexus/design-system' },
+      { id: 'nexus-tokens', name: 'Tokens Governance', icon: Sigma, path: '/nexus/tokens-governance' },
+    ],
+  },
+];
+
 const reliquaryItems: NavItem[] = [
   { id: 'reliquary-vault', name: 'Vault Browser', icon: Database, path: '/reliquary/vault' },
   { id: 'reliquary-lineage', name: 'Lineage Graph', icon: GitFork, path: '/reliquary/lineage' },
@@ -247,6 +290,9 @@ export function Sidebar() {
         {operationsSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
         {infrastructureSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
         {cognitiveSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        <SectionHeader>NEXUS</SectionHeader>
+        {nexusSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
 
         <SectionHeader>Decision Intelligence</SectionHeader>
         <nav className="flex flex-col gap-0.5">

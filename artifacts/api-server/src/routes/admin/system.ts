@@ -38,7 +38,7 @@ export const SZL_APPS = [
   { id: "vessel-tracker", name: "Vessel Tracker", description: "Maritime fleet tracking", status: "active", url: "/vessels/" },
   { id: "firestorm", name: "PARAGON Security", description: "Cyber resilience command platform", status: "active", url: "/firestorm/" },
   { id: "stephen-site", name: "Stephen Lutar", description: "Personal portfolio site", status: "active", url: "/stephen/" },
-  { id: "mockup-sandbox", name: "Component Preview", description: "Design system preview", status: "active", url: "/__mockup/" },
+
   { id: "terra", name: "DOMAINE Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
 ];
 

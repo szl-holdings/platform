@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
+import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 
 const vitePort = Number(process.env.VITE_PORT) || 4110;
 const basePath = process.env.BASE_PATH || '/';
@@ -13,6 +14,7 @@ export default defineConfig({
   base: basePath,
   plugins: [
     securityHeadersVitePlugin(),
+    sharedUiManifestPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

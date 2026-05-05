@@ -5,6 +5,7 @@ import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
 import { DemoModeProvider } from './lib/operations/demo-mode';
 import { FabricShellProvider } from './lib/fabric-shell-context';
+import NexusAuthGate from './pages/nexus/NexusAuthGate';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -207,7 +208,24 @@ const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m =>
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
 const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
 const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m => ({ default: m.KarpathyEvolution })));
-const Praxis = lazy(() => import('./pages/Praxis').then(m => ({ default: m.Praxis })));
+const NexusHome = lazy(() => import('./pages/nexus/NexusHome'));
+const NexusResearch = lazy(() => import('./pages/nexus/NexusResearch'));
+const NexusMemory = lazy(() => import('./pages/nexus/NexusMemory'));
+const NexusSkills = lazy(() => import('./pages/nexus/NexusSkills'));
+const NexusBridge = lazy(() => import('./pages/nexus/NexusBridge'));
+const NexusOrchestrator = lazy(() => import('./pages/nexus/NexusOrchestrator'));
+const NexusMarketplace = lazy(() => import('./pages/nexus/NexusMarketplace'));
+const NexusIngest = lazy(() => import('./pages/nexus/NexusIngest'));
+const NexusPatternAtlas = lazy(() => import('./pages/nexus/NexusPatternAtlas'));
+const NexusDesignSystem = lazy(() => import('./pages/nexus/NexusDesignSystem'));
+const NexusTokensGovernance = lazy(() => import('./pages/nexus/NexusTokensGovernance'));
+const NexusAIQuality = lazy(() => import('./pages/nexus/NexusAIQuality'));
+const NexusPromptRegistry = lazy(() => import('./pages/nexus/NexusPromptRegistry'));
+const NexusEvalConsole = lazy(() => import('./pages/nexus/NexusEvalConsole'));
+const NexusAuditTrail = lazy(() => import('./pages/nexus/NexusAuditTrail'));
+const NexusEvalLayer = lazy(() => import('./pages/nexus/NexusEvalLayer'));
+const NexusKernelDashboard = lazy(() => import('./pages/nexus/NexusKernelDashboard'));
+const NexusPassportRegistry = lazy(() => import('./pages/nexus/NexusPassportRegistry'));
 const AtelierHub = lazy(() => import('./pages/atelier/AtelierHub').then(m => ({ default: m.AtelierHub })));
 const AtelierDetail = lazy(() => import('./pages/atelier/AtelierDetail').then(m => ({ default: m.AtelierDetail })));
 const AtelierNew = lazy(() => import('./pages/atelier/AtelierNew').then(m => ({ default: m.AtelierNew })));
@@ -469,8 +487,65 @@ export default function App() {
         <Route path={`${base}/console`}>
           <WithShell><Console /></WithShell>
         </Route>
-        <Route path={`${base}/praxis`} component={Praxis} />
-        <Route path={`${base}/nexus`} component={Praxis} />
+        <Route path={`${base}/praxis`}>
+          <RedirectTo to={`${base}/nexus`} />
+        </Route>
+
+        {/* NEXUS — Unified Agentic AI Layer (consolidated into A11oy — Task #4310) */}
+        <Route path={`${base}/nexus/research`}>
+          <WithShell><NexusAuthGate><NexusResearch /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/memory`}>
+          <WithShell><NexusAuthGate><NexusMemory /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/skills`}>
+          <WithShell><NexusAuthGate><NexusSkills /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/bridge`}>
+          <WithShell><NexusAuthGate><NexusBridge /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/orchestrator`}>
+          <WithShell><NexusAuthGate><NexusOrchestrator /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/marketplace`}>
+          <WithShell><NexusAuthGate><NexusMarketplace /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/ingest`}>
+          <WithShell><NexusAuthGate><NexusIngest /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/pattern-atlas`}>
+          <WithShell><NexusAuthGate><NexusPatternAtlas /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/design-system`}>
+          <WithShell><NexusAuthGate><NexusDesignSystem /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/tokens-governance`}>
+          <WithShell><NexusAuthGate><NexusTokensGovernance /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/ai-quality`}>
+          <WithShell><NexusAuthGate><NexusAIQuality /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/prompt-registry`}>
+          <WithShell><NexusAuthGate><NexusPromptRegistry /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/eval-console`}>
+          <WithShell><NexusAuthGate><NexusEvalConsole /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/audit-trail`}>
+          <WithShell><NexusAuthGate><NexusAuditTrail /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/eval-layer`}>
+          <WithShell><NexusAuthGate><NexusEvalLayer /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/kernel`}>
+          <WithShell><NexusAuthGate><NexusKernelDashboard /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus/passport-registry`}>
+          <WithShell><NexusAuthGate><NexusPassportRegistry /></NexusAuthGate></WithShell>
+        </Route>
+        <Route path={`${base}/nexus`}>
+          <WithShell><NexusAuthGate><NexusHome /></NexusAuthGate></WithShell>
+        </Route>
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
         <Route path={`${base}/fabric/products`} component={FabricProducts} />
@@ -1249,9 +1324,6 @@ export default function App() {
 
         <Route path="/command">
           <RedirectTo to="/command-surface" />
-        </Route>
-        <Route path="/nexus">
-          <RedirectTo to="/praxis" />
         </Route>
         <Route path="/a11oy/:rest*">
           <LegacyA11oyRedirect />

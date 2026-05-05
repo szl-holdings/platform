@@ -33,7 +33,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference.
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
-- **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
+- **NEXUS – Unified Agentic AI Layer (in A11oy):** The NEXUS surface (formerly the standalone PRAXIS/mockup-sandbox artifact) is consolidated into A11oy under `/nexus/*` routes (Task #4310). All 16 Nexus pages are served by A11oy's shell with explicit `NexusApiPending` states for non-wired surfaces and real `praxisApi` wiring for Research, Memory, Skills, Orchestrator, and Home.
 - **Continuum — Business Observability Fabric:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, Governed Security Agents, and Zero-Trust Agent Identity + Model Provenance Graph.
 - **Continuum Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag`. The Praxis chat (at `/a11oy/nexus`) streams real Claude responses via SSE (`POST /api/a11oy/chat`), with PCE governance gate, MirrorEval scoring, proof-chain tagging, provenance envelope metadata, model lane selection (Sovereign/Code/Reason/Fast), and conversation persistence in PostgreSQL (conversations + messages tables). Conversations and messages endpoints: `GET /api/a11oy/conversations`, `GET /api/a11oy/conversations/:id/messages`.
 - **Zero-Trust Agent Identity & Model Provenance:** Ed25519 cryptographic identity for every agent (public key, fingerprint, capability certificates, attestation status). Identity-aware HuggingFace client with access audit logging (X-Agent-Identity header injection). Model Provenance Graph (`/a11oy/model-provenance`) visualizing full lineage from base models through datasets, fine-tuning, evaluation, deployment, and agent access. Agent reputation scoring based on deployment success, governance compliance, and cost efficiency. Types in `packages/a11oy-runtime/src/types/index.ts`, adapter extensions in `lib/services/src/adapters/huggingface.ts`, API routes at `/api/a11oy/pages/identity-zero-trust` and `/api/a11oy/pages/model-provenance`.
@@ -218,7 +218,7 @@ All 9 active artifact workflows running from cold start. API server healthy, DB 
 | terra | `/terra/` | GREEN — real estate intelligence | Real API + NYC open data ingestion |
 | carlota-jo | `/carlota-jo/` | GREEN — private advisory landing | Real API with seed fallback |
 | vessels | `/vessels/` | GREEN — maritime intelligence | Real API + AIS feed endpoints |
-| mockup-sandbox | `/nexus/` | GREEN — internal tooling (auth-gated) | N/A (canvas tool) |
+| a11oy /nexus/* | `/nexus/` | GREEN — Nexus surface (auth-gated, consolidated from PRAXIS) | praxisApi for Research/Memory/Skills/Orchestrator/Home; NexusApiPending for remaining 11 surfaces |
 | lexicon | `/lexicon/` | GREEN — license intelligence catalog | Embedded SPA data + API at `/api/lexicon/v1/` |
 
 **DB/API verification:**
@@ -235,7 +235,7 @@ All 9 active artifact workflows running from cold start. API server healthy, DB 
 
 **Cleanup performed:**
 - Removed 5 dead/orphaned workflows (brand-strings, praxis-smoke-e2e, GI Design System Storybook, api-integration-tests, lyte-command-center: web)
-- Fixed duplicate symbol declarations in `artifacts/mockup-sandbox/src/pages/Skills.tsx` (SEED_RENDER_JOBS, JOB_STATUS_META, HyperFramesJobQueue)
+- Fixed duplicate symbol declarations in PRAXIS Skills.tsx (SEED_RENDER_JOBS, JOB_STATUS_META, HyperFramesJobQueue) — artifact since retired/deleted (Task #4310)
 - Fixed failing startup-validation test (QCLAW_ENDPOINT not in .env.example extras list)
 - Moved 7 orphaned artifact directories to `.archived/artifacts/`
 
@@ -255,10 +255,10 @@ Standalone web artifact at `/lexicon/` (repurposed `artifacts/lyte-command-cente
 
 ## 2026-04-29 — Portfolio consolidation pass
 
-Live SZL surface narrowed to 7 products + shared backend + canvas tool:
+Live SZL surface narrowed to 7 products + shared backend + NEXUS (consolidated):
 - conduit (Amaru), a11oy, sentra, counsel, terra, carlota-jo, vessels
 - api-server (kept; live frontends depend on /api/)
-- mockup-sandbox (kept; canvas workspace tool)
+- mockup-sandbox retired (Task #4310); NEXUS consolidated into a11oy under /nexus/*
 
 Archived to `.archived/artifacts/`:
 - szl-holdings, szl-holdings-mobile, command, pulse, lyte-command-center,
@@ -689,8 +689,7 @@ A11oy now hosts both decision intelligence and the agentic AI lab.
   `/a11oy/lab/prompts` (`GET /api/ai/prompts`, auth-gated, graceful 401
   empty state), `/a11oy/lab/evals` (`GET /api/pulse-evals/regression-dashboard`,
   admin/operator gated).
-- `mockup-sandbox` artifact retained as the deep tooling console under
-  `/nexus/`; A11oy is the user-facing portal.
+- NEXUS surface consolidated into A11oy under `/nexus/*` (Task #4310); `mockup-sandbox` artifact fully retired and directory deleted.
 
 **Cross-app links**
 - Sentra sidebar adds `A11oy Intelligence` (opens `/a11oy/intelligence/`

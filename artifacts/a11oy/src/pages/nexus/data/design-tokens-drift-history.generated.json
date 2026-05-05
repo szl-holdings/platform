@@ -1,0 +1,135 @@
+[
+  {
+    "ts": "2026-04-22T23:22:38.248Z",
+    "averageScore": 65,
+    "perArtifact": {
+      "sentra": 86,
+      "counsel": 80,
+      "szl-holdings-mobile": 68,
+      "szl-demo-video": 83,
+      "pulse": 52,
+      "aegis": 55,
+      "command": 28,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 65,
+      "lyte-command-center": 89,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-22T23:22:40.159Z",
+    "averageScore": 65,
+    "perArtifact": {
+      "sentra": 86,
+      "counsel": 80,
+      "szl-holdings-mobile": 68,
+      "szl-demo-video": 83,
+      "pulse": 52,
+      "aegis": 55,
+      "command": 28,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 65,
+      "lyte-command-center": 89,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-26T14:18:34.197Z",
+    "averageScore": 52,
+    "perArtifact": {
+      "sentra": 10,
+      "counsel": 70,
+      "szl-holdings-mobile": 76,
+      "szl-demo-video": 57,
+      "pulse": 50,
+      "aegis": 7,
+      "command": 23,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 62,
+      "lyte-command-center": 73,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-26T14:19:02.739Z",
+    "averageScore": 52,
+    "perArtifact": {
+      "sentra": 10,
+      "counsel": 70,
+      "szl-holdings-mobile": 76,
+      "szl-demo-video": 57,
+      "pulse": 50,
+      "aegis": 7,
+      "command": 23,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 62,
+      "lyte-command-center": 73,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-26T19:28:33.085Z",
+    "averageScore": 51,
+    "perArtifact": {
+      "sentra": 9,
+      "counsel": 70,
+      "szl-holdings-mobile": 76,
+      "szl-demo-video": 57,
+      "pulse": 45,
+      "aegis": 7,
+      "command": 22,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 62,
+      "lyte-command-center": 73,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-26T19:38:20.151Z",
+    "averageScore": 51,
+    "perArtifact": {
+      "sentra": 9,
+      "counsel": 70,
+      "szl-holdings-mobile": 76,
+      "szl-demo-video": 57,
+      "pulse": 45,
+      "aegis": 7,
+      "command": 22,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 62,
+      "lyte-command-center": 73,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-26T19:43:16.950Z",
+    "averageScore": 51,
+    "perArtifact": {
+      "sentra": 9,
+      "counsel": 70,
+      "szl-holdings-mobile": 76,
+      "szl-demo-video": 57,
+      "pulse": 45,
+      "aegis": 7,
+      "command": 22,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 62,
+      "lyte-command-center": 73,
+      "api-server": 98
+    }
+  }
+]

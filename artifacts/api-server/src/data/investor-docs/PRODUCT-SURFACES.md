@@ -313,14 +313,14 @@ For the live mobile surface available today, see **APEX — Unified Mobile Comma
 
 ## Development / Internal Surfaces
 
-### Component Preview Server (mockup-sandbox)
+### NEXUS — Unified Agentic AI Layer (in A11oy)
 
 | Attribute | Detail |
 |-----------|--------|
-| **Artifact** | `artifacts/mockup-sandbox` |
-| **Preview Path** | `/__mockup` |
-| **Audience** | Internal — design and frontend engineers only |
-| **Purpose** | Design sandbox for iterating on `@szl-holdings/shared-ui` components in isolation |
+| **Artifact** | `artifacts/a11oy` (routes under `/nexus/*`) |
+| **Preview Path** | `/nexus/` |
+| **Audience** | Internal — engineering and AI operations |
+| **Purpose** | Consolidated NEXUS surface (formerly standalone `mockup-sandbox`/PRAXIS artifact, retired Task #4310). All 16 Nexus pages served by A11oy shell. API-wired surfaces: Research, Memory, Skills, Orchestrator, Home. Remaining 11 surfaces pending `/api/nexus/*` backend endpoints. |
 
 ---
 

@@ -354,6 +354,39 @@ export const mspTheme = aegisTheme;
 
 export const dreamscapeTheme = continuumCreativeTheme;
 
+export const alloyTheme: BrandTheme = {
+  name: 'A11oy',
+  slug: 'alloy',
+  colors: {
+    primary: '#c9b787',
+    primaryLight: '#d4c79a',
+    primaryDark: '#a89868',
+    primaryMuted: 'rgba(201,183,135,0.15)',
+    primarySubtle: 'rgba(201,183,135,0.05)',
+    secondary: '#8a8a8a',
+    secondaryLight: '#b0b0b0',
+    surface: '#121212',
+    surfaceHover: '#1a1a1a',
+  },
+  gradient: {
+    primary: 'linear-gradient(135deg, #c9b787, #a89868)',
+    subtle: 'linear-gradient(135deg, rgba(201,183,135,0.08), rgba(168,152,104,0.08))',
+    text: 'linear-gradient(135deg, #d4c79a, #c9b787)',
+  },
+  typography: {
+    displayWeight: '600',
+    headingWeight: '500',
+    bodyWeight: '400',
+  },
+  motion: {
+    duration: '0.25s',
+    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    stagger: 0.05,
+  },
+};
+
+export const alloyCreativeTheme: BrandTheme = alloyTheme;
+
 // ─── Theme registry ───────────────────────────────────────────────────────────
 
 export const brandThemes = {
@@ -370,6 +403,8 @@ export const brandThemes = {
   terra: terraTheme,
   lyte: lyteTheme,
   continuum: continuumTheme,
+  alloy: alloyTheme,
+  'alloy-creative': alloyCreativeTheme,
 } as const;
 
 export type BrandSlug = keyof typeof brandThemes;

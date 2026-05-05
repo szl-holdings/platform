@@ -65,13 +65,6 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     enabledFor: ['demo'],
     notes: 'Demo mode only; shows role-based view switching.',
   },
-  PRAXIS_PUBLIC_ACCESS: {
-    id: 'PRAXIS_PUBLIC_ACCESS',
-    description: 'Allow unauthenticated access to PRAXIS mockup-sandbox preview.',
-    enabledFor: [],
-    notes:
-      'Disabled by default. PRAXIS is an internal prototype and should not be publicly accessible.',
-  },
   SEPA_BACS_RAILS: {
     id: 'SEPA_BACS_RAILS',
     description: 'Enable SEPA (EU) and BACS (UK) international payment rails in billing.',

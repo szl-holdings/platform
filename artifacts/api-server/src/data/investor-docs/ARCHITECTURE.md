@@ -167,7 +167,7 @@ Confirmed Action + Full Audit Trail
 │   ├── szl-holdings-mobile/# APEX — Unified Mobile Command
 │   ├── prism-counsel/      # Counsel — Legal Command
 │   ├── stephen-site/       # Stephen Lutar — Founder site
-│   └── mockup-sandbox/     # Component design preview (internal)
+│   └── (mockup-sandbox retired — Task #4310; NEXUS consolidated into a11oy /nexus/*)
 │
 ├── lib/                    # 40 shared TypeScript packages
 │   ├── db/                 # Drizzle schema (798 tables), migrations, seed

@@ -58,11 +58,13 @@ Each artifact has a dedicated Replit workflow. Workflows are managed through the
 | `artifacts/carlota-jo: web` | Carlota Jo Advisory | `/carlota-jo/` | Shared gateway on port 9090 |
 | `artifacts/command: web` | Command Portal | `/command/` | Shared gateway on port 9090 |
 | `artifacts/szl-holdings-mobile: expo` | APEX mobile | Expo tunnel | |
-| `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | `/__mockup` | Internal only |
+| `artifacts/a11oy: web` /nexus/* | NEXUS — Unified Agentic AI Layer (consolidated from PRAXIS) | `/nexus/` | Shared gateway on port 9090 |
 
 The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.
 
 **Archived artifacts** (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) have no running workflows. App source code (pages, components, routes) has been removed; DEPRECATED.md/ARCHIVED.md markers, stale dist/node_modules, and residual config files may remain.
+
+**Retired artifact platform note (mockup-sandbox):** The `artifacts/mockup-sandbox` directory was deleted (Task #4310). The Replit platform auto-unregistered the artifact from its internal registry when the directory was removed. The root `.replit` file retains a stale `[[artifacts]] id = "artifacts/mockup-sandbox"` entry that cannot be removed via normal edit paths (`.replit` is platform-managed). This entry is inert — deploy and startup behavior is governed by live artifact directories, not stale `.replit` declarations. No action required in normal operations; monitor for any platform startup warnings referencing this entry and report to the platform team if observed.
 
 ### When to Restart a Workflow
 - Code changes require a server restart

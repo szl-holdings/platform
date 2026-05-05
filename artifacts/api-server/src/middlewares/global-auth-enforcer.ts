@@ -473,7 +473,7 @@ const PUBLIC_PREFIXES = [
   // underlying data is sourced exclusively from public product blogs / RSS feeds.
   "/api/competitive-intel/",
   // NEXUS unified agentic AI layer — Research Swarm, Memory Fabric, and
-  // Cross-App Orchestrator endpoints power the mockup-sandbox NEXUS demo and
+  // Cross-App Orchestrator endpoints power the A11oy /nexus/* surface and
   // are intended to be reachable without a session, mirroring the rest of the
   // SZL demo surface. Mutating routes (POST /memory, POST /orchestrate, etc.)
   // remain protected by CSRF + per-user write rate limiting in the router.
