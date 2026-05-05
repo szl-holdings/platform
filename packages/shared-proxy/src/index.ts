@@ -28,6 +28,7 @@ export const SZL_DEMO_VIDEO_PORT = 8765;
 export const PLUGINMESH_PORT = 8190;
 export const CONDUIT_PORT = 5300;
 export const LYTE_COMMAND_CENTER_PORT = 8097;
+export const ROSIE_PORT = 5113;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/a11oy/', port: A11OY_PORT },
@@ -48,6 +49,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/pulse/', port: PULSE_PORT },
   { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
   { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
+  { prefix: '/rosie/', port: ROSIE_PORT },
 ];
 
 // ─── Diagnostics state ────────────────────────────────────────────────────────
