@@ -4,6 +4,13 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Scan shared workspace UI packages so classes used inside SharedDashboardShell
+   (md:relative, md:translate-x-0, etc.) are emitted at desktop widths. Without
+   these @source directives the aside stays `fixed -translate-x-full` at all
+   widths and the main content overlaps the sidebar at >=768px. */
+@source "../../../lib/shared-ui/src/**/*.{ts,tsx}";
+@source "../../../packages/design-system/src/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

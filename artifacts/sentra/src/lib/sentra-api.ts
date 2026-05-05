@@ -1800,6 +1800,9 @@ export function patchHunt(id: string, body: Record<string, unknown>) {
 export function listRemediationPlans() {
   return getJson<{ plans: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/remediation-plans');
 }
+// Alias used by the remediation-plans page UI. Matches the plan-centric
+// payload shape rather than the generic case-action approveRemediation.
+export const approveRemediationPlan = approveHuntRemediationPlan;
 export function patchRemediationPlan(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/hunt-data/remediation-plans/${encodeURIComponent(id)}`, body);
 }

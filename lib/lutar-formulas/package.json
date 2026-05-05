@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/lutar-formulas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical TypeScript implementations of the SZL/Lutar formula corpus: Λ (invariant), Λ₅ (Gauß-closed), L_Ω (omega hierarchy), P_Λ (propeller), A_lang (language arbitrage), Ξ (chat unification).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./lutar": "./src/lutar.ts",
+    "./omega": "./src/omega.ts",
+    "./propeller": "./src/propeller.ts",
+    "./arbitrage": "./src/arbitrage.ts",
+    "./xi": "./src/xi.ts",
+    "./router": "./src/router.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

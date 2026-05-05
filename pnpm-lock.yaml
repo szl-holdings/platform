@@ -2421,6 +2421,12 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  lib/lutar-formulas:
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   lib/mcp-client:
     dependencies:
       '@modelcontextprotocol/sdk':

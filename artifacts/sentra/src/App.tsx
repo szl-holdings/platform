@@ -413,7 +413,7 @@ const NAV_SECTIONS: NavSection[] = [
 const { aegisExtendedModules: EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
   import.meta.env as unknown as Record<string, unknown>,
 );
-const EXTENDED_SECTION_IDS = new Set(['intelligence']);
+const EXTENDED_SECTION_IDS = new Set<string>([]);
 const EXTENDED_ITEM_PATHS = new Set(['/identity-blast-radius']);
 
 function filterExtendedSections(sections: NavSection[]): NavSection[] {
