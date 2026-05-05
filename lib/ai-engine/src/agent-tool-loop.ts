@@ -39,11 +39,31 @@ export interface ToolLoopCallbacks {
   onToolCallResult?: (event: ToolResultEvent) => void;
 }
 
+/**
+ * Governance context threaded into every tool call so that plan-mode,
+ * trust-tier, and covenant hooks have full context to evaluate.
+ */
+export interface GovernanceContext {
+  session_id?: string;
+  permission_mode?: string;
+  trust_tier?: number;
+  plan_id?: string;
+  /** Active skill ID — used to resolve covenant metadata in invokeToolWithGovernance */
+  skill_id?: string;
+  /** Pre-resolved covenant metadata; if omitted, tool-bridge looks it up from the skill registry */
+  covenant_metadata?: {
+    allowed_tools?: string[];
+    blocked_tools?: string[];
+    covenant_policy_bundle?: string;
+  };
+}
+
 async function runToolCalls(
   agentId: string,
   toolCalls: Array<{ id: string; name: string; arguments: Record<string, unknown> }>,
   messages: LoopMessage[],
   callbacks: ToolLoopCallbacks | undefined,
+  governance: GovernanceContext,
 ): Promise<{ toolCallCount: number }> {
   callbacks?.onToolCallStart?.(
     toolCalls.map((tc) => ({
@@ -65,7 +85,14 @@ async function runToolCalls(
 
   const results = await Promise.all(
     toolCalls.map(async (toolCall) => {
-      const gwResult = await invokeToolWithGovernance(agentId, toolCall.name, toolCall.arguments);
+      const gwResult = await invokeToolWithGovernance(agentId, toolCall.name, toolCall.arguments, {
+        session_id: governance.session_id,
+        permission_mode: governance.permission_mode,
+        trust_tier: governance.trust_tier,
+        plan_id: governance.plan_id,
+        skill_id: governance.skill_id,
+        covenant_metadata: governance.covenant_metadata,
+      });
 
       void recordToolCall(
         agentId,
@@ -107,6 +134,7 @@ async function runOpenAIToolLoop(
   model: string,
   maxTokens: number,
   callbacks?: ToolLoopCallbacks,
+  governance: GovernanceContext = {},
 ): Promise<ToolLoopResult> {
   const { openAIChatInterface } = await import('./providers/openai/chat-with-tools.js');
   const toolDefs = getToolDefinitionsForAgent(agent.tools);
@@ -143,6 +171,7 @@ async function runOpenAIToolLoop(
       result.toolCalls,
       messages,
       callbacks,
+      governance,
     );
     toolCallCount += roundCalls;
   }
@@ -161,6 +190,7 @@ async function runAnthropicToolLoop(
   model: string,
   maxTokens: number,
   callbacks?: ToolLoopCallbacks,
+  governance: GovernanceContext = {},
 ): Promise<ToolLoopResult> {
   const { anthropicChatInterface } = await import('./providers/anthropic/chat-with-tools.js');
   const toolDefs = getToolDefinitionsForAgent(agent.tools);
@@ -197,6 +227,7 @@ async function runAnthropicToolLoop(
       result.toolCalls,
       messages,
       callbacks,
+      governance,
     );
     toolCallCount += roundCalls;
   }
@@ -215,6 +246,7 @@ async function runGeminiToolLoop(
   model: string,
   maxTokens: number,
   callbacks?: ToolLoopCallbacks,
+  governance: GovernanceContext = {},
 ): Promise<ToolLoopResult> {
   const { geminiChatInterface } = await import('./providers/gemini/chat-with-tools.js');
   const toolDefs = getToolDefinitionsForAgent(agent.tools);
@@ -251,6 +283,7 @@ async function runGeminiToolLoop(
       result.toolCalls,
       messages,
       callbacks,
+      governance,
     );
     toolCallCount += roundCalls;
   }
@@ -269,20 +302,21 @@ export async function runAgentToolLoop(
   model: string,
   maxTokens = 2048,
   callbacks?: ToolLoopCallbacks,
+  governance: GovernanceContext = {},
 ): Promise<ToolLoopResult> {
   if (agent.tools.length === 0) {
     return { response: '', tokensUsed: 0, toolCallCount: 0 };
   }
 
   if (agent.preferredProvider === 'anthropic') {
-    return runAnthropicToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks);
+    return runAnthropicToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks, governance);
   }
   if (agent.preferredProvider === 'gemini') {
     try {
-      return await runGeminiToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks);
+      return await runGeminiToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks, governance);
     } catch {
-      return runOpenAIToolLoop(agent, systemPrompt, userQuery, 'gpt-5.2', maxTokens, callbacks);
+      return runOpenAIToolLoop(agent, systemPrompt, userQuery, 'gpt-5.2', maxTokens, callbacks, governance);
     }
   }
-  return runOpenAIToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks);
+  return runOpenAIToolLoop(agent, systemPrompt, userQuery, model, maxTokens, callbacks, governance);
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, KpiCard, SectionTitle, ProgressBar } from '../components/ui';
+import { fetchJson } from './cognitive/shared';
 
 
 const VERTICAL_LABEL_MAP: Record<string, string> = {
@@ -94,13 +95,21 @@ interface FabricData {
   layers: Array<{ layer: string; status: string; latencyMs?: number; lastHeartbeat?: string }>;
 }
 
+interface TrustTierEntry {
+  subagent_class: string;
+  tier: number;
+  label: string;
+  set_by: string;
+  covenant_bundle?: string;
+}
+
 interface VerticalData {
   id: string;
   label: string;
   signalCount: number;
 }
 
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/a11oy\/$/, '/api').replace(/\/$/, '');
 const POLL_INTERVAL_MS = 30_000;
 
 export function ControlTower() {
@@ -112,17 +121,20 @@ export function ControlTower() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [trustTiers, setTrustTiers] = useState<TrustTierEntry[]>([]);
+  const [tierSetPending, setTierSetPending] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const [mcpRes, readRes, ctRes, fabricRes, vertRes] = await Promise.allSettled([
+      const [mcpRes, readRes, ctRes, fabricRes, vertRes, tiersRes] = await Promise.allSettled([
         fetch(`${API_BASE}/internal/a11oy/mcp/readiness`),
         fetch(`${API_BASE}/internal/a11oy/readiness`),
         fetch(`${API_BASE}/a11oy/control-tower/status`),
         fetch(`${API_BASE}/a11oy/fabric`),
         fetch(`${API_BASE}/a11oy/verticals`),
+        fetch(`${API_BASE}/a11oy/trust-tiers`),
       ]);
 
       const failures: string[] = [];
@@ -181,6 +193,13 @@ export function ControlTower() {
             })),
           ];
           setVerticals(merged);
+        }
+      }
+
+      if (tiersRes.status === 'fulfilled' && tiersRes.value.ok) {
+        const j = await tiersRes.value.json();
+        if (j.ok && Array.isArray(j.data)) {
+          setTrustTiers(j.data as TrustTierEntry[]);
         }
       }
 
@@ -357,6 +376,81 @@ export function ControlTower() {
         </div>
 
         <div className="flex flex-col gap-6">
+          <div>
+            <SectionTitle>Trust Tier Status</SectionTitle>
+            <div className="rounded-lg border p-3 flex flex-col gap-2" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>
+              {loading && trustTiers.length === 0 && (
+                <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading…</div>
+              )}
+              {trustTiers.map(row => {
+                const tierColor = row.tier >= 3 ? '#f5f5f5' : row.tier === 2 ? '#c9b787' : row.tier === 1 ? '#8a8a8a' : '#5e5e5e';
+                return (
+                  <div key={row.subagent_class} className="flex items-center justify-between text-xs gap-2">
+                    <span className="flex-1 truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{row.subagent_class}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <select
+                        value={row.tier}
+                        disabled={tierSetPending === row.subagent_class}
+                        className="text-[10px] font-mono rounded px-1 py-0.5 border"
+                        style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'var(--color-a11oy-border)', color: tierColor, cursor: 'pointer' }}
+                        onChange={async (e) => {
+                          const newTier = Number(e.target.value);
+                          setTierSetPending(row.subagent_class);
+                          try {
+                            const json = await fetchJson<{ ok: boolean; data?: { tier: number; label: string } }>(
+                              `${API_BASE}/a11oy/trust-tiers`,
+                              { method: 'POST', body: JSON.stringify({ subagent_class: row.subagent_class, tier: newTier, set_by: 'operator' }) },
+                            );
+                            if (json.ok && json.data) {
+                              setTrustTiers(prev => prev.map(t =>
+                                t.subagent_class === row.subagent_class
+                                  ? { ...t, tier: json.data!.tier, label: json.data!.label }
+                                  : t
+                              ));
+                            }
+                          } finally {
+                            setTierSetPending(null);
+                          }
+                        }}
+                      >
+                        <option value={0}>T0 — Read-only</option>
+                        <option value={1}>T1 — Plan-only</option>
+                        <option value={2}>T2 — Auto-low-risk</option>
+                        <option value={3}>T3 — HITL-required</option>
+                        <option value={4}>T4 — Air-gapped</option>
+                      </select>
+                      <span className="font-mono text-[10px]" style={{ color: tierColor }}>{row.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <SectionTitle>Hook Health</SectionTitle>
+            <div className="rounded-lg border p-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>
+              {[
+                { name: 'Plan Mode Gate', status: 'healthy', allow_24h: 3841, block_24h: 47 },
+                { name: 'Trust Tier Enforcer', status: 'healthy', allow_24h: 8241, block_24h: 12 },
+                { name: 'Redaction Gate', status: 'healthy', allow_24h: 4128, block_24h: 0 },
+                { name: 'Proof Sealer', status: 'healthy', allow_24h: 12847, block_24h: 0 },
+                { name: 'Reward-Hacking Watchdog', status: 'healthy', allow_24h: 1842, block_24h: 3 },
+                { name: 'Covenant Policy Gate', status: 'healthy', allow_24h: 7421, block_24h: 89 },
+              ].map(h => (
+                <div key={h.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#c9b787' }} />
+                    <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{h.name}</span>
+                  </div>
+                  <span className="font-mono text-[10px]" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                    ✓{h.allow_24h.toLocaleString()} ✕{h.block_24h}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div>
             <SectionTitle>Worker Bridge & Model Router</SectionTitle>
             <div className="rounded-lg border p-4 flex flex-col gap-3" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>

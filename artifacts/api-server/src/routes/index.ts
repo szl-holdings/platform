@@ -33,6 +33,7 @@ import a11oyFabricRouter from "./a11oy-fabric-api";
 import capabilityFabricRouter from "./capability-fabric";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
+import { a11oyClaudeCodeDoctrineRouter } from "./a11oy-claude-code-doctrine.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
 import a11oyDoctrineRouter from "./a11oy-doctrine-api";
 import forgeSkillsRouter from "./forge-skills";
@@ -336,6 +337,11 @@ router.use('/a11oy', a11oySovereignRouter);
 // POST /api/a11oy/cognitive/proof-chains
 // GET  /api/a11oy/cognitive/deployments
 router.use(a11oyCognitiveRuntimeRouter);
+
+// A11oy Claude Code Doctrine BFF — Skills v2, Hook Packs, Memory Tiers, Plan Lock, Trust Tiers, Watchdog, OTel, Rego.
+// Namespace: /a11oy/skills/v2, /a11oy/hooks, /a11oy/memory, /a11oy/plans, /a11oy/trust-tiers,
+//            /a11oy/watchdog, /a11oy/otel, /a11oy/rego
+router.use('/a11oy', a11oyClaudeCodeDoctrineRouter);
 
 // A11oy Runtime API (Phase 2) — mutating endpoints, operators, MirrorEval, PCE gate, Workcells, Skills.
 // Mounted BEFORE the Phase 1 fabric router so runtime routes take precedence when paths overlap.

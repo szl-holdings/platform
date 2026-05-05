@@ -6,6 +6,21 @@ import { useWorkflowRunSubscription } from '../graphql';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const API_BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/a11oy\/$/, '/api').replace(/\/$/, '');
+
+interface LiveWorkcell {
+  id: string;
+  plan_id: string;
+  name: string;
+  objective: string;
+  status: string;
+  agent_id: string;
+  trust_tier: number;
+  vertical: string;
+  created_at: string;
+  updated_at: string;
+  proof_packet_id?: string;
+}
 const VERTICAL_COLORS: Record<string, string> = {
   'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
   'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
@@ -22,6 +37,26 @@ export function Workcells() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterVertical, setFilterVertical] = useState<string>('all');
   const [liveRunUpdate, setLiveRunUpdate] = useState<{ workflowId: string; status: string } | null>(null);
+  const [liveWorkcells, setLiveWorkcells] = useState<LiveWorkcell[]>([]);
+  const [wcLoading, setWcLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setWcLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/a11oy/workcells`);
+        const json = await res.json();
+        if (!cancelled && json.ok && Array.isArray(json.data)) {
+          setLiveWorkcells(json.data as LiveWorkcell[]);
+        }
+      } finally {
+        if (!cancelled) setWcLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const { data: runUpdate } = useWorkflowRunSubscription();
   useEffect(() => {
@@ -31,14 +66,17 @@ export function Workcells() {
     return () => clearTimeout(t);
   }, [runUpdate]);
 
-  const filtered = SEED_WORKCELLS.filter(w =>
+  const allWorkcells = liveWorkcells.length > 0 ? liveWorkcells : SEED_WORKCELLS;
+  const isLive = liveWorkcells.length > 0;
+
+  const filtered = allWorkcells.filter((w: typeof allWorkcells[0]) =>
     (filterStatus === 'all' || w.status === filterStatus) &&
     (filterVertical === 'all' || w.vertical === filterVertical)
   );
 
-  const running = SEED_WORKCELLS.filter(w => w.status === 'running');
-  const completed = SEED_WORKCELLS.filter(w => w.status === 'completed');
-  const pendingApproval = SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running');
+  const running = allWorkcells.filter((w: typeof allWorkcells[0]) => w.status === 'running');
+  const completed = allWorkcells.filter((w: typeof allWorkcells[0]) => w.status === 'completed');
+  const pendingApproval = allWorkcells.filter((w: typeof allWorkcells[0]) => 'requiresApproval' in w && (w as typeof SEED_WORKCELLS[0]).requiresApproval && w.status === 'running');
 
   return (
     <Layout>
@@ -59,10 +97,10 @@ export function Workcells() {
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="RUNNING" value={running.length} sub="active cells" accent="#c9b787" />
-        <KpiCard label="COMPLETED" value={completed.length} sub="with proof" accent="#c9b787" />
+        <KpiCard label="RUNNING" value={wcLoading ? '…' : running.length} sub={isLive ? 'live' : 'seed'} accent="#c9b787" />
+        <KpiCard label="COMPLETED" value={wcLoading ? '…' : completed.length} sub="with proof" accent="#c9b787" />
         <KpiCard label="APPROVAL GATES" value={pendingApproval.length} sub="awaiting human" accent="#8a8a8a" />
-        <KpiCard label="TOTAL CELLS" value={SEED_WORKCELLS.length} sub="in registry" accent="#c9b787" />
+        <KpiCard label="T3 AGENTS" value={isLive ? allWorkcells.filter((w: typeof allWorkcells[0]) => (w as LiveWorkcell).trust_tier >= 3).length : SEED_WORKCELLS.filter(w => w.requiresApproval).length} sub="hitl-required" accent="#f5f5f5" />
       </div>
 
       {/* Filters */}
@@ -100,9 +138,15 @@ export function Workcells() {
       </div>
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map(wc => {
+        {(filtered as Array<typeof allWorkcells[0]>).map(wc => {
+          const seedWc = !isLive ? (wc as typeof SEED_WORKCELLS[0]) : null;
+          const liveWc = isLive ? (wc as LiveWorkcell) : null;
           const color = VERTICAL_COLORS[wc.vertical] ?? '#5e5e5e';
           const statusColor = STATUS_COLORS[wc.status] ?? '#5e5e5e';
+          const verdict = seedWc?.mirrorEvalResult?.verdict ?? 'pass';
+          const agentRoles = seedWc?.agentSequence?.map((a: { role: string }) => a.role) ?? (liveWc ? [liveWc.agent_id] : []);
+          const requiresApproval = seedWc?.requiresApproval ?? (liveWc ? liveWc.trust_tier >= 3 : false);
+          const approvalTier = seedWc?.actionBrief?.approvalTier ?? `T${liveWc?.trust_tier ?? 3}`;
           return (
             <Card key={wc.id} className="flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
@@ -110,18 +154,19 @@ export function Workcells() {
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>{wc.status}</span>
                     <VerticalBadge vertical={VERTICAL_LABELS[wc.vertical] ?? wc.vertical} color={color} />
+                    {isLive && <span className="text-[9px] font-mono px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787' }}>LIVE</span>}
                   </div>
                   <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</div>
                 </div>
-                <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
+                <VerdictBadge verdict={verdict} />
               </div>
 
               <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{wc.objective}</p>
 
               <div className="flex flex-wrap gap-1">
-                {wc.agentSequence.map((a, i) => (
+                {agentRoles.map((role: string, i: number) => (
                   <span key={i} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>
-                    {a.role}
+                    {role}
                   </span>
                 ))}
               </div>
@@ -129,12 +174,12 @@ export function Workcells() {
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.id}</span>
                 <div className="flex items-center gap-2">
-                  {wc.requiresApproval && <span className="font-mono" style={{ color: '#8a8a8a' }}>⚬ approval</span>}
+                  {requiresApproval && <span className="font-mono" style={{ color: '#8a8a8a' }}>⚬ approval</span>}
                 </div>
               </div>
 
-              {wc.requiresApproval && wc.status === 'running' && (
-                <ApprovalGate label={`Approval tier: ${wc.actionBrief.approvalTier}`} />
+              {requiresApproval && wc.status === 'running' && (
+                <ApprovalGate label={`Approval tier: ${approvalTier}`} />
               )}
 
               <div className="flex gap-2 mt-auto">

@@ -156,6 +156,7 @@ const platformItems: NavItem[] = [
   { id: 'evolution', name: 'Evolution Runtime', icon: Zap, path: '/evolution' },
   { id: 'trust-center', name: 'Trust Center', icon: Lock, path: '/trust' },
   { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
+  { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
 ];
 
 function SectionHeader({ children }: { children: React.ReactNode }) {

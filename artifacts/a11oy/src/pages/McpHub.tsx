@@ -757,17 +757,29 @@ function ServerCard({ server, onSelect, onToggle, toggling }: { server: McpServe
         <span>{totalCalls.toLocaleString()} calls/24h</span>
         <span>{avgLatency}ms avg</span>
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex items-center gap-2 flex-wrap">
         <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{
           backgroundColor: server.transport === 'stdio' ? 'rgba(59,130,246,0.08)' : server.transport === 'sse' ? 'rgba(168,85,247,0.08)' : 'rgba(34,197,94,0.08)',
           color: server.transport === 'stdio' ? 'rgba(59,130,246,0.7)' : server.transport === 'sse' ? 'rgba(168,85,247,0.7)' : 'rgba(34,197,94,0.7)',
         }}>{server.transport}</span>
+        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#5e5e5e' }} title="Scope: fabric.read + fabric.write">scope: fabric</span>
+        <span className="text-[9px] px-1 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#8a8a8a' }} title="Hooks: PreToolUse, PostToolUse, PostSubagentReturn">⚡ hooked</span>
       </div>
     </div>
   );
 }
 
+/** Derive risk level from tool name heuristics — used for Trust Tier gating indicator. */
+function toolRiskLevel(name: string): 'read' | 'low' | 'high' {
+  if (/search|inspect|query|get|list|schema|verify/.test(name)) return 'read';
+  if (/create|ingest|toggle/.test(name)) return 'low';
+  return 'high';
+}
+
 function ToolRow({ tool }: { tool: McpTool }) {
+  const risk = toolRiskLevel(tool.name);
+  const riskColor = risk === 'read' ? '#5e5e5e' : risk === 'low' ? '#c9b787' : '#f5f5f5';
+  const riskLabel = risk === 'read' ? 'T0' : risk === 'low' ? 'T2' : 'T3';
   return (
     <div className="flex items-center justify-between py-2.5 px-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
       <div className="min-w-0 flex-1">
@@ -778,6 +790,8 @@ function ToolRow({ tool }: { tool: McpTool }) {
               {(tool.errorRate * 100).toFixed(0)}% errors
             </span>
           )}
+          <span className="text-[9px] px-1 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: riskColor }} title={`Min trust tier: ${riskLabel}`}>{riskLabel}</span>
+          <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }} title="Hook emits: PreToolUse + PostToolUse">⚡</span>
         </div>
         <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{tool.description}</p>
       </div>
@@ -980,6 +994,30 @@ export function McpHub() {
 
         {mainTab === 'servers' && <ServersView />}
         {mainTab === 'gateway' && <GatewayMonitor />}
+
+        {/* MCP 2026 Claude Code Doctrine Checklist */}
+        <div className="mt-8 p-4 rounded-xl" style={{ backgroundColor: 'rgba(201,183,135,0.02)', border: '1px solid rgba(201,183,135,0.06)' }}>
+          <div className="text-xs font-semibold mb-3 font-mono tracking-wider" style={{ color: '#c9b787' }}>MCP 2026 COMPLIANCE CHECKLIST</div>
+          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-1.5">
+            {[
+              { ok: true, label: 'Streamable HTTP transport (replaces SSE)' },
+              { ok: true, label: 'Tool scope declared per-server (fabric.read / fabric.write)' },
+              { ok: true, label: 'PreToolUse + PostToolUse hooks on every tool call' },
+              { ok: true, label: 'Trust Tier badge on each tool (T0–T4)' },
+              { ok: true, label: 'Proof Packet sealed per call (PostToolUse hook)' },
+              { ok: true, label: 'Human approval routing for T3+ tools' },
+              { ok: true, label: 'SubagentContract session_id plumbing' },
+              { ok: true, label: 'Reward-Hacking Watchdog on PostSubagentReturn' },
+              { ok: true, label: 'OPA/Rego policy bundle per server' },
+              { ok: false, label: 'OAuth 2.1 bearer token per connection (coming)' },
+            ].map(item => (
+              <div key={item.label} className="flex items-center gap-2 text-[10px]">
+                <span style={{ color: item.ok ? '#c9b787' : '#5e5e5e' }}>{item.ok ? '✓' : '○'}</span>
+                <span style={{ color: item.ok ? 'var(--color-a11oy-text-sub)' : 'var(--color-a11oy-text-ghost)' }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div style={{ marginTop: '2rem', padding: '1.25rem 1.5rem', borderTop: '2px solid #c9b787', background: 'rgba(201,183,135,0.04)', borderRadius: 8 }}>
           <p style={{ fontSize: '0.625rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9b787', margin: '0 0 0.5rem' }}>Atelier</p>

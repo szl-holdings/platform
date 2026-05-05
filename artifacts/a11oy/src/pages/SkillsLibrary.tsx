@@ -1,12 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusPill } from '../components/ui';
+
+const API_BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/a11oy\/$/, '/api').replace(/\/$/, '');
+
+type PermissionMode = 'read-only' | 'plan-only' | 'auto-approve-low-risk' | 'hitl-required' | 'sovereign-air-gapped';
 
 interface Skill {
   id: string; name: string; category: string; domain: string; version: string; status: string;
   calls: number; successRate: number; avgLatencyMs: number; description: string;
   allowedTools: string[]; blockedTools: string[]; requiredPolicies: string[];
   evalRequired: boolean; sampleInput: Record<string, unknown>; sampleOutput: Record<string, unknown>;
+  permissionMode: PermissionMode;
+  evalPassRate: number;
+  covenantBundle?: string;
+  constitutionClause?: string;
+  source: 'filesystem' | 'programmatic';
+  chainableWith: string[];
+  triggerKeywords: string[];
 }
 
 interface SkillsData {
@@ -28,24 +39,40 @@ const CAT_COLORS: Record<string, string> = {
   'Data Intelligence': '#8a8a8a',
 };
 
+const PM_LABELS: Record<PermissionMode, string> = {
+  'read-only': 'READ-ONLY',
+  'plan-only': 'PLAN-ONLY',
+  'auto-approve-low-risk': 'AUTO-LOW',
+  'hitl-required': 'HITL',
+  'sovereign-air-gapped': 'AIR-GAPPED',
+};
+
+const PM_COLORS: Record<PermissionMode, string> = {
+  'read-only': '#5e5e5e',
+  'plan-only': '#8a8a8a',
+  'auto-approve-low-risk': '#c9b787',
+  'hitl-required': '#f5f5f5',
+  'sovereign-air-gapped': '#b08d52',
+};
+
 const SKILLS_DATA: SkillsData = {
   summary: { total: 15, live: 15, demo: 0, totalCallsToday: 1847 },
   skills: [
-    { id: 'skill-maritime-risk', name: 'Maritime Risk Assessment', category: 'Maritime Intelligence', domain: 'SEXTANT', version: '3.2.1', status: 'LIVE', calls: 2847, successRate: 0.97, avgLatencyMs: 480, description: 'Ingests AIS feeds, port congestion indices, and charter rates to score vessel-level operational risk and generate reroute or demurrage recommendations.', allowedTools: ['vessel_track', 'eta_lookup', 'port_congestion', 'cost_model'], blockedTools: ['cargo_manifest_write', 'flag_state_modify', 'charter_sign'], requiredPolicies: ['human-approval-tier-3', 'sanctions-screening-required'], evalRequired: true, sampleInput: { vessel_id: 'VLCC-EVEREST-001', route: 'Singapore→Rotterdam', cargo: 'Crude Oil' }, sampleOutput: { risk_score: 0.74, drift_class: 'HIGH', recommended_action: 'Reroute to Port Antwerp', standby_cost_per_day: '$2.4M', evidence_refs: ['ais:ETA_DEVIATION_31H', 'congestion:PORT_ROTTERDAM_HIGH'] } },
-    { id: 'skill-legal-analysis', name: 'Legal Document Analysis', category: 'Legal Intelligence', domain: 'Counsel', version: '2.8.0', status: 'LIVE', calls: 1423, successRate: 0.96, avgLatencyMs: 890, description: 'Analyzes legal documents, dockets, and matter timelines to identify deadline risk, privilege exposure, and settlement probability — with privilege preservation enforced.', allowedTools: ['docket_search', 'document_retrieve', 'deadline_monitor'], blockedTools: ['filing_submit', 'settlement_execute', 'privilege_waive'], requiredPolicies: ['privilege-preservation-legal', 'human-approval-tier-3'], evalRequired: true, sampleInput: { matter_id: 'SZL-2026-047', document_type: 'motion_brief', deadline: '2026-05-03' }, sampleOutput: { deadline_risk: 'HIGH', privilege_exposure: 'NONE', recommended_action: 'File response motion — deadline in 7 days', settlement_probability: 0.68 } },
-    { id: 'skill-revenue-forecast', name: 'Revenue Signal Forecasting', category: 'Revenue Intelligence', domain: 'KORA', version: '4.1.2', status: 'LIVE', calls: 3812, successRate: 0.98, avgLatencyMs: 310, description: 'Ingests CRM pipeline signals, churn indicators, and market data to forecast revenue risk and generate account-level intervention briefs.', allowedTools: ['account_lookup', 'pipeline_analyze', 'churn_score', 'price_lookup'], blockedTools: ['deal_close', 'contract_sign', 'account_delete'], requiredPolicies: ['pii-redaction-enforced', 'connector-default-deny'], evalRequired: true, sampleInput: { tenant: 'lyte-revenue', signal_type: 'churn_risk', accounts: ['acct-001', 'acct-002', 'acct-003'] }, sampleOutput: { at_risk_arr: '$180K', accounts_flagged: 3, recommended_action: 'Executive outreach program', forecast_recovery: '85% probability', evidence_refs: ['crm:CHURN_SIGNAL_HIGH', 'pipeline:ARR_DECEL'] } },
-    { id: 'skill-threat-triage', name: 'Security Threat Triage', category: 'Defense Intelligence', domain: 'PARAGON', version: '2.4.0', status: 'LIVE', calls: 987, successRate: 0.94, avgLatencyMs: 620, description: 'Classifies threat indicators, CVEs, and incident signals against known TTPs. Generates containment briefs with CISA notification drafts — restricted to cleared operators.', allowedTools: ['threat_lookup', 'indicator_enrich', 'cve_query'], blockedTools: ['cisa_report_submit', 'incident_escalate', 'classified_retrieve'], requiredPolicies: ['human-approval-tier-3', 'output-sanitization-required'], evalRequired: true, sampleInput: { cve_id: 'CVE-2025-4891', affected_endpoints: 847, threat_actor_type: 'nation-state' }, sampleOutput: { severity: 'CRITICAL', cvss_score: 9.1, containment_actions: ['isolate_endpoints', 'apply_patch_KB2025-4891', 'notify_cisa'], estimated_exposure: '847 endpoints', notification_draft: 'CISA_FORM_61_DRAFT' } },
-    { id: 'skill-real-estate-eval', name: 'Real Estate Deal Evaluation', category: 'Real Estate Intelligence', domain: 'DOMAINE', version: '1.9.3', status: 'LIVE', calls: 634, successRate: 0.95, avgLatencyMs: 540, description: 'Evaluates property acquisition, lease-up, and covenant risk using MLS data, comparable transactions, and lender covenant thresholds.', allowedTools: ['property_search', 'lease_comp_analysis', 'market_report'], blockedTools: ['listing_create', 'offer_submit', 'lease_sign'], requiredPolicies: ['human-approval-tier-3', 'connector-default-deny'], evalRequired: true, sampleInput: { asset_id: '45-park-ave', analysis_type: 'covenant_risk', covenant_threshold: 0.85 }, sampleOutput: { occupancy_rate: 0.89, covenant_status: 'COMPLIANT', risk_score: 0.22, recommended_action: 'Continue lease-up — 2 LOIs in negotiation', lease_comp_confidence: 0.91 } },
-    { id: 'skill-procurement-risk', name: 'Procurement Contract Risk', category: 'Procurement Intelligence', domain: 'Enterprise', version: '2.1.0', status: 'LIVE', calls: 412, successRate: 0.93, avgLatencyMs: 470, description: 'Analyzes vendor SLA performance, sanctions screening results, and supply chain dependency to generate procurement risk briefs.', allowedTools: ['vendor_score', 'sla_monitor', 'sanctions_check'], blockedTools: ['vendor_delist', 'contract_terminate', 'payment_block'], requiredPolicies: ['sanctions-screening-required', 'human-approval-tier-3'], evalRequired: true, sampleInput: { vendor_id: 'APEX-SUPPLY-001', sla_breach_days: 12, component_category: 'critical' }, sampleOutput: { risk_level: 'CRITICAL', sla_breach_impact: 'production_halt_risk', recommended_action: 'Renegotiate SLA + onboard secondary vendor', sanctions_status: 'CLEAR', secondary_vendor_recommendations: ['VendorB Corp', 'SupplyChain Plus'] } },
-    { id: 'skill-boardroom-synthesis', name: 'Boardroom Packet Synthesis', category: 'Boardroom Intelligence', domain: 'Enterprise', version: '3.0.1', status: 'LIVE', calls: 89, successRate: 0.99, avgLatencyMs: 1840, description: 'Synthesizes signals, workcells, outcomes, and proof packets into a board-ready executive briefing with MirrorEval scoring.', allowedTools: ['signal_aggregate', 'workcell_summarize', 'proof_retrieve', 'eval_score'], blockedTools: ['board_distribute', 'pdf_email_send'], requiredPolicies: ['human-approval-tier-3', 'proof-chain-required'], evalRequired: true, sampleInput: { tenant_id: 'szl-holdings', period: 'Q2 2026', domains: ['maritime', 'legal', 'revenue'] }, sampleOutput: { packet_id: 'bp-001', eval_composite: 0.94, sections_generated: 4, kpis: 4, proof_ref: 'sha256:c9f2e5b8...', awaiting_approval: true } },
-    { id: 'skill-eval-harness', name: 'MirrorEval Evaluation Harness', category: 'Governance', domain: 'Core', version: '2.0.4', status: 'LIVE', calls: 5234, successRate: 0.99, avgLatencyMs: 280, description: '14-dimension evaluation harness for all governed actions. Scores groundedness, evidence coverage, action safety, hallucination risk, policy compliance, and more.', allowedTools: ['eval_score', 'evidence_check', 'policy_lookup'], blockedTools: ['eval_override', 'score_modify'], requiredPolicies: ['mirroreval-pass-gate'], evalRequired: false, sampleInput: { workcell_id: 'wc-001', action_brief_id: 'act-001', eval_dimensions: 14 }, sampleOutput: { verdict: 'pass', composite: 0.94, flags: [], blocked: false, dimensions_scored: 14 } },
-    { id: 'skill-proof-generator', name: 'Proof Packet Generator', category: 'Governance', domain: 'Core', version: '1.7.2', status: 'LIVE', calls: 2891, successRate: 0.99, avgLatencyMs: 120, description: 'Generates SHA-256 hash-chained proof packets for every governed action. Immutable, replayable, and verifiable by any audit party.', allowedTools: ['proof_create', 'hash_chain_append', 'evidence_attach'], blockedTools: ['proof_delete', 'hash_modify'], requiredPolicies: ['proof-chain-required'], evalRequired: false, sampleInput: { action_id: 'act-001', evidence_refs: ['sig-vessels-001', 'eval-me-001'], actor: 'VP Operations' }, sampleOutput: { proof_id: 'proof-001', sha256: 'c9f2e5b8a1d3e6f9...', chain_position: 47, immutable: true, replayable: true } },
-    { id: 'skill-twin-sync', name: 'Digital Twin Sync Engine', category: 'Data Intelligence', domain: 'Core', version: '2.3.0', status: 'LIVE', calls: 1847, successRate: 0.96, avgLatencyMs: 340, description: 'Continuously synchronizes business digital twins against live connector data. Scores drift, flags anomalies, and triggers workcells when thresholds are crossed.', allowedTools: ['twin_state_read', 'connector_pull', 'drift_score'], blockedTools: ['twin_state_write', 'twin_delete'], requiredPolicies: ['connector-default-deny'], evalRequired: false, sampleInput: { twin_id: 'vessel-twin-001', sync_interval: '5m', drift_threshold: 60 }, sampleOutput: { drift_score: 74, anomaly_detected: true, workcell_triggered: 'wc-vessels-001', last_sync: '2026-04-26T14:28:00Z' } },
-    { id: 'skill-signal-classifier', name: 'Signal Classification & Routing', category: 'Data Intelligence', domain: 'Core', version: '3.1.0', status: 'LIVE', calls: 6201, successRate: 0.98, avgLatencyMs: 95, description: 'Classifies incoming signals by severity, vertical, and action type. Routes to the appropriate skill, workcell, or approval queue.', allowedTools: ['signal_classify', 'routing_lookup', 'severity_score'], blockedTools: ['signal_suppress', 'routing_override'], requiredPolicies: ['no-action-without-approval-above-tier2'], evalRequired: false, sampleInput: { signal_raw: 'ETA deviation detected: VLCC Everest +31h', vertical: 'vessels-maritime' }, sampleOutput: { severity: 'critical', skill_route: 'skill-maritime-risk', approval_tier: 'TIER_3', routed: true } },
-    { id: 'skill-connector-firewall', name: 'Connector Trust Scorer', category: 'Governance', domain: 'Core', version: '1.4.1', status: 'LIVE', calls: 4127, successRate: 0.99, avgLatencyMs: 45, description: 'Scores connector trust in real-time based on schema validation, consent status, injection patterns, and call history. Gates all tool calls.', allowedTools: ['trust_score', 'schema_validate', 'consent_check'], blockedTools: ['trust_override', 'allowlist_modify'], requiredPolicies: ['connector-default-deny', 'proof-chain-required'], evalRequired: false, sampleInput: { connector_id: 'ais-live-api', tool_call: 'vessel_track', context_hash: 'sha256:a1b2c3' }, sampleOutput: { trust_score: 92, approved: true, injection_detected: false, schema_valid: true, latency_ms: 45 } },
-    { id: 'skill-covenant-checker', name: 'Covenant Policy Checker', category: 'Governance', domain: 'Core', version: '2.2.0', status: 'LIVE', calls: 8903, successRate: 1.0, avgLatencyMs: 32, description: 'Checks every governed action against the full covenant policy set in real-time. Blocks any action that violates policy before execution.', allowedTools: ['policy_lookup', 'covenant_check', 'violation_log'], blockedTools: ['policy_override', 'covenant_disable'], requiredPolicies: [], evalRequired: false, sampleInput: { action_id: 'act-001', policies_to_check: ['human-approval-tier-3', 'sanctions-screening-required', 'proof-chain-required'] }, sampleOutput: { compliant: true, policies_checked: 10, policies_passed: 10, violations: [], blocked: false } },
-    { id: 'skill-approval-router', name: 'Approval Tier Router', category: 'Governance', domain: 'Core', version: '1.8.0', status: 'LIVE', calls: 847, successRate: 0.99, avgLatencyMs: 85, description: 'Routes actions to the correct approval tier based on action impact, domain, and PCE contract configuration. Creates approval requests with full evidence context.', allowedTools: ['approval_create', 'tier_lookup', 'approver_notify'], blockedTools: ['approval_auto_approve', 'tier_downgrade'], requiredPolicies: ['human-approval-tier-3', 'no-action-without-approval-above-tier2'], evalRequired: false, sampleInput: { action_id: 'act-001', estimated_impact: '$2.4M/day', domain: 'maritime' }, sampleOutput: { approval_tier: 'TIER_3', approver: 'VP Operations', approval_id: 'apr-001', status: 'pending', deadline: '2026-04-27T14:00:00Z' } },
-    { id: 'skill-replay-analyst', name: 'Workcell Replay Analyst', category: 'Governance', domain: 'Core', version: '1.5.1', status: 'LIVE', calls: 312, successRate: 0.97, avgLatencyMs: 210, description: 'Reconstructs workcell execution traces from the Proof Ledger for audit, compliance, and failure analysis. Classifies failure types and generates retry recommendations.', allowedTools: ['replay_retrieve', 'proof_read', 'failure_classify'], blockedTools: ['replay_modify', 'trace_delete'], requiredPolicies: ['proof-chain-required'], evalRequired: false, sampleInput: { workcell_id: 'wc-001', replay_depth: 'full' }, sampleOutput: { steps_replayed: 6, outcome: 'success', failure_class: null, proof_integrity: true, duration_ms: 31400 } },
+    { id: 'skill-maritime-risk', name: 'Maritime Risk Assessment', category: 'Maritime Intelligence', domain: 'SEXTANT', version: '3.2.1', status: 'LIVE', calls: 2847, successRate: 0.97, avgLatencyMs: 480, description: 'Ingests AIS feeds, port congestion indices, and charter rates to score vessel-level operational risk and generate reroute or demurrage recommendations.', allowedTools: ['vessel_track', 'eta_lookup', 'port_congestion', 'cost_model'], blockedTools: ['cargo_manifest_write', 'flag_state_modify', 'charter_sign'], requiredPolicies: ['human-approval-tier-3', 'sanctions-screening-required'], evalRequired: true, sampleInput: { vessel_id: 'VLCC-EVEREST-001', route: 'Singapore→Rotterdam', cargo: 'Crude Oil' }, sampleOutput: { risk_score: 0.74, drift_class: 'HIGH', recommended_action: 'Reroute to Port Antwerp', standby_cost_per_day: '$2.4M', evidence_refs: ['ais:ETA_DEVIATION_31H', 'congestion:PORT_ROTTERDAM_HIGH'] }, permissionMode: 'hitl-required', evalPassRate: 0.97, covenantBundle: 'covenant:maritime-ops', constitutionClause: 'clause-7-maritime', source: 'filesystem', chainableWith: ['skill-eval-harness', 'skill-proof-generator'], triggerKeywords: ['vessel', 'ais', 'eta', 'maritime', 'shipping', 'port'] },
+    { id: 'skill-legal-analysis', name: 'Legal Document Analysis', category: 'Legal Intelligence', domain: 'Counsel', version: '2.8.0', status: 'LIVE', calls: 1423, successRate: 0.96, avgLatencyMs: 890, description: 'Analyzes legal documents, dockets, and matter timelines to identify deadline risk, privilege exposure, and settlement probability — with privilege preservation enforced.', allowedTools: ['docket_search', 'document_retrieve', 'deadline_monitor'], blockedTools: ['filing_submit', 'settlement_execute', 'privilege_waive'], requiredPolicies: ['privilege-preservation-legal', 'human-approval-tier-3'], evalRequired: true, sampleInput: { matter_id: 'SZL-2026-047', document_type: 'motion_brief', deadline: '2026-05-03' }, sampleOutput: { deadline_risk: 'HIGH', privilege_exposure: 'NONE', recommended_action: 'File response motion — deadline in 7 days', settlement_probability: 0.68 }, permissionMode: 'hitl-required', evalPassRate: 0.96, covenantBundle: 'covenant:legal-default', constitutionClause: 'clause-4-privilege', source: 'filesystem', chainableWith: ['skill-approval-router', 'skill-proof-generator'], triggerKeywords: ['legal', 'docket', 'filing', 'deadline', 'motion', 'counsel', 'contract'] },
+    { id: 'skill-revenue-forecast', name: 'Revenue Signal Forecasting', category: 'Revenue Intelligence', domain: 'KORA', version: '4.1.2', status: 'LIVE', calls: 3812, successRate: 0.98, avgLatencyMs: 310, description: 'Ingests CRM pipeline signals, churn indicators, and market data to forecast revenue risk and generate account-level intervention briefs.', allowedTools: ['account_lookup', 'pipeline_analyze', 'churn_score', 'price_lookup'], blockedTools: ['deal_close', 'contract_sign', 'account_delete'], requiredPolicies: ['pii-redaction-enforced', 'connector-default-deny'], evalRequired: true, sampleInput: { tenant: 'lyte-revenue', signal_type: 'churn_risk', accounts: ['acct-001', 'acct-002', 'acct-003'] }, sampleOutput: { at_risk_arr: '$180K', accounts_flagged: 3, recommended_action: 'Executive outreach program', forecast_recovery: '85% probability', evidence_refs: ['crm:CHURN_SIGNAL_HIGH', 'pipeline:ARR_DECEL'] }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.98, covenantBundle: 'covenant:revenue-ops', source: 'programmatic', chainableWith: ['skill-eval-harness', 'skill-approval-router'], triggerKeywords: ['pipeline', 'churn', 'revenue', 'forecast', 'crm', 'arr'] },
+    { id: 'skill-threat-triage', name: 'Security Threat Triage', category: 'Defense Intelligence', domain: 'PARAGON', version: '2.4.0', status: 'LIVE', calls: 987, successRate: 0.94, avgLatencyMs: 620, description: 'Classifies threat indicators, CVEs, and incident signals against known TTPs. Generates containment briefs with CISA notification drafts — restricted to cleared operators.', allowedTools: ['threat_lookup', 'indicator_enrich', 'cve_query'], blockedTools: ['cisa_report_submit', 'incident_escalate', 'classified_retrieve'], requiredPolicies: ['human-approval-tier-3', 'output-sanitization-required'], evalRequired: true, sampleInput: { cve_id: 'CVE-2025-4891', affected_endpoints: 847, threat_actor_type: 'nation-state' }, sampleOutput: { severity: 'CRITICAL', cvss_score: 9.1, containment_actions: ['isolate_endpoints', 'apply_patch_KB2025-4891', 'notify_cisa'], estimated_exposure: '847 endpoints', notification_draft: 'CISA_FORM_61_DRAFT' }, permissionMode: 'hitl-required', evalPassRate: 0.94, covenantBundle: 'covenant:aegis-clearance', constitutionClause: 'clause-9-security-clearance', source: 'filesystem', chainableWith: ['skill-eval-harness', 'skill-proof-generator', 'skill-approval-router'], triggerKeywords: ['cve', 'threat', 'ioc', 'stix', 'yara', 'apt', 'malware', 'incident'] },
+    { id: 'skill-real-estate-eval', name: 'Real Estate Deal Evaluation', category: 'Real Estate Intelligence', domain: 'DOMAINE', version: '1.9.3', status: 'LIVE', calls: 634, successRate: 0.95, avgLatencyMs: 540, description: 'Evaluates property acquisition, lease-up, and covenant risk using MLS data, comparable transactions, and lender covenant thresholds.', allowedTools: ['property_search', 'lease_comp_analysis', 'market_report'], blockedTools: ['listing_create', 'offer_submit', 'lease_sign'], requiredPolicies: ['human-approval-tier-3', 'connector-default-deny'], evalRequired: true, sampleInput: { asset_id: '45-park-ave', analysis_type: 'covenant_risk', covenant_threshold: 0.85 }, sampleOutput: { occupancy_rate: 0.89, covenant_status: 'COMPLIANT', risk_score: 0.22, recommended_action: 'Continue lease-up — 2 LOIs in negotiation', lease_comp_confidence: 0.91 }, permissionMode: 'hitl-required', evalPassRate: 0.95, covenantBundle: 'covenant:terra-default', source: 'programmatic', chainableWith: ['skill-eval-harness'], triggerKeywords: ['property', 'real estate', 'lease', 'covenant', 'cap rate', 'mls'] },
+    { id: 'skill-procurement-risk', name: 'Procurement Contract Risk', category: 'Procurement Intelligence', domain: 'Enterprise', version: '2.1.0', status: 'LIVE', calls: 412, successRate: 0.93, avgLatencyMs: 470, description: 'Analyzes vendor SLA performance, sanctions screening results, and supply chain dependency to generate procurement risk briefs.', allowedTools: ['vendor_score', 'sla_monitor', 'sanctions_check'], blockedTools: ['vendor_delist', 'contract_terminate', 'payment_block'], requiredPolicies: ['sanctions-screening-required', 'human-approval-tier-3'], evalRequired: true, sampleInput: { vendor_id: 'APEX-SUPPLY-001', sla_breach_days: 12, component_category: 'critical' }, sampleOutput: { risk_level: 'CRITICAL', sla_breach_impact: 'production_halt_risk', recommended_action: 'Renegotiate SLA + onboard secondary vendor', sanctions_status: 'CLEAR', secondary_vendor_recommendations: ['VendorB Corp', 'SupplyChain Plus'] }, permissionMode: 'hitl-required', evalPassRate: 0.93, covenantBundle: 'covenant:procurement-default', source: 'programmatic', chainableWith: ['skill-eval-harness', 'skill-approval-router'], triggerKeywords: ['vendor', 'sla', 'sanctions', 'procurement', 'supply chain'] },
+    { id: 'skill-boardroom-synthesis', name: 'Boardroom Packet Synthesis', category: 'Boardroom Intelligence', domain: 'Enterprise', version: '3.0.1', status: 'LIVE', calls: 89, successRate: 0.99, avgLatencyMs: 1840, description: 'Synthesizes signals, workcells, outcomes, and proof packets into a board-ready executive briefing with MirrorEval scoring.', allowedTools: ['signal_aggregate', 'workcell_summarize', 'proof_retrieve', 'eval_score'], blockedTools: ['board_distribute', 'pdf_email_send'], requiredPolicies: ['human-approval-tier-3', 'proof-chain-required'], evalRequired: true, sampleInput: { tenant_id: 'szl-holdings', period: 'Q2 2026', domains: ['maritime', 'legal', 'revenue'] }, sampleOutput: { packet_id: 'bp-001', eval_composite: 0.94, sections_generated: 4, kpis: 4, proof_ref: 'sha256:c9f2e5b8...', awaiting_approval: true }, permissionMode: 'hitl-required', evalPassRate: 0.99, covenantBundle: 'covenant:executive-tier', constitutionClause: 'clause-1-board-approved', source: 'programmatic', chainableWith: ['skill-eval-harness', 'skill-proof-generator'], triggerKeywords: ['board', 'executive', 'briefing', 'packet', 'quarterly'] },
+    { id: 'skill-eval-harness', name: 'MirrorEval Evaluation Harness', category: 'Governance', domain: 'Core', version: '2.0.4', status: 'LIVE', calls: 5234, successRate: 0.99, avgLatencyMs: 280, description: '14-dimension evaluation harness for all governed actions. Scores groundedness, evidence coverage, action safety, hallucination risk, policy compliance, and more.', allowedTools: ['eval_score', 'evidence_check', 'policy_lookup'], blockedTools: ['eval_override', 'score_modify'], requiredPolicies: ['mirroreval-pass-gate'], evalRequired: false, sampleInput: { workcell_id: 'wc-001', action_brief_id: 'act-001', eval_dimensions: 14 }, sampleOutput: { verdict: 'pass', composite: 0.94, flags: [], blocked: false, dimensions_scored: 14 }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.99, covenantBundle: 'covenant:core-eval', source: 'programmatic', chainableWith: ['skill-proof-generator'], triggerKeywords: ['eval', 'score', 'assess', 'quality', 'hallucination'] },
+    { id: 'skill-proof-generator', name: 'Proof Packet Generator', category: 'Governance', domain: 'Core', version: '1.7.2', status: 'LIVE', calls: 2891, successRate: 0.99, avgLatencyMs: 120, description: 'Generates SHA-256 hash-chained proof packets for every governed action. Immutable, replayable, and verifiable by any audit party.', allowedTools: ['proof_create', 'hash_chain_append', 'evidence_attach'], blockedTools: ['proof_delete', 'hash_modify'], requiredPolicies: ['proof-chain-required'], evalRequired: false, sampleInput: { action_id: 'act-001', evidence_refs: ['sig-vessels-001', 'eval-me-001'], actor: 'VP Operations' }, sampleOutput: { proof_id: 'proof-001', sha256: 'c9f2e5b8a1d3e6f9...', chain_position: 47, immutable: true, replayable: true }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.99, covenantBundle: 'covenant:core-proof', source: 'programmatic', chainableWith: [], triggerKeywords: ['proof', 'audit', 'chain', 'hash', 'evidence'] },
+    { id: 'skill-twin-sync', name: 'Digital Twin Sync Engine', category: 'Data Intelligence', domain: 'Core', version: '2.3.0', status: 'LIVE', calls: 1847, successRate: 0.96, avgLatencyMs: 340, description: 'Continuously synchronizes business digital twins against live connector data. Scores drift, flags anomalies, and triggers workcells when thresholds are crossed.', allowedTools: ['twin_state_read', 'connector_pull', 'drift_score'], blockedTools: ['twin_state_write', 'twin_delete'], requiredPolicies: ['connector-default-deny'], evalRequired: false, sampleInput: { twin_id: 'vessel-twin-001', sync_interval: '5m', drift_threshold: 60 }, sampleOutput: { drift_score: 74, anomaly_detected: true, workcell_triggered: 'wc-vessels-001', last_sync: '2026-04-26T14:28:00Z' }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.96, covenantBundle: 'covenant:core-sync', source: 'programmatic', chainableWith: ['skill-eval-harness'], triggerKeywords: ['twin', 'drift', 'sync', 'digital twin', 'anomaly'] },
+    { id: 'skill-signal-classifier', name: 'Signal Classification & Routing', category: 'Data Intelligence', domain: 'Core', version: '3.1.0', status: 'LIVE', calls: 6201, successRate: 0.98, avgLatencyMs: 95, description: 'Classifies incoming signals by severity, vertical, and action type. Routes to the appropriate skill, workcell, or approval queue.', allowedTools: ['signal_classify', 'routing_lookup', 'severity_score'], blockedTools: ['signal_suppress', 'routing_override'], requiredPolicies: ['no-action-without-approval-above-tier2'], evalRequired: false, sampleInput: { signal_raw: 'ETA deviation detected: VLCC Everest +31h', vertical: 'vessels-maritime' }, sampleOutput: { severity: 'critical', skill_route: 'skill-maritime-risk', approval_tier: 'TIER_3', routed: true }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.98, covenantBundle: 'covenant:core-routing', source: 'programmatic', chainableWith: ['skill-maritime-risk', 'skill-threat-triage'], triggerKeywords: ['signal', 'classify', 'route', 'severity', 'alert'] },
+    { id: 'skill-connector-firewall', name: 'Connector Trust Scorer', category: 'Governance', domain: 'Core', version: '1.4.1', status: 'LIVE', calls: 4127, successRate: 0.99, avgLatencyMs: 45, description: 'Scores connector trust in real-time based on schema validation, consent status, injection patterns, and call history. Gates all tool calls.', allowedTools: ['trust_score', 'schema_validate', 'consent_check'], blockedTools: ['trust_override', 'allowlist_modify'], requiredPolicies: ['connector-default-deny', 'proof-chain-required'], evalRequired: false, sampleInput: { connector_id: 'ais-live-api', tool_call: 'vessel_track', context_hash: 'sha256:a1b2c3' }, sampleOutput: { trust_score: 92, approved: true, injection_detected: false, schema_valid: true, latency_ms: 45 }, permissionMode: 'auto-approve-low-risk', evalPassRate: 0.99, covenantBundle: 'covenant:connector-default', source: 'programmatic', chainableWith: [], triggerKeywords: ['connector', 'trust', 'firewall', 'injection', 'schema'] },
+    { id: 'skill-covenant-checker', name: 'Covenant Policy Checker', category: 'Governance', domain: 'Core', version: '2.2.0', status: 'LIVE', calls: 8903, successRate: 1.0, avgLatencyMs: 32, description: 'Checks every governed action against the full covenant policy set in real-time. Blocks any action that violates policy before execution.', allowedTools: ['policy_lookup', 'covenant_check', 'violation_log'], blockedTools: ['policy_override', 'covenant_disable'], requiredPolicies: [], evalRequired: false, sampleInput: { action_id: 'act-001', policies_to_check: ['human-approval-tier-3', 'sanctions-screening-required', 'proof-chain-required'] }, sampleOutput: { compliant: true, policies_checked: 10, policies_passed: 10, violations: [], blocked: false }, permissionMode: 'read-only', evalPassRate: 1.0, covenantBundle: 'covenant:constitutional', constitutionClause: 'clause-1-no-bypass', source: 'programmatic', chainableWith: [], triggerKeywords: ['covenant', 'policy', 'compliance', 'governance'] },
+    { id: 'skill-approval-router', name: 'Approval Tier Router', category: 'Governance', domain: 'Core', version: '1.8.0', status: 'LIVE', calls: 847, successRate: 0.99, avgLatencyMs: 85, description: 'Routes actions to the correct approval tier based on action impact, domain, and PCE contract configuration. Creates approval requests with full evidence context.', allowedTools: ['approval_create', 'tier_lookup', 'approver_notify'], blockedTools: ['approval_auto_approve', 'tier_downgrade'], requiredPolicies: ['human-approval-tier-3', 'no-action-without-approval-above-tier2'], evalRequired: false, sampleInput: { action_id: 'act-001', estimated_impact: '$2.4M/day', domain: 'maritime' }, sampleOutput: { approval_tier: 'TIER_3', approver: 'VP Operations', approval_id: 'apr-001', status: 'pending', deadline: '2026-04-27T14:00:00Z' }, permissionMode: 'hitl-required', evalPassRate: 0.99, covenantBundle: 'covenant:approval-core', source: 'programmatic', chainableWith: ['skill-proof-generator'], triggerKeywords: ['approval', 'tier', 'gate', 'authorize', 'escalate'] },
+    { id: 'skill-replay-analyst', name: 'Workcell Replay Analyst', category: 'Governance', domain: 'Core', version: '1.5.1', status: 'LIVE', calls: 312, successRate: 0.97, avgLatencyMs: 210, description: 'Reconstructs workcell execution traces from the Proof Ledger for audit, compliance, and failure analysis. Classifies failure types and generates retry recommendations.', allowedTools: ['replay_retrieve', 'proof_read', 'failure_classify'], blockedTools: ['replay_modify', 'trace_delete'], requiredPolicies: ['proof-chain-required'], evalRequired: false, sampleInput: { workcell_id: 'wc-001', replay_depth: 'full' }, sampleOutput: { steps_replayed: 6, outcome: 'success', failure_class: null, proof_integrity: true, duration_ms: 31400 }, permissionMode: 'read-only', evalPassRate: 0.97, covenantBundle: 'covenant:audit-read', source: 'programmatic', chainableWith: [], triggerKeywords: ['replay', 'audit', 'trace', 'reconstruct', 'failure'] },
   ],
 };
 
@@ -60,12 +87,61 @@ const SKILL_RUN_OUTPUTS: Record<string, Record<string, unknown>> = {
 let runCounter = 1000;
 
 export function SkillsLibrary() {
-  const [data] = useState<SkillsData>(SKILLS_DATA);
+  const [data, setData] = useState<SkillsData>(SKILLS_DATA);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Skill | null>(null);
   const [runResult, setRunResult] = useState<Record<string, unknown> | null>(null);
   const [runLoading, setRunLoading] = useState(false);
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/a11oy/skills/v2`);
+        const json = await res.json();
+        if (!cancelled && json.ok && Array.isArray(json.data) && json.data.length > 0) {
+          const skills: Skill[] = json.data.map((s: Record<string, unknown>) => ({
+            id: String(s.skill_id ?? s.id ?? ''),
+            name: String(s.name ?? ''),
+            category: String(s.category ?? 'General'),
+            domain: String(s.category ?? 'Core'),
+            version: String(s.version ?? '1.0.0'),
+            status: 'LIVE',
+            calls: 0,
+            successRate: Number(s.eval_pass_rate ?? 0.95),
+            avgLatencyMs: 200,
+            description: String(s.description ?? ''),
+            allowedTools: (s.allowed_tools as string[]) ?? [],
+            blockedTools: (s.blocked_tools as string[]) ?? [],
+            requiredPolicies: s.covenant_policy_bundle ? [String(s.covenant_policy_bundle)] : [],
+            evalRequired: s.permission_mode === 'hitl-required',
+            sampleInput: {},
+            sampleOutput: {},
+            permissionMode: (s.permission_mode as PermissionMode) ?? 'hitl-required',
+            evalPassRate: Number(s.eval_pass_rate ?? 0.95),
+            covenantBundle: s.covenant_policy_bundle ? String(s.covenant_policy_bundle) : undefined,
+            constitutionClause: s.eligibility_constitution_clause ? String(s.eligibility_constitution_clause) : undefined,
+            source: (s.source as 'filesystem' | 'programmatic') ?? 'programmatic',
+            chainableWith: (s.chainable_with as string[]) ?? [],
+            triggerKeywords: (s.trigger_keywords as string[]) ?? [],
+          }));
+          setData({
+            skills,
+            summary: { total: skills.length, live: skills.length, demo: 0, totalCallsToday: 0 },
+          });
+        }
+      } catch {
+        // Fall back to seed data
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   function runSkill(skill: Skill) {
     setRunLoading(true);
@@ -132,14 +208,20 @@ export function SkillsLibrary() {
                   <StatusPill status={skill.status as 'LIVE' | 'ROADMAP'} />
                 </div>
                 <p className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{skill.description}</p>
-                <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="grid grid-cols-4 gap-2 text-xs">
                   <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>calls</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{skill.calls.toLocaleString()}</div></div>
                   <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>success</div><div style={{ color: '#c9b787' }}>{Math.round(skill.successRate * 100)}%</div></div>
+                  <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>eval pass</div><div style={{ color: '#c9b787' }}>{Math.round(skill.evalPassRate * 100)}%</div></div>
                   <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>latency</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{skill.avgLatencyMs}ms</div></div>
                 </div>
-                {skill.evalRequired && (
-                  <div className="mt-1.5 text-xs" style={{ color: '#8a8a8a' }}>◎ Eval required before action</div>
-                )}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: PM_COLORS[skill.permissionMode] }}>
+                    {PM_LABELS[skill.permissionMode]}
+                  </span>
+                  <span className="text-[10px] font-mono" style={{ color: '#5e5e5e' }}>
+                    {skill.source === 'filesystem' ? '◈ FS' : '◉ PROG'}
+                  </span>
+                </div>
               </Card>
             ))}
           </div>
@@ -150,10 +232,48 @@ export function SkillsLibrary() {
             <>
               <SectionTitle>Skill Detail — {selected.name}</SectionTitle>
               <Card>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="text-xs px-1.5 py-0 rounded" style={{ backgroundColor: `${CAT_COLORS[selected.category] ?? '#5e5e5e'}18`, color: CAT_COLORS[selected.category] ?? '#5e5e5e' }}>{selected.category}</span>
                   <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>v{selected.version}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: PM_COLORS[selected.permissionMode] }}>
+                    {PM_LABELS[selected.permissionMode]}
+                  </span>
+                  <span className="text-[10px] font-mono" style={{ color: '#5e5e5e' }}>
+                    {selected.source === 'filesystem' ? '◈ filesystem' : '◉ programmatic'}
+                  </span>
                 </div>
+                {selected.covenantBundle && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Covenant Bundle</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(176,141,82,0.08)', color: '#b08d52' }}>{selected.covenantBundle}</span>
+                  </div>
+                )}
+                {selected.constitutionClause && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Constitution</span>
+                    <span className="text-[10px] font-mono" style={{ color: '#c9b787' }}>{selected.constitutionClause}</span>
+                  </div>
+                )}
+                {selected.triggerKeywords.length > 0 && (
+                  <div className="mb-2">
+                    <div className="text-[10px] font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Trigger Keywords</div>
+                    <div className="flex flex-wrap gap-1">
+                      {selected.triggerKeywords.map(kw => (
+                        <span key={kw} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'var(--color-a11oy-text-ghost)' }}>{kw}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selected.chainableWith.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-[10px] font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Chainable With</div>
+                    <div className="flex flex-wrap gap-1">
+                      {selected.chainableWith.map(s => (
+                        <span key={s} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: '#c9b787' }}>{s.replace('skill-', '')}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mb-3">
                   <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Allowed Tools</div>

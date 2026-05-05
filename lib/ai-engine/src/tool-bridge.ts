@@ -331,9 +331,95 @@ export async function invokeToolWithGovernance(
   agentId: string,
   toolName: string,
   args: Record<string, unknown>,
+  options: {
+    session_id?: string;
+    permission_mode?: string;
+    trust_tier?: number;
+    plan_id?: string;
+    skill_id?: string;
+    /** Pre-resolved covenant metadata; if omitted we look it up from the skill registry */
+    covenant_metadata?: {
+      allowed_tools?: string[];
+      blocked_tools?: string[];
+      covenant_policy_bundle?: string;
+    };
+  } = {},
 ): Promise<GatewayToolResult> {
   ensureInitialized();
   const t0 = Date.now();
+
+  // Resolve covenant metadata from the active skill so the covenant-policy-gate
+  // hook always has access to allowed_tools / blocked_tools, regardless of
+  // whether the caller passed them explicitly.
+  let covenantMeta = options.covenant_metadata;
+  if (!covenantMeta) {
+    try {
+      const { getAllSkillsV2 } = await import('./skills/skills-v2.js');
+      const allSkills = getAllSkillsV2();
+      // Find a skill applicable to this agent, or use skill_id if provided.
+      const skill = options.skill_id
+        ? allSkills.find(s => s.skill_id === options.skill_id)
+        : allSkills.find(s => s.applicable_agents.includes(agentId) || s.applicable_agents.length === 0);
+      if (skill) {
+        covenantMeta = {
+          allowed_tools: skill.allowed_tools,
+          blocked_tools: skill.blocked_tools,
+          covenant_policy_bundle: skill.covenant_policy_bundle,
+        };
+      }
+    } catch {
+      // Skill lookup failure — covenant gate will apply fail-closed logic
+    }
+  }
+
+  // Fire PreToolUse hooks — covenant policy gate (priority 3), plan-mode gate (5),
+  // trust-tier enforcer (10). A block decision short-circuits tool execution.
+  try {
+    const { executeHooks } = await import('./hooks/index.js');
+    const { decision } = await executeHooks('PreToolUse', {
+      event: 'PreToolUse',
+      session_id: options.session_id ?? `tool-bridge-${Date.now()}`,
+      agent_id: agentId,
+      tool_name: toolName,
+      tool_input: args,
+      plan_id: options.plan_id,
+      permission_mode: options.permission_mode,
+      trust_tier: options.trust_tier,
+      metadata: covenantMeta
+        ? {
+            allowed_tools: covenantMeta.allowed_tools,
+            blocked_tools: covenantMeta.blocked_tools,
+            covenant_policy_bundle: covenantMeta.covenant_policy_bundle,
+            skill_id: options.skill_id,
+            // Signal to covenant gate that we had a skill context — enables fail-closed
+            skill_bound: true,
+          }
+        : {
+            // No skill found — not skill-bound, covenant gate will allow
+            skill_bound: false,
+          },
+    });
+    if (decision.action === 'block') {
+      return {
+        output: JSON.stringify({ error: `Hook blocked: ${decision.reason}`, toolName }),
+        success: false,
+        decisionOutcome: 'hook_block',
+        latencyMs: Date.now() - t0,
+      };
+    }
+  } catch (hookErr) {
+    // Hook executor threw unexpectedly — fail closed: governance must not be bypassed.
+    return {
+      output: JSON.stringify({
+        error: `Governance gate unavailable: ${hookErr instanceof Error ? hookErr.message : String(hookErr)}`,
+        toolName,
+      }),
+      success: false,
+      decisionOutcome: 'governance_error',
+      latencyMs: Date.now() - t0,
+    };
+  }
+
   const gatewayId = AGENT_TOOL_TO_GATEWAY_ID[toolName];
   if (gatewayId) {
     const result = await defaultGateway.invoke(gatewayId, args, {

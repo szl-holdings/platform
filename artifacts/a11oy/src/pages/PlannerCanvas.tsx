@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ActionButton } from '../components/ui';
+import { fetchJson } from './cognitive/shared';
+
+const API_BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/a11oy\/$/, '/api').replace(/\/$/, '');
 
 const T = {
   bg: '#0a0a0a', surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -89,6 +92,9 @@ export function PlannerCanvas() {
   const [stepIdx, setStepIdx] = useState(-1);
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [planLocked, setPlanLocked] = useState(false);
+  const [lockLoading, setLockLoading] = useState(false);
+  const [showDecisionCard, setShowDecisionCard] = useState(false);
 
   const plan = DEMO_PLANS.find(p => p.id === selectedPlan)!;
 
@@ -141,6 +147,46 @@ export function PlannerCanvas() {
 
   const selectedNodeData = selectedNode ? plan.nodes.find(n => n.id === selectedNode) : null;
 
+  async function signAndLock() {
+    setLockLoading(true);
+    try {
+      const agents = [...new Set(plan.nodes.map(n => n.agent))];
+      const createJson = await fetchJson<{ ok: boolean; data: { plan_id: string }; error?: string }>(
+        `${API_BASE}/a11oy/plans`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            name: plan.label,
+            objective: plan.objective,
+            agent_id: agents[0] ?? 'operator',
+            trust_tier: 3,
+            decision_card: {
+              signal: plan.label,
+              context: plan.objective,
+              recommendation: `Execute ${plan.nodes.length}-step plan via ${agents.join(', ')}`,
+              simulation: 'Pre-lock simulation: no side-effecting steps unblocked until signed',
+            },
+          }),
+        },
+      );
+      if (!createJson.ok) throw new Error(createJson.error ?? 'Plan creation failed');
+
+      const planId: string = createJson.data.plan_id;
+
+      const signJson = await fetchJson<{ ok: boolean; error?: string }>(
+        `${API_BASE}/a11oy/plans/${planId}/sign`,
+        { method: 'POST', body: JSON.stringify({ signed_by: 'operator' }) },
+      );
+      if (!signJson.ok) throw new Error(signJson.error ?? 'Plan signing failed');
+
+      setPlanLocked(true);
+    } catch {
+      // Sign failed — leave unlocked so the user can retry
+    } finally {
+      setLockLoading(false);
+    }
+  }
+
   return (
     <Layout>
       <PageHeader
@@ -154,7 +200,7 @@ export function PlannerCanvas() {
         <KpiCard label="DEMO PLANS" value={DEMO_PLANS.length} sub="pre-built" accent={T.accent} />
         <KpiCard label="MAX NODES" value={Math.max(...DEMO_PLANS.map(p => p.nodes.length))} sub="per plan" accent={T.accent} />
         <KpiCard label="PARALLEL PATHS" value="up to 3" sub="concurrent" accent={T.accent} />
-        <KpiCard label="AVG PLAN DEPTH" value="5 layers" sub="typical" accent={T.dim} />
+        <KpiCard label={planLocked ? 'PLAN LOCKED' : 'PLAN STATUS'} value={planLocked ? 'LOCKED' : 'DRAFT'} sub={planLocked ? 'signed & proof-chained' : 'awaiting sign-off'} accent={planLocked ? '#c9b787' : T.dim} />
       </div>
 
       {/* Plan selector */}
@@ -162,7 +208,7 @@ export function PlannerCanvas() {
         {DEMO_PLANS.map(p => (
           <button
             key={p.id}
-            onClick={() => selectPlan(p.id)}
+            onClick={() => { selectPlan(p.id); setPlanLocked(false); setShowDecisionCard(false); }}
             className="px-4 py-2 rounded-lg text-xs font-mono transition-all"
             style={{
               background: selectedPlan === p.id ? `${p.color}18` : T.surface,
@@ -176,17 +222,93 @@ export function PlannerCanvas() {
         ))}
       </div>
 
+      {/* Plan Lock affordance */}
+      <div className="mb-4 p-3 rounded-lg" style={{ background: 'rgba(201,183,135,0.04)', border: `1px solid ${planLocked ? 'rgba(201,183,135,0.25)' : T.border}` }}>
+        <div className="flex items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="text-[9px] font-mono uppercase tracking-widest" style={{ color: T.muted }}>PLAN LOCK</div>
+              {planLocked && (
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>
+                  ◆ SIGNED & LOCKED · proof-plan-{plan.id.slice(0, 8)}
+                </span>
+              )}
+            </div>
+            <div className="text-xs" style={{ color: T.dim }}>
+              {planLocked
+                ? 'Plan is signed and locked. Side-effecting tools are unblocked. Promote to Workcell when ready.'
+                : 'Sign and lock this plan before promoting to Workcell. Hooks will block side-effecting tools until signed.'}
+            </div>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            {!planLocked ? (
+              <button
+                type="button"
+                onClick={signAndLock}
+                disabled={lockLoading}
+                className="text-xs px-3 py-1.5 rounded font-mono transition-colors"
+                style={{
+                  backgroundColor: lockLoading ? 'rgba(201,183,135,0.08)' : 'rgba(201,183,135,0.15)',
+                  color: lockLoading ? T.muted : '#c9b787',
+                  border: '1px solid rgba(201,183,135,0.3)',
+                  cursor: lockLoading ? 'wait' : 'pointer',
+                }}
+              >
+                {lockLoading ? 'SIGNING…' : '◆ SIGN & LOCK PLAN'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setPlanLocked(false); setShowDecisionCard(false); }}
+                className="text-xs px-3 py-1.5 rounded font-mono"
+                style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: T.muted, border: `1px solid ${T.border}` }}
+              >
+                UNLOCK (re-draft)
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowDecisionCard(p => !p)}
+              className="text-xs px-3 py-1.5 rounded font-mono"
+              style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: T.dim, border: `1px solid ${T.border}` }}
+            >
+              {showDecisionCard ? 'HIDE CARD' : 'DECISION CARD'}
+            </button>
+          </div>
+        </div>
+
+        {showDecisionCard && (
+          <div className="mt-3 pt-3 border-t grid grid-cols-2 gap-3" style={{ borderColor: T.border }}>
+            {[
+              { label: 'SIGNAL', value: plan.label, desc: 'Triggering signal / objective' },
+              { label: 'CONTEXT', value: plan.objective, desc: 'Situational context' },
+              { label: 'RECOMMENDATION', value: `Execute ${plan.nodes.length}-step plan via ${[...new Set(plan.nodes.map(n => n.agent))].join(', ')}`, desc: 'Agent recommendation' },
+              { label: 'SIMULATION', value: planLocked ? 'Plan locked — no simulation drift possible' : 'Plan in draft — simulation available pre-lock', desc: 'Pre-lock simulation result' },
+            ].map(({ label, value, desc }) => (
+              <div key={label} className="p-2 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: `1px solid ${T.border}` }}>
+                <div className="text-[10px] font-mono mb-0.5" style={{ color: T.muted }}>{label}</div>
+                <div className="text-[11px] font-medium mb-0.5 leading-snug" style={{ color: T.text }}>{value}</div>
+                <div className="text-[10px]" style={{ color: T.muted }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="mb-4 p-3 rounded-lg flex items-start gap-4" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
         <div className="flex-1">
           <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: T.muted }}>OBJECTIVE</div>
           <p className="text-sm" style={{ color: T.text }}>{plan.objective}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <ActionButton variant="primary" size="sm" onClick={play}>
+          <ActionButton variant="primary" size="sm" onClick={play} disabled={!planLocked || playing}>
             {playing ? '⏸ Pause' : stepIdx < 0 ? '▶ Execute' : '▶ Continue'}
           </ActionButton>
           <ActionButton variant="ghost" size="sm" onClick={reset}>Reset</ActionButton>
         </div>
+        {!planLocked && (
+          <div className="text-[10px] font-mono self-center" style={{ color: T.muted }}>Lock plan to execute</div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">

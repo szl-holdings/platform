@@ -99,26 +99,66 @@ export function WorkcellDetail() {
           <div>
             <SectionTitle>Agent Sequence ({wc.agentSequence.length})</SectionTitle>
             <div className="flex flex-col gap-2">
-              {wc.agentSequence.map((a, i) => (
-                <Card key={i} className="text-xs">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>#{i + 1}</span>
-                        <span className="font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{a.role}</span>
-                        <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>
-                          {a.agentId}
-                        </span>
+              {wc.agentSequence.map((a, i) => {
+                const tierMap: Record<string, { tier: number; mode: string }> = {
+                  'Cascade Navigator': { tier: 3, mode: 'hitl-required' },
+                  'Counsel Sentinel': { tier: 3, mode: 'hitl-required' },
+                  'Guardian': { tier: 3, mode: 'hitl-required' },
+                  'Pipeline Oracle': { tier: 2, mode: 'auto-low-risk' },
+                  'DOMAINE Analyst': { tier: 2, mode: 'auto-low-risk' },
+                };
+                const trust = tierMap[a.role] ?? { tier: 0, mode: 'read-only' };
+                const tierColor = trust.tier === 3 ? '#f5f5f5' : trust.tier === 2 ? '#c9b787' : '#5e5e5e';
+                return (
+                  <Card key={i} className="text-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>#{i + 1}</span>
+                          <span className="font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{a.role}</span>
+                          <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>
+                            {a.agentId}
+                          </span>
+                          <span className="font-mono px-1 py-0.5 rounded text-[10px]" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: tierColor }} title={`Trust tier ${trust.tier}: ${trust.mode}`}>T{trust.tier}</span>
+                        </div>
+                        <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Action: {a.action}</div>
+                        <div className="mt-1 text-[10px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                          mode: <span style={{ color: tierColor }}>{trust.mode}</span>
+                          {' · '}hooks: PreSubagentSpawn · PostSubagentReturn
+                        </div>
                       </div>
-                      <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Action: {a.action}</div>
+                      <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(201,183,135,0.12)' : wc.status === 'running' ? 'rgba(201,183,135,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#c9b787' : wc.status === 'running' ? '#c9b787' : '#5e5e5e' }}>
+                        {wc.status}
+                      </span>
                     </div>
-                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(201,183,135,0.12)' : wc.status === 'running' ? 'rgba(201,183,135,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#c9b787' : wc.status === 'running' ? '#c9b787' : '#5e5e5e' }}>
-                      {wc.status}
-                    </span>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Subagent Spawn Contract */}
+          <div>
+            <SectionTitle>Subagent Spawn Contract</SectionTitle>
+            <Card className="text-xs">
+              <div className="flex flex-col gap-1.5 font-mono">
+                {[
+                  { k: 'subagent_id', v: `${wc.id.slice(0, 12)}-sub-0` },
+                  { k: 'model', v: 'claude-sonnet-4-6' },
+                  { k: 'permission_mode', v: wc.requiresApproval ? 'hitl-required' : 'auto-approve-low-risk' },
+                  { k: 'trust_tier', v: wc.requiresApproval ? '3' : '2' },
+                  { k: 'allowed_tools', v: wc.agentSequence.map(a => a.role.toLowerCase().replace(/\s+/g, '_') + '.*').join(', ') },
+                  { k: 'blocked_tools', v: 'charter_sign, filing_submit, settlement_execute' },
+                  { k: 'parent_proof_id', v: `proof-${wc.pceContractId.slice(0, 12)}` },
+                  { k: 'session_id', v: `sess-${wc.id.slice(4, 12)}` },
+                ].map(row => (
+                  <div key={row.k} className="flex items-start gap-2">
+                    <span className="flex-shrink-0" style={{ color: 'var(--color-a11oy-text-ghost)', minWidth: 140 }}>{row.k}</span>
+                    <span style={{ color: '#c9b787', wordBreak: 'break-all' }}>{row.v}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
 
           {/* MirrorEval */}

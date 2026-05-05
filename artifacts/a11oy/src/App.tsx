@@ -104,6 +104,7 @@ const FabricEcosystemRoadmap = lazy(() => import('./pages/fabric/EcosystemRoadma
 const Verticals = lazy(() => import('./pages/Verticals').then(m => ({ default: m.Verticals })));
 const Outcomes = lazy(() => import('./pages/Outcomes').then(m => ({ default: m.Outcomes })));
 const Memory = lazy(() => import('./pages/Memory').then(m => ({ default: m.Memory })));
+const HookPacks = lazy(() => import('./pages/HookPacks').then(m => ({ default: m.HookPacks })));
 const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools })));
 const Pce = lazy(() => import('./pages/Pce').then(m => ({ default: m.Pce })));
 const Demo = lazy(() => import('./pages/Demo').then(m => ({ default: m.Demo })));
@@ -428,6 +429,7 @@ export default function App() {
         <Route path={`${base}/portfolio-archive`}>
           <WithShell><PortfolioArchive /></WithShell>
         </Route>
+        <Route path={`${base}/governance/hook-packs`} component={HookPacks} />
         <Route path={`${base}/governance`} component={Governance} />
         <Route path={`${base}/agents`} component={Agents} />
         <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />

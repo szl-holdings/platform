@@ -74,6 +74,20 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 7. No model weights are hosted in this repo; all inference is remote.
 8. No secrets are committed; all credentials flow through environment variables.
 
+**Claude Code Doctrine (Task #4253 — May 2026):**
+- **Skills v2:** All skills declare `scope`, `trust_tier_required`, `input_schema`, `output_schema`, `hooks_emitted`, `memory_tier` fields. Registry in `lib/ai-engine/src/skills/`. Sample skill at `docs/a11oy/skills/SAMPLE_SKILL.md`. BFF endpoint: `GET /api/a11oy/skills/v2`.
+- **Hook System:** Lifecycle events (SessionStart, PreToolUse, PostToolUse, PrePromptSubmit, PreSubagentSpawn, PostSubagentReturn, OnError, OnPlanProposed, OnPlanApproved, OnDecisionEmitted, OnProofPacketSealed) with JSON decision contracts (`allow | block | modify | route`). Registry in `lib/ai-engine/src/hooks/index.ts`. Builtin hooks: Plan Mode Gate, Trust Tier Enforcer, Redaction Gate, Proof Sealer, Reward-Hacking Watchdog, Covenant Policy Gate.
+- **SubagentContract:** Every spawned subagent must declare `model`, `allowed_tools`, `blocked_tools`, `permission_mode`, `trust_tier`, `parent_proof_id`, `session_id`. Type in `lib/ai-engine/src/multi-agent-coordinator.ts`.
+- **Trust Tier Ladder:** 0=Read-only, 1=Plan-only, 2=Auto-approve-low-risk, 3=HITL-required, 4=Sovereign-air-gapped. Enforced by Trust Tier Enforcer hook.
+- **Tiered Memory:** Working (ephemeral), Episodic (session-scoped), Semantic (long-term vector). Managed by `lib/ai-engine/src/memory/`. Provenance, sensitivity, freshness tracked per entry.
+- **Plan Lock:** Plans must be signed and locked (`planLocked = true`) before side-effecting tools may execute. Enforced by Plan Mode Gate hook. UI in PlannerCanvas.tsx.
+- **OTel GenAI:** OpenTelemetry GenAI semantic conventions. Spans emitted per model call, subagent spawn, tool use. BFF: `/api/a11oy/otel`.
+- **OPA/Rego:** Policy bundles per hook (`core:trust-tier`, `core:plan-mode`, `core:redaction`, `core:proof-chain`, `core:alignment`). Adapter in `lib/ai-engine/src/opa/`. BFF: `/api/a11oy/rego`.
+- **Reward-Hacking Watchdog:** Detects goal substitution, eval gaming, sycophancy, scope creep. Runs as PostSubagentReturn hook. Source: `lib/ai-engine/src/evals/reward-hacking-watchdog.ts`.
+- **session_id plumbing:** `CoordinatorRunOptions.sessionId` threaded through every SubagentContract and proof chain entry. `CoordinatorRunResult.sessionId` returned on every run. BFF endpoints forward session_id from request headers.
+- **BFF Endpoints:** All doctrine endpoints mounted at `/api/a11oy/*` in `artifacts/api-server/src/routes/a11oy-claude-code-doctrine.ts`.
+- **Research brief:** `docs/a11oy/CLAUDE_CODE_DOCTRINE_RESEARCH.md`.
+
 **Model & Endpoint Policy:**
 - **Primary governed model:** Qwen 3.6-27B Reasoning (`Qwen/Qwen3-27B`).
 - **Endpoint plane:** Hugging Face Inference Endpoint, OpenAI-compatible transport.

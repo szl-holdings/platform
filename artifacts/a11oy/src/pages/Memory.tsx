@@ -1,390 +1,370 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, ActionButton } from '../components/ui';
-import { useApiData } from '../hooks/useApiData';
+import { PageHeader, Card, SectionTitle, KpiCard, ActionButton } from '../components/ui';
 
-const GOLD = '#c9b787';
+const API_BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/a11oy\/$/, '/api').replace(/\/$/, '');
 
-const DEMO_SESSION_MEMORIES = [
-  { id: 'sm-001', key: 'mv_cascade_active_context', value: 'Active voyage: ETA deviation 18h, port standby recommended, demurrage exposure $42K', operator: 'Cascade Navigator', workcell: 'WC-0041', ts: '2026-04-25T04:00:00Z', ttl: '4h', accessCount: 12, provenanceHash: 'sha256:sm01a1', decayScore: 0.92, reinforcementScore: 0.88 },
-  { id: 'sm-002', key: 'talbot_active_deadline', value: 'Discovery deadline T-48h, 340 docs outstanding, escalation pending GC approval', operator: 'Counsel Sentinel', workcell: 'WC-0042', ts: '2026-04-25T02:30:00Z', ttl: '4h', accessCount: 8, provenanceHash: 'sha256:sm02b2', decayScore: 0.85, reinforcementScore: 0.76 },
-  { id: 'sm-003', key: 'tg_ember_active_iocs', value: 'Current IOC set: 3 C2 beacons, 2 lateral movement indicators, 1 exfil pattern', operator: 'Guardian', workcell: 'WC-0043', ts: '2026-04-25T18:42:00Z', ttl: '2h', accessCount: 24, provenanceHash: 'sha256:sm03c3', decayScore: 0.98, reinforcementScore: 0.95 },
-  { id: 'sm-004', key: 'q2_pipeline_snapshot', value: 'Pipeline velocity: 14.1 deals/week (22.5% below baseline), 3 at-risk deals flagged', operator: 'Pipeline Oracle', workcell: 'WC-0044', ts: '2026-04-25T01:00:00Z', ttl: '4h', accessCount: 6, provenanceHash: 'sha256:sm04d4', decayScore: 0.72, reinforcementScore: 0.65 },
-];
-
-const DEMO_BANK_MEMORIES = [
-  { id: 'bm-001', key: 'cascade_delay_pattern', value: 'ETA deviation >30h triggers port standby recommendation. Historical success rate: 88%. 12 prior cases.', operator: 'Cascade Navigator', consolidatedFrom: ['sm-prev-001', 'sm-prev-012', 'sm-prev-023'], consolidatedAt: '2026-04-20T00:00:00Z', proofHash: 'sha256:bm01a1', accessCount: 47, version: 3, decayScore: 0.94, reinforcementScore: 0.91 },
-  { id: 'bm-002', key: 'talbot_opposing_counsel_pattern', value: 'Opposing counsel has filed late 3 of last 5 cases. Early escalation pattern yields 40% better outcomes.', operator: 'Counsel Sentinel', consolidatedFrom: ['sm-prev-002', 'sm-prev-014'], consolidatedAt: '2026-04-18T00:00:00Z', proofHash: 'sha256:bm02b2', accessCount: 23, version: 2, decayScore: 0.88, reinforcementScore: 0.82 },
-  { id: 'bm-003', key: 'tg_ember_fingerprint', value: 'TG-Ember APT: C2 on 443/8080, exfil via DNS-over-HTTPS. YARA rules v4.2 active. 24 prior incidents.', operator: 'Guardian', consolidatedFrom: ['sm-prev-003', 'sm-prev-015', 'sm-prev-027', 'sm-prev-038'], consolidatedAt: '2026-04-22T00:00:00Z', proofHash: 'sha256:bm03c3', accessCount: 92, version: 4, decayScore: 0.97, reinforcementScore: 0.96 },
-  { id: 'bm-004', key: 'plano_cap_rate_model', value: 'Cap rate +18bps over 30d (6.2%). Historical reversal threshold: 6.5%. Comparable: 5.8-6.4% in DFW metro.', operator: 'DOMAINE Analyst', consolidatedFrom: ['sm-prev-006'], consolidatedAt: '2026-04-19T00:00:00Z', proofHash: 'sha256:bm04d4', accessCount: 15, version: 1, decayScore: 0.78, reinforcementScore: 0.68 },
-  { id: 'bm-005', key: 'mirror_eval_baseline', value: 'Global MirrorEval pass rate: 94.2%. Maritime: 96.1%, Legal: 97.4%, Defense: 91.8%, Revenue: 88.4%.', operator: 'Fabric Watchdog', consolidatedFrom: ['sm-prev-007', 'sm-prev-019'], consolidatedAt: '2026-04-21T00:00:00Z', proofHash: 'sha256:bm05e5', accessCount: 34, version: 5, decayScore: 0.95, reinforcementScore: 0.93 },
-];
-
-const RESTRICTED_MEMORIES = [
-  { key: 'talbot_privileged_comms', restriction: 'Attorney-Client Privilege', authority: 'pol-privilege-001', operator: 'Counsel Sentinel', reason: 'Contains privileged attorney-client communications — sealed from non-legal operators' },
-  { key: 'tg_ember_classified_iocs', restriction: 'Classified', authority: 'pol-classification-002', operator: 'Guardian', reason: 'IOC set sourced from classified threat feed — restricted to CISO-approved operators' },
-  { key: 'hr_compensation_model', restriction: 'PII/Sensitive', authority: 'pol-pii-001', operator: 'Pipeline Oracle', reason: 'Contains individual compensation data — PII redacted before bank storage' },
-  { key: 'acquisition_target_valuation', restriction: 'Material Non-Public', authority: 'pol-mnpi-001', operator: 'DOMAINE Analyst', reason: 'Pre-announcement acquisition valuation — MNPI wall enforced' },
-];
-
-const DEMO_CONSOLIDATION_EVENTS = [
-  { id: 'ce-001', from: 'Session Memory (WC-0038)', to: 'Memory Bank', key: 'cascade_delay_pattern', action: 'Merged 3 session observations into bank entry', proofHash: 'sha256:ce01a1', ts: '2026-04-20T00:00:00Z', delta: '+2 cases added to historical record' },
-  { id: 'ce-002', from: 'Session Memory (WC-0039)', to: 'Memory Bank', key: 'tg_ember_fingerprint', action: 'Updated TG-Ember IOC set with 4 new indicators', proofHash: 'sha256:ce02b2', ts: '2026-04-22T00:00:00Z', delta: '+4 IOCs, YARA rules updated to v4.2' },
-  { id: 'ce-003', from: 'Session Memory (WC-0040)', to: 'Memory Bank', key: 'mirror_eval_baseline', action: 'Refreshed baseline metrics from latest eval run', proofHash: 'sha256:ce03c3', ts: '2026-04-21T00:00:00Z', delta: 'Pass rate updated: 94.2% → 94.2% (stable)' },
-  { id: 'ce-004', from: 'Session Memory (WC-0037)', to: 'Memory Bank', key: 'talbot_opposing_counsel_pattern', action: 'Added new late-filing data point', proofHash: 'sha256:ce04d4', ts: '2026-04-18T00:00:00Z', delta: 'Filing pattern updated: 2/4 → 3/5 late' },
-];
-
-const GOVERNANCE_RULES = [
-  { rule: 'No cross-operator memory sharing without Covenant Layer permission', status: 'enforced' },
-  { rule: 'All memory access logged to Proof Ledger', status: 'enforced' },
-  { rule: 'Session memory auto-expires after workcell TTL', status: 'enforced' },
-  { rule: 'Bank consolidation requires proof chain attestation', status: 'enforced' },
-  { rule: 'Memory provenance hash computed on every write', status: 'enforced' },
-  { rule: 'PII/classified data redacted before bank storage', status: 'enforced' },
-  { rule: 'Memory access audit trail retained 90 days', status: 'enforced' },
-];
-
-const DEMO_WORKCELLS = [
-  { id: 'WC-0041', label: 'Horizon Star — Maritime Risk', domain: 'maritime', color: '#8a8a8a' },
-  { id: 'WC-0042', label: 'Talbot — Legal Escalation', domain: 'legal', color: GOLD },
-  { id: 'WC-0043', label: 'TG-Ember — Cyber Incident', domain: 'cyber', color: '#f5f5f5' },
-];
-
-const DEMO_RETRIEVAL_TRACES: Record<string, Array<{ step: string; source: string; size: string; content: string; latency: string }>> = {
-  'WC-0041': [
-    { step: 'Query Session Memory', source: 'Session Layer', size: '12 KB', content: 'Active context: Horizon Star charter party terms, last 4 AIS pings, voyage plan', latency: '3ms' },
-    { step: 'Query Memory Bank', source: 'Bank Layer', size: '48 KB', content: 'Historical ETA deviations for Cascade Navigator (88 records), Port Klang capacity data', latency: '28ms' },
-    { step: 'Retrieve domain schema', source: 'Context Engine', size: '8 KB', content: 'Maritime domain schema v2.3 — vessel entity types, port codes, sanctions lists', latency: '5ms' },
-    { step: 'Inject operator instructions', source: 'Operator Profile', size: '2 KB', content: 'Cascade Navigator: "Always include fuel cost delta in port recommendations"', latency: '1ms' },
-    { step: 'Fetch proof cache', source: 'Proof Cache', size: '4 KB', content: 'OFAC/EU/UN screens cached for Horizon Star — last verified 2h ago', latency: '4ms' },
-    { step: 'Assemble context pack', source: 'Context Engine', size: '74 KB', content: 'Final context pack: 6 sources merged, deduped, ranked by recency × relevance', latency: '12ms' },
-    { step: 'Pack delivered to workcell', source: 'Workcell Engine', size: '74 KB', content: 'Context pack bound to WC-0041 — ready for Cascade Navigator invocation', latency: '2ms' },
-  ],
-  'WC-0042': [
-    { step: 'Query Session Memory', source: 'Session Layer', size: '8 KB', content: 'Active context: Talbot matter metadata, upcoming deadline, assigned attorney', latency: '2ms' },
-    { step: 'Query Memory Bank', source: 'Bank Layer', size: '64 KB', content: 'Talbot full case history: 18 docket entries, 5 filings, opposing counsel track record', latency: '31ms' },
-    { step: 'Retrieve domain schema', source: 'Context Engine', size: '6 KB', content: 'Legal domain schema v1.8 — matter types, deadline rules, motion templates', latency: '4ms' },
-    { step: 'Inject operator instructions', source: 'Operator Profile', size: '3 KB', content: 'Counsel Sentinel: "Flag opposing late pattern, cite minimum 3 precedents"', latency: '1ms' },
-    { step: 'Load docket feed cache', source: 'Proof Cache', size: '2 KB', content: 'Court calendar sync cached — Talbot deadlines confirmed current as of 4h ago', latency: '3ms' },
-    { step: 'Assemble context pack', source: 'Context Engine', size: '83 KB', content: 'Final context pack: 5 sources merged, deadline proximity boost applied', latency: '14ms' },
-    { step: 'Pack delivered to workcell', source: 'Workcell Engine', size: '83 KB', content: 'Context pack bound to WC-0042 — ready for Counsel Sentinel invocation', latency: '2ms' },
-  ],
-  'WC-0043': [
-    { step: 'Query Session Memory', source: 'Session Layer', size: '6 KB', content: 'Active context: SIEM alert #4821, initial IOC match, affected host list', latency: '2ms' },
-    { step: 'Query Memory Bank', source: 'Bank Layer', size: '92 KB', content: 'TG-Ember threat intel: 24 prior incidents, TTPs, C2 infrastructure, YARA rules', latency: '38ms' },
-    { step: 'Retrieve domain schema', source: 'Context Engine', size: '10 KB', content: 'Cyber domain schema v3.1 — STIX/TAXII entity types, MITRE ATT&CK mappings', latency: '6ms' },
-    { step: 'Inject operator instructions', source: 'Operator Profile', size: '2 KB', content: 'Guardian: "Auto-isolate at IOC confidence >0.90 for known APTs"', latency: '1ms' },
-    { step: 'Fetch threat intel cache', source: 'Proof Cache', size: '18 KB', content: 'IOC hashes cached from ISAC feed — TG-Ember C2 list updated 6h ago', latency: '5ms' },
-    { step: 'Assemble context pack', source: 'Context Engine', size: '128 KB', content: 'Final context pack: 5 sources merged — threat intel ranked highest', latency: '18ms' },
-    { step: 'Pack delivered to workcell', source: 'Workcell Engine', size: '128 KB', content: 'Context pack bound to WC-0043 — ready for Guardian invocation', latency: '2ms' },
-  ],
+const T = {
+  bg: '#0a0a0a', surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
+  text: '#f5f5f5', dim: '#8a8a8a', muted: '#5e5e5e', accent: '#c9b787', gold: '#b08d52',
 };
 
-function fmt(ts: string) {
-  try {
-    const d = new Date(ts);
-    const diffH = Math.round((Date.now() - d.getTime()) / 3_600_000);
-    if (diffH < 1) return '<1h ago';
-    if (diffH < 24) return `${diffH}h ago`;
-    return `${Math.round(diffH / 24)}d ago`;
-  } catch { return ts; }
+type MemoryTier = 'org-constitution' | 'project-doctrine' | 'auto-memory';
+
+interface MemoryEntry {
+  id: string;
+  tier: MemoryTier;
+  key: string;
+  content: string;
+  artifact_id?: string;
+  redacted: boolean;
+  redaction_reason?: string;
+  provenance: {
+    written_by_hook?: string;
+    written_on_event?: string;
+    written_for_run?: string;
+    session_id?: string;
+    agent_id?: string;
+  };
+  proof_packet_id?: string;
+  created_at: string;
+  version: number;
 }
 
+
+const TIER_META: Record<MemoryTier, { label: string; color: string; description: string; icon: string }> = {
+  'org-constitution': { label: 'Org Constitution', color: '#b08d52', description: 'Immutable per release. Sourced from mythosDoctrine + Constitution. Cannot be overridden by operators.', icon: '◆' },
+  'project-doctrine': { label: 'Project Doctrine', color: '#c9b787', description: 'Per-artifact CLAUDE.md-style directives. Writable by operators. Versioned.', icon: '◈' },
+  'auto-memory': { label: 'Auto-Memory', color: '#8a8a8a', description: 'Learned, append-only entries written by hooks on PostToolUse / PostSubagentReturn. Redactable with proof entry.', icon: '◉' },
+};
+
+const EVENT_COLORS: Record<string, string> = {
+  SessionStart: '#c9b787',
+  PostToolUse: '#8a8a8a',
+  PostSubagentReturn: '#8a8a8a',
+  PrePromptSubmit: '#f5f5f5',
+  manual: '#c9b787',
+};
+
 export function Memory() {
-  const { data, loading, error } = useApiData<{ sessionMemories: typeof DEMO_SESSION_MEMORIES; bankMemories: typeof DEMO_BANK_MEMORIES; consolidationEvents: typeof DEMO_CONSOLIDATION_EVENTS; retrievalTraces: typeof DEMO_RETRIEVAL_TRACES }>('/pages/memory', { sessionMemories: DEMO_SESSION_MEMORIES, bankMemories: DEMO_BANK_MEMORIES, consolidationEvents: DEMO_CONSOLIDATION_EVENTS, retrievalTraces: DEMO_RETRIEVAL_TRACES });
-  const [activeTab, setActiveTab] = useState<'vault' | 'consolidation' | 'trace' | 'governance'>('vault');
-  const [memoryLayer, setMemoryLayer] = useState<'session' | 'bank'>('session');
-  const [selectedWorkcell, setSelectedWorkcell] = useState<string>(DEMO_WORKCELLS[0].id);
-  const [traceStep, setTraceStep] = useState(-1);
-  const [traceRunning, setTraceRunning] = useState(false);
+  const [activeTier, setActiveTier] = useState<MemoryTier | 'all'>('all');
+  const [selectedEntry, setSelectedEntry] = useState<MemoryEntry | null>(null);
+  const [showRedacted, setShowRedacted] = useState(false);
+  const [redactPending, setRedactPending] = useState<string | null>(null);
+  const [allEntries, setAllEntries] = useState<MemoryEntry[]>([]);
+  const [tierStats, setTierStats] = useState<{ org_constitution: { count: number }; project_doctrine: { count: number }; auto_memory: { count: number; redacted: number } } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!data) {
-    return (
-      <Layout>
-        <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '0.8rem', color: loading ? '#c9b787' : '#ef4444' }}>
-          {loading ? 'Loading memory fabric…' : (error ?? 'Failed to load memory data')}
-        </div>
-      </Layout>
-    );
-  }
-
-  const SESSION_MEMORIES = data.sessionMemories;
-  const BANK_MEMORIES = data.bankMemories;
-  const CONSOLIDATION_EVENTS = data.consolidationEvents;
-  const RETRIEVAL_TRACES = data.retrievalTraces;
-  const wc = DEMO_WORKCELLS.find(w => w.id === selectedWorkcell)!;
-  const traceSteps = RETRIEVAL_TRACES[selectedWorkcell] ?? [];
-
-  function runTrace() {
-    setTraceStep(-1);
-    setTraceRunning(true);
-    let i = 0;
-    const tick = setInterval(() => {
-      setTraceStep(i);
-      i++;
-      if (i >= traceSteps.length) {
-        clearInterval(tick);
-        setTraceRunning(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const [entriesRes, tiersRes] = await Promise.all([
+          fetch(`${API_BASE}/a11oy/memory/entries?limit=200&artifact_id=a11oy`),
+          fetch(`${API_BASE}/a11oy/memory/tiers`),
+        ]);
+        const [entriesJson, tiersJson] = await Promise.all([entriesRes.json(), tiersRes.json()]);
+        if (!cancelled) {
+          if (entriesJson.ok && Array.isArray(entriesJson.data)) {
+            setAllEntries(entriesJson.data as MemoryEntry[]);
+          }
+          if (tiersJson.ok && tiersJson.data) {
+            setTierStats(tiersJson.data);
+          }
+        }
+      } catch {
+        // Silently fall back to seed data already in state
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    }, 600);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const filtered = allEntries.filter(e => {
+    if (activeTier !== 'all' && e.tier !== activeTier) return false;
+    if (!showRedacted && e.redacted) return false;
+    return true;
+  });
+
+  const autoEntries = allEntries.filter(e => e.tier === 'auto-memory');
+  const autoTotal = tierStats?.auto_memory?.count ?? autoEntries.length;
+  const autoRedacted = tierStats?.auto_memory?.redacted ?? autoEntries.filter(e => e.redacted).length;
+  const constitutionCount = tierStats?.org_constitution?.count ?? allEntries.filter(e => e.tier === 'org-constitution').length;
+  const doctrineCount = tierStats?.project_doctrine?.count ?? allEntries.filter(e => e.tier === 'project-doctrine').length;
+
+  async function handleRedact(id: string) {
+    setRedactPending(id);
+    try {
+      const res = await fetch(`${API_BASE}/a11oy/memory/redact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, reason: 'Operator redaction request' }),
+      });
+      if (res.ok) {
+        setAllEntries(prev => prev.map(e => e.id === id ? { ...e, redacted: true, content: '[REDACTED]', redaction_reason: 'Operator redaction request' } : e));
+        if (selectedEntry?.id === id) setSelectedEntry(null);
+      }
+    } finally {
+      setRedactPending(null);
+    }
   }
 
   return (
     <Layout>
       <PageHeader
-        label="GOVERNED MEMORY VAULT"
-        title="Two-Layer Memory Architecture"
-        subtitle="Session Memory (ephemeral, per-workcell) + Memory Bank (persistent, consolidated). Every memory write is provenance-tracked, every consolidation is proof-attested, every access is governed."
+        label="TIERED MEMORY"
+        title="Three-Tier Memory Architecture"
+        subtitle="Every memory entry is sourced, versioned, and proof-chained. Org constitution is immutable. Project doctrine is operator-controlled. Auto-memory is hook-written and redactable."
         status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="SESSION ENTRIES" value={SESSION_MEMORIES.length} sub="active workcells" accent={GOLD} />
-        <KpiCard label="BANK ENTRIES" value={BANK_MEMORIES.length} sub="persistent knowledge" accent={GOLD} />
-        <KpiCard label="CONSOLIDATIONS" value={CONSOLIDATION_EVENTS.length} sub="proof-attested" accent="#22c55e" />
-        <KpiCard label="GOVERNANCE" value={`${GOVERNANCE_RULES.length}/${GOVERNANCE_RULES.length}`} sub="all enforced" accent="#22c55e" />
+        <KpiCard label="CONSTITUTION" value={loading ? '…' : String(constitutionCount)} sub="immutable entries" accent={T.gold} />
+        <KpiCard label="DOCTRINE" value={loading ? '…' : String(doctrineCount)} sub="operator-controlled" accent={T.accent} />
+        <KpiCard label="AUTO-MEMORY" value={loading ? '…' : String(autoTotal - autoRedacted)} sub="hook-written" accent={T.dim} />
+        <KpiCard label="REDACTED" value={loading ? '…' : String(autoRedacted)} sub="with proof entry" accent={T.muted} />
       </div>
 
-      <div className="flex gap-1 mb-6">
-        {(['vault', 'consolidation', 'trace', 'governance'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className="px-4 py-2 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all" style={{ background: activeTab === tab ? 'rgba(201,183,135,0.1)' : 'transparent', color: activeTab === tab ? GOLD : '#5e5e5e', border: `1px solid ${activeTab === tab ? 'rgba(201,183,135,0.2)' : 'transparent'}`, cursor: 'pointer' }}>
-            {tab === 'vault' ? 'Memory Vault' : tab === 'consolidation' ? 'Consolidation' : tab === 'trace' ? 'Retrieval Trace' : 'Governance'}
-          </button>
+      {/* Tier overview */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {(Object.entries(TIER_META) as [MemoryTier, typeof TIER_META[MemoryTier]][]).map(([tier, meta]) => (
+          <div
+            key={tier}
+            className="p-3 rounded border cursor-pointer transition-colors"
+            style={{
+              borderColor: activeTier === tier ? meta.color : T.border,
+              backgroundColor: activeTier === tier ? `${meta.color}08` : T.surface,
+            }}
+            onClick={() => setActiveTier(activeTier === tier ? 'all' : tier)}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span style={{ color: meta.color }}>{meta.icon}</span>
+              <span className="text-xs font-medium" style={{ color: T.text }}>{meta.label}</span>
+            </div>
+            <p className="text-[10px] leading-relaxed" style={{ color: T.muted }}>{meta.description}</p>
+          </div>
         ))}
       </div>
 
-      {activeTab === 'vault' && (
-        <>
-          <div className="flex gap-2 mb-4">
-            {(['session', 'bank'] as const).map(l => (
-              <button key={l} onClick={() => setMemoryLayer(l)} className="text-xs px-3 py-1.5 rounded-lg font-mono" style={{ backgroundColor: memoryLayer === l ? 'rgba(201,183,135,0.12)' : 'var(--color-a11oy-muted)', color: memoryLayer === l ? GOLD : 'var(--color-a11oy-text-ghost)', border: `1px solid ${memoryLayer === l ? 'rgba(201,183,135,0.3)' : 'transparent'}`, cursor: 'pointer' }}>
-                {l === 'session' ? 'Session Memory' : 'Memory Bank'}
+      <div className="flex items-center justify-between mb-4">
+        <SectionTitle>{activeTier === 'all' ? 'All Entries' : TIER_META[activeTier].label} — {filtered.length} shown</SectionTitle>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showRedacted}
+              onChange={e => setShowRedacted(e.target.checked)}
+              className="w-3 h-3"
+            />
+            <span className="text-[11px]" style={{ color: T.muted }}>Show redacted</span>
+          </label>
+          <div className="flex gap-1">
+            {(['all', 'org-constitution', 'project-doctrine', 'auto-memory'] as const).map(t => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setActiveTier(t)}
+                className="text-[10px] font-mono px-2 py-0.5 rounded transition-colors"
+                style={{
+                  backgroundColor: activeTier === t ? 'rgba(201,183,135,0.15)' : 'rgba(255,255,255,0.04)',
+                  color: activeTier === t ? T.accent : T.muted,
+                }}
+              >
+                {t === 'all' ? 'ALL' : TIER_META[t].label.split(' ')[0]?.toUpperCase()}
               </button>
             ))}
           </div>
+        </div>
+      </div>
 
-          {memoryLayer === 'session' && (
-            <>
-              <SectionTitle>Session Memory — Ephemeral ({SESSION_MEMORIES.length})</SectionTitle>
-              <div className="rounded-lg border overflow-hidden" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
-                      {['Key', 'Value', 'Operator', 'Workcell', 'TTL', 'Decay', 'Reinf.', 'Provenance'].map(h => (
-                        <th key={h} className="text-left px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {SESSION_MEMORIES.map((e, i) => (
-                      <tr key={e.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
-                        <td className="px-3 py-2 font-mono" style={{ color: '#b08d52', maxWidth: 140 }}><div className="truncate">{e.key}</div></td>
-                        <td className="px-3 py-2" style={{ color: 'var(--color-a11oy-text-sub)', maxWidth: 260 }}><div className="truncate">{e.value}</div></td>
-                        <td className="px-3 py-2 whitespace-nowrap" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.operator}</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: GOLD }}>{e.workcell}</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.ttl}</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: e.decayScore >= 0.9 ? '#22c55e' : e.decayScore >= 0.75 ? GOLD : '#ef4444' }}>{Math.round(e.decayScore * 100)}%</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: e.reinforcementScore >= 0.85 ? '#22c55e' : e.reinforcementScore >= 0.7 ? GOLD : '#ef4444' }}>{Math.round(e.reinforcementScore * 100)}%</td>
-                        <td className="px-3 py-2 font-mono" style={{ color: '#22c55e', fontSize: 9 }}>{e.provenanceHash.slice(0, 16)}…</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-                Session memory is ephemeral — scoped to a single workcell execution and auto-expires after TTL. No cross-workcell leakage.
-              </div>
-            </>
-          )}
-
-          {memoryLayer === 'bank' && (
-            <>
-              <SectionTitle>Memory Bank — Persistent ({BANK_MEMORIES.length})</SectionTitle>
-              <div className="flex flex-col gap-3">
-                {BANK_MEMORIES.map(e => (
-                  <Card key={e.id}>
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div>
-                        <div className="font-mono text-sm font-semibold" style={{ color: '#b08d52' }}>{e.key}</div>
-                        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.operator} · v{e.version} · {e.accessCount} accesses</div>
-                      </div>
-                      <div className="text-[9px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)' }}>PERSISTENT</div>
-                    </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)' }}>{e.value}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[9px] mb-2">
-                      <div className="flex items-center gap-2"><span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Decay:</span><span className="font-mono" style={{ color: e.decayScore >= 0.9 ? '#22c55e' : GOLD }}>{Math.round(e.decayScore * 100)}%</span></div>
-                      <div className="flex items-center gap-2"><span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Reinforcement:</span><span className="font-mono" style={{ color: e.reinforcementScore >= 0.85 ? '#22c55e' : GOLD }}>{Math.round(e.reinforcementScore * 100)}%</span></div>
-                    </div>
-                    <div className="flex items-center gap-3 text-[9px]">
-                      <span className="font-mono" style={{ color: '#22c55e' }}>{e.proofHash}</span>
-                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Consolidated from {e.consolidatedFrom.length} sessions</span>
-                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{fmt(e.consolidatedAt)}</span>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      {activeTab === 'consolidation' && (
-        <>
-          <SectionTitle>Consolidation Proof Chain ({CONSOLIDATION_EVENTS.length})</SectionTitle>
-          <div className="flex flex-col gap-0">
-            {CONSOLIDATION_EVENTS.map((ce, idx) => {
-              const isLast = idx === CONSOLIDATION_EVENTS.length - 1;
-              return (
-                <div key={ce.id} className="relative flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10" style={{ backgroundColor: 'rgba(34,197,94,0.1)', border: '2px solid #22c55e', color: '#22c55e', fontSize: 10, fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}>{idx + 1}</div>
-                    {!isLast && <div className="w-0.5 flex-1 my-1" style={{ backgroundColor: 'rgba(255,255,255,0.06)', minHeight: 20 }} />}
-                  </div>
-                  <div className="flex-1 pb-4">
-                    <Card>
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div>
-                          <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{ce.key}</div>
-                          <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{ce.from} → {ce.to}</div>
-                        </div>
-                        <div className="text-[9px] font-mono" style={{ color: '#22c55e' }}>{ce.proofHash}</div>
-                      </div>
-                      <p className="text-xs mb-1" style={{ color: 'var(--color-a11oy-text-sub)' }}>{ce.action}</p>
-                      <div className="text-xs font-mono" style={{ color: GOLD }}>{ce.delta}</div>
-                      <div className="text-[9px] mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{fmt(ce.ts)}</div>
-                    </Card>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {activeTab === 'trace' && (
-        <>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {DEMO_WORKCELLS.map(w => (
-              <button key={w.id} onClick={() => { setSelectedWorkcell(w.id); setTraceStep(-1); setTraceRunning(false); }} className="px-4 py-2 rounded-lg text-xs font-mono transition-all" style={{ background: selectedWorkcell === w.id ? `${w.color}18` : 'rgba(255,255,255,0.025)', border: `1px solid ${selectedWorkcell === w.id ? w.color + '40' : 'rgba(255,255,255,0.08)'}`, color: selectedWorkcell === w.id ? w.color : '#5e5e5e', cursor: 'pointer' }}>
-                {w.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex-1 p-3 rounded-lg text-xs" style={{ background: `${wc.color}08`, border: `1px solid ${wc.color}20` }}>
-              <span style={{ color: wc.color }}>Workcell: {wc.id}</span>
-              <span className="ml-3" style={{ color: '#5e5e5e' }}>{wc.domain} domain</span>
-            </div>
-            <ActionButton variant="primary" size="sm" onClick={runTrace} disabled={traceRunning}>
-              {traceRunning ? '⟳ Assembling…' : traceStep >= 0 ? '↺ Re-trace' : '▶ Run Retrieval Trace'}
-            </ActionButton>
-          </div>
-
-          <div className="rounded-lg overflow-hidden" style={{ background: '#050505', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: '#5e5e5e' }}>Context Assembly Trace — {traceSteps.length} steps</span>
-              {traceStep >= 0 && (
-                <span className="text-[9px] font-mono" style={{ color: GOLD }}>
-                  {traceSteps.slice(0, traceStep + 1).reduce((a, s) => a + parseInt(s.size), 0)} KB assembled
-                </span>
-              )}
-            </div>
-            <div className="p-4 flex flex-col gap-2">
-              {traceSteps.map((step, i) => {
-                const isActive = traceStep === i;
-                const isDone = traceStep > i;
-                return (
-                  <div key={i}>
-                    <motion.div className="rounded-lg p-3" style={{ background: isActive ? `${wc.color}12` : isDone ? 'rgba(255,255,255,0.02)' : 'transparent', border: `1px solid ${isActive ? wc.color + '40' : isDone ? 'rgba(255,255,255,0.06)' : 'transparent'}`, opacity: traceStep >= 0 && !isActive && !isDone ? 0.35 : 1, transition: 'all 0.3s ease' }}>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-mono font-bold flex-shrink-0" style={{ background: (isActive || isDone) ? `${wc.color}20` : 'rgba(255,255,255,0.04)', border: `1px solid ${(isActive || isDone) ? wc.color + '50' : 'rgba(255,255,255,0.08)'}`, color: (isActive || isDone) ? wc.color : '#5e5e5e' }}>
-                          {isDone ? '✓' : i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-[10px] font-medium" style={{ color: (isActive || isDone) ? '#f5f5f5' : '#5e5e5e' }}>{step.step}</span>
-                            <span className="text-[9px] font-mono px-1 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', color: '#5e5e5e' }}>{step.source}</span>
-                          </div>
-                          <AnimatePresence>
-                            {(isActive || isDone) && (
-                              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-[10px] mt-1" style={{ color: '#8a8a8a' }}>
-                                {step.content}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                        {(isActive || isDone) && (
-                          <div className="text-right flex-shrink-0 text-[9px]">
-                            <div className="font-mono" style={{ color: wc.color }}>{step.size}</div>
-                            <div style={{ color: '#5e5e5e' }}>{step.latency}</div>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                    {i < traceSteps.length - 1 && (
-                      <div className="flex justify-start ml-3 my-0.5">
-                        <div className="w-px h-2" style={{ background: isDone ? `${wc.color}30` : 'rgba(255,255,255,0.06)' }} />
-                      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Entry list */}
+        <div className="lg:col-span-2 flex flex-col gap-2">
+          {filtered.map(entry => {
+            const meta = TIER_META[entry.tier];
+            return (
+              <div
+                key={entry.id}
+                className="p-3 rounded border cursor-pointer transition-colors"
+                style={{
+                  borderColor: selectedEntry?.id === entry.id ? meta.color : T.border,
+                  backgroundColor: selectedEntry?.id === entry.id ? `${meta.color}06` : T.surface,
+                  opacity: entry.redacted ? 0.7 : 1,
+                }}
+                onClick={() => setSelectedEntry(selectedEntry?.id === entry.id ? null : entry)}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono" style={{ color: meta.color }}>{meta.icon} {meta.label}</span>
+                    {entry.artifact_id && (
+                      <span className="text-[10px] font-mono px-1.5 py-0 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: T.dim }}>{entry.artifact_id}</span>
+                    )}
+                    {entry.redacted && (
+                      <span className="text-[10px] font-mono px-1.5 py-0 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.06)', color: '#f5f5f5' }}>REDACTED</span>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      {activeTab === 'governance' && (
-        <>
-          <SectionTitle>Memory Governance Panel</SectionTitle>
-          <Card>
-            <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: GOLD }}>MEMORY ACCESS POLICY</div>
-            <div className="space-y-2">
-              {GOVERNANCE_RULES.map((r, i) => (
-                <div key={i} className="flex items-center justify-between text-xs p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
-                  <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.rule}</span>
-                  <span className="font-mono flex-shrink-0" style={{ color: '#22c55e' }}>{r.status}</span>
+                  <span className="text-[10px] font-mono" style={{ color: T.muted }}>v{entry.version}</span>
                 </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="mt-4">
-            <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: '#ef4444' }}>POLICY-RESTRICTED MEMORIES</div>
-            <div className="space-y-2">
-              {RESTRICTED_MEMORIES.map((rm, i) => (
-                <div key={i} className="rounded-lg p-3" style={{ backgroundColor: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.12)' }}>
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="text-xs font-mono font-semibold" style={{ color: '#ef4444' }}>{rm.key}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)' }}>{rm.restriction}</span>
-                  </div>
-                  <p className="text-[10px] mb-1" style={{ color: 'var(--color-a11oy-text-sub)' }}>{rm.reason}</p>
-                  <div className="flex items-center gap-3 text-[9px]">
-                    <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{rm.operator}</span>
-                    <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{rm.authority}</span>
-                  </div>
+                <div className="text-xs font-mono mb-1" style={{ color: T.accent }}>{entry.key}</div>
+                <div className="text-xs leading-relaxed" style={{ color: entry.redacted ? T.muted : T.dim }}>
+                  {entry.content.length > 120 ? `${entry.content.slice(0, 120)}…` : entry.content}
                 </div>
-              ))}
+                {entry.redacted && entry.redaction_reason && (
+                  <div className="text-[10px] mt-1" style={{ color: '#5e5e5e' }}>{entry.redaction_reason}</div>
+                )}
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="p-6 text-center rounded border" style={{ borderColor: T.border, color: T.muted }}>
+              No entries match the current filter.
             </div>
-          </Card>
+          )}
+        </div>
 
-          <Card className="mt-4">
-            <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: GOLD }}>MEMORY ARCHITECTURE</div>
-            <div className="grid sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
-                <div className="font-semibold mb-1" style={{ color: GOLD }}>Session Memory (Layer 1)</div>
-                <p style={{ color: 'var(--color-a11oy-text-sub)' }}>Ephemeral, per-workcell context. Auto-expires after TTL. No cross-workcell leakage. Every read/write provenance-hashed.</p>
+        {/* Detail panel */}
+        <div className="flex flex-col gap-3">
+          {selectedEntry ? (
+            <>
+              <SectionTitle>Entry Detail</SectionTitle>
+              <div className="p-3 rounded border" style={{ borderColor: T.border, backgroundColor: T.surface }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] font-mono" style={{ color: TIER_META[selectedEntry.tier].color }}>
+                    {TIER_META[selectedEntry.tier].icon} {TIER_META[selectedEntry.tier].label}
+                  </span>
+                  <span className="text-[10px] font-mono" style={{ color: T.muted }}>v{selectedEntry.version}</span>
+                </div>
+
+                <div className="text-xs font-mono mb-2" style={{ color: T.accent }}>{selectedEntry.key}</div>
+                <div className="text-xs leading-relaxed mb-4" style={{ color: T.dim }}>{selectedEntry.content}</div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="text-[10px] font-mono uppercase mb-1" style={{ color: T.muted }}>Provenance</div>
+                  {selectedEntry.provenance.written_by_hook && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Hook</span>
+                      <span className="text-[10px] font-mono" style={{ color: T.dim }}>{selectedEntry.provenance.written_by_hook}</span>
+                    </div>
+                  )}
+                  {selectedEntry.provenance.written_on_event && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Event</span>
+                      <span className="text-[10px] font-mono" style={{ color: EVENT_COLORS[selectedEntry.provenance.written_on_event] ?? T.dim }}>
+                        {selectedEntry.provenance.written_on_event}
+                      </span>
+                    </div>
+                  )}
+                  {selectedEntry.provenance.agent_id && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Agent</span>
+                      <span className="text-[10px] font-mono" style={{ color: T.dim }}>{selectedEntry.provenance.agent_id}</span>
+                    </div>
+                  )}
+                  {selectedEntry.provenance.session_id && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Session</span>
+                      <span className="text-[10px] font-mono" style={{ color: T.dim }}>{selectedEntry.provenance.session_id}</span>
+                    </div>
+                  )}
+                  {selectedEntry.provenance.written_for_run && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Run</span>
+                      <span className="text-[10px] font-mono" style={{ color: T.dim }}>{selectedEntry.provenance.written_for_run}</span>
+                    </div>
+                  )}
+                  {selectedEntry.proof_packet_id && (
+                    <div className="flex justify-between">
+                      <span className="text-[10px]" style={{ color: T.muted }}>Proof</span>
+                      <span className="text-[10px] font-mono" style={{ color: T.accent }}>{selectedEntry.proof_packet_id}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] font-mono mb-3" style={{ color: T.muted }}>
+                  <span>{new Date(selectedEntry.created_at).toLocaleDateString()}</span>
+                  {selectedEntry.artifact_id && <span>artifact: {selectedEntry.artifact_id}</span>}
+                </div>
+
+                {selectedEntry.tier === 'auto-memory' && !selectedEntry.redacted && (
+                  <button
+                    type="button"
+                    onClick={() => handleRedact(selectedEntry.id)}
+                    disabled={redactPending === selectedEntry.id}
+                    className="w-full text-[11px] font-mono py-1.5 rounded transition-colors"
+                    style={{
+                      backgroundColor: 'rgba(245,245,245,0.05)',
+                      color: redactPending === selectedEntry.id ? T.muted : '#f5f5f5',
+                      border: '1px solid rgba(245,245,245,0.15)',
+                    }}
+                  >
+                    {redactPending === selectedEntry.id ? 'REDACTING… (covenant gate)' : 'REDACT ENTRY'}
+                  </button>
+                )}
+                {selectedEntry.tier === 'org-constitution' && (
+                  <div className="text-[10px] text-center py-1.5 rounded" style={{ backgroundColor: 'rgba(176,141,82,0.06)', color: T.gold, border: '1px solid rgba(176,141,82,0.15)' }}>
+                    IMMUTABLE — constitutional entry cannot be modified
+                  </div>
+                )}
               </div>
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)' }}>
-                <div className="font-semibold mb-1" style={{ color: '#22c55e' }}>Memory Bank (Layer 2)</div>
-                <p style={{ color: 'var(--color-a11oy-text-sub)' }}>Persistent, versioned knowledge. Consolidated from session observations via proof-attested pipeline. Domain-scoped access control.</p>
+            </>
+          ) : (
+            <>
+              <SectionTitle>Governance Rules</SectionTitle>
+              <div className="p-3 rounded border" style={{ borderColor: T.border, backgroundColor: T.surface }}>
+                {[
+                  'No cross-operator memory sharing without Covenant Layer permission',
+                  'All memory access logged to Proof Ledger',
+                  'Auto-memory entries written only by registered hooks',
+                  'Org-constitution tier immutable per release',
+                  'Memory provenance hash computed on every write',
+                  'PII/classified data redacted before auto-memory storage',
+                  'Memory access audit trail retained 90 days',
+                  'Redaction action requires covenant policy gate pass',
+                ].map(rule => (
+                  <div key={rule} className="flex items-start gap-2 py-1.5 border-b last:border-0" style={{ borderColor: T.border }}>
+                    <span className="text-[10px] mt-0.5 shrink-0" style={{ color: T.accent }}>✓</span>
+                    <span className="text-[11px]" style={{ color: T.dim }}>{rule}</span>
+                  </div>
+                ))}
               </div>
-            </div>
-          </Card>
-        </>
-      )}
+
+              <SectionTitle>Tier Comparison</SectionTitle>
+              <div className="rounded border overflow-hidden" style={{ borderColor: T.border }}>
+                <div className="grid grid-cols-3 gap-0 text-[10px] font-mono">
+                  {[
+                    ['Property', 'Org Constitution', 'Project Doctrine', 'Auto-Memory'],
+                    ['Writable by', 'Release system', 'Operators', 'Hooks only'],
+                    ['Redactable', 'No', 'No (versioned)', 'Yes + proof'],
+                    ['Scope', 'All artifacts', 'Per-artifact', 'Per-session'],
+                    ['Source', 'mythosDoctrine', 'CLAUDE.md-style', 'PostToolUse hook'],
+                    ['Audit', 'Immutable', 'Versioned', 'Proof-chained'],
+                  ].map((row, i) => (
+                    <div key={i} className="contents">
+                      {row.map((cell, j) => (
+                        <div
+                          key={j}
+                          className="p-2 border-b border-r last:border-r-0"
+                          style={{
+                            borderColor: T.border,
+                            backgroundColor: i === 0 ? 'rgba(255,255,255,0.04)' : 'transparent',
+                            color: i === 0 ? T.dim : j === 0 ? T.muted : T.dim,
+                            fontWeight: i === 0 || j === 0 ? '500' : '400',
+                          }}
+                        >
+                          {cell}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }

@@ -204,6 +204,42 @@ export function Governance() {
         </div>
 
         <div>
+          <SectionTitle>Trust Tier Ladder</SectionTitle>
+          <div className="flex flex-col gap-1.5 mb-6">
+            {[
+              { tier: 0, label: 'Read-only', description: 'Knowledge retrieval and analysis only. No tool calls with side effects permitted.', subagentClasses: ['retrieval', 'rag', 'search'], active: false },
+              { tier: 1, label: 'Plan-only', description: 'May draft plans and call read tools. Side-effecting tools blocked until plan is signed and locked.', subagentClasses: ['planning', 'analysis'], active: false },
+              { tier: 2, label: 'Auto-approve-low-risk', description: 'Low-risk actions approved automatically. High-risk actions gated to HITL queue.', subagentClasses: ['pipeline-oracle', 'domaine'], active: true },
+              { tier: 3, label: 'HITL-required', description: 'Every material action requires human-in-the-loop approval. All governed actions covenant-gated.', subagentClasses: ['cascade-navigator', 'counsel-sentinel', 'guardian'], active: true },
+              { tier: 4, label: 'Sovereign / Air-gapped', description: 'No external API calls. All actions air-gapped and operator-supervised. Evidence-sealed outputs only.', subagentClasses: ['sovereign-sentinel'], active: false },
+            ].map(row => (
+              <div
+                key={row.tier}
+                className="p-3 rounded border"
+                style={{
+                  borderColor: row.active ? 'rgba(201,183,135,0.25)' : 'rgba(255,255,255,0.06)',
+                  backgroundColor: row.active ? 'rgba(201,183,135,0.04)' : 'transparent',
+                }}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: row.active ? '#c9b787' : '#5e5e5e' }}>
+                      TIER {row.tier}
+                    </span>
+                    <span className="text-xs font-medium" style={{ color: row.active ? 'var(--color-a11oy-text)' : 'var(--color-a11oy-text-ghost)' }}>{row.label}</span>
+                  </div>
+                  {row.active && <span className="text-[10px] font-mono" style={{ color: '#c9b787' }}>ACTIVE</span>}
+                </div>
+                <div className="text-[11px] mb-1.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{row.description}</div>
+                <div className="flex flex-wrap gap-1">
+                  {row.subagentClasses.map(sc => (
+                    <span key={sc} className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'var(--color-a11oy-text-ghost)' }}>{sc}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
           <SectionTitle>Covenant Simulator</SectionTitle>
           <Card>
             <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>

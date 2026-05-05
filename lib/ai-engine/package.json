@@ -52,7 +52,14 @@
     "./tool-bridge": "./src/tool-bridge.ts",
     "./data-fabric": "./src/data-fabric/index.ts",
     "./passport-resolver": "./src/passport-resolver.ts",
-    "./model-registry": "./src/model-registry.ts"
+    "./model-registry": "./src/model-registry.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./skills/skills-v2": "./src/skills/skills-v2.ts",
+    "./evals/reward-hacking-watchdog": "./src/evals/reward-hacking-watchdog.ts",
+    "./governance/opa-rego-adapter": "./src/governance/opa-rego-adapter.ts",
+    "./plan-lock": "./src/plan-lock.ts",
+    "./memory/tiered-memory": "./src/memory/tiered-memory.ts",
+    "./observability/otel-genai": "./src/observability/otel-genai.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
