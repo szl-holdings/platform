@@ -446,6 +446,46 @@ const InfraSubstrateInference = lazy(() => import('./pages/infrastructure/substr
 const InfraDataFabric = lazy(() => import('./pages/infrastructure/data-fabric'));
 const InfraAtlasExecute = lazy(() => import('./pages/infrastructure/atlas-execute'));
 
+// Agent Foundry (consolidates PRAXIS / Lyte / Unified Command / Pulse)
+const FoundryHome = lazy(() => import('./pages/foundry/FoundryHome').then(m => ({ default: m.FoundryHome })));
+const FoundryCatalog = lazy(() => import('./pages/foundry/FoundryCatalog').then(m => ({ default: m.FoundryCatalog })));
+const FoundryProvision = lazy(() => import('./pages/foundry/FoundryProvision').then(m => ({ default: m.FoundryProvision })));
+const FoundryDeployments = lazy(() => import('./pages/foundry/FoundryDeployments').then(m => ({ default: m.FoundryDeployments })));
+const FoundryWorkcells = lazy(() => import('./pages/foundry/FoundryWorkcells').then(m => ({ default: m.FoundryWorkcells })));
+const FoundryKeys = lazy(() => import('./pages/foundry/FoundryKeys').then(m => ({ default: m.FoundryKeys })));
+const FoundrySovereignMode = lazy(() => import('./pages/foundry/FoundrySovereignMode').then(m => ({ default: m.FoundrySovereignMode })));
+const FoundryMonitoring = lazy(() => import('./pages/foundry/FoundryMonitoring').then(m => ({ default: m.FoundryMonitoring })));
+const FoundryQuickstarts = lazy(() => import('./pages/foundry/FoundryQuickstarts').then(m => ({ default: m.FoundryQuickstarts })));
+
+// Primitives (PRAXIS)
+const PrimitivesHub = lazy(() => import('./pages/primitives/PrimitivesHub').then(m => ({ default: m.PrimitivesHub })));
+const PrimitivesResearchSwarm = lazy(() => import('./pages/primitives/ResearchSwarm').then(m => ({ default: m.ResearchSwarm })));
+const PrimitivesMemoryFabric = lazy(() => import('./pages/primitives/MemoryFabric').then(m => ({ default: m.MemoryFabric })));
+const PrimitivesProtocolBridge = lazy(() => import('./pages/primitives/ProtocolBridge').then(m => ({ default: m.ProtocolBridge })));
+const PrimitivesOrchestrator = lazy(() => import('./pages/primitives/PrimitivesOrchestrator').then(m => ({ default: m.PrimitivesOrchestrator })));
+const PrimitivesSkillsLibrary = lazy(() => import('./pages/primitives/PrimitivesSkillsLibrary').then(m => ({ default: m.PrimitivesSkillsLibrary })));
+const PrimitivesTokensGovernance = lazy(() => import('./pages/primitives/TokensGovernancePrimitive').then(m => ({ default: m.TokensGovernancePrimitive })));
+
+// Decisions additions (Lyte / KORA)
+const DecisionTwin = lazy(() => import('./pages/decisions/DecisionTwin').then(m => ({ default: m.DecisionTwin })));
+const DecisionsAutonomyModes = lazy(() => import('./pages/decisions/AutonomyModes').then(m => ({ default: m.AutonomyModes })));
+const DecisionsEntityGraph = lazy(() => import('./pages/decisions/DecisionsEntityGraph').then(m => ({ default: m.DecisionsEntityGraph })));
+const DecisionsWorkflowHealth = lazy(() => import('./pages/decisions/WorkflowHealth').then(m => ({ default: m.WorkflowHealth })));
+
+// Strategy → Briefings (Pulse)
+const BriefingsHub = lazy(() => import('./pages/strategy/briefings/BriefingsHub').then(m => ({ default: m.BriefingsHub })));
+const BriefingsTodaysBrief = lazy(() => import('./pages/strategy/briefings/TodaysBrief').then(m => ({ default: m.TodaysBrief })));
+const BriefingsEngine = lazy(() => import('./pages/strategy/briefings/BriefingEngine').then(m => ({ default: m.BriefingEngine })));
+const BriefingsLibrary = lazy(() => import('./pages/strategy/briefings/BriefingsLibrary').then(m => ({ default: m.BriefingsLibrary })));
+const BriefingsWatchlist = lazy(() => import('./pages/strategy/briefings/BriefingsWatchlist').then(m => ({ default: m.BriefingsWatchlist })));
+const BriefingsConfidence = lazy(() => import('./pages/strategy/briefings/ConfidenceDashboard').then(m => ({ default: m.ConfidenceDashboard })));
+const BriefingsDissent = lazy(() => import('./pages/strategy/briefings/DissentChannel').then(m => ({ default: m.DissentChannel })));
+const BriefingsGovernedCockpit = lazy(() => import('./pages/strategy/briefings/GovernedCockpit').then(m => ({ default: m.GovernedCockpit })));
+
+// Trust + What's New
+const TrustHub = lazy(() => import('./pages/trust/TrustHub').then(m => ({ default: m.TrustHub })));
+const WhatsNew = lazy(() => import('./pages/WhatsNew').then(m => ({ default: m.WhatsNew })));
+
 const MarketingHome = lazy(() => import('./pages/marketing/index'));
 const MarketingPricing = lazy(() => import('./pages/marketing/pricing'));
 const MarketingSignup = lazy(() => import('./pages/marketing/signup'));
@@ -497,7 +537,10 @@ export default function App() {
         <Route path={`${base}/forge`} component={SkillForge} />
         <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
         <Route path={`${base}/replay`} component={WorkcellReplay} />
-        <Route path={`${base}/trust`} component={TrustCenter} />
+        <Route path={`${base}/trust-center`} component={TrustCenter} />
+        <Route path={`${base}/trust`}>
+          <WithShell><TrustHub /></WithShell>
+        </Route>
         <Route path={`${base}/constitution`} component={Constitution} />
         <Route path={`${base}/security-compliance`} component={SecurityCompliance} />
         <Route path={`${base}/right-to-audit`} component={RightToAudit} />
@@ -1398,8 +1441,116 @@ export default function App() {
           </Suspense>
         </Route>
 
+
+        {/* ── Agent Foundry (consolidates PRAXIS / Lyte / Unified Command / Pulse) ── */}
+        <Route path={`${base}/foundry/catalog`}>
+          <WithShell><FoundryCatalog /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/provision`}>
+          <WithShell><FoundryProvision /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/deployments`}>
+          <WithShell><FoundryDeployments /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/workcells`}>
+          <WithShell><FoundryWorkcells /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/keys`}>
+          <WithShell><FoundryKeys /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/sovereign`}>
+          <WithShell><FoundrySovereignMode /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/monitoring`}>
+          <WithShell><FoundryMonitoring /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry/quickstarts`}>
+          <WithShell><FoundryQuickstarts /></WithShell>
+        </Route>
+        <Route path={`${base}/foundry`}>
+          <WithShell><FoundryHome /></WithShell>
+        </Route>
+
+        {/* ── Primitives (PRAXIS) ── */}
+        <Route path={`${base}/primitives/research-swarm`}>
+          <WithShell><PrimitivesResearchSwarm /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives/memory-fabric`}>
+          <WithShell><PrimitivesMemoryFabric /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives/protocol-bridge`}>
+          <WithShell><PrimitivesProtocolBridge /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives/orchestrator`}>
+          <WithShell><PrimitivesOrchestrator /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives/skills`}>
+          <WithShell><PrimitivesSkillsLibrary /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives/tokens-governance`}>
+          <WithShell><PrimitivesTokensGovernance /></WithShell>
+        </Route>
+        <Route path={`${base}/primitives`}>
+          <WithShell><PrimitivesHub /></WithShell>
+        </Route>
+
+        {/* ── Decisions additions (Lyte / KORA) ── */}
+        <Route path={`${base}/decisions/twin`}>
+          <WithShell><DecisionTwin /></WithShell>
+        </Route>
+        <Route path={`${base}/decisions/autonomy`}>
+          <WithShell><DecisionsAutonomyModes /></WithShell>
+        </Route>
+        <Route path={`${base}/decisions/entity-graph`}>
+          <WithShell><DecisionsEntityGraph /></WithShell>
+        </Route>
+        <Route path={`${base}/decisions/workflow-health`}>
+          <WithShell><DecisionsWorkflowHealth /></WithShell>
+        </Route>
+
+        {/* ── Strategy → Briefings (Pulse) ── */}
+        <Route path={`${base}/strategy/briefings/today`}>
+          <WithShell><BriefingsTodaysBrief /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/engine`}>
+          <WithShell><BriefingsEngine /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/library`}>
+          <WithShell><BriefingsLibrary /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/watchlist`}>
+          <WithShell><BriefingsWatchlist /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/confidence`}>
+          <WithShell><BriefingsConfidence /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/dissent`}>
+          <WithShell><BriefingsDissent /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings/cockpit`}>
+          <WithShell><BriefingsGovernedCockpit /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefings`}>
+          <WithShell><BriefingsHub /></WithShell>
+        </Route>
+
+        {/* ── What's New landing card ── */}
+        <Route path={`${base}/whats-new`}>
+          <WithShell><WhatsNew /></WithShell>
+        </Route>
+
+        {/* ── Deprecated standalone surfaces — redirect to consolidated paths ── */}
         <Route path="/command">
           <RedirectTo to="/command-surface" />
+        </Route>
+        <Route path="/pulse">
+          <RedirectTo to="/strategy/briefings" />
+        </Route>
+        <Route path="/lyte">
+          <RedirectTo to="/decisions" />
+        </Route>
+        <Route path="/nexus">
+          <RedirectTo to="/primitives" />
         </Route>
         <Route path="/a11oy/:rest*">
           <LegacyA11oyRedirect />

@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  LayoutGrid, Palette, Mic2, Component, Rocket, ShieldCheck, Infinity, Archive,
-  Beaker, Sparkles, Sigma, MessageSquare, Search, DollarSign, Brain, Gauge,
+  LayoutGrid, Rocket, ShieldCheck, Sparkles,
   ChevronDown, ChevronRight,
   Globe, Crosshair, Activity, Radio, BarChart3, Map, Shield, Server,
   Cpu, Eye, Zap, Network, Settings, Users, Terminal, Layers,
   Briefcase, FileText, Target, GitBranch, Database, Lock,
   GitFork, History, BookOpen, SquareTerminal, Sliders,
   FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert,
-  Swords, Waves, Microscope, TrendingUp, FlaskRound
+  Swords, Waves, Microscope, TrendingUp, FlaskRound,
+  Palette, Sigma, MessageSquare, Brain, Beaker,
+  Box, Cog, Newspaper, KeyRound, Boxes, Wrench,
+  Gauge, Search, DollarSign,
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
@@ -20,6 +22,7 @@ interface NavItem {
   name: string;
   icon: React.ElementType;
   path: string;
+  badge?: string;
 }
 
 interface NavSection {
@@ -29,26 +32,46 @@ interface NavSection {
   defaultOpen?: boolean;
 }
 
-const orchestrationItems: NavItem[] = [
-  { id: 'console', name: 'Console', icon: SquareTerminal, path: '/console' },
-  { id: 'atlas', name: 'Atlas', icon: LayoutGrid, path: '/atlas' },
-  { id: 'tokens', name: 'Tokens', icon: Palette, path: '/tokens' },
-  { id: 'voice', name: 'Voice', icon: Mic2, path: '/voice' },
-  { id: 'library', name: 'Library', icon: Component, path: '/library' },
-  { id: 'releases', name: 'Releases', icon: Rocket, path: '/releases' },
-  { id: 'audit', name: 'Audit', icon: ShieldCheck, path: '/audit' },
-  { id: 'andean', name: 'Andean Loop', icon: Infinity, path: '/andean-orchestration' },
-  { id: 'archive', name: 'Portfolio Archive', icon: Archive, path: '/portfolio-archive' },
+// Top: Foundry pinned + What's New
+const topItems: NavItem[] = [
+  { id: 'whats-new', name: "What's New", icon: Newspaper, path: '/whats-new', badge: 'NEW' },
+  { id: 'console', name: 'Console', icon: Terminal, path: '/console' },
+];
+
+const foundrySections: NavSection[] = [
+  {
+    id: 'foundry',
+    label: 'Foundry',
+    defaultOpen: true,
+    items: [
+      { id: 'foundry-home', name: 'Foundry Home', icon: LayoutGrid, path: '/foundry' },
+      { id: 'foundry-catalog', name: 'Catalog', icon: Boxes, path: '/foundry/catalog' },
+      { id: 'foundry-provision', name: 'Provision', icon: FileText, path: '/foundry/provision' },
+      { id: 'foundry-deployments', name: 'Deployments', icon: Rocket, path: '/foundry/deployments' },
+      { id: 'foundry-workcells', name: 'Workcells', icon: Box, path: '/foundry/workcells' },
+      { id: 'foundry-keys', name: 'Keys & Secrets', icon: KeyRound, path: '/foundry/keys' },
+      { id: 'foundry-sovereign', name: 'Sovereign Mode', icon: Lock, path: '/foundry/sovereign' },
+      { id: 'foundry-monitoring', name: 'Monitoring', icon: Activity, path: '/foundry/monitoring' },
+      { id: 'foundry-quickstarts', name: 'Quickstarts', icon: Sparkles, path: '/foundry/quickstarts' },
+    ],
+  },
 ];
 
 const strategySections: NavSection[] = [
   {
-    id: 'strategy-core',
+    id: 'strategy',
     label: 'Strategy',
-    defaultOpen: true,
+    defaultOpen: false,
     items: [
       { id: 'strat-dashboard', name: 'Strategy Dashboard', icon: Globe, path: '/strategy' },
-      { id: 'strat-briefing', name: 'Executive Briefing', icon: Briefcase, path: '/strategy/executive-briefing' },
+      { id: 'strat-briefings', name: 'Briefings Hub', icon: Newspaper, path: '/strategy/briefings' },
+      { id: 'strat-briefing-today', name: "Today's Brief", icon: FileText, path: '/strategy/briefings/today' },
+      { id: 'strat-briefing-engine', name: 'Briefing Engine', icon: Cog, path: '/strategy/briefings/engine' },
+      { id: 'strat-briefing-library', name: 'Brief Library', icon: BookOpen, path: '/strategy/briefings/library' },
+      { id: 'strat-briefing-watchlist', name: 'Watchlist', icon: Eye, path: '/strategy/briefings/watchlist' },
+      { id: 'strat-briefing-confidence', name: 'Confidence', icon: BarChart3, path: '/strategy/briefings/confidence' },
+      { id: 'strat-briefing-dissent', name: 'Dissent Channel', icon: MessageSquare, path: '/strategy/briefings/dissent' },
+      { id: 'strat-briefing-cockpit', name: 'Governed Cockpit', icon: ShieldCheck, path: '/strategy/briefings/cockpit' },
       { id: 'strat-atlas-runtime', name: 'Atlas Runtime', icon: Zap, path: '/strategy/atlas-runtime' },
       { id: 'strat-enterprise', name: 'Enterprise State', icon: Layers, path: '/strategy/enterprise-state' },
       { id: 'strat-simulation', name: 'Simulation', icon: GitBranch, path: '/strategy/simulation' },
@@ -59,18 +82,17 @@ const strategySections: NavSection[] = [
       { id: 'strat-worldline', name: 'Worldline Registry', icon: FileText, path: '/strategy/worldline-registry' },
       { id: 'strat-cross', name: 'Cross-Platform Hub', icon: Globe, path: '/strategy/cross-platform/hub' },
       { id: 'strat-competitive', name: 'Competitive Atlas', icon: Map, path: '/strategy/competitive-atlas' },
-      { id: 'strat-decisions', name: 'Decision Center', icon: Crosshair, path: '/decisions' },
     ],
   },
 ];
 
 const operationsSections: NavSection[] = [
   {
-    id: 'ops-observability',
+    id: 'operations',
     label: 'Operations',
     defaultOpen: false,
     items: [
-      { id: 'ops-exec', name: 'Executive Command', icon: Gauge, path: '/operations' },
+      { id: 'ops-exec', name: 'Executive Command', icon: Activity, path: '/operations' },
       { id: 'ops-noc', name: 'Autonomous NOC', icon: Eye, path: '/operations/autonomous-noc' },
       { id: 'ops-slo', name: 'SLO Management', icon: Target, path: '/operations/slo' },
       { id: 'ops-topology', name: 'Service Topology', icon: Network, path: '/operations/topology' },
@@ -79,31 +101,16 @@ const operationsSections: NavSection[] = [
       { id: 'ops-logs', name: 'Log Explorer', icon: Terminal, path: '/operations/logs' },
       { id: 'ops-alerts', name: 'Alert Management', icon: Radio, path: '/operations/alerts' },
       { id: 'ops-self-heal', name: 'Self-Healing', icon: Zap, path: '/operations/self-healing' },
-      { id: 'ops-finops', name: 'FinOps', icon: DollarSign, path: '/operations/finops' },
-      { id: 'ops-oncall', name: 'On-Call Center', icon: Users, path: '/operations/on-call' },
       { id: 'ops-runbook', name: 'Runbook Studio', icon: FileText, path: '/operations/runbook-studio' },
       { id: 'ops-deployments', name: 'Deployments', icon: Rocket, path: '/operations/deployments' },
-      { id: 'ops-ai-ops', name: 'AI Quality Dashboard', icon: Brain, path: '/operations/ai-ops' },
-    ],
-  },
-  {
-    id: 'ops-admin',
-    label: 'Admin Console',
-    defaultOpen: false,
-    items: [
-      { id: 'admin-overview', name: 'Admin Overview', icon: Settings, path: '/operations/admin/overview' },
-      { id: 'admin-users', name: 'Users', icon: Users, path: '/operations/admin/users' },
-      { id: 'admin-flags', name: 'Feature Flags', icon: ShieldCheck, path: '/operations/admin/flags' },
-      { id: 'admin-apps', name: 'Apps Registry', icon: Component, path: '/operations/admin/apps' },
-      { id: 'admin-jobs', name: 'Jobs', icon: Cpu, path: '/operations/admin/jobs' },
-      { id: 'admin-audit', name: 'Audit Log', icon: FileText, path: '/operations/admin/audit' },
+      { id: 'ops-admin', name: 'Admin Console', icon: Settings, path: '/operations/admin/overview' },
     ],
   },
 ];
 
 const infrastructureSections: NavSection[] = [
   {
-    id: 'infra-imperium',
+    id: 'infrastructure',
     label: 'Infrastructure',
     defaultOpen: false,
     items: [
@@ -118,6 +125,71 @@ const infrastructureSections: NavSection[] = [
       { id: 'infra-coalition', name: 'Coalition', icon: Users, path: '/infrastructure/coalition' },
     ],
   },
+];
+
+const decisionsSections: NavSection[] = [
+  {
+    id: 'decisions',
+    label: 'Decisions',
+    defaultOpen: false,
+    items: [
+      { id: 'dec-center', name: 'Decision Center', icon: Crosshair, path: '/decisions' },
+      { id: 'dec-twin', name: 'Decision Twin (PRISM)', icon: Brain, path: '/decisions/twin' },
+      { id: 'dec-autonomy', name: 'Autonomy Modes', icon: Workflow, path: '/decisions/autonomy' },
+      { id: 'dec-entity', name: 'Entity Graph', icon: Network, path: '/decisions/entity-graph' },
+      { id: 'dec-health', name: 'Workflow Health', icon: Activity, path: '/decisions/workflow-health' },
+      { id: 'dec-intelligence', name: 'Command Overview', icon: LayoutGrid, path: '/intelligence' },
+      { id: 'dec-deep', name: 'Entity Deep Dive', icon: Eye, path: '/intelligence/deep-dive' },
+      { id: 'dec-roi', name: 'ROI Lens', icon: BarChart3, path: '/intelligence/roi-lens' },
+    ],
+  },
+];
+
+const primitivesSections: NavSection[] = [
+  {
+    id: 'primitives',
+    label: 'Primitives',
+    defaultOpen: false,
+    items: [
+      { id: 'prim-hub', name: 'Primitives Hub', icon: LayoutGrid, path: '/primitives' },
+      { id: 'prim-research', name: 'Research Swarm', icon: Beaker, path: '/primitives/research-swarm' },
+      { id: 'prim-memory', name: 'Memory Fabric', icon: Database, path: '/primitives/memory-fabric' },
+      { id: 'prim-bridge', name: 'Protocol Bridge', icon: GitBranch, path: '/primitives/protocol-bridge' },
+      { id: 'prim-orchestrator', name: 'Orchestrator', icon: Workflow, path: '/primitives/orchestrator' },
+      { id: 'prim-skills', name: 'Skills Library', icon: Wrench, path: '/primitives/skills' },
+      { id: 'prim-tokens', name: 'Tokens & Governance', icon: ShieldCheck, path: '/primitives/tokens-governance' },
+    ],
+  },
+];
+
+const intelligenceItems: NavItem[] = [
+  { id: 'chat', name: 'Chat', icon: MessageSquare, path: '/chat' },
+  { id: 'sigil', name: 'SIGIL', icon: Sigma, path: '/sigil' },
+  { id: 'lab', name: 'A11oy Lab', icon: Beaker, path: '/lab' },
+  { id: 'reasoning', name: 'Reasoning Audit', icon: Brain, path: '/reasoning' },
+  { id: 'lesson-graph', name: 'Lesson Graph', icon: GitFork, path: '/lesson-graph' },
+];
+
+const platformItems: NavItem[] = [
+  { id: 'substrate', name: 'Substrate Command', icon: Cpu, path: '/substrate' },
+  { id: 'ecosystem', name: 'MCP Ecosystem', icon: Network, path: '/ecosystem' },
+  { id: 'omnia', name: 'OMNIA Hub', icon: Sparkles, path: '/omnia' },
+  { id: 'evolution', name: 'Evolution Runtime', icon: Zap, path: '/evolution' },
+  { id: 'trust-center', name: 'Trust Center (legacy)', icon: Lock, path: '/trust-center' },
+  { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
+  { id: 'adaptive-governance', name: 'Adaptive Governance', icon: GitBranch, path: '/adaptive-governance' },
+  { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
+  { id: 'routing-weights', name: 'Routing Weights', icon: Sliders, path: '/routing-weights' },
+  { id: 'codex', name: 'Codex', icon: Brain, path: '/codex' },
+];
+
+const evaluationItems: NavItem[] = [
+  { id: 'evals', name: 'MirrorEval', icon: Eye, path: '/evals' },
+  { id: 'eval-evolution', name: 'Eval Evolution', icon: Sparkles, path: '/eval-evolution' },
+];
+
+const operatorsItems: NavItem[] = [
+  { id: 'operator-profile', name: 'Operator Profiles', icon: Users, path: '/operator-profile' },
 ];
 
 const cognitiveSections: NavSection[] = [
@@ -143,36 +215,6 @@ const decisionIntelligenceItems: NavItem[] = [
   { id: 'di-deep-dive', name: 'Entity Deep Dive', icon: Search, path: '/intelligence/deep-dive' },
   { id: 'di-roi-lens', name: 'ROI Lens', icon: DollarSign, path: '/intelligence/roi-lens' },
   { id: 'di-propeller', name: 'Propeller Drive', icon: Brain, path: '/fabric/decisions' },
-];
-
-const intelligenceItems: NavItem[] = [
-  { id: 'chat', name: 'Chat', icon: MessageSquare, path: '/chat' },
-  { id: 'sigil', name: 'SIGIL', icon: Sigma, path: '/sigil' },
-  { id: 'lab', name: 'A11oy Lab', icon: Beaker, path: '/lab' },
-  { id: 'reasoning', name: 'Reasoning Audit', icon: Brain, path: '/reasoning' },
-  { id: 'lesson-graph', name: 'Lesson Graph', icon: GitFork, path: '/lesson-graph' },
-];
-
-const platformItems: NavItem[] = [
-  { id: 'substrate', name: 'Substrate Command', icon: Cpu, path: '/substrate' },
-  { id: 'ecosystem', name: 'MCP Ecosystem', icon: Network, path: '/ecosystem' },
-  { id: 'omnia', name: 'OMNIA Hub', icon: Sparkles, path: '/omnia' },
-  { id: 'evolution', name: 'Evolution Runtime', icon: Zap, path: '/evolution' },
-  { id: 'trust-center', name: 'Trust Center', icon: Lock, path: '/trust' },
-  { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
-  { id: 'adaptive-governance', name: 'Adaptive Governance', icon: GitBranch, path: '/adaptive-governance' },
-  { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
-  { id: 'routing-weights', name: 'Routing Weights', icon: Sliders, path: '/routing-weights' },
-  { id: 'codex', name: 'Codex', icon: Brain, path: '/codex' },
-];
-
-const evaluationItems: NavItem[] = [
-  { id: 'evals', name: 'MirrorEval', icon: Eye, path: '/evals' },
-  { id: 'eval-evolution', name: 'Eval Evolution', icon: Sparkles, path: '/eval-evolution' },
-];
-
-const operatorsItems: NavItem[] = [
-  { id: 'operator-profile', name: 'Operator Profiles', icon: Users, path: '/operator-profile' },
 ];
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -265,6 +307,43 @@ const reliquaryItems: NavItem[] = [
   { id: 'reliquary-doctrine', name: 'Doctrine', icon: BookOpen, path: '/reliquary/doctrine' },
 ];
 
+const doctrineSections: NavSection[] = [
+  {
+    id: 'doctrine',
+    label: 'Doctrine',
+    defaultOpen: false,
+    items: [
+      { id: 'doc-overview', name: 'Doctrine Overview', icon: BookOpen, path: '/doctrine' },
+      { id: 'doc-constitution', name: 'Constitution', icon: FileText, path: '/constitution' },
+      { id: 'doc-constitution-dsl', name: 'Constitution DSL', icon: Cog, path: '/constitution-dsl' },
+      { id: 'doc-covenant-lift', name: 'Covenant Lift', icon: Sparkles, path: '/covenant-lift' },
+      { id: 'doc-alignment', name: 'Alignment Review', icon: ShieldCheck, path: '/alignment-review' },
+      { id: 'doc-welfare', name: 'Welfare Playbooks', icon: BookOpen, path: '/welfare-playbooks' },
+      { id: 'doc-reliquary', name: 'Reliquary Doctrine', icon: Lock, path: '/reliquary/doctrine' },
+    ],
+  },
+];
+
+const trustSections: NavSection[] = [
+  {
+    id: 'trust',
+    label: 'Trust',
+    defaultOpen: false,
+    items: [
+      { id: 'trust-hub', name: 'Trust Hub', icon: ShieldCheck, path: '/trust' },
+      { id: 'trust-portal', name: 'Public Trust Portal', icon: Globe, path: '/trust-portal' },
+      { id: 'trust-transparency', name: 'Transparency Report', icon: FileText, path: '/transparency-report' },
+      { id: 'trust-bom', name: 'Agent BOM / Proof', icon: GitBranch, path: '/agent-bom' },
+      { id: 'trust-exchange', name: 'Trust Exchange', icon: Network, path: '/trust-exchange' },
+      { id: 'trust-security', name: 'Security & Compliance', icon: Shield, path: '/security-compliance' },
+      { id: 'trust-audit', name: 'Right to Audit', icon: Eye, path: '/right-to-audit' },
+      { id: 'trust-vault', name: 'Reliquary Vault', icon: Database, path: '/reliquary/vault' },
+      { id: 'trust-governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
+      { id: 'trust-hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
+    ],
+  },
+];
+
 function CollapsibleSection({ section }: { section: NavSection }) {
   const [isOpen, setIsOpen] = useState(section.defaultOpen ?? false);
   const [location] = useLocation();
@@ -280,10 +359,10 @@ function CollapsibleSection({ section }: { section: NavSection }) {
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
         className={cn(
-          "flex items-center gap-2 w-full text-left text-[11px] font-medium uppercase tracking-wider mt-5 mb-1 px-3 transition-colors cursor-pointer",
+          'flex items-center gap-2 w-full text-left text-[11px] font-medium uppercase tracking-wider mt-5 mb-1 px-3 transition-colors cursor-pointer',
           hasActiveChild
-            ? "text-[var(--color-a11oy-gold-dim)]"
-            : "text-[var(--color-a11oy-text-ghost)] hover:text-[var(--color-a11oy-text-sub)]"
+            ? 'text-[var(--color-a11oy-gold-dim)]'
+            : 'text-[var(--color-a11oy-text-ghost)] hover:text-[var(--color-a11oy-text-sub)]',
         )}
       >
         {isOpen ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
@@ -309,31 +388,40 @@ function NavLink({ item }: { item: NavItem }) {
     <Link
       href={fullPath}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors",
+        'flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors',
         isActive
-          ? "bg-[var(--color-a11oy-gold-soft)] text-[var(--color-a11oy-gold-dim)] font-medium"
-          : "text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-overlay)] hover:text-[var(--color-a11oy-text)]"
+          ? 'bg-[var(--color-a11oy-gold-soft)] text-[var(--color-a11oy-gold-dim)] font-medium'
+          : 'text-[var(--color-a11oy-text-sub)] hover:bg-[var(--color-a11oy-overlay)] hover:text-[var(--color-a11oy-text)]',
       )}
     >
-      <item.icon className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-50")} />
-      {item.name}
+      <item.icon className={cn('w-4 h-4', isActive ? 'opacity-100' : 'opacity-50')} />
+      <span className="flex-1">{item.name}</span>
+      {item.badge && (
+        <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'rgba(201,183,135,0.16)', color: '#c9b787' }}>{item.badge}</span>
+      )}
     </Link>
   );
 }
 
 export function Sidebar() {
-  const [location] = useLocation();
   return (
     <aside className="w-60 border-r border-[var(--color-a11oy-border)] bg-[var(--color-a11oy-deep)] shrink-0 flex flex-col h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto">
       <div className="px-3 py-4 flex-1">
-        <SectionHeader>Orchestration</SectionHeader>
         <nav className="flex flex-col gap-0.5">
-          {orchestrationItems.map(item => <NavLink key={item.id} item={item} />)}
+          {topItems.map(item => <NavLink key={item.id} item={item} />)}
         </nav>
 
+        {foundrySections.map(s => <CollapsibleSection key={s.id} section={s} />)}
         {strategySections.map(s => <CollapsibleSection key={s.id} section={s} />)}
         {operationsSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
         {infrastructureSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+        {decisionsSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+        {primitivesSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+        {doctrineSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+        {trustSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        <SectionHeader>Cognitive (legacy)</SectionHeader>
         {cognitiveSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
 
         <SectionHeader>NEXUS</SectionHeader>
@@ -399,7 +487,7 @@ export function Sidebar() {
         </nav>
       </div>
       <div className="px-4 py-3 border-t border-[var(--color-a11oy-border-subtle)] text-xs text-[var(--color-a11oy-text-ghost)]">
-        <div>v5.0.0</div>
+        <div>v5.0.0 — Agent Foundry</div>
         <div className="text-[var(--color-a11oy-success)]">System nominal</div>
       </div>
     </aside>
