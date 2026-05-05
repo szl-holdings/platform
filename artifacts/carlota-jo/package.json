@@ -55,6 +55,7 @@
     "react-i18next": "^17.0.2",
     "@szl-holdings/omnia-shell": "workspace:*",
     "@workspace/tokens": "workspace:*",
-    "@szl-holdings/platform-registry": "workspace:*"
+    "@szl-holdings/platform-registry": "workspace:*",
+    "@workspace/a11oy-orchestration": "workspace:*"
   }
 }

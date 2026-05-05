@@ -1,5 +1,6 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { emitProof, crossProductHandoff } from '@workspace/a11oy-orchestration/client';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -133,6 +134,26 @@ export default function Approvals() {
     toast.success(`${id} ${decision === 'approved' ? 'approved' : 'rejected'}`, {
       description: 'Proof envelope sealed and recorded to provenance ledger.',
     });
+    const proof = proofs.find((p) => p.id === id);
+    const summary = proof
+      ? `Counsel ${decision} ${proof.id}: ${proof.recommendation}`
+      : `Counsel ${decision} proof envelope ${id}`;
+    void emitProof({
+      product: 'counsel',
+      kind: decision === 'approved' ? 'action_approved' : 'recommendation_emitted',
+      summary,
+      deepLink: '/counsel/approvals',
+      payload: { proofId: id, decision, matterId: proof?.matterId },
+    });
+    if (decision === 'approved') {
+      void crossProductHandoff({
+        fromProduct: 'counsel',
+        toProduct: 'sentra',
+        refId: id,
+        reason: 'Approved breach-notification path; close out incident in Sentra',
+        deepLink: '/counsel/approvals',
+      });
+    }
   };
 
   const activeProof = proofs.find((p) => p.id === active);

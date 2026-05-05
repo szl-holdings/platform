@@ -61,6 +61,7 @@
     "@szl-holdings/omnia-shell": "workspace:*",
     "@workspace/tokens": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*",
-    "@szl-holdings/alloy-client": "workspace:*"
+    "@szl-holdings/alloy-client": "workspace:*",
+    "@workspace/a11oy-orchestration": "workspace:*"
   }
 }

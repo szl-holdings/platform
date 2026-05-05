@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Sigma } from 'lucide-react';
+import { Anchor, Sigma } from 'lucide-react';
+import { emitProof, crossProductHandoff } from '@workspace/a11oy-orchestration/client';
 
 const API_BASE = '/api/sigil';
 
@@ -20,6 +21,33 @@ const AXES = [
 export default function ConduitSigil() {
         const [axes, setAxes] = useState({ provenance: 0.97, containment: 0.74, coherence: 0.89, convergence: 0.95 });
         const [report, setReport] = useState<SigilReport | null>(null);
+        const [anchored, setAnchored] = useState(false);
+
+        const anchorToA11oy = async () => {
+                if (!report) return;
+                setAnchored(true);
+                const sigmaPctVal = (report.sigma * 100).toFixed(1);
+                await emitProof({
+                        product: 'amaru',
+                        kind: 'action_executed',
+                        summary: `Amaru anchored Σ=${sigmaPctVal}% trust envelope to the A11oy ledger`,
+                        deepLink: '/conduit/sigil',
+                        payload: {
+                                sigma: report.sigma,
+                                axes: report.axes,
+                                formula: report.proof.formula,
+                        },
+                });
+                if (report.sigma < 0.6) {
+                        await crossProductHandoff({
+                                fromProduct: 'amaru',
+                                toProduct: 'sentra',
+                                refId: `sigil-${Date.now().toString(36)}`,
+                                reason: `Σ=${sigmaPctVal}% below trust floor — request cyber-resilience review`,
+                                deepLink: '/conduit/sigil',
+                        });
+                }
+        };
 
         const compose = async (next: typeof axes) => {
                 try {
@@ -104,6 +132,18 @@ export default function ConduitSigil() {
                                         <div className="font-mono text-sm break-all text-slate-100">{report.proof.formula}</div>
                                         <div className="mt-2 text-xs text-slate-500">{report.proof.law}</div>
                                 </div>
+                        )}
+
+                        {report && (
+                                <button
+                                        type="button"
+                                        onClick={() => { void anchorToA11oy(); }}
+                                        disabled={anchored}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                                >
+                                        <Anchor className="w-4 h-4" />
+                                        {anchored ? 'Anchored to A11oy ledger' : 'Anchor Σ to A11oy ledger'}
+                                </button>
                         )}
                 </div>
         );

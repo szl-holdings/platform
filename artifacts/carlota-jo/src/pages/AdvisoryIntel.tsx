@@ -3,11 +3,13 @@ import {
   Award,
   BookOpen,
   Lightbulb,
+  Send,
   Star,
   TrendingUp,
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
+import { emitProof } from '@workspace/a11oy-orchestration/client';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { CARLOTA_JO_RETENTION, metricDisplay } from '@/lib/claims';
 
@@ -154,6 +156,24 @@ export default function AdvisoryIntel() {
     canonical: 'https://szlholdings.com/carlota-jo/advisory',
   });
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'insights'>('overview');
+  const [publishedCases, setPublishedCases] = useState<Record<string, boolean>>({});
+
+  const publishCaseToA11oy = (cs: (typeof caseStudies)[number]) => {
+    const refId = cs.client.replace(/\s+/g, '-').toLowerCase();
+    setPublishedCases((prev) => ({ ...prev, [refId]: true }));
+    void emitProof({
+      product: 'carlota-jo',
+      kind: 'recommendation_emitted',
+      summary: `Carlota Jo published advisory case for ${cs.client} (score ${cs.score}/10): ${cs.outcome}`,
+      deepLink: '/carlota-jo/advisory-intel',
+      payload: {
+        client: cs.client,
+        score: cs.score,
+        methodology: cs.methodology,
+        duration: cs.duration,
+      },
+    });
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#fff', position: 'relative' }}>
@@ -435,6 +455,36 @@ export default function AdvisoryIntel() {
                     {cs.client}
                   </h3>
                   <ScoreBar score={cs.score} />
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => publishCaseToA11oy(cs)}
+                    disabled={publishedCases[cs.client.replace(/\s+/g, '-').toLowerCase()]}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      background: 'rgba(59,130,246,0.1)',
+                      border: '1px solid rgba(59,130,246,0.3)',
+                      color: '#60a5fa',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: publishedCases[cs.client.replace(/\s+/g, '-').toLowerCase()]
+                        ? 'not-allowed'
+                        : 'pointer',
+                      opacity: publishedCases[cs.client.replace(/\s+/g, '-').toLowerCase()]
+                        ? 0.5
+                        : 1,
+                    }}
+                  >
+                    <Send size={11} />
+                    {publishedCases[cs.client.replace(/\s+/g, '-').toLowerCase()]
+                      ? 'Published to A11oy'
+                      : 'Publish case to A11oy'}
+                  </button>
                 </div>
                 <div
                   style={{

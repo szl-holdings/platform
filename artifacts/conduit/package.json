@@ -50,6 +50,7 @@
     "@workspace/tokens": "workspace:*",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*",
-    "@workspace/ouroboros": "workspace:*"
+    "@workspace/ouroboros": "workspace:*",
+    "@workspace/a11oy-orchestration": "workspace:*"
   }
 }

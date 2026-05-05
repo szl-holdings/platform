@@ -173,6 +173,12 @@ function isExempt(path: string): boolean {
   // `Authorization: Bearer <A11OY_API_TOKEN|a11oy-demo-cli>`, and material
   // execution is further gated by the PCE gate + MirrorEval block checks.
   if (path.startsWith('/api/a11oy/demo/')) return true;
+  // A11oy Orchestration Backbone (#4748) — fabric registry/ledger/router shim.
+  // Child products call /fabric/products/register, /fabric/proofs/emit, and
+  // /fabric/route-model fire-and-forget on boot from any browser tab without
+  // a CSRF token. The store is in-memory and per-product; callers are
+  // identified by the `product` field (validated against A11OY_PRODUCT_IDS).
+  if (path.startsWith('/api/a11oy/fabric/')) return true;
   // A11oy FORGE — Proof-Carrying Agent Skills marketplace.
   // Narrow CSRF exemption: only read-only routes and the stateless
   // evaluation preview are exempt. The state-mutating publish route

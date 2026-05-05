@@ -1,3 +1,4 @@
+import { registerWithA11oy } from '@workspace/a11oy-orchestration/client';
 import { configurePlausible } from '@szl-holdings/analytics';
 import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
 import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
@@ -20,6 +21,17 @@ configurePlausible({
 initSentry({ appSlug: 'carlota-jo', tracesSampleRate: 0.2 });
 initWebVitals('carlota-jo', '/api/');
 initAnalytics({ appSlug: 'carlota-jo' });
+
+void registerWithA11oy({
+  product: 'carlota-jo',
+  displayName: 'Carlota Jo Consulting',
+  basePath: '/carlota-jo/',
+  accentColor: '#8b7ac8',
+  capabilities: [
+    { id: 'engagement', label: 'Engagement Tracking', governanceClass: 'observation' },
+    { id: 'invoice', label: 'Invoice Dispatch', governanceClass: 'external_action' },
+  ],
+});
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary appName="Carlota Jo Consulting" accentColor="#8b7ac8">

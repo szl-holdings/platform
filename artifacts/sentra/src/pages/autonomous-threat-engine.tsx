@@ -11,6 +11,11 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
+import {
+  routeModel,
+  emitProof,
+  crossProductHandoff,
+} from '@workspace/a11oy-orchestration/client';
 
 const ACCENT = '#f5f5f5';
 const DS = {
@@ -659,20 +664,62 @@ export default function AutonomousThreatEngine() {
                     <div className="mt-4 flex gap-2">
                       <button
                         onClick={async () => {
-                          const id = selectedThreat.id;
+                          const t = selectedThreat;
+                          const id = t.id;
                           setThreats((prev) =>
-                            prev.map((t) => (t.id === id ? { ...t, status: 'contained' } : t)),
+                            prev.map((x) => (x.id === id ? { ...x, status: 'contained' } : x)),
                           );
                           try {
                             await api.threatEngine.updateStatus(id, 'contained');
                           } catch {
                             /* best-effort — local state already updated */
                           }
+                          // Material action → A11oy fabric: governed model
+                          // call for the triage decision, an action_executed
+                          // proof anchored to this incident, and (for
+                          // critical/high severity) a cross-product handoff
+                          // to Counsel for breach-notification review.
+                          try {
+                            await routeModel({
+                              product: 'sentra',
+                              model: 'Qwen/Qwen3-8B',
+                              purpose: `threat triage · ${t.mitreId} · ${t.title}`,
+                              deepLink: `/sentra/autonomous-threat-engine?id=${id}`,
+                            });
+                            await emitProof({
+                              product: 'sentra',
+                              kind: 'action_executed',
+                              summary: `Contained ${t.mitreId} on ${t.affectedAssets[0] ?? 'host'} (blast ${t.blastRadius})`,
+                              deepLink: `/sentra/autonomous-threat-engine?id=${id}`,
+                              payload: {
+                                incidentId: id,
+                                mitreId: t.mitreId,
+                                severity: t.severity,
+                                blastRadius: t.blastRadius,
+                              },
+                            });
+                            if (t.severity === 'critical' || t.severity === 'high') {
+                              await crossProductHandoff({
+                                fromProduct: 'sentra',
+                                toProduct: 'counsel',
+                                reason: `Breach-notification review for ${t.mitreId}`,
+                                refId: id,
+                                deepLink: `/sentra/autonomous-threat-engine?id=${id}`,
+                                payload: {
+                                  severity: t.severity,
+                                  affectedAssets: t.affectedAssets,
+                                },
+                              });
+                            }
+                          } catch (err) {
+                            console.warn('[sentra] fabric proof emission failed', err);
+                          }
                         }}
                         className="flex-1 py-2 rounded-lg text-xs font-bold"
                         style={{ background: ACCENT, color: 'white' }}
+                        data-testid="approve-containment"
                       >
-                        Approve Containment
+                        Approve & Escalate to Counsel
                       </button>
                       <button
                         onClick={async () => {

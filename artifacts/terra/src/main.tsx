@@ -1,3 +1,4 @@
+import { registerWithA11oy } from '@workspace/a11oy-orchestration/client';
 import { configurePlausible } from '@szl-holdings/analytics';
 import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
 import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
@@ -17,6 +18,17 @@ configurePlausible({
 initSentry({ appSlug: 'terra', tracesSampleRate: 0.2 });
 initWebVitals('terra', '/api/');
 initAnalytics({ appSlug: 'terra' });
+
+void registerWithA11oy({
+  product: 'terra',
+  displayName: 'Terra — Real Estate Intelligence',
+  basePath: '/terra/',
+  accentColor: '#d4a054',
+  capabilities: [
+    { id: 'cap_rate', label: 'Cap-Rate Forecast', governanceClass: 'recommendation' },
+    { id: 'valuation', label: 'Property Valuation', governanceClass: 'recommendation' },
+  ],
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

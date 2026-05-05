@@ -3,6 +3,7 @@ import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import {
   AlertTriangle,
   Bomb,
+  CheckCircle,
   Clock,
   Flag,
   MapPin,
@@ -10,6 +11,7 @@ import {
   Skull,
 } from 'lucide-react';
 import { type ElementType, useState } from 'react';
+import { emitProof, crossProductHandoff } from '@workspace/a11oy-orchestration/client';
 
 const regions = [
   {
@@ -137,6 +139,31 @@ const levelColor: Record<string, string> = {
 
 export default function IncidentReporting() {
   const [selected, setSelected] = useState<(typeof incidents)[0] | null>(null);
+  const [acknowledged, setAcknowledged] = useState<Record<string, boolean>>({});
+
+  const acknowledge = (inc: (typeof incidents)[0]) => {
+    setAcknowledged((prev) => ({ ...prev, [inc.id]: true }));
+    void emitProof({
+      product: 'vessels',
+      kind: 'action_executed',
+      summary: `Vessels acknowledged ${inc.id} (${inc.type}) on ${inc.vessel} in ${inc.region}`,
+      deepLink: '/vessels/incident-reporting',
+      payload: {
+        incidentId: inc.id,
+        severity: inc.severity,
+        vessel: inc.vessel,
+      },
+    });
+    if (inc.severity === 'Critical') {
+      void crossProductHandoff({
+        fromProduct: 'vessels',
+        toProduct: 'sentra',
+        refId: inc.id,
+        reason: `Critical maritime incident — request cyber-resilience review for ${inc.vessel}`,
+        deepLink: '/vessels/incident-reporting',
+      });
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -250,6 +277,24 @@ export default function IncidentReporting() {
                             {inc.timestamp}
                           </span>
                         </div>
+                        {selected?.id === inc.id && (
+                          <div className="mt-2 pt-2 border-t border-border space-y-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                acknowledge(inc);
+                              }}
+                              disabled={acknowledged[inc.id]}
+                              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              {acknowledged[inc.id]
+                                ? 'Acknowledged → A11oy ledger'
+                                : 'Acknowledge & escalate via A11oy'}
+                            </button>
+                          </div>
+                        )}
                         {selected?.id === inc.id && (
                           <div className="mt-2 pt-2 border-t border-border space-y-1">
                             <div className="flex gap-4 text-xs">

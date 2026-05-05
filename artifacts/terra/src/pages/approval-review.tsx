@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { emitProof } from '@workspace/a11oy-orchestration/client';
 import { type PropertyApproval, propertyTwins } from '@/data/property-twin';
 
 const ACCENT = '#40856a';
@@ -218,6 +219,25 @@ export default function ApprovalReview() {
       escalate: 'escalated',
     };
     setApprovalStates((prev) => ({ ...prev, [id]: map[action] }));
+    const approval = allApprovals.find((a) => a.id === id);
+    void emitProof({
+      product: 'terra',
+      kind:
+        action === 'approve'
+          ? 'action_approved'
+          : action === 'escalate'
+            ? 'cross_product_handoff'
+            : 'recommendation_emitted',
+      summary: approval
+        ? `Terra ${map[action]} ${approval.actionClass} on ${approval.propertyName}: ${approval.title}`
+        : `Terra ${map[action]} approval ${id}`,
+      deepLink: '/terra/approval-review',
+      payload: {
+        approvalId: id,
+        action,
+        priority: approval?.priority,
+      },
+    });
   }
 
   const displayed = allApprovals

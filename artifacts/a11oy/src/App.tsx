@@ -101,6 +101,7 @@ const FabricDecisionQueue = lazy(() => import('./pages/fabric/DecisionQueue').th
 const FabricOutcomeMemory = lazy(() => import('./pages/fabric/OutcomeMemory').then(m => ({ default: m.OutcomeMemory })));
 const FabricEvidenceLedger = lazy(() => import('./pages/fabric/EvidenceLedger').then(m => ({ default: m.EvidenceLedger })));
 const FabricEcosystemRoadmap = lazy(() => import('./pages/fabric/EcosystemRoadmap').then(m => ({ default: m.EcosystemRoadmap })));
+const FabricProducts = lazy(() => import('./pages/FabricProducts').then(m => ({ default: m.FabricProducts })));
 const Verticals = lazy(() => import('./pages/Verticals').then(m => ({ default: m.Verticals })));
 const Outcomes = lazy(() => import('./pages/Outcomes').then(m => ({ default: m.Outcomes })));
 const Memory = lazy(() => import('./pages/Memory').then(m => ({ default: m.Memory })));
@@ -462,6 +463,7 @@ export default function App() {
         <Route path={`${base}/nexus`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
+        <Route path={`${base}/fabric/products`} component={FabricProducts} />
         <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />
         <Route path={`${base}/fabric/twins`} component={FabricDomainTwins} />
         <Route path={`${base}/fabric/signals`} component={FabricSignalMeshPage} />

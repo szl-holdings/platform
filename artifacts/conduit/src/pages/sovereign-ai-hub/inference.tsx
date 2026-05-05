@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
+import { listFabricProofs, type ProofLedgerEntry } from '@workspace/a11oy-orchestration/client';
 import {
   ArrowLeft,
   Eye,
@@ -59,13 +60,25 @@ const COST_BY_PROVIDER = [
   { name: 'Substrate', cost: 0, color: '#8b5cf6' },
 ];
 
-const ROUTING_DECISIONS = [
-  { time: '2m ago', route: 'legal-analysis', from: 'OpenAI GPT-4o', to: 'Anthropic Claude 3.5', reason: 'Lower latency for structured output' },
-  { time: '5m ago', route: 'threat-triage', from: 'Anthropic Claude', to: 'DeepSeek V3', reason: 'Cost optimization — non-critical classification' },
-  { time: '8m ago', route: 'vessel-anomaly', from: 'Primary', to: 'Substrate oLLM', reason: 'Edge inference — sub-50ms requirement' },
-  { time: '12m ago', route: 'deal-scoring', from: 'GPT-4o', to: 'GPT-4o', reason: 'Primary route — within SLA' },
-  { time: '15m ago', route: 'entity-extraction', from: 'Anthropic', to: 'Gemini 2.5 Flash', reason: 'Failover — Anthropic rate limit exceeded' },
-];
+function relativeTime(iso: string): string {
+  const ageMs = Date.now() - new Date(iso).getTime();
+  const s = Math.max(1, Math.round(ageMs / 1000));
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.round(s / 60)}m ago`;
+  return `${Math.round(s / 3600)}h ago`;
+}
+
+function describeRouting(p: ProofLedgerEntry): { route: string; from: string; to: string; reason: string } {
+  const model = (p.payload as { gates?: { name: string }[] } | undefined)?.gates?.length
+    ? 'Gated model'
+    : 'Routed model';
+  return {
+    route: `${p.product} · ${p.kind}`,
+    from: 'A11oy router',
+    to: model,
+    reason: p.summary,
+  };
+}
 
 const STATUS_COLORS = {
   healthy: 'text-green-400',
@@ -79,6 +92,19 @@ export default function InferenceObservatory() {
     queryFn: () => fetchHub<{ status: string }>('/ai/gateway/status').catch(() => ({ status: 'operational' })),
     retry: false,
   });
+
+  // Live A11oy fabric proofs — model routing + governance decisions emitted
+  // by the six child products. Refreshed every 5s so this page reflects the
+  // unified ledger in near-real-time.
+  const { data: fabricProofs } = useQuery({
+    queryKey: ['fabric-proofs'],
+    queryFn: () => listFabricProofs({ limit: 20 }),
+    refetchInterval: 5_000,
+    retry: false,
+  });
+  const routingProofs = (fabricProofs ?? []).filter(
+    (p) => p.kind === 'model_invocation' || p.kind === 'governance_block' || p.kind === 'cross_product_handoff',
+  );
 
   const totalRequests = PROVIDERS.reduce((s, p) => s + p.requestsToday, 0);
   const totalCost = PROVIDERS.reduce((s, p) => s + p.costToday, 0);
@@ -205,20 +231,40 @@ export default function InferenceObservatory() {
         <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <Activity className="w-4 h-4 text-green-400" />
           Recent Routing Decisions
+          <span className="ml-auto text-[10px] font-mono text-muted-foreground">
+            A11oy fabric · live
+          </span>
         </h3>
         <div className="space-y-2">
-          {ROUTING_DECISIONS.map((d, i) => (
-            <div key={i} className="flex items-start gap-3 p-2 rounded-md bg-background border border-border">
-              <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap mt-0.5">{d.time}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-mono font-semibold text-primary">{d.route}</span>
-                  <span className="text-[10px] text-muted-foreground">{d.from} → {d.to}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{d.reason}</p>
-              </div>
+          {routingProofs.length === 0 ? (
+            <div className="text-xs text-muted-foreground p-3">
+              No routing decisions yet — child products emit a proof every time
+              they invoke a governed model or cross product boundaries.
             </div>
-          ))}
+          ) : (
+            routingProofs.map((p) => {
+              const d = describeRouting(p);
+              return (
+                <a
+                  key={p.id}
+                  href={p.deepLink ?? '#'}
+                  className="flex items-start gap-3 p-2 rounded-md bg-background border border-border hover:border-cyan-500/40 transition-colors no-underline"
+                  data-testid={`fabric-routing-${p.id}`}
+                >
+                  <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap mt-0.5">
+                    {relativeTime(p.ts)}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-mono font-semibold text-primary">{d.route}</span>
+                      <span className="text-[10px] text-muted-foreground">{d.from} → {d.to}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{d.reason}</p>
+                  </div>
+                </a>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

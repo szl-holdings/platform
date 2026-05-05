@@ -324,6 +324,10 @@ router.use(lazyMatch("/reliquary", () => import("./reliquary"), "reliquary"));
 // Note: routes/index.ts is mounted at /api in app.ts, so this resolves to /api/a11oy/*.
 router.use('/a11oy', a11oySovereignRouter);
 
+// A11oy Orchestration Backbone (#4748) is mounted directly in app.ts BEFORE
+// the global auth enforcer so the public fabric registry/proofs/demo-chain
+// endpoints can be reached without a session. See app.ts ~line 322.
+
 // A11oy Cognitive Runtime API — Cortex Router, Memory Fabric, Phase Engine, SLA Planner,
 // Worker Registry, Guided Output Guard, Proof Chain, Event Plane.
 // GET  /api/a11oy/cognitive/health

@@ -49,6 +49,7 @@ import { traceEmitMiddleware } from './middlewares/trace-emit';
 import { createHonoApp, createHonoExpressHandler } from './hono/index';
 import router from './routes';
 import demoResetRouter from './routes/demo-reset';
+import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 
 const app: Express = express();
 
@@ -310,6 +311,12 @@ app.get('/', (_req: Request, res: Response) => {
 const _aefRouter = createAefRouter();
 app.use('/alloy-embedding-api', _aefRouter);
 app.use('/api/alloy-embedding-api', _aefRouter);
+
+// A11oy Orchestration Backbone (#4748) — single conductor for the six child
+// products. Mounted BEFORE csrf/auth/globalAuthEnforcer because it is a public
+// fabric API: child products register from public boots and the demo-chain
+// endpoint must run without a session for the demo flow.
+app.use('/api/a11oy', a11oyOrchestrationRouter);
 
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));

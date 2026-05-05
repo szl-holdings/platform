@@ -1,3 +1,4 @@
+import { registerWithA11oy } from '@workspace/a11oy-orchestration/client';
 import { configurePlausible } from '@szl-holdings/analytics';
 import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
 import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
@@ -16,6 +17,18 @@ configurePlausible({
 initSentry({ appSlug: 'counsel', tracesSampleRate: 0.2 });
 initWebVitals('counsel', '/api/');
 initAnalytics({ appSlug: 'counsel' });
+
+void registerWithA11oy({
+  product: 'counsel',
+  displayName: 'Counsel — Legal Matter Command',
+  basePath: '/counsel/',
+  accentColor: '#8b5cf6',
+  capabilities: [
+    { id: 'matter_review', label: 'Matter Review', governanceClass: 'recommendation' },
+    { id: 'esign', label: 'eSignature Dispatch', governanceClass: 'external_action' },
+    { id: 'court_filing', label: 'Court Filing', governanceClass: 'external_action' },
+  ],
+});
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
