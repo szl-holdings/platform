@@ -99,6 +99,7 @@ const Lab = lazy(() => import('./pages/lab/Lab').then(m => ({ default: m.Lab }))
 const PatternAtlasNative = lazy(() => import('./pages/lab/PatternAtlasNative').then(m => ({ default: m.PatternAtlasNative })));
 const PromptRegistryNative = lazy(() => import('./pages/lab/PromptRegistryNative').then(m => ({ default: m.PromptRegistryNative })));
 const EvalConsoleNative = lazy(() => import('./pages/lab/EvalConsoleNative').then(m => ({ default: m.EvalConsoleNative })));
+const SentraOps = lazy(() => import('./pages/SentraOps').then(m => ({ default: m.SentraOps })));
 const AiGateway = lazy(() => import('./pages/AiGateway').then(m => ({ default: m.AiGateway })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
 const SkillForge = lazy(() => import('./pages/SkillForge'));
@@ -1389,6 +1390,12 @@ export default function App() {
         </Route>
         <Route path={`${base}/marketing`}>
           <MarketingHome />
+        </Route>
+
+        <Route path={`${base}/sentra-ops`}>
+          <Suspense fallback={null}>
+            <SentraOps />
+          </Suspense>
         </Route>
 
         <Route path="/command">

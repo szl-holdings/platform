@@ -102,6 +102,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'SENTRA OPS ⬡',
+    items: [
+      { href: '/sentra-ops', label: 'Sentra Operations' },
+    ],
+  },
+  {
     label: 'a1.1oy',
     items: [
       { href: '/praxis',         label: 'a1.1oy Chat' },

@@ -432,6 +432,21 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/a11oy-brain', label: 'a11oy Brain', icon: Brain, comp: L(() => import('@/pages/a11oy-brain-panel')) },
     ],
   },
+  {
+    id: 'sentra-command',
+    label: 'Sentra Command ⬡',
+    items: [
+      { path: '/command-center', label: 'Command Center', icon: ShieldCheck, comp: L(() => import('@/pages/command-center')) },
+      { path: '/asset-registry', label: 'Asset Registry', icon: Server, comp: L(() => import('@/pages/asset-registry')) },
+      { path: '/containment-actions', label: 'Containment Actions', icon: Lock, comp: L(() => import('@/pages/containment-actions')) },
+      { path: '/evidence-vault', label: 'Evidence Vault', icon: BookLock, comp: L(() => import('@/pages/evidence-vault')) },
+      { path: '/approval-queue', label: 'Approval Queue', icon: CheckCircle2, comp: L(() => import('@/pages/approval-queue-sentra')) },
+      { path: '/integrations-hub', label: 'Integrations Hub', icon: Plug, comp: L(() => import('@/pages/integrations-hub')) },
+      { path: '/reports-generator', label: 'Reports Generator', icon: FileText, comp: L(() => import('@/pages/reports-generator')) },
+      { path: '/policy-log', label: 'Policy Enforcement Log', icon: ShieldAlert, comp: L(() => import('@/pages/policy-enforcement-log')) },
+      { path: '/audit-trail', label: 'Audit Trail', icon: Database, comp: L(() => import('@/pages/audit-trail-v2')) },
+    ],
+  },
 ];
 
 const { aegisExtendedModules: EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
@@ -461,6 +476,7 @@ const SLIDES_NAV: NavItem = {
 };
 
 const MobileShell = lazy(() => import('@/pages/mobile/mobile-shell'));
+const IncidentDetailV2Page = lazy(() => import('@/pages/incident-detail-v2'));
 const SentraLandingPage = lazy(() => import('@/pages/sentra-landing'));
 const SentraPricingPage = lazy(() => import('@/pages/pricing'));
 const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
@@ -519,6 +535,12 @@ function DashboardRoutes() {
           </Suspense>
         </Route>
       ))}
+
+      <Route path="/incidents/:id">
+        <Suspense fallback={<PageLoader />}>
+          <IncidentDetailV2Page />
+        </Suspense>
+      </Route>
 
       <Route path="/crisis-simulator/:id">
         <Suspense fallback={<PageLoader />}>
@@ -1041,6 +1063,21 @@ function AppShell({
   return (
     <div className="flex flex-col h-screen" style={{ background: '#0a0a0a' }}>
       <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
+      {/* ── Persistent Defensive-Only Doctrine Banner ── */}
+      <div
+        className="flex items-center justify-center gap-2 px-4 py-1 shrink-0"
+        style={{ background: 'rgba(201,183,135,0.05)', borderBottom: '1px solid rgba(201,183,135,0.12)' }}
+        role="banner"
+        aria-label="Sentra defensive-only doctrine enforced"
+      >
+        <ShieldCheck className="w-3 h-3 text-[#c9b787] shrink-0" />
+        <span className="text-[9px] font-mono uppercase tracking-widest text-[#c9b787]">
+          DEFENSIVE ONLY
+        </span>
+        <span className="text-[9px] font-mono text-slate-600 hidden sm:inline">
+          · All offensive, retaliatory &amp; attacker-side actions denied by policy · NIST SP 800-61r2 · CISA CIRCIA · MITRE D3FEND
+        </span>
+      </div>
       <SharedDashboardShell
         sidebar={
           <SentraSidebarContent
