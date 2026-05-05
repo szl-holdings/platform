@@ -230,29 +230,22 @@ export function OverviewTab({
             <table className="w-full text-[10px]">
               <thead>
                 <tr>
-                  {['Tenant', 'Suite', 'Base Rent/Mo', 'Lease Expiry', 'Escalation', 'AI Confidence'].map((h) => (
-                    <th key={h} className="text-left pb-2 font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.2)' }}>{h}</th>
+                  {['Tenant', 'Suite', 'Base Rent/Mo', 'Lease Expiry'].map((h) => (
+                    <th key={h} className="text-left pb-2 font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.55)' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {propertyTenants.map((tenant, i) => {
-                  const mockConfidence = 88 + ((i * 4) % 12);
-                  const mockEscalation = ['3% annual', '2.5% annual', 'CPI capped 3%'][i % 3];
-                  const confColor = mockConfidence >= 90 ? '#40856a' : '#b8943c';
-                  return (
-                    <tr key={tenant.id} className="border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                      <td className="py-2 font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>{tenant.name}</td>
-                      <td className="py-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{tenant.unit}</td>
-                      <td className="py-2 font-mono font-bold" style={{ color: '#b8943c' }}>{formatCurrency(tenant.monthlyRent)}</td>
-                      <td className="py-2" style={{ color: new Date(tenant.leaseEnd) < new Date(Date.now() + 365 * 86400000) ? '#f59e0b' : 'rgba(255,255,255,0.4)' }}>
-                        {new Date(tenant.leaseEnd).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                      </td>
-                      <td className="py-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{mockEscalation}</td>
-                      <td className="py-2"><span className="font-mono font-bold" style={{ color: confColor }}>{mockConfidence}%</span></td>
-                    </tr>
-                  );
-                })}
+                {propertyTenants.map((tenant) => (
+                  <tr key={tenant.id} className="border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <td className="py-2 font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{tenant.name}</td>
+                    <td className="py-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{tenant.unit}</td>
+                    <td className="py-2 font-mono font-bold" style={{ color: '#b8943c' }}>{formatCurrency(tenant.monthlyRent)}</td>
+                    <td className="py-2" style={{ color: new Date(tenant.leaseEnd) < new Date(Date.now() + 365 * 86400000) ? '#f59e0b' : 'rgba(255,255,255,0.6)' }}>
+                      {new Date(tenant.leaseEnd).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

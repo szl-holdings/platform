@@ -711,8 +711,9 @@ export default function AutonomousThreatEngine() {
                                 },
                               });
                             }
-                          } catch (err) {
-                            console.warn('[sentra] fabric proof emission failed', err);
+                          } catch {
+                            // Fabric proof emission is best-effort: containment
+                            // proceeds even if the proof bus is unreachable.
                           }
                         }}
                         className="flex-1 py-2 rounded-lg text-xs font-bold"

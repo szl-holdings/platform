@@ -435,7 +435,9 @@ function PrivateApp({
           currentAppName="TERRA — Property Intelligence"
           accentColor={TERRA_ACCENT}
         />
-        <SandboxModeBanner />
+        <div className="hidden md:block">
+          <SandboxModeBanner />
+        </div>
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
             <PrivateRouter />
@@ -519,7 +521,9 @@ function App() {
 
   return (
     <AppModeProvider>
-      <AppModeBanner />
+      <div className="hidden md:block">
+        <AppModeBanner />
+      </div>
       <AnalyticsProvider appName="terra">
         <PrismBusProvider domain="terra">
           <SandboxModeProvider>

@@ -93,14 +93,6 @@ export function MarketingFooter() {
             >
               LinkedIn
             </a>
-            <a
-              href="https://medium.com/@stephen_38454"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#c9b787]/90 text-[12px] hover:text-[#8a8a8a]/90 transition-colors"
-            >
-              Medium
-            </a>
             {legalLinks.map((l) => (
               <Link
                 key={l.label}

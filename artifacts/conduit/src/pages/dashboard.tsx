@@ -63,7 +63,7 @@ export default function Dashboard() {
   );
   const throughput = useMemo(() => {
     const buckets = new Array(12).fill(0);
-    const now = Date.parse('2026-05-05T03:55:00Z');
+    const now = Date.now();
     for (const e of RELAY_RUN_EVENTS) {
       if (e.type !== 'completed') continue;
       const idx = Math.floor((now - Date.parse(e.atIso)) / (60 * 60 * 1000));

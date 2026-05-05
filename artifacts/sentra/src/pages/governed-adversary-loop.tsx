@@ -32,7 +32,7 @@ const LOOP_STAGES: LoopStage[] = [
   { id: 's3', seq: 3, app: 'a11oy', label: 'Approval Queue', description: 'If the scenario passes covenants, it enters the human Approval Queue with a constitutional citation and risk summary for operator review.', status: 'complete', proof_id: 'proof-s3-c1f9a' },
   { id: 's4', seq: 4, app: 'sentra', label: 'Execution (Sandboxed)', description: 'After operator approval, the scenario executes against the digital twin. Every step is covenant-gated. No live exploit traffic.', status: 'active', proof_id: 'proof-s4-d3b5e' },
   { id: 's5', seq: 5, app: 'sentra', label: 'Blue Team Detection', description: 'SOC detection layer monitors for expected sensor triggers. Results feed the purple-team coverage matrix.', status: 'pending' },
-  { id: 's6', seq: 6, app: 'a11oy', label: 'Proof Chain Closure', description: 'a11oy closes the proof packet — attack proposal, covenant gate, approval, execution steps, detections fired, and gap analysis — all in one chain.', status: 'pending', proof_id: 'proof-s6-TBD' },
+  { id: 's6', seq: 6, app: 'a11oy', label: 'Proof Chain Closure', description: 'a11oy closes the proof packet — attack proposal, covenant gate, approval, execution steps, detections fired, and gap analysis — all in one chain.', status: 'pending' },
 ];
 
 const APP_COLORS: Record<string, string> = { sentra: '#c9b787', a11oy: '#8b5cf6' };

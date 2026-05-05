@@ -352,6 +352,11 @@ function Router() {
   );
 }
 
+const CARLOTA_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const navTo = (path: string) => {
+  window.location.href = `${CARLOTA_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+};
+
 const carlotaCommands: CommandItem[] = [
   {
     id: 'nav-home',
@@ -360,7 +365,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'Navigation',
     keywords: ['overview', 'main'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/');
+      navTo('/');
     },
   },
   {
@@ -369,7 +374,7 @@ const carlotaCommands: CommandItem[] = [
     icon: '📋',
     group: 'Navigation',
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/services');
+      navTo('/services');
     },
   },
   {
@@ -378,7 +383,7 @@ const carlotaCommands: CommandItem[] = [
     icon: '👥',
     group: 'Navigation',
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/who-we-serve');
+      navTo('/who-we-serve');
     },
   },
   {
@@ -387,7 +392,7 @@ const carlotaCommands: CommandItem[] = [
     icon: '👤',
     group: 'Navigation',
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/founder');
+      navTo('/founder');
     },
   },
   {
@@ -396,7 +401,7 @@ const carlotaCommands: CommandItem[] = [
     icon: '📬',
     group: 'Actions',
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/contact');
+      navTo('/contact');
     },
   },
   {
@@ -405,7 +410,7 @@ const carlotaCommands: CommandItem[] = [
     icon: '🔐',
     group: 'Actions',
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/client-portal');
+      navTo('/client-portal');
     },
   },
   {
@@ -415,7 +420,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['diagnosis', 'strategy', 'analysis', 'market'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/strategic-diagnostic');
+      navTo('/strategic-diagnostic');
     },
   },
   {
@@ -425,7 +430,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['competitor', 'competitive', 'monitor', 'intelligence'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/competitive-radar');
+      navTo('/competitive-radar');
     },
   },
   {
@@ -435,7 +440,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['roi', 'impact', 'return', 'recommendations'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/engagement-roi');
+      navTo('/engagement-roi');
     },
   },
   {
@@ -445,7 +450,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['scenario', 'what-if', 'simulate', 'model'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/scenario-simulator');
+      navTo('/scenario-simulator');
     },
   },
   {
@@ -455,7 +460,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['health', 'client', 'score', 'risk'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/client-health');
+      navTo('/client-health');
     },
   },
   {
@@ -465,7 +470,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['proposal', 'generate', 'prospect', 'pitch'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/proposal-generator');
+      navTo('/proposal-generator');
     },
   },
   {
@@ -475,7 +480,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['dashboard', 'os', 'platform', 'overview'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/consulting-os');
+      navTo('/consulting-os');
     },
   },
   {
@@ -485,7 +490,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['knowledge', 'graph', 'ip', 'library', 'frameworks'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/knowledge-graph');
+      navTo('/knowledge-graph');
     },
   },
   {
@@ -495,7 +500,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['revenue', 'pipeline', 'deals', 'forecast'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/revenue-intelligence');
+      navTo('/revenue-intelligence');
     },
   },
   {
@@ -505,7 +510,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['workshop', 'training', 'agenda', 'session'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/workshop-platform');
+      navTo('/workshop-platform');
     },
   },
   {
@@ -515,7 +520,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['experts', 'team', 'assembly', 'network', 'skills'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/expert-network');
+      navTo('/expert-network');
     },
   },
   {
@@ -525,7 +530,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['time', 'billing', 'invoice', 'hours', 'rate'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/time-tracking');
+      navTo('/time-tracking');
     },
   },
   {
@@ -535,7 +540,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['capacity', 'resource', 'utilisation', 'heatmap', 'allocation'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/capacity-planner');
+      navTo('/capacity-planner');
     },
   },
   {
@@ -545,7 +550,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['knowledge', 'vault', 'library', 'playbook', 'framework', 'template'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/knowledge-vault');
+      navTo('/knowledge-vault');
     },
   },
   {
@@ -555,7 +560,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['benchmark', 'industry', 'data', 'metrics', 'comparison'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/benchmark-database');
+      navTo('/benchmark-database');
     },
   },
   {
@@ -565,7 +570,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['deliverable', 'approval', 'review', 'version', 'sign-off'],
     action: () => {
-      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/deliverable-workflow');
+      navTo('/deliverable-workflow');
     },
   },
   {
@@ -575,10 +580,7 @@ const carlotaCommands: CommandItem[] = [
     group: 'AI Platform',
     keywords: ['profitability', 'margin', 'p&l', 'write-off', 'scope creep'],
     action: () => {
-      window.location.href = window.location.pathname.replace(
-        /\/[^/]*$/,
-        '/profitability-analytics',
-      );
+      navTo('/profitability-analytics');
     },
   },
   {

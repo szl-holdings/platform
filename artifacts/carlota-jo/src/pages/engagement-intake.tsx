@@ -65,7 +65,7 @@ const ENGAGEMENT_TYPES = [
     id: 'other',
     label: 'Something Else',
     desc: 'Not sure which fits? Describe your situation and Rosa will determine the right approach.',
-    timeline: 'TBD',
+    timeline: 'Discussed at initial call',
     fee: 'Discussed at initial call',
     ideal: 'Complex or multi-layered situations',
   },

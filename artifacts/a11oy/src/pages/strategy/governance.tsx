@@ -108,7 +108,7 @@ const FALLBACK_POLICIES: Policy[] = [
     version: 'v1.0-draft',
     owner: 'Stephen Lutar',
     lastUpdated: 'Apr 14',
-    effectiveDate: 'TBD',
+    effectiveDate: 'Pending CISO + CEO approval',
     description:
       'Governs the use of AI-generated outputs in decision-making workflows. Requires human review for decisions above defined risk thresholds. Establishes explainability requirements.',
     enforcement: 'manual',
@@ -170,7 +170,7 @@ const FALLBACK_POLICIES: Policy[] = [
     version: 'v1.0-draft',
     owner: 'Sofia Reyes',
     lastUpdated: 'Apr 15',
-    effectiveDate: 'TBD',
+    effectiveDate: 'Pending CFO + CEO approval',
     description:
       'Defines approval authority levels for real estate acquisitions and dispositions based on deal size, asset class, and leverage ratios.',
     enforcement: 'manual',

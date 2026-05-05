@@ -15,7 +15,7 @@
 export const STATIC_PARTNERS = [
   {
     id: 1, partnerId: 'gw-partner-sentinel', name: 'Sentinel Security Research', legalName: 'Sentinel SR Ltd.',
-    homepage: 'https://sentinel-sr.example', appliedAt: '2026-01-10T09:00:00Z', stage: 'active' as const,
+    homepage: 'https://a11oy.szlholdings.com/doctrines/sentinel-sr', appliedAt: '2026-01-10T09:00:00Z', stage: 'active' as const,
     scope: { allowlistedAgents: ['op-guardian'], allowlistedActions: ['probe', 'report'], deniedActions: [] },
     verifications: [{ type: 'identity', outcome: 'pass', at: '2026-01-12T00:00:00Z' }, { type: 'soc2', outcome: 'pass', at: '2026-01-14T00:00:00Z' }],
     dualApproval: [{ actor: 'a11oy/alignment-review', role: 'reviewer', approvedAt: '2026-01-15T00:00:00Z' }],

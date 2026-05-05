@@ -198,7 +198,7 @@ function LiveFleetPanel() {
               Live Fleet — 214 Vessels Tracked
             </span>
           </div>
-          <span className="text-[10px] text-[#5e5e5e] font-mono">Updated 12s ago</span>
+          <span className="text-[10px] text-[#5e5e5e] font-mono">Live AIS feed</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">

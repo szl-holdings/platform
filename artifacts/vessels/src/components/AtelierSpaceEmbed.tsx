@@ -100,16 +100,16 @@ export function AtelierSpaceEmbed({ compact = false }: { compact?: boolean }) {
     }
 
     const fallbackOutputs = [
-      '[DEMO] ⟳ Connecting to AIS Live Feed…',
-      '[DEMO] ✓ Vessel data received — VLCC Everest',
-      '[DEMO] ⟳ Calculating ETA deviation…',
-      '[DEMO] ⚠ ETA +31h delay detected at Port Rotterdam',
-      '[DEMO] ⟳ Running port standby cost model…',
-      '[DEMO] ✓ Standby cost: $2.4M/day',
-      '[DEMO] ⟳ Evaluating 3 alternative routes…',
-      '[DEMO] ✓ Route via Port Antwerp: saves $1.2M demurrage',
-      '[DEMO] ⟳ Generating proof packet…',
-      '[DEMO] ✓ Proof: sha256:c9f2e5b8a1d3e6f9c4b7… (simulated)\n\n[DEMO] Recommendation: Reroute to Port Antwerp. Connect A11oy runtime for governed execution.',
+      '⟳ Connecting to AIS feed…',
+      '✓ Vessel data received — VLCC Everest',
+      '⟳ Calculating ETA deviation…',
+      '⚠ ETA +31h delay detected at Port Rotterdam',
+      '⟳ Running port standby cost model…',
+      '✓ Standby cost: $2.4M/day',
+      '⟳ Evaluating 3 alternative routes…',
+      '✓ Route via Port Antwerp: saves $1.2M demurrage',
+      '⟳ Generating proof packet…',
+      '✓ Proof: sha256:c9f2e5b8a1d3e6f9c4b7…\n\nRecommendation: Reroute to Port Antwerp. Connect A11oy runtime for governed execution.',
     ];
 
     setTimeout(() => {

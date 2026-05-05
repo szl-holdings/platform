@@ -120,23 +120,11 @@ const insightCards = [
   },
 ];
 
-const initialHistory = [
-  {
-    role: 'user' as const,
-    content: 'What are the key drivers of enterprise SaaS churn in the manufacturing vertical?',
-  },
-  {
-    role: 'assistant' as const,
-    content:
-      'Based on analysis of 847 enterprise contracts across the manufacturing vertical, the top 3 churn drivers are: (1) Poor integration with legacy ERP systems — accounts for 34% of churns; (2) Insufficient ROI demonstration in the first 90 days — 28%; (3) Executive sponsor turnover — 19%. Mitigation: Prioritize native SAP/Oracle connectors, implement 30-60-90 day success milestones tied to KPIs, and build multi-threader relationships across VP+ level in Year 1.',
-  },
-  { role: 'user' as const, content: 'How does this compare to the healthcare vertical?' },
-  {
-    role: 'assistant' as const,
-    content:
-      "Healthcare shows meaningfully different churn patterns. The top drivers there are: (1) Regulatory/compliance concerns — 41% of churns post-HIPAA audit anxiety; (2) Clinical workflow disruption — 31%; (3) Budget freeze cycles tied to fiscal years — 22%. The actionable contrast: Manufacturing needs deep technical integration focus, while Healthcare needs dedicated compliance documentation and change management. Recommend structuring your client's CS team by vertical with specialized playbooks.",
-  },
-];
+// Empty initial history — the advisory thread begins when the operator asks
+// the first question. Prior fabricated example exchanges (manufacturing /
+// healthcare churn paragraphs with invented "847 enterprise contracts"
+// statistics) were removed so visitors don't read invented data as fact.
+const initialHistory: { role: 'user' | 'assistant'; content: string }[] = [];
 
 export default function AIAdvisory() {
   usePageMeta({

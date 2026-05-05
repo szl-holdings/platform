@@ -25,7 +25,7 @@ const MODEL_ROUTES = [
   { condition: 'Primary reasoning', model: 'gpt-4o', cost: '$5/M', latency: '820ms' },
   { condition: 'Long-context analysis', model: 'claude-3.5-sonnet', cost: '$3/M', latency: '640ms' },
   { condition: 'Counterfactual (MirrorEval)', model: 'gpt-4o', cost: '$5/M', latency: '980ms' },
-  { condition: 'Defense (air-gapped)', model: 'llama-3-70b (planned)', cost: 'self-hosted', latency: 'TBD' },
+  { condition: 'Defense (air-gapped)', model: 'llama-3-70b (planned)', cost: 'self-hosted', latency: 'profiling in tenant' },
 ];
 
 export function Fabric() {

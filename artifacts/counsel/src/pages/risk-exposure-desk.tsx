@@ -172,15 +172,9 @@ export default function RiskExposureDesk() {
       : `${o.title} is ${o.status}. Filing required: ${o.filingRequired ? 'yes' : 'no'}.`,
   }));
 
-  if (DEADLINE_EVIDENCE.length === 0) {
-    DEADLINE_EVIDENCE.push({
-      id: 'ev-risk-fallback',
-      label: 'Exposure Model — Risk Analysis',
-      type: 'model',
-      timestamp: new Date(Date.now() - 15 * 60_000).toISOString(),
-      excerpt: 'Risk model computed from matter pressure scores and obligation status.',
-    });
-  }
+  // Note: when DEADLINE_EVIDENCE is empty we render the empty-state in the
+  // exposure panel rather than injecting a synthetic evidence row. This avoids
+  // showing fabricated obligations in a cleared queue.
 
   return (
     <div className="p-6 space-y-6">

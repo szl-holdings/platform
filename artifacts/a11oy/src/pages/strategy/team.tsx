@@ -117,7 +117,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     name: 'New Hire',
     email: 'hire@szlholdings.com',
     role: 'Analyst',
-    team: 'TBD',
+    team: 'Unassigned',
     status: 'invited',
     lastSeen: '—',
     apps: [],
