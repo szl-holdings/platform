@@ -104,6 +104,7 @@
     "@szl-holdings/services": "workspace:*",
     "@szl-holdings/signal-mesh": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
+    "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",
     "@szl/a11oy-runtime": "workspace:*",
     "@szl/alloy": "workspace:*",

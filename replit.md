@@ -50,8 +50,17 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory fabric, evidence ledger, and policy guard.
 - **Trust Score Engine:** A graduated autonomy system.
 - **Fine-Tuned Model Router:** Domain-aware model routing with fallback chains.
-- **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, and Adversarial ML Defense Console.
+- **Offline-First Sync (Mobile):** For mobile applications with local cache and conflict resolution.
+- **Unified Auth Mesh:** Backend-only authentication unification layer.
+- **Forecast & Anomaly Fabric:** Unified forecasting and anomaly detection services.
+- **Premium Data Fabric:** Adapter framework for data integration.
+- **Predictive Cap Rate Model:** ML-driven cap rate forecasting.
+- **Voyage Economics Calculator:** For maritime P&L calculations.
+- **Causal Scenario Backtesting & Monte Carlo Simulation Fabric:** For validating predictions and stochastic simulations.
+- **OpenAI Agents SDK Bridge:** Integration with OpenAI agents.
+- **Cyber Payload Standard (CPS):** A signed, versioned automation package format with five execution sections: detect/decide/act/approve/recover. Features maturity modes (shadow/supervised-auto/autonomous), tiered approval gates (auto/operator/supervisor/executive/dual-executive), governance enforcement (irreversible-action blocking, mandatory rollback paths, signed deployments, RBAC on rollback/maturity/execution endpoints), and cryptographic proof bundle generation. DB-backed persistence for runs (`cps_runs`), approvals (`cps_approvals`), and proof bundles (`cps_proof_bundles`) via Drizzle ORM with tenant scoping (`tenant_id`), with supplemental fan-out to `@workspace/run-ledger` and `@szl-holdings/evidence-ledger`. Three flagship defensive payloads: Identity Kill-Chain Interceptor (impossible travel, token anomaly, privilege expansion), Lateral Movement Containment (east-west traffic, process chains, credential dumps), Data Exfiltration Guardrail (egress anomaly, DLP classification, destination risk). API routes at `/cps/` (payloads, runs, approvals, rollback, proof-bundles, executive status). Sentra operator console: CPS Catalog, Run History, Approval Queue. Aegis executive surface: `aegis-cps-executive.tsx` at `/aegis/cps-command` (SOC Operations) and `/cps/executive` (CPS section) with KPIs, decision-deadline timers, containment status, payload performance. Rollback contract tests at `src/lib/__tests__/cps-rollback.test.ts` (10+ tests covering rollback execution, window expiry, governance blocks, confidence auto-rollback). Domain service at `artifacts/api-server/src/lib/domain-services/cps/`, schema at `lib/db/src/schema/cps.ts`, migrations at `lib/db/drizzle/0154_cps_tables.sql` and `0155_cps_tenant_scoping.sql`.
 - **Sentra Domain CRUD API (`/api/sentra/*`):** Provides in-memory map-based stores for various security and compliance domains.
+- **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, Hardware Root of Trust, and Adversarial ML Defense Console.
 - **Continuum ARGO — Field Intelligence Forge:** Fuses external signals with defensive doctrines.
 - **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, and self-healing.
 - **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, and Project Memory.

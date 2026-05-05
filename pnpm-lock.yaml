@@ -20201,7 +20201,7 @@ snapshots:
   '@types/compression@1.8.1':
     dependencies:
       '@types/express': 5.0.6
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/connect@3.4.38':
     dependencies:
@@ -20219,7 +20219,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/d3-array@3.2.2': {}
 
@@ -20438,7 +20438,7 @@ snapshots:
 
   '@types/nodemailer@7.0.11':
     dependencies:
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/pako@2.0.4': {}
 
@@ -20446,7 +20446,7 @@ snapshots:
 
   '@types/pdfkit@0.17.5':
     dependencies:
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/pg-pool@2.0.7':
     dependencies:
@@ -20550,13 +20550,13 @@ snapshots:
 
   '@types/web-push@3.6.4':
     dependencies:
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 22.19.17
+      '@types/node': 25.3.5
 
   '@types/yargs-parser@21.0.3': {}
 

@@ -67,4 +67,8 @@ export function register(router: IRouter): void {
   router.use("/aegis", _readLimiter);
   router.use(lazyMatch("/aegis", () => import("../aegis-digital-twin"), "aegis-digital-twin"));
   router.use(lazyMatch("/aegis", () => import("../aegis-modules"), "aegis-modules"));
+
+  router.use("/cps", tenantScope({ required: true }));
+  router.use("/cps", _readLimiter);
+  router.use(lazyRegisterMatch("/cps", () => import("../cps"), "cps"));
 }

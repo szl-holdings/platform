@@ -401,12 +401,131 @@ export default function IncidentProofChain() {
         </>
       )}
 
+      <CpsProofBundleSection incidentId={selectedIncidentId} />
+
       <div className="flex items-center gap-6 text-[10px] pt-2" style={{ color: DS.text.muted }}>
         <Activity className="w-3 h-3" />
         <span>Verified by: {provenance.verifiedBy ?? 'Cognitive Runtime'}</span>
         <span>Runtime: {provenance.cognitiveRuntime ?? 'v2.1.0'}</span>
         {dataUpdatedAt > 0 && <span>Updated: {new Date(dataUpdatedAt).toLocaleTimeString()}</span>}
       </div>
+    </div>
+  );
+}
+
+function CpsProofBundleSection({ incidentId }: { incidentId: number | null }) {
+  const { data, isLoading } = useStandardQuery({
+    queryKey: ['cps-runs-for-incident', incidentId],
+    queryFn: async () => {
+      const r = await fetch(`${API}/cps/runs`, { credentials: 'include' });
+      if (!r.ok) return [];
+      const json = await r.json();
+      return json.data ?? [];
+    },
+    staleTime: 30_000,
+  });
+
+  const cpsRuns: Array<{
+    id: string;
+    payloadId: string;
+    status: string;
+    startedAt: string;
+    completedAt: string | null;
+    linkedCaseId: string | null;
+    proofBundle: {
+      id: string;
+      signature: string;
+      generatedAt: string;
+      governanceChecks: Array<{ rule: string; passed: boolean; detail: string }>;
+      residualRisk: string;
+    } | null;
+    governanceChecks: Array<{ rule: string; passed: boolean; detail: string }>;
+  }> = (data ?? []).filter(
+    (r: any) => r.proofBundle || r.linkedCaseId,
+  );
+
+  if (isLoading || cpsRuns.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Link2 className="w-4 h-4 text-[#c9b787]" />
+        <h3
+          className="text-xs font-semibold uppercase tracking-widest"
+          style={{ color: DS.text.muted }}
+        >
+          CPS Proof Bundles
+        </h3>
+      </div>
+      {cpsRuns.map((run) => (
+        <div
+          key={run.id}
+          className="rounded-xl p-4 space-y-3"
+          style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono" style={{ color: DS.text.muted }}>
+                {run.payloadId}
+              </span>
+              <span
+                className="text-[9px] px-2 py-0.5 rounded-full font-medium"
+                style={{
+                  background: run.status === 'completed' ? 'rgba(201,183,135,0.1)' : 'rgba(245,245,245,0.08)',
+                  color: run.status === 'completed' ? '#c9b787' : '#f5f5f5',
+                  border: `1px solid ${run.status === 'completed' ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.15)'}`,
+                }}
+              >
+                {run.status}
+              </span>
+            </div>
+            <span className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
+              {new Date(run.startedAt).toLocaleString()}
+            </span>
+          </div>
+
+          {run.linkedCaseId && (
+            <div className="text-[10px]" style={{ color: '#c9b787' }}>
+              Linked Case: {run.linkedCaseId}
+            </div>
+          )}
+
+          {run.proofBundle && (
+            <div
+              className="rounded-lg p-3 space-y-2"
+              style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}
+            >
+              <div className="flex items-center gap-2 text-[10px]">
+                <CheckCircle className="w-3 h-3 text-[#c9b787]" />
+                <span style={{ color: DS.text.primary }}>
+                  Proof Bundle: {run.proofBundle.id.slice(0, 8)}...
+                </span>
+              </div>
+              <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
+                Signature: {run.proofBundle.signature.slice(0, 24)}...
+              </div>
+              <div className="text-[10px]" style={{ color: DS.text.secondary }}>
+                Residual Risk: {run.proofBundle.residualRisk}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {run.proofBundle.governanceChecks.map((gc) => (
+                  <span
+                    key={gc.rule}
+                    className="text-[8px] px-1.5 py-0.5 rounded font-mono"
+                    style={{
+                      background: gc.passed ? 'rgba(201,183,135,0.08)' : 'rgba(245,245,245,0.08)',
+                      color: gc.passed ? '#c9b787' : '#f5f5f5',
+                      border: `1px solid ${gc.passed ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.15)'}`,
+                    }}
+                  >
+                    {gc.passed ? '✓' : '✗'} {gc.rule}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

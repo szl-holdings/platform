@@ -42,6 +42,7 @@ import {
   Briefcase,
   Bug,
   Cpu,
+  CheckCircle2,
   Crosshair,
   Database,
   Eye,
@@ -200,6 +201,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/incidents', label: 'Incidents', icon: Bug, comp: L(() => import('@/pages/incidents-page')) },
       { path: '/investigations', label: 'Investigations', icon: Search, comp: L(() => import('@/pages/investigations-board')) },
       { path: '/cases', label: 'Cases', icon: Briefcase, comp: L(() => import('@/pages/cases-page')) },
+      { path: '/aegis/cps-command', label: 'CPS Executive Command', icon: Landmark, comp: L(() => import('@/pages/aegis-cps-executive')) },
       { path: '/findings', label: 'Findings', icon: Target, comp: L(() => import('@/pages/findings-page')) },
       { path: '/action-queue', label: 'Action Queue', icon: Zap, comp: L(() => import('@/pages/action-queue')) },
       { path: '/forensics', label: 'Forensics Timeline', icon: Microscope, comp: L(() => import('@/pages/forensics-timeline')) },
@@ -359,6 +361,16 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/reports', label: 'Reports', icon: FileText, comp: L(() => import('@/pages/reports-page')) },
       { path: '/pdf-export', label: 'PDF Export', icon: Presentation, comp: L(() => import('@/pages/aegis-pdf-export')) },
       { path: '/settings', label: 'Settings', icon: SettingsIcon, comp: L(() => import('@/pages/settings/unified-settings')) },
+    ],
+  },
+  {
+    id: 'cps',
+    label: 'Cyber Payload Standard',
+    items: [
+      { path: '/cps/catalog', label: 'CPS Catalog', icon: Shield, comp: L(() => import('@/pages/cps-catalog')) },
+      { path: '/cps/runs', label: 'Run History', icon: Activity, comp: L(() => import('@/pages/cps-run-history')) },
+      { path: '/cps/approvals', label: 'CPS Approvals', icon: CheckCircle2, comp: L(() => import('@/pages/cps-approvals')) },
+      { path: '/cps/executive', label: 'Executive Command', icon: Landmark, comp: L(() => import('@/pages/aegis-cps-executive')) },
     ],
   },
   {

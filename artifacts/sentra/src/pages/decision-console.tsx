@@ -23,6 +23,7 @@ import {
   TradecraftPanel,
 } from '@/components/tradecraft-panel';
 import { api } from '@/lib/api';
+import { cpsApi } from '@/lib/cps-api';
 import { useStepUp } from '@/lib/use-step-up';
 
 const DECISIONS = [
@@ -707,6 +708,8 @@ export default function DecisionConsole() {
             })()}
           </div>
 
+          <CpsApprovalLineage />
+
           {/* Tradecraft Decisions Panel */}
           {usingLive && selectedLive ? (
             <div className="space-y-3">
@@ -728,6 +731,85 @@ export default function DecisionConsole() {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CpsApprovalLineage() {
+  const { data } = useStandardQuery({
+    queryKey: ['cps-pending-approvals'],
+    queryFn: () => cpsApi.approvals.list({ status: 'pending' }),
+    retry: false,
+  });
+
+  const approvals: Array<{
+    id: string;
+    runId: string;
+    tier: string;
+    status: string;
+    requestedAt: string;
+    deadlineAt: string;
+    approver?: string;
+    dualApprovals?: Array<{ approver: string; approvedAt: string }>;
+    requiredDualCount?: number;
+  }> = data ?? [];
+
+  if (approvals.length === 0) return null;
+
+  return (
+    <div className="bg-[#c9b787]/[0.04] border border-[#c9b787]/15 rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Shield className="w-3.5 h-3.5 text-[#c9b787]" />
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#c9b787]/70">
+          CPS Approval Queue ({approvals.length})
+        </span>
+      </div>
+      <div className="space-y-2">
+        {approvals.map((a) => {
+          const deadline = new Date(a.deadlineAt);
+          const remaining = deadline.getTime() - Date.now();
+          const hoursLeft = Math.max(0, Math.floor(remaining / (60 * 60 * 1000)));
+          const minutesLeft = Math.max(0, Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000)));
+          const isUrgent = remaining < 60 * 60 * 1000;
+          const isDual = a.tier === 'dual-executive';
+          const dualProgress = isDual && a.requiredDualCount
+            ? `${(a.dualApprovals ?? []).length}/${a.requiredDualCount}`
+            : null;
+
+          return (
+            <div
+              key={a.id}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2',
+                isUrgent ? 'bg-[#f5f5f5]/5 border border-[#f5f5f5]/15' : 'bg-white/[0.025]',
+              )}
+            >
+              <Clock className={cn('w-3.5 h-3.5 shrink-0', isUrgent ? 'text-[#f5f5f5]' : 'text-[#c9b787]')} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-white/85 truncate">
+                    {a.tier.toUpperCase()} approval
+                  </span>
+                  {dualProgress && (
+                    <span className="text-[9px] font-mono text-[#c9b787]/70 px-1.5 py-0.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20">
+                      {dualProgress} signed
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-mono text-white/35">
+                  Run {a.runId.slice(0, 8)}
+                </span>
+              </div>
+              <span className={cn(
+                'text-[10px] font-mono shrink-0',
+                isUrgent ? 'text-[#f5f5f5]' : 'text-white/40',
+              )}>
+                {hoursLeft}h {minutesLeft}m
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
