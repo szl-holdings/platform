@@ -2,16 +2,30 @@
  * SZL Holdings — Agent Gateway: Approval Routing
  * Phase 11 — Agent Gateway
  *
- * When the OPA decision requires human approval, this module initiates a
- * Temporal approval workflow (from platform/temporal/workflows/approval-workflow.ts)
- * and returns the approval outcome.
+ * When the OPA decision requires human approval, this module starts the
+ * Temporal `approvalWorkflow` (defined in
+ * platform/temporal/workflows/approval-workflow.ts) and waits for the
+ * `approvalDecisionSignal` round trip to resolve the workflow.
  *
- * In local/test mode (TEMPORAL_ENDPOINT=local) the approval is auto-approved
- * immediately to allow integration tests to complete without a live Temporal cluster.
+ * Two modes:
+ *   - temporalEndpoint === 'local'  → auto-approves immediately (used by
+ *     unit/integration tests that do not have a Temporal cluster).
+ *   - temporalEndpoint is a host:port → uses the @temporalio/client SDK to
+ *     start the workflow against a live Temporal Frontend service. The caller
+ *     awaits the workflow result, which resolves once the
+ *     `approvalDecisionSignal` is received and counted by the workflow.
  */
 
 import { randomUUID } from 'crypto';
-import type { ApprovalRequest, ApprovalOutcome, EvidenceRecord, OpaDecision } from './types.js';
+import { mapToRegoOperationType } from './operation-mapping.js';
+import type {
+  AgentActionRequest,
+  ApprovalRequest,
+  ApprovalOutcome,
+  CallerIdentity,
+  EvidenceRecord,
+  OpaDecision,
+} from './types.js';
 
 export class ApprovalError extends Error {
   constructor(
@@ -37,20 +51,48 @@ function approveLocal(req: ApprovalRequest): ApprovalOutcome {
 }
 
 // ---------------------------------------------------------------------------
-// Remote Temporal approval request
+// Remote Temporal approval — uses @temporalio/client SDK
 // ---------------------------------------------------------------------------
 
-async function requestTemporalApproval(
-  temporalEndpoint: string,
+/**
+ * Lazily import the Temporal client so that:
+ *   - The agent-gateway has zero hard runtime dependency on @temporalio/client
+ *     when running in local/test mode.
+ *   - Tests that never touch the live path can run without the native bridge.
+ */
+async function loadTemporalClient(): Promise<typeof import('@temporalio/client')> {
+  try {
+    return await import('@temporalio/client');
+  } catch (err) {
+    throw new ApprovalError(
+      `Temporal client SDK is not installed. Install @temporalio/client to use a live TEMPORAL_ENDPOINT. (${err instanceof Error ? err.message : String(err)})`,
+      'unknown',
+    );
+  }
+}
+
+/**
+ * Build the workflow input expected by `approvalWorkflow`. The shape mirrors
+ * `ApprovalWorkflowInput` from platform/temporal/types/workflow-types.ts.
+ *
+ * Both `targetEnvironment` and `operationType` are sourced from the same
+ * places the OPA evaluation used:
+ *   - `targetEnvironment` comes straight from the inbound `AgentActionRequest`
+ *     (NOT inferred from the policyId, which is brittle).
+ *   - `operationType` runs through the same `mapToRegoOperationType` mapper
+ *     that authz.ts used to build the OPA input, guaranteeing the workflow
+ *     records the same operation type that policy actually evaluated.
+ */
+function buildWorkflowInput(
   req: ApprovalRequest,
   evidence: EvidenceRecord,
-): Promise<ApprovalOutcome> {
-  const startUrl = `${temporalEndpoint}/api/v1/namespaces/default/workflows`;
-
-  const workflowInput = {
-    operationType: `agent_${evidence.capability}`,
-    targetService: evidence.target,
-    targetEnvironment: 'development',
+  request: AgentActionRequest,
+  caller: CallerIdentity,
+) {
+  return {
+    operationType: mapToRegoOperationType(request, caller),
+    targetService: request.target,
+    targetEnvironment: request.targetEnvironment,
     targetVersion: 'agent-gateway',
     policyId: evidence.policyDecision.policyId,
     initiatedBy: evidence.actor,
@@ -65,62 +107,75 @@ async function requestTemporalApproval(
       promptHash: evidence.promptHash,
     },
   };
+}
 
-  const startRes = await fetch(startUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      workflowId: `agent-approval-${req.approvalId}`,
-      workflowType: { name: 'approvalWorkflow' },
-      taskQueue: { name: 'approval-task-queue' },
-      input: { payloads: [{ data: Buffer.from(JSON.stringify(workflowInput)).toString('base64') }] },
-    }),
-  });
+async function requestTemporalApproval(
+  temporalEndpoint: string,
+  req: ApprovalRequest,
+  evidence: EvidenceRecord,
+  request: AgentActionRequest,
+  caller: CallerIdentity,
+): Promise<ApprovalOutcome> {
+  const { Connection, Client } = await loadTemporalClient();
 
-  if (!startRes.ok) {
+  const namespace = process.env['TEMPORAL_NAMESPACE'] ?? 'default';
+  const taskQueue = process.env['TEMPORAL_APPROVAL_TASK_QUEUE'] ?? 'approval-task-queue';
+
+  let connection: Awaited<ReturnType<typeof Connection.connect>>;
+  try {
+    connection = await Connection.connect({ address: temporalEndpoint });
+  } catch (err) {
     throw new ApprovalError(
-      `Failed to start Temporal approval workflow: HTTP ${startRes.status}`,
+      `Failed to connect to Temporal at ${temporalEndpoint}: ${err instanceof Error ? err.message : String(err)}`,
       req.approvalId,
     );
   }
 
-  // Poll for completion (simplified — production would use a Temporal SDK client)
-  const pollUrl = `${temporalEndpoint}/api/v1/namespaces/default/workflows/agent-approval-${req.approvalId}/runs/-/result`;
-  const deadline = Date.now() + req.timeoutMs;
+  try {
+    const client = new Client({ connection, namespace });
+    const workflowId = `agent-approval-${req.approvalId}`;
 
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 2_000));
-    const pollRes = await fetch(pollUrl);
+    const handle = await client.workflow.start('approvalWorkflow', {
+      taskQueue,
+      workflowId,
+      args: [buildWorkflowInput(req, evidence, request, caller)],
+      workflowExecutionTimeout: req.timeoutMs + 60_000,
+    });
 
-    if (pollRes.status === 200) {
-      const data = (await pollRes.json()) as { result?: { payloads?: Array<{ data: string }> } };
-      const payload = data.result?.payloads?.[0]?.data;
-      if (payload) {
-        const outcome = JSON.parse(Buffer.from(payload, 'base64').toString('utf8')) as {
-          outcome: string;
-          approvals?: Array<{ approver: string; decidedAt: string }>;
-        };
+    // Wait for the workflow to resolve. The workflow blocks on the
+    // `approvalDecisionSignal` (or its internal timeout), so awaiting the
+    // result is what makes this an end-to-end signal round trip.
+    const result = (await handle.result()) as {
+      outcome: 'approved' | 'rejected' | 'expired';
+      approvals?: Array<{ approverUserId: string; decidedAt: string; notes: string | null }>;
+    };
 
-        if (outcome.outcome === 'approved') {
-          return {
-            approvalId: req.approvalId,
-            outcome: 'approved',
-            approvedBy: outcome.approvals?.[0]?.approver,
-            approvedAt: outcome.approvals?.[0]?.decidedAt ?? new Date().toISOString(),
-          };
-        } else {
-          return {
-            approvalId: req.approvalId,
-            outcome: 'rejected',
-            rejectedBy: outcome.approvals?.[0]?.approver,
-            rejectedReason: 'Rejected via Temporal approval workflow',
-          };
-        }
-      }
+    if (result.outcome === 'approved') {
+      const first = result.approvals?.[0];
+      return {
+        approvalId: req.approvalId,
+        outcome: 'approved',
+        approvedBy: first?.approverUserId,
+        approvedAt: first?.decidedAt ?? new Date().toISOString(),
+      };
     }
-  }
 
-  return { approvalId: req.approvalId, outcome: 'expired' };
+    if (result.outcome === 'rejected') {
+      const first = result.approvals?.[0];
+      return {
+        approvalId: req.approvalId,
+        outcome: 'rejected',
+        rejectedBy: first?.approverUserId,
+        rejectedReason: first?.notes ?? 'Rejected via Temporal approval workflow',
+      };
+    }
+
+    return { approvalId: req.approvalId, outcome: 'expired' };
+  } finally {
+    await connection.close().catch(() => {
+      /* best-effort cleanup */
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -130,6 +185,8 @@ async function requestTemporalApproval(
 export async function routeApproval(
   decision: OpaDecision,
   evidence: EvidenceRecord,
+  request: AgentActionRequest,
+  caller: CallerIdentity,
   temporalEndpoint: string,
   approvalTimeoutMs: number,
 ): Promise<ApprovalOutcome> {
@@ -153,5 +210,5 @@ export async function routeApproval(
     return approveLocal(req);
   }
 
-  return requestTemporalApproval(temporalEndpoint, req, evidence);
+  return requestTemporalApproval(temporalEndpoint, req, evidence, request, caller);
 }

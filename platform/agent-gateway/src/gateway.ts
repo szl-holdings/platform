@@ -163,6 +163,8 @@ export class AgentGateway {
       approvalOutcome = await routeApproval(
         policyDecision,
         evidence,
+        request,
+        caller,
         this.config.temporalEndpoint,
         this.config.approvalTimeoutMs,
       );

@@ -67,6 +67,37 @@ pnpm test
 
 ---
 
+## Wiring the Agent Gateway to Live OPA + Temporal
+
+The agent gateway (`platform/agent-gateway/`) routes approval requests through
+the `approvalWorkflow` defined here. Two environment variables switch it from
+embedded/test mode to live mode:
+
+```bash
+# Live OPA serving the platform/policy/ bundle
+export OPA_ENDPOINT=http://opa.szl-platform.svc:8181
+
+# Live Temporal Frontend service (host:port; the SDK uses gRPC, not HTTP)
+export TEMPORAL_ENDPOINT=temporal.szl-platform.svc:7233
+
+# Optional overrides
+export TEMPORAL_NAMESPACE=szl-platform           # default: "default"
+export TEMPORAL_APPROVAL_TASK_QUEUE=approval-task-queue
+```
+
+The end-to-end test
+`platform/temporal/tests/agent-gateway-temporal-e2e.test.ts` boots an
+ephemeral Temporal server via `TestWorkflowEnvironment.createLocal()`,
+points the gateway's `routeApproval` at it, and verifies that the
+`approvalDecisionSignal` round trip resolves both approved and rejected
+outcomes back to the gateway caller. The OPA half of the wiring is covered
+by `platform/agent-gateway/tests/gateway-opa-live.test.ts`, which spawns a
+real `opa` process serving `platform/policy/approval/approval-requirements.rego`
+and asserts that production-targeted requests get gated through the live
+bundle (with `policyDecision.evaluatedAt` taken from OPA's HTTP `Date` header).
+
+---
+
 ## Temporal Namespace Configuration
 
 ```bash
