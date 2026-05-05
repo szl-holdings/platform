@@ -209,6 +209,39 @@ export const getAdminUsage = (params?: { plan?: string; org?: string; limit?: nu
   return apiFetch<AdminUsageResponse>(`/admin/usage${qs ? `?${qs}` : ''}`);
 };
 
+// ─── Quota Violations (admin) ────────────────────────────────────────────────
+export interface QuotaViolationRow {
+  id: number;
+  featureKey: string;
+  violationType: 'soft' | 'hard';
+  action: string;
+  currentUsage: number | null;
+  limitValue: number | null;
+  metadata: Record<string, unknown> | null;
+  occurredAt: string;
+}
+
+export interface QuotaViolationsResponse {
+  orgId: number;
+  rows: QuotaViolationRow[];
+  pagination: { limit: number; offset: number; total: number; hasMore: boolean };
+}
+
+export const getOrgQuotaViolations = (
+  orgId: number,
+  params?: { limit?: number; offset?: number; type?: 'soft' | 'hard'; feature?: string },
+) => {
+  const q = new URLSearchParams();
+  if (params?.limit != null) q.set('limit', String(params.limit));
+  if (params?.offset != null) q.set('offset', String(params.offset));
+  if (params?.type) q.set('type', params.type);
+  if (params?.feature) q.set('feature', params.feature);
+  const qs = q.toString();
+  return apiFetch<QuotaViolationsResponse>(
+    `/admin/orgs/${orgId}/quota-violations${qs ? `?${qs}` : ''}`,
+  );
+};
+
 // ─── Connections ──────────────────────────────────────────────────────────────
 export const listConnections = () => apiFetch<Connection[]>('/conduit/connections');
 export const getConnection = (id: string) => apiFetch<Connection>(`/conduit/connections/${id}`);

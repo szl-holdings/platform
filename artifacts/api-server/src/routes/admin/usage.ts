@@ -12,6 +12,13 @@
  *
  * PUT /api/admin/usage/:orgId/limits — set per-org quota overrides
  *   Body: { apiCalls?: number | null, members?: number | null, storageMB?: number | null }
+ *
+ * GET /api/admin/orgs/:orgId/quota-violations — paginated quota violation history for an org
+ *   Query params:
+ *     limit   — max rows (default: 50, max: 500)
+ *     offset  — pagination offset (default: 0)
+ *     type    — filter by violation type (soft|hard)
+ *     feature — filter by featureKey (exact match)
  */
 
 import {
@@ -20,11 +27,12 @@ import {
   orgMembersTable,
   pool,
   quotaConfigsTable,
+  quotaViolationsTable,
   usageEventsTable,
   usageThresholdNotificationsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { and, count, eq, gte, ilike, lt, lte, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, ilike, lt, lte, or, sql } from 'drizzle-orm';
 import type { IRouter, Request, Response } from 'express';
 import {
   handleRouteError,
@@ -380,6 +388,104 @@ export function register(router: IRouter): void {
         });
       } catch (err) {
         handleRouteError(res, err, 'Failed to aggregate admin usage data');
+      }
+    },
+  );
+
+  router.get(
+    '/admin/orgs/:orgId/quota-violations',
+    readLimiter,
+    validateQuery(listQuerySchema),
+    async (req: Request, res: Response) => {
+      try {
+        if (!requireSuperAdmin(req, res)) return;
+
+        const orgId = parseInt(req.params.orgId, 10);
+        if (Number.isNaN(orgId)) {
+          sendBadRequest(res, 'Invalid orgId');
+          return;
+        }
+
+        const {
+          limit: limitStr = '50',
+          offset: offsetStr = '0',
+          type,
+          feature,
+        } = req.query as Record<string, string | undefined>;
+
+        const limitNum = Math.min(Math.max(1, parseInt(limitStr ?? '50', 10) || 50), 500);
+        const offsetNum = Math.max(parseInt(offsetStr ?? '0', 10) || 0, 0);
+
+        if (type && type !== 'soft' && type !== 'hard') {
+          sendBadRequest(res, "Invalid 'type' — must be 'soft' or 'hard'");
+          return;
+        }
+
+        const org = await db
+          .select({ id: organizationsTable.id })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId))
+          .limit(1);
+
+        if (org.length === 0) {
+          sendNotFound(res, 'Organization');
+          return;
+        }
+
+        const conditions: ReturnType<typeof eq>[] = [eq(quotaViolationsTable.orgId, orgId)];
+        if (type === 'soft' || type === 'hard') {
+          conditions.push(eq(quotaViolationsTable.violationType, type));
+        }
+        if (feature) {
+          conditions.push(eq(quotaViolationsTable.featureKey, feature));
+        }
+
+        const whereClause = and(...conditions);
+
+        const [totalRow] = await db
+          .select({ total: count() })
+          .from(quotaViolationsTable)
+          .where(whereClause);
+        const total = Number(totalRow?.total ?? 0);
+
+        const rows = await db
+          .select({
+            id: quotaViolationsTable.id,
+            featureKey: quotaViolationsTable.featureKey,
+            violationType: quotaViolationsTable.violationType,
+            action: quotaViolationsTable.action,
+            currentUsage: quotaViolationsTable.currentUsage,
+            limitValue: quotaViolationsTable.limitValue,
+            metadata: quotaViolationsTable.metadata,
+            occurredAt: quotaViolationsTable.occurredAt,
+          })
+          .from(quotaViolationsTable)
+          .where(whereClause)
+          .orderBy(desc(quotaViolationsTable.occurredAt))
+          .limit(limitNum)
+          .offset(offsetNum);
+
+        sendSuccess(res, {
+          orgId,
+          rows: rows.map((r) => ({
+            id: r.id,
+            featureKey: r.featureKey,
+            violationType: r.violationType,
+            action: r.action,
+            currentUsage: r.currentUsage != null ? Number(r.currentUsage) : null,
+            limitValue: r.limitValue != null ? Number(r.limitValue) : null,
+            metadata: r.metadata ?? null,
+            occurredAt: r.occurredAt.toISOString(),
+          })),
+          pagination: {
+            limit: limitNum,
+            offset: offsetNum,
+            total,
+            hasMore: offsetNum + limitNum < total,
+          },
+        });
+      } catch (err) {
+        handleRouteError(res, err, 'Failed to load quota violations');
       }
     },
   );

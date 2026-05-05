@@ -9,6 +9,16 @@ export const useAdminUsage = (params?: { plan?: string; org?: string; limit?: nu
     queryFn: () => api.getAdminUsage(params),
   });
 
+export const useOrgQuotaViolations = (
+  orgId: number | null,
+  params?: { limit?: number; offset?: number; type?: 'soft' | 'hard'; feature?: string },
+) =>
+  useQuery({
+    queryKey: ['admin-org-quota-violations', orgId, params],
+    queryFn: () => api.getOrgQuotaViolations(orgId as number, params),
+    enabled: orgId != null,
+  });
+
 export const useConnections = () => useQuery({ queryKey: ['connections'], queryFn: api.listConnections });
 export const useConnection = (id: string) => useQuery({ queryKey: ['connections', id], queryFn: () => api.getConnection(id), enabled: !!id });
 export const useCreateConnection = () => {
