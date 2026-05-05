@@ -119,6 +119,7 @@
     "@types/pdfkit": "^0.17.5",
     "@workspace/a11oy-fabric": "workspace:*",
     "@workspace/a11oy-orchestration": "workspace:*",
+    "@workspace/frontier-ingest": "workspace:*",
     "@workspace/a11oy-reliquary": "workspace:*",
     "@workspace/aef-domain-profiles": "workspace:*",
     "@workspace/aef-evals": "workspace:*",

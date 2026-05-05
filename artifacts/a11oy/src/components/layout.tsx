@@ -32,7 +32,9 @@ const NAV_GROUPS = [
     items: [
       { href: '/recommendations', label: 'Recommendations' },
       { href: '/brief',           label: 'Executive Brief' },
-      { href: '/frontier',        label: 'Frontier Intel' },
+      { href: '/frontier',        label: 'Frontier Engine' },
+      { href: '/frontier/inbox',  label: 'Frontier Inbox' },
+      { href: '/frontier-intel',  label: 'Frontier Intel' },
     ],
   },
   {

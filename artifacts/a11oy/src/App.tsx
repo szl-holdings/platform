@@ -160,6 +160,8 @@ const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ defa
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
+const FrontierEngine = lazy(() => import('./pages/Frontier').then(m => ({ default: m.Frontier })));
+const FrontierInbox = lazy(() => import('./pages/FrontierInbox').then(m => ({ default: m.FrontierInbox })));
 const QuantumIntelligence = lazy(() => import('./pages/QuantumIntelligence').then(m => ({ default: m.QuantumIntelligence })));
 const DarpaResilienceHub = lazy(() => import('./pages/DarpaResilienceHub').then(m => ({ default: m.DarpaResilienceHub })));
 const GardRobustness = lazy(() => import('./pages/GardRobustness').then(m => ({ default: m.GardRobustness })));
@@ -684,7 +686,12 @@ export default function App() {
         <Route path={`${base}/learning`} component={LearningLoop} />
         <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
         <Route path={`${base}/adversarial`} component={AdversarialResilience} />
-        <Route path={`${base}/frontier`} component={FrontierIntelligence} />
+        {/* Frontier Ingestion Engine — primary surface per task #4803.
+            The legacy Frontier Intelligence dashboard moved to
+            /frontier-intel to avoid path collision. */}
+        <Route path={`${base}/frontier`} component={FrontierEngine} />
+        <Route path={`${base}/frontier/inbox`} component={FrontierInbox} />
+        <Route path={`${base}/frontier-intel`} component={FrontierIntelligence} />
         <Route path={`${base}/quantum`} component={QuantumIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
         <Route path={`${base}/runtime`}>

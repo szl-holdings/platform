@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/frontier-ingest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Frontier Ingestion Engine — continuous pulls from Anthropic, OpenAI, Google, NVIDIA, HuggingFace; codex-scored; auto-promote or queue for operator review.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./sources": "./src/sources.ts",
+    "./classifier": "./src/classifier.ts",
+    "./worker": "./src/worker.ts",
+    "./store": "./src/store.ts",
+    "./adapters": "./src/adapters.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/formulas": "workspace:*",
+    "@workspace/lutar-formulas": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

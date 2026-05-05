@@ -513,6 +513,243 @@ export async function bootstrap(
           '[ot-ics-feed] Synthetic stream feed disabled (OT_ICS_FEED_ENABLED != "true"). Set OT_ICS_FEED_ENABLED=true to enable.',
         );
       }
+
+      // Frontier Ingestion Engine — continuous pulls from Anthropic/OpenAI/
+      // Google/NVIDIA/HuggingFace. Default OFF so we never make surprise
+      // outbound calls; flip FRONTIER_INGEST_ENABLED=true to arm.
+      // Subscribe downstream registries to promotion events. This is the
+      // auto-routing seam: when the codex auto-promotes (or an operator
+      // approves) an artifact, it lands in the operator model registry / chat
+      // router availability list / thesis corpus / eval harness / tool-
+      // proposal queue without further worker coupling. Listeners log their
+      // dispatch into pino so the proof-chain is visible in workflow logs.
+      try {
+        const { onPromotion, onCapReached, ensureFrontierIngestDbSchema, isFrontierIngestDbEnabled, dbListPromotionsShared } = await import('@workspace/frontier-ingest');
+        // Bootstrap the cross-process Postgres backend so the api-server,
+        // the Temporal worker process, and any on-demand pulls share the
+        // same artifacts/inbox/timeline/promotions/downstream state.
+        try {
+          await ensureFrontierIngestDbSchema();
+          if (isFrontierIngestDbEnabled()) {
+            logger.info('[frontier-ingest] postgres-shared backend ready (cross-process state)');
+          } else {
+            logger.warn('[frontier-ingest] DB backend unavailable — running in-memory only (single process)');
+          }
+        } catch (dbErr) {
+          logger.warn({ err: dbErr }, '[frontier-ingest] DB backend bootstrap failed — falling back to in-memory');
+        }
+        const { addModelToRegistry } = await import('./a11oy/runtime/model-registry.js');
+        const { appendDownstream } = await import('./a11oy/runtime/frontier-downstream.js');
+
+        // Cost-cap notifier: when either the lifetime or 24h-rolling cap
+        // trips, log a warning so the proof-chain shows operators why
+        // ingestion paused. (Webhook/email notifier is intentionally
+        // pluggable — replace this listener with the platform's alerting
+        // adapter when needed.)
+        onCapReached((message, totals) => {
+          logger.warn(
+            { ...totals },
+            `[frontier-ingest] cost cap reached — ingestion paused: ${message}`,
+          );
+        });
+
+        const dispatchPromotion = (event: {
+          target: string;
+          at: string;
+          artifact: {
+            id: string;
+            kind: string;
+            externalId: string;
+            title: string;
+            url: string;
+            summary?: string;
+            provider: string;
+          };
+          evidence: { score: { composite: number }; decision: string };
+        }) => {
+          // Real downstream wiring — when an artifact is auto-promoted (or
+          // operator-approved), if it targets the operator model registry
+          // and is a model, register it into the live in-memory registry.
+          // The registry entry starts gated (productionApproved=false,
+          // sensitivityAllowance='restricted') so the chat router won't
+          // route real traffic to it until an operator explicitly approves
+          // — matching the existing addModelToRegistry contract.
+          try {
+            switch (event.target) {
+              case 'operator_model_registry':
+                if (event.artifact.kind === 'model') {
+                  addModelToRegistry({
+                    id: event.artifact.id,
+                    hfModelId: event.artifact.externalId,
+                    displayName: event.artifact.title,
+                    provider: event.artifact.provider,
+                    capabilities: ['reasoning'],
+                    tier: 'experimental',
+                    contextWindow: 0,
+                    maxOutputTokens: 0,
+                    inputCostPer1kTokens: 0,
+                    outputCostPer1kTokens: 0,
+                    license: 'unknown',
+                    description:
+                      event.artifact.summary ?? `Frontier-ingest discovery: ${event.artifact.title}`,
+                  });
+                }
+                break;
+              case 'thesis_corpus':
+              case 'eval_harness':
+              case 'tool_proposals':
+              case 'benchmark_registry': {
+                // Concrete adapter: append to the in-process downstream
+                // store so the queue is queryable via
+                // /api/a11oy/frontier/downstream/:target. This is the
+                // proof-chain seam — operators can verify a discovery
+                // actually landed in its downstream system.
+                appendDownstream(event.target, {
+                  artifactId: event.artifact.id,
+                  provider: event.artifact.provider,
+                  kind: event.artifact.kind,
+                  title: event.artifact.title,
+                  url: event.artifact.url,
+                  summary: event.artifact.summary,
+                  codexScore: event.evidence.score.composite,
+                  source: event.artifact.id.split(':')[0] ?? event.artifact.provider,
+                  receivedAt: event.at,
+                  proofChainRef: `frontier:${event.artifact.id}@${event.at}`,
+                });
+                logger.info(
+                  {
+                    target: event.target,
+                    artifactId: event.artifact.id,
+                    provider: event.artifact.provider,
+                    kind: event.artifact.kind,
+                  },
+                  `[frontier-ingest] ${event.target}.append`,
+                );
+                break;
+              }
+            }
+          } catch (regErr) {
+            logger.warn({ err: regErr }, '[frontier-ingest] downstream registry write failed');
+          }
+          logger.info(
+            {
+              target: event.target,
+              provider: event.artifact.provider,
+              kind: event.artifact.kind,
+              artifactId: event.artifact.id,
+              decision: event.evidence.decision,
+            },
+            '[frontier-ingest] promotion dispatched downstream',
+          );
+        };
+        onPromotion(dispatchPromotion);
+        logger.info('[frontier-ingest] downstream promotion listeners armed');
+
+        // Cross-process promotion poller — when the Temporal worker
+        // process (or any other api-server replica) writes to
+        // `frontier_promotions`, the in-process onPromotion EventEmitter
+        // doesn't fire here. Poll the shared DB on a slow cadence and
+        // dispatch any promotions newer than `lastSeenAt` so the
+        // downstream wiring (model registry / thesis corpus / eval
+        // harness / tool-proposals / benchmark-registry) stays
+        // consistent across the whole stack. Dedup by artifactId+target.
+        try {
+          if (await isFrontierIngestDbEnabled()) {
+            const seenKey = (target: string, artifactId: string) => `${target}::${artifactId}`;
+            const seen = new Set<string>();
+            // Seed `seen` with whatever's already in the DB so we don't
+            // re-dispatch historical promotions on every restart.
+            const initial = (await dbListPromotionsShared(500)) ?? [];
+            let lastSeenAt = 0;
+            for (const p of initial) {
+              seen.add(seenKey(p.target, p.artifact.id));
+              const t = Date.parse(p.at);
+              if (Number.isFinite(t) && t > lastSeenAt) lastSeenAt = t;
+            }
+            const pollMs = Number(process.env.FRONTIER_PROMOTION_POLL_MS ?? '5000');
+            const timer = setInterval(async () => {
+              try {
+                const rows = (await dbListPromotionsShared(200)) ?? [];
+                for (const p of rows) {
+                  const k = seenKey(p.target, p.artifact.id);
+                  if (seen.has(k)) continue;
+                  const t = Date.parse(p.at);
+                  if (!Number.isFinite(t) || t <= lastSeenAt) {
+                    seen.add(k);
+                    continue;
+                  }
+                  seen.add(k);
+                  if (t > lastSeenAt) lastSeenAt = t;
+                  dispatchPromotion({
+                    target: p.target,
+                    at: p.at,
+                    artifact: p.artifact,
+                    evidence: { score: p.evidence.score, decision: p.evidence.decision },
+                  });
+                  logger.info(
+                    { target: p.target, artifactId: p.artifact.id, source: 'cross-process-poller' },
+                    '[frontier-ingest] cross-process promotion dispatched',
+                  );
+                }
+              } catch (pollErr) {
+                logger.warn({ err: pollErr }, '[frontier-ingest] cross-process promotion poll failed');
+              }
+            }, Math.max(1000, pollMs));
+            timer.unref?.();
+            logger.info(
+              { pollMs, seeded: seen.size },
+              '[frontier-ingest] cross-process promotion poller armed',
+            );
+          }
+        } catch (pollSetupErr) {
+          logger.warn({ err: pollSetupErr }, '[frontier-ingest] cross-process promotion poller setup failed');
+        }
+      } catch (err) {
+        logger.warn({ err }, '[frontier-ingest] failed to arm downstream listeners');
+      }
+
+      if (process.env.FRONTIER_INGEST_ENABLED === 'true') {
+        try {
+          // Production scheduler is Temporal: try to ensure the durable
+          // schedule exists. The actual workflow execution happens in the
+          // dedicated Temporal worker process — api-server only owns the
+          // schedule lifecycle. If Temporal is unreachable we fall back
+          // to the in-process dev loop ONLY when the operator opts in via
+          // FRONTIER_INGEST_DEV_WORKER=true. This guarantees production
+          // never silently runs the setInterval fallback.
+          const { ensureFrontierIngestSchedule, startWorker } = await import(
+            '@workspace/frontier-ingest'
+          );
+          const scheduleResult = await ensureFrontierIngestSchedule();
+          if (scheduleResult.ok) {
+            logger.info(
+              {
+                scheduleId: scheduleResult.scheduleId,
+                workflowType: scheduleResult.workflowType,
+                taskQueue: scheduleResult.taskQueue,
+              },
+              '[frontier-ingest] Temporal schedule ensured (production scheduler)',
+            );
+          } else if (process.env.FRONTIER_INGEST_DEV_WORKER === 'true') {
+            startWorker({ force: true });
+            logger.warn(
+              { reason: scheduleResult.reason },
+              '[frontier-ingest] Temporal unavailable — dev in-process worker armed (FRONTIER_INGEST_DEV_WORKER=true)',
+            );
+          } else {
+            logger.warn(
+              { reason: scheduleResult.reason },
+              '[frontier-ingest] Temporal unavailable and FRONTIER_INGEST_DEV_WORKER!=true — ingestion not scheduled',
+            );
+          }
+        } catch (err) {
+          logger.warn({ err }, '[frontier-ingest] failed to start scheduler');
+        }
+      } else {
+        logger.info(
+          '[frontier-ingest] Worker disabled (FRONTIER_INGEST_ENABLED != "true"). Operators can pull-on-demand from /a11oy/frontier-engine.',
+        );
+      }
     }
 
     try {

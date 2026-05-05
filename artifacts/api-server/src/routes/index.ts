@@ -551,6 +551,10 @@ router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"))
 // Search, download, upload with PCE gate evaluation, proof chain, and cost metering.
 router.use(lazyMatch("/a11oy/hub-operations", () => import("./a11oy-hub-operations"), "a11oy-hub-operations"));
 
+// Frontier Ingestion Engine — continuous pulls from Anthropic/OpenAI/Google/NVIDIA/HF.
+// Codex-scored (Ouroboros + Lutar + thesis-fit). Auto-promote or queue for operator review.
+router.use(lazyMatch("/a11oy/frontier", () => import("./a11oy-frontier"), "a11oy-frontier"));
+
 // Unified Hugging Face Hub — model/dataset/space search, pinned registry,
 // multimodal inference proxy, and token health. All HF traffic from every
 // frontend flows through this single surface so auth, retries, and cost
