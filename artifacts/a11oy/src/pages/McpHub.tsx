@@ -26,6 +26,7 @@ interface McpServer {
   latencyMs: number;
   requestsToday: number;
   lastHealthCheck: number;
+  gatewayServerId?: string;
 }
 
 interface McpTool {
@@ -42,6 +43,19 @@ interface McpResource {
   name: string;
   mimeType: string;
   description: string;
+}
+
+interface LiveServerStatus {
+  serverId: string;
+  name: string;
+  enabled: boolean;
+  status: string;
+  callsToday: number;
+  calls24h: number;
+  errorRate: number;
+  avgLatencyMs: number;
+  toggledAt?: string;
+  toggledBy?: string;
 }
 
 interface GatewayStats {
@@ -141,7 +155,7 @@ interface ConnectInstructions {
 
 const SERVERS: McpServer[] = [
   {
-    id: 'mcp-fabric', name: 'A11oy Fabric',
+    id: 'mcp-fabric', name: 'A11oy Fabric', gatewayServerId: 'szl-tool-mesh',
     description: 'Core governance fabric — workcells, signals, proof, covenants',
     status: 'connected', transport: 'stdio', version: '2.4.0', latencyMs: 12, requestsToday: 2847, lastHealthCheck: Date.now() - 30000,
     tools: [
@@ -158,7 +172,7 @@ const SERVERS: McpServer[] = [
     ],
   },
   {
-    id: 'mcp-knowledge', name: 'Knowledge Store',
+    id: 'mcp-knowledge', name: 'Knowledge Store', gatewayServerId: 'szl-counsel-evidence',
     description: 'Agentic RAG — vector retrieval, semantic search, document ingestion',
     status: 'connected', transport: 'streamable-http', version: '1.8.0', latencyMs: 34, requestsToday: 1203, lastHealthCheck: Date.now() - 15000,
     tools: [
@@ -171,7 +185,7 @@ const SERVERS: McpServer[] = [
     ],
   },
   {
-    id: 'mcp-github', name: 'GitHub',
+    id: 'mcp-github', name: 'GitHub', gatewayServerId: 'szl-aegis-threat',
     description: 'Repository access, PR management, code search, issue tracking',
     status: 'connected', transport: 'stdio', version: '2026.1.26', latencyMs: 89, requestsToday: 456, lastHealthCheck: Date.now() - 45000,
     tools: [
@@ -182,7 +196,7 @@ const SERVERS: McpServer[] = [
     resources: [{ uri: 'github://repos', name: 'Repositories', mimeType: 'application/json', description: 'Accessible repositories' }],
   },
   {
-    id: 'mcp-postgres', name: 'PostgreSQL',
+    id: 'mcp-postgres', name: 'PostgreSQL', gatewayServerId: 'szl-terra-portfolio',
     description: 'Database queries, schema inspection, data analysis',
     status: 'connected', transport: 'stdio', version: '0.7.0', latencyMs: 8, requestsToday: 1892, lastHealthCheck: Date.now() - 10000,
     tools: [
@@ -192,7 +206,7 @@ const SERVERS: McpServer[] = [
     resources: [{ uri: 'postgres://schema', name: 'Database Schema', mimeType: 'application/json', description: 'Full database schema' }],
   },
   {
-    id: 'mcp-memory', name: 'Memory Fabric',
+    id: 'mcp-memory', name: 'Memory Fabric', gatewayServerId: 'szl-vessels-maritime',
     description: 'Multi-tier memory — chronicle, episodic, semantic, working',
     status: 'connected', transport: 'streamable-http', version: '1.2.0', latencyMs: 18, requestsToday: 934, lastHealthCheck: Date.now() - 20000,
     tools: [
@@ -200,6 +214,26 @@ const SERVERS: McpServer[] = [
       { name: 'memory.recall', description: 'Recall from memory with context', inputSchema: '{ query, tiers? }', calls24h: 456, avgLatencyMs: 89, errorRate: 0.005 },
     ],
     resources: [{ uri: 'a11oy://memory/tiers', name: 'Memory Tiers', mimeType: 'application/json', description: 'Memory tier statistics' }],
+  },
+  {
+    id: 'mcp-huggingface', name: 'HuggingFace Hub', gatewayServerId: 'szl-hf-hub-bridge',
+    description: 'ML ecosystem — search 1M+ models, 500K+ datasets, papers, Spaces, and community tools',
+    status: 'connected', transport: 'sse', version: '1.0.0', latencyMs: 145, requestsToday: 0, lastHealthCheck: Date.now() - 60000,
+    tools: [
+      { name: 'hf_search_models', description: 'Search HuggingFace models by query, task, library, or license', inputSchema: '{ search, task?, library?, license?, limit?, sort? }', calls24h: 0, avgLatencyMs: 320, errorRate: 0 },
+      { name: 'hf_search_datasets', description: 'Search HuggingFace datasets by query and task', inputSchema: '{ search, task?, limit?, sort? }', calls24h: 0, avgLatencyMs: 280, errorRate: 0 },
+      { name: 'hf_search_papers', description: 'Search HuggingFace Daily Papers by topic or keyword', inputSchema: '{ query, limit? }', calls24h: 0, avgLatencyMs: 250, errorRate: 0 },
+      { name: 'hf_search_spaces', description: 'Search HuggingFace Spaces — ML demos, Gradio apps, Streamlit apps', inputSchema: '{ query, limit? }', calls24h: 0, avgLatencyMs: 290, errorRate: 0 },
+      { name: 'hf_get_model_info', description: 'Get detailed model card, config, files, tags, and download stats', inputSchema: '{ model_id }', calls24h: 0, avgLatencyMs: 180, errorRate: 0 },
+      { name: 'hf_get_dataset_info', description: 'Get dataset card, features, splits, and statistics', inputSchema: '{ dataset_id }', calls24h: 0, avgLatencyMs: 190, errorRate: 0 },
+      { name: 'hf_doc_search', description: 'Search across model cards, dataset cards, and documentation', inputSchema: '{ query, doc_type?, limit? }', calls24h: 0, avgLatencyMs: 260, errorRate: 0 },
+      { name: 'hf_download_model', description: 'Retrieve model metadata, file listing, and download URLs', inputSchema: '{ modelId, revision?, purpose? }', calls24h: 0, avgLatencyMs: 450, errorRate: 0 },
+      { name: 'hf_launch_space', description: 'Manage HuggingFace Spaces — create, list, restart, or pause', inputSchema: '{ action, spaceId?, sdk?, hardware? }', calls24h: 0, avgLatencyMs: 520, errorRate: 0 },
+    ],
+    resources: [
+      { uri: 'huggingface://mcp/catalog', name: 'HF Tool Catalog', mimeType: 'application/json', description: 'Live tool catalog from the HuggingFace MCP server' },
+      { uri: 'huggingface://models/trending', name: 'Trending Models', mimeType: 'application/json', description: 'Currently trending models on HuggingFace Hub' },
+    ],
   },
 ];
 
@@ -698,17 +732,23 @@ function GatewayMonitor() {
   );
 }
 
-function ServerCard({ server, onSelect }: { server: McpServer; onSelect: () => void }) {
+function ServerCard({ server, onSelect, onToggle, toggling }: { server: McpServer; onSelect: () => void; onToggle?: (id: string, enabled: boolean) => void; toggling?: string | null }) {
   const totalCalls = server.tools.reduce((s, t) => s + t.calls24h, 0);
   const avgLatency = Math.round(server.tools.reduce((s, t) => s + t.avgLatencyMs, 0) / server.tools.length);
+  const isToggling = toggling === server.id;
   return (
-    <button onClick={onSelect} className="w-full p-4 rounded-xl text-left transition-all hover:translate-y-[-1px]" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+    <div role="button" tabIndex={0} onClick={onSelect} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(); }} className="w-full p-4 rounded-xl text-left transition-all hover:translate-y-[-1px] cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', opacity: isToggling ? 0.6 : 1, pointerEvents: isToggling ? 'none' : undefined }}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <StatusDot status={server.status} />
           <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{server.name}</span>
         </div>
-        <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.3)' }}>v{server.version}</span>
+        <div className="flex items-center gap-2">
+          {onToggle && (
+            <ServerToggle server={server} onToggle={onToggle} disabled={isToggling} />
+          )}
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.3)' }}>v{server.version}</span>
+        </div>
       </div>
       <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{server.description}</p>
       <div className="flex items-center gap-4 text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>
@@ -723,7 +763,7 @@ function ServerCard({ server, onSelect }: { server: McpServer; onSelect: () => v
           color: server.transport === 'stdio' ? 'rgba(59,130,246,0.7)' : server.transport === 'sse' ? 'rgba(168,85,247,0.7)' : 'rgba(34,197,94,0.7)',
         }}>{server.transport}</span>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -749,11 +789,97 @@ function ToolRow({ tool }: { tool: McpTool }) {
   );
 }
 
+function ServerToggle({ server, onToggle, disabled }: { server: McpServer; onToggle: (id: string, enabled: boolean) => void; disabled?: boolean }) {
+  const isOn = server.status === 'connected' || server.status === 'degraded';
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); if (!disabled) onToggle(server.id, !isOn); }}
+      disabled={disabled}
+      className="relative w-8 h-[18px] rounded-full transition-colors flex-shrink-0"
+      style={{ backgroundColor: isOn ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.08)', opacity: disabled ? 0.5 : 1, cursor: disabled ? 'wait' : 'pointer' }}
+      title={disabled ? 'Toggling...' : isOn ? 'Disable server' : 'Enable server'}
+    >
+      <span
+        className="absolute top-[2px] w-[14px] h-[14px] rounded-full transition-all"
+        style={{
+          left: isOn ? '16px' : '2px',
+          backgroundColor: isOn ? '#22c55e' : 'rgba(255,255,255,0.25)',
+        }}
+      />
+    </button>
+  );
+}
+
 function ServersView() {
   const [selectedServer, setSelectedServer] = useState<McpServer | null>(null);
-  const totalTools = SERVERS.reduce((s, srv) => s + srv.tools.length, 0);
-  const totalCalls = SERVERS.reduce((s, srv) => s + srv.requestsToday, 0);
-  const connectedCount = SERVERS.filter(s => s.status === 'connected').length;
+  const [liveStatus, setLiveStatus] = useState<Record<string, LiveServerStatus>>({});
+  const [toggling, setToggling] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/mcp-governed-gateway/servers`, { credentials: 'include', headers: csrfHeaders() });
+        if (res.ok && active) {
+          const data = await res.json();
+          const map: Record<string, LiveServerStatus> = {};
+          for (const s of (data.servers ?? []) as LiveServerStatus[]) {
+            map[s.serverId] = s;
+          }
+          setLiveStatus(map);
+        }
+      } catch { /* ignore */ }
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 15000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  const getStatus = (s: McpServer): McpServer['status'] => {
+    if (s.gatewayServerId && liveStatus[s.gatewayServerId]) {
+      return liveStatus[s.gatewayServerId].enabled ? 'connected' : 'offline';
+    }
+    return s.status;
+  };
+  const getLiveMetrics = (s: McpServer) => {
+    if (s.gatewayServerId && liveStatus[s.gatewayServerId]) {
+      const live = liveStatus[s.gatewayServerId];
+      return { requestsToday: live.callsToday, latencyMs: live.avgLatencyMs || s.latencyMs };
+    }
+    return { requestsToday: s.requestsToday, latencyMs: s.latencyMs };
+  };
+  const activeServers = SERVERS.map(s => ({ ...s, status: getStatus(s), ...getLiveMetrics(s) }));
+  const totalTools = activeServers.reduce((s, srv) => s + srv.tools.length, 0);
+  const totalCalls = activeServers.reduce((s, srv) => s + srv.requestsToday, 0);
+  const connectedCount = activeServers.filter(s => s.status === 'connected').length;
+
+  const handleToggle = useCallback(async (serverId: string, enable: boolean) => {
+    const server = SERVERS.find(s => s.id === serverId);
+    const gatewayId = server?.gatewayServerId;
+    if (!gatewayId) return;
+    setToggling(serverId);
+    try {
+      const res = await fetch(`${API_BASE}/mcp-governed-gateway/servers/${gatewayId}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+        credentials: 'include',
+        body: JSON.stringify({ enabled: enable }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.enabled === 'boolean') {
+          setLiveStatus(prev => ({
+            ...prev,
+            [gatewayId]: { ...prev[gatewayId], ...data },
+          }));
+          if (selectedServer && selectedServer.id === serverId) {
+            setSelectedServer(prev => prev ? { ...prev, status: data.enabled ? 'connected' : 'offline' } : null);
+          }
+        }
+      }
+    } catch { /* ignore */ }
+    setToggling(null);
+  }, [selectedServer]);
 
   return (
     <>
@@ -761,12 +887,12 @@ function ServersView() {
         <KpiCard label="MCP Servers" value={String(SERVERS.length)} sub={`${connectedCount} healthy`} />
         <KpiCard label="Total Tools" value={String(totalTools)} sub="across all servers" />
         <KpiCard label="Calls Today" value={totalCalls.toLocaleString()} sub="governed executions" />
-        <KpiCard label="Avg Latency" value={`${Math.round(SERVERS.reduce((s, srv) => s + srv.latencyMs, 0) / SERVERS.length)}ms`} sub="proxy overhead" />
+        <KpiCard label="Avg Latency" value={`${Math.round(activeServers.reduce((s, srv) => s + srv.latencyMs, 0) / activeServers.length)}ms`} sub="proxy overhead" />
       </div>
       <div className="flex gap-6">
         <div className="flex-1 min-w-0">
           <div className="grid grid-cols-2 gap-3">
-            {SERVERS.map(s => <ServerCard key={s.id} server={s} onSelect={() => setSelectedServer(s)} />)}
+            {activeServers.map(s => <ServerCard key={s.id} server={s} onSelect={() => setSelectedServer(s)} onToggle={handleToggle} toggling={toggling} />)}
           </div>
         </div>
         {selectedServer && (
@@ -775,12 +901,15 @@ function ServersView() {
               <div className="p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <StatusDot status={selectedServer.status} />
+                    <StatusDot status={getStatus(selectedServer)} />
                     <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{selectedServer.name}</span>
                   </div>
-                  <button onClick={() => setSelectedServer(null)} className="p-1 rounded hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <ServerToggle server={{ ...selectedServer, status: getStatus(selectedServer) }} onToggle={handleToggle} />
+                    <button onClick={() => setSelectedServer(null)} className="p-1 rounded hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    </button>
+                  </div>
                 </div>
                 <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{selectedServer.description}</p>
                 <div className="flex gap-2 mt-2">

@@ -437,6 +437,151 @@ export async function governedManageSpace(
   }
 }
 
+export async function governedSearchPapers(
+  params: { query: string; limit?: number },
+  opts?: { agentId?: string; tenantId?: string },
+) {
+  const { allowed, governedOp } = await runGovernanceGate(
+    'search_papers',
+    'hf://papers',
+    { ...opts, purpose: `search papers: ${params.query || '*'}` },
+  );
+
+  if (!allowed) return { result: null, governance: governedOp };
+
+  try {
+    const { callHfTool } = await import('../../routes/hf-mcp-proxy.js');
+    const result = await callHfTool('search_papers', params);
+    governedOp.hubRecord.status = 'completed';
+    governedOp.result = result;
+    finalizeProofPacket(governedOp);
+    storeGovernedOp(governedOp);
+    return { result, governance: governedOp };
+  } catch (err) {
+    governedOp.error = err instanceof Error ? err.message : String(err);
+    governedOp.hubRecord.status = 'failed';
+    governedOp.hubRecord.error = governedOp.error;
+    storeGovernedOp(governedOp);
+    return { result: null, governance: governedOp };
+  }
+}
+
+export async function governedSearchSpaces(
+  params: { query: string; limit?: number },
+  opts?: { agentId?: string; tenantId?: string },
+) {
+  const { allowed, governedOp } = await runGovernanceGate(
+    'search_spaces',
+    'hf://spaces',
+    { ...opts, purpose: `search spaces: ${params.query || '*'}` },
+  );
+
+  if (!allowed) return { result: null, governance: governedOp };
+
+  try {
+    const { callHfTool } = await import('../../routes/hf-mcp-proxy.js');
+    const result = await callHfTool('search_spaces', params);
+    governedOp.hubRecord.status = 'completed';
+    governedOp.result = result;
+    finalizeProofPacket(governedOp);
+    storeGovernedOp(governedOp);
+    return { result, governance: governedOp };
+  } catch (err) {
+    governedOp.error = err instanceof Error ? err.message : String(err);
+    governedOp.hubRecord.status = 'failed';
+    governedOp.hubRecord.error = governedOp.error;
+    storeGovernedOp(governedOp);
+    return { result: null, governance: governedOp };
+  }
+}
+
+export async function governedGetModelInfo(
+  params: { model_id: string },
+  opts?: { agentId?: string; tenantId?: string },
+) {
+  const { allowed, governedOp } = await runGovernanceGate(
+    'get_model_card',
+    `hf://models/${params.model_id}`,
+    { ...opts, purpose: `get model info: ${params.model_id}` },
+  );
+
+  if (!allowed) return { result: null, governance: governedOp };
+
+  try {
+    const { callHfTool } = await import('../../routes/hf-mcp-proxy.js');
+    const result = await callHfTool('get_model_info', params);
+    governedOp.hubRecord.status = 'completed';
+    governedOp.result = result;
+    finalizeProofPacket(governedOp);
+    storeGovernedOp(governedOp);
+    return { result, governance: governedOp };
+  } catch (err) {
+    governedOp.error = err instanceof Error ? err.message : String(err);
+    governedOp.hubRecord.status = 'failed';
+    governedOp.hubRecord.error = governedOp.error;
+    storeGovernedOp(governedOp);
+    return { result: null, governance: governedOp };
+  }
+}
+
+export async function governedGetDatasetInfo(
+  params: { dataset_id: string },
+  opts?: { agentId?: string; tenantId?: string },
+) {
+  const { allowed, governedOp } = await runGovernanceGate(
+    'get_dataset_info',
+    `hf://datasets/${params.dataset_id}`,
+    { ...opts, purpose: `get dataset info: ${params.dataset_id}` },
+  );
+
+  if (!allowed) return { result: null, governance: governedOp };
+
+  try {
+    const { callHfTool } = await import('../../routes/hf-mcp-proxy.js');
+    const result = await callHfTool('get_dataset_info', params);
+    governedOp.hubRecord.status = 'completed';
+    governedOp.result = result;
+    finalizeProofPacket(governedOp);
+    storeGovernedOp(governedOp);
+    return { result, governance: governedOp };
+  } catch (err) {
+    governedOp.error = err instanceof Error ? err.message : String(err);
+    governedOp.hubRecord.status = 'failed';
+    governedOp.hubRecord.error = governedOp.error;
+    storeGovernedOp(governedOp);
+    return { result: null, governance: governedOp };
+  }
+}
+
+export async function governedDocSearch(
+  params: { query: string; doc_type?: string; limit?: number },
+  opts?: { agentId?: string; tenantId?: string },
+) {
+  const { allowed, governedOp } = await runGovernanceGate(
+    'get_model_card',
+    'hf://docs',
+    { ...opts, purpose: `doc search: ${params.query || '*'}` },
+  );
+
+  if (!allowed) return { result: null, governance: governedOp };
+
+  try {
+    const { callHfTool } = await import('../../routes/hf-mcp-proxy.js');
+    const result = await callHfTool('doc_search', params);
+    governedOp.hubRecord.status = 'completed';
+    governedOp.result = result;
+    finalizeProofPacket(governedOp);
+    storeGovernedOp(governedOp);
+    return { result, governance: governedOp };
+  } catch (err) {
+    governedOp.error = err instanceof Error ? err.message : String(err);
+    governedOp.hubRecord.status = 'failed';
+    governedOp.hubRecord.error = governedOp.error;
+    storeGovernedOp(governedOp);
+    return { result: null, governance: governedOp };
+  }
+}
+
 export function listGovernedOperations(opts?: {
   limit?: number;
   type?: HubOperationType;

@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 export type HubOperationType =
   | 'search_models'
   | 'search_datasets'
+  | 'search_papers'
+  | 'search_spaces'
   | 'download_model'
   | 'upload_model'
   | 'manage_bucket'
@@ -103,6 +105,8 @@ export interface HubSpaceRequest {
 const RISK_MAP: Record<HubOperationType, HubRiskLevel> = {
   search_models: 'low',
   search_datasets: 'low',
+  search_papers: 'low',
+  search_spaces: 'low',
   get_model_card: 'low',
   get_dataset_info: 'low',
   download_model: 'medium',
@@ -114,6 +118,8 @@ const RISK_MAP: Record<HubOperationType, HubRiskLevel> = {
 const COST_ESTIMATES: Record<HubOperationType, number> = {
   search_models: 0.0001,
   search_datasets: 0.0001,
+  search_papers: 0.0001,
+  search_spaces: 0.0001,
   get_model_card: 0.0001,
   get_dataset_info: 0.0001,
   download_model: 0.005,

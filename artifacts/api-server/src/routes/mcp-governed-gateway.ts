@@ -10,7 +10,7 @@ import {
 } from '@szl-holdings/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '../lib/logger';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 import {
   classifyRisk,
   evaluatePolicies,
@@ -939,6 +939,107 @@ if (process.env.SEED_DEMO_GATEWAY === 'true') {
   seedDemoData();
 }
 
+const serverEnabledState = new Map<string, { enabled: boolean; toggledAt: string; toggledBy: string }>();
+
+const MANAGED_SERVERS = [
+  { serverId: 'szl-tool-mesh', name: 'SZL Tool Mesh', toolPrefixes: ['workcell', 'signal_mesh', 'proof', 'covenant'] },
+  { serverId: 'szl-counsel-evidence', name: 'Counsel Evidence MCP', toolPrefixes: ['knowledge', 'counsel'] },
+  { serverId: 'szl-terra-portfolio', name: 'DOMAINE Portfolio MCP', toolPrefixes: ['terra', 'postgres'] },
+  { serverId: 'szl-aegis-threat', name: 'AEGIS Threat Intelligence MCP', toolPrefixes: ['firestorm', 'github'] },
+  { serverId: 'szl-vessels-maritime', name: 'SEXTANT Maritime Intelligence MCP', toolPrefixes: ['vessels', 'memory'] },
+  { serverId: 'szl-hf-hub-bridge', name: 'HuggingFace Hub MCP', toolPrefixes: ['hf_'] },
+  { serverId: 'szl-cognitive-observability', name: 'Cognitive Observability MCP', toolPrefixes: ['observability'] },
+];
+
+for (const s of MANAGED_SERVERS) {
+  serverEnabledState.set(s.serverId, { enabled: true, toggledAt: new Date().toISOString(), toggledBy: 'system' });
+}
+
+function isServerDisabled(serverId: string): boolean {
+  const state = serverEnabledState.get(serverId);
+  return state !== undefined && !state.enabled;
+}
+
+function findServerForTool(toolName: string): string | undefined {
+  for (const s of MANAGED_SERVERS) {
+    if (s.toolPrefixes.some(p => toolName.startsWith(p) || toolName.includes(p))) {
+      return s.serverId;
+    }
+  }
+  return undefined;
+}
+
+function getServerMetrics(serverId: string) {
+  const managed = MANAGED_SERVERS.find(s => s.serverId === serverId);
+  const prefixes = managed?.toolPrefixes ?? [];
+  const serverCalls = toolCalls.filter(c =>
+    prefixes.some(p => c.toolName.startsWith(p) || c.toolName.includes(p)),
+  );
+  const last24h = Date.now() - 86400000;
+  const recent = serverCalls.filter(c => new Date(c.timestamp).getTime() > last24h);
+  const errors = recent.filter(c => c.disposition === 'execution_failed');
+  const avgLatency = recent.length > 0
+    ? Math.round(recent.reduce((s, c) => s + c.latencyMs, 0) / recent.length)
+    : 0;
+  return {
+    callsToday: recent.length,
+    calls24h: recent.length,
+    errorRate: recent.length > 0 ? errors.length / recent.length : 0,
+    avgLatencyMs: avgLatency,
+  };
+}
+
+router.get('/servers', authMiddleware(), (_req: Request, res: Response) => {
+  const servers = MANAGED_SERVERS.map(s => {
+    const state = serverEnabledState.get(s.serverId);
+    const metrics = getServerMetrics(s.serverId);
+    return {
+      serverId: s.serverId,
+      name: s.name,
+      enabled: state?.enabled ?? true,
+      status: state?.enabled ? 'connected' : 'offline',
+      toggledAt: state?.toggledAt,
+      toggledBy: state?.toggledBy,
+      ...metrics,
+    };
+  });
+  res.json({ servers });
+});
+
+router.post('/servers/:serverId/toggle', authMiddleware({ required: true }), requireRole('super_admin', 'ops', 'exec'), (req: Request, res: Response) => {
+  const { serverId } = req.params;
+  const { enabled } = req.body ?? {};
+
+  if (typeof enabled !== 'boolean') {
+    return res.status(400).json({ error: "'enabled' (boolean) is required in request body" });
+  }
+
+  const managed = MANAGED_SERVERS.find(s => s.serverId === serverId);
+  if (!managed) {
+    return res.status(404).json({ error: `Server '${serverId}' not found in managed server catalog` });
+  }
+
+  const actor = req.user?.email ?? req.user?.id ?? 'operator';
+  serverEnabledState.set(serverId, {
+    enabled,
+    toggledAt: new Date().toISOString(),
+    toggledBy: String(actor),
+  });
+
+  logger.info({ serverId, enabled, actor }, '[mcp-governed-gateway] Server toggled');
+
+  const metrics = getServerMetrics(serverId);
+  res.json({
+    serverId,
+    name: managed.name,
+    enabled,
+    status: enabled ? 'connected' : 'offline',
+    toggledAt: serverEnabledState.get(serverId)!.toggledAt,
+    toggledBy: String(actor),
+    ...metrics,
+  });
+});
+
 router.get('/stats', authMiddleware(), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const tenantConns = filterByTenant([...connections.values()], tenantId);
@@ -1203,6 +1304,16 @@ router.post('/tool-call', async (req: Request, res: Response) => {
   const { toolName, parameters, agentName } = req.body ?? {};
   if (!toolName || typeof toolName !== 'string') {
     return res.status(400).json({ error: 'toolName is required' });
+  }
+
+  const ownerServerId = findServerForTool(toolName);
+  if (ownerServerId && isServerDisabled(ownerServerId)) {
+    return res.status(403).json({
+      error: `Server '${ownerServerId}' is currently disabled`,
+      toolName,
+      serverId: ownerServerId,
+      disposition: 'server_disabled',
+    });
   }
 
   const rawKey = extractBearerKey(req);

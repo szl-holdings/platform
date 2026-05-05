@@ -322,6 +322,96 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         },
       }),
       ToolManifestSchema.parse({
+        id: 'hf_search_papers',
+        name: 'hf_search_papers',
+        description:
+          'Search HuggingFace Daily Papers for recent ML/AI research papers by topic or keyword. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Paper search query (e.g., "reasoning", "diffusion models")' },
+            limit: { type: 'number', description: 'Max results to return (default: 5)' },
+          },
+          required: ['query'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_search_spaces',
+        name: 'hf_search_spaces',
+        description:
+          'Search HuggingFace Spaces for interactive ML demos, apps, and Gradio/Streamlit deployments. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Search query (e.g., "image segmentation demo")' },
+            limit: { type: 'number', description: 'Max results to return (default: 5)' },
+          },
+          required: ['query'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_get_model_info',
+        name: 'hf_get_model_info',
+        description:
+          'Get detailed information about a specific HuggingFace model — model card, config, files, tags, and download stats. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            model_id: { type: 'string', description: 'Full model ID (e.g., meta-llama/Llama-3.1-8B-Instruct)' },
+          },
+          required: ['model_id'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_get_dataset_info',
+        name: 'hf_get_dataset_info',
+        description:
+          'Get detailed information about a specific HuggingFace dataset — card, features, splits, and statistics. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            dataset_id: { type: 'string', description: 'Full dataset ID (e.g., HuggingFaceFW/fineweb)' },
+          },
+          required: ['dataset_id'],
+        },
+      }),
+      ToolManifestSchema.parse({
+        id: 'hf_doc_search',
+        name: 'hf_doc_search',
+        description:
+          'Search across HuggingFace model cards, dataset cards, and documentation by keyword. ' +
+          'Returns matching snippets from model/dataset documentation. ' +
+          'Governed operation: PCE gate evaluates risk (low), proof chain records provenance.',
+        domainTags: ['analytics', 'data'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Documentation search query (e.g., "fine-tuning BERT", "tokenizer configuration")' },
+            doc_type: { type: 'string', enum: ['model', 'dataset', 'all'], description: 'Type of documentation to search (default: all)' },
+            limit: { type: 'number', description: 'Max results to return (default: 5)' },
+          },
+          required: ['query'],
+        },
+      }),
+      ToolManifestSchema.parse({
         id: 'hf_download_model',
         name: 'hf_download_model',
         description:
@@ -457,6 +547,11 @@ async function hfHubProxyHandler(
 const HF_HANDLER_MAP: Record<string, (input: unknown) => Promise<unknown>> = {
   hf_search_models: (input) => hfHubProxyHandler('search-models', input),
   hf_search_datasets: (input) => hfHubProxyHandler('search-datasets', input),
+  hf_search_papers: (input) => hfHubProxyHandler('search-papers', input),
+  hf_search_spaces: (input) => hfHubProxyHandler('search-spaces', input),
+  hf_get_model_info: (input) => hfHubProxyHandler('get-model-info', input),
+  hf_get_dataset_info: (input) => hfHubProxyHandler('get-dataset-info', input),
+  hf_doc_search: (input) => hfHubProxyHandler('doc-search', input),
   hf_download_model: (input) => hfHubProxyHandler('download-model', input),
   hf_upload_model: (input) => hfHubProxyHandler('upload-model', input),
   hf_manage_bucket: (input) => hfHubProxyHandler('manage-bucket', input),

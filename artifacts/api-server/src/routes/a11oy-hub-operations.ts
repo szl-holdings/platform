@@ -16,6 +16,11 @@ import {
   governedUploadModel,
   governedManageBucket,
   governedManageSpace,
+  governedSearchPapers,
+  governedSearchSpaces,
+  governedGetModelInfo,
+  governedGetDatasetInfo,
+  governedDocSearch,
   listGovernedOperations,
   getHubCostDashboard,
 } from '../a11oy/runtime/hub-operations.js';
@@ -189,6 +194,71 @@ router.post('/a11oy/hub-operations/manage-space', requireAuth, async (req: Reque
     sendSuccess(res, result);
   } catch (err) {
     handleRouteError(res, err, 'Governed space management failed');
+  }
+});
+
+router.post('/a11oy/hub-operations/search-papers', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const query = typeof body.query === 'string' ? body.query : '';
+    const limit = typeof body.limit === 'number' && Number.isFinite(body.limit) ? Math.min(Math.max(1, body.limit), 50) : 5;
+    const identity = extractIdentity(req);
+    const result = await governedSearchPapers({ query, limit }, identity);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, 'Governed paper search failed');
+  }
+});
+
+router.post('/a11oy/hub-operations/search-spaces', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const query = typeof body.query === 'string' ? body.query : '';
+    const limit = typeof body.limit === 'number' && Number.isFinite(body.limit) ? Math.min(Math.max(1, body.limit), 50) : 5;
+    const identity = extractIdentity(req);
+    const result = await governedSearchSpaces({ query, limit }, identity);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, 'Governed spaces search failed');
+  }
+});
+
+router.post('/a11oy/hub-operations/get-model-info', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    if (typeof body.model_id !== 'string' || !body.model_id) return sendBadRequest(res, "'model_id' is required");
+    const identity = extractIdentity(req);
+    const result = await governedGetModelInfo({ model_id: body.model_id }, identity);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, 'Governed model info retrieval failed');
+  }
+});
+
+router.post('/a11oy/hub-operations/get-dataset-info', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    if (typeof body.dataset_id !== 'string' || !body.dataset_id) return sendBadRequest(res, "'dataset_id' is required");
+    const identity = extractIdentity(req);
+    const result = await governedGetDatasetInfo({ dataset_id: body.dataset_id }, identity);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, 'Governed dataset info retrieval failed');
+  }
+});
+
+router.post('/a11oy/hub-operations/doc-search', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const query = typeof body.query === 'string' ? body.query : '';
+    if (!query) return sendBadRequest(res, "'query' is required");
+    const doc_type = typeof body.doc_type === 'string' ? body.doc_type : 'all';
+    const limit = typeof body.limit === 'number' && Number.isFinite(body.limit) ? Math.min(Math.max(1, body.limit), 50) : 5;
+    const identity = extractIdentity(req);
+    const result = await governedDocSearch({ query, doc_type, limit }, identity);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, 'Governed doc search failed');
   }
 });
 
