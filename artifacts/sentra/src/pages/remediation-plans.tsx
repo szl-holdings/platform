@@ -15,7 +15,7 @@ import { Link } from 'wouter';
 import { REMEDIATION_PLANS as fallbackPlans, type RemediationPlan, type RemediationStep } from '@/data/hunt-data';
 import { listRemediationPlans } from '@/lib/sentra-api';
 import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
-import { approveRemediation } from '@/lib/sentra-api';
+import { approveRemediationPlan } from '@/lib/sentra-api';
 
 const STATUS_CONFIG: Record<RemediationPlan['status'], { label: string; color: string; bg: string; border: string }> = {
   draft: {
@@ -94,7 +94,7 @@ function PlanCard({ plan }: { plan: RemediationPlan }) {
     setApproving(true);
     setApprovalError(null);
     try {
-      const res = await approveRemediation(plan.id, {
+      const res = await approveRemediationPlan(plan.id, {
         huntId: plan.huntId,
         huntTitle: plan.huntTitle,
         blastRadiusCost: plan.blastRadiusCost,

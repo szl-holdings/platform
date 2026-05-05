@@ -1010,7 +1010,12 @@ export async function dismissHunt(
   }
 }
 
-export async function approveRemediation(
+/**
+ * Approve a hunt-derived remediation plan with full hunt context payload.
+ * Distinct from `approveRemediation` (line ~683) which is the generic
+ * case-action style approve/reject for the remediation pipeline.
+ */
+export async function approveRemediationPlan(
   planId: string,
   payload: {
     huntId: string;
@@ -1787,10 +1792,8 @@ export function patchCyberTwinAsset(id: string, body: Record<string, unknown>) {
 }
 
 // ── Hunt Data ───────────────────────────────────────────────────────────────
+// Note: listHunts() is defined above with the strongly-typed HuntListItem[] shape.
 
-export function listHunts() {
-  return getJson<{ hunts: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hunt-data/hunts');
-}
 export function patchHunt(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/hunt-data/hunts/${encodeURIComponent(id)}`, body);
 }
@@ -1811,18 +1814,14 @@ export function listHuntFleetAgents() {
 }
 
 // ── PQC ─────────────────────────────────────────────────────────────────────
+// Note: listPqcStandards() and getPqcReadinessScore() are defined above with
+// strongly-typed PqcStandardItem[] / PqcReadinessScore shapes.
 
-export function listPqcStandards() {
-  return getJson<{ standards: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/standards');
-}
 export function listPqcMigrationPhases() {
   return getJson<{ phases: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/migration-phases');
 }
 export function listPqcEcosystem() {
   return getJson<{ ecosystem: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/pqc/ecosystem');
-}
-export function getPqcReadinessScore() {
-  return getJson<Record<string, unknown>>('/sentra/pqc/readiness-score');
 }
 export function patchPqcStandard(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/pqc/standards/${encodeURIComponent(id)}`, body);
@@ -1842,9 +1841,9 @@ export function listHardwareCompartments() {
 export function listHardwareSupplyChain() {
   return getJson<{ components: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/hardware-trust/supply-chain');
 }
-export function getHardwareTrustSummary() {
-  return getJson<Record<string, unknown>>('/sentra/hardware-trust/summary');
-}
+// Note: getHardwareTrustSummary() is defined above with the strongly-typed
+// HardwareTrustSummary shape.
+
 export function patchHardwareTrustAnchor(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/hardware-trust/anchors/${encodeURIComponent(id)}`, body);
 }
@@ -1917,9 +1916,9 @@ export function listMcpServers() {
 export function listMeshSecrets() {
   return getJson<{ secrets: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/secrets');
 }
-export function listMeshExposures() {
-  return getJson<{ exposures: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/exposures');
-}
+// Note: listMeshExposures() is defined above with the strongly-typed
+// MeshExposureItem[] shape.
+
 export function patchMeshExposure(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/exposures/${encodeURIComponent(id)}`, body);
 }
@@ -1941,9 +1940,9 @@ export function listDriftSnapshots() {
 export function patchDriftSnapshot(id: string, body: Record<string, unknown>) {
   return patchJson<Record<string, unknown>>(`/sentra/agent-mesh/drift-snapshots/${encodeURIComponent(id)}`, body);
 }
-export function listMeshResilience() {
-  return getJson<{ resilience: Record<string, unknown>[]; source: 'live' | 'seed' }>('/sentra/agent-mesh/resilience');
-}
+// Note: listMeshResilience() is defined above with the strongly-typed
+// MeshResilienceItem shape.
+
 export function getAgentMeshSummary() {
   return getJson<Record<string, unknown>>('/sentra/agent-mesh/summary');
 }

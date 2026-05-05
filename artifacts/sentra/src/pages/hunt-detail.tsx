@@ -28,7 +28,7 @@ import { Link, useParams } from 'wouter';
 import { HUNTS as fallbackHunts, type Hunt, type HuntNode } from '@/data/hunt-data';
 import { listHunts } from '@/lib/sentra-api';
 import { SourceBadge, useApiQuery } from '@/lib/use-api-query';
-import { approveHunt, approveRemediation, dismissHunt } from '@/lib/sentra-api';
+import { approveHunt, approveRemediationPlan, dismissHunt } from '@/lib/sentra-api';
 
 const NODE_ICON: Record<HuntNode['type'], typeof ShieldAlert> = {
   endpoint: ShieldAlert,
@@ -292,7 +292,7 @@ export default function HuntDetailPage() {
         approvedBy: 'Analyst',
       });
       if (!huntRes.ok) throw new Error(huntRes.error);
-      const remRes = await approveRemediation(`rem-${hunt.id}`, {
+      const remRes = await approveRemediationPlan(`rem-${hunt.id}`, {
         huntId: hunt.id,
         huntTitle: hunt.title,
         blastRadiusCost: hunt.attackPath.blastRadiusCost,
