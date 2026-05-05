@@ -971,3 +971,9 @@ id = "joUoHaNd71JTHTR55OPXh"
 uri = "file://dossier/v2/pdf/APEX_v2_DOSSIER_INDEX.pdf"
 type = "pdf"
 title = "Dossier Index v2"
+
+[[outputs]]
+id = "uv_9DEbl7Lv2kp0WXKLoa"
+uri = "file://dossier/v2/pptx/APEX_v2_Investor_Pitch_Deck.pptx"
+type = "slides"
+title = "APEX v2 Investor Pitch Deck (PPTX)"

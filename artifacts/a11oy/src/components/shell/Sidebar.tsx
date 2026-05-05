@@ -11,7 +11,7 @@ import {
   Swords, Waves, Microscope, TrendingUp, FlaskRound,
   Palette, Sigma, MessageSquare, Brain, Beaker,
   Box, Cog, Newspaper, KeyRound, Boxes, Wrench,
-  Gauge, Search, DollarSign,
+  Gauge, Search, DollarSign, Mic2,
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
