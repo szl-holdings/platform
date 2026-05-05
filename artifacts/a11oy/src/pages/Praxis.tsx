@@ -365,6 +365,39 @@ const SUGGESTIONS = [
   { text: 'Refactor the approval chain logic', desc: 'Code' },
 ];
 
+const TOOL_ACTIONS = [
+  {
+    id: 'analyze',
+    label: 'Analyze',
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/>
+      </svg>
+    ),
+    prompt: 'Analyze the current signal mesh for anomalies. Return a structured summary of: (1) which signals are outside normal bounds, (2) their likely root causes, and (3) the top 3 recommended actions, each citing the relevant covenant clause.',
+  },
+  {
+    id: 'web',
+    label: 'Search the Web',
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
+      </svg>
+    ),
+    prompt: 'Search the web for: ',
+  },
+  {
+    id: 'github',
+    label: 'GitHub',
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+      </svg>
+    ),
+    prompt: 'Search GitHub for: ',
+  },
+];
+
 export function Praxis() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -432,9 +465,9 @@ export function Praxis() {
     } catch { /* ignore */ }
   }, []);
 
-  const handleSubmit = useCallback(async () => {
-    if (!input.trim() || isStreaming) return;
-    const userContent = input.trim();
+  const handleSubmit = useCallback(async (overridePrompt?: string) => {
+    const userContent = (overridePrompt ?? input).trim();
+    if (!userContent || isStreaming) return;
 
     const userMsg: Message = {
       id: `m-${Date.now()}`,
@@ -737,12 +770,42 @@ export function Praxis() {
                       />
                       <div className="flex items-center justify-between px-3 pb-3">
                         <div className="flex items-center gap-0.5">
-                          <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Attach">
+                          <button disabled className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.12)', cursor: 'not-allowed' }} title="Attach (coming soon)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                           </button>
-                          <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="MCP Tools">
+                          <button disabled className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.12)', cursor: 'not-allowed' }} title="MCP Tools (coming soon)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
                           </button>
+                          <div className="w-px h-4 mx-1" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+                          {TOOL_ACTIONS.map(ta => (
+                            <button
+                              key={ta.id}
+                              onClick={() => {
+                                if (ta.id === 'analyze' || ta.id === 'web' || ta.id === 'github') {
+                                  const existing = input.trim();
+                                  const hasPrefix = existing.startsWith(ta.prompt);
+                                  const query = hasPrefix
+                                    ? existing
+                                    : existing
+                                      ? `${ta.prompt}${existing}`
+                                      : ta.prompt + (ta.id === 'web'
+                                        ? 'recent CVEs and threat intelligence relevant to current signals'
+                                        : ta.id === 'github'
+                                          ? 'open-source threat detection rules and IOCs matching current attack patterns'
+                                          : 'current state');
+                                  handleSubmit(query);
+                                } else {
+                                  setInput(p => p.startsWith(ta.prompt) ? p : ta.prompt + (p ? p : ''));
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2 h-7 rounded-lg text-[11px] font-medium transition-colors hover:bg-white/[0.04]"
+                              style={{ color: 'rgba(255,255,255,0.3)' }}
+                              title={ta.label}
+                            >
+                              {ta.icon}
+                              <span className="hidden sm:inline">{ta.label}</span>
+                            </button>
+                          ))}
                         </div>
                         <button
                           onClick={handleSubmit}
@@ -837,12 +900,42 @@ export function Praxis() {
                   />
                   <div className="flex items-center justify-between px-3 pb-3">
                     <div className="flex items-center gap-0.5">
-                      <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Attach">
+                      <button disabled className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.12)', cursor: 'not-allowed' }} title="Attach (coming soon)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                       </button>
-                      <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="MCP Tools">
+                      <button disabled className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.12)', cursor: 'not-allowed' }} title="MCP Tools (coming soon)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
                       </button>
+                      <div className="w-px h-4 mx-1" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+                      {TOOL_ACTIONS.map(ta => (
+                        <button
+                          key={ta.id}
+                          onClick={() => {
+                            if (ta.id === 'analyze' || ta.id === 'web' || ta.id === 'github') {
+                              const existing = input.trim();
+                              const hasPrefix = existing.startsWith(ta.prompt);
+                              const query = hasPrefix
+                                ? existing
+                                : existing
+                                  ? `${ta.prompt}${existing}`
+                                  : ta.prompt + (ta.id === 'web'
+                                    ? 'recent CVEs and threat intelligence relevant to current signals'
+                                    : ta.id === 'github'
+                                      ? 'open-source threat detection rules and IOCs matching current attack patterns'
+                                      : 'current state');
+                              handleSubmit(query);
+                            } else {
+                              setInput(p => p.startsWith(ta.prompt) ? p : ta.prompt + (p ? p : ''));
+                            }
+                          }}
+                          className="flex items-center gap-1 px-2 h-7 rounded-lg text-[11px] font-medium transition-colors hover:bg-white/[0.04]"
+                          style={{ color: 'rgba(255,255,255,0.3)' }}
+                          title={ta.label}
+                        >
+                          {ta.icon}
+                          <span className="hidden sm:inline">{ta.label}</span>
+                        </button>
+                      ))}
                     </div>
                     <div className="flex items-center gap-2">
                       {isStreaming && (

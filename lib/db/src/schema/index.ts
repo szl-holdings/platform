@@ -157,6 +157,7 @@ export * from './scim';
 export * from './self_healing';
 export * from './self_improvement';
 export * from './sentra';
+export * from './sentra_cortex';
 export * from './settings';
 // skill_library.ts is intentionally excluded from this barrel.
 // It previously defined pgTable('skills',...) / pgTable('skill_runs',...)

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, SeverityDot, SeverityBadge, VerticalBadge, ActionButton, HashId, VerdictBadge, ApprovalGate } from '../components/ui';
 
@@ -85,10 +85,45 @@ const ACTIVE_AGENTS = [
 type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
 type ActionState = Record<string, ApprovalDecision>;
 
+interface CyberLobePrediction {
+  id: string;
+  threat_actor: string;
+  composite_score: number;
+  horizon: string;
+  countermove_status: string;
+  intercept_layer: string;
+}
+
+interface CyberLobeAgent {
+  name: string;
+  status: string;
+  domain: string;
+}
+
+interface CyberLobeData {
+  swarm_agents_active: number;
+  top_predictions: CyberLobePrediction[];
+  approved_countermoves: number;
+  pending_countermoves: number;
+  a11oy_brain_agents: CyberLobeAgent[];
+  twin_fidelity: number;
+  last_updated: string;
+}
+
 export function CommandSurface() {
   const [selectedSignalId, setSelectedSignalId] = useState<string | null>(null);
   const [approvals, setApprovals] = useState<ActionState>({});
   const [tick, setTick] = useState(0);
+  const [cyberLobe, setCyberLobe] = useState<CyberLobeData | null>(null);
+
+  useEffect(() => {
+    const BASE = import.meta.env.BASE_URL ?? '/a11oy/';
+    const apiBase = BASE.replace(/\/$/, '').replace(/\/[^/]*$/, '');
+    fetch(`${apiBase}/api/internal/a11oy/cyber-lobe`)
+      .then(r => r.json())
+      .then(body => { if (body?.ok && body?.data) setCyberLobe(body.data); })
+      .catch(() => {});
+  }, []);
 
   const { data: liveSignals, fetching: signalsLoading } = useAlloySignals({ limit: 100 });
   const { data: liveWorkflows } = useAlloyWorkflows({ limit: 50 });
@@ -469,6 +504,73 @@ export function CommandSurface() {
                   <div key={o.id} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: 'var(--color-a11oy-card)', border: '1px solid var(--color-a11oy-border)' }}>
                     <span className="truncate flex-1" style={{ color: 'var(--color-a11oy-text-sub)' }}>{o.title.slice(0, 32)}</span>
                     <span className="font-mono ml-2 flex-shrink-0" style={{ color: statusColor }}>{o.status.replace(/_/g, ' ')}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <SectionTitle>Cyber Lobe — Sentra Live</SectionTitle>
+            <div className="rounded-lg border overflow-hidden" style={{ borderColor: 'rgba(139,92,246,0.2)', backgroundColor: 'rgba(139,92,246,0.03)' }}>
+              <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(139,92,246,0.12)' }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#8b5cf6' }} />
+                <span className="text-xs font-mono" style={{ color: '#8b5cf6' }}>PREDICTIVE DEFENSE CORTEX</span>
+                <span className="ml-auto text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Art. IX</span>
+              </div>
+              <div className="grid grid-cols-3" style={{ borderBottom: '1px solid rgba(139,92,246,0.1)' }}>
+                {[
+                  { label: 'Swarm Agents', value: cyberLobe?.swarm_agents_active ?? 12, color: '#8b5cf6' },
+                  { label: 'Predictions', value: cyberLobe?.top_predictions?.length ?? 5, color: '#c9b787' },
+                  { label: 'Staged', value: cyberLobe?.approved_countermoves ?? 2, color: '#22c55e' },
+                ].map(kpi => (
+                  <div key={kpi.label} className="px-3 py-2 text-center" style={{ borderColor: 'rgba(139,92,246,0.1)' }}>
+                    <div className="text-base font-mono font-bold" style={{ color: kpi.color }}>{kpi.value}</div>
+                    <div className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{kpi.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col" style={{ borderTop: '1px solid rgba(139,92,246,0.06)' }}>
+                {(cyberLobe?.top_predictions ?? [
+                  { id: 'seed-1', threat_actor: 'APT29 (Cozy Bear)', composite_score: 94, horizon: '24h', countermove_status: 'pending', intercept_layer: 'Identity Layer' },
+                  { id: 'seed-2', threat_actor: 'Lazarus Group', composite_score: 87, horizon: '24h', countermove_status: 'approved', intercept_layer: 'Perimeter Layer' },
+                  { id: 'seed-3', threat_actor: 'FIN7', composite_score: 78, horizon: '72h', countermove_status: 'pending', intercept_layer: 'Data Layer' },
+                ] satisfies CyberLobePrediction[]).map((p, i) => {
+                  const layer = p.intercept_layer.replace(/ Layer.*/, '');
+                  const isStaged = p.countermove_status === 'approved' || p.countermove_status === 'staged';
+                  return (
+                    <div key={p.id ?? i} className="px-3 py-2 flex items-center gap-2" style={{ borderColor: 'rgba(139,92,246,0.06)' }}>
+                      <div className="text-sm font-mono font-bold flex-shrink-0" style={{ color: p.composite_score >= 90 ? '#ef4444' : p.composite_score >= 80 ? '#f97316' : GOLD }}>{p.composite_score}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs truncate" style={{ color: 'var(--color-a11oy-text)' }}>{p.threat_actor}</div>
+                        <div className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.horizon} · {layer}</div>
+                      </div>
+                      <span className="text-[8px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: isStaged ? 'rgba(34,197,94,0.1)' : 'rgba(249,115,22,0.1)', color: isStaged ? '#22c55e' : '#f97316' }}>
+                        {isStaged ? '✓ staged' : '⏳ pending'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="px-3 py-2 text-center">
+                <a href="/sentra/future-threat-horizon" className="text-[10px] font-mono" style={{ color: '#8b5cf6', textDecoration: 'none' }}>
+                  Open Future Threat Horizon in Sentra →
+                </a>
+              </div>
+            </div>
+            <div className="mt-2 flex flex-col gap-1">
+              {(cyberLobe?.a11oy_brain_agents ?? [
+                { name: 'APT29 Shadow Agent', status: 'executing', domain: 'adversary-swarm' },
+                { name: 'Cortex Prediction Engine', status: 'aggregating', domain: 'prediction-engine' },
+                { name: 'Covenant Gate', status: 'reviewing', domain: 'covenant-gate' },
+              ] satisfies CyberLobeAgent[]).map((agent) => {
+                const DOMAIN_COLORS: Record<string, string> = { 'adversary-swarm': '#ef4444', 'prediction-engine': '#8b5cf6', 'covenant-gate': '#f59e0b', 'countermove-proposer': '#22c55e' };
+                const color = DOMAIN_COLORS[agent.domain] ?? '#8b5cf6';
+                return (
+                  <div key={agent.name} className="flex items-center gap-2 px-2 py-1.5 rounded" style={{ backgroundColor: 'rgba(139,92,246,0.03)', border: '1px solid rgba(139,92,246,0.08)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: color }} />
+                    <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--color-a11oy-text-sub)' }}>{agent.name}</span>
+                    <span className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{agent.status}</span>
                   </div>
                 );
               })}

@@ -43,6 +43,7 @@ import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
 import internalA11oyDefenseRouter from "./internal-a11oy-defense";
+import sentraCortexApiRouter from "./sentra-cortex-api";
 import apiKeysRouter from "./api-keys";
 import oauthRouter from "./oauth";
 import meshObservabilityRouter from "./mesh-observability";
@@ -306,6 +307,14 @@ router.use(internalA11oyRouter);
 // (PrecisionAI, WeaponizedIntel, AgentZeroTrust, AtlasShield, SwarmOrchestrator, PlaybookEngine).
 // GET /api/internal/a11oy/defense/{precision-ai|weaponized-intel|agent-zero-trust|atlas-shield|swarm-orchestrator|playbook-engine}.
 router.use(internalA11oyDefenseRouter);
+
+// Sentra Predictive Defense Cortex API — seed data for Future Threat Horizon, Layered Intercept,
+// Governed Adversary Swarm, and the a11oy Cyber Lobe cross-app panel.
+// GET /api/internal/sentra/cortex/predictions
+// GET /api/internal/sentra/cortex/swarm-status
+// GET /api/internal/sentra/layered-intercept
+// GET /api/internal/a11oy/cyber-lobe
+router.use(sentraCortexApiRouter);
 
 // A11oy Domain Fabric API — fabric data routes for domain twins, signals, risks, decisions,
 // outcomes, evidence, verticals, agents, roadmap, and page-specific summaries.

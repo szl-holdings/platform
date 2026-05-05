@@ -475,4 +475,24 @@ export const api = {
     getById: (id: string) =>
       apiFetch<{ narrative: any }>(`/aegis/narrative-engine/narratives/${id}`),
   },
+  cortex: {
+    predictions: () =>
+      apiFetch<any>('/internal/sentra/cortex/predictions'),
+    swarmStatus: () =>
+      apiFetch<any>('/internal/sentra/cortex/swarm-status'),
+    layeredIntercept: () =>
+      apiFetch<any>('/internal/sentra/layered-intercept'),
+    cyberLobe: () =>
+      apiFetch<any>('/internal/a11oy/cyber-lobe'),
+    approveCountermove: (pathId: string, action: 'approve' | 'deny' | 'stage') =>
+      apiFetch<any>(`/internal/sentra/cortex/countermoves/${pathId}/${action}`, { method: 'POST' }),
+    proofLog: () => apiFetch<any>('/internal/sentra/cortex/proof-log'),
+  },
+  redTeam: {
+    launch: (scenarioId: string, scenarioName?: string) =>
+      apiFetch<any>('/internal/sentra/red-team/launch', {
+        method: 'POST',
+        body: JSON.stringify({ scenario_id: scenarioId, scenario_name: scenarioName }),
+      }),
+  },
 };

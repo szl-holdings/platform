@@ -114,6 +114,20 @@ const ARTICLES: Article[] = [
       { id: 'VIII.3', text: 'A diff of every amendment is published in the next public transparency report cycle.', enforcedBy: 'Glasswing Layer', surface: { label: '90-Day Report', href: '/transparency-report' } },
     ],
   },
+  {
+    num: 'IX',
+    title: 'Adversarial Covenants — Predictive Swarm Governance',
+    preamble:
+      'The Predictive Defense Cortex operates a governed adversary swarm against a synthetic digital twin 24 hours a day. The swarm may simulate any technique from the MITRE ATT&CK or ATLAS catalogs inside the sandbox. It may never operate against live production systems, generate live exploit code, or stage countermoves without operator approval. These covenants are machine-readable, versioned, and enforced at every swarm step.',
+    obligations: [
+      { id: 'IX.1', text: 'All swarm execution is confined to the sandboxed digital twin. Techniques that target real production infrastructure, live credentials, or live network paths are prohibited and blocked at the covenant gate.', enforcedBy: 'Predictive Defense Cortex · Covenant Gate', surface: { label: 'Future Threat Horizon', href: '/defense/precision-ai' } },
+      { id: 'IX.2', text: 'Identity-hardening countermoves (credential rotation, PAM policy enforcement, deception identity placement) require explicit operator approval recorded in the Approval Queue before execution. Pre-approved tier covers deception asset placement and detection rule staging only.', enforcedBy: 'Approval Queue · Covenant Gate', surface: { label: 'Approval Queue', href: '/approval-queue' } },
+      { id: 'IX.3', text: 'Data-exfiltration-prevention countermoves (honeypot data seeding, DLP rule staging, bucket-access policy hardening) are pre-approved up to the classification tier defined in Covenant Policy. Moves that alter production data configurations require operator approval.', enforcedBy: 'Covenant Policy · Connector Firewall', surface: { label: 'Governance', href: '/governance' } },
+      { id: 'IX.4', text: 'Destructive-impact-prevention countermoves (immutable backup pre-staging, IR playbook activation, network isolation) are auto-approved for the pre-staging phase only; live activation requires operator confirmation.', enforcedBy: 'Approval Queue · Action Rail', surface: { label: 'Action Rail', href: '/actions' } },
+      { id: 'IX.5', text: 'Every swarm run produces a proof packet: the attack proposal, covenant gate outcome, approval decisions, execution steps, technique citations (ATT&CK / ATLAS), detections fired, and countermoves staged — all linked in a single proof chain spanning both a11oy and Sentra.', enforcedBy: 'Proof Chain · Predictive Defense Cortex', surface: { label: 'Proof Ledger', href: '/proof' } },
+      { id: 'IX.6', text: 'The adversary swarm\'s capability ceiling is defined by the active Covenant Policy tier and may not be raised without a covenant-quorum amendment. The swarm may not model techniques classified above the agreed tier, even if those techniques are present in ATT&CK or ATLAS.', enforcedBy: 'Covenant Policy · Delegation Chain', surface: { label: 'Governance', href: '/governance' } },
+    ],
+  },
 ];
 
 export function Constitution() {

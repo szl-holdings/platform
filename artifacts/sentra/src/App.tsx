@@ -397,6 +397,17 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/benchmarks', label: 'Benchmarks & Leaderboards', icon: Trophy, comp: L(() => import('@/pages/benchmarks')) },
     ],
   },
+  {
+    id: 'predictive-cortex',
+    label: 'Predictive Defense Cortex',
+    items: [
+      { path: '/future-threat-horizon', label: 'Future Threat Horizon', icon: Telescope, comp: L(() => import('@/pages/future-threat-horizon')) },
+      { path: '/layered-intercept', label: 'Layered Intercept', icon: Layers, comp: L(() => import('@/pages/layered-intercept')) },
+      { path: '/red-team-hub', label: 'Red Team Hub', icon: Crosshair, comp: L(() => import('@/pages/red-team-hub')) },
+      { path: '/governed-adversary-loop', label: 'Governed Adversary Loop', icon: GitMerge, comp: L(() => import('@/pages/governed-adversary-loop')) },
+      { path: '/a11oy-brain', label: 'a11oy Brain', icon: Brain, comp: L(() => import('@/pages/a11oy-brain-panel')) },
+    ],
+  },
 ];
 
 const { aegisExtendedModules: EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
