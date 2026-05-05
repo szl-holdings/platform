@@ -4,12 +4,13 @@ import { OptimizerPage } from './pages/OptimizerPage';
 import { FabricPage } from './pages/FabricPage';
 import { ResearchPage } from './pages/ResearchPage';
 import { ProofPage } from './pages/ProofPage';
+import { EvidenceBenchPage } from './pages/EvidenceBenchPage';
 import { NavBar } from './components/NavBar';
 
-export type AppPage = 'identity' | 'optimizer' | 'fabric' | 'research' | 'proof';
+export type AppPage = 'identity' | 'optimizer' | 'fabric' | 'research' | 'proof' | 'bench';
 
 const VALID_PAGES: ReadonlyArray<AppPage> = [
-  'identity', 'optimizer', 'fabric', 'research', 'proof',
+  'identity', 'optimizer', 'fabric', 'research', 'proof', 'bench',
 ];
 
 function getPageFromHash(): AppPage {
@@ -41,6 +42,7 @@ export default function App() {
       {page === 'fabric'     && <FabricPage />}
       {page === 'research'   && <ResearchPage />}
       {page === 'proof'      && <ProofPage />}
+      {page === 'bench'      && <EvidenceBenchPage />}
     </div>
   );
 }

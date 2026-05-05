@@ -100,4 +100,32 @@ cleanup() {
 trap cleanup EXIT INT TERM
 # -----------------------------------------------------------------------------
 
+# --- Eval Runner sidecar -----------------------------------------------------
+# The governed evaluation harness runs as a Python FastAPI process alongside the
+# API server. Starts on port 8001 (EVAL_RUNNER_URL defaults to localhost:8001).
+# The api-server proxies /eval-harness/* to this sidecar.
+EVAL_RUNNER_DIR="/home/runner/workspace/apps/eval-runner"
+EVAL_RUNNER_LOG="/tmp/eval-runner.log"
+if [ -f "$EVAL_RUNNER_DIR/run.py" ] && command -v python3 >/dev/null 2>&1; then
+  echo "[api-server start.sh] Launching eval-runner sidecar on port 8001 — log: $EVAL_RUNNER_LOG"
+  (
+    cd "$EVAL_RUNNER_DIR"
+    PORT=8001 exec python3 run.py
+  ) >"$EVAL_RUNNER_LOG" 2>&1 &
+  EVAL_RUNNER_PID=$!
+  echo "[api-server start.sh] Eval-runner pid=$EVAL_RUNNER_PID"
+  # Extend cleanup trap to also kill the eval-runner
+  old_cleanup=$(declare -f cleanup)
+  cleanup() {
+    eval "${old_cleanup#cleanup ()}"
+    if [ -n "$EVAL_RUNNER_PID" ] && kill -0 "$EVAL_RUNNER_PID" 2>/dev/null; then
+      kill "$EVAL_RUNNER_PID" 2>/dev/null || true
+    fi
+  }
+  trap cleanup EXIT INT TERM
+else
+  echo "[api-server start.sh] WARN: eval-runner not found or python3 unavailable — skipping sidecar." >&2
+fi
+# -----------------------------------------------------------------------------
+
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs

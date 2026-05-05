@@ -17,7 +17,12 @@ export type PrismBusEventType =
   | "execution_started"
   | "execution_completed"
   | "execution_failed"
-  | "policy_decision";
+  | "policy_decision"
+  | "model.eval.started"
+  | "model.eval.completed"
+  | "model.eval.regression"
+  | "model.eval.gate_blocked"
+  | "model.eval.gate_approved";
 
 export interface PrismBusEvent {
   id: string;

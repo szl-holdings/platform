@@ -53,6 +53,7 @@ export const NAMED_JOB_TYPES = {
   OUTCOME_GRAPH_CALIBRATION: "outcome_graph_calibration",
   EXPORT_JOB_PROCESSOR: "export_job_processor",
   HF_JOBS_STATUS_SYNC: "hf_jobs_status_sync",
+  NIGHTLY_MODEL_EVAL_SWEEP: "nightly_model_eval_sweep",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -192,6 +193,168 @@ registerEntry({
     'Polls HuggingFace Jobs API for active and recently completed runs across the org namespace. Syncs status transitions (queued → running → succeeded/failed/timeout) into the agent run timeline and trace graph. Updates the scheduled-jobs registry view with HF schedule metadata. Remote HF entries are clearly labeled as external compute.',
   schedule: 'hourly',
   enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.NIGHTLY_MODEL_EVAL_SWEEP,
+  name: 'Nightly Model Eval Sweep',
+  description:
+    'Runs the full Standard Suite (MMLU / IFEval / TruthfulQA / Safety) plus all 5 Domain Suites against every active model variant in the model passport registry. Emits PRISM Signal Bus events for completions, regressions, and gate decisions. Fires model.eval.regression events when any suite pass-rate drops > 5% vs the previous night\'s baseline. Results are stored as signed HMAC evidence records in the eval runner store.',
+  schedule: 'daily',
+  enabled: true,
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.NIGHTLY_MODEL_EVAL_SWEEP, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'nightly_model_eval_sweep: starting');
+  const RUNNER_URL = process.env['EVAL_RUNNER_URL'] ?? 'http://localhost:8001';
+  const REGRESSION_THRESHOLD = 0.05;
+  const ALL_SUITE_IDS = [
+    'standard-v1',
+    'vessels-domain-v1',
+    'terra-domain-v1',
+    'aegis-domain-v1',
+    'sentra-domain-v1',
+    'counsel-domain-v1',
+  ];
+
+  let totalRuns = 0;
+  let regressions = 0;
+  let blocked = 0;
+  let errors = 0;
+
+  try {
+    const { prismBus } = await import('@szl-holdings/prism-bus');
+
+    const activeModels: Array<{ modelId: string; provider: string }> = [];
+    try {
+      const { db, modelPassportRegistry } = await import('@szl-holdings/db').then(async (m) => {
+        const schema = await import('@szl-holdings/db/schema');
+        return { db: m.db, modelPassportRegistry: schema.modelPassportRegistry };
+      });
+      const { eq } = await import('drizzle-orm');
+      const passports = await db
+        .select()
+        .from(modelPassportRegistry)
+        .where(eq(modelPassportRegistry.state, 'active'))
+        .limit(20);
+      for (const p of passports) {
+        activeModels.push({ modelId: p.modelId, provider: p.provider });
+      }
+    } catch {
+      activeModels.push({ modelId: 'gpt-4o-mini', provider: 'openai' });
+    }
+
+    for (const { modelId, provider } of activeModels) {
+      for (const suiteId of ALL_SUITE_IDS) {
+        try {
+          const submitResp = await fetch(`${RUNNER_URL}/runs`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ suite_id: suiteId, model_id: modelId, provider, triggered_by: 'nightly_sweep' }),
+            signal: AbortSignal.timeout(30_000),
+          });
+          if (!submitResp.ok) { errors++; continue; }
+          const run = await submitResp.json() as { run_id?: string };
+          const runId = run.run_id;
+          if (!runId) { errors++; continue; }
+          totalRuns++;
+
+          let passRate: number | null = null;
+          let attempts = 0;
+          while (attempts < 40) {
+            await new Promise(r => setTimeout(r, 5000));
+            const detail = await fetch(`${RUNNER_URL}/runs/${runId}`, { signal: AbortSignal.timeout(10_000) });
+            if (detail.ok) {
+              const d = await detail.json() as { status?: string; pass_rate?: number };
+              if (d.status === 'completed') { passRate = d.pass_rate ?? null; break; }
+              if (d.status === 'failed') break;
+            }
+            attempts++;
+          }
+
+          if (passRate === null) { errors++; continue; }
+
+          await prismBus.publish({
+            type: 'model.eval.completed',
+            domain: 'global' as import('@szl-holdings/prism-bus').PrismDomain,
+            sourceId: 'nightly_model_eval_sweep',
+            severity: 'info',
+            payload: { suiteId, modelId, provider, passRate, runId, sweepJobId: job.id },
+          });
+
+          const prevResp = await fetch(`${RUNNER_URL}/runs?limit=50`, { signal: AbortSignal.timeout(10_000) }).catch(() => null);
+          if (prevResp?.ok) {
+            const prev = await prevResp.json() as { runs?: Array<{ run_id: string; suite_id?: string; model_id?: string; pass_rate?: number }> };
+            const prevRuns = (prev.runs ?? []).filter(
+              r => r.run_id !== runId && r.suite_id === suiteId && r.model_id === modelId,
+            );
+            const prevRun = prevRuns[0];
+            if (prevRun && prevRun.pass_rate !== undefined) {
+              const delta = passRate - prevRun.pass_rate;
+              if (delta < -REGRESSION_THRESHOLD) {
+                regressions++;
+                await prismBus.publish({
+                  type: 'model.eval.regression',
+                  domain: 'global' as import('@szl-holdings/prism-bus').PrismDomain,
+                  sourceId: 'nightly_model_eval_sweep',
+                  severity: 'high',
+                  payload: {
+                    suiteId, modelId, provider, runId,
+                    currentPassRate: passRate,
+                    baselinePassRate: prevRun.pass_rate,
+                    delta,
+                    baselineRunId: prevRun.run_id,
+                  },
+                });
+              }
+            }
+          }
+
+          const minThreshold = suiteId === 'standard-v1' ? 0.75 : 0.70;
+          if (passRate < minThreshold) {
+            blocked++;
+            await prismBus.publish({
+              type: 'model.eval.gate_blocked',
+              domain: 'global' as import('@szl-holdings/prism-bus').PrismDomain,
+              sourceId: 'nightly_model_eval_sweep',
+              severity: 'high',
+              payload: { suiteId, modelId, provider, runId, passRate, threshold: minThreshold },
+            });
+          } else {
+            await prismBus.publish({
+              type: 'model.eval.gate_approved',
+              domain: 'global' as import('@szl-holdings/prism-bus').PrismDomain,
+              sourceId: 'nightly_model_eval_sweep',
+              severity: 'info',
+              payload: { suiteId, modelId, provider, runId, passRate, threshold: minThreshold },
+            });
+          }
+        } catch (err) {
+          errors++;
+          logger.warn({ err, suiteId, modelId }, 'nightly_model_eval_sweep: suite run failed');
+        }
+      }
+    }
+
+    const durationMs = Date.now() - start;
+    updateRegistry(NAMED_JOB_TYPES.NIGHTLY_MODEL_EVAL_SWEEP, {
+      lastStatus: errors === totalRuns ? 'failed' : 'completed',
+      lastDurationMs: durationMs,
+      lastResult: { totalRuns, regressions, blocked, errors, modelsChecked: activeModels.length },
+    });
+    logger.info({ jobId: job.id, totalRuns, regressions, blocked, errors, durationMs }, 'nightly_model_eval_sweep: completed');
+    serverTelemetry.recordBusinessEvent('scheduled_job.nightly_model_eval_sweep.completed', {
+      totalRuns, regressions, blocked, errors, durationMs,
+    });
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'nightly_model_eval_sweep: fatal');
+    updateRegistry(NAMED_JOB_TYPES.NIGHTLY_MODEL_EVAL_SWEEP, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.NIGHTLY_MODEL_EVAL_SWEEP)?.failCount ?? 0) + 1,
+    });
+    throw err;
+  }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HF_JOBS_STATUS_SYNC, async (job) => {

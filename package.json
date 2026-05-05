@@ -128,7 +128,9 @@
     "screenshots:proof": "node scripts/assert-workflows-running.mjs && node scripts/capture-proof-screenshots.mjs",
     "validate:markdown-assets": "node scripts/validate-markdown-assets.mjs",
     "audit:mcp-registry": "node ops/audit/meridian-mcp-check.mjs",
-    "dev:validate": "tsx scripts/dev-validate.ts"
+    "dev:validate": "tsx scripts/dev-validate.ts",
+    "eval-harness:run-standard": "pnpm --filter @workspace/eval-harness run eval-harness:run-standard",
+    "eval-harness:reproduce": "pnpm --filter @workspace/eval-harness run eval-harness:reproduce"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",

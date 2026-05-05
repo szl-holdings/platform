@@ -759,4 +759,16 @@ router.use(lazyMatch("/model-passports", () => import("./model-passports"), "mod
 // GET    /governance/gates/:id/bypasses    — list bypass audit trail
 router.use(lazyMatch("/governance", () => import("./governance-gates"), "governance-gates"));
 
+// Governed Evaluation Harness — proxy to the eval runner service.
+// GET  /eval-harness/health
+// GET  /eval-harness/suites
+// POST /eval-harness/runs
+// GET  /eval-harness/runs
+// GET  /eval-harness/runs/:runId
+// POST /eval-harness/runs/:runId/reproduce
+// POST /eval-harness/runs/:runId/verify
+// GET  /eval-harness/regression/:runId/:baselineId
+// GET  /eval-harness/gate-status
+router.use(lazyMatch("/eval-harness", () => import("./eval-harness"), "eval-harness"));
+
 export default router;

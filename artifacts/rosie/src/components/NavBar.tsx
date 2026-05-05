@@ -12,6 +12,7 @@ const NAV_ITEMS: Array<{ id: AppPage; label: string; glyph: string }> = [
   { id: 'fabric',    label: 'Ecosystem Fabric',  glyph: '✦' },
   { id: 'research',  label: 'Research Library',  glyph: '◆' },
   { id: 'proof',     label: 'Proof Ledger',      glyph: '◉' },
+  { id: 'bench',     label: 'Evidence Bench',    glyph: '◈' },
 ];
 
 export function NavBar({ current, onNavigate }: NavBarProps) {

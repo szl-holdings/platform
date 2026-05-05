@@ -6,6 +6,7 @@ import {
   jsonb,
   numeric,
   pgTable,
+  real,
   text,
   timestamp,
   varchar,
@@ -55,6 +56,90 @@ export const aiTracesTable = pgTable(
     idxOrgDomain: index('ai_traces_org_domain_idx').on(t.orgId, t.domain),
   }),
 );
+
+/**
+ * eval_harness_runs — durable store for signed Governed Evaluation Harness run reports.
+ *
+ * Written by the eval-runner Python sidecar via psycopg2 when DATABASE_URL is set.
+ * Each row is immutable once status = 'completed'; HMAC signature covers content_hash.
+ */
+export const evalHarnessRunsTable = pgTable(
+  'eval_harness_runs',
+  {
+    runId: varchar('run_id', { length: 128 }).primaryKey(),
+    suiteId: varchar('suite_id', { length: 100 }).notNull(),
+    suiteName: varchar('suite_name', { length: 200 }).notNull().default(''),
+    suiteContentHash: varchar('suite_content_hash', { length: 64 }).notNull().default(''),
+    modelId: varchar('model_id', { length: 200 }).notNull(),
+    provider: varchar('provider', { length: 50 }).notNull(),
+    triggeredBy: varchar('triggered_by', { length: 100 }).notNull().default('api'),
+    baselineRunId: varchar('baseline_run_id', { length: 128 }),
+    seed: integer('seed'),
+    status: varchar('status', { length: 30 }).notNull().default('pending'),
+    error: text('error'),
+    totalCases: integer('total_cases').notNull().default(0),
+    passedCases: integer('passed_cases').notNull().default(0),
+    failedCases: integer('failed_cases').notNull().default(0),
+    passRate: real('pass_rate').notNull().default(0),
+    aggregateScore: real('aggregate_score').notNull().default(0),
+    categories: jsonb('categories').$type<Record<string, {
+      total: number; passed: number; pass_rate: number; weighted_score: number;
+    }>>().notNull().default(sql`'{}'::jsonb`),
+    caseResults: jsonb('case_results').$type<unknown[]>().notNull().default(sql`'[]'::jsonb`),
+    contentHash: varchar('content_hash', { length: 64 }).notNull().default(''),
+    signature: varchar('signature', { length: 64 }).notNull().default(''),
+    startedAt: timestamp('started_at').notNull().defaultNow(),
+    completedAt: timestamp('completed_at'),
+    durationMs: integer('duration_ms').notNull().default(0),
+  },
+  (t) => ({
+    idxSuiteId: index('eval_harness_runs_suite_id_idx').on(t.suiteId),
+    idxModelId: index('eval_harness_runs_model_id_idx').on(t.modelId),
+    idxStatus: index('eval_harness_runs_status_idx').on(t.status),
+    idxStartedAt: index('eval_harness_runs_started_at_idx').on(t.startedAt),
+    idxSuiteModel: index('eval_harness_runs_suite_model_idx').on(t.suiteId, t.modelId),
+  }),
+);
+
+/**
+ * eval_evidence_records — links a completed harness run to a Proof Chain entry.
+ *
+ * Every time the validation gate passes, an evidence record is written here.
+ * The `proof_chain_content_id` ties this record to a row in the proof_chain table
+ * (contentType='eval_harness_run') so every promotion decision has a traceable
+ * evidence artifact in the immutable Proof Chain.
+ *
+ * Written by attachHarnessEvidenceToPassport() in validation-gate.ts after a
+ * gate pass.  Each record is append-only — never updated.
+ */
+export const evalEvidenceRecordsTable = pgTable(
+  'eval_evidence_records',
+  {
+    id: varchar('id', { length: 128 }).primaryKey(),
+    runId: varchar('run_id', { length: 128 }).notNull(),
+    modelId: varchar('model_id', { length: 200 }).notNull(),
+    provider: varchar('provider', { length: 50 }).notNull(),
+    suiteId: varchar('suite_id', { length: 100 }).notNull(),
+    passRate: real('pass_rate').notNull(),
+    aggregateScore: real('aggregate_score').notNull().default(0),
+    contentHash: varchar('content_hash', { length: 64 }).notNull(),
+    signature: varchar('signature', { length: 64 }).notNull(),
+    suiteContentHash: varchar('suite_content_hash', { length: 64 }).notNull().default(''),
+    // Proof Chain linkage — contentId used to find the proof_chain row
+    proofChainContentId: varchar('proof_chain_content_id', { length: 200 }),
+    proofChainId: integer('proof_chain_id'),
+    triggeredBy: varchar('triggered_by', { length: 100 }).notNull().default('validation_gate'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    idxRunId: index('eval_evidence_records_run_id_idx').on(t.runId),
+    idxModelId: index('eval_evidence_records_model_id_idx').on(t.modelId),
+    idxCreatedAt: index('eval_evidence_records_created_at_idx').on(t.createdAt),
+  }),
+);
+
+export type EvalEvidenceRecord = typeof evalEvidenceRecordsTable.$inferSelect;
+export type InsertEvalEvidenceRecord = typeof evalEvidenceRecordsTable.$inferInsert;
 
 export const aiReviewQueueTable = pgTable(
   'ai_review_queue',

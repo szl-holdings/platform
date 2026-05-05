@@ -133,6 +133,7 @@
     "@workspace/cognitive-runtime": "workspace:*",
     "@workspace/demo-seed": "workspace:*",
     "@workspace/eval-forge": "workspace:*",
+    "@workspace/eval-harness": "workspace:*",
     "@workspace/eval-os": "workspace:*",
     "@workspace/executive-briefing": "workspace:*",
     "@workspace/guardian": "workspace:*",

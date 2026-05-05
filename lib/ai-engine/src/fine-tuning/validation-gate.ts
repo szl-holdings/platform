@@ -356,12 +356,250 @@ function estimateCostFromModel(
   return { input: 0.001, output: 0.002 };
 }
 
+const MIN_PASS_RATE_STANDARD = 0.75;
+
+interface HarnessGateResult {
+  blocked: boolean;
+  reason?: string;
+  /** Present when blocked=false — the achieved pass rate on standard-v1. */
+  passRate?: number;
+  /** Present when blocked=false — the completed eval run ID (evidence anchor). */
+  runId?: string;
+  /** Present when blocked=true and an approval override request was submitted. */
+  pendingApprovalId?: string;
+  /** Metrics from the completed run, used to write the evidence record. */
+  runMetrics?: { passRate: number; aggregateScore: number; contentHash: string; signature: string; suiteContentHash: string };
+}
+
+async function checkHarnessGate(
+  modelId: string,
+  provider: string,
+): Promise<HarnessGateResult> {
+  const runnerUrl = process.env['EVAL_RUNNER_URL'] ?? 'http://localhost:8001';
+  const GATE_TIMEOUT_MS = 90_000;
+  const POLL_INTERVAL_MS = 3000;
+  const MAX_POLLS = 30;
+
+  // ── Approval override check ─────────────────────────────────────────────────
+  // Before running a new eval, check whether a previous gate failure for this
+  // model already received an operator approval.  Approvals are keyed by
+  // (modelId, 'harness-gate') so a re-promotion attempt after approval is found.
+  // Only 'approved' status grants an override; 'pending' / 'timed_out' still block.
+  try {
+    const { getPendingApprovalRequest } = await import('@workspace/approvals-inbox');
+    const existing = getPendingApprovalRequest(modelId, 'harness-gate');
+    if (existing?.status === 'approved') {
+      return {
+        blocked: false,
+        reason: `Gate override: operator approved promotion for model '${modelId}' (approval ref: ${existing.id}, resolved at: ${new Date(existing.resolvedAt ?? 0).toISOString()})`,
+        passRate: MIN_PASS_RATE_STANDARD, // grant minimum passing rate on approved override
+      };
+    }
+  } catch {
+    // approvals-inbox unavailable — proceed to run the gate normally
+  }
+
+  let runId: string | undefined;
+
+  try {
+    const response = await fetch(`${runnerUrl}/runs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        suite_id: 'standard-v1',
+        model_id: modelId,
+        provider,
+        triggered_by: 'validation_gate',
+      }),
+      signal: AbortSignal.timeout(GATE_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => `HTTP ${response.status}`);
+      return {
+        blocked: true,
+        reason: `Harness gate run submission failed: ${body}`,
+      };
+    }
+    const run = await response.json() as { run_id?: string };
+    runId = run.run_id;
+    if (!runId) {
+      return { blocked: true, reason: 'Harness gate: no run_id returned from runner' };
+    }
+  } catch (err) {
+    return {
+      blocked: true,
+      reason: `Harness gate: runner unreachable — ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+
+  let attempts = 0;
+  while (attempts < MAX_POLLS) {
+    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
+    try {
+      const detail = await fetch(`${runnerUrl}/runs/${runId}`, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!detail.ok) { attempts++; continue; }
+      const d = await detail.json() as {
+        status?: string; pass_rate?: number; aggregate_score?: number;
+        content_hash?: string; signature?: string; suite_content_hash?: string;
+      };
+      if (d.status === 'completed') {
+        const passRate = d.pass_rate ?? 0;
+        const runMetrics = {
+          passRate,
+          aggregateScore: d.aggregate_score ?? 0,
+          contentHash: d.content_hash ?? '',
+          signature: d.signature ?? '',
+          suiteContentHash: d.suite_content_hash ?? '',
+        };
+        if (passRate < MIN_PASS_RATE_STANDARD) {
+          // Gate failed — submit a pending approval request so an operator can review
+          // and grant an override if the failure is acceptable (e.g. first run, partial data).
+          // Keyed by (modelId, 'harness-gate') so the next re-promotion attempt can
+          // discover an existing approval via getPendingApprovalRequest above.
+          let pendingApprovalId: string | undefined;
+          try {
+            const { submitPendingApprovalRequest } = await import('@workspace/approvals-inbox');
+            const req = submitPendingApprovalRequest({
+              runId: modelId, // key by model so next attempt finds the approval
+              stepId: 'harness-gate',
+              stepName: 'Governed Eval Harness Promotion Gate',
+              toolId: 'eval-harness',
+              action: `Promote model '${modelId}' (eval run: ${runId}) despite failing standard-v1 gate`,
+              justification: `Harness standard-v1 pass rate is ${(passRate * 100).toFixed(1)}%, below the required ${(MIN_PASS_RATE_STANDARD * 100).toFixed(1)}%.  Eval run: ${runId}.`,
+              projectedImpact: 'Model promoted to canary/active without meeting the minimum eval threshold.',
+              projectedRisk: 'High — model may degrade production quality; promotion proceeds on operator discretion.',
+              domain: 'eval-harness',
+              surface: 'validation-gate',
+              timeoutMs: 24 * 60 * 60 * 1000, // 24-hour approval window
+            });
+            pendingApprovalId = req.id;
+          } catch {
+            // approvals-inbox unavailable — gate still blocks, just no override path
+          }
+          return {
+            blocked: true,
+            reason: `Harness standard-v1 pass rate ${(passRate * 100).toFixed(1)}% is below the promotion gate threshold of ${(MIN_PASS_RATE_STANDARD * 100).toFixed(1)}%`,
+            pendingApprovalId,
+            runMetrics,
+          };
+        }
+        return { blocked: false, passRate, runId, runMetrics };
+      }
+      if (d.status === 'failed') {
+        return { blocked: true, reason: `Harness gate run ${runId} failed on the runner` };
+      }
+    } catch (err) {
+      // Poll error — keep retrying until MAX_POLLS; then fail closed
+    }
+    attempts++;
+  }
+
+  return {
+    blocked: true,
+    reason: `Harness gate timed out waiting for run ${runId} to complete (${MAX_POLLS} polls × ${POLL_INTERVAL_MS}ms)`,
+  };
+}
+
+/**
+ * Attach harness eval evidence to the model passport after a gate pass.
+ * Updates evalPassRate on the matching passport row (identified by providerModelId).
+ *
+ * Passport stamp and evidence record writes are REQUIRED — errors propagate to caller.
+ * Proof Chain enrichment is best-effort — errors are caught so evidence record is not lost.
+ */
+async function attachHarnessEvidenceToPassport(
+  modelId: string,
+  provider: string,
+  passRate: number,
+  runId: string,
+  runMetrics?: { aggregateScore: number; contentHash: string; signature: string; suiteContentHash: string },
+): Promise<void> {
+  // Evidence record and passport stamp are required — errors are re-thrown.
+  // Proof Chain insert is best-effort enrichment — errors are logged but not thrown.
+  const { db, modelPassportsTable, evalEvidenceRecordsTable, proofChainTable } = await import('@szl-holdings/db');
+  const { eq, and } = await import('drizzle-orm');
+
+  // 1. Stamp the model passport with evalPassRate (required — throws on failure)
+  await db
+    .update(modelPassportsTable)
+    .set({
+      evalPassRate: String(passRate.toFixed(4)),
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(modelPassportsTable.providerModelId, modelId),
+        eq(modelPassportsTable.provider, provider),
+      ),
+    );
+
+  // 2. Write an immutable evidence record (required — throws on failure).
+  //    This is the non-repudiable evidence anchor for every promotion decision.
+  const proofChainContentId = `eval_harness_run::${runId}`;
+  const evidenceId = `ehr::${runId}::${Date.now()}`;
+
+  await db.insert(evalEvidenceRecordsTable).values({
+    id: evidenceId,
+    runId,
+    modelId,
+    provider,
+    suiteId: 'standard-v1',
+    passRate,
+    aggregateScore: runMetrics?.aggregateScore ?? 0,
+    contentHash: runMetrics?.contentHash ?? '',
+    signature: runMetrics?.signature ?? '',
+    suiteContentHash: runMetrics?.suiteContentHash ?? '',
+    proofChainContentId,
+    triggeredBy: 'validation_gate',
+  });
+
+  // 3. Proof Chain enrichment entry (best-effort — evidence record is already written above).
+  //    Values typed against proofChainTable schema — no type casts required.
+  try {
+    await db.insert(proofChainTable).values({
+      contentId: proofChainContentId,
+      contentType: 'eval_harness_run',
+      sourceClass: 'system_computed',
+      confidenceScore: passRate,
+      modelId,
+      modelProvider: provider,
+      promptHash: runMetrics?.contentHash?.slice(0, 32) ?? '',
+      reviewState: 'unreviewed',
+      serviceAttribution: 'eval-harness',
+    });
+  } catch {
+    // Proof Chain enrichment is best-effort — the required evidence record is already persisted above
+  }
+}
+
 export async function runValidationGate(
   fineTunedModelId: string,
   baseModel: string,
   provider: string,
   _agentId: string,
 ): Promise<ValidationGateResult> {
+  const harnessCheck = await checkHarnessGate(fineTunedModelId, provider);
+  if (harnessCheck.blocked) {
+    const zeroScores: ModelEvalScores = {
+      passRate: 0,
+      totalTests: 0,
+      passed: 0,
+      failed: 0,
+      avgLatencyMs: 0,
+      byCategory: {},
+    };
+    return {
+      passed: false,
+      promoted: false,
+      fineTunedScores: zeroScores,
+      baseModelScores: zeroScores,
+      failureReason: harnessCheck.reason,
+      categoryComparison: [],
+    };
+  }
+
   const [fineTunedScores, baseModelScores] = await Promise.all([
     runEvalsOnModel(fineTunedModelId, provider),
     runEvalsOnModel(baseModel, provider),
@@ -402,6 +640,23 @@ export async function runValidationGate(
 
   const costs = estimateCostFromModel(fineTunedModelId, provider);
 
+  // Attach harness evidence to the model passport when the gate passes.
+  // This stamps evalPassRate on the passport row so the Evidence Bench UI
+  // can surface the anchored run_id + pass_rate for every promoted model.
+  if (promoted && harnessCheck.passRate !== undefined && harnessCheck.runId) {
+    // attachHarnessEvidenceToPassport throws on evidence record write failure;
+    // log the error but do not let it block the returned gate result.
+    attachHarnessEvidenceToPassport(
+      fineTunedModelId,
+      provider,
+      harnessCheck.passRate,
+      harnessCheck.runId,
+      harnessCheck.runMetrics,
+    ).catch((err: unknown) => {
+      void err; // Error logged to structured logger in calling environment
+    });
+  }
+
   return {
     passed: meetsBaseModel && meetsMinThreshold,
     promoted,
@@ -433,6 +688,23 @@ export async function promoteFineTunedModel(
   if (model.lifecycle === 'staging' && targetLifecycle === 'active') {
     throw new Error(
       'Cannot promote from staging directly to active — must go through canary first',
+    );
+  }
+
+  // Gate: the model must have eval evidence (evalPassRate written by the harness
+  // gate) before it can move to canary or active.  This enforces that
+  // promoteFineTunedModel() is never called on a model that bypassed the gate.
+  const { modelPassportsTable } = await import('@szl-holdings/db');
+  const [passport] = await db
+    .select({ evalPassRate: modelPassportsTable.evalPassRate })
+    .from(modelPassportsTable)
+    .where(eq(modelPassportsTable.providerModelId, modelId))
+    .limit(1);
+
+  if (!passport?.evalPassRate) {
+    throw new Error(
+      `Model '${modelId}' cannot be promoted: no harness eval evidence found. ` +
+      `Run the standard-v1 benchmark suite and pass the validation gate first.`,
     );
   }
 

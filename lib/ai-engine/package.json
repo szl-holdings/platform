@@ -65,6 +65,7 @@
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "@szl-holdings/shared-contracts": "workspace:*",
+    "@workspace/approvals-inbox": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "drizzle-orm": "catalog:",
     "openai": "^6.27.0",
