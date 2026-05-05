@@ -28,6 +28,16 @@ import {
   Wand2,
   Boxes,
   Network,
+  Zap,
+  FlaskRound,
+  Merge,
+  ScanLine,
+  Leaf,
+  RotateCcw,
+  Clapperboard,
+  SlidersHorizontal,
+  SearchCheck,
+  Code2,
 } from 'lucide-react';
 
 const coreItems = [
@@ -61,6 +71,20 @@ const sovereignItems = [
   { name: 'PRAXIS', href: '/sovereign-ai-hub/praxis', icon: Wand2 },
   { name: 'Data Estate', href: '/sovereign-ai-hub/data-estate', icon: Database },
   { name: 'Cognitive', href: '/sovereign-ai-hub/cognitive', icon: Brain },
+];
+
+const innovationItems = [
+  { name: 'Innovation Brief', href: '/innovation', icon: Zap },
+  { name: 'Audience SQL', href: '/innovation/audience-sql', icon: FlaskRound },
+  { name: 'Lineage Graph', href: '/innovation/lineage', icon: ScanLine },
+  { name: 'Drift Repair', href: '/innovation/drift-repair', icon: GitBranch },
+  { name: 'Golden Record', href: '/innovation/golden-record', icon: Merge },
+  { name: 'Cost & Carbon', href: '/innovation/cost-carbon', icon: Leaf },
+  { name: 'Closed Loop', href: '/innovation/closed-loop', icon: RotateCcw },
+  { name: 'Sim Theater', href: '/innovation/sim-theater', icon: Clapperboard },
+  { name: 'Mapper Accuracy', href: '/innovation/mapper-accuracy', icon: SlidersHorizontal },
+  { name: 'Dest Discovery', href: '/innovation/destination-discovery', icon: SearchCheck },
+  { name: 'Policy DSL', href: '/innovation/policy-dsl', icon: Code2 },
 ];
 
 const externalNavItems = [
@@ -142,6 +166,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <NavSection label="Activation Fabric" items={fabricItems} location={location} collapsed={!isSidebarOpen} />
           <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
           <NavSection label="Sovereign AI Hub" items={sovereignItems} location={location} collapsed={!isSidebarOpen} />
+          <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
+          <NavSection label="One-of-One" items={innovationItems} location={location} collapsed={!isSidebarOpen} />
           <div className="my-3 mx-3 h-px bg-[rgba(255,255,255,0.04)]" />
 
           {isSidebarOpen && (

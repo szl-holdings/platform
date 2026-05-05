@@ -232,6 +232,12 @@ export function FabricCockpit() {
             </Card>
           </Link>
         ))}
+        <a href={`${window.location.origin.replace('/intelligence', '')}/conduit/innovation`} target="_blank" rel="noopener noreferrer">
+          <Card className="h-full cursor-pointer hover:border-[#c9b787] transition-colors" style={{ borderColor: 'rgba(201,183,135,0.25)', background: 'rgba(201,183,135,0.04)' }}>
+            <div className="text-sm font-medium mb-1" style={{ color: GOLD }}>Conduit Innovations →</div>
+            <p className="text-[10px]" style={{ color: GHOST }}>10 one-of-one activation capabilities in Amaru</p>
+          </Card>
+        </a>
       </div>
     </Layout>
   );

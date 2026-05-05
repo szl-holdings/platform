@@ -342,6 +342,126 @@ export function computeLutarSigma(axes: LutarAxes): LutarSigma {
   };
 }
 
+// ─── Lutar Σ envelope (axis-variance bounds) ────────────────────────────────
+/**
+ * Σ envelope — confidence interval around Σ derived from axis dispersion. The
+ * monotone form Σ = ∏ axisᵢ^wᵢ is exact, but axes themselves carry sampling
+ * noise. The envelope expresses the implicit Σ range when each axis is
+ * perturbed by its mean-deviation, weighted by the same Egyptian unit
+ * fractions used in the canonical Σ. Pure, deterministic, no randomness.
+ *
+ * Returns Σ_low / Σ_high bracketing the canonical Σ. Width tightens as axes
+ * cluster, widens when one axis falls far from the mean.
+ */
+export interface LutarEnvelope {
+  readonly sigma: number;
+  readonly sigmaLow: number;
+  readonly sigmaHigh: number;
+  readonly width: number;
+  readonly dispersion: number;
+  readonly tightestAxis: 'P' | 'K' | 'phi' | 'C';
+  readonly weakestAxis: 'P' | 'K' | 'phi' | 'C';
+  readonly formula: string;
+}
+
+export function computeLutarEnvelope(axes: LutarAxes): LutarEnvelope {
+  const safe = (v: number) => Math.max(1e-9, Math.min(1, v));
+  const wP = 1 / 2, wK = 1 / 4, wPhi = 1 / 8, wC = 1 / 8;
+  const sigma =
+    Math.pow(safe(axes.P), wP) *
+    Math.pow(safe(axes.K), wK) *
+    Math.pow(safe(axes.phi), wPhi) *
+    Math.pow(safe(axes.C), wC);
+  const mean = (axes.P + axes.K + axes.phi + axes.C) / 4;
+  const devs = {
+    P: Math.abs(axes.P - mean),
+    K: Math.abs(axes.K - mean),
+    phi: Math.abs(axes.phi - mean),
+    C: Math.abs(axes.C - mean),
+  };
+  const dispersion = (devs.P + devs.K + devs.phi + devs.C) / 4;
+  const low = (a: number, dev: number) => safe(a - dev);
+  const high = (a: number, dev: number) => safe(a + dev);
+  const sigmaLow =
+    Math.pow(low(axes.P, devs.P), wP) *
+    Math.pow(low(axes.K, devs.K), wK) *
+    Math.pow(low(axes.phi, devs.phi), wPhi) *
+    Math.pow(low(axes.C, devs.C), wC);
+  const sigmaHigh =
+    Math.pow(high(axes.P, devs.P), wP) *
+    Math.pow(high(axes.K, devs.K), wK) *
+    Math.pow(high(axes.phi, devs.phi), wPhi) *
+    Math.pow(high(axes.C, devs.C), wC);
+  const axisKeys = ['P', 'K', 'phi', 'C'] as const;
+  let tightest: typeof axisKeys[number] = 'P';
+  let weakest: typeof axisKeys[number] = 'P';
+  for (const k of axisKeys) {
+    if (devs[k] < devs[tightest]) tightest = k;
+    if (devs[k] > devs[weakest]) weakest = k;
+  }
+  return {
+    sigma: Math.round(sigma * 10000) / 10000,
+    sigmaLow: Math.round(sigmaLow * 10000) / 10000,
+    sigmaHigh: Math.round(sigmaHigh * 10000) / 10000,
+    width: Math.round((sigmaHigh - sigmaLow) * 10000) / 10000,
+    dispersion: Math.round(dispersion * 10000) / 10000,
+    tightestAxis: tightest,
+    weakestAxis: weakest,
+    formula: 'Σ_lo, Σ_hi = ∏ (axisᵢ ± |axisᵢ − mean|)^wᵢ',
+  };
+}
+
+// ─── Lutar Σ flow (velocity vs prior) ───────────────────────────────────────
+/**
+ * Σ-flow — first-difference dynamics over a sequence of prior Σ samples.
+ * Returns Σ velocity (Δ vs immediate prior), Σ acceleration (Δ²), and a
+ * monotonicity score (0..1) that approaches 1 when Σ rises monotonically.
+ * Pure function of an ordered sample window.
+ */
+export interface LutarFlow {
+  readonly current: number;
+  readonly prior: number | null;
+  readonly velocity: number;
+  readonly acceleration: number;
+  readonly monotonicity: number;
+  readonly trend: 'rising' | 'falling' | 'flat' | 'oscillating';
+  readonly samples: number;
+}
+
+export function computeLutarFlow(samples: readonly number[]): LutarFlow {
+  if (samples.length === 0) {
+    return { current: 0, prior: null, velocity: 0, acceleration: 0, monotonicity: 0, trend: 'flat', samples: 0 };
+  }
+  const current = samples[samples.length - 1]!;
+  const prior = samples.length > 1 ? samples[samples.length - 2]! : null;
+  const priorPrior = samples.length > 2 ? samples[samples.length - 3]! : null;
+  const velocity = prior === null ? 0 : current - prior;
+  const acceleration = priorPrior === null || prior === null ? 0 : (current - prior) - (prior - priorPrior);
+  let rising = 0;
+  let falling = 0;
+  for (let i = 1; i < samples.length; i++) {
+    const d = samples[i]! - samples[i - 1]!;
+    if (d > 1e-6) rising++;
+    else if (d < -1e-6) falling++;
+  }
+  const transitions = rising + falling;
+  const monotonicity = transitions === 0 ? 1 : Math.max(rising, falling) / transitions;
+  const trend: LutarFlow['trend'] =
+    Math.abs(velocity) < 1e-4 ? 'flat'
+    : monotonicity < 0.6 ? 'oscillating'
+    : velocity > 0 ? 'rising'
+    : 'falling';
+  return {
+    current: Math.round(current * 10000) / 10000,
+    prior: prior === null ? null : Math.round(prior * 10000) / 10000,
+    velocity: Math.round(velocity * 10000) / 10000,
+    acceleration: Math.round(acceleration * 10000) / 10000,
+    monotonicity: Math.round(monotonicity * 10000) / 10000,
+    trend,
+    samples: samples.length,
+  };
+}
+
 // ─── Aggregate cockpit KPIs ─────────────────────────────────────────────────
 export function buildCockpitKpis(args: {
   events: readonly RelayRunEvent[];

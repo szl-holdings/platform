@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { RELAY_POLICIES } from '@/data/fabric';
 import { groupPoliciesBySeverity } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, GovernanceDot, SeverityChip } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
+import { useInnovationStore } from '@/lib/innovation-store';
+import { Code } from 'lucide-react';
 
 export default function PoliciesPage() {
+  const { dslVersions, dslActiveRuleCount } = useInnovationStore();
   const [q, setQ] = useState('');
   const [kind, setKind] = useState('');
   const [drawerId, setDrawerId] = useState<string | null>(null);
@@ -26,14 +30,32 @@ export default function PoliciesPage() {
         eyebrow="ACTIVATION FABRIC · 05"
         title="Policies"
         blurb="The registry Sentinel evaluates against every batch. Each rule is a condition, an enforcement action, a Lutar weight, and a recent-hit log — the spine never ships unless this registry says it can."
+        trailing={
+          <Link href="/innovation/policy-dsl" className="flex items-center gap-1.5 text-[11px] font-mono text-[#c9b787] hover:underline">
+            <Code className="w-3.5 h-3.5" /> Policy DSL →
+          </Link>
+        }
       />
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
         <FabricStat label="Policies" value={RELAY_POLICIES.length} tone="gold" />
         <FabricStat label="Critical" value={grouped.critical.length} tone="bad" />
         <FabricStat label="High" value={grouped.high.length} tone="warn" />
         <FabricStat label="Medium" value={grouped.medium.length} />
         <FabricStat label="Low / info" value={grouped.low.length + grouped.info.length} />
+        <FabricStat label="DSL versions" value={dslVersions.length} tone={dslVersions.length > 0 ? 'good' : 'neutral'} sub={dslActiveRuleCount > 0 ? `${dslActiveRuleCount} active rules` : undefined} />
       </div>
+      {dslVersions.length > 0 && (
+        <div className="mb-4 p-3 rounded text-[12px] flex items-center justify-between" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)' }}>
+          <div className="flex items-center gap-2">
+            <Code className="w-3.5 h-3.5 text-[#c9b787]" />
+            <span className="text-[#f5f5f5]">Latest DSL version</span>
+            <span className="font-mono text-[#c9b787]">v{dslVersions[0]!.version}</span>
+            <span className="text-[#666]">— {dslVersions[0]!.description}</span>
+            <span className="text-[#555] font-mono">({dslVersions[0]!.ruleCount} rules)</span>
+          </div>
+          <Link href="/innovation/policy-dsl" className="text-[11px] text-[#c9b787] hover:underline">Edit DSL →</Link>
+        </div>
+      )}
 
       <FabricToolbar>
         <Input placeholder="Search policies / conditions…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />

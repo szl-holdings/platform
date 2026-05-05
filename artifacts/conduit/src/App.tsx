@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { Toaster } from 'sonner';
 import { Layout } from '@/components/layout';
+import { InnovationStoreProvider } from '@/lib/innovation-store';
 import Dashboard from '@/pages/dashboard';
 import ComputePage from '@/pages/compute';
 import ConnectionsList from '@/pages/connections/list';
@@ -34,6 +35,17 @@ import ObservabilityPage from '@/pages/observability';
 import OutcomesPage from '@/pages/outcomes';
 import AgentsPage from '@/pages/agents';
 import RoadmapPage from '@/pages/roadmap';
+import InnovationPage from '@/pages/innovation/index';
+import AudienceSqlPage from '@/pages/innovation/audience-sql';
+import LineagePage from '@/pages/innovation/lineage';
+import DriftRepairPage from '@/pages/innovation/drift-repair';
+import GoldenRecordPage from '@/pages/innovation/golden-record';
+import CostCarbonPage from '@/pages/innovation/cost-carbon';
+import ClosedLoopPage from '@/pages/innovation/closed-loop';
+import SimTheaterPage from '@/pages/innovation/sim-theater';
+import MapperAccuracyPage from '@/pages/innovation/mapper-accuracy';
+import DestinationDiscoveryPage from '@/pages/innovation/destination-discovery';
+import PolicyDslPage from '@/pages/innovation/policy-dsl';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +92,17 @@ function AppContent() {
         <Route path="/outcomes" component={OutcomesPage} />
         <Route path="/agents" component={AgentsPage} />
         <Route path="/roadmap" component={RoadmapPage} />
+        <Route path="/innovation" component={InnovationPage} />
+        <Route path="/innovation/audience-sql" component={AudienceSqlPage} />
+        <Route path="/innovation/lineage" component={LineagePage} />
+        <Route path="/innovation/drift-repair" component={DriftRepairPage} />
+        <Route path="/innovation/golden-record" component={GoldenRecordPage} />
+        <Route path="/innovation/cost-carbon" component={CostCarbonPage} />
+        <Route path="/innovation/closed-loop" component={ClosedLoopPage} />
+        <Route path="/innovation/sim-theater" component={SimTheaterPage} />
+        <Route path="/innovation/mapper-accuracy" component={MapperAccuracyPage} />
+        <Route path="/innovation/destination-discovery" component={DestinationDiscoveryPage} />
+        <Route path="/innovation/policy-dsl" component={PolicyDslPage} />
         <Route>
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Page not found
@@ -94,7 +117,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <AppContent />
+        <InnovationStoreProvider>
+          <AppContent />
+        </InnovationStoreProvider>
       </WouterRouter>
       <Toaster theme="dark" toastOptions={{ className: 'font-sans' }} />
     </QueryClientProvider>

@@ -1,16 +1,23 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { RELAY_DESTINATIONS, RELAY_RUN_EVENTS } from '@/data/fabric';
 import { calculateDestinationHealth } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, GovernanceDot, MicroBar } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
+import { useInnovationStore } from '@/lib/innovation-store';
+import { Search } from 'lucide-react';
 
 export default function DestinationsPage() {
+  const { discoveredDestinations } = useInnovationStore();
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('');
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
+  const allDestinations = useMemo(() => [...discoveredDestinations, ...RELAY_DESTINATIONS], [discoveredDestinations]);
+  const discoveredIds = useMemo(() => new Set(discoveredDestinations.map((d) => d.id)), [discoveredDestinations]);
+
   const rows = useMemo(() => {
-    return RELAY_DESTINATIONS
+    return allDestinations
       .filter((d) => {
         if (q && !d.name.toLowerCase().includes(q.toLowerCase())) return false;
         if (cat && d.category !== cat) return false;
@@ -18,14 +25,14 @@ export default function DestinationsPage() {
       })
       .map((d) => ({ ...d, computedHealth: calculateDestinationHealth(d, RELAY_RUN_EVENTS) }))
       .sort((a, b) => a.computedHealth - b.computedHealth);
-  }, [q, cat]);
+  }, [q, cat, allDestinations]);
 
-  const greenCount = RELAY_DESTINATIONS.filter((d) => d.governanceState === 'green').length;
-  const amberCount = RELAY_DESTINATIONS.filter((d) => d.governanceState === 'amber').length;
-  const redCount = RELAY_DESTINATIONS.filter((d) => d.governanceState === 'red').length;
-  const expiringAuth = RELAY_DESTINATIONS.filter((d) => d.authState !== 'connected').length;
+  const greenCount = allDestinations.filter((d) => d.governanceState === 'green').length;
+  const amberCount = allDestinations.filter((d) => d.governanceState === 'amber').length;
+  const redCount = allDestinations.filter((d) => d.governanceState === 'red').length;
+  const expiringAuth = allDestinations.filter((d) => d.authState !== 'connected').length;
 
-  const drawer = drawerId ? RELAY_DESTINATIONS.find((d) => d.id === drawerId)! : null;
+  const drawer = drawerId ? allDestinations.find((d) => d.id === drawerId) ?? null : null;
   const drawerEvents = drawer ? RELAY_RUN_EVENTS.filter((e) => e.destinationId === drawer.id).slice(0, 12) : [];
 
   return (
@@ -34,9 +41,14 @@ export default function DestinationsPage() {
         eyebrow="ACTIVATION FABRIC · 03"
         title="Destinations"
         blurb="Every system the spine writes into — CRM, support, marketing, collab, data, webhook, finance, logistics. Each one has a contract, a rate envelope, an auth state, and a health score derived from the last 50 deliveries."
+        trailing={
+          <Link href="/innovation/destination-discovery" className="flex items-center gap-1.5 text-[11px] font-mono text-[#c9b787] hover:underline">
+            <Search className="w-3.5 h-3.5" /> Auto-Discovery →
+          </Link>
+        }
       />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <FabricStat label="Destinations" value={RELAY_DESTINATIONS.length} tone="gold" sub={`${greenCount} green · ${amberCount} amber · ${redCount} red`} />
+        <FabricStat label="Destinations" value={allDestinations.length} tone="gold" sub={`${greenCount} green · ${amberCount} amber · ${redCount} red${discoveredDestinations.length > 0 ? ` · +${discoveredDestinations.length} discovered` : ''}`} />
         <FabricStat label="Auth attention" value={expiringAuth} tone={expiringAuth > 0 ? 'warn' : 'good'} sub="expiring / rotation / expired / untested" />
         <FabricStat label="Avg health" value={Math.round(RELAY_DESTINATIONS.reduce((s, d) => s + d.healthScore, 0) / RELAY_DESTINATIONS.length)} tone="good" />
         <FabricStat label="PII-permitted" value={RELAY_DESTINATIONS.filter((d) => d.piiAllowed).length} />
@@ -54,12 +66,12 @@ export default function DestinationsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {rows.map((d) => (
-          <button key={d.id} onClick={() => setDrawerId(d.id)} className="conduit-card p-4 text-left">
+          <button key={d.id} onClick={() => setDrawerId(d.id)} className="conduit-card p-4 text-left" style={discoveredIds.has(d.id) ? { borderColor: 'rgba(201,183,135,0.25)' } : undefined}>
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: d.accent, boxShadow: `0 0 6px ${d.accent}55` }} />
                 <div>
-                  <div className="text-[#f5f5f5] text-sm font-medium">{d.name}</div>
+                  <div className="text-[#f5f5f5] text-sm font-medium flex items-center gap-1.5">{d.name}{discoveredIds.has(d.id) && <Badge variant="active">discovered</Badge>}</div>
                   <div className="text-[11px] text-[#666] mt-0.5">{d.category} · {d.rateLimitRpm} rpm</div>
                 </div>
               </div>

@@ -31,6 +31,7 @@ import {
   Sparkline,
 } from '@/components/fabric/primitives';
 import { Badge, Button } from '@/components/ui';
+import { INNOVATION_CAPABILITIES } from '@/data/innovation/competitive';
 
 export default function Dashboard() {
   const kpis = useMemo(
@@ -292,7 +293,7 @@ export default function Dashboard() {
       </div>
 
       {/* Vertical playbooks */}
-      <FabricCard title="VERTICAL PLAYBOOKS — ACTIVATED BY AMARU">
+      <FabricCard title="VERTICAL PLAYBOOKS — ACTIVATED BY AMARU" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {VERTICAL_PLAYBOOKS.map((pb) => (
             <a key={pb.verticalId} href={pb.route} target="_blank" rel="noopener noreferrer" className="conduit-card p-4 hover:border-[rgba(201,183,135,0.3)]">
@@ -313,6 +314,29 @@ export default function Dashboard() {
                 ))}
               </div>
             </a>
+          ))}
+        </div>
+      </FabricCard>
+
+      {/* One-of-One Innovation Panel */}
+      <FabricCard
+        title="ONE-OF-ONE — 10 INNOVATIONS"
+        trailing={<Link href="/innovation" className="text-[11px] text-[#c9b787] hover:underline">Full competitive brief →</Link>}
+      >
+        <p className="text-[12px] text-[#8a8a8a] mb-4 leading-relaxed">
+          Original capabilities assembled from field research across 10 public reverse ETL projects — re-implemented as A11oy-native, governed, proof-anchored primitives.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+          {INNOVATION_CAPABILITIES.map((cap) => (
+            <Link key={cap.id} href={cap.route} className="conduit-card p-3 block hover:border-[rgba(201,183,135,0.3)] transition-all">
+              <div className="flex items-start gap-2 mb-1.5">
+                <span className="font-mono text-[10px] text-[#c9b787] shrink-0 mt-0.5">
+                  {String(cap.number).padStart(2, '0')}
+                </span>
+                <div className="text-[#f5f5f5] text-[11px] font-medium leading-tight">{cap.title}</div>
+              </div>
+              <div className="text-[10px] text-[#666] leading-tight ml-5">{cap.tagline}</div>
+            </Link>
           ))}
         </div>
       </FabricCard>

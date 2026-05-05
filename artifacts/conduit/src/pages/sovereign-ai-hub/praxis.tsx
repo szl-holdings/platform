@@ -107,7 +107,7 @@ export default function PraxisPlayground() {
         </div>
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs font-mono text-muted-foreground uppercase mb-1">Critical</p>
-          <p className="text-2xl font-mono font-bold text-red-400">{fusionStats?.bySeverity?.critical ?? 0}</p>
+          <p className="text-2xl font-mono font-bold text-red-400">{(fusionStats?.bySeverity as Record<string, number> | undefined)?.critical ?? 0}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs font-mono text-muted-foreground uppercase mb-1">Domains Active</p>

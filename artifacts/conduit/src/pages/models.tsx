@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { RELAY_MODELS, RELAY_SOURCES, RELAY_DESTINATIONS, RELAY_MAPPINGS } from '@/data/fabric';
 import type { RelayModel } from '@/data/fabric/types';
 import { calculateActivationReadiness, classifyPiiRisk } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, GovernanceDot, MicroBar } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
+import { Zap } from 'lucide-react';
 
 export default function ModelsPage() {
   const [q, setQ] = useState('');
@@ -37,6 +39,11 @@ export default function ModelsPage() {
         eyebrow="ACTIVATION FABRIC · 02"
         title="Models"
         blurb="Composed entities the business actually uses. Each model is sourced, typed, scored, and replay-grade — its anchor hash is the witness the rest of the fabric trusts."
+        trailing={
+          <Link href="/innovation/audience-sql" className="flex items-center gap-1.5 text-[11px] font-mono text-[#c9b787] hover:underline">
+            <Zap className="w-3.5 h-3.5" /> Audience SQL Studio →
+          </Link>
+        }
       />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <FabricStat label="Models" value={RELAY_MODELS.length} tone="gold" />

@@ -1,17 +1,39 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { RELAY_MAPPINGS, RELAY_MODELS, RELAY_DESTINATIONS, RELAY_SOURCES, RELAY_POLICIES } from '@/data/fabric';
 import { scoreMappingCompatibility, deriveApprovalRequirement, buildDryRunSummary, classifyPiiRisk } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricToolbar, FabricDrawer, GovernanceDot, MicroBar, SeverityChip } from '@/components/fabric/primitives';
 import { Input, Select, Badge } from '@/components/ui';
+import { ScanLine, GitBranch as DriftIcon } from 'lucide-react';
+import { useInnovationStore, applyMappingOverrides } from '@/lib/innovation-store';
 
 export default function MappingsPage() {
+  const { driftDecisions, mappingOverrides } = useInnovationStore();
   const [q, setQ] = useState('');
   const [vertical, setVertical] = useState('');
   const [needsApproval, setNeedsApproval] = useState(false);
   const [drawerId, setDrawerId] = useState<string | null>(null);
 
+  const driftByMappingId = useMemo(() => {
+    const map = new Map<string, typeof driftDecisions[number][]>();
+    for (const d of driftDecisions) {
+      for (const mid of d.mappingIds) {
+        const arr = map.get(mid) ?? [];
+        arr.push(d);
+        map.set(mid, arr);
+      }
+    }
+    return map;
+  }, [driftDecisions]);
+  const approvedDriftCount = driftDecisions.filter((d) => d.status === 'approved').length;
+
+  const effectiveMappings = useMemo(
+    () => RELAY_MAPPINGS.map((m) => applyMappingOverrides(m, mappingOverrides)),
+    [mappingOverrides],
+  );
+
   const rows = useMemo(() => {
-    return RELAY_MAPPINGS
+    return effectiveMappings
       .filter((m) => {
         if (q && !m.name.toLowerCase().includes(q.toLowerCase())) return false;
         if (vertical && m.verticalId !== vertical) return false;
@@ -19,9 +41,9 @@ export default function MappingsPage() {
         return true;
       })
       .sort((a, b) => scoreMappingCompatibility(b) - scoreMappingCompatibility(a));
-  }, [q, vertical, needsApproval]);
+  }, [effectiveMappings, q, vertical, needsApproval]);
 
-  const drawer = drawerId ? RELAY_MAPPINGS.find((m) => m.id === drawerId) ?? null : null;
+  const drawer = drawerId ? effectiveMappings.find((m) => m.id === drawerId) ?? null : null;
   const drawerModel = drawer ? RELAY_MODELS.find((mo) => mo.id === drawer.modelId) ?? null : null;
   const drawerDest = drawer ? RELAY_DESTINATIONS.find((d) => d.id === drawer.destinationId) ?? null : null;
   const drawerSource = drawerModel ? RELAY_SOURCES.find((s) => s.id === drawerModel.sourceId) ?? null : null;
@@ -35,12 +57,23 @@ export default function MappingsPage() {
         eyebrow="ACTIVATION FABRIC · 04"
         title="Mappings"
         blurb="The Mapper agent's proposals: model fields fanned into destination fields, with explicit transforms, confidence, PII handling, and a recommended approval level. Nothing ships without a witness."
+        trailing={
+          <div className="flex gap-3">
+            <Link href="/innovation/lineage" className="flex items-center gap-1.5 text-[11px] font-mono text-[#c9b787] hover:underline">
+              <ScanLine className="w-3.5 h-3.5" /> Lineage →
+            </Link>
+            <Link href="/innovation/drift-repair" className="flex items-center gap-1.5 text-[11px] font-mono text-[#c9b787] hover:underline">
+              <DriftIcon className="w-3.5 h-3.5" /> Drift Repair →
+            </Link>
+          </div>
+        }
       />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <FabricStat label="Mappings" value={RELAY_MAPPINGS.length} tone="gold" />
         <FabricStat label="Awaiting approval" value={RELAY_MAPPINGS.filter((m) => m.approvalRequired).length} tone="warn" />
         <FabricStat label="Avg compatibility" value={Math.round(RELAY_MAPPINGS.reduce((s, m) => s + m.compatibilityScore, 0) / RELAY_MAPPINGS.length)} tone="good" />
         <FabricStat label="PII transforms" value={RELAY_MAPPINGS.filter((m) => m.piiWarnings.length > 0).length} />
+        <FabricStat label="Drift repairs" value={approvedDriftCount} tone={approvedDriftCount > 0 ? 'good' : 'neutral'} sub={driftDecisions.length > 0 ? `${driftDecisions.length} decisions` : undefined} />
       </div>
 
       <FabricToolbar>
@@ -74,7 +107,16 @@ export default function MappingsPage() {
             {rows.map((m) => (
               <tr key={m.id} className="border-b border-[rgba(255,255,255,0.04)] hover:bg-[#1a1a1a] cursor-pointer transition-colors" onClick={() => setDrawerId(m.id)}>
                 <td className="px-4 py-3">
-                  <div className="font-mono text-[#f5f5f5] text-[12px]">{m.name}</div>
+                  <div className="font-mono text-[#f5f5f5] text-[12px] flex items-center gap-1.5">
+                    {m.name}
+                    {(() => {
+                      const decisions = driftByMappingId.get(m.id) ?? [];
+                      const approved = decisions.filter((d) => d.status === 'approved').length;
+                      if (approved > 0) return <Badge variant="success">{approved} drift fix{approved !== 1 ? 'es' : ''}</Badge>;
+                      if (decisions.length > 0) return <Badge variant="partial">drift</Badge>;
+                      return null;
+                    })()}
+                  </div>
                   {m.approvalRequired && <div className="text-[10px] text-[#d4a853] mt-0.5">approval: {m.approvalReason}</div>}
                 </td>
                 <td className="px-4 py-3"><Badge variant="default">{m.verticalId}</Badge></td>

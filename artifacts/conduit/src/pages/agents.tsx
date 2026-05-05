@@ -1,26 +1,44 @@
 import { useState } from 'react';
+import { Link } from 'wouter';
 import { AMARU_AGENTS, RELAY_MAPPINGS, RELAY_MODELS, RELAY_DESTINATIONS, RELAY_POLICIES, RELAY_SOURCES } from '@/data/fabric';
 import type { AmaruAgent } from '@/data/fabric/types';
-import { runCoalition } from '@/lib/agentic';
+import { runCoalition, parseDslRules } from '@/lib/agentic';
 import { FabricHeader, FabricStat, FabricCard, FabricDrawer, MicroBar, SeverityChip } from '@/components/fabric/primitives';
 import { Badge, Button, Select } from '@/components/ui';
+import { useInnovationStore, applyMappingOverrides } from '@/lib/innovation-store';
+import { Settings } from 'lucide-react';
 
 export default function AgentsPage() {
+  const { mapperStats, dslVersions, mappingOverrides, goldenMerges } = useInnovationStore();
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [mappingId, setMappingId] = useState<string>(RELAY_MAPPINGS[0]?.id ?? '');
   const [seed, setSeed] = useState(42);
   const [run, setRun] = useState<ReturnType<typeof runCoalition> | null>(null);
+  const activeDsl = dslVersions[0] ?? null;
+  const activeDslRules = activeDsl ? parseDslRules(activeDsl.content) : [];
 
   const drawer = drawerId ? AMARU_AGENTS.find((a) => a.id === drawerId)! : null;
 
   const trigger = () => {
-    const m = RELAY_MAPPINGS.find((mp) => mp.id === mappingId);
-    if (!m) return;
+    const seedMapping = RELAY_MAPPINGS.find((mp) => mp.id === mappingId);
+    if (!seedMapping) return;
+    // Apply approved drift repairs to the mapping definition before handing
+    // it to the coalition, so the run reflects the repaired field set,
+    // transformations, and any governance promotion.
+    const m = applyMappingOverrides(seedMapping, mappingOverrides);
     const model = RELAY_MODELS.find((mo) => mo.id === m.modelId);
     const dest = RELAY_DESTINATIONS.find((d) => d.id === m.destinationId);
     const src = model ? RELAY_SOURCES.find((s) => s.id === model.sourceId) : undefined;
     if (!model || !dest || !src) return;
-    setRun(runCoalition({ mapping: m, model, destination: dest, source: src, policies: RELAY_POLICIES, seed, nowIso: '2026-05-05T03:55:00Z' }));
+    const goldenIdentity = goldenMerges[0]?.entityName;
+    setRun(runCoalition({
+      mapping: m, model, destination: dest, source: src,
+      policies: RELAY_POLICIES, seed, nowIso: '2026-05-05T03:55:00Z',
+      dslRules: activeDslRules,
+      dslVersion: activeDsl?.version,
+      goldenMergeCount: goldenMerges.length,
+      goldenIdentity,
+    }));
   };
 
   return (
@@ -41,12 +59,28 @@ export default function AgentsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <FabricStat label="Agents" value={AMARU_AGENTS.length} tone="gold" />
         <FabricStat label="Recent decisions" value={AMARU_AGENTS.reduce((s, a) => s + a.recentDecisionCount, 0).toLocaleString()} />
         <FabricStat label="Recent blocks" value={AMARU_AGENTS.reduce((s, a) => s + a.recentBlockCount, 0)} tone="warn" />
         <FabricStat label="Avg approval rate" value={`${Math.round((AMARU_AGENTS.reduce((s, a) => s + a.approvalRate, 0) / AMARU_AGENTS.length) * 100)}%`} tone="good" />
+        <FabricStat
+          label="Mapper accept rate"
+          value={mapperStats ? `${Math.round((mapperStats.accepted / Math.max(1, mapperStats.totalDecided)) * 100)}%` : '—'}
+          tone={mapperStats && mapperStats.accepted / Math.max(1, mapperStats.totalDecided) >= 0.8 ? 'good' : 'warn'}
+          sub={mapperStats ? `${mapperStats.totalDecided} calibrated · θ=${mapperStats.threshold.toFixed(2)}` : 'no calibration data'}
+        />
       </div>
+      {mapperStats && (
+        <div className="mb-6 p-3 rounded text-[12px] flex items-center justify-between" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)' }}>
+          <div className="flex items-center gap-2">
+            <Settings className="w-3.5 h-3.5 text-[#c9b787]" />
+            <span className="text-[#f5f5f5]">Mapper calibration loop active</span>
+            <span className="text-[#666] font-mono">{mapperStats.accepted} accepted · {mapperStats.rejected} rejected · θ={mapperStats.threshold.toFixed(2)}</span>
+          </div>
+          <Link href="/innovation/mapper-accuracy" className="text-[11px] text-[#c9b787] hover:underline">View calibration →</Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
         {AMARU_AGENTS.map((a: AmaruAgent) => (

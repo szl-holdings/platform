@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { listFabricProofs, type ProofLedgerEntry } from '@workspace/a11oy-orchestration/client';
+import { listFabricProofs } from '@workspace/a11oy-orchestration/client';
+type ProofLedgerEntry = Awaited<ReturnType<typeof listFabricProofs>>[number];
 import {
   ArrowLeft,
   Eye,
