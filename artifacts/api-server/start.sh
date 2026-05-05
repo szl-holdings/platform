@@ -64,6 +64,56 @@ cleanup() {
 trap cleanup EXIT INT TERM
 # -----------------------------------------------------------------------------
 
+# --- Agent Gateway sidecar ---------------------------------------------------
+# The agent-gateway exposes /v1/capabilities and /v1/agent/action for tool-using
+# agents. It runs as a Node sidecar bound to port 6800. The api-server artifact's
+# secondary [[services]] entry maps /agent-gateway/* to this port via the proxy.
+AGENT_GATEWAY_PORT="${AGENT_GATEWAY_PORT:-6800}"
+AGENT_GATEWAY_DIR="/home/runner/workspace/platform/agent-gateway"
+AGENT_GATEWAY_LOG="/tmp/agent-gateway.log"
+if [ ! -d "$AGENT_GATEWAY_DIR" ]; then
+  echo "[api-server start.sh] FATAL: agent-gateway directory not found at $AGENT_GATEWAY_DIR" >&2
+  exit 1
+fi
+# Build dist/ if missing or stale (dist/ is intentionally untracked in git).
+AG_DIST="$AGENT_GATEWAY_DIR/dist/server.js"
+AG_NEEDS_BUILD=0
+if [ ! -f "$AG_DIST" ]; then
+  AG_NEEDS_BUILD=1
+elif [ -n "$(find "$AGENT_GATEWAY_DIR/src" -name '*.ts' -newer "$AG_DIST" -print -quit 2>/dev/null)" ]; then
+  AG_NEEDS_BUILD=1
+fi
+if [ "$AG_NEEDS_BUILD" = "1" ]; then
+  echo "[api-server start.sh] Building agent-gateway (tsc)..."
+  # tsc returns non-zero on type errors elsewhere in the workspace (e.g. unrelated
+  # 'openai' module), but still emits dist/. Tolerate non-zero exit and verify
+  # dist/server.js was produced below.
+  (cd "$AGENT_GATEWAY_DIR" && pnpm run build) || \
+    echo "[api-server start.sh] WARN: agent-gateway tsc reported errors; verifying emitted dist/..." >&2
+fi
+if [ ! -f "$AG_DIST" ]; then
+  echo "[api-server start.sh] FATAL: agent-gateway dist/server.js still missing after build" >&2
+  exit 1
+fi
+echo "[api-server start.sh] Launching agent-gateway sidecar on port ${AGENT_GATEWAY_PORT} — log: $AGENT_GATEWAY_LOG"
+(
+  cd "$AGENT_GATEWAY_DIR"
+  PORT="$AGENT_GATEWAY_PORT" BASE_PATH="/agent-gateway" exec node dist/server.js 2>&1 \
+    | sed -u 's/^/[agent-gateway] /' \
+    | tee -a "$AGENT_GATEWAY_LOG"
+) &
+AGENT_GATEWAY_PID=$!
+echo "[api-server start.sh] Agent-gateway pid=$AGENT_GATEWAY_PID"
+old_cleanup_ag=$(declare -f cleanup)
+cleanup() {
+  eval "${old_cleanup_ag#cleanup ()}"
+  if [ -n "$AGENT_GATEWAY_PID" ] && kill -0 "$AGENT_GATEWAY_PID" 2>/dev/null; then
+    kill "$AGENT_GATEWAY_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
+# -----------------------------------------------------------------------------
+
 # --- Eval Runner sidecar -----------------------------------------------------
 # The governed evaluation harness runs as a Python FastAPI process alongside the
 # API server. Starts on port 8001 (EVAL_RUNNER_URL defaults to localhost:8001).

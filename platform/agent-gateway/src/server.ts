@@ -81,10 +81,15 @@ export function createServer(config?: GatewayConfig) {
   const cfg = config ?? loadConfig();
   const gateway = new AgentGateway(cfg);
 
+  const basePath = (process.env['BASE_PATH'] ?? '').replace(/\/$/, '');
+
   return createHttpServer(async (req: IncomingMessage, res: ServerResponse) => {
     const correlationId =
       (req.headers['x-correlation-id'] as string | undefined) ?? randomUUID();
-    const url = req.url ?? '/';
+    let url = req.url ?? '/';
+    if (basePath && url.startsWith(basePath)) {
+      url = url.slice(basePath.length) || '/';
+    }
     const method = req.method ?? 'GET';
 
     try {

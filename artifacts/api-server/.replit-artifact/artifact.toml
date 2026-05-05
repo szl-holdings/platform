@@ -16,3 +16,16 @@ run = "pnpm --filter @workspace/api-server run dev:fast"
 
 [services.env]
 PORT = "8080"
+
+[[services]]
+name = "agent-gateway"
+paths = [ "/agent-gateway/" ]
+localPort = 6800
+autoStart = false
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/platform/agent-gateway && exec node dist/server.js'"
+
+[services.env]
+PORT = "6800"
+BASE_PATH = "/agent-gateway"
