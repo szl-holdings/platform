@@ -75,7 +75,7 @@ export function OmniaAdoption() {
   const refresh = async (showR = false) => {
     if (showR) setRefreshing(true);
     try {
-      const base = import.meta.env.BASE_URL.replace(/\/$/, '').replace(/\/a11oy$/, '');
+      const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const res = await fetch(`${base}/api/omnia/adoption`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();

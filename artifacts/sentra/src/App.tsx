@@ -448,7 +448,7 @@ function buildSidebarSections(): SidebarNavSection[] {
       {
         id: 'a11oy-intelligence',
         label: 'A11oy Intelligence',
-        href: '/a11oy/intelligence/',
+        href: '/intelligence/',
         icon: <Sparkles className="w-3.5 h-3.5" />,
       },
     ],
@@ -539,7 +539,7 @@ function SentraSidebarContent({
       collapsed={!expanded}
       onNavigate={(item) => {
         if (item.href) {
-          if (item.href.startsWith('/a11oy/') || /^https?:\/\//.test(item.href)) {
+          if (item.href.startsWith('/intelligence/') || /^https?:\/\//.test(item.href)) {
             window.open(item.href, '_blank', 'noopener,noreferrer');
           } else {
             navigate(item.href);

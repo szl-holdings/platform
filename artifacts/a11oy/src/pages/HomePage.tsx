@@ -25,7 +25,7 @@ const T = {
 };
 
 const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const b = (path: string) => (path === '/' ? `${BASE}/` : `${BASE}${path}`);
 
 const CAPABILITIES = [

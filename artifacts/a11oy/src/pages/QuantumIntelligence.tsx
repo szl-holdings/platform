@@ -15,7 +15,7 @@ const DIM = '#8a8a8a';
 const SURFACE = '#111111';
 const BORDER = 'rgba(201,183,135,0.12)';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface BenchmarkData {
   name: string;

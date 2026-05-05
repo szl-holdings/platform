@@ -5,7 +5,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, ActionButton } from '../components/ui';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface ReplayStep {
   step: number; label: string; actor: string; ts: string;

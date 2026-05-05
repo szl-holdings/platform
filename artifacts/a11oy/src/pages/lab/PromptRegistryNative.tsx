@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, ExternalLink, FileText, Loader, ShieldOff } from 'lucide-react';
 
-const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface PromptSummary {
   id: string;

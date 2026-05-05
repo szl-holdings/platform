@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, InfoRow, StatusBadge } from '../components/ui';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
-const API_BASE = BASE.replace('/a11oy', '/api');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const API_BASE = '/api';
 const link = (path: string) => `${BASE}${path}`;
 
 const T = {

@@ -7,7 +7,7 @@ import {
   useTransparencyReports, useDefenderCreditPool, DoctrineLoader,
 } from '../hooks/useDoctrine';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const link = (path: string) => `${BASE}${path}`;
 const fmtDate = (s: string) => new Date(s).toISOString().slice(0, 10);
 const fmtCurrency = (n: number) => `$${n.toLocaleString('en-US')}`;

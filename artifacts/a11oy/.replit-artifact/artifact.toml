@@ -1,5 +1,5 @@
 kind = "web"
-    previewPath = "/a11oy/"
+    previewPath = "/"
     title = "A11oy — Brand Orchestration Layer"
     version = "1.0.0"
     id = "artifacts/a11oy"
@@ -11,7 +11,7 @@ kind = "web"
 
     [[services]]
     name = "web"
-    paths = [ "/a11oy/" ]
+    paths = [ "/" ]
     localPort = 9090
 
     [services.development]
@@ -28,4 +28,4 @@ kind = "web"
 
     [services.env]
     VITE_PORT = "4110"
-    BASE_PATH = "/a11oy/"
+    BASE_PATH = "/"

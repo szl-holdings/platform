@@ -14,8 +14,8 @@ const T = {
   mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
 } as const;
 
-const BASE_URL = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
-const API_PATH = `${BASE_URL.replace(/\/a11oy$/, '')}/api/a11oy/chat`;
+const BASE_URL = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const API_PATH = '/api/a11oy/chat';
 
 interface Message {
   id: string;

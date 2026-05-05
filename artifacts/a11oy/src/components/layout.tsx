@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 function b(path: string) {
   return path === '/' ? `${BASE}/` : `${BASE}${path}`;
@@ -24,7 +24,7 @@ const NAV_GROUPS = [
     label: 'NOW',
     items: [
       { href: '/now',     label: 'Now Board' },
-      { href: '/command', label: 'Command' },
+      { href: '/command-surface', label: 'Command' },
     ],
   },
   {
@@ -103,7 +103,7 @@ const NAV_GROUPS = [
   {
     label: 'a1.1oy',
     items: [
-      { href: '/nexus',          label: 'a1.1oy Chat' },
+      { href: '/praxis',         label: 'a1.1oy Chat' },
       { href: '/mcp-hub',        label: 'MCP Hub' },
       { href: '/agentic-rag',    label: 'Agentic RAG' },
       { href: '/hub-operations', label: 'Hub Operations' },

@@ -5,7 +5,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, ActionButton, VerdictBadge, TraceStep } from '../components/ui';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 export function WorkcellReplayDetail() {
   const params = useParams<{ id: string }>();

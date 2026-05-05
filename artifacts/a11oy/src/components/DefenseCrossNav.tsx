@@ -13,7 +13,7 @@ function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '') || '/a11oy');
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || '');
 
 export type DefensePageId =
   | 'precision-ai'

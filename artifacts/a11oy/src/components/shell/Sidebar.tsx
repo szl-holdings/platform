@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface NavItem {
   id: string;

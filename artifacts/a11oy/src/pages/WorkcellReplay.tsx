@@ -4,7 +4,7 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface ReplaySummary {
   id: string; workcellId: string; workcellName: string; tenant: string; domain: string;

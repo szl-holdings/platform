@@ -23,7 +23,7 @@ import {
   YAxis,
 } from 'recharts';
 
-const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface PortfolioEntity {
   id: string;

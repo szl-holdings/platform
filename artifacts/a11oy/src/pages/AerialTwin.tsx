@@ -34,7 +34,7 @@ const PHASE_LABEL: Record<RoadmapPhase, string> = {
   '13–24': 'Months 13–24 · Hardening',
 };
 
-const base = (import.meta.env.BASE_URL || '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 export function AerialTwin() {
   const phases: RoadmapPhase[] = ['0–6', '7–12', '13–24'];

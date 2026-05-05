@@ -3,10 +3,10 @@ import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { ApprovalGate } from '../components/ui';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 const STAGE_CTAS: Record<number, { label: string; path: string; color: string }> = {
-  2: { label: 'Enter Command Surface →', path: '/command', color: '#8a8a8a' },
+  2: { label: 'Enter Command Surface →', path: '/command-surface', color: '#8a8a8a' },
   4: { label: 'View Workcell Replay →', path: '/replay', color: '#c9b787' },
   10: { label: 'Generate Board Packet →', path: '/boardroom', color: '#c9b787' },
 };

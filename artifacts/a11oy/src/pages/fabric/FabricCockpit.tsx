@@ -6,7 +6,7 @@ import { rankRisksByScore, rankSignalsBySeverity, SEVERITY_COLORS, GOVERNANCE_CO
 import type { VerticalId } from '../../data/fabric';
 import { useFabricData } from '../../hooks/useFabricData';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const GOLD = '#c9b787';
 const TEXT = '#f5f5f5';
 const GHOST = '#5e5e5e';

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowRight, Brain, DollarSign, Search, TrendingUp, Zap } from 'lucide-react';
 
-const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 const GHOST = '#5e5e5e';
 const GOLD = '#c9b787';

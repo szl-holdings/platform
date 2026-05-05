@@ -1,6 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { Route, Switch } from 'wouter';
+import { Route, Switch, useLocation } from 'wouter';
+import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
 import { DemoModeProvider } from './lib/operations/demo-mode';
 import { FabricShellProvider } from './lib/fabric-shell-context';
@@ -9,7 +10,19 @@ function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '') || '/a11oy');
+const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || '');
+
+function RedirectTo({ to }: { to: string }) {
+  const [, navigate] = useLocation();
+  useEffect(() => { navigate(to, { replace: true }); }, [to, navigate]);
+  return null;
+}
+
+function LegacyA11oyRedirect() {
+  const [location] = useLocation();
+  const rest = location.replace(/^\/a11oy\/?/, '');
+  return <RedirectTo to={`/${rest}`} />;
+}
 
 function Loader() {
   return (
@@ -396,15 +409,14 @@ export default function App() {
   return (
     <Suspense fallback={<Loader />}>
       <Switch>
-        <Route path={`${base}/`} component={HomePage} />
-        <Route path={`${base}`} component={HomePage} />
+        <Route path="/" component={HomePage} />
         <Route path={`${base}/loop-reasoner`}>
           <WithShell><LoopReasoner /></WithShell>
         </Route>
         <Route path={`${base}/now`} component={NowBoard} />
         <Route path={`${base}/recommendations`} component={Recommendations} />
         <Route path={`${base}/brief`} component={ExecutiveBrief} />
-        <Route path={`${base}/command`} component={CommandSurface} />
+        <Route path={`${base}/command-surface`} component={CommandSurface} />
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
         <Route path={`${base}/proof`} component={ProofLedger} />
@@ -439,7 +451,7 @@ export default function App() {
           <WithShell><FlexCacheRuntime /></WithShell>
         </Route>
         <Route path={`${base}/terminal`} component={Terminal} />
-        <Route path={`${base}/nexus`} component={Praxis} />
+        <Route path={`${base}/praxis`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
         <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />
@@ -1212,12 +1224,22 @@ export default function App() {
           <MarketingHome />
         </Route>
 
+        <Route path="/command">
+          <RedirectTo to="/command-surface" />
+        </Route>
+        <Route path="/nexus">
+          <RedirectTo to="/praxis" />
+        </Route>
+        <Route path="/a11oy/:rest*">
+          <LegacyA11oyRedirect />
+        </Route>
+
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">
               <div className="text-6xl font-display font-bold mb-4" style={{ color: 'var(--color-a11oy-border)' }}>404</div>
               <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Page not found</div>
-              <a href={`${base}/`} className="mt-4 inline-block text-sm" style={{ color: '#c9b787' }}>← Back to A11oy</a>
+              <a href="/" className="mt-4 inline-block text-sm" style={{ color: '#c9b787' }}>← Back to A11oy</a>
             </div>
           </div>
         </Route>

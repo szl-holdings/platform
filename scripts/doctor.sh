@@ -122,8 +122,8 @@ check_port() {
 }
 
 check_port "${PORT:-8080}"  "api-server (main)"
-check_port 9090             "lyte-command-center"
-check_port 21130            "szl-holdings"
+check_port 9090             "shared-proxy"
+check_port 4110             "a11oy"
 
 # ── 4. Database connectivity ─────────────────────────────────────────────────
 log ""

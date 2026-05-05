@@ -44,7 +44,7 @@ const sovereignItems = [
 ];
 
 const externalNavItems = [
-  { name: 'A11oy Advisor', href: '/a11oy/intelligence/', icon: Sparkles },
+  { name: 'A11oy Advisor', href: '/intelligence/', icon: Sparkles },
 ];
 
 function NavLink({ item, isActive, collapsed }: { item: { name: string; href: string; icon: React.ComponentType<{ className?: string }> }; isActive: boolean; collapsed: boolean }) {

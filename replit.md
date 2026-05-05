@@ -102,14 +102,14 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 - **Government Data:** Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
-- **Government Data:** Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
+- **Government Data:** NYSTEC Pre-briefing, Empire APEX Accelerator, NIST AI RMF, DoD Responsible AI, GSAR 552.239-7001
 
 ## Platform Status (as of May 2026)
 
 **Active Artifacts (all rendering, themed, operational):**
 | Artifact | Path | Status |
 |----------|------|--------|
-| A11oy — Brand Orchestration Layer | `/a11oy` | Live — flagship landing + governed OS |
+| A11oy — Brand Orchestration Layer | `/` | Live — flagship landing + governed OS (canonical root) |
 | Amaru (Conduit) — Convergent Reverse-ETL | `/conduit` | Live — dashboard + sovereign AI hub |
 | Sentra — Cyber Resilience Command | `/sentra` | Live — SOC ops + 80+ modules |
 | Counsel — Legal Matter Command | `/counsel` | Live — matter management |
@@ -157,6 +157,14 @@ All unique pages from the deleted `artifacts/command` artifact have been recover
 - Replaced `@szl-holdings/services` seed-data imports with inline empty arrays (services barrel export pulls in `@google-cloud/storage` which can't be browser-bundled)
 - Added `sonner` dependency for cognitive pages
 - Production build passes: 3644+ modules, ~45s
+
+## 2026-05-04 — A11oy consolidated to root path
+- A11oy now serves at `/` (root path) instead of `/a11oy/`
+- Shared proxy fallback port changed from 21130 (szl-holdings) to 4110 (A11oy)
+- Removed `/a11oy/` route from shared proxy — A11oy is the canonical fallback
+- Updated cross-artifact references in Sentra, Conduit, and brand-registry
+- Updated all internal A11oy page BASE_URL fallbacks from `/a11oy/` to `/`
+- API routes (`/api/a11oy/...`) remain unchanged
 
 ## 2026-05-04 — Empire APEX Meeting Pack (complete dossier)
 
@@ -1283,4 +1291,3 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - Post-merge setup script timeout increased from 15 min to 20 min for 800+ table schema push
 - All 10 workflows running, all 8 product frontends verified 200 OK with screenshots
 - 3 proposed follow-up tasks (#4693-4695) remain PROPOSED -- post-funding enhancements
->>>>>>> 15321352a (Consolidate Unified Command artifact into A11oy)

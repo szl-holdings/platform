@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 const vitePort = Number(process.env.VITE_PORT) || 4110;
-const basePath = process.env.BASE_PATH || '/a11oy/';
+const basePath = process.env.BASE_PATH || '/';
 
 export default defineConfig({
   base: basePath,

@@ -34,7 +34,7 @@ const RESOURCES: Resource[] = [
     description: 'The eleven blueprint components, seven governing principles, and nine implementation priorities that define the A11oy governed agentic layer.',
     availability: 'public',
     version: 'v1.0',
-    href: '/a11oy/architecture',
+    href: '/architecture',
     hrefLabel: 'Open Architecture page',
   },
   {
@@ -44,7 +44,7 @@ const RESOURCES: Resource[] = [
     description: 'What A11oy is, what it is not, how it differs from copilots and automation platforms, and the north star that governs its design decisions.',
     availability: 'public',
     version: 'v1.0',
-    href: '/a11oy/about',
+    href: '/about',
     hrefLabel: 'Open Platform Definition',
   },
   {
@@ -54,7 +54,7 @@ const RESOURCES: Resource[] = [
     description: 'All 12 governed applications with honest operational status, seven-principle tags, domain grouping, and registry profile IDs for the six AEEP-registered domains.',
     availability: 'public',
     version: null,
-    href: '/a11oy/applications',
+    href: '/applications',
     hrefLabel: 'Open Applications Catalog',
   },
   {
@@ -84,7 +84,7 @@ const RESOURCES: Resource[] = [
     description: 'Formal specification of the PCE contract format — hash algorithm, approval chain structure, verification protocol, and ledger append semantics.',
     availability: 'public',
     version: 'v1.0',
-    href: '/a11oy/pce',
+    href: '/pce',
     hrefLabel: 'Open Proof Chain viewer',
   },
   {
@@ -94,7 +94,7 @@ const RESOURCES: Resource[] = [
     description: 'Approval tier definitions, policy clause structure, covenant enforcement modes, override audit trails, and human-in-the-loop approval contracts.',
     availability: 'public',
     version: 'v1.0',
-    href: '/a11oy/governance',
+    href: '/governance',
     hrefLabel: 'Open Governance page',
   },
   {
@@ -134,7 +134,7 @@ const RESOURCES: Resource[] = [
     description: 'The A11oy execution fabric — shared types, tool connectors, schema contracts, and Zod validators in @workspace/a11oy-fabric.',
     availability: 'public',
     version: '4.2.0',
-    href: '/a11oy/fabric',
+    href: '/fabric',
     hrefLabel: 'Open Fabric viewer',
   },
   {

@@ -7,7 +7,7 @@ import {
 } from '../data/mythosDoctrine';
 import { useDoctrineOverview, DoctrineLoader, type DoctrineConstitution, type DoctrineRiskReport } from '../hooks/useDoctrine';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const b = (p: string) => `${BASE}${p}`;
 
 const PILLARS = [

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
-const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface LabCapability {
   id: string;

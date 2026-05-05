@@ -8,7 +8,7 @@ import { DELEGATION_CHAINS } from '../data/complianceFabric';
 
 type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
   'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
   'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',

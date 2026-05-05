@@ -9,7 +9,7 @@ import {
 import type { DoctrineAgentId } from '../data/mythosDoctrine';
 import { useSystemCard, DoctrineLoader, type DoctrineBehavioralAudit, type DoctrineRewardHackingIncident, type DoctrineAlignmentReview, type DoctrineRedTeamProbe, type DoctrineCapabilitySnapshot } from '../hooks/useDoctrine';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const GOLD = '#c9b787';
 
 export function SystemCard() {

@@ -15,7 +15,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'wouter';
 
-const base = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 interface FinancialMetrics {
   revenue: string;

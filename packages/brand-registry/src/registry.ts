@@ -111,7 +111,7 @@ export const registry: BrandRegistry = {
         'Alloy is the SZL flagship enterprise AI hub and governed decision intelligence platform. The Hub surface (/a11oy/hub) provides HF-caliber model, dataset, space, and governance browsing. The orchestration surface (/a11oy/) provides brand orchestration, decision intelligence, and the A11oy control plane. Built on Proof Chain, Policy Engine, Cognitive Runtime, and Prism Bus.',
       status: 'live',
       doctrineRole: 'EXECUTE',
-      link: '/a11oy/hub',
+      link: '/',
       color: '#c9b787',
     },
     {

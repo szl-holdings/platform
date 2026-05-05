@@ -23,7 +23,7 @@ const T = {
 };
 
 const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 function toAlpha(hex: string, a: number): string {
   const r = parseInt(hex.slice(1, 3), 16);

@@ -10,10 +10,9 @@ export interface ProxyRoute {
   port: number;
 }
 
-export const CANONICAL_FALLBACK_PORT = 21130;
-export const SHARED_PROXY_PORT = 9090;
-
 export const A11OY_PORT = 4110;
+export const SHARED_PROXY_PORT = 9090;
+export const CANONICAL_FALLBACK_PORT = A11OY_PORT;
 export const API_PORT = 8080;
 export const CARLOTA_JO_PORT = 8098;
 export const COMMAND_PORT = 5000;
@@ -31,7 +30,6 @@ export const LYTE_COMMAND_CENTER_PORT = 8097;
 export const ROSIE_PORT = 5113;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
-  { prefix: '/a11oy/', port: A11OY_PORT },
   { prefix: '/api/', port: API_PORT },
   // '/ws/' routes bare WebSocket upgrades to the api-server platform WS
   // (artifacts/api-server/src/lib/websocket.ts, path: '/ws').

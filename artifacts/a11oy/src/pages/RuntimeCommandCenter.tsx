@@ -11,7 +11,7 @@ const RED = '#ef4444';
 const ORANGE = '#f97316';
 const BLUE = '#60a5fa';
 
-const BASE_URL = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE_URL = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 function api(path: string) {
   return `${BASE_URL}/api${path}`;
 }

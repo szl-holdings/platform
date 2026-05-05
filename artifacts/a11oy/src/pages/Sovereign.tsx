@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, StatusPill } from '../components/ui';
 
-const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 function b(path: string) { return `${BASE}${path}`; }
 
 const API = '/api/a11oy';

@@ -324,7 +324,7 @@ export function TrustCenter() {
               </div>
             );
           })()}
-          <Link href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/compass`} className="block w-full text-center text-xs mt-3 py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
+          <Link href={`${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/compass`} className="block w-full text-center text-xs mt-3 py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
             Open Compass Dashboard →
           </Link>
         </Card>
@@ -352,7 +352,7 @@ export function TrustCenter() {
               </div>
             ))}
           </div>
-          <Link href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/trust-exchange`} className="block w-full text-center text-xs py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
+          <Link href={`${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/trust-exchange`} className="block w-full text-center text-xs py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
             Open Trust Exchange →
           </Link>
         </Card>

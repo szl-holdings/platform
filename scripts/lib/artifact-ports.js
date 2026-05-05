@@ -14,7 +14,6 @@
 
 export const ARTIFACT_PORTS = {
   'api-server': 8080,
-  'szl-holdings': 21130,
   aegis: 3002,
   vessels: 8097,
   terra: 6100,

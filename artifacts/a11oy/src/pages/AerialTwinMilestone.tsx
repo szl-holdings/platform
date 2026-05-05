@@ -10,7 +10,7 @@ const TEXT = 'var(--color-a11oy-text)';
 const SUB = 'var(--color-a11oy-text-sub)';
 const GHOST = 'var(--color-a11oy-text-ghost)';
 
-const base = (import.meta.env.BASE_URL || '/a11oy/').replace(/\/$/, '');
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 const PHASE_LABEL: Record<string, string> = {
   '0–6':   'PHASE 1 · Months 0–6 · Foundation',
