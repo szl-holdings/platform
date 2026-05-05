@@ -69,6 +69,7 @@ const PromptRegistryNative = lazy(() => import('./pages/lab/PromptRegistryNative
 const EvalConsoleNative = lazy(() => import('./pages/lab/EvalConsoleNative').then(m => ({ default: m.EvalConsoleNative })));
 const AiGateway = lazy(() => import('./pages/AiGateway').then(m => ({ default: m.AiGateway })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
+const SkillForge = lazy(() => import('./pages/SkillForge'));
 const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
 const SovereignReplayDetail = lazy(() => import('./pages/SovereignReplayDetail').then(m => ({ default: m.SovereignReplayDetail })));
 const Sovereign = lazy(() => import('./pages/Sovereign').then(m => ({ default: m.Sovereign })));
@@ -423,6 +424,7 @@ export default function App() {
         <Route path={`${base}/model-router`} component={ModelRouter} />
         <Route path={`${base}/ai-gateway`} component={AiGateway} />
         <Route path={`${base}/skills`} component={SkillsLibrary} />
+        <Route path={`${base}/forge`} component={SkillForge} />
         <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
         <Route path={`${base}/replay`} component={WorkcellReplay} />
         <Route path={`${base}/trust`} component={TrustCenter} />

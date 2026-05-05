@@ -134,6 +134,7 @@ const NAV_GROUPS = [
     items: [
       { href: '/tools',        label: 'Tools' },
       { href: '/skills',       label: 'Skills' },
+      { href: '/forge',        label: 'FORGE — Skill Marketplace' },
       { href: '/model-router', label: 'Model Router' },
       { href: '/ai-gateway',   label: 'AI Gateway' },
       { href: '/connectors',   label: 'Agent Gateway' },

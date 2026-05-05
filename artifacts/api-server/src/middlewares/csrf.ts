@@ -173,6 +173,17 @@ function isExempt(path: string): boolean {
   // `Authorization: Bearer <A11OY_API_TOKEN|a11oy-demo-cli>`, and material
   // execution is further gated by the PCE gate + MirrorEval block checks.
   if (path.startsWith('/api/a11oy/demo/')) return true;
+  // A11oy FORGE — Proof-Carrying Agent Skills marketplace.
+  // Narrow CSRF exemption: only read-only routes and the stateless
+  // evaluation preview are exempt. The state-mutating publish route
+  // (/forge/skills/publish) requires a Bearer token via requirePublishAuth
+  // and reaches CSRF exemption through the global bearer-token bypass above.
+  if (path.startsWith('/api/a11oy/forge/.well-known/')) return true;
+  if (path === '/api/a11oy/forge/skills') return true;
+  if (path.startsWith('/api/a11oy/forge/skills/') && (path.endsWith('/export') || path.endsWith('/verify'))) return true;
+  if (path.startsWith('/api/a11oy/forge/certificates/')) return true;
+  if (path === '/api/a11oy/forge/skills/evaluate') return true;
+  if (/^\/api\/a11oy\/forge\/skills\/[^/]+$/.test(path)) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
   // Sentra EDR agent endpoints — machine-to-machine; agents authenticate via
   // long-lived bearer tokens issued at enrollment-token exchange time.

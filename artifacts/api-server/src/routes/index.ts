@@ -34,6 +34,7 @@ import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
 import a11oyDoctrineRouter from "./a11oy-doctrine-api";
+import forgeSkillsRouter from "./forge-skills";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
@@ -277,6 +278,16 @@ router.use(internalA11oyDefenseRouter);
 // Resolves to /api/a11oy/fabric/*, /api/a11oy/pages/identity, /api/a11oy/pages/rag, etc.
 // Mounted before agentic-pages so live fabric routes win over seed-backed overlapping paths.
 router.use('/a11oy', a11oyDomainFabricRouter);
+
+// A11oy FORGE — Proof-Carrying Agent Skills marketplace.
+// In-memory FORGE-certified skill registry, MirrorEval evaluation, covenant compliance,
+// PCE Gate approval, capability certificate generation, HF-compatible export.
+// Owns /api/a11oy/forge/skills, /forge/skills/:id, /forge/skills/evaluate,
+// /forge/skills/publish, /forge/skills/:id/export, /forge/certificates/:id.
+// Mounted BEFORE a11oyDoctrineRouter because doctrine-crud applies a router-level
+// authMiddleware to all POST/PUT/PATCH/DELETE requests; forge endpoints are
+// public-demo POSTs that must run before that guard short-circuits the request.
+router.use('/a11oy', forgeSkillsRouter);
 
 // A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
 router.use('/a11oy', a11oyDoctrineRouter);
