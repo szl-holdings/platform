@@ -425,10 +425,12 @@ app.get('/api/health', async (_req: Request, res: Response) => {
 
   const platformApps = [
     { slug: 'szl-holdings', name: 'SZL Holdings Dashboard', type: 'command_surface' },
-    { slug: 'command', name: 'Unified Command', type: 'command_surface' },
+    { slug: 'a11oy', name: 'A11oy — Governed AI Platform', type: 'command_surface' },
     { slug: 'sentra', name: 'Sentra — Cyber Resilience Command', type: 'domain_pack' },
     { slug: 'terra', name: 'Terra — Real Estate Intelligence', type: 'domain_pack' },
     { slug: 'vessels', name: 'Vessels — Maritime Intelligence', type: 'domain_pack' },
+    { slug: 'counsel', name: 'Counsel — Legal Matter Command', type: 'domain_pack' },
+    { slug: 'conduit', name: 'Conduit — Reverse ETL', type: 'domain_pack' },
     { slug: 'carlota-jo', name: 'Carlota Jo Consulting', type: 'domain_pack' },
     { slug: 'szl-holdings-mobile', name: 'APEX — Mobile Command', type: 'mobile' },
     { slug: 'api-server', name: 'API Server', type: 'backend' },

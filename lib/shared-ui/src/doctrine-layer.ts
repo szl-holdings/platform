@@ -67,70 +67,65 @@ export const DOCTRINE_LAYER_DESCRIPTIONS: Record<DoctrineLayer, string> = {
 export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   {
     appId: 'szl-holdings',
-    appName: 'SZL Holdings',
+    appName: 'A11oy',
+    displayName: 'A11oy — Brand Orchestration Layer',
     layers: ['OBSERVE', 'UNDERSTAND', 'DECIDE', 'EXECUTE'],
     description:
-      'Parent holding company — the unified operating model and brand hierarchy across all platforms.',
-    primaryRole: 'Parent Company',
+      'Governed Decision Operating System — the unified intelligence and orchestration layer across all SZL domain products.',
+    primaryRole: 'Ecosystem Intelligence Layer',
   },
   {
-    appId: 'alloy',
-    appName: 'Counsel',
-    displayName: 'Counsel',
+    appId: 'sentra',
+    appName: 'Sentra',
+    displayName: 'Sentra — Cyber Resilience Command',
+    layers: ['OBSERVE', 'UNDERSTAND', 'DECIDE'],
+    description:
+      'Cyber resilience command — threat intelligence, incident response, remediation automation, and constitutional AI governance.',
+    primaryRole: 'Cyber Resilience Command',
+  },
+  {
+    appId: 'conduit',
+    appName: 'Conduit',
+    displayName: 'Conduit — Reverse ETL',
     layers: ['EXECUTE'],
     description:
-      'Signal ingestion, workflow orchestration, action routing, output generation, and governance. Powers all platforms.',
-    primaryRole: 'Intelligence Backbone & Execution Engine',
-  },
-  {
-    appId: 'command',
-    appName: 'Command',
-    displayName: 'Unified Command',
-    layers: ['OBSERVE', 'DECIDE', 'EXECUTE'],
-    description:
-      'Unified Command workspace — Strategy, Operations, and Infrastructure modes for end-to-end business orchestration.',
-    primaryRole: 'Unified Command Surface',
+      'Reverse ETL platform — syncs warehouse data to any SaaS destination with governed orchestration and audit trails.',
+    primaryRole: 'Reverse ETL & Data Activation',
   },
   {
     appId: 'vessels',
-    appName: 'SEXTANT',
+    appName: 'Vessels',
+    displayName: 'Vessels — Maritime Intelligence',
     layers: ['OBSERVE'],
     description:
-      'Maritime command intelligence — fleet visibility, voyage performance, and operational exceptions.',
+      'Maritime command intelligence — fleet visibility, voyage economics, AIS tracking, and operational exceptions.',
     primaryRole: 'Maritime Command Platform',
   },
   {
     appId: 'terra',
-    appName: 'DOMAINE',
+    appName: 'Terra',
+    displayName: 'Terra — Real Estate Intelligence',
     layers: ['OBSERVE', 'DECIDE', 'EXECUTE'],
     description:
-      'Listings intelligence, inquiry routing, agent coordination, and distress signals for commercial real estate brokers.',
-    primaryRole: 'Real Estate Broker Command Platform',
+      'Real estate intelligence — distress radar, deal pipeline underwriting, market analytics, and agent coordination.',
+    primaryRole: 'Real Estate Intelligence Platform',
   },
   {
     appId: 'carlota-jo',
     appName: 'Carlota Jo',
-    layers: ['EXECUTE', 'TRUST'],
+    layers: ['TRUST'],
     description:
-      'Discreet operational and residence support for high-trust environments. Not a software product.',
-    primaryRole: 'Premium Service Brand',
+      'Premium consulting and advisory operations platform for high-trust client engagements and founder strategy.',
+    primaryRole: 'Premium Advisory Brand',
   },
   {
-    appId: 'szl-leadership',
-    appName: 'Leadership',
-    layers: ['SIGNAL', 'TRUST'],
+    appId: 'counsel',
+    appName: 'Counsel',
+    displayName: 'Counsel — Legal Matter Command',
+    layers: ['UNDERSTAND', 'DECIDE'],
     description:
-      "Founder identity and canonical narrative — Stephen Lutar's thesis, case studies, and ecosystem health, consolidated inside SZL Holdings.",
-    primaryRole: 'Founder · SZL Holdings',
-  },
-  {
-    appId: 'aegis',
-    appName: 'PARAGON',
-    displayName: 'PARAGON — Unified Defense & Intelligence Command',
-    layers: ['OBSERVE', 'UNDERSTAND', 'DECIDE', 'EXECUTE'],
-    description:
-      'Unified security, managed operations, and AI intelligence. SOC command, XDR, MSP operations, model registry, and agentic cortex in one platform.',
-    primaryRole: 'Unified Defense & Intelligence Command',
+      'Legal matter command — matter intelligence, obligation graph, proof chain, and exposure forecasting.',
+    primaryRole: 'Legal Matter Command',
   },
 ];
 

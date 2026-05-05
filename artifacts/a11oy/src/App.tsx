@@ -27,14 +27,21 @@ function LegacyA11oyRedirect() {
 
 function Loader() {
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#0a0a0a' }}>
       <div
-        className="w-6 h-6 border-2 rounded-full animate-spin"
-        style={{ borderColor: 'rgba(255,255,255,0.08)', borderTopColor: '#c9b787' }}
+        style={{
+          width: 24, height: 24,
+          border: '2px solid rgba(255,255,255,0.08)',
+          borderTopColor: '#c9b787',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }}
       />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
+
 
 function WithShell({ children }: { children: ReactNode }) {
   return (
@@ -503,7 +510,7 @@ const MarketingLeads = lazy(() => import('./pages/marketing/leads'));
 const MarketingVerifyEmail = lazy(() => import('./pages/marketing/verify-email'));
 
 
-export default function App() {
+function AppInner() {
   return (
     <Suspense fallback={<Loader />}>
       <Switch>
@@ -1587,4 +1594,8 @@ export default function App() {
       </Switch>
     </Suspense>
   );
+}
+
+export default function App() {
+  return <AppInner />;
 }

@@ -59,12 +59,15 @@ export function UsageIndicator({
       return DEMO_USAGE[featureKey] ?? DEMO_USAGE.default;
     }
     try {
-      const usage = await apiFetch<UsageSummary>(
+      const raw = await apiFetch<UsageSummary & { demo?: boolean }>(
         `/api/billing/usage-summary?featureKey=${encodeURIComponent(featureKey)}`,
       );
-      return usage ?? { limit: null, used: 0 };
+      if (!raw || raw.demo || typeof raw.used !== 'number') {
+        return DEMO_USAGE[featureKey] ?? DEMO_USAGE.default;
+      }
+      return raw;
     } catch {
-      return { limit: null, used: 0 };
+      return DEMO_USAGE[featureKey] ?? DEMO_USAGE.default;
     }
   }, [featureKey]);
 
@@ -75,7 +78,7 @@ export function UsageIndicator({
     refetchInterval: 120_000,
   });
 
-  const usage = data ?? { limit: null, used: 0 };
+  const usage = (data && typeof data.used === 'number') ? data : { limit: null, used: 0, unit: undefined };
   const p = pct(usage.used, usage.limit);
   const color = barColor(p, accentColor);
   const displayLabel = label ?? (featureKey === 'default' ? 'Usage' : featureKey.replace(/_/g, ' '));
