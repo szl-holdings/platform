@@ -487,6 +487,14 @@ router.use(
     "pulse",
   ),
 );
+// Live AI accuracy scores from `lib/pulse-evals` — surfaced in the Pulse
+// dashboard. Mounted before the catch-all `/pulse` router so the more
+// specific path takes priority.
+router.use(
+  "/pulse/eval-trends",
+  perUserApiSlidingLimiter,
+  lazyMount(() => import("./pulse-eval-trends"), "pulse-eval-trends"),
+);
 // Aliased mount so the Pulse client (and CSRF / global-auth-enforcer
 // exemptions) can address these routes under the canonical `/api/pulse/...`
 // prefix that they were always documented as.

@@ -239,6 +239,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // demo-org when no session, so investors can trigger the seed without login.
   // CSRF still applies. Idempotent (no-ops if already seeded).
   "/api/counsel/seed/cross-jurisdictional-securities",
+  // Pulse live AI accuracy scores — read-only GET endpoint surfacing real
+  // `lib/pulse-evals` aggregate trends, promotion gate state, and regressions
+  // for the Pulse dashboard. Public so the demo dashboard loads without a
+  // session; the underlying ledger is in-memory and contains no PII.
+  "/api/pulse/eval-trends",
 ]);
 
 const PUBLIC_PREFIXES = [

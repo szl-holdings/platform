@@ -46,7 +46,13 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Sovereign AI Hub:** A HuggingFace-inspired AI Operations Console within Conduit (Amaru).
 
 **Key Technical Implementations:**
-- **Amaru — Convergent Reverse-ETL:** A production-grade Reverse-ETL system with a real sync engine and connector framework.
+- **Amaru — Convergent Reverse-ETL:** A visual no-code Reverse-ETL system with a real sync engine and connector framework.
+- **Pulse AI Accuracy Scores Endpoint (api-server):** GET /api/pulse/eval-trends exposes real lib/pulse-evals aggregate trends, promotion gate state, and regressions; public read-only endpoint with in-memory ledger (no PII).
+- **Red-Team Game Day Engine:** For live competitive crisis simulations.
+- **Cross-Domain Signal Bus (Alert Bus):** A "When/then" automation engine.
+- **Outbound Gateway:** Unified omni-channel notification layer.
+- **@workspace/ouroboros — Ouroboros Loop Kernel:** A shared TS package for bounded loops with measurable convergence.
+- **@workspace/codex-kernel — Replay-Grade Governed Loop Kernel:** Implements hash-chained state, decision receipts, and an append-only proof ledger with tamper-evident digests, crucial for replay verification and auditability. Ships a payload-driven CLI (`pnpm --filter @workspace/codex-kernel codex:run` / `codex:replay`) backed by `runner/payload.json` (the E4 unified loop spec). Writes six deterministic deliverables to `./output/` (trace.jsonl, proof_ledger.jsonl, final_state.json, run_summary.json, decision_receipt.json, final_table_preview.json). Determinism + replay-attestation are enforced by `src/cli/run.test.ts`.
 - **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory fabric, evidence ledger, and policy guard.
 - **Trust Score Engine:** A graduated autonomy system.
 - **Fine-Tuned Model Router:** Domain-aware model routing with fallback chains.
@@ -61,13 +67,17 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Sentra Domain CRUD API (`/api/sentra/*`):** Provides in-memory map-based stores for various security and compliance domains.
 - **Advanced Cybersecurity Modules:** Including DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, Hardware Root of Trust, and Adversarial ML Defense Console.
 - **Continuum ARGO — Field Intelligence Forge:** Fuses external signals with defensive doctrines.
-- **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, and self-healing.
-- **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, and Project Memory.
+- **Continuum Aerial Twin & Mythos Layer:** Doctrine hubs for digital-twin and defensive architecture.
+- **Mythos Doctrine Governance (DB-backed):** All ~21 doctrine governance pages in A11oy are wired to real PostgreSQL tables via REST API endpoints at `/api/doctrine/*`. Schema in `lib/db/src/schema/doctrine.ts` (21 tables: `doctrine_constitutions`, `doctrine_behavioral_audits`, `doctrine_welfare_signals`, `doctrine_red_team_probes`, `doctrine_reward_hacking`, `doctrine_alignment_reviews`, `doctrine_code_behaviors`, `doctrine_covenant_lift`, `doctrine_risk_reports`, `doctrine_snapshots`, `doctrine_user_turn_signals`, `doctrine_capability_snapshots`, `doctrine_partners`, `doctrine_glasswing_config`, `doctrine_cavd_records`, `doctrine_robustness_snapshots`, `doctrine_transparency_reports`, `doctrine_welfare_playbooks`, `doctrine_defender_credit_pool`, `doctrine_dsl_examples`, `doctrine_dsl_simulations`). CRUD routes in `artifacts/api-server/src/routes/doctrine-crud.ts`. Frontend hooks in `artifacts/a11oy/src/hooks/useDoctrine.tsx`. Seed endpoint: `POST /api/doctrine/seed`. Composite endpoints: `GET /api/doctrine/overview`, `GET /api/doctrine/system-card/:agentId`. The static data file `artifacts/a11oy/src/data/mythosDoctrine.ts` retains only types, constants, and helpers.
+- **Continuum Observability AI Layer:** Advanced ML-driven observability pages for forecasting, causal root-cause analysis, synthetic metrics, self-healing, AI alert triage, cost-aware monitoring, and observability as code.
+- **Alloy WorkGraph — Governed Workspace Intelligence Layer (`/alloy/workgraph`, `/alloy/workspace/*`):** A full semantic workspace intelligence layer with Explorer & Answer Engine, Skills Studio, Project Memory, Workspace Intelligence Home, Event Stream (normalized log with proof state lifecycle), Meeting to Execution, Approval Chase, Proof Packets (tamper-evident SHA-256 evidence chains), and Admin Control Center (7 DLP enforcement policies, 9 data classification tiers).
 - **A11oy Orchestrator:** The unified control plane for guard decisions, Lambda Engine execution, and model routing.
 - **Sovereign Agent Mesh:** Governed micro-agent swarms with trust-scored field agents, crew composition, MCP-based agent discovery, and proof-carrying inter-agent communication.
 - **Governance-Injecting MCP Gateway:** External agent access with PCE Gate enforcement and proof packets.
 - **Post-Quantum Identity & Governance Gateway (`lib/pqc-identity/`):** Hybrid signing (Ed25519 + ML-DSA-65), DID-based identity, self-rooted PKI/CA with certificate transparency Merkle log, cryptographic identity for MCP gateway responses, and public verification API at `/api/pqc/*`.
 - **Machine/Agent Identity + Hybrid-Signed Audit Chain:** A `did:plat:*` DID registry with a Software-Encrypted Key Custody service. Every new `audit_chain_events` row carries a hybrid Ed25519 + ML-DSA-65 signature bound to the signing DID.
+- **Shared Reverse Proxy (`packages/shared-proxy`) & Security Headers (`@szl-holdings/security-headers`):** Ensures consistent platform routing and security policies.
+- **Scheduled Job Run History Persistence:** Stores per-execution records for all scheduled jobs in a dedicated database table.
 
 **Canonical Identity & Source of Truth:**
 The single source of truth for canonical metrics, vertical names, and slugs is `SOURCE_OF_TRUTH.md` at the repo root, backed by the machine-readable `audit/source-of-truth.json`.
