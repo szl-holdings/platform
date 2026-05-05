@@ -132,7 +132,9 @@ async function* walk(rootDir: string, recursive: boolean, maxDepth: number, dept
     return;
   }
   for (const e of entries) {
-    if (e.name.startsWith('.') && e.name !== '.local') continue;
+    // Exclude every hidden dir (including .local, .git, .replit, .cache, ...).
+    // Public-repo material under docs/ and attached_assets/ never starts with a dot.
+    if (e.name.startsWith('.')) continue;
     const full = path.join(rootDir, e.name);
     if (e.isDirectory()) {
       if (recursive && depth < maxDepth) yield* walk(full, recursive, maxDepth, depth + 1);
