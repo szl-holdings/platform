@@ -15,7 +15,8 @@
     "./convergence-pulse": { "types": "./src/convergence-pulse.ts", "default": "./src/convergence-pulse.ts" }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@workspace/reconciliation": "workspace:*",
@@ -23,6 +24,7 @@
     "@workspace/ouroboros-guardrails": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "*"
+    "typescript": "*",
+    "vitest": "catalog:"
   }
 }

@@ -1306,3 +1306,22 @@ Key files: `artifacts/api-server/src/lib/sentra-a11oy-tools.ts`, `artifacts/api-
 - Post-merge setup script timeout increased from 15 min to 20 min for 800+ table schema push
 - All 10 workflows running, all 8 product frontends verified 200 OK with screenshots
 - 3 proposed follow-up tasks (#4693-4695) remain PROPOSED -- post-funding enhancements
+
+## Ouroboros Thesis v9 — UNIFIED-OPERATIONAL (May 5, 2026)
+
+Authored canonical v9 thesis covering the Lutar Invariant family v1 → v7 + Ω, binding every formula to a shipping API endpoint, a typed Codex v11 node (75 nodes / 94 edges / 43 sourced / 19 formula), guardrails contract tests, and an A11oy surface.
+
+**Deliverables:**
+- `docs/thesis/v9-canonical.md` — canonical thesis (v6 Holographic-Twistor-Cyclic, Lutar Ω master invariant, v7 Bianchi closure HUFT-inspired)
+- `docs/thesis/v9-essay.md`, `v9-onepager.md`, `v9-social-cards.md`, `v9-publishing-checklist.md`, `README.md`
+- `docs/audits/formula-thesis-gaps.md` — gap audit, all rows CLOSED
+- `docs/audits/github-audit-v9.md` — read-only org+repo audit (17 repos, org `szl-holdings`, ORCID 0009-0001-0110-4173)
+- `docs/thesis/v9-deposit/` — staged copy for `szl-holdings/ouroboros-thesis` Zenodo deposit
+- `CITATION.cff` + `.zenodo.json` at repo root — Zenodo will mint a fresh DOI on the next published release of any repo with the Zenodo–GitHub webhook enabled
+- `artifacts/a11oy/src/pages/Thesis.tsx` + route `/thesis` — formula cards (v1..v7+Ω) deep-link to `/api/ouroboros/lutar/*` and `/codex/node/*`, prisca helper grid, abstract, derivation chain, Supreme Equation Ω
+- `packages/ouroboros-integrations/test/lutar-formulas.test.ts` — 41 contract tests (all passing): v1..v7, Ω, adaptive weights, Noether check, twistor projection, Bekenstein bound + violation, conformal rescale, prisca helpers, ouroboros operator
+- `packages/ouroboros-integrations/vitest.config.ts` + test script — package now has its own vitest discovery
+
+**Test status:** 62/62 green in `@workspace/ouroboros-integrations` (formulas + a11oy + amaru + sentra). a11oy typechecks clean.
+
+**DOI publication path (operator action — see `docs/audits/github-audit-v9.md` §4):** copy `docs/thesis/v9-deposit/*` into `szl-holdings/ouroboros-thesis/papers/v9/`, confirm Zenodo–GitHub webhook is on for `szl-holdings/ouroboros-thesis`, then `gh release create paper-v9-1.0.0` (style-matched to existing `paper-v3..v8` releases). Zenodo mints a fresh DOI within minutes; backfill it into root `CITATION.cff` and `.zenodo.json`.

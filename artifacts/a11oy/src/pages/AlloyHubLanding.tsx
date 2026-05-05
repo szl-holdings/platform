@@ -300,6 +300,15 @@ const CAPABILITIES = [
     color: '#ec4899',
     widgetType: 'space' as const,
   },
+  {
+    icon: '∮',
+    title: 'Ouroboros Thesis v9',
+    body: 'The canonical Lutar Invariant family v1 → v7 + Ω, rendered inline at /a11oy/thesis with deep-links into the Supreme Knowledge Codex and live API endpoints. Every formula is sourced, tested, and operational.',
+    badge: 'Codex v11',
+    color: '#c9b787',
+    widgetType: 'audit' as const,
+    href: b('/thesis'),
+  },
 ];
 
 const FLEET = registry.products.filter((p) => p.status === 'live').map((p) => ({
@@ -533,15 +542,29 @@ function CapabilitiesSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 * i, ease }}
           >
-            <CapabilityTile
-              icon={<span style={{ fontSize: 18 }}>{cap.icon}</span>}
-              title={cap.title}
-              body={cap.body}
-              productBadge={cap.badge}
-              productColor={cap.color}
-            >
-              <CapabilityStatusWidget color={cap.color} type={cap.widgetType} />
-            </CapabilityTile>
+            {cap.href ? (
+              <Link href={cap.href} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                <CapabilityTile
+                  icon={<span style={{ fontSize: 18 }}>{cap.icon}</span>}
+                  title={cap.title}
+                  body={cap.body}
+                  productBadge={cap.badge}
+                  productColor={cap.color}
+                >
+                  <CapabilityStatusWidget color={cap.color} type={cap.widgetType} />
+                </CapabilityTile>
+              </Link>
+            ) : (
+              <CapabilityTile
+                icon={<span style={{ fontSize: 18 }}>{cap.icon}</span>}
+                title={cap.title}
+                body={cap.body}
+                productBadge={cap.badge}
+                productColor={cap.color}
+              >
+                <CapabilityStatusWidget color={cap.color} type={cap.widgetType} />
+              </CapabilityTile>
+            )}
           </motion.div>
         ))}
       </div>

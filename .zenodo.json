@@ -1,0 +1,61 @@
+{
+  "title": "Ouroboros Thesis v9 — UNIFIED-OPERATIONAL: The Lutar Invariant Family (v1 → v7 + Ω)",
+  "description": "Operational, source-grounded canonical thesis covering the full Lutar Invariant family v1..v7 plus the unified master invariant L_Ω, with a Bianchi-closed fiber-bundle formulation (HUFT-inspired) and a Holographic-Twistor-Cyclic L₆ extension. Every formula is bound to a shipping API endpoint, a typed knowledge-graph node (Supreme Knowledge Codex v11: 75 nodes, 94 edges, 43 sourced, 19 formula nodes), guardrails contract tests, and an A11oy surface (/thesis). Companion to szl-holdings/ouroboros-thesis.",
+  "creators": [
+    {
+      "name": "Lutar, Stephen P.",
+      "affiliation": "SZL Holdings",
+      "orcid": "0009-0001-0110-4173"
+    }
+  ],
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "CC-BY-4.0",
+  "language": "eng",
+  "version": "9.0.0",
+  "publication_date": "2026-05-05",
+  "keywords": [
+    "ouroboros",
+    "lutar-invariant",
+    "holographic-principle",
+    "twistor-theory",
+    "bekenstein-bound",
+    "conformal-cyclic-cosmology",
+    "bianchi-identity",
+    "fiber-bundle",
+    "noether-closure",
+    "prisca-sapientia",
+    "ai-governance",
+    "decision-intelligence",
+    "supreme-knowledge-codex"
+  ],
+  "communities": [
+    { "identifier": "open-science" }
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/szl-holdings/ouroboros-thesis",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://arxiv.org/abs/2510.06282",
+      "relation": "cites",
+      "scheme": "url",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://orcid.org/0009-0001-0110-4173",
+      "relation": "isIdenticalTo",
+      "scheme": "url",
+      "resource_type": "other"
+    }
+  ],
+  "subjects": [
+    { "term": "Theoretical Physics" },
+    { "term": "Mathematical Physics" },
+    { "term": "Decision Theory" },
+    { "term": "AI Governance" }
+  ]
+}

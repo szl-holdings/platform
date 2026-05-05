@@ -483,6 +483,11 @@ export function AlloyGovernance() {
               }}>
                 View full Proof Ledger →
               </Link>
+              <Link href={b('/thesis')} style={{
+                fontSize: '0.75rem', color: T.accent, textDecoration: 'none',
+              }}>
+                Read the Ouroboros Thesis v9 →
+              </Link>
             </div>
           </>
         )}
