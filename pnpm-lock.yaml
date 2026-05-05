@@ -410,6 +410,9 @@ importers:
       '@szl-holdings/flexcache':
         specifier: workspace:*
         version: link:../../lib/flexcache
+      '@szl-holdings/formulas':
+        specifier: workspace:*
+        version: link:../../lib/formulas
       '@szl-holdings/omnia-shell':
         specifier: workspace:*
         version: link:../../packages/omnia-shell
@@ -687,6 +690,9 @@ importers:
       '@szl-holdings/forge-runtime':
         specifier: workspace:*
         version: link:../../lib/forge-runtime
+      '@szl-holdings/formulas':
+        specifier: workspace:*
+        version: link:../../lib/formulas
       '@szl-holdings/intelligence-feeds':
         specifier: workspace:*
         version: link:../../lib/intelligence-feeds
@@ -1543,6 +1549,9 @@ importers:
       '@szl-holdings/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@szl-holdings/formulas':
+        specifier: workspace:*
+        version: link:../../lib/formulas
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -2292,6 +2301,16 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  lib/formulas:
+    dependencies:
+      '@workspace/lutar-formulas':
+        specifier: workspace:*
+        version: link:../lutar-formulas
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   lib/graphql-client:
     dependencies:

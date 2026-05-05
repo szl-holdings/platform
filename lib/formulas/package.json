@@ -1,0 +1,26 @@
+{
+  "name": "@szl-holdings/formulas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical, thesis-sourced formula registry for the SZL platform. One typed pure function per formula, with provenance pointing back to its thesis section + version + first-seen commit. Re-exports the lutar-formulas corpus and adds: governance, risk, scoring, routing, and ROSIE-evolution helpers. Every export has an instrumented variant that emits a proof-ledger entry on every invocation.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./registry": "./src/registry.ts",
+    "./instrument": "./src/instrument.ts",
+    "./governance": "./src/governance.ts",
+    "./risk": "./src/risk.ts",
+    "./scoring": "./src/scoring.ts",
+    "./routing": "./src/routing.ts",
+    "./evolution": "./src/evolution.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@workspace/lutar-formulas": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

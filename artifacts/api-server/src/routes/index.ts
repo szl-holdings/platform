@@ -32,6 +32,7 @@ import a11oyDomainFabricRouter from "./a11oy-domain-fabric-api.js";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import { a11oyAttestationPublicRouter, a11oyAttestationProtectedRouter } from "./a11oy-attestation-api.js";
 import { a11oyCodexPublicRouter, a11oyCodexProtectedRouter } from "./a11oy-codex-api.js";
+import { a11oyFormulasPublicRouter, a11oyFormulasProtectedRouter } from "./a11oy-formulas-api.js";
 import capabilityFabricRouter from "./capability-fabric";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
@@ -295,6 +296,11 @@ router.use(lazyMatch("/doctrine", () => import("./doctrine-crud"), "doctrine-cru
 // POST /api/a11oy/chat  (SSE stream)
 // GET  /api/a11oy/conversations
 // GET  /api/a11oy/conversations/:id/messages
+// A11oy Formulas — public reads of the canonical formula registry. MUST be
+// mounted before the /a11oy chat router because chat owns a generic
+// /formulas/:id matcher that would otherwise capture our /catalog path.
+// Mutating endpoints (propose/approve/reject) mount after guardianPolicyCheck.
+router.use(a11oyFormulasPublicRouter);
 router.use("/a11oy", lazyMount(() => import("./a11oy-chat"), "a11oy-chat"));
 
 // A11oy Console — Workbench BFF route.
@@ -458,6 +464,8 @@ router.use(lazyMatch("/v1/os/recommendations", () => import("./os-layer-actions"
 router.use(a11oyAttestationProtectedRouter);
 // A11oy Codex — gated mutations (POST /a11oy/codex/rebuild).
 router.use(a11oyCodexProtectedRouter);
+// A11oy Formulas — operator-gated mutations (propose/approve/reject tunings).
+router.use(a11oyFormulasProtectedRouter);
 
 // Pulse demo + briefing surfaces — owns multiple top-level prefixes.
 router.use(

@@ -75,6 +75,7 @@ const ProofEnvelope = lazy(() => import('./pages/ProofEnvelope'));
 const ProofPacketDetail = lazy(() => import('./pages/ProofPacketDetail').then(m => ({ default: m.ProofPacketDetail })));
 const RoutingWeights = lazy(() => import('./pages/RoutingWeights').then(m => ({ default: m.RoutingWeights })));
 const Codex = lazy(() => import('./pages/Codex'));
+const Formulas = lazy(() => import('./pages/Formulas'));
 const CodexEntry = lazy(() => import('./pages/CodexEntry'));
 const CodexReceipts = lazy(() => import('./pages/CodexReceipts').then(m => ({ default: m.CodexReceipts })));
 const PortfolioArchive = lazy(() => import('./pages/PortfolioArchive').then(m => ({ default: m.PortfolioArchive })));
@@ -515,6 +516,7 @@ export default function App() {
         <Route path={`${base}/proof/envelope/:envelopeId`} component={ProofEnvelope} />
         <Route path={`${base}/routing-weights`} component={RoutingWeights} />
         <Route path={`${base}/codex`} component={Codex} />
+        <Route path={`${base}/formulas`} component={Formulas} />
         <Route path={`${base}/codex/:entryId`} component={CodexEntry} />
         <Route path={`${base}/codex-receipts`}>
           <WithShell><CodexReceipts /></WithShell>
