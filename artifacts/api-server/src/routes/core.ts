@@ -13,6 +13,7 @@ import {
 } from '@szl-holdings/db';
 import { count, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
+import { getHubspotFallbackCount } from '@szl-holdings/services';
 import { handleRouteError, sendError, } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -517,6 +518,13 @@ router.get('/core/metrics', async (_req, res) => {
         platform: {
           audit_events_30d: auditTotal?.count ?? 0,
           generated_at: new Date().toISOString(),
+        },
+        integrations: {
+          // Monotonic counter of HubSpot live→mock fallback events since
+          // process start. A nonzero value means the live token is set but
+          // HubSpot has been returning errors. Auth failures (401/403) are
+          // NOT counted here — they re-throw to surface loudly.
+          hubspot_fallback_count: getHubspotFallbackCount(),
         },
       },
       meta: {

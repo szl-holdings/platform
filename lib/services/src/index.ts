@@ -49,7 +49,13 @@ export { GoogleAdapter, type GoogleAuthStatus } from './adapters/google.js';
 export { type CalendarEvent, GoogleCalendarAdapter } from './adapters/google-calendar.js';
 export { type GoogleDoc, GoogleDocsAdapter } from './adapters/google-docs.js';
 export { type DriveFile, GoogleDriveAdapter } from './adapters/google-drive.js';
-export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from './adapters/hubspot.js';
+export {
+  HubSpotAdapter,
+  type HubSpotContact,
+  type HubSpotDeal,
+  HUBSPOT_STILL_MOCK,
+  getHubspotFallbackCount,
+} from './adapters/hubspot.js';
 export {
   type AgentContext,
   type HFChatMessage,

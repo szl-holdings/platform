@@ -1,21 +1,27 @@
 /**
- * [STUB] HubSpot CRM Adapter
+ * HubSpot CRM Adapter — live HubSpot v3 when `HUBSPOT_ACCESS_TOKEN` is set,
+ * deterministic mock fixtures otherwise. On API failure, live methods log
+ * the error, increment `getHubspotFallbackCount()`, and degrade to mock data.
  *
- * Status: Hybrid stub — returns hard-coded mock data until HUBSPOT_ACCESS_TOKEN
- * is set in the environment.  When live, `testConnection()` calls the real
- * HubSpot API, but `listContacts()` and `listDeals()` always return mock data
- * regardless of the `isLive` flag (TODO: replace the mock returns with real
- * HubSpot API calls once the prod token is provisioned).
- *
- * Activation:
- *   1. Create a Private App in your HubSpot portal.
- *   2. Set HUBSPOT_ACCESS_TOKEN=<token> in the environment / Replit secrets.
- *   3. Replace the `return [...MOCK_CONTACTS]` / `return [...MOCK_DEALS]` lines
- *      in `listContacts()` and `listDeals()` with real `hsRequest()` calls.
- *
- * Tracking: docs/audit/2026-04/mock-and-gap-report.md § HubSpot
+ * Tracking: docs/audits/machine-gap-audit.md#p0-02
  */
 import { ServiceAdapter } from '../base.js';
+
+/** Compatibility sentinel — `false` since the live wiring landed (Task #4804). */
+export const HUBSPOT_STILL_MOCK = false;
+
+/** Monotonic counter of HubSpot live→mock fallback events; for dashboards/alerts. */
+let hubspotFallbackCount = 0;
+export function getHubspotFallbackCount(): number {
+  return hubspotFallbackCount;
+}
+/** @internal — exposed for tests only */
+export function __resetHubspotFallbackCountForTests(): void {
+  hubspotFallbackCount = 0;
+}
+function recordHubspotFallback(): void {
+  hubspotFallbackCount += 1;
+}
 
 export interface HubSpotContact {
   id: string;
@@ -92,7 +98,15 @@ export class HubSpotAdapter extends ServiceAdapter {
         'Content-Type': 'application/json',
       },
     });
-    if (!response.ok) throw new Error(`HubSpot API error: ${response.status}`);
+    if (!response.ok) {
+      const err = new Error(`HubSpot API error: ${response.status}`) as Error & {
+        status: number;
+        isAuthError: boolean;
+      };
+      err.status = response.status;
+      err.isAuthError = response.status === 401 || response.status === 403;
+      throw err;
+    }
     return response.json();
   }
 
@@ -113,12 +127,87 @@ export class HubSpotAdapter extends ServiceAdapter {
 
   async listContacts(): Promise<HubSpotContact[]> {
     if (!this.isLive) return [...MOCK_CONTACTS];
-    return [...MOCK_CONTACTS];
+    try {
+      const data = (await this.hsRequest(
+        '/crm/v3/objects/contacts?limit=100&properties=email,firstname,lastname,company,lifecyclestage,lastmodifieddate',
+      )) as {
+        results: Array<{
+          id: string;
+          properties: {
+            email?: string;
+            firstname?: string;
+            lastname?: string;
+            company?: string;
+            lifecyclestage?: string;
+            lastmodifieddate?: string;
+          };
+        }>;
+      };
+      return (data.results ?? []).map((r) => ({
+        id: r.id,
+        email: r.properties.email ?? '',
+        firstName: r.properties.firstname ?? '',
+        lastName: r.properties.lastname ?? '',
+        company: r.properties.company ?? '',
+        lifecycleStage: r.properties.lifecyclestage ?? 'unknown',
+        lastActivity: r.properties.lastmodifieddate ?? '',
+      }));
+    } catch (err) {
+      // Auth failures (401/403) indicate a misconfigured token — surface them
+      // loudly rather than silently degrading to mock fixtures and masking
+      // a production credential issue.
+      if ((err as { isAuthError?: boolean }).isAuthError) {
+        console.error(
+          `[hubspot-adapter] listContacts() AUTH FAILURE — token rejected by HubSpot (${(err as Error).message}). Refusing silent mock fallback.`,
+        );
+        throw err;
+      }
+      recordHubspotFallback();
+      console.error(
+        `[hubspot-adapter] listContacts() live call failed; falling back to mock data: ${(err as Error).message}`,
+      );
+      return [...MOCK_CONTACTS];
+    }
   }
 
   async listDeals(): Promise<HubSpotDeal[]> {
     if (!this.isLive) return [...MOCK_DEALS];
-    return [...MOCK_DEALS];
+    try {
+      const data = (await this.hsRequest(
+        '/crm/v3/objects/deals?limit=100&properties=dealname,dealstage,amount,closedate&associations=contacts',
+      )) as {
+        results: Array<{
+          id: string;
+          properties: {
+            dealname?: string;
+            dealstage?: string;
+            amount?: string;
+            closedate?: string;
+          };
+          associations?: { contacts?: { results?: Array<{ id: string }> } };
+        }>;
+      };
+      return (data.results ?? []).map((r) => ({
+        id: r.id,
+        name: r.properties.dealname ?? '',
+        stage: r.properties.dealstage ?? 'unknown',
+        amount: Number.parseFloat(r.properties.amount ?? '0') || 0,
+        closeDate: r.properties.closedate ?? '',
+        contactId: r.associations?.contacts?.results?.[0]?.id ?? '',
+      }));
+    } catch (err) {
+      if ((err as { isAuthError?: boolean }).isAuthError) {
+        console.error(
+          `[hubspot-adapter] listDeals() AUTH FAILURE — token rejected by HubSpot (${(err as Error).message}). Refusing silent mock fallback.`,
+        );
+        throw err;
+      }
+      recordHubspotFallback();
+      console.error(
+        `[hubspot-adapter] listDeals() live call failed; falling back to mock data: ${(err as Error).message}`,
+      );
+      return [...MOCK_DEALS];
+    }
   }
 
   async sync(): Promise<{ synced: number; timestamp: string }> {

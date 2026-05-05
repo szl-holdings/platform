@@ -47,6 +47,12 @@ React 19 + Vite 7 + TypeScript (strict) · Express 5 (shared API server) · Post
 
 Full system architecture: [`docs/architecture/architecture.md`](../../docs/architecture/architecture.md)
 
+## Governance & audit
+
+- Machine gap audit (latest pass, 2026-05-05): [`docs/audits/machine-gap-audit.md`](../../docs/audits/machine-gap-audit.md)
+- Best-of-breed adoption survey: [`docs/research/best-of-breed-adoption.md`](../../docs/research/best-of-breed-adoption.md)
+- Operations governance hub (in-app): [`/a11oy/operations/alloy-governance`](src/pages/operations/alloy-governance.tsx)
+
 ---
 
 **SZL Holdings** · [szlholdings.com](https://szlholdings.com) · [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)

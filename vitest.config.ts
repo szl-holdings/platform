@@ -515,6 +515,7 @@ export default defineConfig({
       'tests/**/*.spec.ts',
       'lib/audit/src/**/*.test.ts',
       'lib/scene-export/src/__tests__/**/*.test.ts',
+      'lib/services/src/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.tsx',
       'scripts/**/*.test.js',

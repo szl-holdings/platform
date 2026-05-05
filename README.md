@@ -173,6 +173,14 @@ Alloy is the govern-and-act layer. Once an operator is ready to respond to a sig
 
 ---
 
+## Platform Status & Audits
+
+- **Machine gap audit (latest, 2026-05-05):** [`docs/audits/machine-gap-audit.md`](docs/audits/machine-gap-audit.md) — full P0/P1/P2/P3 inventory across all artifacts, libs, workers, and routes. Net result this pass: **P0 = 0**.
+- **Best-of-breed adoption survey:** [`docs/research/best-of-breed-adoption.md`](docs/research/best-of-breed-adoption.md) — per-domain OSS landscape with adopt / inspire / decline decisions and license-compliance posture.
+- **A11oy governance hub:** in-app at `/a11oy/operations/alloy-governance`; module overview in [`artifacts/a11oy/README.md`](artifacts/a11oy/README.md).
+
+---
+
 ## Security Posture
 
 - **Access control:** Multi-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.

@@ -1,0 +1,34 @@
+# Machine inventory snapshot
+# Generated: 2026-05-05T07:04:12Z
+# Cross-reference: docs/audits/machine-gap-audit.md
+
+artifacts.active_dirs               = 11
+artifacts.archived_dirs             = 1
+lib.packages                        = 55
+packages.packages                   = 137
+workers.packages                    = 5
+api_server.route_files              = 610
+drizzle.schema_files                = 9
+
+# Active artifact directories:
+  artifacts/a11oy
+  artifacts/api-server
+  artifacts/carlota-jo
+  artifacts/conduit
+  artifacts/counsel
+  artifacts/lexicon
+  artifacts/mockup-sandbox
+  artifacts/rosie
+  artifacts/sentra
+  artifacts/terra
+  artifacts/vessels
+
+# Archived artifact directories:
+  archive/artifacts/lyte-command-center
+
+# Worker packages:
+  workers/alloy-embed-worker
+  workers/alloy-rank-worker
+  workers/alloy-rerank-worker
+  workers/alloy-vector-worker
+  workers/substrate-python

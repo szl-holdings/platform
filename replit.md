@@ -121,6 +121,8 @@ The single source of truth for canonical metrics, vertical names, and slugs is `
 
 ## Platform Status (as of May 2026)
 
+**Machine gap audit (2026-05-05, Task #4804):** Full inventory at `docs/audits/machine-gap-audit.md`; companion best-of-breed survey at `docs/research/best-of-breed-adoption.md`. Net result after the audit pass: P0 = 0, P1 = 6 (all owned by existing project tasks), P2 = 9, P3 = 7. The two former P0 stubs are both **resolved in-task**: (1) the AEF "503 stub" at `artifacts/api-server/src/lib/alloy-embedding-router.ts` was orphan dead code — `app.ts` imports the real `createAefRouter` from `@workspace/alloy-embedding-api` and the live router responds 200 OK; orphan deleted. (2) `lib/services/src/adapters/hubspot.ts` now calls the real HubSpot v3 CRM API in `listContacts()`/`listDeals()` with safe fallback to mock fixtures on API failure.
+
 **Active Artifacts (all rendering, themed, operational):**
 | Artifact | Path | Status |
 |----------|------|--------|
