@@ -7,7 +7,7 @@ import {
   Globe, Crosshair, Activity, Radio, BarChart3, Map, Shield, Server,
   Cpu, Eye, Zap, Network, Settings, Users, Terminal, Layers,
   Briefcase, FileText, Target, GitBranch, Database, Lock,
-  GitFork, History, BookOpen, SquareTerminal,
+  GitFork, History, BookOpen, SquareTerminal, Sliders,
   FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
@@ -158,7 +158,7 @@ const platformItems: NavItem[] = [
   { id: 'trust-center', name: 'Trust Center', icon: Lock, path: '/trust' },
   { id: 'governance', name: 'Governance', icon: ShieldCheck, path: '/governance' },
   { id: 'hook-packs', name: 'Hook Packs', icon: Zap, path: '/governance/hook-packs' },
-  { id: 'routing-weights', name: 'Routing Weights', icon: Sigma, path: '/routing-weights' },
+  { id: 'routing-weights', name: 'Routing Weights', icon: Sliders, path: '/routing-weights' },
   { id: 'codex', name: 'Codex', icon: Brain, path: '/codex' },
 ];
 

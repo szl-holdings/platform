@@ -135,92 +135,27 @@ interface ProofChain {
   nodes: ProofNode[];
 }
 
+// Minimal demo skeletons — chain metadata only, no node data.
+// Full node data is authoritative in the API seed store (a11oy-fabric-api.ts).
+// This is only used in VITE_IS_DEMO=true mode; in normal dev/prod the API populates data.
 const DEMO_CHAINS: ProofChain[] = [
   {
-    id: 'chain-001',
-    title: 'MV Cascade Port Standby — Full Proof Chain',
-    domain: 'Maritime',
-    hash: 'sha256:c9f2e5b8a1d3e6f9b2c5a8d3e1f6b9c2',
-    completedAt: '2026-04-25T04:34:58Z',
-    attestation: { algorithm: 'Ed25519', signer: 'spiffe://a11oy.szl/verifier', timestamp: '2026-04-25T04:34:58Z', nonce: 'a8f3c2b1' },
-    nodes: [
-      { id: 'n1', kind: 'SIGNAL', label: 'Signal Detected', actor: 'Signal Mesh', ts: '2026-04-25T03:48:00Z', hash: 'sha256:a1b2c3d4e5', detail: 'MV Cascade 18h delay detected from AIS stream — Tanjung Pelepas congestion', evidenceRefs: ['ais-feed-cascade', 'port-api-tpp'], status: 'verified' },
-      { id: 'n2', kind: 'CONTEXT', label: 'Context Assembled', actor: 'Context Engine', ts: '2026-04-25T03:49:12Z', hash: 'sha256:b2c3d4e5f6', detail: 'Context pack assembled: voyage plan, demurrage contract, port cost schedule, historical standby data', evidenceRefs: ['ctx-pack-4421'], status: 'verified' },
-      {
-        id: 'n3', kind: 'REASONING', label: 'Reasoning Trace', actor: 'Cascade Navigator', ts: '2026-04-25T03:52:30Z', hash: 'sha256:c3d4e5f6a7',
-        detail: 'Full reasoning trace: 3 premises, 2 inference steps, 1 conclusion.',
-        evidenceRefs: ['action-brief-cascade'],
-        status: 'verified',
-        reasoningTrace: [
-          { id: 'r1', type: 'premise', content: 'MV Cascade ETA delayed 18h due to Tanjung Pelepas port congestion (AIS feed confirmed)', confidence: 0.98, evidenceRefs: ['ais-feed-cascade'] },
-          { id: 'r2', type: 'premise', content: 'Demurrage contract clause 4.2: $14,200/day rate applies after 24h delay', confidence: 0.99, evidenceRefs: ['demurrage-contract-4421'] },
-          { id: 'r3', type: 'premise', content: 'Historical standby at alternative anchorage saves avg $42,000 per event (12 prior cases)', confidence: 0.94, evidenceRefs: ['historical-standby-data'] },
-          { id: 'r4', type: 'inference', content: 'Port standby at anchorage 1.28N 103.67E reduces demurrage exposure by ~$42K vs. waiting at berth', confidence: 0.96, evidenceRefs: ['cost-model-cascade'] },
-          { id: 'r5', type: 'inference', content: 'No alternative port within 6h offers lower total cost when factoring fuel + port charges', confidence: 0.92, evidenceRefs: ['route-optimizer-output'] },
-          { id: 'r6', type: 'conclusion', content: 'Recommend port standby at anchorage 1.28N 103.67E. Expected savings: $42,000. MirrorEval: 94%.', confidence: 0.945, evidenceRefs: ['action-brief-cascade'] },
-        ],
-      },
-      { id: 'n4', kind: 'POLICY_EVAL', label: 'Policy Evaluated', actor: 'Covenant Layer', ts: '2026-04-25T03:52:38Z', hash: 'sha256:d4e5f6a7b8', detail: 'Policy pol-maritime-002 triggered. Enforcement: block_until_approved. Required: VP Operations.', evidenceRefs: ['pol-maritime-002'], status: 'verified' },
-      { id: 'n5', kind: 'APPROVAL', label: 'Approval Requested', actor: 'Approval Gateway', ts: '2026-04-25T03:52:45Z', hash: 'sha256:e5f6a7b8c9', detail: 'Approval request dispatched to VP Operations Sarah Chen. Deadline: T+4h.', evidenceRefs: ['approval-req-001'], status: 'verified' },
-      { id: 'n6', kind: 'APPROVAL', label: 'Approval Granted', actor: 'vp-operations:sarah.chen', ts: '2026-04-25T04:30:22Z', hash: 'sha256:f6a7b8c9d1', detail: 'VP Operations approved port standby. Notes: "Agreed — minimize demurrage exposure."', evidenceRefs: ['approval-grant-001'], status: 'verified' },
-      { id: 'n7', kind: 'EXECUTION', label: 'Action Executed', actor: 'Cascade Navigator', ts: '2026-04-25T04:32:11Z', hash: 'sha256:a7b8c9d1e2', detail: 'Port standby authorized. Vessel repositioned to anchorage 1.28N 103.67E.', evidenceRefs: ['exec-001'], status: 'verified' },
-      { id: 'n8', kind: 'VERIFICATION', label: 'Result Verified', actor: 'Verifier Agent', ts: '2026-04-25T04:34:58Z', hash: 'sha256:c9f2e5b8a1d3e6f9b2c5a8d3e1f6b9c2', detail: 'AIS position confirmed. Port authority standby registered. Cost rate locked at $14,200/day. Verification: PASSED.', evidenceRefs: ['vr-001'], status: 'verified' },
-    ],
+    id: 'chain-001', title: 'MV Cascade Port Standby — Full Proof Chain', domain: 'Maritime',
+    hash: 'sha256:c9f2e5b8a1d3e6f9b2c5a8d3e1f6b9c2', completedAt: '2026-04-25T04:34:58Z',
+    attestation: { algorithm: 'SHA-256 (structural content hash)', signer: 'spiffe://a11oy.szl/verifier (not yet active)', timestamp: '2026-04-25T04:34:58Z', nonce: 'a8f3c2b1' },
+    nodes: [],
   },
   {
-    id: 'chain-002',
-    title: 'TG-Ember Threat Escalation — Full Proof Chain',
-    domain: 'Defense',
-    hash: 'sha256:b8c3f9e2a4d1e7f3b6c2a9e4d1f7b3c6',
-    completedAt: '2026-04-24T18:56:12Z',
-    attestation: { algorithm: 'Ed25519', signer: 'spiffe://a11oy.szl/verifier', timestamp: '2026-04-24T18:56:12Z', nonce: 'b7e2d1c0' },
-    nodes: [
-      { id: 'n1', kind: 'SIGNAL', label: 'Signal Detected', actor: 'Signal Mesh', ts: '2026-04-24T18:42:00Z', hash: 'sha256:aa1b2c3', detail: 'TG-Ember threat actor activity detected — YELLOW threshold breached', evidenceRefs: ['siem-alert-4431'], status: 'verified' },
-      { id: 'n2', kind: 'CONTEXT', label: 'Context Assembled', actor: 'Context Engine', ts: '2026-04-24T18:43:00Z', hash: 'sha256:bb2c3d4', detail: 'Threat intelligence context: TG-Ember history, TTPs, current attack surface', evidenceRefs: ['threat-ctx-4431'], status: 'verified' },
-      {
-        id: 'n3', kind: 'REASONING', label: 'Reasoning Trace', actor: 'Guardian', ts: '2026-04-24T18:44:30Z', hash: 'sha256:cc3d4e5',
-        detail: 'Full reasoning trace for threat escalation decision.',
-        evidenceRefs: ['guardian-brief-01'],
-        status: 'verified',
-        reasoningTrace: [
-          { id: 'r1', type: 'premise', content: 'TG-Ember C2 beacons detected on ports 443 and 8080 from 3 internal hosts', confidence: 0.97, evidenceRefs: ['siem-alert-4431'] },
-          { id: 'r2', type: 'premise', content: 'TG-Ember TTPs match known APT campaign (MITRE ATT&CK T1071, T1041)', confidence: 0.95, evidenceRefs: ['threat-intel-db'] },
-          { id: 'r3', type: 'inference', content: 'Confidence-weighted threat score exceeds ORANGE threshold (0.92 > 0.90)', confidence: 0.96, evidenceRefs: ['threat-scoring-model'] },
-          { id: 'r4', type: 'conclusion', content: 'Escalate to ORANGE. Apply 14 perimeter hardening rules. Notify CISO.', confidence: 0.96, evidenceRefs: ['guardian-brief-01'] },
-        ],
-      },
-      { id: 'n4', kind: 'POLICY_EVAL', label: 'Policy Evaluated', actor: 'Covenant Layer', ts: '2026-04-24T18:44:38Z', hash: 'sha256:dd4e5f6', detail: 'Policy pol-security-007: auto_escalate for ORANGE+ threats.', evidenceRefs: ['pol-security-007'], status: 'verified' },
-      { id: 'n5', kind: 'EXECUTION', label: 'Action Executed', actor: 'Guardian (auto)', ts: '2026-04-24T18:55:00Z', hash: 'sha256:ee5f6a7', detail: '14 firewall block rules applied. CISO notified. Threat tier set to ORANGE.', evidenceRefs: ['exec-defense-001'], status: 'verified' },
-      { id: 'n6', kind: 'VERIFICATION', label: 'Result Verified', actor: 'Verifier Agent', ts: '2026-04-24T18:56:12Z', hash: 'sha256:b8c3f9e2a4d1e7f3b6c2a9e4d1f7b3c6', detail: 'SIEM confirmed ORANGE status. Perimeter surface reduced 22%. PASSED.', evidenceRefs: ['vr-003'], status: 'verified' },
-    ],
+    id: 'chain-002', title: 'TG-Ember Threat Escalation — Full Proof Chain', domain: 'Defense',
+    hash: 'sha256:b8c3f9e2a4d1e7f3b6c2a9e4d1f7b3c6', completedAt: '2026-04-24T18:56:12Z',
+    attestation: { algorithm: 'SHA-256 (structural content hash)', signer: 'spiffe://a11oy.szl/verifier (not yet active)', timestamp: '2026-04-24T18:56:12Z', nonce: 'b7e2d1c0' },
+    nodes: [],
   },
   {
-    id: 'chain-003',
-    title: 'Talbot Discovery Escalation — Full Proof Chain',
-    domain: 'Legal',
-    hash: 'sha256:a2d7e1f4b9c3e6a8d2f5b1c7e3a6d9f2',
-    completedAt: '2026-04-24T14:23:45Z',
-    attestation: { algorithm: 'Ed25519', signer: 'spiffe://a11oy.szl/verifier', timestamp: '2026-04-24T14:23:45Z', nonce: 'c6d3e2f1' },
-    nodes: [
-      { id: 'n1', kind: 'SIGNAL', label: 'Signal Detected', actor: 'Signal Mesh', ts: '2026-04-24T08:00:00Z', hash: 'sha256:la1b2c3', detail: 'Talbot matter: 340 documents outstanding, T-48h discovery deadline', evidenceRefs: ['clio-matter-4421'], status: 'verified' },
-      { id: 'n2', kind: 'CONTEXT', label: 'Context Assembled', actor: 'Context Engine', ts: '2026-04-24T08:01:30Z', hash: 'sha256:lb2c3d4', detail: 'Matter context: case timeline, outstanding documents, discovery scope, risk assessment', evidenceRefs: ['legal-ctx-4421'], status: 'verified' },
-      {
-        id: 'n3', kind: 'REASONING', label: 'Reasoning Trace', actor: 'Counsel Sentinel', ts: '2026-04-24T08:05:00Z', hash: 'sha256:lc3d4e5',
-        detail: 'Full reasoning trace for legal escalation decision.',
-        evidenceRefs: ['counsel-brief-001'],
-        status: 'verified',
-        reasoningTrace: [
-          { id: 'r1', type: 'premise', content: '340 documents remain outstanding with T-48h discovery deadline', confidence: 0.99, evidenceRefs: ['clio-matter-4421'] },
-          { id: 'r2', type: 'premise', content: 'Opposing counsel has filed late in 3 of 5 prior cases — adverse inference motion risk is HIGH', confidence: 0.94, evidenceRefs: ['opposing-counsel-history'] },
-          { id: 'r3', type: 'inference', content: 'Production rate of 15 docs/hour requires 22.7h — exceeds available time by 4.7h', confidence: 0.97, evidenceRefs: ['production-rate-model'] },
-          { id: 'r4', type: 'conclusion', content: 'Immediate escalation to lead counsel + co-counsel required. Risk: adverse inference motion.', confidence: 0.97, evidenceRefs: ['counsel-brief-001'] },
-        ],
-      },
-      { id: 'n4', kind: 'POLICY_EVAL', label: 'Policy Evaluated', actor: 'Covenant Layer', ts: '2026-04-24T08:05:08Z', hash: 'sha256:ld4e5f6', detail: 'Policy pol-legal-003: block_until_approved. General Counsel approval required.', evidenceRefs: ['pol-legal-003'], status: 'verified' },
-      { id: 'n5', kind: 'APPROVAL', label: 'Approval Granted', actor: 'general-counsel:patricia.mwangi', ts: '2026-04-24T14:20:33Z', hash: 'sha256:le5f6a7', detail: 'General Counsel approved escalation. Notes: "Priority. Engage outside co-counsel immediately."', evidenceRefs: ['approval-legal-001'], status: 'verified' },
-      { id: 'n6', kind: 'EXECUTION', label: 'Action Executed', actor: 'Counsel Sentinel', ts: '2026-04-24T14:22:10Z', hash: 'sha256:lf6a7b8', detail: 'Escalation email sent to lead counsel + co-counsel. Clio matter updated.', evidenceRefs: ['exec-legal-001'], status: 'verified' },
-      { id: 'n7', kind: 'VERIFICATION', label: 'Result Verified', actor: 'Verifier Agent', ts: '2026-04-24T14:23:45Z', hash: 'sha256:a2d7e1f4b9c3e6a8d2f5b1c7e3a6d9f2', detail: 'Email delivery confirmed. Clio status updated. PASSED.', evidenceRefs: ['vr-002'], status: 'verified' },
-    ],
+    id: 'chain-003', title: 'Talbot Discovery Escalation — Full Proof Chain', domain: 'Legal',
+    hash: 'sha256:a2d7e1f4b9c3e6a8d2f5b1c7e3a6d9f2', completedAt: '2026-04-24T14:23:45Z',
+    attestation: { algorithm: 'SHA-256 (structural content hash)', signer: 'spiffe://a11oy.szl/verifier (not yet active)', timestamp: '2026-04-24T14:23:45Z', nonce: 'c6d3e2f1' },
+    nodes: [],
   },
 ];
 
@@ -245,7 +180,7 @@ function fmt(ts: string) {
 }
 
 export function ProofLedger() {
-  const { data, loading, error } = useApiData<{ chains: ProofChain[] }>('/pages/proof-ledger', { chains: DEMO_CHAINS });
+  const { data, loading, error } = useApiData<{ chains: ProofChain[]; totalNodes?: number; totalReasoningTraces?: number }>('/ledger/chains', { chains: DEMO_CHAINS });
   const [selectedChain, setSelectedChain] = useState('');
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chain' | 'replay' | 'diff' | 'reliquary' | 'capability-routing'>('chain');
@@ -330,16 +265,16 @@ export function ProofLedger() {
       <PageHeader
         label="REASONING PROOF ENGINE"
         title="Immutable Proof Chain with Reasoning Traces"
-        subtitle="Every governed execution is a connected chain with full reasoning traces: premises → inference steps → conclusion. Each node is cryptographically hashed and attested."
+        subtitle="Every governed execution is a connected chain with full reasoning traces: premises → inference steps → conclusion. Each node is structurally hashed (SHA-256 content hash) — cryptographic signing is not active in this phase."
         status="LIVE"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <KpiCard label="PROOF CHAINS" value={CHAINS.length} sub="complete" accent={GOLD} />
-        <KpiCard label="TOTAL NODES" value={CHAINS.reduce((a, c) => a + c.nodes.length, 0)} sub="all verified" accent={GOLD} />
-        <KpiCard label="REASONING TRACES" value={CHAINS.reduce((a, c) => a + c.nodes.filter(n => n.reasoningTrace).length, 0)} sub="full traces" accent={GOLD} />
+        <KpiCard label="TOTAL NODES" value={data?.totalNodes ?? CHAINS.reduce((a, c) => a + c.nodes.length, 0)} sub="all verified" accent={GOLD} />
+        <KpiCard label="REASONING TRACES" value={data?.totalReasoningTraces ?? CHAINS.reduce((a, c) => a + c.nodes.filter(n => n.reasoningTrace).length, 0)} sub="full traces" accent={GOLD} />
         <KpiCard label="CHAIN INTEGRITY" value="100%" sub="no tampering" accent="#22c55e" />
-        <KpiCard label="ATTESTATION" value="Ed25519" sub="SPIFFE-signed" accent="#22c55e" />
+        <KpiCard label="ATTESTATION" value="SHA-256" sub="structural hash" accent={GOLD} />
         <KpiCard label="VERIFICATION" value="100%" sub="all chains verified" accent="#22c55e" />
       </div>
 
@@ -427,7 +362,17 @@ export function ProofLedger() {
                             </div>
                             {!isExpanded && <div className="text-xs mt-1 truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{node.detail.slice(0, 72)}…</div>}
                           </div>
-                          <div className="text-xs font-mono flex-shrink-0" style={{ color: '#22c55e' }}>✓</div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-xs font-mono" style={{ color: '#22c55e' }}>✓</span>
+                            <Link
+                              href={`${BASE_URL}/proof-packet/${chain.id}--${node.id}`}
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              className="text-[10px] font-mono whitespace-nowrap transition-colors"
+                              style={{ color: 'rgba(201,183,135,0.55)' }}
+                            >
+                              Open packet →
+                            </Link>
+                          </div>
                         </div>
 
                         {isExpanded && (
@@ -974,7 +919,7 @@ export function ProofLedger() {
       ))()}
 
       <div className="mt-4 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Reasoning Proof Engine — every proof chain includes full reasoning traces (premises → inference → conclusion) with cryptographic attestation. Chains are immutable and append-only.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Reasoning Proof Engine — every proof chain includes full reasoning traces (premises → inference → conclusion) with structural SHA-256 content hashing. Chains are immutable and append-only. Cryptographic signing is not active in this phase.
       </div>
     </Layout>
   );

@@ -59,7 +59,8 @@ const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default:
 const ActionRail = lazy(() => import('./pages/ActionRail').then(m => ({ default: m.ActionRail })));
 const ProofLedger = lazy(() => import('./pages/ProofLedger').then(m => ({ default: m.ProofLedger })));
 const ProofEnvelope = lazy(() => import('./pages/ProofEnvelope'));
-const RoutingWeights = lazy(() => import('./pages/RoutingWeights'));
+const ProofPacketDetail = lazy(() => import('./pages/ProofPacketDetail').then(m => ({ default: m.ProofPacketDetail })));
+const RoutingWeights = lazy(() => import('./pages/RoutingWeights').then(m => ({ default: m.RoutingWeights })));
 const Codex = lazy(() => import('./pages/Codex'));
 const CodexEntry = lazy(() => import('./pages/CodexEntry'));
 const CodexReceipts = lazy(() => import('./pages/CodexReceipts').then(m => ({ default: m.CodexReceipts })));
@@ -447,6 +448,8 @@ export default function App() {
         <Route path={`${base}/command-surface`} component={CommandSurface} />
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
+        <Route path={`${base}/proof-packet/:packetRef`} component={ProofPacketDetail} />
+        <Route path="/a11oy/proof-packet/:packetRef" component={ProofPacketDetail} />
         <Route path={`${base}/proof`} component={ProofLedger} />
         <Route path={`${base}/proof/envelope/:envelopeId`} component={ProofEnvelope} />
         <Route path={`${base}/routing-weights`} component={RoutingWeights} />
