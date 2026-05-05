@@ -25,6 +25,80 @@ import {
 import { useEffect, useState } from 'react';
 import { CARLOTA_JO_RETENTION, metricDisplay } from '@/lib/claims';
 
+function CarlotaIntelBrief() {
+  const [data, setData] = useState<{
+    metrics: { npsScore: number; retentionRate: number };
+    anomalySummary: { anomalyLabel: string; topSignal: string };
+    strategicAlert: { competitor: string; probability: number; predictedAction: string };
+    caseStudy: { label: string; a11oyDeepLink: string };
+  } | null>(null);
+
+  useEffect(() => {
+    const API = (import.meta.env.BASE_URL as string)?.replace(/\/$/, '') + '/api';
+    fetch(`${API}/carlota/executive-brief`, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => { if (json?.data) setData(json.data); })
+      .catch(() => {});
+  }, []);
+
+  if (!data) return null;
+
+  const alertColor = data.anomalySummary.anomalyLabel === 'elevated'
+    ? '#ef4444' : data.anomalySummary.anomalyLabel === 'moderate'
+    ? '#f59e0b' : '#10b981';
+
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="rounded-lg p-4 mb-5"
+      style={{ background: 'rgba(196,162,101,0.04)', border: '1px solid rgba(196,162,101,0.12)' }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="w-3.5 h-3.5" style={{ color: '#c4a265' }} />
+        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          Advisory Intel Brief
+        </span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(196,162,101,0.12)', color: '#c4a265' }}>
+          Live · Carlota Jo
+        </span>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>NPS</p>
+          <p className="text-xl font-semibold" style={{ color: '#10b981' }}>{data.metrics.npsScore}</p>
+          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Best in class</p>
+        </div>
+        <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Retention</p>
+          <p className="text-xl font-semibold" style={{ color: '#c4a265' }}>{Math.round(data.metrics.retentionRate * 100)}%</p>
+          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Platform avg</p>
+        </div>
+        <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="text-[10px] mb-1 flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Anomaly
+            <span className="px-1 rounded-sm text-[9px]" style={{ background: alertColor + '20', color: alertColor }}>{data.anomalySummary.anomalyLabel}</span>
+          </p>
+          <p className="text-[11px] leading-snug" style={{ color: 'rgba(255,255,255,0.65)' }}>{data.anomalySummary.topSignal.slice(0, 60)}…</p>
+        </div>
+        <div className="rounded-md p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Strategic ({Math.round(data.strategicAlert.probability * 100)}%)
+          </p>
+          <p className="text-[11px] leading-snug" style={{ color: 'rgba(255,255,255,0.65)' }}>{data.strategicAlert.competitor.split(' ')[0]}: {data.strategicAlert.predictedAction.slice(0, 45)}…</p>
+        </div>
+      </div>
+      <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <a href={data.caseStudy.a11oyDeepLink} className="text-[10px] flex items-center gap-1 hover:opacity-80 transition-opacity" style={{ color: '#c4a265' }}>
+          <Activity className="w-3 h-3" />
+          Named Case Study: {data.caseStudy.label}
+        </a>
+      </div>
+    </m.div>
+  );
+}
+
 const AGENTS = [
   { name: 'Compass CJ', domain: 'strategy' },
   { name: 'Brand Analyst', domain: 'branding' },
@@ -347,6 +421,8 @@ export default function CarlotaJoPulse() {
             title="Advisory Operations"
           />
         </div>
+        {/* Carlota Executive Intel Brief */}
+        <CarlotaIntelBrief />
         <div className="text-center py-4 mt-4">
           <p
             className="text-[9px] uppercase tracking-[0.25em]"

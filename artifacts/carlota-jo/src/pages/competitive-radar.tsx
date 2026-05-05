@@ -233,6 +233,21 @@ export default function CompetitiveRadar() {
   const trackedRef = useRef(tracked);
   trackedRef.current = tracked;
   const clientIdRef = useRef(clientId);
+
+  // ML Forecast state
+  const [mlForecast, setMlForecast] = useState<{
+    competitor: string;
+    probabilityPercent: number;
+    predictedAction: string;
+    horizon: string;
+    anomalyScore: number;
+    anomalyLabel: string;
+    topSignals: Array<{ source: string; description: string; score: number }>;
+    feedHealth: Array<{ feedType: string; status: string; signalsLastRun?: number }>;
+    enrichedSignals: CompetitorSignal[];
+  } | null>(null);
+  const [mlLoading, setMlLoading] = useState(false);
+  const [showMlPanel, setShowMlPanel] = useState(false);
   clientIdRef.current = clientId;
 
   useEffect(() => {
@@ -980,6 +995,148 @@ Return ONLY valid JSON, no markdown.`;
           <Loader2 className="w-4 h-4 animate-spin" />
           Loading intelligence data…
         </div>
+      )}
+
+      {/* ML Forecast + Feed Health panel */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={async () => {
+            setShowMlPanel((s) => !s);
+            if (!mlForecast) {
+              setMlLoading(true);
+              try {
+                const competitor = tracked[0] ?? 'McKinsey & Company';
+                const [smRes, anomalyRes, feedRes, enrichedRes] = await Promise.allSettled([
+                  fetch(`${API}/carlota/ml-forecasts/strategic-move?competitor=${encodeURIComponent(competitor)}`, { credentials: 'include' }),
+                  fetch(`${API}/carlota/ml-forecasts/concierge-anomaly`, { credentials: 'include' }),
+                  fetch(`${API}/carlota/competitive-feeds/health`, { credentials: 'include' }),
+                  fetch(`${API}/carlota/competitive-feeds/signals?competitors=${encodeURIComponent(tracked.join(','))}`, { credentials: 'include' }),
+                ]);
+                const smData = smRes.status === 'fulfilled' && smRes.value.ok ? (await smRes.value.json()).data : null;
+                const anomalyData = anomalyRes.status === 'fulfilled' && anomalyRes.value.ok ? (await anomalyRes.value.json()).data : null;
+                const feedData = feedRes.status === 'fulfilled' && feedRes.value.ok ? (await feedRes.value.json()).data : null;
+                const enrichedData = enrichedRes.status === 'fulfilled' && enrichedRes.value.ok ? (await enrichedRes.value.json()).data : null;
+                setMlForecast({
+                  competitor: smData?.competitor ?? competitor,
+                  probabilityPercent: smData?.probabilityPercent ?? 55,
+                  predictedAction: smData?.predictedAction ?? 'Strategic expansion in adjacent market',
+                  horizon: smData?.horizon ?? '60 days',
+                  anomalyScore: anomalyData?.anomalyScore ?? 0.42,
+                  anomalyLabel: anomalyData?.anomalyLabel ?? 'moderate',
+                  topSignals: anomalyData?.topSignals ?? [],
+                  feedHealth: feedData?.feedHealth ?? [],
+                  enrichedSignals: (enrichedData?.signals ?? []).slice(0, 8),
+                });
+              } catch { /* non-fatal */ } finally {
+                setMlLoading(false);
+              }
+            }
+          }}
+          className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors flex items-center gap-1.5"
+          title="Show ML forecast heads + live feed health"
+        >
+          {mlLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" style={{ color: GOLD }} />}
+          ML Intel &amp; Feed Health
+        </button>
+      </div>
+
+      {showMlPanel && mlForecast && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+          {/* Strategic Move Forecast */}
+          <Card className="border-l-4" style={{ borderLeftColor: GOLD }}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4" style={{ color: GOLD }} />
+                ML Forecast — Strategic Move Probability
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Competitor</p>
+                  <p className="text-sm font-medium">{mlForecast.competitor}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Probability ({mlForecast.horizon})</p>
+                  <p className="text-2xl font-semibold" style={{ color: mlForecast.probabilityPercent > 65 ? 'var(--color-red-600, #dc2626)' : GOLD }}>
+                    {mlForecast.probabilityPercent}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Predicted Action</p>
+                  <p className="text-sm">{mlForecast.predictedAction}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Anomaly Digest */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" style={{ color: mlForecast.anomalyLabel === 'elevated' ? 'var(--color-red-600, #dc2626)' : mlForecast.anomalyLabel === 'moderate' ? 'var(--color-amber-500, #f59e0b)' : 'var(--color-emerald-600, #059669)' }} />
+                Anomaly Digest — Week of {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                <Badge variant="outline" className="text-[10px]">{mlForecast.anomalyLabel}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {mlForecast.topSignals.slice(0, 3).map((s, i) => (
+                <div key={i} className="flex items-start gap-3 p-2 rounded-lg bg-muted/30">
+                  <div className="shrink-0 text-xs font-medium text-muted-foreground w-28 pt-0.5">{s.source}</div>
+                  <div className="flex-1 text-xs">{s.description}</div>
+                  <div className="shrink-0 text-xs font-medium" style={{ color: s.score > 0.7 ? 'var(--color-red-600, #dc2626)' : GOLD }}>{Math.round(s.score * 100)}%</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Feed Health */}
+          {mlForecast.feedHealth.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Live Feed Health</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {mlForecast.feedHealth.map((f) => (
+                    <span key={f.feedType} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border" style={{ borderColor: f.status === 'healthy' ? 'var(--color-emerald-200, #a7f3d0)' : f.status === 'degraded' ? 'var(--color-amber-200, #fde68a)' : 'var(--color-stone-200)', background: f.status === 'healthy' ? 'var(--color-emerald-50, #ecfdf5)' : f.status === 'degraded' ? 'var(--color-amber-50, #fffbeb)' : 'transparent' }}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${f.status === 'healthy' ? 'bg-emerald-500' : f.status === 'degraded' ? 'bg-amber-500' : f.status === 'never_polled' ? 'bg-stone-400' : 'bg-red-500'}`} />
+                      {f.feedType}
+                      {f.signalsLastRun != null && <span className="text-muted-foreground">({f.signalsLastRun})</span>}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Enriched signals from live feeds */}
+          {mlForecast.enrichedSignals.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Enriched Signals — Live Feeds</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {mlForecast.enrichedSignals.map((s, i) => (
+                  <div key={i} className="flex items-start gap-3 p-2 rounded-lg border border-border/60">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="text-xs font-medium">{s.competitor}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full border" style={{ borderColor: 'var(--color-gold-border)', color: GOLD }}>{(s as { feedType?: string }).feedType ?? s.source ?? 'feed'}</span>
+                      </div>
+                      <p className="text-xs text-foreground">{s.event}</p>
+                    </div>
+                    {s.url && s.url !== '#' && (
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs" style={{ color: GOLD }}>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

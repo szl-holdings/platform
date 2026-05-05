@@ -533,6 +533,39 @@ const TOOL_CATALOGUE: ToolMetadata[] = [
     rateLimit: 5, timeoutMs: 15000, auditRequired: true, safeForAutonomy: false,
     demoSupported: true, isDestructive: false, category: 'compute',
   },
+  {
+    id: 'carlotaRunDiagnostic',
+    name: 'Carlota — Run Strategic Diagnostic',
+    description: 'Runs a Carlota strategic diagnostic for a target company, generating competitive position score, market risks, and engagement opportunity signals via live ML inference.',
+    inputSchema: { companyName: 'string', industry: 'string', topCompetitors: 'string[]' },
+    outputSchema: { diagnosticId: 'string', marketPositionScore: 'number', opportunitySummary: 'string', riskSummary: 'string', feedHealth: 'object[]' },
+    riskLevel: 'medium', requiresApproval: false, allowedVerticals: ['carlota-jo', 'alloy-core'],
+    allowedRoles: ['operator', 'executive', 'board', 'analyst'], blockedActions: [],
+    rateLimit: 20, timeoutMs: 30000, auditRequired: true, safeForAutonomy: false,
+    demoSupported: true, isDestructive: false, category: 'analytics',
+  },
+  {
+    id: 'carlotaRefreshRadar',
+    name: 'Carlota — Refresh Competitive Radar',
+    description: 'Triggers a live refresh of the Carlota competitive radar feeds for the specified competitor list, returning updated signals and feed health.',
+    inputSchema: { competitors: 'string[]', domains: 'Record<string, string>' },
+    outputSchema: { newSignalCount: 'number', feedHealth: 'object[]', signals: 'object[]' },
+    riskLevel: 'low', requiresApproval: false, allowedVerticals: ['carlota-jo', 'alloy-core'],
+    allowedRoles: ['operator', 'executive', 'board', 'analyst'], blockedActions: [],
+    rateLimit: 10, timeoutMs: 60000, auditRequired: false, safeForAutonomy: true,
+    demoSupported: true, isDestructive: false, category: 'analytics',
+  },
+  {
+    id: 'carlotaGenerateConciergeDigest',
+    name: 'Carlota — Generate Concierge Anomaly Digest',
+    description: 'Generates a per-client weekly concierge anomaly digest using live competitive feed signals and the Carlota isolation-forest ML model. Requires PCE gate approval.',
+    inputSchema: { clientId: 'string', clientName: 'string', competitors: 'string[]' },
+    outputSchema: { anomalyScore: 'number', anomalyLabel: 'string', topSignals: 'object[]', recommendedAction: 'string', weekOf: 'string' },
+    riskLevel: 'medium', requiresApproval: true, allowedVerticals: ['carlota-jo'],
+    allowedRoles: ['operator', 'executive', 'board'], blockedActions: [],
+    rateLimit: 5, timeoutMs: 30000, auditRequired: true, safeForAutonomy: false,
+    demoSupported: true, isDestructive: false, category: 'analytics',
+  },
 ];
 
 const MOCK_OUTPUTS: Record<string, MockFn> = {
@@ -803,6 +836,51 @@ const MOCK_OUTPUTS: Record<string, MockFn> = {
     inferenceMs: 24,
     demo,
   }),
+  carlotaRunDiagnostic: (input, demo) => ({
+    diagnosticId: `dx-carlota-${Date.now().toString(36)}`,
+    marketPositionScore: 68,
+    opportunitySummary: `${(input as { companyName?: string }).companyName ?? 'Target company'} shows mid-market vulnerability — pricing and product gaps identified in ${(input as { industry?: string }).industry ?? 'target industry'}.`,
+    riskSummary: 'Competitor hiring velocity elevated. 2 patent filings detected in adjacent segment.',
+    feedHealth: [
+      { feedType: 'wayback-cdx', status: 'healthy' },
+      { feedType: 'gdelt', status: 'healthy' },
+      { feedType: 'hiring-boards', status: 'healthy' },
+    ],
+    modelVersionId: 'carlota-strategic_move_forecast-prod-v1',
+    scoredAt: new Date().toISOString(),
+    demo,
+  }),
+  carlotaRefreshRadar: (input, demo) => ({
+    newSignalCount: 7,
+    feedHealth: [
+      { feedType: 'wayback-cdx', status: 'healthy', signalsLastRun: 3 },
+      { feedType: 'gdelt', status: 'healthy', signalsLastRun: 4 },
+      { feedType: 'hiring-boards', status: 'healthy', signalsLastRun: 2 },
+    ],
+    signals: ((input as { competitors?: string[] }).competitors ?? ['McKinsey', 'BCG']).slice(0, 2).map((c) => ({
+      competitor: c,
+      event: `Live website change detected for ${c}`,
+      impact: 'medium',
+      direction: 'threat',
+      feedType: 'wayback-cdx',
+      score: 0.62,
+    })),
+    demo,
+  }),
+  carlotaGenerateConciergeDigest: (input, demo) => ({
+    anomalyScore: 0.64,
+    anomalyLabel: 'moderate',
+    topSignals: [
+      { source: 'McKinsey & Company', description: 'Elevated hiring velocity in AI strategy practice', score: 0.81, feedType: 'hiring-boards' },
+      { source: 'BCG', description: 'Website pricing page structural change detected', score: 0.73, feedType: 'wayback-cdx' },
+    ],
+    recommendedAction: 'Monitor closely: competitor activity elevated vs client baseline',
+    weekOf: new Date().toISOString().slice(0, 10),
+    clientId: (input as { clientId?: string }).clientId ?? 'portfolio',
+    clientName: (input as { clientName?: string }).clientName ?? 'Client',
+    modelVersionId: 'carlota-concierge_anomaly_digest-prod-v1',
+    demo,
+  }),
 };
 
 const toolMap = new Map<string, ToolMetadata>(TOOL_CATALOGUE.map((t) => [t.id, t]));
@@ -827,6 +905,40 @@ export function executeToolMock(toolId: string, input: Record<string, unknown>, 
   const mockFn = MOCK_OUTPUTS[toolId];
   const output = mockFn ? mockFn(input, isDemoMode) : { status: 'ok', toolId, demo: isDemoMode };
   return { ok: true, toolId, output, durationMs: Date.now() - t, isDemo: isDemoMode };
+}
+
+const CARLOTA_TOOL_IDS = new Set(['carlotaRunDiagnostic', 'carlotaRefreshRadar', 'carlotaGenerateConciergeDigest']);
+
+/**
+ * Live execution bridge: routes Carlota tool calls to the real ML/feed back-end
+ * (`invokeCarlotaTool`). All other tools fall back to the mock/demo path.
+ * Returns a Promise so callers must await it.
+ */
+export async function executeToolLive(
+  toolId: string,
+  input: Record<string, unknown>,
+  isDemoMode: boolean,
+): Promise<ToolResult> {
+  const tool = toolMap.get(toolId);
+  if (!tool) {
+    return { ok: false, toolId, error: `Tool "${toolId}" not found in registry.`, durationMs: 0 };
+  }
+  if (!CARLOTA_TOOL_IDS.has(toolId) || isDemoMode) {
+    return executeToolMock(toolId, input, isDemoMode);
+  }
+  const t = Date.now();
+  try {
+    const { invokeCarlotaTool } = await import('../../lib/carlota-a11oy-tools.js');
+    const output = await invokeCarlotaTool(toolId, input);
+    return { ok: true, toolId, output, durationMs: Date.now() - t, isDemo: false };
+  } catch (err) {
+    return {
+      ok: false,
+      toolId,
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - t,
+    };
+  }
 }
 
 export function getMcpToolDescriptions(): Array<{ name: string; description: string; inputSchema: Record<string, unknown> }> {

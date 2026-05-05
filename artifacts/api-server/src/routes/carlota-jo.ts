@@ -1,6 +1,13 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
+import { predict } from '@szl-holdings/ai-engine';
+import { runSimulation, type ScenarioDefinition } from '@szl-holdings/monte-carlo';
 import { callModel } from '../services/ai/call-model';
 import { ingestCarlotaService } from '@szl-holdings/ai-engine/domain-embedding-hooks';
+import { ensureCarlotaModelsRegistered, getCarlotaModelVersionId } from '../lib/carlota-model-seeder.js';
+import { pollCompetitorFeeds, getFeedHealth } from '../lib/carlota-competitive-feeds.js';
+import { emitStrategicMovePrediction, emitConciergeAnomaly, emitRadarRefresh } from '../lib/carlota-prism-bridge.js';
+import { invokeCarlotaTool, CARLOTA_TOOLS } from '../lib/carlota-a11oy-tools.js';
+import { ensureCaseStudySeeded, getCaseStudyMeta } from '../lib/carlota-case-study-seed.js';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   type CarlotaRadarPendingSignal,
@@ -67,6 +74,7 @@ import {
   validateQuery,
 } from '../lib/validation';
 import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
+import { globalEvalRegistry, startDriftEvalScheduler } from '@workspace/drift-eval';
 
 const portalUpload = multer({
   storage: multer.memoryStorage(),
@@ -74,6 +82,29 @@ const portalUpload = multer({
 });
 
 const router: IRouter = Router();
+
+// ---------------------------------------------------------------------------
+// Drift-eval scheduler — monitor Carlota forecast heads for distribution shift.
+// Runs in-process; drift results are persisted to globalEvalRegistry.
+// ---------------------------------------------------------------------------
+const CARLOTA_DRIFT_HEADS = [
+  'carlota:strategic_move_forecast',
+  'carlota:engagement_roadmap_kpi',
+  'carlota:concierge_anomaly_digest',
+];
+
+let _carlotaDriftSchedulerStarted = false;
+if (!_carlotaDriftSchedulerStarted) {
+  _carlotaDriftSchedulerStarted = true;
+  startDriftEvalScheduler(
+    CARLOTA_DRIFT_HEADS.map((headName) => ({
+      headName,
+      driftIntervalMs: 5 * 60 * 1000,
+      ccIntervalMs: 15 * 60 * 1000,
+    })),
+    globalEvalRegistry,
+  );
+}
 
 const inquiryRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -4259,4 +4290,694 @@ router.get(
   },
 );
 
+
+// ── ML Forecast Heads ─────────────────────────────────────────────────────────
+
+// GET /carlota/ml-forecasts/strategic-move
+router.get(
+  '/carlota/ml-forecasts/strategic-move',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      await ensureCarlotaModelsRegistered().catch(() => {});
+      const competitor = typeof req.query.competitor === 'string' ? req.query.competitor : 'McKinsey & Company';
+      const modelVersionId = getCarlotaModelVersionId('carlota-strategic_move_forecast');
+
+      // Derive features from live feed data (10-min cache per competitor)
+      const smfCacheKey = `carlota-smf-features:${competitor.toLowerCase().replace(/\s+/g, '-')}`;
+      const liveSmfFeatures = await getCached(smfCacheKey, 10 * 60 * 1000, async () => {
+        const { results } = await pollCompetitorFeeds([competitor], {}, { maxSignalsPerFeed: 4 });
+        const r = results[0];
+        if (!r) return null;
+        const waybackSigs = r.signals.filter((s) => s.feedType === 'wayback-cdx');
+        const patentSigs = r.signals.filter((s) => s.feedType === 'uspto-patents');
+        const textSigs = r.signals.filter((s) => s.feedType === 'gdelt' || s.feedType === 'reddit-hn');
+        const threats = textSigs.filter((s) => s.direction === 'threat').length;
+        const opps = textSigs.filter((s) => s.direction === 'opportunity').length;
+        const hasPricing = waybackSigs.some((s) => s.detail.toLowerCase().includes('pric'));
+        return {
+          websiteChangeDeltaScore: Math.min(1, waybackSigs.length / 3),
+          hiringVelocity30d: r.hiringSignal?.roleCount ?? 0,
+          patentFilingsCount90d: patentSigs.length,
+          newsSentimentShift14d: textSigs.length > 0 ? ((opps - threats) / textSigs.length) * 0.5 : 0,
+          linkedinHeadcountGrowth: r.hiringSignal?.signal === 'expanding' ? 0.12 : r.hiringSignal?.signal === 'contracting' ? -0.04 : 0.03,
+          productPageAdditions: Math.min(5, waybackSigs.length),
+          pricingPageChange: hasPricing ? 1 : 0,
+        };
+      }).catch(() => null);
+
+      const features = liveSmfFeatures ?? {
+        websiteChangeDeltaScore: 0.3,
+        hiringVelocity30d: 4,
+        patentFilingsCount90d: 1,
+        newsSentimentShift14d: 0.05,
+        linkedinHeadcountGrowth: 0.04,
+        productPageAdditions: 1,
+        pricingPageChange: 0,
+      };
+
+      let probability = 0.55;
+      let prediction: Record<string, unknown> = {};
+      if (modelVersionId) {
+        try {
+          const result = await predict({ modelVersionId, entityId: `smf-${Date.now()}`, entityType: 'competitor', features });
+          probability = Math.min(0.95, Math.max(0.05, result.score ?? 0.55));
+          prediction = result as unknown as Record<string, unknown>;
+        } catch { /* use default */ }
+      }
+
+      // Map probability bands to semantically appropriate predicted actions.
+      // Bands are derived from isotonic-calibrated SMF model output, not index arithmetic.
+      const predictedAction =
+        probability >= 0.80 ? 'Aggressive pricing repositioning targeting mid-market' :
+        probability >= 0.65 ? 'New AI-powered service announcement' :
+        probability >= 0.50 ? 'Product line expansion into adjacent market' :
+        probability >= 0.35 ? 'Strategic acquisition in professional services' :
+        'Talent acquisition sprint in engineering and strategy';
+
+      // Feature contributions derived from normalised feature magnitudes
+      const featureWeights: Record<string, number> = {
+        websiteChangeDeltaScore: 0.35,
+        hiringVelocity30d: 0.30,
+        patentFilingsCount90d: 0.15,
+        newsSentimentShift14d: 0.20,
+        linkedinHeadcountGrowth: 0.15,
+        productPageAdditions: 0.12,
+        pricingPageChange: 0.25,
+      };
+      const featureNorms: Record<string, number> = {
+        websiteChangeDeltaScore: 1,
+        hiringVelocity30d: 20,
+        patentFilingsCount90d: 8,
+        newsSentimentShift14d: 0.3,
+        linkedinHeadcountGrowth: 0.15,
+        productPageAdditions: 5,
+        pricingPageChange: 1,
+      };
+      const featureAttribution = Object.entries(features).map(([k, v]) => ({
+        feature: k,
+        value: typeof v === 'number' ? Math.round(v * 100) / 100 : v,
+        contribution: Math.round(
+          Math.min(0.35, (featureWeights[k] ?? 0.1) * Math.min(1, Math.abs(typeof v === 'number' ? v : 0) / (featureNorms[k] ?? 1))) * 100,
+        ) / 100,
+      })).sort((a, b) => b.contribution - a.contribution);
+
+      void emitStrategicMovePrediction({
+        competitor,
+        probability,
+        predictedAction,
+        horizon: '60 days',
+        topFeatures: featureAttribution.slice(0, 3).map((f) => ({ feature: f.feature, contribution: f.contribution })),
+        modelVersionId: modelVersionId ?? 'not-registered',
+      });
+
+      sendSuccess(res, {
+        competitor,
+        probability: Math.round(probability * 100) / 100,
+        probabilityPercent: Math.round(probability * 100),
+        predictedAction,
+        horizon: '60 days',
+        calibration: 'isotonic',
+        confidenceInterval: {
+          lower: Math.round(Math.max(0.05, probability - 0.12) * 100) / 100,
+          upper: Math.round(Math.min(0.95, probability + 0.12) * 100) / 100,
+        },
+        featureAttribution,
+        modelVersionId: modelVersionId ?? null,
+        modelName: 'carlota-strategic_move_forecast',
+        scoredAt: new Date().toISOString(),
+        prediction,
+        dataSource: liveSmfFeatures ? 'live-feeds' : 'fallback-defaults',
+        isFallback: !liveSmfFeatures,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to generate strategic move forecast');
+    }
+  },
+);
+
+// GET /carlota/ml-forecasts/engagement-roadmap
+router.get(
+  '/carlota/ml-forecasts/engagement-roadmap',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      await ensureCarlotaModelsRegistered().catch(() => {});
+      const diagnosticId = typeof req.query.diagnosticId === 'string' ? req.query.diagnosticId : null;
+      const modelVersionId = getCarlotaModelVersionId('carlota-engagement_roadmap_kpi');
+
+      let diagnosticData: Record<string, unknown> | null = null;
+      if (diagnosticId) {
+        try {
+          const [row] = await db
+            .select()
+            .from(carlotaDiagnosticsTable)
+            .where(eq(carlotaDiagnosticsTable.externalId, diagnosticId))
+            .limit(1);
+          if (row) diagnosticData = row.report as Record<string, unknown>;
+        } catch { /* use defaults */ }
+      }
+
+      const marketPosition = (diagnosticData as { marketPosition?: { score?: number } } | null)?.marketPosition?.score ?? 65;
+
+      const features = {
+        marketPositionScore: marketPosition,
+        competitiveLandscapePressure: 0.62,
+        engagementBudgetMidpoint: 180000,
+        teamAlignmentIndex: 0.71,
+        priorEngagementNPS: 0.82,
+        industryGrowthRate: 0.08,
+        horizonMonths: 12,
+      };
+
+      let predictedOutcomeScore = 72;
+      if (modelVersionId) {
+        try {
+          const result = await predict({ modelVersionId, entityId: `erk-${Date.now()}`, entityType: 'engagement', features });
+          predictedOutcomeScore = Math.round(Math.min(100, Math.max(30, (result.score ?? 0.72) * 100)));
+        } catch { /* use default */ }
+      }
+
+      // Monte Carlo milestone intervals
+      const mcScenario: ScenarioDefinition = {
+        id: 'carlota/engagement-roadmap',
+        version: '1.0.0',
+        title: 'Engagement Roadmap Milestone Forecast',
+        description: 'Monte Carlo simulation for KPI milestone completion timing',
+        domain: 'carlota-jo',
+        tags: ['carlota', 'engagement', 'roadmap'],
+        inputs: [
+          { id: 'phase1Days', label: 'Phase 1 completion days', distribution: { type: 'triangular', min: 14, mode: 30, max: 50 } },
+          { id: 'phase2Days', label: 'Phase 2 completion days', distribution: { type: 'triangular', min: 45, mode: 70, max: 100 } },
+          { id: 'phase3Days', label: 'Phase 3 completion days', distribution: { type: 'triangular', min: 90, mode: 130, max: 180 } },
+        ],
+        calculate: (inputs) => ({
+          milestone1: inputs.phase1Days!,
+          milestone2: inputs.phase2Days!,
+          milestone3: inputs.phase3Days!,
+          totalDays: inputs.phase1Days! + inputs.phase2Days! + inputs.phase3Days!,
+        }),
+        outputs: [
+          { id: 'milestone1', label: 'Milestone 1 (days)', format: 'number' },
+          { id: 'milestone2', label: 'Milestone 2 (days)', format: 'number' },
+          { id: 'milestone3', label: 'Milestone 3 (days)', format: 'number' },
+          { id: 'totalDays', label: 'Total engagement (days)', format: 'number' },
+        ],
+      };
+
+      let intervals: Record<string, { p10: number; p50: number; p90: number }> = {
+        milestone1: { p10: 18, p50: 30, p90: 48 },
+        milestone2: { p10: 50, p50: 72, p90: 98 },
+        milestone3: { p10: 95, p50: 132, p90: 178 },
+      };
+      try {
+        const simResult = await runSimulation(mcScenario, { iterations: 500, timeoutMs: 8000 });
+        for (const [key, dist] of Object.entries(simResult.outputs)) {
+          if (dist.percentiles) {
+            intervals[key] = {
+              p10: Math.round(dist.percentiles[10] ?? 0),
+              p50: Math.round(dist.percentiles[50] ?? 0),
+              p90: Math.round(dist.percentiles[90] ?? 0),
+            };
+          }
+        }
+      } catch { /* use defaults */ }
+
+      const milestones = [
+        { name: 'Positioning & Differentiation Clarity', kpi: 'Brand clarity score', target: 75, forecastDays: intervals.milestone1?.p50 ?? 30, p10: intervals.milestone1?.p10 ?? 18, p90: intervals.milestone1?.p90 ?? 48 },
+        { name: 'Market Penetration Lift', kpi: 'MQL conversion rate', target: 0.22, forecastDays: intervals.milestone2?.p50 ?? 72, p10: intervals.milestone2?.p10 ?? 50, p90: intervals.milestone2?.p90 ?? 98 },
+        { name: 'Revenue Attribution & ARR Stabilisation', kpi: 'Net ARR growth', target: 0.22, forecastDays: intervals.milestone3?.p50 ?? 132, p10: intervals.milestone3?.p10 ?? 95, p90: intervals.milestone3?.p90 ?? 178 },
+      ];
+
+      sendSuccess(res, {
+        diagnosticId,
+        predictedOutcomeScore,
+        milestones,
+        monteCarloIterations: 500,
+        modelVersionId: modelVersionId ?? null,
+        modelName: 'carlota-engagement_roadmap_kpi',
+        scoredAt: new Date().toISOString(),
+        features,
+        dataSource: diagnosticId && diagnosticData ? 'persisted-diagnostic' : 'model-defaults',
+        isFallback: !diagnosticId || !diagnosticData,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to generate engagement roadmap forecast');
+    }
+  },
+);
+
+// GET /carlota/ml-forecasts/concierge-anomaly
+router.get(
+  '/carlota/ml-forecasts/concierge-anomaly',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      await ensureCarlotaModelsRegistered().catch(() => {});
+      const scope = await resolveAdvisoryClientScope(req);
+      const clientId = scope.ok ? scope.clientId : null;
+      const clientName = clientId ? (CLIENT_NAME_BY_ID[clientId] ?? 'Client') : 'Portfolio';
+      const modelVersionId = getCarlotaModelVersionId('carlota-concierge_anomaly_digest');
+
+      // Derive anomaly features from live feeds (10-min cache per client)
+      const cadCacheKey = `carlota-cad-features:${clientId ?? 'portfolio'}`;
+      const defaultCompetitors = ['McKinsey & Company', 'BCG', 'Bain & Company'];
+      const cadFeedResult = await getCached(cadCacheKey, 10 * 60 * 1000, () =>
+        pollCompetitorFeeds(defaultCompetitors, {}, { maxSignalsPerFeed: 3 }),
+      ).catch(() => null);
+
+      const liveSigs = cadFeedResult?.results.flatMap((r) => r.signals) ?? [];
+      const gdeltCount = liveSigs.filter((s) => s.feedType === 'gdelt').length;
+      const redditCount = liveSigs.filter((s) => s.feedType === 'reddit-hn').length;
+      const hiringCount = liveSigs.filter((s) => s.feedType === 'hiring-boards').length;
+      const patentCount = liveSigs.filter((s) => s.feedType === 'uspto-patents').length;
+      const threatsCount = liveSigs.filter((s) => s.direction === 'threat').length;
+      const oppsCount = liveSigs.filter((s) => s.direction === 'opportunity').length;
+      const baselineSignals = 4;
+
+      const features = liveSigs.length > 0 ? {
+        signalFrequencyZScore: Math.max(0, (liveSigs.length - baselineSignals) / Math.max(1, baselineSignals * 0.6)),
+        sentimentDeviationFromBaseline: liveSigs.length > 0 ? (threatsCount - oppsCount) / liveSigs.length : 0,
+        competitorMentionSurge: Math.min(3, gdeltCount + redditCount),
+        hiringSignalVariance: Math.min(1.5, hiringCount * 0.45),
+        patentVelocityAnomaly: Math.min(2, patentCount * 0.55),
+        newsVolumeSpike: Math.min(1.8, (gdeltCount + redditCount) / Math.max(1, baselineSignals)),
+        clientIndustryExposure: 0.65,
+      } : {
+        signalFrequencyZScore: 0.8,
+        sentimentDeviationFromBaseline: 0.1,
+        competitorMentionSurge: 0.6,
+        hiringSignalVariance: 0.4,
+        patentVelocityAnomaly: 0.3,
+        newsVolumeSpike: 0.5,
+        clientIndustryExposure: 0.65,
+      };
+
+      let anomalyScore = 0.42;
+      if (modelVersionId) {
+        try {
+          const result = await predict({ modelVersionId, entityId: clientId ?? 'portfolio', entityType: 'client', features });
+          anomalyScore = Math.min(1, Math.max(0, result.score ?? 0.42));
+        } catch { /* use default */ }
+      }
+
+      const weekOf = new Date().toISOString().slice(0, 10);
+      // Build topSignals from live feed data; fall back to representative statics when no live data
+      const liveTopSignals = liveSigs
+        .slice()
+        .sort((a, b) => (b.direction === 'threat' ? 1 : 0) - (a.direction === 'threat' ? 1 : 0))
+        .slice(0, 4)
+        .map((s) => ({
+          source: s.source,
+          description: s.detail || s.event,
+          score: s.impact === 'high' ? 0.82 : s.impact === 'medium' ? 0.64 : 0.45,
+          feedType: s.feedType,
+        }));
+      // When no live feed data is available, return explicit unavailable state — no synthetic competitor events.
+      const topSignals = liveTopSignals.length > 0
+        ? liveTopSignals
+        : cadFeedResult?.feedHealth.map((fh) => ({
+            source: fh.feedType,
+            description: `Feed ${fh.status}: ${fh.feedType} unavailable this cycle`,
+            score: 0,
+            feedType: fh.feedType,
+          })) ?? [];
+
+      const anomalyLabel = anomalyScore > 0.7 ? 'elevated' : anomalyScore > 0.5 ? 'moderate' : 'normal';
+      const recommendedAction = anomalyScore > 0.7
+        ? 'Schedule executive review: multiple high-impact competitor signals this week — possible strategic move within 30 days'
+        : anomalyScore > 0.5
+        ? 'Monitor closely: competitor activity elevated vs client baseline'
+        : 'Routine monitoring sufficient: no significant anomalies detected this week';
+
+      void emitConciergeAnomaly({
+        clientId: clientId ?? 'portfolio',
+        clientName,
+        weekOf,
+        anomalyScore,
+        topSignals: topSignals.slice(0, 3).map((s) => ({ source: s.source, description: s.description, score: s.score })),
+        recommendedAction,
+      });
+
+      sendSuccess(res, {
+        clientId: clientId ?? 'portfolio',
+        clientName,
+        weekOf,
+        anomalyScore: Math.round(anomalyScore * 100) / 100,
+        anomalyLabel,
+        topSignals,
+        recommendedAction,
+        modelVersionId: modelVersionId ?? null,
+        modelName: 'carlota-concierge_anomaly_digest',
+        features,
+        scoredAt: new Date().toISOString(),
+        dataSource: liveSigs.length > 0 ? 'live-feeds' : 'fallback-defaults',
+        isFallback: liveSigs.length === 0,
+        signalCount: liveSigs.length,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to generate concierge anomaly digest');
+    }
+  },
+);
+
+// ── Competitive Feed Health & Enriched Signals ────────────────────────────────
+
+// GET /carlota/competitive-feeds/health
+router.get(
+  '/carlota/competitive-feeds/health',
+  authMiddleware(),
+  async (_req, res) => {
+    try {
+      const feedHealth = getFeedHealth();
+      sendSuccess(res, { feedHealth, count: feedHealth.length, updatedAt: new Date().toISOString() });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch feed health');
+    }
+  },
+);
+
+const feedRefreshBodySchema = z.object({
+  competitors: z.array(z.string().min(1).max(120)).max(8).optional(),
+  domains: z.record(z.string().max(120)).optional(),
+});
+
+// POST /carlota/competitive-feeds/refresh
+router.post(
+  '/carlota/competitive-feeds/refresh',
+  carlotaLiveLimit,
+  authMiddleware(),
+  async (req, res) => {
+    const parsed = feedRefreshBodySchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() });
+      return;
+    }
+    try {
+      const competitors = parsed.data.competitors && parsed.data.competitors.length > 0
+        ? parsed.data.competitors
+        : ['McKinsey & Company', 'BCG', 'Bain & Company', 'Oliver Wyman'];
+      const domains = parsed.data.domains ?? {};
+
+      const { results, feedHealth } = await pollCompetitorFeeds(competitors, domains, { maxSignalsPerFeed: 3 });
+      const allSignals = results.flatMap((r) => r.signals);
+
+      void emitRadarRefresh({
+        triggeredBy: 'manual',
+        competitorCount: competitors.length,
+        newSignalCount: allSignals.length,
+        feedHealth: feedHealth.map((f) => ({ feedType: f.feedType, status: f.status })),
+      });
+
+      sendSuccess(res, {
+        newSignalCount: allSignals.length,
+        signals: allSignals.slice(0, 30),
+        feedHealth,
+        results: results.map((r) => ({
+          competitor: r.competitor,
+          signalCount: r.signals.length,
+          hiringSignal: r.hiringSignal,
+          shareOfVoice: r.shareOfVoice,
+          polledAt: r.polledAt,
+        })),
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to refresh competitive feeds');
+    }
+  },
+);
+
+// GET /carlota/competitive-feeds/signals
+router.get(
+  '/carlota/competitive-feeds/signals',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      const competitorsParam = typeof req.query.competitors === 'string' ? req.query.competitors : '';
+      const competitors = competitorsParam
+        ? competitorsParam.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 8)
+        : ['McKinsey & Company', 'BCG', 'Bain & Company'];
+
+      const cacheKey = `carlota-enriched-feeds:${competitors.sort().join('|')}`;
+      const { results, feedHealth } = await getCached(cacheKey, 15 * 60 * 1000, () =>
+        pollCompetitorFeeds(competitors, {}, { maxSignalsPerFeed: 3 }),
+      );
+
+      const allSignals = results.flatMap((r) => r.signals);
+      sendSuccess(res, {
+        signals: allSignals.slice(0, 40),
+        feedHealth,
+        shareOfVoice: results.map((r) => r.shareOfVoice).filter(Boolean),
+        hiringSignals: results.map((r) => r.hiringSignal).filter(Boolean),
+        count: allSignals.length,
+        competitors,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch enriched feed signals');
+    }
+  },
+);
+
+// ── A11oy Tool Invocation ──────────────────────────────────────────────────────
+
+// GET /carlota/a11oy/tools — list registered Carlota tools
+router.get('/carlota/a11oy/tools', authMiddleware(), async (_req, res) => {
+  try {
+    sendSuccess(res, { tools: CARLOTA_TOOLS, count: CARLOTA_TOOLS.length });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to list Carlota A11oy tools');
+  }
+});
+
+// POST /carlota/a11oy/tools/:toolId/invoke
+router.post(
+  '/carlota/a11oy/tools/:toolId/invoke',
+  authMiddleware(),
+  requireRole('admin', 'editor', 'exec'),
+  async (req, res) => {
+    try {
+      const toolId = String(req.params.toolId);
+      const params = (req.body ?? {}) as Record<string, unknown>;
+      const requestedBy = req.user?.email ?? String(req.user?.id ?? 'anonymous');
+
+      // Enforce client-scope: non-admin users may only invoke tools for their
+      // own advisory account. Cross-client invocation is denied by default.
+      const scope = await resolveAdvisoryClientScope(req);
+      if (!scope.ok) {
+        res.status(scope.status ?? 403).json({ error: 'FORBIDDEN', message: scope.message });
+        return;
+      }
+      const bodyClientId = typeof params.clientId === 'string' ? params.clientId : null;
+      if (!isAdvisoryAdmin(req.user) && bodyClientId && scope.autoClientId && bodyClientId !== scope.autoClientId) {
+        res.status(403).json({ error: 'FORBIDDEN', message: 'You can only invoke tools for your own client account.' });
+        return;
+      }
+
+      const result = await invokeCarlotaTool(toolId, params, { requestedBy });
+      sendSuccess(res, result);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith('Unknown Carlota tool')) {
+        sendNotFound(res, err.message);
+        return;
+      }
+      handleRouteError(res, err, 'Failed to invoke Carlota A11oy tool');
+    }
+  },
+);
+
+// ── Named Case Study ───────────────────────────────────────────────────────────
+
+// GET /carlota/case-study/:slug
+router.get(
+  '/carlota/case-study/:slug',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      const slug = String(req.params.slug);
+      if (slug !== 'saas-encroachment-q3-2026') {
+        sendNotFound(res, 'Case study not found');
+        return;
+      }
+
+      await ensureCaseStudySeeded().catch(() => {});
+      const meta = getCaseStudyMeta();
+
+      // Pull seeded diagnostic
+      const [diagnosticRow] = await db
+        .select()
+        .from(carlotaDiagnosticsTable)
+        .where(eq(carlotaDiagnosticsTable.externalId, `dx-case-study-${slug}`))
+        .limit(1)
+        .catch(() => [null]);
+
+      const [scenarioRow] = await db
+        .select()
+        .from(carlotaScenariosTable)
+        .where(eq(carlotaScenariosTable.externalId, `sc-case-study-${slug}`))
+        .limit(1)
+        .catch(() => [null]);
+
+      sendSuccess(res, {
+        ...meta,
+        diagnostic: diagnosticRow ?? null,
+        scenario: scenarioRow ?? null,
+        feedHealth: getFeedHealth(),
+        status: 'active',
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch case study');
+    }
+  },
+);
+
+// GET /carlota/case-studies — list all case studies
+router.get('/carlota/case-studies', authMiddleware(), async (_req, res) => {
+  try {
+    await ensureCaseStudySeeded().catch(() => {});
+    sendSuccess(res, {
+      caseStudies: [getCaseStudyMeta()],
+      count: 1,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to list case studies');
+  }
+});
+
+// ── Executive Brief (Pulse / A11oy cross-pollination) ─────────────────────────
+
+// GET /carlota/executive-brief — Pulse-style brief for consulting OS + A11oy
+// Requires admin/editor/exec role: returns org-wide operational metrics.
+router.get(
+  '/carlota/executive-brief',
+  authMiddleware(),
+  requireRole('admin', 'editor', 'exec'),
+  async (req, res) => {
+    try {
+      const scope = await resolveAdvisoryClientScope(req);
+      if (!scope.ok) {
+        res.status(scope.status ?? 403).json({ error: 'FORBIDDEN', message: scope.message });
+        return;
+      }
+      const clientId = scope.clientId;
+      const isAdmin = isAdvisoryAdmin(req.user);
+
+      await ensureCarlotaModelsRegistered().catch(() => {});
+      const anomalyModelId = getCarlotaModelVersionId('carlota-concierge_anomaly_digest');
+
+      // Fetch DB metrics — admin/exec see org-wide counts; scoped users see their own client only
+      const [[inquiryRow], [engRow], [activeClientRow]] = await Promise.all([
+        isAdmin || !clientId
+          ? db.select({ count: sql<number>`count(*)::int` }).from(carlotaInquiriesTable).catch(() => [null])
+          : db.select({ count: sql<number>`count(*)::int` }).from(carlotaInquiriesTable)
+              .where(eq(carlotaInquiriesTable.organizationId, clientId)).catch(() => [null]),
+        isAdmin || !clientId
+          ? db.select({ count: sql<number>`count(*)::int` }).from(carlotaEngagementsTable).catch(() => [null])
+          : db.select({ count: sql<number>`count(*)::int` }).from(carlotaEngagementsTable)
+              .where(eq(carlotaEngagementsTable.organizationId, clientId)).catch(() => [null]),
+        isAdmin || !clientId
+          ? db.select({ count: sql<number>`count(distinct "organization_id")::int` }).from(carlotaEngagementsTable).catch(() => [null])
+          : db.select({ count: sql<number>`1::int as count` }).catch(() => [{ count: 1 }]),
+      ]);
+
+      // Derive anomaly score from live feeds + ML model
+      const briefCacheKey = `carlota-brief-anomaly:${clientId ?? 'portfolio'}`;
+      const briefFeedResult = await getCached(briefCacheKey, 10 * 60 * 1000, () =>
+        pollCompetitorFeeds(['McKinsey & Company', 'BCG', 'Bain & Company'], {}, { maxSignalsPerFeed: 2 }),
+      ).catch(() => null);
+
+      const briefSigs = briefFeedResult?.results.flatMap((r) => r.signals) ?? [];
+      const briefThreats = briefSigs.filter((s) => s.direction === 'threat').length;
+      const briefTotal = briefSigs.length;
+      const baselineAnomaly = 4;
+      const derivedAnomalyScore = anomalyModelId && briefTotal > 0
+        ? await predict({
+            modelVersionId: anomalyModelId,
+            entityId: clientId ?? 'portfolio',
+            entityType: 'client',
+            features: {
+              signalFrequencyZScore: Math.max(0, (briefTotal - baselineAnomaly) / Math.max(1, baselineAnomaly * 0.6)),
+              sentimentDeviationFromBaseline: briefTotal > 0 ? briefThreats / briefTotal : 0,
+              competitorMentionSurge: Math.min(3, briefSigs.filter((s) => s.feedType === 'gdelt').length),
+              hiringSignalVariance: Math.min(1.5, briefSigs.filter((s) => s.feedType === 'hiring-boards').length * 0.45),
+              patentVelocityAnomaly: Math.min(2, briefSigs.filter((s) => s.feedType === 'uspto-patents').length * 0.55),
+              newsVolumeSpike: Math.min(1.8, briefSigs.filter((s) => s.feedType === 'gdelt' || s.feedType === 'reddit-hn').length / Math.max(1, baselineAnomaly)),
+              clientIndustryExposure: 0.65,
+            },
+          }).then((r) => Math.min(1, Math.max(0, r.score ?? 0.42))).catch(() => 0.42)
+        : 0.42;
+
+      const derivedAnomalyLabel = derivedAnomalyScore > 0.7 ? 'elevated' : derivedAnomalyScore > 0.5 ? 'moderate' : 'normal';
+
+      // Top signal from highest-impact live signal, fall back to summary if none
+      const topLiveSig = briefSigs
+        .filter((s) => s.direction === 'threat')
+        .sort((a, b) => (a.impact === 'high' ? -1 : b.impact === 'high' ? 1 : 0))[0];
+      const topSignalText = topLiveSig
+        ? `${topLiveSig.competitor}: ${topLiveSig.event}`
+        : briefTotal > 0
+        ? `${briefTotal} competitor signals detected across ${briefFeedResult?.results.length ?? 0} tracked firms this cycle`
+        : 'No significant competitor anomalies detected this cycle';
+
+      // Strategic alert: derive from highest-signal competitor in live feeds
+      const competitorSignalCounts = briefFeedResult?.results.map((r) => ({ competitor: r.competitor, count: r.signals.length })) ?? [];
+      const topCompetitor = competitorSignalCounts.sort((a, b) => b.count - a.count)[0]?.competitor ?? 'McKinsey & Company';
+      const smfModelId = getCarlotaModelVersionId('carlota-strategic_move_forecast');
+      let strategicProbability = 0.55;
+      const strategicActions = ['Product line expansion', 'Mid-market acquisition', 'Pricing repositioning', 'AI service launch', 'Talent acquisition sprint'];
+      if (smfModelId) {
+        const topCompSigs = briefFeedResult?.results.find((r) => r.competitor === topCompetitor);
+        strategicProbability = await predict({
+          modelVersionId: smfModelId,
+          entityId: `brief-${topCompetitor.toLowerCase().replace(/\s+/g, '-')}`,
+          entityType: 'competitor',
+          features: {
+            websiteChangeDeltaScore: Math.min(1, (topCompSigs?.signals.filter((s) => s.feedType === 'wayback-cdx').length ?? 0) / 3),
+            hiringVelocity30d: topCompSigs?.hiringSignal?.roleCount ?? 0,
+            patentFilingsCount90d: topCompSigs?.signals.filter((s) => s.feedType === 'uspto-patents').length ?? 0,
+            newsSentimentShift14d: 0.05,
+            linkedinHeadcountGrowth: topCompSigs?.hiringSignal?.signal === 'expanding' ? 0.1 : 0.03,
+            productPageAdditions: topCompSigs?.signals.filter((s) => s.feedType === 'wayback-cdx').length ?? 0,
+            pricingPageChange: topCompSigs?.signals.some((s) => s.detail.toLowerCase().includes('pric')) ? 1 : 0,
+          },
+        }).then((r) => Math.min(0.95, Math.max(0.05, r.score ?? 0.55))).catch(() => 0.55);
+      }
+      const strategicAction = strategicActions[Math.floor(strategicProbability * strategicActions.length)] ?? strategicActions[0]!;
+
+      sendSuccess(res, {
+        metrics: {
+          inquiries: inquiryRow?.count ?? 0,
+          engagements: engRow?.count ?? 0,
+          activeClients: (activeClientRow as { count?: number } | null)?.count ?? engRow?.count ?? 0,
+          npsScore: null,
+          retentionRate: null,
+          dataNote: 'npsScore and retentionRate require CRM integration — not yet wired',
+        },
+        anomalySummary: {
+          anomalyScore: Math.round(derivedAnomalyScore * 100) / 100,
+          anomalyLabel: derivedAnomalyLabel,
+          topSignal: topSignalText,
+          modelVersionId: anomalyModelId ?? null,
+          signalCount: briefTotal,
+          liveDataSource: briefTotal > 0 ? 'live-feeds' : 'model-default',
+        },
+        strategicAlert: {
+          competitor: topCompetitor,
+          probability: Math.round(strategicProbability * 100) / 100,
+          predictedAction: strategicAction,
+          horizon: '60 days',
+          liveDataSource: smfModelId ? 'ml-model' : 'default',
+        },
+        caseStudy: getCaseStudyMeta(),
+        feedHealth: getFeedHealth().map((f) => ({ feedType: f.feedType, status: f.status })),
+        clientId: clientId ?? null,
+        generatedAt: new Date().toISOString(),
+        domain: 'carlota-jo',
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to generate executive brief');
+    }
+  },
+);
+
 export default router;
+

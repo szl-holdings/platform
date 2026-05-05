@@ -26,6 +26,9 @@ const REGISTRY: Record<OperatorId, OperatorFactory> = {
   connector: () => new ConnectorOperator(),
   evaluator: () => new EvaluatorOperator(),
   code: () => new CodeOperator(),
+  'carlota-diagnostic': () => new PlannerOperator(),
+  'carlota-radar': () => new AnalystOperator(),
+  'carlota-concierge': () => new AnalystOperator(),
 };
 
 export const OPERATOR_METADATA: Array<{
@@ -105,6 +108,52 @@ export const OPERATOR_METADATA: Array<{
     capabilities: ['code_audit', 'config_drift_detection', 'policy_compliance_check'],
     restrictions: ['read_only', 'no_code_modification'],
   },
+  // ── Carlota Jo Domain Operators ────────────────────────────────────────────
+  {
+    operatorId: 'carlota-diagnostic',
+    displayName: 'Carlota Strategic Diagnostic',
+    description:
+      'Runs ML-backed strategic diagnostics for consulting engagements. Produces market position score, ' +
+      'competitive landscape summary, growth opportunities, risk register, and engagement roadmap KPI forecast.',
+    capabilities: [
+      'strategic_diagnostic',
+      'market_position_scoring',
+      'engagement_roadmap_kpi_forecast',
+      'competitor_analysis',
+      'risk_register_generation',
+    ],
+    restrictions: ['requires_auth', 'client_data_redacted_in_logs', 'carlota_domain_only'],
+  },
+  {
+    operatorId: 'carlota-radar',
+    displayName: 'Carlota Competitive Radar',
+    description:
+      'Refreshes live competitive intelligence signals from Wayback CDX, GDELT, Reddit/HN, ' +
+      'USPTO patents, and public hiring boards. Emits Prism Bus signals on significant finds.',
+    capabilities: [
+      'competitive_signal_refresh',
+      'wayback_cdx_monitoring',
+      'gdelt_news_feed',
+      'hiring_board_monitoring',
+      'uspto_patent_monitoring',
+      'share_of_voice_analysis',
+    ],
+    restrictions: ['rate_limited', 'public_feeds_only', 'carlota_domain_only'],
+  },
+  {
+    operatorId: 'carlota-concierge',
+    displayName: 'Carlota Concierge Anomaly Digest',
+    description:
+      'Generates per-client, per-week anomaly digests using the isolation forest model. ' +
+      'Ranks signals against client historical baseline and recommends concierge actions.',
+    capabilities: [
+      'anomaly_detection',
+      'client_baseline_comparison',
+      'per_client_digest_generation',
+      'concierge_action_recommendation',
+    ],
+    restrictions: ['requires_auth', 'client_data_redacted_in_logs', 'carlota_domain_only'],
+  },
 ];
 
 export function getOperator(operatorId: OperatorId): BaseOperator {
@@ -125,6 +174,7 @@ export function routeOperator(opts: {
 }): OperatorId {
   if (opts.riskLevel === 'critical' || opts.signalSeverity === 'critical') return 'risk';
   if (opts.vertical === 'alloy-core') return 'connector';
+  if (opts.vertical === 'carlota-jo') return 'carlota-diagnostic';
   return 'planner';
 }
 

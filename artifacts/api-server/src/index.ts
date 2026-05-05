@@ -925,6 +925,21 @@ export async function bootstrap(
       { name: 'seedKnowledgeBase', fn: seedKnowledgeBase },
       { name: 'initIngestionFramework', fn: initIngestionFramework },
       { name: 'runOpsMgmtBootInit', fn: () => runOpsMgmtBootInit() },
+      {
+        name: 'ensureCarlotaModelsRegistered',
+        fn: async () => {
+          const { ensureCarlotaModelsRegistered } = await import('./lib/carlota-model-seeder.js');
+          const result = await ensureCarlotaModelsRegistered();
+          logger.info(result, '[carlota-seeder] Carlota ML models seeded');
+        },
+      },
+      {
+        name: 'ensureCarlotaCaseStudySeeded',
+        fn: async () => {
+          const { ensureCaseStudySeeded } = await import('./lib/carlota-case-study-seed.js');
+          await ensureCaseStudySeeded();
+        },
+      },
     );
 
     // Defer seed execution to the next event-loop iteration so that any

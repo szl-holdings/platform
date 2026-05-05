@@ -27,7 +27,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { useCarlotaApiData } from '@/hooks/useCarlotaApiData';
 import { useConsultingMetrics } from '@/hooks/useConsultingMetrics';
@@ -360,6 +360,24 @@ export default function ConsultingOS() {
     engagement: metrics.modules.engagementDelivery,
     revenue: metrics.modules.revenue,
   };
+
+  const [executiveBrief, setExecutiveBrief] = useState<{
+    metrics: { inquiries: number; engagements: number; npsScore: number | null; retentionRate: number | null };
+    anomalySummary: { anomalyLabel: string; topSignal: string };
+    strategicAlert: { competitor: string; probability: number; predictedAction: string };
+    caseStudy: { slug: string; label: string; a11oyDeepLink: string };
+    feedHealth: Array<{ feedType: string; status: string }>;
+  } | null>(null);
+
+  useEffect(() => {
+    const API = import.meta.env.BASE_URL?.replace(/\/$/, '') + '/api';
+    fetch(`${API}/carlota/executive-brief`, { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (json?.data) setExecutiveBrief(json.data);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', background: '#FAFAF8', paddingTop: 64 }}>
@@ -774,6 +792,72 @@ export default function ConsultingOS() {
             })}
           </div>
         </div>
+
+        {/* Executive Brief — Pulse / A11oy cross-pollination */}
+        {executiveBrief && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            style={{ marginBottom: 28 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <Sparkles size={16} color={GOLD} />
+              <h2 style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.08em', color: '#6B5E47', textTransform: 'uppercase', margin: 0 }}>
+                Executive Intel Brief
+              </h2>
+              <span style={{ fontSize: 10, color: '#A89878', background: 'rgba(154,125,82,0.08)', border: '1px solid rgba(154,125,82,0.2)', borderRadius: 4, padding: '2px 6px' }}>
+                Live · Pulse + A11oy
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+              {/* Metrics */}
+              <div style={{ background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12, padding: '18px 20px' }}>
+                <p style={{ fontSize: 11, color: '#A89878', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Platform Metrics</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {[
+                    { label: 'NPS Score', value: executiveBrief.metrics.npsScore != null ? String(executiveBrief.metrics.npsScore) : 'N/A', color: '#10b981' },
+                    { label: 'Retention', value: executiveBrief.metrics.retentionRate != null ? `${Math.round(executiveBrief.metrics.retentionRate * 100)}%` : 'N/A', color: '#c4a265' },
+                    { label: 'Engagements', value: String(executiveBrief.metrics.engagements), color: '#c4a265' },
+                    { label: 'Inquiries', value: String(executiveBrief.metrics.inquiries), color: '#c4a265' },
+                  ].map((m) => (
+                    <div key={m.label}>
+                      <p style={{ fontSize: 10, color: '#A89878', marginBottom: 2 }}>{m.label}</p>
+                      <p style={{ fontSize: 20, fontWeight: 600, color: m.color, fontFamily: "'Cormorant Garamond', serif" }}>{m.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Anomaly Signal */}
+              <div style={{ background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12, padding: '18px 20px' }}>
+                <p style={{ fontSize: 11, color: '#A89878', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                  Anomaly Digest
+                  <span style={{ marginLeft: 8, fontSize: 10, padding: '2px 6px', borderRadius: 4, background: executiveBrief.anomalySummary.anomalyLabel === 'elevated' ? '#fef2f2' : executiveBrief.anomalySummary.anomalyLabel === 'moderate' ? '#fffbeb' : '#f0fdf4', color: executiveBrief.anomalySummary.anomalyLabel === 'elevated' ? '#dc2626' : executiveBrief.anomalySummary.anomalyLabel === 'moderate' ? '#d97706' : '#16a34a', border: `1px solid ${executiveBrief.anomalySummary.anomalyLabel === 'elevated' ? '#fecaca' : executiveBrief.anomalySummary.anomalyLabel === 'moderate' ? '#fde68a' : '#bbf7d0'}` }}>
+                    {executiveBrief.anomalySummary.anomalyLabel}
+                  </span>
+                </p>
+                <p style={{ fontSize: 13, color: '#1A1A14', lineHeight: 1.5 }}>{executiveBrief.anomalySummary.topSignal}</p>
+              </div>
+              {/* Strategic Alert */}
+              <div style={{ background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12, padding: '18px 20px' }}>
+                <p style={{ fontSize: 11, color: '#A89878', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Strategic Alert</p>
+                <p style={{ fontSize: 12, color: '#6B5E47', marginBottom: 6 }}>{executiveBrief.strategicAlert.competitor}</p>
+                <p style={{ fontSize: 22, fontWeight: 600, color: executiveBrief.strategicAlert.probability > 0.65 ? '#dc2626' : '#c4a265', fontFamily: "'Cormorant Garamond', serif", marginBottom: 4 }}>
+                  {Math.round(executiveBrief.strategicAlert.probability * 100)}%
+                </p>
+                <p style={{ fontSize: 12, color: '#1A1A14' }}>{executiveBrief.strategicAlert.predictedAction}</p>
+              </div>
+              {/* Case Study Deep-link */}
+              <a href={executiveBrief.caseStudy.a11oyDeepLink} style={{ textDecoration: 'none', display: 'block', background: `${GOLD}08`, border: `1px solid ${GOLD}30`, borderRadius: 12, padding: '18px 20px' }}>
+                <p style={{ fontSize: 11, color: GOLD, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Named Case Study</p>
+                <p style={{ fontSize: 13, color: '#1A1A14', fontWeight: 500, lineHeight: 1.4, marginBottom: 6 }}>{executiveBrief.caseStudy.label}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: GOLD }}>
+                  <ArrowUpRight size={12} /> Open in Consulting OS
+                </div>
+              </a>
+            </div>
+          </motion.div>
+        )}
 
         {/* Recent Activity */}
         <div style={{ paddingBottom: 64 }}>

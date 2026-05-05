@@ -31,6 +31,7 @@ import {
 } from '../jobs/competitive-intel-monitor';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
 import { adminGuard } from '../middlewares/admin-guard';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -63,7 +64,7 @@ router.get('/status', async (_req: Request, res: Response) => {
   }
 });
 
-router.post('/alerts/:id/dismiss', async (req: Request, res: Response) => {
+router.post('/alerts/:id/dismiss', authMiddleware(), requireRole('admin', 'editor', 'analyst'), async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
     const alert = await dismissAlert(id, actorFromReq(req));
@@ -77,7 +78,7 @@ router.post('/alerts/:id/dismiss', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/refresh', async (_req: Request, res: Response) => {
+router.post('/refresh', authMiddleware(), requireRole('admin', 'editor'), async (_req: Request, res: Response) => {
   try {
     const result = await pollAllFeeds();
     sendSuccess(res, result);
@@ -164,7 +165,7 @@ router.get('/lanes', async (_req: Request, res: Response) => {
   }
 });
 
-router.post('/lanes/:laneId/mute', async (req: Request, res: Response) => {
+router.post('/lanes/:laneId/mute', authMiddleware(), requireRole('admin', 'editor'), async (req: Request, res: Response) => {
   try {
     const laneId = req.params.laneId;
     const muted = (req.body as { muted?: unknown } | null)?.muted;

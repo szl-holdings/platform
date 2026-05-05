@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import {
   CLIENT_DOSSIERS,
@@ -113,6 +113,24 @@ const statCards = [
 
 export default function ConciergeCommand() {
   const [_today] = useState(today);
+
+  const [anomalyDigest, setAnomalyDigest] = useState<{
+    weekOf: string;
+    anomalyScore: number;
+    anomalyLabel: string;
+    topSignals: Array<{ source: string; description: string; score: number }>;
+    recommendedAction: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const API = (import.meta.env.BASE_URL as string)?.replace(/\/$/, '') + '/api';
+    fetch(`${API}/carlota/ml-forecasts/concierge-anomaly`, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.data) setAnomalyDigest(json.data);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div
@@ -287,6 +305,50 @@ export default function ConciergeCommand() {
             </motion.div>
           ))}
         </div>
+
+        {/* Live Anomaly Digest */}
+        {anomalyDigest && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            style={{
+              marginBottom: 28,
+              background: '#fff',
+              border: `1px solid ${anomalyDigest.anomalyLabel === 'elevated' ? 'rgba(192,57,43,0.25)' : anomalyDigest.anomalyLabel === 'moderate' ? 'rgba(183,134,46,0.25)' : BORDER}`,
+              borderLeft: `4px solid ${anomalyDigest.anomalyLabel === 'elevated' ? RED : anomalyDigest.anomalyLabel === 'moderate' ? AMBER : GREEN}`,
+              borderRadius: 12,
+              padding: '18px 22px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertTriangle size={14} color={anomalyDigest.anomalyLabel === 'elevated' ? RED : anomalyDigest.anomalyLabel === 'moderate' ? AMBER : GREEN} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: INK }}>
+                  Competitor Anomaly Digest — Week of {new Date(anomalyDigest.weekOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                </span>
+                <span style={{
+                  fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 20,
+                  background: anomalyDigest.anomalyLabel === 'elevated' ? '#fef2f2' : anomalyDigest.anomalyLabel === 'moderate' ? '#fffbeb' : '#f0fdf4',
+                  color: anomalyDigest.anomalyLabel === 'elevated' ? RED : anomalyDigest.anomalyLabel === 'moderate' ? AMBER : GREEN,
+                }}>
+                  {anomalyDigest.anomalyLabel} · {Math.round(anomalyDigest.anomalyScore * 100)}%
+                </span>
+              </div>
+              <span style={{ fontSize: 11, color: MUTED }}>ML Isolation Forest</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+              {anomalyDigest.topSignals.slice(0, 3).map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 10px', background: '#F9F7F3', borderRadius: 8 }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: GOLD, minWidth: 100, paddingTop: 1 }}>{s.source}</span>
+                  <span style={{ fontSize: 12, color: INK, flex: 1 }}>{s.description}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: s.score > 0.7 ? RED : GOLD, minWidth: 34, textAlign: 'right' }}>{Math.round(s.score * 100)}%</span>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{anomalyDigest.recommendedAction}</p>
+          </motion.div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 28 }}>
           {/* Active requests */}

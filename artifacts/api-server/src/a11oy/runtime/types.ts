@@ -8,7 +8,10 @@ export type OperatorId =
   | 'board-packet'
   | 'connector'
   | 'evaluator'
-  | 'code';
+  | 'code'
+  | 'carlota-diagnostic'
+  | 'carlota-radar'
+  | 'carlota-concierge';
 
 export type ModelProvider = 'substrate' | 'openai' | 'deepseek' | 'nvidia' | 'huggingface' | 'local' | 'mock';
 
