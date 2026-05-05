@@ -1,0 +1,54 @@
+{
+  "name": "@szl/a11oy-code",
+  "version": "1.0.0",
+  "description": "A11oy Code — terminal-native, governed, self-evolving agentic coding tool. Absorbs the design ideas of Claude Code, Cursor, Aider, Cline, Codex CLI, Devin, Continue, Sweep, Goose and OpenHands; extends them with thesis-grounded planning (Ouroboros), Lutar tool routing, multi-provider governed routing, a per-step proof ledger, and bounded autonomous self-evolution under MirrorEval with automatic rollback.",
+  "keywords": [
+    "agentic-coding",
+    "cli",
+    "ai",
+    "claude-code",
+    "ouroboros",
+    "lutar",
+    "self-evolving",
+    "governance"
+  ],
+  "license": "MIT",
+  "author": "SZL Holdings",
+  "homepage": "https://github.com/szl-holdings/a11oy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/a11oy.git",
+    "directory": "tools/a11oy-code"
+  },
+  "type": "module",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./agent": "./src/agent.mjs",
+    "./tools": "./src/tools/index.mjs",
+    "./evolve": "./src/evolve/index.mjs",
+    "./proof": "./src/proof.mjs"
+  },
+  "bin": {
+    "a11oy-code": "./bin/a11oy-code.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node ./bin/a11oy-code.mjs",
+    "test": "node --test test/*.test.mjs",
+    "prepublishOnly": "node ./bin/a11oy-code.mjs --version"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

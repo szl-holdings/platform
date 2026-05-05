@@ -1,0 +1,4 @@
+node_modules/
+.a11oy-test-*/
+.a11oy-symlink-test-*/
+*.log
