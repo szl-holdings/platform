@@ -106,7 +106,7 @@ export function GlasswingPartners() {
               </div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.legalName} · applied {fmtDate(p.appliedAt)}</div>
               <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                Scope: {(p.scope as any)?.allowlistedAgents?.length ?? 0} agents, {(p.scope as any)?.allowlistedActions?.length ?? 0} actions
+                Scope: {(p.scope as { allowlistedAgents?: string[]; allowlistedActions?: string[] })?.allowlistedAgents?.length ?? 0} agents, {(p.scope as { allowlistedAgents?: string[]; allowlistedActions?: string[] })?.allowlistedActions?.length ?? 0} actions
               </div>
             </button>
           ))}
@@ -123,9 +123,9 @@ function PartnerDetail({ partner, cavdForPartner }: { partner: any; cavdForPartn
   const cavd = cavdForPartner(partner.partnerId);
   const stageIdx = STAGES.indexOf(partner.stage);
   const lifecycleIdx = Math.min(stageIdx, 4);
-  const scope = partner.scope as any;
-  const verifications = partner.verifications as any[];
-  const dualApproval = partner.dualApproval as any[];
+  const scope = partner.scope as { allowlistedAgents?: string[]; allowlistedActions?: string[]; rateLimit?: string; dataAccess?: string };
+  const verifications = partner.verifications as Array<{ check: string; status: string; ts: string }>;
+  const dualApproval = partner.dualApproval as Array<{ action: string; requiredBy: string }>;
 
   return (
     <div className="flex flex-col gap-4">

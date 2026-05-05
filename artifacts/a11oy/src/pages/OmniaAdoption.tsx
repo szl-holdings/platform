@@ -454,7 +454,7 @@ export function OmniaAdoption() {
           </div>
         </div>
         <a
-          href="/command/omnia"
+          href={`${import.meta.env.BASE_URL?.replace(/\/$/, '') || '/a11oy'}/omnia`}
           style={{
             display: 'flex',
             alignItems: 'center',

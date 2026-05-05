@@ -69,9 +69,9 @@ export function TransparencyReport() {
       const doc = new jsPDF({ unit: 'pt', format: 'letter' });
       const margin = 48;
       let y = margin;
-      const metrics = active.metrics as any;
+      const metrics = active.metrics as Record<string, unknown> & { governedDecisions: number; approvalsRequired: number; policyBlocks: number; behavioralAuditFindings: number; robustnessDelta: number; welfareInterventions: number; cavd: { opened: number; embargoed: number; disclosed: number; patched: number } };
       const narrativeParagraphs = active.narrativeParagraphs as string[];
-      const signoffs = active.signoffs as any[];
+      const signoffs = active.signoffs as Array<{ role: string; actor: string; signedAt: string }>;
 
       doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
       doc.text('A11oy — 90-Day Transparency Report', margin, y); y += 26;
@@ -119,10 +119,10 @@ export function TransparencyReport() {
     <Layout>
       <DoctrineLoader loading={loading} error={error}>
       {active && (() => {
-        const metrics = active.metrics as any;
+        const metrics = active.metrics as Record<string, unknown> & { governedDecisions: number; approvalsRequired: number; policyBlocks: number; behavioralAuditFindings: number; robustnessDelta: number; welfareInterventions: number; cavd: { opened: number; embargoed: number; disclosed: number; patched: number } };
         const narrativeParagraphs = active.narrativeParagraphs as string[];
-        const signoffs = active.signoffs as any[];
-        const notableEvents = active.notableEvents as any[];
+        const signoffs = active.signoffs as Array<{ role: string; actor: string; signedAt: string }>;
+        const notableEvents = active.notableEvents as Array<{ ts: string; label: string; detail: string }>;
 
         return (
         <>

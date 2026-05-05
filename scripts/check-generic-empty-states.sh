@@ -12,8 +12,9 @@ set -euo pipefail
 SEARCH_DIRS=(
   "artifacts/vessels/src/pages"
   "artifacts/szl-holdings/src/pages"
-  "artifacts/command/src/pages"
-  "artifacts/command/src/infrastructure/pages"
+  "artifacts/a11oy/src/pages/strategy"
+  "artifacts/a11oy/src/pages/operations"
+  "artifacts/a11oy/src/pages/infrastructure"
   "artifacts/terra/src"
 )
 

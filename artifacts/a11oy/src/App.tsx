@@ -1,8 +1,9 @@
 import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
 import { Route, Switch } from 'wouter';
-import { GraphQLProvider } from './graphql';
 import { AppShell } from './components/shell/AppShell';
+import { DemoModeProvider } from './lib/operations/demo-mode';
+import { FabricShellProvider } from './lib/fabric-shell-context';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -22,7 +23,13 @@ function Loader() {
 }
 
 function WithShell({ children }: { children: ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <FabricShellProvider>
+      <DemoModeProvider>
+        <AppShell>{children}</AppShell>
+      </DemoModeProvider>
+    </FabricShellProvider>
+  );
 }
 
 const AlloyHubLanding = lazy(() => import('./pages/AlloyHubLanding').then(m => ({ default: m.AlloyHubLanding })));
@@ -205,10 +212,186 @@ const SovereignMode = lazy(() => import('./pages/reliquary/SovereignMode').then(
 const ReliquaryDoctrine = lazy(() => import('./pages/reliquary/ReliquaryDoctrine').then(m => ({ default: m.ReliquaryDoctrine })));
 const ModelProvenance = lazy(() => import('./pages/ModelProvenance').then(m => ({ default: m.ModelProvenance })));
 
+const StrategyDashboard = lazy(() => import('./pages/strategy/dashboard'));
+const AtlasRuntime = lazy(() => import('./pages/strategy/atlas-runtime'));
+const CorrelationMap = lazy(() => import('./pages/strategy/correlation-map').then(m => ({ default: m.CorrelationMapPage })));
+const SignalChains = lazy(() => import('./pages/strategy/signal-chains').then(m => ({ default: m.SignalChainsPage })));
+const EnterpriseState = lazy(() => import('./pages/strategy/enterprise-state'));
+const WorldlineRegistry = lazy(() => import('./pages/strategy/worldline-registry'));
+const Simulation = lazy(() => import('./pages/strategy/simulation'));
+const StressDrill = lazy(() => import('./pages/strategy/stress-drill'));
+const GameDay = lazy(() => import('./pages/strategy/game-day'));
+const CompetitiveAtlas = lazy(() => import('./pages/strategy/competitive-atlas').then(m => ({ default: m.CompetitiveAtlasPage })));
+const StrategyExecutiveBriefing = lazy(() => import('./pages/strategy/executive-briefing'));
+const BriefingHistory = lazy(() => import('./pages/strategy/briefing-history'));
+const StrategyAlerts = lazy(() => import('./pages/strategy/alerts'));
+const AlloyProof = lazy(() => import('./pages/strategy/alloy-proof'));
+const Automations = lazy(() => import('./pages/strategy/automations'));
+const CarlotaPipeline = lazy(() => import('./pages/strategy/carlota-pipeline'));
+const Changelog = lazy(() => import('./pages/strategy/changelog'));
+const ContinuumProof = lazy(() => import('./pages/strategy/continuum-proof'));
+const Costs = lazy(() => import('./pages/strategy/costs'));
+const DecisionCenter = lazy(() => import('./pages/strategy/decision-center'));
+const DemoLaunchpad = lazy(() => import('./pages/strategy/demo-launchpad'));
+const Digest = lazy(() => import('./pages/strategy/digest'));
+const DigitalTwinsManagement = lazy(() => import('./pages/strategy/digital-twins-management'));
+const DomainDetail = lazy(() => import('./pages/strategy/domain-detail'));
+const Entity360 = lazy(() => import('./pages/strategy/entity-360').then(m => ({ default: m.Entity360Page })));
+const EvalForge = lazy(() => import('./pages/strategy/eval-forge'));
+const EvalLab = lazy(() => import('./pages/strategy/eval-lab'));
+const EvalStudio = lazy(() => import('./pages/strategy/eval-studio'));
+const EvidenceExplorer = lazy(() => import('./pages/strategy/evidence-explorer'));
+const GovernanceTiers = lazy(() => import('./pages/strategy/governance-tiers'));
+const StrategyGovernance = lazy(() => import('./pages/strategy/governance'));
+const GovernedCockpit = lazy(() => import('./pages/strategy/governed-cockpit'));
+const GuardianApprovals = lazy(() => import('./pages/strategy/guardian-approvals'));
+const GuardrailConfigs = lazy(() => import('./pages/strategy/guardrail-configs'));
+const GuardrailHealth = lazy(() => import('./pages/strategy/guardrail-health'));
+const HealthPage = lazy(() => import('./pages/strategy/health'));
+const EnterpriseMcpAdmin = lazy(() => import('./pages/strategy/enterprise-mcp-admin'));
+const OpenEvalHub = lazy(() => import('./pages/strategy/open-eval-hub'));
+const OperatorPanel = lazy(() => import('./pages/strategy/operator-panel').then(m => ({ default: m.OperatorPanel })));
+const PolicyApprovals = lazy(() => import('./pages/strategy/policy-approvals'));
+const PolicyManager = lazy(() => import('./pages/strategy/policy-manager'));
+const ReplayLab = lazy(() => import('./pages/strategy/replay-lab'));
+const RetrievalProofChain = lazy(() => import('./pages/strategy/retrieval-proof-chain'));
+const RunConsole = lazy(() => import('./pages/strategy/run-console').then(m => ({ default: m.RunConsole })));
+const Sla = lazy(() => import('./pages/strategy/sla'));
+const StructuredIntelligence = lazy(() => import('./pages/strategy/structured-intelligence'));
+const Team = lazy(() => import('./pages/strategy/team'));
+const TrustConsole = lazy(() => import('./pages/strategy/trust-console'));
+
+const CrossPlatformHub = lazy(() => import('./pages/cross-platform/index').then(m => ({ default: m.CrossPlatformHubPage })));
+const SignalCorrelation = lazy(() => import('./pages/cross-platform/signal-correlation').then(m => ({ default: m.SignalCorrelationPage })));
+const EvidenceRegistry = lazy(() => import('./pages/cross-platform/evidence-registry').then(m => ({ default: m.EvidenceRegistryPage })));
+const RunHealth = lazy(() => import('./pages/cross-platform/run-health').then(m => ({ default: m.RunHealthPage })));
+const PilotIntelligence = lazy(() => import('./pages/cross-platform/pilot-intelligence').then(m => ({ default: m.PilotIntelligencePage })));
+
+const CognitiveOverview = lazy(() => import('./pages/cognitive/overview'));
+const CognitiveMemory = lazy(() => import('./pages/cognitive/memory'));
+const CognitivePlanner = lazy(() => import('./pages/cognitive/planner'));
+const CognitiveVerifier = lazy(() => import('./pages/cognitive/verifier'));
+const CognitiveReflection = lazy(() => import('./pages/cognitive/reflection'));
+const CognitiveTraces = lazy(() => import('./pages/cognitive/traces'));
+const CognitiveEvals = lazy(() => import('./pages/cognitive/evals'));
+const CognitivePolicies = lazy(() => import('./pages/cognitive/policies'));
+const CognitivePolicySim = lazy(() => import('./pages/cognitive/policy-sim'));
+const CognitiveSelfModel = lazy(() => import('./pages/cognitive/self-model'));
+const CognitiveWorldModel = lazy(() => import('./pages/cognitive/world-model'));
+
+const EcosystemCommandCenter = lazy(() => import('./pages/ecosystem/index').then(m => ({ default: m.EcosystemCommandCenter })));
+
+const OmniaHub = lazy(() => import('./pages/omnia/index'));
+
+const SubstrateCommandCenter = lazy(() => import('./pages/substrate/index').then(m => ({ default: m.SubstrateCommandCenter })));
+const SubstrateCounterfactual = lazy(() => import('./pages/substrate/counterfactual'));
+const SubstrateApprovalQueue = lazy(() => import('./pages/substrate/approval-queue'));
+
+const PERRuntimeOverview = lazy(() => import('./pages/evolution/runtime-overview'));
+const PEREvaluationConsole = lazy(() => import('./pages/evolution/evaluation-console'));
+const PERGovernanceConsole = lazy(() => import('./pages/evolution/governance-console'));
+const PERDiagnostics = lazy(() => import('./pages/evolution/diagnostics'));
+
+const OpsAutonomousNOC = lazy(() => import('./pages/operations/autonomous-noc'));
+const OpsSLOManagement = lazy(() => import('./pages/operations/slo-management'));
+const OpsFinOps = lazy(() => import('./pages/operations/finops'));
+const OpsDistributedTracing = lazy(() => import('./pages/operations/distributed-tracing'));
+const OpsOnCallCenter = lazy(() => import('./pages/operations/oncall-center'));
+const OpsNoiseReduction = lazy(() => import('./pages/operations/noise-reduction'));
+const OpsCapacityPlanning = lazy(() => import('./pages/operations/capacity-planning'));
+const OpsChangeManagement = lazy(() => import('./pages/operations/change-management'));
+const OpsSyntheticMonitoring = lazy(() => import('./pages/operations/synthetic-monitoring'));
+const OpsRevenueImpact = lazy(() => import('./pages/operations/revenue-impact'));
+const OpsBusinessSignals = lazy(() => import('./pages/operations/business-signals-intelligence'));
+const OpsPredictiveIntelligence = lazy(() => import('./pages/operations/predictive-intelligence'));
+const OpsLivingTopology = lazy(() => import('./pages/operations/living-topology'));
+const OpsGovernedDecisionLoop = lazy(() => import('./pages/operations/governed-decision-loop'));
+const OpsCognitiveRuntime = lazy(() => import('./pages/operations/cognitive-runtime'));
+const OpsAIQualityDashboard = lazy(() => import('./pages/operations/ai-quality-dashboard'));
+const OpsRunbookStudio = lazy(() => import('./pages/operations/runbook-studio'));
+const OpsKnowledgeGraph = lazy(() => import('./pages/operations/knowledge-graph'));
+const OpsSelfHealing = lazy(() => import('./pages/operations/self-healing'));
+const OpsDexScoring = lazy(() => import('./pages/operations/dex-scoring'));
+const OpsApprovalsCenter = lazy(() => import('./pages/operations/approvals-center'));
+const OpsCommandInbox = lazy(() => import('./pages/operations/command-inbox'));
+const OpsOwnershipMap = lazy(() => import('./pages/operations/ownership-map-new'));
+const OpsEscalationCenter = lazy(() => import('./pages/operations/escalation-center'));
+const OpsActionQueue = lazy(() => import('./pages/operations/action-queue'));
+const OpsOperationalQueue = lazy(() => import('./pages/operations/operational-queue'));
+const OpsMetricsExplorer = lazy(() => import('./pages/operations/metrics-explorer'));
+const OpsServiceTopology = lazy(() => import('./pages/operations/service-topology'));
+const OpsLogExplorer = lazy(() => import('./pages/operations/log-explorer'));
+const OpsAlertManagement = lazy(() => import('./pages/operations/alert-management'));
+const OpsSignals = lazy(() => import('./pages/operations/signals'));
+const OpsRecommendations = lazy(() => import('./pages/operations/recommendations'));
+const OpsReadiness = lazy(() => import('./pages/operations/readiness'));
+const OpsExecutiveCommand = lazy(() => import('./pages/operations/executive-command'));
+const OpsPulse = lazy(() => import('./pages/operations/pulse'));
+const OpsBlockerBoard = lazy(() => import('./pages/operations/blocker-board'));
+const OpsWhatChanged = lazy(() => import('./pages/operations/what-changed'));
+const OpsDeployments = lazy(() => import('./pages/operations/deployments'));
+const OpsDigestCenter = lazy(() => import('./pages/operations/digest-center'));
+const OpsTrustAudit = lazy(() => import('./pages/operations/trust-audit'));
+const OpsAlloyWorkflowCanvas = lazy(() => import('./pages/operations/alloy-workflow-canvas'));
+const OpsAlloyActionConsole = lazy(() => import('./pages/operations/alloy-action-console'));
+const OpsAlloyWorkflowTemplates = lazy(() => import('./pages/operations/alloy-workflow-templates'));
+const OpsAlloyIntelligence = lazy(() => import('./pages/operations/alloy-intelligence'));
+const OpsAlloyGovernance = lazy(() => import('./pages/operations/alloy-governance'));
+const OpsAlloyAgentMonitor = lazy(() => import('./pages/operations/alloy-agent-monitor'));
+const OpsAlloyExecutionTraces = lazy(() => import('./pages/operations/alloy-execution-traces'));
+const OpsAlloyReplayTimeline = lazy(() => import('./pages/operations/alloy-replay-timeline'));
+const OpsAlloyPolicySim = lazy(() => import('./pages/operations/alloy-policy-sim'));
+const OpsAlloyAgentHandoffs = lazy(() => import('./pages/operations/alloy-agent-handoffs'));
+const OpsAlloyTrustReceipts = lazy(() => import('./pages/operations/alloy-trust-receipts'));
+const OpsAlloyIntegrationHealth = lazy(() => import('./pages/operations/alloy-integration-health'));
+const OpsAlloyGraphCompiler = lazy(() => import('./pages/operations/alloy-graph-compiler'));
+const OpsAlloyWriteBack = lazy(() => import('./pages/operations/alloy-write-back'));
+const OpsAtlasExecute = lazy(() => import('./pages/operations/atlas-execute'));
+const OpsAlloyPolicyCompiler = lazy(() => import('./pages/operations/alloy-policy-compiler'));
+
+const AdminOpsConsole = lazy(() => import('./pages/operations/admin/ops-console'));
+const AdminOverview = lazy(() => import('./pages/operations/admin/overview'));
+const AdminUsers = lazy(() => import('./pages/operations/admin/users'));
+const AdminFlags = lazy(() => import('./pages/operations/admin/feature-flags'));
+const AdminApps = lazy(() => import('./pages/operations/admin/apps-registry'));
+const AdminRuns = lazy(() => import('./pages/operations/admin/run-viewer'));
+const AdminApprovals = lazy(() => import('./pages/operations/admin/approval-queue'));
+const AdminAudit = lazy(() => import('./pages/operations/admin/audit-log'));
+const AdminExports = lazy(() => import('./pages/operations/admin/export-history'));
+const AdminSeeder = lazy(() => import('./pages/operations/admin/seeder'));
+const AdminJobs = lazy(() => import('./pages/operations/admin/jobs'));
+const AdminKbArticles = lazy(() => import('./pages/operations/admin/kb-articles'));
+const AdminSupportOps = lazy(() => import('./pages/operations/admin/support-ops'));
+const AdminAnalytics = lazy(() => import('./pages/operations/admin/analytics-dashboard'));
+const AdminExperiments = lazy(() => import('./pages/operations/admin/experiments'));
+
+const InfraLegatusConsole = lazy(() => import('./pages/infrastructure/legatus-console'));
+const InfraImperiumMap = lazy(() => import('./pages/infrastructure/imperium-map'));
+const InfraImperiumForecast = lazy(() => import('./pages/infrastructure/imperium-forecast'));
+const InfraPraetorianGuard = lazy(() => import('./pages/infrastructure/praetorian-guard'));
+const InfraSenateChamber = lazy(() => import('./pages/infrastructure/senate-chamber'));
+const InfraSupplyLines = lazy(() => import('./pages/infrastructure/supply-lines'));
+const InfraCenturionAI = lazy(() => import('./pages/infrastructure/centurion-ai'));
+const InfraIntelligenceBriefing = lazy(() => import('./pages/infrastructure/intelligence-briefing'));
+const InfraGeospatial = lazy(() => import('./pages/infrastructure/geospatial'));
+const InfraDirectiveCascade = lazy(() => import('./pages/infrastructure/directive-cascade'));
+const InfraCoalition = lazy(() => import('./pages/infrastructure/coalition'));
+const InfraStrategicReserves = lazy(() => import('./pages/infrastructure/strategic-reserves'));
+const InfraSubstrateInference = lazy(() => import('./pages/infrastructure/substrate-inference'));
+const InfraDataFabric = lazy(() => import('./pages/infrastructure/data-fabric'));
+const InfraAtlasExecute = lazy(() => import('./pages/infrastructure/atlas-execute'));
+
+const MarketingHome = lazy(() => import('./pages/marketing/index'));
+const MarketingPricing = lazy(() => import('./pages/marketing/pricing'));
+const MarketingSignup = lazy(() => import('./pages/marketing/signup'));
+const MarketingOnboarding = lazy(() => import('./pages/marketing/onboarding'));
+const MarketingStatus = lazy(() => import('./pages/marketing/status'));
+const MarketingLeads = lazy(() => import('./pages/marketing/leads'));
+const MarketingVerifyEmail = lazy(() => import('./pages/marketing/verify-email'));
+
 
 export default function App() {
   return (
-    <GraphQLProvider>
     <Suspense fallback={<Loader />}>
       <Switch>
         <Route path={`${base}/`} component={HomePage} />
@@ -506,6 +689,523 @@ export default function App() {
           <Suspense fallback={<Loader />}><AtelierHub /></Suspense>
         </Route>
 
+        {/* Strategy Workspace — migrated from Command */}
+        <Route path={`${base}/strategy`}>
+          <WithShell><StrategyDashboard /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/atlas-runtime`}>
+          <WithShell><AtlasRuntime /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/executive-briefing`}>
+          <WithShell><StrategyExecutiveBriefing /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/briefing`}>
+          <WithShell><BriefingHistory /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/simulation`}>
+          <WithShell><Simulation /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/stress-drill`}>
+          <WithShell><StressDrill /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/game-day`}>
+          <WithShell><GameDay /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/correlation-map`}>
+          <WithShell><CorrelationMap /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/signal-chains`}>
+          <WithShell><SignalChains /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/enterprise-state`}>
+          <WithShell><EnterpriseState /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/worldline-registry`}>
+          <WithShell><WorldlineRegistry /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/competitive-atlas`}>
+          <WithShell><CompetitiveAtlas /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/cross-platform/hub`}>
+          <WithShell><CrossPlatformHub /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/cross-platform/evidence`}>
+          <WithShell><EvidenceRegistry /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/cross-platform/run-health`}>
+          <WithShell><RunHealth /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/cross-platform/pilots`}>
+          <WithShell><PilotIntelligence /></WithShell>
+        </Route>
+        <Route path={`${base}/strategy/cross-platform`}>
+          <WithShell><SignalCorrelation /></WithShell>
+        </Route>
+        <Route path={`${base}/decisions`}>
+          <WithShell><DecisionCenter /></WithShell>
+        </Route>
+        <Route path={`${base}/intelligence/evidence`}>
+          <WithShell><EvidenceExplorer /></WithShell>
+        </Route>
+        <Route path={`${base}/entity-360`}>
+          <WithShell><Entity360 /></WithShell>
+        </Route>
+        <Route path={`${base}/digital-twins`}>
+          <WithShell><DigitalTwinsManagement /></WithShell>
+        </Route>
+        <Route path={`${base}/domain-detail`}>
+          <WithShell><DomainDetail /></WithShell>
+        </Route>
+
+        {/* Operations Workspace — migrated from Command */}
+        <Route path={`${base}/operations/autonomous-noc`}>
+          <WithShell><OpsAutonomousNOC /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/slo`}>
+          <WithShell><OpsSLOManagement /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/finops`}>
+          <WithShell><OpsFinOps /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/tracing`}>
+          <WithShell><OpsDistributedTracing /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/on-call`}>
+          <WithShell><OpsOnCallCenter /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/noise-reduction`}>
+          <WithShell><OpsNoiseReduction /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/capacity-planning`}>
+          <WithShell><OpsCapacityPlanning /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/change-management`}>
+          <WithShell><OpsChangeManagement /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/synthetic`}>
+          <WithShell><OpsSyntheticMonitoring /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/revenue-impact`}>
+          <WithShell><OpsRevenueImpact /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/business-signals`}>
+          <WithShell><OpsBusinessSignals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/predictive-intelligence`}>
+          <WithShell><OpsPredictiveIntelligence /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/living-topology`}>
+          <WithShell><OpsLivingTopology /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/governed-decision-loop`}>
+          <WithShell><OpsGovernedDecisionLoop /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/cognitive-runtime`}>
+          <WithShell><OpsCognitiveRuntime /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/ai-ops`}>
+          <WithShell><OpsAIQualityDashboard /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/runbook-studio`}>
+          <WithShell><OpsRunbookStudio /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/knowledge-graph`}>
+          <WithShell><OpsKnowledgeGraph /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/self-healing`}>
+          <WithShell><OpsSelfHealing /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/dex`}>
+          <WithShell><OpsDexScoring /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/approvals`}>
+          <WithShell><OpsApprovalsCenter /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/inbox`}>
+          <WithShell><OpsCommandInbox /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/ownership`}>
+          <WithShell><OpsOwnershipMap /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/escalation`}>
+          <WithShell><OpsEscalationCenter /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/action-queue`}>
+          <WithShell><OpsActionQueue /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/queue`}>
+          <WithShell><OpsOperationalQueue /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/metrics`}>
+          <WithShell><OpsMetricsExplorer /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/topology`}>
+          <WithShell><OpsServiceTopology /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/logs`}>
+          <WithShell><OpsLogExplorer /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/alerts`}>
+          <WithShell><OpsAlertManagement /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/signals`}>
+          <WithShell><OpsSignals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/recommendations`}>
+          <WithShell><OpsRecommendations /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/readiness`}>
+          <WithShell><OpsReadiness /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/pulse`}>
+          <WithShell><OpsPulse /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/blocker-board`}>
+          <WithShell><OpsBlockerBoard /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/what-changed`}>
+          <WithShell><OpsWhatChanged /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/deployments`}>
+          <WithShell><OpsDeployments /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/digest`}>
+          <WithShell><OpsDigestCenter /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/trust-audit`}>
+          <WithShell><OpsTrustAudit /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/canvas`}>
+          <WithShell><OpsAlloyWorkflowCanvas /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/actions`}>
+          <WithShell><OpsAlloyActionConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/templates`}>
+          <WithShell><OpsAlloyWorkflowTemplates /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/intelligence`}>
+          <WithShell><OpsAlloyIntelligence /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/governance`}>
+          <WithShell><OpsAlloyGovernance /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/agents`}>
+          <WithShell><OpsAlloyAgentMonitor /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/traces`}>
+          <WithShell><OpsAlloyExecutionTraces /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/replay`}>
+          <WithShell><OpsAlloyReplayTimeline /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/simulate`}>
+          <WithShell><OpsAlloyPolicySim /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/handoffs`}>
+          <WithShell><OpsAlloyAgentHandoffs /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/receipts`}>
+          <WithShell><OpsAlloyTrustReceipts /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/integrations`}>
+          <WithShell><OpsAlloyIntegrationHealth /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/compiler`}>
+          <WithShell><OpsAlloyGraphCompiler /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/policy-compiler`}>
+          <WithShell><OpsAlloyPolicyCompiler /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/continuum/gates`}>
+          <WithShell><OpsAlloyWriteBack /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/atlas-execute`}>
+          <WithShell><OpsAtlasExecute /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/operator`}>
+          <WithShell><OperatorPanel /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/runs`}>
+          <WithShell><RunConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/evidence-explorer`}>
+          <WithShell><EvidenceExplorer /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/eval-studio`}>
+          <WithShell><EvalStudio /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/forge`}>
+          <WithShell><EvalForge /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/structured-intelligence`}>
+          <WithShell><StructuredIntelligence /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/policy-approvals`}>
+          <WithShell><PolicyApprovals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/guardian/approvals`}>
+          <WithShell><GuardianApprovals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/policy-manager`}>
+          <WithShell><PolicyManager /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/governance-tiers`}>
+          <WithShell><GovernanceTiers /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/guardrail-configs`}>
+          <WithShell><GuardrailConfigs /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/guardrail-health`}>
+          <WithShell><GuardrailHealth /></WithShell>
+        </Route>
+        <Route path={`${base}/operations`}>
+          <WithShell><OpsExecutiveCommand /></WithShell>
+        </Route>
+
+        {/* Admin Console */}
+        <Route path={`${base}/operations/admin/ops`}>
+          <WithShell><AdminOpsConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/overview`}>
+          <WithShell><AdminOverview /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/users`}>
+          <WithShell><AdminUsers /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/flags`}>
+          <WithShell><AdminFlags /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/apps`}>
+          <WithShell><AdminApps /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/runs`}>
+          <WithShell><AdminRuns /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/approvals`}>
+          <WithShell><AdminApprovals /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/audit`}>
+          <WithShell><AdminAudit /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/exports`}>
+          <WithShell><AdminExports /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/seeder`}>
+          <WithShell><AdminSeeder /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/jobs`}>
+          <WithShell><AdminJobs /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/kb`}>
+          <WithShell><AdminKbArticles /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/support`}>
+          <WithShell><AdminSupportOps /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/analytics`}>
+          <WithShell><AdminAnalytics /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/experiments`}>
+          <WithShell><AdminExperiments /></WithShell>
+        </Route>
+
+        {/* Cognitive Workspace — migrated from Command */}
+        <Route path={`${base}/cognitive/overview`}>
+          <WithShell><CognitiveOverview /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/memory`}>
+          <WithShell><CognitiveMemory /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/planner`}>
+          <WithShell><CognitivePlanner /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/verifier`}>
+          <WithShell><CognitiveVerifier /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/reflection`}>
+          <WithShell><CognitiveReflection /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/traces`}>
+          <WithShell><CognitiveTraces /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/evals`}>
+          <WithShell><CognitiveEvals /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/policies`}>
+          <WithShell><CognitivePolicies /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/policy-sim`}>
+          <WithShell><CognitivePolicySim /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/self-model`}>
+          <WithShell><CognitiveSelfModel /></WithShell>
+        </Route>
+        <Route path={`${base}/cognitive/world-model`}>
+          <WithShell><CognitiveWorldModel /></WithShell>
+        </Route>
+
+        {/* Infrastructure Workspace — migrated from Command (IMPERIUM) */}
+        <Route path={`${base}/infrastructure/legatus`}>
+          <WithShell><InfraLegatusConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/imperium-map`}>
+          <WithShell><InfraImperiumMap /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/imperium/forecast`}>
+          <WithShell><InfraImperiumForecast /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/praetorian`}>
+          <WithShell><InfraPraetorianGuard /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/senate`}>
+          <WithShell><InfraSenateChamber /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/supply-lines`}>
+          <WithShell><InfraSupplyLines /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/centurion`}>
+          <WithShell><InfraCenturionAI /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/intelligence`}>
+          <WithShell><InfraIntelligenceBriefing /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/geospatial`}>
+          <WithShell><InfraGeospatial /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/directives`}>
+          <WithShell><InfraDirectiveCascade /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/coalition`}>
+          <WithShell><InfraCoalition /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/reserves`}>
+          <WithShell><InfraStrategicReserves /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/substrate`}>
+          <WithShell><InfraSubstrateInference /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/data-fabric`}>
+          <WithShell><InfraDataFabric /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure/imperium/atlas-execute`}>
+          <WithShell><InfraAtlasExecute /></WithShell>
+        </Route>
+        <Route path={`${base}/infrastructure`}>
+          <WithShell><InfraLegatusConsole /></WithShell>
+        </Route>
+
+        {/* Substrate Command Center */}
+        <Route path={`${base}/substrate/approvals`}>
+          <WithShell><SubstrateApprovalQueue /></WithShell>
+        </Route>
+        <Route path={`${base}/substrate/counterfactual`}>
+          <WithShell><SubstrateCounterfactual /></WithShell>
+        </Route>
+        <Route path={`${base}/substrate`}>
+          <WithShell><SubstrateCommandCenter /></WithShell>
+        </Route>
+
+        {/* Ecosystem / MCP */}
+        <Route path={`${base}/ecosystem`}>
+          <WithShell><EcosystemCommandCenter /></WithShell>
+        </Route>
+
+        {/* OMNIA Cognitive Hub */}
+        <Route path={`${base}/omnia`}>
+          <WithShell><OmniaHub /></WithShell>
+        </Route>
+
+        {/* Precision Evolution Runtime (PER) */}
+        <Route path={`${base}/evolution/evaluation`}>
+          <WithShell><PEREvaluationConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/evolution/governance`}>
+          <WithShell><PERGovernanceConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/evolution/diagnostics`}>
+          <WithShell><PERDiagnostics /></WithShell>
+        </Route>
+        <Route path={`${base}/evolution`}>
+          <WithShell><PERRuntimeOverview /></WithShell>
+        </Route>
+
+        {/* Governance extras */}
+        <Route path={`${base}/governed-cockpit`}>
+          <WithShell><GovernedCockpit /></WithShell>
+        </Route>
+        <Route path={`${base}/eval-forge`}>
+          <WithShell><EvalForge /></WithShell>
+        </Route>
+        <Route path={`${base}/open-eval-hub`}>
+          <WithShell><OpenEvalHub /></WithShell>
+        </Route>
+        <Route path={`${base}/demo-launchpad`}>
+          <WithShell><DemoLaunchpad /></WithShell>
+        </Route>
+        <Route path={`${base}/admin/enterprise-mcp`}>
+          <WithShell><EnterpriseMcpAdmin /></WithShell>
+        </Route>
+        <Route path={`${base}/carlota/pipeline`}>
+          <WithShell><CarlotaPipeline /></WithShell>
+        </Route>
+        <Route path={`${base}/sla`}>
+          <WithShell><Sla /></WithShell>
+        </Route>
+        <Route path={`${base}/health`}>
+          <WithShell><HealthPage /></WithShell>
+        </Route>
+        <Route path={`${base}/changelog`}>
+          <WithShell><Changelog /></WithShell>
+        </Route>
+        <Route path={`${base}/team`}>
+          <WithShell><Team /></WithShell>
+        </Route>
+        <Route path={`${base}/alloy-proof`}>
+          <WithShell><AlloyProof /></WithShell>
+        </Route>
+        <Route path={`${base}/continuum-proof`}>
+          <WithShell><ContinuumProof /></WithShell>
+        </Route>
+        <Route path={`${base}/automations`}>
+          <WithShell><Automations /></WithShell>
+        </Route>
+        <Route path={`${base}/replay-lab`}>
+          <WithShell><ReplayLab /></WithShell>
+        </Route>
+        <Route path={`${base}/eval-lab`}>
+          <WithShell><EvalLab /></WithShell>
+        </Route>
+        <Route path={`${base}/trust-console`}>
+          <WithShell><TrustConsole /></WithShell>
+        </Route>
+        <Route path={`${base}/retrieval/proof-chain`}>
+          <WithShell><RetrievalProofChain /></WithShell>
+        </Route>
+
+        {/* Marketing pages */}
+        <Route path={`${base}/marketing/pricing`}>
+          <MarketingPricing />
+        </Route>
+        <Route path={`${base}/marketing/signup`}>
+          <MarketingSignup />
+        </Route>
+        <Route path={`${base}/marketing/onboarding`}>
+          <MarketingOnboarding />
+        </Route>
+        <Route path={`${base}/marketing/status`}>
+          <MarketingStatus />
+        </Route>
+        <Route path={`${base}/marketing/leads`}>
+          <MarketingLeads />
+        </Route>
+        <Route path={`${base}/marketing/verify-email`}>
+          <MarketingVerifyEmail />
+        </Route>
+        <Route path={`${base}/marketing`}>
+          <MarketingHome />
+        </Route>
+
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">
@@ -517,6 +1217,5 @@ export default function App() {
         </Route>
       </Switch>
     </Suspense>
-    </GraphQLProvider>
   );
 }

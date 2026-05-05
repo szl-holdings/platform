@@ -3,7 +3,7 @@
  * check-correlation-deeplinks — SZL Holdings Platform
  *
  * Verifies that every URL the cross-platform correlation surfaces produce
- * (artifacts/command/src/pages/cross-platform/product-links.ts) actually
+ * (artifacts/a11oy/src/pages/cross-platform/product-links.ts) actually
  * resolves to a registered route inside the target artifact (vessels, terra,
  * etc.).
  *
@@ -31,13 +31,13 @@ const ROOT = join(__dirname, '../..');
 
 // ---------------------------------------------------------------------------
 // Inline copies of the helpers from
-//   artifacts/command/src/pages/cross-platform/product-links.ts
+//   artifacts/a11oy/src/pages/cross-platform/product-links.ts
 // kept in sync via SOURCE_FINGERPRINTS below — if the source helper changes,
 // this script will fail loudly until the inline copy is updated too.
 // ---------------------------------------------------------------------------
 const PRODUCT_LINKS_PATH = join(
   ROOT,
-  'artifacts/command/src/pages/cross-platform/product-links.ts',
+  'artifacts/a11oy/src/pages/cross-platform/product-links.ts',
 );
 const productLinksSrc = readFileSync(PRODUCT_LINKS_PATH, 'utf8');
 

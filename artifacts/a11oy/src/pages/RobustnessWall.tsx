@@ -18,8 +18,8 @@ export function RobustnessWall() {
   const compositeAvg = items.length
     ? (items.reduce((a: number, s: any) => a + s.composite, 0) / items.length).toFixed(1)
     : '0';
-  const totalAttempts = items.reduce((a: number, s: any) => a + (s.categories as any[]).reduce((b: number, c: any) => b + c.attempts, 0), 0);
-  const totalBlocked = items.reduce((a: number, s: any) => a + (s.categories as any[]).reduce((b: number, c: any) => b + c.blocked, 0), 0);
+  const totalAttempts = items.reduce((a: number, s: Record<string, unknown>) => a + (s.categories as Array<{ attempts: number; blocked: number }>).reduce((b: number, c) => b + c.attempts, 0), 0);
+  const totalBlocked = items.reduce((a: number, s: Record<string, unknown>) => a + (s.categories as Array<{ attempts: number; blocked: number }>).reduce((b: number, c) => b + c.blocked, 0), 0);
 
   return (
     <Layout>
@@ -71,7 +71,7 @@ export function RobustnessWall() {
         </div>
         <InfoRow label="snapshot" value={<span className="font-mono">{snapshot.snapshotRef}</span>} />
         <InfoRow label="captured" value={fmtDate(snapshot.capturedAt)} />
-        <InfoRow label="battery" value={<span className="font-mono">{(snapshot.battery as any)?.name} v{(snapshot.battery as any)?.version}</span>} />
+        <InfoRow label="battery" value={<span className="font-mono">{(snapshot.battery as { name?: string; version?: string })?.name} v{(snapshot.battery as { name?: string; version?: string })?.version}</span>} />
         <InfoRow label="composite" value={<span style={{ color: '#c9b787' }} className="text-sm font-semibold">{snapshot.composite} / 100</span>} />
 
         <div className="mt-4">
@@ -83,7 +83,7 @@ export function RobustnessWall() {
             <div className="col-span-1 text-right">Blocked</div>
             <div className="col-span-1 text-right">Δ snap</div>
           </div>
-          {(snapshot.categories as any[])?.map((c: any) => (
+          {(snapshot.categories as Array<{ category: string; score: number; attempts: number; blocked: number; delta: number }>)?.map((c) => (
             <div key={c.category} className="grid grid-cols-12 gap-2 py-1.5 items-center border-t" style={{ borderColor: 'var(--color-a11oy-border)' }}>
               <div className="col-span-4 text-xs" style={{ color: 'var(--color-a11oy-text)' }}>{c.category}</div>
               <div className="col-span-1 text-right text-xs font-mono" style={{ color: '#c9b787' }}>{c.score}</div>

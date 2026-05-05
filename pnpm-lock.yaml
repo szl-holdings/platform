@@ -389,6 +389,12 @@ importers:
 
   artifacts/a11oy:
     dependencies:
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/billing-client':
+        specifier: workspace:*
+        version: link:../../packages/billing-client
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
@@ -404,15 +410,33 @@ importers:
       '@szl-holdings/omnia-shell':
         specifier: workspace:*
         version: link:../../packages/omnia-shell
+      '@szl-holdings/platform-registry':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@szl-holdings/shared-proxy':
         specifier: workspace:*
         version: link:../../packages/shared-proxy
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/speech-specialist':
+        specifier: workspace:*
+        version: link:../../packages/speech-specialist
+      '@szl-holdings/telemetry-standards':
+        specifier: workspace:*
+        version: link:../../packages/telemetry-standards
       '@szl/a11oy-runtime':
         specifier: workspace:*
         version: link:../../packages/a11oy-runtime
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
+      '@szl/substrate-client':
+        specifier: workspace:*
+        version: link:../../packages/substrate-client
       '@urql/exchange-graphcache':
         specifier: ^9.0.0
         version: 9.0.0(graphql@16.13.2)
@@ -425,6 +449,9 @@ importers:
       '@workspace/ouroboros':
         specifier: workspace:*
         version: link:../../packages/ouroboros
+      '@workspace/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       d3:
         specifier: ^7.9.0
         version: 7.9.0
@@ -440,6 +467,15 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
+      react-leaflet:
+        specifier: ^5.0.0
+        version: 5.0.0(leaflet@1.9.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      sonner:
+        specifier: ^1.7.4
+        version: 1.7.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       urql:
         specifier: ^5.0.1
         version: 5.0.1(graphql@16.13.2)(react@19.1.0)
@@ -8450,6 +8486,13 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
+  '@react-leaflet/core@3.0.0':
+    resolution: {integrity: sha512-3EWmekh4Nz+pGcr+xjf0KNyYfC3U2JjnkWsh0zcqaexYqmmB5ZhH37kz41JXGmKzpaMZCnPofBBm64i+YrEvGQ==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: 19.1.0
+      react-dom: 19.1.0
+
   '@react-native-async-storage/async-storage@2.2.0':
     resolution: {integrity: sha512-gvRvjR5JAaUZF8tv2Kcq/Gbt3JHwbKFYfmb445rhOj6NUMx3qPLixmDx5pZAyb9at1bYvJ4/eTUipU5aki45xw==}
     peerDependencies:
@@ -12523,6 +12566,9 @@ packages:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
     engines: {node: '>= 0.6.3'}
 
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
+
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
@@ -13828,6 +13874,13 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
+  react-leaflet@5.0.0:
+    resolution: {integrity: sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: 19.1.0
+      react-dom: 19.1.0
+
   react-native-is-edge-to-edge@1.3.1:
     resolution: {integrity: sha512-NIXU/iT5+ORyCc7p0z2nnlkouYKX425vuU1OEm6bMMtWWR9yvb+Xg5AZmImTKoF9abxCPqrKC3rOZsKzUYgYZA==}
     peerDependencies:
@@ -14339,6 +14392,12 @@ packages:
 
   sonic-boom@4.2.1:
     resolution: {integrity: sha512-w6AxtubXa2wTXAUsZMMWERrsIRAdrK0Sc+FUytWvYAhBJLyuI4llrMIC1DtlNSdI99EI86KZum2MMq3EAZlF9Q==}
+
+  sonner@1.7.4:
+    resolution: {integrity: sha512-DIS8z4PfJRbIyfVFDVnK9rO3eYDtse4Omcm6bt0oEr5/jtLgysmjuBl1frJ9E/EQZrFmKx2A8m/s5s9CRXIzhw==}
+    peerDependencies:
+      react: 19.1.0
+      react-dom: 19.1.0
 
   sonner@2.0.7:
     resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
@@ -19018,6 +19077,12 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
+  '@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      leaflet: 1.9.4
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
   '@react-native-async-storage/async-storage@2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))':
     dependencies:
       merge-options: 3.0.4
@@ -23584,6 +23649,8 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
 
+  leaflet@1.9.4: {}
+
   leven@3.1.0: {}
 
   leven@4.1.0: {}
@@ -25148,6 +25215,13 @@ snapshots:
 
   react-is@18.3.1: {}
 
+  react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      leaflet: 1.9.4
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
   react-native-is-edge-to-edge@1.3.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -25814,6 +25888,11 @@ snapshots:
   sonic-boom@4.2.1:
     dependencies:
       atomic-sleep: 1.0.0
+
+  sonner@1.7.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   sonner@2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
