@@ -5,6 +5,10 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: '@workspace/memory-fabric',
+        replacement: resolve(__dirname, '../../packages/memory-fabric/src/index.ts'),
+      },
+      {
         find: '@szl-holdings/platform-registry',
         replacement: resolve(__dirname, '../../packages/config/src/index.ts'),
       },

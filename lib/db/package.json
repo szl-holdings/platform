@@ -15,7 +15,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
-    "./schema/canonical": "./src/schema/canonical.ts"
+    "./schema/canonical": "./src/schema/canonical.ts",
+    "./schema/memory-fabric": "./src/schema/memory_fabric.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate --config ./drizzle.config.ts",

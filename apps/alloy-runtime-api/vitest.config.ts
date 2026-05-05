@@ -32,8 +32,8 @@ export default defineConfig({
         replacement: resolve(__dirname, '../../packages/aef-domain-profiles/src/index.ts'),
       },
       {
-        find: '@szl-holdings/memory-core',
-        replacement: resolve(__dirname, '../../packages/memory-core/src/index.ts'),
+        find: '@workspace/memory-fabric',
+        replacement: resolve(__dirname, '../../packages/memory-fabric/src/index.ts'),
       },
       {
         find: '@szl-holdings/shared-contracts',

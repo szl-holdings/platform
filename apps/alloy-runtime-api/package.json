@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@szl-holdings/workflow-runtime": "workspace:*",
-    "@szl-holdings/memory-core": "workspace:*",
+    "@workspace/memory-fabric": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
     "@szl-holdings/agent-core": "workspace:*",
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",

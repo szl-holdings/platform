@@ -331,12 +331,12 @@ importers:
       '@szl-holdings/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../../lib/db
       '@szl-holdings/evidence-ledger':
         specifier: workspace:*
         version: link:../../packages/evidence-ledger
-      '@szl-holdings/memory-core':
-        specifier: workspace:*
-        version: link:../../packages/memory-core
       '@szl-holdings/policy-guard':
         specifier: workspace:*
         version: link:../../packages/policy-guard
@@ -358,6 +358,9 @@ importers:
       '@workspace/alloy-embed-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-embed-worker
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../../packages/memory-fabric
       express:
         specifier: ^5
         version: 5.2.1

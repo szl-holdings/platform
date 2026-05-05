@@ -9,6 +9,11 @@ import { z } from "zod";
 import { logger } from "../../lib/logger";
 import { authMiddleware } from "../../middlewares/auth";
 import { callModel } from "../../services/ai/call-model";
+import {
+  persistSessionToFabric,
+  recoverSessionFromFabric,
+  type ConversationSession,
+} from "../../lib/conversation-fabric.js";
 
 // ---------------------------------------------------------------------------
 // Lazy-init guards for OpenAI integration modules.
@@ -51,16 +56,9 @@ router.use(authMiddleware);
 
 // ---------------------------------------------------------------------------
 // In-memory conversation session store (per-process, 30-min TTL)
+// Persistence and recovery are handled by lib/conversation-fabric.ts via
+// defaultMemoryStore (Postgres-backed when DATABASE_URL is set at boot).
 // ---------------------------------------------------------------------------
-
-interface ConversationSession {
-  id: string;
-  ownerId: number;
-  title: string;
-  createdAt: string;
-  lastActiveAt: number;
-  messages: Array<{ role: "user" | "assistant"; content: string }>;
-}
 
 const sessions = new Map<string, ConversationSession>();
 
@@ -90,13 +88,24 @@ function createSession(id: string, ownerId: number): ConversationSession {
 
 /**
  * Retrieve a session and verify the requesting user owns it.
+ *
+ * Primary lookup: process-local sessions Map (fast, zero-copy).
+ * Fallback lookup: recoverSessionFromFabric() — reads from defaultMemoryStore,
+ * which is Postgres-backed at boot. Enables recovery after the 30-min idle
+ * TTL evicts the session from the Map and after process restarts.
+ *
  * Returns null if not found or if the caller is not the owner.
  */
 function getOwnedSession(id: string, requesterId: number): ConversationSession | null {
   const session = sessions.get(id);
-  if (!session) return null;
-  if (session.ownerId !== requesterId) return null;
-  return session;
+  if (session) {
+    if (session.ownerId !== requesterId) return null;
+    return session;
+  }
+
+  const recovered = recoverSessionFromFabric(id, requesterId);
+  if (recovered) sessions.set(id, recovered);
+  return recovered;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,6 +141,7 @@ router.post("/conversations", (req, res) => {
   const ownerId = req.user!.id;
   const id = `${ownerId}-${String(Math.floor(Math.random() * 1e9))}`;
   const session = createSession(id, ownerId);
+  persistSessionToFabric(session);
   res.json({ id: session.id, title: session.title, createdAt: session.createdAt });
 });
 
@@ -203,6 +213,7 @@ async function streamVoiceMessages(
       if (userTranscript) session.messages.push({ role: "user", content: userTranscript });
       session.messages.push({ role: "assistant", content: assistantTranscript });
       session.lastActiveAt = Date.now();
+      persistSessionToFabric(session);
     }
 
     sendEvent({
@@ -301,6 +312,7 @@ router.post("/voice-query", async (req, res) => {
       if (userTranscript) session.messages.push({ role: "user", content: userTranscript });
       if (assistantTranscript) session.messages.push({ role: "assistant", content: assistantTranscript });
       session.lastActiveAt = Date.now();
+      persistSessionToFabric(session);
     }
 
     const provenance = {
@@ -398,6 +410,7 @@ router.post("/text-query", async (req, res) => {
       session.messages.push({ role: "user", content: query });
       session.messages.push({ role: "assistant", content: response });
       session.lastActiveAt = Date.now();
+      persistSessionToFabric(session);
     }
 
     logger.info(
