@@ -16,5 +16,8 @@
   },
   "scripts": {
     "build": "tsc --build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0"
   }
 }
