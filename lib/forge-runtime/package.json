@@ -28,8 +28,15 @@
     "drizzle-orm": "catalog:",
     "esbuild": "^0.25",
     "pino": "^9",
-    "pino-pretty": "^13",
+    "pino-pretty": "^13"
+  },
+  "peerDependencies": {
     "@workspace/tool-mesh": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@workspace/tool-mesh": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "catalog:"
