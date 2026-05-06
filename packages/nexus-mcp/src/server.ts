@@ -947,25 +947,37 @@ export class PRAXISMcpServer {
       },
     );
 
-    // Note: schema typed as ZodRawShape to prevent TS2589 (excessive
-    // type-instantiation depth) from the McpServer.tool() overloads.
+    // The McpServer.tool() overloads do deep type inference on Zod
+    // input shapes. Combined with the prior tool() registrations on
+    // the same instance, TypeScript blows past its instantiation-depth
+    // budget (TS2589). We cast the SDK reference to a permissive
+    // function shape locally so this single registration does not
+    // re-trigger the deep overload resolution; runtime behavior and
+    // the public tool contract are unchanged.
+    type ToolFn = (
+      name: string,
+      description: string,
+      schema: ZodRawShape,
+      handler: (args: Record<string, unknown>) => Promise<CallToolResult>,
+    ) => unknown;
     const renderAppSchema: ZodRawShape = {
       appId: z.string().describe('App ID from nexus_list_apps'),
     };
-    this._sdk.tool(
+    (this._sdk.tool as unknown as ToolFn)(
       'nexus_render_app',
       'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',
       renderAppSchema,
-      async (args: { appId: string }) => {
-        const result = await self.renderApp(args.appId);
+      async (args) => {
+        const appId = String((args as { appId?: unknown }).appId ?? '');
+        const result = await self.renderApp(appId);
         if (!result) {
-          return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) }], isError: true };
+          return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${appId}' not found` }) }], isError: true };
         }
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ appId: args.appId, title: result.title, domain: result.domain, html: result.html }, null, 2),
+              text: JSON.stringify({ appId, title: result.title, domain: result.domain, html: result.html }, null, 2),
             },
           ],
         };
