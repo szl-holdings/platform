@@ -9,7 +9,7 @@ import {
   FrontierKpiTile,
 } from './FrontierPrimitives';
 
-const API_HELIOS = '/api/a11oy/frontier';
+const API_FRONTIER = '/api/a11oy/frontier';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const { GOLD, DIM, MUTED, BORDER, SURFACE } = FRONTIER_TOKENS;
 
@@ -75,7 +75,7 @@ export function SystemHealth() {
 
   function loadStats() {
     setLoading(true);
-    fetch(`${API_HELIOS}/stats`)
+    fetch(`${API_FRONTIER}/stats`)
       .then(r => r.json())
       .then(d => { setStats(d); setLastRefresh(new Date()); })
       .catch(() => setError('System stats unavailable'))
