@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@huggingface/transformers": "^4.1.0",
+    "@huggingface/transformers": "^4.2.0",
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-storage-adapters": "workspace:*",
     "express": "^5.0.0",
