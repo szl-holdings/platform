@@ -12,6 +12,7 @@
  */
 
 export * from './agent-roles.js';
+export * from './circuit-breaker-types.js';
 export * from './eval-types.js';
 export * from './evidence-types.js';
 export * from './memory-types.js';

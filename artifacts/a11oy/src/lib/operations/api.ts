@@ -2,6 +2,17 @@ import {
   apiFetch,
   type PaginatedResponse,
 } from '@szl-holdings/shared-ui/api-fetch';
+import {
+  circuitBreakerResponseSchema,
+  type CircuitBreakerResponse,
+} from '@szl-holdings/shared-contracts/circuit-breaker';
+
+export type {
+  CircuitBreakerProvider,
+  CircuitBreakerResponse,
+  CircuitBreakerState,
+  CircuitBreakerSummary,
+} from '@szl-holdings/shared-contracts/circuit-breaker';
 
 async function apiFetchList<T>(path: string): Promise<T[]> {
   const json = await apiFetch<T[] | PaginatedResponse<T>>(path);
@@ -358,7 +369,19 @@ export const api = {
       ),
   },
   ai: {
-    health: () => apiFetch<AlloyAIHealth>('/ai/health'),
+    health: async (): Promise<AlloyAIHealth> => {
+      const raw = await apiFetch<AlloyAIHealth>('/ai/health');
+      if (raw && typeof raw === 'object' && 'circuitBreakers' in raw && raw.circuitBreakers != null) {
+        const parsed = circuitBreakerResponseSchema.safeParse(raw.circuitBreakers);
+        if (!parsed.success) {
+          throw new Error(
+            `Invalid circuitBreakers payload from /ai/health: ${parsed.error.message}`,
+          );
+        }
+        return { ...raw, circuitBreakers: parsed.data };
+      }
+      return raw;
+    },
     models: () => apiFetch<AlloyAIModels>('/ai/models'),
     respond: (messages: Array<{ role: string; content: string }>, routeClass?: string) =>
       apiFetch<AlloyAIResponse>('/ai/respond', {
@@ -595,6 +618,7 @@ export interface AlloyAIHealth {
   auditLogSize: number;
   degraded?: boolean;
   degradedReason?: string;
+  circuitBreakers?: CircuitBreakerResponse;
 }
 
 export interface AlloyAIModels {

@@ -73,6 +73,7 @@
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/formulas": "workspace:*",
     "@szl-holdings/db-repository": "workspace:*",
     "@szl-holdings/db-schema": "workspace:*",

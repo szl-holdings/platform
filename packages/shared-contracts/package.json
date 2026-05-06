@@ -5,7 +5,8 @@
   "description": "AEEP shared TypeScript contracts — agent roles, workflow types, evidence, policy, retrieval, memory, eval registry",
   "exports": {
     ".": "./src/index.ts",
-    "./eval-types": "./src/eval-types.ts"
+    "./eval-types": "./src/eval-types.ts",
+    "./circuit-breaker": "./src/circuit-breaker-types.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

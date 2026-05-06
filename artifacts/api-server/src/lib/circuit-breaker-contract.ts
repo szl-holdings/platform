@@ -1,37 +1,35 @@
-import { z } from 'zod';
+import {
+  circuitBreakerProviderSchema,
+  circuitBreakerResponseSchema,
+  circuitBreakerStateSchema,
+  circuitBreakerSummarySchema,
+  type CircuitBreakerProvider,
+  type CircuitBreakerResponse,
+  type CircuitBreakerState,
+  type CircuitBreakerSummary,
+} from '@szl-holdings/shared-contracts/circuit-breaker';
 import { getCircuitBreakerMetrics } from './ai-model-observability.js';
 
-export const circuitBreakerStateSchema = z.enum(['open', 'closed', 'half-open']);
-
-export const circuitBreakerProviderSchema = z.object({
-  provider: z.string(),
-  state: circuitBreakerStateSchema,
-  consecutiveFailures: z.number(),
-  openedAt: z.string().datetime().nullable(),
-  lastTestedAt: z.string().datetime().nullable(),
-  totalTripped: z.number(),
-});
-
-export const circuitBreakerSummarySchema = z.object({
-  openCount: z.number(),
-  halfOpenCount: z.number(),
-  closedCount: z.number(),
-});
-
-export const circuitBreakerResponseSchema = z.object({
-  summary: circuitBreakerSummarySchema,
-  providers: z.array(circuitBreakerProviderSchema),
-});
-
-export type CircuitBreakerState = z.infer<typeof circuitBreakerStateSchema>;
-export type CircuitBreakerProvider = z.infer<typeof circuitBreakerProviderSchema>;
-export type CircuitBreakerSummary = z.infer<typeof circuitBreakerSummarySchema>;
-export type CircuitBreakerResponse = z.infer<typeof circuitBreakerResponseSchema>;
+export {
+  circuitBreakerProviderSchema,
+  circuitBreakerResponseSchema,
+  circuitBreakerStateSchema,
+  circuitBreakerSummarySchema,
+};
+export type {
+  CircuitBreakerProvider,
+  CircuitBreakerResponse,
+  CircuitBreakerState,
+  CircuitBreakerSummary,
+};
 
 /**
  * Build the shared `circuitBreakers` response block consumed by both
  * `/ai/health` and `/ai/gateway/status`. Centralizing this prevents the two
  * endpoints from drifting out of sync.
+ *
+ * The schema/types are exported from `@szl-holdings/shared-contracts/circuit-breaker`
+ * so frontend clients can validate and consume the same shape.
  */
 export function buildCircuitBreakerResponse(
   metrics: ReturnType<typeof getCircuitBreakerMetrics> = getCircuitBreakerMetrics(),
