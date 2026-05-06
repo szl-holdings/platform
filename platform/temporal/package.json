@@ -8,7 +8,9 @@
     "test": "node -e \"try{require.resolve('@temporalio/testing')}catch{console.log('Temporal SDK not installed, skipping tests');process.exit(0)}\" && vitest run --reporter=verbose",
     "test:watch": "vitest",
     "worker:start": "node -e \"try{require.resolve('@temporalio/worker')}catch{console.log('Temporal SDK not installed, exiting');process.exit(0)}\" && tsx scripts/start-worker.ts",
-    "worker:smoke": "node -e \"try{require.resolve('@temporalio/testing')}catch{console.log('Temporal SDK not installed, skipping smoke test');process.exit(0)}\" && tsx scripts/smoke-test.ts"
+    "worker:smoke": "node -e \"try{require.resolve('@temporalio/testing')}catch{console.log('Temporal SDK not installed, skipping smoke test');process.exit(0)}\" && tsx scripts/smoke-test.ts",
+    "worker:approval:start": "node -e \"try{require.resolve('@temporalio/worker')}catch{console.log('Temporal SDK not installed, exiting');process.exit(0)}\" && tsx scripts/start-approval-worker.ts",
+    "worker:approval:smoke": "node -e \"try{require.resolve('@temporalio/testing')}catch{console.log('Temporal SDK not installed, skipping smoke test');process.exit(0)}\" && tsx scripts/smoke-approval-worker.ts"
   },
   "dependencies": {
     "@temporalio/activity": "^1.11.0",

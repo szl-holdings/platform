@@ -58,13 +58,20 @@ The Lyte operator surface schema is defined in `observability/lyte-operator-surf
 # Start Temporal server (dev mode — in-process, no persistence)
 npx @temporalio/cli@latest server start-dev --port 7233 --ui-port 8233
 
-# Start a worker (from platform/temporal/)
+# Start a worker on the default platform queue (TEMPORAL_TASK_QUEUE)
 pnpm --filter @szl-holdings/temporal-tests run worker:start
 
-# Smoke-test the worker against an ephemeral in-process Temporal server
+# Start the dedicated worker for the agent-gateway approval queue
+# (TEMPORAL_APPROVAL_TASK_QUEUE; default "approval-task-queue"). Required
+# for production agent-gateway approval requests to actually execute —
+# without it, workflows started by the gateway sit forever in the queue.
+pnpm --filter @szl-holdings/temporal-tests run worker:approval:start
+
+# Smoke-test the workers against an ephemeral in-process Temporal server
 # (no external server required — boots TestWorkflowEnvironment, registers
 # workflows, drives an approvalWorkflow end-to-end, exits 0 on success):
 pnpm --filter @szl-holdings/temporal-tests run worker:smoke
+pnpm --filter @szl-holdings/temporal-tests run worker:approval:smoke
 
 # Run workflow tests
 pnpm test

@@ -44,3 +44,18 @@ PORT = "6801"
 TEMPORAL_ENDPOINT = "localhost:7233"
 TEMPORAL_NAMESPACE = "default"
 TEMPORAL_TASK_QUEUE = "szl-platform"
+
+[[services]]
+name = "temporal-approval-worker"
+paths = []
+localPort = 6802
+autoStart = true
+
+[services.development]
+run = "pnpm --filter @szl-holdings/temporal-tests run worker:approval:start"
+
+[services.env]
+PORT = "6802"
+TEMPORAL_ENDPOINT = "localhost:7233"
+TEMPORAL_NAMESPACE = "default"
+TEMPORAL_APPROVAL_TASK_QUEUE = "approval-task-queue"
