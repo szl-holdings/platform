@@ -345,6 +345,12 @@ const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
 const GeoDecisionCenterPage = lazy(() => import('@/pages/geo-decision-center'));
 const RiskSimulationPage = lazy(() => import('@/pages/risk-simulation'));
 const VoyageCalculatorPage = lazy(() => import('@/pages/voyage-calculator'));
+const FieldAtlasPage = lazy(() => import('@/pages/field-atlas'));
+const CortexMifcPage = lazy(() => import('@/pages/cortex-mifc'));
+const CortexAatPage = lazy(() => import('@/pages/cortex-aat'));
+const CortexCbNcmPage = lazy(() => import('@/pages/cortex-cb-ncm'));
+const CortexChokePointPage = lazy(() => import('@/pages/cortex-choke-point'));
+const CortexSsmPage = lazy(() => import('@/pages/cortex-ssm'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -517,6 +523,48 @@ function VesselsSidebarContent({
           label: 'Decision Center',
           href: '/decision-center',
           icon: <Zap className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
+    {
+      id: 'cortex',
+      label: 'Cortex · A11oy-orchestrated',
+      items: [
+        {
+          id: 'field-atlas',
+          label: 'Field Atlas',
+          href: '/field-atlas',
+          icon: <Layers className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'cortex-mifc',
+          label: 'MIFC · Multi-INT Fusion',
+          href: '/cortex/mifc',
+          icon: <Layers className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'cortex-aat',
+          label: 'AAT · Adversarial AIS Twin',
+          href: '/cortex/aat',
+          icon: <Brain className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'cortex-cb-ncm',
+          label: 'CB-NCM · Convoy Brain',
+          href: '/cortex/cb-ncm',
+          icon: <Shield className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'cortex-choke-point',
+          label: 'Choke Point PRISM',
+          href: '/cortex/choke-point',
+          icon: <Navigation className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'cortex-ssm',
+          label: 'Sovereign Sensor Mesh',
+          href: '/cortex/ssm',
+          icon: <Radio className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -1184,6 +1232,12 @@ function DashboardRouter() {
         <Route path="/geo-decision-center" component={GeoDecisionCenterPage} />
         <Route path="/risk-simulation" component={RiskSimulationPage} />
         <Route path="/voyage-calculator" component={VoyageCalculatorPage} />
+        <Route path="/field-atlas" component={FieldAtlasPage} />
+        <Route path="/cortex/mifc" component={CortexMifcPage} />
+        <Route path="/cortex/aat" component={CortexAatPage} />
+        <Route path="/cortex/cb-ncm" component={CortexCbNcmPage} />
+        <Route path="/cortex/choke-point" component={CortexChokePointPage} />
+        <Route path="/cortex/ssm" component={CortexSsmPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
