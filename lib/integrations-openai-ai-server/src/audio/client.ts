@@ -1,7 +1,7 @@
 import OpenAI, { toFile } from "openai";
 import { Buffer } from "node:buffer";
 import { spawn } from "child_process";
-import { writeFile, unlink, readFile } from "fs/promises";
+import { mkdtemp, readFile, rm, unlink, writeFile } from "fs/promises";
 import { randomUUID } from "crypto";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -62,8 +62,12 @@ export function detectAudioFormat(buffer: Buffer): AudioFormat {
  * Convert any audio/video format to WAV using ffmpeg.
  */
 export async function convertToWav(audioBuffer: Buffer): Promise<Buffer> {
-  const inputPath = join(tmpdir(), `input-${randomUUID()}`);
-  const outputPath = join(tmpdir(), `output-${randomUUID()}.wav`);
+  // Create an exclusive private temp directory (mode 0700) instead of
+  // sharing /tmp with other processes. Defends against TOCTOU races and
+  // information disclosure on multi-tenant hosts. CodeQL js/insecure-temporary-file.
+  const tmpDir = await mkdtemp(join(tmpdir(), "openai-audio-"));
+  const inputPath = join(tmpDir, `input-${randomUUID()}`);
+  const outputPath = join(tmpDir, `output-${randomUUID()}.wav`);
 
   try {
     await writeFile(inputPath, audioBuffer);
@@ -92,6 +96,7 @@ export async function convertToWav(audioBuffer: Buffer): Promise<Buffer> {
   } finally {
     await unlink(inputPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
   }
 }
 
