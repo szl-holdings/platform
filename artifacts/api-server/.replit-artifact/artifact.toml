@@ -29,3 +29,18 @@ run = "bash -c 'cd /home/runner/workspace/platform/agent-gateway && exec node di
 [services.env]
 PORT = "6800"
 BASE_PATH = "/agent-gateway"
+
+[[services]]
+name = "temporal-worker"
+paths = []
+localPort = 6801
+autoStart = false
+
+[services.development]
+run = "pnpm --filter @szl-holdings/temporal-tests run worker:start"
+
+[services.env]
+PORT = "6801"
+TEMPORAL_ENDPOINT = "localhost:7233"
+TEMPORAL_NAMESPACE = "default"
+TEMPORAL_TASK_QUEUE = "szl-platform"

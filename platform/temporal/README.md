@@ -59,11 +59,35 @@ The Lyte operator surface schema is defined in `observability/lyte-operator-surf
 npx @temporalio/cli@latest server start-dev --port 7233 --ui-port 8233
 
 # Start a worker (from platform/temporal/)
-pnpm run worker:start
+pnpm --filter @szl-holdings/temporal-tests run worker:start
+
+# Smoke-test the worker against an ephemeral in-process Temporal server
+# (no external server required — boots TestWorkflowEnvironment, registers
+# workflows, drives an approvalWorkflow end-to-end, exits 0 on success):
+pnpm --filter @szl-holdings/temporal-tests run worker:smoke
 
 # Run workflow tests
 pnpm test
 ```
+
+### Worker registration
+
+`worker.ts` is the source of truth for worker bootstrap. It:
+
+1. Loads every activity module under `activities/` and exposes them via
+   `buildActivityRegistry()`.
+2. Bundles every workflow registered in `workflows/index.ts` (each new
+   workflow MUST be re-exported there).
+3. Connects to `TEMPORAL_ENDPOINT` (default `localhost:7233`) under
+   `TEMPORAL_NAMESPACE` (default `default`) and polls `TEMPORAL_TASK_QUEUE`
+   (default `szl-platform`).
+
+`scripts/start-worker.ts` is the runnable long-running process and is wired
+into the `api-server` artifact as the `temporal-worker` service
+(`autoStart = false` — operators flip it on once a Temporal Frontend is
+reachable). Connection / registration failures fail-fast with a clear
+`[temporal-worker] FATAL` log line so they surface in workflow logs and
+OTel-shipped logs alike.
 
 ---
 
