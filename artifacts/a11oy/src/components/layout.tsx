@@ -34,7 +34,22 @@ const NAV_GROUPS = [
       { href: '/brief',           label: 'Executive Brief' },
       { href: '/frontier',        label: 'Frontier Engine' },
       { href: '/frontier/inbox',  label: 'Frontier Inbox' },
-      { href: '/frontier-intel',  label: 'Frontier Intel' },
+    ],
+  },
+  {
+    label: 'FRONTIER INTELLIGENCE',
+    items: [
+      { href: '/frontier-intel',       label: 'Overview' },
+      { href: '/frontier/feed',        label: 'Signal Feed' },
+      { href: '/frontier/mythos',      label: 'Mythos Index' },
+      { href: '/frontier/proposals',   label: 'Capability Proposals' },
+      { href: '/frontier/memos',       label: 'Recalibration Memos' },
+      { href: '/frontier/benchmarks',  label: 'Benchmark Scoreboard' },
+      { href: '/frontier/scanners',    label: 'Scanner Admin' },
+      { href: '/frontier/system',      label: 'System Health' },
+      { href: '/mythos-layer',         label: 'Mythos Layer' },
+      { href: '/signals',              label: 'Signal Mesh + KG' },
+      { href: '/mythos-spec',          label: 'Open Spec' },
     ],
   },
   {

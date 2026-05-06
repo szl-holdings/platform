@@ -32,7 +32,7 @@ None currently classified as critical (no immediate platform-down risk).
 | Mapbox token missing | Terra map visualization completely unavailable | Acquire Mapbox subscription | Product | Sprint 2 |
 | AIS data feed missing | Vessels real-time tracking unavailable; demo uses simulated data | Acquire AIS subscription | Product | Sprint 3 |
 | No SLSA provenance attestation | Supply chain provenance gap | Add SLSA build attestation to CI | Engineering | Sprint 3 |
-| Unregistered artifact directories (`conduit`, `pluginmesh`, `helios`; plus `artifacts/audit` evidence dir miscounted by metrics script) | Dead weight in monorepo; on-disk count inflated vs registry count | Register, remove, or exclude from metrics script | Engineering | Sprint 1 |
+| Unregistered artifact directories (`conduit`, `pluginmesh`; plus `artifacts/audit` evidence dir miscounted by metrics script) | Dead weight in monorepo; on-disk count inflated vs registry count | Register, remove, or exclude from metrics script | Engineering | Sprint 1 | (Note: `helios` resolved — folded into A11oy Frontier Intelligence, task #4364) |
 
 ---
 

@@ -51,7 +51,7 @@ These directories exist under `artifacts/` but are not in the canonical artifact
 
 | Directory | Package Name | Kind | Workflow? | Build Status | Disposition Recommendation |
 |-----------|-------------|------|-----------|--------------|---------------------------|
-| `artifacts/helios` | `@workspace/helios` | web | No workflow | **FAIL** | Archive — no workflow, not in registry, no docs, purpose unknown |
+| ~~`artifacts/helios`~~ | ~~`@workspace/helios`~~ | web | — | **RESOLVED** | Folded into A11oy Frontier Intelligence section (task #4364). Surfaces at `pages/frontier/`; API routes at `routes/helios/`. |
 | `artifacts/pluginmesh` | `@workspace/pluginmesh` | web | Workflow configured | **FAIL** | Formally register or archive — has a configured workflow but not in artifact registry snapshot; purpose undocumented in diligence docs |
 | `artifacts/conduit` | `@workspace/conduit` | web | Workflow configured | Unknown | Formally register or archive — has a configured workflow but not in artifact registry snapshot; not in diligence docs |
 
@@ -74,7 +74,7 @@ These directories exist under `artifacts/` but are not in the canonical artifact
 - `PaginationOptions & { ... }` not assignable to `Record<string, string | number | boolean | undefined>`
 - Missing index signature
 
-This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-mobile`, `@workspace/helios`, `@workspace/storybook`, `@workspace/szl-demo-video`, `@workspace/pluginmesh`, `@szl/alloy`, `@workspace/alloy-ingestion-orchestrator`, `@szl/substrate`.
+This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-mobile`, `@workspace/storybook`, `@workspace/szl-demo-video`, `@workspace/pluginmesh`, `@szl/alloy`, `@workspace/alloy-ingestion-orchestrator`, `@szl/substrate`. (`@workspace/helios` removed — folded into A11oy, task #4364.)
 
 ### P1 Scripts (Advisory) — Known Issues
 

@@ -8,7 +8,8 @@
       "severity": "medium",
       "artifact": "helios",
       "title": "Helios artifact not building \u2014 missing dependencies",
-      "status": "open"
+      "status": "resolved",
+      "resolution": "Helios folded into A11oy Frontier Intelligence section (task #4364). Standalone artifact directory removed; all surfaces now live under artifacts/a11oy/src/pages/frontier/ and routes/helios/ in api-server."
     },
     {
       "id": "oos-002",

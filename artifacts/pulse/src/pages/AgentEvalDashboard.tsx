@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { FrontierBriefWidget } from './FrontierBriefWidget';
 import { AlertTriangle, CheckCircle, Clock, Loader2, Minus, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
@@ -871,6 +872,10 @@ export default function AgentEvalDashboard() {
             ))}
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <FrontierBriefWidget />
       </div>
     </div>
   );

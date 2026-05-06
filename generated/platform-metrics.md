@@ -18,7 +18,7 @@
 
 | Metric | Count |
 |--------|-------|
-| Artifact directories on disk | 19 (15 formally registered; 4 unregistered: conduit, pluginmesh, helios, artifacts/audit evidence dir) |
+| Artifact directories on disk | 18 (15 formally registered; 3 unregistered: conduit, pluginmesh, artifacts/audit evidence dir — helios folded into A11oy, task #4364) |
 | Library packages (lib/) | 51 |
 | Standalone packages (packages/) | 101 |
 | Total packages | 152 |
@@ -35,7 +35,7 @@
 | @workspace/command | web |
 | @workspace/conduit | web |
 | @workspace/counsel | web |
-| @workspace/helios | web |
+| ~~@workspace/helios~~ | folded into A11oy Frontier Intelligence (task #4364) |
 | @workspace/lyte-command-center | web |
 | @workspace/mockup-sandbox | design |
 | @workspace/pluginmesh | web |

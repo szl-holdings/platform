@@ -288,6 +288,28 @@ export function Recommendations() {
           </div>
         </div>
       </div>
+
+      <div style={{ margin: '2rem 1.5rem 0', padding: '1rem 1.25rem', borderRadius: 12, display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.14)' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.15em', color: '#9a8456', marginBottom: 4 }}>FRONTIER INTELLIGENCE</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e0d8', marginBottom: 2 }}>Emerging Capability Signals</div>
+          <div style={{ fontSize: 11, color: 'rgba(226,224,216,0.45)' }}>Frontier benchmarks and capability proposals inform next-cycle recommendations. Track calibration drift and cross-domain model improvements.</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          {[
+            { label: 'Capability Proposals', href: '/frontier/proposals' },
+            { label: 'Benchmark Scoreboard', href: '/frontier/benchmarks' },
+            { label: 'Signal Feed', href: '/frontier/feed' },
+          ].map(l => {
+            const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+            return (
+              <a key={l.href} href={`${BASE}${l.href}`} style={{ color: '#c9b787', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textDecoration: 'none', padding: '4px 10px', borderRadius: 4, border: '1px solid rgba(201,183,135,0.2)', background: 'rgba(201,183,135,0.06)', whiteSpace: 'nowrap' }}>
+                {l.label} →
+              </a>
+            );
+          })}
+        </div>
+      </div>
     </Layout>
   );
 }

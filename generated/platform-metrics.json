@@ -47,7 +47,8 @@
       },
       {
         "name": "@workspace/helios",
-        "kind": "web"
+        "kind": "folded",
+        "note": "Folded into A11oy Frontier Intelligence (task #4364)"
       },
       {
         "name": "@workspace/lyte-command-center",

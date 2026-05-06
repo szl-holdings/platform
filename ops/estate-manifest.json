@@ -101,10 +101,11 @@
       "status": "running"
     },
     "helios": {
-      "title": "Helios (consolidated into A11oy /frontier per Task #4362)",
-      "kind": "web",
+      "title": "Helios (folded into A11oy Frontier Intelligence)",
+      "kind": "folded",
       "port": null,
-      "status": "removed"
+      "status": "folded-into-a11oy",
+      "resolution": "consolidated per tasks #4362 and #4364 — all surfaces live at artifacts/a11oy/src/pages/frontier/; API routes registered at /api/helios/ in api-server"
     }
   },
   "verticals": [

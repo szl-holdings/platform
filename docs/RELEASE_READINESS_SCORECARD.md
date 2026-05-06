@@ -69,7 +69,7 @@ Index signature for type 'string' is missing in type 'PaginationOptions & { ... 
 |---------|-------------|
 | `@workspace/a11oy` | FAIL (cascaded) |
 | `@workspace/szl-holdings-mobile` | FAIL (cascaded) |
-| `@workspace/helios` | FAIL (cascaded) |
+| ~~`@workspace/helios`~~ | ~~FAIL~~ | Folded into A11oy (task #4364) — no longer a separate build target |
 | `@workspace/pluginmesh` | FAIL (cascaded) |
 | `@workspace/szl-demo-video` | FAIL (cascaded) |
 | `@szl/alloy` | FAIL (cascaded) |

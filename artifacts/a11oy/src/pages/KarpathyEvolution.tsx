@@ -320,6 +320,27 @@ export function KarpathyEvolution() {
           GENESIS LEDGER →
         </a>
       </div>
+
+      <div style={{ margin: '1rem 0 0', padding: '1rem 1.25rem', borderRadius: 12, display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(107,141,227,0.04)', border: '1px solid rgba(107,141,227,0.15)' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#4a6abf', marginBottom: 4 }}>FRONTIER INTELLIGENCE</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e0d8', marginBottom: 2 }}>Mythos Index — Evolution Lineage</div>
+          <div style={{ fontSize: 11, color: 'rgba(226,224,216,0.5)' }}>Karpathy evolution milestones feed the Mythos Index — the canonical record of capability emergence, model lineage, and frontier-lab benchmarks across all SZL agents.</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          {[
+            { label: 'MYTHOS INDEX', href: '/frontier/mythos' },
+            { label: 'SIGNAL FEED', href: '/frontier/feed' },
+          ].map(l => {
+            const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+            return (
+              <a key={l.href} href={`${BASE}${l.href}`} style={{ padding: '0.5rem 1rem', borderRadius: 8, fontSize: 11, fontFamily: 'monospace', background: 'rgba(107,141,227,0.08)', border: '1px solid rgba(107,141,227,0.2)', color: '#6b8de3', textDecoration: 'none' }}>
+                {l.label} →
+              </a>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

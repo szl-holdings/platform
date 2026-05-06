@@ -93,7 +93,7 @@ All "unverified" claims originally found in in-scope documents were either corre
 |---|-------|-----------------|----------|---------|
 | 31 | "Domain packages: 82, Shared library packages: 41, Total packages: 123" | platform-facts.md | `generated/platform-metrics.json` 2026-04-27: lib: 51, standalone: 101, total: 152 | **partial** — counts reflect April 2026-04-20 snapshot; stale by 5 weeks |
 | 32 | "Last comprehensive audit: 2026-04-21" | platform-facts.md | This audit supersedes; new comprehensive audit is 2026-04-27 | **partial** — stale audit date |
-| 33 | "Active registered artifacts: 15 registered across both systems" | platform-facts.md | 15 registered in workspace registry; 19 on-disk directories per `generated/platform-metrics.json` | **partial** — 4 unregistered on-disk entries: conduit, pluginmesh, helios (artifacts), and `artifacts/audit` (evidence dir that the metrics script miscounts); see DEPENDENCY_AND_SCRIPT_DRIFT.md |
+| 33 | "Active registered artifacts: 15 registered across both systems" | platform-facts.md | 15 registered in workspace registry; 18 on-disk directories per `generated/platform-metrics.json` | **partial** — 3 unregistered on-disk entries: conduit, pluginmesh (artifacts), and `artifacts/audit` (evidence dir that the metrics script miscounts). (Note: `helios` resolved — folded into A11oy Frontier Intelligence, task #4364.) |
 
 ---
 

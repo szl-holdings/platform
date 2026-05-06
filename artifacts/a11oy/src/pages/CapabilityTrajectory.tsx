@@ -101,6 +101,28 @@ export function CapabilityTrajectory() {
             decisions in this same workspace. Select an agent above to inspect its specific trajectory.
           </p>
         </Card>
+
+        <div style={{ marginTop: '1.25rem', padding: '1rem 1.25rem', borderRadius: 12, display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.14)' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.15em', color: GHOST, marginBottom: 4 }}>FRONTIER INTELLIGENCE</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e0d8', marginBottom: 2 }}>Frontier Capability Proposals</div>
+            <div style={{ fontSize: 11, color: GHOST }}>Trajectory data feeds into formal capability proposals and benchmark scoring in the Frontier Intelligence layer.</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {[
+              { label: 'Proposals', href: '/frontier/proposals' },
+              { label: 'Benchmarks', href: '/frontier/benchmarks' },
+              { label: 'Overview', href: '/frontier-intel' },
+            ].map(l => {
+              const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+              return (
+                <a key={l.href} href={`${BASE}${l.href}`} style={{ color: GOLD, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textDecoration: 'none', padding: '4px 10px', borderRadius: 4, border: '1px solid rgba(201,183,135,0.2)', background: 'rgba(201,183,135,0.06)', whiteSpace: 'nowrap' }}>
+                  {l.label} →
+                </a>
+              );
+            })}
+          </div>
+        </div>
       </DoctrineLoader>
     </Layout>
   );

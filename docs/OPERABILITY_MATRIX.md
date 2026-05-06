@@ -61,8 +61,13 @@
 
 | Artifact | Build | Grade | Notes |
 |----------|-------|-------|-------|
-| `helios` | **FAIL** | **X** | Not registered in workspace; build fails; purpose undocumented |
 | `pluginmesh` | **FAIL** | **X** | Not registered in workspace; build fails; purpose undocumented |
+
+## Folded Artifacts
+
+| Artifact | Disposition | Notes |
+|----------|-------------|-------|
+| `helios` | **Folded into A11oy** | All 7 surfaces merged into A11oy Frontier Intelligence section (task #4364). API routes live at `/api/helios/`. Standalone directory removed. |
 
 ## Dead / Archived
 
