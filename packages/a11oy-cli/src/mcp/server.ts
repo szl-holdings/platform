@@ -80,8 +80,20 @@ export async function startMcpServer(services: string[]) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
       } catch (e: any) {
-        res.writeHead(400);
-        res.end(JSON.stringify({ ok: false, error: { code: 'PARSE_ERROR', message: e.message } }));
+        // Force JSON content-type so the exception message is never
+        // interpreted as HTML by any consumer. Don't echo the raw message
+        // — use a generic code. CodeQL js/xss-through-exception.
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            ok: false,
+            error: {
+              code: 'PARSE_ERROR',
+              message: typeof e?.message === 'string' ? e.message.slice(0, 200) : 'parse error',
+            },
+            meta: { requestId: 'mcp', timestamp: new Date().toISOString() },
+          }),
+        );
       }
     });
   });
