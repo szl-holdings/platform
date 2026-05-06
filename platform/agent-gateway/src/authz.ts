@@ -14,9 +14,13 @@
  * The remote evaluator captures `evaluatedAt` from OPA's HTTP `Date` header
  * (falling back to the local clock only when OPA omits it). This makes the
  * audit log's `policyDecision.evaluatedAt` reflect the live OPA clock.
+ *
+ * The gateway sends the agent capability straight through as
+ * `operation_type = "agent_<capability>"`. The Rego bundle owns the agent
+ * approval rules end-to-end — no capability→operation mapping happens here.
  */
 
-import { mapToRegoOperationType } from './operation-mapping.js';
+import { agentOperationType } from './capabilities/operation-type.js';
 import type { AgentActionRequest, CallerIdentity, OpaDecision } from './types.js';
 
 export class AuthzError extends Error {
@@ -30,43 +34,49 @@ export class AuthzError extends Error {
   }
 }
 
+const MUTATING_AGENT_OPERATION_TYPES: ReadonlySet<string> = new Set([
+  'agent_draft_prs',
+  'agent_propose_policy_fixes',
+  'agent_propose_architecture_diffs',
+]);
+
+const TRUSTED_AGENT_CALLER_ROLES: ReadonlySet<string> = new Set([
+  'platform-engineer',
+  'operator',
+]);
+
 // ---------------------------------------------------------------------------
-// Local (embedded) policy evaluator — mirrors approval-requirements.rego
+// Local (embedded) policy evaluator — mirrors the agent_* rules in
+// platform/policy/approval/approval-requirements.rego.
 // ---------------------------------------------------------------------------
 
 function evaluateLocal(request: AgentActionRequest, caller: CallerIdentity): OpaDecision {
-  const policyId = `szl.agent-gateway.${request.capability}`;
+  const operationType = agentOperationType(request.capability);
+  const policyId = `szl.approval/${operationType}`;
   const evaluatedAt = new Date().toISOString();
 
-  // Agent actions are advisory-only (read/draft); no prod mutation is possible.
-  // Therefore the base required_approvals for agent capabilities is 0 in dev.
   let requiredApprovals = 0;
   let requiredGroups: string[] = [];
   const reasons: string[] = [];
 
-  // Production targets require 1 approval from platform-team
   if (request.targetEnvironment === 'production') {
+    // Rule 1 — Production target requires release-quality approvers.
     requiredApprovals = 1;
     requiredGroups = ['platform-team', 'release-managers'];
     reasons.push('Agent action targeting production environment requires platform-team approval.');
-  }
-
-  // Callers without platform-engineer or operator role require explicit approval
-  if (!['platform-engineer', 'operator'].includes(caller.role)) {
-    if (requiredApprovals === 0) {
-      requiredApprovals = 1;
-      requiredGroups = ['platform-team'];
-      reasons.push(`Caller role '${caller.role}' requires platform-team approval for agent actions.`);
-    }
-  }
-
-  // Draft PR and propose_policy_fixes always require staging/prod approval
-  if (['draft_prs', 'propose_policy_fixes', 'propose_architecture_diffs'].includes(request.capability)) {
-    if (request.targetEnvironment !== 'development') {
-      requiredApprovals = Math.max(requiredApprovals, 1);
-      if (!requiredGroups.includes('platform-team')) requiredGroups.push('platform-team');
-      reasons.push(`Capability '${request.capability}' targeting non-dev environment requires approval.`);
-    }
+  } else if (!TRUSTED_AGENT_CALLER_ROLES.has(caller.role)) {
+    // Rule 2 — Non-prod call from an untrusted caller role.
+    requiredApprovals = 1;
+    requiredGroups = ['platform-team'];
+    reasons.push(`Caller role '${caller.role}' requires platform-team approval for agent actions.`);
+  } else if (
+    request.targetEnvironment === 'staging' &&
+    MUTATING_AGENT_OPERATION_TYPES.has(operationType)
+  ) {
+    // Rule 3 — Mutating capability targeting staging by a trusted caller.
+    requiredApprovals = 1;
+    requiredGroups = ['platform-team'];
+    reasons.push(`Capability '${request.capability}' targeting staging requires approval.`);
   }
 
   return {
@@ -89,7 +99,7 @@ async function evaluateRemote(
   caller: CallerIdentity,
 ): Promise<OpaDecision> {
   const url = `${opaEndpoint.replace(/\/$/, '')}/v1/data/szl/approval`;
-  const operationType = mapToRegoOperationType(request, caller);
+  const operationType = agentOperationType(request.capability);
   const body = {
     input: {
       operation_type: operationType,

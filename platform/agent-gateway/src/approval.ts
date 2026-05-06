@@ -17,7 +17,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { mapToRegoOperationType } from './operation-mapping.js';
+import { agentOperationType } from './capabilities/operation-type.js';
 import type {
   AgentActionRequest,
   ApprovalRequest,
@@ -79,8 +79,8 @@ async function loadTemporalClient(): Promise<typeof import('@temporalio/client')
  * places the OPA evaluation used:
  *   - `targetEnvironment` comes straight from the inbound `AgentActionRequest`
  *     (NOT inferred from the policyId, which is brittle).
- *   - `operationType` runs through the same `mapToRegoOperationType` mapper
- *     that authz.ts used to build the OPA input, guaranteeing the workflow
+ *   - `operationType` is built with the same `agentOperationType` helper
+ *     that authz.ts used for the OPA input, guaranteeing the workflow
  *     records the same operation type that policy actually evaluated.
  */
 function buildWorkflowInput(
@@ -90,7 +90,7 @@ function buildWorkflowInput(
   caller: CallerIdentity,
 ) {
   return {
-    operationType: mapToRegoOperationType(request, caller),
+    operationType: agentOperationType(request.capability),
     targetService: request.target,
     targetEnvironment: request.targetEnvironment,
     targetVersion: 'agent-gateway',

@@ -140,3 +140,146 @@ test_policy_exception_requires_security_team if {
     }
     "security-team" in req_groups
 }
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Agent gateway capability rules (Phase 11)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Advisory capability in development by a trusted caller: no approval required.
+test_agent_inspect_code_dev_trusted_no_approval if {
+    req := approval.required_approvals with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "development",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req == 0
+}
+
+# Advisory capability in production: 1 approval from platform-team / release-managers.
+test_agent_inspect_code_production_requires_release_quality_approvers if {
+    groups := approval.required_groups with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "production",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req := approval.required_approvals with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "production",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req == 1
+    "platform-team" in groups
+    "release-managers" in groups
+}
+
+# Mutating capability targeting staging by a trusted caller: 1 approval from platform-team.
+test_agent_draft_prs_staging_trusted_requires_platform_team if {
+    groups := approval.required_groups with input as {
+        "operation_type": "agent_draft_prs",
+        "environment": "staging",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req := approval.required_approvals with input as {
+        "operation_type": "agent_draft_prs",
+        "environment": "staging",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req == 1
+    groups == ["platform-team"]
+}
+
+# Mutating capability targeting development by a trusted caller: still no approval.
+test_agent_draft_prs_dev_trusted_no_approval if {
+    req := approval.required_approvals with input as {
+        "operation_type": "agent_draft_prs",
+        "environment": "development",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req == 0
+}
+
+# Untrusted caller role outside production: 1 approval from platform-team.
+test_agent_action_untrusted_role_requires_platform_team if {
+    groups := approval.required_groups with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "development",
+        "actor_role": "agent-service",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req := approval.required_approvals with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "development",
+        "actor_role": "agent-service",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    req == 1
+    groups == ["platform-team"]
+}
+
+# Production target by an untrusted caller: production rule wins (release-managers required).
+test_agent_action_production_untrusted_role_uses_production_rule if {
+    groups := approval.required_groups with input as {
+        "operation_type": "agent_propose_policy_fixes",
+        "environment": "production",
+        "actor_role": "agent-service",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    "platform-team" in groups
+    "release-managers" in groups
+}
+
+# Production agent action without an approval should produce a deny message.
+test_agent_action_production_unapproved_denies if {
+    deny := approval.deny with input as {
+        "operation_type": "agent_propose_architecture_diffs",
+        "environment": "production",
+        "actor_role": "platform-engineer",
+        "approvals": [],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    count(deny) > 0
+    some msg in deny
+    contains(msg, "requires")
+}
+
+# Production agent action satisfied with platform-team AND release-managers approvals
+# (both required groups must be covered by the per-group coverage rule).
+test_agent_action_production_approved_passes if {
+    deny := approval.deny with input as {
+        "operation_type": "agent_inspect_code",
+        "environment": "production",
+        "actor_role": "platform-engineer",
+        "approvals": [
+            {"state": "approved", "approver_groups": ["platform-team"]},
+            {"state": "approved", "approver_groups": ["release-managers"]},
+        ],
+        "pending_minutes": 0,
+        "tier": "tier-1",
+    }
+    count(deny) == 0
+}

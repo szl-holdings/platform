@@ -71,6 +71,77 @@ required_groups := ["security-team"] if {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Agent gateway actions (Phase 11)
+#
+# The agent gateway sends `operation_type = "agent_<capability>"` straight
+# from the inbound request. The bundle is authoritative for agent approval
+# requirements — the gateway does NOT translate capabilities to other Rego
+# operation types before evaluation.
+#
+# Capability set (kept in sync with platform/agent-gateway/src/types.ts):
+#   advisory     : agent_inspect_code, agent_inspect_manifests,
+#                  agent_analyze_telemetry, agent_summarize_incidents,
+#                  agent_draft_runbooks, agent_generate_documentation,
+#                  agent_generate_test_plans
+#   mutating     : agent_draft_prs, agent_propose_policy_fixes,
+#                  agent_propose_architecture_diffs
+#
+# Rules (mutually exclusive on environment + actor_role to avoid conflicts):
+#   1. Production target          → 1 approval, [platform-team, release-managers]
+#   2. Non-prod, untrusted role   → 1 approval, [platform-team]
+#   3. Staging + mutating + trusted role → 1 approval, [platform-team]
+#   4. Otherwise (dev or trusted advisory) → 0 approvals (default)
+# ──────────────────────────────────────────────────────────────────────────────
+agent_mutating_operation_types := {
+    "agent_draft_prs",
+    "agent_propose_policy_fixes",
+    "agent_propose_architecture_diffs",
+}
+
+agent_trusted_caller_roles := {"platform-engineer", "operator"}
+
+is_agent_operation if {
+    startswith(input.operation_type, "agent_")
+}
+
+# Rule 1 — Production target requires release-quality approvers
+required_approvals := 1 if {
+    is_agent_operation
+    input.environment == "production"
+}
+
+required_groups := ["platform-team", "release-managers"] if {
+    is_agent_operation
+    input.environment == "production"
+}
+
+# Rule 2 — Non-prod call from an untrusted caller role
+required_approvals := 1 if {
+    is_agent_operation
+    input.environment != "production"
+    not input.actor_role in agent_trusted_caller_roles
+}
+
+required_groups := ["platform-team"] if {
+    is_agent_operation
+    input.environment != "production"
+    not input.actor_role in agent_trusted_caller_roles
+}
+
+# Rule 3 — Mutating capability targeting staging by a trusted caller
+required_approvals := 1 if {
+    input.operation_type in agent_mutating_operation_types
+    input.environment == "staging"
+    input.actor_role in agent_trusted_caller_roles
+}
+
+required_groups := ["platform-team"] if {
+    input.operation_type in agent_mutating_operation_types
+    input.environment == "staging"
+    input.actor_role in agent_trusted_caller_roles
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Validation: check if current approvals satisfy requirements
 # ──────────────────────────────────────────────────────────────────────────────
 deny contains msg if {
