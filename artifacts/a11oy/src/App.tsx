@@ -441,6 +441,7 @@ const AdminOpsConsole = lazy(() => import('./pages/operations/admin/ops-console'
 const AdminOverview = lazy(() => import('./pages/operations/admin/overview'));
 const AdminUsers = lazy(() => import('./pages/operations/admin/users'));
 const AdminFlags = lazy(() => import('./pages/operations/admin/feature-flags'));
+const AdminRuntimeConfig = lazy(() => import('./pages/operations/admin/runtime-config'));
 const AdminApps = lazy(() => import('./pages/operations/admin/apps-registry'));
 const AdminRuns = lazy(() => import('./pages/operations/admin/run-viewer'));
 const AdminApprovals = lazy(() => import('./pages/operations/admin/approval-queue'));
@@ -1208,6 +1209,9 @@ function AppInner() {
         </Route>
         <Route path={`${base}/operations/admin/flags`}>
           <WithShell><AdminFlags /></WithShell>
+        </Route>
+        <Route path={`${base}/operations/admin/runtime-config`}>
+          <WithShell><AdminRuntimeConfig /></WithShell>
         </Route>
         <Route path={`${base}/operations/admin/apps`}>
           <WithShell><AdminApps /></WithShell>
