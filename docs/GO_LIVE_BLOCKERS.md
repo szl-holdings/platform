@@ -46,9 +46,11 @@ This file does not spin. If a launch happens with the items below unresolved, he
 - **Mitigation:** Cut the deploy from `main` at a known-green commit. Rolling subsequent merges into the live deploy is supported by Replit autoscale; verify each merge against `/api/health` post-merge.
 
 ### S6. `governance-restart-process.test.ts` carries an open failure
-- **Status:** POST `/api/guardrail-configs` returns 500 inside the spawned production-bundle child process during the OS-level restart smoke test. Test was not skipped to make CI pass — it is catalogued as a known carried failure per the task contract.
-- **Owner:** Task #4622 (feature-flag and runtime config API regression coverage) is the closest open task touching guardrail-configs surface; if that task does not resolve it, file a follow-up against the api-server route owner of `/api/guardrail-configs`.
-- **What goes wrong:** A production restart could leave the guardrail-configs write path silently broken — but only if the bug exists at runtime, not just in the spawned-bundle path the test exercises. Manual smoke of `POST /api/guardrail-configs` against the deployed instance is required at T+5 minutes per the verification runbook.
+- **Status:** POST `/api/guardrail-configs` returns 500 inside the spawned production-bundle child process during the OS-level restart smoke test. Test was NOT skipped to make CI pass — it is catalogued as a known carried failure per the task contract.
+- **Suspected root cause:** Linked to B4. The spawned `dist/index.mjs` child boots against the same Postgres but the drizzle-kit schema sync runs from the parent process and hits the 60 s SIGTERM. The child therefore boots against a possibly-stale schema. The route handler at `artifacts/api-server/src/routes/guardian.ts:3595` is itself fine (verified by reading the code: it does a single `db.insert(guardrailConfigsTable)` with all columns provided); the 500 is an upstream DB-layer error.
+- **Verified live:** A direct POST against the running api-server in this workspace (with bearer-token CSRF bypass per `middlewares/csrf.ts:283`) reaches the route handler. The CSRF bypass IS in place — the bug lives in the spawned-bundle interaction with the schema sync, not in the runtime route code.
+- **Owner:** Task #4622 (feature-flag and runtime config API regression coverage) is the closest open task touching the guardrail-configs surface; if that task does not resolve it, file a follow-up against the api-server route owner of `/api/guardrail-configs`. Resolving B4 (drizzle-kit timeout) is the upstream fix.
+- **Manual smoke required:** `POST /api/guardrail-configs` against the deployed instance at T+5 minutes per the verification runbook with a real bearer token.
 
 ### S2. `firestorm` brand still present in some legacy URLs and audit logs
 - **Status:** Tasks #1437 / #1438 / #3419 partial. Some source files still carry the deprecated name.
@@ -75,6 +77,6 @@ This file does not spin. If a launch happens with the items below unresolved, he
 
 ## Recommended go/no-go
 
-**Conditional go.** Launch only if B1, B3, and B4 are resolved (or the affected surfaces are hidden behind a feature flag). B2 is mitigatable with a "soft launch" — deploy at low traffic, watch metrics via `/api/health`, ramp up.
+**Conditional go.** Launch only if B1, B3, B4, and B5 are resolved (or the affected surfaces are hidden behind a feature flag / B5 confirmed as already-correct production topology). B2 is mitigatable with a "soft launch" — deploy at low traffic, watch metrics via `/api/health`, ramp up.
 
-**No-go** if any of B1–B4 are open at T-30 minutes.
+**No-go** if any of **B1–B5** are open at T-30 minutes. (`GO_LIVE_VERIFICATION.md` uses the same B1–B5 taxonomy.)

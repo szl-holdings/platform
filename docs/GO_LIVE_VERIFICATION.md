@@ -63,6 +63,8 @@ A11oy SLO dashboard reads `/api/health` directly via the existing dashboard data
 
 ## 3. Deploy
 
+The deploy itself is **user-initiated** through the Replit Publish UI; it cannot be triggered from a code path. The platform team / operator runs:
+
 Replit autoscale, configured in `.replit`:
 
 ```toml
