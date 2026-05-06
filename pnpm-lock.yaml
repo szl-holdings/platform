@@ -19,8 +19,8 @@ catalogs:
       specifier: ^4.2.4
       version: 4.2.4
     '@tanstack/react-query':
-      specifier: 5.100.5
-      version: 5.100.5
+      specifier: 5.100.9
+      version: 5.100.9
     '@types/node':
       specifier: 25.3.5
       version: 25.3.5
@@ -422,7 +422,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -546,7 +546,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -629,11 +629,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@workspace/aef-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
@@ -679,7 +679,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -768,11 +768,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -818,7 +818,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -892,11 +892,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -942,7 +942,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1040,11 +1040,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -1090,7 +1090,7 @@ importers:
         version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1156,7 +1156,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.78.0
-        version: 0.78.0(zod@4.3.6)
+        version: 0.78.0(zod@4.4.3)
       '@google/genai':
         specifier: ^1.44.0
         version: 1.47.0(@modelcontextprotocol/sdk@1.29.0)
@@ -1189,7 +1189,7 @@ importers:
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(pg@8.20.0)
       openai:
         specifier: ^6.27.0
-        version: 6.33.0(ws@8.20.0)(zod@4.3.6)
+        version: 6.33.0(ws@8.20.0)(zod@4.4.3)
       p-limit:
         specifier: ^7.3.0
         version: 7.3.0
@@ -1214,7 +1214,7 @@ importers:
     dependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
     devDependencies:
       '@szl-holdings/api-spec':
         specifier: workspace:*
@@ -1498,7 +1498,7 @@ importers:
     dependencies:
       openai:
         specifier: ^6.27.0
-        version: 6.33.0(ws@8.20.0)(zod@4.3.6)
+        version: 6.33.0(ws@8.20.0)(zod@4.4.3)
       p-limit:
         specifier: ^7.3.0
         version: 7.3.0
@@ -1532,7 +1532,7 @@ importers:
         version: 1.29.0
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@workspace/nexus-mcp':
         specifier: workspace:*
         version: link:../../packages/nexus-mcp
@@ -1550,14 +1550,14 @@ importers:
   lib/mobile-shared:
     dependencies:
       '@tanstack/query-async-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -1567,7 +1567,7 @@ importers:
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.5))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -1924,14 +1924,14 @@ importers:
         specifier: workspace:*
         version: link:../replit-auth-web
       '@tanstack/query-persist-client-core':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.100.5
-        version: 5.100.5
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@udecode/plate-common':
         specifier: ^42.0.0
         version: 42.0.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -2797,7 +2797,7 @@ importers:
     devDependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.100.5(react@19.2.5)
+        version: 5.100.9(react@19.2.5)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -7214,20 +7214,28 @@ packages:
     peerDependencies:
       vite: 8.0.10
 
-  '@tanstack/query-async-storage-persister@5.100.5':
-    resolution: {integrity: sha512-Jdke52IjYiv6WDcMbOT9ujWatJSqxwd4zarT8rqkRdc9VgFUaeuTJ57O1Vnu6RVDRnWB2B0mOV8fRZDZ1E4Scg==}
+  '@tanstack/query-async-storage-persister@5.100.9':
+    resolution: {integrity: sha512-KTWqpXIAwuR1bSIxfOnoRr7hOMxfrtLk9kxSuDfOu4sSBEFqHp9+aDp8Ig6YdHxCclNI86SizPnmKmSqNxcJxg==}
 
   '@tanstack/query-core@5.100.5':
     resolution: {integrity: sha512-t20KrhKkf0HXzqQkPbJ5erhFesup68BAbwFgYmTrS7bxMF7O5MdmL8jUkik4thsG7Hg00fblz30h6yF1d5TxGg==}
 
-  '@tanstack/query-persist-client-core@5.100.5':
-    resolution: {integrity: sha512-Vp8UL1GL/QRBWmUT+6pUmsjNhL72Vme8hJ7fTox2A8/syrCab0nCHBbskbhioRtJrdLw7k8sZos/068A8ZTEwA==}
+  '@tanstack/query-core@5.100.9':
+    resolution: {integrity: sha512-SJSFw1S8+kQ0+knv/XGfrbocWoAlT7vDKsSImtLx3ZPQmEcR46hkDjLSvynSy25N8Ms4tIEini1FuBd5k7IscQ==}
 
-  '@tanstack/query-sync-storage-persister@5.100.5':
-    resolution: {integrity: sha512-W6y30mo+IgI4QMTtUpkJcaZ/xHwkEfzuA82tUoz9X0ZffTW2hcjglV9usXRbmU7AOr087DhvaBVF+NvSbPu1Mg==}
+  '@tanstack/query-persist-client-core@5.100.9':
+    resolution: {integrity: sha512-sCPZZp3D9sOeqcA4SDxjUIm4wVq8PwHebH4ouFZetwjT4xvGjT/cLBQ4Sst+BFcFuk745pCPkf3T4MFliLHECQ==}
+
+  '@tanstack/query-sync-storage-persister@5.100.9':
+    resolution: {integrity: sha512-v3cShfFtrxiLwc8b/fjQbUO4wIT//wLT5x4WWl8k/11s2ZyW9qpXE4xFWhiuAHCvKLluF0iI7ZnhT7BAlihwgg==}
 
   '@tanstack/react-query@5.100.5':
     resolution: {integrity: sha512-aNwj1mi2v2bQ9IxkyR1grLOUkv3BYWoykHy9KDyLNbjC3tsahbOHJibK+Wjtr1wRhG59/AvJhiJG5OlthaCgJA==}
+    peerDependencies:
+      react: 19.2.5
+
+  '@tanstack/react-query@5.100.9':
+    resolution: {integrity: sha512-Oa44XkaI3kCNN6ME0KByU3xT3SEUNOMfZpHxL6+wFoTm+OeUFYHKdeYVe0aOXlRDm/f15sgLwEt2HDorIdW8+A==}
     peerDependencies:
       react: 19.2.5
 
@@ -12559,6 +12567,9 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
   zustand-x@6.1.0:
     resolution: {integrity: sha512-lW1Fs29bLCrerWDa3lZLPuEn+ZkbSGzXdwdImKLJUtI2OqlDjpcFac5WTzCPs2ul/igwXFnGiKH1mdn+1Pl2mw==}
     peerDependencies:
@@ -12648,11 +12659,11 @@ snapshots:
       tslib: 2.8.1
       web-vitals: 5.1.0
 
-  '@anthropic-ai/sdk@0.78.0(zod@4.3.6)':
+  '@anthropic-ai/sdk@0.78.0(zod@4.4.3)':
     dependencies:
       json-schema-to-ts: 3.1.1
     optionalDependencies:
-      zod: 4.3.6
+      zod: 4.4.3
 
   '@apollo/client@3.14.1(@types/react@19.2.14)(graphql-ws@6.0.8(graphql@16.13.2)(ws@8.20.0))(graphql@16.13.2)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
@@ -14334,8 +14345,8 @@ snapshots:
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
-      zod: 4.3.6
-      zod-to-json-schema: 3.25.2(zod@4.3.6)
+      zod: 4.4.3
+      zod-to-json-schema: 3.25.2(zod@4.4.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -15794,7 +15805,7 @@ snapshots:
 
   '@scalar/openapi-types@0.5.4':
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.3
 
   '@scalar/openapi-upgrader@0.1.11':
     dependencies:
@@ -16182,25 +16193,32 @@ snapshots:
       tailwindcss: 4.2.4
       vite: 8.0.10(@types/node@25.3.5)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  '@tanstack/query-async-storage-persister@5.100.5':
+  '@tanstack/query-async-storage-persister@5.100.9':
     dependencies:
-      '@tanstack/query-core': 5.100.5
-      '@tanstack/query-persist-client-core': 5.100.5
+      '@tanstack/query-core': 5.100.9
+      '@tanstack/query-persist-client-core': 5.100.9
 
   '@tanstack/query-core@5.100.5': {}
 
-  '@tanstack/query-persist-client-core@5.100.5':
-    dependencies:
-      '@tanstack/query-core': 5.100.5
+  '@tanstack/query-core@5.100.9': {}
 
-  '@tanstack/query-sync-storage-persister@5.100.5':
+  '@tanstack/query-persist-client-core@5.100.9':
     dependencies:
-      '@tanstack/query-core': 5.100.5
-      '@tanstack/query-persist-client-core': 5.100.5
+      '@tanstack/query-core': 5.100.9
+
+  '@tanstack/query-sync-storage-persister@5.100.9':
+    dependencies:
+      '@tanstack/query-core': 5.100.9
+      '@tanstack/query-persist-client-core': 5.100.9
 
   '@tanstack/react-query@5.100.5(react@19.2.5)':
     dependencies:
       '@tanstack/query-core': 5.100.5
+      react: 19.2.5
+
+  '@tanstack/react-query@5.100.9(react@19.2.5)':
+    dependencies:
+      '@tanstack/query-core': 5.100.9
       react: 19.2.5
 
   '@testing-library/dom@10.4.0':
@@ -19985,10 +20003,10 @@ snapshots:
       ws: 8.20.0
       zod: 3.25.76
 
-  openai@6.33.0(ws@8.20.0)(zod@4.3.6):
+  openai@6.33.0(ws@8.20.0)(zod@4.4.3):
     optionalDependencies:
       ws: 8.20.0
-      zod: 4.3.6
+      zod: 4.4.3
 
   optics-ts@2.4.1: {}
 
@@ -22061,15 +22079,17 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.7.0
 
-  zod-to-json-schema@3.25.2(zod@4.3.6):
+  zod-to-json-schema@3.25.2(zod@4.4.3):
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.3
 
   zod@3.25.67: {}
 
   zod@3.25.76: {}
 
   zod@4.3.6: {}
+
+  zod@4.4.3: {}
 
   zustand-x@6.1.0(react-dom@19.2.5(react@19.2.5))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.5))(react@19.2.5)(scheduler@0.27.0)(zustand@5.0.12(@types/react@19.2.14)(immer@10.2.0)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))):
     dependencies:
