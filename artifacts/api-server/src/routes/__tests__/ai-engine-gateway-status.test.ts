@@ -151,6 +151,7 @@ vi.mock('@szl-holdings/ai-engine', () => ({
 }));
 
 const { default: aiEngineRouter } = await import('../ai-engine.js');
+const { circuitBreakerResponseSchema } = await import('../../lib/circuit-breaker-contract.js');
 
 function buildApp() {
   const app = express();
@@ -188,22 +189,23 @@ describe('GET /ai/gateway/status', () => {
     const res = await request(buildApp()).get('/ai/gateway/status');
 
     expect(res.status).toBe(200);
-    expect(res.body.circuitBreakers).toBeDefined();
-    expect(res.body.circuitBreakers.summary).toEqual({
+    const parsed = circuitBreakerResponseSchema.parse(res.body.circuitBreakers);
+
+    expect(parsed.summary).toEqual({
       openCount: 0,
       halfOpenCount: 1,
       closedCount: 5,
     });
-    expect(res.body.circuitBreakers.providers).toHaveLength(2);
-    expect(res.body.circuitBreakers.providers[1]).toMatchObject({
+    expect(parsed.providers).toHaveLength(2);
+    expect(parsed.providers[1]).toMatchObject({
       provider: 'anthropic',
       state: 'half-open',
       consecutiveFailures: 3,
       totalTripped: 2,
     });
-    expect(typeof res.body.circuitBreakers.providers[1].openedAt).toBe('string');
-    expect(typeof res.body.circuitBreakers.providers[1].lastTestedAt).toBe('string');
-    expect(res.body.circuitBreakers.providers[0].openedAt).toBeNull();
+    expect(typeof parsed.providers[1].openedAt).toBe('string');
+    expect(typeof parsed.providers[1].lastTestedAt).toBe('string');
+    expect(parsed.providers[0].openedAt).toBeNull();
   });
 
   it('includes an updatedAt ISO timestamp', async () => {

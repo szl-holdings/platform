@@ -156,6 +156,7 @@ vi.mock('@szl-holdings/ai-engine', () => ({
 }));
 
 const { default: aiEngineRouter } = await import('../ai-engine.js');
+const { circuitBreakerResponseSchema } = await import('../../lib/circuit-breaker-contract.js');
 
 function buildApp() {
   const app = express();
@@ -184,61 +185,33 @@ describe('GET /ai/health', () => {
     expect(typeof res.body.auditLogSize).toBe('number');
   });
 
-  it('exposes circuitBreakers.summary with openCount, halfOpenCount, closedCount', async () => {
+  it('exposes a circuitBreakers block that conforms to the shared schema', async () => {
     const res = await request(buildApp()).get('/ai/health');
 
     expect(res.status).toBe(200);
     expect(getCircuitBreakerMetricsMock).toHaveBeenCalled();
 
-    expect(res.body.circuitBreakers).toBeDefined();
-    expect(res.body.circuitBreakers.summary).toEqual({
+    const parsed = circuitBreakerResponseSchema.parse(res.body.circuitBreakers);
+
+    expect(parsed.summary).toEqual({
       openCount: 1,
       halfOpenCount: 1,
       closedCount: 3,
     });
-    expect(typeof res.body.circuitBreakers.summary.openCount).toBe('number');
-    expect(typeof res.body.circuitBreakers.summary.halfOpenCount).toBe('number');
-    expect(typeof res.body.circuitBreakers.summary.closedCount).toBe('number');
-  });
+    expect(parsed.providers).toHaveLength(3);
 
-  it('exposes circuitBreakers.providers as a non-empty array with the per-provider shape', async () => {
-    const res = await request(buildApp()).get('/ai/health');
-
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.circuitBreakers.providers)).toBe(true);
-    expect(res.body.circuitBreakers.providers.length).toBeGreaterThan(0);
-
-    for (const entry of res.body.circuitBreakers.providers) {
-      expect(entry).toEqual(
-        expect.objectContaining({
-          provider: expect.any(String),
-          state: expect.any(String),
-          consecutiveFailures: expect.any(Number),
-        }),
-      );
-      expect(['open', 'closed', 'half-open']).toContain(entry.state);
-      expect('openedAt' in entry).toBe(true);
-    }
-
-    const closed = res.body.circuitBreakers.providers.find(
-      (p: { provider: string }) => p.provider === 'openai',
-    );
+    const closed = parsed.providers.find((p) => p.provider === 'openai');
     expect(closed).toMatchObject({
-      provider: 'openai',
       state: 'closed',
       consecutiveFailures: 0,
       openedAt: null,
     });
 
-    const opened = res.body.circuitBreakers.providers.find(
-      (p: { provider: string }) => p.provider === 'anthropic',
-    );
+    const opened = parsed.providers.find((p) => p.provider === 'anthropic');
     expect(opened).toMatchObject({
-      provider: 'anthropic',
       state: 'open',
       consecutiveFailures: 5,
     });
-    expect(typeof opened.openedAt).toBe('string');
-    expect(() => new Date(opened.openedAt as string).toISOString()).not.toThrow();
+    expect(typeof opened?.openedAt).toBe('string');
   });
 });
