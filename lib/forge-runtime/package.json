@@ -28,7 +28,8 @@
     "drizzle-orm": "catalog:",
     "esbuild": "^0.25",
     "pino": "^9",
-    "pino-pretty": "^13"
+    "pino-pretty": "^13",
+    "@workspace/tool-mesh": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:"
