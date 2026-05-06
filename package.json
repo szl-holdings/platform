@@ -154,7 +154,7 @@
     "express": "^5.2.1",
     "happy-dom": "^20.8.9",
     "lru-cache": "^11.3.5",
-    "oxlint": "^1.60.0",
+    "oxlint": "^1.62.0",
     "supertest": "^7.2.2",
     "tsx": "catalog:",
     "turbo": "^2.9.6",
