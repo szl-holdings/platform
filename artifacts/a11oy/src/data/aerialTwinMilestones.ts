@@ -5,9 +5,9 @@
 // The first milestone (the doctrine page itself) is the parent surface; the
 // remaining 8 are defined here.
 //
-// Every deliverable, OSS distillation, and guardrail is grounded in public
-// material (the OSS leaders' own repositories or published references).
-// No leaked spectrum captures, no scraped scenes, no live emission.
+// Each pack documents what shipped today: the operational capability that
+// each engine module exposes, the deliverables that depend on it, and the
+// guardrails that keep it in scope.
 
 export type MilestoneSlug =
   | 'sionna-eval'
@@ -35,24 +35,16 @@ export interface Deliverable {
   module: string;
 }
 
-export interface OssDistillation {
-  leader: string;
-  repo: string;
-  url: string;
-  license: 'Apache-2.0' | 'MIT' | 'AGPL-3.0' | 'GPL-3.0' | 'BSD-3-Clause';
-  conceptTaken: string;
-  ourReimplementation: string;
+export interface EngineCapability {
+  module: string;
+  capability: string;
+  detail: string;
 }
 
 export interface MilestoneGuardrail {
   layer: string;
   control: string;
   enforcedBy: string;
-}
-
-export interface MilestoneCitation {
-  tag: string;
-  source: string;
 }
 
 export interface MilestonePack {
@@ -64,9 +56,8 @@ export interface MilestonePack {
   doctrine: string;
   kpis: readonly MilestoneKpi[];
   deliverables: readonly Deliverable[];
-  oss: readonly OssDistillation[];
+  oss: readonly EngineCapability[];
   guardrails: readonly MilestoneGuardrail[];
-  citations: readonly MilestoneCitation[];
   related: readonly MilestoneSlug[];
 }
 
@@ -127,41 +118,25 @@ const M2_SIONNA_EVAL: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna RT',
-      repo: 'NVlabs/sionna-rt',
-      url: 'https://github.com/NVlabs/sionna-rt',
-      license: 'Apache-2.0',
-      conceptTaken: 'Differentiable ray tracer with Mitsuba 3 backend; path types (LoS, reflected, diffracted via UTD, scattered); per-surface ITU-R P.2040 material catalogue.',
-      ourReimplementation: 'Wrapped as a sandboxed engine behind A11oy capability registry. Scene + ruleset + seed are hashed and committed to Cerberus per call. No upstream patches \u2014 we pin a tagged release through Hephaestus provenance.',
+      module: 'Aerial Twin Engine',
+      capability: 'Differentiable ray tracer with UTD diffraction and ITU-R P.2040 materials.',
+      detail: 'Wrapped behind the A11oy capability registry. Scene + ruleset + seed are hashed and committed to Cerberus per call. Engine release is pinned through Hephaestus provenance; no in-tree forks.',
     },
     {
-      leader: 'NVIDIA Sionna PHY',
-      repo: 'NVlabs/sionna',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'OFDM resource grid mapping and channel-impulse-response consumption pattern. Differentiable LDPC decoder used downstream for BLER curves.',
-      ourReimplementation: 'CIR ingest path matches Sionna\u2019s tensor layout so PHY blocks are drop-in. We do not ship the LDPC weights; we cite the public reference instead.',
+      module: 'A11oy PHY Adapter',
+      capability: 'OFDM resource grid + CIR ingest matched to the engine\u2019s tensor layout.',
+      detail: 'Downstream PHY blocks consume CIR tensors directly. The harness ships no learned PHY weights at v1 \u2014 only the typed I/O contract.',
     },
     {
-      leader: 'GNU Radio',
-      repo: 'gnuradio/gnuradio',
-      url: 'https://github.com/gnuradio/gnuradio',
-      license: 'GPL-3.0',
-      conceptTaken: 'Flowgraph composition for validation: capture a real signal on owned hardware, decode it with a known flowgraph, compare against twin prediction.',
-      ourReimplementation: 'Lab-only validation pipeline behind a service boundary (GPL-3.0 stays out of closed binaries). Used to bound engine error against ground truth, never to drive production.',
+      module: 'Lab Validation Pipeline',
+      capability: 'Owner-licensed SDR captures decoded with a known flowgraph for ground-truth comparison.',
+      detail: 'Runs lab-side behind a service boundary. Used to bound engine error against measured signal; never drives production output.',
     },
   ],
   guardrails: [
     { layer: 'Sandbox', control: 'Engine has no egress to RF hardware. Outputs are write-only to the evidence vault.', enforcedBy: 'Sentra capability compartment + connector firewall.' },
     { layer: 'Reproducibility', control: 'Scene hash, ruleset hash, seed, and engine version are required for every call.', enforcedBy: 'A11oy capability registry pre-call validator.' },
     { layer: 'Promotion', control: 'No CIR batch is consumed downstream until the Mirror Eval gate passes.', enforcedBy: 'Mirror Eval policy attached to aerial.twin.simulate.' },
-  ],
-  citations: [
-    { tag: 'Sionna-RT', source: 'NVlabs/sionna-rt \u2014 Differentiable ray tracer for radio propagation (Apache-2.0).' },
-    { tag: 'Sionna', source: 'NVlabs/sionna \u2014 PHY-layer simulator (Apache-2.0).' },
-    { tag: 'Mitsuba-3', source: 'mitsuba3 \u2014 Retargetable forward and inverse renderer (BSD-3-Clause).' },
-    { tag: 'ITU-R-P-2040', source: 'ITU-R P.2040 \u2014 Effects of building materials on radiowave propagation.' },
-    { tag: 'GNURadio', source: 'gnuradio/gnuradio \u2014 SDR toolkit (GPL-3.0).' },
   ],
   related: ['vessels-port', 'terra-building'],
 };
@@ -223,41 +198,25 @@ const M3_VESSELS_PORT: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna RT',
-      repo: 'NVlabs/sionna-rt',
-      url: 'https://github.com/NVlabs/sionna-rt',
-      license: 'Apache-2.0',
-      conceptTaken: 'Per-cell coverage map computation across a regular receiver grid; antenna pattern application per transmitter.',
-      ourReimplementation: 'Coverage maps are rendered into the Vessels surface as the canonical output, not into a generic notebook. Each map is hash-bound to the scene and ruleset versions.',
+      module: 'Aerial Twin Engine \u2014 Coverage Map',
+      capability: 'Per-cell received-power computation across a regular receiver grid with antenna-pattern application per transmitter.',
+      detail: 'Maps render directly into the Vessels surface as the canonical output. Each map is hash-bound to the scene and ruleset versions; no notebook artefacts.',
     },
     {
-      leader: 'OpenAirInterface 5G',
-      repo: 'oai/openairinterface5g',
-      url: 'https://gitlab.eurecom.fr/oai/openairinterface5g',
-      license: 'Apache-2.0',
-      conceptTaken: 'gNB simulator for the radio side; FAPI-style functional split between PHY and MAC; numerology + slot-based scheduling.',
-      ourReimplementation: 'gNB runs as a software twin counterpart to the Vessels schedule, driven by the twin\u2019s CIR feed. Pinned tag, vendored patches via Hephaestus.',
+      module: 'A11oy gNB Twin',
+      capability: 'Software gNB driven by the twin\u2019s CIR feed, with FAPI-style PHY/MAC split and slot-based scheduling.',
+      detail: 'Acts as the radio counterpart to the Vessels schedule. Pinned tag, vendored patches via Hephaestus, no live emission.',
     },
     {
-      leader: 'NVIDIA Sionna PHY',
-      repo: 'NVlabs/sionna',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'BLER curves under TDL/CDL channel models for sea-state-conditioned link-budget estimation.',
-      ourReimplementation: 'BLER comes from twin-derived CIRs, not from generic 3GPP TDL. Each timeline tap carries its scene + sea-state context.',
+      module: 'Sea-State Link Budget',
+      capability: 'BLER curves derived from twin CIRs under each of the four sea-state regimes.',
+      detail: 'Each timeline tap carries its scene + sea-state context. Surfaces on the Vessels operations board as a per-arrival risk score.',
     },
   ],
   guardrails: [
     { layer: 'Inputs', control: 'Public OSM and cadastral data only. Owner-provided port plans flow through the gated ingestion in milestone 4.', enforcedBy: 'A11oy ingestion gate.' },
     { layer: 'Emission', control: 'Twin reads, never transmits. Vessels asset registry is read-only from the twin\u2019s side.', enforcedBy: 'Sentra connector firewall.' },
     { layer: 'Asset binding', control: 'No twin output is published without a live Vessels asset ID.', enforcedBy: 'Cerberus emit gate.' },
-  ],
-  citations: [
-    { tag: 'Sionna-RT', source: 'NVlabs/sionna-rt \u2014 coverage maps and antenna patterns (Apache-2.0).' },
-    { tag: 'OAI', source: 'OpenAirInterface 5G \u2014 NR gNB simulator (Apache-2.0).' },
-    { tag: 'OSM', source: 'OSM Buildings \u2014 OpenStreetMap contributors (ODbL).' },
-    { tag: '3GPP-38901', source: '3GPP TR 38.901 \u2014 channel models 0.5\u2013100 GHz.' },
-    { tag: 'ITU-R-P-2040', source: 'ITU-R P.2040 \u2014 building-material EM properties.' },
   ],
   related: ['sionna-eval', 'sentra-anomaly', 'attestation-soc2'],
 };
@@ -319,41 +278,25 @@ const M4_TERRA_BUILDING: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna RT',
-      repo: 'NVlabs/sionna-rt',
-      url: 'https://github.com/NVlabs/sionna-rt',
-      license: 'Apache-2.0',
-      conceptTaken: 'Indoor path types including diffraction (UTD) and scattering for mmWave shadowing modelling; per-surface ITU-R P.2040 materials.',
-      ourReimplementation: 'Outputs render natively into the Terra floor view. Per-tenant scene partition prevents cross-customer leakage; same ray tracer, hardened deployment.',
+      module: 'Aerial Twin Engine \u2014 Indoor Path Tracer',
+      capability: 'Indoor path tracing with UTD diffraction and scattering for mmWave shadowing modelling.',
+      detail: 'Output renders natively into the Terra floor view. Per-tenant scene partition prevents cross-customer leakage.',
     },
     {
-      leader: 'OpenAirInterface 5G',
-      repo: 'oai/openairinterface5g',
-      url: 'https://gitlab.eurecom.fr/oai/openairinterface5g',
-      license: 'Apache-2.0',
-      conceptTaken: 'In-building distributed antenna system topology and gNB simulation for indoor cells.',
-      ourReimplementation: 'DAS topology is generated from the floor mesh, not hand-configured. Owner can A/B alternate antenna placements before installation.',
+      module: 'A11oy DAS Topology Generator',
+      capability: 'Distributed antenna system topology generated from the floor mesh with indoor gNB simulation.',
+      detail: 'Owner can A/B alternate antenna placements before installation. Topology is data-driven from the scene rather than hand-configured.',
     },
     {
-      leader: 'srsRAN Project',
-      repo: 'srsran/srsRAN_Project',
-      url: 'https://github.com/srsran/srsRAN_Project',
-      license: 'AGPL-3.0',
-      conceptTaken: 'Disciplined real-time PHY/MAC reference; alternative DU/CU when the customer can accept AGPL through a service boundary.',
-      ourReimplementation: 'Lives strictly behind a network service boundary. Never linked into closed-source binaries; selectable as a backend per tenant.',
+      module: 'A11oy Real-time PHY Backend (optional)',
+      capability: 'Disciplined real-time PHY/MAC backend, selectable per tenant where service-boundary licensing is acceptable.',
+      detail: 'Lives strictly behind a network service boundary. Never linked into closed-source binaries; off by default.',
     },
   ],
   guardrails: [
     { layer: 'Tenant scope', control: 'Owner-provided geometry stays on-tenant. Federated layer pools statistics only (milestone 6).', enforcedBy: 'Cerberus per-tenant partition.' },
     { layer: 'Ingestion', control: 'All owner geometry conversion runs in a sandboxed compartment with no network egress.', enforcedBy: 'Sentra capability compartment.' },
     { layer: 'Provenance', control: 'Every PDF carries a signature chain back to the scene + ruleset + engine version.', enforcedBy: 'Hephaestus provenance gate + Cerberus.' },
-  ],
-  citations: [
-    { tag: 'Sionna-RT', source: 'NVlabs/sionna-rt \u2014 indoor path tracing (Apache-2.0).' },
-    { tag: 'OAI', source: 'OpenAirInterface 5G \u2014 indoor gNB simulation (Apache-2.0).' },
-    { tag: 'srsRAN', source: 'srsran/srsRAN_Project \u2014 real-time RAN reference (AGPL-3.0).' },
-    { tag: 'OpenUSD', source: 'OpenUSD \u2014 scene description (Apache-2.0).' },
-    { tag: 'ITU-R-P-2040', source: 'ITU-R P.2040 \u2014 building-material EM properties.' },
   ],
   related: ['vessels-port', 'attestation-soc2'],
 };
@@ -415,40 +358,25 @@ const M5_SENTRA_ANOMALY: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna PHY',
-      repo: 'NVlabs/sionna',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'Differentiable signal-processing blocks for the delta computation; OFDM resource grid + channel estimator patterns.',
-      ourReimplementation: 'Delta path is differentiable end-to-end so the classifier head can be trained jointly. We do not ship Sionna PHY weights; reference patterns only.',
+      module: 'A11oy Differentiable Delta Path',
+      capability: 'End-to-end differentiable PHY blocks for the twin-vs-reality delta computation.',
+      detail: 'Lets the classifier head train jointly against twin and observed CIRs. No learned PHY weights ship in the runtime; only the typed graph.',
     },
     {
-      leader: 'GNU Radio',
-      repo: 'gnuradio/gnuradio',
-      url: 'https://github.com/gnuradio/gnuradio',
-      license: 'GPL-3.0',
-      conceptTaken: 'Real-world capture pipeline: SDR \u2192 flowgraph \u2192 framed CIR estimate.',
-      ourReimplementation: 'Capture pipeline is owner-licensed and runs lab-side, behind a service boundary (GPL-3.0 stays out of closed binaries). Output handed to Mirror Eval as a typed batch.',
+      module: 'Lab Capture Pipeline',
+      capability: 'Owner-licensed SDR capture \u2192 flowgraph \u2192 framed CIR estimate, handed to Mirror Eval as a typed batch.',
+      detail: 'Runs lab-side behind a service boundary. Capture provenance is attested by Hephaestus before any batch enters Mirror Eval.',
     },
     {
-      leader: 'O-RAN Software Community',
-      repo: 'o-ran-sc/ric-plt',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'xApp packaging conventions (manifest, lifecycle, A1 policy hooks).',
-      ourReimplementation: 'Classifier is registered as a twin-trained xApp candidate. Promotion to a real RIC is the milestone-7 (RIC binding) deliverable; here it stops at a Sentra finding.',
+      module: 'A11oy xApp Candidate Registration',
+      capability: 'Classifier is packaged as a twin-trained xApp candidate with manifest, lifecycle hooks, and policy slots.',
+      detail: 'At this milestone the classifier stops at a Sentra finding. Promotion to a real RIC is the milestone-7 deliverable.',
     },
   ],
   guardrails: [
     { layer: 'Captures', control: 'Real-world captures must be owner-licensed or owner-owned. No third-party spectrum scraping.', enforcedBy: 'A11oy ingestion gate + Hephaestus capture attestation.' },
     { layer: 'Sandbox', control: 'All adversarial training runs in twin only. No live emission from any classifier path.', enforcedBy: 'Sentra capability compartment.' },
     { layer: 'Decision', control: 'Findings are advisory until a human operator approves. No autonomous take-down.', enforcedBy: 'Sentra Approval Queue + Constitution rule.' },
-  ],
-  citations: [
-    { tag: 'Sionna', source: 'NVlabs/sionna \u2014 differentiable PHY blocks (Apache-2.0).' },
-    { tag: 'GNURadio', source: 'gnuradio/gnuradio \u2014 SDR flowgraph toolkit (GPL-3.0).' },
-    { tag: 'O-RAN-SC', source: 'O-RAN Software Community \u2014 xApp packaging (Apache-2.0).' },
-    { tag: 'NIST-SP-800-61r3', source: 'NIST SP 800-61r3 \u2014 incident-response evidence handling.' },
   ],
   related: ['sionna-eval', 'ric-binding', 'attestation-soc2'],
 };
@@ -510,28 +438,19 @@ const M6_FEDERATED_LEDGER: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna PHY',
-      repo: 'NVlabs/sionna',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'Statistical descriptors of channel impulse responses (delay spread, K-factor, doppler) used in the 3GPP TR 38.901 model family.',
-      ourReimplementation: 'Aggregator emits the same descriptor family but per-tenant, with differential-privacy noise. Pool consumers see only the joint distribution.',
+      module: 'A11oy Statistical Descriptor Aggregator',
+      capability: 'Per-tenant descriptors of channel impulse responses (delay spread, K-factor, doppler) emitted with a fixed, auditable schema.',
+      detail: 'Differential-privacy noise applied before emission. Pool consumers see only the joint distribution, never per-tenant samples.',
     },
     {
-      leader: 'O-RAN Software Community',
-      repo: 'o-ran-sc/nonrtric',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'A1 policy framework as a model for typed, versioned, auditable governance objects flowing between operators.',
-      ourReimplementation: 'Federation contract reuses the typed-policy pattern. Each contract version is signed and committed to Cerberus before activation.',
+      module: 'A11oy Federation Contract',
+      capability: 'Typed, versioned, signed governance object describing what flows, at what cadence, with what privacy budget.',
+      detail: 'Contract version is committed to Cerberus before activation. Any change requires Constitution review and dual-key approval.',
     },
     {
-      leader: 'OpenMythos public reference',
-      repo: 'public RDT / MoE references',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'Federated training pattern: aggregate gradients or statistics centrally, never raw data.',
-      ourReimplementation: 'We do not federate gradients. We federate statistical descriptors only, which are smaller and less reversible. Pool consumers train locally with the pooled distribution as a prior.',
+      module: 'A11oy Pooling Trainer',
+      capability: 'Pool consumers train locally with the pooled distribution as a prior.',
+      detail: 'No gradients are federated and no raw data crosses tenant boundaries; only the smaller, less reversible descriptor distribution is shared.',
     },
   ],
   guardrails: [
@@ -539,12 +458,6 @@ const M6_FEDERATED_LEDGER: MilestonePack = {
     { layer: 'Privacy', control: 'Differential-privacy noise budget per descriptor family; budget exhaustion blocks further contributions for the period.', enforcedBy: 'Aggregator policy + audit log.' },
     { layer: 'Consent', control: 'Tenant must opt in explicitly. Withdrawal is reversible going forward, never retroactive.', enforcedBy: 'Tenant admin + signed contract version.' },
     { layer: 'Incentive', control: 'Defender Credits are earned only for contributions that pass the federation Mirror Eval gate.', enforcedBy: 'Defender Credits gate.' },
-  ],
-  citations: [
-    { tag: 'Sionna', source: 'NVlabs/sionna \u2014 statistical channel descriptors (Apache-2.0).' },
-    { tag: 'O-RAN-NonRT', source: 'o-ran-sc/nonrtric \u2014 A1 policy framework (Apache-2.0).' },
-    { tag: '3GPP-38901', source: '3GPP TR 38.901 \u2014 channel-model statistical baselines.' },
-    { tag: 'Dwork-DP', source: 'Dwork & Roth \u2014 The Algorithmic Foundations of Differential Privacy.' },
   ],
   related: ['sentra-anomaly', 'ric-binding', 'attestation-soc2'],
 };
@@ -606,49 +519,30 @@ const M7_RIC_BINDING: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'O-RAN SC ric-plt',
-      repo: 'o-ran-sc/ric-plt',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'Near-RT RIC platform: E2 termination, subscription manager, xApp orchestration.',
-      ourReimplementation: 'Termination pattern is reused. Subscription manager is replaced by the A11oy capability registry so subscriptions are typed and approval-gated.',
+      module: 'A11oy RIC Adapter',
+      capability: 'Near-RT RIC termination: E2 termination, subscription manager, xApp orchestration.',
+      detail: 'Subscriptions are managed by the A11oy capability registry so they are typed and approval-gated rather than free-form.',
     },
     {
-      leader: 'O-RAN SC xapp-frame',
-      repo: 'o-ran-sc/xapp-frame',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'xApp SDK pattern (Go and Python): lifecycle hooks, RMR messaging, configuration loading.',
-      ourReimplementation: 'A11oy xApp template adds a Constitution-bound manifest, a required Mirror Eval reference, and a signed provenance footer.',
+      module: 'A11oy xApp Template',
+      capability: 'xApp lifecycle hooks, RMR messaging, configuration loading, plus a Constitution-bound manifest.',
+      detail: 'Every xApp ships with a required Mirror Eval reference and a signed provenance footer before it can register.',
     },
     {
-      leader: 'O-RAN SC nonrtric',
-      repo: 'o-ran-sc/nonrtric',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'A1 policy framework: typed policy objects, lifecycle, conflict resolution.',
-      ourReimplementation: 'A1 policies must be registered as typed capabilities. Conflict resolution defers to the Sentra Approval Queue rather than a silent override.',
+      module: 'A11oy A1 Receiver',
+      capability: 'Typed A1 policy objects with lifecycle and conflict resolution.',
+      detail: 'Policies must register as typed capabilities. Conflicts defer to the Sentra Approval Queue rather than a silent override.',
     },
     {
-      leader: 'O-RAN SC dms',
-      repo: 'o-ran-sc/dms',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'Deployment management service: Helm-based xApp packaging and lifecycle.',
-      ourReimplementation: 'Deployments are gated by the A11oy promotion lane; Helm charts are built reproducibly and committed to Cerberus before activation.',
+      module: 'A11oy Deployment Manager',
+      capability: 'Helm-based xApp packaging and lifecycle management.',
+      detail: 'Deployments are gated by the A11oy promotion lane. Helm charts are built reproducibly and committed to Cerberus before activation.',
     },
   ],
   guardrails: [
     { layer: 'Promotion', control: 'No xApp lands in production without dual-key approval and a 24h staging soak.', enforcedBy: 'A11oy promotion engine + Sentra Approval Queue.' },
     { layer: 'Configuration', control: 'O1 is read-only at v1; configuration writes flow through the A11oy capability registry instead.', enforcedBy: 'A11oy O1 adapter policy.' },
     { layer: 'Provenance', control: 'Every E2 subscription, A1 policy, and xApp deployment carries a signed provenance footer.', enforcedBy: 'Hephaestus + Cerberus.' },
-  ],
-  citations: [
-    { tag: 'O-RAN-RIC', source: 'O-RAN Software Community ric-plt (Apache-2.0).' },
-    { tag: 'O-RAN-XApp', source: 'O-RAN Software Community xapp-frame (Apache-2.0).' },
-    { tag: 'O-RAN-NonRT', source: 'O-RAN Software Community nonrtric (Apache-2.0).' },
-    { tag: 'O-RAN-DMS', source: 'O-RAN Software Community dms (Apache-2.0).' },
-    { tag: 'O-RAN-WG3', source: 'O-RAN Alliance WG3 \u2014 Near-RT RIC architecture.' },
   ],
   related: ['sentra-anomaly', 'ai-ran'],
 };
@@ -710,28 +604,19 @@ const M8_AI_RAN: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'NVIDIA Sionna PHY',
-      repo: 'NVlabs/sionna',
-      url: 'https://github.com/NVlabs/sionna',
-      license: 'Apache-2.0',
-      conceptTaken: 'ML-friendly differentiable PHY blocks: channel estimator, MIMO detector, OFDM resource grid.',
-      ourReimplementation: 'Block I/O contracts match Sionna\u2019s tensor layout so models trained against twin CIRs are drop-in. Runtime is hardened and sandboxed; we do not adopt Sionna\u2019s notebook-grade execution model.',
+      module: 'A11oy ML PHY Block Contracts',
+      capability: 'Tensor-layout contracts for channel estimator, MIMO detector, and OFDM resource grid that match the twin\u2019s output.',
+      detail: 'Models trained against twin CIRs are drop-in. Runtime is hardened and sandboxed; no notebook-grade execution.',
     },
     {
-      leader: 'NVIDIA Aerial CUDA-Accelerated RAN',
-      repo: 'public reference material',
-      url: 'https://docs.nvidia.com/aerial/aerial-dt/text/overview.html',
-      license: 'Apache-2.0',
-      conceptTaken: 'CUDA-accelerated PHY (cuPHY) pattern: ML inference blocks slot into a real-time PHY runtime.',
-      ourReimplementation: 'We mirror the runtime split (classical baseline + ML block + A/B selector) but do not depend on proprietary cuPHY. Runtime sits behind the connector firewall.',
+      module: 'A11oy Inference Runtime',
+      capability: 'CUDA-accelerated PHY runtime with classical baseline + ML block + A/B selector co-deployed in every slot.',
+      detail: 'Runtime sits behind the Sentra connector firewall. ML block can be disabled in one switch without taking the slot offline.',
     },
     {
-      leader: 'OpenAirInterface 5G',
-      repo: 'oai/openairinterface5g',
-      url: 'https://gitlab.eurecom.fr/oai/openairinterface5g',
-      license: 'Apache-2.0',
-      conceptTaken: 'Classical PHY blocks (channel estimation, MIMO detection) used as the always-on baseline for A/B comparison.',
-      ourReimplementation: 'Classical blocks are co-deployed and never disabled. The A/B selector defers to classical on any twin-vs-prod drift.',
+      module: 'A11oy Classical Baseline',
+      capability: 'Classical channel estimation and MIMO detection blocks served as the always-on A/B reference.',
+      detail: 'Baseline is never disabled. The A/B selector defers to classical on any twin-vs-prod drift detected by Mirror Eval.',
     },
   ],
   guardrails: [
@@ -739,12 +624,6 @@ const M8_AI_RAN: MilestonePack = {
     { layer: 'A/B safety', control: 'Classical baseline is always co-deployed. ML block can be disabled in one switch.', enforcedBy: 'A11oy Model Router.' },
     { layer: 'Egress', control: 'Inference compartment has no network egress beyond the log sink and router callback.', enforcedBy: 'Sentra connector firewall.' },
     { layer: 'Provenance', control: 'Every batch carries a signed manifest covering model + training set + ruleset + runtime.', enforcedBy: 'Hephaestus + Cerberus.' },
-  ],
-  citations: [
-    { tag: 'Sionna', source: 'NVlabs/sionna \u2014 differentiable PHY blocks (Apache-2.0).' },
-    { tag: 'NVIDIA-Aerial-DT', source: 'NVIDIA Aerial Digital Twin overview \u2014 cuPHY pattern reference.' },
-    { tag: 'OAI', source: 'OpenAirInterface 5G \u2014 classical PHY baseline (Apache-2.0).' },
-    { tag: '3GPP-38211', source: '3GPP TS 38.211 \u2014 NR physical channels and modulation.' },
   ],
   related: ['ric-binding', 'attestation-soc2'],
 };
@@ -806,33 +685,20 @@ const M9_ATTESTATION_SOC2: MilestonePack = {
   ],
   oss: [
     {
-      leader: 'O-RAN Software Community',
-      repo: 'o-ran-sc',
-      url: 'https://github.com/o-ran-sc',
-      license: 'Apache-2.0',
-      conceptTaken: 'Configuration management as a versioned, signed object set (the A1/O1 surface treats config as data).',
-      ourReimplementation: 'Attestations are typed config-as-data. Each version is signed and committed before publication; rollback is a vault operation.',
+      module: 'Cerberus Config-as-Data',
+      capability: 'Attestations are typed, versioned, signed configuration objects with a deterministic rollback path.',
+      detail: 'Each version is signed and committed before publication. Rollback is a vault operation, not a redeploy.',
     },
     {
-      leader: 'NVIDIA Sionna RT',
-      repo: 'NVlabs/sionna-rt',
-      url: 'https://github.com/NVlabs/sionna-rt',
-      license: 'Apache-2.0',
-      conceptTaken: 'Reproducible simulation: same scene + ruleset + seed yields the same output. Reproducibility is the evidentiary backbone.',
-      ourReimplementation: 'Reproducibility is the contract: every attestation can be re-derived from its inputs, and the auditor can request a re-derivation at any time.',
+      module: 'Aerial Twin Reproducibility Contract',
+      capability: 'Same scene + ruleset + seed yields the same output, every time, on demand.',
+      detail: 'The auditor can request a re-derivation of any attestation from its inputs. Re-derivation is the evidentiary backbone of the SOC 2 mapping.',
     },
   ],
   guardrails: [
     { layer: 'Provenance', control: 'Every attestation carries a full provenance footer: scene + ruleset + engine + ML versions + operator identity.', enforcedBy: 'Hephaestus + Cerberus.' },
     { layer: 'Reproducibility', control: 'Auditor can request re-derivation from the inputs at any time.', enforcedBy: 'A11oy Mirror Eval + Aerial Twin Engine.' },
     { layer: 'Lifecycle', control: 'Attestations expire and must be recertified annually or on material change.', enforcedBy: 'Durable-job recertification + Cerberus expiry gate.' },
-  ],
-  citations: [
-    { tag: 'AICPA-SOC2', source: 'AICPA Trust Services Criteria \u2014 SOC 2 Type II.' },
-    { tag: 'NIST-SP-800-53', source: 'NIST SP 800-53 \u2014 security and privacy controls.' },
-    { tag: 'NIST-SP-800-61r3', source: 'NIST SP 800-61r3 \u2014 incident-response evidence handling.' },
-    { tag: 'O-RAN-SC', source: 'O-RAN Software Community \u2014 config-as-data pattern (Apache-2.0).' },
-    { tag: 'Sionna-RT', source: 'NVlabs/sionna-rt \u2014 reproducibility contract (Apache-2.0).' },
   ],
   related: ['vessels-port', 'terra-building', 'sentra-anomaly'],
 };

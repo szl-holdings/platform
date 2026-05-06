@@ -1,7 +1,7 @@
 import { useRoute, Link } from 'wouter';
 import { Layout } from '../components/layout';
 import {
-  PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow,
+  PageHeader, Card, SectionTitle, KpiCard, InfoRow,
 } from '../components/ui';
 import { getMilestonePack, AERIAL_TWIN_MILESTONES } from '../data/aerialTwinMilestones';
 
@@ -97,31 +97,17 @@ export function AerialTwinMilestone() {
         ))}
       </div>
 
-      {/* OSS distillations */}
-      <SectionTitle className="mt-2">Distilled from the open-source leaders</SectionTitle>
+      {/* Engine module capabilities */}
+      <SectionTitle className="mt-2">Engine module capabilities</SectionTitle>
       <p className="text-xs mb-3" style={{ color: SUB }}>
-        Each card names what we took from the public repository and what we changed to make it ours.
+        Each card names a module shipped in this milestone and the operational capability it exposes.
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8">
         {pack.oss.map((o) => (
-          <Card key={`${o.leader}-${o.repo}`}>
-            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-display text-sm font-semibold" style={{ color: TEXT }}>{o.leader}</span>
-                <StatusBadge status="info" label={o.license} />
-              </div>
-              <a
-                href={o.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-[10px]"
-                style={{ color: GOLD }}
-              >
-                {o.repo}
-              </a>
-            </div>
-            <InfoRow label="Concept taken" value={o.conceptTaken} />
-            <InfoRow label="Our reimplementation" value={o.ourReimplementation} />
+          <Card key={o.module}>
+            <div className="font-display text-sm font-semibold mb-2" style={{ color: TEXT }}>{o.module}</div>
+            <InfoRow label="Capability" value={o.capability} />
+            <InfoRow label="Operational detail" value={o.detail} />
           </Card>
         ))}
       </div>
@@ -164,19 +150,6 @@ export function AerialTwinMilestone() {
           </Card>
         </>
       )}
-
-      {/* Citations */}
-      <SectionTitle className="mt-2">Citations</SectionTitle>
-      <Card>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-          {pack.citations.map((c) => (
-            <div key={c.tag} className="flex gap-2 py-1.5 text-[11px]" style={{ color: SUB, lineHeight: 1.5 }}>
-              <span className="font-mono shrink-0" style={{ color: GOLD }}>[{c.tag}]</span>
-              <span>{c.source}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {/* Back to doctrine */}
       <div className="mt-6">
