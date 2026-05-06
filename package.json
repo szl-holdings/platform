@@ -175,7 +175,7 @@
     "puppeteer-core": "^24.41.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "slate": "^0.124.0",
+    "slate": "^0.124.1",
     "slate-react": "^0.124.0",
     "yaml": "^2.8.3"
   },
