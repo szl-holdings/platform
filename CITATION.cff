@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the SZL Holdings research thesis (Ouroboros Thesis v10) and reference this monorepo."
+title: "SZL Holdings Platform — Governed AI decision infrastructure"
+abstract: >-
+  TypeScript monorepo implementing the Ouroboros Thesis (DOI 10.5281/zenodo.19944926)
+  as a production-grade decision intelligence platform. Includes 34 sovereign
+  innovations, 48+ API endpoints, the Lutar Invariant family v1..v7+Omega, the
+  Audit Closure Operator Lambda_10, the Supreme Knowledge Codex v11, and seven
+  domain product surfaces — A11oy (orchestration), Sentra (cyber resilience),
+  Amaru (data sync), Counsel (legal), Terra (real estate), Vessels (maritime),
+  and Carlota Jo (advisory operations). Stack — React, Express, PostgreSQL,
+  Drizzle ORM, pnpm workspaces, Vite. Released under the Business Source License
+  1.1 with a four-year change date to Apache-2.0.
+type: software
+authors:
+  - family-names: Lutar
+    given-names: Stephen
+    name-particle: P.
+    affiliation: SZL Holdings
+    orcid: "https://orcid.org/0009-0001-0110-4173"
+license: BUSL-1.1
+url: "https://github.com/szl-holdings/szl-holdings-platform"
+repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
+keywords:
+  - szl-holdings
+  - ai-governance
+  - decision-intelligence
+  - ouroboros-thesis
+  - lutar-invariant
+  - audit-closure-operator
+  - typescript
+  - monorepo
+  - postgresql
+  - drizzle-orm
+  - express
+  - react
+  - vite
+identifiers:
+  - description: "Ouroboros Thesis v10 — research foundation (Zenodo)"
+    type: doi
+    value: "10.5281/zenodo.20053163"
+  - description: "Ouroboros Thesis concept DOI — always-latest"
+    type: doi
+    value: "10.5281/zenodo.19944926"
+  - description: "ORCID iD of the principal author"
+    type: other
+    value: "https://orcid.org/0009-0001-0110-4173"
+preferred-citation:
+  type: software
+  title: "SZL Holdings Platform — Governed AI decision infrastructure"
+  authors:
+    - family-names: Lutar
+      given-names: Stephen
+      name-particle: P.
+      affiliation: SZL Holdings
+      orcid: "https://orcid.org/0009-0001-0110-4173"
+  year: 2026
+  url: "https://github.com/szl-holdings/szl-holdings-platform"
