@@ -101,10 +101,10 @@
       "status": "running"
     },
     "helios": {
-      "title": "Helios",
+      "title": "Helios (consolidated into A11oy /frontier per Task #4362)",
       "kind": "web",
       "port": null,
-      "status": "inactive"
+      "status": "removed"
     }
   },
   "verticals": [

@@ -413,11 +413,14 @@ router.use(lazyMatch("/lyte", () => import("./lyte-market"), "lyte-market"));
 // mode without a session). Gracefully returns 503 when not configured.
 router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
 
-// Helios — Frontier Intelligence & Evolution Engine. Public demo surface.
-// Owns /helios/* endpoints: signals, mythos, proposals, benchmarks, scanners,
+// Frontier Intelligence & Evolution Engine — consolidated under A11oy
+// (Task #4362). Owns signals, mythos, proposals, benchmarks, scanners,
 // memos, stats, mcp (Mythos query for portfolio agents), and frontier-briefing.
-// Mounted BEFORE guardianPolicyCheck so unauthenticated views can hydrate.
-router.use("/helios", lazyMount(() => import("./helios/index"), "helios"));
+// Primary surface: /a11oy/frontier/*. The /helios/* mount is preserved as a
+// deprecated alias for backwards compatibility — both resolve to the same
+// router. Mounted BEFORE guardianPolicyCheck so unauthenticated views hydrate.
+router.use("/a11oy/frontier", lazyMount(() => import("./helios/index"), "a11oy-frontier-alias"));
+router.use("/helios", lazyMount(() => import("./helios/index"), "helios-deprecated"));
 
 // Continuum Meridian — Cognitive observability OS with model router, agent
 // constellation, forecast council, signal graph, decision weather,

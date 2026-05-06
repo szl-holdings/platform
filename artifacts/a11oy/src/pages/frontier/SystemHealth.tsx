@@ -9,7 +9,7 @@ import {
   FrontierKpiTile,
 } from './FrontierPrimitives';
 
-const API_HELIOS = '/api/helios';
+const API_HELIOS = '/api/a11oy/frontier';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const { GOLD, DIM, MUTED, BORDER, SURFACE } = FRONTIER_TOKENS;
 

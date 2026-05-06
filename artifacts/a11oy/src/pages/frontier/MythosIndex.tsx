@@ -13,7 +13,7 @@ import {
 } from './FrontierPrimitives';
 import { MYTHOS_IDEAS, MYTHOS_ACTORS } from '@szl-holdings/frontier-mythos';
 
-const API = '/api/helios';
+const API = '/api/a11oy/frontier';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const { GOLD, DIM, MUTED, BORDER, SURFACE, MONO } = FRONTIER_TOKENS;
 
