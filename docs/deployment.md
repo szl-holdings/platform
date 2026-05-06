@@ -93,8 +93,18 @@ pnpm --filter scripts run seed
 
 ## Health Checks
 
-- `GET /api/health` — Basic liveness check (public)
-- `GET /api/health/detailed` — Full system status including DB pool metrics (authenticated or internal token)
+- `GET /api/health` — Rich liveness (server, db+latency, job_queue, storage, auth, ai+latency, huggingface gate, registered platform apps). Public.
+- `GET /api/healthz` — Codex-kernel deployment contract payload. Public.
+- `GET /api/health/live` — Boot-gated liveness (returns 503 with `{status:"starting"}` until `bootstrapDone=true`). Public.
+- `GET /api/health/detailed` — Full system status including DB pool metrics. Authenticated or internal token.
+
+## Production URL
+
+The published Replit deployment is reachable at:
+
+> **https://szlholdings.replit.app**
+
+This is the canonical staging/demo URL for SZL Holdings and is the URL referenced in `userenv.production.PUBLIC_APP_URL`. Operator runbook for cutting and verifying a deploy: `docs/GO_LIVE_VERIFICATION.md`. Hard blockers list: `docs/GO_LIVE_BLOCKERS.md`.
 
 ## CI/CD
 
