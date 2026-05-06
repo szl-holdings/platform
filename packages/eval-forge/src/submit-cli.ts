@@ -65,17 +65,12 @@ function scaffold(args: string[]): void {
   const filename = `${slugify(entityId)}.yaml`;
   const outPath = resolve(RESULTS_DIR, filename);
 
-  if (!existsSync(RESULTS_DIR)) {
-    mkdirSync(RESULTS_DIR, { recursive: true });
-  }
+  // mkdirSync(recursive:true) is idempotent — no existsSync TOCTOU window.
+  // CodeQL js/file-system-race.
+  mkdirSync(RESULTS_DIR, { recursive: true });
 
-  if (existsSync(outPath)) {
-    console.error(`File already exists: ${outPath}`);
-    console.error('Use --force to overwrite.');
-    if (!args.includes('--force')) {
-      process.exit(1);
-    }
-  }
+  // Use exclusive create flag 'wx' below to atomically check-and-create.
+  // Falls through to overwrite only when --force is passed.
 
   const yaml = `# eval_results.yaml — Open Evaluation Layer
 # Schema: @szl-holdings/shared-contracts/eval-types EvalResultsYamlSchema
@@ -102,7 +97,18 @@ results:
       - ${domain}
 `;
 
-  writeFileSync(outPath, yaml, 'utf8');
+  // 'wx' = create exclusively, fail if exists (atomic, no race window).
+  // CodeQL js/file-system-race.
+  try {
+    writeFileSync(outPath, yaml, { encoding: 'utf8', flag: args.includes('--force') ? 'w' : 'wx' });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
+      console.error(`File already exists: ${outPath}`);
+      console.error('Use --force to overwrite.');
+      process.exit(1);
+    }
+    throw err;
+  }
   console.log(`\n✅  Scaffolded: ${outPath}`);
   console.log('\nNext steps:');
   console.log(`  1. Edit ${outPath} with your actual results`);

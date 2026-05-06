@@ -21,12 +21,12 @@ export class FilesystemLedgerStore implements LedgerStore {
   constructor(filePath: string) {
     this.filePath = filePath;
     const dir = dirname(filePath);
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
-    if (!existsSync(filePath)) {
-      writeFileSync(filePath, '', 'utf8');
-    }
+    // mkdirSync(recursive:true) is idempotent — no existsSync TOCTOU window.
+    // CodeQL js/file-system-race.
+    mkdirSync(dir, { recursive: true });
+    // 'a' creates the file if missing without race; appending an empty
+    // buffer is a no-op if the file already exists.
+    writeFileSync(filePath, '', { flag: 'a' });
     this.buildIndex();
   }
 

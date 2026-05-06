@@ -13,6 +13,7 @@
 import {
   access,
   mkdir,
+  open,
   readdir,
   readFile,
   stat,
@@ -90,7 +91,6 @@ export class FilesystemCapability implements SandboxCapability {
     options: { offsetBytes?: number; limitBytes?: number } = {},
   ): Promise<FileReadResult> {
     const fullPath = await validateWorkspacePathSafe(path, this.workspaceRoot);
-    const stats = await stat(fullPath);
     const isBinary = BINARY_EXTS.has(extname(path).toLowerCase());
 
     const limitBytes = Math.min(
@@ -99,8 +99,19 @@ export class FilesystemCapability implements SandboxCapability {
     );
     const offsetBytes = options.offsetBytes ?? 0;
 
+    // Open once and use the FileHandle's own stat() to eliminate the
+    // TOCTOU window between stat(path) and readFile(path).
+    // CodeQL js/file-system-race.
+    const handle = await open(fullPath, 'r');
     const readStart = Date.now();
-    const raw = await readFile(fullPath);
+    let stats;
+    let raw: Buffer;
+    try {
+      stats = await handle.stat();
+      raw = await handle.readFile();
+    } finally {
+      await handle.close();
+    }
     const readDurationMs = Date.now() - readStart;
     const slice = raw.slice(offsetBytes, offsetBytes + limitBytes);
     const truncated = offsetBytes + limitBytes < stats.size;
