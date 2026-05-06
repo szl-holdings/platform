@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 
 interface TenantBucket {
   tokens: number;
@@ -18,6 +19,10 @@ function refill(bucket: TenantBucket, maxTokens: number): void {
   bucket.lastRefill = now;
 }
 
+/**
+ * Tenant-scoped token-bucket limiter applied AFTER auth/tenant resolution.
+ * Each tenant gets its own RPM budget.
+ */
 export function perTenantRateLimit(req: Request, res: Response, next: NextFunction): void {
   const tenantId = req.tenantId ?? 'default';
   const maxTokens = DEFAULT_RPM;
@@ -42,3 +47,23 @@ export function perTenantRateLimit(req: Request, res: Response, next: NextFuncti
   bucket.tokens -= 1;
   next();
 }
+
+/**
+ * Defense-in-depth IP-scoped global limiter applied BEFORE auth.
+ * Protects unauthenticated public endpoints (health, metrics, docs) and
+ * caps total per-IP request volume independently of tenant identity.
+ *
+ * Tunables:
+ *   AEF_GLOBAL_RATE_LIMIT_WINDOW_MS  default 60_000 (1 minute)
+ *   AEF_GLOBAL_RATE_LIMIT_MAX        default 600 requests / window / IP
+ */
+export const globalRateLimit = rateLimit({
+  windowMs: Number(process.env.AEF_GLOBAL_RATE_LIMIT_WINDOW_MS ?? 60_000),
+  limit: Number(process.env.AEF_GLOBAL_RATE_LIMIT_MAX ?? 600),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    error: 'Rate limit exceeded',
+    detail: 'Too many requests from this IP. Retry after the window resets.',
+  },
+});

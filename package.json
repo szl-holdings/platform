@@ -177,7 +177,8 @@
     "react-dom": "catalog:",
     "slate": "^0.124.1",
     "slate-react": "^0.124.0",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.3",
+    "express-rate-limit": "^7.5.0"
   },
   "pnpm": {
     "overrides": {

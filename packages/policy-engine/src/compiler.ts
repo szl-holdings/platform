@@ -363,14 +363,26 @@ export function mergeWithLLMResult(
   return merged;
 }
 
+/**
+ * Hard cap on input length passed to the deterministic regex parser.
+ * Real policies are well under 64 KB; anything larger is truncated to
+ * prevent polynomial-redos on the role/action/domain pattern matchers.
+ */
+const MAX_POLICY_INPUT_LEN = 65_536;
+
+function capInput(s: string): string {
+  return s.length > MAX_POLICY_INPUT_LEN ? s.slice(0, MAX_POLICY_INPUT_LEN) : s;
+}
+
 export function compilePolicy(
   input: string,
   policyId?: string,
   existingVersion?: number,
 ): PolicyCompilerResult {
+  const capped = capInput(input);
   return buildCompilerResult(
-    input,
-    splitToSentences(input).map((s, i) => sentenceToRule(s, i)),
+    capped,
+    splitToSentences(capped).map((s, i) => sentenceToRule(s, i)),
     { policyId, existingVersion },
     [],
   );
@@ -390,6 +402,7 @@ export async function compilePolicyWithLLM(
   llmAssist: LLMAssistFn | null | undefined,
   options: CompilePolicyOptions = {},
 ): Promise<PolicyCompilerResult> {
+  input = capInput(input);
   const threshold = options.llmThreshold ?? DEFAULT_LLM_THRESHOLD;
   const sentences = splitToSentences(input);
   const deterministic = sentences.map((s, i) => sentenceToRule(s, i));

@@ -9,6 +9,7 @@
  * before delivery. All challenges and outcomes are logged for the flywheel.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { HFChatMessage } from './providers/hf-client.js';
 
 export type ContrarianSeverity = 'none' | 'minor' | 'moderate' | 'major' | 'critical';
@@ -134,7 +135,7 @@ function parseChallengerResponse(
   targetOutputId: string,
   domain: string,
 ): ContrarianChallenge {
-  const challengeId = `cc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const challengeId = `cc_${Date.now()}_${randomUUID().slice(0, 8)}`;
 
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
@@ -227,7 +228,7 @@ export async function runShadowCouncil(
   originalQuery: string,
   outputId: string,
 ): Promise<ShadowCouncilResult> {
-  const sessionId = `sc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const sessionId = `sc_${Date.now()}_${randomUUID().slice(0, 8)}`;
   const start = Date.now();
 
   let challenge: ContrarianChallenge;

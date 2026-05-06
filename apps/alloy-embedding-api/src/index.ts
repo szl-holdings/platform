@@ -4,7 +4,7 @@ import { requestTracing } from "./middleware/tracing.js";
 import { requestLogger, logger } from "./middleware/logger.js";
 import { conditionalAuth } from "./middleware/auth.js";
 import { tenantScoping } from "./middleware/tenant.js";
-import { perTenantRateLimit } from "./middleware/rate-limit.js";
+import { perTenantRateLimit, globalRateLimit } from "./middleware/rate-limit.js";
 import { metricsMiddleware, metricsHandler } from "./middleware/prometheus.js";
 import { healthRouter } from "./routes/health.js";
 import { embedRouter } from "./routes/embed.js";
@@ -22,12 +22,35 @@ const BASE_PATH = process.env.BASE_PATH ?? "/alloy-embedding-api";
 const app: Application = express();
 
 app.set("trust proxy", 1);
-app.use(cors({ origin: true }));
+
+// CORS: explicit allowlist via CORS_ALLOWED_ORIGINS (comma-separated).
+// Defaults to no cross-origin access; set the env var in production deployments.
+const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Same-origin / non-browser requests have no Origin header — allow them.
+      if (!origin) return callback(null, true);
+      if (CORS_ALLOWED_ORIGINS.includes("*")) return callback(null, true);
+      if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "10mb" }));
 
 app.use(requestTracing as RequestHandler);
 app.use(metricsMiddleware as RequestHandler);
 app.use(requestLogger as RequestHandler);
+
+// Defense-in-depth: IP-scoped global limiter before any auth.
+// Protects unauthenticated public endpoints (health/metrics/docs) and
+// caps per-IP request volume independent of tenant identity.
+app.use(globalRateLimit as RequestHandler);
 
 app.get(`${BASE_PATH}/health`, (_req, res) => {
   res.status(200).json({

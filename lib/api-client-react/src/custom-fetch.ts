@@ -28,7 +28,15 @@ const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
  * Pass `null` to clear the base URL.
  */
 export function setBaseUrl(url: string | null): void {
-  _baseUrl = url ? url.replace(/\/+$/, "") : null;
+  if (!url) {
+    _baseUrl = null;
+    return;
+  }
+  // Strip trailing slashes with a bounded loop to avoid polynomial-redos on
+  // pathological inputs (length-capped + non-regex form).
+  let i = url.length;
+  while (i > 0 && url.charCodeAt(i - 1) === 47 /* '/' */) i -= 1;
+  _baseUrl = url.slice(0, i);
 }
 
 export function getApiBaseUrl(): string | null {

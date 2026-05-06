@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Substrate MCP Gateway — exposes the Sovereign Execution Substrate over the Model Context Protocol (HTTP+SSE and stdio transports). Pure transport layer; no business logic.",
+  "description": "Substrate MCP Gateway \u2014 exposes the Sovereign Execution Substrate over the Model Context Protocol (HTTP+SSE and stdio transports). Pure transport layer; no business logic.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -29,7 +29,8 @@
     "@workspace/nexus-mcp": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "express": "^5.0.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "express-rate-limit": "^7.5.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

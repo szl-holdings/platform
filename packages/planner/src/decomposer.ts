@@ -23,7 +23,17 @@ function defaultRoute(routeClass: RouteDecision['routeClass']): RouteDecision {
 }
 
 function baselineSteps(objective: string): PlanStep[] {
-  const trimmed = objective.trim().replace(/[.\s]+$/, '');
+  // Cap objective length to avoid polynomial-redos on pathological inputs.
+  const capped = objective.length > 8192 ? objective.slice(0, 8192) : objective;
+  let trimmed = capped.trim();
+  // Strip trailing dots/whitespace with bounded loop.
+  let _end = trimmed.length;
+  while (_end > 0) {
+    const c = trimmed.charCodeAt(_end - 1);
+    if (c === 46 /* . */ || c === 32 /* space */ || c === 9 /* tab */ || c === 10 /* \n */ || c === 13 /* \r */) _end -= 1;
+    else break;
+  }
+  trimmed = trimmed.slice(0, _end);
   const steps: Array<Omit<PlanStep, 'stepId' | 'index' | 'dependsOn'> & { dependsOn?: string[] }> =
     [
       {

@@ -180,7 +180,14 @@ function parseCefEvent(cefLine: string): Partial<NormalizedSiemEvent> {
     "medium", "high", "high", "critical", "critical", "critical",
   ];
 
-  const extensionStr = parts.slice(7).join("|");
+  // CEF parsing: cap input length to prevent polynomial-redos on pathological
+  // SIEM events. RFC-compliant CEF lines are well under 10 KB; anything larger
+  // is malformed and gets the same treatment as no extensions.
+  const MAX_CEF_EXT_LEN = 16_384;
+  const extensionStrRaw = parts.slice(7).join("|");
+  const extensionStr = extensionStrRaw.length > MAX_CEF_EXT_LEN
+    ? extensionStrRaw.slice(0, MAX_CEF_EXT_LEN)
+    : extensionStrRaw;
   const extFields: Record<string, string> = {};
   const extPattern = /(\w+)=([^=]+?)(?=\s+\w+=|$)/g;
   let match;

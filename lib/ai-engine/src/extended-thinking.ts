@@ -11,6 +11,7 @@
  * the cognitive workspace's shared scratchpad.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { HFChatMessage } from './providers/hf-client.js';
 
 export interface ThinkingBudget {
@@ -166,7 +167,7 @@ export async function runExtendedThinking(
     return buildFallbackResult(query, context, options);
   }
 
-  const sessionId = `xt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const sessionId = `xt_${Date.now()}_${randomUUID().slice(0, 8)}`;
   const budget = allocateBudget(options);
   const passes: ThinkingPass[] = [];
   let totalTokensUsed = 0;

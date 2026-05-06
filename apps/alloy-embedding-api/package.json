@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Alloy Embedding Fabric — REST API gateway for embed, rerank, hybrid-search, ingest, index ops, and evals.",
+  "description": "Alloy Embedding Fabric \u2014 REST API gateway for embed, rerank, hybrid-search, ingest, index ops, and evals.",
   "exports": {
     ".": {
       "types": "./dist/router.d.ts",
@@ -34,7 +34,8 @@
     "cors": "^2.8.5",
     "express": "^5",
     "prom-client": "^15.1.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "express-rate-limit": "^7.5.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

@@ -51,6 +51,16 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
+  // Origin check: only accept messages from same-origin clients (defense-in-depth
+  // against postMessage-based attacks even though SW already runs in same origin).
+  const sourceUrl = (event.source as Client | null)?.url;
+  if (sourceUrl) {
+    try {
+      if (new URL(sourceUrl).origin !== self.location.origin) return;
+    } catch {
+      return;
+    }
+  }
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

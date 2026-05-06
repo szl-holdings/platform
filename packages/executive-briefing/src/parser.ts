@@ -39,7 +39,10 @@ export function parseBriefResponse(
 ): ParseResult | ParseError {
   let raw = aiContent.trim();
 
-  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  // Cap input to avoid polynomial-redos on pathological LLM outputs.
+  const MAX_PARSE_LEN = 1_048_576; // 1 MB
+  if (raw.length > MAX_PARSE_LEN) raw = raw.slice(0, MAX_PARSE_LEN);
+  const fenceMatch = raw.match(/```(?:json)?[ \t]*\n?([\s\S]*?)```/);
   if (fenceMatch) raw = fenceMatch[1]?.trim();
 
   const jsonStart = raw.indexOf('{');
