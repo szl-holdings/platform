@@ -29,6 +29,7 @@
  */
 
 import { Router, type IRouter, type Request, type Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import {
   a11oy as a11oyAdapter,
@@ -125,6 +126,23 @@ import {
 } from '@workspace/ouroboros-integrations';
 
 const router: IRouter = Router();
+
+// ---------------------------------------------------------------------------
+// Defense-in-depth router-level rate limiter.
+// Applied to all routes in this file; the host application is also expected
+// to apply auth + tenant scoping upstream. Tunables:
+//   OUROBOROS_RATE_LIMIT_WINDOW_MS  default 60_000 (1 minute)
+//   OUROBOROS_RATE_LIMIT_MAX        default 300 requests / window / IP
+// ---------------------------------------------------------------------------
+router.use(
+  rateLimit({
+    windowMs: Number(process.env.OUROBOROS_RATE_LIMIT_WINDOW_MS ?? 60_000),
+    limit: Number(process.env.OUROBOROS_RATE_LIMIT_MAX ?? 300),
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'RATE_LIMITED', detail: 'Too many requests. Retry after the window resets.' },
+  }),
+);
 
 // ---------------------------------------------------------------------------
 // Process-local Sentra HSM stand-in.

@@ -141,7 +141,14 @@ function truncateOutput(buf: string, maxBytes: number): { out: string; truncated
   };
 }
 
+// Deny-list patterns run on user-supplied commands. Cap input length so
+// pathological commands cannot turn deny-list scanning into a DoS vector.
+const MAX_COMMAND_LEN = 8_192;
+
 function checkBlocked(command: string, patterns: ReadonlyArray<RegExp>): string | null {
+  if (command.length > MAX_COMMAND_LEN) {
+    return `Command rejected: length ${command.length} exceeds maximum ${MAX_COMMAND_LEN} bytes.`;
+  }
   for (const pattern of patterns) {
     if (pattern.test(command)) {
       return `Command blocked by deny-list pattern: ${pattern.toString()}`;

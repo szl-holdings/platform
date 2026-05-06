@@ -15,6 +15,30 @@ export interface ExportOptions {
   columns?: ExportColumn[];
 }
 
+function escapeHtml(value: unknown): string {
+  const str = value === null || value === undefined ? '' : String(value);
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+// Permit only safe CSS color values (hex, rgb()/rgba(), hsl()/hsla(),
+// or a small allowlist of named colors). Falls back to a neutral default
+// if the input contains anything else.
+function sanitizeCssColor(value: unknown, fallback = '#8b7ac8'): string {
+  if (typeof value !== 'string') return fallback;
+  const trimmed = value.trim();
+  if (trimmed.length > 64) return fallback;
+  if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) return trimmed;
+  if (/^rgba?\(\s*[-0-9.,%\s]+\s*\)$/.test(trimmed)) return trimmed;
+  if (/^hsla?\(\s*[-0-9.,%\s]+\s*\)$/.test(trimmed)) return trimmed;
+  if (/^[a-zA-Z]{3,32}$/.test(trimmed)) return trimmed;
+  return fallback;
+}
+
 function escapeCSVCell(value: unknown): string {
   const str = value === null || value === undefined ? '' : String(value);
   if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
@@ -85,14 +109,22 @@ export function exportToPDF(options: ExportOptions = {}): void {
 
   const contentEl =
     document.querySelector('[data-export-content]') ?? document.querySelector('main');
+  // contentHTML is sourced from the live DOM that the user is currently viewing.
+  // Caller-provided strings (title/subtitle/appName) are escaped below; accentColor
+  // is sanitized through sanitizeCssColor.
   const contentHTML = contentEl?.innerHTML ?? '<p>No content available</p>';
+  const safeTitle = escapeHtml(title);
+  const safeSubtitle = subtitle ? escapeHtml(subtitle) : '';
+  const safeAppName = escapeHtml(appName);
+  const safeAccent = sanitizeCssColor(accentColor);
+  const safeTimestamp = escapeHtml(timestamp);
 
   printWindow.document.write(`
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <title>${title}</title>
+      <title>${safeTitle}</title>
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -106,7 +138,7 @@ export function exportToPDF(options: ExportOptions = {}): void {
           background: linear-gradient(135deg, #0a0c14 0%, #1a1a2e 100%);
           color: white;
           padding: 28px 36px 24px;
-          border-bottom: 4px solid ${accentColor};
+          border-bottom: 4px solid ${safeAccent};
         }
         .header-brand {
           display: flex;
@@ -149,7 +181,7 @@ export function exportToPDF(options: ExportOptions = {}): void {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: ${accentColor};
+          background: ${safeAccent};
           margin-right: 6px;
         }
         .content {
@@ -191,7 +223,7 @@ export function exportToPDF(options: ExportOptions = {}): void {
         }
         [class*="bg-"] { color: #333 !important; }
         .text-muted-foreground { color: #888 !important; }
-        .text-primary { color: ${accentColor} !important; }
+        .text-primary { color: ${safeAccent} !important; }
         svg { max-width: 100%; }
         .animate-spin { animation: none !important; }
         nav, .eco-nav, header.sticky, [class*="EcosystemNav"], [data-no-print] { display: none !important; }
@@ -214,20 +246,20 @@ export function exportToPDF(options: ExportOptions = {}): void {
       <div class="header">
         <div class="header-brand">
           <div class="header-brand-logo">🏛️</div>
-          <span class="header-brand-name">${appName}</span>
+          <span class="header-brand-name">${safeAppName}</span>
         </div>
-        <div class="header-title">${title}</div>
-        ${subtitle ? `<div style="font-size:14px;opacity:0.6;margin-bottom:10px">${subtitle}</div>` : ''}
+        <div class="header-title">${safeTitle}</div>
+        ${safeSubtitle ? `<div style="font-size:14px;opacity:0.6;margin-bottom:10px">${safeSubtitle}</div>` : ''}
         <div class="header-meta">
-          <span><span class="header-accent"></span>${timestamp}</span>
+          <span><span class="header-accent"></span>${safeTimestamp}</span>
           <span>SZL Holdings Platform</span>
         </div>
       </div>
       <div class="content">${contentHTML}</div>
       <div class="content">
         <div class="footer">
-          <span>${appName} · ${title}</span>
-          <span>Generated ${timestamp} · SZL Holdings</span>
+          <span>${safeAppName} · ${safeTitle}</span>
+          <span>Generated ${safeTimestamp} · SZL Holdings</span>
         </div>
       </div>
       <script>

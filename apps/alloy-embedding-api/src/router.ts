@@ -3,7 +3,7 @@ import { requestTracing } from "./middleware/tracing.js";
 import { requestLogger } from "./middleware/logger.js";
 import { conditionalAuth } from "./middleware/auth.js";
 import { tenantScoping } from "./middleware/tenant.js";
-import { perTenantRateLimit } from "./middleware/rate-limit.js";
+import { perTenantRateLimit, globalRateLimit } from "./middleware/rate-limit.js";
 import { metricsMiddleware, metricsHandler } from "./middleware/prometheus.js";
 import { embedRouter } from "./routes/embed.js";
 import { rerankRouter } from "./routes/rerank.js";
@@ -21,6 +21,9 @@ export function createAefRouter(): IRouter {
   router.use(requestTracing as RequestHandler);
   router.use(metricsMiddleware as RequestHandler);
   router.use(requestLogger as RequestHandler);
+
+  // Defense-in-depth IP-scoped global limiter (covers public endpoints).
+  router.use(globalRateLimit as RequestHandler);
 
   router.get("/health", (_req, res) => {
     res.status(200).json({

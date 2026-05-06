@@ -987,10 +987,19 @@ export function applyMergeFields(
       ...block,
       children: block.children.map((leaf) => ({
         ...leaf,
-        text: leaf.text.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
-          const k = key.trim();
-          return values[`{{${k}}}`] ?? values[k] ?? match;
-        }),
+        // Bounded mustache substitution: cap leaf size and key length so a
+        // pathological document cannot turn template substitution into a
+        // polynomial-redos / DoS vector.
+        text: ((): string => {
+          const MAX_LEAF = 65_536;
+          const MAX_KEY = 256;
+          const src = leaf.text.length > MAX_LEAF ? leaf.text.slice(0, MAX_LEAF) : leaf.text;
+          return src.replace(/\{\{([^}]{1,256})\}\}/g, (match, key: string) => {
+            if (key.length > MAX_KEY) return match;
+            const k = key.trim();
+            return values[`{{${k}}}`] ?? values[k] ?? match;
+          });
+        })(),
       })),
     })),
   };

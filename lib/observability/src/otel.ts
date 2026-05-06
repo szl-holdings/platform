@@ -261,7 +261,10 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     config.otlpEndpoint ?? _env.OTLP_ENDPOINT ?? _env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
   if (otlpEndpoint) {
-    const normalizedEndpoint = otlpEndpoint.replace(/\/+$/, '');
+    // Bounded trailing-slash strip (avoids polynomial-redos on pathological config values).
+    let _slashEnd = otlpEndpoint.length;
+    while (_slashEnd > 0 && otlpEndpoint.charCodeAt(_slashEnd - 1) === 47) _slashEnd -= 1;
+    const normalizedEndpoint = otlpEndpoint.slice(0, _slashEnd);
     const otlpUrl = normalizedEndpoint.endsWith('/v1/traces')
       ? normalizedEndpoint
       : `${normalizedEndpoint}/v1/traces`;

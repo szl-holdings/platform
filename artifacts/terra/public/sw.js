@@ -28,6 +28,15 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
+  // Origin check: reject messages from clients outside our origin.
+  const sourceUrl = event.source && event.source.url;
+  if (sourceUrl) {
+    try {
+      if (new URL(sourceUrl).origin !== self.location.origin) return;
+    } catch (_e) {
+      return;
+    }
+  }
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 

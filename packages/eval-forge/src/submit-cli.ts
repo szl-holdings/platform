@@ -26,10 +26,31 @@ import { EvalResultsYamlSchema } from '@szl-holdings/shared-contracts/eval-types
 const RESULTS_DIR = '.eval_results';
 
 function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  // Cap input length to avoid polynomial-redos on pathological CLI args.
+  const capped = s.length > 1024 ? s.slice(0, 1024) : s;
+  // Build slug character-by-character (linear, no regex on raw input).
+  let out = '';
+  let lastDash = false;
+  for (let i = 0; i < capped.length; i += 1) {
+    const c = capped.charCodeAt(i);
+    const isAlphaNum =
+      (c >= 97 && c <= 122) || // a-z
+      (c >= 65 && c <= 90)  || // A-Z
+      (c >= 48 && c <= 57);    // 0-9
+    if (isAlphaNum) {
+      out += String.fromCharCode(c >= 65 && c <= 90 ? c + 32 : c);
+      lastDash = false;
+    } else if (!lastDash) {
+      out += '-';
+      lastDash = true;
+    }
+  }
+  // Trim leading/trailing dashes (bounded).
+  let start = 0;
+  let end = out.length;
+  while (start < end && out.charCodeAt(start) === 45) start += 1;
+  while (end > start && out.charCodeAt(end - 1) === 45) end -= 1;
+  return out.slice(start, end);
 }
 
 // ─── Scaffold ─────────────────────────────────────────────────────────────────

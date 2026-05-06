@@ -101,8 +101,14 @@ interface ExecutionPlan {
  *  2. Single-command prefix: `run: cmd`, `exec: cmd`, `shell: cmd`
  *  3. Fallback: plan-marker (no commands; caller must extend)
  */
+// Hard cap on objective length — real objectives are well under 32 KB.
+// Larger inputs are truncated to prevent polynomial-redos on the
+// run/exec/shell prefix matcher and bound JSON parsing time.
+const MAX_OBJECTIVE_LEN = 32_768;
+
 function planExecution(objective: string): ExecutionPlan {
-  const trimmed = objective.trim();
+  const capped = objective.length > MAX_OBJECTIVE_LEN ? objective.slice(0, MAX_OBJECTIVE_LEN) : objective;
+  const trimmed = capped.trim();
 
   // 1. JSON command list
   if (trimmed.startsWith('{')) {

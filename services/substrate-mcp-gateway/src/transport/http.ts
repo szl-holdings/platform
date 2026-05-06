@@ -20,6 +20,7 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { runtimeEventBus, type SubstrateRuntimeEvent } from '@szl/substrate';
 import express, { type NextFunction, type Request, type Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authMiddleware, resolveAuthContext } from '../auth.js';
 import {
   CAPABILITIES,
@@ -252,6 +253,19 @@ export function createHttpTransport(): express.Router {
 
   router.use(express.json({ limit: '4mb' }));
   router.use(securityHeaders);
+  // Defense-in-depth: standard express-rate-limit (IP-scoped, applied first).
+  // Tunables:
+  //   MCP_GLOBAL_RATE_LIMIT_WINDOW_MS  default 60_000 (1 minute)
+  //   MCP_GLOBAL_RATE_LIMIT_MAX        default 600 requests / window / IP
+  router.use(
+    rateLimit({
+      windowMs: Number(process.env.MCP_GLOBAL_RATE_LIMIT_WINDOW_MS ?? 60_000),
+      limit: Number(process.env.MCP_GLOBAL_RATE_LIMIT_MAX ?? 600),
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+      message: { error: 'RATE_LIMITED', reason: 'Too many requests from this IP. Retry after the window resets.' },
+    }),
+  );
   router.use(corsMiddleware);
   router.use(originValidation);
   router.use(rateLimiter);

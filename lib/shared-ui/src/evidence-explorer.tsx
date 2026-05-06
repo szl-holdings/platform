@@ -146,9 +146,25 @@ interface ApiStatus {
 
 // ─── Fetch helpers ─────────────────────────────────────────────────────────
 
+// Allowlist: only same-origin requests under the /api/evidence-graph/ namespace.
+// Defends against URLs constructed from caller-controlled values pointing
+// off-origin or to other APIs.
+function assertSafeApiUrl(rawUrl: string): string {
+  const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+  const u = new URL(rawUrl, base);
+  if (typeof window !== 'undefined' && u.origin !== window.location.origin) {
+    throw new Error(`Refusing cross-origin fetch: ${u.origin}`);
+  }
+  if (!u.pathname.startsWith('/api/evidence-graph/')) {
+    throw new Error(`Refusing fetch outside /api/evidence-graph/: ${u.pathname}`);
+  }
+  return u.pathname + u.search;
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${url}`);
+  const safeUrl = assertSafeApiUrl(url);
+  const res = await fetch(safeUrl, { credentials: 'include' });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${safeUrl}`);
   const body = await res.json();
   return (body?.data ?? body) as T;
 }
