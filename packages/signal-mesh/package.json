@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "9-stage signal pipeline worker: intake → normalize → enrich → entity-resolve → correlate → score → recommend → policy-evaluate → telemetry-writeback",
+  "description": "9-stage signal pipeline worker: intake \u2192 normalize \u2192 enrich \u2192 entity-resolve \u2192 correlate \u2192 score \u2192 recommend \u2192 policy-evaluate \u2192 telemetry-writeback",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

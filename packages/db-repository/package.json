@@ -15,6 +15,7 @@
     "./firestorm": "./src/firestorm.ts"
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — policy rule evaluation, tenant boundary enforcement, retention controls, and redaction hook registry. Returns structured PolicyDecision objects; no silent fallbacks.",
+  "description": "Alloy Embedding Fabric \u2014 policy rule evaluation, tenant boundary enforcement, retention controls, and redaction hook registry. Returns structured PolicyDecision objects; no silent fallbacks.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

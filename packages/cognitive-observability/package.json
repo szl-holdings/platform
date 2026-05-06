@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Cognitive Observability — telemetry, quality, cost, drift, and value metrics. OpenTelemetry-compatible exporter with the full SZL metric set for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "Cognitive Observability \u2014 telemetry, quality, cost, drift, and value metrics. OpenTelemetry-compatible exporter with the full SZL metric set for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

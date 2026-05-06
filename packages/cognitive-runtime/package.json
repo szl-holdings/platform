@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Cognitive Runtime — end-to-end PERCEIVE → ORIENT → PLAN → EXECUTE → VERIFY → REFLECT → UPDATE SELF MODEL → UPDATE MEMORY loop orchestrator with checkpointing, retries, and resume.",
+  "description": "Cognitive Runtime \u2014 end-to-end PERCEIVE \u2192 ORIENT \u2192 PLAN \u2192 EXECUTE \u2192 VERIFY \u2192 REFLECT \u2192 UPDATE SELF MODEL \u2192 UPDATE MEMORY loop orchestrator with checkpointing, retries, and resume.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -48,6 +48,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

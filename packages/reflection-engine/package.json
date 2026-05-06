@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Reflection Engine — structured self-improvement after every run. Scores quality, classifies failures, writes lessons, drafts candidate skills, and wires results into memory-fabric and skill-library without claiming awareness.",
+  "description": "Reflection Engine \u2014 structured self-improvement after every run. Scores quality, classifies failures, writes lessons, drafts candidate skills, and wires results into memory-fabric and skill-library without claiming awareness.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,6 +51,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

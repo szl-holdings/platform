@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "description": "Drift-Eval — drift detection and champion-vs-challenger evaluation jobs that read from and persist to the eval registry, with scheduled execution.",
+  "description": "Drift-Eval \u2014 drift detection and champion-vs-challenger evaluation jobs that read from and persist to the eval registry, with scheduled execution.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

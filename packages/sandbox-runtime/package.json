@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Sandbox Runtime — governed Unix-local execution environments following the OpenAI sandbox architecture. Every operation flows through Guardian, Policy Engine, and Tool Mesh for full audit coverage.",
+  "description": "Sandbox Runtime \u2014 governed Unix-local execution environments following the OpenAI sandbox architecture. Every operation flows through Guardian, Policy Engine, and Tool Mesh for full audit coverage.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -63,6 +63,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

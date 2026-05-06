@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "OpenAI Agents SDK Bridge — wires the @openai/agents SDK tracing surface into SZL's Trace Graph, Cognitive Observability, Tool Mesh, Policy Engine, and SZL agent registry.",
+  "description": "OpenAI Agents SDK Bridge \u2014 wires the @openai/agents SDK tracing surface into SZL's Trace Graph, Cognitive Observability, Tool Mesh, Policy Engine, and SZL agent registry.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -60,6 +60,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

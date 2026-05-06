@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
+  "description": "Alloy Embedding Fabric \u2014 retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
     "vitest": "^4.1.5"
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

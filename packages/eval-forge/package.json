@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "description": "Eval Forge — unified evaluation system consolidating eval-os and evals-core. Provides all 10 eval-type suites, 9 metric categories, CLI, nightly scheduler, and API integration.",
+  "description": "Eval Forge \u2014 unified evaluation system consolidating eval-os and evals-core. Provides all 10 eval-type suites, 9 metric categories, CLI, nightly scheduler, and API integration.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -56,6 +56,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:watch": "vitest"
   },

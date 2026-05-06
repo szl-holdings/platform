@@ -6,6 +6,7 @@ import {
   IngestRequestSchema,
 } from '@workspace/aef-contracts';
 import { type AuditEmitter, type WorkflowContext, createWorkflowMachine, FileApprovalStore, FileCheckpointStore } from '@workspace/aef-workflow-runtime';
+import type { AuditEvent } from '@workspace/aef-workflow-runtime/types';
 import express from 'express';
 
 const app = express();
@@ -36,7 +37,7 @@ function authMiddleware(
 }
 
 function makeStepLogger(workflowId: string): AuditEmitter {
-  return (event) => {
+  return (event: AuditEvent) => {
     process.stdout.write(
       `${JSON.stringify({
         level: 'info',

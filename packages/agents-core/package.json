@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Agents Core — typed, replayable, auditable agent orchestration. Run lifecycle (start/step/complete/fail), retry policy, approval gates wired to the approvals inbox, structured-log emission, and OTel span helpers.",
+  "description": "Agents Core \u2014 typed, replayable, auditable agent orchestration. Run lifecycle (start/step/complete/fail), retry policy, approval gates wired to the approvals inbox, structured-log emission, and OTel span helpers.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -72,6 +72,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

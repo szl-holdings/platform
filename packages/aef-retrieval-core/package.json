@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — pure retrieval functions: query normalization, reciprocal rank fusion, exact-match boost rules, metadata filtering, score normalization, citation assembly, and pluggable dense/keyword/rerank adapter interfaces.",
+  "description": "Alloy Embedding Fabric \u2014 pure retrieval functions: query normalization, reciprocal rank fusion, exact-match boost rules, metadata filtering, score normalization, citation assembly, and pluggable dense/keyword/rerank adapter interfaces.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -49,6 +49,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

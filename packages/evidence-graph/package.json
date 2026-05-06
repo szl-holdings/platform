@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Evidence graph store — evidence items linked to entities and signals, recommendations with evidence chains, and the 'why does the system believe X' query layer",
+  "description": "Evidence graph store \u2014 evidence items linked to entities and signals, recommendations with evidence chains, and the 'why does the system believe X' query layer",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

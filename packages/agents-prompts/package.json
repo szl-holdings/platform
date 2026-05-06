@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Agents Prompts — prompt templates with semantic versioning, separated from business logic. Named PromptRef references replace inline string templates.",
+  "description": "Agents Prompts \u2014 prompt templates with semantic versioning, separated from business logic. Named PromptRef references replace inline string templates.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

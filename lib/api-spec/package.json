@@ -13,6 +13,7 @@
   },
   "scripts": {
     "codegen": "test -f ../api-client-react/src/generated/api.ts && test -f ../api-zod/src/generated/api.ts && echo 'codegen artifacts present, skipping orval' || orval --config ./orval.config.ts",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

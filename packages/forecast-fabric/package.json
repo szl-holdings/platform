@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "description": "Forecast Fabric — unified multi-head forecasting service with calibrated interval outputs, provider-adapter slots, and named heads for every platform lane.",
+  "description": "Forecast Fabric \u2014 unified multi-head forecasting service with calibrated interval outputs, provider-adapter slots, and named heads for every platform lane.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,6 +30,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

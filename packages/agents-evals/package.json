@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Agents Evals — eval suites wired to agents-tools and agents-prompts registries. Auto-generates tool-reliability and prompt-eval suites; supports deterministic trace replay evals.",
+  "description": "Agents Evals \u2014 eval suites wired to agents-tools and agents-prompts registries. Auto-generates tool-reliability and prompt-eval suites; supports deterministic trace replay evals.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -39,6 +39,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

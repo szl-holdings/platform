@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Verifier — strict pre-commit checks (evidence, citation, contradiction, policy, domain, action safety, completeness, calibration) gating every cognitive output.",
+  "description": "Verifier \u2014 strict pre-commit checks (evidence, citation, contradiction, policy, domain, action safety, completeness, calibration) gating every cognitive output.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -43,6 +43,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

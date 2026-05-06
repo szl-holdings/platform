@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": false,
   "type": "module",
-  "description": "Memory Fabric — 10-type cognitive memory for working, session, episodic, semantic, workflow, entity, artifact, operator-feedback, executive, and skill scopes. Provenance, freshness, confidence, retention enforcement, episodic summarization, lesson distillation, and tier-based sensitivity redaction.",
+  "description": "Memory Fabric \u2014 10-type cognitive memory for working, session, episodic, semantic, workflow, entity, artifact, operator-feedback, executive, and skill scopes. Provenance, freshness, confidence, retention enforcement, episodic summarization, lesson distillation, and tier-based sensitivity redaction.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

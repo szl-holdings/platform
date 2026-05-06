@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — deterministic, checkpointed workflow state machine. Defines actor roles (IngestionPlanner, SourceNormalizer, ChunkPlanner, PolicyGuard, VectorDispatch, IndexVerifier, RetrievalEvaluator, ApprovalGate), approval interrupt support, resumable execution across restarts, and audit event emission at each step.",
+  "description": "Alloy Embedding Fabric \u2014 deterministic, checkpointed workflow state machine. Defines actor roles (IngestionPlanner, SourceNormalizer, ChunkPlanner, PolicyGuard, VectorDispatch, IndexVerifier, RetrievalEvaluator, ApprovalGate), approval interrupt support, resumable execution across restarts, and audit event emission at each step.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -40,6 +40,7 @@
     "vitest": "^4.1.5"
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

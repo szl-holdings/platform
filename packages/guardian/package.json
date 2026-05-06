@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Guardian — unified policy engine and approval tiers. Eight policy tiers, deny-by-default decision engine, and rule schema for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "Guardian \u2014 unified policy engine and approval tiers. Eight policy tiers, deny-by-default decision engine, and rule schema for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -48,6 +48,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

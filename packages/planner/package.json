@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Planner — goal decomposition, model/tool/approval routing, risk-aware sequencing, fallback plan generation, persistent plan graphs.",
+  "description": "Planner \u2014 goal decomposition, model/tool/approval routing, risk-aware sequencing, fallback plan generation, persistent plan graphs.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -53,6 +53,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

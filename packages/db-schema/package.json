@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Explicit table/relation definitions — the single source of truth for the Drizzle schema. Re-organizes lib/db schema by domain.",
+  "description": "Explicit table/relation definitions \u2014 the single source of truth for the Drizzle schema. Re-organizes lib/db schema by domain.",
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/domains/auth.ts",
@@ -16,6 +16,7 @@
     "./platform": "./src/domains/platform.ts"
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

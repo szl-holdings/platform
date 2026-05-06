@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — append-only evidence ledger recording request, chunk, source, scoring, and policy provenance for every retrieval operation. Ships an in-memory adapter and a JSONL filesystem adapter for development.",
+  "description": "Alloy Embedding Fabric \u2014 append-only evidence ledger recording request, chunk, source, scoring, and policy provenance for every retrieval operation. Ships an in-memory adapter and a JSONL filesystem adapter for development.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,6 +38,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

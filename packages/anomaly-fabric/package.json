@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "description": "Anomaly Fabric — unified streaming and batch anomaly detection service with a single shared contract used across all platform lanes.",
+  "description": "Anomaly Fabric \u2014 unified streaming and batch anomaly detection service with a single shared contract used across all platform lanes.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,6 +30,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "MCP Tool Mesh — canonical schema-bound tool registry and gateway. Consolidates tool-registry, gateway, rate limiting, timeouts, fallback chains, guardian approval, observability hooks, MCP bridging, and execution tracking.",
+  "description": "MCP Tool Mesh \u2014 canonical schema-bound tool registry and gateway. Consolidates tool-registry, gateway, rate limiting, timeouts, fallback chains, guardian approval, observability hooks, MCP bridging, and execution tracking.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -85,6 +85,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

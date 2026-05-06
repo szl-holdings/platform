@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Trace Graph — run/agent/tool trace capture and replay. Full-fidelity trace schema, writer API, persistence adapter, and deterministic replay for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "Trace Graph \u2014 run/agent/tool trace capture and replay. Full-fidelity trace schema, writer API, persistence adapter, and deterministic replay for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -55,6 +55,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

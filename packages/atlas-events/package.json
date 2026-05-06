@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "ATLAS standardized event taxonomy — business event class definitions, metadata contracts, and domain event routing",
+  "description": "ATLAS standardized event taxonomy \u2014 business event class definitions, metadata contracts, and domain event routing",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -29,6 +29,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "build": "tsc --build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
