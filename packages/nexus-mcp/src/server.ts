@@ -516,7 +516,13 @@ export class PRAXISMcpServer {
     }>,
   ): void {
     const self = this;
-    this._sdk.prompt(name, description, argsShape, async (args, _extra) => {
+    // Cast through `any` to break Zod's deep generic inference (TS2589):
+    // `_sdk.prompt`'s overloaded signature reconstructs the args type from
+    // `argsShape` at every level of `ZodRawShape`, which exhausts the type
+    // depth budget. The runtime contract is the same; we just opt out of
+    // the recursive inference at the call boundary.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this._sdk.prompt as any)(name, description, argsShape, async (args: Record<string, string>, _extra: unknown) => {
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
       void self._writeProofChain({
         entryType: 'prompt_get',
