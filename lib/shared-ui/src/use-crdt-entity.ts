@@ -135,6 +135,9 @@ export function useCrdtEntity(
         setFields((prev) => {
           const next = { ...prev };
           for (const [key, incoming] of Object.entries(delta)) {
+            // Defend against prototype pollution from untrusted WebSocket peers.
+            // CodeQL js/remote-property-injection.
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
             const existing = fieldStatesRef.current[key];
             if (!existing) {
               fieldStatesRef.current[key] = incoming;
@@ -158,6 +161,7 @@ export function useCrdtEntity(
 
           if (msg.clock) {
             for (const [actor, tick] of Object.entries(msg.clock)) {
+              if (actor === '__proto__' || actor === 'constructor' || actor === 'prototype') continue;
               clockRef.current[actor] = Math.max(clockRef.current[actor] ?? 0, tick);
             }
           }

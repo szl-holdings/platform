@@ -166,10 +166,15 @@ function buildDefaultCodeModeExecutor(
 function buildDefaultCodeScriptGenerator(registry: ToolRegistry): CodeScriptGeneratorFn {
   return async (step, discoveredToolIds, _context) => {
     // Sanitize values for safe interpolation into template literals.
-    const safeTitle = step.title.replace(/`/g, "'").replace(/\\/g, '\\\\');
-    const safeDesc = (typeof step.description === 'string' ? step.description : safeTitle)
-      .replace(/`/g, "'")
-      .replace(/\\/g, '\\\\');
+    // Order matters: escape backslashes FIRST, then escape template-literal
+    // metacharacters. Reversing the order causes double-escaping where
+    // the backslash inserted by step 1 gets re-escaped. CodeQL js/double-escaping.
+    const escapeForTemplate = (s: string): string =>
+      s.replace(/\\/g, '\\\\').replace(/`/g, "'").replace(/\$\{/g, '\\${');
+    const safeTitle = escapeForTemplate(step.title);
+    const safeDesc = escapeForTemplate(
+      typeof step.description === 'string' ? step.description : step.title,
+    );
 
     if (discoveredToolIds.length === 0) {
       // No tools — return a structured acknowledgement that records the step intent.

@@ -1114,10 +1114,19 @@ router.post('/sovereign/redteam/campaign', (req: Request, res: Response) => {
   return res.json(rth.runCampaign(target ?? "alloy", defender, n ?? 12));
 });
 
+// Caps for caller-supplied array inputs — defense against
+// algorithmic-complexity DoS. CodeQL js/resource-exhaustion.
+const MAX_TOKENS = 4096;
+const MAX_PATTERNS = 256;
+
 router.post('/sovereign/mamba/sequence', (req: Request, res: Response) => {
   const { tokens, stateSize } = req.body ?? {};
   const ssm = new CondorMambaSSM(stateSize ?? 8);
-  const toks: number[] = Array.isArray(tokens) ? tokens.map(Number) : Array.from({ length: 10 }, (_, i) => i * 0.1);
+  const rawToks: unknown[] = Array.isArray(tokens) ? tokens : Array.from({ length: 10 }, (_, i) => i * 0.1);
+  if (rawToks.length > MAX_TOKENS) {
+    return res.status(413).json({ error: `tokens[] exceeds maximum length of ${MAX_TOKENS}` });
+  }
+  const toks: number[] = rawToks.map(Number);
   return res.json(ssm.processSequence(toks));
 });
 
@@ -1152,6 +1161,9 @@ router.post('/sovereign/hopfield/retrieve', (req: Request, res: Response) => {
   const { patterns, query, dim } = req.body ?? {};
   if (!Array.isArray(patterns) || !query) {
     return res.status(400).json({ error: 'patterns[] and query required' });
+  }
+  if (patterns.length > MAX_PATTERNS) {
+    return res.status(413).json({ error: `patterns[] exceeds maximum length of ${MAX_PATTERNS}` });
   }
   const haam = new HopfieldAmaruMemory(dim ?? 8);
   for (const p of patterns) haam.store(p.id ?? p, p.content ?? p);

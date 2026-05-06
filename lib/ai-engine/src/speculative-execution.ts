@@ -54,10 +54,17 @@ export function setSpeculativeModelCaller(fn: ModelCaller): void {
   _modelCaller = fn;
 }
 
-const _winnerTracker: Record<string, Record<string, number>> = {};
+const _winnerTracker: Record<string, Record<string, number>> = Object.create(null) as Record<string, Record<string, number>>;
+
+function _isUnsafeKey(k: string): boolean {
+  return k === '__proto__' || k === 'constructor' || k === 'prototype';
+}
 
 export function recordWinner(domain: string, model: string): void {
-  if (!_winnerTracker[domain]) _winnerTracker[domain] = {};
+  // Defend against prototype pollution if domain/model ever derive from
+  // user-controlled input. CodeQL js/prototype-polluting-assignment.
+  if (_isUnsafeKey(domain) || _isUnsafeKey(model)) return;
+  if (!_winnerTracker[domain]) _winnerTracker[domain] = Object.create(null) as Record<string, number>;
   _winnerTracker[domain]![model] = (_winnerTracker[domain]![model] ?? 0) + 1;
 }
 

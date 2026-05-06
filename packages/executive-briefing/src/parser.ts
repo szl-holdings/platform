@@ -42,7 +42,8 @@ export function parseBriefResponse(
   // Cap input to avoid polynomial-redos on pathological LLM outputs.
   const MAX_PARSE_LEN = 1_048_576; // 1 MB
   if (raw.length > MAX_PARSE_LEN) raw = raw.slice(0, MAX_PARSE_LEN);
-  const fenceMatch = raw.match(/```(?:json)?[ \t]*\n?([\s\S]*?)```/);
+  // Bound the inter-fence whitespace to avoid polynomial-redos. CodeQL js/polynomial-redos.
+  const fenceMatch = raw.match(/```(?:json)?[ \t]{0,16}\n?([\s\S]*?)```/);
   if (fenceMatch) raw = fenceMatch[1]?.trim();
 
   const jsonStart = raw.indexOf('{');

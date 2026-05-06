@@ -517,7 +517,12 @@ export class SalesforceAdapter extends ServiceAdapter {
       const ops = [...MOCK_OPPORTUNITIES];
       return stage ? ops.filter((o) => o.stageName === stage) : ops;
     }
-    const stageFilter = stage ? ` AND StageName = '${stage.replace(/'/g, "\\'")}'` : '';
+    // Escape backslash FIRST, then single-quote, to avoid double-escaping
+    // and to fully neutralize SOQL string-literal metacharacters.
+    // CodeQL js/incomplete-sanitization.
+    const escapeSoql = (v: string): string =>
+      v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const stageFilter = stage ? ` AND StageName = '${escapeSoql(stage)}'` : '';
     const soql = `SELECT Id, Name, AccountId, Account.Name, Amount, StageName, CloseDate, Probability, ForecastCategory, IsClosed, IsWon, Type, LastModifiedDate FROM Opportunity WHERE IsClosed = false${stageFilter} ORDER BY Amount DESC NULLS LAST LIMIT ${limit}`;
     const result = await this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
     return result.records.map((r) => ({

@@ -62,8 +62,11 @@ const SENSITIVE_KEYS = new Set([
 function redactSensitive(obj: unknown, depth = 0): unknown {
   if (depth > 4 || obj === null || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map(v => redactSensitive(v, depth + 1));
-  const out: Record<string, unknown> = {};
+  // Use a null-prototype object to defend against prototype pollution from
+  // attacker-controlled keys. CodeQL js/remote-property-injection.
+  const out: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
   for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (k === "__proto__" || k === "constructor" || k === "prototype") continue;
     out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "[REDACTED]" : redactSensitive(v, depth + 1);
   }
   return out;
