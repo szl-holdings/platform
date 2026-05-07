@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   LayoutGrid, Rocket, ShieldCheck, Sparkles,
@@ -364,13 +364,18 @@ const trustSections: NavSection[] = [
 ];
 
 function CollapsibleSection({ section }: { section: NavSection }) {
-  const [isOpen, setIsOpen] = useState(section.defaultOpen ?? false);
   const [location] = useLocation();
 
   const hasActiveChild = section.items.some(item => {
     const fullPath = `${BASE}${item.path}`;
     return location === fullPath || location.startsWith(fullPath + '/');
   });
+
+  const [isOpen, setIsOpen] = useState((section.defaultOpen ?? false) || hasActiveChild);
+
+  useEffect(() => {
+    if (hasActiveChild) setIsOpen(true);
+  }, [hasActiveChild]);
 
   return (
     <div>
