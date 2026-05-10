@@ -165,11 +165,20 @@ function buildDefaultCodeModeExecutor(
 /** Default code-script generator for steps without a pre-written codeScript. */
 function buildDefaultCodeScriptGenerator(registry: ToolRegistry): CodeScriptGeneratorFn {
   return async (step, discoveredToolIds, _context) => {
-    // Sanitize values for safe interpolation into template literals.
-    const safeTitle = step.title.replace(/`/g, "'").replace(/\\/g, '\\\\');
-    const safeDesc = (typeof step.description === 'string' ? step.description : safeTitle)
-      .replace(/`/g, "'")
-      .replace(/\\/g, '\\\\');
+    // Sanitize values for safe interpolation into template literals. We must
+    // escape backslashes BEFORE any other substitution, otherwise replacements
+    // that introduce backslashes get double-escaped on the next pass
+    // (CodeQL js/double-escaping). We also escape `${` to neutralise template
+    // expression injection.
+    const sanitizeForTemplate = (s: string): string =>
+      s
+        .replace(/\\/g, '\\\\') // backslash first
+        .replace(/`/g, "'")        // then backtick
+        .replace(/\$\{/g, '\\${'); // then ${ to neutralise interpolation
+    const safeTitle = sanitizeForTemplate(step.title);
+    const safeDesc = sanitizeForTemplate(
+      typeof step.description === 'string' ? step.description : step.title,
+    );
 
     if (discoveredToolIds.length === 0) {
       // No tools — return a structured acknowledgement that records the step intent.

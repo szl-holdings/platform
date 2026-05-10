@@ -1081,11 +1081,20 @@ router.get('/sovereign/icrc/constants', (_req: Request, res: Response) => {
   });
 });
 
+// Cap dimensions on user-controlled allocations (CodeQL js/resource-exhaustion).
+const MAX_SOVEREIGN_DIM = 4096;
+const MAX_SOVEREIGN_LAYERS = 64;
+const MAX_SOVEREIGN_ITER = 10_000;
+
 router.post('/sovereign/sae/run', (req: Request, res: Response) => {
   const { x, inputDim, l1Lambda } = req.body ?? {};
-  const dim = inputDim ?? 8;
+  const dimRaw = Number(inputDim ?? 8);
+  if (!Number.isFinite(dimRaw) || dimRaw < 1 || dimRaw > MAX_SOVEREIGN_DIM) {
+    return res.status(400).json({ error: `inputDim must be 1..${MAX_SOVEREIGN_DIM}` });
+  }
+  const dim = Math.floor(dimRaw);
   const tsa = new TawaSparseAutoencoder(dim);
-  const input = Array.isArray(x) ? x.map(Number) : new Array(dim).fill(0.5);
+  const input = Array.isArray(x) ? x.slice(0, dim).map(Number) : new Array(dim).fill(0.5);
   const h = tsa.encode(input, l1Lambda ?? 0.01);
   return res.json({
     sparseCodeNonzero: h.filter((v: number) => v > 0).length,
@@ -1160,9 +1169,23 @@ router.post('/sovereign/hopfield/retrieve', (req: Request, res: Response) => {
 
 router.post('/sovereign/predictive-coding/infer', (req: Request, res: Response) => {
   const { observation, layers, dim, iterations, lr } = req.body ?? {};
-  const pcem = new PredictiveCodingEngine(layers ?? 3, dim ?? 8);
-  const obs = Array.isArray(observation) ? observation.map(Number) : new Array(dim ?? 8).fill(0.5);
-  return res.json(pcem.infer(obs, iterations ?? 10, lr ?? 0.1));
+  // Cap user-controlled dimensions on attacker-influenced allocations
+  // (CodeQL js/resource-exhaustion).
+  const layersN = Math.floor(Number(layers ?? 3));
+  const dimN = Math.floor(Number(dim ?? 8));
+  const itersN = Math.floor(Number(iterations ?? 10));
+  if (!Number.isFinite(layersN) || layersN < 1 || layersN > MAX_SOVEREIGN_LAYERS) {
+    return res.status(400).json({ error: `layers must be 1..${MAX_SOVEREIGN_LAYERS}` });
+  }
+  if (!Number.isFinite(dimN) || dimN < 1 || dimN > MAX_SOVEREIGN_DIM) {
+    return res.status(400).json({ error: `dim must be 1..${MAX_SOVEREIGN_DIM}` });
+  }
+  if (!Number.isFinite(itersN) || itersN < 1 || itersN > MAX_SOVEREIGN_ITER) {
+    return res.status(400).json({ error: `iterations must be 1..${MAX_SOVEREIGN_ITER}` });
+  }
+  const pcem = new PredictiveCodingEngine(layersN, dimN);
+  const obs = Array.isArray(observation) ? observation.slice(0, dimN).map(Number) : new Array(dimN).fill(0.5);
+  return res.json(pcem.infer(obs, itersN, lr ?? 0.1));
 });
 
 router.post('/sovereign/sacred-geometry/coherence', (req: Request, res: Response) => {

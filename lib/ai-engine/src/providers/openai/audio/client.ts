@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 import { getEnv } from '@szl-holdings/env';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import OpenAI, { toFile } from 'openai';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -65,11 +65,14 @@ export function detectAudioFormat(buffer: Buffer): AudioFormat {
  * Convert any audio/video format to WAV using ffmpeg.
  */
 export async function convertToWav(audioBuffer: Buffer): Promise<Buffer> {
-  const inputPath = join(tmpdir(), `input-${randomUUID()}`);
-  const outputPath = join(tmpdir(), `output-${randomUUID()}.wav`);
+  // Create a private, mode-0700 directory under tmpdir() so the ffmpeg input/output paths
+  // cannot be predicted or pre-created by another local user (CodeQL js/insecure-temporary-file).
+  const workDir = await mkdtemp(join(tmpdir(), `szl-audio-${randomUUID()}-`));
+  const inputPath = join(workDir, 'input');
+  const outputPath = join(workDir, 'output.wav');
 
   try {
-    await writeFile(inputPath, audioBuffer);
+    await writeFile(inputPath, audioBuffer, { mode: 0o600 });
 
     await new Promise<void>((resolve, reject) => {
       const ffmpeg = spawn('ffmpeg', [
@@ -98,8 +101,10 @@ export async function convertToWav(audioBuffer: Buffer): Promise<Buffer> {
 
     return await readFile(outputPath);
   } finally {
+    // Best-effort cleanup of the entire isolated work directory.
     await unlink(inputPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
+    await rm(workDir, { recursive: true, force: true }).catch(() => {});
   }
 }
 
