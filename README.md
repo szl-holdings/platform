@@ -1,8 +1,43 @@
 # SZL Holdings
 
-[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/szl-holdings/szl-holdings-platform/badge)](https://securityscorecards.dev/viewer/?uri=github.com/szl-holdings/szl-holdings-platform) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
 **The governed infrastructure for high-consequence decisions.**
+
+## Architecture
+
+```mermaid
+flowchart LR
+    classDef research fill:#28251D,stroke:#C8B26A,color:#F7F6F2;
+    classDef runtime  fill:#1B474D,stroke:#01696F,color:#F7F6F2;
+    classDef platform fill:#01696F,stroke:#C8B26A,color:#F7F6F2;
+    classDef surface  fill:#F7F6F2,stroke:#01696F,color:#1B474D;
+
+    subgraph FOUND["Foundation"]
+        T["Ouroboros Thesis<br/>10 papers · DOI lineage"]:::research
+        R["Ouroboros Runtime<br/>bounded loops · 172/172 tests"]:::runtime
+        L["Lambda Engine<br/>9-axis Lutar Invariant"]:::runtime
+    end
+    subgraph PLAT["This monorepo"]
+        P["Platform API<br/>48 endpoints · 34 innovations"]:::platform
+    end
+    subgraph SURF["Product surfaces"]
+        A["A11oy"]:::surface
+        S["Sentra"]:::surface
+        AM["Amaru"]:::surface
+        V["Vessels"]:::surface
+        TE["Terra"]:::surface
+        C["Counsel"]:::surface
+        CJ["Carlota Jo"]:::surface
+    end
+    T --> R --> L --> P --> A
+    P --> S
+    P --> AM
+    P --> V
+    P --> TE
+    P --> C
+    P --> CJ
+```
 
 > Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single platform.
 
