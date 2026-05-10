@@ -90,6 +90,12 @@ export class FilesystemCapability implements SandboxCapability {
     options: { offsetBytes?: number; limitBytes?: number } = {},
   ): Promise<FileReadResult> {
     const fullPath = await validateWorkspacePathSafe(path, this.workspaceRoot);
+    // The stat() lookup below is purely informational (used for the truncated
+    // flag and observability metric). The subsequent readFile() does not assume
+    // the file still has the same size or shape — it slices whatever it gets.
+    // CodeQL js/file-system-race is acknowledged here as accepted-risk because
+    // the workspace path was already validated against escape attempts and the
+    // file content is bounded by `limitBytes`.
     const stats = await stat(fullPath);
     const isBinary = BINARY_EXTS.has(extname(path).toLowerCase());
 

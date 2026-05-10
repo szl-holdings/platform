@@ -59,11 +59,16 @@ const SENSITIVE_KEYS = new Set([
   "card_number", "private_key", "client_secret",
 ]);
 
+// Reject prototype-polluting keys arriving from external/audit payloads
+// (CodeQL js/remote-property-injection).
+const _AUDIT_FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
 function redactSensitive(obj: unknown, depth = 0): unknown {
   if (depth > 4 || obj === null || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map(v => redactSensitive(v, depth + 1));
-  const out: Record<string, unknown> = {};
+  const out: Record<string, unknown> = Object.create(null);
   for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (typeof k !== "string" || _AUDIT_FORBIDDEN_KEYS.has(k)) continue;
     out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "[REDACTED]" : redactSensitive(v, depth + 1);
   }
   return out;

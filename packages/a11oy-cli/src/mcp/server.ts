@@ -80,8 +80,16 @@ export async function startMcpServer(services: string[]) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
       } catch (e: any) {
-        res.writeHead(400);
-        res.end(JSON.stringify({ ok: false, error: { code: 'PARSE_ERROR', message: e.message } }));
+        // Sanitize raw error text before reflecting it: strip control chars and
+        // cap length so attacker-supplied payloads can't smuggle markup or
+        // inflate the response (CodeQL js/xss-through-exception).
+        const rawMsg = typeof e?.message === 'string' ? e.message : 'parse error';
+        const safeMsg = rawMsg
+          // eslint-disable-next-line no-control-regex
+          .replace(/[\u0000-\u001f\u007f<>]/g, '')
+          .slice(0, 200);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: { code: 'PARSE_ERROR', message: safeMsg } }));
       }
     });
   });

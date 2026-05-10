@@ -65,16 +65,14 @@ function scaffold(args: string[]): void {
   const filename = `${slugify(entityId)}.yaml`;
   const outPath = resolve(RESULTS_DIR, filename);
 
-  if (!existsSync(RESULTS_DIR)) {
-    mkdirSync(RESULTS_DIR, { recursive: true });
-  }
+  // mkdir is idempotent with recursive (CodeQL js/file-system-race).
+  mkdirSync(RESULTS_DIR, { recursive: true });
 
-  if (existsSync(outPath)) {
+  const force = args.includes('--force');
+  if (!force && existsSync(outPath)) {
     console.error(`File already exists: ${outPath}`);
     console.error('Use --force to overwrite.');
-    if (!args.includes('--force')) {
-      process.exit(1);
-    }
+    process.exit(1);
   }
 
   const yaml = `# eval_results.yaml — Open Evaluation Layer
@@ -102,7 +100,9 @@ results:
       - ${domain}
 `;
 
-  writeFileSync(outPath, yaml, 'utf8');
+  // Use atomic create/replace: 'wx' fails if exists (no TOCTOU window), 'w'
+  // only when --force is passed.
+  writeFileSync(outPath, yaml, { encoding: 'utf8', flag: force ? 'w' : 'wx' });
   console.log(`\n✅  Scaffolded: ${outPath}`);
   console.log('\nNext steps:');
   console.log(`  1. Edit ${outPath} with your actual results`);

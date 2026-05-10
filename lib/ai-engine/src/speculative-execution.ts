@@ -54,11 +54,24 @@ export function setSpeculativeModelCaller(fn: ModelCaller): void {
   _modelCaller = fn;
 }
 
-const _winnerTracker: Record<string, Record<string, number>> = {};
+const _winnerTracker: Record<string, Record<string, number>> = Object.create(null);
+
+// Guard against prototype-polluting writes when callers pass attacker-controlled keys.
+const _PROTO_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+function _safeKey(k: string): string | null {
+  if (typeof k !== 'string' || _PROTO_KEYS.has(k)) return null;
+  return k;
+}
 
 export function recordWinner(domain: string, model: string): void {
-  if (!_winnerTracker[domain]) _winnerTracker[domain] = {};
-  _winnerTracker[domain]![model] = (_winnerTracker[domain]![model] ?? 0) + 1;
+  const safeDomain = _safeKey(domain);
+  const safeModel = _safeKey(model);
+  if (safeDomain === null || safeModel === null) return;
+  if (!Object.prototype.hasOwnProperty.call(_winnerTracker, safeDomain)) {
+    _winnerTracker[safeDomain] = Object.create(null) as Record<string, number>;
+  }
+  const bucket = _winnerTracker[safeDomain]!;
+  bucket[safeModel] = (bucket[safeModel] ?? 0) + 1;
 }
 
 export function getDomainWinnerStats(): Record<string, Record<string, number>> {

@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Guard against remote-controlled keys writing onto Object.prototype
+// (CodeQL js/remote-property-injection).
+const _CRDT_FORBIDDEN_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+function _isSafeFieldKey(k: unknown): k is string {
+  return typeof k === 'string' && k.length > 0 && !_CRDT_FORBIDDEN_KEYS.has(k);
+}
+
 export interface FieldSchema {
   conflictReview?: boolean;
 }
@@ -135,6 +142,8 @@ export function useCrdtEntity(
         setFields((prev) => {
           const next = { ...prev };
           for (const [key, incoming] of Object.entries(delta)) {
+            // Reject prototype-polluting keys arriving over the wire.
+            if (!_isSafeFieldKey(key)) continue;
             const existing = fieldStatesRef.current[key];
             if (!existing) {
               fieldStatesRef.current[key] = incoming;
@@ -158,6 +167,7 @@ export function useCrdtEntity(
 
           if (msg.clock) {
             for (const [actor, tick] of Object.entries(msg.clock)) {
+              if (!_isSafeFieldKey(actor)) continue;
               clockRef.current[actor] = Math.max(clockRef.current[actor] ?? 0, tick);
             }
           }

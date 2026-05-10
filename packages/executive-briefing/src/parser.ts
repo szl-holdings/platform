@@ -42,8 +42,18 @@ export function parseBriefResponse(
   // Cap input to avoid polynomial-redos on pathological LLM outputs.
   const MAX_PARSE_LEN = 1_048_576; // 1 MB
   if (raw.length > MAX_PARSE_LEN) raw = raw.slice(0, MAX_PARSE_LEN);
-  const fenceMatch = raw.match(/```(?:json)?[ \t]*\n?([\s\S]*?)```/);
-  if (fenceMatch) raw = fenceMatch[1]?.trim();
+  // Linear fence extraction: find the outermost ```...``` pair via simple
+  // indexOf calls, avoiding the polynomial-redos shape of a regex with two
+  // overlapping `[\s\S]*?` style quantifiers (CodeQL js/polynomial-redos).
+  const fenceStart = raw.indexOf('```');
+  if (fenceStart !== -1) {
+    const afterFence = raw.indexOf('\n', fenceStart);
+    const bodyStart = afterFence === -1 ? fenceStart + 3 : afterFence + 1;
+    const fenceEnd = raw.indexOf('```', bodyStart);
+    if (fenceEnd !== -1) {
+      raw = raw.slice(bodyStart, fenceEnd).trim();
+    }
+  }
 
   const jsonStart = raw.indexOf('{');
   const jsonEnd = raw.lastIndexOf('}');

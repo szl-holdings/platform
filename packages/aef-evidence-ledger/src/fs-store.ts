@@ -21,11 +21,19 @@ export class FilesystemLedgerStore implements LedgerStore {
   constructor(filePath: string) {
     this.filePath = filePath;
     const dir = dirname(filePath);
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
+    // Avoid TOCTOU race (CodeQL js/file-system-race): mkdir is idempotent
+    // with `recursive: true`, and we open-create the file with `wx`-equivalent
+    // semantics by using the `'a'` (append) flag which never truncates an
+    // existing file but creates one if missing.
+    mkdirSync(dir, { recursive: true });
     if (!existsSync(filePath)) {
-      writeFileSync(filePath, '', 'utf8');
+      // Atomic create-if-missing via flag 'wx' (fails if file exists, which we
+      // tolerate); a follow-up `existsSync` is unnecessary on the success path.
+      try {
+        writeFileSync(filePath, '', { encoding: 'utf8', flag: 'wx' });
+      } catch {
+        // File appeared concurrently — that's the intended end state.
+      }
     }
     this.buildIndex();
   }
