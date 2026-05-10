@@ -199,7 +199,11 @@
       "@xmldom/xmldom": "^0.9.10",
       "fast-xml-parser": "^5.7.2",
       "postcss": "^8.5.12",
-      "uuid": "^10.0.0"
+      "uuid": "^10.0.0",
+      "hono": "^4.12.18",
+      "fast-uri": "^3.1.2",
+      "fast-xml-builder": "^1.2.0",
+      "basic-ftp": "^6.0.1"
     }
   }
 }
