@@ -109,7 +109,7 @@ This PR lands the complete Moonshot program — eight structured phases of audit
 
 ## Known Remaining Issues After Merge
 
-See `RELEASE_READINESS_SCORECARD.md` §Open Blockers. The critical path to Series A readiness:
+See `RELEASE_READINESS_SCORECARD.md` §Open Blockers. The critical path to growth capital readiness:
 
 1. Provide `DATABASE_URL` in CI to unlock the 8 deferred quality-suite checks
 2. Configure live credentials: `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `MAPBOX_ACCESS_TOKEN`, `AIS_API_KEY`, `SENTRY_DSN`

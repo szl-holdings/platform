@@ -5,6 +5,12 @@
 
 ---
 
+## Alloy → Continuum Rebrand (Task #3196 — 2026-04-28)
+
+The governed agentic execution layer is now **Continuum — Business Observability Fabric**. The name "Alloy" (and "Alloy Execution Fabric", "AEEP") is retired. The platform is re-cast as a continuous, governed view of every signal and decision flowing through the business — in the spirit of New Relic and BOSS Technologies. Architecture and behavior are unchanged.
+
+---
+
 ## Summary
 
 Comprehensive audit, stabilization, and publish of the SZL Holdings monorepo. All 13 open GitHub PRs resolved, 12 of 14 artifact workflows running cleanly, critical bug fixes applied across the platform, and the application deployed to production.

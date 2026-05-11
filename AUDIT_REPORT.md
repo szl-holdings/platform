@@ -21,7 +21,7 @@
 
 ## GitHub Push
 
-- **Remote:** `https://github.com/szl-holdings/platform.git`
+- **Remote:** `https://github.com/szl-holdings/szl-holdings-platform.git`
 - **Branch:** `master`
 - **Status:** ✅ Pushed successfully (merged 13 remote docs/a11y commits, then pushed ~20 local feature commits)
 - **Vulnerabilities flagged by GitHub:** 5 (4 high, 1 moderate) — see Dependabot alerts
