@@ -50,7 +50,7 @@ jobs:
           node-version: "24"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v4 — repinned 2026-04-30 (fe52bf0a force-deleted upstream)
+        uses: pnpm/action-setup@739bfe42ca9233c5e6aca07c1a25a9d34aca49b0 # v4 — repinned 2026-04-30 (fe52bf0a force-deleted upstream)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
