@@ -37,7 +37,14 @@ export interface GuardianPolicyResult {
 }
 
 export interface ProofChainEntry {
-  entryType: 'tool_call' | 'resource_read' | 'prompt_get' | 'sampling_request' | 'elicitation' | 'task_update' | 'app_render';
+  entryType:
+    | 'tool_call'
+    | 'resource_read'
+    | 'prompt_get'
+    | 'sampling_request'
+    | 'elicitation'
+    | 'task_update'
+    | 'app_render';
   toolName?: string;
   tenantId?: string;
   userId?: number;
@@ -238,7 +245,10 @@ export class PRAXISMcpServer {
     name: string,
     description: string,
     schema: T,
-    handler: (args: z.infer<z.ZodObject<T>>, ctx: TenantContext) => Promise<{ content: ToolContent; isError?: boolean }>,
+    handler: (
+      args: z.infer<z.ZodObject<T>>,
+      ctx: TenantContext,
+    ) => Promise<{ content: ToolContent; isError?: boolean }>,
   ): void {
     const self = this;
     // Cast to bypass generic inference — PRAXISMcpServer provides its own type-safe wrapper generics
@@ -275,7 +285,9 @@ export class PRAXISMcpServer {
             timestamp: new Date().toISOString(),
           });
           return {
-            content: errorContent(`Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`),
+            content: errorContent(
+              `Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`,
+            ),
             isError: true,
           };
         }
@@ -348,9 +360,7 @@ export class PRAXISMcpServer {
       const isRequired = (inputSchema.required ?? []).includes(key);
       let fieldSchema: z.ZodTypeAny;
       if (p['type'] === 'string') {
-        fieldSchema = p['enum']
-          ? z.enum(p['enum'] as [string, ...string[]])
-          : z.string();
+        fieldSchema = p['enum'] ? z.enum(p['enum'] as [string, ...string[]]) : z.string();
       } else if (p['type'] === 'number') {
         fieldSchema = z.number();
       } else if (p['type'] === 'boolean') {
@@ -394,7 +404,9 @@ export class PRAXISMcpServer {
             timestamp: new Date().toISOString(),
           });
           return {
-            content: errorContent(`Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`),
+            content: errorContent(
+              `Tool blocked by policy: ${policyResult.reason ?? 'Guardian denied'}`,
+            ),
             isError: true,
           };
         }
@@ -418,10 +430,18 @@ export class PRAXISMcpServer {
           'content' in raw &&
           Array.isArray((raw as Record<string, unknown>)['content'])
         ) {
-          const r = raw as { content: ToolContent; isError?: boolean; _meta?: Record<string, unknown> };
+          const r = raw as {
+            content: ToolContent;
+            isError?: boolean;
+            _meta?: Record<string, unknown>;
+          };
           content = r.content;
-          if (r.isError) { outcome = 'error'; }
-          if (r._meta) { extraMeta = r._meta; }
+          if (r.isError) {
+            outcome = 'error';
+          }
+          if (r._meta) {
+            extraMeta = r._meta;
+          }
         } else {
           content = textContent(raw);
         }
@@ -468,7 +488,10 @@ export class PRAXISMcpServer {
     name: string,
     uri: string,
     metadata: { description?: string; mimeType?: string },
-    handler: (uri: string, ctx: TenantContext) => Promise<{ contents: Array<{ uri: string; text: string; mimeType?: string }> }>,
+    handler: (
+      uri: string,
+      ctx: TenantContext,
+    ) => Promise<{ contents: Array<{ uri: string; text: string; mimeType?: string }> }>,
   ): void {
     const self = this;
     this._sdk.resource(name, uri, metadata, async (_uri, _extra) => {
@@ -510,13 +533,32 @@ export class PRAXISMcpServer {
     name: string,
     description: string,
     argsShape: ZodRawShape,
-    handler: (args: Record<string, string>, ctx: TenantContext) => Promise<{
+    handler: (
+      args: Record<string, string>,
+      ctx: TenantContext,
+    ) => Promise<{
       description?: string;
       messages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }>;
     }>,
   ): void {
     const self = this;
-    this._sdk.prompt(name, description, argsShape, async (args, _extra) => {
+    // Cast to bypass generic inference — PRAXISMcpServer provides its own type-safe
+    // wrapper generics. The SDK's `prompt` overload uses deeply-recursive Zod inference
+    // that triggers TS2589 ("Type instantiation is excessively deep and possibly
+    // infinite") at this call site. Mirrors the pattern used for registerTool above.
+    const sdkPrompt = this._sdk.prompt.bind(this._sdk) as (
+      name: string,
+      description: string,
+      argsShape: ZodRawShape,
+      cb: (
+        args: Record<string, string>,
+        extra: unknown,
+      ) => Promise<{
+        description?: string;
+        messages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }>;
+      }>,
+    ) => void;
+    sdkPrompt(name, description, argsShape, async (args, _extra) => {
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
       void self._writeProofChain({
         entryType: 'prompt_get',
@@ -555,7 +597,11 @@ export class PRAXISMcpServer {
 
     // Also fire to in-process subscribers (e.g., SSE fan-out)
     for (const listener of this._externalNotifyListeners) {
-      try { listener(type); } catch { /* non-fatal */ }
+      try {
+        listener(type);
+      } catch {
+        /* non-fatal */
+      }
     }
   }
 
@@ -574,7 +620,9 @@ export class PRAXISMcpServer {
   /** Subscribe to discovery notifications (for SSE fan-out transport) */
   onDiscoveryNotification(listener: (type: DiscoveryEventType) => void): () => void {
     this._externalNotifyListeners.add(listener);
-    return () => { this._externalNotifyListeners.delete(listener); };
+    return () => {
+      this._externalNotifyListeners.delete(listener);
+    };
   }
 
   // ─── Sampling ────────────────────────────────────────────────────────────────
@@ -619,7 +667,9 @@ export class PRAXISMcpServer {
         policyResult = { allowed: true };
       }
       if (!policyResult.allowed) {
-        throw new Error(`Sampling blocked by Guardian policy: ${policyResult.reason ?? 'policy denied'}`);
+        throw new Error(
+          `Sampling blocked by Guardian policy: ${policyResult.reason ?? 'policy denied'}`,
+        );
       }
     }
 
@@ -774,12 +824,18 @@ export class PRAXISMcpServer {
             total: total ?? 100,
           },
         });
-      } catch { /* client may not be connected */ }
+      } catch {
+        /* client may not be connected */
+      }
     }
   }
 
   /** Mark a task as complete or failed */
-  async finalizeTask(taskId: string, status: 'complete' | 'failed' | 'cancelled', error?: string): Promise<void> {
+  async finalizeTask(
+    taskId: string,
+    status: 'complete' | 'failed' | 'cancelled',
+    error?: string,
+  ): Promise<void> {
     const task = this._tasks.get(taskId);
     if (!task) return;
     task.status = status;
@@ -876,7 +932,8 @@ export class PRAXISMcpServer {
       'nexus://instructions',
       'nexus://instructions',
       {
-        description: 'Dynamic system-level guidance for connected LLMs based on tenant context, active role, and domain',
+        description:
+          'Dynamic system-level guidance for connected LLMs based on tenant context, active role, and domain',
         mimeType: 'text/plain',
       },
       async () => ({
@@ -896,7 +953,8 @@ export class PRAXISMcpServer {
       'nexus://roots',
       'nexus://roots',
       {
-        description: 'Tenant-scoped filesystem boundary constraints — defines allowed root paths for connected clients',
+        description:
+          'Tenant-scoped filesystem boundary constraints — defines allowed root paths for connected clients',
         mimeType: 'application/json',
       },
       async () => ({
@@ -941,20 +999,38 @@ export class PRAXISMcpServer {
       },
     );
 
-    this._sdk.tool(
+    // Cast to bypass deep Zod inference — same pattern as registerTool/prompt above
+    // (TS2589: "Type instantiation is excessively deep and possibly infinite").
+    const sdkTool = this._sdk.tool.bind(this._sdk) as (
+      name: string,
+      description: string,
+      argsShape: ZodRawShape,
+      cb: (args: Record<string, unknown>) => Promise<CallToolResult>,
+    ) => void;
+    sdkTool(
       'nexus_render_app',
       'Render a domain micro-dashboard App as inline HTML. The HTML is scoped to the authenticated tenant and generated from live platform data.',
       { appId: z.string().describe('App ID from nexus_list_apps') },
       async (args) => {
-        const result = await self.renderApp(args.appId);
+        const appId = args.appId as string;
+        const result = await self.renderApp(appId);
         if (!result) {
-          return { content: [{ type: 'text', text: JSON.stringify({ error: `App '${args.appId}' not found` }) }], isError: true };
+          return {
+            content: [
+              { type: 'text', text: JSON.stringify({ error: `App '${appId}' not found` }) },
+            ],
+            isError: true,
+          };
         }
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ appId: args.appId, title: result.title, domain: result.domain, html: result.html }, null, 2),
+              text: JSON.stringify(
+                { appId, title: result.title, domain: result.domain, html: result.html },
+                null,
+                2,
+              ),
             },
           ],
         };
@@ -968,7 +1044,9 @@ export class PRAXISMcpServer {
     if (this._config.proofChainWriter) {
       try {
         await this._config.proofChainWriter(entry);
-      } catch { /* proof chain writes must not throw */ }
+      } catch {
+        /* proof chain writes must not throw */
+      }
     }
   }
 
@@ -976,7 +1054,9 @@ export class PRAXISMcpServer {
     if (this._config.auditLogger) {
       try {
         await this._config.auditLogger(entry);
-      } catch { /* audit writes must not throw */ }
+      } catch {
+        /* audit writes must not throw */
+      }
     }
   }
 }

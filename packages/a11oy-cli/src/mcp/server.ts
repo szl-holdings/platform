@@ -13,7 +13,7 @@ export async function startMcpServer(services: string[]) {
     }
 
     let body = '';
-    req.on('data', chunk => body += chunk);
+    req.on('data', (chunk) => (body += chunk));
     req.on('end', async () => {
       try {
         const { tool, args } = JSON.parse(body);
@@ -43,9 +43,13 @@ export async function startMcpServer(services: string[]) {
             break;
           case 'a11oy_action_execute':
             if (args.acknowledged !== true) {
-               result = { ok: false, error: { code: 'UNAUTHORIZED', message: 'acknowledged=true required' }, meta: { requestId: 'mcp', timestamp: new Date().toISOString() } };
+              result = {
+                ok: false,
+                error: { code: 'UNAUTHORIZED', message: 'acknowledged=true required' },
+                meta: { requestId: 'mcp', timestamp: new Date().toISOString() },
+              };
             } else {
-               result = await client.post(`/api/a11oy/actions/${args.id}/execute`);
+              result = await client.post(`/api/a11oy/actions/${args.id}/execute`);
             }
             break;
           case 'a11oy_proof_create':
@@ -73,7 +77,7 @@ export async function startMcpServer(services: string[]) {
             result = {
               ok: false,
               error: { code: 'UNKNOWN_TOOL', message: `Tool ${tool} not found` },
-              meta: { requestId: 'mcp', timestamp: new Date().toISOString() }
+              meta: { requestId: 'mcp', timestamp: new Date().toISOString() },
             };
         }
 
@@ -86,6 +90,7 @@ export async function startMcpServer(services: string[]) {
         const rawMsg = typeof e?.message === 'string' ? e.message : 'parse error';
         const safeMsg = rawMsg
           // eslint-disable-next-line no-control-regex
+          // biome-ignore lint/suspicious/noControlCharactersInRegex: deliberate XSS-defence sanitiser that strips ASCII control characters (CodeQL js/xss-through-exception remediation)
           .replace(/[\u0000-\u001f\u007f<>]/g, '')
           .slice(0, 200);
         res.writeHead(400, { 'Content-Type': 'application/json' });
