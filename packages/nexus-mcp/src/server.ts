@@ -516,7 +516,16 @@ export class PRAXISMcpServer {
     }>,
   ): void {
     const self = this;
-    this._sdk.prompt(name, description, argsShape, async (args, _extra) => {
+    // Cast _sdk.prompt to a non-recursive signature to break TS2589
+    // (excessively deep Zod type instantiation in @modelcontextprotocol/sdk@^1.0).
+    // The runtime contract is identical; only the type-checker boundary is widened here.
+    const sdkPrompt = this._sdk.prompt.bind(this._sdk) as (
+      n: string,
+      d: string,
+      s: ZodRawShape,
+      cb: (args: Record<string, unknown>, extra: unknown) => Promise<unknown>,
+    ) => void;
+    sdkPrompt(name, description, argsShape, async (args, _extra) => {
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
       void self._writeProofChain({
         entryType: 'prompt_get',
