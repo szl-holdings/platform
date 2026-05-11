@@ -9,6 +9,9 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan

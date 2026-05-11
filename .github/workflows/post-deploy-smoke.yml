@@ -21,6 +21,9 @@ concurrency:
   group: post-deploy-smoke-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   # Only proceed when the triggering deployment succeeded (not applicable for
   # manual dispatches, which always run).

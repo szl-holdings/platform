@@ -14,11 +14,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "tsc -p tsconfig.json",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "tsc -p tsconfig.json"
   },
   "exports": {
     ".": "./src/index.ts"

@@ -14,6 +14,9 @@ concurrency:
   group: audit-full-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   audit:
     name: Runtime Audit (audit:full)

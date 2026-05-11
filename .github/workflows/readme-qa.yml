@@ -32,6 +32,9 @@ on:
 permissions:
   contents: read
 
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   validate-readme-assets:
     name: Validate README images and badge workflows

@@ -14,6 +14,9 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   e2e-app:
     name: e2e-app (${{ matrix.app }})
