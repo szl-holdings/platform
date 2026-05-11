@@ -27,6 +27,7 @@
     }
   },
   "scripts": {
+    "build": "tsc --build",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",

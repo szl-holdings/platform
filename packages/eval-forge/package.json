@@ -51,6 +51,7 @@
     "eval-submit": "./src/submit-cli.ts"
   },
   "scripts": {
+    "build": "tsc --build",
     "test": "vitest run",
     "run-suite": "tsx src/cli.ts",
     "lint": "biome lint ./src",
