@@ -12,7 +12,7 @@ This runbook covers day-to-day development operations, first-time setup, and com
 
 ```bash
 # Clone the monorepo
-git clone https://github.com/stephenlutar2-hash/szl-holdings-platform.git
+git clone https://github.com/stephenlutar2-hash/platform.git
 
 # Install dependencies (pnpm only — yarn and npm are blocked)
 pnpm install

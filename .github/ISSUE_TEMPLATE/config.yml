@@ -7,8 +7,8 @@ contact_links:
     url: mailto:inquiries@szlholdings.com
     about: "For enterprise access, investor data room, or partnership inquiries."
   - name: Platform Wiki & Documentation
-    url: https://github.com/szl-holdings/szl-holdings-platform/wiki
+    url: https://github.com/szl-holdings/platform/wiki
     about: "Architecture, trust, buyer use cases, investor overview, FAQ, and glossary."
   - name: In-Repo Documentation
-    url: https://github.com/szl-holdings/szl-holdings-platform/tree/main/docs
+    url: https://github.com/szl-holdings/platform/tree/main/docs
     about: "Full documentation for architecture, trust, investor materials, and deployment."

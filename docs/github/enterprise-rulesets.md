@@ -118,7 +118,7 @@ master (protected — production branch)
 
 ### Repository Rulesets (GitHub Pro / Team tier)
 
-1. Navigate to: `github.com/szl-holdings/szl-holdings-platform/settings/rules`
+1. Navigate to: `github.com/szl-holdings/platform/settings/rules`
 2. Click **New ruleset**
 3. Name: `flagship-production`
 4. Enforcement status: Active
@@ -129,7 +129,7 @@ master (protected — production branch)
 
 If rulesets are not available on the current plan, use branch protection rules:
 
-1. Navigate to: `github.com/szl-holdings/szl-holdings-platform/settings/branches`
+1. Navigate to: `github.com/szl-holdings/platform/settings/branches`
 2. Click **Add rule**
 3. Branch name pattern: `master`
 4. Apply settings per Tier 1 table above (note: bypass settings differ from rulesets)

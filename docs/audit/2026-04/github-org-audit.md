@@ -10,7 +10,7 @@
 
 | Repo | Decision | Reason |
 |------|----------|--------|
-| `szl-holdings/szl-holdings-platform` | **Keep** | Active monorepo — all platform artifacts, 14 registered artifacts, 2,816 API endpoints |
+| `szl-holdings/platform` | **Keep** | Active monorepo — all platform artifacts, 14 registered artifacts, 2,816 API endpoints |
 | `szl-holdings/.github` | **Keep** | Org profile README and community health files |
 
 **Summary:** 0 repos archived, 0 repos deleted. Both repos are active and current.
@@ -47,9 +47,9 @@ All 15 open Dependabot alerts were resolved. Mitigation strategy: **documented d
 | #13 | High | `picomatch` (ReDoS) | Same override; extglob patterns not used in monorepo glob configs |
 | #11 | Medium | `esbuild` (dev CORS) | Overridden to `0.27.3`; dev server not exposed in production |
 
-**All 15 alerts dismissed** via GitHub API (PATCH `/repos/szl-holdings/szl-holdings-platform/dependabot/alerts/{n}` with `state: dismissed, dismissed_reason: tolerable_risk`). No lockfile changes needed — overrides were already enforced.
+**All 15 alerts dismissed** via GitHub API (PATCH `/repos/szl-holdings/platform/dependabot/alerts/{n}` with `state: dismissed, dismissed_reason: tolerable_risk`). No lockfile changes needed — overrides were already enforced.
 
-Verifiable evidence: [Dependabot alerts (closed)](https://github.com/szl-holdings/szl-holdings-platform/security/dependabot?q=is%3Aclosed)
+Verifiable evidence: [Dependabot alerts (closed)](https://github.com/szl-holdings/platform/security/dependabot?q=is%3Aclosed)
 
 ---
 
@@ -60,9 +60,9 @@ Verifiable evidence: [Dependabot alerts (closed)](https://github.com/szl-holding
 | #3 | Stripe Webhook Signing Secret | Dismissed as **false positive**. Current `.env.example` contains `REPLACE_ME_STRIPE_WEBHOOK_SECRET` — a non-functional placeholder string (not a real `whsec_...` format key). Alert was triggered by a historical commit. **No real key to rotate.** |
 | #1 | Google API Key | Dismissed as **false positive**. All Google key fields in `.env.example` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_PROJECT_ID`, `GOOGLE_MAPS_API_KEY`) are empty strings. Alert was triggered by a historical commit. **No real key to rotate.** |
 
-**Both alerts resolved** via GitHub API (PATCH `/repos/szl-holdings/szl-holdings-platform/secret-scanning/alerts/{n}` with `state: resolved, resolution: false_positive`). The current `.env.example` uses safe, non-scannable placeholder values throughout.
+**Both alerts resolved** via GitHub API (PATCH `/repos/szl-holdings/platform/secret-scanning/alerts/{n}` with `state: resolved, resolution: false_positive`). The current `.env.example` uses safe, non-scannable placeholder values throughout.
 
-Verifiable evidence: [Secret scanning alerts (closed)](https://github.com/szl-holdings/szl-holdings-platform/security/secret-scanning?q=is%3Aclosed)
+Verifiable evidence: [Secret scanning alerts (closed)](https://github.com/szl-holdings/platform/security/secret-scanning?q=is%3Aclosed)
 
 ---
 
@@ -125,6 +125,6 @@ The following items require manual action in the GitHub UI and cannot be perform
 |----------|------|------|
 | High | **Verify pinned repos**: Confirm `szl-holdings-platform` is pinned on the org profile. Add pin if missing. | [Org settings](https://github.com/orgs/szl-holdings/settings) |
 | Medium | **Investigate Command Portal startup**: The `artifacts/command` workflow consistently fails to open port 9090. This blocks fresh screenshots and indicates a startup issue in the Command Portal. | Follow-up task #2871 |
-| Low | **Review dismissed Dependabot alerts**: 15 alerts were dismissed as `tolerable_risk`. If any new CVEs emerge for these packages, the overrides in `package.json` should be re-evaluated. | [Dependabot alerts](https://github.com/szl-holdings/szl-holdings-platform/security/dependabot) |
-| Low | **Confirm no real keys leaked**: Both secret-scanning alerts were from historical commits. If you have any doubt about whether a real Google API key or Stripe webhook secret was committed at any point, rotate those keys as a precaution. | [Secret scanning](https://github.com/szl-holdings/szl-holdings-platform/security/secret-scanning) |
+| Low | **Review dismissed Dependabot alerts**: 15 alerts were dismissed as `tolerable_risk`. If any new CVEs emerge for these packages, the overrides in `package.json` should be re-evaluated. | [Dependabot alerts](https://github.com/szl-holdings/platform/security/dependabot) |
+| Low | **Confirm no real keys leaked**: Both secret-scanning alerts were from historical commits. If you have any doubt about whether a real Google API key or Stripe webhook secret was committed at any point, rotate those keys as a precaution. | [Secret scanning](https://github.com/szl-holdings/platform/security/secret-scanning) |
 | Low | **Refresh mobile screenshots**: CORTEX mobile screenshots in the org profile use placeholder desktop screenshots. Once CORTEX mobile is ready for review, capture real mobile screenshots and update `vessels-mobile-fleet.jpg` and `terra-mobile-home.jpg`. | Follow-up task #2872 |

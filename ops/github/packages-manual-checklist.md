@@ -11,7 +11,7 @@
 
 ### 1.1 Enable Packages feature
 
-1. Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
+1. Navigate to: `https://github.com/szl-holdings/platform/settings`
 2. Scroll to **Features** section
 3. Check: **Packages** ✅ Enabled
 4. Save changes
@@ -30,7 +30,7 @@ For each `@szl-holdings/*` package that appears at `https://github.com/orgs/szl-
 
 1. Navigate to the package page (e.g., `https://github.com/orgs/szl-holdings/packages/npm/shared-ui`)
 2. Click **Connect repository** (right sidebar)
-3. Search for and select `szl-holdings/szl-holdings-platform`
+3. Search for and select `szl-holdings/platform`
 4. Click **Connect**
 
 Packages to connect (after first publish):
@@ -61,7 +61,7 @@ Packages to connect (after first publish):
 For each container image at `https://github.com/orgs/szl-holdings/packages?ecosystem=container`:
 
 1. Navigate to the package page
-2. Click **Connect repository** → select `szl-holdings/szl-holdings-platform`
+2. Click **Connect repository** → select `szl-holdings/platform`
 
 Images to connect (after first push):
 - [ ] `ghcr.io/szl-holdings/api-server`
@@ -109,7 +109,7 @@ GitHub Packages inherits visibility from the repo by default, but explicit verif
 
 ### 4.2 Enable GitHub Actions write permissions
 
-1. Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/settings/actions`
+1. Navigate to: `https://github.com/szl-holdings/platform/settings/actions`
 2. Under **Workflow permissions**:
    - Select: **Read and write permissions** ✅
    - Check: **Allow GitHub Actions to create and approve pull requests** ✅
@@ -128,7 +128,7 @@ are set to **Read and write** (done in Phase 4.2 above).
 
 ### 5.2 Add repo-level secrets (if needed)
 
-Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/settings/secrets/actions`
+Navigate to: `https://github.com/szl-holdings/platform/settings/secrets/actions`
 
 | Secret | Value | When Needed |
 |--------|-------|------------|

@@ -19,7 +19,7 @@ This table contains every repository found on the account. No repos are deferred
 
 | # | Repository | Visibility | Archived | Fork | Disposition | Action | Priority |
 |---|------------|-----------|----------|------|-------------|--------|----------|
-| 1 | `szl-holdings/szl-holdings-platform` | Public | No | No | **Active — transferred ✅** | Transfer complete. Live at `szl-holdings/szl-holdings-platform`. Org profile links confirmed. | **Done** |
+| 1 | `szl-holdings/platform` | Public | No | No | **Active — transferred ✅** | Transfer complete. Live at `szl-holdings/platform`. Org profile links confirmed. | **Done** |
 | 2 | `stephenlutar2-hash/szl-holdings` | Public | Yes | No | **Archive confirmed** | Already archived. Verify description says "consolidated into platform." No further action needed. | Done |
 | 3 | `stephenlutar2-hash/stephenlutar2-hash` | Public | Yes | No | **Archive confirmed** | Already archived. Personal profile README repo. No further action needed. | Done |
 | 4 | `stephenlutar2-hash/inca-intelligence-platform` | Public | Yes | No | **Archive confirmed** | Already archived. Previous project, absorbed into platform. No further action needed. | Done |
@@ -35,14 +35,14 @@ This table contains every repository found on the account. No repos are deferred
 
 ## Detailed Disposition — Repo by Repo
 
-### Repo 1: `szl-holdings/szl-holdings-platform` — Transfer Complete ✅
+### Repo 1: `szl-holdings/platform` — Transfer Complete ✅
 
-**Current state:** Public, active, not archived. Now live at `szl-holdings/szl-holdings-platform`. Contains the full SZL Holdings monorepo (15 registered artifacts, 798 tables, full CI/CD, CodeQL, release pipeline).
+**Current state:** Public, active, not archived. Now live at `szl-holdings/platform`. Contains the full SZL Holdings monorepo (15 registered artifacts, 798 tables, full CI/CD, CodeQL, release pipeline).
 
 **Disposition:** ✅ Transfer complete. No further action required.
 
 **Post-transfer checklist:**
-- [x] Repo lives at `szl-holdings/szl-holdings-platform`
+- [x] Repo lives at `szl-holdings/platform`
 - [x] Org profile README links resolve correctly under `szl-holdings/`
 - [x] Description updated to reflect 15 artifacts (was 14; A11oy added)
 - [ ] Secrets (`AZURE_CREDENTIALS`, `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`) — verify these have been re-added in Settings → Secrets (secrets do not transfer automatically)

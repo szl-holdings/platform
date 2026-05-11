@@ -130,8 +130,8 @@ Each `screenshots/README.md` lists the exact shot list for that post. The filena
 | Platform | URL |
 |----------|-----|
 | LinkedIn | https://linkedin.com/in/stephen-l-279315240 |
-| GitHub | https://github.com/szl-holdings/szl-holdings-platform |
-| GitHub Release (v1.0-standby) | https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby |
+| GitHub | https://github.com/szl-holdings/platform |
+| GitHub Release (v1.0-standby) | https://github.com/szl-holdings/platform/releases/tag/v1.0-standby |
 | Medium | https://medium.com/@stephen_38454 |
 | Substack | https://szlholdings.substack.com |
 | Site | https://szlholdings.com |
@@ -142,7 +142,7 @@ Each `screenshots/README.md` lists the exact shot list for that post. The filena
 
 | Tag | URL | Notes |
 |-----|-----|-------|
-| `v1.0-standby` | https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby | Wave 3 launch standby — 10 deployed artifacts, 700+ tables, 11-role RBAC, 9 schema-validated AI decision types, six load-bearing platform primitives |
+| `v1.0-standby` | https://github.com/szl-holdings/platform/releases/tag/v1.0-standby | Wave 3 launch standby — 10 deployed artifacts, 700+ tables, 11-role RBAC, 9 schema-validated AI decision types, six load-bearing platform primitives |
 
 ## Week 1 Launch Status
 

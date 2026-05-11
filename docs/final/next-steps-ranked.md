@@ -62,7 +62,7 @@ BLOCKED BY PERMISSIONS (GitHub UI / gh auth required)
        bash scripts/public-mirror/validate-public-surface.sh .mirror-staging
        cd .mirror-staging
        git init
-       git remote add origin git@github.com:stephenlutar2-hash/szl-holdings-platform.git
+       git remote add origin git@github.com:stephenlutar2-hash/platform.git
        git add -A && git commit -m "feat: 3-phase investor-grade platform hardening"
        git push -f origin main
 

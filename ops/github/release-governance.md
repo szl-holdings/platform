@@ -54,7 +54,7 @@ Or via CLI:
 
 ```bash
 gh workflow run release.yml \
-  --repo szl-holdings/szl-holdings-platform \
+  --repo szl-holdings/platform \
   --field version_bump=minor
 ```
 
@@ -128,7 +128,7 @@ For alpha/beta milestones use GitHub's pre-release flag:
 
 ```bash
 gh release create v1.4.0-alpha \
-  --repo szl-holdings/szl-holdings-platform \
+  --repo szl-holdings/platform \
   --title "v1.4.0-alpha — Vessels Commercial Launch" \
   --notes-file docs/releases/v1.4.0-alpha.md \
   --prerelease

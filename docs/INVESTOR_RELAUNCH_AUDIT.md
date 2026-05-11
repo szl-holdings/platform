@@ -3,7 +3,7 @@
 **Audit Date:** April 27, 2026
 **Auditor:** Agent pass (automated + manual review)
 **Scope:** Full investor-facing GitHub presence — README quality, screenshots, artifact health, narrative consistency, publishing status
-**GitHub Remote:** `https://github.com/szl-holdings/szl-holdings-platform`
+**GitHub Remote:** `https://github.com/szl-holdings/platform`
 
 ---
 
@@ -207,7 +207,7 @@ All per-artifact READMEs were reviewed and found investor-quality with no change
 - `.github/assets/screenshots/vessels-hero.jpg` — refreshed
 - `docs/INVESTOR_RELAUNCH_AUDIT.md` — this document
 
-**GitHub Remote:** `https://github.com/szl-holdings/szl-holdings-platform`
+**GitHub Remote:** `https://github.com/szl-holdings/platform`
 
 **Pass 1 Commit SHA:** `2ed7da005b955debaf7ec553c62b4acda86885eb`
 
@@ -297,9 +297,9 @@ Verification: All sections visible, table formatting correct, images reference v
 | Pass 1 — Workflow gitignore fix | `3d504cb31b73bba8d2bfce7b92111cd306d8439e` | chore(git): exclude .github/workflows/ from tracking (token lacks workflow scope) |
 | Pass 2 — Audit report finalization | *(committed after this update)* | docs(investor): pass 2 audit finalization — push confirmed, collateral issues documented |
 
-**GitHub Remote:** `https://github.com/szl-holdings/szl-holdings-platform`
+**GitHub Remote:** `https://github.com/szl-holdings/platform`
 
-**GitHub Repository:** [szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)
+**GitHub Repository:** [szl-holdings/platform](https://github.com/szl-holdings/platform)
 
 **Push Verified:** Remote master confirmed at `3d504cb31b73bba8d2bfce7b92111cd306d8439e` via `git ls-remote github master`.
 

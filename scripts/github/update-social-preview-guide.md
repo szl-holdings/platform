@@ -7,7 +7,7 @@ GitHub repository social preview images must be uploaded manually through the Gi
 ## Steps to Upload — szl-holdings-platform
 
 1. **Go to repository settings:**
-   `https://github.com/szl-holdings/szl-holdings-platform/settings`
+   `https://github.com/szl-holdings/platform/settings`
 
 2. **Scroll to "Social preview"** in the General settings section.
 

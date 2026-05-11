@@ -59,7 +59,7 @@ Governed decision infrastructure software — built for operators who need signa
 
 **Products:** Lyte · Alloy · Aegis · Vessels · Terra · Carlota Jo
 
-[szlholdings.com](https://szlholdings.com) · [Platform →](https://github.com/szl-holdings/szl-holdings-platform)
+[szlholdings.com](https://szlholdings.com) · [Platform →](https://github.com/szl-holdings/platform)
 ```
 
 ---

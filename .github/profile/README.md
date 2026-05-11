@@ -7,13 +7,13 @@
 </p>
 
 <p align="center">
-  <a href="https://szlholdings.com">Website</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform">Platform Repository</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/investor/platform-thesis.md">Investor Thesis</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://szlholdings.com/stephen/investor">Investor Dashboard</a>
+  <a href="https://szlholdings.com">Website</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/platform">Platform Repository</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/platform/blob/main/docs/investor/platform-thesis.md">Investor Thesis</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://szlholdings.com/stephen/investor">Investor Dashboard</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL" /></a>
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg?branch=main" alt="Security Audit" /></a>
+  <a href="https://github.com/szl-holdings/platform/actions/workflows/ci.yml"><img src="https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
+  <a href="https://github.com/szl-holdings/platform/actions/workflows/codeql.yml"><img src="https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL" /></a>
+  <a href="https://github.com/szl-holdings/platform/actions/workflows/security.yml"><img src="https://github.com/szl-holdings/platform/actions/workflows/security.yml/badge.svg?branch=main" alt="Security Audit" /></a>
 </p>
 
 <p align="center">
@@ -183,42 +183,42 @@ Verified, unmodified captures from the active demo platform. No mockups or AI-ge
 ### A11oy — Governed Agentic Execution Fabric
 
 **A11oy Hero — Seven-Layer Governed Fabric**
-![A11oy — Live Enterprise Execution Fabric](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/a11oy-hero-2026-04--desktop-1440.png)
+![A11oy — Live Enterprise Execution Fabric](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/a11oy-hero-2026-04--desktop-1440.png)
 
 *Captured 2026-04-25. Seven-layer governed agentic fabric with live in-memory seed data.*
 
 **Boardroom Mode — Executive Governed Decision Briefing**
-![A11oy Boardroom Mode](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/a11oy-boardroom-mode-2026-04--desktop-1440.png)
+![A11oy Boardroom Mode](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/a11oy-boardroom-mode-2026-04--desktop-1440.png)
 
 *Boardroom Mode — executive decision surface with full attribution and proof chain links.*
 
 **Command Surface — Unified Operator View**
-![A11oy Command Surface](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/a11oy-command-surface-2026-04--desktop-1440.png)
+![A11oy Command Surface](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/a11oy-command-surface-2026-04--desktop-1440.png)
 
 *Cross-vertical operator command with human-approval queue. No action executes without confirmation.*
 
 ### Platform Surfaces and Domain Packs
 
 **SZL Holdings Dashboard — Cross-Portfolio Command**
-![SZL Holdings Dashboard](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/szl-holdings-dashboard-2026-04-21.jpg)
+![SZL Holdings Dashboard](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/szl-holdings-dashboard-2026-04-21.jpg)
 
 **Lyte — PRAXIS Command Surface**
-![Lyte PRAXIS Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/kora-praxis-command-2026-04-21.jpg)
+![Lyte PRAXIS Command](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/kora-praxis-command-2026-04-21.jpg)
 
 **Command — Unified Executive View**
-![Command Portal](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/forge-command-portal-executive-2026-04-21.jpg)
+![Command Portal](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/forge-command-portal-executive-2026-04-21.jpg)
 
 **Sentra — SOC Command**
-![Sentra SOC Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/tenax-soc-command-2026-04-21.jpg)
+![Sentra SOC Command](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/tenax-soc-command-2026-04-21.jpg)
 
 **Vessels — Fleet Command**
-![Vessels Fleet Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/sextant-fleet-command-2026-04-21.jpg)
+![Vessels Fleet Command](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/sextant-fleet-command-2026-04-21.jpg)
 
 **Terra — Deal Pipeline**
-![Terra Deal Pipeline](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/domaine-deal-pipeline-2026-04-21.jpg)
+![Terra Deal Pipeline](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/domaine-deal-pipeline-2026-04-21.jpg)
 
 **Carlota Jo — Client Portal**
-![Carlota Jo Client Portal](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/carlota-jo-client-portal-2026-04-21.jpg)
+![Carlota Jo Client Portal](https://raw.githubusercontent.com/szl-holdings/platform/main/docs/assets/screenshots/current/carlota-jo-client-portal-2026-04-21.jpg)
 
 > A11oy screenshots captured 2026-04-25 from live server. Platform surface screenshots captured 2026-04-21. Full manifest: `docs/assets/screenshots/current/screenshot-manifest.md` (81 A11oy captures across 19 routes and 5 viewports).
 
@@ -226,7 +226,7 @@ Verified, unmodified captures from the active demo platform. No mockups or AI-ge
 
 ## Repositories
 
-→ **[szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)**
+→ **[szl-holdings/platform](https://github.com/szl-holdings/platform)**
 
 The canonical platform monorepo. TypeScript throughout. A11oy, all domain packs, API server, and documentation live here.
 

@@ -89,7 +89,7 @@ DOI mint chain verified: both DOIs resolve, both tags match expected commit SHAs
 | --- | --- |
 | Local workspace | 22 files, 29 occurrences |
 | GitHub `szl-holdings/.github` | 1 file (org profile README) — direct push |
-| GitHub `szl-holdings/szl-holdings-platform` | 29 files — bundled into PR #66, squash-merged |
+| GitHub `szl-holdings/platform` | 29 files — bundled into PR #66, squash-merged |
 
 All `inquiries@szlholdings.com` references replaced with `stephen@szlholdings.com`. Cached search index will catch up within hours.
 
@@ -101,7 +101,7 @@ All `inquiries@szlholdings.com` references replaced with `stephen@szlholdings.co
 2. **PR #38 (Governed Python efficiency migration, 2599/833).** Codex draft PR is conflicting against master. Needs a rebase from the Replit side or a fresh PR.
 3. **Dependabot PR #60 (`ui-components` group).** Conflicting against the codex-kernel changes. Easiest path: close it and let Dependabot reopen on the next dependency cycle.
 4. **CI failures on `szl-holdings-platform`.** Multiple workflows red: `e2e`, `deploy-staging`, `a11y`, `runtime audit`, `nightly smoke`. Out of scope for this hygiene sweep — handle in the next operational pass.
-5. **Pinned repos on personal profile.** GitHub's GraphQL pinning mutation isn't exposed through the audit token. Stephen can pin manually from his [profile page](https://github.com/stephenlutar2-hash) — recommend pinning: `szl-holdings/ouroboros`, `szl-holdings/ouroboros-thesis`, `szl-holdings/szl-holdings-platform`, `szl-holdings/a11oy`, `szl-holdings/sentra`, `szl-holdings/amaru`.
+5. **Pinned repos on personal profile.** GitHub's GraphQL pinning mutation isn't exposed through the audit token. Stephen can pin manually from his [profile page](https://github.com/stephenlutar2-hash) — recommend pinning: `szl-holdings/ouroboros`, `szl-holdings/ouroboros-thesis`, `szl-holdings/platform`, `szl-holdings/a11oy`, `szl-holdings/sentra`, `szl-holdings/amaru`.
 
 ---
 

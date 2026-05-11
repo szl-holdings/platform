@@ -47,7 +47,7 @@ For general questions about the platform, partnership opportunities, or investme
 
 ## Bug Reports
 
-Non-security bugs may be reported via [GitHub Issues](https://github.com/szl-holdings/szl-holdings-platform/issues) using the provided issue templates. Issues are triaged at SZL Holdings' discretion. Response timelines are not guaranteed for non-partner reports.
+Non-security bugs may be reported via [GitHub Issues](https://github.com/szl-holdings/platform/issues) using the provided issue templates. Issues are triaged at SZL Holdings' discretion. Response timelines are not guaranteed for non-partner reports.
 
 ---
 

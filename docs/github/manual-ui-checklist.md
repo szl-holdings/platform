@@ -67,7 +67,7 @@
 
 ## Category 3 — Flagship Repo Transfer & Settings
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free
 
 ### 3.1 Transfer Repo to Org
@@ -86,7 +86,7 @@
 
 ### 3.2 Repo General Settings
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings`
+**Location:** `github.com/szl-holdings/platform/settings`
 
 | Setting | Value | Rationale | Level |
 |---------|-------|-----------|-------|
@@ -125,17 +125,17 @@
 
 | Slot | Repo | Action |
 |------|------|--------|
-| 1 | `szl-holdings/szl-holdings-platform` | Pin — flagship |
+| 1 | `szl-holdings/platform` | Pin — flagship |
 | 2–6 | (leave blank until Phase 2 candidates are ready) | — |
 
 ---
 
 ## Category 5 — Branch Protection Rules
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings/branches` → "Add rule"
+**Location:** `github.com/szl-holdings/platform/settings/branches` → "Add rule"
 
 | Setting | Value | Rationale |
 |---------|-------|-----------|
@@ -177,7 +177,7 @@
 
 ### 6.2 Repo Actions Settings
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings/actions`
+**Location:** `github.com/szl-holdings/platform/settings/actions`
 
 | Setting | Value | Rationale |
 |---------|-------|-----------|
@@ -188,10 +188,10 @@
 
 ## Category 7 — Secrets & Variables
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings/secrets/actions`
+**Location:** `github.com/szl-holdings/platform/settings/secrets/actions`
 
 | Secret | Value Source | Scope | Notes |
 |--------|-------------|-------|-------|
@@ -200,7 +200,7 @@
 
 ### 7.1 Create Production Environment
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings/environments`
+**Location:** `github.com/szl-holdings/platform/settings/environments`
 
 | Step | Action | Value |
 |------|--------|-------|
@@ -231,7 +231,7 @@
 
 ### 8.2 Repo Security Settings
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/settings/security_analysis`
+**Location:** `github.com/szl-holdings/platform/settings/security_analysis`
 
 Apply same settings as org level. Verify each is enabled individually at repo level.
 
@@ -239,7 +239,7 @@ Apply same settings as org level. Verify each is enabled individually at repo le
 
 ## Category 9 — Issue & PR Templates
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free (these are files in the repo — no UI config needed)
 
 Verify these files exist and are committed:
@@ -259,10 +259,10 @@ Verify these files exist and are committed:
 
 ## Category 10 — Issue Labels
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/labels`
+**Location:** `github.com/szl-holdings/platform/labels`
 
 1. Delete default GitHub labels that don't fit (good first issue, help wanted — unless desired)
 2. Create/update the canonical label set from `ops/github/repo-settings.json`
@@ -331,10 +331,10 @@ Verify these files exist and are committed:
 
 ## Category 13 — Release Management
 
-**Applies to:** `szl-holdings/szl-holdings-platform`  
+**Applies to:** `szl-holdings/platform`  
 **Tier:** Free
 
-**Location:** `github.com/szl-holdings/szl-holdings-platform/releases/new`
+**Location:** `github.com/szl-holdings/platform/releases/new`
 
 ### Create v0.1.0 Release
 

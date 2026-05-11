@@ -80,7 +80,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full change log.
 ```bash
 # Create release from a notes file
 gh release create v0.2.0 \
-  --repo szl-holdings/szl-holdings-platform \
+  --repo szl-holdings/platform \
   --title "v0.2.0 — Production Readiness & Revenue Activation" \
   --notes-file docs/releases/v0.2.0.md \
   --latest
@@ -88,7 +88,7 @@ gh release create v0.2.0 \
 
 ### Via GitHub Web Interface
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/releases/new`
+1. Go to: `https://github.com/szl-holdings/platform/releases/new`
 2. Click **Choose a tag** → type `v0.2.0` → click **Create new tag: v0.2.0 on publish**
 3. Target: `main`
 4. Enter title and paste release notes from `docs/releases/v0.2.0.md`
@@ -103,7 +103,7 @@ For alpha/beta milestones, use GitHub's pre-release flag:
 
 ```bash
 gh release create v0.2.0-alpha \
-  --repo szl-holdings/szl-holdings-platform \
+  --repo szl-holdings/platform \
   --title "v0.2.0-alpha — Production Infrastructure" \
   --notes-file docs/releases/v0.2.0-alpha.md \
   --prerelease

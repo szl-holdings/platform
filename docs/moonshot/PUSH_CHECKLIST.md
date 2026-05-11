@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-25  
 **Branch:** `master`  
-**Target repo:** `szl-holdings/szl-holdings-platform` (GitHub)  
+**Target repo:** `szl-holdings/platform` (GitHub)  
 **Prepared by:** Platform Engineering — Moonshot Phase 8
 
 ---
@@ -44,16 +44,16 @@ Choose SSH (preferred) or HTTPS:
 
 ```bash
 # SSH (requires SSH key added to your GitHub account)
-git remote add github git@github.com:szl-holdings/szl-holdings-platform.git
+git remote add github git@github.com:szl-holdings/platform.git
 
 # OR HTTPS (will prompt for GitHub username + personal access token)
-git remote add github https://github.com/szl-holdings/szl-holdings-platform.git
+git remote add github https://github.com/szl-holdings/platform.git
 
 # Verify the remote was added
 git remote -v | grep github
 # Expected:
-#   github  git@github.com:szl-holdings/szl-holdings-platform.git (fetch)
-#   github  git@github.com:szl-holdings/szl-holdings-platform.git (push)
+#   github  git@github.com:szl-holdings/platform.git (fetch)
+#   github  git@github.com:szl-holdings/platform.git (push)
 ```
 
 ---
@@ -80,7 +80,7 @@ git push github master
 
 ## Step 4 — Confirm CI Triggers
 
-Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/actions`
+Navigate to: `https://github.com/szl-holdings/platform/actions`
 
 Verify the following workflows start within 60 seconds:
 - CI Gate

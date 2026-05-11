@@ -121,7 +121,7 @@ Even with a single owner, creating teams now establishes the governance structur
 1. Navigate to: `github.com/stephenlutar2-hash/szl-holdings-platform/settings`
 2. Scroll to **Danger Zone** → **Transfer**
 3. Transfer to: `szl-holdings`
-4. New canonical URL: `github.com/szl-holdings/szl-holdings-platform`
+4. New canonical URL: `github.com/szl-holdings/platform`
 5. Update all README links and docs to use new org URL
 
 ### Step 5: Configure Security Defaults

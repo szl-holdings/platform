@@ -2,7 +2,7 @@
 
 **Purpose:** Manual steps to configure the GitHub repository and org for enterprise-grade CI/CD, branch protection, security, and investor-ready presentation.
 
-**Repo:** `github.com/szl-holdings/szl-holdings-platform`
+**Repo:** `github.com/szl-holdings/platform`
 **Org:** `github.com/szl-holdings`
 
 ---
@@ -57,7 +57,7 @@ The org profile README includes:
 
 ## 1. Repository Description, Topics, and Website
 
-Navigate to **github.com/szl-holdings/szl-holdings-platform → Settings (gear icon next to "About")**:
+Navigate to **github.com/szl-holdings/platform → Settings (gear icon next to "About")**:
 
 **Description:**
 ```

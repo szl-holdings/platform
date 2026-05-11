@@ -5,7 +5,7 @@
   "description": "Substrate Edge Inference adapters — oLLM-powered local GPU inference with OpenAI-compatible API surface. Zero-cost, air-gapped, 80B+ parameter models on consumer GPUs.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "url": "https://github.com/szl-holdings/platform.git",
     "directory": "packages/substrate-adapters"
   },
   "type": "module",

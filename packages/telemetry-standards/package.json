@@ -4,7 +4,7 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "url": "https://github.com/szl-holdings/platform.git",
     "directory": "packages/telemetry-standards"
   },
   "publishConfig": {

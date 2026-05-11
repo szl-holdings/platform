@@ -1,4 +1,4 @@
-# CircleCI Setup — szl-holdings/szl-holdings-platform
+# CircleCI Setup — szl-holdings/platform
 
 Last updated: 2026-04-26
 
@@ -34,7 +34,7 @@ These steps are performed once by an operator with admin access to the GitHub or
 
 1. **Log in** to [app.circleci.com](https://app.circleci.com) with your GitHub account.
 2. **Create or join the `szl-holdings` CircleCI organization** (Settings → Organization Settings).
-3. **Add the project**: Projects → Add Project → select `szl-holdings/szl-holdings-platform` → click **Set Up Project**.
+3. **Add the project**: Projects → Add Project → select `szl-holdings/platform` → click **Set Up Project**.
 4. CircleCI detects `.circleci/config.yml` automatically. Select "Use Existing Config" and click **Start Building**.
 5. **Set required environment variables** in Project Settings → Environment Variables:
 

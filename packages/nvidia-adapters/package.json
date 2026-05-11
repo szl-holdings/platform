@@ -5,7 +5,7 @@
   "description": "Optional NVIDIA-ready adapters — NIM model endpoints, NeMo evaluation hooks, agent profiling. No GPU dependency required for development.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "url": "https://github.com/szl-holdings/platform.git",
     "directory": "packages/nvidia-adapters"
   },
   "type": "module",

@@ -54,7 +54,7 @@ For repos that are part of the SZL Holdings ecosystem:
 
 This repository is part of the SZL Holdings platform ecosystem. It sits in the [layer description] layer, serving [purpose].
 
-→ [Platform overview](https://github.com/szl-holdings/szl-holdings-platform)
+→ [Platform overview](https://github.com/szl-holdings/platform)
 ```
 
 ### 5. What This Repo Contains

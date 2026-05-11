@@ -82,7 +82,7 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ## [1.0.0-alpha] — 2026-04-20
 
-First public alpha release. Tagged on the public `szl-holdings/szl-holdings-platform` repo and published to the [Releases page](https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.
+First public alpha release. Tagged on the public `szl-holdings/platform` repo and published to the [Releases page](https://github.com/szl-holdings/platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.
 
 ### Active Artifact Count
 - **14 registered artifacts** in the monorepo across web, mobile, video, and design surfaces: SZL Holdings dashboard, Aegis (investor pitch deck), Vessels (maritime intelligence), Terra (real estate intelligence), Pulse (executive briefing), Sentra (cyber resilience), Counsel (legal matter command), Carlota Jo Consulting, Unified Command, Lyte Decision Intelligence, NEXUS sandbox, SZL Holdings mobile command, the governed-autonomy demo video, and the API server.

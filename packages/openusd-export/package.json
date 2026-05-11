@@ -5,7 +5,7 @@
   "description": "OpenUSD digital twin and simulation export for spatial domain workflows (Vessels routes, Terra properties, Aegis scenarios)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "url": "https://github.com/szl-holdings/platform.git",
     "directory": "packages/openusd-export"
   },
   "type": "module",

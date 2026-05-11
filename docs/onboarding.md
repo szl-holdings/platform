@@ -21,7 +21,7 @@ No Docker required. No virtual environments. PostgreSQL must be running locally 
 ## Step 1 — Clone and Install
 
 ```bash
-git clone https://github.com/szl-holdings/szl-holdings-platform.git
+git clone https://github.com/szl-holdings/platform.git
 cd szl-holdings-platform
 pnpm install
 ```

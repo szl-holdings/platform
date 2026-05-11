@@ -6,7 +6,7 @@ Generated: 2026-04-15
 
 ```bash
 # Clone the monorepo
-git clone https://github.com/szl-holdings/szl-holdings-platform.git
+git clone https://github.com/szl-holdings/platform.git
 cd szl-holdings-platform
 
 # Install dependencies (pnpm only)

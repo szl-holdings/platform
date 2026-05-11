@@ -10,7 +10,7 @@ This document provides exact step-by-step instructions for GitHub UI changes tha
 
 ## 1. Set the Default Branch to `main`
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
+1. Go to: `https://github.com/szl-holdings/platform/settings`
 2. Scroll to **Default branch**
 3. Click the pencil icon (edit)
 4. Select `main` from the dropdown
@@ -32,7 +32,7 @@ This document provides exact step-by-step instructions for GitHub UI changes tha
 
 ### Navigate to rulesets
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/rules`
+1. Go to: `https://github.com/szl-holdings/platform/settings/rules`
 2. Click **New ruleset**
 3. Select **New branch ruleset**
 
@@ -84,7 +84,7 @@ After enabling "Require status checks to pass":
 
 ### Create `staging` environment
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/environments`
+1. Go to: `https://github.com/szl-holdings/platform/settings/environments`
 2. Click **New environment**
 3. Name: `staging`
 4. Click **Configure environment**
@@ -118,7 +118,7 @@ To view or delete repository-level secrets: **Settings → Secrets and variables
 
 ## 5. Configure General Repository Settings
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
+1. Go to: `https://github.com/szl-holdings/platform/settings`
 
 **Merge button settings** (scroll to "Pull Requests"):
 - Allow merge commits: **On** (for release branches)
@@ -134,7 +134,7 @@ To view or delete repository-level secrets: **Settings → Secrets and variables
 
 Dependabot is configured via `.github/dependabot.yml` (already in the repository). To verify it is active:
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/security_analysis`
+1. Go to: `https://github.com/szl-holdings/platform/settings/security_analysis`
 2. Scroll to **Dependabot**
 3. Verify:
    - Dependabot alerts: **Enabled**
@@ -145,7 +145,7 @@ Dependabot is configured via `.github/dependabot.yml` (already in the repository
 
 ## 7. Enable GitHub Advanced Security (if available on plan)
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/security_analysis`
+1. Go to: `https://github.com/szl-holdings/platform/settings/security_analysis`
 2. Under **Code scanning**, click **Set up** → **Advanced** (to use the repo's `codeql.yml` workflow)
 3. Under **Secret scanning**:
    - Secret scanning: **Enable**
@@ -155,7 +155,7 @@ Dependabot is configured via `.github/dependabot.yml` (already in the repository
 
 ## 8. Configure Repository Topics and Description
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/platform`
 2. Click the gear icon next to **About** (top right of the description area)
 3. Set **Description**: `SZL Holdings unified intelligence and command platform`
 4. Add **Topics**: `pnpm-workspace`, `typescript`, `react`, `replit`, `monorepo`
@@ -180,7 +180,7 @@ To verify:
 ## 10. Configure Notifications
 
 For the repository owner:
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/platform`
 2. Click **Watch** → **Custom**
 3. Enable: Issues, Pull requests, Releases, Security alerts, Deployments
 4. Click **Apply**

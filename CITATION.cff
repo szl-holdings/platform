@@ -19,8 +19,8 @@ authors:
     affiliation: SZL Holdings
     orcid: "https://orcid.org/0009-0001-0110-4173"
 license: BUSL-1.1
-url: "https://github.com/szl-holdings/szl-holdings-platform"
-repository-code: "https://github.com/szl-holdings/szl-holdings-platform"
+url: "https://github.com/szl-holdings/platform"
+repository-code: "https://github.com/szl-holdings/platform"
 keywords:
   - szl-holdings
   - ai-governance
@@ -55,4 +55,4 @@ preferred-citation:
       affiliation: SZL Holdings
       orcid: "https://orcid.org/0009-0001-0110-4173"
   year: 2026
-  url: "https://github.com/szl-holdings/szl-holdings-platform"
+  url: "https://github.com/szl-holdings/platform"

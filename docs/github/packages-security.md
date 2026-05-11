@@ -151,7 +151,7 @@ If a token is accidentally committed:
 
 ### Adding repo-level secrets
 
-1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/secrets/actions`
+1. Go to: `https://github.com/szl-holdings/platform/settings/secrets/actions`
 2. Click **New repository secret**
 
 ### Required secrets by registry

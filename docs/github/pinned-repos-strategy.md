@@ -39,7 +39,7 @@ This is the definitive selection for all 6 pin slots on both the personal profil
 
 | Slot | Repo | Decision | Rationale |
 |------|------|----------|-----------|
-| **1** | `szl-holdings/szl-holdings-platform` | **Pin — immediate** | Only repo meeting all readiness gate criteria. Flagship monorepo: 16 artifacts, 120+ DB tables, TypeScript, full CI/CD, CodeQL, SHA-pinned supply chain. Always slot 1. |
+| **1** | `szl-holdings/platform` | **Pin — immediate** | Only repo meeting all readiness gate criteria. Flagship monorepo: 16 artifacts, 120+ DB tables, TypeScript, full CI/CD, CodeQL, SHA-pinned supply chain. Always slot 1. |
 | **2** | _(empty)_ | **Do not fill** | `szl-holdings`, `stephenlutar2-hash`, and `inca-intelligence-platform` are all archived — they must not be pinned. No other repo exists to fill this slot. Empty is correct. |
 | **3** | _(empty)_ | **Do not fill** | Same as slot 2 — no eligible repo exists. Candidate for `szl-docs` when created and deployed. |
 | **4** | _(empty)_ | **Do not fill** | Candidate for `szl-design-system` when published to npm. |
@@ -105,7 +105,7 @@ Slot 1 (`szl-holdings-platform`) is permanent and does not rotate.
 
 1. Navigate to: `github.com/stephenlutar2-hash`
 2. Click **Customize your pins**
-3. Select `szl-holdings/szl-holdings-platform` (org repos appear when you are a member)
+3. Select `szl-holdings/platform` (org repos appear when you are a member)
 4. Save — leave all other slots empty
 
 ---

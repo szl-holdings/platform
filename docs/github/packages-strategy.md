@@ -1,7 +1,7 @@
 # SZL Holdings — GitHub Packages Strategy
 
 > Registry: `https://github.com/orgs/szl-holdings/packages`
-> Platform repo: `szl-holdings/szl-holdings-platform`
+> Platform repo: `szl-holdings/platform`
 
 ---
 
@@ -134,7 +134,7 @@ docker-compose -f ops/local/docker-compose.yml down
 ## Maven Registry
 
 - Status: **Template ready** — see `docs/github/packages/maven/`
-- URL: `https://maven.pkg.github.com/szl-holdings/szl-holdings-platform`
+- URL: `https://maven.pkg.github.com/szl-holdings/platform`
 - Group ID: `com.szlholdings`
 - CI: `.github/workflows/maven-publish.yml`
 
@@ -200,7 +200,7 @@ Current policy: all packages are **public** (consistent with the public repo).
 After publishing a package, connect it to the repository in GitHub UI:
 1. Go to the package page on GitHub
 2. Click **Connect repository**
-3. Select `szl-holdings/szl-holdings-platform`
+3. Select `szl-holdings/platform`
 
 This links the package in the repo's sidebar and applies repo visibility rules.
 

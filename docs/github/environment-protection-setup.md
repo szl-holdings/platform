@@ -1,6 +1,6 @@
 # GitHub Environment Protection Rules — Setup Guide
 
-This guide documents the `staging` and `production` GitHub Environments configured for `szl-holdings/szl-holdings-platform`, and explains how to complete the protection rule setup that requires a paid GitHub plan.
+This guide documents the `staging` and `production` GitHub Environments configured for `szl-holdings/platform`, and explains how to complete the protection rule setup that requires a paid GitHub plan.
 
 ---
 
@@ -108,10 +108,10 @@ To confirm both environments are active:
 
 ```bash
 # List environments (requires GitHub CLI)
-gh api repos/szl-holdings/szl-holdings-platform/environments
+gh api repos/szl-holdings/platform/environments
 
 # List staging branch policies
-gh api repos/szl-holdings/szl-holdings-platform/environments/staging/deployment-branch-policies
+gh api repos/szl-holdings/platform/environments/staging/deployment-branch-policies
 ```
 
 Expected results:
