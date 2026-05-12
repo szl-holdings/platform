@@ -3,3 +3,8 @@ uvicorn[standard]>=0.34.0,<1.0.0
 pydantic>=2.10.0,<3.0.0
 structlog>=24.0.0,<26.0.0
 httpx>=0.28.0,<1.0.0
+
+# Optional GPU dependencies — install these on a GPU host:
+# pip install torch>=2.5.0 transformers>=4.47.0 accelerate>=1.2.0 safetensors>=0.5.0
+# pip install peft>=0.14.0 bitsandbytes>=0.44.0
+# pip install flash-attn>=2.7.0   # requires CUDA toolkit
