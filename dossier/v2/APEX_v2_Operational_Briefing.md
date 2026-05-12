@@ -16,10 +16,10 @@ The May 3 briefing introduced SZL Holdings as a unified governed-intelligence pl
 
 1. **A second, peer-style paper was published** — the Ouroboros Thesis v9 (*The Lutar Invariant Family v1 → v7 → Ω: From Three-Term Foundation to Bianchi-Closed Fiber Bundle*) and a companion v10 audit paper (*The Audit Closure Operator Λ₁₀*) were deposited to GitHub on May 5 with PDF artifacts attached to the GitHub release source archives so the Zenodo webhook re-fires with each tag. v9 is 17 pages, v10 is 11 pages plus an Appendix A essay and a Lutar-family one-pager.
 2. **A11oy gained four new operator surfaces** — Argo (experience-era decision engine with champion policies, mirror eval, counterfactuals, and reward-hacking guardrails), PSYCHE (emergent-sentience observatory), the Trust Center / Trust Exchange / Public Trust Portal triad, and Agent Zero Trust.
-3. **A new vertical surface, ROSIE — Unified Decision Fabric**, was promoted from internal tooling to a registered customer-facing artifact. There are now eight customer-facing surfaces, not seven.
+3. **The Decision Fabric cross-primitive query layer hardened.** `lib/db/src/schema/decision_fabric.ts` and the `/api/decision-fabric` namespace expose Workflow 360, Entity Investigation, and Recommendation Trace as governed read paths across the existing seven verticals. This is a substrate capability, not a new customer-facing surface — the surface count remains seven, consolidated under A11oy.
 4. **The Covenant Proof Standard (CPS) shipped as a first-class API** — `/api/cps/payloads`, `/api/cps/runs`, with three flagship payloads, tiered approval, rollback, and a maturity-mode gate.
 5. **A live agent gateway service** (`artifacts/api-server: agent-gateway`) now sits in front of every agent action and enforces OPA bundle policy at the runtime boundary.
-6. **A documented investor demo path** (`docs/audits/INVESTOR_DEMO_PATH.md`) and per-artifact audit reports for all eight surfaces were committed, so the platform can be walked end-to-end on a known-good route.
+6. **A documented investor demo path** (`docs/audits/INVESTOR_DEMO_PATH.md`) and per-artifact audit reports for all seven surfaces were committed, so the platform can be walked end-to-end on a known-good route.
 7. **Surgical Series-A polish** was applied across all seven prior verticals — placeholder URLs purged, demo-mode copy scrubbed, broken links removed, date-rotted fields rewired to live timestamps, fabricated example data deleted.
 
 The platform's core thesis has not changed: governed AI cognition, proof-chain by construction, math written down. What changed is the operational evidence backing that thesis.
@@ -42,7 +42,7 @@ The convergence properties of this loop (when it terminates, what its proof-chai
 
 ## 3. Platform Surface — Live Today (refreshed)
 
-The platform now runs as **eight customer-facing product surfaces** orchestrated by a single decision-intelligence layer (A11oy).
+The platform runs as **seven customer-facing product surfaces** orchestrated by a single decision-intelligence layer (A11oy), with a hardened Decision Fabric query substrate exposing cross-primitive views inside each surface.
 
 ### A11oy — Orchestration + Decision Intelligence + Trust Plane
 
@@ -93,11 +93,9 @@ Slug: `/carlota-jo/`
 
 Premium service brand for individuals who require precision and discretion. Proof-Chain decision-receipts bound to the runtime. Since May 3: full **competitive-intel and ML-forecast module**, deeper A11oy mesh integration, command-palette navigation rewritten to be `BASE_URL`-aware across all 23 commands; invented "847 enterprise contracts" sample exchange removed; intake `timeline: TBD` default replaced with honest copy.
 
-### ROSIE — Unified Decision Fabric (NEW since May 3)
+### Decision Fabric — Cross-Primitive Query Layer (substrate, not a separate surface)
 
-Slug: `/rosie/`
-
-Promoted to a registered customer-facing artifact in the May 4–5 cycle. Six operator pages: Identity, Optimizer, Fabric, Research, Proof, Evidence Bench. ROSIE is the integration surface for cross-vertical decision payloads — it consumes the CPS standard (Section 5) and renders the proof bench against live runs.
+The Decision Fabric is a governed read layer that joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. Schema: `lib/db/src/schema/decision_fabric.ts`. API namespace: `/api/decision-fabric`. It is consumed by every customer-facing surface (KORA → Carlota Jo) and is the integration point for the CPS standard (Section 5). It is not itself a customer-facing product surface.
 
 ---
 
@@ -130,7 +128,7 @@ CPS is a payload-and-receipt standard the platform now exposes as a first-class 
 
 Three flagship payloads ship with the standard. They cover the cross-domain shape investors and procurement officers care about most: incident → governed action → audit close.
 
-The CPS layer is the reason ROSIE exists as its own artifact: ROSIE is the operator surface for CPS payloads, and the pattern repeats per-lane (Vessels, Terra, Counsel, Carlota Jo) as those payloads come online.
+The CPS layer is exposed per-vertical through the Decision Fabric query namespace; each lane (Vessels, Terra, Counsel, Carlota Jo) renders its CPS payloads inside its existing surface as those payloads come online.
 
 ---
 
@@ -141,7 +139,7 @@ Every number below was produced by re-running the documented verification comman
 | Metric | Verified value | Δ vs May 3 |
 |---|---|---|
 | Registered artifacts (artifact.toml files) | 9 | unchanged |
-| Customer-facing product surfaces (live) | **8** + the A11oy orchestration layer | +1 (ROSIE) |
+| Customer-facing product surfaces (live) | **7** orchestrated by the A11oy layer | unchanged |
 | Database tables (live, provisioned) | 848 | unchanged |
 | API endpoint declarations | 5,524 | unchanged |
 | Industry verticals | 7 | unchanged |
@@ -261,7 +259,7 @@ In priority order:
 
 ## 12. Closing
 
-The premise has not changed. Governed AI cognition will be a procurement requirement before long, not a procurement preference. Two days of additional shipping made the proof denser: a second peer-style paper, a third (the audit closure paper), a CPS standard, a live agent gateway, four new Trust-Plane surfaces, an eighth vertical (ROSIE), and a documented investor demo path that runs the proof spine end-to-end.
+The premise has not changed. Governed AI cognition will be a procurement requirement before long, not a procurement preference. Two days of additional shipping made the proof denser: a second peer-style paper, a third (the audit closure paper), a CPS standard, a live agent gateway, four new Trust-Plane surfaces, a hardened Decision Fabric query layer across the seven verticals, and a documented investor demo path that runs the proof spine end-to-end.
 
 The May 6 conversation remains about how to get this in front of buyers responsibly.
 
