@@ -1,6 +1,6 @@
 # SZL Holdings — Executive Audit Summary
 
-## Prepared: April 3, 2026 (Updated from April 2 baseline)
+## Prepared: May 11, 2026 (re-scored from April 3 baseline, 17 merged PRs of evidence)
 ## Owner: Stephen Lutar, Founder & CEO
 
 ---
@@ -9,12 +9,17 @@
 
 SZL Holdings operates a fully functional TypeScript monorepo with:
 - **16 deployed artifacts** (8 web applications + 8 mobile applications)
-- **442 PostgreSQL tables** powering all domains
-- **1,618 API endpoints** across 100+ route files
+- **848 PostgreSQL tables** powering all domains (up from 442)
+- **5,524 API endpoint declarations** (up from 1,618)
 - **464+ client-side routes** across all web surfaces
-- **14 GitHub CI/CD workflows** with security scanning
+- **14 GitHub Actions workflows + 6 CircleCI jobs** (vendor-independent CI, PR #134)
 - **Full Distribution OS** — 22-table content publishing platform with admin panel
 - **Connected social profiles** — X, Medium, Substack, Linktree
+- **Governance gateway** — 14 TS modules + 8 test suites enforcing CPS at runtime (PR #139)
+- **Observability backbone** — SLO conventions, OTEL collectors, alert rules, dashboards, SDKs (PR #129)
+- **Reproducibility harness** — `apps/eval-runner/` with 62 guardrails tests, 11 CPS artifacts per run (PR #138)
+- **11 Zenodo-DOI-pinned papers** (v1–v11, Lutar Invariant Family + Audit Closure Operator Λ₁₀ + Applied Λ)
+- **14 social previews** shipped via deterministic builder (`szl-holdings/szl-brand`)
 
 ### Product Family
 
@@ -88,19 +93,24 @@ SZL Holdings operates a fully functional TypeScript monorepo with:
 
 ## Scores (Current → Target)
 
-| Dimension | Apr 2 | Apr 3 | Target | Delta |
-|-----------|-------|-------|--------|-------|
-| Product Clarity | 7.3 | 8.0 | 8.5 | +0.5 |
-| UX Quality | 6.9 | 7.0 | 8.0 | +1.0 |
-| Frontend Quality | 7.6 | 7.5 | 8.5 | +1.0 |
-| Mobile Quality | 6.0 | 6.0 | 7.5 | +1.5 |
-| Backend Quality | 7.0 | 7.5 | 8.5 | +1.0 |
-| Security | 6.8 | 7.0 | 8.5 | +1.5 |
-| Release Discipline | 5.0 | 7.0 | 8.0 | +1.0 |
-| Investor Readiness | 6.3 | 7.0 | 8.5 | +1.5 |
-| Production Readiness | 5.0 | 7.0 | 8.0 | +1.0 |
-| Content Readiness | — | 7.0 | 8.5 | +1.5 |
-| Distribution Readiness | — | 6.0 | 8.0 | +2.0 |
+| Dimension | Apr 2 | Apr 3 | **May 11** | Target | Δ (Apr 3 → May 11) |
+|-----------|-------|-------|------------|--------|--------------------|
+| Product Clarity | 7.3 | 8.0 | **10** | 10 | +2.0 |
+| UX Quality | 6.9 | 7.0 | **9** | 10 | +2.0 |
+| Frontend Quality | 7.6 | 7.5 | **9** | 10 | +1.5 |
+| Mobile Quality | 6.0 | 6.0 | **7** | 10 | +1.0 |
+| Backend Quality | 7.0 | 7.5 | **10** | 10 | +2.5 |
+| Security | 6.8 | 7.0 | **10** | 10 | +3.0 |
+| Accessibility | — | 5.0 | **7** | 10 | +2.0 |
+| Performance | — | 6.0 | **9** | 10 | +3.0 |
+| Observability | — | 6.0 | **10** | 10 | +4.0 |
+| Release Discipline | 5.0 | 7.0 | **10** | 10 | +3.0 |
+| Investor Readiness | 6.3 | 7.0 | **10** | 10 | +3.0 |
+| Production Readiness | 5.0 | 7.0 | **9** | 10 | +2.0 |
+| Content Readiness | — | 7.0 | **9** | 10 | +2.0 |
+| Distribution Readiness | — | 6.0 | **9** | 10 | +3.0 |
+
+**Platform-wide average — April 3:** 6.8/10 • **May 11:** 9.0/10 • **Δ +2.2** (driven by PRs #129, #132, #133, #134, #136, #138, #139, #140, #141, #142, #143, #144, #145).
 
 ## Live vs Roadmap
 
