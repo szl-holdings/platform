@@ -43,6 +43,8 @@ import indexRouter from './routes/v1/index.js';
 import memoryRouter from './routes/v1/memory.js';
 import searchRouter from './routes/v1/search.js';
 import tasksRouter from './routes/v1/tasks.js';
+import ouroborosRouter from './routes/v1/ouroboros.js';
+import lutarRouter from './routes/v1/lutar.js';
 import workflowsRouter from './routes/v1/workflows.js';
 
 const V1_ENDPOINTS = {
@@ -60,6 +62,26 @@ const V1_ENDPOINTS = {
   embeddings: ['POST /v1/embed', 'POST /v1/rerank', 'POST /v1/openai/embeddings'],
   index: ['POST /v1/index/rebuild', 'GET /v1/index/verify'],
   evals: ['POST /v1/evals/run'],
+  ouroboros: [
+    'POST /v1/ouroboros/a11oy/reconcile-handoff',
+    'POST /v1/ouroboros/a11oy/audit-fleet',
+    'POST /v1/ouroboros/amaru/observe-metric',
+    'POST /v1/ouroboros/amaru/audit-threshold',
+    'POST /v1/ouroboros/sentra/anchor-event',
+    'POST /v1/ouroboros/sentra/anchor-batch',
+    'POST /v1/ouroboros/sentra/verify-trace',
+    'GET /v1/ouroboros/sentra/anchor-state',
+  ],
+  lutar: [
+    'POST /v1/ouroboros/lutar/v1',
+    'POST /v1/ouroboros/lutar/v2',
+    'POST /v1/ouroboros/lutar/v6',
+    'POST /v1/ouroboros/lutar/v7',
+    'POST /v1/ouroboros/lutar/v8',
+    'POST /v1/ouroboros/lutar/v9',
+    'POST /v1/ouroboros/lutar/v10',
+    'POST /v1/ouroboros/lutar/evaluate-all',
+  ],
 };
 
 const ALL_V1_ENDPOINTS = Object.values(V1_ENDPOINTS).flat();
@@ -123,6 +145,8 @@ export function createRouter(): Router {
   router.use('/v1', apiKeyGuard, embedRouter);
   router.use('/v1/index', apiKeyGuard, indexRouter);
   router.use('/v1/evals', apiKeyGuard, evalsRouter);
+  router.use('/v1/ouroboros', apiKeyGuard, ouroborosRouter);
+  router.use('/v1/ouroboros', apiKeyGuard, lutarRouter);
 
   return router;
 }

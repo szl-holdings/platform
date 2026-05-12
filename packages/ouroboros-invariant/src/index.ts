@@ -36,3 +36,16 @@ export type {
   AxisEvaluatorInput,
   AxisEvaluatorReport,
 } from "./axis-evaluator.js";
+
+export {
+  ARTIFACT_DIMENSIONS,
+  lutarV10Audit,
+  fullArtifactRow,
+  partialArtifactRow,
+} from "./lutar-v10-audit.js";
+export type {
+  ArtifactDimension,
+  LutarLayerArtifacts,
+  MissingArtifact,
+  LutarV10AuditReport,
+} from "./lutar-v10-audit.js";

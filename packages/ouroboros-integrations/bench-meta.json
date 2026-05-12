@@ -1,0 +1,19 @@
+{
+  "runner": {
+    "node": "v24.0.0",
+    "platform": "linux",
+    "release": "6.1.158",
+    "arch": "x64",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+    "cpu_count": 2,
+    "totalmem_gb": 8
+  },
+  "timestamp_utc": "2026-05-12T12:18:23.647Z",
+  "seeds": {
+    "receipt": 1,
+    "bekenstein": 2,
+    "lambda9": 3,
+    "dualWitness": 4
+  },
+  "determinism": "mulberry32-seeded; same N + same Node + same arch → ±2% wall-clock"
+}
