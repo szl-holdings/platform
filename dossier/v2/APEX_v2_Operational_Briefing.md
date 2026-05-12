@@ -178,7 +178,7 @@ Repository: `https://github.com/szl-holdings/ouroboros-thesis`
 
 | Paper | Title | Pages | Released | DOI |
 |---|---|---|---|---|
-| **v3-2.0.0** | The Loop Is the Product: Measuring Bounded Recursion as a System Primitive for Auditable AI | — | 2026-05-02 | `10.5281/zenodo.19944926` |
+| **v3-2.0.0** | The Lutar Invariant (axiomatic trust aggregator, audit-supported rewrite) | — | 2026-05-02 | `10.5281/zenodo.19983066` |
 | **v9-1.0.0** | The Lutar Invariant Family v1 → v7 → Ω: From Three-Term Foundation to Bianchi-Closed Fiber Bundle | 17 | 2026-05-05 | minted via Zenodo webhook on tag re-fire |
 | **v10-1.0.0** | The Audit Closure Operator Λ₁₀: Formalising the Implementation Contract of the Lutar Family | 11 + Appendix A essay + Lutar-family one-pager | 2026-05-05 | minted via Zenodo webhook on tag re-fire |
 

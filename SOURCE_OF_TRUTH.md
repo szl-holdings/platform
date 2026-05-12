@@ -69,7 +69,7 @@
 
 **Orchestration layer (powers and unifies all seven):** **A11oy** — `/a11oy/` — Brand Orchestration + Decision Intelligence (formerly KORA `/lyte/`, consolidated 2026-05-03).
 
-**Public-proof open source (not a vertical, foundational runtime):** **Ouroboros** runtime (`@szl-holdings/ouroboros`, current release v6.2.0, full suite 172/172 tests passing) and **Ouroboros Thesis** (paper-v3-2.0.0 "The Loop Is the Product: Measuring Bounded Recursion as a System Primitive for Auditable AI", DOI 10.5281/zenodo.19944926, concept DOI 10.5281/zenodo.19944926, published 2026-05-02). Both repositories are public on `github.com/szl-holdings`. The earlier reserved DOI 10.5281/zenodo.19951520 was withdrawn during a re-release sequence on 2026-05-02 and is not the canonical v3 record.
+**Public-proof open source (not a vertical, foundational runtime):** **Ouroboros** runtime (`@szl-holdings/ouroboros`, current release v6.2.0, full suite 172/172 tests passing) and **Ouroboros Thesis** — 11 Zenodo-archived papers (v1–v11). Canonical latest is v11 "Applied Λ: Measured Per-Request Overhead of the Audit-Closure Operator" (per-version DOI 10.5281/zenodo.20119582, published 2026-05-11). v3 in the same series is paper-v3-2.0.0 "The Lutar Invariant (audit-supported rewrite)" (per-version DOI 10.5281/zenodo.19983066, published 2026-05-02). Concept DOI is 10.5281/zenodo.19944926 and resolves to the latest version (currently v11). Both repositories are public on `github.com/szl-holdings`. The earlier reserved DOI 10.5281/zenodo.19951520 was withdrawn during a re-release sequence on 2026-05-02 and is not the canonical v3 record.
 
 ---
 

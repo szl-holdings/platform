@@ -132,7 +132,7 @@ First is the Ouroboros Runtime. Open-source code — the bounded-loop runtime th
 
 *Open: `github.com/szl-holdings/ouroboros`*
 
-"Second is the Ouroboros Thesis paper-v3-2.0.0. DOI `10.5281/zenodo.19944926`. Title: *The Loop Is the Product*. CC-BY-4.0. This is the convergence proof for the bounded loop the runtime implements."
+"Second is the Ouroboros Thesis. The canonical, latest paper is v11 — *Applied Λ: Measured Per-Request Overhead of the Audit-Closure Operator* — under per-version DOI `10.5281/zenodo.20119582`, concept DOI `10.5281/zenodo.19944926`. v3 in the same series is *The Lutar Invariant* (DOI `10.5281/zenodo.19983066`), the axiomatic trust aggregator. All papers are CC-BY-4.0. Together they are the formal proof spine for the bounded loop the runtime implements."
 
 *Open: `github.com/szl-holdings/ouroboros-thesis`*
 
