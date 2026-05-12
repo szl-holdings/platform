@@ -22,6 +22,30 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
     return finish("REFUSED_BEKENSTEIN_OVERFLOW", x, trace, false, "Bekenstein bound exceeded");
   }
 
+  let witnessInfo: OuroborosReceipt<T>["witnessDiversity"];
+  if (mechanisms.witnessDiversity) {
+    const w = mechanisms.witnessDiversity(x);
+    const admitted = w.axis >= w.threshold;
+    witnessInfo = {
+      axis: w.axis,
+      threshold: w.threshold,
+      admitted,
+      discriminant: w.discriminant,
+      classNumber: w.classNumber,
+    };
+    if (!admitted) {
+      const r = finish(
+        "REFUSED_WITNESS_DIVERSITY",
+        x,
+        trace,
+        false,
+        `Gauss class-number axis ${w.axis.toFixed(3)} < threshold ${w.threshold.toFixed(3)}`,
+      );
+      r.witnessDiversity = witnessInfo;
+      return r;
+    }
+  }
+
   const distHistory: number[] = [];
   let forecastInfo: OuroborosReceipt<T>["forecast"];
 
@@ -48,11 +72,13 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
         if (!dw.match) {
           const r = finish("REFUSED_DUAL_WITNESS_DIVERGE", nextX, trace, true, "Dual-witness providers diverged");
           r.forecast = forecastInfo;
+          r.witnessDiversity = witnessInfo;
           return r;
         }
       }
       const r = finish("ACCEPTED", nextX, trace, true, null);
       r.forecast = forecastInfo;
+      r.witnessDiversity = witnessInfo;
       return r;
     }
     x = nextX;
@@ -60,6 +86,7 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
   }
   const r = finish("MAX_ITER_NO_FIXED_POINT", x, trace, false, `No fixed point in ${maxIter} iterations`);
   r.forecast = forecastInfo;
+  r.witnessDiversity = witnessInfo;
   return r;
 }
 

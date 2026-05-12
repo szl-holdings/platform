@@ -149,3 +149,53 @@ describe("gaussForecast", () => {
     expect(["REFUSED_FORECAST_DIVERGENT", "MAX_ITER_NO_FIXED_POINT"]).toContain(r.verdict);
   });
 });
+
+// ============================================================================
+// witnessDiversity (Gauss class-number axis) integration
+// ============================================================================
+describe("witnessDiversity gate", () => {
+  it("ACCEPTS when class-number axis ≥ threshold", () => {
+    const r = run({
+      payload: { v: 1 },
+      canonical: (x) => `c:${x.v}`,
+      transform: (x) => x,
+      mechanisms: {
+        witnessDiversity: () => ({ axis: 0.9, threshold: 0.5, discriminant: -3, classNumber: 1 }),
+      },
+      maxIter: 4,
+    });
+    expect(r.verdict).toBe("ACCEPTED");
+    expect(r.witnessDiversity?.admitted).toBe(true);
+    expect(r.witnessDiversity?.classNumber).toBe(1);
+  });
+
+  it("REFUSES with REFUSED_WITNESS_DIVERSITY when axis < threshold", () => {
+    const r = run({
+      payload: { v: 1 },
+      canonical: (x) => `c:${x.v}`,
+      transform: (x) => x,
+      mechanisms: {
+        witnessDiversity: () => ({ axis: 0.1, threshold: 0.5, discriminant: -163, classNumber: 1 }),
+      },
+      maxIter: 4,
+    });
+    expect(r.verdict).toBe("REFUSED_WITNESS_DIVERSITY");
+    expect(r.witnessDiversity?.admitted).toBe(false);
+    expect(r.refusalReason).toMatch(/class-number axis/);
+  });
+
+  it("propagates witnessDiversity info on dual-witness divergence", () => {
+    const r = run({
+      payload: { v: 1 },
+      canonical: (x) => `c:${x.v}`,
+      transform: (x) => x,
+      mechanisms: {
+        witnessDiversity: () => ({ axis: 0.9, threshold: 0.5 }),
+        dualWitness: () => ({ match: false }),
+      },
+      maxIter: 4,
+    });
+    expect(r.verdict).toBe("REFUSED_DUAL_WITNESS_DIVERGE");
+    expect(r.witnessDiversity?.admitted).toBe(true);
+  });
+});

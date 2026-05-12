@@ -5,6 +5,7 @@ export type Verdict =
   | "REFUSED_FLUXIONS_BARE_CLAIM"
   | "REFUSED_BEKENSTEIN_OVERFLOW"
   | "REFUSED_FORECAST_DIVERGENT"
+  | "REFUSED_WITNESS_DIVERSITY"
   | "MAX_ITER_NO_FIXED_POINT";
 
 export interface OuroborosInput<T> {
@@ -21,6 +22,11 @@ export interface OuroborosInput<T> {
     /** Gauss-forecast: returns predicted residual norm of next iter; if it
      *  exceeds tolerance the loop short-circuits with REFUSED_FORECAST_DIVERGENT. */
     forecast?: (history: number[]) => { predictedResidual: number; tolerance: number };
+    /** Gauss witness-diversity gate (class-number axis). Returns the
+     *  computed K_axis ∈ [0,1] and a minimum threshold. Short-circuits
+     *  with REFUSED_WITNESS_DIVERSITY when K_axis < threshold. Runs
+     *  AFTER Λ-gate and fluxionsReceipt, BEFORE the iteration loop. */
+    witnessDiversity?: (x: T) => { axis: number; threshold: number; discriminant?: number; classNumber?: number };
   };
   maxIter?: number;
 }
@@ -35,4 +41,5 @@ export interface OuroborosReceipt<T> {
   refusalReason: string | null;
   receiptDigest: string;
   forecast?: { predictedResidual: number; tolerance: number; admitted: boolean };
+  witnessDiversity?: { axis: number; threshold: number; admitted: boolean; discriminant?: number; classNumber?: number };
 }
