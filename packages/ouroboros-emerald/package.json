@@ -1,0 +1,14 @@
+{
+  "name": "@workspace/ouroboros-emerald",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "catalog:"
+  }
+}
