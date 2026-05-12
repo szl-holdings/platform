@@ -129,7 +129,7 @@ The authoritative source is `API-SPEC.md` in the platform repo (PR #141).
 
 **23. Amaru — convergent multi-source data sync.** Append-only delta logs, hash-verified ingest, ten innovations beyond the open-source reverse-ETL field documented in a side-by-side audit. Binding: [`szl-holdings/amaru`](https://github.com/szl-holdings/amaru).
 
-**24. ROSIE — Unified Decision Fabric.** An eighth customer-facing surface (per APEX v2, 2026-05-05). Operator surface for CPS payloads: Identity, Optimizer, Fabric, Research, Proof, Evidence Bench pages. Status: declared in the org's APEX v2 dossier (PR #133); ROSIE does not yet have a dedicated public repository.
+**24. Decision Fabric — cross-primitive query layer.** A governed read substrate that joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. Workflow 360 (cross-primitive joins), Entity Investigation (per-entity timelines across all primitives), Recommendation Trace (AI output → outcome with prediction error). Schema: [`lib/db/src/schema/decision_fabric.ts`](https://github.com/szl-holdings/platform/blob/main/lib/db/src/schema/decision_fabric.ts). Namespace: `/api/decision-fabric`. The integration point through which the CPS standard renders inside the existing seven customer-facing surfaces.
 
 ---
 

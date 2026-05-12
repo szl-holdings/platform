@@ -2,8 +2,8 @@
 
 TypeScript core for the SZL Holdings governance gateway. Implements the
 Covenant Proof Standard (CPS) enforcement layer that sits in front of
-every customer-facing surface (A11oy, ROSIE, Sentra, Amaru, Vessels,
-Terra, Counsel, Carlota Jo).
+every customer-facing surface (A11oy, Sentra, Amaru, Vessels, Terra,
+Counsel, Carlota Jo).
 
 ## Modules
 | Module | Role |

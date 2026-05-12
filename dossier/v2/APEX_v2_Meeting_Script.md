@@ -26,7 +26,7 @@
 |---|---|---|
 | 1. Introduction | 2 min | Who you are, why you are here |
 | 2. What SZL Holdings builds | 4 min | The governed command layer + CPS |
-| 3. Live platform walkthrough | 6 min | Screen share — Trust Center → 7 surfaces → ROSIE |
+| 3. Live platform walkthrough | 6 min | Screen share — Trust Center → 7 surfaces → Decision Fabric proof bench |
 | 4. Public proof artifacts | 3 min | GitHub repos + Zenodo DOIs (v3 + v9 + v10) |
 | 5. Government alignment | 3 min | NIST AI RMF, DoD RAI, GSA, NY S.B. 7599 |
 | 6. Registration status | 2 min | SAM.gov, NAICS, set-asides |
@@ -115,10 +115,10 @@ There is one new thing worth pointing out. Over the last week we shipped a stand
 
 "Vessels is the maritime surface. Live AIS feed, fleet positions, sanctions screening, dark-vessel detection. Same proof spine."
 
-### Stop 8 — ROSIE Proof Bench (45s, NEW)
-*Navigate to: `/rosie/#/proof`*
+### Stop 8 — Decision Fabric Proof Bench (45s, NEW)
+*Navigate to: `/a11oy/#/decision-fabric/proof`*
 
-"This is ROSIE. It became its own customer-facing surface yesterday. ROSIE is the operator surface for CPS payloads — this is where you actually run a payload, watch the proof packets emit, and approve or roll back. This is what 'governed AI' looks like as a workflow, not as a slide."
+"This is the Decision Fabric proof bench, the cross-primitive query layer that joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. It is the operator surface for CPS payloads — this is where you actually run a payload, watch the proof packets emit, and approve or roll back. This is what 'governed AI' looks like as a workflow, not as a slide."
 
 > **Note for Mercy:** She is a procurement counselor, not a buyer. The point of the demo is not to sell — it is to give her enough operational confidence to send introductions. Keep it factual.
 
