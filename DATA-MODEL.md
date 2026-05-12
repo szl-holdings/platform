@@ -39,11 +39,11 @@
 |--------|-------------|------------|
 | Authentication & Identity | `auth.ts`, `api_keys.ts` | users, sessions, organizations, org_members, api_keys |
 | Audit & Compliance | `audit_logs.ts`, `audit_chain_events.ts`, `compliance.ts`, `governance.ts` | audit_logs, audit_chain_events, compliance_records |
-| Alloy — Execution Fabric | `alloy.ts`, `alloy_ai_decisions.ts`, `alloy_chat.ts`, `approvals.ts` | alloy_workflows, alloy_runs, approval_requests |
+| Continuum — Business Observability Fabric | `continuum.ts`, `continuum_ai_decisions.ts`, `continuum_chat.ts`, `approvals.ts` | continuum_workflows, continuum_runs, approval_requests |
 | Aegis — Security & Defense | `aegis*.ts` | security_incidents, threat_actors, soar_playbooks |
 | Vessels — Maritime | `vessels*.ts` | vessels, voyages, vessel_anomalies, sanctions_checks |
 | Terra — Real Estate | `terra*.ts` | properties, distress_scores, ownership_entities |
-| PRISM Counsel — Legal | `counsel*.ts` | matters, documents, court_filings, recovery_ops |
+| Counsel — Legal | `counsel*.ts` | matters, documents, court_filings, recovery_ops |
 | IMPERIUM — Cloud | `imperium*.ts` | cloud_resources, governance_policies, cost_allocations |
 | Carlota Jo — Advisory | `carlota_jo*.ts` | clients, bookings, service_catalog, inquiries |
 | Pulse — Briefing | `pulse*.ts` | briefings, signal_summaries, executive_digests |
