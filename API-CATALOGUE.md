@@ -1,7 +1,7 @@
 # API Catalogue — SZL Holdings DreamStack API
 
 > **Auto-generated** from `lib/api-spec/openapi.yaml` — do not edit by hand.
-> Last generated: **2026-05-01** | Spec version: **0.3.0** | Base URL: `/api`
+> Last generated: **2026-04-22** | Spec version: **0.3.0** | Base URL: `/api`
 
 Run `pnpm docs:generate` to refresh after editing the spec.
 
@@ -9,9 +9,9 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 
 | Metric | Value |
 |--------|-------|
-| Total paths | 4089 |
-| Total operations | 5065 |
-| Tag groups | 283 |
+| Total paths | 4071 |
+| Total operations | 5040 |
+| Tag groups | 282 |
 | Spec version | 0.3.0 |
 
 ## Table of Contents
@@ -108,7 +108,6 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 - [correlation-map](#correlation-map) (2 endpoints)
 - [cortex](#cortex) (19 endpoints)
 - [counsel](#counsel) (21 endpoints)
-- [conduit](#conduit) (25 endpoints)
 - [covenant-policy-api](#covenant-policy-api) (18 endpoints)
 - [crm](#crm) (28 endpoints)
 - [cross-app-handoffs](#cross-app-handoffs) (8 endpoints)
@@ -3267,40 +3266,6 @@ Auto-generated tag for counsel route group
 | `PATCH` | /counsel/obligations/{id} | `counselUpdateObligation` | Update an obligation (status, completed date, assignee, due date) |
 | `GET` | /counsel/proof-chain | `counselListProofChain` | List proof-chain entries for a matter |
 | `POST` | /counsel/proof-chain | `counselAppendProofChainEntry` | Append a proof-chain entry to a matter |
-
-<a id="conduit"></a>
-
-## conduit
-
-Conduit Reverse ETL — connections, syncs, field mappings, sync runs, and templates
-
-| Method | Path | Operation ID | Summary |
-|--------|------|-------------|---------|
-| `GET` | /conduit/connections | `listConduitConnections` | List all connections |
-| `POST` | /conduit/connections | `createConduitConnection` | Create a connection |
-| `GET` | /conduit/connections/{id} | `getConduitConnection` | Get a connection |
-| `PATCH` | /conduit/connections/{id} | `updateConduitConnection` | Update a connection |
-| `DELETE` | /conduit/connections/{id} | `deleteConduitConnection` | Delete a connection |
-| `POST` | /conduit/connections/{id}/test | `testConduitConnection` | Test a connection |
-| `GET` | /conduit/destinations/{destination}/objects | `listConduitDestinationObjects` | List available destination objects for a connector type |
-| `GET` | /conduit/destinations/{destination}/objects/{objectType}/fields | `listConduitDestinationFields` | List fields for a destination object |
-| `POST` | /conduit/sources/preview | `previewConduitSource` | Preview source rows for a given source configuration |
-| `GET` | /conduit/stats | `getConduitStats` | Get Conduit dashboard stats |
-| `GET` | /conduit/sync-runs | `listConduitSyncRuns` | List sync runs |
-| `GET` | /conduit/sync-runs/{id} | `getConduitSyncRun` | Get a sync run with details |
-| `GET` | /conduit/sync-runs/{id}/rows | `listConduitSyncRunRows` | List row-level errors for a sync run |
-| `POST` | /conduit/sync-runs/{id}/rows/{rowId}/retry | `retryConduitSyncRunRow` | Retry a failed row |
-| `GET` | /conduit/syncs | `listConduitSyncs` | List all syncs |
-| `POST` | /conduit/syncs | `createConduitSync` | Create a sync |
-| `GET` | /conduit/syncs/{id} | `getConduitSync` | Get a sync |
-| `PATCH` | /conduit/syncs/{id} | `updateConduitSync` | Update a sync |
-| `DELETE` | /conduit/syncs/{id} | `deleteConduitSync` | Delete a sync |
-| `GET` | /conduit/syncs/{id}/mappings | `getConduitSyncMappings` | Get field mappings for a sync |
-| `PUT` | /conduit/syncs/{id}/mappings | `updateConduitSyncMappings` | Replace field mappings for a sync |
-| `POST` | /conduit/syncs/{id}/run | `runConduitSync` | Trigger an immediate sync run |
-| `GET` | /conduit/templates | `listConduitTemplates` | List available sync templates |
-| `GET` | /conduit/templates/{id} | `getConduitTemplate` | Get a sync template |
-| `POST` | /conduit/templates/{id}/apply | `applyConduitTemplate` | Apply a template to create a pre-populated sync |
 
 <a id="covenant-policy-api"></a>
 
