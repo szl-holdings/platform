@@ -22,7 +22,7 @@
       "path": "./lib/shared-ui"
     },
     {
-      "path": "./lib/config"
+      "path": "./packages/config"
     },
     {
       "path": "./lib/auth"
@@ -109,7 +109,7 @@
       "path": "./packages/tool-mesh"
     },
     {
-      "path": "./packages/forge"
+      "path": "./packages/alloy"
     },
     {
       "path": "./packages/cognitive-observability"
@@ -131,9 +131,6 @@
     },
     {
       "path": "./packages/design-system"
-    },
-    {
-      "path": "./packages/db"
     },
     {
       "path": "./packages/contracts"

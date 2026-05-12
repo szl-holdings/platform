@@ -1,22 +1,10 @@
 modules = ["nodejs-24", "python-3.11", "javascript", "postgresql-16"]
 
 [[artifacts]]
-id = "artifacts/a11oy"
+id = "artifacts/api-server"
 
 [[artifacts]]
-id = "artifacts/sentra"
-
-[[artifacts]]
-id = "artifacts/terra"
-
-[[artifacts]]
-id = "artifacts/carlota-jo"
-
-[[artifacts]]
-id = "artifacts/counsel"
-
-[[artifacts]]
-id = "artifacts/vessels"
+id = "artifacts/mockup-sandbox"
 
 [deployment]
 router = "application"
@@ -36,57 +24,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/a11oy: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/sentra: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "artifacts/counsel: web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "artifacts/terra: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/carlota-jo: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/vessels: web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "brand-strings"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "GI Design System Storybook"
-
-[[workflows.workflow]]
-name = "artifacts/a11oy: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/a11oy && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "artifacts/sentra: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/sentra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-
-[workflows.workflow.metadata]
-outputType = "webview"
+args = "artifacts/conduit: web"
 
 [[workflows.workflow]]
 name = "artifacts/counsel: web"
@@ -100,60 +42,16 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 outputType = "webview"
 
 [[workflows.workflow]]
-name = "artifacts/terra: web"
+name = "artifacts/conduit: web"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+args = "bash -c 'cd /home/runner/workspace/artifacts/conduit && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+waitForPort = 5300
 
 [workflows.workflow.metadata]
 outputType = "webview"
-
-[[workflows.workflow]]
-name = "artifacts/carlota-jo: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/carlota-jo && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "artifacts/vessels: web"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow]]
-name = "brand-strings"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm brand:strings"
-
-[workflows.workflow.metadata]
-isValidation = true
-
-[[workflows.workflow]]
-name = "GI Design System Storybook"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm --filter @workspace/storybook run dev"
-waitForPort = 6800
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -162,7 +60,7 @@ integrations = ["github:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
-timeoutMs = 420000
+timeoutMs = 1200000
 
 [nix]
 channel = "stable-25_05"
@@ -182,6 +80,10 @@ DB_CONNECT_TIMEOUT_MS = "90000"
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
+X_API_KEY = "REPLACE_ME_when_x_developer_account_is_paid"
+X_API_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
 SUBSTRATE_GATEWAY_PORT = "8077"
 AEF_GATEWAY_URL = "http://localhost:4200"
 VITE_AEF_GATEWAY_URL = "http://localhost:4200"
@@ -199,8 +101,60 @@ OT_ICS_FEED_ENABLED = "true"
 DB_CONNECT_TIMEOUT_MS = "30000"
 
 [[ports]]
+localPort = 3002
+externalPort = 3003
+
+[[ports]]
+localPort = 3010
+externalPort = 8000
+
+[[ports]]
+localPort = 4099
+externalPort = 3002
+
+[[ports]]
+localPort = 4110
+externalPort = 4200
+
+[[ports]]
+localPort = 5300
+externalPort = 8099
+
+[[ports]]
+localPort = 6000
+externalPort = 6800
+
+[[ports]]
+localPort = 6100
+externalPort = 6000
+
+[[ports]]
+localPort = 7099
+externalPort = 9000
+
+[[ports]]
+localPort = 8008
+externalPort = 8008
+
+[[ports]]
+localPort = 8077
+externalPort = 5173
+
+[[ports]]
 localPort = 8080
 externalPort = 80
+
+[[ports]]
+localPort = 8085
+externalPort = 8081
+
+[[ports]]
+localPort = 8097
+externalPort = 5000
+
+[[ports]]
+localPort = 8098
+externalPort = 8080
 
 [[ports]]
 localPort = 9090

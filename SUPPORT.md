@@ -31,7 +31,7 @@ If you are an enterprise customer or design partner with a support agreement:
 
 For technical questions during an evaluation or due diligence process:
 
-**Email:** `stephen@szlholdings.com`
+**Email:** `inquiries@szlholdings.com`
 
 ---
 
@@ -39,7 +39,7 @@ For technical questions during an evaluation or due diligence process:
 
 For general questions about the platform, partnership opportunities, or investment:
 
-**Email:** `stephen@szlholdings.com`
+**Email:** `inquiries@szlholdings.com`
 **Website:** [szlholdings.com](https://szlholdings.com)
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
 
@@ -47,7 +47,7 @@ For general questions about the platform, partnership opportunities, or investme
 
 ## Bug Reports
 
-Non-security bugs may be reported via [GitHub Issues](https://github.com/szl-holdings/platform/issues) using the provided issue templates. Issues are triaged at SZL Holdings' discretion. Response timelines are not guaranteed for non-partner reports.
+Non-security bugs may be reported via [GitHub Issues](https://github.com/szl-holdings/szl-holdings-platform/issues) using the provided issue templates. Issues are triaged at SZL Holdings' discretion. Response timelines are not guaranteed for non-partner reports.
 
 ---
 
