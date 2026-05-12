@@ -18,6 +18,11 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import {
+  InitializeRequestSchema,
+  LATEST_PROTOCOL_VERSION,
+  SUPPORTED_PROTOCOL_VERSIONS,
+} from '@modelcontextprotocol/sdk/types.js';
 import { runtimeEventBus, type SubstrateRuntimeEvent } from '@szl/substrate';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -47,7 +52,7 @@ import { getAvailableTools } from '../handlers.js';
 import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
 import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-import { getGatewayServer } from '../nexus-gateway-server.js';
+import { getGatewayServer, createGatewayServer } from '../nexus-gateway-server.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
@@ -238,12 +243,63 @@ function handleStreamableGet(req: Request, res: Response): void {
     res.status(400).json({ error: 'Mcp-Session-Id header required' });
     return;
   }
-  const transport = streamableSessions.get(sessionId);
-  if (!transport) {
+  if (!streamableSessions.has(sessionId)) {
     res.status(404).json({ error: `Session '${sessionId}' not found` });
     return;
   }
-  void transport.handleRequest(req, res);
+
+  // MCP 2025-11-25 Streamable HTTP SSE listener. Bypass the SDK transport for
+  // GET so we can emit `$/ready` + substrate run-lifecycle and runtime events
+  // directly over the wire as named SSE frames.
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.setHeader('Mcp-Session-Id', sessionId);
+  res.flushHeaders?.();
+
+  const writeEvent = (eventName: string, data: unknown): void => {
+    try {
+      res.write(`event: ${eventName}\n`);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    } catch {
+      /* closed */
+    }
+  };
+
+  writeEvent('$/ready', { sessionId, serverInfo: SERVER_INFO, timestamp: Date.now() });
+
+  const keepAlive = setInterval(() => {
+    try {
+      res.write(`: keepalive ${Date.now()}\n\n`);
+    } catch {
+      /* closed */
+    }
+  }, 25_000);
+
+  const unsubscribeRun = runEventBus.subscribe((event: RunLifecycleEvent) => {
+    writeEvent(event.type, event);
+    if (event.type === 'stage_complete') writeEvent('stage:complete', event);
+    else if (event.type === 'run_started') {
+      writeEvent('run:start', event);
+      writeEvent('stage:start', event);
+    } else if (event.type === 'run_complete') writeEvent('run:complete', event);
+    else if (event.type === 'run_failed') writeEvent('run:failed', event);
+  });
+  const unsubscribeRuntime = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
+    writeEvent(event.type, event);
+  });
+
+  req.on('close', () => {
+    clearInterval(keepAlive);
+    unsubscribeRun();
+    unsubscribeRuntime();
+    try {
+      res.end();
+    } catch {
+      /* already ended */
+    }
+  });
 }
 
 // ─── Express Router Factory ───────────────────────────────────────────────────
@@ -344,32 +400,83 @@ export function createHttpTransport(): express.Router {
     const ctx = resolveAuthContext(req);
     const sessionId = randomUUID();
 
-    const transport = new SSEServerTransport(`/mcp/message`, res);
-    sseSessions.set(sessionId, transport);
+    // Raw SSE headers — independent of the SDK transport so we can emit
+    // substrate run-lifecycle events directly to the wire as `event: <type>`.
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('X-Session-Id', sessionId);
+    res.setHeader('Mcp-Session-Id', sessionId);
+    // CORS for SSE — required for browser EventSource consumers.
+    const reqOrigin = req.headers.origin;
+    if (reqOrigin && isOriginAllowed(reqOrigin as string)) {
+      res.setHeader('Access-Control-Allow-Origin', reqOrigin as string);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    res.flushHeaders?.();
 
-    // Bridge substrate runtime events to the SDK SSE session.
+    const writeEvent = (eventName: string, data: unknown): void => {
+      try {
+        res.write(`event: ${eventName}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      } catch {
+        /* connection closed mid-write */
+      }
+    };
+
+    // Emit a ready frame so clients can confirm the stream is alive.
+    writeEvent('$/ready', { sessionId, serverInfo: SERVER_INFO, timestamp: Date.now() });
+
+    // Keep-alive ping every 25s to defeat intermediary buffers.
+    const keepAlive = setInterval(() => {
+      try {
+        res.write(`: keepalive ${Date.now()}\n\n`);
+      } catch {
+        /* socket closed */
+      }
+    }, 25_000);
+
+    // Bridge substrate run lifecycle events onto the SSE stream.
+    // We emit both the canonical snake_case event name AND a colon-form
+    // alias (`stage:start`, `stage:complete`, `run:complete`) so clients
+    // that follow the MCP 2025 streaming naming convention also work.
     const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
-      if (event.type === 'tool_list_changed') {
+      writeEvent(event.type, event);
+      if (event.type === 'stage_complete') {
+        writeEvent('stage:complete', event);
+      } else if (event.type === 'run_started') {
+        writeEvent('run:start', event);
+        // Surface a synthetic stage:start so multi-stage UIs render progress.
+        writeEvent('stage:start', event);
+      } else if (event.type === 'run_complete') {
+        writeEvent('run:complete', event);
+      } else if (event.type === 'run_failed') {
+        writeEvent('run:failed', event);
+      } else if (event.type === 'tool_list_changed') {
         void getGatewayServer().notifyListChanged('tools/list_changed');
       }
     });
 
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((_event: SubstrateRuntimeEvent) => {
-      // Runtime events are surfaced via the SDK's notification mechanism.
-      // More granular progress is handled via the Tasks capability.
+    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
+      // The substrate runtime already emits colon-form names
+      // (`stage:start`, `stage:complete`, `run:complete`, ...). Forward verbatim.
+      writeEvent(event.type, event);
     });
 
     req.on('close', () => {
+      clearInterval(keepAlive);
       unsubscribeRunEvents();
       unsubscribeRuntimeEvents();
       sseSessions.delete(sessionId);
+      try {
+        res.end();
+      } catch {
+        /* already ended */
+      }
     });
 
-    res.setHeader('X-Session-Id', sessionId);
     void ctx; // auth context available for future per-session tenant injection
-
-    const gatewayServer = getGatewayServer();
-    await gatewayServer.connect(transport);
   });
 
   // ── Legacy SSE message endpoint ───────────────────────────────────────────
@@ -475,7 +582,27 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
-    // New session — create a fresh transport and connect the PRAXISMcpServer
+    // If a session id was supplied but it does not correspond to an active
+    // session, the session has been terminated or never existed. Per MCP
+    // Streamable HTTP spec, return 404 so clients can re-initialize.
+    if (sessionId && !streamableSessions.has(sessionId)) {
+      res.status(404).json({
+        jsonrpc: '2.0',
+        id: (req.body as { id?: string | number | null } | undefined)?.id ?? null,
+        error: {
+          code: -32001,
+          message: 'Session not found',
+          data: { sessionId, reason: 'Session terminated or never existed. Re-initialize to obtain a new session.' },
+        },
+      });
+      return;
+    }
+
+    // New session — create a fresh transport and a fresh per-session server.
+    // The MCP SDK's Protocol.connect() throws "Already connected to a transport"
+    // when called a second time on the same McpServer instance. Using a factory
+    // that builds a new PRAXISMcpServer per session prevents that error while
+    // keeping the singleton alive for SSE list-changed bridge notifications.
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (id: string) => {
@@ -487,10 +614,65 @@ export function createHttpTransport(): express.Router {
       if (transport.sessionId) {
         streamableSessions.delete(transport.sessionId);
       }
+      // sessionServer is GC'd naturally — do NOT call sessionServer.close() here
+      // because the SDK's close() calls transport.close() which calls onclose again
+      // → infinite recursion and stack overflow.
     };
 
-    const gatewayServer = getGatewayServer();
-    await gatewayServer.connect(transport);
+    const sessionServer = createGatewayServer();
+
+    // Extension negotiation: the MCP SDK's default initialize handler returns
+    // { protocolVersion, capabilities, serverInfo, instructions? } but ignores
+    // client-supplied `extensions`. Override the InitializeRequestSchema handler
+    // BEFORE connecting the transport so it intersects client-requested with
+    // server-supported extensions and includes them in the response.
+    {
+      // PRAXISMcpServer.sdk → McpServer; McpServer.server → low-level Server
+      // that owns setRequestHandler / _oninitialize. Reach in and override the
+      // initialize handler so it includes negotiated `extensions` in the result.
+      //
+      // We read extensions from `req.body` directly because the SDK's zod
+      // parser strips top-level `extensions` (it is only defined inside
+      // ClientCapabilitiesSchema). Reading from `req.body` lets us accept
+      // BOTH `params.extensions` (top-level, used by some clients) and the
+      // canonical `params.capabilities.extensions`.
+      const rawInit = req.body as
+        | { method?: string; params?: { extensions?: unknown; capabilities?: { extensions?: unknown } } }
+        | undefined;
+      const clientExtensions =
+        rawInit?.params?.extensions ?? rawInit?.params?.capabilities?.extensions;
+      const sdkServer = (sessionServer as unknown as { sdk: { server: unknown } }).sdk.server;
+      const serverAny = sdkServer as unknown as {
+        setRequestHandler: (schema: typeof InitializeRequestSchema, handler: (request: unknown) => Promise<Record<string, unknown>>) => void;
+        _clientCapabilities?: unknown;
+        _clientVersion?: unknown;
+        _serverInfo: unknown;
+        _instructions?: string;
+        getCapabilities: () => unknown;
+      };
+      serverAny.setRequestHandler(InitializeRequestSchema, async (rawRequest) => {
+        const request = rawRequest as {
+          params: { protocolVersion: string; capabilities?: unknown; clientInfo?: unknown };
+        };
+        const requestedVersion = request.params.protocolVersion;
+        serverAny._clientCapabilities = request.params.capabilities;
+        serverAny._clientVersion = request.params.clientInfo;
+        const protocolVersion = SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion as never)
+          ? requestedVersion
+          : LATEST_PROTOCOL_VERSION;
+        const negotiated = negotiateExtensions(clientExtensions);
+        return {
+          protocolVersion,
+          capabilities: serverAny.getCapabilities(),
+          serverInfo: serverAny._serverInfo,
+          extensions: negotiated,
+          ...(serverAny._instructions ? { instructions: serverAny._instructions } : {}),
+        };
+      });
+    }
+
+    await sessionServer.connect(transport);
+
     await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
   });
 
