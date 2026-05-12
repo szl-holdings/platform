@@ -26,6 +26,10 @@ export default defineConfig({
       },
       { find: '@workspace/auth', replacement: resolve(__dirname, 'lib/auth/src/index.ts') },
       {
+        find: '@workspace/ouroboros-integrations',
+        replacement: resolve(__dirname, 'packages/ouroboros-integrations/src/index.ts'),
+      },
+      {
         find: '@szl-holdings/auth-shared/server',
         replacement: resolve(__dirname, 'packages/auth-shared/src/server/index.ts'),
       },
