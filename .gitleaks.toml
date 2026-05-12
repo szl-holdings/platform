@@ -92,7 +92,7 @@ useDefault = true
 
     # React cognitive-memory page: uses `key:` as a JavaScript object field
     # name in an array of memory capsule descriptors, not as an API key.
-    "artifacts/command/src/pages/cognitive/memory\\.tsx",
+    "artifacts/a11oy/src/pages/cognitive/memory\\.tsx",
 
     # Developer portal UI: renders truncated example API key values for
     # developer documentation purposes. Values are clearly placeholder strings.

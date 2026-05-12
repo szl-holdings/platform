@@ -234,7 +234,7 @@ The following sections describe the A11oy product runtime as built in Phase 1. T
 | `vessels-maritime` | SEXTANT Maritime | Fleet and voyage management |
 | `terra-real-estate` | DOMAINE Real Estate | Portfolio and asset management |
 | `aegis-defense` | PARAGON Defense | Defense and intelligence operations |
-| `prism-counsel` | PRISM Counsel | Legal matter and contract management |
+| `prism-counsel` | Counsel | Legal matter and contract management |
 | `carlota-jo` | Carlota Jo | Professional services consulting |
 | `alloy-core` | Alloy Core | Platform health and fabric operations |
 
@@ -441,3 +441,37 @@ Open `alloy.commands.md`, find the relevant category, and paste the prompt into 
 - `pnpm brand:check` passes
 - `pnpm typecheck` passes
 - No uncommitted changes
+
+---
+
+## Python Substrate
+
+Alongside the TypeScript fabric at `lib/a11oy-fabric/`, the repo ships a
+Python substrate engine at `lib/a11oy-fabric-py/`. It defines the pydantic
+contract every vertical pack implements and emits deterministic JSON
+artifacts plus Proof-Carrying Pack Run (PCPR) companions under
+`reports/a11oy-substrate/<pack-slug>/<run-id>.{json,proof.json}`.
+
+The substrate runs **alongside** the TS fabric — it does not replace it.
+The TS `Vertical` enum is unchanged; the Python substrate defines a
+superset taxonomy in its own contract.
+
+**Package:** `a11oy-fabric-py` (hatchling, pydantic 2, structlog, opentelemetry-api)
+
+**CLI:** `python -m a11oy_fabric_py {list-packs, run, verify}`
+
+**JSON artifacts:** `reports/a11oy-substrate/<pack-slug>/<run-id>.json` + `.proof.json`
+
+**JSON schemas:** `reports/a11oy-substrate/_schema/<Entity>.schema.json`
+
+**Reference packs:**
+- `platform-agentops` (vertical `alloy-core`) — substrate self-observation
+- `cyber-resilience` (vertical `tenax-cyber`) — TENAX/sentra surface
+
+**Tests:** `pytest lib/a11oy-fabric-py/tests/ -v`
+
+See `lib/a11oy-fabric-py/README.md` for the full contract, the
+discovery/governed two-plane execution model, the JSON-artifact
+convention, PCPR format, and the recipe for plugging in the seven
+follow-up vertical packs (Pulse, Finance/Fincept, Lyte/KORA, Terra,
+Vessels, PRISM Counsel, Marketing/Growth).

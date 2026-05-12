@@ -1,3 +1,23 @@
 project-export.tar.gz filter=lfs diff=lfs merge=lfs -text
 project-export.zip filter=lfs diff=lfs merge=lfs -text
 content-package/a11oy-content-package.zip filter=lfs diff=lfs merge=lfs -text
+
+# ─── Model weights & dataset files (routed via Hugging Face Xet / LFS) ────────
+# Keep patterns specific to known large-binary extensions only.
+# Do NOT add broad globs (e.g. *.bin at root) that would accidentally catch
+# compiled JS/native binaries. Cross-reference: docs/operations/xet-developer-guide.md
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.gguf filter=lfs diff=lfs merge=lfs -text
+*.onnx filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
+*.ckpt filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text
+*.parquet filter=lfs diff=lfs merge=lfs -text
+*.arrow filter=lfs diff=lfs merge=lfs -text
+# *.bin scoped to known model/dataset directory conventions only.
+# The root-level *.bin glob is intentionally avoided — it would match compiled
+# JS bundles and native Node.js addons. The paths below cover the conventional
+# locations for HuggingFace model weights stored in the legacy .bin format.
+models/**/*.bin filter=lfs diff=lfs merge=lfs -text
+datasets/**/*.bin filter=lfs diff=lfs merge=lfs -text

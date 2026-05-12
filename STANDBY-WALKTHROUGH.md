@@ -22,7 +22,7 @@
 |---|---|---|---|
 | **Local Replit checkpoint** | ✅ Current | `master @ 4eb20cb87` | Replit auto-checkpoints persist through standby. |
 | **`gitsafe-backup` mirror** | ✅ **Current — this is the canonical preservation target** | `main @ 4eb20cb87` | All 2,575 commits of `master` pushed as `master:main` on 2026-04-23. |
-| **GitHub `origin`** (`github.com/szl-holdings/platform`) | ⚠️ Stale (behind by ~1,598 commits) | `master @ 0cf237f70` | Push blocked — see below. |
+| **GitHub `origin`** (`github.com/szl-holdings/szl-holdings-platform`) | ⚠️ Stale (behind by ~1,598 commits) | `master @ 0cf237f70` | Push blocked — see below. |
 
 ### GitHub push limitation
 The OAuth token attached to `origin` (and the Replit GitHub integration connector) does **not** carry the `workflow` scope. Our branch adds 20+ files under `.github/workflows/`, so GitHub rejects every push with:
@@ -32,7 +32,7 @@ The OAuth token attached to `origin` (and the Replit GitHub integration connecto
 The remote `origin/master` also has 2 small commits we don't have locally (a Dependabot tanstack bump + README metric update) that conflict in `package.json` files and `pnpm-lock.yaml`. **No data is at risk** — `gitsafe-backup` already mirrors everything. To reconcile when you return:
 
 1. Generate a Personal Access Token with `repo` + `workflow` scopes.
-2. `git remote set-url origin https://<user>:<PAT>@github.com/szl-holdings/platform.git`
+2. `git remote set-url origin https://<user>:<PAT>@github.com/szl-holdings/szl-holdings-platform.git`
 3. `git fetch origin && git merge origin/master` (resolve `package.json` conflicts in favor of HEAD; keep the Dependabot tanstack version bumps).
 4. `git push origin master`.
 

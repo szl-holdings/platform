@@ -52,7 +52,7 @@ export default defineConfig({
         replacement: resolve(__dirname, 'lib/observability/src/index.ts'),
       },
       { find: '@workspace/services', replacement: resolve(__dirname, 'lib/services/src/index.ts') },
-      { find: '@workspace/config', replacement: resolve(__dirname, 'lib/config/src/index.ts') },
+      { find: '@workspace/config', replacement: resolve(__dirname, 'packages/config/src/index.ts') },
       { find: '@workspace/audit', replacement: resolve(__dirname, 'lib/audit/src/index.ts') },
       {
         find: '@workspace/forge-runtime',
@@ -84,7 +84,7 @@ export default defineConfig({
         find: '@szl-holdings/services',
         replacement: resolve(__dirname, 'lib/services/src/index.ts'),
       },
-      { find: '@szl-holdings/config', replacement: resolve(__dirname, 'lib/config/src/index.ts') },
+      { find: '@szl-holdings/platform-registry', replacement: resolve(__dirname, 'packages/config/src/index.ts') },
       { find: '@szl-holdings/audit', replacement: resolve(__dirname, 'lib/audit/src/index.ts') },
       {
         find: '@szl-holdings/forge-runtime',
@@ -104,6 +104,10 @@ export default defineConfig({
       },
       {
         find: '@workspace/ontology',
+        replacement: resolve(__dirname, 'packages/ontology/src/index.ts'),
+      },
+      {
+        find: '@szl-holdings/ontology',
         replacement: resolve(__dirname, 'packages/ontology/src/index.ts'),
       },
       {
@@ -275,34 +279,34 @@ export default defineConfig({
         replacement: resolve(__dirname, 'packages/tool-mesh/src/index.ts'),
       },
       {
-        find: '@workspace/forge/types',
-        replacement: resolve(__dirname, 'packages/forge/src/types.ts'),
+        find: '@workspace/alloy/types',
+        replacement: resolve(__dirname, 'packages/alloy/src/types.ts'),
       },
       {
-        find: '@workspace/forge/checkpoint',
-        replacement: resolve(__dirname, 'packages/forge/src/checkpoint.ts'),
+        find: '@workspace/alloy/checkpoint',
+        replacement: resolve(__dirname, 'packages/alloy/src/checkpoint.ts'),
       },
       {
-        find: '@workspace/forge/run-manager',
-        replacement: resolve(__dirname, 'packages/forge/src/run-manager.ts'),
+        find: '@workspace/alloy/run-manager',
+        replacement: resolve(__dirname, 'packages/alloy/src/run-manager.ts'),
       },
       {
-        find: '@workspace/forge/ledger',
-        replacement: resolve(__dirname, 'packages/forge/src/ledger.ts'),
+        find: '@workspace/alloy/ledger',
+        replacement: resolve(__dirname, 'packages/alloy/src/ledger.ts'),
       },
       {
-        find: '@workspace/forge/model-router',
-        replacement: resolve(__dirname, 'packages/forge/src/model-router.ts'),
+        find: '@workspace/alloy/model-router',
+        replacement: resolve(__dirname, 'packages/alloy/src/model-router.ts'),
       },
       {
-        find: '@workspace/forge/workflow',
-        replacement: resolve(__dirname, 'packages/forge/src/workflow.ts'),
+        find: '@workspace/alloy/workflow',
+        replacement: resolve(__dirname, 'packages/alloy/src/workflow.ts'),
       },
       {
-        find: '@workspace/forge/plan-orchestrator',
-        replacement: resolve(__dirname, 'packages/forge/src/plan-orchestrator.ts'),
+        find: '@workspace/alloy/plan-orchestrator',
+        replacement: resolve(__dirname, 'packages/alloy/src/plan-orchestrator.ts'),
       },
-      { find: '@workspace/forge', replacement: resolve(__dirname, 'packages/forge/src/index.ts') },
+      { find: '@workspace/alloy', replacement: resolve(__dirname, 'packages/alloy/src/index.ts') },
       {
         find: '@workspace/cognitive-observability/metrics',
         replacement: resolve(__dirname, 'packages/cognitive-observability/src/metrics.ts'),
@@ -511,6 +515,7 @@ export default defineConfig({
       'tests/**/*.spec.ts',
       'lib/audit/src/**/*.test.ts',
       'lib/scene-export/src/__tests__/**/*.test.ts',
+      'lib/services/src/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.tsx',
       'scripts/**/*.test.js',
