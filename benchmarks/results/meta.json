@@ -1,0 +1,295 @@
+{
+  "harness": "benchmarks/run_benchmarks.py",
+  "version": "1.0.0",
+  "started_iso": "2026-05-12T12:21:02Z",
+  "wallclock_seconds": 26.913,
+  "reps_per_route": 1000,
+  "warmup_per_route": 50,
+  "seed": 42,
+  "host": {
+    "hostname": "e2b.local",
+    "platform": "Linux-6.1.158-x86_64-with-glibc2.41",
+    "python_version": "3.12.8",
+    "machine": "x86_64"
+  },
+  "server": {
+    "base": "http://localhost:4010",
+    "health": {
+      "status": "ok",
+      "service": "alloy-runtime-api",
+      "version": "0.2.0",
+      "timestamp": "2026-05-12T12:21:02.049Z",
+      "v1EndpointCount": 34,
+      "endpoints": {
+        "tasks": [
+          "POST /v1/tasks/plan",
+          "POST /v1/tasks/execute"
+        ],
+        "memory": [
+          "POST /v1/memory/write",
+          "POST /v1/memory/query",
+          "DELETE /v1/memory/evict-stale"
+        ],
+        "workflows": [
+          "POST /v1/workflows/start",
+          "GET /v1/workflows",
+          "GET /v1/workflows/:runId",
+          "POST /v1/workflows/:runId/resume",
+          "POST /v1/workflows/:runId/approve",
+          "DELETE /v1/workflows/:runId"
+        ],
+        "search": [
+          "POST /v1/search/hybrid"
+        ],
+        "embeddings": [
+          "POST /v1/embed",
+          "POST /v1/rerank",
+          "POST /v1/openai/embeddings"
+        ],
+        "index": [
+          "POST /v1/index/rebuild",
+          "GET /v1/index/verify"
+        ],
+        "evals": [
+          "POST /v1/evals/run"
+        ],
+        "ouroboros": [
+          "POST /v1/ouroboros/a11oy/reconcile-handoff",
+          "POST /v1/ouroboros/a11oy/audit-fleet",
+          "POST /v1/ouroboros/amaru/observe-metric",
+          "POST /v1/ouroboros/amaru/audit-threshold",
+          "POST /v1/ouroboros/sentra/anchor-event",
+          "POST /v1/ouroboros/sentra/anchor-batch",
+          "POST /v1/ouroboros/sentra/verify-trace",
+          "GET /v1/ouroboros/sentra/anchor-state"
+        ],
+        "lutar": [
+          "POST /v1/ouroboros/lutar/v1",
+          "POST /v1/ouroboros/lutar/v2",
+          "POST /v1/ouroboros/lutar/v6",
+          "POST /v1/ouroboros/lutar/v7",
+          "POST /v1/ouroboros/lutar/v8",
+          "POST /v1/ouroboros/lutar/v9",
+          "POST /v1/ouroboros/lutar/v10",
+          "POST /v1/ouroboros/lutar/evaluate-all"
+        ]
+      }
+    }
+  },
+  "routes": [
+    {
+      "route_id": "a11oy.reconcile-handoff",
+      "method": "POST",
+      "path": "/v1/ouroboros/a11oy/reconcile-handoff",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "a11oy.audit-fleet",
+      "method": "POST",
+      "path": "/v1/ouroboros/a11oy/audit-fleet",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "amaru.observe-metric",
+      "method": "POST",
+      "path": "/v1/ouroboros/amaru/observe-metric",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "amaru.audit-threshold",
+      "method": "POST",
+      "path": "/v1/ouroboros/amaru/audit-threshold",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "sentra.anchor-event",
+      "method": "POST",
+      "path": "/v1/ouroboros/sentra/anchor-event",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "sentra.anchor-batch",
+      "method": "POST",
+      "path": "/v1/ouroboros/sentra/anchor-batch",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "sentra.verify-trace",
+      "method": "POST",
+      "path": "/v1/ouroboros/sentra/verify-trace",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "sentra.anchor-state",
+      "method": "GET",
+      "path": "/v1/ouroboros/sentra/anchor-state",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v1",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v1",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v2",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v2",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v6",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v6",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v7",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v7",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v8",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v8",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v9",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v9",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.v10",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/v10",
+      "status_counts": {
+        "200": 1000
+      }
+    },
+    {
+      "route_id": "lutar.evaluate-all",
+      "method": "POST",
+      "path": "/v1/ouroboros/lutar/evaluate-all",
+      "status_counts": {
+        "200": 1000
+      }
+    }
+  ],
+  "paired": [
+    {
+      "route_id": "a11oy.reconcile-handoff",
+      "base_p50_ms": 0.757040994358249,
+      "gov_p50_ms": 1.4533334979205392,
+      "delta_p50_ms": 0.6962925035622902,
+      "delta_p99_ms": 1.2347464123740792,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "a11oy.audit-fleet",
+      "base_p50_ms": 0.6445459985116031,
+      "gov_p50_ms": 1.4577444999304134,
+      "delta_p50_ms": 0.8131985014188103,
+      "delta_p99_ms": 1.7462469528982179,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "amaru.observe-metric",
+      "base_p50_ms": 0.5438405023596715,
+      "gov_p50_ms": 1.1464129966043402,
+      "delta_p50_ms": 0.6025724942446686,
+      "delta_p99_ms": 0.8869117122230824,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "amaru.audit-threshold",
+      "base_p50_ms": 0.4503624986682553,
+      "gov_p50_ms": 1.1607965025177691,
+      "delta_p50_ms": 0.7104340038495138,
+      "delta_p99_ms": 1.1891867351368999,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "sentra.anchor-event",
+      "base_p50_ms": 0.4893139994237572,
+      "gov_p50_ms": 1.2034985011268873,
+      "delta_p50_ms": 0.7141845017031301,
+      "delta_p99_ms": 1.6817980029009039,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "sentra.anchor-batch",
+      "base_p50_ms": 0.5415590021584649,
+      "gov_p50_ms": 1.3982099953864235,
+      "delta_p50_ms": 0.8566509932279587,
+      "delta_p99_ms": 1.0191276951081816,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "sentra.verify-trace",
+      "base_p50_ms": 0.4531045015028212,
+      "gov_p50_ms": 1.2195474992040545,
+      "delta_p50_ms": 0.7664429977012333,
+      "delta_p99_ms": 1.1127066599874522,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    },
+    {
+      "route_id": "sentra.anchor-state",
+      "base_p50_ms": 0.35009250495932065,
+      "gov_p50_ms": 1.094339502742514,
+      "delta_p50_ms": 0.7442469977831934,
+      "delta_p99_ms": 1.105852621112717,
+      "rho_closed_rate": 1.0,
+      "missing_total": 0,
+      "error_count": 0
+    }
+  ],
+  "pearson_rho": {
+    "k_vs_p50": 0.6674698512517665,
+    "k_vs_p99": 0.5011941580059233
+  }
+}

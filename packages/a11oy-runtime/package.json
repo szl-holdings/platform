@@ -1,17 +1,30 @@
 {
-  "name": "@szl/a11oy-runtime",
+  "name": "@workspace/a11oy-runtime",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "src/index.ts",
+  "description": "A11oy — autonomous workcell runtime. Wraps workcell-admission decisions through the Ouroboros loop spine with Λ-gate (from MirrorEval axes), Newton fluxions-receipt (tool-risk consistency), and Gauss class-number witness-diversity gate on the operator sequence.",
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
-    "./data": "./src/data/index.ts"
+    "./data": "./src/data/index.ts",
+    "./verify": "./src/verify.ts"
   },
   "scripts": {
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@workspace/ouroboros-loop": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/ouroboros-gauss": "workspace:*"
+  },
   "devDependencies": {
-    "typescript": "catalog:"
+    "vitest": "catalog:",
+    "typescript": "catalog:",
+    "tsx": "^4.19.0",
+    "@workspace/amaru-runtime": "workspace:*",
+    "@workspace/sentra-runtime": "workspace:*"
   }
 }

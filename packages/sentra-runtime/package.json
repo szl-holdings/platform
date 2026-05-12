@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/sentra-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "description": "Sentra — cyber-resilience command runtime. Composes the Ouroboros spine with Kuramoto defender-coupling, Gauss multi-sensor fusion (least-squares + residual goodness-of-fit), and Newton mint-style evidence assay for tamper-evident threat receipts.",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@workspace/ouroboros-loop": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/ouroboros-resonance": "workspace:*",
+    "@workspace/ouroboros-gauss": "workspace:*",
+    "@workspace/ouroboros-newton": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "fast-check": "^3.23.0",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0"
+  }
+}

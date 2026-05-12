@@ -129,12 +129,27 @@ export {
   pwmClassifyRegime,
   PLATONIC_SOLIDS,
   SefirotContinualLearning,
+  // v7 thesis compatibility alias — v7 deposit refers to this class as
+  // `SefirotContinualLearner`. Renamed to `SefirotContinualLearning`
+  // between draft and merge. Alias preserved for v7-era imports.
+  SefirotContinualLearning as SefirotContinualLearner,
   SEFIROT_TIERS,
   ChinchillaLutarScaling,
   GrokkingPhaseDetector,
   FreeEnergyLutarActiveInference,
+  // v8 thesis compatibility alias — the v8 deposit refers to this class as
+  // `FreeEnergyLutarInference`. The class was renamed to
+  // `FreeEnergyLutarActiveInference` between draft and merge.
+  // The alias is preserved so v8-era imports continue to resolve.
+  FreeEnergyLutarActiveInference as FreeEnergyLutarInference,
   TawaSparseAutoencoder,
+  // v5 thesis compatibility alias — v5 deposit refers to this class as `TawaSAE`.
+  TawaSparseAutoencoder as TawaSAE,
   RedTeamHarness,
+  // v6 thesis compatibility alias — v6 deposit refers to this class as
+  // `ApolloMETRHarness`. Renamed to `RedTeamHarness` between draft and merge.
+  // Alias preserved so v6-era imports continue to resolve.
+  RedTeamHarness as ApolloMETRHarness,
   RED_TEAM_ATTACK_CATEGORIES,
   CondorMambaSSM,
   EPRBellValidator,

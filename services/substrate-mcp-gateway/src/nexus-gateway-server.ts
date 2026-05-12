@@ -6,8 +6,15 @@
  * here using the official SDK's typed registration API.
  *
  * This module is the single source of truth for the gateway's tool surface.
- * Both the HTTP transport and the stdio transport share this instance — the
- * SDK handles concurrent client sessions via transport-level session isolation.
+ *
+ * Two entry points are exported:
+ *   - getGatewayServer()    — singleton used by stdio transport and SSE
+ *                             list-changed bridge notifications.
+ *   - createGatewayServer() — factory that returns a FRESH PRAXISMcpServer
+ *                             instance, used by the Streamable HTTP transport
+ *                             so every new MCP session gets its own server
+ *                             instance and `connect()` is never called twice
+ *                             on the same instance.
  */
 
 import { z } from 'zod';
@@ -27,14 +34,16 @@ import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
 
 let _server: PRAXISMcpServer | null = null;
 
-/**
- * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
- * Called once at startup by both HTTP and stdio entry points.
- */
-export function getGatewayServer(): PRAXISMcpServer {
-  if (_server) return _server;
+// ─── Private builder — shared by singleton and factory ────────────────────────
 
-  _server = new PRAXISMcpServer({
+/**
+ * Build and fully register a new PRAXISMcpServer instance.
+ * All tools, apps, resources, and prompts are registered on the returned
+ * instance. This helper is called both by the singleton getter and by the
+ * per-session factory so the registration logic is never duplicated.
+ */
+function _buildGatewayServer(): PRAXISMcpServer {
+  const server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
     version: GATEWAY_VERSION,
     enableSampling: true,
@@ -53,27 +62,19 @@ export function getGatewayServer(): PRAXISMcpServer {
 
   // ── Register domain Apps ─────────────────────────────────────────────────────
   for (const app of createDomainApps()) {
-    _server.registerApp(app);
+    server.registerApp(app);
   }
-
-  // ── Wire resource update notifications (Prism Bus → MCP subscriptions) ──────
-  // When startConvergenceBridge() receives a cross_domain_correlation event from
-  // the Prism Bus, it calls this callback which pushes notifications/resources/updated
-  // to all connected MCP clients that have subscribed to the affected URIs.
-  setResourceUpdateCallback((uri: string) => {
-    void _server?.notifyResourceUpdated(uri);
-  });
 
   // ── Register substrate tools via SDK ─────────────────────────────────────────
   const tools = getAvailableTools();
   for (const tool of tools) {
-    _registerSubstrateTool(_server, tool.name, tool.description, tool.inputSchema);
+    _registerSubstrateTool(server, tool.name, tool.description, tool.inputSchema);
   }
 
   // ── Register resources ───────────────────────────────────────────────────────
   for (const res of SUBSTRATE_RESOURCES) {
     const capturedRes = res;
-    _server.resource(
+    server.resource(
       capturedRes.name,
       capturedRes.uri,
       { description: capturedRes.description, mimeType: capturedRes.mimeType },
@@ -111,7 +112,7 @@ export function getGatewayServer(): PRAXISMcpServer {
         ? z.string().describe(arg.description)
         : z.string().optional().describe(arg.description);
     }
-    _server.prompt(
+    server.prompt(
       capturedPrompt.name,
       capturedPrompt.description,
       argsShape,
@@ -131,7 +132,43 @@ export function getGatewayServer(): PRAXISMcpServer {
     );
   }
 
+  return server;
+}
+
+/**
+ * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
+ * Used by the stdio transport and by the SSE list-changed notification bridge
+ * (notifyToolListChanged). Do NOT call connect() on this singleton more than
+ * once — use createGatewayServer() for Streamable HTTP sessions instead.
+ */
+export function getGatewayServer(): PRAXISMcpServer {
+  if (_server) return _server;
+
+  _server = _buildGatewayServer();
+
+  // ── Wire resource update notifications (Prism Bus → MCP subscriptions) ──────
+  // When startConvergenceBridge() receives a cross_domain_correlation event from
+  // the Prism Bus, it calls this callback which pushes notifications/resources/updated
+  // to all connected MCP clients that have subscribed to the affected URIs.
+  setResourceUpdateCallback((uri: string) => {
+    void _server?.notifyResourceUpdated(uri);
+  });
+
   return _server;
+}
+
+/**
+ * Create a FRESH PRAXISMcpServer instance for a new Streamable HTTP session.
+ *
+ * The MCP SDK's Protocol.connect() throws "Already connected to a transport"
+ * if called a second time on the same instance. Streamable HTTP sessions each
+ * need their own server instance so the SDK can manage session state cleanly.
+ *
+ * This factory registers the full tool/resource/prompt surface on every new
+ * instance by delegating to the shared _buildGatewayServer() helper.
+ */
+export function createGatewayServer(): PRAXISMcpServer {
+  return _buildGatewayServer();
 }
 
 /**
@@ -205,6 +242,7 @@ function _registerSubstrateTool(
  * Notify the gateway's PRAXISMcpServer that the tool list has changed.
  * Call this after enable_server / disable_server to push discovery
  * notifications to connected clients.
+ * Uses the singleton so list-changed notifications continue to flow.
  */
 export async function notifyToolListChanged(): Promise<void> {
   if (_server) {

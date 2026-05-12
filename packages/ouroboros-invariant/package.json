@@ -12,10 +12,12 @@
     }
   },
   "scripts": {
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "*"
+    "typescript": "*",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@workspace/reconciliation": "workspace:*"
