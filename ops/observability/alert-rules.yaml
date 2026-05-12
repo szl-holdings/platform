@@ -1,0 +1,179 @@
+# SZL Holdings — Alert Rules Seed
+# Version: 1.0 (Phase 8)
+#
+# Format: Compatible with Azure Monitor alert rule JSON (summarised as YAML for readability).
+# Deployment: Extend infra/modules/alerting.bicep to deploy these rules to Azure Monitor.
+# Local validation: Rules are evaluated as PromQL — validate with promtool or the
+#   Azure Monitor Metrics Explorer.
+#
+# Alert channels:
+#   - CRITICAL → PagerDuty + Slack #incidents
+#   - HIGH     → Slack #platform-alerts
+#   - MEDIUM   → Slack #platform-alerts (low priority)
+
+groups:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Group 1: Service Availability
+  # ──────────────────────────────────────────────────────────────────────────
+  - name: szl.availability
+    interval: 60s
+    rules:
+
+      - alert: ServiceDown
+        expr: |
+          up{job=~"szl-services"} == 0
+        for: 2m
+        severity: CRITICAL
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/service-down.md"
+        annotations:
+          summary: "Service {{ $labels.service }} is down"
+          description: "Health endpoint has not responded for 2+ minutes. Immediate action required."
+
+      - alert: HighErrorRate
+        expr: |
+          rate(szl_api_error_total[5m]) / rate(szl_api_request_total[5m]) > 0.05
+        for: 5m
+        severity: HIGH
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/high-error-rate.md"
+        annotations:
+          summary: "Error rate above 5% for {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }}. Check recent deployments and upstream dependencies."
+
+      - alert: DomainErrorRateHigh
+        expr: |
+          rate(szl_domain_error_total[5m]) / rate(szl_domain_request_total[5m]) > 0.05
+        for: 5m
+        severity: HIGH
+        labels:
+          team: platform
+        annotations:
+          summary: "Domain {{ $labels.domain }} error rate above 5%"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Group 2: Latency
+  # ──────────────────────────────────────────────────────────────────────────
+  - name: szl.latency
+    interval: 60s
+    rules:
+
+      - alert: P99LatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            rate(szl_api_request_duration_seconds_bucket[5m])
+          ) > 2
+        for: 5m
+        severity: HIGH
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/slow-response.md"
+        annotations:
+          summary: "P99 latency above 2s for {{ $labels.service }}"
+          description: "P99 latency is {{ $value | humanizeDuration }}. Check DB query times and downstream services."
+
+      - alert: AlloyEmbedLatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            rate(szl_alloy_embed_request_duration_seconds_bucket[5m])
+          ) > 5
+        for: 5m
+        severity: HIGH
+        labels:
+          team: ai-platform
+        annotations:
+          summary: "Alloy embedding P99 latency above 5s"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Group 3: Saturation
+  # ──────────────────────────────────────────────────────────────────────────
+  - name: szl.saturation
+    interval: 30s
+    rules:
+
+      - alert: DbPoolSaturation
+        expr: |
+          szl_db_connection_pool_active / szl_db_connection_pool_max > 0.80
+        for: 3m
+        severity: HIGH
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/db-pool-saturation.md"
+        annotations:
+          summary: "DB connection pool above 80% for {{ $labels.service }}"
+          description: "Pool utilization is {{ $value | humanizePercentage }}. Consider increasing pool size or reducing query latency."
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Group 4: Proof Chain & Governance
+  # ──────────────────────────────────────────────────────────────────────────
+  - name: szl.governance
+    interval: 60s
+    rules:
+
+      - alert: ProofChainEmissionFailed
+        expr: |
+          rate(szl_proof_chain_emission_total{status="failed"}[5m]) > 0
+        for: 1m
+        severity: HIGH
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/proof-chain-failure.md"
+        annotations:
+          summary: "Proof chain emission failures detected"
+          description: "AI decisions are failing to emit proof chain entries. Audit trail may be incomplete."
+
+      - alert: PolicyBlockSpike
+        expr: |
+          rate(szl_policy_evaluation_blocked_total[5m]) > 10
+        for: 2m
+        severity: HIGH
+        labels:
+          team: platform
+          runbook: "https://github.com/szl-holdings/monorepo/blob/main/infra/runbooks/policy-block-spike.md"
+        annotations:
+          summary: "Policy blocking rate above 10/min"
+          description: "More than 10 requests per minute are being blocked by policy. Check for misconfiguration or active attack."
+
+      - alert: OpaEvaluationErrors
+        expr: |
+          rate(szl_policy_evaluation_total{outcome="error"}[5m]) > 0
+        for: 2m
+        severity: HIGH
+        labels:
+          team: platform
+        annotations:
+          summary: "OPA policy evaluation errors detected"
+          description: "Policy engine is returning errors rather than allow/deny decisions. Policy gate may be bypassed."
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Group 5: Orchestration (Temporal)
+  # ──────────────────────────────────────────────────────────────────────────
+  - name: szl.orchestration
+    interval: 60s
+    rules:
+
+      - alert: TemporalWorkflowFailureRate
+        expr: |
+          rate(szl_temporal_workflow_failures_total[10m]) / rate(szl_temporal_workflow_starts_total[10m]) > 0.05
+        for: 5m
+        severity: HIGH
+        labels:
+          team: platform
+        annotations:
+          summary: "Temporal workflow failure rate above 5%"
+
+      - alert: ApprovalWorkflowStuck
+        expr: |
+          szl_temporal_workflow_running{workflow_type="approval-workflow"} > 0
+          and
+          szl_temporal_workflow_last_heartbeat_seconds{workflow_type="approval-workflow"} > 3600
+        for: 5m
+        severity: MEDIUM
+        labels:
+          team: platform
+        annotations:
+          summary: "Approval workflow has not heartbeated for 1h"
+          description: "An approval workflow may be stuck waiting for human input beyond the expected SLA."

@@ -1,0 +1,41 @@
+# SZL Holdings — OTel Collector Dev Overlay
+# Merge on top of otel-collector-config.yaml for local development.
+# Usage: otelcol --config=otel-collector-config.yaml --config=otel-collector-config.dev.yaml
+
+processors:
+  # Re-enable stack traces in dev
+  attributes/redact:
+    actions:
+      - key: "http.request.header.authorization"
+        action: delete
+      - key: "http.request.header.cookie"
+        action: delete
+      - key: "db.statement"
+        action: hash
+
+exporters:
+  logging:
+    verbosity: detailed
+    sampling_initial: 100
+    sampling_thereafter: 100
+
+service:
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, resourcedetection, resource, filter/health_probes, transform/span_names, batch]
+      exporters:  [debug, logging]
+    metrics:
+      receivers:  [otlp, hostmetrics]
+      processors: [memory_limiter, resourcedetection, resource, batch]
+      exporters:  [debug, logging]
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, resourcedetection, resource, batch]
+      exporters:  [debug, logging]
+
+  telemetry:
+    logs:
+      level: "debug"
+      development: true
+      encoding: "console"

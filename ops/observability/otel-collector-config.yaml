@@ -1,0 +1,204 @@
+# SZL Holdings — OpenTelemetry Collector Configuration
+# Version: 1.0 (Phase 8 — Operability & Governance)
+#
+# Deployment: Sidecar or standalone collector process per environment.
+# Local dev: docker run --rm -p 4317:4317 -p 4318:4318 -p 8888:8888 \
+#   -v $(pwd)/observability/collector/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml \
+#   otel/opentelemetry-collector-contrib:0.118.0
+#
+# Production: Azure Container Apps Job (per-environment). See infra/modules/ for bicep.
+# Secrets: AZURE_MONITOR_CONNECTION_STRING must be injected via Azure Key Vault reference.
+
+# ---------------------------------------------------------------------------
+# Receivers — how the collector ingests telemetry
+# ---------------------------------------------------------------------------
+receivers:
+
+  # OTLP — primary receiver for all SZL services
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+        max_recv_msg_size_mib: 32
+      http:
+        endpoint: "0.0.0.0:4318"
+        cors:
+          allowed_origins:
+            - "https://*.szl-holdings.com"
+            - "http://localhost:*"           # dev only; stripped in prod pipeline
+
+  # Prometheus scrape — for services that expose /metrics (future)
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "szl-services"
+          scrape_interval: 30s
+          static_configs:
+            - targets: []   # populated via environment-specific overlay
+          relabel_configs:
+            - source_labels: [__address__]
+              target_label: instance
+
+  # Host metrics — collector host resource usage
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      memory: {}
+      disk: {}
+      network: {}
+
+# ---------------------------------------------------------------------------
+# Processors — transform, filter, batch telemetry before export
+# ---------------------------------------------------------------------------
+processors:
+
+  # Memory limiter — prevent OOM in high-cardinality spikes
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Batch — reduce export calls
+  batch:
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+    timeout: 10s
+
+  # Resource detection — enrich spans/metrics with host and cloud metadata
+  resourcedetection:
+    detectors: [env, azure, system]
+    timeout: 5s
+    override: false
+
+  # Resource attributes — enforce required SZL attributes on every signal
+  resource:
+    attributes:
+      - key: szl.platform
+        value: "szl-holdings"
+        action: upsert
+      - key: deployment.environment
+        from_attribute: DEPLOYMENT_ENV
+        action: insert   # services must set OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<env>
+
+  # Attributes processor — redact PII and credentials before export
+  attributes/redact:
+    actions:
+      # Strip any field that looks like a credential
+      - key: "http.request.header.authorization"
+        action: delete
+      - key: "http.request.header.cookie"
+        action: delete
+      - key: "db.statement"
+        action: hash   # hash query strings; full text may contain PII
+      - key: "exception.stacktrace"
+        action: delete  # stack traces stripped in production (re-enable in dev overlay)
+
+  # Filter — drop health-check noise from trace export
+  filter/health_probes:
+    traces:
+      span:
+        - 'attributes["http.route"] == "/health"'
+        - 'attributes["http.route"] == "/ready"'
+        - 'attributes["http.target"] == "/health"'
+        - 'attributes["http.target"] == "/ready"'
+
+  # Transform — normalise span names to SZL naming convention
+  transform/span_names:
+    trace_statements:
+      - context: span
+        statements:
+          # Ensure HTTP spans include method + route
+          - 'set(name, Concat([attributes["http.method"], " ", attributes["http.route"]], "")) where attributes["http.method"] != nil and attributes["http.route"] != nil'
+
+# ---------------------------------------------------------------------------
+# Exporters — where telemetry goes
+# ---------------------------------------------------------------------------
+exporters:
+
+  # Azure Monitor Application Insights — production backend
+  azuremonitor:
+    connection_string: "${env:AZURE_MONITOR_CONNECTION_STRING}"
+    maxbatchsize: 100
+    maxbatchinterval: 10s
+
+  # OTLP/gRPC — forward to a Grafana Tempo or secondary collector (optional)
+  otlp/grafana:
+    endpoint: "${env:GRAFANA_OTLP_ENDPOINT:-}"
+    headers:
+      authorization: "Bearer ${env:GRAFANA_API_TOKEN:-}"
+    tls:
+      insecure: false
+    sending_queue:
+      enabled: true
+      num_consumers: 4
+      queue_size: 100
+
+  # Prometheus remote write — metrics to Azure Managed Prometheus (production)
+  prometheusremotewrite:
+    endpoint: "${env:AZURE_PROMETHEUS_REMOTE_WRITE_URL:-}"
+    headers:
+      authorization: "Bearer ${env:AZURE_PROMETHEUS_TOKEN:-}"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Logging exporter — debug output only; disable in production
+  logging:
+    verbosity: normal
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # Debug exporter — structured JSON to stdout for local dev
+  debug:
+    verbosity: detailed
+
+# ---------------------------------------------------------------------------
+# Extensions — collector operational endpoints
+# ---------------------------------------------------------------------------
+extensions:
+
+  health_check:
+    endpoint: "0.0.0.0:13133"
+    path: "/health"
+
+  pprof:
+    endpoint: "0.0.0.0:1777"
+
+  zpages:
+    endpoint: "0.0.0.0:55679"
+
+# ---------------------------------------------------------------------------
+# Service pipelines — wire receivers → processors → exporters
+# ---------------------------------------------------------------------------
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+
+    # Traces pipeline
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, resourcedetection, resource, attributes/redact, filter/health_probes, transform/span_names, batch]
+      exporters:  [azuremonitor, logging]
+
+    # Metrics pipeline
+    metrics:
+      receivers:  [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, resourcedetection, resource, batch]
+      exporters:  [prometheusremotewrite, azuremonitor, logging]
+
+    # Logs pipeline
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, resourcedetection, resource, attributes/redact, batch]
+      exporters:  [azuremonitor, logging]
+
+  # Collector self-telemetry
+  telemetry:
+    logs:
+      level: "info"
+      development: false
+      encoding: "json"
+    metrics:
+      level: detailed
+      address: "0.0.0.0:8888"
