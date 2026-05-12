@@ -1,0 +1,18 @@
+{
+  "name": "@workspace/ouroboros-guardrails",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "description": "SZL Guardrails — drop-in LLM safety SKU. NeMo-Guardrails-compatible config surface, closed-form 9-axis Lutar Invariant scoring, tamper-evident hash-chained receipts, Adaptive Depth Routing.",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@workspace/ouroboros-invariant": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "catalog:"
+  }
+}

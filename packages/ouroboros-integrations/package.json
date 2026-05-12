@@ -20,6 +20,18 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts --reporter=verbose"
   },
+  "dependencies": {
+    "@workspace/ouroboros-anduril": "workspace:*",
+    "@workspace/ouroboros-aristotle": "workspace:*",
+    "@workspace/ouroboros-davinci": "workspace:*",
+    "@workspace/ouroboros-emerald": "workspace:*",
+    "@workspace/ouroboros-guardrails": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*",
+    "@workspace/ouroboros-jung": "workspace:*",
+    "@workspace/ouroboros-theosophy": "workspace:*",
+    "@workspace/ouroboros-trithemius": "workspace:*",
+    "@workspace/reconciliation": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",

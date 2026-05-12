@@ -1,0 +1,17 @@
+{
+  "name": "@workspace/ouroboros-blanca",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "description": "Blanca — Einstein-derived runtime primitives: Lorentz invariance, equivalence principle, EPR completeness, and the Λ-retraction discipline. Sourced from the Einstein publication corpus (alberteinstein.com/publications and the Collected Papers of Albert Einstein).",
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0"
+  }
+}
