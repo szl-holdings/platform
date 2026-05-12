@@ -5,6 +5,22 @@
 
 ---
 
+> **REVERT NOTICE — 2026-04-28**
+>
+> At the user's request, all product renames introduced by this audit have been reverted.
+> The original names below are the canonical product names again:
+> Sentra, Aegis, Terra, Pulse, Lyte, Vessels, NEXUS, CORTEX, Alloy.
+>
+> Only the PRISM Counsel → Counsel and INCA → Counsel renames are retained (those were pre-existing
+> issues unrelated to the originality audit).
+>
+> The `scripts/banned-brand-strings.json` has been updated accordingly — CORTEX, NEXUS, and the
+> other original names are no longer banned. The internal Alloy execution package has been physically
+> moved from `packages/forge/` back to `packages/alloy/` with npm package name `@workspace/alloy`.
+> The coordinator package now lives at `packages/alloy-crew/` as `@workspace/alloy-crew`.
+
+---
+
 ## 1. Rename Map
 
 The following product codenames were identified as colliding with real companies, registered trademarks, or recognizable brand names. Each has been replaced with an original, ownable codename across all user-facing strings, metadata, and API responses.
@@ -20,7 +36,7 @@ The following product codenames were identified as colliding with real companies
 | Vessels | **SEXTANT** | Vessels (common word product name; avoids confusion with maritime data vendors) |
 | PRISM Counsel | **Counsel** | PRISM (NSA program brand association; removed prefix, "Counsel" is a generic descriptor kept as-is) |
 | CORTEX | **APEX** | CORTEX (Palo Alto Networks trademark; multiple infosec product conflicts) |
-| Alloy | **FORGE** | Alloy (Rippling/fintech automation brand; multiple enterprise workflow conflicts) |
+| Alloy | **Continuum** | Alloy (Rippling/fintech automation brand; multiple enterprise workflow conflicts) — rebranded to Continuum — Business Observability Fabric on 2026-04-28 |
 
 ---
 
@@ -76,7 +92,7 @@ All artifact preview paths and URL slugs were preserved to avoid breaking inboun
 - **Carlota Jo Consulting** — user's own advisory brand
 
 ### Internal Code Identifiers (Out of Scope)
-The Alloy backend package has since been renamed to `packages/forge/` (npm name `@workspace/forge`), and the `alloy-wiring.ts` domain-events file is now `forge-wiring.ts` exporting `initializeForgeDomainEventSubscriptions`. Other internal codenames (e.g. `packages/brand-registry/`, `firestormAssetsTable`, internal TypeScript variable names) remain unchanged as they are not user-facing and renaming would risk breaking working functionality.
+The Alloy backend package has since been renamed to `packages/continuum/` (npm name `@workspace/continuum`) with the tagline "Business Observability Fabric". The `alloy-wiring.ts` domain-events file is now `continuum-wiring.ts`. Other internal codenames (e.g. `packages/brand-registry/`, `firestormAssetsTable`, internal TypeScript variable names) remain unchanged as they are not user-facing and renaming would risk breaking working functionality.
 
 ---
 

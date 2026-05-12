@@ -30,18 +30,21 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 **Strategy Matrices**
 - `audit/strategy/active-vs-defer-matrix.md` — Artifact-by-artifact classification: Flagship, Supporting, Internal Only, Deferred, Archived, Concept. Defines public claim surface.
 - `audit/strategy/public-focus-recommendation.md` — Investor messaging hierarchy: Tier 1 (lead with), Tier 2 (domain-specific), Tier 3 (explicit disclosure), Tier 4 (do not demo). Core messaging discipline.
-- `audit/strategy/non-core-scope-reduction-plan.md` — Concrete scope reduction actions: immediate (hours), medium-term (30 days), and deferred (post-Series A).
+- `audit/strategy/non-core-scope-reduction-plan.md` — Concrete scope reduction actions: immediate (hours), medium-term (30 days), and deferred (post-growth capital).
 
 **Final Readiness Scorecards**
 - `audit/final/executive-rehaul-summary.md` — Single executive summary of all Rehaul phases 1–9: what was verified, what was fixed, what remains open. Platform verdict: **Operational Alpha**.
 - `audit/final/top-25-risks-and-gaps.md` — Brutally honest enumeration of the 25 highest-risk items ranked by severity × diligence likelihood. Each item has severity, status, and mitigation plan.
 - `audit/final/what-was-fixed.md` — Complete record of every fix applied across the Rehaul program (visual, CI, bugs, architecture, CI phase 9).
-- `audit/final/what-remains-unverified.md` — Honest accounting of claims and features that have NOT been independently verified in this cycle. Includes action required before Series A diligence.
-- `audit/final/series-a-surface-scorecard.md` — Per-artifact 1–5 scoring across three lenses (Enterprise Buyer, Technical Diligence, Investor Signal). Overall platform score: **4.1/5 — Fundable at Series A with honest alpha positioning.**
+- `audit/final/what-remains-unverified.md` — Honest accounting of claims and features that have NOT been independently verified in this cycle. Includes action required before growth capital diligence.
+- `audit/final/series-a-surface-scorecard.md` — Per-artifact 1–5 scoring across three lenses (Enterprise Buyer, Technical Diligence, Investor Signal). Overall platform score: **4.1/5 — Fundable at growth capital with honest alpha positioning.**
 
 ---
 
 ## [Unreleased]
+
+### Changed
+- **Alloy → Continuum rebrand (Task #3196):** The governed agentic execution layer previously known as "Alloy" / "Alloy Execution Fabric" / "AEEP" is now **Continuum — Business Observability Fabric**. The rename is brand-deep and behavior-preserving — architecture, governance primitives, Outcome Graph, Proof Chain, and Covenant Policy are unchanged. Code identifiers updated: `@workspace/alloy` → `@workspace/continuum`, `aef-*` → `cf-*`, `useAlloyWebSocket` → `useContinuumWebSocket`, `ALLOY_INTERNAL_TOKEN` → `CONTINUUM_INTERNAL_TOKEN`, GraphQL domain `alloy.ts` → `continuum.ts`, mobile routes `portfolio/alloy` → `portfolio/continuum`. DB table renames applied via new migration.
 
 ### Fixed
 - **`artifacts/api-server`**: path-scoped the top-level `authMiddleware` / `tenantScope` guards in 13 sub-router files (`agent-autonomy`, `ontology`, `briefings`, `booking`, `drift`, `domains`, `imperium`, `graph`, `forge`, `nuro-mesh-advanced`, `connectors`, `alloy-skills`, `alloy-governance`) so the guards only run for the path each file owns. Previously the unprefixed `router.use(authMiddleware())` / `router.use(tenantScope({ required: true }))` at the top of each file executed for **every** request that reached the parent router under the shared `lazyMatch` prefix, silently 401/403'ing unrelated public sibling routes (the same footgun that produced the original Carlota Jo `/booking/time-entries` outage and tasks #718, #1329). New `artifacts/api-server/src/routes/__tests__/sub-router-middleware-path-scope.test.ts` and a "Sub-router middleware path-scoping" rule in the api-server README lock this in for future contributors.
@@ -82,7 +85,7 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ## [1.0.0-alpha] — 2026-04-20
 
-First public alpha release. Tagged on the public `szl-holdings/platform` repo and published to the [Releases page](https://github.com/szl-holdings/platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.
+First public alpha release. Tagged on the public `szl-holdings/szl-holdings-platform` repo and published to the [Releases page](https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.
 
 ### Active Artifact Count
 - **14 registered artifacts** in the monorepo across web, mobile, video, and design surfaces: SZL Holdings dashboard, Aegis (investor pitch deck), Vessels (maritime intelligence), Terra (real estate intelligence), Pulse (executive briefing), Sentra (cyber resilience), Counsel (legal matter command), Carlota Jo Consulting, Unified Command, Lyte Decision Intelligence, NEXUS sandbox, SZL Holdings mobile command, the governed-autonomy demo video, and the API server.
@@ -306,7 +309,7 @@ This is the first formal public release of the SZL Holdings platform ecosystem.
 - Command workspace: MSP operations, client SLA management
 - Intelligence workspace: AI research (INCA), model registry, experiment tracking
 - STIX/TAXII protocol layer
-- FedRAMP readiness track (Aegis — Phase 2 roadmap)
+- StateRAMP readiness track (Aegis — Phase 2 roadmap)
 
 **Terra — Real Estate Intelligence**
 - NYC distress property data pipeline (multiple public data sources)

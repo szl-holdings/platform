@@ -11,7 +11,7 @@
 | Type | Examples |
 |------|---------|
 | **Command surface** | KORA (Lyte Command Center), Command Portal, LUMINA (Pulse) |
-| **Execution fabric** | FORGE (shared backbone, formerly Alloy) |
+| **Execution fabric** | FORGE (shared backbone) · Continuum — Business Observability Fabric |
 | **Mobile command** | APEX (`artifacts/szl-holdings-mobile`) |
 | **Domain pack** | TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, Carlota Jo, LUMINA (Pulse), PARAGON (Aegis) |
 | **Corporate platform** | SZL Holdings (web) |
