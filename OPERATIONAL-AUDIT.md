@@ -118,7 +118,7 @@ Each artifact verified against today's screenshot capture set.
 
 ---
 
-## 8. Series A readiness — honest scoring
+## 8. growth capital readiness — honest scoring
 
 | Dimension | Score | Evidence |
 |---|---|---|
@@ -131,7 +131,7 @@ Each artifact verified against today's screenshot capture set.
 | Pilot pipeline | 6/10 | Request paths in place; cohort sizes not yet documented externally |
 | Revenue activation | 5/10 | Stripe billing in-progress per CHANGELOG; not blocking diligence but visible |
 
-**Overall: 7.75/10 for Series A diligence today.** The two soft spots (revenue activation, pilot cohort metrics) are funding-stage-appropriate; both are explicitly tracked, not hidden.
+**Overall: 7.75/10 for growth capital diligence today.** The two soft spots (revenue activation, pilot cohort metrics) are funding-stage-appropriate; both are explicitly tracked, not hidden.
 
 ---
 

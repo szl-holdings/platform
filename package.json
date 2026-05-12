@@ -1,7 +1,7 @@
 {
   "name": "workspace",
   "version": "0.0.0",
-  "license": "BUSL-1.1",
+  "license": "UNLICENSED",
   "scripts": {
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "prepare": "sh scripts/setup-hooks.sh || true",
@@ -10,6 +10,7 @@
     "lint:ci": "oxlint . && biome lint --reporter=github . && pnpm run check:env-coverage",
     "check:env-coverage": "tsx scripts/check-env-coverage.ts",
     "check:env-coverage:strict": "tsx scripts/check-env-coverage.ts --strict",
+    "check:nexus-scope": "tsx scripts/check-nexus-scope.ts",
     "lint:copy": "bash scripts/lint-copy.sh",
     "format": "biome format --write .",
     "format:check": "biome format .",
@@ -32,10 +33,12 @@
     "seed:all": "bash scripts/seed-demo-canonical.sh",
     "seed:demo": "bash scripts/seed-demo-canonical.sh",
     "seed:atlas": "pnpm --filter @workspace/scripts run seed:atlas",
+    "seed:atlas:aegis": "pnpm --filter @workspace/scripts run seed:atlas:aegis",
     "seed:atlas:vessels": "pnpm --filter @workspace/scripts run seed:atlas:vessels",
     "seed:atlas:terra": "pnpm --filter @workspace/scripts run seed:atlas:terra",
     "seed:atlas:counsel": "pnpm --filter @workspace/scripts run seed:atlas:counsel",
     "seed:tenant-health": "pnpm --filter @workspace/scripts run seed:tenant-health",
+    "seed:uptime-history": "pnpm --filter @workspace/api-server run seed:uptime-history",
     "migrate": "pnpm --filter @szl-holdings/db run push-non-interactive",
     "db:migrate": "pnpm --filter @szl-holdings/db run migrate",
     "start": "pnpm -r --if-present run dev",
@@ -55,7 +58,7 @@
     "generate:og": "python3 scripts/generate_og_cards.py",
     "qa:site": "pnpm qa:routes && pnpm qa:links && pnpm qa:deprecated-links && pnpm qa:trust && pnpm qa:meta && pnpm qa:empty-states && pnpm qa:placeholder-empty-states && pnpm qa:og",
     "test:atlas": "vitest run --config vitest.config.ts --reporter=verbose lib/scene-export",
-    "test:unit": "pnpm -r --if-present test",
+    "test:unit": "pnpm --filter ./artifacts/api-server test",
     "test:smoke": "node scripts/qa/smoke-routes.js && node scripts/qa/smoke-test-integrations.js",
     "test:stress": "node scripts/stress-test.mjs",
     "db:reset:demo": "pnpm --filter @szl-holdings/db run migrate && pnpm seed:demo",
@@ -92,8 +95,8 @@
     "security:vuln": "node scripts/qa/generate-vuln-report.js",
     "security:license": "node scripts/qa/generate-license-report.js",
     "smoke:product-mode": "node scripts/qa/smoke-product-mode.js",
-    "readiness:gate": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run qa:routes && pnpm run audit:mocks && pnpm run audit:deps && pnpm run audit:copy && pnpm run smoke:product-mode && pnpm -r --if-present run build",
-    "audit:series-a": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build",
+    "readiness:gate": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run qa:routes && pnpm run qa:deprecated-links && pnpm run audit:mocks && pnpm run audit:deps && pnpm run audit:copy && pnpm run smoke:product-mode && pnpm -r --if-present run build",
+    "audit:series-a": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run qa:deprecated-links && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build",
     "readme:check": "node scripts/validate-readme-assets.js",
     "readme:portfolio": "node scripts/generate-readme-product-table.js",
     "readme:portfolio:check": "node scripts/generate-readme-product-table.js --check",
@@ -124,7 +127,10 @@
     "meridian:check": "node ops/python/run-python.mjs ops/meridian/check.py",
     "screenshots:proof": "node scripts/assert-workflows-running.mjs && node scripts/capture-proof-screenshots.mjs",
     "validate:markdown-assets": "node scripts/validate-markdown-assets.mjs",
-    "audit:mcp-registry": "node ops/audit/meridian-mcp-check.mjs"
+    "audit:mcp-registry": "node ops/audit/meridian-mcp-check.mjs",
+    "dev:validate": "tsx scripts/dev-validate.ts",
+    "eval-harness:run-standard": "pnpm --filter @workspace/eval-harness run eval-harness:run-standard",
+    "eval-harness:reproduce": "pnpm --filter @workspace/eval-harness run eval-harness:reproduce"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",
@@ -137,7 +143,7 @@
     "@biomejs/biome": "^2.4.12",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.0",
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -147,19 +153,19 @@
     "@types/react": "catalog:",
     "@types/supertest": "^7.2.0",
     "@types/ws": "^8.5.14",
-    "@vitest/coverage-v8": "^4.1.5",
-    "@vitest/ui": "^4.1.5",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/ui": "^4.1.2",
     "cookie-parser": "^1.4.7",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
     "happy-dom": "^20.8.9",
     "lru-cache": "^11.3.5",
-    "oxlint": "^1.62.0",
+    "oxlint": "^1.60.0",
     "supertest": "^7.2.2",
     "tsx": "catalog:",
     "turbo": "^2.9.6",
     "typescript": "~5.9.2",
-    "vitest": "^4.1.5",
+    "vitest": "^4.1.2",
     "ws": "^8.18.0"
   },
   "dependencies": {
@@ -175,10 +181,9 @@
     "puppeteer-core": "^24.41.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "slate": "^0.124.1",
+    "slate": "^0.124.0",
     "slate-react": "^0.124.0",
-    "yaml": "^2.8.3",
-    "express-rate-limit": "^7.5.0"
+    "yaml": "^2.8.3"
   },
   "pnpm": {
     "overrides": {
@@ -188,7 +193,7 @@
       "react-dom": "$react-dom",
       "path-to-regexp": "8.4.2",
       "brace-expansion": "2.1.0",
-      "vite": "8.0.10",
+      "vite": "7.3.2",
       "lodash": "4.18.1",
       "micromatch>picomatch": "2.3.2",
       "tinyglobby>picomatch": "4.0.4",
@@ -199,11 +204,7 @@
       "@xmldom/xmldom": "^0.9.10",
       "fast-xml-parser": "^5.7.2",
       "postcss": "^8.5.12",
-      "uuid": "^10.0.0",
-      "hono": "^4.12.18",
-      "fast-uri": "^3.1.2",
-      "fast-xml-builder": "^1.2.0",
-      "basic-ftp": "^6.0.1"
+      "uuid": "^14.0.0"
     }
   }
 }

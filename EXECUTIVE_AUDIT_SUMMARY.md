@@ -22,7 +22,7 @@ The Moonshot program ran eight sequential phases to take the SZL Holdings platfo
 | 7 | Cloud, Ops & Release | ✅ COMPLETE | Secrets separation; 3-layer tenant isolation; cost controls; eval runner IaC |
 | 8 | GitHub Push Prep | ✅ COMPLETE | RELEASE_READINESS_SCORECARD, MODEL_BACKBONE_BLUEPRINT corrections, PR_DRAFT, PUSH_CHECKLIST |
 
-**Final release-readiness: 7/10 — Investor Demo Ready. Series A readiness gated on credential provisioning and engineering items documented in `RELEASE_READINESS_SCORECARD.md`.**
+**Final release-readiness: 7/10 — Investor Demo Ready. growth capital readiness gated on credential provisioning and engineering items documented in `RELEASE_READINESS_SCORECARD.md`.**
 
 ---
 
