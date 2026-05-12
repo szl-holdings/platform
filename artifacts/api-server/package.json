@@ -1,0 +1,23 @@
+{
+  "name": "@workspace/api-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Express HTTP transport for SZL Holdings platform. Mounts 5,500+ endpoints across 11 product surfaces (a11oy, sentra, amaru, vessels, terra, counsel, carlota-jo, pulse, lyte, holdings, ouroboros). Pure transport — business logic lives in @workspace/ouroboros-integrations and lib/*.",
+  "exports": {
+    "./routes/ouroboros": {
+      "workspace": "./src/routes/ouroboros.ts",
+      "import": "./src/routes/ouroboros.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@workspace/ouroboros-integrations": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

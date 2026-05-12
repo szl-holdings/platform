@@ -152,7 +152,9 @@ const sentraAnchor = new sentraAdapter.SentraHSMAnchor();
 // Track Amaru fleet monitor per metricId (process-local).
 const amaruMonitor = new amaruAdapter.AmaruFleetMonitor();
 
-// Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse + Sovereign Engine (43 innovations).
+// Process-local A11oy orchestrator — unified Lambda pipeline + Convergence Pulse + Sovereign Engine (44 innovations).
+// Innovation count is verified at runtime against INNOVATION_MANIFEST.length on engine construction; see
+// tests/api/innovations-product-integration.test.ts for the per-innovation coverage matrix.
 const orchestrator = new A11oyOrchestrator({ windowSize: 100 });
 
 const lae = new LanguageArbitrageEngine();
