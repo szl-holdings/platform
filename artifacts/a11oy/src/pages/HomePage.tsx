@@ -274,16 +274,61 @@ export function HomePage() {
       </nav>
 
       <section style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        display: 'flex', alignItems: 'flex-start',
         position: 'relative', overflow: 'hidden',
-        padding: 'clamp(8rem, 14vh, 12rem) clamp(2rem, 6vw, 5rem) clamp(5rem, 10vh, 8rem)',
+        padding: 'clamp(6rem, 10vh, 8rem) clamp(2rem, 6vw, 5rem) clamp(4rem, 8vh, 6rem)',
       }}>
+        <div aria-hidden style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.05, zIndex: 0,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)`,
+          backgroundSize: '56px 56px',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)',
+          maskImage: 'radial-gradient(ellipse at center, #000 30%, transparent 75%)',
+        }} />
+        <div aria-hidden style={{
+          position: 'absolute',
+          top: 'clamp(2rem, 5vh, 4rem)',
+          left: 'clamp(2rem, 6vw, 5rem)',
+          right: 'clamp(2rem, 6vw, 5rem)',
+          display: 'flex', justifyContent: 'space-between',
+          fontFamily: T.mono, fontSize: '0.6875rem', letterSpacing: '0.18em',
+          textTransform: 'uppercase', color: T.textDim, lineHeight: 1.6, zIndex: 2,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span>SURFACE · GOVERNED DECISION OS</span>
+            <span>INGESTION · PUBLIC_ONLY</span>
+            <span>DOCTRINE · V6</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
+            <span>NODE · A11OY-01</span>
+            <span>EPOCH · 2026.Q2</span>
+            <span><span style={{ color: T.accentDim }}>●</span> LIVE · RT</span>
+          </div>
+        </div>
         <div style={{
-          position: 'relative', display: 'grid',
+          position: 'relative', display: 'grid', zIndex: 1,
           gridTemplateColumns: '1fr 0.6fr', gap: 'clamp(3rem, 6vw, 6rem)',
           alignItems: 'center', maxWidth: 1320, margin: '0 auto', width: '100%',
+          paddingTop: 'clamp(3rem, 6vh, 5rem)',
         }}>
           <div>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease }}
+              style={{ marginBottom: '1.25rem' }}
+            >
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.4rem 1rem', border: `1px solid ${T.accentBorder}`,
+                borderRadius: 999, fontFamily: T.mono, fontSize: '0.6875rem',
+                letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accentDim,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: T.accentDim, display: 'inline-block' }} />
+                Governed Decision OS · Series A
+              </span>
+            </motion.div>
+
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -291,7 +336,7 @@ export function HomePage() {
               style={{
                 fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500,
                 letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: T.accentDim, marginBottom: '2rem',
+                color: T.accentDim, marginBottom: '1.5rem',
               }}
             >Governed Decision Operating System</motion.p>
 
@@ -308,7 +353,7 @@ export function HomePage() {
             >
               Governed intelligence{'\u2002'}
               <span style={{ color: T.accentDim }}>your unfair</span>{' '}
-              advantage
+              <span style={{ color: T.accentDim }}>advantage</span>
             </motion.h1>
 
             <motion.p
@@ -325,6 +370,21 @@ export function HomePage() {
               calls tools, executes workflows, verifies outcomes, and leaves a proof trail.
               Every action policy-gated. Every outcome proven.
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.26, ease }}
+              style={{
+                fontFamily: T.mono, fontSize: '0.625rem', letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: T.textDim, opacity: 0.7,
+                borderTop: `1px solid ${T.borderSubtle}`,
+                paddingTop: '1rem', marginTop: '-1rem', marginBottom: '1.5rem',
+                maxWidth: 520, width: '100%',
+              }}
+            >
+              Λ ≥ 0.90 · 9-axis ∧ · 5 replays · replay-root 1ed4d253…
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
