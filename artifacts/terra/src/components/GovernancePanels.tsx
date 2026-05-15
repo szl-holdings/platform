@@ -1,78 +1,226 @@
 // @ts-nocheck
-import {
-  OmniaEvidencePanel,
-  StatusChip,
-  StatusChipGroup,
-  DeploymentContext,
-  OwnershipMeta,
-  type EvidenceEntry,
-} from '@szl-holdings/omnia-shell';
+import type { CSSProperties } from 'react';
+import { StatusChip, StatusChipGroup } from '@szl-holdings/omnia-shell';
 
-const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+const DS = {
+  page: '#08090e',
+  surface: 'rgba(255,255,255,0.025)',
+  surfaceSolid: '#0d0e14',
+  border: 'rgba(255,255,255,0.05)',
+  borderMuted: 'rgba(255,255,255,0.03)',
+  gold: '#b8943c',
+  goldDim: 'rgba(184,148,60,0.7)',
+  text: 'rgba(255,255,255,0.85)',
+  textDim: 'rgba(255,255,255,0.5)',
+  textMuted: 'rgba(255,255,255,0.3)',
+  mono: "'JetBrains Mono', 'SF Mono', ui-monospace, monospace",
+  sans: "'Inter', system-ui, -apple-system, sans-serif",
+};
 
-const TERRA_EVIDENCE: EvidenceEntry[] = [
-  { id: 't-sig-1', type: 'signal', label: 'Covenant scan — TER-4402', value: 'DSCR 1.01x (floor 1.00x)', timestamp: ago(2 * 60_000), confidence: 0.94, domain: 'terra' },
-  { id: 't-der-1', type: 'derivation', label: 'Watch-list classification', value: 'Marginal — 0.01x above floor', timestamp: ago(90_000), confidence: 0.91, domain: 'terra' },
-  { id: 't-pol-1', type: 'policy', label: 'Covenant tier — tier-1 watch', value: 'Notify lender within 48h', timestamp: ago(60_000), domain: 'terra' },
-  { id: 't-agt-1', type: 'agent', label: 'AVM recommendation', value: 'Refinance window open — 14 days', timestamp: ago(30_000), confidence: 0.83 },
-];
+const REPLAY_ROOT_PREFIX = '1ed4d253';
+const REPLAY_ROOT_FULL = '1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b';
+const TERRA_COMMIT_SHA = '2ffac59c45550220772602f974fc95293a6754a2';
+const TERRA_TAG_SHA = 'c45d6ca2861fe7623056264566c8dc2ce93f9c59';
+const TERRA_TAG = 'v1.0.0-alpha';
+const TERRA_PUSHED_AT = '2026-05-15T14:40:14Z';
+const ARXIV_SHA_PREFIX = '13ca4a06';
+
+const sectionStyle: CSSProperties = {
+  padding: '80px 24px',
+  borderTop: `1px solid ${DS.border}`,
+  background: DS.page,
+};
+
+const cardStyle: CSSProperties = {
+  background: DS.surfaceSolid,
+  border: `1px solid ${DS.border}`,
+  borderRadius: 4,
+  padding: 24,
+};
+
+const eyebrowStyle: CSSProperties = {
+  fontSize: 10,
+  fontFamily: DS.mono,
+  fontWeight: 600,
+  letterSpacing: '0.16em',
+  color: DS.gold,
+  textTransform: 'uppercase' as const,
+  marginBottom: 12,
+};
+
+const cardTitle: CSSProperties = {
+  fontSize: 14,
+  fontWeight: 600,
+  color: DS.text,
+  letterSpacing: '-0.005em',
+  marginBottom: 14,
+};
+
+const rowStyle: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 16,
+  padding: '8px 0',
+  borderBottom: `1px solid ${DS.borderMuted}`,
+  fontSize: 12,
+};
+
+const labelStyle: CSSProperties = {
+  color: DS.textDim,
+  fontFamily: DS.mono,
+  fontSize: 11,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase' as const,
+};
+
+const valueStyle: CSSProperties = {
+  color: DS.text,
+  fontFamily: DS.mono,
+  fontSize: 11,
+  textAlign: 'right' as const,
+  wordBreak: 'break-all' as const,
+};
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div style={rowStyle}>
+      <span style={labelStyle}>{label}</span>
+      <span style={valueStyle}>{value}</span>
+    </div>
+  );
+}
 
 export function TerraGovernancePanels() {
   return (
-    <section style={{ padding: '60px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', background: '#0a0a0a' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,183,135,0.7)', marginBottom: 6 }}>
-            Governance posture — live
+    <section style={sectionStyle}>
+      <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+        <div style={{ marginBottom: 28 }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontFamily: DS.mono,
+              fontWeight: 600,
+              letterSpacing: '0.16em',
+              color: DS.goldDim,
+              textTransform: 'uppercase',
+              marginBottom: 10,
+            }}
+          >
+            Governance posture · payload-grounded
           </p>
-          <h3 style={{ fontSize: 22, fontWeight: 700, color: '#f5f5f5', letterSpacing: '-0.01em' }}>
-            Covenant health and decision provenance
+          <h3
+            style={{
+              fontSize: 24,
+              fontWeight: 600,
+              color: DS.text,
+              letterSpacing: '-0.01em',
+              fontFamily: DS.sans,
+              maxWidth: 720,
+              lineHeight: 1.2,
+            }}
+          >
+            Real-estate intelligence with the same provenance contract as the
+            rest of the SZL Holdings stack.
           </h3>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <StatusChipGroup>
-            <StatusChip status="warning" label="TER-4402 — watch" pulsing />
-            <StatusChip status="approved" label="TER-8821 — compliant" />
-            <StatusChip status="enforced" label="Covenant policy" />
-            <StatusChip status="healthy" label="AVM engine" />
-          </StatusChipGroup>
-        </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 16,
+          }}
+        >
+          {/* Provenance */}
+          <div style={cardStyle}>
+            <p style={eyebrowStyle}>Provenance</p>
+            <h4 style={cardTitle}>Replay root &amp; invariant</h4>
+            <Row label="Replay root" value={`${REPLAY_ROOT_PREFIX}…`} />
+            <Row label="Byte-identical replays" value="5 of 5" />
+            <Row label="Λ floor" value="0.90 (9-axis ∧)" />
+            <Row label="moralGrounding" value="≥ 0.95" />
+            <Row label="measurabilityHonesty" value="≥ 0.95" />
+            <Row label="Ingestion" value="PUBLIC_ONLY" />
+            <Row
+              label="License allowlist"
+              value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0"
+            />
+            <Row label="HEAD" value={`${TERRA_COMMIT_SHA.slice(0, 12)}…`} />
+            <p
+              style={{
+                marginTop: 14,
+                fontSize: 10,
+                color: DS.textMuted,
+                fontFamily: DS.mono,
+                lineHeight: 1.6,
+                wordBreak: 'break-all',
+              }}
+            >
+              {REPLAY_ROOT_FULL}
+            </p>
+          </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-          <OmniaEvidencePanel
-            title="TER-4402 — investment readiness"
-            entries={TERRA_EVIDENCE}
-            correlationId="terra-ter4402-2026-05-15"
-            auditId="audit-ter-1147"
-          />
-          <DeploymentContext
-            serviceName="terra-covenant"
-            environment="production"
-            version="1.9.2"
-            deploymentStatus="deployed"
-            uptime={99.91}
-            lastDeployedAt={ago(48 * 3600_000)}
-            deployedBy="terra-platform"
-            healthProbes={[
-              { name: 'Valuation feed', url: '/health/valuation', status: 'passing', latencyMs: 256, lastChecked: ago(60_000) },
-              { name: 'Covenant scan', url: '/health/covenant', status: 'passing', latencyMs: 178, lastChecked: ago(45_000) },
-            ]}
-            sloName="Covenant scan freshness < 5m"
-            sloTarget={99.0}
-            sloCurrent={99.36}
-          />
-          <OwnershipMeta
-            ownerTeam="Terra Platform"
-            system="terra-covenant"
-            domain="terra"
-            lifecycle="production"
-            tier="tier-1"
-            healthEndpoint="https://terra.szl-holdings.com/health"
-            runbookUrl="https://runbooks.szl-holdings.com/terra"
-            scorecardScore={88}
-            lastDeploy={ago(48 * 3600_000)}
-          />
+          {/* Evidence Ledger */}
+          <div style={cardStyle}>
+            <p style={eyebrowStyle}>Evidence Ledger</p>
+            <h4 style={cardTitle}>13-DOI ledger · Zenodo v14</h4>
+            <Row label="Tag" value={TERRA_TAG} />
+            <Row label="Tag SHA" value={`${TERRA_TAG_SHA.slice(0, 12)}…`} />
+            <Row label="Pushed" value={TERRA_PUSHED_AT.slice(0, 10)} />
+            <Row label="Repository" value="szl-holdings/terra" />
+            <Row label="Latest commit" value={`${TERRA_COMMIT_SHA.slice(0, 12)}…`} />
+            <Row label="Citation" value="CITATION.cff" />
+            <Row label="Notice" value="NOTICE + LICENSE" />
+            <Row label="DOI ledger" value="13 minted" />
+            <Row label="Push queue" value={`Zenodo v14 · arXiv ${ARXIV_SHA_PREFIX}…`} />
+          </div>
+
+          {/* Ownership */}
+          <div style={cardStyle}>
+            <p style={eyebrowStyle}>Ownership</p>
+            <h4 style={cardTitle}>Canonical byline</h4>
+            <Row label="Author" value="Lutar, Stephen P." />
+            <Row label="ORCID" value="0009-0001-0110-4173" />
+            <Row label="Org" value="SZL Holdings" />
+            <Row label="Repository" value="szl-holdings/terra" />
+            <Row label="Default branch" value="main" />
+            <Row label="Visibility" value="Public · PUBLIC_ONLY" />
+            <Row label="License" value="See LICENSE + NOTICE" />
+            <p
+              style={{
+                marginTop: 14,
+                fontSize: 11,
+                color: DS.textDim,
+                lineHeight: 1.55,
+                fontFamily: DS.sans,
+              }}
+            >
+              Underwriting recommendations on this surface inherit the same
+              attribution chain as every other Doctrine V6 artifact.
+            </p>
+          </div>
+
+          {/* SLO / Status */}
+          <div style={cardStyle}>
+            <p style={eyebrowStyle}>SLO &amp; Status</p>
+            <h4 style={cardTitle}>Org posture · 16 repos</h4>
+            <div style={{ marginBottom: 14 }}>
+              <StatusChipGroup>
+                <StatusChip status="healthy" label="CI 0 failing" pulsing />
+                <StatusChip status="approved" label="BP-strict 10/16" />
+                <StatusChip status="enforced" label="Λ floor 0.90" />
+                <StatusChip status="healthy" label="Dependabot 0 high" />
+                <StatusChip status="approved" label="PUBLIC_ONLY" />
+              </StatusChipGroup>
+            </div>
+            <Row label="Repos" value="16" />
+            <Row label="CI failing" value="0" />
+            <Row label="Scorecard avg" value="6.62 / 10" />
+            <Row label="BP-strict" value="10 / 16" />
+            <Row label="Dependabot high/crit" value="0 / 0" />
+            <Row label="Replays required" value="5 byte-identical" />
+            <Row label="Λ axes" value="9 conjunctive ∧" />
+          </div>
         </div>
       </div>
     </section>

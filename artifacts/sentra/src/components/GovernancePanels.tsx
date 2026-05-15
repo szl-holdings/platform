@@ -1,80 +1,228 @@
-import {
-  OmniaEvidencePanel,
-  StatusChip,
-  StatusChipGroup,
-  DeploymentContext,
-  OwnershipMeta,
-  type EvidenceEntry,
-} from '@szl-holdings/omnia-shell';
+const PALETTE = {
+  bg: '#0a0a0a',
+  card: '#0e0e0e',
+  cardAlt: '#1a1814',
+  gold: '#c9b787',
+  body: '#ededed',
+  bodyStrong: '#f5f5f5',
+  muted: '#888',
+  mutedDeep: '#555',
+  rule: 'rgba(255,255,255,0.04)',
+  goldSoft: 'rgba(201,183,135,0.18)',
+  goldBg: 'rgba(201,183,135,0.04)',
+};
 
-const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
-const SENTRA_EVIDENCE: EvidenceEntry[] = [
-  { id: 's-sig-1', type: 'signal', label: 'IOC match — APT-41 cluster', value: '14 indicators corroborated', timestamp: ago(45_000), confidence: 0.92, domain: 'sentra' },
-  { id: 's-der-1', type: 'derivation', label: 'Threat severity uplift', value: 'medium → HIGH', timestamp: ago(40_000), confidence: 0.92, domain: 'sentra' },
-  { id: 's-pol-1', type: 'policy', label: 'Containment policy — defensive only', value: 'No retaliation actions permitted', timestamp: ago(30_000), domain: 'sentra' },
-  { id: 's-agt-1', type: 'agent', label: 'Triage agent recommendation', value: 'Isolate DMZ host srv-edge-07', timestamp: ago(20_000), confidence: 0.88 },
-  { id: 's-app-1', type: 'approval', label: 'Human-in-the-loop approval', author: 'SOC Lead', timestamp: ago(10_000), confidence: 1 },
-];
+type ChipTone = 'gold' | 'ok' | 'warn' | 'muted';
+const TONE: Record<ChipTone, { fg: string; border: string; bg: string }> = {
+  gold: { fg: PALETTE.gold, border: 'rgba(201,183,135,0.30)', bg: 'rgba(201,183,135,0.06)' },
+  ok: { fg: '#7fb893', border: 'rgba(127,184,147,0.28)', bg: 'rgba(127,184,147,0.05)' },
+  warn: { fg: '#d4a853', border: 'rgba(212,168,83,0.28)', bg: 'rgba(212,168,83,0.05)' },
+  muted: { fg: PALETTE.muted, border: 'rgba(255,255,255,0.08)', bg: 'rgba(255,255,255,0.02)' },
+};
+
+function Chip({ tone = 'gold', label }: { tone?: ChipTone; label: string }) {
+  const t = TONE[tone];
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 10px',
+        fontFamily: MONO,
+        fontSize: 10,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: t.fg,
+        border: `1px solid ${t.border}`,
+        background: t.bg,
+        borderRadius: 2,
+      }}
+    >
+      <span style={{ width: 5, height: 5, borderRadius: 999, background: t.fg }} />
+      {label}
+    </span>
+  );
+}
+
+function PanelCard({
+  kicker,
+  title,
+  children,
+}: {
+  kicker: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        background: PALETTE.card,
+        border: `1px solid ${PALETTE.rule}`,
+        padding: 22,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+      }}
+    >
+      <div>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: MONO,
+            fontSize: 9,
+            letterSpacing: '0.24em',
+            color: PALETTE.gold,
+            textTransform: 'uppercase',
+          }}
+        >
+          {kicker}
+        </p>
+        <h4
+          style={{
+            margin: '6px 0 0',
+            fontSize: 15,
+            fontWeight: 500,
+            color: PALETTE.bodyStrong,
+            letterSpacing: '-0.005em',
+          }}
+        >
+          {title}
+        </h4>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+    </div>
+  );
+}
+
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        gap: 12,
+        paddingBottom: 8,
+        borderBottom: `1px solid ${PALETTE.rule}`,
+      }}
+    >
+      <span style={{ fontSize: 11, color: PALETTE.muted, letterSpacing: '0.02em' }}>{label}</span>
+      <span
+        style={{
+          fontSize: mono ? 11 : 12,
+          color: PALETTE.body,
+          fontFamily: mono ? MONO : 'inherit',
+          textAlign: 'right',
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export function SentraGovernancePanels() {
   return (
-    <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)', background: '#070707' }}>
+    <section
+      style={{
+        padding: '80px 24px',
+        borderTop: `1px solid ${PALETTE.rule}`,
+        background: PALETTE.bg,
+      }}
+    >
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.2em', color: 'rgba(16,185,129,0.7)', textTransform: 'uppercase' as const, marginBottom: 8 }}>
-            Live: Governance posture
+        <div style={{ marginBottom: 28 }}>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: MONO,
+              fontSize: 10,
+              letterSpacing: '0.25em',
+              color: PALETTE.gold,
+              textTransform: 'uppercase',
+            }}
+          >
+            Governance posture · Doctrine V6
           </p>
-          <h3 style={{ fontSize: 24, fontWeight: 600, color: '#f5f5f5', letterSpacing: '-0.01em' }}>
-            Every containment carries its proof packet
+          <h3
+            style={{
+              margin: '8px 0 6px',
+              fontSize: 26,
+              fontWeight: 500,
+              color: PALETTE.bodyStrong,
+              letterSpacing: '-0.012em',
+            }}
+          >
+            Every containment ships with its proof packet
           </h3>
+          <p style={{ margin: 0, fontSize: 13, color: PALETTE.muted, maxWidth: 640 }}>
+            Sentra inherits the SZL Holdings replay-anchored audit chain. Below is the live
+            posture of this artifact against the canonical doctrine — sourced from the public
+            org inventory, not from product-marketing copy.
+          </p>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <StatusChipGroup>
-            <StatusChip status="critical" label="APT-41 — HIGH" pulsing />
-            <StatusChip status="warning" label="DMZ exposure" />
-            <StatusChip status="enforced" label="Defensive only" />
-            <StatusChip status="approved" label="SOC sign-off" />
-            <StatusChip status="healthy" label="SIEM ingest" />
-          </StatusChipGroup>
+        <div style={{ marginBottom: 22, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip tone="gold" label="Λ floor 0.90 · 9-axis AND" />
+          <Chip tone="ok" label="CI 0 failing · 16 repos" />
+          <Chip tone="ok" label="Dependabot 0 high/critical" />
+          <Chip tone="gold" label="Scorecard 6.62 · BP 10/16" />
+          <Chip tone="muted" label="Ingest PUBLIC_ONLY" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-          <OmniaEvidencePanel
-            title="APT-41 containment — proof packet"
-            entries={SENTRA_EVIDENCE}
-            correlationId="sentra-apt41-2026-05-15"
-            auditId="audit-sn-9081"
-          />
-          <DeploymentContext
-            serviceName="sentra-triage"
-            environment="production"
-            version="3.1.4"
-            deploymentStatus="deployed"
-            uptime={99.97}
-            lastDeployedAt={ago(12 * 3600_000)}
-            deployedBy="sentra-soc"
-            healthProbes={[
-              { name: 'Threat feed', url: '/health/feed', status: 'passing', latencyMs: 88, lastChecked: ago(20_000) },
-              { name: 'SIEM correlation', url: '/health/siem', status: 'passing', latencyMs: 312, lastChecked: ago(15_000) },
-              { name: 'Containment exec', url: '/health/contain', status: 'passing', latencyMs: 124, lastChecked: ago(25_000) },
-            ]}
-            sloName="Triage decision < 60s"
-            sloTarget={99.0}
-            sloCurrent={99.42}
-          />
-          <OwnershipMeta
-            ownerTeam="Sentra SOC"
-            system="sentra-triage"
-            domain="sentra"
-            lifecycle="production"
-            tier="tier-0"
-            healthEndpoint="https://sentra.szl-holdings.com/health"
-            runbookUrl="https://runbooks.szl-holdings.com/sentra"
-            scorecardScore={94}
-            lastDeploy={ago(12 * 3600_000)}
-          />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 16,
+          }}
+        >
+          <PanelCard kicker="01 · Provenance" title="Replay-anchored, conjunctive Λ">
+            <Row label="Replay root" value="1ed4d253…" mono />
+            <Row label="Byte-identical replays" value="5 required" />
+            <Row label="Λ floor (conjunctive AND)" value="0.90 across 9 axes" />
+            <Row label="Moral grounding floor" value="0.95" />
+            <Row label="Measurability honesty" value="0.95" />
+            <Row label="Latest commit" value="2ac304a9…" mono />
+            <Row label="License allowlist" value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0" />
+            <Row label="Ingestion policy" value="PUBLIC_ONLY" />
+          </PanelCard>
+
+          <PanelCard kicker="02 · Evidence ledger" title="Citable artifacts, public lineage">
+            <Row label="Repository" value="szl-holdings/sentra" mono />
+            <Row label="Latest tag" value="v1.0.0-alpha" />
+            <Row label="Tag SHA" value="d02cbdbd…" mono />
+            <Row label="Pushed at (UTC)" value="2026-05-15 05:33" />
+            <Row label="Hygiene files" value="LICENSE · NOTICE · CITATION.cff · SECURITY.md" />
+            <Row label="Doctrine ledger" value="13-DOI evidence chain" />
+            <Row label="Zenodo deposit" value="v14 — push queue ready" />
+            <Row label="arXiv submission" value="sha 13ca4a06… (one-way door queued)" />
+          </PanelCard>
+
+          <PanelCard kicker="03 · Ownership" title="Canonical SZL Holdings byline">
+            <Row label="Author" value="Lutar, Stephen P." />
+            <Row label="ORCID" value="0009-0001-0110-4173" mono />
+            <Row label="Affiliation" value="SZL Holdings" />
+            <Row label="GitHub org" value="szl-holdings" mono />
+            <Row label="Repository full name" value="szl-holdings/sentra" mono />
+            <Row label="Default branch" value="main" />
+            <Row label="Doctrine version" value="V6" />
+            <Row label="Byline scope" value="Cyber resilience command" />
+          </PanelCard>
+
+          <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">
+            <Row label="Repos in org" value="16" />
+            <Row label="CI failing" value="0" />
+            <Row label="Open dependabot (high/critical)" value="0" />
+            <Row label="Open code-scanning alerts" value="115 (org-wide)" />
+            <Row label="Scorecard average" value="6.62 / 10" />
+            <Row label="Branch protection — strict" value="10 / 16" />
+            <Row label="Push queue — ready" value="ZENODO v14 · arXiv submit" />
+            <Row label="One-way doors" value="awaiting confirm" />
+          </PanelCard>
         </div>
       </div>
     </section>
