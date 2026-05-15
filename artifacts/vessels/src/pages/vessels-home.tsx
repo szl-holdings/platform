@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AtelierSpaceEmbed } from '../components/AtelierSpaceEmbed';
+import { VesselsGovernancePanels } from '../components/GovernancePanels';
 import { useFleetExceptions, useVesselsDashboard } from '@/hooks/use-vessels-data';
 import {
   metricDisplay,
@@ -852,6 +853,8 @@ export default function VesselsHome() {
           </m.div>
         </div>
       </section>
+
+      <VesselsGovernancePanels />
 
       {/* Footer */}
       <footer className="py-10 border-t border-sky-500/10">

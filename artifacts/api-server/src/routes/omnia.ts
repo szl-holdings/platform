@@ -104,15 +104,16 @@ const ADOPTION_METRICS = [
   { artifactId: 'command', artifactName: 'Command', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.82, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
   { artifactId: 'holdings', artifactName: 'SZL Holdings', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.74, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
   { artifactId: 'aegis', artifactName: 'Aegis', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.71, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'sentra', artifactName: 'Sentra', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.68, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'terra', artifactName: 'Terra', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.65, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'vessels', artifactName: 'Vessels', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.77, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'counsel', artifactName: 'Counsel', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.70, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'a11oy', artifactName: 'A11oy', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.89, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'sentra', artifactName: 'Sentra', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.88, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'terra', artifactName: 'Terra', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.86, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'vessels', artifactName: 'Vessels', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.90, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'counsel', artifactName: 'Counsel', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.87, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'a11oy', artifactName: 'A11oy', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.94, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
   { artifactId: 'pulse', artifactName: 'Pulse', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.61, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
-  { artifactId: 'carlota-jo', artifactName: 'Carlota Jo', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.55, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'carlota-jo', artifactName: 'Carlota Jo', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.85, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
   { artifactId: 'lyte', artifactName: 'Lyte', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.66, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
   { artifactId: 'praxis', artifactName: 'PRAXIS', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.58, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
+  { artifactId: 'conduit', artifactName: 'Conduit', shellVersion: '1.0.0', commandPaletteWired: true, provenanceCoverage: 0.89, omniaProviderAdopted: true, lastChecked: ago(5 * 60_000) },
 ];
 
 const PORTFOLIO_NOTIFICATIONS = [

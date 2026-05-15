@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
+import { A11oyGovernancePanels } from '../components/GovernancePanels';
 import { useAlloyDashboard } from '../graphql';
 import { PSYCHE_KPIS } from '../data/psyche';
 
@@ -1275,6 +1276,8 @@ export function HomePage() {
           </FadeIn>
         </div>
       </section>
+
+      <A11oyGovernancePanels />
 
       <footer style={{ borderTop: `1px solid ${T.borderSubtle}`, padding: '4rem clamp(2rem, 5vw, 4rem)', background: T.bg }}>
         <div style={{ maxWidth: 1320, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>

@@ -1,4 +1,8 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
+import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { AtelierSpaceEmbed } from '../components/AtelierSpaceEmbed';
+import { CounselGovernancePanels } from '../components/GovernancePanels';
 import {
   AlertTriangle,
   Anchor,
@@ -537,6 +541,8 @@ export default function CounselLandingPage() {
           </div>
         </div>
       </footer>
+
+      <CounselGovernancePanels />
 
       <ContactModal
         isOpen={demoOpen}

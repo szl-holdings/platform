@@ -21,6 +21,7 @@ import {
   rankSyncRisk,
   generateRecommendedAction,
 } from '@/lib/agentic';
+import { ConduitGovernancePanels } from '../components/GovernancePanels';
 import {
   FabricCard,
   FabricStat,
@@ -317,6 +318,8 @@ export default function Dashboard() {
           ))}
         </div>
       </FabricCard>
+
+      <ConduitGovernancePanels />
 
       {/* One-of-One Innovation Panel */}
       <FabricCard

@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import { TerraGovernancePanels } from '@/components/GovernancePanels';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-badge';
 import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
@@ -323,6 +324,7 @@ export default function TerraIntelligence() {
 
   return (
     <div className="space-y-4 max-w-[1400px]">
+      <TerraGovernancePanels />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

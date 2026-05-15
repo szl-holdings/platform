@@ -1,6 +1,7 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { SentraGovernancePanels } from '../components/GovernancePanels';
 import { Link } from 'wouter';
 
 const NAV_LINKS = [
@@ -508,6 +509,8 @@ export default function SentraLandingPage() {
           </div>
         </div>
       </section>
+
+      <SentraGovernancePanels />
 
       {/* FOOTER */}
       <footer className="border-t border-white/[0.04] px-6 py-10">

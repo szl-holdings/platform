@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Proof from '@/components/Proof';
 import Services from '@/components/Services';
+import { CarlotaJoGovernancePanels } from '@/components/GovernancePanels';
 
 function RosaBlock() {
   const { t } = useTranslation();
@@ -889,6 +890,7 @@ export default function Home() {
       <PrivatePortalTeaser />
       <InquiryCard />
       <SzlCommandSubscribeSection />
+      <CarlotaJoGovernancePanels />
       <Footer />
     </div>
   );
