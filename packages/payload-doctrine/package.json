@@ -1,0 +1,27 @@
+{
+  "name": "@szl-holdings/payload-doctrine",
+  "version": "0.1.0",
+  "description": "Typed canonical SZL Holdings payload — Doctrine V6, 13-DOI ledger, 16-repo inventory, push queue, Λ axes, axiom/theorem/derivation/constant indices",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "*"
+  }
+}

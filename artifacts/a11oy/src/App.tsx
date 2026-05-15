@@ -199,6 +199,7 @@ const LibrarySection = lazy(() => import('./pages/LibrarySection').then(m => ({ 
 const ReleasesSection = lazy(() => import('./pages/ReleasesSection').then(m => ({ default: m.ReleasesSection })));
 const AuditSection = lazy(() => import('./pages/AuditSection').then(m => ({ default: m.AuditSection })));
 const DoctrineOverview = lazy(() => import('./pages/DoctrineOverview').then(m => ({ default: m.DoctrineOverview })));
+const PayloadProvenance = lazy(() => import('./pages/PayloadProvenance').then(m => ({ default: m.PayloadProvenance })));
 const RiskReports = lazy(() => import('./pages/RiskReports').then(m => ({ default: m.RiskReports })));
 const BehavioralAudit = lazy(() => import('./pages/BehavioralAudit').then(m => ({ default: m.BehavioralAudit })));
 const CovenantLift = lazy(() => import('./pages/CovenantLift').then(m => ({ default: m.CovenantLift })));
@@ -726,6 +727,7 @@ function AppInner() {
         <Route path={`${base}/formulas/:id`} component={CodexNode} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />
+        <Route path={`${base}/payload`} component={PayloadProvenance} />
         <Route path={`${base}/risk-reports`} component={RiskReports} />
         <Route path={`${base}/behavioral-audit`} component={BehavioralAudit} />
         <Route path={`${base}/covenant-lift`} component={CovenantLift} />

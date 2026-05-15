@@ -39,6 +39,7 @@ import a11oyCognitiveRuntimeRouter from "./a11oy-cognitive-runtime.js";
 import { a11oyClaudeCodeDoctrineRouter } from "./a11oy-claude-code-doctrine.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
 import a11oyDoctrineRouter from "./a11oy-doctrine-api";
+import a11oyPayloadRouter from "./a11oy-payload";
 import forgeSkillsRouter from "./forge-skills";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
@@ -349,6 +350,11 @@ router.use('/a11oy', forgeSkillsRouter);
 
 // A11oy Mythos Doctrine — live data API for the 13 doctrine pages.
 router.use('/a11oy', a11oyDoctrineRouter);
+
+// A11oy canonical payload — read-only Doctrine V6 / DOI ledger / 16-repo inventory /
+// push queue / Λ-axes / artifact indices / manifest. Backed by the typed
+// @szl-holdings/payload-doctrine workspace package.
+router.use('/a11oy/payload', a11oyPayloadRouter);
 
 // A11oy Agentic Pages API — seed data endpoints for the 9 agentic frontend pages
 // (A2A Interop, Agent Identity, Self-Optimization, Security Agents, Gateway, Proof Ledger, Memory, Signal Mesh).
