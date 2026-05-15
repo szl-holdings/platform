@@ -3,6 +3,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { Toaster } from 'sonner';
 import { Layout } from '@/components/layout';
 import { InnovationStoreProvider } from '@/lib/innovation-store';
+import ConduitLandingPage from '@/pages/conduit-landing';
 import Dashboard from '@/pages/dashboard';
 import ComputePage from '@/pages/compute';
 import ConnectionsList from '@/pages/connections/list';
@@ -58,9 +59,13 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
+    <Switch>
+      <Route path="/" component={ConduitLandingPage} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/cockpit" component={Dashboard} />
+            <Route path="/dashboard" component={Dashboard} />
         <Route path="/compute" component={ComputePage} />
         <Route path="/connections" component={ConnectionsList} />
         <Route path="/connections/new" component={ConnectionsNew} />
@@ -103,13 +108,15 @@ function AppContent() {
         <Route path="/innovation/mapper-accuracy" component={MapperAccuracyPage} />
         <Route path="/innovation/destination-discovery" component={DestinationDiscoveryPage} />
         <Route path="/innovation/policy-dsl" component={PolicyDslPage} />
-        <Route>
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            Page not found
-          </div>
-        </Route>
-      </Switch>
-    </Layout>
+            <Route>
+              <div className="flex h-full items-center justify-center text-muted-foreground">
+                Page not found
+              </div>
+            </Route>
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

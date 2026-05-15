@@ -123,6 +123,7 @@ import {
   useAuth as useVesselsRoleAuth,
 } from '@/contexts/auth-context';
 import MarketingHomePage from '@/pages/marketing-home';
+import VesselsLandingPage from '@/pages/vessels-landing';
 
 function pathToVesselsActionType(path: string): string | undefined {
   const seg = path.replace(/^\/+/, '').split('/')[0];
@@ -1579,7 +1580,7 @@ function AppContent({
     >
       <Switch>
         <Route path="/pulse" component={VesselsPulse} />
-        <Route path="/" component={MarketingHomePage} />
+        <Route path="/" component={VesselsLandingPage} />
         {VESSELS_COMMERCIAL_ENABLED && (
           <Route path="/platform" component={MarketingPlatformPage} />
         )}

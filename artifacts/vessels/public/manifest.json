@@ -1,0 +1,12 @@
+{
+  "rows": [
+    { "imo": "IMO 9876541", "name": "AURORA OCEAN",   "state": "AT SEA",  "lat": "01°22′N", "lon": "104°44′E" },
+    { "imo": "IMO 9543210", "name": "NORTHWIND BAY",  "state": "BERTHED", "lat": "51°57′N", "lon": "004°08′E" },
+    { "imo": "IMO 9432198", "name": "STELLA MARIS",   "state": "TRANSIT", "lat": "12°31′N", "lon": "043°20′E" },
+    { "imo": "IMO 9765432", "name": "MV ACHILLES",    "state": "FLAGGED", "lat": "26°44′N", "lon": "055°12′E" },
+    { "imo": "IMO 9612087", "name": "PACIFIC HERALD", "state": "AT SEA",  "lat": "34°41′N", "lon": "139°46′E" },
+    { "imo": "IMO 9388112", "name": "ATLANTIC ROSE",  "state": "BERTHED", "lat": "40°42′N", "lon": "074°03′W" },
+    { "imo": "IMO 9709220", "name": "SOUTHERN CROSS", "state": "TRANSIT", "lat": "33°55′S", "lon": "018°25′E" },
+    { "imo": "IMO 9498774", "name": "ARCTIC LANTERN", "state": "AT SEA",  "lat": "69°39′N", "lon": "018°57′E" }
+  ]
+}

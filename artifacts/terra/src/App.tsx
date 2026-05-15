@@ -172,7 +172,7 @@ function PrivateRouter() {
       <Switch>
         <Route path="/pulse" component={TerraPulse} />
         <Route path="/decision-center" component={DecisionCenterPage} />
-        <Route path="/" component={() => <Redirect to="/dashboard" />} />
+        <Route path="/" component={TerraMarketingLanding} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/home" component={() => <Redirect to="/dashboard" />} />
         <Route path="/distress-engine" component={DistressEngine} />
