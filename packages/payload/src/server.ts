@@ -12,30 +12,35 @@ import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-// When bundled into another package's dist/ (e.g. api-server/dist/server.mjs),
-// `import.meta.url` no longer points at packages/payload/src/, so the default
-// `../raw` resolution misses. Probe a series of candidates and use the first
-// one that actually contains payload.json.
+// When bundled into another package's dist/ (e.g. api-server/dist/index.mjs),
+// `import.meta.url` no longer points at packages/payload/src/, so the
+// in-package `../raw` resolution would land on the consumer's own directory
+// (e.g. `artifacts/api-server/raw`). Instead, walk up from HERE and from
+// process.cwd() looking for `packages/payload/raw/payload.json` — this is the
+// canonical location and the package's `files` glob ships it.
 import { existsSync } from "node:fs";
-const RAW_CANDIDATES: string[] = [
-  resolve(HERE, "..", "raw"),
-  resolve(HERE, "..", "..", "raw"),
-  resolve(HERE, "..", "..", "..", "packages", "payload", "raw"),
-  resolve(HERE, "..", "..", "..", "..", "packages", "payload", "raw"),
-  resolve(process.cwd(), "packages", "payload", "raw"),
-  resolve(process.cwd(), "..", "..", "packages", "payload", "raw"),
-  resolve(process.cwd(), "..", "packages", "payload", "raw"),
-];
+
+function walkUpForPayloadRaw(start: string): string | null {
+  let cur = resolve(start);
+  for (let i = 0; i < 12; i += 1) {
+    const candidate = join(cur, "packages", "payload", "raw");
+    if (existsSync(join(candidate, "payload.json"))) return candidate;
+    const parent = dirname(cur);
+    if (parent === cur) break;
+    cur = parent;
+  }
+  return null;
+}
+
 function pickRawRoot(): string {
-  for (const c of RAW_CANDIDATES) {
-    try {
-      if (existsSync(join(c, "payload.json"))) return c;
-    } catch {
-      // continue
-    }
+  const probed: string[] = [];
+  for (const start of [HERE, process.cwd()]) {
+    const found = walkUpForPayloadRaw(start);
+    if (found) return found;
+    probed.push(start);
   }
   throw new Error(
-    `@szl-holdings/payload: cannot locate raw/payload.json; probed: ${RAW_CANDIDATES.join(", ")}`,
+    `@szl-holdings/payload: cannot locate packages/payload/raw/payload.json; walked up from: ${probed.join(", ")}`,
   );
 }
 const RAW_ROOT = pickRawRoot();
