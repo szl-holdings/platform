@@ -378,7 +378,7 @@ export default function PresenterMode() {
             }}
           >
             Edits save to this browser only. Defaults live in{' '}
-            <code>artifacts/aegis/src/data/slides-manifest.json</code>.
+            <code>artifacts/sentra/src/data/slides-manifest.json</code>.
           </div>
         </aside>
       </div>

@@ -26,7 +26,7 @@ interface ForecastHead {
 
 const AEGIS_FORECAST_DATA: ForecastHead[] = [
   {
-    headName: 'aegis:alert-surge',
+    headName: 'sentra:alert-surge',
     label: 'Alert Volume Surge',
     intervals: [
       { horizon: '1d', point: 0.61, lower: 0.46, upper: 0.76, confidence: 0.85, unit: 'score' },
@@ -37,7 +37,7 @@ const AEGIS_FORECAST_DATA: ForecastHead[] = [
     alertThreshold: 0.8,
   },
   {
-    headName: 'aegis:analyst-overload',
+    headName: 'sentra:analyst-overload',
     label: 'Analyst Overload Risk',
     intervals: [
       { horizon: '1d', point: 0.54, lower: 0.39, upper: 0.69, confidence: 0.88, unit: 'score' },
@@ -49,7 +49,7 @@ const AEGIS_FORECAST_DATA: ForecastHead[] = [
     thresholdBreached: true,
   },
   {
-    headName: 'aegis:control-drift',
+    headName: 'sentra:control-drift',
     label: 'Control Drift Score',
     intervals: [
       { horizon: '7d', point: 0.41, lower: 0.26, upper: 0.56, confidence: 0.86, unit: 'score' },
@@ -60,7 +60,7 @@ const AEGIS_FORECAST_DATA: ForecastHead[] = [
     alertThreshold: 0.6,
   },
   {
-    headName: 'aegis:severity-clustering',
+    headName: 'sentra:severity-clustering',
     label: 'Severity Cluster Momentum',
     intervals: [
       { horizon: '1d', point: 0.47, lower: 0.32, upper: 0.62, confidence: 0.87, unit: 'score' },

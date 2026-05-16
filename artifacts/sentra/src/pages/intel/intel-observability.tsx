@@ -369,7 +369,7 @@ export default function ObservabilityPage() {
 
         {/* Transaction Traces */}
         <Panel>
-          <PanelHead icon={TrendingDown} title="Transaction Traces — aegis-soc" accent="#8a8a8a" />
+          <PanelHead icon={TrendingDown} title="Transaction Traces — sentra-soc" accent="#8a8a8a" />
           <div className="p-2 space-y-1.5">
             {traces.map((tr, i) => {
               const maxDur = Math.max(...traces.map((t) => t.totalMs));

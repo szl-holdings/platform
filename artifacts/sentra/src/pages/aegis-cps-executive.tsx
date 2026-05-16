@@ -51,7 +51,7 @@ export default function CpsExecutive() {
       <header>
         <div className="flex items-center gap-2 text-[10px] font-mono text-[#c9b787]/70 uppercase tracking-widest mb-1">
           <Shield className="w-3 h-3" />
-          Aegis / PARAGON
+          Sentra
         </div>
         <h1 className="text-3xl font-display font-bold text-slate-100">CPS Executive Command</h1>
         <p className="text-slate-400 mt-1">

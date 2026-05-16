@@ -8,7 +8,7 @@ export function SubstrateWorkflowPanel() {
     <SharedSubstrateWorkflowPanel
       workflowId="aegis-threat-triage"
       title="Threat Triage and Escalation Routing"
-      subtitle="Substrate · aegis-threat-triage · Phase 2"
+      subtitle="Substrate · sentra-threat-triage · Phase 2"
       description="Classifies incoming threat alerts by severity and routes to the appropriate response team. CISO approval required before containment actions."
       accentColor={productAccent.sentra}
       workflowInput={{

@@ -212,7 +212,7 @@ export default function RiskScoringPage() {
         <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-3">
             <Brain className="w-4 h-4 text-[#c9b787]" />
-            <span className="text-xs font-semibold text-[#c9b787]">ML Scoring Registry — Aegis Risk Intelligence</span>
+            <span className="text-xs font-semibold text-[#c9b787]">ML Scoring Registry — Sentra Risk Intelligence</span>
             <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787] font-mono uppercase ml-auto">
               {mlRegistry.models.filter(m => m.status === 'production').length} Production
             </span>

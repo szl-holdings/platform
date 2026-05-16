@@ -1,4 +1,3 @@
-import { readEnvFeatureFlags } from '@szl-holdings/platform-registry';
 import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
@@ -373,6 +372,8 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/multi-fund', label: 'Multi-Fund View', icon: Layers, comp: L(() => import('@/pages/multi-fund-view')) },
       { path: '/reports', label: 'Reports', icon: FileText, comp: L(() => import('@/pages/reports-page')) },
       { path: '/pdf-export', label: 'PDF Export', icon: Presentation, comp: L(() => import('@/pages/aegis-pdf-export')) },
+      { path: '/what-changed', label: 'What Changed', icon: Activity, comp: L(() => import('@/pages/aegis-what-changed')) },
+      { path: '/enterprise-tiers', label: 'Enterprise Tiers', icon: Landmark, comp: L(() => import('@/pages/aegis-pricing')) },
       { path: '/settings', label: 'Settings', icon: SettingsIcon, comp: L(() => import('@/pages/settings/unified-settings')) },
     ],
   },
@@ -450,23 +451,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-const { aegisExtendedModules: EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
-  import.meta.env as unknown as Record<string, unknown>,
-);
-const EXTENDED_SECTION_IDS = new Set<string>([]);
-const EXTENDED_ITEM_PATHS = new Set(['/identity-blast-radius']);
-
-function filterExtendedSections(sections: NavSection[]): NavSection[] {
-  if (EXTENDED_MODULES_ENABLED) return sections;
-  return sections
-    .filter((sec) => !EXTENDED_SECTION_IDS.has(sec.id))
-    .map((sec) => ({
-      ...sec,
-      items: sec.items.filter((item) => !EXTENDED_ITEM_PATHS.has(item.path)),
-    }));
-}
-
-const VISIBLE_NAV_SECTIONS = filterExtendedSections(NAV_SECTIONS);
+const VISIBLE_NAV_SECTIONS = NAV_SECTIONS;
 const ALL_ROUTES: NavItem[] = VISIBLE_NAV_SECTIONS.flatMap((s) => s.items);
 
 const SLIDES_NAV: NavItem = {
