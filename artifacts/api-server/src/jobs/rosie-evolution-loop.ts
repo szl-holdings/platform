@@ -114,7 +114,7 @@ function makeInProcessFetch(): typeof fetch {
     } catch {
       body = null;
     }
-    const result: ProposeTuningInProcessResult = proposeTuningInProcess(
+    const result: ProposeTuningInProcessResult = await proposeTuningInProcess(
       (body ?? {}) as Record<string, unknown>,
     );
     return new Response(JSON.stringify(result.envelope), {

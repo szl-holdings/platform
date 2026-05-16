@@ -13,10 +13,23 @@
  *   POST /a11oy/formulas/approve-tuning/:id
  *   POST /a11oy/formulas/reject-tuning/:id
  *
+ * Persistence: backed by Postgres via `@szl-holdings/db`. The formulas,
+ * formula_versions, formula_invocations, and formula_tuning_proposals
+ * tables ship in migration 0162. Invocations are written through a
+ * lightweight async buffer to keep the hot path non-blocking.
+ *
  * Source: docs/audits/formulas.md, lib/formulas/src/registry.ts.
  */
 
 import { Router, type Response } from 'express';
+import { and, desc, eq, sql } from 'drizzle-orm';
+import {
+  db,
+  formulasTable,
+  formulaVersionsTable,
+  formulaInvocationsTable,
+  formulaTuningProposalsTable,
+} from '@szl-holdings/db';
 import { logger } from '../lib/logger.js';
 import {
   FORMULA_REGISTRY,
@@ -37,40 +50,58 @@ function err(res: Response, status: number, message: string) {
   res.status(status).json({ ok: false, error: { message, retryable: false } });
 }
 
-// ─── Lightweight in-memory stores ────────────────────────────────────
-// The Drizzle tables ship in migration 0162; this module keeps an
-// in-memory mirror so the API works without DB writes during demo /
-// agent-gateway boot. Persistence wires up in a follow-up task.
-type ProposalRow = {
-  id: number;
-  formulaId: string;
-  fromVersion: string;
-  parameter: string;
-  oldValue: number;
-  newValue: number;
-  proposalScore: number;
-  rationale: string;
-  evidence: { samples: number; gap: number; drift: number; thesisCitation: string };
-  proposedBy: string;
-  status: 'pending' | 'approved' | 'rejected' | 'superseded';
-  decidedAt?: string;
-  decisionNote?: string;
-  createdAt: string;
-};
+// ─── Invocation write buffer ─────────────────────────────────────────
+// Invocations can fire at high frequency from instrumented hot paths.
+// We buffer them in-process and flush in small batches so a single
+// hot-path call never awaits a DB round-trip. Failure to flush is logged
+// at debug-level — losing a few telemetry rows must never break the
+// app, and the proof-ledger is the system-of-record for anything that
+// matters.
 
-const invocations: FormulaInvocation[] = [];
-const MAX_INVOCATIONS = 5000;
-const proposals: ProposalRow[] = [];
-let nextProposalId = 1;
-const versionHistory = new Map<string, Array<{ version: string; parameters: Record<string, number>; note?: string; createdAt: string }>>();
+type InvocationRow = typeof formulaInvocationsTable.$inferInsert;
 
-// Wire the in-memory invocation sink so any caller using `instrument()`
-// will surface invocations on the /invocations endpoint immediately and
-// — when the invocation carries observed-vs-baseline metadata — feed
-// the ROSIE drift detector for the scheduled evolution loop.
+const INVOCATION_FLUSH_INTERVAL_MS = 2_000;
+const INVOCATION_FLUSH_BATCH_MAX = 200;
+const invocationBuffer: InvocationRow[] = [];
+
+function toInvocationRow(inv: FormulaInvocation): InvocationRow {
+  return {
+    formulaId: inv.formulaId,
+    version: inv.version,
+    inputHash: inv.inputHash,
+    outputHash: inv.outputHash,
+    caller: inv.caller ?? null,
+    durationMs: String(inv.durationMs),
+    metadata: inv.meta ?? null,
+    invokedAt: new Date(inv.ts),
+  };
+}
+
+async function flushInvocationBuffer(): Promise<void> {
+  if (invocationBuffer.length === 0) return;
+  const batch = invocationBuffer.splice(0, INVOCATION_FLUSH_BATCH_MAX);
+  try {
+    await db.insert(formulaInvocationsTable).values(batch);
+  } catch (e) {
+    logger.warn(
+      { err: e, dropped: batch.length },
+      '[a11oy-formulas] invocation flush failed (rows dropped)',
+    );
+  }
+}
+
+const _flushTimer = setInterval(() => {
+  void flushInvocationBuffer();
+}, INVOCATION_FLUSH_INTERVAL_MS);
+_flushTimer.unref?.();
+
+// Wire the invocation sink — buffer to DB and forward observed-vs-baseline
+// metadata to the ROSIE drift detector for the scheduled evolution loop.
 setInvocationSink((inv) => {
-  invocations.push(inv);
-  if (invocations.length > MAX_INVOCATIONS) invocations.splice(0, invocations.length - MAX_INVOCATIONS);
+  invocationBuffer.push(toInvocationRow(inv));
+  if (invocationBuffer.length >= INVOCATION_FLUSH_BATCH_MAX) {
+    void flushInvocationBuffer();
+  }
   // Lazy import to avoid a circular load at module init.
   import('../jobs/rosie-evolution-loop.js')
     .then(({ formulaInvocationDriftBridge }) => formulaInvocationDriftBridge(inv))
@@ -79,17 +110,51 @@ setInvocationSink((inv) => {
     });
 });
 
-// Seed initial version history from the registry so /history is non-empty.
-for (const f of FORMULA_REGISTRY) {
-  versionHistory.set(f.id, [
-    {
-      version: f.version,
-      parameters: Object.fromEntries(f.parameters.map((p) => [p.name, p.default])),
-      note: 'initial version (seeded from registry)',
-      createdAt: new Date().toISOString(),
-    },
-  ]);
+// ─── Registry seeding ────────────────────────────────────────────────
+// Idempotent: inserts the canonical registry into `formulas` and seeds
+// an initial row into `formula_versions` per formula. Safe to run on
+// every boot — ON CONFLICT clauses make this a no-op after first boot.
+async function seedRegistry(): Promise<void> {
+  try {
+    for (const f of FORMULA_REGISTRY) {
+      const defaults = Object.fromEntries(f.parameters.map((p) => [p.name, p.default]));
+      await db
+        .insert(formulasTable)
+        .values({
+          formulaId: f.id,
+          name: f.name,
+          domain: f.domain,
+          currentVersion: f.version,
+          description: f.description,
+          provenance: f.provenance as typeof formulasTable.$inferInsert['provenance'],
+          parameters: defaults,
+          consumers: [...f.consumers],
+          inputShape: f.inputShape,
+          outputShape: f.outputShape,
+        })
+        .onConflictDoNothing({ target: formulasTable.formulaId });
+
+      // Seed an initial version row if none exists for this formula.
+      const existing = await db
+        .select({ id: formulaVersionsTable.id })
+        .from(formulaVersionsTable)
+        .where(eq(formulaVersionsTable.formulaId, f.id))
+        .limit(1);
+      if (existing.length === 0) {
+        await db.insert(formulaVersionsTable).values({
+          formulaId: f.id,
+          version: f.version,
+          parameters: defaults,
+          note: 'initial version (seeded from registry)',
+        });
+      }
+    }
+  } catch (e) {
+    logger.warn({ err: e }, '[a11oy-formulas] registry seed failed (non-fatal)');
+  }
 }
+
+void seedRegistry();
 
 function summarise(f: typeof FORMULA_REGISTRY[number]) {
   return {
@@ -127,28 +192,152 @@ publicRouter.get('/a11oy/formulas/detail/:id', (req, res) => {
   ok(res, summarise(f));
 });
 
-publicRouter.get('/a11oy/formulas/invocations/:id', (req, res) => {
-  const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit ?? '50'), 10) || 50));
-  const filtered = invocations.filter((i) => i.formulaId === req.params.id).slice(-limit).reverse();
-  ok(res, { results: filtered, total: filtered.length });
+publicRouter.get('/a11oy/formulas/invocations/:id', async (req, res) => {
+  try {
+    const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit ?? '50'), 10) || 50));
+    const offset = Math.max(0, parseInt(String(req.query.offset ?? '0'), 10) || 0);
+    // Flush pending writes so the most recent invocations are queryable
+    // immediately after they are emitted (esp. useful in tests / demos).
+    await flushInvocationBuffer();
+    const where = eq(formulaInvocationsTable.formulaId, req.params.id);
+    const [rows, [{ count }]] = await Promise.all([
+      db
+        .select()
+        .from(formulaInvocationsTable)
+        .where(where)
+        .orderBy(desc(formulaInvocationsTable.invokedAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(formulaInvocationsTable)
+        .where(where),
+    ]);
+    const results = rows.map((r) => ({
+      formulaId: r.formulaId,
+      version: r.version,
+      ts: r.invokedAt.toISOString(),
+      inputHash: r.inputHash,
+      outputHash: r.outputHash,
+      caller: r.caller ?? undefined,
+      durationMs: r.durationMs == null ? 0 : Number(r.durationMs),
+      meta: (r.metadata ?? undefined) as Record<string, unknown> | undefined,
+    }));
+    ok(res, { results, total: count, limit, offset });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] invocations');
+    err(res, 500, 'Failed to load invocations.');
+  }
 });
 
-publicRouter.get('/a11oy/formulas/history/:id', (req, res) => {
-  const hist = versionHistory.get(req.params.id) ?? [];
-  ok(res, { history: [...hist].reverse() });
+publicRouter.get('/a11oy/formulas/history/:id', async (req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(formulaVersionsTable)
+      .where(eq(formulaVersionsTable.formulaId, req.params.id))
+      .orderBy(desc(formulaVersionsTable.createdAt));
+    const history = rows.map((r) => ({
+      version: r.version,
+      parameters: r.parameters,
+      note: r.note ?? undefined,
+      createdAt: r.createdAt.toISOString(),
+    }));
+    ok(res, { history });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] history');
+    err(res, 500, 'Failed to load version history.');
+  }
 });
 
-publicRouter.get('/a11oy/formulas/proposals', (req, res) => {
-  const status = req.query.status ? String(req.query.status) : undefined;
-  const filtered = status ? proposals.filter((p) => p.status === status) : proposals;
-  ok(res, {
-    total: filtered.length,
-    proposals: [...filtered].reverse(),
-    byStatus: proposals.reduce<Record<string, number>>((acc, p) => {
-      acc[p.status] = (acc[p.status] ?? 0) + 1;
-      return acc;
-    }, {}),
-  });
+function proposalDto(row: typeof formulaTuningProposalsTable.$inferSelect) {
+  return {
+    id: row.id,
+    formulaId: row.formulaId,
+    fromVersion: row.fromVersion,
+    parameter: row.parameter,
+    oldValue: Number(row.oldValue),
+    newValue: Number(row.newValue),
+    proposalScore: Number(row.proposalScore),
+    rationale: row.rationale,
+    evidence: row.evidence,
+    proposedBy: row.proposedBy,
+    status: row.status,
+    decidedAt: row.decidedAt?.toISOString(),
+    decisionNote: row.decisionNote ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+const PROPOSAL_STATUSES = ['pending', 'approved', 'rejected', 'superseded'] as const;
+type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
+
+publicRouter.get('/a11oy/formulas/proposals', async (req, res) => {
+  try {
+    let status: ProposalStatus | undefined;
+    if (req.query.status !== undefined) {
+      const raw = String(req.query.status);
+      if (!(PROPOSAL_STATUSES as readonly string[]).includes(raw)) {
+        return err(
+          res,
+          400,
+          `Invalid status "${raw}". Expected one of: ${PROPOSAL_STATUSES.join(', ')}.`,
+        );
+      }
+      status = raw as ProposalStatus;
+    }
+    const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit ?? '100'), 10) || 100));
+    const offset = Math.max(0, parseInt(String(req.query.offset ?? '0'), 10) || 0);
+    const filter = status
+      ? eq(formulaTuningProposalsTable.status, status)
+      : undefined;
+
+    const [rows, [{ count: total }], statusCounts] = await Promise.all([
+      filter
+        ? db
+            .select()
+            .from(formulaTuningProposalsTable)
+            .where(filter)
+            .orderBy(desc(formulaTuningProposalsTable.createdAt))
+            .limit(limit)
+            .offset(offset)
+        : db
+            .select()
+            .from(formulaTuningProposalsTable)
+            .orderBy(desc(formulaTuningProposalsTable.createdAt))
+            .limit(limit)
+            .offset(offset),
+      filter
+        ? db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(formulaTuningProposalsTable)
+            .where(filter)
+        : db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(formulaTuningProposalsTable),
+      db
+        .select({
+          status: formulaTuningProposalsTable.status,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(formulaTuningProposalsTable)
+        .groupBy(formulaTuningProposalsTable.status),
+    ]);
+
+    const byStatus: Record<string, number> = {};
+    for (const r of statusCounts) byStatus[r.status] = r.count;
+
+    ok(res, {
+      total,
+      proposals: rows.map(proposalDto),
+      byStatus,
+      limit,
+      offset,
+    });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] proposals');
+    err(res, 500, 'Failed to load proposals.');
+  }
 });
 
 export interface ProposeTuningInProcessResult {
@@ -163,9 +352,9 @@ export interface ProposeTuningInProcessResult {
  * scheduled ROSIE evolution loop so server-side ticks don't need to
  * make a loopback HTTP request (and re-enter CSRF/auth middleware).
  */
-export function proposeTuningInProcess(
+export async function proposeTuningInProcess(
   body: Record<string, unknown>,
-): ProposeTuningInProcessResult {
+): Promise<ProposeTuningInProcessResult> {
   try {
     const partial = body as Partial<ObservedEvent>;
     if (!partial.formulaId || typeof partial.parameter !== 'string') {
@@ -211,26 +400,28 @@ export function proposeTuningInProcess(
         },
       };
     }
-    const row: ProposalRow = {
-      id: nextProposalId++,
-      formulaId: decision.proposal.formulaId,
-      fromVersion: decision.proposal.fromVersion,
-      parameter: decision.proposal.parameter,
-      oldValue: decision.proposal.oldValue,
-      newValue: decision.proposal.newValue,
-      proposalScore: decision.proposal.score,
-      rationale: decision.proposal.rationale,
-      evidence: decision.proposal.evidence,
-      proposedBy: 'rosie',
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-    proposals.push(row);
+
+    const [inserted] = await db
+      .insert(formulaTuningProposalsTable)
+      .values({
+        formulaId: decision.proposal.formulaId,
+        fromVersion: decision.proposal.fromVersion,
+        parameter: decision.proposal.parameter,
+        oldValue: String(decision.proposal.oldValue),
+        newValue: String(decision.proposal.newValue),
+        proposalScore: String(decision.proposal.score),
+        rationale: decision.proposal.rationale,
+        evidence: decision.proposal.evidence,
+        proposedBy: 'rosie',
+        status: 'pending',
+      })
+      .returning();
+
     return {
       status: 200,
       envelope: {
         ok: true,
-        data: { accepted: true, proposal: row },
+        data: { accepted: true, proposal: proposalDto(inserted) },
         meta: { timestamp: new Date().toISOString() },
       },
     };
@@ -243,28 +434,10 @@ export function proposeTuningInProcess(
   }
 }
 
-protectedRouter.post('/a11oy/formulas/propose-tuning', (req, res) => {
-  const result = proposeTuningInProcess((req.body ?? {}) as Record<string, unknown>);
+protectedRouter.post('/a11oy/formulas/propose-tuning', async (req, res) => {
+  const result = await proposeTuningInProcess((req.body ?? {}) as Record<string, unknown>);
   res.status(result.status).json(result.envelope);
 });
-
-function decide(id: number, status: 'approved' | 'rejected', note?: string) {
-  const p = proposals.find((row) => row.id === id);
-  if (!p) return null;
-  if (p.status !== 'pending') return p;
-  p.status = status;
-  p.decidedAt = new Date().toISOString();
-  p.decisionNote = note;
-  if (status === 'approved') {
-    const hist = versionHistory.get(p.formulaId) ?? [];
-    const last = hist[hist.length - 1];
-    const params = { ...(last?.parameters ?? {}), [p.parameter]: p.newValue };
-    const next = bumpVersion(last?.version ?? p.fromVersion);
-    hist.push({ version: next, parameters: params, note: `tuning #${p.id}: ${p.rationale.slice(0, 200)}`, createdAt: new Date().toISOString() });
-    versionHistory.set(p.formulaId, hist);
-  }
-  return p;
-}
 
 function bumpVersion(v: string): string {
   const parts = v.split('.').map((n) => parseInt(n, 10));
@@ -272,18 +445,116 @@ function bumpVersion(v: string): string {
   return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
 }
 
-protectedRouter.post('/a11oy/formulas/approve-tuning/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const result = decide(id, 'approved', String(req.body?.note ?? ''));
-  if (!result) return err(res, 404, `Proposal ${id} not found.`);
-  ok(res, result);
+async function decide(
+  id: number,
+  status: 'approved' | 'rejected',
+  note?: string,
+): Promise<ReturnType<typeof proposalDto> | null> {
+  // Run the whole decision — proposal status update, version insert,
+  // and formula parameter mirror — inside one transaction so a mid-way
+  // failure can never leave an approved proposal without its version
+  // row / current parameter snapshot.
+  return await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(formulaTuningProposalsTable)
+      .where(eq(formulaTuningProposalsTable.id, id))
+      .limit(1);
+    if (!existing) return null;
+    if (existing.status !== 'pending') return proposalDto(existing);
+
+    // Conditional UPDATE guards against concurrent decisions across replicas.
+    const [updated] = await tx
+      .update(formulaTuningProposalsTable)
+      .set({
+        status,
+        decidedAt: new Date(),
+        decisionNote: note ?? null,
+      })
+      .where(
+        and(
+          eq(formulaTuningProposalsTable.id, id),
+          eq(formulaTuningProposalsTable.status, 'pending'),
+        ),
+      )
+      .returning();
+    if (!updated) {
+      const [snapshot] = await tx
+        .select()
+        .from(formulaTuningProposalsTable)
+        .where(eq(formulaTuningProposalsTable.id, id))
+        .limit(1);
+      return snapshot ? proposalDto(snapshot) : null;
+    }
+
+    if (status === 'approved') {
+      const [latestVersion] = await tx
+        .select()
+        .from(formulaVersionsTable)
+        .where(eq(formulaVersionsTable.formulaId, updated.formulaId))
+        .orderBy(desc(formulaVersionsTable.createdAt))
+        .limit(1);
+
+      const [formulaRow] = await tx
+        .select()
+        .from(formulasTable)
+        .where(eq(formulasTable.formulaId, updated.formulaId))
+        .limit(1);
+
+      const registryEntry = getFormula(updated.formulaId);
+      const baselineParams: Record<string, number> =
+        latestVersion?.parameters ??
+        formulaRow?.parameters ??
+        (registryEntry
+          ? Object.fromEntries(registryEntry.parameters.map((p) => [p.name, p.default]))
+          : {});
+
+      const nextParams = { ...baselineParams, [updated.parameter]: Number(updated.newValue) };
+      const nextVersion = bumpVersion(latestVersion?.version ?? updated.fromVersion);
+
+      await tx.insert(formulaVersionsTable).values({
+        formulaId: updated.formulaId,
+        version: nextVersion,
+        parameters: nextParams,
+        note: `tuning #${updated.id}: ${updated.rationale.slice(0, 200)}`,
+      });
+
+      await tx
+        .update(formulasTable)
+        .set({
+          parameters: nextParams,
+          currentVersion: nextVersion,
+          updatedAt: new Date(),
+        })
+        .where(eq(formulasTable.formulaId, updated.formulaId));
+    }
+
+    return proposalDto(updated);
+  });
+}
+
+protectedRouter.post('/a11oy/formulas/approve-tuning/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const result = await decide(id, 'approved', String(req.body?.note ?? ''));
+    if (!result) return err(res, 404, `Proposal ${id} not found.`);
+    ok(res, result);
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] approve-tuning');
+    err(res, 500, 'Failed to approve proposal.');
+  }
 });
 
-protectedRouter.post('/a11oy/formulas/reject-tuning/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const result = decide(id, 'rejected', String(req.body?.note ?? ''));
-  if (!result) return err(res, 404, `Proposal ${id} not found.`);
-  ok(res, result);
+protectedRouter.post('/a11oy/formulas/reject-tuning/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const result = await decide(id, 'rejected', String(req.body?.note ?? ''));
+    if (!result) return err(res, 404, `Proposal ${id} not found.`);
+    ok(res, result);
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy-formulas] reject-tuning');
+    err(res, 500, 'Failed to reject proposal.');
+  }
 });
 
 export const a11oyFormulasPublicRouter = publicRouter;
