@@ -68,7 +68,7 @@ export default function ComputePage() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div>
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">CONDUIT · COMPUTE · ORCHESTRATION</p>
+        <p className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">AMARU · COMPUTE · ORCHESTRATION</p>
         <h1 className="text-2xl font-display font-bold tracking-tight">Compute Orchestration</h1>
         <p className="text-sm text-muted-foreground mt-1">
           GPU/CPU cluster management across Kubernetes, Slurm, dstack, and Lambda Cloud.

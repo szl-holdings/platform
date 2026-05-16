@@ -11,7 +11,34 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const RAW_ROOT = resolve(HERE, "..", "raw");
+
+// When bundled into another package's dist/ (e.g. api-server/dist/server.mjs),
+// `import.meta.url` no longer points at packages/payload/src/, so the default
+// `../raw` resolution misses. Probe a series of candidates and use the first
+// one that actually contains payload.json.
+import { existsSync } from "node:fs";
+const RAW_CANDIDATES: string[] = [
+  resolve(HERE, "..", "raw"),
+  resolve(HERE, "..", "..", "raw"),
+  resolve(HERE, "..", "..", "..", "packages", "payload", "raw"),
+  resolve(HERE, "..", "..", "..", "..", "packages", "payload", "raw"),
+  resolve(process.cwd(), "packages", "payload", "raw"),
+  resolve(process.cwd(), "..", "..", "packages", "payload", "raw"),
+  resolve(process.cwd(), "..", "packages", "payload", "raw"),
+];
+function pickRawRoot(): string {
+  for (const c of RAW_CANDIDATES) {
+    try {
+      if (existsSync(join(c, "payload.json"))) return c;
+    } catch {
+      // continue
+    }
+  }
+  throw new Error(
+    `@szl-holdings/payload: cannot locate raw/payload.json; probed: ${RAW_CANDIDATES.join(", ")}`,
+  );
+}
+const RAW_ROOT = pickRawRoot();
 
 function readJson<T = unknown>(rel: string): T {
   return JSON.parse(readFileSync(join(RAW_ROOT, rel), "utf8")) as T;

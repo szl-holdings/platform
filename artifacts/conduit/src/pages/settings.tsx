@@ -251,7 +251,7 @@ export default function Settings() {
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <dt className="text-muted-foreground">Version</dt><dd className="font-mono">1.0.0</dd>
           <dt className="text-muted-foreground">Environment</dt><dd className="font-mono">development</dd>
-          <dt className="text-muted-foreground">API Base</dt><dd className="font-mono text-xs truncate">/api/conduit</dd>
+          <dt className="text-muted-foreground">API Base</dt><dd className="font-mono text-xs truncate">/api/amaru</dd>
           <dt className="text-muted-foreground">Destinations</dt><dd>13 supported</dd>
         </dl>
       </div>

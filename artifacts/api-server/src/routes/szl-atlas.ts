@@ -4,15 +4,43 @@ import path from "node:path";
 
 const router: IRouter = Router();
 
-const AUDIT_DIR = path.join(__dirname, "..", "data", "audit");
-
 type AuditFile = "github_full.json" | "thesis_atlas.json" | "gap_report.json" | "backlog.json";
+
+const AUDIT_CANDIDATES: string[] = [
+  path.join(__dirname, "data", "audit"),
+  path.join(__dirname, "..", "data", "audit"),
+  path.join(__dirname, "..", "..", "data", "audit"),
+  path.join(process.cwd(), "dist", "data", "audit"),
+  path.join(process.cwd(), "src", "data", "audit"),
+  path.join(process.cwd(), "data", "audit"),
+  path.join(process.cwd(), "artifacts", "api-server", "dist", "data", "audit"),
+  path.join(process.cwd(), "artifacts", "api-server", "src", "data", "audit"),
+];
+
+let resolvedAuditDir: string | null = null;
+function findAuditDir(file: AuditFile): string {
+  if (resolvedAuditDir) return resolvedAuditDir;
+  for (const dir of AUDIT_CANDIDATES) {
+    try {
+      if (fs.existsSync(path.join(dir, file))) {
+        resolvedAuditDir = dir;
+        return dir;
+      }
+    } catch {
+      // ignore and continue probing
+    }
+  }
+  throw new Error(
+    `audit data directory not found; probed: ${AUDIT_CANDIDATES.join(", ")}`,
+  );
+}
 
 const cache: Partial<Record<AuditFile, unknown>> = {};
 
 function loadAudit(file: AuditFile): unknown {
   if (cache[file] !== undefined) return cache[file];
-  const full = path.join(AUDIT_DIR, file);
+  const dir = findAuditDir(file);
+  const full = path.join(dir, file);
   const raw = fs.readFileSync(full, "utf8");
   const parsed = JSON.parse(raw);
   cache[file] = parsed;
