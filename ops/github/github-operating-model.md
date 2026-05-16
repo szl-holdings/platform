@@ -25,7 +25,7 @@ This document defines how we use GitHub as the platform for source control, code
 
 | Branch | Purpose | Protected |
 |--------|---------|-----------|
-| `main` / `master` | Canonical trunk — always deployable | Yes |
+| `main` | Canonical trunk — always deployable | Yes |
 | `feat/<name>` | Feature work | No |
 | `fix/<name>` | Bug fixes | No |
 | `chore/<name>` | Tooling, config, non-functional | No |

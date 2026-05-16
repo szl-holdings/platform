@@ -25,7 +25,7 @@
     "packages": false
   },
   "branch_protection": {
-    "branch": "master",
+    "branch": "main",
     "required_status_checks": ["ci", "build"],
     "require_pull_request": true,
     "include_administrators": true,

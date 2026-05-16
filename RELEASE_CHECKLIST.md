@@ -75,10 +75,10 @@ This executes `brand:check → typecheck → test → audit:mocks → audit:rout
 
 ## Release Execution
 
-1. Ensure `master`/`main` branch is up to date and all above checks pass
+1. Ensure `main` branch is up to date and all above checks pass
 2. Update `CHANGELOG.md` with the new version and date
 3. Commit: `chore(release): vX.Y.Z`
-4. Push to `master` — `release.yml` creates the tag and GitHub Release automatically
+4. Push to `main` — `release.yml` creates the tag and GitHub Release automatically
 5. Confirm staging deployment succeeds
 6. Confirm production deployment succeeds (triggered by release publication)
 7. Verify the live production deployment is healthy via `pnpm verify:health`

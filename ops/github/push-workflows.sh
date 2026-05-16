@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Push .github/workflows/ to szl-holdings/szl-holdings-platform on master and main.
+# Push .github/workflows/ to szl-holdings/szl-holdings-platform on main.
 #
 # Why this script exists:
 # Replit's GitHub OAuth connection has the `repo` scope but not the `workflow` scope.
@@ -12,7 +12,7 @@
 #   3. bash ops/github/push-workflows.sh
 #
 # This script clones the repo to a tempdir, copies the workflow files in, and pushes
-# both master and main. Idempotent — safe to re-run.
+# to main. Idempotent — safe to re-run.
 set -euo pipefail
 
 OWNER="szl-holdings"
@@ -62,7 +62,6 @@ security, readiness-gate, proof-chain, brand-strings) remain unchanged."
   git push origin "$branch"
 }
 
-push_branch master
 push_branch main
 
 echo ">>> done. Verify at https://github.com/${OWNER}/${REPO}/actions"

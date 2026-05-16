@@ -30,7 +30,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | axe-based accessibility audit per artifact surface — WCAG 2.1 AA coverage |
-| **Triggers** | `pull_request` → main/master; `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM — advisory only; catches ARIA and alt-text regressions |
 | **Required Status** | No — advisory; does not block merge |
 | **Action** | KEEP |
@@ -56,7 +56,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Runs `pnpm audit:full` — route coverage, mock register, dependency audit, env validation |
-| **Triggers** | `pull_request` → main/master; `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM — catches drift in route coverage and mock registers; complements CI |
 | **Required Status** | No — advisory |
 | **Action** | KEEP |
@@ -82,7 +82,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Full monorepo build verification (all artifacts) |
-| **Triggers** | `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM-HIGH — catches build regressions that TypeScript typecheck misses |
 | **Required Status** | No — advisory |
 | **Action** | KEEP |
@@ -95,7 +95,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Primary quality gate: lint, TypeScript typecheck, unit tests |
-| **Triggers** | `pull_request` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `workflow_dispatch` |
 | **Signal Quality** | HIGH — the single most important workflow |
 | **Required Status** | **Yes** — status check name `CI`; registered in branch protection; blocks merge on failure |
 | **Action** | KEEP |
@@ -121,7 +121,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Enforces conventional commit message format on PRs |
-| **Triggers** | `pull_request` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM — enables auto-release bump detection in `release.yml`; maintains changelog quality |
 | **Required Status** | No — advisory; failure is visible but does not block merge |
 | **Action** | KEEP |
@@ -147,7 +147,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Blocks PRs that introduce high/critical vulnerability-scored dependencies or GPL/AGPL licensed packages |
-| **Triggers** | `pull_request` → main/master |
+| **Triggers** | `pull_request` → main |
 | **Signal Quality** | HIGH — required status check; actionable on every dependency bump |
 | **Required Status** | **Yes** — status check name `dependency-review`; registered in branch protection; blocks merge on failure |
 | **Action** | KEEP |
@@ -172,8 +172,8 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 
 | Field | Value |
 |---|---|
-| **Purpose** | Deploy to the staging environment on every push to main/master |
-| **Triggers** | `push` → main/master |
+| **Purpose** | Deploy to the staging environment on every push to main |
+| **Triggers** | `push` → main |
 | **Signal Quality** | HIGH — continuous staging deployment provides fast post-merge feedback |
 | **Required Status** | No — post-merge trigger |
 | **Action** | KEEP |
@@ -186,7 +186,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | End-to-end test suite across artifact surfaces |
-| **Triggers** | `pull_request` → main/master; `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM-HIGH — catches startup/crash regressions even with minimal test coverage |
 | **Required Status** | **Yes** — status check name `E2E Gate`; registered in branch protection; blocks merge on failure |
 | **Action** | KEEP |
@@ -199,7 +199,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Performance, accessibility, and best-practice scoring per artifact surface via Lighthouse CI |
-| **Triggers** | `pull_request` → main/master; `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main; `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM-HIGH — required status check; catches performance regressions and a11y score drops |
 | **Required Status** | **Yes** — status check name `Lighthouse Gate`; registered in branch protection; blocks merge on failure |
 | **Action** | KEEP |
@@ -212,7 +212,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Visual regression snapshot comparison for PRAXIS (mockup-sandbox) design system components |
-| **Triggers** | `pull_request` → main/master; `workflow_dispatch` (with baseline update option) |
+| **Triggers** | `pull_request` → main; `workflow_dispatch` (with baseline update option) |
 | **Signal Quality** | MEDIUM — catches design system regressions; manual baseline update flow is correctly gated |
 | **Required Status** | No — advisory |
 | **Action** | KEEP |
@@ -264,7 +264,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Validates README image paths, portfolio table sync with artifact registry, and profile README assets |
-| **Triggers** | `pull_request` → main/master (path-scoped: README, docs, assets, workflow files); `push` → main/master (same paths) |
+| **Triggers** | `pull_request` → main (path-scoped: README, docs, assets, workflow files); `push` → main (same paths) |
 | **Signal Quality** | MEDIUM — path-scoped so it runs only when relevant; catches broken asset references before they ship |
 | **Required Status** | No — advisory |
 | **Action** | KEEP |
@@ -276,8 +276,8 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 
 | Field | Value |
 |---|---|
-| **Purpose** | Automatic version bump detection and GitHub Release creation on push to main/master; manual dispatch with explicit bump type option |
-| **Triggers** | `push` → main/master; `workflow_dispatch` (with version_bump choice input) |
+| **Purpose** | Automatic version bump detection and GitHub Release creation on push to main; manual dispatch with explicit bump type option |
+| **Triggers** | `push` → main; `workflow_dispatch` (with version_bump choice input) |
 | **Signal Quality** | HIGH — the canonical release creation path |
 | **Required Status** | No — post-merge trigger |
 | **Action** | KEEP |
@@ -290,7 +290,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Gitleaks scan of the commits introduced by each PR — catches secrets before they reach `main` |
-| **Triggers** | `pull_request` → main/master |
+| **Triggers** | `pull_request` → main |
 | **Signal Quality** | HIGH — the job fails and blocks the PR merge UI when Gitleaks finds a secret |
 | **Required Status** | No — not registered as a named required status check in branch protection (confirmed: the 5 required checks are CI, E2E Gate, Lighthouse Gate, dependency-review, analyze). However, a Gitleaks failure causes the job to exit 1, which shows as a failed check on the PR and requires dismissal or fix before merge under the current flow. |
 | **Action** | KEEP |
@@ -342,7 +342,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 | Field | Value |
 |---|---|
 | **Purpose** | Detects metric drift between `audit/source-of-truth.json` (investor-facing claim file) and the actual codebase counts |
-| **Triggers** | `pull_request` → main/master (path-scoped: source-of-truth.json, verify.sh, api routes, packages, lib, screenshots); `push` → main/master; `workflow_dispatch` |
+| **Triggers** | `pull_request` → main (path-scoped: source-of-truth.json, verify.sh, api routes, packages, lib, screenshots); `push` → main; `workflow_dispatch` |
 | **Signal Quality** | MEDIUM — prevents stale investor claim files from diverging from reality |
 | **Required Status** | No — advisory |
 | **Action** | KEEP |
@@ -352,7 +352,7 @@ All 25 workflows provide real signal or serve a documented operational purpose. 
 
 ## Branch Protection — Required Status Checks
 
-The following five status checks are registered as **required** in branch protection on `main`/`master`. Confirmed from Task #2825 audit.
+The following five status checks are registered as **required** in branch protection on `main`. Confirmed from Task #2825 audit.
 
 | Status Check Name | Workflow File | Blocks Merge |
 |---|---|---|

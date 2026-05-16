@@ -17,7 +17,7 @@
  *   git commit -m "chore: update PRAXIS visual regression baselines"
  *
  * CI behaviour:
- *   - Runs on every PR against master/main.
+ *   - Runs on every PR against main.
  *   - Fails if any baseline PNG is missing.
  *   - Fails if any screenshot differs from baseline by more than 0.5%.
  *   - Diffs are uploaded as CI artifacts on failure.

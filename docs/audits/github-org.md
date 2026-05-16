@@ -28,7 +28,7 @@ The SZL org was already partway there (READMEs in our voice, LICENSE/SECURITY/NO
 
 | Repo | Visibility | Default branch | License | README | SECURITY | CONTRIBUTING | CoC | CI badge | Topics |
 |---|---|---|---|---|---|---|---|---|---|
-| `szl-holdings-platform` | public | `master` → **`main`** ✅ | Proprietary | ✅ | ✅ | ✅ (was) | ✅ (was) | ✅ (own CI) | 19 |
+| `szl-holdings-platform` | public | `main` ✅ (renamed from `master` 2026-05-16) | Proprietary | ✅ | ✅ | ✅ (was) | ✅ (was) | ✅ (own CI) | 19 |
 | `.github` (org profile) | public | `main` | — | ✅ | ✅ | **added** ✅ | **added** ✅ | n/a | 4 |
 | `a11oy` | public | `main` | Proprietary | ✅ + **badges** ✅ | ✅ | **added** ✅ | **added** ✅ | ✅ (platform CI) | 7 |
 | `sentra` | public | `main` | Proprietary | ✅ + **badges** ✅ | ✅ | **added** ✅ | **added** ✅ | ✅ (platform CI) | 7 |

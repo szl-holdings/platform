@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # configure-branch-protection.sh
 #
-# One-shot script to configure branch protection for main/master via the
+# One-shot script to configure branch protection for main via the
 # GitHub GraphQL API.
 #
 # PREREQUISITE: The repository must be either:
@@ -79,17 +79,8 @@ EOF
 
 create_rule "main"
 
-# master is optional — skip if it doesn't exist
-if curl -fsSL -H "${AUTH_HEADER}" \
-  "https://api.github.com/repos/${OWNER}/${REPO}/branches/master" \
-  | jq -e '.name' > /dev/null 2>&1; then
-  create_rule "master"
-else
-  echo "  (master branch not found — skipped)"
-fi
-
 echo ""
 echo "Branch protection applied.  Verify at:"
 echo "  https://github.com/${OWNER}/${REPO}/settings/branches"
 echo ""
-echo "Note: the repo's default branch is 'master'; both 'main' and 'master' patterns are configured."
+echo "Note: the repo's default branch is 'main' (renamed from 'master' on 2026-05-16)."

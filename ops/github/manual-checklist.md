@@ -48,7 +48,7 @@ Use this checklist when performing GitHub operations manually through the web in
 
 1. Navigate to: Settings → Branches
 2. Click **Add branch protection rule**
-3. Branch name pattern: `master`
+3. Branch name pattern: `main`
 
 - [ ] **Require a pull request before merging:** ✅ (recommended for public mirror discipline)
 - [ ] **Require status checks to pass before merging:** ✅ (if CI workflows are active)
@@ -88,7 +88,7 @@ Use this checklist when performing GitHub operations manually through the web in
 
 1. Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/releases/new`
 2. Click **Choose a tag** → Type `v0.1.0` → Click **Create new tag: v0.1.0 on publish**
-3. Target: `master`
+3. Target: `main`
 4. **Release title:** `v0.1.0 — Initial Public Platform Release`
 5. **Description:** Copy from `docs/releases/v0.1.0.md`
 6. **Mark as latest release:** ✅ Yes (for pre-commercial, can also mark as pre-release)
@@ -172,7 +172,7 @@ After all steps above:
 - [ ] Repository description is set (new canonical description)
 - [ ] Topics are added (11 recommended topics from `recommended-topics.md`)
 - [ ] Homepage URL is set
-- [ ] Branch protection is applied to `master`
+- [ ] Branch protection is applied to `main`
 - [ ] Profile README repository exists and is populated
 - [ ] GitHub profile settings are updated
 - [ ] v0.1.0 release is published

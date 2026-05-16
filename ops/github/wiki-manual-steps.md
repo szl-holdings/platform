@@ -78,7 +78,7 @@ If the sidebar is not visible, GitHub may not have rendered the `_Sidebar.md`. C
 
 **Alternative:** For reliable image rendering in the wiki, host images as GitHub release assets or use absolute GitHub raw content URLs:
 ```
-https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/lyte-overview.jpg
+https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/media/screenshots/lyte-overview.jpg
 ```
 
 Update the image URLs in `docs/wiki/wiki-seed/Screenshots-and-Demos.md` if relative paths do not render.

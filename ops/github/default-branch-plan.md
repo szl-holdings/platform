@@ -1,19 +1,20 @@
 # SZL Holdings — Default Branch Plan
 
-**Version:** 1.0  
-**Date:** April 2026  
+**Version:** 2.0
+**Date:** May 2026
 **Authority:** Stephen Lutar, Founder
 
 ---
 
 ## 1. Current Branch State
 
-| Repository | Current Default Branch | Intended Default Branch | Action Required |
-|------------|------------------------|-------------------------|-----------------|
-| `szl-holdings-platform` | `master` | `master` | No change — already correct |
-| `stephenlutar2-hash` (profile README) | `main` | `main` | No change — already correct |
+| Repository | Default Branch | Notes |
+|------------|----------------|-------|
+| `szl-holdings-platform` | `main` | Renamed from `master` on 2026-05-16 to unify with the rest of the org |
+| `stephenlutar2-hash` (profile README) | `main` | Unchanged |
+| All other `szl-holdings/*` repos | `main` | Unchanged |
 
-**Assessment:** The default branch configuration is already aligned with the intended strategy. No migration is needed.
+**Assessment:** All repositories in the `szl-holdings` GitHub org now use `main` as the default branch. There is no remaining branch-name drift.
 
 ---
 
@@ -21,17 +22,16 @@
 
 ### 2.1 Flagship Platform Repo (`szl-holdings-platform`)
 
-**Default branch:** `master`
+**Default branch:** `main`
 
 **Rationale:**
-- `master` was the chosen branch at project inception and is already in use
-- Changing to `main` would require updating all documentation references, mirror scripts, and automation — unnecessary churn
-- The branch name `master` has no bearing on credibility for investors or technical evaluators
-- Consistency within the project is more important than convention alignment
+- `main` is the org-wide convention used by every other `szl-holdings/*` repo.
+- Aligning on a single branch name removes a small but visible inconsistency for outside reviewers and simplifies org-wide tooling/scripts that assume one branch name.
+- The historical name `master` carried no functional meaning — the rename is a cosmetic / consistency change only.
 
 **Branch policy:**
 ```
-master (single published branch — always clean and buildable)
+main (single published branch — always clean and buildable)
   └── No feature branches are published
   └── No draft/WIP branches are exposed publicly
   └── All development happens in Replit workspace
@@ -43,22 +43,21 @@ master (single published branch — always clean and buildable)
 **Default branch:** `main`
 
 **Rationale:**
-- GitHub creates new repos with `main` as default
-- The profile README repo is a simple single-file repo — no branching complexity
-- `main` is appropriate for this use case
+- GitHub creates new repos with `main` as default.
+- The profile README repo is a simple single-file repo — no branching complexity.
 
 ---
 
 ## 3. Branch Protection Configuration
 
-### For `szl-holdings-platform` (Master)
+### For `szl-holdings-platform` (Main)
 
-Apply the following branch protection rules at:  
+Apply the following branch protection rules at:
 `https://github.com/szl-holdings/szl-holdings-platform/settings/branches`
 
 | Rule | Setting | Rationale |
 |------|---------|-----------|
-| **Target branch** | `master` | Protect the published mirror branch |
+| **Target branch** | `main` | Protect the published mirror branch |
 | **Require pull request** | ✅ Enable | No direct pushes — all changes via PR |
 | **Required approvals** | 1 (self-review OK for solo founder) | Enforce deliberate review |
 | **Require status checks** | Enable if CI is active | Block broken builds |
@@ -66,11 +65,9 @@ Apply the following branch protection rules at:
 | **No force pushes** | ✅ Enable | Prevent history rewriting on public branch |
 | **No deletions** | ✅ Enable | Prevent accidental branch deletion |
 
-**Note:** For a founder-run monorepo with mirror pushes, branch protection rules primarily protect against accidental force pushes and deletions rather than enforcing PR-based workflows. Direct mirror push (`git push -f origin master`) is acceptable for the initial setup but should transition to PR-based updates as the team grows.
-
 **CLI command (requires `gh auth login`):**
 ```bash
-gh api repos/szl-holdings/szl-holdings-platform/branches/master/protection \
+gh api repos/szl-holdings/szl-holdings-platform/branches/main/protection \
   --method PUT \
   --field required_status_checks=null \
   --field enforce_admins=true \
@@ -106,55 +103,51 @@ If additional branches are ever created (for staging, hotfixes, or documentation
 
 ---
 
-## 5. Migration Steps (If Default Branch Change Is Ever Needed)
+## 5. Rename History — `master` → `main` (2026-05-16)
 
-If a decision is made to rename `master` to `main` in the future, follow these steps:
+The platform repo was renamed from `master` to `main` to unify naming across the org.
 
 ### Step 1: Rename via GitHub UI
 ```
-Settings → Branches → Default branch → Rename
+Settings → Branches → Default branch → Rename master → main
 ```
+GitHub automatically retargets open PRs and creates a permanent `master → main` redirect.
 
-### Step 2: Update Local/Replit References
+### Step 2: Update local clones
 ```bash
-# In Replit workspace
 git branch -m master main
 git fetch origin
 git branch -u origin/main main
 git remote set-head origin -a
 ```
 
-### Step 3: Update All Script References
+### Step 3: In-repo references updated in the same task
+- `.github/workflows/*.yml` — all push/pull-request triggers now target `branches: [main]` only.
+- `ops/github/repo-settings.json`, `ops/github/repo-metadata.json` — `branch_protection.branch` set to `main`.
+- `ops/github/push-workflows.sh` — pushes to `main` only.
+- `ops/github/configure-branch-protection.sh` — applies protection to `main` only.
+- `ops/github/manual-checklist.md` — UI checklist now uses `main`.
+- `ops/github/wiki-manual-steps.md` — raw image URL updated to `/main/`.
+- `ops/github/github-operating-model.md` — branch table simplified to `main`.
+- `profile-readme/README.md` — featured-repo links updated to `/main/`.
+- `docs/audits/github-org.md`, `docs/audits/github-audit-v9.md` — audit entries updated.
 
-Files that reference `master`:
-- `scripts/github/create-release.sh`
-- `ops/github/commands.sh`
-- `ops/github/commands.ps1`
-- `docs/public/public-mirror-policy.md`
-- `docs/audit/repo-canonicalization-plan.md`
-- `ops/github/manual-checklist.md`
-
-### Step 4: Update GitHub Actions
-
-Any workflow YAML files in `.github/workflows/` that specify `branches: [master]` must be updated to `branches: [main]`.
-
-### Step 5: Verify
-
+### Step 4: Verify
 ```bash
 gh repo view szl-holdings/szl-holdings-platform --json defaultBranchRef
 ```
 
 ---
 
-## 6. Current Decision: No Change Required
+## 6. Current Decision
 
-**Decision:** Keep `master` as the default branch for `szl-holdings-platform`.
+**Decision:** `main` is the default and only published branch for `szl-holdings-platform`. The `master` branch has been retired.
 
-**Reviewed by:** Stephen Lutar  
-**Date:** April 2026  
+**Reviewed by:** Stephen Lutar
+**Date:** May 2026
 **Next review:** Before v1.0.0 release
 
 ---
 
-*Maintained by: Stephen Lutar, Founder — SZL Holdings*  
+*Maintained by: Stephen Lutar, Founder — SZL Holdings*
 *See also: [Manual Checklist](manual-checklist.md) | [Repo Canonicalization Plan](../../docs/audit/repo-canonicalization-plan.md)*

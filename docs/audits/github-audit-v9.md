@@ -58,7 +58,7 @@
 | License | NOASSERTION ⚠ |
 | `CITATION.cff` | ❌ → **created in this audit** at repo root |
 | `.zenodo.json` | ❌ → **created in this audit** at repo root |
-| Default branch | `master` (note: differs from the other two which use `main`) |
+| Default branch | `main` (unified with the other org repos as of 2026-05-16) |
 | Docs surface | 30+ top-level `.md` (ARCHITECTURE, API-CATALOGUE, DATA-MODEL, etc.) ✅ |
 | Workflows | 19 (CI, CodeQL, Lighthouse CI, E2E, Dep Review, Secret Scan, Release, Deploy-Staging, Post-Deploy Smoke, etc.) ✅ |
 | `CODE_OF_CONDUCT.md` / `CONTRIBUTING.md` / `SECURITY.md` | All ✅ |
@@ -120,7 +120,7 @@ Once the v9 DOI is live, append it to root `CITATION.cff` `identifiers:` here (`
 | P1 | ouroboros, szl-holdings-platform | Replace `NOASSERTION` license with explicit SPDX tag (`MIT`, `Apache-2.0`, or `BUSL-1.1` depending on intent) |
 | P1 | ouroboros-thesis | Add CI workflow (markdown lint + PDF render) |
 | P2 | ouroboros-thesis, ouroboros | Add `CONTRIBUTING.md` + `CODE_OF_CONDUCT.md` (already present in main platform — lift verbatim) |
-| P2 | All | Enable branch protection on `main`/`master`: required reviews, required status checks, signed commits |
+| P2 | All | Enable branch protection on `main`: required reviews, required status checks, signed commits |
 | P3 | All | Enable Dependabot security updates (already on Dependabot but verify auto-merge for patch) |
 
 ---

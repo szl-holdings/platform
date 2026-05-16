@@ -67,7 +67,7 @@ OpenAI  Anthropic  Gemini  Apollo GraphQL  Vite
 
 **[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform monorepo. TypeScript throughout.
 
-[Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) · [Architecture](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/architecture.md) · [Platform Primitives](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/platform-primitives.md)
+[Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/main/SECURITY.md) · [Architecture](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/architecture/architecture.md) · [Platform Primitives](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/architecture/platform-primitives.md)
 
 ---
 
