@@ -1,4 +1,13 @@
 import { type EmbedRequest, type EmbedResponse, type HybridSearchRequest, type HybridSearchResponse, type IngestRequest, type IngestResponse, type RerankRequest, type RerankResponse, EmbedResponseSchema, HybridSearchResponseSchema, IngestResponseSchema, RerankResponseSchema } from '@workspace/aef-contracts';
+import {
+  ReceiptChain,
+  hashJson,
+  type AuditClosureReceipt,
+  type LambdaReceipt,
+  type ReceiptStorage,
+} from '@szl-holdings/szl-receipts';
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { type AefClientConfig, resolveConfig } from './config.js';
 import {
   AefAuthError,
@@ -16,28 +25,112 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export interface AefReceiptsConfig {
+  enabled: boolean;
+  operatorId: string;
+  storagePath?: string;
+  /**
+   * Invoked when a receipt append fails. Receipt errors never block the
+   * primary API call, but they are surfaced here so operators can detect
+   * audit gaps. Defaults to `console.warn`.
+   */
+  onError?: (err: unknown, context: { endpoint: string }) => void;
+}
+
+export interface AefReceiptsHandle {
+  readonly enabled: boolean;
+  merkleRoot(): Promise<string>;
+  readAll(): Promise<LambdaReceipt[]>;
+  close(): Promise<AuditClosureReceipt>;
+}
+
+class JsonlFileStorage implements ReceiptStorage {
+  constructor(private readonly path: string) {
+    mkdirSync(dirname(path), { recursive: true });
+  }
+  append(receipt: LambdaReceipt): void {
+    appendFileSync(this.path, JSON.stringify(receipt) + '\n', 'utf8');
+  }
+  readAll(): LambdaReceipt[] {
+    if (!existsSync(this.path)) return [];
+    return readFileSync(this.path, 'utf8')
+      .split('\n')
+      .filter((l) => l.trim().length > 0)
+      .map((l) => JSON.parse(l) as LambdaReceipt);
+  }
+}
+
+class DisabledReceipts implements AefReceiptsHandle {
+  readonly enabled = false;
+  async merkleRoot(): Promise<string> {
+    throw new Error('AefClient: receipts are disabled. Pass { receipts: { enabled: true, operatorId } } to enable.');
+  }
+  async readAll(): Promise<LambdaReceipt[]> { return []; }
+  async close(): Promise<AuditClosureReceipt> {
+    throw new Error('AefClient: receipts are disabled. Pass { receipts: { enabled: true, operatorId } } to enable.');
+  }
+}
+
+class EnabledReceipts implements AefReceiptsHandle {
+  readonly enabled = true;
+  constructor(public readonly chain: ReceiptChain) {}
+  merkleRoot(): Promise<string> { return this.chain.merkleRoot(); }
+  readAll(): Promise<LambdaReceipt[]> { return this.chain.readAll(); }
+  close(): Promise<AuditClosureReceipt> { return this.chain.close(); }
+}
+
+export interface AefClientConfigWithReceipts extends AefClientConfig {
+  receipts?: AefReceiptsConfig;
+}
+
 export class AefClient {
   private readonly config: Required<AefClientConfig>;
+  readonly receipts: AefReceiptsHandle;
+  private readonly chain?: ReceiptChain;
+  private readonly onReceiptError: (err: unknown, ctx: { endpoint: string }) => void;
 
-  constructor(configOverrides: Partial<AefClientConfig> = {}) {
-    this.config = resolveConfig(configOverrides) as Required<AefClientConfig>;
+  constructor(configOverrides: Partial<AefClientConfigWithReceipts> = {}) {
+    const { receipts, ...rest } = configOverrides;
+    this.config = resolveConfig(rest) as Required<AefClientConfig>;
+    if (receipts?.enabled) {
+      if (!receipts.operatorId) {
+        throw new Error('AefClient: receipts.operatorId is required when receipts.enabled is true');
+      }
+      const storage = receipts.storagePath ? new JsonlFileStorage(receipts.storagePath) : undefined;
+      this.chain = new ReceiptChain({
+        operatorId: receipts.operatorId,
+        ...(storage ? { storage } : {}),
+      });
+      this.receipts = new EnabledReceipts(this.chain);
+      this.onReceiptError =
+        receipts.onError ??
+        ((err, ctx) => {
+          console.warn(`[aef-sdk] receipt append failed for ${ctx.endpoint}:`, err);
+        });
+    } else {
+      this.receipts = new DisabledReceipts();
+      this.onReceiptError = () => {};
+    }
   }
 
-  private buildHeaders(traceId?: string): Record<string, string> {
+  private buildHeaders(traceId: string | undefined, idempotencyKey: string): Record<string, string> {
     return {
       'content-type': 'application/json',
       authorization: `Bearer ${this.config.apiKey}`,
       'x-tenant-id': this.config.tenantId,
+      'idempotency-key': idempotencyKey,
       [this.config.traceHeaderName]: traceId ?? generateId(),
     };
   }
 
   private async fetchAef<T>(endpoint: string, body: unknown, traceId?: string): Promise<T> {
     const url = `${this.config.gatewayUrl}${endpoint}`;
-    const headers = this.buildHeaders(traceId);
+    const paramsHash = hashJson(body);
+    const headers = this.buildHeaders(traceId, paramsHash);
     const timeoutMs = this.config.timeoutMs;
 
     let lastError: unknown;
+    let lastStatus = 0;
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
       if (attempt > 0) {
         await sleep(this.config.retryDelayMs * 2 ** (attempt - 1));
@@ -53,6 +146,7 @@ export class AefClient {
           body: JSON.stringify(body),
           signal: controller.signal,
         });
+        lastStatus = response.status;
 
         if (response.status === 401) {
           throw new AefAuthError();
@@ -78,7 +172,9 @@ export class AefClient {
           throw lastError;
         }
 
-        return (await response.json()) as T;
+        const json = (await response.json()) as T;
+        await this.recordReceipt(endpoint, body, paramsHash, lastStatus, json);
+        return json;
       } catch (err) {
         if (
           err instanceof AefAuthError ||
@@ -110,6 +206,28 @@ export class AefClient {
       throw new AefUnavailableError(this.config.gatewayUrl, lastError);
     }
     throw lastError;
+  }
+
+  private async recordReceipt(
+    endpoint: string,
+    body: unknown,
+    paramsHash: string,
+    status: number,
+    result: unknown,
+  ): Promise<void> {
+    if (!this.chain) return;
+    try {
+      await this.chain.append({
+        endpoint,
+        method: 'POST',
+        params: body,
+        result,
+        metadata: { status, idempotencyKey: paramsHash, tenantId: this.config.tenantId },
+      });
+    } catch (err) {
+      // Audit gap is surfaced via onReceiptError; never breaks the call path.
+      this.onReceiptError(err, { endpoint });
+    }
   }
 
   private isNetworkError(err: unknown): boolean {
@@ -212,6 +330,6 @@ export function getDefaultClient(): AefClient {
   return _defaultClient;
 }
 
-export function createAefClient(config: Partial<AefClientConfig>): AefClient {
+export function createAefClient(config: Partial<AefClientConfigWithReceipts>): AefClient {
   return new AefClient(config);
 }

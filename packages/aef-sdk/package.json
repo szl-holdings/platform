@@ -1,6 +1,6 @@
 {
   "name": "@workspace/aef-sdk",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "description": "Continuum Fabric — Business Observability Fabric SDK — typed SDK client for Continuum Fabric native API. Provides embed(), rerank(), hybridSearch(), and ingest() with centralized bearer-token + tenant header management, automatic retry with exponential backoff, OpenTelemetry trace propagation, and React hooks for query-bound usage.",
@@ -27,7 +27,8 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*"
+    "@workspace/aef-contracts": "workspace:*",
+    "@szl-holdings/szl-receipts": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18.0.0"

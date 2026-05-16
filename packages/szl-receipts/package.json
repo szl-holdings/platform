@@ -1,0 +1,26 @@
+{
+  "name": "@szl-holdings/szl-receipts",
+  "version": "0.1.0",
+  "description": "Λ-receipt chain — SHA-256 linked LambdaReceipt[] with Merkle root + audit-closure receipts. Shared between @szl-holdings/sdk and @workspace/aef-sdk.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

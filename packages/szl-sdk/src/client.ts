@@ -1,3 +1,7 @@
+import { ReceiptChain, type ReceiptStorage, type LambdaReceipt, type AuditClosureReceipt } from '@szl-holdings/szl-receipts';
+import { appendFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { dirname } from 'node:path';
+
 import { HttpClient } from './http.js';
 import type { SZLClientOptions } from './types.js';
 import { ApiKeysResource } from './resources/api-keys.js';
@@ -9,6 +13,72 @@ import { TreasuryResource } from './resources/treasury.js';
 import { EsignatureResource } from './resources/esignature.js';
 import { CourtFilingsResource } from './resources/court-filings.js';
 import { PluginsResource } from './resources/plugins.js';
+
+export interface SZLReceiptsConfig {
+  enabled: boolean;
+  operatorId: string;
+  /** Optional path to a JSONL file. If omitted, receipts live in-memory only. */
+  storagePath?: string;
+  /**
+   * Invoked when a receipt fails to append (e.g. disk full). Receipt errors
+   * never block the SDK call path, but they are surfaced here so operators
+   * can detect audit gaps. If omitted, errors are logged via `console.warn`.
+   */
+  onError?: (err: unknown, context: { path: string; method: string }) => void;
+}
+
+export interface SZLClientOptionsWithReceipts extends SZLClientOptions {
+  receipts?: SZLReceiptsConfig;
+}
+
+class JsonlFileStorage implements ReceiptStorage {
+  constructor(private readonly path: string) {
+    mkdirSync(dirname(path), { recursive: true });
+  }
+  append(receipt: LambdaReceipt): void {
+    appendFileSync(this.path, JSON.stringify(receipt) + '\n', 'utf8');
+  }
+  readAll(): LambdaReceipt[] {
+    if (!existsSync(this.path)) return [];
+    const text = readFileSync(this.path, 'utf8');
+    return text
+      .split('\n')
+      .filter((l) => l.trim().length > 0)
+      .map((l) => JSON.parse(l) as LambdaReceipt);
+  }
+}
+
+/**
+ * Public surface exposed via `client.receipts`. Methods are deliberately
+ * thin pass-throughs to the underlying `ReceiptChain`.
+ */
+export interface ReceiptsHandle {
+  readonly enabled: boolean;
+  merkleRoot(): Promise<string>;
+  readAll(): Promise<LambdaReceipt[]>;
+  close(): Promise<AuditClosureReceipt>;
+}
+
+class DisabledReceipts implements ReceiptsHandle {
+  readonly enabled = false;
+  async merkleRoot(): Promise<string> {
+    throw new Error('SZLClient: receipts are disabled. Pass { receipts: { enabled: true, operatorId } } to enable.');
+  }
+  async readAll(): Promise<LambdaReceipt[]> {
+    return [];
+  }
+  async close(): Promise<AuditClosureReceipt> {
+    throw new Error('SZLClient: receipts are disabled. Pass { receipts: { enabled: true, operatorId } } to enable.');
+  }
+}
+
+class EnabledReceipts implements ReceiptsHandle {
+  readonly enabled = true;
+  constructor(public readonly chain: ReceiptChain) {}
+  merkleRoot(): Promise<string> { return this.chain.merkleRoot(); }
+  readAll(): Promise<LambdaReceipt[]> { return this.chain.readAll(); }
+  close(): Promise<AuditClosureReceipt> { return this.chain.close(); }
+}
 
 /**
  * SZLClient — Main entry point for the SZL Holdings SDK.
@@ -22,14 +92,14 @@ import { PluginsResource } from './resources/plugins.js';
  * // Get portfolio summary
  * const portfolio = await client.portfolio.getSummary();
  *
- * // List briefings
- * const briefings = await client.briefings.list({ limit: 5 });
- *
- * // Subscribe to webhooks
- * const endpoint = await client.webhooks.create({
- *   url: 'https://myapp.com/webhooks/szl',
- *   eventTypes: ['alert.raised', 'deal.created'],
+ * // Opt into receipts:
+ * const audited = new SZLClient({
+ *   apiKey: process.env.SZL_API_KEY!,
+ *   receipts: { enabled: true, operatorId: 'me@szlholdings.com' },
  * });
+ * await audited.portfolio.getSummary();
+ * const root = await audited.receipts.merkleRoot();
+ * const closure = await audited.receipts.close();
  * ```
  */
 export class SZLClient {
@@ -44,14 +114,50 @@ export class SZLClient {
   readonly esignature: EsignatureResource;
   readonly courtFilings: CourtFilingsResource;
   readonly plugins: PluginsResource;
+  readonly receipts: ReceiptsHandle;
 
-  constructor(options: SZLClientOptions) {
+  constructor(options: SZLClientOptionsWithReceipts) {
     if (!options.apiKey) throw new Error('SZLClient requires an apiKey');
     if (!options.apiKey.startsWith('szl_')) {
       throw new Error('SZL API keys must start with "szl_". Generate one at https://szlholdings.com/developers');
     }
 
     this.http = new HttpClient(options);
+
+    if (options.receipts?.enabled) {
+      if (!options.receipts.operatorId) {
+        throw new Error('SZLClient: receipts.operatorId is required when receipts.enabled is true');
+      }
+      const storage = options.receipts.storagePath
+        ? new JsonlFileStorage(options.receipts.storagePath)
+        : undefined;
+      const chain = new ReceiptChain({
+        operatorId: options.receipts.operatorId,
+        ...(storage ? { storage } : {}),
+      });
+      this.receipts = new EnabledReceipts(chain);
+      const onError =
+        options.receipts.onError ??
+        ((err: unknown, ctx: { path: string; method: string }) => {
+          // Default: warn but don't break the call. Audit gap is observable.
+          console.warn(`[szl-sdk] receipt append failed for ${ctx.method} ${ctx.path}:`, err);
+        });
+      this.http.setObserver(async (record) => {
+        try {
+          await chain.append({
+            endpoint: record.path,
+            method: record.method,
+            params: record.body ?? { method: record.method, path: record.path },
+            result: record.result,
+            metadata: { status: record.status, idempotencyKey: record.idempotencyKey },
+          });
+        } catch (err) {
+          onError(err, { path: record.path, method: record.method });
+        }
+      });
+    } else {
+      this.receipts = new DisabledReceipts();
+    }
 
     this.apiKeys = new ApiKeysResource(this.http);
     this.portfolio = new PortfolioResource(this.http);
