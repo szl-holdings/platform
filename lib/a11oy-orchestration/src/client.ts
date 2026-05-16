@@ -131,8 +131,12 @@ export async function registerWithA11oy(
     );
     return { ok: true };
   } catch (err) {
+    // Intentional fail-open per SDK contract: child products must boot even
+    // when the fabric is unreachable (cross-port dev, api-server cold start,
+    // 401 before cookie mint). Demoted from warn → debug so the dev console
+    // isn't permanently red over an expected condition.
     if (typeof console !== 'undefined') {
-      console.warn(`[a11oy-orchestration] register failed for ${registration.product}:`, err);
+      console.debug(`[a11oy-orchestration] register skipped for ${registration.product}:`, err);
     }
     return { ok: false };
   }

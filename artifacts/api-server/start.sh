@@ -95,15 +95,21 @@ if [ ! -f "$AG_DIST" ]; then
   echo "[api-server start.sh] FATAL: agent-gateway dist/server.js still missing after build" >&2
   exit 1
 fi
-echo "[api-server start.sh] Launching agent-gateway sidecar on port ${AGENT_GATEWAY_PORT} — log: $AGENT_GATEWAY_LOG"
-(
-  cd "$AGENT_GATEWAY_DIR"
-  PORT="$AGENT_GATEWAY_PORT" BASE_PATH="/agent-gateway" exec node dist/server.js 2>&1 \
-    | sed -u 's/^/[agent-gateway] /' \
-    | tee -a "$AGENT_GATEWAY_LOG"
-) &
-AGENT_GATEWAY_PID=$!
-echo "[api-server start.sh] Agent-gateway pid=$AGENT_GATEWAY_PID"
+if (exec 3<>/dev/tcp/127.0.0.1/"$AGENT_GATEWAY_PORT") 2>/dev/null; then
+  exec 3<&- 3>&-
+  echo "[api-server start.sh] Port ${AGENT_GATEWAY_PORT} already bound (standalone agent-gateway workflow); skipping sidecar spawn"
+  AGENT_GATEWAY_PID=""
+else
+  echo "[api-server start.sh] Launching agent-gateway sidecar on port ${AGENT_GATEWAY_PORT} — log: $AGENT_GATEWAY_LOG"
+  (
+    cd "$AGENT_GATEWAY_DIR"
+    PORT="$AGENT_GATEWAY_PORT" BASE_PATH="/agent-gateway" exec node dist/server.js 2>&1 \
+      | sed -u 's/^/[agent-gateway] /' \
+      | tee -a "$AGENT_GATEWAY_LOG"
+  ) &
+  AGENT_GATEWAY_PID=$!
+  echo "[api-server start.sh] Agent-gateway pid=$AGENT_GATEWAY_PID"
+fi
 old_cleanup_ag=$(declare -f cleanup)
 cleanup() {
   eval "${old_cleanup_ag#cleanup ()}"
