@@ -48,6 +48,10 @@ export default defineConfig({
       { find: '@workspace/db', replacement: resolve(__dirname, 'lib/db/src/index.ts') },
       { find: '@workspace/api-zod', replacement: resolve(__dirname, 'lib/api-zod/src/index.ts') },
       {
+        find: '@szl-holdings/formulas',
+        replacement: resolve(__dirname, 'lib/formulas/src/index.ts'),
+      },
+      {
         find: '@workspace/observability',
         replacement: resolve(__dirname, 'lib/observability/src/index.ts'),
       },

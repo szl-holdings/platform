@@ -22,6 +22,12 @@ export interface FormulaInvocation {
   outputHash: string;
   caller?: string;
   durationMs: number;
+  /**
+   * Free-form bag for callers to attach domain context (observed vs
+   * baseline performance, parameter under test, etc). Consumed by
+   * downstream sinks such as the ROSIE drift detector.
+   */
+  meta?: Record<string, unknown>;
 }
 
 export type InvocationSink = (inv: FormulaInvocation) => void;

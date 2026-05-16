@@ -133,3 +133,116 @@ export function evaluateObservedEvent(
   };
   return { kind: 'tuning', proposal };
 }
+
+// ─── ROSIE evolution loop (signal → proposal) ────────────────────────
+//
+// These helpers are the bridge between Sentra's drift detector and the
+// A11oy `/formulas/propose-tuning` queue. They live in the canonical
+// formulas package so any artifact (sentra brain, api-server scheduled
+// job, future workers) can drive the loop with one shared implementation.
+//
+// Source: docs/thesis/v10-canonical.md §6.1, docs/audits/formulas.md §7.
+
+export interface SentraSignalForRosie {
+  formulaId: string;
+  parameter: string;
+  observedGap: number;
+  samples: number;
+  oldValue: number;
+  candidateValue: number;
+  fromVersion: string;
+  thesisCitation: string;
+  driftSamples?: { current: readonly number[]; candidate: readonly number[] };
+  irreversibility?: number;
+}
+
+export interface RosieLoopOptions {
+  /** Endpoint base — defaults to the api-server tenant prefix. */
+  apiBase?: string;
+  /** Override for fetch (testing / in-process invocation). */
+  fetchImpl?: typeof fetch;
+  /** ROSIE thresholds — forwarded to `evaluateObservedEvent`. */
+  gapMin?: number;
+  samplesMin?: number;
+  scoreMin?: number;
+}
+
+export interface RosieLoopResult {
+  decision: RosieDecision;
+  submitted?: unknown;
+}
+
+/**
+ * Process a single Sentra signal through the ROSIE loop. The loop is
+ * **bounded autonomy** — proposals never apply without an operator
+ * decision (see docs/A11OY_NON_NEGOTIABLES.md).
+ */
+export async function processSignal(
+  signal: SentraSignalForRosie,
+  options: RosieLoopOptions = {},
+): Promise<RosieLoopResult> {
+  const event: ObservedEvent = {
+    formulaId: signal.formulaId,
+    fromVersion: signal.fromVersion,
+    parameter: signal.parameter,
+    oldValue: signal.oldValue,
+    candidateValue: signal.candidateValue,
+    observedGap: signal.observedGap,
+    samples: signal.samples,
+    driftSamples: signal.driftSamples,
+    irreversibility: signal.irreversibility,
+    thesisCitation: signal.thesisCitation,
+  };
+  const decision = evaluateObservedEvent(event, {
+    gapMin: options.gapMin,
+    samplesMin: options.samplesMin,
+    scoreMin: options.scoreMin,
+  });
+  if (decision.kind === 'noop') return { decision };
+
+  const base = options.apiBase ?? '/api';
+  const fetcher = options.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch : undefined);
+  if (!fetcher) {
+    return { decision, submitted: { ok: false, error: 'no fetch implementation available' } };
+  }
+  try {
+    const r = await fetcher(`${base}/a11oy/formulas/propose-tuning`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        formulaId: event.formulaId,
+        fromVersion: event.fromVersion,
+        parameter: event.parameter,
+        oldValue: event.oldValue,
+        candidateValue: event.candidateValue,
+        observedGap: event.observedGap,
+        samples: event.samples,
+        thesisCitation: event.thesisCitation,
+        driftSamples: event.driftSamples,
+        irreversibility: event.irreversibility,
+      }),
+    });
+    const submitted = await r.json().catch(() => null);
+    return { decision, submitted };
+  } catch (e) {
+    // Never let the loop crash the brain — surface the decision and let
+    // the caller decide what to do with the failed submission.
+    return { decision, submitted: { ok: false, error: String(e) } };
+  }
+}
+
+/**
+ * Process a batch of signals. Sequential to avoid hammering the
+ * proposals endpoint. Returns per-signal decisions in input order.
+ */
+export async function runRosieLoop(
+  signals: readonly SentraSignalForRosie[],
+  options: RosieLoopOptions = {},
+): Promise<RosieLoopResult[]> {
+  const results: RosieLoopResult[] = [];
+  for (const s of signals) {
+    // eslint-disable-next-line no-await-in-loop
+    results.push(await processSignal(s, options));
+  }
+  return results;
+}

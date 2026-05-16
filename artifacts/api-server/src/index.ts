@@ -46,6 +46,7 @@ import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-ho
 import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
+import { startRosieEvolutionLoop } from './jobs/rosie-evolution-loop';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
@@ -511,6 +512,19 @@ export async function bootstrap(
       } else {
         logger.info(
           '[ot-ics-feed] Synthetic stream feed disabled (OT_ICS_FEED_ENABLED != "true"). Set OT_ICS_FEED_ENABLED=true to enable.',
+        );
+      }
+
+      // ROSIE continuous-evolution loop — drains the formula drift
+      // detector every ROSIE_LOOP_INTERVAL_MINUTES (default 15) and
+      // posts tuning proposals into the A11oy /formulas Codex queue.
+      // The loop is bounded autonomy — proposals never apply without
+      // an operator decision. Disable with ROSIE_LOOP_ENABLED=false.
+      if (process.env.ROSIE_LOOP_ENABLED !== 'false') {
+        startRosieEvolutionLoop();
+      } else {
+        logger.info(
+          '[rosie-loop] Disabled (ROSIE_LOOP_ENABLED=false). Unset or set to "true" to enable.',
         );
       }
 

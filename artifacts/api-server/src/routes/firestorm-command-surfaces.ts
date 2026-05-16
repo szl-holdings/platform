@@ -30,6 +30,22 @@ import { desc, eq, inArray, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { recordDriftObservation } from '../jobs/rosie-evolution-loop.js';
+
+const seenRiskScoreObservations = new Map<string, string>();
+const SEEN_RISK_SCORE_CAP = 500;
+function shouldRecordRiskScoreObservation(id: unknown, calculatedAt: unknown): boolean {
+  const key = String(id ?? '');
+  const stamp = String(calculatedAt ?? '');
+  if (!key || !stamp) return false;
+  if (seenRiskScoreObservations.get(key) === stamp) return false;
+  seenRiskScoreObservations.set(key, stamp);
+  if (seenRiskScoreObservations.size > SEEN_RISK_SCORE_CAP) {
+    const firstKey = seenRiskScoreObservations.keys().next().value;
+    if (firstKey !== undefined) seenRiskScoreObservations.delete(firstKey);
+  }
+  return true;
+}
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -707,6 +723,38 @@ router.get(
       ]);
 
       const latestRisk = riskScores[0] ?? null;
+      // ROSIE: feed observed-vs-baseline risk-score deltas into the
+      // shared drift detector. We compare the freshest score against
+      // the mean of the prior window so sustained drift in real
+      // production data eventually files a tuning proposal.
+      // De-dup on (id, calculatedAt) so repeated dashboard reads on the
+      // same underlying telemetry don't inflate the sample count.
+      if (
+        latestRisk &&
+        riskScores.length >= 2 &&
+        shouldRecordRiskScoreObservation(latestRisk.id, latestRisk.calculatedAt)
+      ) {
+        const prior = riskScores.slice(1);
+        const baseline =
+          prior.reduce((s, r) => s + (r.currentScore ?? 0), 0) / prior.length;
+        const observed = latestRisk.currentScore ?? 0;
+        if (baseline > 0 && Number.isFinite(observed)) {
+          try {
+            recordDriftObservation({
+              formulaId: 'risk-score',
+              parameter: 'wSeverity',
+              observed,
+              baseline,
+              oldValue: 0.5,
+              candidateValue: 0.5 * (observed / baseline),
+              fromVersion: '1.0.0',
+              thesisCitation: 'v10-canonical.md §3.2',
+            });
+          } catch {
+            // Drift feed must never break the executive posture response.
+          }
+        }
+      }
       // compliance status: implemented|partial|not_implemented|not_applicable
       const passedControls = complianceControls.filter((c) => c.status === 'implemented');
       const failedControls = complianceControls.filter((c) => c.status !== 'implemented');

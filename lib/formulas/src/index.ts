@@ -15,6 +15,7 @@ export * from './risk.js';
 export * from './scoring.js';
 export * from './routing.js';
 export * from './evolution.js';
+export * from './drift-detector.js';
 
 // Re-export the underlying Lutar formula corpus for convenience so
 // callsites can `import { lutarInvariant5 } from '@szl-holdings/formulas'`

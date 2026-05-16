@@ -65,10 +65,18 @@ let nextProposalId = 1;
 const versionHistory = new Map<string, Array<{ version: string; parameters: Record<string, number>; note?: string; createdAt: string }>>();
 
 // Wire the in-memory invocation sink so any caller using `instrument()`
-// will surface invocations on the /invocations endpoint immediately.
+// will surface invocations on the /invocations endpoint immediately and
+// — when the invocation carries observed-vs-baseline metadata — feed
+// the ROSIE drift detector for the scheduled evolution loop.
 setInvocationSink((inv) => {
   invocations.push(inv);
   if (invocations.length > MAX_INVOCATIONS) invocations.splice(0, invocations.length - MAX_INVOCATIONS);
+  // Lazy import to avoid a circular load at module init.
+  import('../jobs/rosie-evolution-loop.js')
+    .then(({ formulaInvocationDriftBridge }) => formulaInvocationDriftBridge(inv))
+    .catch(() => {
+      // Drift bridge failures must never break the invocation hot path.
+    });
 });
 
 // Seed initial version history from the registry so /history is non-empty.
@@ -143,31 +151,65 @@ publicRouter.get('/a11oy/formulas/proposals', (req, res) => {
   });
 });
 
-protectedRouter.post('/a11oy/formulas/propose-tuning', (req, res) => {
+export interface ProposeTuningInProcessResult {
+  status: number;
+  envelope:
+    | { ok: true; data: unknown; meta: Record<string, unknown> }
+    | { ok: false; error: { message: string; retryable: boolean } };
+}
+
+/**
+ * Programmatic in-process equivalent of the POST handler. Used by the
+ * scheduled ROSIE evolution loop so server-side ticks don't need to
+ * make a loopback HTTP request (and re-enter CSRF/auth middleware).
+ */
+export function proposeTuningInProcess(
+  body: Record<string, unknown>,
+): ProposeTuningInProcessResult {
   try {
-    const body = (req.body ?? {}) as Partial<ObservedEvent>;
-    if (!body.formulaId || typeof body.parameter !== 'string') {
-      return err(res, 400, 'formulaId and parameter are required.');
+    const partial = body as Partial<ObservedEvent>;
+    if (!partial.formulaId || typeof partial.parameter !== 'string') {
+      return {
+        status: 400,
+        envelope: { ok: false, error: { message: 'formulaId and parameter are required.', retryable: false } },
+      };
     }
-    const f = getFormula(body.formulaId);
-    if (!f) return err(res, 404, `Formula "${body.formulaId}" not found.`);
-    const param = f.parameters.find((p) => p.name === body.parameter);
-    if (!param) return err(res, 400, `Parameter "${body.parameter}" not found on ${f.id}.`);
+    const f = getFormula(partial.formulaId);
+    if (!f) {
+      return {
+        status: 404,
+        envelope: { ok: false, error: { message: `Formula "${partial.formulaId}" not found.`, retryable: false } },
+      };
+    }
+    const param = f.parameters.find((p) => p.name === partial.parameter);
+    if (!param) {
+      return {
+        status: 400,
+        envelope: { ok: false, error: { message: `Parameter "${partial.parameter}" not found on ${f.id}.`, retryable: false } },
+      };
+    }
     const event: ObservedEvent = {
-      formulaId: body.formulaId,
-      fromVersion: body.fromVersion ?? f.version,
-      parameter: body.parameter,
-      oldValue: body.oldValue ?? param.default,
-      candidateValue: Number(body.candidateValue ?? param.default),
-      observedGap: Number(body.observedGap ?? 0),
-      samples: Number(body.samples ?? 0),
-      driftSamples: body.driftSamples,
-      irreversibility: body.irreversibility ?? 0,
-      thesisCitation: body.thesisCitation ?? `${f.provenance.thesisDoc} ${f.provenance.thesisSection}`,
+      formulaId: partial.formulaId,
+      fromVersion: partial.fromVersion ?? f.version,
+      parameter: partial.parameter,
+      oldValue: partial.oldValue ?? param.default,
+      candidateValue: Number(partial.candidateValue ?? param.default),
+      observedGap: Number(partial.observedGap ?? 0),
+      samples: Number(partial.samples ?? 0),
+      driftSamples: partial.driftSamples,
+      irreversibility: partial.irreversibility ?? 0,
+      thesisCitation: partial.thesisCitation ?? `${f.provenance.thesisDoc} ${f.provenance.thesisSection}`,
     };
     const decision = evaluateObservedEvent(event);
     if (decision.kind === 'noop') {
-      return ok(res, { accepted: false, reason: decision.reason });
+      return {
+        status: 200,
+        envelope: {
+          ok: true,
+          data: { accepted: false, reason: decision.reason },
+          meta: { timestamp: new Date().toISOString() },
+        },
+      };
     }
     const row: ProposalRow = {
       id: nextProposalId++,
@@ -184,11 +226,26 @@ protectedRouter.post('/a11oy/formulas/propose-tuning', (req, res) => {
       createdAt: new Date().toISOString(),
     };
     proposals.push(row);
-    ok(res, { accepted: true, proposal: row });
+    return {
+      status: 200,
+      envelope: {
+        ok: true,
+        data: { accepted: true, proposal: row },
+        meta: { timestamp: new Date().toISOString() },
+      },
+    };
   } catch (e) {
-    logger.error({ err: e }, '[a11oy-formulas] propose-tuning');
-    err(res, 500, 'Failed to record tuning proposal.');
+    logger.error({ err: e }, '[a11oy-formulas] propose-tuning (in-process)');
+    return {
+      status: 500,
+      envelope: { ok: false, error: { message: 'Failed to record tuning proposal.', retryable: false } },
+    };
   }
+}
+
+protectedRouter.post('/a11oy/formulas/propose-tuning', (req, res) => {
+  const result = proposeTuningInProcess((req.body ?? {}) as Record<string, unknown>);
+  res.status(result.status).json(result.envelope);
 });
 
 function decide(id: number, status: 'approved' | 'rejected', note?: string) {
