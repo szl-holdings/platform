@@ -31,12 +31,17 @@ import { setSamplingBridge } from './governed-sampling.js';
 let _server: PRAXISMcpServer | null = null;
 
 /**
- * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
- * Called once at startup by both HTTP and stdio entry points.
+ * Build a fully-configured PRAXISMcpServer instance.
+ *
+ * The MCP SDK's underlying `Server` carries a one-shot "initialized" flag, so
+ * a single instance cannot service multiple Streamable HTTP sessions — every
+ * fresh `initialize` request needs its own server + transport pair. Use this
+ * factory from the HTTP transport's per-session bootstrap path; use
+ * `getGatewayServer()` for stdio / singleton consumers (notifications, etc).
+ *
+ * Tracked: szl-holdings/platform#113.
  */
-export function getGatewayServer(): PRAXISMcpServer {
-  if (_server) return _server;
-
+export function createGatewayServer(): PRAXISMcpServer {
   const domainRoots = listRoots('substrate-gateway').map((r) => ({
     uri: r.uri,
     name: r.name,
@@ -44,7 +49,7 @@ export function getGatewayServer(): PRAXISMcpServer {
 
   const cryptographicIdentity = initGatewayIdentity();
 
-  _server = new PRAXISMcpServer({
+  const server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
     version: GATEWAY_VERSION,
     enableSampling: true,
@@ -74,12 +79,12 @@ export function getGatewayServer(): PRAXISMcpServer {
   });
 
   setSamplingBridge({
-    requestSampling: (params) => _server!.requestSampling(params),
+    requestSampling: (params) => server.requestSampling(params),
   });
 
   // ── Register domain Apps ─────────────────────────────────────────────────────
   for (const app of createDomainApps()) {
-    _server.registerApp(app);
+    server.registerApp(app);
   }
 
   // ── Wire resource update notifications (Prism Bus → MCP subscriptions) ──────
@@ -87,19 +92,19 @@ export function getGatewayServer(): PRAXISMcpServer {
   // the Prism Bus, it calls this callback which pushes notifications/resources/updated
   // to all connected MCP clients that have subscribed to the affected URIs.
   setResourceUpdateCallback((uri: string) => {
-    void _server?.notifyResourceUpdated(uri);
+    void server.notifyResourceUpdated(uri);
   });
 
   // ── Register substrate tools via SDK ─────────────────────────────────────────
   const tools = getAvailableTools();
   for (const tool of tools) {
-    _registerSubstrateTool(_server, tool.name, tool.description, tool.inputSchema);
+    _registerSubstrateTool(server, tool.name, tool.description, tool.inputSchema);
   }
 
   // ── Register resources ───────────────────────────────────────────────────────
   for (const res of SUBSTRATE_RESOURCES) {
     const capturedRes = res;
-    _server.resource(
+    server.resource(
       capturedRes.name,
       capturedRes.uri,
       { description: capturedRes.description, mimeType: capturedRes.mimeType },
@@ -137,7 +142,7 @@ export function getGatewayServer(): PRAXISMcpServer {
         ? z.string().describe(arg.description)
         : z.string().optional().describe(arg.description);
     }
-    _server.prompt(
+    server.prompt(
       capturedPrompt.name,
       capturedPrompt.description,
       argsShape,
@@ -157,6 +162,16 @@ export function getGatewayServer(): PRAXISMcpServer {
     );
   }
 
+  return server;
+}
+
+/**
+ * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
+ * Used for stdio transport and module-level notifications. The HTTP transport
+ * builds fresh per-session servers via `createGatewayServer()`.
+ */
+export function getGatewayServer(): PRAXISMcpServer {
+  if (!_server) _server = createGatewayServer();
   return _server;
 }
 

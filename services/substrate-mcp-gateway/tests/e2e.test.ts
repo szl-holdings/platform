@@ -98,21 +98,83 @@ registerWorkflow(liveGateWorkflow);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function rpc(
+// Per-key MCP session id, captured from the initialize response. The MCP
+// Streamable HTTP transport is stateful — subsequent requests must echo back
+// the Mcp-Session-Id header issued during initialize.
+const rpcSessionByKey = new Map<string, string>();
+
+async function rpcRaw(
   method: string,
-  params?: Record<string, unknown>,
-  key: string | null = TEST_API_KEY,
-): Promise<unknown> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  params: Record<string, unknown> | undefined,
+  key: string | null,
+  extraHeaders: Record<string, string> = {},
+): Promise<{ status: number; body: unknown; sessionId: string | null }> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json, text/event-stream',
+    ...extraHeaders,
+  };
   if (key) headers.Authorization = `Bearer ${key}`;
 
   const res = await fetch(`${baseUrl}/mcp`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params: params ?? {} }),
   });
 
-  return res.json() as Promise<unknown>;
+  const ct = res.headers.get('content-type') ?? '';
+  const sessionId = res.headers.get('mcp-session-id');
+  let body: unknown = null;
+  if (ct.includes('text/event-stream')) {
+    const text = await res.text();
+    for (const line of text.split('\n')) {
+      if (line.startsWith('data: ')) {
+        body = JSON.parse(line.slice(6));
+        break;
+      }
+    }
+  } else if (ct.includes('application/json')) {
+    body = await res.json();
+  } else {
+    body = await res.text();
+  }
+  return { status: res.status, body, sessionId };
+}
+
+async function ensureSession(key: string | null): Promise<string | null> {
+  const cacheKey = key ?? '__anon__';
+  const existing = rpcSessionByKey.get(cacheKey);
+  if (existing) return existing;
+  const initParams = {
+    protocolVersion: '2025-11-25',
+    capabilities: {},
+    clientInfo: { name: 'e2e-test', version: '1.0.0' },
+  };
+  const initRes = await rpcRaw('initialize', initParams, key);
+  if (initRes.sessionId) rpcSessionByKey.set(cacheKey, initRes.sessionId);
+  return initRes.sessionId;
+}
+
+async function rpc(
+  method: string,
+  params?: Record<string, unknown>,
+  key: string | null = TEST_API_KEY,
+): Promise<unknown> {
+  if (method === 'initialize') {
+    const initParams = params ?? {
+      protocolVersion: '2025-11-25',
+      capabilities: {},
+      clientInfo: { name: 'e2e-test', version: '1.0.0' },
+    };
+    const res = await rpcRaw('initialize', initParams, key);
+    if (res.sessionId) rpcSessionByKey.set(key ?? '__anon__', res.sessionId);
+    return res.body;
+  }
+  const sessionId = await ensureSession(key);
+  const extraHeaders: Record<string, string> = {};
+  if (sessionId) extraHeaders['Mcp-Session-Id'] = sessionId;
+  const res = await rpcRaw(method, params, key, extraHeaders);
+  return res.body;
 }
 
 async function toolCall(
@@ -178,7 +240,10 @@ test('2. tools/list returns all 8 substrate tools', async () => {
   for (const name of expected) {
     assert.ok(names.includes(name), `Missing tool: ${name}`);
   }
-  assert.equal(names.length, 8);
+  // The gateway also surfaces tools from federated MCP apps (alloy_*, etc.);
+  // assert on the substrate_* surface specifically (szl-holdings/platform#113).
+  const substrateNames = names.filter((n) => n.startsWith('substrate_'));
+  assert.equal(substrateNames.length, 8);
 });
 
 test('3. substrate_submit_run submits a dry-run and returns a runId', async () => {

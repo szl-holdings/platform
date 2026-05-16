@@ -49,8 +49,12 @@ export class HybridSigner {
       ? bytesToHex(ed25519.sign(message, this._ed25519PrivateKey))
       : undefined;
 
+    // @noble/post-quantum v0.6+ uses FIPS-204 argument order: sign(msg, secretKey).
+    // Earlier versions accepted (secretKey, msg); the swap below was the root cause
+    // of substrate-mcp-gateway e2e failures (szl-holdings/platform#113) — every
+    // certificate issuance threw "secretKey expected length 4032, got <msg length>".
     const mldsa65Sig = this._mode !== 'classical-only'
-      ? bytesToHex(ml_dsa65.sign(this._mldsaPrivateKey, message))
+      ? bytesToHex(ml_dsa65.sign(message, this._mldsaPrivateKey))
       : undefined;
 
     return {

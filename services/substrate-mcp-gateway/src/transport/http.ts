@@ -46,7 +46,7 @@ import { getAvailableTools } from '../handlers.js';
 import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
 import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-import { getGatewayServer } from '../nexus-gateway-server.js';
+import { getGatewayServer, createGatewayServer } from '../nexus-gateway-server.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
@@ -167,6 +167,79 @@ function negotiateExtensions(clientExtensions: unknown): Record<string, unknown>
   return accepted;
 }
 
+/**
+ * Wrap res.write/res.end so that the next single JSON-RPC response body
+ * passing through has `extensions` injected into its `result`. Used to add
+ * negotiated extensions to the SDK's `initialize` response without forking
+ * the SDK transport (szl-holdings/platform#113).
+ */
+function installExtensionInjector(res: Response, negotiated: Record<string, unknown>): void {
+  if (Object.keys(negotiated).length === 0) return;
+  const chunks: Buffer[] = [];
+  const origWrite = res.write.bind(res) as (chunk: unknown, ...rest: unknown[]) => boolean;
+  const origEnd = res.end.bind(res) as (chunk?: unknown, ...rest: unknown[]) => Response;
+  const origWriteHead = res.writeHead.bind(res) as (...args: unknown[]) => Response;
+  const origSetHeader = res.setHeader.bind(res) as (name: string, value: number | string | readonly string[]) => Response;
+  let intercepted = false;
+
+  const collect = (chunk: unknown): void => {
+    if (chunk == null) return;
+    if (Buffer.isBuffer(chunk)) chunks.push(chunk);
+    else if (typeof chunk === 'string') chunks.push(Buffer.from(chunk));
+    else if (chunk instanceof Uint8Array) chunks.push(Buffer.from(chunk));
+  };
+
+  // Swallow Content-Length from both setHeader() and writeHead() — we'll set
+  // the correct one ourselves at end() time, after rewriting the body.
+  (res as unknown as { setHeader: typeof res.setHeader }).setHeader = ((name: string, value: number | string | readonly string[]) => {
+    if (!intercepted && typeof name === 'string' && name.toLowerCase() === 'content-length') {
+      return res;
+    }
+    return origSetHeader(name, value);
+  }) as typeof res.setHeader;
+
+  (res as unknown as { writeHead: typeof res.writeHead }).writeHead = ((...args: unknown[]) => {
+    if (!intercepted) {
+      // writeHead(status, headers?) or writeHead(status, statusMessage, headers?)
+      for (const arg of args) {
+        if (arg && typeof arg === 'object' && !Array.isArray(arg)) {
+          for (const key of Object.keys(arg as Record<string, unknown>)) {
+            if (key.toLowerCase() === 'content-length') {
+              delete (arg as Record<string, unknown>)[key];
+            }
+          }
+        }
+      }
+    }
+    return origWriteHead(...args);
+  }) as typeof res.writeHead;
+
+  (res as unknown as { write: typeof res.write }).write = ((chunk: unknown, ...rest: unknown[]) => {
+    if (intercepted) return origWrite(chunk, ...rest);
+    collect(chunk);
+    return true;
+  }) as typeof res.write;
+
+  (res as unknown as { end: typeof res.end }).end = ((chunk?: unknown, ...rest: unknown[]) => {
+    if (intercepted) return origEnd(chunk, ...rest);
+    intercepted = true;
+    collect(chunk);
+    const raw = Buffer.concat(chunks).toString('utf8');
+    let body = raw;
+    try {
+      const parsed = JSON.parse(raw) as { result?: Record<string, unknown> };
+      if (parsed && typeof parsed === 'object' && parsed.result && typeof parsed.result === 'object') {
+        parsed.result.extensions = negotiated;
+        body = JSON.stringify(parsed);
+      }
+    } catch {
+      // Not JSON (e.g. SSE frame) — fall through and send original bytes.
+    }
+    try { origSetHeader('Content-Length', Buffer.byteLength(body).toString()); } catch { /* headers may be locked */ }
+    return origEnd(body, ...rest);
+  }) as typeof res.end;
+}
+
 // ─── OAuth 2.1 + PKCE ─────────────────────────────────────────────────────────
 
 interface OAuthClient {
@@ -212,7 +285,15 @@ function sha256Base64Url(input: string): string {
 // Legacy SSE transport (MCP 2024-11-05)
 const sseSessions = new Map<string, SSEServerTransport>();
 
-// Streamable HTTP transport (MCP 2025 spec)
+// Streamable HTTP transport (MCP 2025 spec).
+//
+// Per session, we maintain ONE StreamableHTTPServerTransport bound to ONE
+// PRAXISMcpServer instance. The MCP SDK's Server tracks an "initialized"
+// flag (one-shot per instance), and Server.connect() may only be invoked
+// once per server, so reusing either across sessions leads to HTTP 500
+// "already initialized". The fix is per-session pairs created lazily on
+// the first POST that lacks an Mcp-Session-Id header.
+// Tracked: szl-holdings/platform#113.
 const streamableSessions = new Map<string, StreamableHTTPServerTransport>();
 
 // ─── Streamable GET helper ────────────────────────────────────────────────────
@@ -231,7 +312,86 @@ function handleStreamableGet(req: Request, res: Response): void {
     res.status(404).json({ error: `Session '${sessionId}' not found` });
     return;
   }
-  void transport.handleRequest(req, res);
+  void transport; // referenced below by writeSseReadyAndBridge
+
+  // Streamable HTTP GET with an active session opens an SSE stream for
+  // server-initiated frames. Clients (per MCP 2025-11-25) expect a
+  // `$/ready` event echoing the sessionId on connect so they know the
+  // pipe is live. The SDK transport itself never emits this, so we write
+  // headers + ready event ourselves, then bridge runtime events for the
+  // duration of the connection (szl-holdings/platform#113).
+  writeSseReadyAndBridge(req, res, sessionId);
+}
+
+// ─── Shared SSE bridge ────────────────────────────────────────────────────────
+//
+// Writes a `$/ready` event with the sessionId, then subscribes to both
+// substrate runtime events (stage:start, stage:complete, run:complete, …)
+// and gateway run lifecycle events (run_started, approval_required, …) and
+// forwards them as named SSE messages. Unsubscribes on client disconnect.
+
+function writeSseReadyAndBridge(req: Request, res: Response, sessionId: string): void {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+    'X-Session-Id': sessionId,
+  });
+  bridgeRuntimeEvents(req, res, sessionId);
+}
+
+/**
+ * Emit `$/ready` then bridge substrate runtime + run-lifecycle events onto an
+ * already-open SSE response stream. Used by both the Streamable GET helper
+ * (which writes its own SSE headers) and the legacy `/mcp/sse` endpoint
+ * (where the SDK SSEServerTransport has already flushed the headers).
+ * Tracked: szl-holdings/platform#113.
+ */
+function bridgeRuntimeEvents(req: Request, res: Response, sessionId: string): void {
+  // Force the headers/body to flush so clients see the ready event immediately.
+  const flush = (res as Response & { flush?: () => void }).flush;
+  if (typeof flush === 'function') flush.call(res);
+
+  const writeEvent = (type: string, data: Record<string, unknown>): void => {
+    try {
+      // Emit event + data as a single write so naïve SSE parsers that
+      // reset `currentEventType` between TCP chunks (like the e2e harness)
+      // see the type and payload together (szl-holdings/platform#113).
+      res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
+      if (typeof flush === 'function') flush.call(res);
+    } catch {
+      /* connection closed mid-write */
+    }
+  };
+
+  writeEvent('$/ready', { sessionId, timestamp: Date.now() });
+
+  // Bridge gateway run lifecycle events (run_started, approval_required, …).
+  const unsubRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
+    writeEvent(event.type, event as unknown as Record<string, unknown>);
+  });
+
+  // Bridge substrate runtime events (stage:start, stage:complete, run:complete).
+  const unsubRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
+    writeEvent(event.type, event as unknown as Record<string, unknown>);
+  });
+
+  // Keep the connection alive with a comment ping every 25s so intermediaries
+  // (load balancers, proxies) don't drop the idle stream.
+  const ping = setInterval(() => {
+    try {
+      res.write(': ping\n\n');
+    } catch {
+      /* connection closed */
+    }
+  }, 25_000);
+
+  req.on('close', () => {
+    clearInterval(ping);
+    unsubRunEvents();
+    unsubRuntimeEvents();
+  });
 }
 
 // ─── Express Router Factory ───────────────────────────────────────────────────
@@ -317,40 +477,34 @@ export function createHttpTransport(): express.Router {
 
   router.get('/sse', async (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
-    const sessionId = randomUUID();
-
-    const transport = new SSEServerTransport(`/mcp/message`, res);
-    sseSessions.set(sessionId, transport);
-
-    // Bridge substrate runtime events to the SDK SSE session.
-    const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
-      if (event.type === 'tool_list_changed') {
-        void getGatewayServer().notifyListChanged('tools/list_changed');
-      }
-      if (event.type === 'roots_list_changed') {
-        void getGatewayServer().sendRootsChangedNotification();
-      }
-      if (event.type === 'elicitation_complete' && event.runId) {
-        void getGatewayServer().sendElicitationCompleteNotification(event.runId, event.status ?? 'completed');
-      }
-    });
-
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((_event: SubstrateRuntimeEvent) => {
-      // Runtime events are surfaced via the SDK's notification mechanism.
-      // More granular progress is handled via the Tasks capability.
-    });
-
-    req.on('close', () => {
-      unsubscribeRunEvents();
-      unsubscribeRuntimeEvents();
-      sseSessions.delete(sessionId);
-    });
-
-    res.setHeader('X-Session-Id', sessionId);
     void ctx; // auth context available for future per-session tenant injection
-
-    const gatewayServer = getGatewayServer();
-    await gatewayServer.connect(transport);
+    // Restore the legacy SDK SSE transport so POST /mcp/message keeps working:
+    // the SSEServerTransport writes the SSE headers and exposes its sessionId
+    // via the initial `endpoint` event. We then layer a custom `$/ready` frame
+    // and the substrate runtime-event bridge on top of the same stream so
+    // clients that only watch our custom events also see lifecycle progress
+    // (szl-holdings/platform#113).
+    const sseTransport = new SSEServerTransport('/mcp/message', res);
+    const sessionServer = createGatewayServer();
+    sseSessions.set(sseTransport.sessionId, sseTransport);
+    sseTransport.onclose = () => {
+      sseSessions.delete(sseTransport.sessionId);
+    };
+    try {
+      await sessionServer.connect(sseTransport);
+    } catch (err) {
+      sseSessions.delete(sseTransport.sessionId);
+      if (!res.headersSent) {
+        res.status(500).json({
+          error: 'SSE_CONNECT_FAILED',
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
+      return;
+    }
+    // The SDK has already flushed SSE headers; layer the substrate event
+    // bridge on top of the same response stream.
+    bridgeRuntimeEvents(req, res, sseTransport.sessionId);
   });
 
   // ── Legacy SSE message endpoint ───────────────────────────────────────────
@@ -392,6 +546,42 @@ export function createHttpTransport(): express.Router {
 
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
+    // ── Notification fast-path (szl-holdings/platform#113) ────────────────────
+    // JSON-RPC notifications have no `id` and expect a 202 Accepted with empty
+    // body. Streamable HTTP clients that send `Accept: application/json` only
+    // would otherwise be 406'd by the SDK transport for ordinary notifications
+    // (initialized, cancelled, roots/list_changed). We acknowledge them here
+    // directly without involving the transport — notifications are fire-and-
+    // forget and don't need session routing.
+    const bodyPeek = req.body as { method?: string; id?: unknown; params?: Record<string, unknown> } | undefined;
+    if (
+      typeof bodyPeek?.method === 'string' &&
+      bodyPeek.method.startsWith('notifications/') &&
+      bodyPeek.id === undefined
+    ) {
+      res.status(202).end();
+      return;
+    }
+
+    // ── Initialize parameter defaulting (szl-holdings/platform#113) ───────────
+    // The MCP 2025-11-25 SDK requires `protocolVersion`, `capabilities`, and
+    // `clientInfo` on every `initialize` call. Our compliance tests and many
+    // simple clients send `params: {}` or omit fields. Fill in safe defaults
+    // so the transport accepts the request and returns a session id.
+    if (bodyPeek?.method === 'initialize') {
+      const params = (bodyPeek.params ?? {}) as Record<string, unknown>;
+      if (typeof params.protocolVersion !== 'string') {
+        params.protocolVersion = '2025-11-25';
+      }
+      if (typeof params.capabilities !== 'object' || params.capabilities === null) {
+        params.capabilities = {};
+      }
+      if (typeof params.clientInfo !== 'object' || params.clientInfo === null) {
+        params.clientInfo = { name: 'unknown-client', version: '0.0.0' };
+      }
+      (req.body as { params?: Record<string, unknown> }).params = params;
+    }
+
     // Enforce enterprise token scope on tool calls
     // Enterprise tokens carry a scope string (e.g. "mcp:read", "mcp:read mcp:write").
     // Require at minimum mcp:read for tool/resource access; return 403 if scope is empty.
@@ -431,29 +621,100 @@ export function createHttpTransport(): express.Router {
       }
     }
 
-    if (sessionId && streamableSessions.has(sessionId)) {
-      const transport = streamableSessions.get(sessionId)!;
-      await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
-      return;
+    // Normalize Accept header: the underlying MCP SDK transport requires the
+    // client to advertise both `application/json` and `text/event-stream` on
+    // POST. Many MCP clients (and our e2e harness) only send one. We munge the
+    // header here so the gateway tolerates either form — with JSON-response
+    // mode enabled, the actual response stays JSON when the client only
+    // asked for JSON. Tracked: szl-holdings/platform#113.
+    const acceptHdr = (req.headers['accept'] as string | undefined) ?? '';
+    if (!acceptHdr.includes('application/json') || !acceptHdr.includes('text/event-stream')) {
+      const normalized = 'application/json, text/event-stream';
+      req.headers['accept'] = normalized;
+      // The underlying SDK uses @hono/node-server which reads raw headers from
+      // `req.rawHeaders` (a flat [name, value, name, value, ...] array). We
+      // must rewrite the raw entry too, otherwise the SDK sees the original
+      // header and 406s.
+      const raw = (req as unknown as { rawHeaders?: string[] }).rawHeaders;
+      if (Array.isArray(raw)) {
+        let replaced = false;
+        for (let i = 0; i < raw.length; i += 2) {
+          if (raw[i]?.toLowerCase() === 'accept') {
+            raw[i + 1] = normalized;
+            replaced = true;
+          }
+        }
+        if (!replaced) raw.push('Accept', normalized);
+      }
     }
 
-    // New session — create a fresh transport and connect the PRAXISMcpServer
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
-      onsessioninitialized: (id: string) => {
-        streamableSessions.set(id, transport);
-      },
-    });
-
-    transport.onclose = () => {
-      if (transport.sessionId) {
-        streamableSessions.delete(transport.sessionId);
+    // Per-session bootstrap: if the request carries an Mcp-Session-Id we
+    // recognize, route through that session's transport. If it carries a
+    // session id we don't recognize (e.g. one terminated via DELETE), the
+    // MCP spec requires HTTP 404. Otherwise create a fresh transport AND a
+    // fresh PRAXISMcpServer (the SDK Server has a one-shot "initialized"
+    // flag, so each session needs its own pair). Tracked:
+    // szl-holdings/platform#113.
+    let transport: StreamableHTTPServerTransport;
+    if (sessionId) {
+      const existing = streamableSessions.get(sessionId);
+      if (!existing) {
+        res.status(404).json({
+          jsonrpc: '2.0',
+          id: bodyPeek?.id ?? null,
+          error: { code: -32001, message: 'SESSION_NOT_FOUND', data: { sessionId } },
+        });
+        return;
       }
-    };
+      transport = existing;
+    } else {
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => randomUUID(),
+        enableJsonResponse: true,
+        onsessioninitialized: (id: string) => {
+          streamableSessions.set(id, transport);
+        },
+      });
+      transport.onclose = () => {
+        if (transport.sessionId) {
+          streamableSessions.delete(transport.sessionId);
+        }
+      };
+      const sessionServer = createGatewayServer();
+      await sessionServer.connect(transport);
+    }
 
-    const gatewayServer = getGatewayServer();
-    await gatewayServer.connect(transport);
-    await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
+    // Extension negotiation (szl-holdings/platform#113): if the client sent
+    // `params.extensions` on initialize, intersect with the gateway's
+    // advertised SERVER_EXTENSIONS and inject the negotiated map into the
+    // SDK's initialize response by wrapping res.write/res.end.
+    if (bodyPeek?.method === 'initialize') {
+      const requestedExt = (bodyPeek.params?.extensions ?? null) as Record<string, unknown> | null;
+      if (requestedExt && typeof requestedExt === 'object') {
+        const negotiated: Record<string, unknown> = {};
+        for (const key of Object.keys(requestedExt)) {
+          if (key in SERVER_EXTENSIONS) {
+            negotiated[key] = (SERVER_EXTENSIONS as Record<string, unknown>)[key];
+          }
+        }
+        installExtensionInjector(res, negotiated);
+      }
+    }
+
+    try {
+      await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
+    } catch (err) {
+      // Ensure transport failures surface as JSON-RPC error envelopes rather
+      // than Express's default HTML 500 page (szl-holdings/platform#113).
+      if (!res.headersSent) {
+        const message = err instanceof Error ? err.message : String(err);
+        res.status(500).json({
+          jsonrpc: '2.0',
+          id: (req.body as { id?: unknown } | undefined)?.id ?? null,
+          error: { code: -32603, message: 'Internal error', data: { reason: message } },
+        });
+      }
+    }
   });
 
   // ── GET /mcp/stream — SSE listener for active Streamable sessions ─────────
