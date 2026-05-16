@@ -13,8 +13,8 @@
  *   DELETE /:key                Delete a config entry (resets to code default)
  */
 
-import { db, runtimeConfigTable } from '@szl-holdings/db';
-import { and, eq, ilike } from 'drizzle-orm';
+import { activityLogTable, db, runtimeConfigTable, usersTable } from '@szl-holdings/db';
+import { and, desc, eq, ilike, inArray } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -27,8 +27,13 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { logActivity } from '../lib/activity-logger';
+
 import { invalidateConfigCache, invalidateAllConfigCache } from '../lib/runtime-config';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+
+const REDACTED_VALUE = '[redacted]';
+const maskValue = (value: string | null | undefined, isSensitive: boolean) =>
+  isSensitive ? REDACTED_VALUE : (value ?? null);
 
 const router = Router();
 
@@ -95,6 +100,68 @@ router.get('/runtime-config', authMiddleware(), requireRole('ops', 'admin'), asy
   }
 });
 
+// History endpoint — must be declared before the `/:key` dynamic route so
+// Express doesn't match it as `key="_history"`. Returns recent activity-log
+// entries for runtime_config writes; powers the admin Runtime Config UI's
+// inline "who changed this and when" badges and the per-key history drawer.
+router.get(
+  '/runtime-config/_history',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  async (req, res) => {
+    try {
+      const keyParam = req.query.key as string | undefined;
+      const limitParam = Number.parseInt((req.query.limit as string) ?? '200', 10);
+      const limit = Math.min(Math.max(1, Number.isNaN(limitParam) ? 200 : limitParam), 500);
+
+      // Restrict to true value-change events so operators see the actual
+      // create/update/delete history. Cache-invalidation entries (also logged
+      // under the runtime_config resource) would otherwise mask the most
+      // recent value mutation in the per-row "last changed" badge.
+      const conditions = [
+        eq(activityLogTable.resource, 'runtime_config'),
+        inArray(activityLogTable.action, ['create', 'update', 'delete']),
+      ];
+      if (keyParam) conditions.push(eq(activityLogTable.resourceId, keyParam));
+
+      const rows = await db
+        .select({
+          id: activityLogTable.id,
+          key: activityLogTable.resourceId,
+          action: activityLogTable.action,
+          description: activityLogTable.description,
+          metadata: activityLogTable.metadata,
+          createdAt: activityLogTable.createdAt,
+          userId: activityLogTable.userId,
+          actorName: usersTable.displayName,
+          actorEmail: usersTable.email,
+        })
+        .from(activityLogTable)
+        .leftJoin(usersTable, eq(activityLogTable.userId, usersTable.id))
+        .where(and(...conditions))
+        .orderBy(desc(activityLogTable.createdAt))
+        .limit(limit);
+
+      sendSuccess(
+        res,
+        rows.map((r) => ({
+          id: r.id,
+          key: r.key,
+          action: r.action,
+          actor: r.actorEmail ?? r.actorName ?? (r.userId ? `user_${r.userId}` : 'system'),
+          actorEmail: r.actorEmail,
+          actorName: r.actorName,
+          description: r.description,
+          metadata: r.metadata,
+          createdAt: r.createdAt.toISOString(),
+        })),
+      );
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load runtime config history');
+    }
+  },
+);
+
 router.get(
   '/runtime-config/:key',
   authMiddleware(),
@@ -146,7 +213,18 @@ router.post(
           isSensitive: data.isSensitive,
         })
         .returning();
-      await logActivity(req, 'create', 'runtime_config', row.key, `Created config: ${row.key}`);
+      await logActivity(
+        req,
+        'create',
+        'runtime_config',
+        row.key,
+        `Created config: ${row.key}`,
+        {
+          newValue: maskValue(row.value, row.isSensitive),
+          valueType: row.valueType,
+          category: row.category,
+        },
+      );
       invalidateConfigCache(row.key);
       sendCreated(res, row);
     } catch (err) {
@@ -178,6 +256,12 @@ router.patch(
       if (data.category !== undefined) updateData.category = data.category;
       if (data.isSensitive !== undefined) updateData.isSensitive = data.isSensitive;
 
+      const [previous] = await db
+        .select()
+        .from(runtimeConfigTable)
+        .where(eq(runtimeConfigTable.key, key))
+        .limit(1);
+
       const [row] = await db
         .update(runtimeConfigTable)
         .set(updateData)
@@ -187,12 +271,25 @@ router.patch(
         sendNotFound(res, `Config key '${key}'`);
         return;
       }
+      const sensitive = row.isSensitive || (previous?.isSensitive ?? false);
       await logActivity(
         req,
         'update',
         'runtime_config',
         row.key,
-        `Updated config: ${row.key}${data.value !== undefined ? ` = ${row.isSensitive ? '[redacted]' : data.value}` : ''}`,
+        `Updated config: ${row.key}${data.value !== undefined ? ` = ${sensitive ? REDACTED_VALUE : data.value}` : ''}`,
+        {
+          // Only include previous/new value in metadata when the value field
+          // itself changed; otherwise rely on changedFields so the audit feed
+          // doesn't imply a value mutation for description/category-only edits.
+          ...(data.value !== undefined
+            ? {
+                previousValue: previous ? maskValue(previous.value, sensitive) : null,
+                newValue: maskValue(row.value, sensitive),
+              }
+            : {}),
+          changedFields: Object.keys(data),
+        },
       );
       invalidateConfigCache(row.key);
       sendSuccess(res, {
@@ -221,7 +318,14 @@ router.delete(
         sendNotFound(res, `Config key '${key}'`);
         return;
       }
-      await logActivity(req, 'delete', 'runtime_config', row.key, `Deleted config: ${row.key}`);
+      await logActivity(
+        req,
+        'delete',
+        'runtime_config',
+        row.key,
+        `Deleted config: ${row.key}`,
+        { previousValue: maskValue(row.value, row.isSensitive) },
+      );
       invalidateConfigCache(row.key);
       sendNoContent(res);
     } catch (err) {

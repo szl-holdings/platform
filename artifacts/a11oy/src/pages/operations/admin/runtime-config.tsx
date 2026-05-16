@@ -4,12 +4,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Check,
+  Clock,
+  History,
   Lock,
   Plus,
   RefreshCw,
   Search,
   Sliders,
   Trash2,
+  User,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -30,6 +33,44 @@ interface ListResponse {
   data: RuntimeConfigRow[];
   meta: { page: number; limit: number; offset: number };
 }
+
+interface HistoryEntry {
+  id: number;
+  key: string | null;
+  action: string;
+  actor: string;
+  actorEmail: string | null;
+  actorName: string | null;
+  description: string | null;
+  metadata: {
+    previousValue?: string | null;
+    newValue?: string | null;
+    changedFields?: string[];
+    [k: string]: unknown;
+  } | null;
+  createdAt: string;
+}
+
+function formatRelative(iso: string): string {
+  const then = new Date(iso).getTime();
+  const diff = Date.now() - then;
+  if (Number.isNaN(then)) return iso;
+  const sec = Math.round(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 30) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+const actionColors: Record<string, string> = {
+  create: 'text-[#6b8f71] bg-[#6b8f71]/10',
+  update: 'text-[#4a90b8] bg-[#4a90b8]/10',
+  delete: 'text-[#c45a4a] bg-[#c45a4a]/10',
+};
 
 const VALUE_TYPES = ['string', 'number', 'boolean', 'json'] as const;
 const CATEGORIES = [
@@ -91,6 +132,113 @@ function validateValue(value: string, valueType: CreateDraft['valueType']): stri
   return null;
 }
 
+function HistoryDrawer({ configKey, onClose }: { configKey: string; onClose: () => void }) {
+  const { data, isLoading, error } = useStandardQuery<{ data: HistoryEntry[] }>({
+    queryKey: ['runtime-config-history', configKey],
+    queryFn: () =>
+      apiFetch(`/runtime-config/_history?key=${encodeURIComponent(configKey)}&limit=50`),
+  });
+  const entries = data?.data ?? [];
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl max-h-[80vh] flex flex-col bg-card border border-border rounded-xl shadow-xl"
+      >
+        <div className="flex items-start justify-between gap-2 p-5 border-b border-border">
+          <div className="min-w-0">
+            <h2 className="text-base font-display font-bold flex items-center gap-2">
+              <History className="w-4 h-4 text-primary" />
+              Change history
+            </h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5 break-all">
+              <code className="font-mono">{configKey}</code> — last 50 entries
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-muted text-muted-foreground shrink-0"
+            title="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="p-6 text-center text-xs text-muted-foreground">
+              <AlertTriangle className="w-5 h-5 text-[#d4a054] mx-auto mb-2" />
+              Failed to load history
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="p-6 text-center text-xs text-muted-foreground">
+              No recorded changes for this key
+            </div>
+          ) : (
+            <ol className="divide-y divide-border">
+              {entries.map((entry) => {
+                const prev = entry.metadata?.previousValue;
+                const next = entry.metadata?.newValue;
+                return (
+                  <li key={entry.id} className="px-5 py-3">
+                    <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                      <span
+                        className={`px-1.5 py-0.5 rounded font-medium uppercase tracking-wide ${actionColors[entry.action] ?? 'bg-muted text-muted-foreground'}`}
+                      >
+                        {entry.action}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <User className="w-3 h-3" />
+                        {entry.actor}
+                      </span>
+                      <span
+                        className="inline-flex items-center gap-1 text-muted-foreground ml-auto"
+                        title={new Date(entry.createdAt).toLocaleString()}
+                      >
+                        <Clock className="w-3 h-3" />
+                        {formatRelative(entry.createdAt)}
+                      </span>
+                    </div>
+                    {(prev !== undefined || next !== undefined) && (
+                      <div className="mt-1.5 text-[11px] flex items-center gap-2 flex-wrap">
+                        {prev !== undefined && (
+                          <span className="text-muted-foreground">
+                            from{' '}
+                            <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                              {prev === null || prev === '' ? '∅' : String(prev)}
+                            </code>
+                          </span>
+                        )}
+                        {next !== undefined && (
+                          <span className="text-muted-foreground">
+                            to{' '}
+                            <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                              {next === null || next === '' ? '∅' : String(next)}
+                            </code>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {entry.description && (
+                      <p className="text-[11px] text-muted-foreground mt-1">{entry.description}</p>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RuntimeConfigAdmin() {
   const [search, setSearch] = useState('');
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -101,12 +249,30 @@ export default function RuntimeConfigAdmin() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading, error, refetch, isFetching } = useStandardQuery<ListResponse>({
     queryKey: ['runtime-config'],
     queryFn: () => apiFetch('/runtime-config?limit=200'),
   });
+
+  // Recent activity across all runtime_config writes — used to attach a
+  // "last changed by X, Ys ago" badge to each row without firing one request
+  // per row.
+  const { data: historyData } = useStandardQuery<{ data: HistoryEntry[] }>({
+    queryKey: ['runtime-config-history'],
+    queryFn: () => apiFetch('/runtime-config/_history?limit=300'),
+  });
+
+  const latestByKey = useMemo(() => {
+    const map = new Map<string, HistoryEntry>();
+    for (const entry of historyData?.data ?? []) {
+      if (!entry.key) continue;
+      if (!map.has(entry.key)) map.set(entry.key, entry);
+    }
+    return map;
+  }, [historyData]);
 
   const invalidateAndRefresh = async (key?: string) => {
     try {
@@ -118,6 +284,8 @@ export default function RuntimeConfigAdmin() {
       // best-effort cache bust — backend already invalidates locally
     }
     qc.invalidateQueries({ queryKey: ['runtime-config'] });
+    qc.invalidateQueries({ queryKey: ['runtime-config-history'] });
+    if (key) qc.invalidateQueries({ queryKey: ['runtime-config-history', key] });
   };
 
   const updateMutation = useStandardMutation({
@@ -398,6 +566,39 @@ export default function RuntimeConfigAdmin() {
                                 default: <code className="font-mono">{row.defaultValue}</code>
                               </p>
                             )}
+                            {(() => {
+                              const latest = latestByKey.get(row.key);
+                              if (!latest) return null;
+                              const prev = latest.metadata?.previousValue;
+                              return (
+                                <div className="mt-1.5 flex items-center gap-1.5 flex-wrap text-[10px] text-muted-foreground">
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded font-medium uppercase tracking-wide ${actionColors[latest.action] ?? 'bg-muted text-muted-foreground'}`}
+                                  >
+                                    {latest.action}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {latest.actor}
+                                  </span>
+                                  <span
+                                    className="inline-flex items-center gap-1"
+                                    title={new Date(latest.createdAt).toLocaleString()}
+                                  >
+                                    <Clock className="w-3 h-3" />
+                                    {formatRelative(latest.createdAt)}
+                                  </span>
+                                  {prev !== undefined && prev !== null && prev !== '' && (
+                                    <span className="text-muted-foreground/70">
+                                      was{' '}
+                                      <code className="font-mono break-all">
+                                        {String(prev)}
+                                      </code>
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
 
                           <div className="col-span-5">
@@ -461,6 +662,13 @@ export default function RuntimeConfigAdmin() {
                               </>
                             ) : (
                               <>
+                                <button
+                                  onClick={() => setHistoryKey(row.key)}
+                                  title="View change history"
+                                  className="p-1.5 rounded hover:bg-muted/40 text-muted-foreground"
+                                >
+                                  <History className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => startEdit(row)}
                                   className="text-xs px-2 py-1 rounded border border-border hover:bg-muted/40 text-foreground"
@@ -658,6 +866,10 @@ export default function RuntimeConfigAdmin() {
             </div>
           </div>
         </div>
+      )}
+
+      {historyKey && (
+        <HistoryDrawer configKey={historyKey} onClose={() => setHistoryKey(null)} />
       )}
 
       {deleteKey && (
