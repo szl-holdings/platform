@@ -11,26 +11,38 @@ pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
 # Uses the non-interactive wrapper (push-non-interactive) so the workflow
 # never hangs on drizzle-kit's "Is `foo` a new table or rename?" prompts.
 # See lib/db/scripts/non-interactive-migrate.mjs for behavior + safety knobs
-# (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FAIL_ON_PROMPT).
+# (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FAIL_ON_PROMPT, DB_MIGRATE_FORCE).
 # stdin is /dev/null so any remaining prompt receives EOF and fails immediately
 # rather than blocking forever.
-# The duplicate-index-name error caused by skill_library.ts has been resolved
-# (that file is excluded from the schema barrel — see lib/db/src/schema/index.ts
-# and lib/db/drizzle/0144_skill_library_schema_audit.sql for details).
-# drizzle-kit push is non-fatal: the 800+ table schema takes longer than the
-# introspection timeout on some runs. Failures are logged but do not block
-# the merge or workflow reconciliation.
-# Inner wrapper timeout (12 min) sits ~3 min under the outer post-merge
-# timeout (15 min) so the wrapper finishes cleanly and prints diagnostics
-# before the platform sends SIGTERM. FAIL_ON_PROMPT stays off because the
-# wrapper auto-answers drizzle's "create new table?" prompts with the safe
-# default (Enter -> "create"); failing closed here would block every merge
-# whenever the schema introduces a new table that visually resembles one
-# of the orphan legacy tables in the live DB.
-DB_MIGRATE_TIMEOUT_MS=120000 \
+#
+# Schema-hash short-circuit (Task #5025): the wrapper now hashes
+# lib/db/src/schema/** and compares against a marker row in
+# `_szl_schema_marker` on the dev DB. The common case (no schema change)
+# completes in seconds without invoking drizzle-kit at all. Only an
+# actual schema delta triggers the ~4 min `drizzle-kit push` introspection.
+#
+# Real drizzle failures now propagate. With the schema-hash short-circuit
+# in place, the common (no-delta) case never invokes drizzle-kit at all,
+# so a timeout or non-zero exit always signals a genuine problem with an
+# actual schema delta. We therefore fail the post-merge on ANY non-zero
+# status (including 124 timeouts) so schema drift is never silent.
+#
+# `set -e` is active, so we briefly disable errexit to capture the real
+# exit code (`if ! cmd; then $?` does NOT preserve it — `!` is the last
+# command evaluated). `set +e` / `set -e` is the only pattern that works.
+set +e
+DB_MIGRATE_TIMEOUT_MS=600000 \
 DB_MIGRATE_FAIL_ON_PROMPT=false \
-  pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 \
-  || echo "drizzle-kit push timed out or failed (non-fatal, 800+ table schema)"
+  pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1
+migrate_status=$?
+set -e
+if [ "$migrate_status" -eq 124 ]; then
+  echo "drizzle-kit push timed out applying a schema delta — failing the post-merge step so the drift is visible (raise DB_MIGRATE_TIMEOUT_MS or investigate the delta)"
+  exit "$migrate_status"
+elif [ "$migrate_status" -ne 0 ]; then
+  echo "drizzle-kit push failed with exit $migrate_status — failing the post-merge step so the schema drift is visible"
+  exit "$migrate_status"
+fi
 
 # Ensure the corporate site's capability manifest is a symlink to the audit
 # source-of-truth, never a stale hand-copied file. The Product Readiness Matrix,
