@@ -93,8 +93,39 @@ router.patch(
         );
         return;
       }
+
+      const payloadId = req.params.id as string;
+      const existing = getPayload(payloadId);
+      if (!existing) {
+        sendNotFound(res, 'CPS Payload');
+        return;
+      }
+
+      const MATURITY_RANK: Record<string, number> = {
+        shadow: 0,
+        'supervised-auto': 1,
+        autonomous: 2,
+      };
+      const currentRank = MATURITY_RANK[existing.defaultMaturityMode] ?? 0;
+      const targetRank = MATURITY_RANK[mode] ?? 0;
+      const isPromotion = targetRank > currentRank;
+
+      if (isPromotion && (mode === 'supervised-auto' || mode === 'autonomous')) {
+        const gate = await checkPayloadMaturityGate(payloadId);
+        if (!gate.allowed) {
+          sendError(
+            res,
+            `Payload '${payloadId}' cannot be promoted to '${mode}' — emulation scorecard gate failed. Blockers: ${gate.blockers.join('; ')}`,
+            422,
+            'MATURITY_GATE_BLOCKED',
+            { gate },
+          );
+          return;
+        }
+      }
+
       const tenantId = extractTenantId(req);
-      const payload = updatePayloadMaturity(req.params.id as string, mode, tenantId);
+      const payload = updatePayloadMaturity(payloadId, mode, tenantId);
       if (!payload) {
         sendNotFound(res, 'CPS Payload');
         return;
@@ -105,6 +136,45 @@ router.patch(
     }
   },
 );
+
+router.get('/cps/payloads/:id/maturity-gate', authMiddleware(), async (req, res) => {
+  try {
+    const gate = await checkPayloadMaturityGate(req.params.id as string);
+    sendSuccess(res, gate);
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to evaluate maturity gate');
+  }
+});
+
+router.get('/cps/maturity-gates', authMiddleware(), async (_req, res) => {
+  try {
+    const payloads = listPayloads();
+    const gates = await Promise.all(
+      payloads.map(async (p) => {
+        try {
+          return await checkPayloadMaturityGate(p.id);
+        } catch {
+          return {
+            payloadId: p.id,
+            payloadName: p.name,
+            allowed: false,
+            compositeConfidence: null,
+            detectionRate: null,
+            requiredThreshold: 0.75,
+            regressionInLastRun: false,
+            blockers: ['Failed to evaluate emulation gate'],
+            coverageGaps: [],
+          };
+        }
+      }),
+    );
+    const byPayload: Record<string, (typeof gates)[number]> = {};
+    for (const g of gates) byPayload[g.payloadId] = g;
+    sendSuccess(res, { gates: byPayload });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to evaluate maturity gates');
+  }
+});
 
 router.get('/cps/runs', authMiddleware(), async (req, res) => {
   try {

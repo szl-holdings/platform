@@ -1,5 +1,16 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 
+export interface MaturityGate {
+  payloadId: string;
+  payloadName: string;
+  allowed: boolean;
+  compositeConfidence: number | null;
+  detectionRate: number | null;
+  requiredThreshold: number;
+  regressionInLastRun: boolean;
+  blockers: string[];
+}
+
 export const cpsApi = {
   payloads: {
     list: () => apiFetch<any[]>('/cps/payloads'),
@@ -9,6 +20,10 @@ export const cpsApi = {
         method: 'PATCH',
         body: JSON.stringify({ mode }),
       }),
+    maturityGate: (id: string) =>
+      apiFetch<MaturityGate>(`/cps/payloads/${id}/maturity-gate`),
+    maturityGates: () =>
+      apiFetch<{ gates: Record<string, MaturityGate> }>('/cps/maturity-gates'),
   },
   runs: {
     list: (params?: { payloadId?: string; status?: string }) => {

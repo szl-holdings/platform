@@ -11,8 +11,10 @@ import {
   Zap,
   Bot,
   Target,
+  ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
-import { cpsApi } from '@/lib/cps-api';
+import { cpsApi, type MaturityGate } from '@/lib/cps-api';
 
 const CATEGORY_ICONS: Record<string, typeof Shield> = {
   'identity-defense': Shield,
@@ -28,15 +30,21 @@ const MATURITY_LABELS: Record<string, { label: string; color: string; icon: type
 
 export default function CpsCatalog() {
   const [payloads, setPayloads] = useState<any[]>([]);
+  const [gates, setGates] = useState<Record<string, MaturityGate>>({});
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [executingId, setExecutingId] = useState<string | null>(null);
+  const [maturityError, setMaturityError] = useState<{ payloadId: string; message: string } | null>(null);
 
   useEffect(() => {
-    cpsApi.payloads.list().then((data) => {
+    Promise.all([
+      cpsApi.payloads.list().catch(() => []),
+      cpsApi.payloads.maturityGates().catch(() => ({ gates: {} as Record<string, MaturityGate> })),
+    ]).then(([data, g]) => {
       setPayloads(Array.isArray(data) ? data : []);
+      setGates(g?.gates ?? {});
       setLoading(false);
-    }).catch(() => setLoading(false));
+    });
   }, []);
 
   async function handleExecute(payloadId: string) {
@@ -48,10 +56,14 @@ export default function CpsCatalog() {
   }
 
   async function handleMaturityChange(payloadId: string, mode: string) {
+    setMaturityError(null);
     try {
       const updated = await cpsApi.payloads.updateMaturity(payloadId, mode);
       setPayloads((prev) => prev.map((p) => (p.id === payloadId ? updated : p)));
-    } catch { /* handled by UI */ }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update maturity';
+      setMaturityError({ payloadId, message });
+    }
   }
 
   if (loading) {
@@ -77,6 +89,10 @@ export default function CpsCatalog() {
           const maturity = MATURITY_LABELS[payload.defaultMaturityMode] ?? MATURITY_LABELS.shadow;
           const MatIcon = maturity.icon;
           const expanded = expandedId === payload.id;
+          const gate = gates[payload.id];
+          const promotionAllowed = gate?.allowed ?? false;
+          const confidencePct =
+            gate?.compositeConfidence != null ? Math.round(gate.compositeConfidence * 100) : null;
 
           return (
             <div key={payload.id} className="sentra-panel p-0 overflow-hidden">
@@ -94,11 +110,34 @@ export default function CpsCatalog() {
                       <span className="text-[10px] font-mono text-slate-500">v{payload.version}</span>
                     </div>
                     <p className="text-sm text-slate-400 mt-1 line-clamp-2">{payload.description}</p>
-                    <div className="flex items-center gap-3 mt-3">
+                    <div className="flex items-center gap-3 mt-3 flex-wrap">
                       <span className={cn('inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full border', maturity.color)}>
                         <MatIcon className="w-3 h-3" />
                         {maturity.label}
                       </span>
+                      {gate && (
+                        <span
+                          title={
+                            promotionAllowed
+                              ? 'Emulation scorecard gate passed — promotion allowed'
+                              : `Promotion blocked: ${gate.blockers.join('; ')}`
+                          }
+                          className={cn(
+                            'inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full border',
+                            promotionAllowed
+                              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                              : 'text-red-400 bg-red-500/10 border-red-500/30',
+                          )}
+                        >
+                          {promotionAllowed ? (
+                            <ShieldCheck className="w-3 h-3" />
+                          ) : (
+                            <ShieldAlert className="w-3 h-3" />
+                          )}
+                          Emulation gate: {promotionAllowed ? 'PASS' : 'BLOCKED'}
+                          {confidencePct != null && ` · ${confidencePct}%`}
+                        </span>
+                      )}
                       {payload.mitreTactics?.map((t: string) => (
                         <span key={t} className="text-[10px] font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
                           {t}
@@ -124,25 +163,63 @@ export default function CpsCatalog() {
                 <div className="border-t border-white/5 p-5 space-y-5 bg-black/20">
                   <div>
                     <h4 className="text-xs font-mono text-slate-500 uppercase mb-3">Maturity Mode</h4>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       {(['shadow', 'supervised-auto', 'autonomous'] as const).map((mode) => {
                         const m = MATURITY_LABELS[mode];
+                        const MATURITY_RANK: Record<string, number> = {
+                          shadow: 0,
+                          'supervised-auto': 1,
+                          autonomous: 2,
+                        };
+                        const currentRank = MATURITY_RANK[payload.defaultMaturityMode] ?? 0;
+                        const targetRank = MATURITY_RANK[mode] ?? 0;
+                        const isPromotion = targetRank > currentRank;
+                        const requiresGate = mode === 'supervised-auto' || mode === 'autonomous';
+                        const wouldBeBlocked =
+                          isPromotion && requiresGate && gate != null && !promotionAllowed;
                         return (
                           <button
                             key={mode}
                             onClick={() => handleMaturityChange(payload.id, mode)}
+                            disabled={wouldBeBlocked && payload.defaultMaturityMode !== mode}
+                            title={
+                              wouldBeBlocked
+                                ? `Emulation gate blocked: ${gate?.blockers.join('; ')}`
+                                : undefined
+                            }
                             className={cn(
                               'px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors',
                               payload.defaultMaturityMode === mode
                                 ? m.color
-                                : 'text-slate-500 border-slate-700 hover:border-slate-600',
+                                : wouldBeBlocked
+                                  ? 'text-slate-600 border-slate-800 cursor-not-allowed opacity-50'
+                                  : 'text-slate-500 border-slate-700 hover:border-slate-600',
                             )}
                           >
                             {m.label}
+                            {wouldBeBlocked && payload.defaultMaturityMode !== mode && ' · gated'}
                           </button>
                         );
                       })}
                     </div>
+                    {gate && !promotionAllowed && (
+                      <div className="mt-3 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+                        <div className="flex items-center gap-2 text-[11px] font-mono text-red-400">
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          Emulation scorecard gate is blocking promotion
+                        </div>
+                        <ul className="mt-2 space-y-1 text-[11px] text-slate-400 pl-5 list-disc">
+                          {gate.blockers.map((b, i) => (
+                            <li key={i}>{b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {maturityError && maturityError.payloadId === payload.id && (
+                      <div className="mt-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 text-[11px] font-mono text-amber-300">
+                        {maturityError.message}
+                      </div>
+                    )}
                   </div>
 
                   <div>

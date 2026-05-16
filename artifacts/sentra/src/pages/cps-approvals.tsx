@@ -4,23 +4,30 @@ import {
   CheckCircle2,
   Clock,
   Shield,
+  ShieldAlert,
+  ShieldCheck,
   XCircle,
   AlertTriangle,
   Timer,
   User,
 } from 'lucide-react';
-import { cpsApi } from '@/lib/cps-api';
+import { cpsApi, type MaturityGate } from '@/lib/cps-api';
 
 export default function CpsApprovals() {
   const [approvals, setApprovals] = useState<any[]>([]);
+  const [gates, setGates] = useState<Record<string, MaturityGate>>({});
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
-    cpsApi.approvals.list().then((data) => {
+    Promise.all([
+      cpsApi.approvals.list().catch(() => []),
+      cpsApi.payloads.maturityGates().catch(() => ({ gates: {} as Record<string, MaturityGate> })),
+    ]).then(([data, g]) => {
       setApprovals(Array.isArray(data) ? data : []);
+      setGates(g?.gates ?? {});
       setLoading(false);
-    }).catch(() => setLoading(false));
+    });
   }, []);
 
   async function handleRespond(id: string, approved: boolean, reason?: string) {
@@ -36,6 +43,9 @@ export default function CpsApprovals() {
 
   const pending = approvals.filter((a) => a.status === 'pending');
   const resolved = approvals.filter((a) => a.status !== 'pending');
+  const gateList = Object.values(gates);
+  const blockedGates = gateList.filter((g) => !g.allowed);
+  const passingGates = gateList.filter((g) => g.allowed);
 
   if (loading) {
     return (
@@ -47,6 +57,64 @@ export default function CpsApprovals() {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {gateList.length > 0 && (
+        <section className="sentra-panel p-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#c9b787]" />
+              <span className="text-sm font-medium text-slate-200">CPS Maturity Promotion Gates</span>
+              <span className="text-[10px] font-mono text-slate-500">
+                (composite confidence ≥ 75% · no regression)
+              </span>
+            </div>
+            <div className="flex gap-3 text-[11px] font-mono">
+              <span className="flex items-center gap-1 text-emerald-400">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                {passingGates.length} passing
+              </span>
+              <span className={cn('flex items-center gap-1', blockedGates.length > 0 ? 'text-red-400' : 'text-slate-500')}>
+                <ShieldAlert className="w-3.5 h-3.5" />
+                {blockedGates.length} blocked
+              </span>
+            </div>
+          </div>
+          {blockedGates.length > 0 && (
+            <div className="mt-3 grid gap-2">
+              {blockedGates.map((g) => (
+                <div
+                  key={g.payloadId}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5 border border-red-500/20"
+                >
+                  <ShieldAlert className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-slate-200">{g.payloadName}</span>
+                      <span className="text-[10px] font-mono text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">
+                        promotion blocked
+                      </span>
+                      {g.compositeConfidence != null && (
+                        <span className="text-[10px] font-mono text-slate-500">
+                          confidence {(g.compositeConfidence * 100).toFixed(0)}% / required{' '}
+                          {(g.requiredThreshold * 100).toFixed(0)}%
+                        </span>
+                      )}
+                      {g.regressionInLastRun && (
+                        <span className="text-[10px] font-mono text-amber-400">regression detected</span>
+                      )}
+                    </div>
+                    <ul className="mt-1.5 space-y-0.5 text-[11px] text-slate-400 pl-4 list-disc">
+                      {g.blockers.map((b, i) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-display font-bold text-slate-100">CPS Approval Queue</h1>

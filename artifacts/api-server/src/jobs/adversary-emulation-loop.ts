@@ -744,6 +744,7 @@ export interface MaturityGateResult {
   requiredThreshold: number;
   regressionInLastRun: boolean;
   blockers: string[];
+  coverageGaps: string[];
 }
 
 export async function checkPayloadMaturityGate(payloadId: string): Promise<MaturityGateResult> {
@@ -780,6 +781,7 @@ export async function checkPayloadMaturityGate(payloadId: string): Promise<Matur
       requiredThreshold: MATURITY_GATE_THRESHOLD,
       regressionInLastRun: false,
       blockers,
+      coverageGaps: [],
     };
   }
 
@@ -806,6 +808,16 @@ export async function checkPayloadMaturityGate(payloadId: string): Promise<Matur
     );
   }
 
+  const coverageGaps = Array.isArray(latest.coverageGaps) ? latest.coverageGaps : [];
+
+  // If the gate is failing, surface specific coverage gaps as blockers so the
+  // promotion attempt returns actionable remediation items, not just thresholds.
+  if (blockers.length > 0 && coverageGaps.length > 0) {
+    for (const gap of coverageGaps) {
+      blockers.push(`Coverage gap: ${gap}`);
+    }
+  }
+
   return {
     payloadId,
     payloadName,
@@ -815,6 +827,7 @@ export async function checkPayloadMaturityGate(payloadId: string): Promise<Matur
     requiredThreshold: MATURITY_GATE_THRESHOLD,
     regressionInLastRun,
     blockers,
+    coverageGaps,
   };
 }
 
