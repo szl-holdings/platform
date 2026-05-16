@@ -10,7 +10,21 @@ export {
   type Cadence,
 } from './gauge-registry';
 
-export { ingestMetr, ingestEpoch, ingestArc } from './ingestors';
+export {
+  ingestMetr,
+  ingestEpoch,
+  ingestArc,
+  ingestApollo,
+  ingestAisi,
+  ingestRsp,
+  ingestFsf,
+  ingestGpqa,
+  ingestMmlu,
+  ingestSweBench,
+  ingestHumanEval,
+  ingestMath,
+  ingestGithubStargazers,
+} from './ingestors';
 export type { IngestResult, IngestSuccess, IngestFailure } from './ingestors';
 
 export {

@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { ingestArc, ingestEpoch, ingestMetr } from '../ingestors';
+import {
+  ingestAisi,
+  ingestApollo,
+  ingestArc,
+  ingestEpoch,
+  ingestFsf,
+  ingestGpqa,
+  ingestHumanEval,
+  ingestMath,
+  ingestMetr,
+  ingestMmlu,
+  ingestRsp,
+  ingestSweBench,
+} from '../ingestors';
 
 function jsonResponse(body: unknown, ok = true, status = 200): Response {
   return new Response(JSON.stringify(body), { status: ok ? status : status });
@@ -68,3 +81,49 @@ describe('ingestors — never throw, always return typed result', () => {
     expect(res.ok).toBe(false);
   });
 });
+
+const GITHUB_STARGAZER_INGESTORS = [
+  { name: 'APOLLO', fn: ingestApollo, urlMatch: /ApolloResearch/ },
+  { name: 'AISI', fn: ingestAisi, urlMatch: /inspect_ai/ },
+  { name: 'RSP', fn: ingestRsp, urlMatch: /anthropic-cookbook/ },
+  { name: 'FSF', fn: ingestFsf, urlMatch: /deepmind-research/ },
+  { name: 'GPQA', fn: ingestGpqa, urlMatch: /gpqa/ },
+  { name: 'MMLU', fn: ingestMmlu, urlMatch: /hendrycks\/test/ },
+  { name: 'SWE_BENCH', fn: ingestSweBench, urlMatch: /SWE-bench/ },
+  { name: 'HUMANEVAL', fn: ingestHumanEval, urlMatch: /human-eval/ },
+  { name: 'MATH', fn: ingestMath, urlMatch: /hendrycks\/math/ },
+] as const;
+
+describe.each(GITHUB_STARGAZER_INGESTORS)(
+  '$name ingestor — GitHub stargazer proxy',
+  ({ name, fn, urlMatch }) => {
+    it(`${name} success returns typed value`, async () => {
+      const res = await fn(async () => jsonResponse({ stargazers_count: 99 }));
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.value).toBe(99);
+        expect(res.sourceUrl).toMatch(urlMatch);
+        expect(res.fetchedAt).toMatch(/^\d{4}-/);
+      }
+    });
+
+    it(`${name} captures HTTP errors without throwing`, async () => {
+      const res = await fn(async () => new Response('nope', { status: 502 }));
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.error).toMatch(/HTTP 502/);
+    });
+
+    it(`${name} captures malformed payloads without throwing`, async () => {
+      const res = await fn(async () => jsonResponse({ stargazers_count: 'not-a-number' }));
+      expect(res.ok).toBe(false);
+    });
+
+    it(`${name} captures network failures without throwing`, async () => {
+      const res = await fn(async () => {
+        throw new Error(`${name}-boom`);
+      });
+      expect(res.ok).toBe(false);
+      if (!res.ok) expect(res.error).toBe(`${name}-boom`);
+    });
+  },
+);
