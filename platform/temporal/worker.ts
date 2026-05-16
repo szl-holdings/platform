@@ -15,6 +15,7 @@
 
 import { NativeConnection, Worker, type WorkerOptions } from "@temporalio/worker";
 
+import { logger as defaultLogger } from "./logger.js";
 import * as approvalActivities from "./activities/approval-activities.js";
 import * as evidenceActivities from "./activities/evidence-activities.js";
 import * as ingestionActivities from "./activities/ingestion-activities.js";
@@ -68,13 +69,13 @@ export interface BootstrappedWorker {
   shutdown: () => void;
 }
 
-const consoleLogger: SimpleLogger = {
+const pinoLogger: SimpleLogger = {
   info: (obj, msg) =>
-    typeof obj === "string" ? console.log(`[temporal-worker] ${obj}`) : console.log(`[temporal-worker] ${msg ?? ""}`, obj),
+    typeof obj === "string" ? defaultLogger.info(obj) : defaultLogger.info(obj, msg),
   warn: (obj, msg) =>
-    typeof obj === "string" ? console.warn(`[temporal-worker] ${obj}`) : console.warn(`[temporal-worker] ${msg ?? ""}`, obj),
+    typeof obj === "string" ? defaultLogger.warn(obj) : defaultLogger.warn(obj, msg),
   error: (obj, msg) =>
-    typeof obj === "string" ? console.error(`[temporal-worker] ${obj}`) : console.error(`[temporal-worker] ${msg ?? ""}`, obj),
+    typeof obj === "string" ? defaultLogger.error(obj) : defaultLogger.error(obj, msg),
 };
 
 /**
@@ -85,7 +86,7 @@ const consoleLogger: SimpleLogger = {
 export async function bootstrapTemporalWorker(
   opts: WorkerBootstrapOptions = {},
 ): Promise<BootstrappedWorker> {
-  const logger = opts.logger ?? consoleLogger;
+  const logger = opts.logger ?? pinoLogger;
   const address = opts.address ?? process.env.TEMPORAL_ENDPOINT ?? "localhost:7233";
   const namespace = opts.namespace ?? process.env.TEMPORAL_NAMESPACE ?? DEFAULT_NAMESPACE;
   const taskQueue = opts.taskQueue ?? process.env.TEMPORAL_TASK_QUEUE ?? DEFAULT_TASK_QUEUE;

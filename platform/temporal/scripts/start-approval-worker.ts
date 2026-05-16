@@ -17,15 +17,28 @@
  *   TEMPORAL_NAMESPACE             Default: "default"
  *   TEMPORAL_APPROVAL_TASK_QUEUE   Default: "approval-task-queue"
  *
+ * Initializes the platform OpenTelemetry tracer (Phase 8) BEFORE bootstrap
+ * so workflow/activity executions show up as spans in the shared pipeline,
+ * and routes logging through the shared pino logger.
+ *
  * Surfaces startup/connection errors clearly with a `[temporal-approval-worker]
- * FATAL` prefix and forwards SIGTERM/SIGINT for graceful shutdown.
+ * FATAL` prefix and forwards SIGTERM/SIGINT for graceful shutdown, flushing
+ * the OTel exporter on exit.
  */
 
+import { initOtel } from "@szl-holdings/otel";
+import { shutdownTracer } from "@szl-holdings/observability";
+
+import { createLogger } from "../logger.js";
 import { bootstrapTemporalWorker } from "../worker.js";
 import { parseTimeoutEnv, waitForTemporalReady } from "./wait-for-temporal.js";
 
 const APPROVAL_TASK_QUEUE_ENV = "TEMPORAL_APPROVAL_TASK_QUEUE";
 const DEFAULT_APPROVAL_TASK_QUEUE = "approval-task-queue";
+const SERVICE_NAME =
+  process.env.OTEL_SERVICE_NAME ?? "temporal-approval-worker";
+
+const logger = createLogger(SERVICE_NAME);
 
 async function main() {
   const started = Date.now();
@@ -44,25 +57,48 @@ async function main() {
     process.exit(1);
   }
 
+  try {
+    await initOtel({
+      serviceName: SERVICE_NAME,
+      serviceVersion: process.env.npm_package_version ?? "0.0.0",
+      otlpEndpoint:
+        process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+      exportToAzureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
+      exportToNewRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
+      exportToConsole: process.env.OTEL_CONSOLE_EXPORT === "true",
+    });
+  } catch (err) {
+    logger.warn(
+      { err },
+      "[temporal-approval-worker] OpenTelemetry initialization failed — continuing without OTel",
+    );
+  }
+
   let bootstrapped: Awaited<ReturnType<typeof bootstrapTemporalWorker>>;
   try {
-    bootstrapped = await bootstrapTemporalWorker({ taskQueue });
+    bootstrapped = await bootstrapTemporalWorker({ taskQueue, logger });
   } catch (err) {
-    console.error(
+    logger.error(
+      { err: err instanceof Error ? { message: err.message, stack: err.stack } : err },
       "[temporal-approval-worker] FATAL: failed to start worker",
-      err instanceof Error ? { message: err.message, stack: err.stack } : err,
     );
+    await shutdownTracer(4_000).catch(() => {});
     process.exit(1);
   }
 
-  console.log(
-    `[temporal-approval-worker] running (namespace=${bootstrapped.namespace} ` +
-      `taskQueue=${bootstrapped.taskQueue} bootMs=${Date.now() - started})`,
+  logger.info(
+    {
+      namespace: bootstrapped.namespace,
+      taskQueue: bootstrapped.taskQueue,
+      bootMs: Date.now() - started,
+    },
+    "[temporal-approval-worker] running",
   );
 
   const stop = (signal: NodeJS.Signals) => {
-    console.log(
-      `[temporal-approval-worker] received ${signal} — initiating graceful shutdown`,
+    logger.info(
+      { signal },
+      "[temporal-approval-worker] received signal — initiating graceful shutdown",
     );
     bootstrapped.shutdown();
   };
@@ -71,13 +107,15 @@ async function main() {
 
   try {
     await bootstrapped.run();
-    console.log("[temporal-approval-worker] shut down cleanly");
+    logger.info("[temporal-approval-worker] shut down cleanly");
+    await shutdownTracer(4_000).catch(() => {});
     process.exit(0);
   } catch (err) {
-    console.error(
+    logger.error(
+      { err: err instanceof Error ? { message: err.message, stack: err.stack } : err },
       "[temporal-approval-worker] worker.run() exited with error",
-      err instanceof Error ? { message: err.message, stack: err.stack } : err,
     );
+    await shutdownTracer(4_000).catch(() => {});
     process.exit(1);
   }
 }
