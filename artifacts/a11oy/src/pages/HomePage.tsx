@@ -1,11 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
 import { A11oyGovernancePanels } from '../components/GovernancePanels';
-import { useAlloyDashboard } from '../graphql';
 import { PSYCHE_KPIS } from '../data/psyche';
+
+interface DashboardSnapshot {
+  totalWorkflows: number;
+  totalRuns: number;
+  runningRuns: number;
+  pendingApprovals: number;
+  failedRuns: number;
+  successRate: number;
+  avgDurationMs: number | null;
+}
+
+const DASHBOARD_URL = `${(import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')}/api/a11oy/dashboard`;
+
+function useDashboardSnapshot() {
+  const [data, setData] = useState<DashboardSnapshot | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(DASHBOARD_URL, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((j) => {
+        if (!cancelled && j?.ok && j?.data) setData(j.data as DashboardSnapshot);
+      })
+      .catch((e: Error) => {
+        if (!cancelled) setError(e.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return { data, error };
+}
 
 const T = {
   bg: '#0a0a0a',
@@ -184,12 +215,12 @@ function CommandPrompt() {
 }
 
 function LivePulseStrip() {
-  const { data: dashboard } = useAlloyDashboard();
+  const { data: dashboard } = useDashboardSnapshot();
   if (!dashboard) return null;
   const stats = [
     { label: 'Workflows', value: String(dashboard.totalWorkflows) },
     { label: 'Running', value: String(dashboard.runningRuns) },
-    { label: 'Success', value: `${Math.round(dashboard.successRate * 100)}%` },
+    { label: 'Success', value: `${Math.round(dashboard.successRate)}%` },
     { label: 'Approvals', value: String(dashboard.pendingApprovals) },
     { label: 'Avg Duration', value: dashboard.avgDurationMs ? `${Math.round(dashboard.avgDurationMs / 1000)}s` : '—' },
   ];

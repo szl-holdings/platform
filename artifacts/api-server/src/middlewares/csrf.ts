@@ -48,6 +48,10 @@ const EXEMPT_PATHS = new Set([
   '/api/observability/error-feedback',
   '/api/telemetry/events',
   '/api/analytics/event',
+  // Omnia Shell adoption beacon — fire-and-forget telemetry POST emitted once
+  // per shell mount from every web artifact. No browser session is required,
+  // no per-user mutation occurs (single row keyed by artifactId + shellVersion),
+  // so CSRF double-submit is not applicable. Server still validates payload shape.
   // Public-site funnel analytics ingest. Anonymous client-side events posted
   // from any marketing page (often pre-session); CSRF double-submit is not
   // applicable. Server still validates eventName / domain / sourceApp shape.
