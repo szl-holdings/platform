@@ -1073,7 +1073,7 @@ router.get('/stats', authMiddleware(), (req: Request, res: Response) => {
   });
 });
 
-router.get('/connections', authMiddleware(), (req: Request, res: Response) => {
+router.get('/connections', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const list = filterByTenant([...connections.values()], tenantId).sort(
     (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
@@ -1081,7 +1081,7 @@ router.get('/connections', authMiddleware(), (req: Request, res: Response) => {
   res.json({ connections: list, total: list.length });
 });
 
-router.get('/audit-log', authMiddleware(), (req: Request, res: Response) => {
+router.get('/audit-log', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const limit = Math.min(parseInt(String(req.query.limit) || '50', 10), 200);
   const riskFilter = req.query.risk as string | undefined;
@@ -1093,7 +1093,7 @@ router.get('/audit-log', authMiddleware(), (req: Request, res: Response) => {
   res.json({ calls: result, total: filtered.length, returned: result.length });
 });
 
-router.get('/approvals', authMiddleware(), (req: Request, res: Response) => {
+router.get('/approvals', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const statusFilter = req.query.status as string | undefined;
   let list = [...approvals.values()].filter(a => {
@@ -1109,7 +1109,7 @@ router.get('/approvals', authMiddleware(), (req: Request, res: Response) => {
   });
 });
 
-router.post('/approvals/:id/approve', authMiddleware(), async (req: Request, res: Response) => {
+router.post('/approvals/:id/approve', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), async (req: Request, res: Response) => {
   const approval = approvals.get(req.params.id!);
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
@@ -1118,6 +1118,21 @@ router.post('/approvals/:id/approve', authMiddleware(), async (req: Request, res
   if (callerTenant && call && call.tenantId !== callerTenant) {
     return res.status(403).json({ error: 'Cannot approve resources outside your tenant' });
   }
+  const reviewerRoles = req.user?.roles ?? [];
+  const isAdminOrSuperAdmin = reviewerRoles.includes('super_admin') || reviewerRoles.includes('admin');
+  const tierSatisfied = (() => {
+    if (isAdminOrSuperAdmin) return true;
+    const tier = approval.requiredTier;
+    if (tier === 'executive') return reviewerRoles.includes('exec');
+    if (tier === 'operator') return reviewerRoles.includes('ops') || reviewerRoles.includes('exec');
+    return false;
+  })();
+  if (!tierSatisfied) {
+    return res.status(403).json({
+      error: `Insufficient authority — this approval requires ${approval.requiredTier} tier`,
+      requiredTier: approval.requiredTier,
+    });
+  }
   approval.reviewedBy = req.user?.email ?? 'operator';
   approval.reviewedAt = new Date().toISOString();
   approval.reviewNote = req.body?.note ?? null;
@@ -1125,7 +1140,7 @@ router.post('/approvals/:id/approve', authMiddleware(), async (req: Request, res
   let executionError: string | undefined;
   if (call) {
     try {
-      const execOutcome = await executeToolForGateway(call.toolName, call.parameters);
+      const execOutcome = await executeToolForGateway(call.toolName, call.parameters, req.user);
       executionResult = execOutcome.result;
       executionError = execOutcome.error;
     } catch (err) {
@@ -1166,7 +1181,7 @@ router.post('/approvals/:id/approve', authMiddleware(), async (req: Request, res
   });
 });
 
-router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Response) => {
+router.post('/approvals/:id/reject', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const approval = approvals.get(req.params.id!);
   if (!approval) return res.status(404).json({ error: 'Approval not found' });
   if (approval.status !== 'pending') return res.status(409).json({ error: `Approval already ${approval.status}` });
@@ -1195,7 +1210,7 @@ router.post('/approvals/:id/reject', authMiddleware(), (req: Request, res: Respo
   res.json({ approval });
 });
 
-router.get('/proof-chain', authMiddleware(), (req: Request, res: Response) => {
+router.get('/proof-chain', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const limit = Math.min(parseInt(String(req.query.limit) || '50', 10), 200);
   const filtered = proofPackets.filter(p => !tenantId || p.tenantId === tenantId);
@@ -1203,7 +1218,7 @@ router.get('/proof-chain', authMiddleware(), (req: Request, res: Response) => {
   res.json({ packets: result, total: filtered.length, returned: result.length });
 });
 
-router.get('/rate-limits', authMiddleware(), (req: Request, res: Response) => {
+router.get('/rate-limits', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const now = Date.now();
   const limits: RateLimitEntry[] = [];
@@ -1227,7 +1242,7 @@ router.get('/rate-limits', authMiddleware(), (req: Request, res: Response) => {
   res.json({ rateLimits: limits });
 });
 
-router.get('/api-keys', authMiddleware(), (req: Request, res: Response) => {
+router.get('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const keys = [...apiKeys.values()]
     .filter(k => !tenantId || k.tenantId === tenantId)
@@ -1245,7 +1260,7 @@ router.get('/api-keys', authMiddleware(), (req: Request, res: Response) => {
   res.json({ keys, total: keys.length });
 });
 
-router.post('/api-keys', authMiddleware(), (req: Request, res: Response) => {
+router.post('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
   const callerTenant = resolveTenantId(req);
   const { label, tenantId, scopes, rateLimit } = req.body ?? {};
   if (!label || typeof label !== 'string') return res.status(400).json({ error: 'label is required' });
@@ -1282,7 +1297,7 @@ router.post('/api-keys', authMiddleware(), (req: Request, res: Response) => {
   });
 });
 
-router.delete('/api-keys/:id', authMiddleware(), (req: Request, res: Response) => {
+router.delete('/api-keys/:id', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
   const callerTenant = resolveTenantId(req);
   const key = apiKeys.get(req.params.id!);
   if (!key) return res.status(404).json({ error: 'API key not found' });

@@ -11,7 +11,7 @@ import {
 } from '@szl-holdings/db';
 import { connectorHub } from '@szl-holdings/services';
 import { and, desc, eq } from 'drizzle-orm';
-import { type Request, type Response, Router } from 'express';
+import { type NextFunction, type Request, type Response, Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { PRAXISMcpServer as NexusMcpServer, buildTenantInstructions, createDomainApps } from '@workspace/nexus-mcp';
@@ -21,7 +21,43 @@ import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, requireAuthOrGatewayKey, updateGatewayCallPostExecution } from './mcp-governed-gateway';
+import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, updateGatewayCallPostExecution } from './mcp-governed-gateway';
+
+/**
+ * Restricts raw MCP transport access to gateway-key holders or session users
+ * with at least operator-level platform role (ops, exec, admin, super_admin).
+ *
+ * Ordinary tenant members must use the governed gateway (POST
+ * /api/mcp-governed-gateway/tool-call) which enforces approval flows and proof
+ * generation. Allowing them onto the raw transport would let them bypass those
+ * controls and invoke internal-token-backed tools without review.
+ */
+function requireOperatorOrGatewayKey(req: Request, res: Response, next: NextFunction): void {
+  if (req.gatewayApiKey) {
+    next();
+    return;
+  }
+  if (req.user) {
+    const roles = req.user.roles;
+    if (
+      roles.includes('super_admin') ||
+      roles.includes('admin') ||
+      roles.includes('ops') ||
+      roles.includes('exec')
+    ) {
+      next();
+      return;
+    }
+    res.status(403).json({
+      error: 'Insufficient permissions — raw MCP transport requires operator role or a gateway API key',
+      hint: 'Use POST /api/mcp-governed-gateway/tool-call with a gateway API key for governed tool access',
+    });
+    return;
+  }
+  res.status(401).json({
+    error: 'Authentication required — provide a gateway API key via Authorization: Bearer header, or authenticate via session with operator role',
+  });
+}
 
 const router = Router();
 
@@ -809,9 +845,10 @@ function buildPromptMessages(
 export async function executeToolForGateway(
   toolName: string,
   toolArgs: Record<string, unknown>,
+  reviewer?: AuthenticatedUser,
 ): Promise<{ result: unknown; error?: string }> {
   try {
-    const result = await executeTool(toolName, toolArgs, undefined);
+    const result = await executeTool(toolName, toolArgs, reviewer);
     return { result };
   } catch (err) {
     return { result: null, error: String(err) };
@@ -1642,7 +1679,7 @@ router.get('/mcp/health', (_req: Request, res: Response) => {
   });
 });
 
-router.get('/mcp/tools', gatewayApiKeyGate, authMiddleware({ required: false }), (req: Request, res: Response) => {
+router.get('/mcp/tools', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, (req: Request, res: Response) => {
   if (req.gatewayApiKey && req.gatewayConnection) {
     recordGatewayLifecycleEvent(
       req.gatewayConnection as Parameters<typeof recordGatewayLifecycleEvent>[0],
@@ -1666,13 +1703,15 @@ router.get('/mcp/tools', gatewayApiKeyGate, authMiddleware({ required: false }),
 
 router.get(
   '/mcp/resources',
+  gatewayApiKeyGate,
   authMiddleware({ required: false }),
+  requireOperatorOrGatewayKey,
   (_req: Request, res: Response) => {
     res.json({ resources: MCP_RESOURCES, count: MCP_RESOURCES.length });
   },
 );
 
-router.get('/mcp/prompts', authMiddleware({ required: false }), (_req: Request, res: Response) => {
+router.get('/mcp/prompts', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, (_req: Request, res: Response) => {
   res.json({ prompts: MCP_PROMPTS, count: MCP_PROMPTS.length });
 });
 
@@ -1681,7 +1720,7 @@ router.get('/mcp/prompts', authMiddleware({ required: false }), (_req: Request, 
 // Creates a per-session SSEServerTransport backed by a fresh NexusMcpServer
 // instance scoped to the authenticated user's tenant context.
 
-router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), requireAuthOrGatewayKey, async (req: Request, res: Response) => {
+router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, async (req: Request, res: Response) => {
   const sessionId = randomUUID();
   const transport = new SSEServerTransport('/api/mcp/message', res);
   sseSessions.set(sessionId, transport);
@@ -1719,7 +1758,7 @@ router.post(
   '/mcp/message',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
-  requireAuthOrGatewayKey,
+  requireOperatorOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = String(req.query['sessionId'] ?? '');
     const transport = sseSessions.get(sessionId);
@@ -1742,7 +1781,7 @@ router.post(
   '/mcp',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
-  requireAuthOrGatewayKey,
+  requireOperatorOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
@@ -1793,7 +1832,7 @@ router.get(
   '/mcp/stream',
   gatewayApiKeyGate,
   authMiddleware({ required: false }),
-  requireAuthOrGatewayKey,
+  requireOperatorOrGatewayKey,
   async (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
     if (!sessionId) {
