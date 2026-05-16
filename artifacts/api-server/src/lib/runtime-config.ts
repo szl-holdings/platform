@@ -66,19 +66,41 @@ async function getCachedRow(key: string): Promise<RuntimeConfig | null> {
   return value;
 }
 
-function castValue(raw: string, type: string): unknown {
+/**
+ * Cast a stored string value to the requested type.
+ *
+ * Contract (changed in task #4902):
+ *   On cast failure (e.g. valueType=`number` but the text isn't a finite
+ *   number, or valueType=`json` but the text doesn't parse) we now return
+ *   the caller's `defaultValue` AND emit a structured warning. Previously
+ *   this function silently returned `0` for malformed numbers and `null`
+ *   for malformed JSON, which masked data-corruption bugs — e.g. a rate
+ *   limit accidentally set to "twohundred" would become `0` and block all
+ *   traffic. Falling back to the default keeps the system running while
+ *   the log line surfaces the corruption to operators.
+ */
+function castValue(raw: string, type: string, key: string, defaultValue: unknown): unknown {
   switch (type) {
     case 'number': {
       const n = Number(raw);
-      return Number.isFinite(n) ? n : 0;
+      if (Number.isFinite(n)) return n;
+      logger.warn(
+        { key, valueType: type, raw, defaultValue },
+        '[runtime-config] malformed number value — falling back to default',
+      );
+      return defaultValue;
     }
     case 'boolean':
       return raw === 'true' || raw === '1';
     case 'json': {
       try {
         return JSON.parse(raw);
-      } catch {
-        return null;
+      } catch (err) {
+        logger.warn(
+          { key, valueType: type, raw, err, defaultValue },
+          '[runtime-config] malformed JSON value — falling back to default',
+        );
+        return defaultValue;
       }
     }
     default:
@@ -99,7 +121,7 @@ export async function getConfig<T = string>(key: string, defaultValue: T): Promi
   try {
     const row = await getCachedRow(key);
     if (!row) return defaultValue;
-    return castValue(row.value, row.valueType) as T;
+    return castValue(row.value, row.valueType, key, defaultValue) as T;
   } catch (err) {
     logger.warn({ err, key }, '[runtime-config] getConfig failed — returning default');
     return defaultValue;

@@ -117,12 +117,14 @@ describe('getConfig — type casting', () => {
     expect(v).toBe(0.125);
   });
 
-  it('returns 0 when the number value is not finite', async () => {
+  it('falls back to defaultValue when the number value is not finite (task #4902)', async () => {
     const { getConfig } = await loadSut();
     dbState.row = { key: 'broken', value: 'not-a-number', valueType: 'number' };
     const v = await getConfig<number>('broken', 999);
-    // castValue → NaN → 0 (NOT defaultValue, which is the documented behaviour)
-    expect(v).toBe(0);
+    // castValue → NaN → defaultValue (was silently 0 before #4902; that
+    // masked data-corruption bugs — e.g. a rate limit set to "twohundred"
+    // would become 0 and block all traffic).
+    expect(v).toBe(999);
   });
 
   it('casts boolean strings (true / 1 → true; anything else → false)', async () => {
@@ -158,13 +160,14 @@ describe('getConfig — type casting', () => {
     expect(v).toEqual({ a: 1, b: ['x', 'y'] });
   });
 
-  it('returns null (not the default) when JSON is malformed', async () => {
+  it('falls back to defaultValue when JSON is malformed (task #4902)', async () => {
     const { getConfig } = await loadSut();
     dbState.row = { key: 'j', value: '{not json', valueType: 'json' };
     const v = await getConfig<unknown>('j', { fallback: true });
-    // castValue returns null for invalid JSON; the default only applies when
-    // the row is missing, not when casting fails.
-    expect(v).toBeNull();
+    // castValue returns defaultValue for invalid JSON (previously returned
+    // null silently — see task #4902). A structured warning is also logged
+    // so operators can spot the corruption.
+    expect(v).toEqual({ fallback: true });
   });
 });
 
