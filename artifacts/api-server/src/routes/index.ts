@@ -273,6 +273,14 @@ router.use(lazyMatch("/sentra/remediation", () => import("./sentra-remediation")
 // /api/sentra/duel/*          — Sentinel agent duel sessions
 // /api/sentra/deception/*     — canary tokens + honey grid
 // /api/honey/*                — honey endpoints (trap attackers)
+// Sentra Posture / Controls Coverage / Doctrine V6 Governance reads —
+// landing-surface and operator dashboard endpoints (payload-grounded).
+// Mounted BEFORE sentra-defense so these reads aren't gated by the active-
+// defense lazy module's init chain.
+//   GET /api/sentra/posture
+//   GET /api/sentra/controls/coverage
+//   GET /api/sentra/governance/doctrine
+router.use(lazyMatch("/sentra", () => import("./sentra-posture"), "sentra-posture"));
 router.use(lazyMatch("/sentra", () => import("./sentra-defense"), "sentra-defense"));
 router.use(lazyMatch("/honey", () => import("./sentra-defense"), "sentra-honey"));
 

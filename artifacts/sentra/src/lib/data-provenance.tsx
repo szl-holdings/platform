@@ -2,7 +2,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { Database, Loader2, WifiOff } from 'lucide-react';
 
 interface DataProvenanceProps {
-  source: 'live' | 'seed' | 'loading' | 'error';
+  source: 'live' | 'seed' | 'degraded' | 'loading' | 'error';
   label?: string;
   className?: string;
 }
@@ -34,6 +34,21 @@ export function DataProvenance({ source, label, className }: DataProvenanceProps
       >
         <WifiOff className="w-2.5 h-2.5" />
         {label ?? 'Unavailable'}
+      </span>
+    );
+  }
+
+  if (source === 'degraded') {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[9px] uppercase tracking-wider',
+          'bg-amber-500/20 border border-amber-500/40 text-amber-300',
+          className,
+        )}
+      >
+        <Database className="w-2.5 h-2.5" />
+        {label ?? 'Degraded · Fallback'}
       </span>
     );
   }

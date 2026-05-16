@@ -64,6 +64,21 @@
     }
   },
   "critical_findings": [],
+  "sentra_posture": {
+    "insurance_policy": {
+      "carrier": "Chartered Hazard Re",
+      "policy_id": "CHR-2024-991",
+      "coverage_limit_usd": 10000000,
+      "retention_usd": 500000,
+      "fail_clause": "Backup staleness + compromised asset triggers section 8.3",
+      "pass_clause": "All policy clauses satisfied"
+    },
+    "exposure_model": {
+      "base_unsegmented_ot_usd": 1400000,
+      "per_open_incident_usd": 350000,
+      "per_compromised_asset_usd": 700000
+    }
+  },
   "org_summary": {
     "repos_total": 16,
     "ci_failing": 0,

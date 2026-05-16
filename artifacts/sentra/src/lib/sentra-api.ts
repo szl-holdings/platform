@@ -236,6 +236,119 @@ export async function getSentraSummary(): Promise<SentraSummary | null> {
   }
 }
 
+// ── Posture / Controls Coverage / Doctrine V6 ─────────────────────────────
+
+export interface CveFinding {
+  id: string;
+  title: string;
+  severity: IncidentSeverity;
+  score: number;
+  description: string;
+}
+
+export interface InsurancePosture {
+  coverageLimit: number;
+  retention: number;
+  carrier: string;
+  policyId: string;
+  complianceStatus: 'pass' | 'fail';
+  complianceReason: string;
+}
+
+export interface SentraPosture {
+  source: 'live' | 'seed' | 'degraded';
+  lastUpdated: string;
+  financialExposure: number;
+  financialExposureLabel: string;
+  openIncidents: number;
+  criticalAlerts: number;
+  openAlerts: number;
+  compromisedAssets: number;
+  totalAssets: number;
+  sevenDayTrend: number[];
+  trendDeltaPct: number;
+  topCveFindings: CveFinding[];
+  insurancePosture: InsurancePosture;
+}
+
+export interface ControlFamilyCoverage {
+  family: 'Identify' | 'Protect' | 'Detect' | 'Respond' | 'Recover';
+  total: number;
+  compliant: number;
+  drifting: number;
+  remediating: number;
+  coveragePct: number;
+}
+
+export interface ControlsCoverage {
+  source: 'live' | 'seed' | 'degraded';
+  lastUpdated: string;
+  framework: string;
+  overallCoveragePct: number;
+  totals: { total: number; compliant: number; drifting: number; remediating: number };
+  families: ControlFamilyCoverage[];
+}
+
+export interface DoctrineV6 {
+  version: string;
+  replayRoot: string;
+  bylineCanonical: string;
+  licenseAllowlist: string[];
+  ingestionPolicy: string;
+  byteIdenticalReplaysRequired: number;
+  lambdaAxesCount: number;
+  lambdaConjunctiveFloor: number;
+  moralGroundingFloor: number;
+  measurabilityHonestyFloor: number;
+}
+
+export interface DoctrineGovernance {
+  source: 'live' | 'seed' | 'degraded';
+  lastUpdated: string;
+  doctrine: DoctrineV6;
+  orgPosture: {
+    reposTotal: number;
+    ciFailing: number;
+    openPrs: number;
+    openCodeScanningAlerts: number;
+    openDependabotHighCritical: number;
+    scorecardAvg: number;
+    branchProtectionCompliant: number;
+    branchProtectionWeak: number;
+  };
+  sentraRepo: { repository: string; defaultBranch: string; latestTag: string };
+}
+
+export async function getSentraPosture(): Promise<SentraPosture | null> {
+  try {
+    const res = await fetch(`${BASE}/sentra/posture`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as SentraPosture;
+  } catch {
+    return null;
+  }
+}
+
+export async function getControlsCoverage(): Promise<ControlsCoverage | null> {
+  try {
+    const res = await fetch(`${BASE}/sentra/controls/coverage`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as ControlsCoverage;
+  } catch {
+    return null;
+  }
+}
+
+export async function getDoctrineGovernance(): Promise<DoctrineGovernance | null> {
+  try {
+    const res = await fetch(`${BASE}/sentra/governance/doctrine`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as DoctrineGovernance;
+  } catch {
+    return null;
+  }
+}
+
 // ── Agents ─────────────────────────────────────────────────────────────────
 
 export async function listAgents(): Promise<{ agents: Agent[]; source: 'live' | 'seed' }> {
