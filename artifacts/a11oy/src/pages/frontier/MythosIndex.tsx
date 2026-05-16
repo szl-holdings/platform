@@ -12,6 +12,7 @@ import {
   FrontierCrossLinks,
 } from './FrontierPrimitives';
 import { MYTHOS_IDEAS, MYTHOS_ACTORS } from '@szl-holdings/frontier-mythos';
+import { MythosGraphCanvas } from './MythosGraphCanvas';
 
 const API = '/api/a11oy/frontier';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -119,6 +120,7 @@ export function MythosIndex() {
   const [selected, setSelected] = useState<MythosNode | null>(null);
   const [nodeDetail, setNodeDetail] = useState<{ node: MythosNode; neighbors: MythosNode[]; edges: MythosEdge[] } | null>(null);
   const [allCitations, setAllCitations] = useState<Citation[]>(FRAMEWORK_CITATIONS);
+  const [view, setView] = useState<'grid' | 'graph'>('grid');
 
   // Build canonical nodes from the shared frontier-mythos package.
   // This is the single source of truth for all Mythos Index content.
@@ -233,6 +235,24 @@ export function MythosIndex() {
               <span style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: MUTED }}>
                 {filtered.length} nodes · {edges.length} edges
               </span>
+              <div style={{ display: 'flex', gap: 0, marginLeft: 'auto', border: `1px solid ${BORDER}`, borderRadius: 4, overflow: 'hidden' }}>
+                {(['grid', 'graph'] as const).map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    style={{
+                      padding: '5px 12px', fontSize: 10, fontFamily: 'var(--font-mono, monospace)',
+                      letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                      background: view === v ? GOLD : 'transparent',
+                      color: view === v ? '#0a0a0a' : DIM,
+                      border: 'none', transition: 'all 0.15s',
+                    }}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {loading && (
@@ -246,7 +266,20 @@ export function MythosIndex() {
               </div>
             )}
 
-            {!loading && !error && (
+            {!loading && !error && view === 'graph' && (
+              <MythosGraphCanvas
+                nodes={filtered}
+                edges={edges}
+                kindColor={KIND_COLOR}
+                selectedId={selected?.id ?? null}
+                onSelect={(n) => {
+                  const full = nodes.find(x => x.id === n.id);
+                  if (full) selectNode(full);
+                }}
+              />
+            )}
+
+            {!loading && !error && view === 'grid' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 8 }}>
                 {filtered.map(node => (
                   <button
