@@ -554,6 +554,7 @@ export async function bootstrap(
         }
         const { addModelToRegistry } = await import('./a11oy/runtime/model-registry.js');
         const { appendDownstream } = await import('./a11oy/runtime/frontier-downstream.js');
+        const { registerPromotedModel, enqueueToolProposalImprovement } = await import('./routes/a11oy-chat.js');
 
         // Cost-cap notifier: when either the lifetime or 24h-rolling cap
         // trips, log a warning so the proof-chain shows operators why
@@ -607,11 +608,37 @@ export async function bootstrap(
                     description:
                       event.artifact.summary ?? `Frontier-ingest discovery: ${event.artifact.title}`,
                   });
+                  // Surface the promoted model in the A11oy chat router
+                  // model picker immediately, with the codex composite
+                  // score for the tooltip. This is the auto-wiring seam
+                  // requested by #4888 — no manual router refresh.
+                  registerPromotedModel({
+                    artifactId: event.artifact.id,
+                    externalId: event.artifact.externalId,
+                    displayName: event.artifact.title,
+                    provider: event.artifact.provider,
+                    codexScore: event.evidence.score.composite,
+                    summary: event.artifact.summary,
+                    promotedAt: event.at,
+                  });
                 }
                 break;
+              case 'tool_proposals':
+                // #4888: feed tool-proposal promotions into the #4786
+                // improvement queue so operators review them in the
+                // same surface they already use for low-MirrorEval turns.
+                enqueueToolProposalImprovement({
+                  artifactId: event.artifact.id,
+                  title: event.artifact.title,
+                  summary: event.artifact.summary,
+                  codexScore: event.evidence.score.composite,
+                  promotedAt: event.at,
+                });
+                // fall through to also append the downstream store entry
+                // (operators still see it in /a11oy/frontier/downstream).
+                // eslint-disable-next-line no-fallthrough
               case 'thesis_corpus':
               case 'eval_harness':
-              case 'tool_proposals':
               case 'benchmark_registry': {
                 // Concrete adapter: append to the in-process downstream
                 // store so the queue is queryable via

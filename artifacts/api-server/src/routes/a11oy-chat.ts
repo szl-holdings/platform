@@ -97,6 +97,114 @@ function enqueueImprovement(entry: ImprovementEntry): void {
   if (IMPROVEMENT_QUEUE.length > IMPROVEMENT_QUEUE_MAX) IMPROVEMENT_QUEUE.length = IMPROVEMENT_QUEUE_MAX;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Promoted-model picker — populated automatically by the Frontier Ingest
+// promotion adapter (services/frontier-ingest → operator_model_registry).
+// Entries here become routable choices in the chat model picker without
+// requiring an operator to manually edit MODEL_LANE_MAP. Codex score is
+// surfaced so the UI can render it as a tooltip next to the model name.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface PromotedModelEntry {
+  modelId: string;        // chat-router lane id (e.g. 'a1.1oy-frontier:hf:Qwen/Qwen3-8B')
+  displayName: string;
+  provider: ChatProvider;
+  upstreamModel: string;  // raw provider model id used at inference time
+  codexScore: number;
+  summary?: string;
+  promotedAt: string;
+}
+
+const PROMOTED_MODELS = new Map<string, PromotedModelEntry>();
+
+// Only providers the current /chat transport can actually dispatch to.
+// The transport is hard-wired to the Anthropic Messages API via the
+// Replit AI Integrations proxy, so non-Anthropic promotions would fail
+// at inference time. We accept the promotion event (the model still
+// lands in operator_model_registry and the downstream store) but we do
+// not expose non-Anthropic models in the chat picker — they'll appear
+// once a provider-aware dispatch layer is added (see follow-up).
+const ROUTABLE_PROVIDERS = new Set<ChatProvider>(['anthropic']);
+
+function normalizeProvider(raw: string): ChatProvider | null {
+  switch (raw) {
+    case 'anthropic':
+    case 'openai':
+    case 'huggingface':
+      return raw;
+    case 'kimi':
+      return 'kimi';
+    default:
+      return null;
+  }
+}
+
+export function registerPromotedModel(input: {
+  artifactId: string;
+  externalId: string;
+  displayName: string;
+  provider: string;
+  codexScore: number;
+  summary?: string;
+  promotedAt: string;
+}): void {
+  const provider = normalizeProvider(input.provider);
+  if (!provider || !ROUTABLE_PROVIDERS.has(provider)) {
+    // Silently skip — the model is already recorded in the operator
+    // model registry by the upstream listener; we just don't expose
+    // it through the chat picker because /chat can't dispatch to it.
+    return;
+  }
+  const laneId = `a1.1oy-frontier:${provider}:${input.externalId}`;
+  const entry: PromotedModelEntry = {
+    modelId: laneId,
+    displayName: input.displayName,
+    provider,
+    upstreamModel: input.externalId,
+    codexScore: input.codexScore,
+    summary: input.summary,
+    promotedAt: input.promotedAt,
+  };
+  PROMOTED_MODELS.set(laneId, entry);
+  // Keep the picker bounded so a noisy ingestion run can't grow it
+  // unboundedly. Drop the oldest by promotedAt when over cap.
+  const MAX_PICKER_ENTRIES = 50;
+  if (PROMOTED_MODELS.size > MAX_PICKER_ENTRIES) {
+    const oldest = Array.from(PROMOTED_MODELS.values())
+      .sort((a, b) => a.promotedAt.localeCompare(b.promotedAt))[0];
+    if (oldest) PROMOTED_MODELS.delete(oldest.modelId);
+  }
+}
+
+export function enqueueToolProposalImprovement(input: {
+  artifactId: string;
+  title: string;
+  summary?: string;
+  codexScore: number;
+  promotedAt: string;
+}): void {
+  const id = `tool-${input.artifactId}`;
+  // Dedup: cross-process poller + in-process listener can both fire for
+  // the same artifact, and restart replay can re-trigger historical
+  // promotions before the dedup-by-time check kicks in. A deterministic
+  // id per artifact lets us no-op the second enqueue.
+  if (IMPROVEMENT_QUEUE.some((e) => e.id === id)) return;
+  enqueueImprovement({
+    id,
+    createdAt: input.promotedAt,
+    status: 'pending',
+    mode: 'governance',
+    modelId: 'frontier-ingest:tool-proposal',
+    prompt: `Tool proposal from Frontier Ingest: ${input.title}`,
+    response: input.summary ?? '(no summary provided)',
+    mirrorEvalScore: input.codexScore,
+    mirrorEvalDisposition: 'tool_proposal',
+    proposedImprovement:
+      `Promote tool "${input.title}" (codex score ${input.codexScore.toFixed(2)}) ` +
+      `into the chat router tool catalog after operator review.`,
+  });
+}
+
 const SYSTEM_PROMPT_VERSION = 'v2.0.0';
 const SYSTEM_PROMPT = `You are A11oy — the unified Orchestration and Decision Intelligence layer of the SZL Holdings governed platform.
 
@@ -225,6 +333,21 @@ const AVAILABLE_TOOLS: ToolDescriptor[] = [
 ];
 
 router.get('/health', (_req: Request, res: Response) => {
+  const promotedModels = Array.from(PROMOTED_MODELS.values())
+    .sort((a, b) => b.promotedAt.localeCompare(a.promotedAt))
+    .map((m) => ({
+      modelId: m.modelId,
+      displayName: m.displayName,
+      provider: m.provider,
+      upstreamModel: m.upstreamModel,
+      codexScore: m.codexScore,
+      // The UI renders this as a tooltip on the picker entry so operators
+      // see why the Frontier Engine promoted the model.
+      tooltip: `Codex score ${m.codexScore.toFixed(2)} • promoted ${m.promotedAt}`,
+      summary: m.summary,
+      promotedAt: m.promotedAt,
+      source: 'frontier-ingest',
+    }));
   res.json({
     ok: true,
     configured: Boolean(ANTHROPIC_BASE && ANTHROPIC_KEY),
@@ -233,6 +356,7 @@ router.get('/health', (_req: Request, res: Response) => {
     lanes: Object.keys(MODEL_LANE_MAP),
     modes: Object.keys(MODE_TO_MODEL),
     tools: AVAILABLE_TOOLS,
+    promotedModels,
     systemPromptVersion: SYSTEM_PROMPT_VERSION,
     unifiedChat: true,
   });
@@ -422,12 +546,25 @@ router.post('/chat', async (req: Request, res: Response) => {
     chosenModelId = MODE_TO_MODEL[forcedMode];
     overrideApplied = true;
   }
-  if (forcedModelId && MODEL_LANE_MAP[forcedModelId]) {
+  if (forcedModelId && (MODEL_LANE_MAP[forcedModelId] || PROMOTED_MODELS.has(forcedModelId))) {
     chosenModelId = forcedModelId;
     overrideApplied = true;
   }
 
-  const laneConfig = MODEL_LANE_MAP[chosenModelId] ?? MODEL_LANE_MAP['a1.1oy-sovereign']!;
+  // Resolve lane config — built-in lanes win; promoted models from the
+  // Frontier Ingest adapter get a synthesised LaneConfig so the picker
+  // can route to them immediately after auto-promotion, before any
+  // operator edits MODEL_LANE_MAP.
+  const promoted = PROMOTED_MODELS.get(chosenModelId);
+  const laneConfig: LaneConfig = MODEL_LANE_MAP[chosenModelId]
+    ?? (promoted
+      ? {
+          model: promoted.upstreamModel,
+          lane: 'frontier-promoted',
+          temperature: 0.5,
+          provider: promoted.provider,
+        }
+      : MODEL_LANE_MAP['a1.1oy-sovereign']!);
 
   let pceResult: PCEGateResult | null = null;
   try {
