@@ -99,7 +99,7 @@ importers:
         version: 2.40.0
       '@openai/agents':
         specifier: ^0.0.15
-        version: 0.0.15(ws@8.20.0)(zod@3.25.67)
+        version: 0.0.15(ws@8.20.0)(zod@4.3.6)
       '@replit/connectors-sdk':
         specifier: ^0.3.0
         version: 0.3.0
@@ -5074,6 +5074,25 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/vsp-otel:
+    dependencies:
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.1
+    devDependencies:
+      '@opentelemetry/sdk-trace-base':
+        specifier: ^1.30.1
+        version: 1.30.1(@opentelemetry/api@1.9.1)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/workflow-runtime:
     dependencies:
       '@szl-holdings/agent-core':
@@ -5122,7 +5141,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+        version: 3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   platform/temporal:
     dependencies:
@@ -17627,29 +17646,6 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@modelcontextprotocol/sdk@1.29.0(zod@3.25.67)':
-    dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.15)
-      ajv: 8.18.0
-      ajv-formats: 3.0.1
-      content-type: 1.0.5
-      cors: 2.8.6
-      cross-spawn: 7.0.6
-      eventsource: 3.0.7
-      eventsource-parser: 3.0.8
-      express: 5.2.1
-      express-rate-limit: 8.3.1(express@5.2.1)
-      hono: 4.12.15
-      jose: 6.2.2
-      json-schema-typed: 8.0.2
-      pkce-challenge: 5.0.1
-      raw-body: 3.0.2
-      zod: 3.25.67
-      zod-to-json-schema: 3.25.2(zod@3.25.67)
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
       '@hono/node-server': 1.19.14(hono@4.12.15)
@@ -17726,19 +17722,6 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
-  '@openai/agents-core@0.0.15(ws@8.20.0)(zod@3.25.67)':
-    dependencies:
-      '@openai/zod': zod@3.25.67
-      debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
-    optionalDependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.67)
-      zod: 3.25.67
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - supports-color
-      - ws
-
   '@openai/agents-core@0.0.15(ws@8.20.0)(zod@3.25.76)':
     dependencies:
       '@openai/zod': zod@3.25.67
@@ -17752,17 +17735,18 @@ snapshots:
       - supports-color
       - ws
 
-  '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@3.25.67)':
+  '@openai/agents-core@0.0.15(ws@8.20.0)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
       '@openai/zod': zod@3.25.67
       debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
+      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
+    optionalDependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color
       - ws
-      - zod
 
   '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@3.25.76)':
     dependencies:
@@ -17776,18 +17760,16 @@ snapshots:
       - ws
       - zod
 
-  '@openai/agents-realtime@0.0.15(zod@3.25.67)':
+  '@openai/agents-openai@0.0.15(ws@8.20.0)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
       '@openai/zod': zod@3.25.67
-      '@types/ws': 8.18.1
       debug: 4.4.3
-      ws: 8.20.0
+      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
-      - bufferutil
       - supports-color
-      - utf-8-validate
+      - ws
       - zod
 
   '@openai/agents-realtime@0.0.15(zod@3.25.76)':
@@ -17804,19 +17786,18 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@openai/agents@0.0.15(ws@8.20.0)(zod@3.25.67)':
+  '@openai/agents-realtime@0.0.15(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@3.25.67)
-      '@openai/agents-openai': 0.0.15(ws@8.20.0)(zod@3.25.67)
-      '@openai/agents-realtime': 0.0.15(zod@3.25.67)
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
+      '@openai/zod': zod@3.25.67
+      '@types/ws': 8.18.1
       debug: 4.4.3
-      openai: 5.23.2(ws@8.20.0)(zod@3.25.67)
+      ws: 8.20.0
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
       - supports-color
       - utf-8-validate
-      - ws
       - zod
 
   '@openai/agents@0.0.15(ws@8.20.0)(zod@3.25.76)':
@@ -17826,6 +17807,21 @@ snapshots:
       '@openai/agents-realtime': 0.0.15(zod@3.25.76)
       debug: 4.4.3
       openai: 5.23.2(ws@8.20.0)(zod@3.25.76)
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+      - ws
+      - zod
+
+  '@openai/agents@0.0.15(ws@8.20.0)(zod@4.3.6)':
+    dependencies:
+      '@openai/agents-core': 0.0.15(ws@8.20.0)(zod@4.3.6)
+      '@openai/agents-openai': 0.0.15(ws@8.20.0)(zod@4.3.6)
+      '@openai/agents-realtime': 0.0.15(zod@4.3.6)
+      debug: 4.4.3
+      openai: 5.23.2(ws@8.20.0)(zod@4.3.6)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
@@ -24662,15 +24658,15 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@5.23.2(ws@8.20.0)(zod@3.25.67):
-    optionalDependencies:
-      ws: 8.20.0
-      zod: 3.25.67
-
   openai@5.23.2(ws@8.20.0)(zod@3.25.76):
     optionalDependencies:
       ws: 8.20.0
       zod: 3.25.76
+
+  openai@5.23.2(ws@8.20.0)(zod@4.3.6):
+    optionalDependencies:
+      ws: 8.20.0
+      zod: 4.3.6
 
   openai@6.33.0(ws@8.20.0)(zod@4.3.6):
     optionalDependencies:
@@ -26764,7 +26760,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitest@3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
+  vitest@3.2.4(@types/node@22.19.17)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.4
@@ -27108,11 +27104,6 @@ snapshots:
       archiver-utils: 5.0.2
       compress-commons: 6.0.2
       readable-stream: 4.7.0
-
-  zod-to-json-schema@3.25.2(zod@3.25.67):
-    dependencies:
-      zod: 3.25.67
-    optional: true
 
   zod-to-json-schema@3.25.2(zod@3.25.76):
     dependencies:

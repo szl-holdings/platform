@@ -146,6 +146,9 @@
     },
     {
       "path": "./packages/agi-forecast"
+    },
+    {
+      "path": "./packages/vsp-otel"
     }
   ]
 }
