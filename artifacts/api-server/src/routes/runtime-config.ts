@@ -166,6 +166,287 @@ router.get(
   },
 );
 
+/**
+ * Bulk export (task #5015).
+ *
+ * Returns every NON-sensitive entry in a stable, portable JSON envelope so
+ * operators can copy a known-good config from one environment to another, or
+ * snapshot the current state for disaster-recovery purposes.
+ *
+ * Sensitive entries are excluded entirely (not just redacted) — a redacted
+ * payload would corrupt the target environment if imported. Operators must
+ * re-set sensitive values per environment.
+ */
+router.get(
+  '/runtime-config/_export',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  async (req, res) => {
+    try {
+      const rows = await db
+        .select()
+        .from(runtimeConfigTable)
+        .where(eq(runtimeConfigTable.isSensitive, false))
+        .orderBy(runtimeConfigTable.category, runtimeConfigTable.key);
+
+      const payload = {
+        version: 1 as const,
+        exportedAt: new Date().toISOString(),
+        entryCount: rows.length,
+        sensitiveExcluded: true,
+        entries: rows.map((r) => ({
+          key: r.key,
+          value: r.value,
+          valueType: r.valueType,
+          description: r.description,
+          defaultValue: r.defaultValue,
+          category: r.category,
+          isSensitive: false as const,
+        })),
+      };
+      sendSuccess(res, payload);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to export runtime config');
+    }
+  },
+);
+
+const importEntrySchema = z.object({
+  key: z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/^[a-z0-9_]+$/, 'Key must be lowercase alphanumeric with underscores'),
+  value: z.string().min(0).max(10000),
+  valueType: z.enum(VALUE_TYPES).default('string'),
+  description: z.string().max(500).nullable().optional(),
+  defaultValue: z.string().max(10000).nullable().optional(),
+  category: z.enum(CATEGORIES).default('general'),
+  isSensitive: z.boolean().optional(),
+});
+
+const importSchema = z.object({
+  version: z.literal(1).optional(),
+  entries: z.array(importEntrySchema).max(2000),
+  deleteMissing: z.boolean().default(false),
+  dryRun: z.boolean().default(true),
+});
+
+interface ImportDiffEntry {
+  key: string;
+  category: string;
+  valueType: string;
+  description: string | null;
+  previousValue?: string | null;
+  newValue?: string | null;
+}
+
+interface ImportPlan {
+  adds: ImportDiffEntry[];
+  updates: ImportDiffEntry[];
+  deletes: ImportDiffEntry[];
+  unchanged: Array<{ key: string }>;
+  skipped: Array<{ key: string; reason: string }>;
+}
+
+/**
+ * Bulk import (task #5015).
+ *
+ * Two-phase contract: callers ALWAYS preview first with `dryRun: true`, then
+ * confirm with `dryRun: false`. The diff is computed against the live table
+ * the same way in both phases, so the preview is faithful to what apply will
+ * do (modulo concurrent edits — apply re-reads the row before each write).
+ *
+ * Doctrine notes:
+ * - Sensitive entries are silently SKIPPED. Importing a sensitive value
+ *   from another environment would be a credential mix-up; if the payload
+ *   claims an entry is sensitive we refuse to touch it.
+ * - `deleteMissing` is opt-in. Default behaviour is purely additive so the
+ *   common "promote staging tweaks to prod" workflow can't accidentally
+ *   wipe prod-only entries.
+ * - Each create/update/delete writes its own activity-log row so the
+ *   existing per-key history drawer keeps working unchanged.
+ */
+router.post(
+  '/runtime-config/_import',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  async (req, res) => {
+    try {
+      const parsed = importSchema.safeParse(req.body);
+      if (!parsed.success) {
+        sendBadRequest(res, 'Invalid import payload', parsed.error.flatten().fieldErrors);
+        return;
+      }
+      const { entries, deleteMissing, dryRun } = parsed.data;
+
+      const seenKeys = new Set<string>();
+      const dedupedEntries: typeof entries = [];
+      const skipped: ImportPlan['skipped'] = [];
+      for (const e of entries) {
+        if (seenKeys.has(e.key)) {
+          skipped.push({ key: e.key, reason: 'duplicate key in payload' });
+          continue;
+        }
+        if (e.isSensitive === true) {
+          skipped.push({ key: e.key, reason: 'sensitive entries cannot be bulk-imported' });
+          continue;
+        }
+        seenKeys.add(e.key);
+        dedupedEntries.push(e);
+      }
+
+      const existing = await db.select().from(runtimeConfigTable);
+      const existingByKey = new Map(existing.map((r) => [r.key, r]));
+
+      const plan: ImportPlan = { adds: [], updates: [], deletes: [], unchanged: [], skipped };
+
+      for (const e of dedupedEntries) {
+        const cur = existingByKey.get(e.key);
+        if (!cur) {
+          plan.adds.push({
+            key: e.key,
+            category: e.category,
+            valueType: e.valueType,
+            description: e.description ?? null,
+            newValue: e.value,
+          });
+          continue;
+        }
+        if (cur.isSensitive) {
+          plan.skipped.push({
+            key: e.key,
+            reason: 'live entry is marked sensitive; refusing to overwrite',
+          });
+          continue;
+        }
+        const changed =
+          cur.value !== e.value ||
+          cur.valueType !== e.valueType ||
+          cur.category !== e.category ||
+          (cur.description ?? null) !== (e.description ?? null);
+        if (!changed) {
+          plan.unchanged.push({ key: e.key });
+          continue;
+        }
+        plan.updates.push({
+          key: e.key,
+          category: e.category,
+          valueType: e.valueType,
+          description: e.description ?? null,
+          previousValue: cur.value,
+          newValue: e.value,
+        });
+      }
+
+      if (deleteMissing) {
+        for (const cur of existing) {
+          if (cur.isSensitive) continue; // never bulk-delete sensitive entries
+          if (seenKeys.has(cur.key)) continue;
+          plan.deletes.push({
+            key: cur.key,
+            category: cur.category,
+            valueType: cur.valueType,
+            description: cur.description,
+            previousValue: cur.value,
+          });
+        }
+      }
+
+      if (dryRun) {
+        sendSuccess(res, { applied: false, plan });
+        return;
+      }
+
+      // Apply phase. Sequential and per-row so each mutation produces its
+      // own activity-log entry (matching the single-row routes) and one
+      // failing row doesn't roll back others — operators can re-run import
+      // after fixing the bad row.
+      const applied = { added: 0, updated: 0, deleted: 0, errors: [] as Array<{ key: string; error: string }> };
+
+      for (const a of plan.adds) {
+        try {
+          const entry = dedupedEntries.find((d) => d.key === a.key);
+          if (!entry) continue;
+          const [row] = await db
+            .insert(runtimeConfigTable)
+            .values({
+              key: entry.key,
+              value: entry.value,
+              valueType: entry.valueType,
+              description: entry.description ?? null,
+              defaultValue: entry.defaultValue ?? null,
+              category: entry.category,
+              isSensitive: false,
+            })
+            .returning();
+          await logActivity(req, 'create', 'runtime_config', row.key, `Imported config: ${row.key}`, {
+            newValue: row.value,
+            valueType: row.valueType,
+            category: row.category,
+            bulkImport: true,
+          });
+          invalidateConfigCache(row.key);
+          applied.added += 1;
+        } catch (err) {
+          applied.errors.push({ key: a.key, error: err instanceof Error ? err.message : String(err) });
+        }
+      }
+
+      for (const u of plan.updates) {
+        try {
+          const entry = dedupedEntries.find((d) => d.key === u.key);
+          if (!entry) continue;
+          const [row] = await db
+            .update(runtimeConfigTable)
+            .set({
+              value: entry.value,
+              valueType: entry.valueType,
+              description: entry.description ?? null,
+              category: entry.category,
+              updatedAt: new Date(),
+            })
+            .where(eq(runtimeConfigTable.key, entry.key))
+            .returning();
+          if (!row) continue;
+          await logActivity(req, 'update', 'runtime_config', row.key, `Imported update: ${row.key} = ${row.value}`, {
+            previousValue: u.previousValue,
+            newValue: row.value,
+            changedFields: ['value', 'valueType', 'category', 'description'],
+            bulkImport: true,
+          });
+          invalidateConfigCache(row.key);
+          applied.updated += 1;
+        } catch (err) {
+          applied.errors.push({ key: u.key, error: err instanceof Error ? err.message : String(err) });
+        }
+      }
+
+      for (const d of plan.deletes) {
+        try {
+          const [row] = await db
+            .delete(runtimeConfigTable)
+            .where(eq(runtimeConfigTable.key, d.key))
+            .returning();
+          if (!row) continue;
+          await logActivity(req, 'delete', 'runtime_config', row.key, `Imported delete: ${row.key}`, {
+            previousValue: row.value,
+            bulkImport: true,
+          });
+          invalidateConfigCache(row.key);
+          applied.deleted += 1;
+        } catch (err) {
+          applied.errors.push({ key: d.key, error: err instanceof Error ? err.message : String(err) });
+        }
+      }
+
+      sendSuccess(res, { applied: true, plan, result: applied });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to import runtime config');
+    }
+  },
+);
+
 router.get(
   '/runtime-config/:key',
   authMiddleware(),

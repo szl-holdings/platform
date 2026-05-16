@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Check,
   Clock,
+  Download,
   History,
   Lock,
   Plus,
@@ -13,10 +14,11 @@ import {
   Sliders,
   Trash2,
   Undo2,
+  Upload,
   User,
   X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 interface RuntimeConfigRow {
   key: string;
@@ -350,6 +352,29 @@ function HistoryDrawer({
   );
 }
 
+interface ImportDiffEntry {
+  key: string;
+  category: string;
+  valueType: string;
+  description: string | null;
+  previousValue?: string | null;
+  newValue?: string | null;
+}
+
+interface ImportPlan {
+  adds: ImportDiffEntry[];
+  updates: ImportDiffEntry[];
+  deletes: ImportDiffEntry[];
+  unchanged: Array<{ key: string }>;
+  skipped: Array<{ key: string; reason: string }>;
+}
+
+interface ImportPreview {
+  plan: ImportPlan;
+  payload: { entries: unknown[]; deleteMissing: boolean };
+  fileName: string;
+}
+
 export default function RuntimeConfigAdmin() {
   const [search, setSearch] = useState('');
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -361,6 +386,15 @@ export default function RuntimeConfigAdmin() {
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [historyKey, setHistoryKey] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importLoading, setImportLoading] = useState<'preview' | 'apply' | null>(null);
+  const [importResult, setImportResult] = useState<
+    { added: number; updated: number; deleted: number; errors: Array<{ key: string; error: string }> } | null
+  >(null);
+  const importFileRef = useRef<HTMLInputElement | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading, error, refetch, isFetching } = useStandardQuery<ListResponse>({
@@ -549,6 +583,118 @@ export default function RuntimeConfigAdmin() {
     if (deleteKey) deleteMutation.mutate(deleteKey);
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const res = await apiFetch<{
+        version: number;
+        exportedAt: string;
+        entryCount: number;
+        sensitiveExcluded: boolean;
+        entries: unknown[];
+      }>('/runtime-config/_export');
+      const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      a.href = url;
+      a.download = `runtime-config-${ts}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const triggerImportFilePicker = () => {
+    setImportError(null);
+    setImportResult(null);
+    importFileRef.current?.click();
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+    setImportError(null);
+    setImportLoading('preview');
+    try {
+      const text = await file.text();
+      let parsed: { entries?: unknown[] };
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw new Error('File is not valid JSON');
+      }
+      if (!parsed || !Array.isArray(parsed.entries)) {
+        throw new Error('Expected an object with an `entries` array (export format v1)');
+      }
+      const body = { entries: parsed.entries, deleteMissing: false, dryRun: true };
+      const preview = await apiFetch<{ plan: ImportPlan }>('/runtime-config/_import', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      setImportPreview({ plan: preview.plan, payload: body, fileName: file.name });
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Preview failed');
+    } finally {
+      setImportLoading(null);
+    }
+  };
+
+  const cancelImport = () => {
+    setImportPreview(null);
+    setImportError(null);
+    setImportResult(null);
+  };
+
+  const toggleDeleteMissing = (checked: boolean) => {
+    if (!importPreview) return;
+    // re-run preview with the new flag so the displayed deletes block matches what apply will do
+    setImportLoading('preview');
+    setImportError(null);
+    apiFetch<{ plan: ImportPlan }>('/runtime-config/_import', {
+      method: 'POST',
+      body: JSON.stringify({ ...importPreview.payload, deleteMissing: checked, dryRun: true }),
+    })
+      .then((res) =>
+        setImportPreview({
+          ...importPreview,
+          payload: { ...importPreview.payload, deleteMissing: checked },
+          plan: res.plan,
+        }),
+      )
+      .catch((err) => setImportError(err instanceof Error ? err.message : 'Preview failed'))
+      .finally(() => setImportLoading(null));
+  };
+
+  const applyImport = async () => {
+    if (!importPreview) return;
+    setImportLoading('apply');
+    setImportError(null);
+    try {
+      const res = await apiFetch<{
+        applied: boolean;
+        plan: ImportPlan;
+        result: { added: number; updated: number; deleted: number; errors: Array<{ key: string; error: string }> };
+      }>('/runtime-config/_import', {
+        method: 'POST',
+        body: JSON.stringify({ ...importPreview.payload, dryRun: false }),
+      });
+      setImportResult(res.result);
+      await invalidateAndRefresh();
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Apply failed');
+    } finally {
+      setImportLoading(null);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4">
@@ -563,6 +709,31 @@ export default function RuntimeConfigAdmin() {
           </p>
         </div>
         <div className="shrink-0 flex items-center gap-2">
+          <input
+            ref={importFileRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={handleImportFile}
+          />
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            title="Download all non-sensitive runtime config as JSON"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors disabled:opacity-50"
+          >
+            <Download className={`w-3.5 h-3.5 ${exporting ? 'animate-pulse' : ''}`} />
+            {exporting ? 'Exporting…' : 'Export'}
+          </button>
+          <button
+            onClick={triggerImportFilePicker}
+            disabled={importLoading !== null}
+            title="Import a runtime-config JSON file (preview before apply)"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors disabled:opacity-50"
+          >
+            <Upload className={`w-3.5 h-3.5 ${importLoading === 'preview' ? 'animate-pulse' : ''}`} />
+            {importLoading === 'preview' && !importPreview ? 'Reading…' : 'Import'}
+          </button>
           <button
             onClick={openCreate}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
@@ -580,6 +751,17 @@ export default function RuntimeConfigAdmin() {
           </button>
         </div>
       </div>
+
+      {exportError && (
+        <div className="text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+          Export failed: {exportError}
+        </div>
+      )}
+      {importError && !importPreview && (
+        <div className="text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+          Import failed: {importError}
+        </div>
+      )}
 
       {error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
@@ -1032,6 +1214,241 @@ export default function RuntimeConfigAdmin() {
               >
                 {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+          onClick={cancelImport}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl max-h-[85vh] flex flex-col bg-card border border-border rounded-xl shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-2 p-5 border-b border-border">
+              <div className="min-w-0">
+                <h2 className="text-base font-display font-bold flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-primary" />
+                  Import preview
+                </h2>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  <code className="font-mono break-all">{importPreview.fileName}</code> —
+                  review every change before applying
+                </p>
+              </div>
+              <button
+                onClick={cancelImport}
+                className="p-1 rounded hover:bg-muted text-muted-foreground shrink-0"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {importError && (
+                <div className="text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+                  {importError}
+                </div>
+              )}
+
+              {importResult ? (
+                <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 font-medium text-[#6b8f71]">
+                    <Check className="w-4 h-4" />
+                    Import applied
+                  </div>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    <li>
+                      <span className="text-[#6b8f71]">{importResult.added}</span> added,{' '}
+                      <span className="text-[#4a90b8]">{importResult.updated}</span> updated,{' '}
+                      <span className="text-[#c45a4a]">{importResult.deleted}</span> deleted
+                    </li>
+                    {importResult.errors.length > 0 && (
+                      <li className="text-[#c45a4a]">
+                        {importResult.errors.length} error
+                        {importResult.errors.length === 1 ? '' : 's'}:
+                        <ul className="ml-3 mt-1 list-disc">
+                          {importResult.errors.map((e) => (
+                            <li key={e.key}>
+                              <code className="font-mono">{e.key}</code> — {e.error}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-4 gap-2 text-[11px]">
+                    <div className="rounded border border-border bg-card p-2 text-center">
+                      <div className="text-muted-foreground">Adds</div>
+                      <div className="text-base font-bold font-display text-[#6b8f71]">
+                        {importPreview.plan.adds.length}
+                      </div>
+                    </div>
+                    <div className="rounded border border-border bg-card p-2 text-center">
+                      <div className="text-muted-foreground">Updates</div>
+                      <div className="text-base font-bold font-display text-[#4a90b8]">
+                        {importPreview.plan.updates.length}
+                      </div>
+                    </div>
+                    <div className="rounded border border-border bg-card p-2 text-center">
+                      <div className="text-muted-foreground">Deletes</div>
+                      <div className="text-base font-bold font-display text-[#c45a4a]">
+                        {importPreview.plan.deletes.length}
+                      </div>
+                    </div>
+                    <div className="rounded border border-border bg-card p-2 text-center">
+                      <div className="text-muted-foreground">Unchanged</div>
+                      <div className="text-base font-bold font-display text-muted-foreground">
+                        {importPreview.plan.unchanged.length}
+                      </div>
+                    </div>
+                  </div>
+
+                  <label className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={importPreview.payload.deleteMissing}
+                      onChange={(e) => toggleDeleteMissing(e.target.checked)}
+                      disabled={importLoading !== null}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      Also delete entries that exist live but are missing from this file. Off by
+                      default so promotions don't wipe environment-specific keys. Sensitive
+                      entries are never bulk-deleted.
+                    </span>
+                  </label>
+
+                  {importPreview.plan.skipped.length > 0 && (
+                    <div className="rounded border border-[#d4a054]/40 bg-[#d4a054]/10 p-2 text-[11px]">
+                      <div className="flex items-center gap-1.5 font-medium text-[#d4a054]">
+                        <AlertTriangle className="w-3 h-3" /> Skipped (
+                        {importPreview.plan.skipped.length})
+                      </div>
+                      <ul className="mt-1 ml-4 list-disc text-muted-foreground space-y-0.5">
+                        {importPreview.plan.skipped.map((s) => (
+                          <li key={`${s.key}-${s.reason}`}>
+                            <code className="font-mono">{s.key}</code> — {s.reason}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {(['adds', 'updates', 'deletes'] as const).map((kind) => {
+                    const list = importPreview.plan[kind];
+                    if (list.length === 0) return null;
+                    const color =
+                      kind === 'adds'
+                        ? 'text-[#6b8f71]'
+                        : kind === 'updates'
+                          ? 'text-[#4a90b8]'
+                          : 'text-[#c45a4a]';
+                    return (
+                      <div key={kind}>
+                        <div className={`text-[11px] font-medium uppercase tracking-wide mb-1 ${color}`}>
+                          {kind} ({list.length})
+                        </div>
+                        <ol className="rounded border border-border divide-y divide-border text-[11px]">
+                          {list.map((d) => (
+                            <li key={`${kind}-${d.key}`} className="px-3 py-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <code className="font-mono font-medium break-all">{d.key}</code>
+                                <span className="text-muted-foreground">{d.category}</span>
+                                <span className="text-muted-foreground">{d.valueType}</span>
+                              </div>
+                              {kind === 'updates' && (
+                                <div className="mt-1 text-muted-foreground flex items-center gap-2 flex-wrap">
+                                  from{' '}
+                                  <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                    {d.previousValue ?? '∅'}
+                                  </code>{' '}
+                                  to{' '}
+                                  <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                    {d.newValue ?? '∅'}
+                                  </code>
+                                </div>
+                              )}
+                              {kind === 'adds' && d.newValue !== undefined && (
+                                <div className="mt-1 text-muted-foreground">
+                                  ={' '}
+                                  <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                    {d.newValue ?? '∅'}
+                                  </code>
+                                </div>
+                              )}
+                              {kind === 'deletes' && d.previousValue !== undefined && (
+                                <div className="mt-1 text-muted-foreground">
+                                  was{' '}
+                                  <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                    {d.previousValue ?? '∅'}
+                                  </code>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    );
+                  })}
+
+                  {importPreview.plan.adds.length === 0 &&
+                    importPreview.plan.updates.length === 0 &&
+                    importPreview.plan.deletes.length === 0 && (
+                      <div className="text-xs text-muted-foreground text-center py-4">
+                        Nothing to apply — every entry already matches.
+                      </div>
+                    )}
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 p-4 border-t border-border">
+              <button
+                onClick={cancelImport}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted/40"
+              >
+                {importResult ? 'Close' : 'Cancel'}
+              </button>
+              {!importResult && (
+                <button
+                  onClick={applyImport}
+                  disabled={
+                    importLoading !== null ||
+                    (importPreview.plan.adds.length === 0 &&
+                      importPreview.plan.updates.length === 0 &&
+                      importPreview.plan.deletes.length === 0)
+                  }
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {importLoading === 'apply' ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Applying{' '}
+                      {importPreview.plan.adds.length +
+                        importPreview.plan.updates.length +
+                        importPreview.plan.deletes.length}{' '}
+                      changes…
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-3 h-3" />
+                      Apply{' '}
+                      {importPreview.plan.adds.length +
+                        importPreview.plan.updates.length +
+                        importPreview.plan.deletes.length}{' '}
+                      changes
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
