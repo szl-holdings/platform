@@ -1,7 +1,17 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Check, Lock, RefreshCw, Search, Sliders, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  Check,
+  Lock,
+  Plus,
+  RefreshCw,
+  Search,
+  Sliders,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface RuntimeConfigRow {
@@ -21,6 +31,18 @@ interface ListResponse {
   meta: { page: number; limit: number; offset: number };
 }
 
+const VALUE_TYPES = ['string', 'number', 'boolean', 'json'] as const;
+const CATEGORIES = [
+  'general',
+  'rate_limits',
+  'circuit_breaker',
+  'slo',
+  'jobs',
+  'load_shedder',
+  'feature_flags',
+  'runtime_config',
+] as const;
+
 const categoryColors: Record<string, string> = {
   rate_limits: 'text-[#4a90b8] bg-[#4a90b8]/10',
   circuit_breaker: 'text-[#c45a4a] bg-[#c45a4a]/10',
@@ -34,17 +56,69 @@ const categoryColors: Record<string, string> = {
 
 const REDACTED = '[redacted]';
 
+interface CreateDraft {
+  key: string;
+  value: string;
+  valueType: (typeof VALUE_TYPES)[number];
+  category: (typeof CATEGORIES)[number];
+  description: string;
+  isSensitive: boolean;
+}
+
+const EMPTY_DRAFT: CreateDraft = {
+  key: '',
+  value: '',
+  valueType: 'string',
+  category: 'general',
+  description: '',
+  isSensitive: false,
+};
+
+function validateValue(value: string, valueType: CreateDraft['valueType']): string | null {
+  if (valueType === 'number' && !Number.isFinite(Number(value))) {
+    return 'Value must be a valid number';
+  }
+  if (valueType === 'boolean' && !['true', 'false', '1', '0'].includes(value.trim())) {
+    return 'Value must be true/false';
+  }
+  if (valueType === 'json') {
+    try {
+      JSON.parse(value);
+    } catch {
+      return 'Value must be valid JSON';
+    }
+  }
+  return null;
+}
+
 export default function RuntimeConfigAdmin() {
   const [search, setSearch] = useState('');
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [draftValue, setDraftValue] = useState('');
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createDraft, setCreateDraft] = useState<CreateDraft>(EMPTY_DRAFT);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [deleteKey, setDeleteKey] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const { data, isLoading, error, refetch, isFetching } = useStandardQuery<ListResponse>({
     queryKey: ['runtime-config'],
     queryFn: () => apiFetch('/runtime-config?limit=200'),
   });
+
+  const invalidateAndRefresh = async (key?: string) => {
+    try {
+      await apiFetch('/runtime-config/invalidate-cache', {
+        method: 'POST',
+        body: JSON.stringify(key ? { key } : {}),
+      });
+    } catch {
+      // best-effort cache bust — backend already invalidates locally
+    }
+    qc.invalidateQueries({ queryKey: ['runtime-config'] });
+  };
 
   const updateMutation = useStandardMutation({
     mutationFn: ({ key, value }: { key: string; value: string }) =>
@@ -55,18 +129,49 @@ export default function RuntimeConfigAdmin() {
     onSuccess: async (_res, { key }) => {
       setEditingKey(null);
       setSaveError(null);
-      try {
-        await apiFetch('/runtime-config/invalidate-cache', {
-          method: 'POST',
-          body: JSON.stringify({ key }),
-        });
-      } catch {
-        // best-effort cache bust — backend already invalidates locally
-      }
-      qc.invalidateQueries({ queryKey: ['runtime-config'] });
+      await invalidateAndRefresh(key);
     },
     onError: (err: unknown) => {
       setSaveError(err instanceof Error ? err.message : 'Save failed');
+    },
+  });
+
+  const createMutation = useStandardMutation({
+    mutationFn: (payload: {
+      key: string;
+      value: string;
+      valueType: string;
+      category: string;
+      description?: string;
+      isSensitive: boolean;
+    }) =>
+      apiFetch('/runtime-config', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: async (_res, payload) => {
+      setShowCreate(false);
+      setCreateDraft(EMPTY_DRAFT);
+      setCreateError(null);
+      await invalidateAndRefresh(payload.key);
+    },
+    onError: (err: unknown) => {
+      setCreateError(err instanceof Error ? err.message : 'Create failed');
+    },
+  });
+
+  const deleteMutation = useStandardMutation({
+    mutationFn: (key: string) =>
+      apiFetch(`/runtime-config/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: async (_res, key) => {
+      setDeleteKey(null);
+      setDeleteError(null);
+      await invalidateAndRefresh(key);
+    },
+    onError: (err: unknown) => {
+      setDeleteError(err instanceof Error ? err.message : 'Delete failed');
     },
   });
 
@@ -108,23 +213,61 @@ export default function RuntimeConfigAdmin() {
   };
 
   const saveEdit = (row: RuntimeConfigRow) => {
-    if (row.valueType === 'number' && !Number.isFinite(Number(draftValue))) {
-      setSaveError('Value must be a valid number');
+    const err = validateValue(draftValue, row.valueType);
+    if (err) {
+      setSaveError(err);
       return;
-    }
-    if (row.valueType === 'boolean' && !['true', 'false', '1', '0'].includes(draftValue.trim())) {
-      setSaveError('Value must be true/false');
-      return;
-    }
-    if (row.valueType === 'json') {
-      try {
-        JSON.parse(draftValue);
-      } catch {
-        setSaveError('Value must be valid JSON');
-        return;
-      }
     }
     updateMutation.mutate({ key: row.key, value: draftValue });
+  };
+
+  const submitCreate = () => {
+    if (!createDraft.key.trim()) {
+      setCreateError('Key is required');
+      return;
+    }
+    if (!/^[a-z0-9_]+$/.test(createDraft.key)) {
+      setCreateError('Key must be lowercase alphanumeric with underscores');
+      return;
+    }
+    const err = validateValue(createDraft.value, createDraft.valueType);
+    if (err) {
+      setCreateError(err);
+      return;
+    }
+    createMutation.mutate({
+      key: createDraft.key.trim(),
+      value: createDraft.value,
+      valueType: createDraft.valueType,
+      category: createDraft.category,
+      description: createDraft.description.trim() || undefined,
+      isSensitive: createDraft.isSensitive,
+    });
+  };
+
+  const openCreate = () => {
+    setCreateDraft(EMPTY_DRAFT);
+    setCreateError(null);
+    setShowCreate(true);
+  };
+
+  const closeCreate = () => {
+    setShowCreate(false);
+    setCreateError(null);
+  };
+
+  const requestDelete = (key: string) => {
+    setDeleteKey(key);
+    setDeleteError(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteKey(null);
+    setDeleteError(null);
+  };
+
+  const confirmDelete = () => {
+    if (deleteKey) deleteMutation.mutate(deleteKey);
   };
 
   return (
@@ -140,14 +283,23 @@ export default function RuntimeConfigAdmin() {
             intervals. Changes take effect within the cache TTL.
           </p>
         </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="shrink-0 flex items-center gap-2">
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New entry
+          </button>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error ? (
@@ -308,12 +460,21 @@ export default function RuntimeConfigAdmin() {
                                 </button>
                               </>
                             ) : (
-                              <button
-                                onClick={() => startEdit(row)}
-                                className="text-xs px-2 py-1 rounded border border-border hover:bg-muted/40 text-foreground"
-                              >
-                                Edit
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => startEdit(row)}
+                                  className="text-xs px-2 py-1 rounded border border-border hover:bg-muted/40 text-foreground"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => requestDelete(row.key)}
+                                  title="Delete"
+                                  className="p-1.5 rounded hover:bg-[#c45a4a]/10 text-[#c45a4a]"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
                             )}
                           </div>
                         </div>
@@ -325,6 +486,226 @@ export default function RuntimeConfigAdmin() {
             </div>
           )}
         </>
+      )}
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+          onClick={closeCreate}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-card border border-border rounded-xl p-5 space-y-4 shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className="text-base font-display font-bold flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-primary" />
+                  New config entry
+                </h2>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Add a new operator-tunable parameter.
+                </p>
+              </div>
+              <button
+                onClick={closeCreate}
+                className="p-1 rounded hover:bg-muted text-muted-foreground"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  Key
+                </label>
+                <input
+                  value={createDraft.key}
+                  onChange={(e) => setCreateDraft({ ...createDraft, key: e.target.value })}
+                  placeholder="lowercase_with_underscores"
+                  className="w-full px-2 py-1.5 text-xs font-mono bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                    Type
+                  </label>
+                  <select
+                    value={createDraft.valueType}
+                    onChange={(e) =>
+                      setCreateDraft({
+                        ...createDraft,
+                        valueType: e.target.value as CreateDraft['valueType'],
+                        value:
+                          e.target.value === 'boolean' ? 'false' : createDraft.value,
+                      })
+                    }
+                    className="w-full px-2 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    {VALUE_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={createDraft.category}
+                    onChange={(e) =>
+                      setCreateDraft({
+                        ...createDraft,
+                        category: e.target.value as CreateDraft['category'],
+                      })
+                    }
+                    className="w-full px-2 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  Value
+                </label>
+                {createDraft.valueType === 'json' ? (
+                  <textarea
+                    value={createDraft.value}
+                    onChange={(e) => setCreateDraft({ ...createDraft, value: e.target.value })}
+                    rows={4}
+                    className="w-full px-2 py-1.5 text-xs font-mono bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                ) : createDraft.valueType === 'boolean' ? (
+                  <select
+                    value={createDraft.value || 'false'}
+                    onChange={(e) => setCreateDraft({ ...createDraft, value: e.target.value })}
+                    className="w-full px-2 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                ) : (
+                  <input
+                    type={createDraft.valueType === 'number' ? 'number' : 'text'}
+                    value={createDraft.value}
+                    onChange={(e) => setCreateDraft({ ...createDraft, value: e.target.value })}
+                    className="w-full px-2 py-1.5 text-xs font-mono bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                  Description
+                </label>
+                <input
+                  value={createDraft.description}
+                  onChange={(e) =>
+                    setCreateDraft({ ...createDraft, description: e.target.value })
+                  }
+                  placeholder="Optional — what does this control?"
+                  className="w-full px-2 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={createDraft.isSensitive}
+                  onChange={(e) =>
+                    setCreateDraft({ ...createDraft, isSensitive: e.target.checked })
+                  }
+                  className="accent-primary"
+                />
+                <Lock className="w-3 h-3 text-[#c45a4a]" />
+                Mark as sensitive (value will be masked in listings)
+              </label>
+
+              {createError && (
+                <p className="text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+                  {createError}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                onClick={closeCreate}
+                disabled={createMutation.isPending}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted/40"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitCreate}
+                disabled={createMutation.isPending}
+                className="px-3 py-1.5 text-xs rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              >
+                {createMutation.isPending ? 'Creating…' : 'Create entry'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteKey && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+          onClick={cancelDelete}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-card border border-border rounded-xl p-5 space-y-4 shadow-xl"
+          >
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-9 h-9 rounded-full bg-[#c45a4a]/10 flex items-center justify-center">
+                <Trash2 className="w-4 h-4 text-[#c45a4a]" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-sm font-display font-bold">Delete config entry?</h2>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  This removes <code className="font-mono break-all">{deleteKey}</code> and resets
+                  it to the code default. This cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {deleteError && (
+              <p className="text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                onClick={cancelDelete}
+                disabled={deleteMutation.isPending}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted/40"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+                className="px-3 py-1.5 text-xs rounded bg-[#c45a4a] text-white hover:bg-[#c45a4a]/90 disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
