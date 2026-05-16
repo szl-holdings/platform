@@ -19,11 +19,8 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from './lib/api-response';
 import { checkInferenceGates, getGateSummary } from './a11oy/runtime/router/model-router';
-import { setInferenceGateChecker } from '@szl-holdings/ai-engine/providers/inference-gates';
-import {
-  ensureLexiconEntryAndEnqueueReview,
-  seedLexiconFromRegistry,
-} from './routes/a11oy-lexicon-api';
+import { seedLexiconFromRegistry } from './routes/a11oy-lexicon-api';
+import { installInferenceGateHook } from './lib/inference-gate-hook';
 
 // Register the registry-aware 5-gate checker so every HF entry point in
 // lib/ai-engine (hf-client, connector adapter) enforces the SAME gates as
@@ -34,16 +31,11 @@ import {
 // fire-and-forget enqueue a Lexicon review request so an operator can
 // approve/deny it. The gate stays failed for THIS call (fails closed) but
 // the next call after operator approval will pass.
-setInferenceGateChecker((modelId) => {
-  const r = checkInferenceGates(modelId);
-  if (!r.gates.license_approved || !r.gates.registry_exists) {
-    void ensureLexiconEntryAndEnqueueReview({
-      targetId: modelId,
-      context: { source: 'inference_gate_checker', failedGates: r.failedGates },
-    }).catch(() => {});
-  }
-  return { allowed: r.allowed, model: r.model, failedGates: r.failedGates, gates: r.gates };
-});
+//
+// Hook body lives in `./lib/inference-gate-hook` so the integration test
+// (`__tests__/lexicon-gate-reviewer-alerts.integration.test.ts`) installs
+// the SAME closure and cannot drift from production wiring.
+installInferenceGateHook();
 
 // Seed the Lexicon catalog at boot so the dashboard renders something on a
 // fresh DB and the inference-gate hook always finds a row to update.
