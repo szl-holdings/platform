@@ -8,6 +8,7 @@ import {
   Search,
   ShieldAlert,
   ShieldCheck,
+  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -57,6 +58,109 @@ const NL_EXAMPLES = [
   'which controls have drifted from policy since Monday?',
   'list incidents touching the auth-service blast radius',
 ];
+
+interface EmulationRunPoint {
+  ranAt: string;
+  overallCompositeScore: number | null;
+  rollingFourWeekAvg: number | null;
+}
+
+function MiniSparkline({ values, color }: { values: number[]; color: string }) {
+  const width = 140;
+  const height = 36;
+  if (values.length < 2) {
+    return (
+      <div
+        className="flex items-center justify-center text-[9px] font-mono text-[#555]"
+        style={{ width, height }}
+      >
+        awaiting history
+      </div>
+    );
+  }
+  const pad = 2;
+  const w = width - pad * 2;
+  const h = height - pad * 2;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const stepX = w / (values.length - 1);
+  const points = values.map((v, i) => {
+    const x = pad + i * stepX;
+    const y = pad + h - ((v - min) / range) * h;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  });
+  const path = `M${points.join(' L')}`;
+  const areaPath = `${path} L${(pad + w).toFixed(2)},${(pad + h).toFixed(2)} L${pad.toFixed(2)},${(pad + h).toFixed(2)} Z`;
+  const lastX = pad + (values.length - 1) * stepX;
+  const lastY = pad + h - ((values[values.length - 1]! - min) / range) * h;
+  return (
+    <svg width={width} height={height} aria-hidden="true">
+      <path d={areaPath} fill={color} fillOpacity={0.14} />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastX} cy={lastY} r={2} fill={color} />
+    </svg>
+  );
+}
+
+function CyberResilienceTrendTile() {
+  const [points, setPoints] = useState<EmulationRunPoint[] | null>(null);
+  useEffect(() => {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    const apiBase = `${base}/../api`.replace('/sentra/../', '/');
+    fetch(`${apiBase}/firestorm/emulation/runs?limit=8`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { runs?: EmulationRunPoint[] } | null) => {
+        if (data?.runs) setPoints(data.runs);
+      })
+      .catch(() => {});
+  }, []);
+
+  const ordered = (points ?? []).slice().reverse();
+  const series = ordered
+    .map(r => r.rollingFourWeekAvg)
+    .filter((v): v is number => v != null);
+  const latest = series.length > 0 ? series[series.length - 1]! : null;
+  const first = series.length > 1 ? series[0]! : null;
+  const delta = latest != null && first != null ? latest - first : null;
+  const color = '#c9b787';
+  const insufficient = series.length < 2;
+
+  return (
+    <div className="stat-panel p-6">
+      <div className="flex items-center gap-3 text-[#c9b787] mb-2">
+        <TrendingUp className="w-5 h-5" />
+        <span className="text-sm font-medium">Cyber Resilience Trend</span>
+      </div>
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <div className="text-4xl font-display font-bold">
+            {latest != null ? `${(latest * 100).toFixed(0)}%` : '—'}
+          </div>
+          <div className="text-xs text-[#c9b787]/60 mt-2 font-mono">4-WEEK ROLLING AVG</div>
+        </div>
+        {insufficient ? (
+          <div
+            className="flex items-center justify-center text-[9px] font-mono text-[#555] text-right"
+            style={{ width: 140, height: 36 }}
+          >
+            insufficient<br />rolling history
+          </div>
+        ) : (
+          <MiniSparkline values={series} color={color} />
+        )}
+      </div>
+      {delta != null && (
+        <div
+          className="text-[10px] font-mono mt-2"
+          style={{ color: delta >= 0 ? '#22c55e' : '#ef4444' }}
+        >
+          {delta >= 0 ? '▲' : '▼'} {Math.abs(delta * 100).toFixed(1)}% over last {series.length} runs
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PatternOfLifePanel() {
   return (
@@ -237,7 +341,7 @@ export default function Dashboard() {
         <p className="text-[#8a8a8a] mt-1">Operational status and posture overview</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="stat-panel p-6">
           <div className="flex items-center gap-3 text-[#f5f5f5] mb-2">
             <ShieldAlert className="w-5 h-5" />
@@ -282,6 +386,8 @@ export default function Dashboard() {
           </div>
           <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
         </div>
+
+        <CyberResilienceTrendTile />
       </div>
 
       <NLThreatQueryBar />

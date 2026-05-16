@@ -142,9 +142,69 @@ function statusBadge(status: string) {
   );
 }
 
-function ScorecardCard({ sc, expanded, onToggle }: { sc: Scorecard; expanded: boolean; onToggle: () => void }) {
+function Sparkline({
+  values,
+  color,
+  width = 96,
+  height = 28,
+}: {
+  values: number[];
+  color: string;
+  width?: number;
+  height?: number;
+}) {
+  if (values.length < 2) {
+    return (
+      <div
+        className="flex items-center justify-center text-[8px] font-mono"
+        style={{ width, height, color: TEXT_SEC }}
+      >
+        n=1
+      </div>
+    );
+  }
+  const pad = 2;
+  const w = width - pad * 2;
+  const h = height - pad * 2;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const stepX = w / (values.length - 1);
+  const points = values.map((v, i) => {
+    const x = pad + i * stepX;
+    const y = pad + h - ((v - min) / range) * h;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  });
+  const path = `M${points.join(' L')}`;
+  const areaPath = `${path} L${(pad + w).toFixed(2)},${(pad + h).toFixed(2)} L${pad.toFixed(2)},${(pad + h).toFixed(2)} Z`;
+  const lastX = pad + (values.length - 1) * stepX;
+  const lastY = pad + h - ((values[values.length - 1]! - min) / range) * h;
+  return (
+    <svg width={width} height={height} aria-hidden="true">
+      <path d={areaPath} fill={color} fillOpacity={0.12} />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.25} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastX} cy={lastY} r={1.75} fill={color} />
+    </svg>
+  );
+}
+
+function ScorecardCard({
+  sc,
+  history,
+  expanded,
+  onToggle,
+}: {
+  sc: Scorecard;
+  history: number[];
+  expanded: boolean;
+  onToggle: () => void;
+}) {
   const conf = sc.compositeConfidence;
   const color = scoreColor(conf);
+  const trendValues = history.length > 0 ? history : [conf];
+  const first = trendValues[0]!;
+  const last = trendValues[trendValues.length - 1]!;
+  const delta = last - first;
 
   return (
     <div className="rounded-xl border" style={{ border: `1px solid ${BORDER}`, background: SURFACE }}>
@@ -164,6 +224,9 @@ function ScorecardCard({ sc, expanded, onToggle }: { sc: Scorecard; expanded: bo
             {statusBadge(sc.status)}
             <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: TEXT_SEC, background: SURFACE2 }}>
               {sc.domain.toUpperCase()}
+            </span>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: TEXT_SEC, background: SURFACE2 }}>
+              n={trendValues.length}
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap">
@@ -187,11 +250,22 @@ function ScorecardCard({ sc, expanded, onToggle }: { sc: Scorecard; expanded: bo
             </span>
           </div>
         </div>
-        {expanded ? (
-          <ChevronUp className="w-4 h-4 flex-shrink-0" style={{ color: TEXT_SEC }} />
-        ) : (
-          <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: TEXT_SEC }} />
-        )}
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <Sparkline values={trendValues} color={color} />
+          <div className="flex items-center gap-1 text-[9px] font-mono" style={{ color: TEXT_SEC }}>
+            <span>last {trendValues.length}</span>
+            {trendValues.length > 1 && (
+              <span style={{ color: delta >= 0 ? GREEN : RED }}>
+                {delta >= 0 ? '+' : ''}{(delta * 100).toFixed(1)}%
+              </span>
+            )}
+            {expanded ? (
+              <ChevronUp className="w-3 h-3" style={{ color: TEXT_SEC }} />
+            ) : (
+              <ChevronDown className="w-3 h-3" style={{ color: TEXT_SEC }} />
+            )}
+          </div>
+        </div>
       </button>
 
       {expanded && (
@@ -584,14 +658,22 @@ export default function EmulationScorecardPage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
-                    {activeRun.scorecards.map(sc => (
-                      <ScorecardCard
-                        key={sc.payloadId}
-                        sc={sc}
-                        expanded={!!expanded[sc.payloadId]}
-                        onToggle={() => setExpanded(e => ({ ...e, [sc.payloadId]: !e[sc.payloadId] }))}
-                      />
-                    ))}
+                    {activeRun.scorecards.map(sc => {
+                      const history = runs
+                        .slice()
+                        .reverse()
+                        .flatMap(r => r.scorecards.filter(s => s.payloadId === sc.payloadId).map(s => s.compositeConfidence))
+                        .slice(-8);
+                      return (
+                        <ScorecardCard
+                          key={sc.payloadId}
+                          sc={sc}
+                          history={history}
+                          expanded={!!expanded[sc.payloadId]}
+                          onToggle={() => setExpanded(e => ({ ...e, [sc.payloadId]: !e[sc.payloadId] }))}
+                        />
+                      );
+                    })}
                     {activeRun.scorecards.length === 0 && (
                       <div className="rounded-xl border p-8 text-center" style={{ border: `1px solid ${BORDER}`, background: SURFACE }}>
                         <Activity className="w-6 h-6 mx-auto mb-2" style={{ color: TEXT_SEC }} />
