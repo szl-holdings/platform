@@ -17,13 +17,14 @@ const DS = {
   sans: "'Inter', system-ui, -apple-system, sans-serif",
 };
 
-const REPLAY_ROOT_PREFIX = '1ed4d253';
-const REPLAY_ROOT_FULL = '1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b';
-const TERRA_COMMIT_SHA = '2ffac59c45550220772602f974fc95293a6754a2';
-const TERRA_TAG_SHA = 'c45d6ca2861fe7623056264566c8dc2ce93f9c59';
-const TERRA_TAG = 'v1.0.0-alpha';
-const TERRA_PUSHED_AT = '2026-05-15T14:40:14Z';
-const ARXIV_SHA_PREFIX = '13ca4a06';
+import {
+  DOCTRINE,
+  PANEL_FACTS,
+  panelRepoFacts,
+  ARXIV_SHA_SHORT,
+} from '@szl-holdings/payload';
+
+const REPLAY_ROOT_FULL = DOCTRINE.replayRoot;
 
 const sectionStyle: CSSProperties = {
   padding: '80px 24px',
@@ -91,6 +92,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export function TerraGovernancePanels() {
+  const repo = panelRepoFacts('terra');
   return (
     <section style={sectionStyle}>
       <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -135,17 +137,17 @@ export function TerraGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Provenance</p>
             <h4 style={cardTitle}>Replay root &amp; invariant</h4>
-            <Row label="Replay root" value={`${REPLAY_ROOT_PREFIX}…`} />
-            <Row label="Byte-identical replays" value="5 of 5" />
-            <Row label="Λ floor" value="0.90 (9-axis ∧)" />
-            <Row label="moralGrounding" value="≥ 0.95" />
-            <Row label="measurabilityHonesty" value="≥ 0.95" />
-            <Row label="Ingestion" value="PUBLIC_ONLY" />
+            <Row label="Replay root" value={PANEL_FACTS.replayRootShort} />
+            <Row label="Byte-identical replays" value={PANEL_FACTS.byteIdenticalReplaysOfText} />
+            <Row label="Λ floor" value={PANEL_FACTS.lambdaFloorParenText} />
+            <Row label="moralGrounding" value={PANEL_FACTS.moralGroundingGteText} />
+            <Row label="measurabilityHonesty" value={PANEL_FACTS.measurabilityHonestyGteText} />
+            <Row label="Ingestion" value={PANEL_FACTS.ingestionPolicyText} />
             <Row
               label="License allowlist"
-              value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0"
+              value={PANEL_FACTS.licenseAllowlistShortText}
             />
-            <Row label="HEAD" value={`${TERRA_COMMIT_SHA.slice(0, 12)}…`} />
+            <Row label="HEAD" value={repo.commitShort} />
             <p
               style={{
                 marginTop: 14,
@@ -164,27 +166,27 @@ export function TerraGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Evidence Ledger</p>
             <h4 style={cardTitle}>13-DOI ledger · Zenodo v14</h4>
-            <Row label="Tag" value={TERRA_TAG} />
-            <Row label="Tag SHA" value={`${TERRA_TAG_SHA.slice(0, 12)}…`} />
-            <Row label="Pushed" value={TERRA_PUSHED_AT.slice(0, 10)} />
-            <Row label="Repository" value="szl-holdings/terra" />
-            <Row label="Latest commit" value={`${TERRA_COMMIT_SHA.slice(0, 12)}…`} />
+            <Row label="Tag" value={repo.latestTag} />
+            <Row label="Tag SHA" value={repo.tagShaShort} />
+            <Row label="Pushed" value={repo.pushedAtUtcText.slice(0, 10)} />
+            <Row label="Repository" value={repo.fullName} />
+            <Row label="Latest commit" value={repo.commitShort} />
             <Row label="Citation" value="CITATION.cff" />
             <Row label="Notice" value="NOTICE + LICENSE" />
-            <Row label="DOI ledger" value="13 minted" />
-            <Row label="Push queue" value={`Zenodo v14 · arXiv ${ARXIV_SHA_PREFIX}…`} />
+            <Row label="DOI ledger" value={PANEL_FACTS.doiMintedText} />
+            <Row label="Push queue" value={`Zenodo ${PANEL_FACTS.zenodoText.split(' ')[0]} · arXiv ${ARXIV_SHA_SHORT}`} />
           </div>
 
           {/* Ownership */}
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Ownership</p>
             <h4 style={cardTitle}>Canonical byline</h4>
-            <Row label="Author" value="Lutar, Stephen P." />
-            <Row label="ORCID" value="0009-0001-0110-4173" />
-            <Row label="Org" value="SZL Holdings" />
-            <Row label="Repository" value="szl-holdings/terra" />
-            <Row label="Default branch" value="main" />
-            <Row label="Visibility" value="Public · PUBLIC_ONLY" />
+            <Row label="Author" value={PANEL_FACTS.authorText} />
+            <Row label="ORCID" value={PANEL_FACTS.orcidText} />
+            <Row label="Org" value={PANEL_FACTS.affiliationText} />
+            <Row label="Repository" value={repo.fullName} />
+            <Row label="Default branch" value={repo.defaultBranch} />
+            <Row label="Visibility" value={`Public · ${PANEL_FACTS.ingestionPolicyText}`} />
             <Row label="License" value="See LICENSE + NOTICE" />
             <p
               style={{
@@ -213,13 +215,13 @@ export function TerraGovernancePanels() {
                 <StatusChip status="approved" label="PUBLIC_ONLY" />
               </StatusChipGroup>
             </div>
-            <Row label="Repos" value="16" />
-            <Row label="CI failing" value="0" />
-            <Row label="Scorecard avg" value="6.62 / 10" />
-            <Row label="BP-strict" value="10 / 16" />
-            <Row label="Dependabot high/crit" value="0 / 0" />
-            <Row label="Replays required" value="5 byte-identical" />
-            <Row label="Λ axes" value="9 conjunctive ∧" />
+            <Row label="Repos" value={PANEL_FACTS.reposCountText} />
+            <Row label="CI failing" value={PANEL_FACTS.ciFailingText} />
+            <Row label="Scorecard avg" value={PANEL_FACTS.scorecardAvgText} />
+            <Row label="BP-strict" value={PANEL_FACTS.branchProtectionStrictText} />
+            <Row label="Dependabot high/crit" value={PANEL_FACTS.dependabotHighCritPairText} />
+            <Row label="Replays required" value={PANEL_FACTS.byteIdenticalReplaysShort} />
+            <Row label="Λ axes" value={PANEL_FACTS.lambdaAxesShortText} />
           </div>
         </div>
       </div>

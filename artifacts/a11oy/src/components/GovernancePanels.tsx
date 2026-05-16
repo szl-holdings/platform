@@ -1,5 +1,11 @@
 import type { CSSProperties } from 'react';
 import { StatusChip, StatusChipGroup } from '@szl-holdings/omnia-shell';
+import {
+  DOCTRINE,
+  PANEL_FACTS,
+  panelRepoFacts,
+  ARXIV_SHA_SHORT,
+} from '@szl-holdings/payload';
 
 const T = {
   bg: '#0a0a0a',
@@ -14,13 +20,7 @@ const T = {
   sans: "'Inter', system-ui, -apple-system, sans-serif",
 };
 
-const REPLAY_ROOT_PREFIX = '1ed4d253';
-const REPLAY_ROOT_FULL = '1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b';
-const A11OY_COMMIT_SHA = '3d0f98412ee6738102634b47f7d8618a6e4cd2b5';
-const A11OY_TAG_SHA = '284ab434eb52424b83499567f8cb8e0d780864d3';
-const A11OY_TAG = 'v1.0.0-alpha';
-const A11OY_PUSHED_AT = '2026-05-15T20:48:09Z';
-const ARXIV_SHA_PREFIX = '13ca4a06';
+const REPLAY_ROOT_FULL = DOCTRINE.replayRoot;
 
 const sectionStyle: CSSProperties = {
   padding: '80px clamp(2rem, 5vw, 4rem)',
@@ -88,6 +88,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export function A11oyGovernancePanels() {
+  const repo = panelRepoFacts('a11oy');
   return (
     <section style={sectionStyle}>
       <div style={{ maxWidth: 1320, margin: '0 auto' }}>
@@ -132,17 +133,17 @@ export function A11oyGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Provenance</p>
             <h4 style={cardTitle}>Replay root &amp; invariant</h4>
-            <Row label="Replay root" value={`${REPLAY_ROOT_PREFIX}…`} />
-            <Row label="Byte-identical replays" value="5 of 5" />
-            <Row label="Λ floor" value="0.90 (9-axis ∧)" />
-            <Row label="moralGrounding" value="≥ 0.95" />
-            <Row label="measurabilityHonesty" value="≥ 0.95" />
-            <Row label="Ingestion" value="PUBLIC_ONLY" />
+            <Row label="Replay root" value={PANEL_FACTS.replayRootShort} />
+            <Row label="Byte-identical replays" value={PANEL_FACTS.byteIdenticalReplaysOfText} />
+            <Row label="Λ floor" value={PANEL_FACTS.lambdaFloorParenText} />
+            <Row label="moralGrounding" value={PANEL_FACTS.moralGroundingGteText} />
+            <Row label="measurabilityHonesty" value={PANEL_FACTS.measurabilityHonestyGteText} />
+            <Row label="Ingestion" value={PANEL_FACTS.ingestionPolicyText} />
             <Row
               label="License allowlist"
-              value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0"
+              value={PANEL_FACTS.licenseAllowlistShortText}
             />
-            <Row label="HEAD" value={`${A11OY_COMMIT_SHA.slice(0, 12)}…`} />
+            <Row label="HEAD" value={repo.commitShort} />
             <p
               style={{
                 marginTop: 14,
@@ -161,29 +162,29 @@ export function A11oyGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Evidence Ledger</p>
             <h4 style={cardTitle}>13-DOI ledger · Zenodo v14</h4>
-            <Row label="Tag" value={A11OY_TAG} />
-            <Row label="Tag SHA" value={`${A11OY_TAG_SHA.slice(0, 12)}…`} />
-            <Row label="Pushed" value={A11OY_PUSHED_AT.slice(0, 10)} />
+            <Row label="Tag" value={repo.latestTag} />
+            <Row label="Tag SHA" value={repo.tagShaShort} />
+            <Row label="Pushed" value={repo.pushedAtUtcText.slice(0, 10)} />
             <Row label="Package" value="@szl-holdings/a11oy-knowledge" />
             <Row label="Version" value="0.3.0 (v0.4.0 in workspace)" />
             <Row label="Axioms" value="A1–A14 (14)" />
             <Row label="Theorems" value="TH1–TH3" />
             <Row label="Derivations" value="T1–T10" />
             <Row label="Constants" value="K01–K13" />
-            <Row label="DOI ledger" value="13 minted" />
-            <Row label="Push queue" value={`Zenodo v14 · arXiv ${ARXIV_SHA_PREFIX}…`} />
+            <Row label="DOI ledger" value={PANEL_FACTS.doiMintedText} />
+            <Row label="Push queue" value={`Zenodo ${PANEL_FACTS.zenodoText.split(' ')[0]} · arXiv ${ARXIV_SHA_SHORT}`} />
           </div>
 
           {/* Ownership */}
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Ownership</p>
             <h4 style={cardTitle}>Canonical byline</h4>
-            <Row label="Author" value="Lutar, Stephen P." />
-            <Row label="ORCID" value="0009-0001-0110-4173" />
-            <Row label="Org" value="SZL Holdings" />
-            <Row label="Repository" value="szl-holdings/a11oy" />
-            <Row label="Default branch" value="main" />
-            <Row label="Visibility" value="Public · PUBLIC_ONLY" />
+            <Row label="Author" value={PANEL_FACTS.authorText} />
+            <Row label="ORCID" value={PANEL_FACTS.orcidText} />
+            <Row label="Org" value={PANEL_FACTS.affiliationText} />
+            <Row label="Repository" value={repo.fullName} />
+            <Row label="Default branch" value={repo.defaultBranch} />
+            <Row label="Visibility" value={`Public · ${PANEL_FACTS.ingestionPolicyText}`} />
             <Row label="License" value="Apache-2.0 + NOTICE" />
             <Row label="Citation" value="CITATION.cff" />
             <p
@@ -213,13 +214,13 @@ export function A11oyGovernancePanels() {
                 <StatusChip status="approved" label="PUBLIC_ONLY" />
               </StatusChipGroup>
             </div>
-            <Row label="Repos" value="16" />
-            <Row label="CI failing" value="0" />
-            <Row label="Scorecard avg" value="6.62 / 10" />
-            <Row label="BP-strict" value="10 / 16" />
-            <Row label="Dependabot high/crit" value="0 / 0" />
-            <Row label="Replays required" value="5 byte-identical" />
-            <Row label="Λ axes" value="9 conjunctive ∧" />
+            <Row label="Repos" value={PANEL_FACTS.reposCountText} />
+            <Row label="CI failing" value={PANEL_FACTS.ciFailingText} />
+            <Row label="Scorecard avg" value={PANEL_FACTS.scorecardAvgText} />
+            <Row label="BP-strict" value={PANEL_FACTS.branchProtectionStrictText} />
+            <Row label="Dependabot high/crit" value={PANEL_FACTS.dependabotHighCritPairText} />
+            <Row label="Replays required" value={PANEL_FACTS.byteIdenticalReplaysShort} />
+            <Row label="Λ axes" value={PANEL_FACTS.lambdaAxesShortText} />
           </div>
         </div>
       </div>

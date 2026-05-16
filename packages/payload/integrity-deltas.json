@@ -1,0 +1,15 @@
+{
+  "_comment": "Structural deltas between packages/payload/raw/ and raw/payload.json.file_integrity. Modifying raw/ is out of scope for the @szl-holdings/payload package work (task #4930); these deltas pre-date package formalization. Each entry MUST cite why it cannot be reconciled. The strict verify script (scripts/verify-integrity.mjs) accepts only the keys listed here, and only when invoked with --accept-known-deltas / ACCEPT_KNOWN_DELTAS=1.",
+  "extras": [
+    "README.md",
+    "_files/thesis/arxiv_pkg/arxiv_submission.zip"
+  ],
+  "missing": [
+    "_critical_findings.json"
+  ],
+  "rationales": {
+    "README.md": "Bundle-level readme added by handoff after payload.json was sealed; not part of the verified payload tree.",
+    "_files/thesis/arxiv_pkg/arxiv_submission.zip": "Generated artifact (zipped from arxiv_pkg/ contents) that post-dates the manifest; the manifest enumerates the unzipped source files individually.",
+    "_critical_findings.json": "Excluded from the public bundle by ingestion_policy=PUBLIC_ONLY; remains in the manifest for the private mirror. The public payload exposes the same data via master.critical_findings."
+  }
+}

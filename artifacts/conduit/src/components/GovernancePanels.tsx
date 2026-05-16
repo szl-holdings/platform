@@ -1,3 +1,9 @@
+import {
+  ORG_SUMMARY,
+  PANEL_FACTS,
+  panelRepoFacts,
+} from '@szl-holdings/payload';
+
 const PALETTE = {
   card: '#0e0e0e',
   cardAlt: '#1a1814',
@@ -121,6 +127,7 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
 }
 
 export function ConduitGovernancePanels() {
+  const amaru = panelRepoFacts('amaru');
   return (
     <section
       className="mt-6"
@@ -154,18 +161,18 @@ export function ConduitGovernancePanels() {
           Every relay recommendation is replay-anchored
         </h3>
         <p style={{ margin: 0, fontSize: 12, color: PALETTE.muted, maxWidth: 620 }}>
-          Amaru (artifact: szl-holdings/amaru) inherits the SZL Holdings audit chain.
+          Amaru (artifact: {amaru.fullName}) inherits the SZL Holdings audit chain.
           The figures below are pulled from the public org inventory and the shared
           Doctrine V6 floor — not from product copy.
         </p>
       </div>
 
       <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        <Chip tone="gold" label="Λ floor 0.90 · 9-axis AND" />
-        <Chip tone="ok" label="CI 0 failing" />
-        <Chip tone="ok" label="Dependabot 0 H/C" />
-        <Chip tone="gold" label="Scorecard 6.62" />
-        <Chip tone="muted" label="PUBLIC_ONLY" />
+        <Chip tone="gold" label={`Λ floor ${PANEL_FACTS.lambdaFloorAndText}`} />
+        <Chip tone="ok" label={`CI ${PANEL_FACTS.ciFailingText} failing`} />
+        <Chip tone="ok" label={`Dependabot ${PANEL_FACTS.dependabotHighCritText} H/C`} />
+        <Chip tone="gold" label={`Scorecard ${ORG_SUMMARY.scorecardAvg.toFixed(2)}`} />
+        <Chip tone="muted" label={PANEL_FACTS.ingestionPolicyText} />
       </div>
 
       <div
@@ -176,46 +183,46 @@ export function ConduitGovernancePanels() {
         }}
       >
         <PanelCard kicker="01 · Provenance" title="Replay-anchored, conjunctive Λ">
-          <Row label="Replay root" value="1ed4d253…" mono />
-          <Row label="Byte-identical replays" value="5 required" />
-          <Row label="Λ floor" value="0.90 · 9-axis AND" />
-          <Row label="Moral grounding" value="0.95" />
-          <Row label="Latest commit" value="6e1614d5…" mono />
-          <Row label="Licenses" value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0" />
-          <Row label="Ingestion" value="PUBLIC_ONLY" />
+          <Row label="Replay root" value={PANEL_FACTS.replayRootShort} mono />
+          <Row label="Byte-identical replays" value={PANEL_FACTS.byteIdenticalReplaysRequiredText} />
+          <Row label="Λ floor" value={PANEL_FACTS.lambdaFloorAndText} />
+          <Row label="Moral grounding" value={PANEL_FACTS.moralGroundingFloorText} />
+          <Row label="Latest commit" value={amaru.commitShort} mono />
+          <Row label="Licenses" value={PANEL_FACTS.licenseAllowlistShortText} />
+          <Row label="Ingestion" value={PANEL_FACTS.ingestionPolicyText} />
         </PanelCard>
 
         <PanelCard kicker="02 · Evidence ledger" title="Citable artifacts, public lineage">
-          <Row label="Repository" value="szl-holdings/amaru" mono />
-          <Row label="Latest tag" value="v1.0.0-alpha" />
-          <Row label="Tag SHA" value="716fd4c2…" mono />
-          <Row label="Pushed at (UTC)" value="2026-05-15 12:58" />
+          <Row label="Repository" value={amaru.fullName} mono />
+          <Row label="Latest tag" value={amaru.latestTag} />
+          <Row label="Tag SHA" value={amaru.tagShaShort} mono />
+          <Row label="Pushed at (UTC)" value={amaru.pushedAtUtcText} />
           <Row label="Hygiene" value="LICENSE · CITATION.cff · SECURITY.md" />
-          <Row label="Doctrine ledger" value="13-DOI evidence chain" />
-          <Row label="Zenodo deposit" value="v14 — push queue ready" />
-          <Row label="arXiv submission" value="sha 13ca4a06…" />
+          <Row label="Doctrine ledger" value={PANEL_FACTS.doiLedgerEvidenceText} />
+          <Row label="Zenodo deposit" value={PANEL_FACTS.zenodoText} />
+          <Row label="arXiv submission" value={PANEL_FACTS.arxivShaShortText} />
         </PanelCard>
 
         <PanelCard kicker="03 · Ownership" title="Canonical SZL Holdings byline">
-          <Row label="Author" value="Lutar, Stephen P." />
-          <Row label="ORCID" value="0009-0001-0110-4173" mono />
-          <Row label="Affiliation" value="SZL Holdings" />
-          <Row label="GitHub org" value="szl-holdings" mono />
-          <Row label="Repository" value="szl-holdings/amaru" mono />
-          <Row label="Default branch" value="main" />
-          <Row label="Doctrine version" value="V6" />
+          <Row label="Author" value={PANEL_FACTS.authorText} />
+          <Row label="ORCID" value={PANEL_FACTS.orcidText} mono />
+          <Row label="Affiliation" value={PANEL_FACTS.affiliationText} />
+          <Row label="GitHub org" value={PANEL_FACTS.githubOrgText} mono />
+          <Row label="Repository" value={amaru.fullName} mono />
+          <Row label="Default branch" value={amaru.defaultBranch} />
+          <Row label="Doctrine version" value={PANEL_FACTS.doctrineVersionText} />
           <Row label="Byline scope" value="Convergent multi-source data sync" />
         </PanelCard>
 
         <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">
-          <Row label="Repos in org" value="16" />
-          <Row label="CI failing" value="0" />
-          <Row label="Open dependabot (H/C)" value="0" />
-          <Row label="Code-scanning alerts" value="115 (org-wide)" />
-          <Row label="Scorecard average" value="6.62 / 10" />
-          <Row label="Branch protection — strict" value="10 / 16" />
-          <Row label="Push queue — ready" value="ZENODO v14 · arXiv submit" />
-          <Row label="One-way doors" value="awaiting confirm" />
+          <Row label="Repos in org" value={PANEL_FACTS.reposCountText} />
+          <Row label="CI failing" value={PANEL_FACTS.ciFailingText} />
+          <Row label="Open dependabot (H/C)" value={PANEL_FACTS.dependabotHighCritText} />
+          <Row label="Code-scanning alerts" value={PANEL_FACTS.codeScanningOrgWideText} />
+          <Row label="Scorecard average" value={PANEL_FACTS.scorecardAvgText} />
+          <Row label="Branch protection — strict" value={PANEL_FACTS.branchProtectionStrictText} />
+          <Row label="Push queue — ready" value={PANEL_FACTS.pushQueueReadyText} />
+          <Row label="One-way doors" value={PANEL_FACTS.oneWayDoorsText} />
         </PanelCard>
       </div>
     </section>

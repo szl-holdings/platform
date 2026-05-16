@@ -70,6 +70,7 @@ import { createHonoApp, createHonoExpressHandler } from './hono/index';
 import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
+import payloadRouter from './routes/payload';
 import a11oyLexiconRouter from './routes/a11oy-lexicon-api';
 import psycheRouter from './routes/psyche';
 import { sentraProbeDetectionMiddleware } from './middlewares/sentra-probe-detection';
@@ -382,6 +383,7 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 // fabric API: child products register from public boots and the demo-chain
 // endpoint must run without a session for the demo flow.
 app.use('/api/a11oy', a11oyOrchestrationRouter);
+app.use('/api/payload', payloadRouter);
 
 // PSYCHE — Emergent Sentience Observatory (#4856). Mounted as a public read
 // surface alongside the orchestration backbone so the A11oy PSYCHE pages

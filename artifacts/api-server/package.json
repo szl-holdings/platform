@@ -93,6 +93,7 @@
     "@szl-holdings/outcome-graph": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
+    "@szl-holdings/payload": "workspace:*",
     "@szl-holdings/payload-doctrine": "workspace:*",
     "@szl-holdings/pqc-identity": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",

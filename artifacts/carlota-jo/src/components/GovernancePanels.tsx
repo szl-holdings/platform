@@ -15,11 +15,16 @@ const C = {
   sans: "'Inter', system-ui, -apple-system, sans-serif",
 };
 
-const REPLAY_ROOT_PREFIX = '1ed4d253';
-const REPLAY_ROOT_FULL = '1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b';
-const SZL_BRAND_SHA = 'd86a37d5305a30886f7884cc4114cda48a8a3402';
-const LUTAR_LEAN_SHA = 'fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09';
-const ARXIV_SHA_PREFIX = '13ca4a06';
+import {
+  ARXIV_SHA_SHORT,
+  DOCTRINE,
+  PANEL_FACTS,
+  getRepoFacts,
+} from '@szl-holdings/payload';
+
+const REPLAY_ROOT_FULL = DOCTRINE.replayRoot;
+const SZL_BRAND_SHA = getRepoFacts('szl-brand').latestCommitSha;
+const LUTAR_LEAN_SHA = getRepoFacts('lutar-lean').latestCommitSha;
 
 const sectionStyle: CSSProperties = {
   padding: '80px 24px',
@@ -132,15 +137,15 @@ export function CarlotaJoGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Provenance</p>
             <h4 style={cardTitle}>Replay root &amp; invariant</h4>
-            <Row label="Replay root" value={`${REPLAY_ROOT_PREFIX}…`} />
-            <Row label="Byte-identical replays" value="5 of 5" />
-            <Row label="Λ floor" value="0.90 (9-axis ∧)" />
-            <Row label="moralGrounding" value="≥ 0.95" />
-            <Row label="measurabilityHonesty" value="≥ 0.95" />
-            <Row label="Ingestion" value="PUBLIC_ONLY" />
+            <Row label="Replay root" value={PANEL_FACTS.replayRootShort} />
+            <Row label="Byte-identical replays" value={PANEL_FACTS.byteIdenticalReplaysOfText} />
+            <Row label="Λ floor" value={PANEL_FACTS.lambdaFloorParenText} />
+            <Row label="moralGrounding" value={PANEL_FACTS.moralGroundingGteText} />
+            <Row label="measurabilityHonesty" value={PANEL_FACTS.measurabilityHonestyGteText} />
+            <Row label="Ingestion" value={PANEL_FACTS.ingestionPolicyText} />
             <Row
               label="License allowlist"
-              value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0"
+              value={PANEL_FACTS.licenseAllowlistShortText}
             />
             <p
               style={{
@@ -166,8 +171,8 @@ export function CarlotaJoGovernancePanels() {
             <Row label="Theory source" value="szl-holdings/lutar-lean" />
             <Row label="Lean HEAD" value={`${LUTAR_LEAN_SHA.slice(0, 12)}…`} />
             <Row label="Lean toolchain" value="leanprover/lean4 v4.13.0" />
-            <Row label="DOI ledger" value="13 minted" />
-            <Row label="Push queue" value={`Zenodo v14 · arXiv ${ARXIV_SHA_PREFIX}…`} />
+            <Row label="DOI ledger" value={PANEL_FACTS.doiMintedText} />
+            <Row label="Push queue" value={`Zenodo ${PANEL_FACTS.zenodoText.split(' ')[0]} · arXiv ${ARXIV_SHA_SHORT}`} />
             <p
               style={{
                 marginTop: 14,
@@ -187,12 +192,12 @@ export function CarlotaJoGovernancePanels() {
           <div style={cardStyle}>
             <p style={eyebrowStyle}>Ownership</p>
             <h4 style={cardTitle}>Canonical byline</h4>
-            <Row label="Author" value="Lutar, Stephen P." />
-            <Row label="ORCID" value="0009-0001-0110-4173" />
-            <Row label="Org" value="SZL Holdings" />
+            <Row label="Author" value={PANEL_FACTS.authorText} />
+            <Row label="ORCID" value={PANEL_FACTS.orcidText} />
+            <Row label="Org" value={PANEL_FACTS.affiliationText} />
             <Row label="Engagement" value="Carlota Jo · consulting front" />
             <Row label="Anchor repo" value="szl-holdings/szl-brand" />
-            <Row label="Visibility" value="Public · PUBLIC_ONLY" />
+            <Row label="Visibility" value={`Public · ${PANEL_FACTS.ingestionPolicyText}`} />
             <Row label="License" value="Apache-2.0 / CC-BY-4.0" />
             <p
               style={{
@@ -221,13 +226,13 @@ export function CarlotaJoGovernancePanels() {
                 <StatusChip status="advisory" label="Consulting front" />
               </StatusChipGroup>
             </div>
-            <Row label="Repos" value="16" />
-            <Row label="CI failing" value="0" />
-            <Row label="Scorecard avg" value="6.62 / 10" />
-            <Row label="BP-strict" value="10 / 16" />
-            <Row label="Dependabot high/crit" value="0 / 0" />
-            <Row label="Replays required" value="5 byte-identical" />
-            <Row label="Λ axes" value="9 conjunctive ∧" />
+            <Row label="Repos" value={PANEL_FACTS.reposCountText} />
+            <Row label="CI failing" value={PANEL_FACTS.ciFailingText} />
+            <Row label="Scorecard avg" value={PANEL_FACTS.scorecardAvgText} />
+            <Row label="BP-strict" value={PANEL_FACTS.branchProtectionStrictText} />
+            <Row label="Dependabot high/crit" value={PANEL_FACTS.dependabotHighCritPairText} />
+            <Row label="Replays required" value={PANEL_FACTS.byteIdenticalReplaysShort} />
+            <Row label="Λ axes" value={PANEL_FACTS.lambdaAxesShortText} />
           </div>
         </div>
       </div>

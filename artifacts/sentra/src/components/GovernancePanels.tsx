@@ -1,3 +1,5 @@
+import { PANEL_FACTS, panelRepoFacts } from '@szl-holdings/payload';
+
 const PALETTE = {
   bg: '#0a0a0a',
   card: '#0e0e0e',
@@ -125,6 +127,7 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
 }
 
 export function SentraGovernancePanels() {
+  const repo = panelRepoFacts('sentra');
   return (
     <section
       style={{
@@ -181,47 +184,47 @@ export function SentraGovernancePanels() {
           }}
         >
           <PanelCard kicker="01 · Provenance" title="Replay-anchored, conjunctive Λ">
-            <Row label="Replay root" value="1ed4d253…" mono />
-            <Row label="Byte-identical replays" value="5 required" />
-            <Row label="Λ floor (conjunctive AND)" value="0.90 across 9 axes" />
-            <Row label="Moral grounding floor" value="0.95" />
-            <Row label="Measurability honesty" value="0.95" />
-            <Row label="Latest commit" value="2ac304a9…" mono />
-            <Row label="License allowlist" value="Apache-2.0 · MIT · BSD-3 · CC-BY-4.0" />
-            <Row label="Ingestion policy" value="PUBLIC_ONLY" />
+            <Row label="Replay root" value={PANEL_FACTS.replayRootShort} mono />
+            <Row label="Byte-identical replays" value={PANEL_FACTS.byteIdenticalReplaysRequiredText} />
+            <Row label="Λ floor (conjunctive AND)" value={PANEL_FACTS.lambdaFloorConjAndText} />
+            <Row label="Moral grounding floor" value={PANEL_FACTS.moralGroundingFloorText} />
+            <Row label="Measurability honesty" value={PANEL_FACTS.measurabilityHonestyText} />
+            <Row label="Latest commit" value={repo.commitShort} mono />
+            <Row label="License allowlist" value={PANEL_FACTS.licenseAllowlistShortText} />
+            <Row label="Ingestion policy" value={PANEL_FACTS.ingestionPolicyText} />
           </PanelCard>
 
           <PanelCard kicker="02 · Evidence ledger" title="Citable artifacts, public lineage">
-            <Row label="Repository" value="szl-holdings/sentra" mono />
-            <Row label="Latest tag" value="v1.0.0-alpha" />
-            <Row label="Tag SHA" value="d02cbdbd…" mono />
-            <Row label="Pushed at (UTC)" value="2026-05-15 05:33" />
+            <Row label="Repository" value={repo.fullName} mono />
+            <Row label="Latest tag" value={repo.latestTag} />
+            <Row label="Tag SHA" value={repo.tagShaShort} mono />
+            <Row label="Pushed at (UTC)" value={repo.pushedAtUtcText} />
             <Row label="Hygiene files" value="LICENSE · NOTICE · CITATION.cff · SECURITY.md" />
-            <Row label="Doctrine ledger" value="13-DOI evidence chain" />
-            <Row label="Zenodo deposit" value="v14 — push queue ready" />
-            <Row label="arXiv submission" value="sha 13ca4a06… (one-way door queued)" />
+            <Row label="Doctrine ledger" value={PANEL_FACTS.doiLedgerEvidenceText} />
+            <Row label="Zenodo deposit" value={PANEL_FACTS.zenodoText} />
+            <Row label="arXiv submission" value={PANEL_FACTS.arxivShaShortQueuedText} />
           </PanelCard>
 
           <PanelCard kicker="03 · Ownership" title="Canonical SZL Holdings byline">
-            <Row label="Author" value="Lutar, Stephen P." />
-            <Row label="ORCID" value="0009-0001-0110-4173" mono />
-            <Row label="Affiliation" value="SZL Holdings" />
-            <Row label="GitHub org" value="szl-holdings" mono />
-            <Row label="Repository full name" value="szl-holdings/sentra" mono />
-            <Row label="Default branch" value="main" />
-            <Row label="Doctrine version" value="V6" />
+            <Row label="Author" value={PANEL_FACTS.authorText} />
+            <Row label="ORCID" value={PANEL_FACTS.orcidText} mono />
+            <Row label="Affiliation" value={PANEL_FACTS.affiliationText} />
+            <Row label="GitHub org" value={PANEL_FACTS.githubOrgText} mono />
+            <Row label="Repository full name" value={repo.fullName} mono />
+            <Row label="Default branch" value={repo.defaultBranch} />
+            <Row label="Doctrine version" value={PANEL_FACTS.doctrineVersionText} />
             <Row label="Byline scope" value="Cyber resilience command" />
           </PanelCard>
 
           <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">
-            <Row label="Repos in org" value="16" />
-            <Row label="CI failing" value="0" />
-            <Row label="Open dependabot (high/critical)" value="0" />
-            <Row label="Open code-scanning alerts" value="115 (org-wide)" />
-            <Row label="Scorecard average" value="6.62 / 10" />
-            <Row label="Branch protection — strict" value="10 / 16" />
-            <Row label="Push queue — ready" value="ZENODO v14 · arXiv submit" />
-            <Row label="One-way doors" value="awaiting confirm" />
+            <Row label="Repos in org" value={PANEL_FACTS.reposCountText} />
+            <Row label="CI failing" value={PANEL_FACTS.ciFailingText} />
+            <Row label="Open dependabot (high/critical)" value={PANEL_FACTS.dependabotHighCritText} />
+            <Row label="Open code-scanning alerts" value={PANEL_FACTS.codeScanningOrgWideText} />
+            <Row label="Scorecard average" value={PANEL_FACTS.scorecardAvgText} />
+            <Row label="Branch protection — strict" value={PANEL_FACTS.branchProtectionStrictText} />
+            <Row label="Push queue — ready" value={PANEL_FACTS.pushQueueReadyText} />
+            <Row label="One-way doors" value={PANEL_FACTS.oneWayDoorsText} />
           </PanelCard>
         </div>
       </div>

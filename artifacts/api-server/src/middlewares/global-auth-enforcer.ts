@@ -574,6 +574,13 @@ const PUBLIC_PREFIXES = [
   // endpoint backing the A11oy Doctrine pages. Public in demo mode (DB-backed,
   // no tenant PII). Write routes are CSRF-protected via global csrfMiddleware.
   "/api/doctrine/",
+  // Canonical SZL Holdings handoff payload — read-only public surface backed
+  // by the @szl-holdings/payload package. Every byte of packages/payload/raw/
+  // is intentionally public (PUBLIC_ONLY ingestion policy); routes serve the
+  // doctrine, org summary, sub-payloads (thesis/runtime/agi_v5/ops/github)
+  // and the SHA-256 file_integrity manifest.
+  "/api/payload",
+  "/api/payload/",
   "/api/a11oy/chat",
   "/api/a11oy/health",
   "/api/a11oy/conversations",
