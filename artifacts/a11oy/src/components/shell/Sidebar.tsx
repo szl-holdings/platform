@@ -375,7 +375,7 @@ function CollapsibleSection({ section }: { section: NavSection }) {
 
   useEffect(() => {
     if (hasActiveChild) setIsOpen(true);
-  }, [hasActiveChild]);
+  }, [hasActiveChild, location]);
 
   return (
     <div>
