@@ -13,6 +13,7 @@
 
 import { db, runtimeConfigTable, type RuntimeConfig } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
+import { onCacheInvalidation, publishCacheInvalidation } from './cache-invalidation-bus';
 import { logger } from './logger';
 
 const DEFAULT_CACHE_TTL_MS = 60_000;
@@ -142,12 +143,20 @@ export async function getConfigRow(key: string): Promise<RuntimeConfig | null> {
 }
 
 /**
- * Immediately evict a key from the in-memory cache.
- * Call this after admin writes so the next read fetches a fresh row.
+ * Immediately evict a key from the in-memory cache, then notify all
+ * other workers via the cross-process invalidation bus so their caches
+ * stay in sync without waiting for the TTL to expire.
+ *
  * If the invalidated key is `config_cache_ttl_ms`, also refreshes the
  * live TTL so the new value takes effect without a restart.
  */
 export function invalidateConfigCache(key: string): void {
+  invalidateConfigCacheLocal(key);
+  void publishCacheInvalidation({ scope: 'config', key });
+}
+
+/** Internal: evict locally without re-publishing (used by bus subscriber). */
+function invalidateConfigCacheLocal(key: string): void {
   configCache.delete(key);
   if (key === 'config_cache_ttl_ms') {
     void refreshCacheTtl();
@@ -155,12 +164,28 @@ export function invalidateConfigCache(key: string): void {
 }
 
 /**
- * Evict all entries from the config cache.
- * Useful after bulk updates.
+ * Evict all entries from the config cache and notify peer workers to
+ * do the same. Useful after bulk updates.
  */
 export function invalidateAllConfigCache(): void {
+  invalidateAllConfigCacheLocal();
+  void publishCacheInvalidation({ scope: 'config-all' });
+}
+
+/** Internal: clear locally without re-publishing (used by bus subscriber). */
+function invalidateAllConfigCacheLocal(): void {
   configCache.clear();
 }
+
+// Subscribe once at module load: notifications from peer workers clear
+// our local cache without re-publishing.
+onCacheInvalidation((event) => {
+  if (event.scope === 'config') {
+    invalidateConfigCacheLocal(event.key);
+  } else if (event.scope === 'config-all') {
+    invalidateAllConfigCacheLocal();
+  }
+});
 
 /**
  * Default operational parameters seeded into the database.

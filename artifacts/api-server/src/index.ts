@@ -36,6 +36,7 @@ import {
   type SeedTask,
 } from './lib/boot-orchestrator';
 import { runOpsMgmtBootInit } from './routes/ops-management';
+import { startCacheInvalidationBus, stopCacheInvalidationBus } from './lib/cache-invalidation-bus';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { ensureRuntimeConfigDefaults } from './lib/runtime-config';
 import { runMigrations } from './lib/run-migrations';
@@ -915,6 +916,12 @@ export async function bootstrap(
     // Step 2: Platform flags, runtime config, and knowledge store depend on schema being ready
     await bootstrapStep('ensurePlatformFlags', ensurePlatformFlags);
     await bootstrapStep('ensureRuntimeConfigDefaults', ensureRuntimeConfigDefaults);
+    // Cross-process cache invalidation bus: subscribes to Postgres
+    // LISTEN/NOTIFY so a flag/config write on this worker is visible
+    // on all other workers without waiting for the per-worker TTL to
+    // expire. Failure here is non-fatal — invalidation falls back to
+    // the existing TTL until the next reconnect succeeds.
+    await bootstrapStep('startCacheInvalidationBus', () => startCacheInvalidationBus());
     await bootstrapStep('knowledgeStore.loadFromDb', () => knowledgeStore.loadFromDb());
 
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
@@ -1357,6 +1364,11 @@ export async function bootstrap(
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();
+    // Release the dedicated LISTEN connection used by the cross-process
+    // cache invalidation bus so it does not linger past graceful shutdown.
+    await stopCacheInvalidationBus().catch((err) => {
+      logger.warn({ err }, 'Error stopping cache invalidation bus');
+    });
     stopScheduledTriggerChecks();
     stopHealthDegradationWatcher();
     stopPrismBusBridge();

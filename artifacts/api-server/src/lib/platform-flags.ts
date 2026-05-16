@@ -7,6 +7,7 @@ import {
   type FeatureFlagOverride,
 } from '@szl-holdings/db';
 import { and, eq } from 'drizzle-orm';
+import { onCacheInvalidation, publishCacheInvalidation } from './cache-invalidation-bus';
 import { logger } from './logger';
 
 // ─── In-memory TTL Cache ──────────────────────────────────────────────────────
@@ -48,14 +49,39 @@ async function getCachedOverrides(flagId: number): Promise<FeatureFlagOverride[]
   return overrides;
 }
 
-/** Immediately bust the cache for a given flag key. Called by admin write routes. */
+/**
+ * Bust the local cache for a given flag key, then notify all other
+ * workers to do the same via the cross-process invalidation bus.
+ *
+ * Local invalidation is synchronous and always succeeds; the cross-
+ * process notify is fire-and-forget — if the bus is down we log and
+ * fall back to the per-worker TTL.
+ */
 export function invalidateFlagCache(key: string): void {
+  invalidateFlagCacheLocal(key);
+  void publishCacheInvalidation({ scope: 'flag', key });
+}
+
+/**
+ * Internal: clear the in-process cache entry for `key` without
+ * notifying other workers. Used by the bus subscriber so a
+ * notification received from a peer does not bounce back.
+ */
+function invalidateFlagCacheLocal(key: string): void {
   const entry = flagRowCache.get(key);
   flagRowCache.delete(key);
   if (entry?.value) {
     overrideCache.delete(entry.value.id);
   }
 }
+
+// Subscribe once at module load: notifications from peer workers clear
+// our local cache without re-publishing (avoids feedback loops).
+onCacheInvalidation((event) => {
+  if (event.scope === 'flag') {
+    invalidateFlagCacheLocal(event.key);
+  }
+});
 
 export const PLATFORM_FLAGS = [
   {
