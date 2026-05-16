@@ -49,3 +49,13 @@ export {
 } from './brier-ledger';
 
 export { LICENSE_ALLOWLIST, assertAllowedLicense, type AllowedLicense } from './licenses';
+
+export {
+  FORECAST_REPLAY_CHAIN_ID,
+  forecastSummaryLeaf,
+  anchorForecastSummaries,
+  verifyForecastSummaryInclusion,
+  type ForecastAnchorEntry,
+  type ForecastInclusionVerdict,
+  type VerifyOptions,
+} from './forecast-anchor';

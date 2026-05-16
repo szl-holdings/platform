@@ -36,6 +36,9 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "@workspace/ouroboros-anchor": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "vitest": "catalog:"
