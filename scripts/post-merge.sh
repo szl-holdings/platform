@@ -6,7 +6,70 @@
 # script exits. Starting them here would create duplicate processes competing for
 # the same ports.
 set -e
-pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
+
+# Workspace package-set snapshot (Task #5076).
+# When a merge adds a new entry under packages/, lib/, apps/, artifacts/, or
+# workers/, the lockfile may already reflect it (so `pnpm install
+# --frozen-lockfile` reports "Lockfile is up to date" and exits without
+# actually populating node_modules/<scope>/<new-pkg>). The result is the
+# api-server build and several Vite artifacts fail to resolve the new
+# package on the next workflow restart (see Task #4991 / #5074).
+#
+# To make that class of failure self-healing, we snapshot the sorted list
+# of name@version pairs from `pnpm m ls --json --depth -1` and compare
+# against the previous snapshot persisted under .local/state/. When the
+# set differs we drop --frozen-lockfile so pnpm always materialises the
+# new symlinks. Unchanged merges keep the fast frozen-lockfile path.
+WORKSPACE_SNAPSHOT_DIR=".local/state"
+WORKSPACE_SNAPSHOT_FILE="$WORKSPACE_SNAPSHOT_DIR/workspace-packages.txt"
+mkdir -p "$WORKSPACE_SNAPSHOT_DIR"
+
+# Capture the workspace snapshot. `set +e` so a non-zero exit from pnpm
+# or node doesn't kill the script under `set -e`; we explicitly handle
+# the failure below (fail-closed: a missing/unparseable snapshot forces a
+# full install rather than silently keeping the fast path, which would
+# reintroduce the exact #4991/#5074 failure mode).
+set +e
+# Parse only stdout from `pnpm m ls`; benign stderr (deprecation notices,
+# peer-dep warnings) is logged separately but must not poison the JSON
+# parse and force unnecessary full installs.
+current_snapshot="$(pnpm m ls --json --depth -1 2>/tmp/post-merge-pnpm-ls.err \
+  | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const pkgs=JSON.parse(d);if(!Array.isArray(pkgs))throw new Error("not array");console.log(pkgs.filter(p=>p&&p.name).map(p=>`${p.name}@${p.version||"0.0.0"}`).sort().join("\n"))}catch(e){console.error("snapshot parse failed: "+e.message);process.exit(1)}})')"
+snapshot_exit=$?
+if [ "$snapshot_exit" -ne 0 ] && [ -s /tmp/post-merge-pnpm-ls.err ]; then
+  echo "post-merge: pnpm m ls stderr:"
+  cat /tmp/post-merge-pnpm-ls.err
+fi
+rm -f /tmp/post-merge-pnpm-ls.err
+set -e
+
+snapshot_changed=0
+if [ "$snapshot_exit" -ne 0 ] || [ -z "$current_snapshot" ]; then
+  echo "post-merge: workspace snapshot unavailable (exit=$snapshot_exit) — forcing full pnpm install (fail-closed)"
+  snapshot_changed=1
+elif [ ! -f "$WORKSPACE_SNAPSHOT_FILE" ]; then
+  echo "post-merge: no prior workspace-package snapshot — forcing full pnpm install"
+  snapshot_changed=1
+elif ! printf '%s\n' "$current_snapshot" | diff -q - "$WORKSPACE_SNAPSHOT_FILE" >/dev/null 2>&1; then
+  echo "post-merge: workspace package set changed since last merge — forcing full pnpm install"
+  printf '%s\n' "$current_snapshot" | diff - "$WORKSPACE_SNAPSHOT_FILE" || true
+  snapshot_changed=1
+fi
+
+if [ "$snapshot_changed" -eq 1 ]; then
+  # Workspace package set changed (or snapshot untrustworthy) — must NOT
+  # use --frozen-lockfile, since the lockfile may already encode the new
+  # package and frozen-lockfile will then no-op without creating the
+  # node_modules symlink. Failure tolerance matches the unchanged branch
+  # so a transient pnpm hiccup doesn't kill the whole post-merge run.
+  pnpm install 2>&1 || pnpm install 2>&1 || true
+else
+  pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
+fi
+
+if [ -n "$current_snapshot" ]; then
+  printf '%s\n' "$current_snapshot" > "$WORKSPACE_SNAPSHOT_FILE"
+fi
 # Run schema sync non-interactively.
 # Uses the non-interactive wrapper (push-non-interactive) so the workflow
 # never hangs on drizzle-kit's "Is `foo` a new table or rename?" prompts.
