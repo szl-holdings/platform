@@ -109,6 +109,7 @@ import type {
   ProtocolTool,
   OrchestrationPlan,
   OrchestrationStep,
+  OrchestrationStepPublishedLink,
   IngestJob,
   ThirdPartyLeader,
   OrchestrationRecipe,
@@ -778,13 +779,28 @@ async function loadToolsFromDB(): Promise<void> {
 
 // ─── Orchestration plan DB persistence ────────────────────────────────────────
 
-function rowToOrchestrationPlan(row: NexusOrchestrationPlanRow): OrchestrationPlan {
+/**
+ * Canonical trace ID convention. Centralized here so the server, audit log,
+ * and any cross-system lookups all derive the same string from a plan ID.
+ * Persisted onto the plan as `traceId` at creation time so clients never
+ * need to recompute it.
+ */
+function buildTraceId(planId: string): string {
+  return `trace_${planId.slice(0, 12)}`;
+}
+
+export function rowToOrchestrationPlan(row: NexusOrchestrationPlanRow): OrchestrationPlan {
   const plan: OrchestrationPlan = {
     id: row.id,
     intent: row.intent,
     status: row.status as OrchestrationPlan['status'],
     steps: (row.steps as OrchestrationStep[]) ?? [],
     createdAt: row.createdAt.toISOString(),
+    // Prefer the durably-stored trace ID so the value the UI saw at
+    // creation time is what we keep returning forever. Fall back to the
+    // legacy derivation only for rows that predate the `trace_id` column
+    // (migration 0163) and haven't been re-persisted yet.
+    traceId: row.traceId ?? buildTraceId(row.id),
   };
   if (row.stitchedOutput) plan.stitchedOutput = row.stitchedOutput;
   if (row.completedAt) plan.completedAt = row.completedAt.toISOString();
@@ -804,6 +820,7 @@ async function persistOrchestrationPlanToDB(plan: OrchestrationPlan): Promise<vo
         steps: plan.steps,
         stitchedOutput: plan.stitchedOutput ?? null,
         createdBy: plan.createdBy ?? null,
+        traceId: plan.traceId,
         createdAt: new Date(plan.createdAt),
         completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
       })
@@ -815,6 +832,7 @@ async function persistOrchestrationPlanToDB(plan: OrchestrationPlan): Promise<vo
           steps: plan.steps,
           stitchedOutput: plan.stitchedOutput ?? null,
           createdBy: plan.createdBy ?? null,
+          traceId: plan.traceId,
           completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
         },
       });
@@ -3010,7 +3028,12 @@ async function simulateEarningsBriefStep(
   step: OrchestrationStep,
   ticker: string,
   priorOutputs: string[],
-): Promise<{ output: string; rawPayload: string; ok: boolean }> {
+): Promise<{
+  output: string;
+  rawPayload: string;
+  ok: boolean;
+  publishedLinks?: OrchestrationStepPublishedLink[];
+}> {
   const now = new Date().toISOString();
 
   switch (step.appSlug) {
@@ -3113,13 +3136,15 @@ async function simulateEarningsBriefStep(
       const jobId = randomUUID();
       const durationS = 58 + Math.floor(Math.random() * 5);
       const fileSizeMb = (4.2 + Math.random() * 2).toFixed(1);
+      const mp4Url = `https://render.hyperframes.internal/output/${jobId}.mp4`;
+      const thumbnailUrl = `https://render.hyperframes.internal/thumb/${jobId}.jpg`;
       const raw = JSON.stringify({
         job_id: jobId,
         status: 'done',
         duration_s: durationS,
         file_size_mb: fileSizeMb,
-        mp4_url: `https://render.hyperframes.internal/output/${jobId}.mp4`,
-        thumbnail_url: `https://render.hyperframes.internal/thumb/${jobId}.jpg`,
+        mp4_url: mp4Url,
+        thumbnail_url: thumbnailUrl,
         cost_cents: 12,
         audit_trace: `trace_${jobId.slice(0, 8)}`,
       });
@@ -3127,40 +3152,60 @@ async function simulateEarningsBriefStep(
         output: `HyperFrames rendered a ${durationS}s video brief for ${ticker} (${fileSizeMb} MB). Video includes narrated financial summary, marketing posture overlay, and SEO positioning. Ready for distribution.`,
         rawPayload: raw,
         ok: true,
+        publishedLinks: [
+          { kind: 'video-mp4', label: 'Open rendered video (MP4)', url: mp4Url },
+          { kind: 'video-thumbnail', label: 'Video thumbnail', url: thumbnailUrl },
+        ],
       };
     }
     case 'publish.pulse': {
       await sleep(300 + Math.random() * 200);
       const cardId = `pulse_card_${randomUUID().slice(0, 8)}`;
+      const surface = 'executive-briefing';
       const raw = JSON.stringify({
         card_id: cardId,
         type: 'earnings-brief',
         ticker,
         period: 'Q4 2025',
         published_at: now,
-        surface: 'executive-briefing',
+        surface,
       });
       return {
         output: `Published ${ticker} earnings brief as Pulse executive briefing card (${cardId}). Card is now visible in the Pulse executive surface.`,
         rawPayload: raw,
         ok: true,
+        publishedLinks: [
+          {
+            kind: 'pulse-card',
+            label: `Open Pulse card · ${cardId}`,
+            url: `/pulse/${surface}/${cardId}`,
+          },
+        ],
       };
     }
     case 'publish.video-library': {
       await sleep(200 + Math.random() * 100);
       const entryId = `szl_video_${randomUUID().slice(0, 8)}`;
+      const library = 'szl-demo-video';
       const raw = JSON.stringify({
         entry_id: entryId,
         ticker,
         period: 'Q4 2025',
         tags: [ticker, 'earnings-brief', 'Q4-2025', 'auto-generated'],
-        library: 'szl-demo-video',
+        library,
         archived_at: now,
       });
       return {
         output: `Archived video in szl-demo-video library (${entryId}), tagged [${ticker}, earnings-brief, Q4-2025]. Entry is browsable in the video library.`,
         rawPayload: raw,
         ok: true,
+        publishedLinks: [
+          {
+            kind: 'video-library-entry',
+            label: `Open ${library} entry · ${entryId}`,
+            url: `/${library}/${entryId}`,
+          },
+        ],
       };
     }
     default:
@@ -3183,7 +3228,10 @@ async function runEarningsBriefOrchestration(planId: string, intent: string) {
     void persistOrchestrationPlanToDB(plan);
 
     const outputs: string[] = [];
-    const traceId = `trace_${planId.slice(0, 12)}`;
+    // Trace ID is now a first-class field on the plan, populated when the
+    // plan is created. Read it directly instead of recomputing so clients
+    // and the audit log always agree.
+    const traceId = plan.traceId;
     let totalCostCents = 0;
 
     for (const step of plan.steps) {
@@ -3199,6 +3247,9 @@ async function runEarningsBriefOrchestration(planId: string, intent: string) {
         const result = await simulateEarningsBriefStep(step, ticker, outputs);
         step.output = result.output;
         step.rawPayload = result.rawPayload;
+        if (result.publishedLinks && result.publishedLinks.length > 0) {
+          step.publishedLinks = result.publishedLinks;
+        }
         step.status = result.ok ? 'done' : 'error';
         step.confidence = result.ok ? 0.91 + Math.random() * 0.07 : 0.15;
         step.httpStatus = result.ok ? 200 : 500;
@@ -3386,6 +3437,7 @@ router.post(
         steps: [],
         createdAt: new Date().toISOString(),
         createdBy,
+        traceId: buildTraceId(id),
       };
       orchestrationStore.set(id, plan);
       void persistOrchestrationPlanToDB(plan);

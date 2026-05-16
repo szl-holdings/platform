@@ -21,7 +21,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { praxisApi } from './nexus-api';
-import type { OrchestrationPlan, OrchestrationStep } from './nexus-types';
+import type {
+  OrchestrationPlan,
+  OrchestrationStep,
+  OrchestrationStepLinkKind,
+} from './nexus-types';
 
 const EXAMPLE_INTENTS = [
   {
@@ -247,45 +251,39 @@ interface ParsedStepPayload {
   fields: Array<{ key: string; value: string }>;
 }
 
+function iconForLinkKind(kind: OrchestrationStepLinkKind): StepLink['icon'] {
+  switch (kind) {
+    case 'video-mp4':
+    case 'video-thumbnail':
+      return 'video';
+    case 'pulse-card':
+      return 'pulse';
+    case 'video-library-entry':
+      return 'library';
+  }
+}
+
 function parseStepPayload(step: OrchestrationStep): ParsedStepPayload {
   const result: ParsedStepPayload = { links: [], fields: [] };
+
+  // Prefer server-supplied structured links. The server owns the link
+  // contract; the UI just renders what it's told.
+  if (step.publishedLinks && step.publishedLinks.length > 0) {
+    for (const link of step.publishedLinks) {
+      result.links.push({
+        label: link.label,
+        url: link.url,
+        icon: iconForLinkKind(link.kind),
+      });
+    }
+  }
+
   if (!step.rawPayload) return result;
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(step.rawPayload) as Record<string, unknown>;
   } catch {
     return result;
-  }
-
-  const get = (k: string) => (typeof parsed[k] === 'string' ? (parsed[k] as string) : undefined);
-
-  if (step.appSlug === 'video.render') {
-    const mp4 = get('mp4_url');
-    const thumb = get('thumbnail_url');
-    if (mp4) result.links.push({ label: 'Open rendered video (MP4)', url: mp4, icon: 'video' });
-    if (thumb) result.links.push({ label: 'Video thumbnail', url: thumb, icon: 'video' });
-  }
-  if (step.appSlug === 'publish.pulse') {
-    const cardId = get('card_id');
-    const surface = get('surface') ?? 'executive-briefing';
-    if (cardId) {
-      result.links.push({
-        label: `Open Pulse card · ${cardId}`,
-        url: `/pulse/${surface}/${cardId}`,
-        icon: 'pulse',
-      });
-    }
-  }
-  if (step.appSlug === 'publish.video-library') {
-    const entryId = get('entry_id');
-    const library = get('library') ?? 'szl-demo-video';
-    if (entryId) {
-      result.links.push({
-        label: `Open ${library} entry · ${entryId}`,
-        url: `/${library}/${entryId}`,
-        icon: 'library',
-      });
-    }
   }
 
   for (const [k, v] of Object.entries(parsed)) {
@@ -297,7 +295,10 @@ function parseStepPayload(step: OrchestrationStep): ParsedStepPayload {
 }
 
 function getPlanTraceId(plan: OrchestrationPlan): string {
-  return `trace_${plan.id.slice(0, 12)}`;
+  // Trace ID is a first-class server-populated field on the plan. Fall back
+  // to deriving from the plan ID only for plans hydrated from very old API
+  // responses that predate this field.
+  return plan.traceId ?? `trace_${plan.id.slice(0, 12)}`;
 }
 
 function getStepCounts(plan: OrchestrationPlan) {

@@ -145,6 +145,24 @@ export interface OrchestrationPlan {
   planGraph?: PlanNode[];
   createdAt: string;
   completedAt?: string;
+  /**
+   * Server-assigned trace identifier for cross-system lookups. Always
+   * populated by the server; the UI must read this directly rather than
+   * recomputing it from `id`.
+   */
+  traceId: string;
+}
+
+export type OrchestrationStepLinkKind =
+  | 'video-mp4'
+  | 'video-thumbnail'
+  | 'pulse-card'
+  | 'video-library-entry';
+
+export interface OrchestrationStepPublishedLink {
+  kind: OrchestrationStepLinkKind;
+  label: string;
+  url: string;
 }
 
 export interface OrchestrationStep {
@@ -159,6 +177,12 @@ export interface OrchestrationStep {
   rawPayload?: string;
   httpStatus?: number;
   confidence?: number;
+  /**
+   * Structured links to artifacts a step published (Pulse cards, rendered
+   * videos, library entries). Populated by the server so the UI does not
+   * parse `rawPayload`.
+   */
+  publishedLinks?: OrchestrationStepPublishedLink[];
 }
 
 export interface PlanNode {

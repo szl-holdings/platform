@@ -98,6 +98,25 @@ export interface OrchestrationPlan {
   createdAt: string;
   completedAt?: string;
   createdBy?: string;
+  /**
+   * Server-assigned trace identifier for cross-system lookups (audit log,
+   * downstream services, etc). Stable for the lifetime of the plan and
+   * persisted alongside it. UI clients MUST read this directly instead of
+   * deriving it from `id`.
+   */
+  traceId: string;
+}
+
+export type OrchestrationStepLinkKind =
+  | 'video-mp4'
+  | 'video-thumbnail'
+  | 'pulse-card'
+  | 'video-library-entry';
+
+export interface OrchestrationStepPublishedLink {
+  kind: OrchestrationStepLinkKind;
+  label: string;
+  url: string;
 }
 
 export interface OrchestrationStep {
@@ -112,6 +131,12 @@ export interface OrchestrationStep {
   rawPayload?: string;
   httpStatus?: number;
   confidence?: number;
+  /**
+   * Structured links to artifacts a step published (Pulse cards, rendered
+   * videos, library entries). Populated by the server so the UI never has
+   * to parse `rawPayload`.
+   */
+  publishedLinks?: OrchestrationStepPublishedLink[];
 }
 
 export interface IngestJob {

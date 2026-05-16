@@ -119,12 +119,21 @@ export const nexusOrchestrationPlansTable = pgTable(
     stitchedOutput: text('stitched_output'),
     /** Email or user-id string of the authenticated caller who created this plan. */
     createdBy: text('created_by'),
+    /**
+     * Server-assigned trace identifier (Task #4870). Persisted at plan
+     * creation time so the value the UI sees, the audit log records, and
+     * any cross-system lookup all agree — even if the derivation
+     * convention changes in the future. Nullable for forward-compatible
+     * migration; the route hydrator backfills on read.
+     */
+    traceId: text('trace_id'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     completedAt: timestamp('completed_at'),
   },
   (t) => [
     index('nexus_orchestration_plans_status_idx').on(t.status),
     index('nexus_orchestration_plans_created_idx').on(t.createdAt),
+    index('nexus_orchestration_plans_trace_id_idx').on(t.traceId),
   ],
 );
 
