@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
   _resetAdaptersForTests,
   _resetForTests,
@@ -12,6 +12,16 @@ import {
   onPromotion,
   pullSource,
 } from '../src/index.js';
+import { ensureSchema } from '../src/db-backend.js';
+
+// Warm the DB-backend schema (idempotent CREATE TABLE IF NOT EXISTS) once,
+// outside any per-test timeout budget. On a cold shared Postgres, the first
+// schema bootstrap can take 7–8s on its own, which would otherwise blow the
+// default 5s per-test timeout and produce spurious failures that mask real
+// bugs. Doing it here amortizes that cost across the whole suite.
+beforeAll(async () => {
+  await ensureSchema();
+}, 60_000);
 
 afterEach(() => {
   _resetAdaptersForTests();
@@ -19,7 +29,7 @@ afterEach(() => {
 });
 
 describe('frontier ingestion engine — e2e', () => {
-  it('discover → score → queue → approve → promote → notify', async () => {
+  it('discover → score → queue → approve → promote → notify', { timeout: 30_000 }, async () => {
     const source = getSource('anthropic.models');
     expect(source).toBeDefined();
 
