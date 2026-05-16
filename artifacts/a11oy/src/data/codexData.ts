@@ -385,7 +385,7 @@ export const RESEARCH_INNOVATIONS: ResearchInnovation[] = [
     title: 'Model Distillation',
     origin: 'OpenAI \u2014 Model Distillation, Stored Completions Research',
     desc: 'Training smaller, faster models from larger frontier models while preserving capability \u2014 reducing cost and latency',
-    a11oyEvolution: 'a11oy Distillation Pipeline \u2014 governed distillation with training data lineage. Distilled model quality verified against parent. Performance regression detection. Deployment governed by quality gates.',
+    a11oyEvolution: 'a11oy Compression Pipeline \u2014 governed model compression with training data lineage. Compressed model quality verified against parent. Performance regression detection. Deployment governed by quality gates.',
     date: 'Oct 2024', category: 'Research',
   },
   {

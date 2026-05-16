@@ -108,7 +108,7 @@ export function RecalibrationMemos() {
           base={BASE}
           section="Recalibration Memos"
           title="Recalibration Memos"
-          description="Weekly intelligence synthesis — distilled from signal ingestion into actionable recalibration blueprints and forward roadmap items for A11oy's capability stack."
+          description="Weekly intelligence synthesis — synthesized from signal ingestion into actionable recalibration blueprints and forward roadmap items for A11oy's capability stack."
         />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>

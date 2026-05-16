@@ -1,5 +1,5 @@
 // ARGO — Field Intelligence Forge
-// Distillation of external open-source primitives + frontier public research
+// Integration of external open-source primitives + frontier public research
 // + the Sentra defensive doctrine into capability seeds for the
 // A11oy / Sentra / Psyche / Argo constellation.
 //
@@ -10,7 +10,7 @@
 export const ARGO_VERSION = '0.2.0-seed';
 
 export const ARGO_TAGLINE =
-  'External signal → distilled primitive → constellation evolution. Defensive only, evidence-bound, human-gated, public-input only.';
+  'External signal → integrated primitive → constellation evolution. Defensive only, evidence-bound, human-gated, public-input only.';
 
 // ---------------------------------------------------------------------------
 // 1. DOCTRINE PILLARS
@@ -77,10 +77,10 @@ export const DOCTRINE_PILLARS: readonly DoctrinePillar[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// 2. CAPABILITY SEEDS — distilled from external sources
+// 2. CAPABILITY SEEDS — integrated from external sources
 // ---------------------------------------------------------------------------
 
-export type SeedStatus = 'observed' | 'distilled' | 'adoptable' | 'piloted';
+export type SeedStatus = 'active' | 'integrated' | 'adoptable' | 'piloted';
 export type ConstellationTarget = 'A11oy' | 'Sentra' | 'Psyche' | 'Argo';
 export type RoadmapPhase = '0\u20136' | '7\u201312' | '13\u201324';
 export type SeedSourceKind = 'open-source' | 'public-research';
@@ -149,9 +149,9 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     evolvesAgent: 'Sentinel (endpoint defender)',
     doctrineLink: 'detection-targets',
     defensiveGuardrail:
-      'Distilled student is read-only at the edge; can only emit alerts upstream, never execute remediation locally without Sentra approval.',
+      'Edge student is read-only at the edge; can only emit alerts upstream, never execute remediation locally without Sentra approval.',
     phase: '7\u201312',
-    status: 'distilled',
+    status: 'integrated',
   },
   {
     id: 'oidc-attest',
@@ -202,7 +202,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Vault is append-only at the logical layer; snapshots augment, never overwrite, the immutable hash chain.',
     phase: '13\u201324',
-    status: 'distilled',
+    status: 'integrated',
   },
   {
     id: 'kernel-tap',
@@ -219,7 +219,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Read-only on the host\u2019s own connection table. No packet injection, no manipulation of conntrack state.',
     phase: '7\u201312',
-    status: 'observed',
+    status: 'active',
   },
   {
     id: 'device-trust',
@@ -236,7 +236,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Authenticates only devices the founder has explicitly enrolled. Revocation propagates within OCSP TTL.',
     phase: '7\u201312',
-    status: 'distilled',
+    status: 'integrated',
   },
   {
     id: 'observatory-repl',
@@ -253,7 +253,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'REPL session is OIDC-attested, time-boxed by kill-switch budget, every command logged to the audit chain.',
     phase: '13\u201324',
-    status: 'observed',
+    status: 'active',
   },
 
   // ---------- FRONTIER METHODS (Anthropic / OpenMythos public research) ----------
@@ -272,7 +272,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Every capability scope is a Sentra-policy permission. Skill load is auditable; capability elevation requires re-attestation in the approval queue.',
     phase: '0\u20136',
-    status: 'distilled',
+    status: 'integrated',
   },
   {
     id: 'system-card-practice',
@@ -306,7 +306,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Chain-of-thought is read-only telemetry. Never used as an authorisation channel; never replayed back into the agent as an instruction.',
     phase: '13\u201324',
-    status: 'distilled',
+    status: 'integrated',
   },
   {
     id: 'rdt-research',
@@ -323,7 +323,7 @@ export const CAPABILITY_SEEDS: readonly CapabilitySeed[] = [
     defensiveGuardrail:
       'Clean-room reimplementation only. No proprietary weights, no scraped private data. Trained only on permissively-licensed public corpora.',
     phase: '13\u201324',
-    status: 'observed',
+    status: 'active',
   },
   {
     id: 'frontier-red-team',

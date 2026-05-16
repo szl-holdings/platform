@@ -15,10 +15,10 @@ const TEXT = 'var(--color-a11oy-text)';
 const GHOST = 'var(--color-a11oy-text-ghost)';
 
 const STATUS_STYLE: Record<SeedStatus, { color: string; bg: string; label: string }> = {
-  observed:  { color: '#5e5e5e', bg: 'rgba(94,94,94,0.12)',     label: 'OBSERVED' },
-  distilled: { color: '#c9b787', bg: 'rgba(201,183,135,0.10)',  label: 'DISTILLED' },
-  adoptable: { color: GOLD,      bg: 'rgba(201,183,135,0.18)',  label: 'ADOPTABLE' },
-  piloted:   { color: '#f5f5f5', bg: 'rgba(245,245,245,0.10)',  label: 'PILOTED' },
+  active:     { color: '#7afa7a', bg: 'rgba(122,250,122,0.08)',  label: 'ACTIVE' },
+  integrated: { color: '#c9b787', bg: 'rgba(201,183,135,0.10)',  label: 'INTEGRATED' },
+  adoptable:  { color: GOLD,      bg: 'rgba(201,183,135,0.18)',  label: 'ADOPTABLE' },
+  piloted:    { color: '#f5f5f5', bg: 'rgba(245,245,245,0.10)',  label: 'PILOTED' },
 };
 
 const TARGET_STYLE: Record<ConstellationTarget, { color: string; bg: string }> = {
@@ -32,7 +32,7 @@ const SOURCE_KIND_META: Record<SeedSourceKind, { title: string; subtitle: string
   'open-source': {
     title: 'Open-Source Primitives',
     subtitle:
-      'Studied with-knowledge-of from the public ei-grad / Andrew Grigorev repository index. No code copied; design patterns distilled.',
+      'Studied with-knowledge-of from the public ei-grad / Andrew Grigorev repository index. No code copied; design patterns reimplemented.',
     chip: 'OSS',
   },
   'public-research': {
@@ -182,7 +182,7 @@ export function ArgoForge() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="Capability Seeds" value={total} sub="distilled this cycle" accent={GOLD} />
+        <KpiCard label="Capability Seeds" value={total} sub="integrated this cycle" accent={GOLD} />
         <KpiCard label="Ready to Adopt" value={adoptable} sub="adoptable + piloted" accent={GOLD} trend="up" />
         <KpiCard label="OSS · Research" value={`${oss} · ${research}`} sub="primitives · methods" accent="#f5f5f5" />
         <KpiCard label="Constellations Touched" value={targets} sub="A11oy · Sentra · Psyche" accent={GOLD} />

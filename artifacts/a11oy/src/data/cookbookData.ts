@@ -714,7 +714,7 @@ job = client.fine_tuning.jobs.create(
     training_file=file.id,
     model="gpt-4.1-mini",  # student
     method={"type": "distillation"},
-    suffix="a11oy-distilled",
+    suffix="a11oy-compressed",
 )
 print(f"Distillation job: {job.id}")`,
   },

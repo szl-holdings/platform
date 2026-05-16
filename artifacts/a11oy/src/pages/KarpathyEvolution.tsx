@@ -220,7 +220,7 @@ export function KarpathyEvolution() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20, marginBottom: 20 }}>
           <Card title="Distillation Engine">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-              <StatBox label="Active Distilled" value={MOCK_DISTILLATION.active} />
+              <StatBox label="Active Integrated" value={MOCK_DISTILLATION.active} />
               <StatBox label="Proposed" value={MOCK_DISTILLATION.proposed} />
               <StatBox label="Observations" value={MOCK_DISTILLATION.observations} />
             </div>
