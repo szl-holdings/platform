@@ -6,6 +6,7 @@ import {
   COLLECTIONS, BENCHMARKS, CATEGORIES, CODEX_TOTALS,
   PLATFORM_CAPABILITIES, ENTERPRISE_FEATURES, AGI_CAPABILITIES,
 } from '../data/codexData';
+import { A11oyCodeLivePanel } from '../components/A11oyCodeLivePanel';
 
 const T = {
   bg: '#0a0a0a', surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
@@ -29,33 +30,6 @@ function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; del
 function Label({ children }: { children: React.ReactNode }) {
   return <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.muted, margin: '0 0 1.5rem' }}>{children}</p>;
 }
-
-const TERMINAL_LINES = [
-  { t: 'sys', text: 'a11oy code v3.0 — governed cognitive agentic development' },
-  { t: 'sys', text: 'Chronicle: 847 memories loaded · Memory Fabric: 5 tiers active' },
-  { t: 'sys', text: 'Forecast Engine: 8 domains · Cyber Safety: ENFORCED' },
-  { t: 'sys', text: 'Models: GPT-5.5 · Claude 4 · DeepSeek V4 · Qwen 3.6 · Llama 405B' },
-  { t: 'div', text: '\u2500'.repeat(72) },
-  { t: 'usr', text: '\u2192 Refactor the ETA pipeline to use weather API v3 — forecast regression risk first' },
-  { t: 'agt', text: '  \u25B6 Cognitive Forecast: analyzing 847 historical commits...' },
-  { t: 'agt', text: '  \u25B6 Regression risk: 12.3% (low) \u2014 3 similar refactors in Chronicle, all clean' },
-  { t: 'agt', text: '  \u25B6 Estimated delivery: 14 minutes \u00B1 3min (94.2% confidence)' },
-  { t: 'div', text: '\u2500'.repeat(72) },
-  { t: 'agt', text: '  Analyzing current ETA pipeline...' },
-  { t: 'agt', text: '  Found 3 files referencing weather API v2:' },
-  { t: 'file', text: '    src/services/eta-calculator.ts  (L42-89)' },
-  { t: 'file', text: '    src/services/weather-client.ts  (L1-67)' },
-  { t: 'file', text: '    src/types/weather.ts            (L1-34)' },
-  { t: 'agt', text: '  Planning refactor: 3 files, ~120 lines changed' },
-  { t: 'agt', text: '  PII Filter: \u2713 no sensitive data in scope' },
-  { t: 'agt', text: '  CoT Monitor: \u2713 reasoning chain clean, no policy violations' },
-  { t: 'agt', text: '  Running type_check... passed \u2713' },
-  { t: 'agt', text: '  Running test_run (14 tests)... 14/14 passed \u2713' },
-  { t: 'gate', text: '  \u2B21 GOVERNANCE GATE: Changes require VP-Engineering approval' },
-  { t: 'gate', text: '    Proof hash: 0x7f3a...e2b1 \u00B7 Committed to ledger' },
-  { t: 'gate', text: '    Chronicle: memory updated \u2014 "weather API v3 migration pattern"' },
-  { t: 'agt', text: '  Refactor complete. Outcome Graph updated. Awaiting approval.' },
-];
 
 const PILLARS = [
   { num: '01', name: 'Governed Execution', desc: 'Every file operation, every model call, every deployment flows through the Proof Chain. Not optional guardrails \u2014 mandatory governance gates with cryptographic evidence.' },
@@ -219,30 +193,7 @@ export function A11oyCode() {
             </p>
           </div></FadeIn>
           <FadeIn delay={0.1}>
-            <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}`, background: '#050505' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderBottom: `1px solid ${T.border}`, background: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ display: 'flex', gap: '0.375rem' }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }} />
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }} />
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
-                </div>
-                <span style={{ fontSize: '0.6875rem', fontFamily: T.mono, color: T.dim, marginLeft: '0.5rem' }}>a11oy code \u2014 governed session</span>
-                <span style={{ marginLeft: 'auto', fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.15rem 0.5rem', borderRadius: 3, background: 'rgba(201,183,135,0.1)', color: T.accent, border: '1px solid rgba(201,183,135,0.15)' }}>GOVERNED</span>
-                <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.15rem 0.5rem', borderRadius: 3, background: 'rgba(40,200,64,0.1)', color: '#28c840', border: '1px solid rgba(40,200,64,0.15)' }}>CYBER SAFE</span>
-              </div>
-              <div style={{ padding: '1.25rem', fontFamily: T.mono, fontSize: '0.6875rem', lineHeight: 1.8, maxHeight: 480, overflowY: 'auto' }}>
-                {TERMINAL_LINES.map((line, i) => (
-                  <div key={i} style={{
-                    color: line.t === 'sys' ? T.muted : line.t === 'usr' ? T.text : line.t === 'file' ? T.accent : line.t === 'gate' ? T.accent : line.t === 'div' ? 'rgba(255,255,255,0.06)' : T.dim,
-                    fontWeight: line.t === 'usr' ? 600 : 400,
-                  }}>{line.text}</div>
-                ))}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
-                  <span style={{ color: T.accent }}>\u2192</span>
-                  <span style={{ width: 6, height: 14, background: T.accent, opacity: 0.6, animation: 'pulse 1.5s infinite' }} />
-                </div>
-              </div>
-            </div>
+            <A11oyCodeLivePanel chatPath={b('/chat')} />
           </FadeIn>
         </div>
       </section>
