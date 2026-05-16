@@ -11,6 +11,7 @@ import {
   discardInboxItemShared,
   ensureFrontierIngestDbSchema,
   ensureFrontierIngestSchedule,
+  getDailySpendHydrated,
   getStats,
   getSpendCap,
   isFrontierIngestDbEnabled,
@@ -84,8 +85,19 @@ router.get('/a11oy/frontier/stats', requireAuth, async (_req: Request, res: Resp
     const shared = isFrontierIngestDbEnabled()
       ? await dbGetStatsShared(inMem.spendCapUsd, inMem.capReached, inMem.lastPullAt)
       : undefined;
+    // Use the hydrated daily spend so a cold-start read reflects the
+    // durable persisted window rather than the process-local 0.
+    const daily = await getDailySpendHydrated();
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const msUntilReset = Math.max(0, new Date(daily.windowStart).getTime() + DAY_MS - Date.now());
     sendSuccess(res, {
       ...(shared ?? inMem),
+      dailySpend: {
+        usd: daily.usd,
+        capUsd: daily.capUsd,
+        windowStart: daily.windowStart,
+        msUntilReset,
+      },
       backend: shared ? 'postgres-shared' : 'in-memory',
       scheduler: {
         authoritative: temporal.ok ? 'temporal' : 'in_process_dev',

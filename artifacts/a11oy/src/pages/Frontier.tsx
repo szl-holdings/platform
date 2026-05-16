@@ -36,6 +36,21 @@ interface Stats {
   lastPullAt?: string;
   workerRunning: boolean;
   sources: SourceMeta[];
+  dailySpend?: {
+    usd: number;
+    capUsd: number;
+    windowStart: string;
+    msUntilReset: number;
+  };
+}
+
+function formatDuration(ms: number): string {
+  if (ms <= 0) return 'resetting…';
+  const totalMinutes = Math.floor(ms / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
 }
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
@@ -119,6 +134,10 @@ export function Frontier() {
 
   const totalSpend = stats?.spend.reduce((s, x) => s + x.spendUsd, 0) ?? 0;
   const providers = ['all', ...Array.from(new Set(stats?.sources.map((s) => s.provider) ?? []))];
+  const daily = stats?.dailySpend;
+  const dailyPct = daily && daily.capUsd > 0 ? Math.min(100, (daily.usd / daily.capUsd) * 100) : 0;
+  const dailyTripped = !!daily && daily.capUsd > 0 && daily.usd >= daily.capUsd;
+  const dailyBarColor = dailyTripped ? '#ef4444' : dailyPct >= 80 ? '#f59e0b' : '#c9b787';
 
   return (
     <Layout>
@@ -139,12 +158,45 @@ export function Frontier() {
         <KpiCard label="Pending review" value={stats?.pendingInbox ?? 0} sub={`${stats?.totalQueued ?? 0} total queued`} accent="#c9b787" />
         <KpiCard label="Discarded" value={stats?.totalDiscarded ?? 0} accent="#8a8a8a" />
         <KpiCard
-          label="Spend"
+          label="Lifetime spend"
           value={`$${totalSpend.toFixed(4)}`}
           sub={`cap $${(stats?.spendCapUsd ?? 0).toFixed(2)}${stats?.capReached ? ' • REACHED' : ''}`}
           accent={stats?.capReached ? '#ef4444' : '#c9b787'}
         />
       </div>
+
+      {daily && (
+        <Card className="p-3 mb-6">
+          <div className="flex items-baseline justify-between mb-2">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-neutral-500 font-mono">
+                Daily spend (24h rolling window)
+              </div>
+              <div className="text-xs text-neutral-200 font-mono mt-0.5">
+                ${daily.usd.toFixed(4)} <span className="text-neutral-500">of</span> ${daily.capUsd.toFixed(2)}
+                {dailyTripped && (
+                  <span className="ml-2 px-1.5 py-0.5 rounded text-[10px]" style={{ backgroundColor: 'rgba(239,68,68,0.20)', color: '#fca5a5' }}>
+                    CAP REACHED
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-neutral-500 font-mono">resets in</div>
+              <div className="text-xs text-neutral-300 font-mono">{formatDuration(daily.msUntilReset)}</div>
+            </div>
+          </div>
+          <div className="h-2 rounded overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+            <div
+              className="h-full transition-all"
+              style={{ width: `${dailyPct}%`, backgroundColor: dailyBarColor }}
+            />
+          </div>
+          <div className="mt-1 text-[10px] text-neutral-500 font-mono">
+            window started {new Date(daily.windowStart).toLocaleString()}
+          </div>
+        </Card>
+      )}
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <button

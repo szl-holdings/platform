@@ -91,4 +91,12 @@ export interface FrontierStats {
   spendCapUsd: number;
   capReached: boolean;
   lastPullAt?: string;
+  dailySpend?: DailySpendWindow;
+}
+
+export interface DailySpendWindow {
+  usd: number;
+  capUsd: number;
+  windowStart: string;
+  msUntilReset: number;
 }
