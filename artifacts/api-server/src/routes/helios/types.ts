@@ -73,6 +73,8 @@ export interface RecalibrationMemo {
   signalCount: number;
   proposalCount: number;
   createdAt: string;
+  status?: 'draft' | 'published';
+  generated?: boolean;
 }
 
 export interface BenchmarkScore {
