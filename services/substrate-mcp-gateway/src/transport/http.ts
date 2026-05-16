@@ -46,7 +46,7 @@ import { getAvailableTools } from '../handlers.js';
 import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
 import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-import { getGatewayServer, createGatewayServer } from '../nexus-gateway-server.js';
+import { createGatewayServer, disposeGatewayServer } from '../nexus-gateway-server.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
@@ -489,11 +489,17 @@ export function createHttpTransport(): express.Router {
     sseSessions.set(sseTransport.sessionId, sseTransport);
     sseTransport.onclose = () => {
       sseSessions.delete(sseTransport.sessionId);
+      disposeGatewayServer(sessionServer);
     };
     try {
       await sessionServer.connect(sseTransport);
     } catch (err) {
       sseSessions.delete(sseTransport.sessionId);
+      // Connect failed before the SDK could wire `onclose`, so explicitly
+      // deregister the session server to keep `_liveServers` from leaking
+      // and to prevent the sampling bridge from routing requests at a dead
+      // instance (code-review follow-up on task #5059).
+      disposeGatewayServer(sessionServer);
       if (!res.headersSent) {
         res.status(500).json({
           error: 'SSE_CONNECT_FAILED',
@@ -675,13 +681,25 @@ export function createHttpTransport(): express.Router {
           streamableSessions.set(id, transport);
         },
       });
+      const sessionServer = createGatewayServer();
       transport.onclose = () => {
         if (transport.sessionId) {
           streamableSessions.delete(transport.sessionId);
         }
+        disposeGatewayServer(sessionServer);
       };
-      const sessionServer = createGatewayServer();
-      await sessionServer.connect(transport);
+      try {
+        await sessionServer.connect(transport);
+      } catch (err) {
+        // Mirror the SSE path: if `connect()` throws before the SDK wires
+        // its `onclose`, manually deregister so `_liveServers` does not
+        // leak a dead instance (code-review follow-up on task #5059).
+        disposeGatewayServer(sessionServer);
+        if (transport.sessionId) {
+          streamableSessions.delete(transport.sessionId);
+        }
+        throw err;
+      }
     }
 
     // Extension negotiation (szl-holdings/platform#113): if the client sent

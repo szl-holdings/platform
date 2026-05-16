@@ -6,12 +6,27 @@
  * here using the official SDK's typed registration API.
  *
  * This module is the single source of truth for the gateway's tool surface.
- * Both the HTTP transport and the stdio transport share this instance — the
- * SDK handles concurrent client sessions via transport-level session isolation.
+ * The MCP SDK's `Server` carries a one-shot `initialized` flag, so each
+ * Streamable HTTP session needs its own `PRAXISMcpServer` + transport pair;
+ * `createGatewayServer()` is the per-session factory used by the HTTP
+ * transport, while `getGatewayServer()` returns a long-lived singleton for
+ * stdio and module-level notifications. Expensive immutable inputs (PQC
+ * identity, domain roots, domain Apps) are cached at the module level so
+ * per-session construction only pays for SDK tool/resource/prompt
+ * registration. A process-wide live-server registry fans out sampling
+ * requests and resource/tool-list change notifications across every active
+ * session.
  */
 
 import { z } from 'zod';
-import { PRAXISMcpServer, buildTenantInstructions, createDomainApps, type TenantContext } from '@workspace/nexus-mcp';
+import {
+  PRAXISMcpServer,
+  buildTenantInstructions,
+  createDomainApps,
+  type CryptographicIdentityConfig,
+  type PRAXISApp,
+  type TenantContext,
+} from '@workspace/nexus-mcp';
 import { getCurrentActorId } from './request-context.js';
 import { GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
 import { initGatewayIdentity } from './pqc-identity-init.js';
@@ -26,7 +41,90 @@ import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
 import { listRoots } from './domain-roots.js';
 import { setSamplingBridge } from './governed-sampling.js';
 
-// ─── Singleton PRAXISMcpServer ─────────────────────────────────────────────────
+// ─── Cached, immutable server inputs ──────────────────────────────────────────
+//
+// The SDK's underlying `Server` carries a one-shot `initialized` flag, so a
+// single `PRAXISMcpServer` instance cannot host more than one Streamable HTTP
+// session. We therefore still build a fresh server per session, but everything
+// that is genuinely immutable across the gateway's lifetime — the PQC identity
+// (and its CA cert), the domain roots list, and the domain Apps registry — is
+// computed once at module load and reused. Previously each session re-ran the
+// identity bootstrap (which talks to the database) and rebuilt the domain apps
+// from scratch, which dominated session-creation cost under load.
+// Tracked: szl-holdings/platform#113 and the per-session-cost follow-up.
+
+let _cachedIdentity: CryptographicIdentityConfig | null = null;
+let _cachedDomainRoots: Array<{ uri: string; name?: string }> | null = null;
+let _cachedDomainApps: PRAXISApp[] | null = null;
+
+function getCachedIdentity(): CryptographicIdentityConfig {
+  if (!_cachedIdentity) {
+    _cachedIdentity = initGatewayIdentity();
+  }
+  return _cachedIdentity;
+}
+
+function getCachedDomainRoots(): Array<{ uri: string; name?: string }> {
+  if (!_cachedDomainRoots) {
+    _cachedDomainRoots = listRoots('substrate-gateway').map((r) => ({
+      uri: r.uri,
+      name: r.name,
+    }));
+  }
+  return _cachedDomainRoots;
+}
+
+function getCachedDomainApps(): PRAXISApp[] {
+  if (!_cachedDomainApps) {
+    _cachedDomainApps = createDomainApps();
+  }
+  return _cachedDomainApps;
+}
+
+// ─── Live server registry + global bridge fan-out ─────────────────────────────
+//
+// `setSamplingBridge` and `setResourceUpdateCallback` install process-wide
+// callbacks. When each session installed its own callbacks, the last session
+// to be created silently overwrote the bridges of all earlier sessions, so
+// resource-updated notifications and sampling requests only reached one
+// client. We now install the bridges exactly once and fan out to every live
+// server instance — including the stdio singleton.
+
+const _liveServers = new Set<PRAXISMcpServer>();
+let _bridgesInstalled = false;
+
+function ensureGlobalBridges(): void {
+  if (_bridgesInstalled) return;
+  _bridgesInstalled = true;
+
+  setSamplingBridge({
+    requestSampling: async (params) => {
+      // Any live server can satisfy a sampling request — pick the first
+      // (insertion order). In practice the gateway is rarely asked to sample
+      // from more than one client at a time.
+      const next = _liveServers.values().next();
+      if (next.done) {
+        throw new Error('No active MCP sessions available for sampling');
+      }
+      return next.value.requestSampling(params);
+    },
+  });
+
+  setResourceUpdateCallback((uri: string) => {
+    for (const server of _liveServers) {
+      void server.notifyResourceUpdated(uri);
+    }
+  });
+}
+
+function registerLiveServer(server: PRAXISMcpServer): () => void {
+  _liveServers.add(server);
+  return () => {
+    _liveServers.delete(server);
+  };
+}
+
+// ─── Singleton PRAXISMcpServer (stdio / module-level notifications) ──────────
 
 let _server: PRAXISMcpServer | null = null;
 
@@ -39,15 +137,17 @@ let _server: PRAXISMcpServer | null = null;
  * factory from the HTTP transport's per-session bootstrap path; use
  * `getGatewayServer()` for stdio / singleton consumers (notifications, etc).
  *
+ * Heavy inputs (PQC identity, domain roots, domain Apps) are cached at the
+ * module level so per-session construction only pays for SDK registration
+ * (tool/resource/prompt entries on the new `McpServer`).
+ *
  * Tracked: szl-holdings/platform#113.
  */
 export function createGatewayServer(): PRAXISMcpServer {
-  const domainRoots = listRoots('substrate-gateway').map((r) => ({
-    uri: r.uri,
-    name: r.name,
-  }));
+  ensureGlobalBridges();
 
-  const cryptographicIdentity = initGatewayIdentity();
+  const cryptographicIdentity = getCachedIdentity();
+  const domainRoots = getCachedDomainRoots();
 
   const server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
@@ -78,22 +178,10 @@ export function createGatewayServer(): PRAXISMcpServer {
     }),
   });
 
-  setSamplingBridge({
-    requestSampling: (params) => server.requestSampling(params),
-  });
-
-  // ── Register domain Apps ─────────────────────────────────────────────────────
-  for (const app of createDomainApps()) {
+  // ── Register domain Apps (from cached registry) ──────────────────────────────
+  for (const app of getCachedDomainApps()) {
     server.registerApp(app);
   }
-
-  // ── Wire resource update notifications (Prism Bus → MCP subscriptions) ──────
-  // When startConvergenceBridge() receives a cross_domain_correlation event from
-  // the Prism Bus, it calls this callback which pushes notifications/resources/updated
-  // to all connected MCP clients that have subscribed to the affected URIs.
-  setResourceUpdateCallback((uri: string) => {
-    void server.notifyResourceUpdated(uri);
-  });
 
   // ── Register substrate tools via SDK ─────────────────────────────────────────
   const tools = getAvailableTools();
@@ -162,7 +250,17 @@ export function createGatewayServer(): PRAXISMcpServer {
     );
   }
 
+  registerLiveServer(server);
   return server;
+}
+
+/**
+ * Deregister a session-scoped server when its transport closes. Callers in the
+ * HTTP transport invoke this from the transport's `onclose` hook so the live
+ * servers set does not leak across the gateway's lifetime.
+ */
+export function disposeGatewayServer(server: PRAXISMcpServer): void {
+  _liveServers.delete(server);
 }
 
 /**
@@ -243,13 +341,13 @@ function _registerSubstrateTool(
 }
 
 /**
- * Notify the gateway's PRAXISMcpServer that the tool list has changed.
- * Call this after enable_server / disable_server to push discovery
- * notifications to connected clients.
+ * Notify every live gateway server that the tool list has changed. Call this
+ * after enable_server / disable_server so connected clients on any session
+ * (Streamable HTTP, legacy SSE, or stdio) receive a discovery refresh.
  */
 export async function notifyToolListChanged(): Promise<void> {
-  if (_server) {
-    await _server.notifyListChanged('tools/list_changed');
+  for (const server of _liveServers) {
+    await server.notifyListChanged('tools/list_changed');
   }
   emitToolListChanged();
 }
