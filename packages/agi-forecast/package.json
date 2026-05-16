@@ -37,6 +37,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@workspace/langextract-bridge": "workspace:*",
     "@workspace/ouroboros-anchor": "workspace:*"
   },
   "devDependencies": {
