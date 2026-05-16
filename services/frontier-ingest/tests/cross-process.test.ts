@@ -199,6 +199,77 @@ describeIfDb('frontier ingestion engine — cross-process DB-shared state', () =
   );
 });
 
+describeIfDb('frontier ingestion engine — daily spend cap survives restart', () => {
+  beforeAll(async () => {
+    _resetDbBackendForTests();
+    const ok = await ensureFrontierIngestDbSchema();
+    if (ok) await _truncateFrontierDbForTests();
+  }, 60_000);
+
+  afterAll(async () => {
+    if (isFrontierIngestDbEnabled()) await _truncateFrontierDbForTests();
+    _resetAdaptersForTests();
+    _resetForTests();
+  }, 30_000);
+
+  it(
+    'restart with persisted daily spend at cap blocks the first post-restart pull',
+    async () => {
+      const ok = await ensureFrontierIngestDbSchema();
+      if (!ok) return;
+      await _truncateFrontierDbForTests();
+      _resetAdaptersForTests();
+      _resetForTests();
+
+      const {
+        setDailySpendCap,
+        setSpendCap,
+        recordCost,
+        isCapReached,
+      } = await import('../src/store.js');
+
+      // ── Process A: scheduled worker fully spends the daily cap.
+      setSpendCap(100);
+      setDailySpendCap(0.5);
+      recordCost('openai', 0.6);
+      expect(isCapReached()).toBe(true);
+      // Let the additive SQL increment land.
+      await new Promise((r) => setTimeout(r, 250));
+
+      // ── Process B: simulate a clean restart by wiping in-memory state.
+      // capReached resets to false, dailySpendUsd resets to 0 — without
+      // hydrating from the persisted row the worker would happily pull.
+      _resetForTests();
+      _resetAdaptersForTests();
+
+      const { pullSource, getSource } = await import('../src/index.js');
+      const source = getSource('anthropic.models');
+      expect(source).toBeDefined();
+      let fetchCalls = 0;
+      const fetchSpy: typeof fetch = async (...args) => {
+        fetchCalls += 1;
+        return (await fetch(...args));
+      };
+      const result = await pullSource(source!, {
+        // Synthetic feed avoids real HTTP even if cap check fails.
+        syntheticFeeds: { 'anthropic.models': { data: [{ id: 'must-be-blocked' }] } },
+        fetchImpl: fetchSpy,
+      });
+
+      // The hydration-aware cap check must block the pull: no artifacts
+      // and no fetch attempts (synthetic feed never consulted either).
+      expect(result.artifacts.length).toBe(0);
+      expect(result.costUsd).toBe(0);
+      expect(fetchCalls).toBe(0);
+
+      // After hydration, isCapReached should be true on the new process.
+      const { isCapReachedHydrated } = await import('../src/store.js');
+      expect(await isCapReachedHydrated()).toBe(true);
+    },
+    20_000,
+  );
+});
+
 describe('frontier ingestion engine — DB backend gracefully disabled', () => {
   it('isFrontierIngestDbEnabled() returns false when DATABASE_URL is absent', async () => {
     const original = process.env.DATABASE_URL;

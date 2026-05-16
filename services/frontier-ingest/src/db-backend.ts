@@ -140,6 +140,12 @@ CREATE TABLE IF NOT EXISTS frontier_seen (
   artifact_id text PRIMARY KEY,
   seen_at     timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS frontier_spend_window (
+  id           integer PRIMARY KEY DEFAULT 1,
+  daily_usd    numeric(14,6) NOT NULL DEFAULT 0,
+  window_start timestamptz NOT NULL DEFAULT now()
+);
 `;
 
 export async function ensureSchema(): Promise<boolean> {
@@ -412,6 +418,85 @@ export async function dbGetStats(spendCapUsd: number, capReached: boolean, lastP
   };
 }
 
+/**
+ * Persist the rolling daily spend window so the daily cap survives
+ * restarts. Without this, a process restart resets `dailySpendUsd` to
+ * 0 and the engine could spend another full daily cap.
+ */
+/**
+ * Atomic additive increment for the daily spend window. Two
+ * processes (api-server + Temporal worker) write to this row; using
+ * additive SQL avoids the lost-update race that a read-modify-write
+ * of process-local totals would suffer.
+ *
+ * Semantics:
+ * - If no row exists, insert (delta, windowStartIso).
+ * - If incoming window_start is newer than persisted (rollover),
+ *   replace the row with (delta, windowStartIso).
+ * - Otherwise add delta to persisted daily_usd, keeping the older
+ *   window_start (so both processes converge on the same window).
+ *
+ * Returns the post-update row so callers can keep their local
+ * `dailySpendUsd` in sync with the durable truth.
+ */
+export async function dbAddSpendWindowIncrement(
+  deltaUsd: number,
+  windowStartIso: string,
+): Promise<{ dailyUsd: number; windowStart: string } | undefined> {
+  const rows = await safeQuery(
+    `INSERT INTO frontier_spend_window (id, daily_usd, window_start)
+     VALUES (1, $1, $2)
+     ON CONFLICT (id) DO UPDATE
+       SET daily_usd = CASE
+             WHEN EXCLUDED.window_start > frontier_spend_window.window_start THEN EXCLUDED.daily_usd
+             ELSE frontier_spend_window.daily_usd + EXCLUDED.daily_usd
+           END,
+           window_start = CASE
+             WHEN EXCLUDED.window_start > frontier_spend_window.window_start THEN EXCLUDED.window_start
+             ELSE frontier_spend_window.window_start
+           END
+     RETURNING daily_usd, window_start`,
+    [deltaUsd, windowStartIso],
+  );
+  if (!rows || rows.length === 0) return undefined;
+  return {
+    dailyUsd: Number(rows[0]!['daily_usd'] ?? 0),
+    windowStart: toIso(rows[0]!['window_start']),
+  };
+}
+
+/**
+ * Rollover-only write: forces the persisted window to a fresh
+ * (0, windowStartIso) when the local process detected a 24h rollover.
+ * Uses the same monotonic window_start comparison so a slower process
+ * can't accidentally rewind the window.
+ */
+export async function dbResetSpendWindow(windowStartIso: string): Promise<void> {
+  await safeQuery(
+    `INSERT INTO frontier_spend_window (id, daily_usd, window_start)
+     VALUES (1, 0, $1)
+     ON CONFLICT (id) DO UPDATE
+       SET daily_usd = CASE
+             WHEN EXCLUDED.window_start > frontier_spend_window.window_start THEN 0
+             ELSE frontier_spend_window.daily_usd
+           END,
+           window_start = CASE
+             WHEN EXCLUDED.window_start > frontier_spend_window.window_start THEN EXCLUDED.window_start
+             ELSE frontier_spend_window.window_start
+           END`,
+    [windowStartIso],
+  );
+}
+
+export async function dbLoadSpendWindow(): Promise<{ dailyUsd: number; windowStart: string } | undefined> {
+  const rows = await safeQuery(`SELECT daily_usd, window_start FROM frontier_spend_window WHERE id=1`);
+  if (!rows || rows.length === 0) return undefined;
+  return {
+    dailyUsd: Number(rows[0]!['daily_usd'] ?? 0),
+    windowStart: toIso(rows[0]!['window_start']),
+  };
+}
+
 export async function dbHasSeen(artifactId: string): Promise<boolean | undefined> {
   const rows = await safeQuery(`SELECT 1 FROM frontier_seen WHERE artifact_id=$1`, [artifactId]);
   if (rows === undefined) return undefined;
@@ -485,6 +570,6 @@ function rowToInbox(r: Row): InboxItem {
 export async function _truncateForTests(): Promise<void> {
   if (!(await ensureSchema()) || !pool) return;
   await pool.query(
-    `TRUNCATE frontier_inbox, frontier_promotions, frontier_downstream, frontier_timeline, frontier_evidence, frontier_artifacts, frontier_spend, frontier_seen RESTART IDENTITY CASCADE`,
+    `TRUNCATE frontier_inbox, frontier_promotions, frontier_downstream, frontier_timeline, frontier_evidence, frontier_artifacts, frontier_spend, frontier_spend_window, frontier_seen RESTART IDENTITY CASCADE`,
   );
 }

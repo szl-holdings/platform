@@ -8,9 +8,14 @@ import {
   dbInsertInbox,
   dbInsertPromotion,
   dbInsertTimeline,
+  dbAddSpendWindowIncrement,
+  dbLoadSpendWindow,
   dbMarkSeen,
+  dbResetSpendWindow,
   dbUpdateInboxStatus,
+  ensureSchema as ensureDbSchema,
   isDbBackendEnabled,
+  _resetDbBackendForTests,
 } from './db-backend.js';
 
 function fireAndForget(p: Promise<unknown>): void {
@@ -45,6 +50,105 @@ let dailySpendUsd = 0;
 let dailyWindowStartMs = Date.now();
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+let spendHydrated = false;
+let spendHydratePromise: Promise<void> | undefined;
+/**
+ * Increments applied to dailySpendUsd before hydration completed.
+ * Hydration adds these to the persisted total instead of overwriting
+ * the local in-memory value with the stale persisted value. This
+ * closes the cold-start race where a recordCost ran before
+ * dbLoadSpendWindow finished and would otherwise be lost.
+ */
+let pendingDailyIncrements = 0;
+
+/**
+ * Hydrate the daily-spend window from the shared DB on first access.
+ * Without this, every process restart would reset the daily meter to
+ * 0 and allow another full daily cap of spend — defeating the cap.
+ */
+async function hydrateSpendWindow(): Promise<void> {
+  if (spendHydrated) return;
+  if (spendHydratePromise) return spendHydratePromise;
+  spendHydratePromise = (async () => {
+    try {
+      await ensureDbSchema();
+      if (!isDbBackendEnabled()) {
+        // No DB to hydrate from — local increments stand as-is.
+        return;
+      }
+      const row = await dbLoadSpendWindow();
+      const now = Date.now();
+      const localPending = pendingDailyIncrements;
+      pendingDailyIncrements = 0;
+      if (!row) {
+        // First-ever write: atomically add the local pending so we
+        // converge with any peer process racing the same insert.
+        const result = await dbAddSpendWindowIncrement(localPending, new Date(dailyWindowStartMs).toISOString());
+        if (result) {
+          dailySpendUsd = result.dailyUsd;
+          dailyWindowStartMs = new Date(result.windowStart).getTime();
+        }
+        return;
+      }
+      const startMs = new Date(row.windowStart).getTime();
+      if (now - startMs >= DAY_MS) {
+        // Persisted window expired — atomically roll it over and add
+        // any pending local increments into the fresh window.
+        dailyWindowStartMs = now;
+        const result = await dbAddSpendWindowIncrement(localPending, new Date(dailyWindowStartMs).toISOString());
+        dailySpendUsd = result?.dailyUsd ?? localPending;
+        if (result) dailyWindowStartMs = new Date(result.windowStart).getTime();
+      } else {
+        // Adopt the persisted total + atomically fold in pending
+        // increments so the durable counter reflects everything.
+        dailyWindowStartMs = startMs;
+        if (localPending > 0) {
+          const result = await dbAddSpendWindowIncrement(localPending, new Date(dailyWindowStartMs).toISOString());
+          dailySpendUsd = result?.dailyUsd ?? (row.dailyUsd + localPending);
+          if (result) dailyWindowStartMs = new Date(result.windowStart).getTime();
+        } else {
+          dailySpendUsd = row.dailyUsd;
+        }
+      }
+      // Re-evaluate cap state against the just-hydrated total so the
+      // first post-restart pull is blocked when the persisted daily
+      // spend already meets/exceeds the cap. Without this, a worker
+      // could fire a pull (and pay) before any recordCost runs.
+      recomputeCapReached();
+    } finally {
+      spendHydrated = true;
+    }
+  })();
+  return spendHydratePromise;
+}
+
+function recomputeCapReached(): void {
+  const lifetime = totalSpend();
+  const tripped = lifetime >= spendCapUsd || dailySpendUsd >= dailySpendCapUsd;
+  if (tripped && !capReached) {
+    capReached = true;
+    const which = dailySpendUsd >= dailySpendCapUsd && lifetime < spendCapUsd ? 'daily' : 'lifetime';
+    const message =
+      which === 'daily'
+        ? `Daily spend cap already reached on hydrate: $${dailySpendUsd.toFixed(4)} of $${dailySpendCapUsd.toFixed(2)} (24h window)`
+        : `Lifetime spend cap already reached on hydrate: $${lifetime.toFixed(4)} of $${spendCapUsd.toFixed(2)}`;
+    pushTimeline({ kind: 'cap-reached', message });
+  } else if (!tripped && capReached) {
+    capReached = false;
+  }
+}
+
+// Kick off hydration eagerly so first recordCost sees persisted state.
+fireAndForget(hydrateSpendWindow());
+
+/** Await-able hydrated cap check — call from worker before first pull. */
+export async function isCapReachedHydrated(): Promise<boolean> {
+  await hydrateSpendWindow();
+  rolloverDailyWindowIfNeeded();
+  recomputeCapReached();
+  return capReached;
+}
+
 type CapNotifier = (message: string, totals: { totalUsd: number; dailyUsd: number; capUsd: number; dailyCapUsd: number }) => void;
 let capNotifier: CapNotifier | undefined;
 
@@ -57,6 +161,7 @@ function rolloverDailyWindowIfNeeded(): void {
   if (Date.now() - dailyWindowStartMs >= DAY_MS) {
     dailySpendUsd = 0;
     dailyWindowStartMs = Date.now();
+    fireAndForget(dbResetSpendWindow(new Date(dailyWindowStartMs).toISOString()));
   }
 }
 let lastPullAt: string | undefined;
@@ -110,6 +215,28 @@ export function recordCost(provider: FrontierProvider, usd: number): void {
   }
   dailySpendUsd += usd;
   fireAndForget(dbAddSpend(provider, usd));
+  if (!spendHydrated) {
+    // Hydration hasn't loaded the persisted window yet — buffer this
+    // delta so hydration can atomically fold it into the persisted
+    // row instead of overwriting it. We do NOT call the additive
+    // SQL twice (here AND from hydration); deferring until hydration
+    // is the single source of truth for cold-start increments.
+    pendingDailyIncrements += usd;
+    // Ensure hydration is in flight even if module-load kickoff was missed.
+    fireAndForget(hydrateSpendWindow());
+  } else {
+    // Hot path: atomically add this delta to the durable row.
+    // Returns the post-update total so we can correct dailySpendUsd
+    // for any concurrent writer (e.g. the Temporal worker process).
+    fireAndForget(
+      dbAddSpendWindowIncrement(usd, new Date(dailyWindowStartMs).toISOString()).then((result) => {
+        if (!result) return;
+        // Adopt the durable total + window start so processes converge.
+        dailySpendUsd = result.dailyUsd;
+        dailyWindowStartMs = new Date(result.windowStart).getTime();
+      }),
+    );
+  }
 
   const total = totalSpend();
   const triggerLifetime = total >= spendCapUsd;
@@ -138,6 +265,22 @@ export function recordCost(provider: FrontierProvider, usd: number): void {
 }
 
 export function getDailySpend(): { usd: number; capUsd: number; windowStart: string } {
+  fireAndForget(hydrateSpendWindow());
+  rolloverDailyWindowIfNeeded();
+  return {
+    usd: dailySpendUsd,
+    capUsd: dailySpendCapUsd,
+    windowStart: new Date(dailyWindowStartMs).toISOString(),
+  };
+}
+
+/**
+ * Await-able variant for callers (e.g. stats endpoints) that want
+ * the hydrated value rather than the eagerly-cached one. Useful in
+ * tests and in the api-server's first request after a cold start.
+ */
+export async function getDailySpendHydrated(): Promise<{ usd: number; capUsd: number; windowStart: string }> {
+  await hydrateSpendWindow();
   rolloverDailyWindowIfNeeded();
   return {
     usd: dailySpendUsd,
@@ -432,4 +575,31 @@ export function _resetForTests(): void {
   dailySpendUsd = 0;
   dailyWindowStartMs = Date.now();
   capNotifier = undefined;
+  spendHydrated = false;
+  spendHydratePromise = undefined;
+  pendingDailyIncrements = 0;
+}
+
+/**
+ * Test-only adapter: force the in-memory store to be the sole backend
+ * for the duration of a test. Disables the DB-backend (env flag +
+ * re-initializes the backend module state so any prior DB pool is
+ * dropped) so reads/writes stay process-local. Pairs with
+ * `_resetForTests()` for clean isolation.
+ *
+ * Production code must NOT call this — the DB-backed store is the
+ * canonical durable store post-restart; the in-memory arrays are only
+ * a hot cache for the current process.
+ */
+export function _useInMemoryStoreForTests(): void {
+  process.env.FRONTIER_INGEST_DB_DISABLED = 'true';
+  // Drop any cached pool / initialized=true so ensureSchema re-evaluates
+  // the env flag and refuses to connect. Without this, a test that
+  // already touched the DB backend would keep the live pool.
+  _resetDbBackendForTests();
+  // Treat hydration as complete: there's nothing durable to load and
+  // we don't want to keep increments in the pending queue.
+  spendHydrated = true;
+  spendHydratePromise = undefined;
+  pendingDailyIncrements = 0;
 }

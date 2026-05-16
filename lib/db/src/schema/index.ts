@@ -228,3 +228,4 @@ export * from './operator_model_registry';
 export * from './disclosure';
 export * from './lexicon';
 export * from './proof_ledger';
+export * from './frontier_ingest';

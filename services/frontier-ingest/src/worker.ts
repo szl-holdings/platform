@@ -4,6 +4,7 @@ import {
   alreadySeen,
   alreadySeenShared,
   isCapReached,
+  isCapReachedHydrated,
   markPullComplete,
   markPullStart,
   markSeen,
@@ -36,7 +37,10 @@ export async function pullSource(
   opts: WorkerOptions = {},
 ): Promise<{ artifacts: FrontierArtifact[]; evidence: EvidencePack[]; costUsd: number }> {
   const evidence: EvidencePack[] = [];
-  if (isCapReached()) return { artifacts: [], evidence, costUsd: 0 };
+  // Hydration-aware cap check: on first call after restart this awaits
+  // dbLoadSpendWindow so the persisted daily total (which may already
+  // be at/over cap) blocks the pull before any paid call is made.
+  if (await isCapReachedHydrated()) return { artifacts: [], evidence, costUsd: 0 };
 
   // Per-source rate-limit gate: respect the source's declared ratePerHour.
   // Synthetic feeds (used in tests / operator on-demand pulls) bypass the
