@@ -92,7 +92,7 @@ export default function LineagePage() {
       <FabricHeader
         eyebrow="ONE-OF-ONE · 02"
         title="Lineage Graph"
-        blurb="End-to-end source → model → mapping → destination → outcome visualization. Every edge carries a proof-anchor hash. Click any node to navigate to its Conduit surface or inspect its evidence reference."
+        blurb="End-to-end source → model → mapping → destination → outcome visualization. Every edge carries a proof-anchor hash. Click any node to navigate to its Amaru surface or inspect its evidence reference."
         trailing={
           <Link href="/innovation" className="flex items-center gap-1.5 text-[11px] text-[#c9b787] hover:underline">
             <ArrowLeft className="w-3 h-3" /> Innovation Brief

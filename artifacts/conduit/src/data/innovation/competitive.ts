@@ -282,7 +282,7 @@ export const INNOVATION_CAPABILITIES: readonly InnovationCapability[] = [
     number: 2,
     title: 'Lineage Graph',
     tagline: 'End-to-end source→outcome node-link visualization with proof-anchor badges.',
-    description: 'Full lineage from source through model, mapping, destination, to outcome. Every edge carries a proof-anchor badge. Click any node to navigate to its Conduit surface.',
+    description: 'Full lineage from source through model, mapping, destination, to outcome. Every edge carries a proof-anchor badge. Click any node to navigate to its Amaru surface.',
     route: '/innovation/lineage',
     agents: ['cartographer', 'scribe'],
     crossLink: [{ label: 'Mappings', route: '/mappings' }],

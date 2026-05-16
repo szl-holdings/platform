@@ -154,7 +154,7 @@ export function ConduitGovernancePanels() {
           Every relay recommendation is replay-anchored
         </h3>
         <p style={{ margin: 0, fontSize: 12, color: PALETTE.muted, maxWidth: 620 }}>
-          Conduit (artifact: szl-holdings/amaru) inherits the SZL Holdings audit chain.
+          Amaru (artifact: szl-holdings/amaru) inherits the SZL Holdings audit chain.
           The figures below are pulled from the public org inventory and the shared
           Doctrine V6 floor — not from product copy.
         </p>

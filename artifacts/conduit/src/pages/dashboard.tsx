@@ -33,8 +33,12 @@ import {
 } from '@/components/fabric/primitives';
 import { Badge, Button } from '@/components/ui';
 import { INNOVATION_CAPABILITIES } from '@/data/innovation/competitive';
+import { useStats, useConnections, useSyncs } from '@/lib/api-hooks';
 
 export default function Dashboard() {
+  const liveStats = useStats();
+  const liveConnections = useConnections();
+  const liveSyncs = useSyncs();
   const kpis = useMemo(
     () => buildCockpitKpis({ events: RELAY_RUN_EVENTS, destinations: RELAY_DESTINATIONS, mappings: RELAY_MAPPINGS, outcomes: RELAY_OUTCOMES, policies: RELAY_POLICIES }),
     [],
@@ -154,17 +158,69 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* KPI tiles */}
+      {/* Live KPI tiles — wired to /api/conduit/* */}
+      {liveStats.isError || liveConnections.isError || liveSyncs.isError ? (
+        <div className="mb-3 p-3 rounded border border-[rgba(212,84,80,0.3)] bg-[rgba(212,84,80,0.05)] text-[12px] text-[#d45450]">
+          Live API unreachable — showing fabric reference values.
+          {' '}<span className="font-mono text-[10px] text-[#888]">{(liveStats.error || liveConnections.error || liveSyncs.error)?.message}</span>
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <FabricStat label="Active syncs" value={kpis.activeSyncs} tone="gold" />
-        <FabricStat label="Records activated · 24h" value={(kpis.recordsActivated24h / 1000).toFixed(1) + 'k'} tone="good" />
-        <FabricStat label="Failed records · 24h" value={kpis.failedRecords24h.toLocaleString()} tone={kpis.failedRecords24h > 5000 ? 'bad' : 'warn'} />
-        <FabricStat label="Policy blocks · 24h" value={kpis.policyBlocks24h} tone={kpis.policyBlocks24h > 4 ? 'warn' : 'good'} />
-        <FabricStat label="Approval queue" value={kpis.approvalQueue} tone="warn" />
-        <FabricStat label="Avg destination health" value={kpis.destinationHealth} tone="good" />
-        <FabricStat label="Avg latency · 24h" value={`${kpis.avgLatencyMs}ms`} />
-        <FabricStat label="Outcome lift" value={`${(kpis.outcomeLiftPct * 100).toFixed(1)}%`} tone="good" />
+        {liveStats.isLoading ? (
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="conduit-card p-4 animate-pulse">
+              <div className="h-3 w-24 bg-[rgba(255,255,255,0.05)] rounded mb-2" />
+              <div className="h-8 w-16 bg-[rgba(255,255,255,0.06)] rounded" />
+            </div>
+          ))
+        ) : liveStats.data ? (
+          <>
+            <FabricStat label="Active syncs · live" value={liveStats.data.activeSyncs} tone="gold" />
+            <FabricStat label="Total syncs · live" value={liveStats.data.totalSyncs} />
+            <FabricStat label="Connections · live" value={liveConnections.data?.length ?? 0} />
+            <FabricStat label="Total runs · live" value={liveStats.data.totalRuns.toLocaleString()} tone="good" />
+            <FabricStat label="Successful runs · live" value={liveStats.data.successfulRuns.toLocaleString()} tone="good" />
+            <FabricStat label="Failed runs · live" value={liveStats.data.failedRuns.toLocaleString()} tone={liveStats.data.failedRuns > 0 ? 'warn' : 'good'} />
+            <FabricStat label="Rows written · live" value={liveStats.data.totalRowsWritten.toLocaleString()} />
+            <FabricStat label="Success rate · live" value={`${(liveStats.data.successRate * 100).toFixed(1)}%`} tone={liveStats.data.successRate >= 0.95 ? 'good' : liveStats.data.successRate >= 0.8 ? 'warn' : 'bad'} />
+          </>
+        ) : (
+          <>
+            <FabricStat label="Active syncs" value={kpis.activeSyncs} tone="gold" />
+            <FabricStat label="Records activated · 24h" value={(kpis.recordsActivated24h / 1000).toFixed(1) + 'k'} tone="good" />
+            <FabricStat label="Failed records · 24h" value={kpis.failedRecords24h.toLocaleString()} tone={kpis.failedRecords24h > 5000 ? 'bad' : 'warn'} />
+            <FabricStat label="Policy blocks · 24h" value={kpis.policyBlocks24h} tone={kpis.policyBlocks24h > 4 ? 'warn' : 'good'} />
+            <FabricStat label="Approval queue" value={kpis.approvalQueue} tone="warn" />
+            <FabricStat label="Avg destination health" value={kpis.destinationHealth} tone="good" />
+            <FabricStat label="Avg latency · 24h" value={`${kpis.avgLatencyMs}ms`} />
+            <FabricStat label="Outcome lift" value={`${(kpis.outcomeLiftPct * 100).toFixed(1)}%`} tone="good" />
+          </>
+        )}
       </div>
+
+      {/* Live recent runs from /api/conduit/stats.recentRuns */}
+      <FabricCard title="RECENT RUNS · LIVE" trailing={<Link href="/runs" className="text-[11px] text-[#c9b787] hover:underline">view all →</Link>} className="mb-6">
+        {liveStats.isLoading ? (
+          <div className="text-[12px] text-[#666] py-3">Loading recent runs…</div>
+        ) : liveStats.isError ? (
+          <div className="text-[12px] text-[#d45450] py-3">Failed to load: {liveStats.error?.message}</div>
+        ) : !liveStats.data || liveStats.data.recentRuns.length === 0 ? (
+          <div className="text-[12px] text-[#666] py-3">
+            No runs yet. <Link href="/syncs/new" className="text-[#c9b787] hover:underline">Create your first sync →</Link>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {liveStats.data.recentRuns.slice(0, 6).map((run) => (
+              <div key={run.id} className="text-[12px] p-2 rounded bg-[#0e0e0e] flex items-center gap-3">
+                <Badge variant={run.status === 'success' ? 'success' : run.status === 'failed' ? 'failed' : 'partial'}>{run.status}</Badge>
+                <span className="font-mono text-[#f5f5f5] truncate flex-1">{run.syncName ?? run.syncId}</span>
+                <span className="font-mono text-[10px] text-[#8a8a8a] tabular-nums">{run.rowsWritten}/{run.rowsRead} rows</span>
+                <span className="font-mono text-[10px] text-[#666]">{new Date(run.startedAt).toLocaleTimeString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </FabricCard>
 
       {/* Activation flow */}
       <FabricCard title="ACTIVATION FLOW" trailing={<Sparkline values={throughput} width={160} height={32} tone="gold" />} className="mb-6">

@@ -22,7 +22,7 @@ export default function InnovationPage() {
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-[#c9b787] mb-2">AMARU · ONE-OF-ONE · INNOVATION BRIEF</div>
             <h1 className="text-4xl font-light tracking-tight text-[#f5f5f5]">
-              <span className="gradient-text">Conduit — One-of-One</span>
+              <span className="gradient-text">Amaru — One-of-One</span>
             </h1>
             <p className="text-sm text-[#8a8a8a] mt-3 max-w-3xl leading-relaxed">
               A research survey of the leading open-source reverse ETL, activation, and data-movement projects on GitHub — distilled into the 10 original innovations that make Amaru genuinely one-of-one. Leaders are sync engines with dashboards. Amaru is an agentic activation layer.
@@ -55,7 +55,7 @@ export default function InnovationPage() {
           {[
             { label: 'What they are', body: 'Sync engines with dashboards. Point-to-point connectors. Transformation layers that stop at the warehouse edge. Observability tools that alert but don\'t act. Policy engines too general to know what PII is.' },
             { label: 'What Amaru adds', body: 'An agentic activation layer. A coalition of eight specialized agents that plan, map, deliver, govern, verify, forecast, fix, and record — end-to-end, in one proof chain. Replay-grade from the first byte.' },
-            { label: 'What makes it one-of-one', body: 'Ten innovations assembled from the best of public patterns, re-implemented as A11oy-native, governed, proof-anchored primitives that no single project in the field has combined. Each innovation links to the relevant Conduit surface.' },
+            { label: 'What makes it one-of-one', body: 'Ten innovations assembled from the best of public patterns, re-implemented as A11oy-native, governed, proof-anchored primitives that no single project in the field has combined. Each innovation links to the relevant Amaru surface.' },
           ].map((item) => (
             <div key={item.label} className="p-4 rounded-lg" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
               <div className="label-mono text-[#c9b787] mb-2">{item.label.toUpperCase()}</div>
@@ -223,7 +223,7 @@ export default function InnovationPage() {
       </FabricCard>
 
       <div className="flex items-center justify-between py-4 px-4 rounded-lg" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.08)' }}>
-        <div className="text-[12px] text-[#666]">Amaru Conduit · One-of-One Innovation Brief · May 2026</div>
+        <div className="text-[12px] text-[#666]">Amaru · One-of-One Innovation Brief · May 2026</div>
         <a href="/" className="flex items-center gap-1.5 text-[12px] text-[#c9b787] hover:underline">
           <ExternalLink className="w-3 h-3" />
           Back to Cockpit
