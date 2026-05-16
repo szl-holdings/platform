@@ -49,7 +49,7 @@ export interface RecentItem {
   timestamp: number;
 }
 
-export type DeploymentEnvironment = 'production' | 'pilot' | 'sandbox';
+export type DeploymentEnvironment = 'production' | 'pilot' | 'sandbox' | 'demo';
 
 export interface EcosystemNavProps {
   currentAppId: string;
@@ -89,9 +89,30 @@ const ENV_CHIP_STYLE: Record<
     border: 'rgba(94,94,94,0.25)',
     bg: 'rgba(94,94,94,0.08)',
   },
+  demo: {
+    dot: '#d4a054',
+    label: 'Demo',
+    color: '#d4a054',
+    border: 'rgba(212,160,84,0.40)',
+    bg: 'rgba(212,160,84,0.12)',
+  },
 };
 
 function detectEnvironment(): DeploymentEnvironment {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    if (env) {
+      const explicit = (env.VITE_APP_MODE ?? env.VITE_RUNTIME_MODE ?? env.VITE_APP_ENV ?? '')
+        .toLowerCase()
+        .trim();
+      if (explicit === 'demo') return 'demo';
+      if (explicit === 'sandbox') return 'sandbox';
+      if (explicit === 'pilot') return 'pilot';
+      if (explicit === 'production') return 'production';
+    }
+  } catch {
+    // import.meta.env not available — fall through to host-based detection
+  }
   if (typeof window === 'undefined') return 'sandbox';
   const host = window.location.hostname.toLowerCase();
   if (host.includes('pilot') || host.includes('staging')) return 'pilot';
