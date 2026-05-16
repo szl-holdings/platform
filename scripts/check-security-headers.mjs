@@ -43,7 +43,6 @@ const ARTIFACTS = [
   { name: 'counsel', path: '/counsel/' },
   { name: 'lyte', path: '/lyte/' },
   { name: 'nexus (mockup-sandbox)', path: '/nexus/' },
-  { name: 'pluginmesh', path: '/pluginmesh/' },
   { name: 'pulse', path: '/pulse/' },
   { name: 'sentra', path: '/sentra/' },
   { name: 'szl-demo-video', path: '/szl-demo-video/' },

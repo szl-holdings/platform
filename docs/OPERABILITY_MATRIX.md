@@ -59,15 +59,14 @@
 
 ## Unregistered On-Disk Artifacts
 
-| Artifact | Build | Grade | Notes |
-|----------|-------|-------|-------|
-| `pluginmesh` | **FAIL** | **X** | Not registered in workspace; build fails; purpose undocumented |
+_None. All previously unregistered artifacts have been dispositioned (see Folded / Removed below)._
 
 ## Folded Artifacts
 
 | Artifact | Disposition | Notes |
 |----------|-------------|-------|
 | `helios` | **Folded into A11oy** | All 7 surfaces merged into A11oy Frontier Intelligence section (task #4364). API routes live at `/api/helios/`. Standalone directory removed. |
+| `pluginmesh` | **Removed** | Directory removed from monorepo; stale `/pluginmesh/` proxy route and `PLUGINMESH_PORT` constant deleted from `packages/shared-proxy/src/index.ts` (task #4897). Unrelated `pluginmesh-orchestrator` skill and `pluginmesh-broker` plugin catalog entry remain. |
 
 ## Dead / Archived
 

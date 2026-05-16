@@ -12,7 +12,7 @@
 
 **Problem:** `packages/szl-sdk/src/resources/plugins.ts` and `treasury.ts` use `PaginationOptions & { ... }` where a `Record<string, string | number | boolean | undefined>` is expected. The type is missing an index signature.
 
-**Impact:** Cascades to 9 dependent packages: `a11oy`, `szl-holdings-mobile`, `pluginmesh`, `szl-demo-video`, `@szl/alloy`, `alloy-ingestion-orchestrator`, `@szl/substrate`. (Note: `helios` removed from cascade list — folded into A11oy, task #4364.)
+**Impact:** Cascades to dependent packages: `a11oy`, `szl-holdings-mobile`, `szl-demo-video`, `@szl/alloy`, `alloy-ingestion-orchestrator`, `@szl/substrate`. (Note: `helios` removed from cascade list — folded into A11oy, task #4364. `pluginmesh` removed from cascade list — directory deleted from monorepo, task #4897.)
 
 **Fix required:** Add index signature to `PaginationOptions` in the SDK, or cast at call sites.
 
@@ -40,13 +40,13 @@
 
 ---
 
-#### FINDING-004: Unregistered Artifact Directories (P1) — PARTIALLY RESOLVED
+#### FINDING-004: Unregistered Artifact Directories (P1) — RESOLVED
 
 **Problem:** `artifacts/helios` and `artifacts/pluginmesh` exist on disk but are not registered in the workspace artifact registry. Both fail to build.
 
 **Fix applied (task #4364):** `artifacts/helios` has been folded into A11oy as the Frontier Intelligence section. All 7 Helios surfaces now live at `artifacts/a11oy/src/pages/frontier/` with API routes at `routes/helios/` in api-server. The standalone artifact directory is removed.
 
-**Remaining:** `artifacts/pluginmesh` still needs to be registered or removed.
+**Fix applied (task #4897):** `artifacts/pluginmesh` directory has been removed from the monorepo. The stale `/pluginmesh/` proxy route and `PLUGINMESH_PORT` constant were deleted from `packages/shared-proxy/src/index.ts`. The pluginmesh-orchestrator skill and `pluginmesh-broker` plugin catalog entry are unrelated (separate broker/MCP concepts) and remain intact.
 
 ---
 

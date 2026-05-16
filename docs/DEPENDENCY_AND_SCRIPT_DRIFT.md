@@ -11,7 +11,7 @@
 | Category | Items Found |
 |----------|------------|
 | Stale metric counts in docs | 3 documents with outdated package/artifact counts (all fixed in this audit) |
-| Unregistered on-disk artifacts | 4 (conduit, pluginmesh, helios, artifacts/audit evidence dir) |
+| Unregistered on-disk artifacts | 1 (artifacts/audit evidence dir) — conduit registered; helios folded into A11oy (#4364); pluginmesh removed (#4897) |
 | Scripts declared but not reliably runnable | 4 (typecheck, lint, build, test — all currently fail) |
 | Deprecated artifact references in docs | 2 (CORTEX Mobile, prism-counsel CI workflow) |
 | Brand/name drift (Alloy vs A11oy) | 1 document (PLATFORM_OVERVIEW.md — fixed in this audit) |
@@ -38,10 +38,10 @@
 | `README.md` "Platform Scale" (prior) | 14 | Stale — **since updated to 14 registered artifacts (canonical)** |
 | `docs/platform-facts.md` | 14 registered / 20 total | Includes archived |
 | `generated/platform-metrics.json` (2026-04-27T03:50:50Z) | **19** artifact directories on disk | Includes 4 unregistered |
-| Workflow manager | 17 artifact workflows | 2 (conduit, pluginmesh) not in formal registry snapshot |
+| Workflow manager | 17 artifact workflows | conduit now registered; pluginmesh removed (#4897) |
 | Workspace artifact registry snapshot | **14 registered** | Canonical for deployment purposes |
 
-**Action required:** Unregistered directories (conduit, pluginmesh, helios, and `artifacts/audit` — an evidence directory mistakenly counted as an artifact by the metrics script) should be formally registered or removed. README now correctly says 14 registered artifacts.
+**Action required:** Only `artifacts/audit` (an evidence directory mistakenly counted as an artifact by the metrics script) remains — update metrics script to exclude it. `conduit` is now formally registered. `helios` was folded into A11oy (task #4364). `pluginmesh` was removed from the monorepo (task #4897). README correctly says 14 registered artifacts.
 
 ---
 
@@ -52,8 +52,8 @@ These directories exist under `artifacts/` but are not in the canonical artifact
 | Directory | Package Name | Kind | Workflow? | Build Status | Disposition Recommendation |
 |-----------|-------------|------|-----------|--------------|---------------------------|
 | ~~`artifacts/helios`~~ | ~~`@workspace/helios`~~ | web | — | **RESOLVED** | Folded into A11oy Frontier Intelligence section (task #4364). Surfaces at `pages/frontier/`; API routes at `routes/helios/`. |
-| `artifacts/pluginmesh` | `@workspace/pluginmesh` | web | Workflow configured | **FAIL** | Formally register or archive — has a configured workflow but not in artifact registry snapshot; purpose undocumented in diligence docs |
-| `artifacts/conduit` | `@workspace/conduit` | web | Workflow configured | Unknown | Formally register or archive — has a configured workflow but not in artifact registry snapshot; not in diligence docs |
+| ~~`artifacts/pluginmesh`~~ | ~~`@workspace/pluginmesh`~~ | web | — | **RESOLVED** | Directory removed from monorepo and proxy route deleted from `packages/shared-proxy/src/index.ts` (task #4897). |
+| ~~`artifacts/conduit`~~ | `@workspace/conduit` | web | Registered | OK | **RESOLVED** — now in the canonical artifact registry. |
 
 ---
 
@@ -74,7 +74,7 @@ These directories exist under `artifacts/` but are not in the canonical artifact
 - `PaginationOptions & { ... }` not assignable to `Record<string, string | number | boolean | undefined>`
 - Missing index signature
 
-This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-mobile`, `@workspace/storybook`, `@workspace/szl-demo-video`, `@workspace/pluginmesh`, `@szl/alloy`, `@workspace/alloy-ingestion-orchestrator`, `@szl/substrate`. (`@workspace/helios` removed — folded into A11oy, task #4364.)
+This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-mobile`, `@workspace/storybook`, `@workspace/szl-demo-video`, `@szl/alloy`, `@workspace/alloy-ingestion-orchestrator`, `@szl/substrate`. (`@workspace/helios` removed — folded into A11oy, task #4364. `@workspace/pluginmesh` removed from monorepo, task #4897.)
 
 ### P1 Scripts (Advisory) — Known Issues
 
@@ -137,7 +137,7 @@ This single SDK error cascades to: `@workspace/a11oy`, `@workspace/szl-holdings-
 | Fix 9-package typecheck failures (`aef-sdk`, `reflection-engine`, `aef-storage-adapters`, `alloy-rank-worker`, `alloy-embed-worker`, `aef-retrieval-core`, `aef-policy-guard`, `@szl-holdings/db`, `api-client-react`) | **P0** | Medium |
 | Consolidate `metrics:generate` script — root `scripts/generate-platform-metrics.ts` and `scripts/audit/generate-platform-metrics.ts` (subdirectory) both exist; verify they produce identical output and consolidate | **P1** | Low |
 | ~~Update README package/artifact counts~~ | ~~P1~~ | **Fixed in this audit** |
-| Register or archive `conduit`, `helios`, and `pluginmesh`; update metrics script to exclude `artifacts/audit` evidence dir from artifact count | **P1** | Low |
+| ~~Register or archive `conduit`, `helios`, and `pluginmesh`~~; update metrics script to exclude `artifacts/audit` evidence dir from artifact count | **P1** | Low | (artifact dispositions complete: conduit registered, helios folded into A11oy #4364, pluginmesh removed #4897) |
 | ~~Update `PLATFORM_OVERVIEW.md` Alloy → A11oy~~ | ~~P1~~ | **Fixed in this audit** |
 | ~~Update `OPERABILITY_MATRIX.md` CORTEX Mobile → szl-holdings-mobile~~ | ~~P1~~ | **Fixed in this audit** |
 

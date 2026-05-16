@@ -24,7 +24,6 @@ export const TERRA_PORT = 6000;
 export const VESSELS_PORT = 8099;
 export const PULSE_PORT = 5201;
 export const SZL_DEMO_VIDEO_PORT = 8765;
-export const PLUGINMESH_PORT = 8190;
 export const CONDUIT_PORT = 5300;
 export const LYTE_COMMAND_CENTER_PORT = 8097;
 export const ROSIE_PORT = 5113;
@@ -46,7 +45,6 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/vessels/', port: VESSELS_PORT },
   { prefix: '/pulse/', port: PULSE_PORT },
   { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
-  { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
   // ROSIE is no longer a standalone artifact — it was folded into Sentra as
   // the "Guard Dog Brain" (see /sentra/brain/*). Legacy /rosie/* requests are
   // routed to the api-server which issues a 301 to /sentra/brain/*.
