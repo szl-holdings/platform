@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { CSSProperties } from 'react';
 import { StatusChip, StatusChipGroup } from '@szl-holdings/omnia-shell';
+import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
 
 const DS = {
   page: '#08090e',
@@ -222,6 +223,36 @@ export function TerraGovernancePanels() {
             <Row label="Dependabot high/crit" value={PANEL_FACTS.dependabotHighCritPairText} />
             <Row label="Replays required" value={PANEL_FACTS.byteIdenticalReplaysShort} />
             <Row label="Λ axes" value={PANEL_FACTS.lambdaAxesShortText} />
+          </div>
+
+          {/* Thesis lineage TH1→TH8 */}
+          <div style={cardStyle}>
+            <p style={eyebrowStyle}>Thesis lineage</p>
+            <h4 style={cardTitle}>TH1 → TH8 chain</h4>
+            <div style={{ marginBottom: 12 }}>
+              <StatusChipGroup>
+                {THESIS_PAPERS.map((p) => (
+                  <StatusChip
+                    key={p.key}
+                    status={p.status.includes('published') ? 'approved' : 'enforced'}
+                    label={`${p.key} ${p.version}`}
+                  />
+                ))}
+                <StatusChip
+                  status={THESIS_LINEAGE.audit.leanSorriesOpen === 0 ? 'healthy' : 'enforced'}
+                  label={`TH8 sorries ${THESIS_LINEAGE.audit.leanSorriesOpen}/${THESIS_LINEAGE.audit.leanTheorems}`}
+                />
+              </StatusChipGroup>
+            </div>
+            {THESIS_PAPERS.map((p) => (
+              <Row key={p.key} label={`${p.key} · ${p.version}`} value={p.status} />
+            ))}
+            <Row label="Closed in mirror" value={`${THESIS_LINEAGE.audit.leanSorriesClosed.length}`} />
+            <Row label="arXiv target" value={`${THESIS_LINEAGE.arxiv.status} → ${THESIS_LINEAGE.arxiv.targetVenue}`} />
+            <Row label="Zenodo target" value={`${THESIS_LINEAGE.zenodo.status} (${THESIS_LINEAGE.zenodo.targetVersion})`} />
+            <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
+            <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} />
+            <Row label="Lineage source" value="@szl-holdings/payload" />
           </div>
         </div>
       </div>

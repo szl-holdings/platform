@@ -14,6 +14,8 @@
 import masterRaw from "../raw/payload.json" with { type: "json" };
 import inventoryRaw from "../raw/github_pro/github_inventory.json" with { type: "json" };
 import runtimeRaw from "../raw/dev2_runtime/runtime_payload.json" with { type: "json" };
+import thesisRaw from "../raw/dev1_thesis/thesis_payload.json" with { type: "json" };
+import th8StatusRaw from "../proofs/lean_th8/status.json" with { type: "json" };
 
 const master = masterRaw as unknown as {
   schema_version: string;
@@ -345,6 +347,203 @@ export const PANEL_FACTS = Object.freeze({
 });
 
 export type PanelFactsKey = keyof typeof PANEL_FACTS;
+
+// ---------------------------------------------------------------------------
+// Thesis lineage TH1..TH8 (derived from raw/dev1_thesis/thesis_payload.json).
+// Mirrors the canonical Zenodo lineage. The TH8 status field is read from
+// packages/payload/proofs/lean_th8/status.json — that mirror is the only place
+// where the lean_skeleton → lean_skeleton_complete transition is recorded
+// (raw/ is byte-locked per the doctrine integrity manifest).
+// ---------------------------------------------------------------------------
+
+const thesisLineage = thesisRaw as unknown as {
+  thesis_lineage: Record<
+    string,
+    {
+      title: string;
+      doi: string;
+      concept_doi?: string;
+      status: string;
+      theorems: ReadonlyArray<{
+        id: string;
+        name: string;
+        proof_status: string;
+        depends_on: ReadonlyArray<string>;
+      }>;
+      target_venue?: string;
+    }
+  >;
+  fly_high_v6_audit: {
+    doctrine_v6: string;
+    gap_fill_p0_fixes: number;
+    beautify_avg_score: number;
+    lean_th8_theorems: number;
+    lean_th8_sorries: number;
+    citation_hardening: string;
+  };
+  arxiv_package: { submission_status: string; target_venue: string; submission_one_way_door: boolean };
+  zenodo_deposit: { submission_status: string; target_version: string; mint_one_way_door: boolean };
+  doctrine: { forbidden_patterns: ReadonlyArray<string> };
+};
+
+const th8Status = th8StatusRaw as unknown as {
+  status: string;
+  sorries_open: number;
+  sorries_closed: ReadonlyArray<string>;
+  sorries_remaining: ReadonlyArray<{ id: string; reason: string }>;
+  proofs_dir: string;
+  updated_at: string;
+};
+
+const ZENODO_BASE = "https://doi.org/";
+const ARXIV_SEARCH_BASE = "https://arxiv.org/a/";
+
+export interface ThesisTheorem {
+  readonly id: string;
+  readonly name: string;
+  readonly proofStatus: string;
+  readonly dependsOn: ReadonlyArray<string>;
+}
+
+export interface ThesisPaper {
+  readonly key: "TH1-TH3" | "TH4-TH7" | "TH8-GLR";
+  readonly title: string;
+  readonly version: string;
+  readonly status: string;
+  readonly doi: string;
+  readonly doiUrl: string;
+  readonly conceptDoi: string | null;
+  readonly conceptDoiUrl: string | null;
+  readonly theorems: ReadonlyArray<ThesisTheorem>;
+  readonly targetVenue: string | null;
+}
+
+function parseVersion(status: string): string {
+  // "published v11" -> "v11"; "proposal + lean_skeleton" -> "proposal"
+  const m = status.match(/v\d+/);
+  if (m) return m[0];
+  if (status.startsWith("proposal")) return "proposal";
+  return status;
+}
+
+function buildPaper(
+  key: ThesisPaper["key"],
+  raw: (typeof thesisLineage.thesis_lineage)[string],
+  overrideStatus?: string,
+): ThesisPaper {
+  const status = overrideStatus ?? raw.status;
+  return Object.freeze({
+    key,
+    title: raw.title,
+    version: parseVersion(status),
+    status,
+    doi: raw.doi,
+    doiUrl: `${ZENODO_BASE}${raw.doi}`,
+    conceptDoi: raw.concept_doi ?? null,
+    conceptDoiUrl: raw.concept_doi ? `${ZENODO_BASE}${raw.concept_doi}` : null,
+    theorems: Object.freeze(
+      raw.theorems.map((t) =>
+        Object.freeze({
+          id: t.id,
+          name: t.name,
+          proofStatus: t.proof_status,
+          dependsOn: Object.freeze([...t.depends_on]),
+        }),
+      ),
+    ),
+    targetVenue: raw.target_venue ?? null,
+  });
+}
+
+export const THESIS_PAPERS: ReadonlyArray<ThesisPaper> = Object.freeze([
+  buildPaper("TH1-TH3", thesisLineage.thesis_lineage["TH1-TH3"]),
+  buildPaper("TH4-TH7", thesisLineage.thesis_lineage["TH4-TH7"]),
+  buildPaper(
+    "TH8-GLR",
+    thesisLineage.thesis_lineage["TH8-GLR"],
+    th8Status.status === "lean_skeleton_complete"
+      ? "lean_skeleton_complete"
+      : thesisLineage.thesis_lineage["TH8-GLR"].status,
+  ),
+]);
+
+export const THESIS_TIMELINE: ReadonlyArray<ThesisTheorem> = Object.freeze(
+  THESIS_PAPERS.flatMap((p) => p.theorems.filter((t) => /^TH\d+$/.test(t.id))),
+);
+
+export interface ThesisLineage {
+  readonly papers: ReadonlyArray<ThesisPaper>;
+  readonly arxiv: {
+    readonly status: string;
+    readonly targetVenue: string;
+    readonly oneWayDoor: boolean;
+    readonly searchUrl: string;
+  };
+  readonly zenodo: {
+    readonly status: string;
+    readonly targetVersion: string;
+    readonly oneWayDoor: boolean;
+    readonly doiUrl: string;
+  };
+  readonly audit: {
+    readonly doctrine: string;
+    readonly p0Fixes: number;
+    readonly beautifyAvg: number;
+    readonly leanTheorems: number;
+    readonly leanSorriesOpen: number;
+    readonly leanSorriesClosed: ReadonlyArray<string>;
+    readonly citationHardening: string;
+    readonly updatedAt: string;
+  };
+  readonly forbiddenPatterns: ReadonlyArray<string>;
+}
+
+export const THESIS_LINEAGE: ThesisLineage = Object.freeze({
+  papers: THESIS_PAPERS,
+  arxiv: Object.freeze({
+    status: thesisLineage.arxiv_package.submission_status,
+    targetVenue: thesisLineage.arxiv_package.target_venue,
+    oneWayDoor: thesisLineage.arxiv_package.submission_one_way_door,
+    searchUrl: `${ARXIV_SEARCH_BASE}lutar_s_1`,
+  }),
+  zenodo: Object.freeze({
+    status: thesisLineage.zenodo_deposit.submission_status,
+    targetVersion: thesisLineage.zenodo_deposit.target_version,
+    oneWayDoor: thesisLineage.zenodo_deposit.mint_one_way_door,
+    doiUrl: `${ZENODO_BASE}${THESIS_PAPERS[1].doi}`,
+  }),
+  audit: Object.freeze({
+    doctrine: thesisLineage.fly_high_v6_audit.doctrine_v6,
+    p0Fixes: thesisLineage.fly_high_v6_audit.gap_fill_p0_fixes,
+    beautifyAvg: thesisLineage.fly_high_v6_audit.beautify_avg_score,
+    leanTheorems: thesisLineage.fly_high_v6_audit.lean_th8_theorems,
+    // Live sorry count reflects the mirrored proofs/ directory (NOT raw/).
+    leanSorriesOpen: th8Status.sorries_open,
+    leanSorriesClosed: Object.freeze([...th8Status.sorries_closed]),
+    citationHardening: thesisLineage.fly_high_v6_audit.citation_hardening,
+    updatedAt: th8Status.updated_at,
+  }),
+  forbiddenPatterns: Object.freeze([...thesisLineage.doctrine.forbidden_patterns]),
+});
+
+/** Render-ready summary for a single paper row in a thesis surface. */
+export function thesisPaperSummary(p: ThesisPaper): {
+  paperKey: string;
+  versionText: string;
+  statusText: string;
+  doiText: string;
+  doiHref: string;
+  theoremCountText: string;
+} {
+  return {
+    paperKey: p.key,
+    versionText: p.version,
+    statusText: p.status,
+    doiText: p.doi,
+    doiHref: p.doiUrl,
+    theoremCountText: `${p.theorems.length} theorem${p.theorems.length === 1 ? "" : "s"}`,
+  };
+}
 
 /** Per-repo display facts derived from REPOS[name]. */
 export function panelRepoFacts(repoKey: PanelRepoKey) {

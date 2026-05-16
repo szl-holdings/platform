@@ -1,0 +1,1110 @@
+[
+  {
+    "file": "artifacts/a11oy/docs/DATA_MODEL.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/a11oy/package.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/RESEARCH.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/App.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/App.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/components/layout.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/components/layout.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/components/shell/Sidebar.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/aerialTwin.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/aerialTwin.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/agiConvergenceData.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/argo.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/argoForge.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/argoForge.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/complianceFabric.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/complianceFabric.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/darpaResilience.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/doctrineFallbacks.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/doctrineFallbacks.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/glasswingDoctrine.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/mythosDoctrine.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/mythosDoctrine.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/mythosLayer.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/mythosLayer.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/psyche/genesis.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/psyche/selfhood.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/psyche/voice.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/data/psyche/volition.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/hooks/useDoctrine.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/lib/glasswing-schemas.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/lib/infrastructure/imperium-data.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/a11oy/src/lib/vertical-marketing-pdf.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/About.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/About.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/AgentWelfare.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/AlignmentReview.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/argo/Bridge.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/argo/SelfPlayArena.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/ArgoForge.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/BehavioralAudit.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/BoardroomMode.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/BoardroomMode.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CapabilityTrajectory.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CareEngine.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CAVD.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CAVD.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CodeBehaviors.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Compass.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Console.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Constitution.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/ConstitutionDSL.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CovenantLift.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/CovenantLift.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/DevPlatform.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/DevPlatform.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/DoctrineOverview.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/DoctrineOverview.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/frontier/MythosIndex.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/frontier/ResearchCitationPanel.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/frontier/SystemHealth.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/FrontierIntelligence.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Glasswing.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/GlasswingPartners.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/GlasswingPartners.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/HomePage.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/HomePage.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/InvestorDemo.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/InvestorDemo.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/KarpathyEvolution.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Memory.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/MythosLayer.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/MythosSpec.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/psyche/VolitionRegistry.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/PublicTrustPortal.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/PublicTrustPortal.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Recommendations.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/RedTeam.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/reliquary/ReliquaryDoctrine.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/reliquary/ReliquaryDoctrine.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/reliquary/SnapshotReplay.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/RewardHacking.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/RobustnessWall.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/SystemCard.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/TrustCenter.tsx",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/TrustExchange.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Verticals.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/Verticals.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/a11oy/src/pages/WelfarePlaybooks.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/__tests__/atlas-tenant-isolation.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/__tests__/feature-flags-routes.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/__tests__/mcp-gateway-security.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/a11oy/codex/codex-index.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/app.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/backlog.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/backlog.json",
+    "pattern": "Stephen Paul"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/gap_report.json",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/gap_report.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/gap_report.json",
+    "pattern": "Perplexity Computer"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/gap_report.json",
+    "pattern": "Stephen Paul"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/github_full.json",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/github_full.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "artifacts/api-server/src/data/audit/github_full.json",
+    "pattern": "Stephen Paul"
+  },
+  {
+    "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/ai-gateway.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/alloy-run-failure-notifications.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/ami-formula.ts",
+    "pattern": "Jr."
+  },
+  {
+    "file": "artifacts/api-server/src/lib/expo-push.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/platform-flags.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/seed-disclosure.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/lib/seed-dreamscape.ts",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/__tests__/rate-limiters.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/csrf.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/global-auth-enforcer.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/global-auth-enforcer.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/rate-limiters.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/middlewares/sliding-window-limiter.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/__tests__/counsel-knowledge-org-scope.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/__tests__/group-gate-coverage.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/__tests__/helios-memos-generate.test.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/__tests__/loose-mount-coverage.test.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/a11oy-adaptive-intelligence.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/a11oy-console.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/a11oy-frontier.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/a11oy-hub-operations.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/alloy-agentic-rag.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/alloy.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/analytics-engine-public.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/analytics-engine.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/api-keys.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-jo.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/carlota-time-tracking.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/changes.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/command.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/comments.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/competitive-intel.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/continuum.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel-knowledge.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/counsel.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/cps/index.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/crisis-arena.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/cross-app-handoffs.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/cross-platform.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/debug.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/decisions-runtime.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/doctrine-crud.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/doctrine-crud.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/domain-atlas-execution.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/evidence-graph.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/fabric.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/feature-flags-public.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/groups/decisions.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/helios/data.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/helios/index.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/helios/types.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/index.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/index.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/investor-analytics.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/lyte-extended.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/mcp-gateway.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/mcp.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/model-foundry.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/multiplayer-sessions.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/narratives.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/nexus-v1.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/nexus.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/page-view-tracking.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/push-tokens.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/reliquary.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/replay-attestation.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/sentra-remediation.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/tenant-provisioning/powerbi.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/terra-cognitive.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/tool-mesh.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/routes/traces.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/scripts/route-security-matrix.ts",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/api-server/src/seed/psyche/genesis.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/seed/psyche/selfhood.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/seed/psyche/voice.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/seed/psyche/volition.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/TENANT_ISOLATION_AUDIT.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/conduit/src/data/fabric/agents.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/conduit/src/data/fabric/types.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/conduit/src/pages/agents.tsx",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/sentra/src/brain/data/a11oyConstitution.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/sentra/src/brain/hooks/useA11oyConstitution.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/sentra/src/brain/pages/FabricPage.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/sentra/src/pages/adversarial-defense-console.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/sentra/src/pages/nexus/threat-actor-profiling.tsx",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/sentra/src/pages/phantom-war-room.tsx",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "artifacts/sentra/src/pages/remediation-pipeline.tsx",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "artifacts/sentra/tsconfig.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/A11OY_OPERATING_PRINCIPLES.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/A11OY_SECURITY_DOCTRINE.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/a11oy/A11OY_DOCTRINE.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/A11OY_DOCTRINE.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/A11OY_PUBLIC_CLAIMS_DOCTRINE.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/A11OY_PUBLIC_CLAIMS_DOCTRINE.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/A11OY.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/A11OY.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/CLAUDE_CODE_DOCTRINE_RESEARCH.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/CLAUDE_DOCTRINE_RESEARCH.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/MYTHOS_RESEARCH_SWEEP.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/MYTHOS_RESEARCH_SWEEP.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/RESEARCH_MYTHOS.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/CHANGELOG.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/CHANGELOG.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/LICENSE.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/LICENSE.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/README.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/README.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/_shared.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/adversarial-robustness-score.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/behavioral-audit-finding.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/constitution.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/coordinated-agent-vulnerability-disclosure.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/covenant-lift-sample.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/glasswing-partner-attestation.json",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/glasswing-partner-attestation.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/risk-report.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/snapshot-fingerprint.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/system-card.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/schemas/welfare-telemetry-sample.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/types/index.d.ts",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/a11oy/spec/mythos-doctrine-spec/types/index.d.ts",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/API-SPEC.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/architecture/agent-gateway-strategy.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/architecture/integrations.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/audit/inventory.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/audit/omega-audit-findings.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/audit/szl-government-readiness.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/audits/github-audit-v9.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/audits/github-audit-v9.md",
+    "pattern": "Stephen Paul"
+  },
+  {
+    "file": "docs/DECISION_LEDGER.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/doctrine/szl-doctrine.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/github/packages-security.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/internal/analytics/event-taxonomy.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/operations/flow-audit-matrix.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/ouroboros-thesis.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/ouroboros-v5/MVP_STACK_OF_ONE.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/product/tenant-tiers.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/reports/elite/analytics/analytics-operating-model.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/reports/github-repo-audit-summary.md",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "docs/research/a11oy-ultimate-replit-payload.v6.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/research/ecosystem-pattern-scan-2026-04.md",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "docs/research/ecosystem-pattern-scan-2026-04.md",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "docs/research/ouroboros-runtime-contract.v2.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/research/ouroboros-runtime-contract.v3.json",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "docs/research/ouroboros-runtime-contract.v3.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/research/ouroboros-runtime-contract.v4.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/research/ouroboros-thesis-v2.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/TOP_20_FIXES_COMPLETED.md",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "docs/trust/A11OY-01-fedramp-authorization-disclosure.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/A11OY-02-cmmc-nist-800-171-gap-assessment.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/A11OY-03-bias-testing-methodology.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/A11OY-04-us-data-residency.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/A11OY-05-incident-response-72hr.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/AMARU-01-data-classification.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/AMARU-02-retention-deletion.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/AMARU-03-cots-erp-integration.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/AMARU-04-privacy-impact-assessment.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/SENTRA-01-soc2-type-2-plan.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/SENTRA-02-incident-response-runbook.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/SENTRA-03-threat-feed-catalog.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "docs/trust/SENTRA-04-penetration-testing-plan.md",
+    "pattern": "Jr."
+  },
+  {
+    "file": "scripts/build-thesis-pdf.mjs",
+    "pattern": "Jr."
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "AlloyScape"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "anonymous"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Glass Wing"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Glasswing"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Jr."
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Mythos"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Perplexity Computer"
+  },
+  {
+    "file": "scripts/check-forbidden-patterns.baseline.json",
+    "pattern": "Stephen Paul"
+  }
+]

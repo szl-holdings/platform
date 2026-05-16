@@ -18,6 +18,7 @@ import Settings from '@/pages/settings';
 import ConvergentSync from '@/pages/convergent-sync';
 import CodexLoop from '@/pages/codex-loop';
 import OuroborosPage from '@/pages/ouroboros';
+import AmaruThesisPage from '@/pages/thesis';
 import ConduitSigil from '@/pages/sigil';
 import SovereignAiHub from '@/pages/sovereign-ai-hub/index';
 import ModelFleetConsole from '@/pages/sovereign-ai-hub/model-fleet';
@@ -79,6 +80,7 @@ function AppContent() {
         <Route path="/convergent-sync" component={ConvergentSync} />
         <Route path="/codex-loop" component={CodexLoop} />
         <Route path="/ouroboros" component={OuroborosPage} />
+        <Route path="/thesis" component={AmaruThesisPage} />
         <Route path="/sigil" component={ConduitSigil} />
         <Route path="/sovereign-ai-hub" component={SovereignAiHub} />
         <Route path="/sovereign-ai-hub/model-fleet" component={ModelFleetConsole} />

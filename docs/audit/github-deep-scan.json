@@ -1,0 +1,815 @@
+{
+  "scan_metadata": {
+    "generated_at": "2026-05-16T04:24:00Z",
+    "generated_by": "task-4940 deep-scan v3 (post code-review revision 2: drift fix + strict scope expansion)",
+    "method": "Live GitHub REST API enriched with per-repo branches/protection, tags, open PRs, latest CI conclusions; diffed against canonical baseline at packages/payload/raw/github_pro/github_inventory.json (snapshot 2026-05-15T21:17:47Z, 16 repos).",
+    "drift_algorithm": "drift = match iff (live_tag.name == payload_baseline_tag.name) AND (live_tag.sha[0:12] == payload_baseline_sha[0:12]); no_tags_either_side iff both sides null; missing_baseline iff live tag present but payload baseline null; drift otherwise. Fixed in v3 — v2 compared a 12-char truncated live SHA against the full payload SHA and reported false drift.",
+    "auth": "GH_WORKFLOW_TOKEN (workflow scope) — branch protection endpoints (/repos/:o/:r/branches/:b/protection) return 403 Resource not accessible because the token lacks admin scope. The scan records that limitation honestly rather than claiming protection status it cannot verify.",
+    "auth_limitations": [
+      "branch_protection: insufficient scope (admin:repo required)",
+      "code_scanning_alerts: not attempted (security_events scope required)",
+      "dependabot_alerts: not attempted (security_events scope required)"
+    ]
+  },
+  "org": {
+    "login": "szl-holdings",
+    "public_repos": 16,
+    "live_repo_count": 17,
+    "delta_since_baseline_2026_05_15": {
+      "added": [
+        ".github"
+      ],
+      "removed": [],
+      "visibility_changes": [
+        {
+          "repo": "platform",
+          "note": "Previously invisible to baseline tool; visible in this scan as private"
+        }
+      ]
+    }
+  },
+  "per_repo_enriched": [
+    {
+      "name": "counsel",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "4decc1c773c06a877bfe6684ea23665e3775943a",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "ff0c594395656ac813d639706bc02a56b535d1e8",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "ff0c594395656ac813d639706bc02a56b535d1e8",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "vessels",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "11e51f628353b0c8b6bb5b1e0b51236662452f76",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "64e0bd024a642f8cca51c4efe14cb60de3e1d70f",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "64e0bd024a642f8cca51c4efe14cb60de3e1d70f",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "a11oy",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 6,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "284ab434eb52424b83499567f8cb8e0d780864d3",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "284ab434eb52424b83499567f8cb8e0d780864d3",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "ouroboros-thesis",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 6,
+      "tags": {
+        "count": 17,
+        "latest": "v11.0.0",
+        "latest_sha": "d495cdff6f2a4cb4f2d4198ef5e52db6b3ef1f4c",
+        "payload_baseline_tag": "v11.0.0",
+        "payload_baseline_sha": "d495cdff6f2a4cb4f2d4198ef5e52db6b3ef1f4c",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "lutar-lean",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09",
+      "ci": {
+        "total_runs": 3,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 3
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "vsp-otel",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "7aca58d2d7ceecbd2ab7f576b63b320f94cacda1",
+      "ci": {
+        "total_runs": 1,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 1
+          }
+        ]
+      },
+      "open_prs": 0,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "agi-forecast",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "2c729680a2d9f1ef3918baeab9d84d6201605330",
+      "ci": {
+        "total_runs": 1,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 1
+          }
+        ]
+      },
+      "open_prs": 0,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "terra",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "2ffac59c45550220772602f974fc95293a6754a2",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "c45d6ca2861fe7623056264566c8dc2ce93f9c59",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "c45d6ca2861fe7623056264566c8dc2ce93f9c59",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "amaru",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "6e1614d541d66fb95557a57d05dfe3c788e34c46",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "716fd4c22b97fdda0826e92fb5a0d5ffba4400f0",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "716fd4c22b97fdda0826e92fb5a0d5ffba4400f0",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "carlota-jo",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "d1a4ce0beccfffb19e6936a729c9831bfa9b4261",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 4,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "f572913a64dd4db7e6d6054af4cd26737eb798aa",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "f572913a64dd4db7e6d6054af4cd26737eb798aa",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "sentra",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "2ac304a9511ccbcf20414cdfcc164f9aed5b5092",
+      "ci": {
+        "total_runs": 9,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 9
+          }
+        ]
+      },
+      "open_prs": 4,
+      "tags": {
+        "count": 1,
+        "latest": "v1.0.0-alpha",
+        "latest_sha": "d02cbdbd4b00ab747a804af46106dadbdb2ba676",
+        "payload_baseline_tag": "v1.0.0-alpha",
+        "payload_baseline_sha": "d02cbdbd4b00ab747a804af46106dadbdb2ba676",
+        "drift": "match"
+      }
+    },
+    {
+      "name": ".github",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "ae4e7ad21edac4451688e043727790da36f6c4b2",
+      "ci": {
+        "total_runs": 5,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 5
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "szl-brand",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "d86a37d5305a30886f7884cc4114cda48a8a3402",
+      "ci": {
+        "total_runs": 6,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 6
+          }
+        ]
+      },
+      "open_prs": 5,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "szl-cookbook",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "0593de09406cd524be701ab4d8719f99aeba8f4f",
+      "ci": {
+        "total_runs": 6,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 6
+          }
+        ]
+      },
+      "open_prs": 3,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "szl-trust",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "24fd1238d5c06bf249625c60517c008eb9a2f253",
+      "ci": {
+        "total_runs": 7,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 7
+          }
+        ]
+      },
+      "open_prs": 4,
+      "tags": {
+        "count": 0,
+        "latest": "null",
+        "latest_sha": "null",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "no_tags_either_side"
+      }
+    },
+    {
+      "name": "ouroboros",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+      "ci": {
+        "total_runs": 3,
+        "conclusions": [
+          {
+            "c": "success",
+            "n": 3
+          }
+        ]
+      },
+      "open_prs": 6,
+      "tags": {
+        "count": 4,
+        "latest": "v6.3.0",
+        "latest_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+        "payload_baseline_tag": "v6.3.0",
+        "payload_baseline_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+        "drift": "match"
+      }
+    },
+    {
+      "name": "platform",
+      "branch_protection": {
+        "status": "auth_insufficient"
+      },
+      "head_main_sha": "ba834a5b779ee10d6b04ea2e735a896eb0fc7189",
+      "ci": {
+        "total_runs": 0,
+        "conclusions": []
+      },
+      "open_prs": 0,
+      "tags": {
+        "count": 11,
+        "latest": "v1.2.0-ouroboros-v6",
+        "latest_sha": "92ac3e30f0554a139ae133a5a25596546700d97d",
+        "payload_baseline_tag": "null",
+        "payload_baseline_sha": "null",
+        "drift": "missing_baseline"
+      }
+    }
+  ],
+  "totals": {
+    "live_repos": 17,
+    "branch_protection_verifiable": 0,
+    "branch_protection_unknown_due_to_scope": 17,
+    "ci_repos_all_green": 16,
+    "ci_repos_with_failures": 0,
+    "open_prs_total": 68,
+    "tag_match": 9,
+    "tag_drift": 0,
+    "tag_missing_baseline": 1,
+    "tag_no_tags_either_side": 7
+  },
+  "org_repos_brief": [
+    {
+      "name": "counsel",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T21:26:23Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [
+        "ai-governance",
+        "compliance",
+        "counsel",
+        "document-review",
+        "legal-tech",
+        "matter-management",
+        "obligation-mapping",
+        "series-a"
+      ],
+      "license": "NOASSERTION",
+      "size": 67,
+      "visibility": "public"
+    },
+    {
+      "name": "vessels",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T21:26:21Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [
+        "ai-governance",
+        "dark-vessel",
+        "fleet-intelligence",
+        "maritime",
+        "sanctions-screening",
+        "series-a",
+        "trade-compliance",
+        "vessels"
+      ],
+      "license": "NOASSERTION",
+      "size": 68,
+      "visibility": "public"
+    },
+    {
+      "name": "a11oy",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": "TypeScript",
+      "pushed_at": "2026-05-15T20:48:09Z",
+      "stargazers_count": 0,
+      "open_issues_count": 6,
+      "topics": [
+        "a11oy",
+        "agent-fabric",
+        "agentic-execution",
+        "ai-governance",
+        "governed-ai",
+        "policy-gates",
+        "proof-chain",
+        "series-a"
+      ],
+      "license": "NOASSERTION",
+      "size": 180,
+      "visibility": "public"
+    },
+    {
+      "name": "ouroboros-thesis",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": "Python",
+      "pushed_at": "2026-05-15T19:08:22Z",
+      "stargazers_count": 0,
+      "open_issues_count": 6,
+      "topics": [
+        "ai-governance",
+        "ai-safety",
+        "bounded-recursion",
+        "cc-by-4",
+        "convergence-traces",
+        "doi",
+        "research-paper",
+        "zenodo"
+      ],
+      "license": "CC-BY-4.0",
+      "size": 14270,
+      "visibility": "public"
+    },
+    {
+      "name": "lutar-lean",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": "Lean",
+      "pushed_at": "2026-05-15T19:04:05Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [],
+      "license": "Apache-2.0",
+      "size": 121,
+      "visibility": "public"
+    },
+    {
+      "name": "vsp-otel",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T18:12:44Z",
+      "stargazers_count": 0,
+      "open_issues_count": 0,
+      "topics": [],
+      "license": "Apache-2.0",
+      "size": 8,
+      "visibility": "public"
+    },
+    {
+      "name": "agi-forecast",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T18:12:44Z",
+      "stargazers_count": 0,
+      "open_issues_count": 0,
+      "topics": [],
+      "license": "Apache-2.0",
+      "size": 8,
+      "visibility": "public"
+    },
+    {
+      "name": "terra",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T14:40:14Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [
+        "ai-governance",
+        "ai-underwriting",
+        "deal-pipeline",
+        "portfolio-analytics",
+        "proptech",
+        "real-estate",
+        "series-a",
+        "terra"
+      ],
+      "license": "NOASSERTION",
+      "size": 67,
+      "visibility": "public"
+    },
+    {
+      "name": "amaru",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T12:58:31Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [
+        "ai-governance",
+        "amaru",
+        "append-only-log",
+        "convergent-sync",
+        "data-convergence",
+        "governed-ingest",
+        "proof-chain",
+        "series-a"
+      ],
+      "license": "NOASSERTION",
+      "size": 73,
+      "visibility": "public"
+    },
+    {
+      "name": "carlota-jo",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T08:23:22Z",
+      "stargazers_count": 0,
+      "open_issues_count": 4,
+      "topics": [
+        "advisory",
+        "ai-governance",
+        "carlota-jo",
+        "concierge-ai",
+        "family-office",
+        "proof-chain",
+        "series-a",
+        "uhnw"
+      ],
+      "license": "NOASSERTION",
+      "size": 65,
+      "visibility": "public"
+    },
+    {
+      "name": "sentra",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T05:33:18Z",
+      "stargazers_count": 0,
+      "open_issues_count": 4,
+      "topics": [
+        "ai-governance",
+        "cyber-resilience",
+        "governed-ai",
+        "incident-response",
+        "posture-drift",
+        "sentra",
+        "series-a",
+        "threat-modeling"
+      ],
+      "license": "NOASSERTION",
+      "size": 65,
+      "visibility": "public"
+    },
+    {
+      "name": ".github",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T03:53:36Z",
+      "stargazers_count": 1,
+      "open_issues_count": 5,
+      "topics": [
+        "branding",
+        "community",
+        "organization",
+        "profile"
+      ],
+      "license": "Apache-2.0",
+      "size": 2069,
+      "visibility": "public"
+    },
+    {
+      "name": "szl-brand",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": "Python",
+      "pushed_at": "2026-05-15T03:52:31Z",
+      "stargazers_count": 0,
+      "open_issues_count": 5,
+      "topics": [],
+      "license": "CC-BY-4.0",
+      "size": 6279,
+      "visibility": "public"
+    },
+    {
+      "name": "szl-cookbook",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T03:50:49Z",
+      "stargazers_count": 0,
+      "open_issues_count": 3,
+      "topics": [],
+      "license": "Apache-2.0",
+      "size": 57,
+      "visibility": "public"
+    },
+    {
+      "name": "szl-trust",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": null,
+      "pushed_at": "2026-05-15T03:50:33Z",
+      "stargazers_count": 0,
+      "open_issues_count": 4,
+      "topics": [],
+      "license": "CC-BY-4.0",
+      "size": 56,
+      "visibility": "public"
+    },
+    {
+      "name": "ouroboros",
+      "private": false,
+      "archived": false,
+      "default_branch": "main",
+      "language": "TypeScript",
+      "pushed_at": "2026-05-15T03:47:54Z",
+      "stargazers_count": 0,
+      "open_issues_count": 6,
+      "topics": [
+        "ai-governance",
+        "bounded-recursion",
+        "convergence",
+        "proof-chain",
+        "runtime",
+        "typescript",
+        "vitest"
+      ],
+      "license": "Apache-2.0",
+      "size": 366,
+      "visibility": "public"
+    },
+    {
+      "name": "platform",
+      "private": true,
+      "archived": false,
+      "default_branch": "main",
+      "language": "TypeScript",
+      "pushed_at": "2026-05-13T16:44:02Z",
+      "stargazers_count": 0,
+      "open_issues_count": 1,
+      "topics": [
+        "agentic-ai",
+        "ai-governance",
+        "audit-trail",
+        "compliance",
+        "decision-intelligence",
+        "enterprise-ai",
+        "evidence-ledger",
+        "governed-runtime",
+        "high-consequence",
+        "human-in-the-loop",
+        "policy-gates",
+        "proof-chain",
+        "series-a"
+      ],
+      "license": "NOASSERTION",
+      "size": 636883,
+      "visibility": "private"
+    }
+  ],
+  "personal": {
+    "user": "stephenlutar2-hash",
+    "public_repos": 1,
+    "repos": [
+      {
+        "full_name": "stephenlutar2-hash/stephenlutar2-hash",
+        "purpose": "GitHub profile readme",
+        "in_inventory_scope": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "status": "lean_skeleton_partial_closure",
+  "updated_at": "2026-05-16T04:20:00Z",
+  "proofs_dir": "packages/payload/proofs/lean_th8",
+  "raw_mirror_note": "packages/payload/raw/_files/thesis/lean_th8 is byte-locked by file_integrity. These files are the editable mirror; thesis_payload.json claims 8 open sorries which remain in the raw skeleton. This mirror records the discharge progress and is the source of truth for THESIS_LINEAGE.audit.leanSorriesOpen.",
+  "honesty_note": "Earlier draft used Lean `axiom` placeholders to 'close' TH8a and TH8c via bespoke inversion lemmas. Code review flagged this as masking the gap. Corrected: all such axioms have been removed and the affected theorems are honest `sorry`s in GLR.proofs.lean with the missing-lemma comment inline. The only sorry-free closures in this directory are the three `LinearReceipt.*` theorems listed in `sorries_closed` plus the helper `TH8b_backward` and `TH8c_definitional_backward` which are not first-class TH8 obligations.",
+  "sorries_total_in_raw_skeleton": 8,
+  "sorries_open": 5,
+  "sorries_closed": [
+    "LinearReceipt.consumeEntry_decrements",
+    "LinearReceipt.consumeEntry_none_iff",
+    "LinearReceipt.consume_unavailable_means_no_receipt"
+  ],
+  "sorries_remaining": [
+    {
+      "id": "LinearReceipt.at_most_one_consume",
+      "reason": "Requires a context-formation invariant (initial use-count = 1 for every linear receipt) that is not yet stated in Lutar.Axioms. Mechanical once the invariant is added; ~1 day of Lean work."
+    },
+    {
+      "id": "GLR.TH8a",
+      "reason": "OPEN. Reduces to `passType_implies_count_pos`, a 3-line `cases ht` inversion on HasType.pass_rule, but that lemma is not stated upstream in the byte-locked raw skeleton, and stating it here as an `axiom` would mask the gap. Carried as a literal `sorry` in GLR.proofs.lean::TH8a' until the inversion lemma lands in lutar-lean."
+    },
+    {
+      "id": "GLR.TH8b",
+      "reason": "PARTIAL. Helper `TH8b_backward` is sorry-free in the mirror (direct application of HasType.replay_rule). `TH8b_forward` remains a literal `sorry` because it requires axiom A12 (constructiveTransparency), which must be declared in Lutar.GLR.AxiomsGLR upstream — not in this mirror. The full bi-implication therefore counts as one open sorry."
+    },
+    {
+      "id": "GLR.TH8c",
+      "reason": "PARTIAL. `TH8c_definitional_backward` is sorry-free in the mirror (uses the rule constructors directly). `TH8c_definitional_forward` is a literal `sorry` because it needs `passType_implies_gatePass`, a 3-line inversion on HasType.pass_rule that is not in the byte-locked raw skeleton. The full GR \u2194 ILL_{g_min} adjunction is the POPL 2027 research contribution (\u223c3\u20134 weeks per proposal \u00a76.2)."
+    },
+    {
+      "id": "GLR.TH8_C3_entropy_monotonicity",
+      "reason": "Direct corollary of TH8b (\u21d2). Closes automatically once TH8b is fully discharged."
+    }
+  ],
+  "build_verification": "lake build was NOT run in this environment (Lean 4 + Mathlib toolchain not provisioned in the Replit container). Proof commentary and partial closures are reviewer-checkable by structure; full elaboration is expected to be performed in szl-holdings/lutar-lean CI per the integration plan in TH8_LEAN_SKELETON.md \u00a76.",
+  "byline": "Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173"
+}

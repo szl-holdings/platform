@@ -2,6 +2,8 @@ import {
   ORG_SUMMARY,
   PANEL_FACTS,
   panelRepoFacts,
+  THESIS_LINEAGE,
+  THESIS_PAPERS,
 } from '@szl-holdings/payload';
 
 const PALETTE = {
@@ -194,8 +196,8 @@ export function ConduitGovernancePanels() {
 
         <PanelCard kicker="02 · Evidence ledger" title="Citable artifacts, public lineage">
           <Row label="Repository" value={amaru.fullName} mono />
-          <Row label="Latest tag" value={amaru.latestTag} />
-          <Row label="Tag SHA" value={amaru.tagShaShort} mono />
+          <Row label="Latest tag" value={amaru.latestTag ?? '—'} />
+          <Row label="Tag SHA" value={amaru.tagShaShort ?? '—'} mono />
           <Row label="Pushed at (UTC)" value={amaru.pushedAtUtcText} />
           <Row label="Hygiene" value="LICENSE · CITATION.cff · SECURITY.md" />
           <Row label="Doctrine ledger" value={PANEL_FACTS.doiLedgerEvidenceText} />
@@ -212,6 +214,19 @@ export function ConduitGovernancePanels() {
           <Row label="Default branch" value={amaru.defaultBranch} />
           <Row label="Doctrine version" value={PANEL_FACTS.doctrineVersionText} />
           <Row label="Byline scope" value="Convergent multi-source data sync" />
+        </PanelCard>
+
+        <PanelCard kicker="05 · Thesis lineage" title="TH1 → TH8 chain">
+          {THESIS_PAPERS.map((p) => (
+            <Row key={p.key} label={`${p.key} · ${p.version}`} value={p.status} />
+          ))}
+          <Row label="TH8 sorries open" value={`${THESIS_LINEAGE.audit.leanSorriesOpen} of ${THESIS_LINEAGE.audit.leanTheorems}`} />
+          <Row label="Closed in mirror" value={`${THESIS_LINEAGE.audit.leanSorriesClosed.length}`} />
+          <Row label="arXiv target" value={`${THESIS_LINEAGE.arxiv.status} → ${THESIS_LINEAGE.arxiv.targetVenue}`} />
+          <Row label="Zenodo target" value={`${THESIS_LINEAGE.zenodo.status} (${THESIS_LINEAGE.zenodo.targetVersion})`} />
+          <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
+          <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} mono />
+          <Row label="Lineage source" value="@szl-holdings/payload" mono />
         </PanelCard>
 
         <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">

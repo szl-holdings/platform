@@ -23,6 +23,7 @@ import { Card, PageHeader, SectionTitle, KpiCard, StatusPill } from '../componen
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — vite '?raw' import
 import canonicalMarkdown from '../../../../docs/thesis/v9-canonical.md?raw';
+import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
 
 const GOLD = '#c9b787';
 const GREY = '#8a8a8a';
@@ -349,6 +350,29 @@ export default function Thesis() {
           </aside>
 
           <Card>
+            {/* TH1→TH8 lineage ribbon (payload-sourced, sibling to v1..v10 invariants) */}
+            <div style={{ marginBottom: 18, padding: 14, border: '1px solid rgba(201,183,135,0.18)', background: 'rgba(201,183,135,0.04)', borderRadius: 4 }}>
+              <div style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10, letterSpacing: '0.18em', color: GOLD, textTransform: 'uppercase', marginBottom: 8 }}>
+                Thesis lineage · TH1 → TH8
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                {THESIS_PAPERS.map((p) => (
+                  <div key={p.key} style={{ borderLeft: `2px solid ${GOLD}`, paddingLeft: 8 }}>
+                    <div style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 10, color: GOLD }}>{p.key} · {p.version}</div>
+                    <div style={{ fontSize: 12, color: '#ededed', margin: '2px 0' }}>{p.title}</div>
+                    <div style={{ fontSize: 10, color: '#888' }}>{p.status} · {p.theorems.length} theorems · <a href={p.doiUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD, textDecoration: 'none' }}>DOI ↗</a></div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 6, fontSize: 10, fontFamily: 'ui-monospace, Menlo, monospace', color: '#888' }}>
+                <div>arXiv: <span style={{ color: '#cfcfcf' }}>{THESIS_LINEAGE.arxiv.status}</span> → <a href={THESIS_LINEAGE.arxiv.searchUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD }}>{THESIS_LINEAGE.arxiv.targetVenue}</a></div>
+                <div>Zenodo: <span style={{ color: '#cfcfcf' }}>{THESIS_LINEAGE.zenodo.status}</span> ({THESIS_LINEAGE.zenodo.targetVersion}) → <a href={THESIS_LINEAGE.zenodo.doiUrl} target="_blank" rel="noopener noreferrer" style={{ color: GOLD }}>DOI</a></div>
+                <div>TH8 sorries: <span style={{ color: THESIS_LINEAGE.audit.leanSorriesOpen === 0 ? '#7fb893' : '#d4a853' }}>{THESIS_LINEAGE.audit.leanSorriesOpen} open</span> / {THESIS_LINEAGE.audit.leanTheorems} · {THESIS_LINEAGE.audit.leanSorriesClosed.length} closed in mirror</div>
+                <div>Fly-High: doctrine <span style={{ color: GOLD }}>{THESIS_LINEAGE.audit.doctrine}</span> · P0 {THESIS_LINEAGE.audit.p0Fixes} · beautify {THESIS_LINEAGE.audit.beautifyAvg}</div>
+                <div>Last updated: <span style={{ color: '#cfcfcf' }}>{THESIS_LINEAGE.audit.updatedAt}</span></div>
+                <div>Source: @szl-holdings/payload</div>
+              </div>
+            </div>
             <MarkdownView md={canonicalMarkdown as string} />
           </Card>
         </div>

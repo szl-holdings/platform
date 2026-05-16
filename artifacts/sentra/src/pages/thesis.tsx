@@ -16,6 +16,7 @@ import v9Canonical from '../../../../docs/thesis/v9-canonical.md?raw';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — vite '?raw' import
 import v10Canonical from '../../../../docs/thesis/v10-canonical.md?raw';
+import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
 
 const SENTRA_GOLD = '#c9b787';
 
@@ -68,6 +69,61 @@ export default function SentraThesisPage() {
           the canonical thesis. Λ₁₀ formalises the contract.
         </p>
       </header>
+
+      <Card className="bg-black/30 border-white/10" style={{ borderColor: 'rgba(201,183,135,0.22)' }}>
+        <CardHeader>
+          <CardTitle className="text-white text-base">Thesis lineage · TH1 → TH8</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+            {THESIS_PAPERS.map((p) => (
+              <div key={p.key} className="border-l-2 pl-3" style={{ borderColor: SENTRA_GOLD }}>
+                <div className="text-[10px] tracking-widest uppercase font-mono" style={{ color: SENTRA_GOLD }}>{p.key} · {p.version}</div>
+                <div className="text-sm text-white mt-1">{p.title}</div>
+                <div className="text-[11px] text-white/60 mt-1">
+                  {p.status} · {p.theorems.length} theorems ·{' '}
+                  <a href={p.doiUrl} target="_blank" rel="noopener noreferrer" style={{ color: SENTRA_GOLD }}>DOI ↗</a>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            className="mt-3 pt-3 grid gap-2 text-[11px] text-white/60 font-mono"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            <div>
+              arXiv: <span className="text-white/85">{THESIS_LINEAGE.arxiv.status}</span> →{' '}
+              <a href={THESIS_LINEAGE.arxiv.searchUrl} target="_blank" rel="noopener noreferrer" style={{ color: SENTRA_GOLD }}>
+                {THESIS_LINEAGE.arxiv.targetVenue}
+              </a>
+            </div>
+            <div>
+              Zenodo: <span className="text-white/85">{THESIS_LINEAGE.zenodo.status}</span> ({THESIS_LINEAGE.zenodo.targetVersion}) →{' '}
+              <a href={THESIS_LINEAGE.zenodo.doiUrl} target="_blank" rel="noopener noreferrer" style={{ color: SENTRA_GOLD }}>DOI</a>
+            </div>
+            <div>
+              TH8 sorries:{' '}
+              <span style={{ color: THESIS_LINEAGE.audit.leanSorriesOpen === 0 ? '#7fb893' : '#d4a853' }}>
+                {THESIS_LINEAGE.audit.leanSorriesOpen} open
+              </span>{' '}
+              / {THESIS_LINEAGE.audit.leanTheorems} · {THESIS_LINEAGE.audit.leanSorriesClosed.length} closed in mirror
+            </div>
+            <div>
+              Fly-High: doctrine <span style={{ color: SENTRA_GOLD }}>{THESIS_LINEAGE.audit.doctrine}</span> · P0{' '}
+              {THESIS_LINEAGE.audit.p0Fixes} · beautify {THESIS_LINEAGE.audit.beautifyAvg}
+            </div>
+            <div>
+              Last updated: <span className="text-white/85">{THESIS_LINEAGE.audit.updatedAt}</span>
+            </div>
+            <div>
+              Source: <span className="text-white/80">@szl-holdings/payload</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="bg-black/30 border-white/10">
         <CardHeader>
