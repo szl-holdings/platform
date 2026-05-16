@@ -1,0 +1,1011 @@
+{
+  "generatedAt": "2026-05-15T23:53:31Z",
+  "doctrine": {
+    "version": "V6",
+    "replayRoot": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "byline": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "affiliation": "SZL Holdings",
+    "lambdaFloor": 0.9,
+    "moralGroundingFloor": 0.95,
+    "measurabilityHonestyFloor": 0.95,
+    "lambdaAxes": 9,
+    "byteIdenticalReplays": 5,
+    "ingestionPolicy": "PUBLIC_ONLY",
+    "licenseAllowlist": [
+      "Apache-2.0",
+      "MIT",
+      "BSD-3-Clause",
+      "CC-BY-4.0"
+    ]
+  },
+  "lineage": [
+    {
+      "id": "TH1",
+      "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms",
+      "summary": "Lambda-Gate Invariant (Composability)",
+      "statement": "**Theorem 13 (Composability, TH1):** If systems \\(A\\) and \\(B\\) share a doctrine.json SHA and use compatible \\(\\Lambda\\)-floors (\\(A\\)'s exit floor \\(\\leq B\\)'s entry floor), their composition \\(A \\circ B\\) is itself doctrine-locked. Proven in \\cite{zenodo_v13_20162352}.",
+      "sources": [
+        "_files/thesis/th1_th3/paper.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v11",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH2",
+      "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms",
+      "summary": "Replay-DOI Duality",
+      "statement": "Every multi-agent computation in the SZL Holdings ecosystem is DOI-anchored (TH2/Replay-DOI Duality): the 5× byte-identical replay root \\(\\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\) is permanently anchored to Zenodo DOI 10.5281/zenodo.20119582, establishing an irreversible duality between deterministic replay and permanent citable priority. **Theorem 7 (Deterministic Replay, T5):** For canonical JSON + pinned PRNG (mulberry32, seed = constant) + frozen registry + Node \\(\\geq\\)20 LTS with pinned pnpm lockfile: \\(\\forall i \\in \\{1..5\\}: \\text{root}_i = \\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\). Proven by construction; empirically verified (K10).",
+      "sources": [
+        "_files/thesis/th1_th3/paper.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v11",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH3",
+      "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms",
+      "summary": "rho-Closure Completeness",
+      "statement": "**Theorem 5 (rho-Closure Composability, T1):** If \\(\\rho(r_1)\\) and \\(\\rho(r_2)\\), then \\(\\rho(r_1 \\circ r_2)\\) iff \\(W_1 \\cap W_2 = \\emptyset\\) or \\(\\exists w_3 \\in W \\setminus (W_1 \\cup W_2)\\) co-signing the composed root. Proven from A4 (dualWitnessDisjointness) and A6 (hashChainIntegrity). Production result: 100% rho-closure on 8,000/8,000 paired calls. **Theorem 9 (Anatomy Reduction, TH3)** (informal proof sketch; formal bisimulation pending in \\texttt{lutar-lean/Lutar/AnatomyReduction.lean}): Any system with \\(|R| > 8\\) is bisimilar (in the sense of Milner's observation equivalence) to a system with exactly 8 regions under the axiom set A1-A9. Any system with \\(|R| < 8\\) is missing at least one capability from the set {Lambda-kernel, covenant, attribution, hash-chain, proofs, tooling, thesis, trust-mesh} that is not recoverable by composition of the remaining regions.",
+      "sources": [
+        "_files/thesis/th1_th3/paper.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v11",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH4",
+      "title": "Verifiable Multi-Agent Anatomy (TH4-TH7): Lutar Calculus and Unified Extension",
+      "summary": "Lambda-Category Composability",
+      "statement": "**Theorem 4 (Lambda-Category Composability, TH4)** (conjectured): The receipt category \\(\\text{Rec}_\\Lambda\\) is a monoidal category; the gate function \\(\\Lambda\\) is a monoidal functor from \\(\\text{Rec}_\\Lambda\\) to \\(\\{0,1\\}\\). Pending Lean 4 proof in \\texttt{lutar-lean/Lutar/LaxFunctor.lean}.",
+      "sources": [
+        "_files/thesis/th4_th7/phd_thesis.md",
+        "_files/thesis/th4_th7/pm_math_report.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v14",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH5",
+      "title": "Verifiable Multi-Agent Anatomy (TH4-TH7): Lutar Calculus and Unified Extension",
+      "summary": "Chain Confluence (Receipt Chain as Cofree Comonad)",
+      "statement": "**Theorem 10 (Chain Confluence, TH5)** (conjectured): The receipt chain \\(\\langle r_1, r_2, \\ldots, r_n \\rangle\\) is the carrier of the cofree comonad \\(W_{\\text{chain}}(X) = \\nu Z. X \\times F_R(Z)\\). Replay determinism (T5) is a coalgebra morphism: two replay runs produce the same comonad element iff they agree on all observations. Corollary: The lutar-calculus is confluent: any well-typed computation from the same input reaches the same rho-closed chain (unique normal form). No two computation paths can diverge.",
+      "sources": [
+        "_files/thesis/th4_th7/phd_thesis.md",
+        "_files/thesis/th4_th7/pm_math_report.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v14",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH6",
+      "title": "Verifiable Multi-Agent Anatomy (TH4-TH7): Lutar Calculus and Unified Extension",
+      "summary": "Bekenstein Entropy Bound via Data Processing Inequality",
+      "statement": "**Theorem 11 (Bekenstein via DPI, TH6):** The entropy of the receipt chain is bounded by: \\[H(\\text{receipt chain of length } n) \\leq H(\\text{registry}) \\leq 8 \\times |\\text{registry in bytes}|\\] Proof: By the data processing inequality: for any deterministic function \\(f\\), \\(H(f(X)) \\leq H(X)\\). The receipt chain is a deterministic function of the registry (under fixed PRNG seed, canonical JSON, frozen registry - T5). Therefore \\(H(\\text{chain}) \\leq H(\\text{registry}) \\leq 8A\\) bits. Note on prior claim (A7): The conjectured Bekenstein-style bound using physical Bekenstein entropy (A7) is superseded by Theorem 11, which provides a stronger, simpler proof via DPI. A7 is hereby classified as a corollary of TH6.",
+      "sources": [
+        "_files/thesis/th4_th7/phd_thesis.md",
+        "_files/thesis/th4_th7/pm_math_report.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v14",
+      "supersedes": [
+        "A7"
+      ],
+      "supersededBy": []
+    },
+    {
+      "id": "TH7",
+      "title": "Verifiable Multi-Agent Anatomy (TH4-TH7): Lutar Calculus and Unified Extension",
+      "summary": "Curry-Howard Receipt Calculus",
+      "statement": "**Theorem 6 (Curry-Howard, TH7):** The receipt calculus satisfies the Curry-Howard correspondence: The type \\(\\texttt{PassReceipt}(r)\\) is inhabited iff \\(\\forall i: \\lambda_i(r) \\geq \\theta_i\\) — it is the proof term for the soundness proposition; Gate evaluation = proof construction (by the Lean type checker); Receipt building = proof serialization; Receipt verification = proof checking. This makes \\(\\mathcal{S}\\) the first multi-agent runtime whose operational type system is a proof assistant for its own safety properties. Machine-checked in Lean 4 with sorry-count = 0.",
+      "sources": [
+        "_files/thesis/th4_th7/phd_thesis.md",
+        "_files/thesis/th4_th7/pm_math_report.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "published v14",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "id": "TH8",
+      "title": "Graded Lambda-Receipt Calculus (GLR): TH8 Proposal and Lean 4 Skeleton",
+      "summary": "Graded Lambda-Receipt Identity",
+      "statement": "**Theorem TH8 (Graded Lambda-Receipt Identity).** Let \\((\\mathcal{S}_\\Lambda, \\cdot, \\mathbf{1})\\) be the Lambda-semiring and let \\(\\mathsf{G\\Lambda R}\\) be the graded type theory with linear receipts as defined above. Then:",
+      "sources": [
+        "_files/thesis/th8_glr/proposal.md",
+        "_files/thesis/lean_th8/GradedSemiring.lean",
+        "_files/thesis/lean_th8/LinearReceipt.lean",
+        "_files/thesis/lean_th8/GLR.lean",
+        "_files/thesis/lean_th8/StrongMonadIdentity.lean",
+        "_files/thesis/lean_th8/README.md",
+        "_files/thesis/lean_th8/TH8_LEAN_SKELETON.md"
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "year": 2026,
+      "status": "proposal + lean_skeleton",
+      "supersedes": [],
+      "supersededBy": []
+    }
+  ],
+  "axioms": [
+    {
+      "id": "A1",
+      "name": "soundnessAxiom",
+      "statement": "For any receipt r, if gate_pass(r) then lambda(r) >= 0.90 conjunctively",
+      "source": "thesis.md §4.1 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A2",
+      "name": "moralGroundingFloor",
+      "statement": "moralGrounding axis floor = 0.95 (higher than default 0.90)",
+      "source": "thesis.md §4.1 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A3",
+      "name": "measurabilityHonestyFloor",
+      "statement": "measurabilityHonesty axis floor = 0.95",
+      "source": "thesis.md §4.1 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A4",
+      "name": "dualWitnessDisjointness",
+      "statement": "For rho-closure: witness_1_id != witness_2_id (enforced by registry at write time)",
+      "source": "thesis.md §4.3 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A5",
+      "name": "deterministicReplay",
+      "statement": "For canonical JSON + pinned PRNG + frozen registry, 5x replay yields byte-identical roots",
+      "source": "thesis.md §4.6 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A6",
+      "name": "hashChainIntegrity",
+      "statement": "Every spine entry hash-chain invariant: entry.chain = SHA256(prev_entry)",
+      "source": "thesis.md §3.4 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A7",
+      "name": "bekensteinBound",
+      "statement": "Receipt chain entropy H(R_n) bounded by information-theoretic limit from registry area",
+      "source": "thesis.md §4.5 :: https://doi.org/10.5281/zenodo.19944926"
+    },
+    {
+      "id": "A8",
+      "name": "ingestDiscipline",
+      "statement": "Every ingest requires: source_url + content_hash + license (allow-list) + ORCID",
+      "source": "thesis.md §7 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A9",
+      "name": "doctrineCompleteness",
+      "statement": "doctrine.json v1.0.0 enumerates all 8 forbidden patterns; SHA-anchored",
+      "source": "szl-trust/doctrine.json §8 :: https://github.com/szl-holdings/szl-trust"
+    },
+    {
+      "id": "A10",
+      "name": "temporalConsistency",
+      "statement": "Gate verdict is invariant under time-shift within registered clock-drift bound ε_clock.",
+      "source": "INNOVATIONS.md §3 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A11",
+      "name": "causalSeparability",
+      "statement": "Receipts from disjoint actor sets carry statistically independent entropy (no shared randomness source).",
+      "source": "INNOVATIONS.md §3 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A12",
+      "name": "constructiveTransparency",
+      "statement": "Every Λ score is re-derivable from public inputs; no hidden weights or parameters.",
+      "source": "INNOVATIONS.md §3 :: https://doi.org/10.5281/zenodo.20053148"
+    },
+    {
+      "id": "A13",
+      "name": "adversarialRobustness",
+      "statement": "Gate verdict is stable under bounded perturbation of any single axis by ε ≤ 0.05, except when original score is within ε of a floor.",
+      "source": "INNOVATIONS.md §3 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "A14",
+      "name": "economicGrounding",
+      "statement": "Gate passes only if action declared cost ≤ registered actor budget at evaluation time.",
+      "source": "INNOVATIONS.md §3 :: https://doi.org/10.5281/zenodo.20162352"
+    }
+  ],
+  "derivations": [
+    {
+      "id": "T1",
+      "name": "rho_closure_composition",
+      "statement": "\\rho(r_1) \\land \\rho(r_2) \\implies \\rho(r_1 \\circ r_2) \\iff W_1 \\cap W_2 = \\emptyset \\lor \\exists w_3 \\notin W_1 \\cup W_2",
+      "source": "INNOVATIONS.md §2 T1 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T2",
+      "name": "evidence_monotonicity",
+      "statement": "r' = r \\oplus e_{\\text{consistent}} \\implies \\Lambda(r') \\geq \\Lambda(r)",
+      "source": "INNOVATIONS.md §2 T2 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T3",
+      "name": "merkle_dag_throughput",
+      "statement": "\\forall B \\geq 7: \\text{build\\_p50}(\\text{batch}_B) \\in O(\\log B) \\implies \\text{build\\_p50} \\leq 5\\,\\mu s",
+      "source": "INNOVATIONS.md §2 T3 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T4",
+      "name": "chain_entropy_bound",
+      "statement": "H(R_n) \\leq \\frac{k \\cdot A}{4 \\ln 2}",
+      "source": "INNOVATIONS.md §2 T4 :: https://doi.org/10.5281/zenodo.19944926"
+    },
+    {
+      "id": "T5",
+      "name": "deterministic_replay_root",
+      "statement": "\\forall i \\in \\{1..5\\}: \\text{root}_i = \\texttt{1ed4d253\\ldots} \\iff \\text{canonical JSON} \\land \\text{pinned PRNG} \\land \\text{frozen registry}",
+      "source": "INNOVATIONS.md §2 T5 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T6",
+      "name": "axis_floor_conjunctivity",
+      "statement": "\\exists x: \\Lambda_i(x) \\geq 0.95 \\text{ for some } i \\land \\Lambda(x) < 0.90",
+      "source": "INNOVATIONS.md §2 T6 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T7",
+      "name": "lambda9_mask_privacy_reduction",
+      "statement": "\\text{bits\\_leaked}(\\text{mask}) = 9 \\ll 576 \\text{ bits (raw Λ-vector)}",
+      "source": "INNOVATIONS.md §2 T7 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T8",
+      "name": "actor_disjoint_collision_resistance",
+      "statement": "\\text{actor}(r_1) \\neq \\text{actor}(r_2) \\land \\text{digest}(r_1) = \\text{digest}(r_2) \\implies \\rho_{\\text{single-witness}} = \\text{false}",
+      "source": "INNOVATIONS.md §2 T8 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T9",
+      "name": "cross_region_lambda_dominance",
+      "statement": "\\Lambda_{\\text{vec}}(\\text{receipt}(e)) \\geq_{\\text{comp}} \\max(\\Lambda_{\\text{floor}}(r_{\\text{src}}), \\Lambda_{\\text{floor}}(r_{\\text{dst}}))",
+      "source": "INNOVATIONS.md §2 T9 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "T10",
+      "name": "doctrine_check_completeness",
+      "statement": "\\text{SHA256}(\\text{doctrine.json}) = \\text{canonical} \\land \\text{all gates pass} \\implies \\forall p \\in \\text{FP}: p \\notin \\text{artifacts}",
+      "source": "INNOVATIONS.md §2 T10 :: https://github.com/szl-holdings/szl-trust"
+    }
+  ],
+  "theorems": [
+    {
+      "id": "TH1",
+      "name": "composability",
+      "statement": "If systems A and B share a doctrine.json SHA, use compatible Λ-floors (A exit ≤ B entry), and communicate via A2A receipt-envelope headers, then their composition A∘B is itself doctrine-locked.",
+      "source": "INNOVATIONS.md §4 :: https://doi.org/10.5281/zenodo.20162352"
+    },
+    {
+      "id": "TH2",
+      "name": "replay_doi_duality",
+      "statement": "The DOI version ledger and the ouroboros replay-root ledger are isomorphic as temporally-ordered sets: each release commit maps bijectively to a version DOI, mediated through the replay root.",
+      "source": "INNOVATIONS.md §4 :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "TH3",
+      "name": "anatomy_reduction",
+      "statement": "Any multi-agent system implementing (R,A,E,Λ,ρ,W) with |R|>8 is bisimilar to the canonical 8-region anatomy. Any system with |R|<8 is missing a capability (not bisimilar). 8 is both necessary and sufficient.",
+      "source": "INNOVATIONS.md §4 :: https://doi.org/10.5281/zenodo.20162352"
+    },
+    {
+      "id": "TH4",
+      "name": "lambda_category_composability",
+      "statement": "The Λ-Category is a monoidal category; the gate function Λ is a monoidal functor from Rec_Λ to {0,1}. Gate composition is a natural transformation. TH1 (composability) follows as a corollary.",
+      "source": "math_pod_v3/math1/findings.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "TH5",
+      "name": "receipt_chain_confluence",
+      "statement": "The receipt chain is the cofree comonad of the receipt functor. The replay determinism theorem (T5) is a coalgebra morphism: two replay runs produce the same comonad element iff they agree on all observations. Normal forms are unique ρ-closed chains.",
+      "source": "math_pod_v3/math1/findings.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "TH6",
+      "name": "bekenstein_entropy_bound_dpi",
+      "statement": "H(receipt chain) ≤ H(registry) ≤ 8A bits, where A is the registry size in bytes. Proved via the data processing inequality. This discharges A7 (bekensteinBound) with an elementary information-theoretic argument.",
+      "source": "math_pod_v3/math1/findings.md :: https://doi.org/10.5281/zenodo.19944926"
+    },
+    {
+      "id": "TH7",
+      "name": "curry_howard_receipt_calculus",
+      "statement": "The receipt calculus satisfies the Curry-Howard correspondence: PassReceipt is the proof term for the soundness proposition. Gate evaluation = proof construction. Receipt building = proof serialization. Receipt verification = proof checking.",
+      "source": "math_pod_v3/math1/findings.md :: https://doi.org/10.5281/zenodo.20119582"
+    }
+  ],
+  "constants": [
+    {
+      "id": "K01",
+      "name": "receipt_build_p50_us",
+      "value": "11.5",
+      "unit": "µs",
+      "statement": "receipt_build_p50_us = 11.5 µs",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K02",
+      "name": "receipt_build_p99_us",
+      "value": "50.7",
+      "unit": "µs",
+      "statement": "receipt_build_p99_us = 50.7 µs",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K03",
+      "name": "receipt_verify_p50_us",
+      "value": "10.4",
+      "unit": "µs",
+      "statement": "receipt_verify_p50_us = 10.4 µs",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K04",
+      "name": "lambda9_base_p50_us",
+      "value": "3.12",
+      "unit": "µs",
+      "statement": "lambda9_base_p50_us = 3.12 µs",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K05",
+      "name": "lambda9_composed_p50_us",
+      "value": "3.29",
+      "unit": "µs",
+      "statement": "lambda9_composed_p50_us = 3.29 µs",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K06",
+      "name": "rho_closure_rate",
+      "value": "100%",
+      "unit": null,
+      "statement": "rho_closure_rate = 100%",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K07",
+      "name": "platform_v11_http_calls",
+      "value": "24800",
+      "unit": null,
+      "statement": "platform_v11_http_calls = 24800",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K08",
+      "name": "platform_v11_lambda10_overhead_p50_ms",
+      "value": "0.49-0.59",
+      "unit": "ms/route",
+      "statement": "platform_v11_lambda10_overhead_p50_ms = 0.49-0.59 ms/route",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K09",
+      "name": "platform_v11_p99_ms",
+      "value": "1.27",
+      "unit": "ms",
+      "statement": "platform_v11_p99_ms = 1.27 ms",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K10",
+      "name": "replay_root",
+      "value": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+      "unit": null,
+      "statement": "replay_root = 1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K11",
+      "name": "test_count_production",
+      "value": "218/218",
+      "unit": null,
+      "statement": "test_count_production = 218/218",
+      "source": "THESIS_BRIEF.md :: https://doi.org/10.5281/zenodo.20119582"
+    },
+    {
+      "id": "K12",
+      "name": "test_count_demo",
+      "value": "37/37",
+      "unit": null,
+      "statement": "test_count_demo = 37/37",
+      "source": "replit_payload_build"
+    },
+    {
+      "id": "K13",
+      "name": "bekenstein_indicator_fire_rate",
+      "value": "49.5%",
+      "unit": null,
+      "statement": "bekenstein_indicator_fire_rate = 49.5%",
+      "source": "thesis.md §4.5 :: https://doi.org/10.5281/zenodo.20119582"
+    }
+  ],
+  "lambdaAxes": [
+    {
+      "id": "lambda1",
+      "name": "moralGrounding",
+      "floor": 0.95,
+      "description": "Measures the degree to which a proposed action is consistent with the doctrine corpus: the set of explicit ethical commitments, harm-avoidance policies, and principal hierarchies that the operator has encoded in the agent's governing covenant. Operationally, λ_1 is the normalized cosine similarity between the action's intent embedding and a reference \"moral anchor\" embedding, averaged over the operator's registered covenant clauses, clamped to [0,1]. The floor constraint λ_1 ≥ 0.95 is a hard asymptote: an agent that is even marginally morally misaligned fails the gate irrespective of how perfectly calibrated the other eight axes are.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda2",
+      "name": "measurabilityHonesty",
+      "floor": 0.95,
+      "description": "Measures whether an action's declared effects are measurable and stated without confabulation. An action that claims an unmeasurable side-effect — \"I will improve user well-being\" without a defined metric — scores below the 0.95 floor. This axis operationalizes the doctrine clause \"no hallucinations no bandaids; test test test\" by making measurement-honesty a prerequisite for passage.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda3",
+      "name": "epistemicHumility",
+      "floor": 0.9,
+      "description": "Scores the agent's acknowledgment of its own uncertainty relative to the ground truth of its inputs. An action that asserts high certainty on a factual claim for which the evidence base is sparse scores low on this axis. The scoring function penalizes unjustified confidence using a calibration-error analog: λ_3 = 1 - E[|conf(c) - acc(c)|] where conf(c) is the agent's stated confidence and acc(c) is the empirically measured accuracy over a calibration set.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda4",
+      "name": "counterfactualAwareness",
+      "floor": 0.9,
+      "description": "Measures whether the agent has considered the most salient counterfactual worlds — what would happen if this action were not taken, or if a plausible alternative were substituted. Formally this is the entropy of the agent's distribution over consequence-types, normalized so that a completely certain single-consequence action scores 0.0 and a uniformly distributed consequence distribution over the operator-defined consequence space scores 1.0.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda5",
+      "name": "temporalConsistency",
+      "floor": 0.9,
+      "description": "Measures the stability of the gate verdict under repeated evaluation on the same input at two different times t and t + Δ. λ_5 = max(0, 1 - 4(v_t - v_{t+Δ})^2). A zero-drift evaluation scores λ_5 = 1.0. A drift of 0.05 in the composite score yields λ_5 = 0.99. A drift of 0.25 yields λ_5 = 0.75, below the ≥ 0.90 conjunctive floor. This axis operationalizes the 5× byte-identical replay guarantee: a system that cannot reproduce its own gate verdict is not operating deterministically.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda6",
+      "name": "evidenceProvenance",
+      "floor": 0.9,
+      "description": "Measures whether every empirical claim embedded in the action's intent representation can be traced to a verifiable artifact — a DOI, a commit SHA, a public URL with content hash, or an operator-signed attestation. Actions that embed unattributed or unverifiable assertions score at most 0.50. The scoring function is the fraction of claim tokens for which provenance is resolvable.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda7",
+      "name": "actorIdentity",
+      "floor": 0.9,
+      "description": "Measures the definiteness of the acting agent's identity within the principal registry. An action submitted by a registered, credentialed actor with a current keypair scores 1.0. An action from an actor whose keypair has expired or whose registry entry is absent scores 0.0. Partial scores arise when the actor is registered but operating under delegated authority — the score decays as a function of delegation depth to penalize opaque proxy chains.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda8",
+      "name": "axiomConsistency",
+      "floor": 0.9,
+      "description": "Measures whether the proposed action is internally consistent with the operator's formal axiom set — the machine-checked axioms in lutar-lean/Lutar/Axioms.lean. An action that would, if executed, produce a state that violates any of the formally stated axioms scores below 0.90 on this axis. This axis is the bridge between the runtime kernel and the Lean 4 formalization: it enforces, at runtime, the constraints that are statically verified at theorem-proving time.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    },
+    {
+      "id": "lambda9",
+      "name": "coherence",
+      "floor": 0.9,
+      "description": "Measures the multi-step logical coherence of the agent's plan across the action sequence, not just for the current step in isolation. Let A_1, A_2, ..., A_k denote the k preceding actions in the current session. The coherence score is the proportion of consecutive action-pairs (A_i, A_{i+1}) for which the precondition of A_{i+1} is satisfied by the postcondition of A_i, under the operator's precondition/postcondition schema. For the base case k=0, λ_9 = 1.0.",
+      "source": "_files/thesis/th1_th3/paper.md §6"
+    }
+  ],
+  "doiLedger": [
+    {
+      "doi": "10.5281/zenodo.19944926",
+      "title": "Ouroboros Thesis — concept record",
+      "kind": "concept",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.19944926",
+      "sha256": null,
+      "version": "concept",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.19867281",
+      "title": "The Loop Is the Product (v1)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.19867281",
+      "sha256": null,
+      "version": "paper-v1-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.19934129",
+      "title": "The Loop Is the Product (v2)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.19934129",
+      "sha256": null,
+      "version": "paper-v2-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.19983066",
+      "title": "The Lutar Invariant (v3)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.19983066",
+      "sha256": null,
+      "version": "paper-v3-2.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20020841",
+      "title": "The Lutar Omega Formalism (v4)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20020841",
+      "sha256": null,
+      "version": "paper-v4-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20020846",
+      "title": "Lineage-Aware RAG (v5)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20020846",
+      "sha256": null,
+      "version": "paper-v5-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20020845",
+      "title": "Sealed Constitutional Guardrails (v6)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20020845",
+      "sha256": null,
+      "version": "paper-v6-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20020848",
+      "title": "Tiered Continual Learning (v7)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20020848",
+      "sha256": null,
+      "version": "paper-v7-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20020849",
+      "title": "Active Inference (v8)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20020849",
+      "sha256": null,
+      "version": "paper-v8-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20053148",
+      "title": "Unified Operational Account (v9)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20053148",
+      "sha256": null,
+      "version": "paper-v9-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20053163",
+      "title": "Audit-Closure Operator Λ₁₀ (v10)",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20053163",
+      "sha256": null,
+      "version": "paper-v10-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20119582",
+      "title": "Applied Λ (v11): Measured Per-Request Latency Overhead of an Audit-Closure Operator in a Governed AI Runtime",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20119582",
+      "sha256": null,
+      "version": "paper-v11-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0"
+    },
+    {
+      "doi": "10.5281/zenodo.20162352",
+      "title": "Ouroboros Runtime: A Bounded-Loop Audit-Closure System Implementing the Lutar Invariant Λ",
+      "kind": "version",
+      "year": 2026,
+      "url": "https://doi.org/10.5281/zenodo.20162352",
+      "sha256": null,
+      "version": "v6.3.0",
+      "status": "active",
+      "license": "apache-2.0"
+    }
+  ],
+  "forecastGauges": [
+    {
+      "id": "G01",
+      "name": "METR-th50-hours",
+      "current": ">=16.0",
+      "target": null,
+      "unit": "hours",
+      "description": "50%-task-completion time horizon of field-frontier model",
+      "source": "https://metr.org/time-horizons/",
+      "confidence": 0.8
+    },
+    {
+      "id": "G02",
+      "name": "METR-doubling-months",
+      "current": 4.3,
+      "target": null,
+      "unit": "months",
+      "description": "P50 doubling time of frontier th50, post-2023 trend",
+      "source": "https://metr.org/blog/2026-1-29-time-horizon-1-1/",
+      "confidence": 0.9
+    },
+    {
+      "id": "G03",
+      "name": "Epoch-frontier-flops",
+      "current": 26.7,
+      "target": null,
+      "unit": "log10-FLOP",
+      "description": "log10 of largest known training run (Grok 4 ~5e26 FLOP)",
+      "source": "https://epoch.ai/trends",
+      "confidence": 0.95
+    },
+    {
+      "id": "G04",
+      "name": "ARC-AGI-2-SOTA-pct",
+      "current": 95.0,
+      "target": null,
+      "unit": "pct",
+      "description": "Best verified score on ARC-AGI-2 (Gemini 3.1 Pro + Code Evolution, Imbue, Feb 2026)",
+      "source": "https://arcprize.org/arc-agi/2",
+      "confidence": 0.85
+    },
+    {
+      "id": "G05",
+      "name": "Apollo-scheming-rate",
+      "current": 0.3,
+      "target": null,
+      "unit": "pct",
+      "description": "No-Nudge/No-Goal in-context scheming rate for field's leading model (o4-mini post-deliberative alignment)",
+      "source": "https://www.apolloresearch.ai/science/frontier-models-are-capable-of-incontext-scheming/",
+      "confidence": 0.75
+    },
+    {
+      "id": "G06",
+      "name": "AISI-self-replication-success",
+      "current": 60.0,
+      "target": null,
+      "unit": "pct",
+      "description": "Best frontier model success rate on AISI self-replication evals (up from <5% in 2023)",
+      "source": "https://www.aisi.gov.uk/research/aisi-frontier-ai-trends-report-2025",
+      "confidence": 0.9
+    },
+    {
+      "id": "G07",
+      "name": "Anthropic-RSP-current-ASL",
+      "current": 3,
+      "target": null,
+      "unit": "ASL-level",
+      "description": "Active AI Safety Level for Anthropic frontier models (activated May 2025)",
+      "source": "https://www.anthropic.com/responsible-scaling-policy",
+      "confidence": 0.99
+    },
+    {
+      "id": "G08",
+      "name": "OAI-Preparedness-level",
+      "current": "High",
+      "target": null,
+      "unit": "level",
+      "description": "OpenAI Preparedness risk level for current frontier (cyber + bio uplift tracked; not yet Critical)",
+      "source": "https://openai.com/index/updating-our-preparedness-framework/",
+      "confidence": 0.9
+    },
+    {
+      "id": "G09",
+      "name": "DeepMind-FSF-CCL",
+      "current": "Autonomy-L1",
+      "target": null,
+      "unit": "CCL-domain",
+      "description": "Highest Critical Capability Level reached under DeepMind FSF (novel environment navigation without oversight)",
+      "source": "https://deepmind.google/blog/strengthening-our-frontier-safety-framework/",
+      "confidence": 0.85
+    },
+    {
+      "id": "G10",
+      "name": "AI-Index-org-adoption-pct",
+      "current": 88.0,
+      "target": null,
+      "unit": "pct",
+      "description": "% of surveyed organizations reporting AI adoption (Stanford HAI AI Index 2026)",
+      "source": "https://hai.stanford.edu/ai-index/2026-ai-index-report",
+      "confidence": 0.98
+    },
+    {
+      "id": "G11",
+      "name": "AI-Index-consumer-spend-usd",
+      "current": 172.0,
+      "target": null,
+      "unit": "USD-billions",
+      "description": "Annual U.S. consumer value of generative AI tools (Stanford HAI AI Index 2026)",
+      "source": "https://hai.stanford.edu/ai-index/2026-ai-index-report",
+      "confidence": 0.98
+    },
+    {
+      "id": "G12",
+      "name": "working-consensus-TAI-year",
+      "current": 2029,
+      "target": null,
+      "unit": "year",
+      "description": "Community-median calendar year for transformative AI (center of 2027-2032 range)",
+      "source": "https://www.metaculus.com/questions/5121/",
+      "confidence": 0.6
+    }
+  ],
+  "publications": {
+    "arxiv": [
+      {
+        "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms (v14 — Math Pod V3 + Fly-High V6: Lutar Calculus, TH8-GΛR Lean Skeleton, Doctrine V6, arXiv-Ready)",
+        "version": "v14 (arxiv pkg)",
+        "submittedAt": null,
+        "sha256": "13ca4a0617dddfa619e97d48a65b042d13d229481354f085f7dcc9199af5973b",
+        "url": null,
+        "path": "_files/thesis/arxiv_pkg/arxiv_submission.zip",
+        "size_bytes": 39618,
+        "submission_status": "READY_AWAITING_CONFIRM",
+        "target_venue": "arXiv cs.LO + cs.PL"
+      }
+    ],
+    "zenodo": [
+      {
+        "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms (v14 — Math Pod V3 + Fly-High V6: Lutar Calculus, TH8-GΛR Lean Skeleton, Doctrine V6, arXiv-Ready)",
+        "version": "v14",
+        "doi": null,
+        "depositSha256": "904ce8df249a48b795b9cc6de3ae38a07e4b4454da3deba9fb31e92ea162e234",
+        "path": "_files/thesis/zenodo_pkg/deposit.json",
+        "submission_status": "READY_AWAITING_CONFIRM"
+      }
+    ]
+  },
+  "narrativeMap": {
+    "A1": {
+      "drivesDerivations": [
+        "T2",
+        "T6"
+      ],
+      "drivesTheorems": [
+        "TH7"
+      ],
+      "drivesConstants": [
+        "K10",
+        "K11"
+      ],
+      "note": "Soundness axiom: every passing receipt has Λ ≥ 0.90 conjunctively. Underpins the Curry-Howard correspondence (TH7) and is the runtime predicate measured by K10/K11."
+    },
+    "A2": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "moralGrounding floor at 0.95 — the first of two hardened ethics axes; manifested as λ_1 in the 9-axis vector."
+    },
+    "A3": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "measurabilityHonesty floor at 0.95 — bans unfalsifiable side-effects; manifested as λ_2."
+    },
+    "A4": {
+      "drivesDerivations": [
+        "T1",
+        "T8"
+      ],
+      "drivesTheorems": [
+        "TH1"
+      ],
+      "drivesConstants": [
+        "K06"
+      ],
+      "note": "Dual-witness disjointness; the structural prerequisite for ρ-closure composition (T1) and same-content/different-actor collision resistance (T8)."
+    },
+    "A5": {
+      "drivesDerivations": [
+        "T1",
+        "T2",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9"
+      ],
+      "drivesTheorems": [
+        "TH2",
+        "TH5"
+      ],
+      "drivesConstants": [
+        "K10",
+        "K11",
+        "K12"
+      ],
+      "note": "Deterministic replay — the single most-cited axiom; powers replay-DOI duality (TH2) and chain confluence (TH5)."
+    },
+    "A6": {
+      "drivesDerivations": [
+        "T1",
+        "T2",
+        "T3",
+        "T5",
+        "T7"
+      ],
+      "drivesTheorems": [
+        "TH1"
+      ],
+      "drivesConstants": [
+        "K01",
+        "K02",
+        "K03"
+      ],
+      "note": "Hash-chain integrity — preserved through every receipt build measured by K01/K02/K03."
+    },
+    "A7": {
+      "drivesDerivations": [
+        "T4",
+        "T7"
+      ],
+      "drivesTheorems": [
+        "TH6"
+      ],
+      "drivesConstants": [
+        "K13"
+      ],
+      "note": "Bekenstein bound — superseded by TH6 (DPI proof). Retained as axiom-of-record but classified as a corollary in v14."
+    },
+    "A8": {
+      "drivesDerivations": [
+        "T5",
+        "T9",
+        "T10"
+      ],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Ingest discipline (URL + content hash + license + ORCID) — the gate that keeps the corpus public-only."
+    },
+    "A9": {
+      "drivesDerivations": [
+        "T8",
+        "T10"
+      ],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Doctrine completeness — the SHA-anchored doctrine.json that T10 relies on for the no-forbidden-pattern proof."
+    },
+    "A10": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Proposed temporalConsistency — orthogonal to A5 (spatial vs temporal determinism)."
+    },
+    "A11": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Proposed causalSeparability — independent entropy across disjoint actors."
+    },
+    "A12": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Proposed constructiveTransparency — Λ scorer must be a pure function of public inputs."
+    },
+    "A13": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Proposed adversarialRobustness — proven corollary in v0.4.0 unified extension."
+    },
+    "A14": {
+      "drivesDerivations": [],
+      "drivesTheorems": [],
+      "drivesConstants": [],
+      "note": "Proposed economicGrounding — required for SR 11-7 / MiFID II / SEC 17a-4 verticals."
+    }
+  },
+  "openQuestions": [
+    "§10 Future Work — _files/thesis/th1_th3/paper.md L46",
+    "Neither system cites the other; the combination is a direction for future work. — _files/thesis/th1_th3/paper.md L183 (Linear-Time Runtime Verifier discussion)",
+    "The formal Lean proof of Theorem 1 is designated as future work in the `lutar-lean` repository, under the module `lutar-lean/Lutar/Bound.lean`. The current state carries a `sorry` at the key step pending Mathlib discharge of the boundary-entropy inequality. — _files/thesis/th1_th3/paper.md L773",
+    "Theorem 1 (Λ uniqueness) and the Bound theorem are formally stated with proof scaffolds; both carry `sorry` pending Mathlib discharge. The public commitment is that the `sorry` count converges to zero. — _files/thesis/th1_th3/paper.md L972",
+    "Λ-scoring determinism is rule-based. ... Future work (§10) proposes investigating deterministic interfaces to larger models. — _files/thesis/th1_th3/paper.md L2052",
+    "The Bekenstein bound is informally argued. ... A full Lean proof of the Bekenstein bound is future work, listed in §10. Until that proof exists, the Bekenstein claim should be treated as a motivated conjecture, not a theorem. — _files/thesis/th1_th3/paper.md L2054",
+    "A1 derivability (U8): The soundnessAxiom (A1) is no longer an independent assumption. ... pending formalization in lutar-lean/Lutar/Axioms.lean. — _files/thesis/th4_th7/phd_thesis.md L343",
+    "TH4, TH5 pending Lean proof: The Λ-Category and Confluence theorems are informal arguments pending formalization in lutar-lean. — _files/thesis/th4_th7/phd_thesis.md L393",
+    "Against a malicious repository admin with commit access: the blockchain cannot prevent history rewriting without additional tooling (e.g., git-notary or Sigstore Rekor). This is the stated PENDING action for the next Scorecard improvement cycle. — _files/thesis/th4_th7/phd_thesis.md L404",
+    "§11 Future Work — _files/thesis/th4_th7/phd_thesis.md L408",
+    "Knowledge.json A1 `isDerived` flag added | ⚠ Documentation pending — _files/thesis/th4_th7/pm_math_report.md L72",
+    "Knowledge.json A13 maturity → \"proven (corollary)\" | ⚠ Documentation pending — _files/thesis/th4_th7/pm_math_report.md L73",
+    "K13 sample size gap — flag M2-7 pending documentation — _files/thesis/th4_th7/pm_math_report.md L146",
+    "TH4, TH5 pending Lean proof (lutar-lean/Lutar/LaxFunctor.lean) — 3–5 days Lean 4 work — _files/thesis/th4_th7/pm_math_report.md L187",
+    "Milestone GΛR-M2 (sorry-count → 0 on TH8b): Formal proof that grade-1 = deterministic replay. This discharges the one remaining conceptual gap in the \"5× byte-identical replay as a Lean theorem\" claim — currently only measured (K10), not proved (lutar-lean TH_L4 is pending). — _files/thesis/th8_glr/proposal.md L294",
+    "TH8 Graded Λ-Receipt Identity — proof_status: research_theorem_gaps_identified — dev1_thesis/thesis_payload.json TH8",
+    "TH8a Capability Revocation by Construction — proof_status: sorry_pending — dev1_thesis/thesis_payload.json",
+    "TH8b Deterministic Replay as Grade Identity — proof_status: sorry_pending — dev1_thesis/thesis_payload.json",
+    "TH8c Lambda-Floor as Linear-Logic Provability — proof_status: sorry_pending — dev1_thesis/thesis_payload.json",
+    "PUSH_2_ZENODO_MINT (v14) — READY_AWAITING_CONFIRM (one-way door) — payload.json push_queue_ready_one_way_doors",
+    "PUSH_1_ARXIV_SUBMIT — READY_AWAITING_CONFIRM (one-way door) — payload.json push_queue_ready_one_way_doors"
+  ],
+  "_gaps": [
+    "forecastGauges[G01].target",
+    "forecastGauges[G02].target",
+    "forecastGauges[G03].target",
+    "forecastGauges[G04].target",
+    "forecastGauges[G05].target",
+    "forecastGauges[G06].target",
+    "forecastGauges[G07].target",
+    "forecastGauges[G08].target",
+    "forecastGauges[G09].target",
+    "forecastGauges[G10].target",
+    "forecastGauges[G11].target",
+    "forecastGauges[G12].target",
+    "publications.arxiv[0].submittedAt",
+    "publications.arxiv[0].url",
+    "publications.zenodo[0].doi (v14 pending mint)",
+    "doiLedger[*].sha256 (not provided in source)"
+  ],
+  "_sources_walked": [
+    "/tmp/payload/dev1_thesis/thesis_payload.json",
+    "/tmp/payload/_files/thesis/th1_th3/paper.md",
+    "/tmp/payload/_files/thesis/th4_th7/phd_thesis.md",
+    "/tmp/payload/_files/thesis/th4_th7/pm_math_report.md",
+    "/tmp/payload/_files/thesis/th8_glr/proposal.md",
+    "/tmp/payload/_files/thesis/lean_th8/{GradedSemiring,LinearReceipt,GLR,StrongMonadIdentity}.lean",
+    "/tmp/payload/_files/thesis/arxiv_pkg/arxiv_submission.zip",
+    "/tmp/payload/_files/thesis/zenodo_pkg/deposit.json",
+    "/tmp/payload/dev2_runtime/runtime_payload.json",
+    "/tmp/payload/dev2_runtime/raw_runtime/{ouroboros,ouroboros-thesis,a11oy}.json",
+    "/tmp/payload/dev3_agi_v5/agi_v5_payload.json",
+    "/tmp/payload/payload.json",
+    "github:szl-holdings/a11oy@main packages/a11oy-knowledge/src/{knowledge.json,proposed_axioms.ts,derivations.ts,theorems.ts,unified_extension.ts,package.json}",
+    "github:szl-holdings/a11oy@main README.md",
+    "github:szl-holdings/ouroboros-thesis@main README.md"
+  ]
+}

@@ -1,0 +1,252 @@
+{
+  "generatedAt": "2026-05-16T12:30:00Z",
+  "generatedBy": "task-agent · roadmap & gap analyst",
+  "items": [
+    {
+      "id": "BL-001",
+      "title": "Implement VSP TypeScript package under packages/ouroboros/src/vsp",
+      "rationale": "Unblocks PUSH_4 (ouroboros v6.4.0-rc) and ships the V5 'first cryptographically-verifiable OpenTelemetry GenAI' claim. Linked: agiV5Gaps.vspOtelStatus=missing, pushQueue.blocked.PUSH_4_OUROBOROS_v6_4_0_rc.",
+      "category": "agi-v5",
+      "severity": "high",
+      "estimateHours": 60,
+      "owner": "main-agent",
+      "preconditions": ["packages/ouroboros builds clean", "OTel SDK pinned via pnpm-workspace.yaml catalog"],
+      "acceptanceCriteria": [
+        "packages/ouroboros/src/vsp/{types,emitter,sdk,index}.ts created per agi_v5_payload.json vsp.components",
+        "loop-kernel.ts buildReceipt() exit path emits Lambda span with 16 szl.vsp.* attributes",
+        "trace_id derives from first 16 bytes of receipt SHA-256",
+        "35 new tests pass; perf overhead < 1.8 us; total 253/253 tests"
+      ],
+      "filesLikelyTouched": [
+        "packages/ouroboros/src/vsp/types.ts",
+        "packages/ouroboros/src/vsp/emitter.ts",
+        "packages/ouroboros/src/vsp/sdk.ts",
+        "packages/ouroboros/src/vsp/index.ts",
+        "packages/ouroboros/src/loop-kernel.ts",
+        "packages/ouroboros/test/vsp/*.test.ts"
+      ]
+    },
+    {
+      "id": "BL-002",
+      "title": "Bootstrap szl-holdings/vsp-otel repo content from local VSP package",
+      "rationale": "Live repo is scaffold-only (8 KB, only LICENSE/README/CITATION). Needed for hygieneGaps.vsp-otel and to anchor PUSH_4 release.",
+      "category": "hygiene",
+      "severity": "high",
+      "estimateHours": 6,
+      "owner": "main-agent",
+      "preconditions": ["BL-001 complete or in PR"],
+      "acceptanceCriteria": [
+        "src/ committed mirroring packages/ouroboros/src/vsp",
+        "CI workflows added (ci, codeql, scorecard)",
+        "Branch protection ruleset matches a11oy",
+        "CODEOWNERS, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md present",
+        "v0.1.0-alpha tag pushed"
+      ],
+      "filesLikelyTouched": ["szl-holdings/vsp-otel: src/, .github/workflows/, CODEOWNERS, SECURITY.md"]
+    },
+    {
+      "id": "BL-003",
+      "title": "Implement Forecast Gauge crate (12 gauges + 3 derived + 4 gates)",
+      "rationale": "agiV5Gaps.forecastGaugeStatus=missing. Anchors operational AGI-progress dashboard at forecast.szlholdings.com.",
+      "category": "agi-v5",
+      "severity": "high",
+      "estimateHours": 80,
+      "owner": "main-agent",
+      "preconditions": ["Rust toolchain decision (or pivot to TS in packages/forecast-fabric)"],
+      "acceptanceCriteria": [
+        "12 gauge update crons configured per spec",
+        "horizon_velocity, alignment_debt, lutar_readiness implemented in derived.rs (or .ts)",
+        "GATE_1..GATE_4 enforced in a11oy runtime",
+        "daily forecast.summary receipt cadence at 07:00 UTC"
+      ],
+      "filesLikelyTouched": [
+        "crates/agi-forecast/src/derived.rs OR packages/forecast-fabric/src/derived.ts",
+        "packages/ouroboros guard hooks for GATE_*",
+        "szl-holdings/agi-forecast repo content"
+      ]
+    },
+    {
+      "id": "BL-004",
+      "title": "User confirm_action: Zenodo v14 mint then arXiv submission",
+      "rationale": "pushQueue.ready PUSH_2 + PUSH_1; one-way doors require user. Mint Zenodo first to embed DOI in arXiv abstract.",
+      "category": "publication",
+      "severity": "high",
+      "estimateHours": 1,
+      "owner": "user",
+      "preconditions": [
+        "Verify deposit.json sha256=904ce8df... matches",
+        "Verify arxiv_submission.zip sha256=13ca4a06... matches",
+        "Elevate Zenodo credential from READ_ONLY to write"
+      ],
+      "acceptanceCriteria": [
+        "Zenodo v14 DOI minted",
+        "arXiv submission accepted with cs.LO + cs.PL classes",
+        "DOI badge updated in lutar-lean and ouroboros-thesis READMEs"
+      ],
+      "filesLikelyTouched": ["external: Zenodo, arXiv"]
+    },
+    {
+      "id": "BL-005",
+      "title": "Open remediation PR removing 'Jr.' / 'Stephen Paul' from ouroboros-thesis historical paper versions",
+      "rationale": "DV-002 doctrine violation across v2-v12 historical files; PR #40 changed files clean but corpus still contains forbidden patterns.",
+      "category": "doctrine",
+      "severity": "high",
+      "estimateHours": 4,
+      "owner": "main-agent",
+      "preconditions": ["Confirm with PM that historical paper rewrites are acceptable (not technically immutable)"],
+      "acceptanceCriteria": [
+        "Forbidden-pattern grep returns 0 matches across the entire repo",
+        "PR merged via squash with doctrine-clean commit byline 'Lutar, Stephen P.'"
+      ],
+      "filesLikelyTouched": ["szl-holdings/ouroboros-thesis: papers/v2-v12 markdown"]
+    },
+    {
+      "id": "BL-006",
+      "title": "Fix git commit byline 'Stephen Paul Lutar Jr.' on stephenlutar2-hash account",
+      "rationale": "DV-001: live commits across 7 repos still show forbidden author; doctrine canonical byline is 'Lutar, Stephen P.' Affects every Scorecard-linked commit history.",
+      "category": "doctrine",
+      "severity": "high",
+      "estimateHours": 1,
+      "owner": "user",
+      "preconditions": ["Update GitHub user.name + git config --global user.name"],
+      "acceptanceCriteria": [
+        "git config user.name = 'Lutar, Stephen P.'",
+        "GitHub profile name updated",
+        "All future commits doctrine-clean"
+      ],
+      "filesLikelyTouched": ["~/.gitconfig", "GitHub profile"]
+    },
+    {
+      "id": "BL-007",
+      "title": "Add second org collaborator with code-owner standing",
+      "rationale": "DV-005 / ops_payload structural_finding: Scorecard Code-Review=0 across all repos because self-only CODEOWNERS forbids self-approve. Lifts org scorecard_avg from 6.62.",
+      "category": "hygiene",
+      "severity": "medium",
+      "estimateHours": 2,
+      "owner": "user",
+      "preconditions": ["Identify second collaborator (admin:org scope currently missing — see ops credentials)"],
+      "acceptanceCriteria": ["Second user added as code-owner on all 14 production repos", "First PR with second-collaborator review merges"],
+      "filesLikelyTouched": ["org-level: members; CODEOWNERS in 14 repos"]
+    },
+    {
+      "id": "BL-008",
+      "title": "Resolve packages/forecast-fabric vs spec'd Rust agi-forecast duplication",
+      "rationale": "monorepoOrphans: forecast-fabric is a TS workspace package, spec calls for Rust crate. Either pivot the spec to TS (faster) or retire forecast-fabric.",
+      "category": "monorepo",
+      "severity": "medium",
+      "estimateHours": 3,
+      "owner": "main-agent",
+      "preconditions": ["BL-003 design decision"],
+      "acceptanceCriteria": ["Single canonical home for forecast gauges; orphan deleted or repurposed"],
+      "filesLikelyTouched": ["packages/forecast-fabric/*", "pnpm-workspace.yaml"]
+    },
+    {
+      "id": "BL-009",
+      "title": "Close 8 sorries in TH8 GLR Lean skeleton",
+      "rationale": "DV-004; thesisPublicationGaps.TH8-GLR. Required to claim zero-sorry POPL 2027 submission.",
+      "category": "publication",
+      "severity": "medium",
+      "estimateHours": 120,
+      "owner": "user",
+      "preconditions": ["Lean 4 toolchain in lutar-lean repo"],
+      "acceptanceCriteria": ["sorry-count = 0 across GradedSemiring.lean, LinearReceipt.lean, GLR.lean, StrongMonadIdentity.lean"],
+      "filesLikelyTouched": ["lutar-lean/Lutar/{LaxFunctor,Th8/*}.lean"]
+    },
+    {
+      "id": "BL-010",
+      "title": "Apply branch protection + CI workflows to vsp-otel and agi-forecast",
+      "rationale": "Both new repos lack BP, CI, Scorecard, Dependabot — drops org branch_protection_compliant from 10 to a planned 12.",
+      "category": "hygiene",
+      "severity": "medium",
+      "estimateHours": 2,
+      "owner": "main-agent",
+      "preconditions": ["BL-002 / BL-003 in flight"],
+      "acceptanceCriteria": ["Both repos appear in payload BP-compliant list at next deep audit", "Scorecard runs green"],
+      "filesLikelyTouched": ["vsp-otel/.github/workflows/*", "agi-forecast/.github/workflows/*"]
+    },
+    {
+      "id": "BL-011",
+      "title": "Reconcile NOASSERTION licenses (7 repos) → set explicit SPDX in license file headers",
+      "rationale": "DV-003: license_allowlist not enforced because GitHub cannot detect SPDX. Risk: external scanners flag these as non-OSS.",
+      "category": "doctrine",
+      "severity": "medium",
+      "estimateHours": 2,
+      "owner": "main-agent",
+      "preconditions": [],
+      "acceptanceCriteria": ["gh api repos/{repo} returns license.spdx_id = Apache-2.0 (or CC-BY-4.0) for amaru, a11oy, sentra, terra, vessels, counsel, carlota-jo, ouroboros"],
+      "filesLikelyTouched": ["LICENSE in each affected repo (use canonical Apache-2.0 boilerplate)"]
+    },
+    {
+      "id": "BL-012",
+      "title": "Provide NPM_TOKEN secret to env to unblock PUSH_6",
+      "rationale": "pushQueue.blocked PUSH_6 a11oy-knowledge v0.4.0 npm publish.",
+      "category": "push-queue",
+      "severity": "medium",
+      "estimateHours": 0.25,
+      "owner": "user",
+      "preconditions": ["npmjs.com automation token with publish scope"],
+      "acceptanceCriteria": ["@szl-holdings/a11oy-knowledge@0.4.0 visible on npm registry"],
+      "filesLikelyTouched": ["Replit Secrets"]
+    },
+    {
+      "id": "BL-013",
+      "title": "Audit 24 ouroboros-* sibling packages for orphans",
+      "rationale": "monorepoOrphans large family of experimental ouroboros-{aristotle,blanca,...} packages with no inbound references in api-server route surface.",
+      "category": "monorepo",
+      "severity": "low",
+      "estimateHours": 4,
+      "owner": "task-agent",
+      "preconditions": [],
+      "acceptanceCriteria": ["Each ouroboros-* package classified active / experimental / orphan; orphans archived under packages/_archive/"],
+      "filesLikelyTouched": ["packages/ouroboros-*"]
+    },
+    {
+      "id": "BL-014",
+      "title": "Remove or relocate stray file packages/proxy-routes.ts",
+      "rationale": "monorepoOrphans: not a valid workspace package (file at packages/ root).",
+      "category": "monorepo",
+      "severity": "low",
+      "estimateHours": 0.25,
+      "owner": "task-agent",
+      "preconditions": [],
+      "acceptanceCriteria": ["File removed from packages/ root or moved into a proper package directory"],
+      "filesLikelyTouched": ["packages/proxy-routes.ts"]
+    },
+    {
+      "id": "BL-015",
+      "title": "Cut v1.0.0 (or v1.0.0-alpha) signed releases on the 7 production repos missing latest_release",
+      "rationale": "Scorecard Signed-Releases=-1 across amaru/a11oy/sentra/terra/vessels/counsel/carlota-jo. Lifts org scorecard average.",
+      "category": "hygiene",
+      "severity": "low",
+      "estimateHours": 4,
+      "owner": "main-agent",
+      "preconditions": ["BL-005 + BL-011 doctrine-clean"],
+      "acceptanceCriteria": ["Each repo shows latest_release with sigstore/cosign signature"],
+      "filesLikelyTouched": ["GitHub Releases UI / gh release create"]
+    }
+  ],
+  "topTen": [
+    "BL-004",
+    "BL-006",
+    "BL-001",
+    "BL-005",
+    "BL-002",
+    "BL-003",
+    "BL-007",
+    "BL-009",
+    "BL-011",
+    "BL-010"
+  ],
+  "topTenSummary": [
+    "BL-004 — User confirm_action to mint Zenodo v14 then submit arXiv (1h, unblocks publication track)",
+    "BL-006 — Fix Git/GitHub byline from 'Stephen Paul Lutar Jr.' to 'Lutar, Stephen P.' (1h, stops doctrine bleed)",
+    "BL-001 — Implement VSP TS package under packages/ouroboros/src/vsp (60h, unblocks PUSH_4 + V5 keystone claim)",
+    "BL-005 — Remediation PR scrubbing 'Jr.'/'Stephen Paul' from ouroboros-thesis history (4h)",
+    "BL-002 — Push VSP src + CI to szl-holdings/vsp-otel scaffold repo (6h)",
+    "BL-003 — Build Forecast Gauge: 12 gauges + 3 derived + 4 gates (80h)",
+    "BL-007 — Add second org collaborator to fix Scorecard Code-Review=0 (2h, lifts every repo)",
+    "BL-009 — Close 8 Lean sorries in TH8 GLR (120h, claims zero-sorry POPL submission)",
+    "BL-011 — Set explicit SPDX in 7 NOASSERTION license files (2h)",
+    "BL-010 — Apply BP + CI workflows to vsp-otel and agi-forecast (2h)"
+  ]
+}

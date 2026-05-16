@@ -200,6 +200,9 @@ const ReleasesSection = lazy(() => import('./pages/ReleasesSection').then(m => (
 const AuditSection = lazy(() => import('./pages/AuditSection').then(m => ({ default: m.AuditSection })));
 const DoctrineOverview = lazy(() => import('./pages/DoctrineOverview').then(m => ({ default: m.DoctrineOverview })));
 const PayloadProvenance = lazy(() => import('./pages/PayloadProvenance').then(m => ({ default: m.PayloadProvenance })));
+const OrgAtlas = lazy(() => import('./pages/OrgAtlas').then(m => ({ default: m.OrgAtlas })));
+const ThesisAtlas = lazy(() => import('./pages/ThesisAtlas').then(m => ({ default: m.ThesisAtlas })));
+const RoadmapGap = lazy(() => import('./pages/RoadmapGap').then(m => ({ default: m.RoadmapGap })));
 const RiskReports = lazy(() => import('./pages/RiskReports').then(m => ({ default: m.RiskReports })));
 const BehavioralAudit = lazy(() => import('./pages/BehavioralAudit').then(m => ({ default: m.BehavioralAudit })));
 const CovenantLift = lazy(() => import('./pages/CovenantLift').then(m => ({ default: m.CovenantLift })));
@@ -728,6 +731,9 @@ function AppInner() {
         <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />
         <Route path={`${base}/payload`} component={PayloadProvenance} />
+        <Route path={`${base}/atlas/org`} component={OrgAtlas} />
+        <Route path={`${base}/atlas/thesis`} component={ThesisAtlas} />
+        <Route path={`${base}/atlas/roadmap`} component={RoadmapGap} />
         <Route path={`${base}/risk-reports`} component={RiskReports} />
         <Route path={`${base}/behavioral-audit`} component={BehavioralAudit} />
         <Route path={`${base}/covenant-lift`} component={CovenantLift} />

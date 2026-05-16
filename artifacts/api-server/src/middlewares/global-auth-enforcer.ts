@@ -468,6 +468,11 @@ const PUBLIC_PREFIXES = [
   // authMiddleware() + denyIfReadOnly() guard in routes/doctrine-crud.ts and
   // are additionally protected by CSRF at the server level.
   "/api/a11oy/",
+  // SZL Atlas — read-only public surface backing the A11oy /atlas/* pages
+  // (Org Atlas, Thesis Atlas, Roadmap & Gap Report). All endpoints are GET
+  // and serve static JSON snapshots from artifacts/api-server/src/data/audit/.
+  // No mutating routes exist on this prefix.
+  "/api/szl/atlas/",
   // Capability Fabric — proof-carrying capability routing.
   // NOTE: GET endpoints and POST /route are public (see method-specific checks
   // below the prefix list). PUT /weights mutates routing policy and requires

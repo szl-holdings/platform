@@ -40,6 +40,7 @@ import { a11oyClaudeCodeDoctrineRouter } from "./a11oy-claude-code-doctrine.js";
 import a11oyAgenticPagesRouter from "./a11oy-agentic-pages-api";
 import a11oyDoctrineRouter from "./a11oy-doctrine-api";
 import a11oyPayloadRouter from "./a11oy-payload";
+import szlAtlasRouter from "./szl-atlas";
 import forgeSkillsRouter from "./forge-skills";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
@@ -355,6 +356,10 @@ router.use('/a11oy', a11oyDoctrineRouter);
 // push queue / Λ-axes / artifact indices / manifest. Backed by the typed
 // @szl-holdings/payload-doctrine workspace package.
 router.use('/a11oy/payload', a11oyPayloadRouter);
+
+// SZL Atlas — read-only audit JSON snapshots (GitHub org sweep, thesis lineage, gap report, backlog).
+// Files live at artifacts/api-server/src/data/audit/*.json and are loaded lazily on first request.
+router.use('/szl/atlas', szlAtlasRouter);
 
 // A11oy Agentic Pages API — seed data endpoints for the 9 agentic frontend pages
 // (A2A Interop, Agent Identity, Self-Optimization, Security Agents, Gateway, Proof Ledger, Memory, Signal Mesh).

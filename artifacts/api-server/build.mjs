@@ -313,6 +313,17 @@ async function copyConfigFiles() {
   }
 }
 
+async function copyAuditData() {
+  const distDir = path.resolve(artifactDir, 'dist');
+  const auditSrc = path.join(artifactDir, 'src', 'data', 'audit');
+  const auditDest = path.join(distDir, 'data', 'audit');
+  try {
+    await mkdir(auditDest, { recursive: true });
+    await cp(auditSrc, auditDest, { recursive: true });
+  } catch (_err) {
+  }
+}
+
 async function copyAgentStubs() {
   const distDir = path.resolve(artifactDir, 'dist');
   const stubsSrc = path.join(artifactDir, 'src', 'agents', 'stubs');
@@ -330,6 +341,7 @@ buildAll()
   )
   .then(() => copyConfigFiles())
   .then(() => copyAgentStubs())
+  .then(() => copyAuditData())
   .then(() => copyPdfkitData())
   .catch((_err) => {
     process.exit(1);

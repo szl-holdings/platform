@@ -1,0 +1,246 @@
+{
+  "generatedAt": "2026-05-16T12:30:00Z",
+  "generatedBy": "task-agent · roadmap & gap analyst",
+  "sources": {
+    "payload": "/tmp/payload/payload.json",
+    "ops": "/tmp/payload/dev4_ops/ops_payload.json",
+    "thesis": "/tmp/payload/dev1_thesis/thesis_payload.json",
+    "agi_v5": "/tmp/payload/dev3_agi_v5/agi_v5_payload.json",
+    "github_inventory": "/tmp/payload/github_pro/github_inventory.json",
+    "live_gh": "GET orgs/szl-holdings/repos"
+  },
+  "doctrineCompliance": {
+    "lambdaFloorMet": true,
+    "moralGroundingMet": true,
+    "measurabilityHonestyMet": true,
+    "byteIdenticalReplaysObserved": 5,
+    "byteIdenticalReplaysRequired": 5,
+    "ingestionPolicyEnforced": true,
+    "licenseAllowlistEnforced": false,
+    "violations": [
+      {
+        "id": "DV-001",
+        "what": "Forbidden byline 'Stephen Paul Lutar Jr.' present as author on most recent dependabot/CI commits across amaru, a11oy, sentra, terra, vessels, counsel, carlota-jo (e.g. amaru fix #16, a11oy #17). Doctrine forbidden_patterns include 'Jr.' and 'Stephen Paul'.",
+        "where": "github_inventory.json repos.amaru.recent_commits[0].author; ops_payload.json doctrine.forbidden_patterns",
+        "severity": "high"
+      },
+      {
+        "id": "DV-002",
+        "what": "Pre-existing doctrine violations in ouroboros-thesis historical paper versions v2-v12 (Jr., Stephen Paul, AlloyScape, Perplexity Computer) — separate remediation PR not yet opened.",
+        "where": "ops_payload.json github_merge_history.pre_existing_doctrine_violations",
+        "severity": "high"
+      },
+      {
+        "id": "DV-003",
+        "what": "License field 'NOASSERTION' on 8 repos (amaru, a11oy, sentra, terra, vessels, counsel, carlota-jo, ouroboros) per live GitHub API — not in license_allowlist [Apache-2.0, MIT, BSD-3-Clause, CC-BY-4.0]. License files exist but SPDX not registered with GitHub.",
+        "where": "live gh api orgs/szl-holdings/repos -> license.spdx_id",
+        "severity": "medium"
+      },
+      {
+        "id": "DV-004",
+        "what": "TH8 Lean skeleton has 8 sorries (target 0) blocking POPL 2027 submission claim of zero-sorry proof.",
+        "where": "thesis_payload.json fly_high_v6_audit.lean_th8_sorries=8",
+        "severity": "medium"
+      },
+      {
+        "id": "DV-005",
+        "what": "Self-only CODEOWNERS structurally prevents code-owner reviews → Scorecard Code-Review=0 across all 14 production repos; org-level mitigation not yet applied.",
+        "where": "ops_payload.json github_merge_history.structural_finding; github_inventory openssf_scorecard.checks[Code-Review]",
+        "severity": "medium"
+      }
+    ]
+  },
+  "pushQueue": {
+    "ready": [
+      {
+        "id": "PUSH_2_ZENODO_MINT",
+        "artifact": "_files/thesis/zenodo_pkg/deposit.json",
+        "targetVersion": "v14",
+        "sha256": "904ce8df249a48b795b9cc6de3ae38a07e4b4454da3deba9fb31e92ea162e234",
+        "blocker": "confirm_action one-way door (Zenodo DOI mint is irrevocable)",
+        "recommendedAction": "User-initiated confirm_action with Zenodo READ_ONLY credential elevated to write; verify deposit.json sha256 before mint."
+      },
+      {
+        "id": "PUSH_1_ARXIV_SUBMIT",
+        "artifact": "_files/thesis/arxiv_pkg/arxiv_submission.zip",
+        "targetVersion": "arxiv cs.LO + cs.PL",
+        "sha256": "13ca4a0617dddfa619e97d48a65b042d13d229481354f085f7dcc9199af5973b",
+        "blocker": "confirm_action one-way door",
+        "recommendedAction": "User-initiated confirm_action; arXiv submission cannot be retracted clean. Submit AFTER Zenodo DOI mint to embed DOI in arXiv abstract."
+      }
+    ],
+    "blocked": [
+      {
+        "id": "PUSH_4_OUROBOROS_v6_4_0_rc",
+        "artifact": "PR to szl-holdings/ouroboros tag v6.4.0-rc",
+        "blocker": "TS runtime code (pool, merkle-dag, BLAKE3, xoshiro256**) not implemented; also depends on VSP wiring into packages/ouroboros/src/runtime/loop-kernel.ts (file exists but no vsp/ subdir present)",
+        "recommendedAction": "Implement pool, merkle-dag, BLAKE3, xoshiro256** in packages/ouroboros/src; wire vsp/emitter.ts → loop-kernel.ts buildReceipt() exit path.",
+        "owner": "main-agent"
+      },
+      {
+        "id": "PUSH_6_NPM_PUBLISH_a11oy_knowledge",
+        "artifact": "npm @szl-holdings/a11oy-knowledge v0.4.0",
+        "blocker": "NPM_TOKEN not in env",
+        "recommendedAction": "User to provide NPM_TOKEN secret via Replit Secrets; main-agent to run pnpm publish with --access public.",
+        "owner": "user"
+      }
+    ],
+    "executed": [],
+    "missingFromCode": [
+      {
+        "id": "PUSH_4_OUROBOROS_v6_4_0_rc",
+        "missing": "packages/ouroboros/src has loop-kernel.ts but NO vsp/ subdirectory (no types.ts, emitter.ts, sdk.ts) per spec in agi_v5_payload.json vsp.components"
+      }
+    ]
+  },
+  "hygieneGaps": [
+    {
+      "repo": "vsp-otel",
+      "evidence": "live gh api repos/szl-holdings/vsp-otel/contents → only [.github, CITATION.cff, LICENSE, README.md]; size=8 KB; open_issues=0; no tags, no releases; payload also flags in org_summary.hygiene_gaps",
+      "issues": [
+        "no src/ tree — scaffold-only repository; spec calls for full VSP TS package (4 weeks ship)",
+        "no tags, no releases (payload-required v6.4.0)",
+        "no CI workflows visible (no Scorecard, no CodeQL, no docs check)",
+        "no branch protection (not in payload BP-compliant=10 list)",
+        "no CODEOWNERS present at standard path",
+        "Scorecard never run on this repo"
+      ],
+      "recommendedActions": [
+        "Scaffold src/ with files per agi_v5_payload.json vsp.components (types.ts, emitter.ts, sdk.ts, index.ts)",
+        "Copy CI workflows from amaru (.github/workflows/{ci.yml, codeql.yml, scorecard.yml})",
+        "Apply same branch-protection ruleset as a11oy (status checks, code-owner reviews, enforce_admins)",
+        "Add CODEOWNERS, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md",
+        "Tag v0.1.0-alpha after first src commit"
+      ]
+    },
+    {
+      "repo": "agi-forecast",
+      "evidence": "live gh api repos/szl-holdings/agi-forecast/contents → only [.github, CITATION.cff, LICENSE, README.md]; size=8 KB; payload flags in org_summary.hygiene_gaps; spec calls for crates/agi-forecast/src/derived.rs (Rust) per agi_v5_payload.json forecast_gauge.derived_metrics[].implementation",
+      "issues": [
+        "no src/ or crates/ tree — scaffold-only",
+        "no Rust toolchain configured (Cargo.toml missing)",
+        "no CI workflows, no Scorecard",
+        "no branch protection",
+        "no tags, no releases (target ship 14 days)",
+        "12 forecast gauges, 3 derived metrics, 4 a11oy gates not implemented"
+      ],
+      "recommendedActions": [
+        "Scaffold crates/agi-forecast Cargo workspace per spec",
+        "Implement gauges 1-12 with provenance receipt-attest cron @ 07:00 UTC",
+        "Implement derived metrics: horizon_velocity, alignment_debt, lutar_readiness",
+        "Wire 4 a11oy safety gates (GATE_1..GATE_4) into a11oy runtime",
+        "Apply CI + branch protection + CODEOWNERS as for amaru/a11oy"
+      ]
+    },
+    {
+      "repo": "all-14-production-repos",
+      "evidence": "github_inventory.json repos.*.openssf_scorecard.checks[Code-Review].score=0 (Found 0/25 approved changesets); ops_payload.json structural_finding",
+      "issues": [
+        "Scorecard Code-Review=0 across amaru/a11oy/sentra/terra/vessels/counsel/carlota-jo/ouroboros/etc. due to single-collaborator self-only CODEOWNERS",
+        "Scorecard CII-Best-Practices=0 (no badge)",
+        "Fuzzing=0 across all repos",
+        "No releases on amaru/a11oy/sentra/terra/vessels/counsel/carlota-jo (latest_release=null) — Signed-Releases=-1"
+      ],
+      "recommendedActions": [
+        "Add second org collaborator with code-owner standing (ops_payload recommendation)",
+        "Apply for OpenSSF best-practices badge to lift CII score",
+        "Create v1.0.0-alpha → v1.0.0 release tags with signed artifacts"
+      ]
+    }
+  ],
+  "orgSummaryDelta": {
+    "payload": {
+      "repos_total": 16,
+      "ci_failing": 0,
+      "open_prs": 64,
+      "open_alerts_code_scanning": 115,
+      "open_dependabot_high_critical": 0,
+      "scorecard_avg": 6.62,
+      "branch_protection_compliant": 10,
+      "branch_protection_weak": 6,
+      "hygiene_gaps": ["vsp-otel", "agi-forecast"]
+    },
+    "live": {
+      "repos_total_including_dot_github": 17,
+      "repos_total_excluding_dot_github": 16,
+      "license_apache_2_0_count": 7,
+      "license_cc_by_4_0_count": 3,
+      "license_noassertion_count": 7,
+      "vsp_otel_present": true,
+      "vsp_otel_size_kb": 8,
+      "agi_forecast_present": true,
+      "agi_forecast_size_kb": 8,
+      "ci_failing_observed": 0,
+      "note": "Live cross-check via gh api orgs/szl-holdings/repos confirmed all 17 repos (16 product + .github) match clone_manifest.json SHAs."
+    },
+    "drift": {
+      "repos_total": "payload=16 vs live=17 (live includes szl-holdings/.github org-meta repo not counted in payload)",
+      "vsp_otel_status": "payload says hygiene_gap; live confirms scaffold-only (4 files, no src)",
+      "agi_forecast_status": "payload says hygiene_gap; live confirms scaffold-only (4 files, no src)",
+      "license_assertion": "payload claims license_allowlist enforced; live shows 7 repos with NOASSERTION SPDX (license files present but not auto-detected by GitHub)"
+    }
+  },
+  "thesisPublicationGaps": [
+    {
+      "id": "TH1-TH3",
+      "missing": "none — published v11, DOI 10.5281/zenodo.20119582",
+      "blocking": "none"
+    },
+    {
+      "id": "TH4-TH7",
+      "missing": "Lean 4 formal proofs (TH4 conjectured, TH5 conjectured, TH6 informal_proof_complete only) — depends on lutar-lean/Lutar/LaxFunctor.lean which is pending",
+      "blocking": "none (already published v14 informally; arxiv submission ready)"
+    },
+    {
+      "id": "TH8-GLR",
+      "missing": "8 Lean sorries in skeleton (TH8a/8b/8c all sorry_pending); proof files GradedSemiring.lean, LinearReceipt.lean, GLR.lean, StrongMonadIdentity.lean staged but unproven",
+      "blocking": "arxiv (POPL deadline 2026-08); zenodo deposit can mint v14 without TH8 closure but loses 'zero-sorry' claim"
+    },
+    {
+      "id": "PUB-ARXIV",
+      "missing": "confirm_action one-way door from user; arxiv_submission.zip ready (sha256 13ca4a06...)",
+      "blocking": "arxiv"
+    },
+    {
+      "id": "PUB-ZENODO",
+      "missing": "confirm_action one-way door; zenodo creds READ_ONLY only (need write elevation)",
+      "blocking": "zenodo"
+    }
+  ],
+  "agiV5Gaps": {
+    "vspOtelStatus": "missing",
+    "forecastGaugeStatus": "missing",
+    "missingComponents": [
+      "packages/ouroboros/src/vsp/types.ts",
+      "packages/ouroboros/src/vsp/emitter.ts (LambdaSpanEmitter)",
+      "packages/ouroboros/src/vsp/sdk.ts (initVsp)",
+      "packages/ouroboros/src/vsp/index.ts",
+      "modification: packages/ouroboros/src/runtime/loop-kernel.ts (does not exist; package has loop-kernel.ts at packages/ouroboros/src/loop-kernel.ts but no runtime/ subdir nor vsp wiring)",
+      "test/vsp/{emitter,schema,integration,perf,verify}.test.ts (35 new tests planned)",
+      "crates/agi-forecast/src/derived.rs (Rust derived metrics)",
+      "agi-forecast: 12 gauge implementations + 4 a11oy safety gates",
+      "vsp-otel and agi-forecast GH repos are scaffolds only (no src)"
+    ],
+    "evidenceFromCode": [
+      {"package": "packages/ouroboros", "present": true, "vsp_subdir_present": false, "loop_kernel_at": "packages/ouroboros/src/loop-kernel.ts (no runtime/ subdir)"},
+      {"package": "packages/forecast-fabric", "present": true, "note": "Local TS package exists but is NOT the spec'd Rust crates/agi-forecast — likely orthogonal/duplicate"},
+      {"package": "packages/otel", "present": true, "note": "Generic OTel infra — does not implement szl.vsp.* extension attributes from spec"},
+      {"package": "packages/payload-doctrine", "present": true, "wired_into_api_server": true, "evidence": "artifacts/api-server/src/routes/index.ts:42 imports a11oyPayloadRouter; line 357 mounts router.use('/a11oy/payload', a11oyPayloadRouter); a11oy-payload.ts references @szl-holdings/payload-doctrine"},
+      {"grep_result": "vsp-otel|agi-forecast|forecast_gauge|vsp_extension across packages/ + artifacts/api-server/src/", "matches": ["packages/payload-doctrine/{README,package.json,src/repos.ts}", "artifacts/a11oy/src/data/payloadProvenance.ts", "artifacts/api-server/{package.json, src/routes/index.ts, src/routes/a11oy-payload.ts}"], "no_matches_for": "VSP emitter, LambdaSpanEmitter, szl.vsp span attributes, forecast gauge implementation"}
+    ]
+  },
+  "monorepoOrphans": [
+    {"package": "packages/forecast-fabric", "reason": "duplicate-or-orphan: similar name to spec'd agi-forecast (Rust) but is TS; unclear if it implements the 12 gauges. Needs reconciliation with agi-forecast scope."},
+    {"package": "packages/otel", "reason": "duplicate-or-orphan vs spec'd packages/ouroboros/src/vsp; if VSP is to live under ouroboros, packages/otel may overlap or should be retired."},
+    {"package": "packages/proxy-routes.ts", "reason": "stray file inside packages/ (not a directory) — appears as a workspace candidate but is not a valid package."},
+    {"package": "packages/szl-alloy + packages/alloy + packages/ouroboros-alloy", "reason": "naming-overlap risk; verify intent with PM before scaling."},
+    {"package": "packages/ouroboros-* (24 sibling packages)", "reason": "stale-or-experimental: many ouroboros-{aristotle,blanca,davinci,emerald,flashforge,fractional,gauss,horizon,jung,lara,newton,oppenheimer,resonance,socrates,theosophy,trithemius,…} have no inbound references in api-server route surface — suspected experimental scaffolds."}
+  ],
+  "summary": {
+    "criticalCount": 0,
+    "highCount": 4,
+    "mediumCount": 6,
+    "lowCount": 3,
+    "notes": "No critical: doctrine floors are met by spec; ingest policy enforced; replays at 5/5. Highs cluster on (1) VSP not implemented blocking PUSH_4 release, (2) forecast gauge not implemented, (3) 'Jr.'/'Stephen Paul' commit byline pollution still showing on recent CI commits, (4) ouroboros-thesis historical doctrine violations not yet remediated."
+  }
+}

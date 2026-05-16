@@ -178,6 +178,9 @@ const NAV_GROUPS = [
     items: [
       { href: '/doctrine',              label: 'Mythos Overview' },
       { href: '/payload',                label: 'Payload' },
+      { href: '/atlas/org',              label: 'Atlas · Org' },
+      { href: '/atlas/thesis',           label: 'Atlas · Thesis' },
+      { href: '/atlas/roadmap',          label: 'Atlas · Roadmap' },
       { href: '/risk-reports',           label: 'Risk Reports' },
       { href: '/behavioral-audit',       label: 'Behavioral Audit' },
       { href: '/covenant-lift',          label: 'Covenant Lift' },
