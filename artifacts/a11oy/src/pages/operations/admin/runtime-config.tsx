@@ -12,6 +12,7 @@ import {
   Search,
   Sliders,
   Trash2,
+  Undo2,
   User,
   X,
 } from 'lucide-react';
@@ -132,12 +133,57 @@ function validateValue(value: string, valueType: CreateDraft['valueType']): stri
   return null;
 }
 
-function HistoryDrawer({ configKey, onClose }: { configKey: string; onClose: () => void }) {
+// Resolve the value that "revert to this" should restore for a given history
+// entry. For create/update entries the target is the value that was active
+// immediately after that entry (newValue). For delete entries the last known
+// value before deletion is the previousValue.
+function revertTargetValue(entry: HistoryEntry): string | null | undefined {
+  if (entry.action === 'delete') return entry.metadata?.previousValue;
+  return entry.metadata?.newValue;
+}
+
+function HistoryDrawer({
+  configKey,
+  onClose,
+  onReverted,
+}: {
+  configKey: string;
+  onClose: () => void;
+  onReverted: (key: string) => void;
+}) {
   const { data, isLoading, error } = useStandardQuery<{ data: HistoryEntry[] }>({
     queryKey: ['runtime-config-history', configKey],
     queryFn: () =>
       apiFetch(`/runtime-config/_history?key=${encodeURIComponent(configKey)}&limit=50`),
   });
+  const [revertError, setRevertError] = useState<string | null>(null);
+  const [pendingRevertId, setPendingRevertId] = useState<number | null>(null);
+
+  const revertMutation = useStandardMutation({
+    mutationFn: ({
+      key,
+      value,
+      revertFromHistoryId,
+    }: {
+      key: string;
+      value: string;
+      revertFromHistoryId: number;
+    }) =>
+      apiFetch(`/runtime-config/${encodeURIComponent(key)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ value, revert: true, revertFromHistoryId }),
+      }),
+    onSuccess: async (_res, { key }) => {
+      setRevertError(null);
+      setPendingRevertId(null);
+      onReverted(key);
+    },
+    onError: (err: unknown) => {
+      setRevertError(err instanceof Error ? err.message : 'Revert failed');
+      setPendingRevertId(null);
+    },
+  });
+
   const entries = data?.data ?? [];
   return (
     <div
@@ -181,57 +227,122 @@ function HistoryDrawer({ configKey, onClose }: { configKey: string; onClose: () 
               No recorded changes for this key
             </div>
           ) : (
-            <ol className="divide-y divide-border">
-              {entries.map((entry) => {
-                const prev = entry.metadata?.previousValue;
-                const next = entry.metadata?.newValue;
-                return (
-                  <li key={entry.id} className="px-5 py-3">
-                    <div className="flex items-center gap-2 flex-wrap text-[11px]">
-                      <span
-                        className={`px-1.5 py-0.5 rounded font-medium uppercase tracking-wide ${actionColors[entry.action] ?? 'bg-muted text-muted-foreground'}`}
-                      >
-                        {entry.action}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-foreground">
-                        <User className="w-3 h-3" />
-                        {entry.actor}
-                      </span>
-                      <span
-                        className="inline-flex items-center gap-1 text-muted-foreground ml-auto"
-                        title={new Date(entry.createdAt).toLocaleString()}
-                      >
-                        <Clock className="w-3 h-3" />
-                        {formatRelative(entry.createdAt)}
-                      </span>
-                    </div>
-                    {(prev !== undefined || next !== undefined) && (
-                      <div className="mt-1.5 text-[11px] flex items-center gap-2 flex-wrap">
-                        {prev !== undefined && (
-                          <span className="text-muted-foreground">
-                            from{' '}
-                            <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
-                              {prev === null || prev === '' ? '∅' : String(prev)}
-                            </code>
+            <>
+              {revertError && (
+                <div className="mx-5 mt-3 text-[11px] text-[#c45a4a] bg-[#c45a4a]/10 rounded px-2 py-1.5">
+                  {revertError}
+                </div>
+              )}
+              <ol className="divide-y divide-border">
+                {entries.map((entry, idx) => {
+                  const prev = entry.metadata?.previousValue;
+                  const next = entry.metadata?.newValue;
+                  const isCurrent = idx === 0;
+                  const isRevertEntry = entry.metadata?.revert === true;
+                  const target = revertTargetValue(entry);
+                  const canRevert =
+                    !isCurrent &&
+                    target !== undefined &&
+                    target !== null &&
+                    target !== REDACTED;
+                  const isPending =
+                    revertMutation.isPending && pendingRevertId === entry.id;
+                  const handleRevert = () => {
+                    if (target === undefined || target === null) return;
+                    setPendingRevertId(entry.id);
+                    setRevertError(null);
+                    revertMutation.mutate({
+                      key: configKey,
+                      value: String(target),
+                      revertFromHistoryId: entry.id,
+                    });
+                  };
+                  return (
+                    <li key={entry.id} className="px-5 py-3">
+                      <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                        <span
+                          className={`px-1.5 py-0.5 rounded font-medium uppercase tracking-wide ${actionColors[entry.action] ?? 'bg-muted text-muted-foreground'}`}
+                        >
+                          {entry.action}
+                        </span>
+                        {isRevertEntry && (
+                          <span
+                            className="px-1.5 py-0.5 rounded font-medium uppercase tracking-wide text-[#8b7ac8] bg-[#8b7ac8]/10"
+                            title="This change was a revert"
+                          >
+                            revert
                           </span>
                         )}
-                        {next !== undefined && (
-                          <span className="text-muted-foreground">
-                            to{' '}
-                            <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
-                              {next === null || next === '' ? '∅' : String(next)}
-                            </code>
+                        {isCurrent && (
+                          <span className="px-1.5 py-0.5 rounded font-medium uppercase tracking-wide text-muted-foreground bg-muted">
+                            current
                           </span>
                         )}
+                        <span className="inline-flex items-center gap-1 text-foreground">
+                          <User className="w-3 h-3" />
+                          {entry.actor}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1 text-muted-foreground ml-auto"
+                          title={new Date(entry.createdAt).toLocaleString()}
+                        >
+                          <Clock className="w-3 h-3" />
+                          {formatRelative(entry.createdAt)}
+                        </span>
                       </div>
-                    )}
-                    {entry.description && (
-                      <p className="text-[11px] text-muted-foreground mt-1">{entry.description}</p>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+                      {(prev !== undefined || next !== undefined) && (
+                        <div className="mt-1.5 text-[11px] flex items-center gap-2 flex-wrap">
+                          {prev !== undefined && (
+                            <span className="text-muted-foreground">
+                              from{' '}
+                              <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                {prev === null || prev === '' ? '∅' : String(prev)}
+                              </code>
+                            </span>
+                          )}
+                          {next !== undefined && (
+                            <span className="text-muted-foreground">
+                              to{' '}
+                              <code className="font-mono break-all bg-muted/50 px-1 py-0.5 rounded">
+                                {next === null || next === '' ? '∅' : String(next)}
+                              </code>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {entry.description && (
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          {entry.description}
+                        </p>
+                      )}
+                      {!isCurrent && (
+                        <div className="mt-2 flex items-center gap-2">
+                          {canRevert ? (
+                            <button
+                              onClick={handleRevert}
+                              disabled={revertMutation.isPending}
+                              title={`Revert ${configKey} to this value`}
+                              className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] rounded border border-border bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-50"
+                            >
+                              <Undo2 className="w-3 h-3" />
+                              {isPending ? 'Reverting…' : 'Revert to this value'}
+                            </button>
+                          ) : target === REDACTED ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"
+                              title="The prior value was redacted at the time of logging — revert unavailable"
+                            >
+                              <Lock className="w-3 h-3" />
+                              revert unavailable (value was redacted)
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </>
           )}
         </div>
       </div>
@@ -869,7 +980,13 @@ export default function RuntimeConfigAdmin() {
       )}
 
       {historyKey && (
-        <HistoryDrawer configKey={historyKey} onClose={() => setHistoryKey(null)} />
+        <HistoryDrawer
+          configKey={historyKey}
+          onClose={() => setHistoryKey(null)}
+          onReverted={(key) => {
+            void invalidateAndRefresh(key);
+          }}
+        />
       )}
 
       {deleteKey && (

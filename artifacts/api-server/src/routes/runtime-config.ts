@@ -68,6 +68,10 @@ const updateSchema = z.object({
   description: z.string().max(500).optional(),
   category: z.enum(CATEGORIES).optional(),
   isSensitive: z.boolean().optional(),
+  // When true, tag the resulting audit entry as a revert (one-click rollback
+  // from the history drawer). Does not change the underlying write semantics.
+  revert: z.boolean().optional(),
+  revertFromHistoryId: z.number().int().positive().optional(),
 });
 
 router.get('/runtime-config', authMiddleware(), requireRole('ops', 'admin'), async (req, res) => {
@@ -246,7 +250,10 @@ router.patch(
         return;
       }
       const data = parsed.data;
-      if (Object.keys(data).length === 0) {
+      const valueOnlyFields = Object.keys(data).filter(
+        (k) => k !== 'revert' && k !== 'revertFromHistoryId',
+      );
+      if (valueOnlyFields.length === 0) {
         sendBadRequest(res, 'At least one field must be provided to update');
         return;
       }
@@ -272,12 +279,13 @@ router.patch(
         return;
       }
       const sensitive = row.isSensitive || (previous?.isSensitive ?? false);
+      const isRevert = data.revert === true;
       await logActivity(
         req,
         'update',
         'runtime_config',
         row.key,
-        `Updated config: ${row.key}${data.value !== undefined ? ` = ${sensitive ? REDACTED_VALUE : data.value}` : ''}`,
+        `${isRevert ? 'Reverted' : 'Updated'} config: ${row.key}${data.value !== undefined ? ` = ${sensitive ? REDACTED_VALUE : data.value}` : ''}`,
         {
           // Only include previous/new value in metadata when the value field
           // itself changed; otherwise rely on changedFields so the audit feed
@@ -288,7 +296,11 @@ router.patch(
                 newValue: maskValue(row.value, sensitive),
               }
             : {}),
-          changedFields: Object.keys(data),
+          changedFields: valueOnlyFields,
+          ...(isRevert ? { revert: true } : {}),
+          ...(data.revertFromHistoryId !== undefined
+            ? { revertFromHistoryId: data.revertFromHistoryId }
+            : {}),
         },
       );
       invalidateConfigCache(row.key);
