@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
+import { authMiddleware } from '../middlewares/auth';
 import { getAdapter, listAdapters } from '../siem/registry';
 import {
   siemConnectionsStore,
@@ -61,6 +62,7 @@ router.get('/sentra/siem/connections', (_req: Request, res: Response) => {
 // POST /api/sentra/siem/connections
 router.post(
   '/sentra/siem/connections',
+  authMiddleware(),
   validateBody(createConnectionSchema),
   (req: Request, res: Response) => {
     try {
@@ -91,6 +93,7 @@ router.post(
 // PATCH /api/sentra/siem/connections/:id
 router.patch(
   '/sentra/siem/connections/:id',
+  authMiddleware(),
   validateBody(updateConnectionSchema),
   (req: Request, res: Response) => {
     try {
@@ -112,7 +115,7 @@ router.patch(
 );
 
 // DELETE /api/sentra/siem/connections/:id
-router.delete('/sentra/siem/connections/:id', (req: Request, res: Response) => {
+router.delete('/sentra/siem/connections/:id', authMiddleware(), (req: Request, res: Response) => {
   try {
     const conn = siemConnectionsStore.get(req.params.id as string);
     if (!conn) {
@@ -129,7 +132,7 @@ router.delete('/sentra/siem/connections/:id', (req: Request, res: Response) => {
 });
 
 // POST /api/sentra/siem/connections/:id/test
-router.post('/sentra/siem/connections/:id/test', async (req: Request, res: Response) => {
+router.post('/sentra/siem/connections/:id/test', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const conn = siemConnectionsStore.get(req.params.id as string);
     if (!conn) {
@@ -155,7 +158,7 @@ router.post('/sentra/siem/connections/:id/test', async (req: Request, res: Respo
 });
 
 // POST /api/sentra/siem/connections/:id/enable
-router.post('/sentra/siem/connections/:id/enable', (req: Request, res: Response) => {
+router.post('/sentra/siem/connections/:id/enable', authMiddleware(), (req: Request, res: Response) => {
   try {
     const conn = enableConnection(req.params.id as string);
     if (!conn) {
@@ -169,7 +172,7 @@ router.post('/sentra/siem/connections/:id/enable', (req: Request, res: Response)
 });
 
 // POST /api/sentra/siem/connections/:id/disable
-router.post('/sentra/siem/connections/:id/disable', (req: Request, res: Response) => {
+router.post('/sentra/siem/connections/:id/disable', authMiddleware(), (req: Request, res: Response) => {
   try {
     const conn = disableConnection(req.params.id as string);
     if (!conn) {

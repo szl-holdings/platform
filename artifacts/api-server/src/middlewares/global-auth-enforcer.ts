@@ -16,8 +16,9 @@
  *  - Webhooks (/api/webhooks/*) — use HMAC authentication internally
  *  - SCIM 2.0 (/api/scim/*) — uses scimTokensTable bearer token auth (RFC 7643/7644);
  *    the SCIM auth is enforced within the SCIM router via scimBearerAuth middleware
- *  - Streaming webhook ingestion endpoints (/api/stream/webhook/*,
- *    /api/stream/ais-nmea) — use source token authentication (streamed-ingestion authToken)
+ *  - Streaming webhook ingestion endpoints (/api/stream/webhook/*) — use source token
+ *    authentication (streamed-ingestion authToken); /api/stream/ais-nmea also requires
+ *    a registered AIS source Bearer token (enforced in the route handler)
  *  - SIEM webhook (/api/stream/webhook-siem) — NOT public; requires Bearer token auth
  *    (SIEM_WEBHOOK_TOKEN env var or a registered SIEM webhook data source authToken)
  *  - Streaming SSE read endpoints (/api/stream/siem-events, /api/stream/market-data,
@@ -80,7 +81,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   // NOTE: routes live at /booking/... in carlota-jo.ts (no /carlota prefix there).
   "/api/booking/availability",
   "/api/booking/reservations",
-  "/api/stream/ais-nmea",
   "/api/stream/siem-events",
   "/api/stream/market-data",
   "/api/stream/ais-tracking",
@@ -404,18 +404,23 @@ const PUBLIC_PREFIXES = [
   // which expose platform-wide MCP containment data and must stay behind
   // operator-only auth (authMiddleware + requireRole('super_admin', 'ops')).
   // NOTE: nothing to add here — see PUBLIC_EXACT_PATHS for the agent-mesh entries.
-  // Sentra cyber resilience cockpit — incidents + alerts CRUD backed by an
-  // in-memory store (no DB). Public so the Sentra demo surface can fetch
-  // live incident/alert data and run the create→triage→resolve flow without
-  // a session. Write routes are still covered by CSRF double-submit
-  // protection (global csrfMiddleware in server.ts).
+  // Sentra cyber resilience cockpit — read-only GET routes are public so the
+  // demo surface can fetch live incident/alert data and summary counts without
+  // a session. Mutating routes (POST incidents, PATCH incidents/:id,
+  // PATCH alerts/:id, and all SIEM connection CUD routes) require authentication
+  // and are gated by authMiddleware() inside routes/sentra.ts and
+  // routes/sentra-siem.ts. The GET-only bypass is handled by the method-specific
+  // check further below.
+  // NOTE: "/api/sentra/" is intentionally absent from this prefix list.
+  // Read-only GET routes are whitelisted by the method-specific block further
+  // below; mutating routes fall through to the 401 response and are further
+  // gated by authMiddleware() inside routes/sentra.ts and routes/sentra-siem.ts.
   // PQC Identity & Governance Gateway — public verification API.
   // All endpoints are read-only or stateless verification (no data writes).
   // GET  /pqc/status, /pqc/certificates, /pqc/transparency-log
   // POST /pqc/verify, /pqc/verify/signature, /pqc/verify/certificate, /pqc/verify/did
   // POST /pqc/transparency-log/inclusion-proof
   "/api/pqc/",
-  "/api/sentra/",
   // RF Intelligence — satellite AIS correlation engine, anomaly detection,
   // and geo-intel surface. All endpoints are read-only GET routes backed by
   // an in-memory simulation store. Public so the Command geo-intel map and
@@ -443,10 +448,13 @@ const PUBLIC_PREFIXES = [
   // Backs the Decision Center pages with the same signal/evidence/recommendation
   // bundle that gets seeded into the live signal mesh at boot.
   "/api/narratives/",
-  // Shared risk evidence store — list/save/delete cited Monte Carlo runs
-  // and resolve them server-side for lender briefing exports. See
-  // routes/risk-evidence.ts for the endpoint contract.
-  "/api/risk-evidence/",
+  // Shared risk evidence store — GET (list/resolve) routes are public so
+  // external reviewers and lender briefing exports can read saved evidence
+  // without a session. POST (save) and DELETE (remove) require authentication;
+  // those methods fall through to the 401 enforcer below and are gated by
+  // authMiddleware() inside routes/risk-evidence.ts.
+  // NOTE: "/api/risk-evidence/" is intentionally absent from this prefix list.
+  // The read-only bypass is handled by the method-specific GET check further below.
   // Global Operations Fabric — snapshot + SSE stream for the Fabric page.
   // Public prefix bypasses this enforcer so the route handler can apply its own
   // production/demo guard: in production the handler checks req.user and returns
@@ -833,6 +841,22 @@ export function globalAuthEnforcer(
     return;
   }
 
+  // AIS/NMEA ingest — POST /api/stream/ais-nmea is a machine-to-machine feed
+  // authenticated by a registered AIS source Bearer token. The route handler
+  // performs the actual source-registry lookup and rejects unknown/paused
+  // tokens; this block only passes through requests that carry any Bearer
+  // token so the handler's validation is reachable. Requests without a Bearer
+  // header fall through to the 401 response below.
+  if (
+    req.method === "POST" &&
+    path === "/api/stream/ais-nmea" &&
+    typeof req.headers.authorization === "string" &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    next();
+    return;
+  }
+
   // Action store read — GET /api/action-store is public (read-only snapshot).
   // PATCH /api/action-store is NOT covered here; it must carry a valid session
   // and is further gated by requireAuth in the route handler (defence-in-depth).
@@ -862,6 +886,44 @@ export function globalAuthEnforcer(
     return;
   }
   if (req.method === "POST" && path === "/api/capability-fabric/route") {
+    next();
+    return;
+  }
+
+  // Sentra cyber resilience cockpit — read-only GET routes are public so the
+  // demo surface can render incident/alert lists and summary counts without a
+  // session. All mutating methods (POST, PATCH, DELETE) fall through to the 401
+  // response; authMiddleware() in the route handlers provides defence-in-depth.
+  if (req.method === "GET" && path.startsWith("/api/sentra/")) {
+    next();
+    return;
+  }
+
+  // Sentra EDR agent endpoints — machine-to-machine; agents authenticate via
+  // long-lived bearer tokens issued at enrollment-token exchange time.
+  // No browser session or cookie involved; route handlers enforce their own
+  // token validation. These must reach the route handler so the custom auth
+  // logic runs; the CSRF middleware already exempts them.
+  if (path.startsWith("/api/sentra/agents/")) {
+    next();
+    return;
+  }
+
+  // Sentra SIEM webhook ingest — external SIEM platforms push events to this
+  // prefix. HMAC-SHA256 signature validation is enforced inside the route
+  // handler for generic-webhook connections (x-signature-sha256 header).
+  // The CSRF middleware already exempts this path. The route handler rejects
+  // unknown connectionIds and bad/missing signatures before any data is written.
+  if (req.method === "POST" && path.startsWith("/api/sentra/siem/ingest/")) {
+    next();
+    return;
+  }
+
+  // Risk evidence store — read-only GET routes are public so external reviewers
+  // and lender briefing exports can resolve saved evidence without a session.
+  // POST (save) and DELETE (remove) fall through to 401; authMiddleware() in
+  // routes/risk-evidence.ts provides defence-in-depth.
+  if (req.method === "GET" && path.startsWith("/api/risk-evidence/")) {
     next();
     return;
   }

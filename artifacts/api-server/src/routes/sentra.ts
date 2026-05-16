@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
+import { authMiddleware } from '../middlewares/auth';
 import { getReflexivityRuntime } from '../lib/cognitive-reflexivity-runtime';
 
 /**
@@ -142,7 +143,7 @@ router.get('/sentra/incidents/:id', async (req: Request, res: Response) => {
 });
 
 // POST /api/sentra/incidents
-router.post('/sentra/incidents', validateBody(createIncidentSchema), async (req: Request, res: Response) => {
+router.post('/sentra/incidents', authMiddleware(), validateBody(createIncidentSchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as z.infer<typeof createIncidentSchema>;
     const id = `INC-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
@@ -195,7 +196,7 @@ router.post('/sentra/incidents', validateBody(createIncidentSchema), async (req:
 });
 
 // PATCH /api/sentra/incidents/:id
-router.patch('/sentra/incidents/:id', validateBody(updateIncidentSchema), async (req: Request, res: Response) => {
+router.patch('/sentra/incidents/:id', authMiddleware(), validateBody(updateIncidentSchema), async (req: Request, res: Response) => {
   try {
     const incidentId = req.params.id as string;
     const [existing] = await db
@@ -277,7 +278,7 @@ router.get('/sentra/alerts', async (_req: Request, res: Response) => {
 });
 
 // PATCH /api/sentra/alerts/:id
-router.patch('/sentra/alerts/:id', validateBody(acknowledgeAlertSchema), async (req: Request, res: Response) => {
+router.patch('/sentra/alerts/:id', authMiddleware(), validateBody(acknowledgeAlertSchema), async (req: Request, res: Response) => {
   try {
     const alertId = req.params.id as string;
     const [existing] = await db

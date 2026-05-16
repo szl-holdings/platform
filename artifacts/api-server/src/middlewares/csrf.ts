@@ -116,16 +116,11 @@ const EXEMPT_PATHS = new Set([
   '/api/auth/risk-assessment',
 ]);
 
-// Risk evidence store — public POST/DELETE endpoints accept any
-// /api/risk-evidence/<domain>[/<evidenceId>] path, so add a prefix-based
-// CSRF exemption alongside the EXEMPT_PATHS set.
-
 const GRAPHQL_PATHS = ['/api/graphql', '/graphql'];
 
 function isExempt(path: string): boolean {
   if (EXEMPT_PATHS.has(path)) return true;
   if (path.startsWith('/api/webhooks/')) return true;
-  if (path.startsWith('/api/risk-evidence/')) return true;
   // A2A federation endpoints — machine-to-machine; authenticated via Bearer token
   // (API key or OAuth JWT), not browser cookies. CSRF double-submit not applicable.
   if (path.startsWith('/api/federation/')) return true;

@@ -6,13 +6,15 @@
  * Terra/Vessels operators capture, so this endpoint backs the SaveRiskRunButton
  * and RiskEvidenceList components in lib/shared-ui/src/risk-evidence.tsx.
  *
- * Endpoints (public, unauthenticated — same model as the rest of the
- * Terra / Vessels demo surfaces):
+ * Endpoints:
  *   GET    /api/risk-evidence/:domain               — list runs for a domain
+ *                                                     (public, unauthenticated)
  *   POST   /api/risk-evidence/:domain               — save a run; returns the
  *                                                     full record (with
  *                                                     evidenceId + savedAt)
+ *                                                     REQUIRES authentication
  *   DELETE /api/risk-evidence/:domain/:evidenceId   — remove a run
+ *                                                     REQUIRES authentication
  *   GET    /api/risk-evidence/by-id/:evidenceId     — resolve a single cited
  *                                                     run server-side (used
  *                                                     by lender briefing
@@ -46,6 +48,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const NAMESPACE = 'szl.riskEvidence';
 const MAX_RUNS_PER_DOMAIN = 200;
@@ -209,6 +212,7 @@ router.get('/risk-evidence/:domain', async (req: Request, res: Response) => {
 
 router.post(
   '/risk-evidence/:domain',
+  authMiddleware(),
   validateBody(
     bodyShape({
       domain: z.unknown().optional(),
@@ -261,6 +265,7 @@ router.post(
 
 router.delete(
   '/risk-evidence/:domain/:evidenceId',
+  authMiddleware(),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {

@@ -295,6 +295,36 @@ streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response)
 });
 
 streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => {
+  // Require a registered AIS data source token delivered as a Bearer token in
+  // the Authorization header. This mirrors the /stream/webhook/:sourceToken
+  // pattern and closes the anonymous-ingest vector described in the security
+  // audit (unauthenticated callers could otherwise forge vessel positions that
+  // get stored in streamIngestedEventsTable and broadcast to live dashboards).
+  const authHeader = req.headers.authorization;
+  const bearerToken =
+    typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
+
+  if (!bearerToken) {
+    sendUnauthorized(res, 'Missing Bearer source token');
+    return;
+  }
+
+  const aisSources = listDataSources().filter(
+    (s) => s.category === 'ais' && s.authToken === bearerToken,
+  );
+  if (aisSources.length === 0) {
+    sendUnauthorized(res, 'Unknown or unauthorized AIS source token');
+    return;
+  }
+
+  const source = aisSources[0]!;
+  if (!source.enabled) {
+    sendError(res, 'AIS data source is paused', 423, 'LOCKED');
+    return;
+  }
+
   const body = req.body as { sentences?: string[] } | { sentence?: string };
   const sentences: string[] =
     'sentences' in body && Array.isArray(body.sentences)
@@ -308,7 +338,7 @@ streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => 
     const normalized = normalizeAisNmea(sentence);
     if (normalized) {
       try {
-        ingestEvent(normalized, undefined);
+        ingestEvent({ ...normalized, sourceId: source.id }, source.id);
         accepted++;
       } catch {}
     }
