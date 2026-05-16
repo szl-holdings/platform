@@ -1,0 +1,43 @@
+{
+  "name": "@workspace/agi-forecast",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Lutar, Stephen P. (ORCID: 0009-0001-0110-4173)",
+  "description": "agi-forecast — MVP slice. Typed gauge-variable registry, three real public-no-auth ingestors, deterministic daily-summary receipts, and an in-memory Brier-score ledger. Mirrors the szl-holdings/agi-forecast README proposal.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./registry": {
+      "types": "./dist/gauge-registry.d.ts",
+      "import": "./src/gauge-registry.ts"
+    },
+    "./ingestors": {
+      "types": "./dist/ingestors/index.d.ts",
+      "import": "./src/ingestors/index.ts"
+    },
+    "./summary": {
+      "types": "./dist/forecast-summary.d.ts",
+      "import": "./src/forecast-summary.ts"
+    },
+    "./brier": {
+      "types": "./dist/brier-ledger.d.ts",
+      "import": "./src/brier-ledger.ts"
+    }
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
+  }
+}

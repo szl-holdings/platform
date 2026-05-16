@@ -143,6 +143,9 @@
     },
     {
       "path": "./packages/db-schema"
+    },
+    {
+      "path": "./packages/agi-forecast"
     }
   ]
 }
