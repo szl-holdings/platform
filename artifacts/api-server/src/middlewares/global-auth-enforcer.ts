@@ -215,15 +215,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/.well-known/szl-attestation-keys.json",
   "/api/.well-known/did.json",
   "/api/governance/stats",
-  // Agent Mesh — genuinely-public read-only paths. Listed here (exact match
-  // via Set.has) rather than in PUBLIC_PREFIXES (startsWith) to prevent any
-  // future /api/agent-mesh/state* or /api/agent-mesh/scan* route from being
-  // accidentally bypassed. Gateway telemetry sub-paths (/gateway, /gateway/stream,
-  // /gateway/export.csv, /gateway/latency) are NOT included; those require
-  // operator-only auth enforced at route level.
-  "/api/agent-mesh/state",
-  "/api/agent-mesh/index",
-  "/api/agent-mesh/scan",
   "/api/hf/hub/status",
   // Counsel read-only surfaces — exact-match only so sub-paths (:id, /dispatch, etc.)
   // remain auth-gated. Handler degrades gracefully to demo/empty payloads when no session.

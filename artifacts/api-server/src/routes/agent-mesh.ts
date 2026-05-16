@@ -41,7 +41,7 @@ function orgIdFromReq(req: Request): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-router.get('/agent-mesh/state', async (req: Request, res: Response) => {
+router.get('/agent-mesh/state', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const state = await loadMeshState(orgIdFromReq(req));
     res.json(state);
@@ -51,7 +51,7 @@ router.get('/agent-mesh/state', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/agent-mesh/index', async (req: Request, res: Response) => {
+router.get('/agent-mesh/index', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const state = await loadMeshState(orgIdFromReq(req));
     if (!state.resilienceIndex) {
@@ -411,10 +411,9 @@ router.post(
   },
 );
 
-router.post('/agent-mesh/scan', async (req: Request, res: Response) => {
+router.post('/agent-mesh/scan', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
-    const extraPaths = Array.isArray(req.body?.paths) ? (req.body.paths as string[]) : [];
-    const result = await runMeshScan({ extraPaths, orgId: orgIdFromReq(req) });
+    const result = await runMeshScan({ extraPaths: [], orgId: orgIdFromReq(req) });
     res.json(result);
   } catch (err) {
     logger.error({ err }, '[agent-mesh] scan failed');
