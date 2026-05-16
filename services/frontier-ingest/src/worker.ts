@@ -104,7 +104,7 @@ export async function pullSource(
     markSeen(a.id);
     recordDiscovered(a);
 
-    const result = classify(a);
+    const result = await classify(a);
     const pack: EvidencePack = {
       artifact: a,
       score: result.score,

@@ -82,7 +82,7 @@ describeIfDb('frontier ingestion engine — cross-process DB-shared state', () =
 
       // ── Process A: scheduled worker behavior ───────────────────────────
       const queuedArtifact = mkArtifact('xproc-queue-1');
-      const queuedClass = classify(queuedArtifact);
+      const queuedClass = await classify(queuedArtifact);
       const queuedEvidence = {
         artifact: queuedArtifact,
         score: queuedClass.score,
@@ -97,7 +97,7 @@ describeIfDb('frontier ingestion engine — cross-process DB-shared state', () =
         kind: 'paper',
         title: 'cheap safe additive paper',
       });
-      const promotedClass = classify(promotedArtifact);
+      const promotedClass = await classify(promotedArtifact);
       const promotedEvidence = {
         artifact: promotedArtifact,
         score: promotedClass.score,
@@ -150,7 +150,7 @@ describeIfDb('frontier ingestion engine — cross-process DB-shared state', () =
         kind: 'paper',
         title: 'cross-process approval probe paper',
       });
-      const cls = classA(queuedArtifact);
+      const cls = await classA(queuedArtifact);
       const evidence = {
         artifact: queuedArtifact,
         score: cls.score,

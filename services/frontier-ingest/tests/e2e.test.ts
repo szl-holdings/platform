@@ -67,7 +67,7 @@ describe('frontier ingestion engine — e2e', () => {
     expect(opusItem!.status).toBe('pending');
 
     // Discarded: low-safety uncensored build.
-    const discardedScore = classify(result.artifacts.find((a) => a.externalId === 'claude-uncensored-test')!);
+    const discardedScore = await classify(result.artifacts.find((a) => a.externalId === 'claude-uncensored-test')!);
     expect(discardedScore.decision).toBe('discard');
 
     // Operator approves the queued opus → must run the same promotion pipeline

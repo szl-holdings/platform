@@ -19,6 +19,7 @@
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/formulas": "workspace:*",
+    "@workspace/alloy-embed-worker": "workspace:*",
     "@workspace/lutar-formulas": "workspace:*"
   },
   "devDependencies": {

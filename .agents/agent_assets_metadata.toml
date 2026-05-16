@@ -977,3 +977,9 @@ id = "uv_9DEbl7Lv2kp0WXKLoa"
 uri = "file://dossier/v2/pptx/APEX_v2_Investor_Pitch_Deck.pptx"
 type = "slides"
 title = "APEX v2 Investor Pitch Deck (PPTX)"
+
+[[outputs]]
+id = "Yn3BQ81-5b2kRRfZGP9jU"
+uri = "file://exports/email-to-andrew.txt"
+type = "text"
+title = "Email to Andrew — a11oy.UDS"

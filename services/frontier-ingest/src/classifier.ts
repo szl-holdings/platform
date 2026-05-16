@@ -60,19 +60,33 @@ function estimateSafety(a: FrontierArtifact): number {
  * the rationale so the proof chain stays inspectable.
  */
 export interface ThesisProbe {
-  (artifact: FrontierArtifact): { score: number; citations?: string[] } | undefined;
+  (artifact: FrontierArtifact):
+    | { score: number; citations?: string[] }
+    | undefined
+    | Promise<{ score: number; citations?: string[] } | undefined>;
 }
 let thesisProbe: ThesisProbe | undefined;
 export function registerThesisProbe(p: ThesisProbe | undefined): void {
   thesisProbe = p;
 }
 
-export function scoreArtifact(a: FrontierArtifact): CodexScore {
+export async function scoreArtifact(a: FrontierArtifact): Promise<CodexScore> {
   const haystack = `${a.title} ${a.summary ?? ''} ${a.tags.join(' ')}`;
   const ouroborosKw = scoreKeywords(haystack, KEYWORDS_OUROBOROS);
   const lutarKw = scoreKeywords(haystack, KEYWORDS_LUTAR);
-  const probe = thesisProbe?.(a);
-  const thesisFit = probe?.score ?? scoreKeywords(haystack, KEYWORDS_THESIS);
+  const keywordThesisFit = scoreKeywords(haystack, KEYWORDS_THESIS);
+  let probe: { score: number; citations?: string[] } | undefined;
+  try {
+    probe = await thesisProbe?.(a);
+  } catch {
+    probe = undefined;
+  }
+  // Blend RAG with keyword scorer: take max so the embedding signal
+  // can only *lift* thesisFit. This preserves routing for artifacts
+  // whose vocabulary the keyword scorer caught — they keep their
+  // pre-existing score floor and the RAG cosine is additive when it
+  // agrees. If the probe is absent, fall back to keyword-only.
+  const thesisFit = probe ? Math.max(probe.score, keywordThesisFit) : keywordThesisFit;
   const costSignal = estimateCostSignal(a);
   const safetySignal = estimateSafety(a);
 
@@ -175,8 +189,8 @@ export interface ClassifyResult {
   score: CodexScore;
 }
 
-export function classify(a: FrontierArtifact): ClassifyResult {
-  const score = scoreArtifact(a);
+export async function classify(a: FrontierArtifact): Promise<ClassifyResult> {
+  const score = await scoreArtifact(a);
   const target = targetFor(a.kind);
 
   if (score.safetySignal < 0.3) return { decision: 'discard', score };
