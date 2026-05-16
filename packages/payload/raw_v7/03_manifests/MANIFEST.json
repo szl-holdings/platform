@@ -1,0 +1,576 @@
+{
+  "schema": "szl-holdings/fly-v7-replit-payload/v1",
+  "generated_at_utc": "2026-05-16T03:06:12Z",
+  "mission": "Fly V7 \u2014 Doctrine Sweep + Hygiene + BP Fix + CITATION.cff Fix + PR Triage",
+  "operator": {
+    "byline": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "affiliation": "SZL Holdings",
+    "email": "stephen@szlholdings.com",
+    "github": "stephenlutar2-hash"
+  },
+  "doctrine": {
+    "version": "V6",
+    "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "lambda_threshold": 0.9,
+    "critical_axes": {
+      "moralGrounding": 0.95,
+      "measurabilityHonesty": 0.95
+    },
+    "forbidden_patterns": [
+      "Jr.",
+      "AlloyScape",
+      "Glass Wing",
+      "Glasswing",
+      "Mythos",
+      "Stephen Paul",
+      "Perplexity Computer",
+      "anonymous"
+    ],
+    "mythos_exception": "Allowed only when citing Anthropic's 'Claude Mythos Preview' as third-party model name",
+    "license_allowlist": [
+      "Apache-2.0",
+      "MIT",
+      "BSD-3-Clause",
+      "CC-BY"
+    ],
+    "git_author_override": "User explicitly approved historical 'Stephen Paul Lutar Jr.' git author metadata; do not remediate"
+  },
+  "specialists": {
+    "doctrine_sweep": {
+      "report": "02_specialists/doctrine/doctrine_sweep_v2_report.md",
+      "files_scanned": 582,
+      "auto_fixes_applied_local": 10,
+      "live_repo_escalations": 30,
+      "status": "PROPOSE_ONLY"
+    },
+    "hygiene_fix": {
+      "report": "02_specialists/hygiene/HYGIENE_FIX_REPORT.md",
+      "repos_targeted": [
+        "vsp-otel",
+        "agi-forecast"
+      ],
+      "files_drafted": 6,
+      "prs_proposed": 2,
+      "status": "AWAITING_CONFIRM_ACTION"
+    },
+    "bp_fix": {
+      "report": "02_specialists/bp_fix/BP_FIX_REPORT.md",
+      "repos_targeted": [
+        "lutar-lean",
+        "szl-trust",
+        "szl-cookbook",
+        "szl-brand",
+        "vsp-otel",
+        "agi-forecast"
+      ],
+      "put_payloads_ready": 6,
+      "risk": "Self-only CODEOWNERS + platform self-approve ban could deadlock merges \u2014 PM must decide review-count strategy",
+      "status": "AWAITING_CONFIRM_ACTION_PER_REPO"
+    },
+    "citation_fix": {
+      "report": "02_specialists/citation_fix/CITATION_FIX_REPORT.md",
+      "repos_drafted": 13,
+      "field_change": "Add email: stephen@szlholdings.com to authors block",
+      "status": "AWAITING_CONFIRM_ACTION"
+    },
+    "pr_triage": {
+      "report": "02_specialists/pr_triage/PR_TRIAGE_REPORT.md",
+      "total_open_prs": 68,
+      "categories": {
+        "MERGE": 12,
+        "CLOSE": 18,
+        "STALE": 0,
+        "NEEDS_REVIEW": 38
+      },
+      "merge_candidates": "Dependabot bumps: codeql-action 4.35.4->4.35.5, harden-runner 2.19.1->2.19.3",
+      "close_urgency": "13 polish/hygiene-and-doctrine-sweep PRs contain all 8 forbidden patterns and are CI-green \u2014 could be merged by accident",
+      "status": "AWAITING_CONFIRM_ACTION"
+    }
+  },
+  "github_org_baseline": {
+    "repos_audited": 16,
+    "ci_failing": 0,
+    "code_scanning_alerts": 115,
+    "dependabot_high_critical": 0,
+    "scorecard_avg": 6.62,
+    "bp_compliant": 10,
+    "bp_weak": 6
+  },
+  "active_crons": [
+    {
+      "id": "488505a8",
+      "cron": "0 11 * * *",
+      "name": "daily health pulse"
+    },
+    {
+      "id": "6a09e1d2",
+      "cron": "0 13 * * 1,4",
+      "name": "scorecard remediate"
+    },
+    {
+      "id": "ab29919e",
+      "cron": "0 13 1 * *",
+      "name": "monthly series-a deep audit"
+    },
+    {
+      "id": "cd08b398",
+      "cron": "0 13 * * 2,5",
+      "name": "scorecard verify"
+    },
+    {
+      "id": "fff8f098",
+      "cron": "0 12 * * 1",
+      "name": "weekly series-a hygiene"
+    }
+  ],
+  "pending_pm_decisions": [
+    "Glasswing/Mythos in platform repo: doctrine exception or wholesale rename?",
+    "BP review-count strategy: add 2nd collaborator OR drop require_code_owner_reviews?",
+    "GitHub display name patch from 'Stephen Paul Lutar Jr.' to 'Lutar, Stephen P.'?"
+  ],
+  "execution_order_recommendation": [
+    "1. CLOSE 18 doctrine-violation PRs (Tier 2)",
+    "2. MERGE 12 Dependabot PRs (Tier 1)",
+    "3. Open 2 Hygiene PRs + 13 CITATION.cff PRs (Tier 1)",
+    "4. PM ruling on Glasswing/Mythos (Tier 4)",
+    "5. PATCH GitHub display name (Tier 3)",
+    "6. PM ruling on BP review-count strategy (Tier 4)",
+    "7. Apply 6 BP PUTs (Tier 3)",
+    "8. Open live-repo doctrine remediation PRs (Tier 3)"
+  ],
+  "files": [
+    {
+      "path": "00_README/PM_OVERWATCH_FLY_V7_ROLLUP.md",
+      "size_bytes": 6178,
+      "sha256": "e994cfbd3038b030a715ae635a25b5663ffe47cd46f877d4a3ff511097a16d4f"
+    },
+    {
+      "path": "00_README/README.md",
+      "size_bytes": 3339,
+      "sha256": "e422d17ab91ce860e8cccc2588e92ec98c3fd7f852403b5da3f1948a9c637cc8"
+    },
+    {
+      "path": "01_doctrine/DOCTRINE_V6.md",
+      "size_bytes": 2183,
+      "sha256": "87ccee0e4670e8e49cf1463b5f11476579b7d2a77af36f93db037cce522f3c69"
+    },
+    {
+      "path": "02_specialists/bp_fix/BP_FIX_REPORT.md",
+      "size_bytes": 20454,
+      "sha256": "c4162f1b4f0c36453a6cc0de7207dc10d8190bf2f1c379a94992b845bf5734a3"
+    },
+    {
+      "path": "02_specialists/bp_fix/agi-forecast_bp_payload.json",
+      "size_bytes": 421,
+      "sha256": "4b19ffa2cc2c0fcf90e438d3b4577d1e930a8635120a5f0e7d383eec0a055a93"
+    },
+    {
+      "path": "02_specialists/bp_fix/agi-forecast_current_bp.json",
+      "size_bytes": 938,
+      "sha256": "421e9f49f2ae98f83246adbdeaa474dc5b1003147858cef13109b9bb67f739e7"
+    },
+    {
+      "path": "02_specialists/bp_fix/agi-forecast_workflows.json",
+      "size_bytes": 516,
+      "sha256": "389673b942b443bc20fdc3d9ad9a8d8ed1a556dcae5cfaa2466e186f43b965e2"
+    },
+    {
+      "path": "02_specialists/bp_fix/lutar-lean_bp_payload.json",
+      "size_bytes": 518,
+      "sha256": "14fbc9d3214d29bbd9155acf9dc9627e16b38b792b1e080622aa3ffe17080727"
+    },
+    {
+      "path": "02_specialists/bp_fix/lutar-lean_current_bp.json",
+      "size_bytes": 928,
+      "sha256": "b2ac96d9712bd5d6a2751819425ce66c5d690f744f72da3e2bd1b2e0aba0f677"
+    },
+    {
+      "path": "02_specialists/bp_fix/lutar-lean_workflows.json",
+      "size_bytes": 2537,
+      "sha256": "26321c6b068f0690724248c204421c48e96e02bdb7ed566e6f0160193b7f972f"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-brand_bp_payload.json",
+      "size_bytes": 483,
+      "sha256": "6f7a9bb1d18336acf80a9b94bd352d9ad24ca5d419739d0b368693bd1f22b3fc"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-brand_current_bp.json",
+      "size_bytes": 1225,
+      "sha256": "dac8a38e1238a378ea076501b4654b9547f7c13287542c3259ca38a78d3e2222"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-brand_workflows.json",
+      "size_bytes": 2014,
+      "sha256": "b0c09c60292b73806a92494c6d328f98b129a99af3aebf288745ca1d4df3257c"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-cookbook_bp_payload.json",
+      "size_bytes": 486,
+      "sha256": "3c912ed3d31fff130dc7f8643a7fbc259cd7d215357fee5fff78fb9d3c6ab488"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-cookbook_current_bp.json",
+      "size_bytes": 1243,
+      "sha256": "097c621b61dbfc0e3db887b66e29fe7b34b4ef5db5bfb2d828dea7780d9ad984"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-cookbook_workflows.json",
+      "size_bytes": 2050,
+      "sha256": "ba58127c687e8e5805b345aec188d0014a27f673978806d3005944b35cc5aa2b"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-trust_bp_payload.json",
+      "size_bytes": 592,
+      "sha256": "d8c316762f1be4a9a7db44b1f4dbd6f6ad9eef2ae201c5bba2b194e4cfb626d5"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-trust_current_bp.json",
+      "size_bytes": 1225,
+      "sha256": "cedaa321663e66b674514c11c9c8ce4092cefaf5b75a634d223c5d7c6c89bbd7"
+    },
+    {
+      "path": "02_specialists/bp_fix/szl-trust_workflows.json",
+      "size_bytes": 2532,
+      "sha256": "28c5b9a4cf0cdbd7e3f73b38ff7ca8879a997b447697fd4a46ccccb901e0fa12"
+    },
+    {
+      "path": "02_specialists/bp_fix/vsp-otel_bp_payload.json",
+      "size_bytes": 421,
+      "sha256": "4b19ffa2cc2c0fcf90e438d3b4577d1e930a8635120a5f0e7d383eec0a055a93"
+    },
+    {
+      "path": "02_specialists/bp_fix/vsp-otel_current_bp.json",
+      "size_bytes": 922,
+      "sha256": "5b9903d7621d37d6973f0025bd38abe5265dff6256df3189b9261a738f89c395"
+    },
+    {
+      "path": "02_specialists/bp_fix/vsp-otel_workflows.json",
+      "size_bytes": 504,
+      "sha256": "0ff627b9e2bd83b78151847690638b731f7af9ff617ccb8ebcdda71c2374d89b"
+    },
+    {
+      "path": "02_specialists/citation_fix/.github_CITATION.cff",
+      "size_bytes": 1142,
+      "sha256": "f68a2b7714ae2b948e68f0cb2f88e684bc0090409d3b27a780401d442c3978a5"
+    },
+    {
+      "path": "02_specialists/citation_fix/.github_PR_BODY.md",
+      "size_bytes": 1209,
+      "sha256": "2c8c2315da1ebd166a73638a4c112ad4360cf4acf0c5f81646d9d6bdab717579"
+    },
+    {
+      "path": "02_specialists/citation_fix/CITATION_FIX_REPORT.md",
+      "size_bytes": 17844,
+      "sha256": "4855d2987ed63a368534828b7fd574dfac967656ffd8d702ebb0bbc81283e062"
+    },
+    {
+      "path": "02_specialists/citation_fix/a11oy_CITATION.cff",
+      "size_bytes": 1862,
+      "sha256": "04b965154ed01fd701b1bb5bcd468ff7df047ea7fb7e80d7f5681eb96323a833"
+    },
+    {
+      "path": "02_specialists/citation_fix/a11oy_PR_BODY.md",
+      "size_bytes": 1205,
+      "sha256": "04721b2a55b3cc97252f58df4af78ce4c33af81c519dc93ead77b4fcbb7bc219"
+    },
+    {
+      "path": "02_specialists/citation_fix/agi-forecast_CITATION.cff",
+      "size_bytes": 1142,
+      "sha256": "672eaee4000616709aefe173bcdd47b8118e267462b547ab5912e2c3985aedc2"
+    },
+    {
+      "path": "02_specialists/citation_fix/agi-forecast_PR_BODY.md",
+      "size_bytes": 1219,
+      "sha256": "21758f08248d3dd436a9514adf2d1bf2c4a29a82a44701782dfdfca32d33628c"
+    },
+    {
+      "path": "02_specialists/citation_fix/amaru_CITATION.cff",
+      "size_bytes": 1844,
+      "sha256": "e0b1b36070a76487a8cc008818f8dec92271f129e2b4e43c01cfc5fc9d383f12"
+    },
+    {
+      "path": "02_specialists/citation_fix/amaru_PR_BODY.md",
+      "size_bytes": 1205,
+      "sha256": "0654e0854b173e524393813b59d3f93a27c770b760c62eb058daf648d5d9a0ad"
+    },
+    {
+      "path": "02_specialists/citation_fix/carlota-jo_CITATION.cff",
+      "size_bytes": 1878,
+      "sha256": "1aafa8c6ecebed7a10cb2dbf08845409c92dcf87d4338f429a1d8e59f3142b60"
+    },
+    {
+      "path": "02_specialists/citation_fix/carlota-jo_PR_BODY.md",
+      "size_bytes": 1215,
+      "sha256": "895f813c5209b2084440d55b45aba8c47819843ead0b8730a417f85b2f0cec22"
+    },
+    {
+      "path": "02_specialists/citation_fix/counsel_CITATION.cff",
+      "size_bytes": 1806,
+      "sha256": "b59f49eedb72d0f8dfd9b12c52a60faf33b8daca447ebf6e439d7e263e1cbebe"
+    },
+    {
+      "path": "02_specialists/citation_fix/counsel_PR_BODY.md",
+      "size_bytes": 1209,
+      "sha256": "715425abd096fea81a4bde51a5b92e4e4e9ac298462954d10fe3b58a7e457b53"
+    },
+    {
+      "path": "02_specialists/citation_fix/lutar-lean_CITATION.cff",
+      "size_bytes": 2013,
+      "sha256": "cecb3ca11c26d2a2f3e02e380a4272f0048789efad29f3ba1e56d6e057be4ffd"
+    },
+    {
+      "path": "02_specialists/citation_fix/lutar-lean_PR_BODY.md",
+      "size_bytes": 1215,
+      "sha256": "8c014b45a070c8b144bee488a7619e54846640013f85a14bf3ee7090ca30da51"
+    },
+    {
+      "path": "02_specialists/citation_fix/ouroboros-thesis_CITATION.cff",
+      "size_bytes": 3356,
+      "sha256": "ff07de21004cbb776d406b3f4616566b2e6bc696d241d13b4e70077014b78fab"
+    },
+    {
+      "path": "02_specialists/citation_fix/ouroboros-thesis_PR_BODY.md",
+      "size_bytes": 1227,
+      "sha256": "f904e4a39bd6b7c92e738523314502ca8d20c9fe18f8063e62942f628021db34"
+    },
+    {
+      "path": "02_specialists/citation_fix/ouroboros_CITATION.cff",
+      "size_bytes": 1782,
+      "sha256": "0b49f36794c3eb3e5396badd21bcc6678f15584b4834631469d58252e1a945d5"
+    },
+    {
+      "path": "02_specialists/citation_fix/ouroboros_PR_BODY.md",
+      "size_bytes": 1213,
+      "sha256": "9c940b206c69f5512cebdcece11ad9bad6632b5d4a3c2b04770b7a32d77955e6"
+    },
+    {
+      "path": "02_specialists/citation_fix/sentra_CITATION.cff",
+      "size_bytes": 1885,
+      "sha256": "dd65775c6c292f082eb7ac3e33dbbdf61d0125e72d7a07f11f17832efe320583"
+    },
+    {
+      "path": "02_specialists/citation_fix/sentra_PR_BODY.md",
+      "size_bytes": 1207,
+      "sha256": "1e5c5380acac1232e7754cfb1d605a870ecd0871c71118d28c5f110191abc887"
+    },
+    {
+      "path": "02_specialists/citation_fix/terra_CITATION.cff",
+      "size_bytes": 1808,
+      "sha256": "dacbc59cb249db701f206058a0490323fa7ba5ef47597df301be71849e8c0a79"
+    },
+    {
+      "path": "02_specialists/citation_fix/terra_PR_BODY.md",
+      "size_bytes": 1205,
+      "sha256": "829078f964755d131588cda96c227f66ac14139e7c5bc6564e2fb0b15fad0ded"
+    },
+    {
+      "path": "02_specialists/citation_fix/vessels_CITATION.cff",
+      "size_bytes": 1833,
+      "sha256": "090027455a6cd6870d7b023c40c914c4771b769d1aabb625abce5b0acfcb4571"
+    },
+    {
+      "path": "02_specialists/citation_fix/vessels_PR_BODY.md",
+      "size_bytes": 1209,
+      "sha256": "953f2c16a834c28b1b560a44e65ff517600c4520c348ca3f0029037382e036e3"
+    },
+    {
+      "path": "02_specialists/citation_fix/vsp-otel_CITATION.cff",
+      "size_bytes": 1046,
+      "sha256": "975b0ed8e7c1dbbf2d5151471f88c768219305e2fa379f913814f026b396736b"
+    },
+    {
+      "path": "02_specialists/citation_fix/vsp-otel_PR_BODY.md",
+      "size_bytes": 1211,
+      "sha256": "060ecc946015c79f6fb78a5714f37b767409f4e8d1aca11ca1a97988b53aa05b"
+    },
+    {
+      "path": "02_specialists/doctrine/doctrine_sweep_v2_report.md",
+      "size_bytes": 21656,
+      "sha256": "946b826532b9de84e7b73f6e0d1a3f82b3c209b999440580718af0d863d3cda5"
+    },
+    {
+      "path": "02_specialists/hygiene/HYGIENE_FIX_REPORT.md",
+      "size_bytes": 8016,
+      "sha256": "ed91ada06ae4524cecd442cd9fdef33fcd1ba96af91ad1467f7b78078465f363"
+    },
+    {
+      "path": "02_specialists/hygiene/agi-forecast/CODE_OF_CONDUCT.md",
+      "size_bytes": 3300,
+      "sha256": "d4f5b29791798e3401fa2ddcd61085835b9bcc535e748c59e012f38ee413c482"
+    },
+    {
+      "path": "02_specialists/hygiene/agi-forecast/CONTRIBUTING.md",
+      "size_bytes": 3838,
+      "sha256": "a18935473d51753014333db2e48a08b431426042a47a44a11a6bbc3d3d99d252"
+    },
+    {
+      "path": "02_specialists/hygiene/agi-forecast/PR_BODY.md",
+      "size_bytes": 2226,
+      "sha256": "b855787fb3b00579aad72edffd849eeadcca67bfdccdccc12b8bbe6c4c6ce30a"
+    },
+    {
+      "path": "02_specialists/hygiene/agi-forecast/SECURITY.md",
+      "size_bytes": 2452,
+      "sha256": "5f447c316a6d99529467676df58addeebb329c50061551c7be20e6e49cfdfeb0"
+    },
+    {
+      "path": "02_specialists/hygiene/vsp-otel/CODE_OF_CONDUCT.md",
+      "size_bytes": 3300,
+      "sha256": "d4f5b29791798e3401fa2ddcd61085835b9bcc535e748c59e012f38ee413c482"
+    },
+    {
+      "path": "02_specialists/hygiene/vsp-otel/CONTRIBUTING.md",
+      "size_bytes": 3780,
+      "sha256": "82c9f9326e1677e5e2b7535b638d85bf8b6b151820f775a73996adbf368b1ba6"
+    },
+    {
+      "path": "02_specialists/hygiene/vsp-otel/PR_BODY.md",
+      "size_bytes": 2195,
+      "sha256": "f50cbd9d38de6c98c0bf2a62665ebbbe9b75a66b8a845eb3d457c1f656e784d8"
+    },
+    {
+      "path": "02_specialists/hygiene/vsp-otel/SECURITY.md",
+      "size_bytes": 2425,
+      "sha256": "1056ec90c5c1e23308b6b481c68f35fb25b12b25aa95d3effb90a64668b28ba3"
+    },
+    {
+      "path": "02_specialists/pr_triage/PR_TRIAGE_REPORT.md",
+      "size_bytes": 85953,
+      "sha256": "d0b5b156a027f5e7816a8ef634388a2e83673a4231efb0f3cab9c41082669f57"
+    },
+    {
+      "path": "02_specialists/pr_triage/all_prs_analyzed.json",
+      "size_bytes": 58027,
+      "sha256": "606cfd431a66babdef6c5ce50656922e62e4a6dfea9a26363f1ed8dfe6addb16"
+    },
+    {
+      "path": "02_specialists/pr_triage/all_prs_final.json",
+      "size_bytes": 58409,
+      "sha256": "b6980fc7069c725f77215d649332c0ed74995270481ff6dacb865578a12088a7"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/.github_prs.json",
+      "size_bytes": 7900,
+      "sha256": "deb894fe3a79f7c5cc113bb1d4ef191c3806cc13fb613b746e193f8c12776877"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/a11oy_prs.json",
+      "size_bytes": 36524,
+      "sha256": "1f7b62913e46bae9d4d7fb83da28371af63ea3c329ffe95136c1317b7b736c49"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/agi-forecast_prs.json",
+      "size_bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/amaru_prs.json",
+      "size_bytes": 30626,
+      "sha256": "df35846fbced88edd53d858f7b5e8462c3c71b5b85dc3a52028c3a18d7af8a68"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/carlota-jo_prs.json",
+      "size_bytes": 15727,
+      "sha256": "858faae2ca5981714f84420656d3c3939cf2d3601453fe0ed4afbb4dbc41e931"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/counsel_prs.json",
+      "size_bytes": 30975,
+      "sha256": "90acb0433339750ecd4f9cdbcf6526a1530fe7bf22688305e2dbd0fb9e4ece95"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/lutar-lean_prs.json",
+      "size_bytes": 12292,
+      "sha256": "ee6fa7f420439eca290edfc53240b42d228eff87ccdc38da25ccceec44dddfbd"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/ouroboros-thesis_prs.json",
+      "size_bytes": 22580,
+      "sha256": "cf864c8f1acc20518f5d83a3019373bbd8d3a649e1ef1d3f0fce34c3ccc6e571"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/ouroboros_prs.json",
+      "size_bytes": 11679,
+      "sha256": "2e630ba9aca4cbef77ffac2b44b64707e271dfb49d8c9dc4a23c8e06a2d8ab8b"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/sentra_prs.json",
+      "size_bytes": 15713,
+      "sha256": "800cfb96d8369857624d75dddac18ab7471226e234cc20ddc06a2d5ae5237635"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/szl-brand_prs.json",
+      "size_bytes": 11520,
+      "sha256": "27aeaaafafdde0e01d8438263310864ae517c69556ff58150480082d4fc579e0"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/szl-cookbook_prs.json",
+      "size_bytes": 5445,
+      "sha256": "63b6d1f857f4ff79f13893bdc3dceb9c1564f403143df0c0aeb8be8bc105d7d0"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/szl-trust_prs.json",
+      "size_bytes": 9651,
+      "sha256": "48a9d31538ffee0b645985a76079e4c1c3786cedda02eb83073921f9c5ae4852"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/terra_prs.json",
+      "size_bytes": 30723,
+      "sha256": "337ac1dc31f6314c15dd8e2910dcdbf6943a9a09ef0386d4efadb92d3bffa9d0"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/vessels_prs.json",
+      "size_bytes": 31112,
+      "sha256": "375d2fe592e2adedeebf1eae6aa9fe9d70637b3703bdaf73fddc87fbb37c7804"
+    },
+    {
+      "path": "02_specialists/pr_triage/raw/vsp-otel_prs.json",
+      "size_bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "04_thread_context/THREAD_TRANSCRIPT.md",
+      "size_bytes": 4299,
+      "sha256": "c51a7d0b85eea39d311f8eea0d4d4c50c057600000cb8f3792a6bd4f72cd0569"
+    },
+    {
+      "path": "05_apply_scripts/00_README.md",
+      "size_bytes": 1221,
+      "sha256": "0b14a2e26330a323f926b89f11c5b7d1b0a4224b977bc0825697ac8a07555e64"
+    },
+    {
+      "path": "05_apply_scripts/01_close_doctrine_violation_prs.sh",
+      "size_bytes": 1531,
+      "sha256": "4158b54dccc25283480c9f2472c9aebd8c499cdda16d165b5fed0eca45a3f7ae"
+    },
+    {
+      "path": "05_apply_scripts/02_merge_dependabot_prs.sh",
+      "size_bytes": 1169,
+      "sha256": "d7aec84bcacace5de0f565723251933ba69f30cca9eb9ce81d5fccefebd9a322"
+    },
+    {
+      "path": "05_apply_scripts/03_open_hygiene_prs.sh",
+      "size_bytes": 1522,
+      "sha256": "abe9d66b455f943ad46838c8d21599eb63ed5ae81e7175d875e7d58f6204bede"
+    },
+    {
+      "path": "05_apply_scripts/04_open_citation_prs.sh",
+      "size_bytes": 1416,
+      "sha256": "1bd3034349f1f75b68c1a5950369bae99642687ff7ab9290e036e3b0cb808d85"
+    },
+    {
+      "path": "05_apply_scripts/05_apply_branch_protection.sh",
+      "size_bytes": 1014,
+      "sha256": "db3508f6cf743b509c8af77cd71b65be35e1b93bef2704dee7d9f7ca2c157cca"
+    },
+    {
+      "path": "05_apply_scripts/06_patch_github_display_name.sh",
+      "size_bytes": 594,
+      "sha256": "1d01b2019da074b76c66d31abeef575fcb2173a0cda11d8e4404798a1bea2e77"
+    }
+  ],
+  "file_count": 86,
+  "total_bytes": 649515
+}
