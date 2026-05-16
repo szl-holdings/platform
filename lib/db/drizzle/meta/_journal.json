@@ -1051,6 +1051,13 @@
       "when": 1780646400000,
       "tag": "0162_lexicon_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1780732800000,
+      "tag": "0163_proof_ledger",
+      "breakpoints": true
     }
   ]
 }

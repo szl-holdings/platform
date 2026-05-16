@@ -48,6 +48,19 @@ setInferenceGateChecker((modelId) => {
 // Seed the Lexicon catalog at boot so the dashboard renders something on a
 // fresh DB and the inference-gate hook always finds a row to update.
 void seedLexiconFromRegistry().catch(() => {});
+
+// Rehydrate the orchestration proof ledger from the durable proof_ledger
+// table (task #4879) so /api/a11oy/fabric/proofs returns the historical
+// audit trail across restarts instead of an empty list. Use the .js
+// specifier — the api-server is built as ESM and dynamic imports must
+// include the extension at runtime (see other dynamic imports in this
+// file, e.g. './lib/health-probes.js'). Errors are logged so a silent
+// hydration regression is observable in the boot logs.
+import { hydrateProofsFromDb } from './services/orchestration-store.js';
+void hydrateProofsFromDb().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('[orchestration-store] proof ledger hydrate failed at boot', err);
+});
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
 import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';

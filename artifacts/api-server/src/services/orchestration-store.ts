@@ -14,6 +14,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { logger } from '../lib/logger.js';
 
 export type A11oyProductId =
   | 'amaru'
@@ -166,6 +167,12 @@ export function registerProduct(reg: ProductRegistration): RegisteredProduct {
       normalizedCapabilities.push(c);
     }
   }
+  // If hydrate-on-boot ran before this product registered, replay its
+  // historical aggregates (recentProofCount / lastProofAt / lastAction /
+  // modelsUsed) from the side-map populated in `hydrateProofsFromDb`. This
+  // preserves the audit-trail continuity across restarts even when the
+  // product re-registers AFTER hydrate.
+  const hydrated = !existing ? hydratedProductStats.get(reg.product) : undefined;
   const next: RegisteredProduct = {
     ...reg,
     capabilities: normalizedCapabilities,
@@ -173,14 +180,27 @@ export function registerProduct(reg: ProductRegistration): RegisteredProduct {
     registeredAt: existing?.registeredAt ?? now,
     lastSeen: now,
     health: 'healthy',
-    recentProofCount: existing?.recentProofCount ?? 0,
-    lastProofAt: existing?.lastProofAt,
-    lastAction: existing?.lastAction,
-    modelsUsed: existing?.modelsUsed ?? [],
+    recentProofCount: existing?.recentProofCount ?? hydrated?.recentProofCount ?? 0,
+    lastProofAt: existing?.lastProofAt ?? hydrated?.lastProofAt,
+    lastAction: existing?.lastAction ?? hydrated?.lastAction,
+    modelsUsed: existing?.modelsUsed ?? hydrated?.modelsUsed ?? [],
   };
   products.set(reg.product, next);
+  // Once the live product record absorbs the hydrated aggregates, drop the
+  // side-map entry so subsequent appendProof calls flow through the live
+  // record (avoiding double-counting).
+  hydratedProductStats.delete(reg.product);
   return next;
 }
+
+interface HydratedProductStats {
+  recentProofCount: number;
+  lastProofAt?: string;
+  lastAction?: string;
+  modelsUsed: string[];
+}
+
+const hydratedProductStats = new Map<A11oyProductId, HydratedProductStats>();
 
 /**
  * Idempotently attach a capability to a product. Used by sub-modules (e.g.
@@ -282,19 +302,133 @@ export function appendProof(input: EmitProofInput): ProofLedgerEntry {
   proofs.unshift(entry);
   if (proofs.length > PROOF_LIMIT) proofs.length = PROOF_LIMIT;
 
-  const p = products.get(input.product);
-  if (p) {
-    p.recentProofCount += 1;
-    p.lastProofAt = entry.ts;
-    p.lastAction = `${entry.kind}: ${entry.summary}`;
-    p.lastSeen = entry.ts;
-    p.health = 'healthy';
-    if (input.modelUsed && !p.modelsUsed.includes(input.modelUsed)) {
-      p.modelsUsed = [...p.modelsUsed, input.modelUsed].slice(-8);
-    }
-    products.set(input.product, p);
-  }
+  applyProofToProduct(entry, input.modelUsed);
+
+  // Fire-and-forget durable write to the proof_ledger table (task #4879).
+  // We deliberately do NOT await — appendProof is a hot synchronous call
+  // path used by every orchestration route. The DB layer is loaded lazily
+  // so unit tests that mount only this module without a DATABASE_URL keep
+  // working (see a11oy-orchestration.test.ts).
+  void persistProof(entry, input.modelUsed);
+
   return entry;
+}
+
+function applyProofToProduct(entry: ProofLedgerEntry, modelUsed: string | undefined): void {
+  const p = products.get(entry.product);
+  if (!p) return;
+  p.recentProofCount += 1;
+  p.lastProofAt = entry.ts;
+  p.lastAction = `${entry.kind}: ${entry.summary}`;
+  p.lastSeen = entry.ts;
+  p.health = 'healthy';
+  if (modelUsed && !p.modelsUsed.includes(modelUsed)) {
+    p.modelsUsed = [...p.modelsUsed, modelUsed].slice(-8);
+  }
+  products.set(entry.product, p);
+}
+
+async function persistProof(entry: ProofLedgerEntry, modelUsed: string | undefined): Promise<void> {
+  try {
+    const { db, proofLedgerTable } = await import('@szl-holdings/db');
+    await db
+      .insert(proofLedgerTable)
+      .values({
+        id: entry.id,
+        product: entry.product,
+        kind: entry.kind,
+        summary: entry.summary,
+        deepLink: entry.deepLink,
+        relatedProduct: entry.relatedProduct,
+        modelUsed,
+        payload: entry.payload ?? {},
+        ts: new Date(entry.ts),
+      })
+      .onConflictDoNothing();
+  } catch (err) {
+    logger.warn({ err, proofId: entry.id }, '[orchestration-store] proof persist failed');
+  }
+}
+
+/**
+ * Restore the in-memory proof ring from the durable `proof_ledger` table
+ * (task #4879). Loads the most recent PROOF_LIMIT rows, replaces the
+ * in-memory ring, and replays per-product aggregates so any product that
+ * subsequently re-registers picks up its prior recentProofCount /
+ * lastProofAt / modelsUsed without losing history across restarts.
+ *
+ * Safe to call multiple times; each call resets the in-memory ring to the
+ * authoritative DB state.
+ */
+export async function hydrateProofsFromDb(): Promise<number> {
+  try {
+    const dbMod = await import('@szl-holdings/db');
+    const { db, proofLedgerTable } = dbMod;
+    const { desc } = await import('drizzle-orm');
+    const rows = await db
+      .select()
+      .from(proofLedgerTable)
+      .orderBy(desc(proofLedgerTable.ts))
+      .limit(PROOF_LIMIT);
+
+    proofs.length = 0;
+    // Reset per-product proof aggregates so we don't double-count if hydrate
+    // is invoked more than once. The product registration itself is left
+    // untouched — products are only added by /register calls.
+    for (const p of products.values()) {
+      p.recentProofCount = 0;
+      p.lastProofAt = undefined;
+      p.lastAction = undefined;
+      p.modelsUsed = [];
+    }
+    hydratedProductStats.clear();
+
+    // Rows come back newest-first; the ring also stores newest-first, so
+    // push directly. To replay product aggregates correctly (counts +
+    // model-usage history) we walk the rows oldest-first via reverse iter.
+    for (const r of rows) {
+      const entry: ProofLedgerEntry = {
+        id: r.id,
+        product: r.product as A11oyProductId,
+        kind: r.kind as ProofKind,
+        summary: r.summary,
+        deepLink: r.deepLink ?? undefined,
+        relatedProduct: (r.relatedProduct ?? undefined) as A11oyProductId | undefined,
+        payload: (r.payload as Record<string, unknown> | null) ?? undefined,
+        ts: new Date(r.ts).toISOString(),
+      };
+      proofs.push(entry);
+    }
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const r = rows[i];
+      const entry = proofs[i];
+      const modelUsed = r.modelUsed ?? undefined;
+      if (products.has(entry.product)) {
+        applyProofToProduct(entry, modelUsed);
+      } else {
+        // Product hasn't registered yet (typical on cold boot — child apps
+        // only call /register after the api-server is up). Park the
+        // aggregate in the side-map so registerProduct can absorb it later.
+        const stats = hydratedProductStats.get(entry.product) ?? {
+          recentProofCount: 0,
+          modelsUsed: [],
+        };
+        stats.recentProofCount += 1;
+        stats.lastProofAt = entry.ts;
+        stats.lastAction = `${entry.kind}: ${entry.summary}`;
+        if (modelUsed && !stats.modelsUsed.includes(modelUsed)) {
+          stats.modelsUsed = [...stats.modelsUsed, modelUsed].slice(-8);
+        }
+        hydratedProductStats.set(entry.product, stats);
+      }
+    }
+
+    logger.info({ count: rows.length }, '[orchestration-store] proof ledger hydrated');
+    return rows.length;
+  } catch (err) {
+    logger.warn({ err }, '[orchestration-store] proof ledger hydrate failed (non-fatal)');
+    return 0;
+  }
 }
 
 export function listProofs(opts?: { product?: A11oyProductId; limit?: number }): ProofLedgerEntry[] {
@@ -312,4 +446,5 @@ export function totalProofs(): number {
 export function __resetForTests(): void {
   products.clear();
   proofs.length = 0;
+  hydratedProductStats.clear();
 }
