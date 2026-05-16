@@ -34,7 +34,7 @@ BASE_PATH = "/agent-gateway"
 name = "temporal-worker"
 paths = []
 localPort = 6801
-autoStart = false
+autoStart = true
 
 [services.development]
 run = "pnpm --filter @szl-holdings/temporal-tests run worker:start"

@@ -22,6 +22,7 @@
  */
 
 import { bootstrapTemporalWorker } from "../worker.js";
+import { parseTimeoutEnv, waitForTemporalReady } from "./wait-for-temporal.js";
 
 const APPROVAL_TASK_QUEUE_ENV = "TEMPORAL_APPROVAL_TASK_QUEUE";
 const DEFAULT_APPROVAL_TASK_QUEUE = "approval-task-queue";
@@ -30,6 +31,18 @@ async function main() {
   const started = Date.now();
   const taskQueue =
     process.env[APPROVAL_TASK_QUEUE_ENV] ?? DEFAULT_APPROVAL_TASK_QUEUE;
+  const endpoint = process.env.TEMPORAL_ENDPOINT ?? "localhost:7233";
+  const totalTimeoutMs = Number(process.env.TEMPORAL_READINESS_TIMEOUT_MS ?? 5 * 60 * 1_000);
+
+  try {
+    await waitForTemporalReady({ endpoint, totalTimeoutMs });
+  } catch (err) {
+    console.error(
+      "[temporal-approval-worker] FATAL: Temporal Frontend never became reachable",
+      err instanceof Error ? { message: err.message } : err,
+    );
+    process.exit(1);
+  }
 
   let bootstrapped: Awaited<ReturnType<typeof bootstrapTemporalWorker>>;
   try {

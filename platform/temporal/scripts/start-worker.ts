@@ -15,9 +15,26 @@
  */
 
 import { bootstrapTemporalWorker } from "../worker.js";
+import { parseTimeoutEnv, waitForTemporalReady } from "./wait-for-temporal.js";
 
 async function main() {
   const started = Date.now();
+  const endpoint = process.env.TEMPORAL_ENDPOINT ?? "localhost:7233";
+  const totalTimeoutMs = parseTimeoutEnv(
+    process.env.TEMPORAL_READINESS_TIMEOUT_MS,
+    5 * 60 * 1_000,
+  );
+
+  try {
+    await waitForTemporalReady({ endpoint, totalTimeoutMs });
+  } catch (err) {
+    console.error(
+      "[temporal-worker] FATAL: Temporal Frontend never became reachable",
+      err instanceof Error ? { message: err.message } : err,
+    );
+    process.exit(1);
+  }
+
   let bootstrapped: Awaited<ReturnType<typeof bootstrapTemporalWorker>>;
   try {
     bootstrapped = await bootstrapTemporalWorker();
