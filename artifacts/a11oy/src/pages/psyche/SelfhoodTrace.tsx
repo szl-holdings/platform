@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { IDENTITY_ASSERTIONS, COHERENCE_SERIES, THEORY_OF_OTHER, SELF_MODEL_VERSIONS } from '../../data/psyche/selfhood';
+import {
+  IDENTITY_ASSERTIONS as SEED_ASSERTIONS,
+  COHERENCE_SERIES as SEED_COHERENCE,
+  THEORY_OF_OTHER as SEED_TOO,
+  SELF_MODEL_VERSIONS as SEED_VERSIONS,
+} from '../../data/psyche/selfhood';
+import { useApiData } from '../../hooks/useApiData';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
 const GOLD = '#c9b787';
@@ -22,6 +28,22 @@ export function SelfhoodTrace() {
   const [expandedToo, setExpandedToo] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [coherenceWindow, setCoherenceWindow] = useState<30 | 60 | 90>(30);
+
+  const { data } = useApiData<{
+    assertions: typeof SEED_ASSERTIONS;
+    coherence: typeof SEED_COHERENCE;
+    theoryOfOther: typeof SEED_TOO;
+    versions: typeof SEED_VERSIONS;
+  }>('/psyche/selfhood', {
+    assertions: SEED_ASSERTIONS,
+    coherence: SEED_COHERENCE,
+    theoryOfOther: SEED_TOO,
+    versions: SEED_VERSIONS,
+  });
+  const IDENTITY_ASSERTIONS = data?.assertions ?? SEED_ASSERTIONS;
+  const COHERENCE_SERIES = data?.coherence ?? SEED_COHERENCE;
+  const THEORY_OF_OTHER = data?.theoryOfOther ?? SEED_TOO;
+  const SELF_MODEL_VERSIONS = data?.versions ?? SEED_VERSIONS;
 
   const coherenceSlice = COHERENCE_SERIES.slice(90 - coherenceWindow);
   const latestCoherence = COHERENCE_SERIES[COHERENCE_SERIES.length - 1].score;

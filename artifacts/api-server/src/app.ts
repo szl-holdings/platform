@@ -71,6 +71,7 @@ import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 import a11oyOrchestrationRouter from './routes/a11oy-orchestration-api';
 import a11oyLexiconRouter from './routes/a11oy-lexicon-api';
+import psycheRouter from './routes/psyche';
 import { sentraProbeDetectionMiddleware } from './middlewares/sentra-probe-detection';
 
 const app: Express = express();
@@ -381,6 +382,13 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 // fabric API: child products register from public boots and the demo-chain
 // endpoint must run without a session for the demo flow.
 app.use('/api/a11oy', a11oyOrchestrationRouter);
+
+// PSYCHE — Emergent Sentience Observatory (#4856). Mounted as a public read
+// surface alongside the orchestration backbone so the A11oy PSYCHE pages
+// (Anima, Genesis, Selfhood, Volition, Dreams, Voice) can fetch live data
+// without a session. The seed data lives under `src/seed/psyche/` and is
+// mirrored on the frontend as fallback/mock data.
+app.use('/api/a11oy/psyche', psycheRouter);
 
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));

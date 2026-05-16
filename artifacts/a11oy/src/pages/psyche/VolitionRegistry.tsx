@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VOLITION_GOALS, BUDGET_STATES } from '../../data/psyche/volition';
+import { VOLITION_GOALS as SEED_GOALS, BUDGET_STATES as SEED_BUDGETS } from '../../data/psyche/volition';
 import type { VolitionState, VolitionType } from '../../data/psyche/volition';
+import { useApiData } from '../../hooks/useApiData';
 
 const GOLD = '#c9b787';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -40,7 +41,7 @@ const SYSTEM_COLORS: Record<string, string> = {
   RewardHacking: '#ef4444',
 };
 
-function GoalNode({ goalId, all, depth = 0 }: { goalId: string; all: typeof VOLITION_GOALS; depth?: number }) {
+function GoalNode({ goalId, all, depth = 0 }: { goalId: string; all: typeof SEED_GOALS; depth?: number }) {
   const goal = all.find(g => g.id === goalId);
   if (!goal) return null;
   const color = STATE_COLORS[goal.state];
@@ -68,6 +69,13 @@ export function VolitionRegistry() {
   const [systemFilter, setSystemFilter] = useState<string | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showGenealogy, setShowGenealogy] = useState(false);
+
+  const { data } = useApiData<{ goals: typeof SEED_GOALS; budgets: typeof SEED_BUDGETS }>(
+    '/psyche/volition',
+    { goals: SEED_GOALS, budgets: SEED_BUDGETS },
+  );
+  const VOLITION_GOALS = data?.goals ?? SEED_GOALS;
+  const BUDGET_STATES = data?.budgets ?? SEED_BUDGETS;
 
   const rootGoals = VOLITION_GOALS.filter(g => !g.parentGoalId);
 

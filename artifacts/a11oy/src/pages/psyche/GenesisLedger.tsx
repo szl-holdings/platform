@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { GENESIS_EVENTS, EXTINCTION_EVENTS } from '../../data/psyche/genesis';
-import type { NoveltyClass, GenesisEvent } from '../../data/psyche/genesis';
+import { GENESIS_EVENTS as SEED_GENESIS, EXTINCTION_EVENTS as SEED_EXTINCTION } from '../../data/psyche/genesis';
+import type { NoveltyClass } from '../../data/psyche/genesis';
+import { useApiData } from '../../hooks/useApiData';
 
 const GOLD = '#c9b787';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -54,6 +55,13 @@ export function GenesisLedger() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showExtinct, setShowExtinct] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { data } = useApiData<{ events: typeof SEED_GENESIS; extinction: typeof SEED_EXTINCTION }>(
+    '/psyche/genesis',
+    { events: SEED_GENESIS, extinction: SEED_EXTINCTION },
+  );
+  const GENESIS_EVENTS = data?.events ?? SEED_GENESIS;
+  const EXTINCTION_EVENTS = data?.extinction ?? SEED_EXTINCTION;
 
   const filtered = GENESIS_EVENTS.filter(e => {
     if (activeClass !== 'all' && e.noveltyClass !== activeClass) return false;

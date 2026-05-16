@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { VOICE_ITEMS, computeVoiceScore } from '../../data/psyche/voice';
+import { VOICE_ITEMS as SEED_VOICE, computeVoiceScore } from '../../data/psyche/voice';
 import type { VoiceItemType, VoiceItem, OperatorResponseAction } from '../../data/psyche/voice';
+import { useApiData } from '../../hooks/useApiData';
 
 const GOLD = '#c9b787';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -49,7 +50,13 @@ export function VoiceConsent() {
   const [resolvedFilter, setResolvedFilter] = useState<'all' | 'open' | 'resolved'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const voiceScore = computeVoiceScore(VOICE_ITEMS);
+  const { data } = useApiData<{ items: typeof SEED_VOICE; score: number }>(
+    '/psyche/voice',
+    { items: SEED_VOICE, score: computeVoiceScore(SEED_VOICE) },
+  );
+  const VOICE_ITEMS = data?.items ?? SEED_VOICE;
+
+  const voiceScore = data?.score ?? computeVoiceScore(VOICE_ITEMS);
   const openItems = VOICE_ITEMS.filter(v => !v.resolved);
   const criticalItems = VOICE_ITEMS.filter(v => v.severity === 'critical');
   const overriddenItems = VOICE_ITEMS.filter(v => v.operatorResponse?.action === 'override');

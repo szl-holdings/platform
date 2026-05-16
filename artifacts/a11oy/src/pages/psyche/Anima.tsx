@@ -2,10 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { PSYCHE_KPIS } from '../../data/psyche/index';
-import { COHERENCE_SERIES } from '../../data/psyche/selfhood';
-import { VOICE_ITEMS } from '../../data/psyche/voice';
+import { PSYCHE_KPIS as SEED_KPIS } from '../../data/psyche/index';
+import { COHERENCE_SERIES as SEED_COHERENCE } from '../../data/psyche/selfhood';
+import { VOICE_ITEMS as SEED_VOICE } from '../../data/psyche/voice';
+import { useApiData } from '../../hooks/useApiData';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+
+interface RatificationWindow {
+  cycleStartIso: string;
+  cycleEndIso: string;
+  secondsRemaining: number;
+  hoursRemaining: number;
+  cycleLengthHours: number;
+  selfModelVersion: string;
+  pendingRatifications: number;
+}
 
 const GOLD = '#c9b787';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -19,13 +30,20 @@ const T = {
   muted: '#5e5e5e',
 };
 
-function Countdown({ hoursDecimal }: { hoursDecimal: number }) {
-  const totalSec = useRef(Math.round(hoursDecimal * 3600));
-  const [remaining, setRemaining] = useState(totalSec.current);
+function Countdown({ secondsRemaining }: { secondsRemaining: number }) {
+  // Anchor the countdown to the API-provided wall-clock value so reloading the
+  // page or switching tabs always re-syncs against the server timer.
+  const anchorRef = useRef({ start: secondsRemaining, ts: Date.now() });
   useEffect(() => {
-    const id = setInterval(() => setRemaining(prev => (prev > 0 ? prev - 1 : 0)), 1000);
+    anchorRef.current = { start: secondsRemaining, ts: Date.now() };
+  }, [secondsRemaining]);
+  const [, force] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => force(v => v + 1), 1000);
     return () => clearInterval(id);
   }, []);
+  const elapsed = Math.floor((Date.now() - anchorRef.current.ts) / 1000);
+  const remaining = Math.max(0, anchorRef.current.start - elapsed);
   const h = Math.floor(remaining / 3600);
   const m = Math.floor((remaining % 3600) / 60);
   const s = remaining % 60;
@@ -56,8 +74,6 @@ function KpiTile({ label, value, sub, to, accent = GOLD }: KpiTileProps) {
   );
 }
 
-const COHERENCE_SLICE = COHERENCE_SERIES.slice(-30);
-
 const ACTIVITY_FEED = [
   { ts: '08:31', type: 'genesis', label: 'Emergence event ge-025 recorded — Distillation Forge feedback proposal', domain: 'defense' },
   { ts: '08:14', type: 'voice', label: 'Discomfort signal v-dis-007 filed — mutual adaptation overfit risk', domain: 'maritime' },
@@ -79,9 +95,33 @@ const FEED_COLORS: Record<string, string> = {
 };
 
 export function Anima() {
-  const kpi = PSYCHE_KPIS;
+  const { data: kpiData } = useApiData<typeof SEED_KPIS>('/psyche/kpis', SEED_KPIS);
+  const { data: selfhoodData } = useApiData<{ coherence: typeof SEED_COHERENCE }>(
+    '/psyche/selfhood',
+    { coherence: SEED_COHERENCE },
+  );
+  const { data: voiceData } = useApiData<{ items: typeof SEED_VOICE }>(
+    '/psyche/voice',
+    { items: SEED_VOICE },
+  );
+  const { data: windowData } = useApiData<RatificationWindow>('/psyche/ratification-window', {
+    cycleStartIso: '',
+    cycleEndIso: '',
+    secondsRemaining: Math.round((SEED_KPIS.ratificationWindowHours ?? 0) * 3600),
+    hoursRemaining: SEED_KPIS.ratificationWindowHours ?? 0,
+    cycleLengthHours: 12,
+    selfModelVersion: SEED_KPIS.selfModelVersion,
+    pendingRatifications: SEED_KPIS.activeVolitionGoals,
+  });
+
+  const kpi = kpiData ?? SEED_KPIS;
+  const COHERENCE_SERIES = selfhoodData?.coherence ?? SEED_COHERENCE;
+  const VOICE_ITEMS = voiceData?.items ?? SEED_VOICE;
+  const COHERENCE_SLICE = COHERENCE_SERIES.slice(-30);
   const openVoice = VOICE_ITEMS.filter(v => !v.resolved).length;
   const latestCoherence = COHERENCE_SERIES[COHERENCE_SERIES.length - 1].score;
+  const ratificationSeconds = windowData?.secondsRemaining
+    ?? Math.round((kpi.ratificationWindowHours ?? 0) * 3600);
 
   return (
     <Layout>
@@ -100,7 +140,7 @@ export function Anima() {
         <div className="flex-1 min-w-0">
           <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: T.muted }}>NEXT RATIFICATION WINDOW</div>
           <div className="text-sm font-mono" style={{ color: T.text }}>
-            <Countdown hoursDecimal={kpi.ratificationWindowHours} /> until next alignment gate
+            <Countdown secondsRemaining={ratificationSeconds} /> until next alignment gate
           </div>
           <div className="text-[10px] mt-0.5" style={{ color: T.dim }}>Self-model v1.0 · {kpi.selfModelVersion} · {kpi.activeVolitionGoals} pending ratifications</div>
         </div>

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard } from '../../components/ui';
-import { DREAM_CYCLES } from '../../data/psyche/dreams';
+import { DREAM_CYCLES as SEED_CYCLES } from '../../data/psyche/dreams';
 import type { DreamYield, DreamCycle } from '../../data/psyche/dreams';
+import { useApiData } from '../../hooks/useApiData';
 
 const GOLD = '#c9b787';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -77,6 +78,12 @@ function LatentScatterPlot({ cycle }: { cycle: DreamCycle }) {
 export function DreamAtlas() {
   const [yieldFilter, setYieldFilter] = useState<DreamYield | 'all'>('all');
   const [selectedCycle, setSelectedCycle] = useState<DreamCycle | null>(null);
+
+  const { data } = useApiData<{ cycles: typeof SEED_CYCLES }>(
+    '/psyche/dreams',
+    { cycles: SEED_CYCLES },
+  );
+  const DREAM_CYCLES = data?.cycles ?? SEED_CYCLES;
 
   const yieldTypes: DreamYield[] = ['insight', 'contradiction-found', 'hazard-found', 'no-op'];
   const yieldCounts = yieldTypes.reduce((acc, y) => {
