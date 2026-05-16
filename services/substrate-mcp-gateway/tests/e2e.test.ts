@@ -1215,3 +1215,158 @@ test('25. Security headers are present on responses', async () => {
   assert.ok(csp, 'Content-Security-Policy header must be present');
   assert.ok(csp?.includes("frame-ancestors 'none'"), 'CSP must include frame-ancestors');
 });
+
+// ─── Regression tests for szl-holdings/platform#113 ───────────────────────────
+//
+// The Streamable HTTP transport fix relies on three invariants that the happy-
+// path tests above don't pin down. A future refactor (e.g. re-introducing a
+// singleton PRAXISMcpServer, dropping the unknown-session 404, or removing the
+// extension-injection response wrapper) would silently break MCP compliance
+// unless these are asserted directly.
+
+async function postInitialize(extraParams: Record<string, unknown> = {}): Promise<Response> {
+  return fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'regression-test', version: '1.0.0' },
+        ...extraParams,
+      },
+    }),
+  });
+}
+
+test('26. back-to-back initialize POSTs yield distinct session ids (per-session server)', async () => {
+  // Pins the fix from szl-holdings/platform#113: a singleton PRAXISMcpServer
+  // would 500 on the second initialize because the SDK's Server carries a
+  // one-shot "initialized" flag. Each session must get its own server +
+  // transport pair built lazily on a session-less POST.
+  const first = await postInitialize();
+  const second = await postInitialize();
+
+  assert.equal(first.status, 200, 'First initialize must return 200');
+  assert.equal(second.status, 200, 'Second initialize must return 200');
+
+  const firstId = first.headers.get('mcp-session-id');
+  const secondId = second.headers.get('mcp-session-id');
+  assert.ok(firstId, 'First initialize must issue a session id');
+  assert.ok(secondId, 'Second initialize must issue a session id');
+  assert.notEqual(firstId, secondId, 'Each initialize must mint a fresh session id');
+
+  // Drain bodies so node-fetch doesn't leak sockets into later tests.
+  await first.text();
+  await second.text();
+});
+
+test('27. POST with a previously-DELETEd session id returns a JSON 404 envelope', async () => {
+  // Pins the fix from szl-holdings/platform#113: unknown / terminated sessions
+  // must surface as a JSON-RPC 404 (-32001 SESSION_NOT_FOUND), not the SDK's
+  // default 400 and not an Express HTML 500. Clients rely on the structured
+  // envelope to know they should re-initialize.
+  const initRes = await postInitialize();
+  assert.equal(initRes.status, 200);
+  const sessionId = initRes.headers.get('mcp-session-id');
+  assert.ok(sessionId, 'initialize must issue a session id');
+  await initRes.text();
+
+  const deleteRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      'Mcp-Session-Id': sessionId,
+    },
+  });
+  assert.equal(deleteRes.status, 200, 'DELETE must terminate the session');
+
+  const reuseRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'application/json, text/event-stream',
+      'Mcp-Session-Id': sessionId,
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 99, method: 'ping', params: {} }),
+  });
+
+  assert.equal(reuseRes.status, 404, 'Reusing a terminated session must return 404');
+  const contentType = reuseRes.headers.get('content-type') ?? '';
+  assert.ok(
+    contentType.includes('application/json'),
+    `404 response must be JSON, got Content-Type: ${contentType}`,
+  );
+  const body = (await reuseRes.json()) as {
+    jsonrpc?: string;
+    id?: unknown;
+    error?: { code?: number; message?: string; data?: { sessionId?: string } };
+  };
+  assert.equal(body.jsonrpc, '2.0', 'Body must be a JSON-RPC envelope');
+  assert.equal(body.id, 99, 'Envelope must echo the request id');
+  assert.equal(body.error?.code, -32001, 'Error code must be -32001 SESSION_NOT_FOUND');
+  assert.equal(body.error?.message, 'SESSION_NOT_FOUND');
+  assert.equal(body.error?.data?.sessionId, sessionId, 'Error data must echo the offending session id');
+});
+
+test('28. initialize with params.extensions echoes intersected server extensions and rewrites Content-Length', async () => {
+  // Pins the extension-negotiation wrapper from szl-holdings/platform#113:
+  //   • Only extensions advertised by the server (CAPABILITIES.extensions) are
+  //     echoed back; unknown client keys must be dropped.
+  //   • Because we inject `extensions` into the SDK's already-serialised body,
+  //     Content-Length must be rewritten to match the post-injection byte
+  //     length — otherwise HTTP/1.1 keep-alive truncates the next response.
+  const UNKNOWN_KEY = 'client/never-supported-by-server-xyz';
+  const KNOWN_KEY = 'szl/governed-autonomy';
+
+  const res = await postInitialize({
+    extensions: {
+      [KNOWN_KEY]: { version: '1.0' },
+      [UNKNOWN_KEY]: { version: '9.9' },
+    },
+  });
+  assert.equal(res.status, 200, 'initialize with extensions must return 200');
+
+  // Framing contract: the wrapper rewrites the body to inject extensions, so
+  // either Content-Length must match the rewritten byte length, OR the response
+  // must fall back to chunked transfer-encoding (which auto-frames). What must
+  // NEVER happen is a stale Content-Length from the pre-injection body —
+  // that would truncate the response on HTTP/1.1 keep-alive connections.
+  const raw = await res.text();
+  const actualByteLen = Buffer.byteLength(raw);
+  const contentLengthHdr = res.headers.get('content-length');
+  const transferEncoding = res.headers.get('transfer-encoding') ?? '';
+  if (contentLengthHdr !== null) {
+    assert.equal(
+      Number(contentLengthHdr),
+      actualByteLen,
+      `Content-Length (${contentLengthHdr}) must match the rewritten body byte length (${actualByteLen}). A stale value would truncate the response on keep-alive connections.`,
+    );
+  } else {
+    assert.ok(
+      transferEncoding.toLowerCase().includes('chunked'),
+      'Without Content-Length the response must use chunked transfer-encoding so the rewritten body is framed correctly',
+    );
+  }
+
+  const parsed = JSON.parse(raw) as { result?: { extensions?: Record<string, unknown> } };
+  assert.ok(parsed.result, 'initialize must return a result');
+  const extensions = parsed.result.extensions;
+  assert.ok(
+    extensions && typeof extensions === 'object',
+    'Negotiated extensions must be present in the result',
+  );
+  assert.ok(KNOWN_KEY in extensions, `Server-supported extension '${KNOWN_KEY}' must be echoed`);
+  assert.ok(
+    !(UNKNOWN_KEY in extensions),
+    `Unknown client extension '${UNKNOWN_KEY}' must be dropped (got: ${Object.keys(extensions).join(', ')})`,
+  );
+});
