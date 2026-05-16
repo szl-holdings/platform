@@ -56,7 +56,6 @@ import {
   OnboardingWizard,
   useOnboardingAnalytics,
 } from '@szl-holdings/shared-ui/onboarding';
-import { PrivateAppGuard } from '@szl-holdings/shared-ui/PrivateAppGuard';
 import { PackBanner } from '@szl-holdings/shared-ui/pack-banner';
 import { RealtimeStatusIndicator } from '@szl-holdings/shared-ui/realtime-status-indicator';
 import { SandboxModeBanner, SandboxModeProvider } from '@szl-holdings/shared-ui/sandbox-mode';
@@ -1563,11 +1562,11 @@ function AppContent({
     location.startsWith('/med-shadow-fleet');
 
   if (isDashboard) {
-    return (
-      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_BRAND_ACCENT}>
-        <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-      </PrivateAppGuard>
-    );
+    // Vessels dashboard surfaces are intentionally accessible without sign-in
+    // for investor demos. The internal AuthProvider supplies a default
+    // role-based persona (see contexts/auth-context.tsx). Real user accounts
+    // still flow through Replit Auth via the marketing /sign-in route.
+    return <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
   }
 
   return (
