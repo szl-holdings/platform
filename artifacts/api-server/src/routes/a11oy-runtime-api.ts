@@ -71,6 +71,12 @@ const LIVE_ACTIONS: Array<{
   pceContractId?: string;
   approvalRecordId?: string;
   riskLevel: string;
+  /**
+   * Continuous risk in [0, 1] produced by a domain wrapper (Sentra/Counsel/Terra).
+   * When present, this is fed straight into `autonomyGate()`; the coarse
+   * `riskLevel` band is only used as a fallback for legacy callers.
+   */
+  riskScore?: number;
   isDestructive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -86,6 +92,7 @@ const LIVE_ACTIONS: Array<{
     approvalTier: 'executive',
     linkedSignalIds: ['sig-lyte-002'],
     riskLevel: 'high',
+    riskScore: 0.72,
     isDestructive: false,
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -101,6 +108,7 @@ const LIVE_ACTIONS: Array<{
     approvalTier: 'executive',
     linkedSignalIds: ['sig-terra-001'],
     riskLevel: 'critical',
+    riskScore: 0.93,
     isDestructive: false,
     createdAt: new Date(Date.now() - 43200000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -116,6 +124,7 @@ const LIVE_ACTIONS: Array<{
     approvalTier: 'executive',
     linkedSignalIds: ['sig-terra-001'],
     riskLevel: 'critical',
+    riskScore: 0.88,
     isDestructive: false,
     createdAt: new Date(Date.now() - 21600000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -131,6 +140,7 @@ const LIVE_ACTIONS: Array<{
     approvalTier: 'operator',
     linkedSignalIds: ['sig-vessels-002'],
     riskLevel: 'high',
+    riskScore: 0.66,
     isDestructive: false,
     createdAt: new Date(Date.now() - 7200000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -146,6 +156,7 @@ const LIVE_ACTIONS: Array<{
     approvalTier: 'auto',
     linkedSignalIds: ['sig-alloy-001'],
     riskLevel: 'low',
+    riskScore: 0.08,
     isDestructive: false,
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -172,8 +183,9 @@ function findAction(id: string) {
 }
 
 /**
- * Map a coarse risk band (low/medium/high/critical) to the canonical
- * autonomy decision via `autonomyGate()` from `@szl-holdings/formulas`.
+ * Fallback mapping from a coarse risk band (low/medium/high/critical) to
+ * a scalar in [0, 1]. Only used when a caller hasn't supplied a real
+ * numeric risk score from a domain wrapper (Sentra/Counsel/Terra).
  * Source: docs/thesis/v10-canonical.md §4.3.
  */
 const RISK_LEVEL_TO_SCALAR: Record<string, number> = {
@@ -183,8 +195,23 @@ const RISK_LEVEL_TO_SCALAR: Record<string, number> = {
   critical: 0.95,
 };
 
-function deriveApprovalTier(riskLevel?: string): 'auto' | 'operator' | 'executive' {
-  const r = RISK_LEVEL_TO_SCALAR[(riskLevel ?? '').toLowerCase()] ?? 0.5;
+/**
+ * Resolve the canonical autonomy decision into an approval tier.
+ *
+ * Prefers a real numeric `riskScore` in [0, 1] (as produced by
+ * `sentraSignalRiskNormalized`, `matterRiskNormalized`,
+ * `dealScoreNormalized`, etc.) and feeds it straight into
+ * `autonomyGate()`. Falls back to the coarse band lookup only when no
+ * numeric score is available, for legacy callers.
+ */
+function deriveApprovalTier(
+  riskLevel?: string,
+  riskScore?: number,
+): 'auto' | 'operator' | 'executive' {
+  const r =
+    typeof riskScore === 'number' && Number.isFinite(riskScore)
+      ? Math.max(0, Math.min(1, riskScore))
+      : (RISK_LEVEL_TO_SCALAR[(riskLevel ?? '').toLowerCase()] ?? 0.5);
   const decision = autonomyGate(r);
   if (decision === 'auto') return 'auto';
   if (decision === 'approve') return 'operator';
@@ -364,7 +391,7 @@ router.post('/a11oy/actions/:id/verify', async (req: Request, res: Response) => 
 
 router.post('/a11oy/workcells', async (req: Request, res: Response) => {
   try {
-    const { name, vertical, operatorId, approvalTier, originSignalIds, description, tools } = req.body as {
+    const { name, vertical, operatorId, approvalTier, originSignalIds, description, tools, riskLevel, riskScore } = req.body as {
       name?: string;
       vertical?: string;
       operatorId?: string;
@@ -372,6 +399,8 @@ router.post('/a11oy/workcells', async (req: Request, res: Response) => {
       originSignalIds?: string[];
       description?: string;
       tools?: string[];
+      riskLevel?: string;
+      riskScore?: number;
     };
 
     if (!name || !vertical) {
@@ -383,9 +412,12 @@ router.post('/a11oy/workcells', async (req: Request, res: Response) => {
       description,
       vertical,
       operatorId,
-      approvalTier: (approvalTier as 'auto' | 'operator' | 'executive' | undefined) ?? deriveApprovalTier(),
+      approvalTier:
+        (approvalTier as 'auto' | 'operator' | 'executive' | undefined) ??
+        deriveApprovalTier(riskLevel, riskScore),
       originSignalIds,
       tools,
+      riskScore,
     });
 
     ok(res, wc, { created: true });

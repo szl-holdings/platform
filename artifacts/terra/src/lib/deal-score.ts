@@ -8,7 +8,7 @@
  * if the formula needs to change, change it in `lib/formulas/src/risk.ts`
  * so every consumer (Sentra, Counsel, Terra) moves together.
  */
-import { riskScore } from '@szl-holdings/formulas';
+import { riskScore, normalizedRiskScore } from '@szl-holdings/formulas';
 
 export interface DealScoreInput {
   severity: number;
@@ -22,4 +22,12 @@ export function dealScore({ severity, likelihood, dealValueUsd, cap }: DealScore
   return riskScore(severity, likelihood, dealValueUsd, cap);
 }
 
-export { riskScore };
+/**
+ * Same compound risk as `dealScore`, normalised to [0, 1] so it can be
+ * fed directly into `autonomyGate()` from `@szl-holdings/formulas`.
+ */
+export function dealScoreNormalized({ severity, likelihood, dealValueUsd, cap }: DealScoreInput): number {
+  return normalizedRiskScore(severity, likelihood, dealValueUsd, cap);
+}
+
+export { riskScore, normalizedRiskScore };

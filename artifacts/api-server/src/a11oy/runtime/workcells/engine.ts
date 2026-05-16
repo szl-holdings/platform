@@ -12,6 +12,12 @@ export interface WorkcellEntity {
   operatorId: string;
   tools: string[];
   approvalTier: 'auto' | 'operator' | 'executive';
+  /**
+   * Continuous risk in [0, 1] from a domain wrapper. Recorded alongside
+   * the coarse `approvalTier` so downstream gates can re-derive autonomy
+   * decisions from the real number rather than a band.
+   */
+  riskScore?: number;
   maxRunDurationMs: number;
   pceContractId?: string;
   approvalRecordId?: string;
@@ -57,6 +63,7 @@ async function persistWorkcell(wc: WorkcellEntity): Promise<void> {
       operatorId: wc.operatorId,
       tools: wc.tools,
       approvalTier: wc.approvalTier,
+      riskScore: wc.riskScore ?? null,
       maxRunDurationMs: wc.maxRunDurationMs,
       pceContractId: wc.pceContractId ?? null,
       approvalRecordId: wc.approvalRecordId ?? null,
@@ -76,6 +83,7 @@ async function persistWorkcell(wc: WorkcellEntity): Promise<void> {
         traceId: wc.traceId ?? null,
         proofPacketId: wc.proofPacketId ?? null,
         lastError: wc.lastError ?? null,
+        riskScore: wc.riskScore ?? null,
         history: wc.history as unknown as Array<{ phase: string; timestamp: string; note?: string }>,
         updatedAt: new Date(wc.updatedAt),
       },
@@ -91,6 +99,7 @@ export function createWorkcell(opts: {
   approvalTier?: 'auto' | 'operator' | 'executive';
   originSignalIds?: string[];
   tools?: string[];
+  riskScore?: number;
 }): WorkcellEntity {
   if (workcells.size >= MAX_WORKCELLS) {
     const oldest = [...workcells.values()]
@@ -109,6 +118,7 @@ export function createWorkcell(opts: {
     operatorId: opts.operatorId ?? 'planner',
     tools: opts.tools ?? [],
     approvalTier: opts.approvalTier ?? 'operator',
+    riskScore: opts.riskScore,
     maxRunDurationMs: 300_000,
     originSignalIds: opts.originSignalIds ?? [],
     createdAt: now,
@@ -297,6 +307,7 @@ export function replayWorkcell(workcellId: string): WorkcellEntity | undefined {
     vertical: original.vertical,
     operatorId: original.operatorId,
     approvalTier: original.approvalTier,
+    riskScore: original.riskScore,
     originSignalIds: original.originSignalIds,
     tools: original.tools,
   });

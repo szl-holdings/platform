@@ -20,6 +20,23 @@ export function riskScore(
 }
 
 /**
+ * Same compound risk as `riskScore`, but normalised to the [0, 1] range
+ * by dividing by `cap`. This is the shape `autonomyGate()` expects, so
+ * domain wrappers (Sentra/Counsel/Terra) can feed the number straight
+ * through without re-mapping coarse bands to scalars.
+ */
+export function normalizedRiskScore(
+  severity: number,
+  likelihood: number,
+  valueAtRisk: number,
+  cap = 1_000_000,
+): number {
+  if (!Number.isFinite(cap) || cap <= 0) return 0;
+  const raw = riskScore(severity, likelihood, valueAtRisk, cap);
+  return Math.max(0, Math.min(1, raw / cap));
+}
+
+/**
  * KL-divergence approximation between two same-length empirical distributions.
  * Both inputs are normalised to sum to 1 before comparison.
  */

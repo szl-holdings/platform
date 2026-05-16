@@ -1,4 +1,4 @@
-import { boolean, index, integer, jsonb, numeric, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, doublePrecision, index, integer, jsonb, numeric, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const a11oyPceContractsTable = pgTable(
   'a11oy_pce_contracts',
@@ -141,6 +141,7 @@ export const a11oyWorkcellsTable = pgTable(
     operatorId: text('operator_id').notNull().default('planner'),
     tools: jsonb('tools').$type<string[]>().default([]),
     approvalTier: text('approval_tier', { enum: ['auto', 'operator', 'executive'] }).notNull().default('operator'),
+    riskScore: doublePrecision('risk_score'),
     maxRunDurationMs: integer('max_run_duration_ms').notNull().default(300000),
     pceContractId: text('pce_contract_id'),
     approvalRecordId: text('approval_record_id'),

@@ -594,6 +594,7 @@ export async function initDurablePersistence(): Promise<void> {
         operatorId: r.operatorId,
         tools: (r.tools as string[]) ?? [],
         approvalTier: r.approvalTier as "auto" | "operator" | "executive",
+        riskScore: r.riskScore ?? undefined,
         maxRunDurationMs: r.maxRunDurationMs,
         pceContractId: r.pceContractId ?? undefined,
         approvalRecordId: r.approvalRecordId ?? undefined,
