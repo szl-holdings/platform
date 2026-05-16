@@ -430,6 +430,10 @@ class SentraStore {
 
   private idCounters: Record<string, number> = {};
 
+  // Persistence: serialize all mutable collections so analyst context survives reloads.
+  // Versioned key — bump suffix if the schema changes incompatibly.
+  private static PERSIST_KEY = 'sentra:store-v1';
+
   nextId(prefix: string): string {
     this.idCounters[prefix] = (this.idCounters[prefix] ?? 0) + 1;
     return `${prefix}-${String(this.idCounters[prefix]).padStart(4, '0')}`;
@@ -441,8 +445,65 @@ class SentraStore {
   }
 
   notify() {
+    this.persist();
     this.listeners.forEach(fn => fn());
     this.broadcastOpsStatus();
+  }
+
+  // ── Persistence ─────────────────────────────────────────────────────────
+  // All mutations flow through notify(), so persisting here captures every
+  // analyst action (containment, evidence locking, approval decisions, etc).
+
+  persist(): void {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const snapshot = {
+        v: 1,
+        assets: this.assets,
+        incidents: this.incidents,
+        approvals: this.approvals,
+        evidence: this.evidence,
+        evidencePacks: this.evidencePacks,
+        reports: this.reports,
+        policyLogs: this.policyLogs,
+        auditEntries: this.auditEntries,
+        playbooks: this.playbooks,
+        sessionDigest: this.sessionDigest,
+        idCounters: this.idCounters,
+      };
+      localStorage.setItem(SentraStore.PERSIST_KEY, JSON.stringify(snapshot));
+    } catch {
+      /* storage unavailable or quota exceeded — drop silently */
+    }
+  }
+
+  hydrate(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    try {
+      const raw = localStorage.getItem(SentraStore.PERSIST_KEY);
+      if (!raw) return false;
+      const snap = JSON.parse(raw);
+      if (!snap || snap.v !== 1) return false;
+      this.assets = snap.assets ?? [];
+      this.incidents = snap.incidents ?? [];
+      this.approvals = snap.approvals ?? [];
+      this.evidence = snap.evidence ?? [];
+      this.evidencePacks = snap.evidencePacks ?? [];
+      this.reports = snap.reports ?? [];
+      this.policyLogs = snap.policyLogs ?? [];
+      this.auditEntries = snap.auditEntries ?? [];
+      this.playbooks = snap.playbooks ?? [];
+      this.sessionDigest = snap.sessionDigest ?? [];
+      this.idCounters = snap.idCounters ?? {};
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  clearPersisted(): void {
+    if (typeof localStorage === 'undefined') return;
+    try { localStorage.removeItem(SentraStore.PERSIST_KEY); } catch { /* ignore */ }
   }
 
   private broadcastOpsStatus(): void {
@@ -1457,13 +1518,15 @@ function seedStore() {
   });
 }
 
-// Only seed once
+// Only seed once per module load. Hydrate from persisted snapshot if present;
+// otherwise inject seed data and persist it as the new baseline.
 let seeded = false;
 export function ensureSeeded() {
-  if (!seeded) {
-    seeded = true;
-    seedStore();
-  }
+  if (seeded) return;
+  seeded = true;
+  if (sentraStore.hydrate()) return;
+  seedStore();
+  sentraStore.persist();
 }
 
 // Auto-seed on module import so data is present before first render
