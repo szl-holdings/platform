@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
 import { A11oyGovernancePanels } from '../components/GovernancePanels';
+import { HeroCanvas } from '../components/HeroCanvas';
 import { PSYCHE_KPIS } from '../data/psyche';
 
 interface DashboardSnapshot {
@@ -444,52 +445,9 @@ export function HomePage() {
             </motion.div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3, ease }}
-            style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              padding: '3rem', background: T.surface, borderRadius: 20,
-              border: `1px solid ${T.borderSubtle}`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
-            }}
-          >
-            <svg viewBox="0 0 500 500" fill="none" style={{ width: '100%', maxWidth: 380 }}>
-              <defs>
-                <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor={T.accent} stopOpacity="0.18" />
-                  <stop offset="100%" stopColor={T.accent} stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <circle cx="250" cy="250" r="200" fill="url(#glow)" />
-              <circle cx="250" cy="250" r="160" stroke={T.border} strokeWidth="0.75" fill="none" />
-              <circle cx="250" cy="250" r="120" stroke={T.border} strokeWidth="0.75" fill="none" />
-              <circle cx="250" cy="250" r="80" stroke={T.accentBorder} strokeWidth="0.75" fill="none" />
-              {[0, 60, 120, 180, 240, 300].map((angle, i) => {
-                const r1 = 80, r2 = 160;
-                const x1 = 250 + r1 * Math.cos((angle * Math.PI) / 180);
-                const y1 = 250 + r1 * Math.sin((angle * Math.PI) / 180);
-                const x2 = 250 + r2 * Math.cos((angle * Math.PI) / 180);
-                const y2 = 250 + r2 * Math.sin((angle * Math.PI) / 180);
-                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={T.borderSubtle} strokeWidth="0.5" />;
-              })}
-              {[0, 72, 144, 216, 288].map((angle, i) => {
-                const r = 120;
-                const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
-                const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-                return <circle key={i} cx={cx} cy={cy} r="5" fill={T.accent} opacity="0.5" />;
-              })}
-              <circle cx="250" cy="250" r="7" fill={T.accent} opacity="0.8" />
-              {[30, 90, 150, 210, 270, 330].map((angle, i) => {
-                const r = 160;
-                const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
-                const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-                return <circle key={`o-${i}`} cx={cx} cy={cy} r="3" fill={T.textMuted} opacity="0.35" />;
-              })}
-              <text x="250" y="254" textAnchor="middle" fill={T.textDim} fontSize="14" fontFamily={T.mono} fontWeight="500" opacity="0.6">a11oy</text>
-            </svg>
-          </motion.div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <HeroCanvas />
+          </div>
         </div>
       </section>
 

@@ -11,6 +11,7 @@
  *   2. Add an entry to the FIXTURE_REGISTRY below.
  */
 
+import { a11oyFixtures } from './a11oy.js';
 import { aegisFixtures } from './aegis.js';
 import { conduitFixtures } from './conduit.js';
 import { counselFixtures } from './counsel.js';
@@ -222,6 +223,25 @@ export const FIXTURE_REGISTRY: FixtureEntry[] = [
   { path: '/api/conduit/syncs', data: conduitFixtures.syncs },
   { path: '/api/conduit/sync-runs', data: conduitFixtures.syncRunsEnvelope },
   { path: '/api/conduit/templates', data: conduitFixtures.templates },
+
+  // A11oy — Brand Orchestration Layer
+  { path: '/api/a11oy/fabric/all',       data: a11oyFixtures.fabricAll },
+  { path: '/api/a11oy/fabric/kpis',      data: a11oyFixtures.fabricKpis },
+  { path: '/api/a11oy/fabric/signals',   data: a11oyFixtures.fabricSignals },
+  { path: '/api/a11oy/fabric/risks',     data: a11oyFixtures.fabricRisks },
+  { path: '/api/a11oy/fabric/decisions', data: a11oyFixtures.fabricDecisions },
+  { path: '/api/a11oy/fabric/outcomes',  data: a11oyFixtures.fabricOutcomes },
+  { path: '/api/a11oy/fabric/evidence',  data: a11oyFixtures.fabricEvidence },
+  { path: '/api/a11oy/fabric/twins',     data: a11oyFixtures.fabricTwins },
+  { path: '/api/a11oy/fabric/verticals', data: a11oyFixtures.fabricVerticals },
+  { path: '/api/a11oy/fabric/agents',    data: a11oyFixtures.fabricAgents },
+  { path: '/api/a11oy/fabric/roadmap',   data: a11oyFixtures.fabricRoadmap },
+  { path: '/api/a11oy/fabric/products',  data: a11oyFixtures.fabricProducts },
+  { path: '/api/a11oy/fabric/proofs',    data: a11oyFixtures.fabricProofs },
+  { path: '/api/a11oy/now',              data: a11oyFixtures.fabricNow },
+  { path: '/api/a11oy/dashboard',        data: a11oyFixtures.dashboardSnapshot },
+  { path: '/api/a11oy/pages/identity',   data: a11oyFixtures.pagesIdentity },
+  { path: '/api/a11oy/pages/rag',        data: a11oyFixtures.pagesRag },
 
   // Counsel — Legal Matter Command
   { path: '/api/counsel/matters', data: counselFixtures.matters },
