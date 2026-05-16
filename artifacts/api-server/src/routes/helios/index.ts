@@ -10,10 +10,14 @@ import {
   MYTHOS_NODES,
   PROPOSALS,
   RECALIBRATION_MEMOS,
-  SCANNERS,
-  SIGNALS,
 } from './data';
-import type { CapabilityProposal, RecalibrationMemo, Scanner, Signal } from './types';
+import {
+  getScanners,
+  getSignals,
+  setScannerEnabled,
+  touchScannerRun,
+} from './live-store';
+import type { CapabilityProposal, RecalibrationMemo, Signal } from './types';
 
 const AGENT_ID_MAP: Record<string, string> = {
   'A11oy': 'alloy',
@@ -27,24 +31,29 @@ const AGENT_ID_MAP: Record<string, string> = {
 
 const router = Router();
 
-// In-memory mutable state (persists for server lifetime)
+// In-memory mutable proposal state (persists for server lifetime).
+// Signal + scanner state lives in `./live-store` so the scheduled scanner
+// jobs (jobs/helios-scanners.ts) can mutate it alongside the HTTP layer.
 let proposals: CapabilityProposal[] = [...PROPOSALS];
-let scanners: Scanner[] = [...SCANNERS];
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 router.get('/stats', (_req, res) => {
-  const signalsToday = SIGNALS.filter(s => {
+  const allSignals = getSignals();
+  const allScanners = getScanners();
+  const signalsToday = allSignals.filter(s => {
     const d = new Date(s.createdAt);
     const now = new Date();
     return now.getTime() - d.getTime() < 86_400_000;
   }).length;
 
   const proposalsOpen = proposals.filter(p => p.status === 'new').length;
-  const scannersActive = scanners.filter(s => s.enabled).length;
-  const avgConfidence = SIGNALS.reduce((sum, s) => sum + s.confidence, 0) / SIGNALS.length;
+  const scannersActive = allScanners.filter(s => s.enabled).length;
+  const avgConfidence = allSignals.length > 0
+    ? allSignals.reduce((sum, s) => sum + s.confidence, 0) / allSignals.length
+    : 0;
 
   const kindCounts: Record<string, number> = {};
-  for (const s of SIGNALS) {
+  for (const s of allSignals) {
     kindCounts[s.kind] = (kindCounts[s.kind] ?? 0) + 1;
   }
   const topKinds = Object.entries(kindCounts)
@@ -57,7 +66,7 @@ router.get('/stats', (_req, res) => {
 // ── Signals ──────────────────────────────────────────────────────────────────
 router.get('/signals', (req, res) => {
   const { kind, page = '1', pageSize = '20', q } = req.query as Record<string, string>;
-  let filtered = [...SIGNALS];
+  let filtered = [...getSignals()];
 
   if (kind) filtered = filtered.filter(s => s.kind === kind);
   if (q) {
@@ -237,51 +246,53 @@ router.get('/benchmarks', (_req, res) => {
 
 // ── Scanners ──────────────────────────────────────────────────────────────────
 router.get('/scanners', (_req, res) => {
-  res.json({ scanners });
+  res.json({ scanners: getScanners() });
 });
 
 router.patch('/scanners/:id/toggle', (req, res) => {
   const { id } = req.params;
   const { enabled } = req.body as { enabled: boolean };
 
-  const idx = scanners.findIndex(s => s.id === id);
-  if (idx === -1) {
+  const scanner = setScannerEnabled(id, enabled);
+  if (!scanner) {
     res.status(404).json({ error: 'Scanner not found' });
     return;
   }
-
-  scanners[idx] = {
-    ...scanners[idx],
-    enabled,
-    status: enabled ? 'healthy' : 'idle',
-  };
-  res.json({ scanner: scanners[idx] });
+  res.json({ scanner });
 });
 
-router.post('/scanners/:id/run', (req, res) => {
+router.post('/scanners/:id/run', async (req, res) => {
   const { id } = req.params;
-  const idx = scanners.findIndex(s => s.id === id);
-  if (idx === -1) {
+  const existing = getScanners().find(s => s.id === id);
+  if (!existing) {
     res.status(404).json({ error: 'Scanner not found' });
     return;
   }
-  if (!scanners[idx].enabled) {
+  if (!existing.enabled) {
     res.status(400).json({ error: 'Scanner is disabled' });
     return;
   }
 
-  const now = new Date().toISOString();
-  const next = new Date(Date.now() + 86_400_000).toISOString();
-  scanners[idx] = {
-    ...scanners[idx],
-    lastRun: now,
-    nextRun: next,
-    status: 'healthy',
-    errorMessage: undefined,
-    signalsToday: scanners[idx].signalsToday + Math.floor(Math.random() * 3 + 1),
-  };
+  // Trigger a real fetch against the live source backing this scanner, if
+  // one is wired. Scanners that don't have an external feed yet just get
+  // their lastRun timestamp refreshed. Unexpected import/runtime failures
+  // are surfaced via recordScannerError (status: degraded) rather than
+  // silently masked as healthy.
+  if (id === 'scanner-arxiv') {
+    const { runArxivScanner } = await import('../../jobs/helios-scanners');
+    await runArxivScanner(); // own try/catch — records error internally
+  } else if (id === 'scanner-github') {
+    const { runHuggingFaceScanner } = await import('../../jobs/helios-scanners');
+    await runHuggingFaceScanner();
+  } else {
+    touchScannerRun(id);
+  }
 
-  res.json({ message: `Scanner "${scanners[idx].name}" triggered successfully. Results will appear in the feed within minutes.` });
+  const updated = getScanners().find(s => s.id === id);
+  res.json({
+    message: `Scanner "${updated?.name ?? id}" triggered successfully. Results will appear in the feed within minutes.`,
+    scanner: updated,
+  });
 });
 
 // ── Recalibration Memos ───────────────────────────────────────────────────────
@@ -574,7 +585,7 @@ router.post('/memos/generate', async (req, res) => {
   const { lookbackDays = 7, topN = 8 } = (req.body ?? {}) as { lookbackDays?: number; topN?: number };
   const cutoff = Date.now() - Math.max(1, Number(lookbackDays)) * 86_400_000;
 
-  const recent = SIGNALS
+  const recent = getSignals()
     .filter(s => new Date(s.createdAt).getTime() >= cutoff)
     .sort((a, b) => b.impactScore - a.impactScore)
     .slice(0, Math.max(1, Math.min(50, Number(topN))));
@@ -663,7 +674,7 @@ router.post('/mcp', (req, res) => {
     const node = MYTHOS_NODES.find(n => n.label.toLowerCase() === entity.toLowerCase());
     if (node) {
       const edges = MYTHOS_EDGES.filter(e => e.source === node.id || e.target === node.id);
-      res.json({ type: 'entity', node, edges, signals: SIGNALS.filter(s => s.entities.includes(entity)) });
+      res.json({ type: 'entity', node, edges, signals: getSignals().filter(s => s.entities.includes(entity)) });
       return;
     }
   }
@@ -676,7 +687,7 @@ router.post('/mcp', (req, res) => {
 
   if (query) {
     const lower = query.toLowerCase();
-    const relevantSignals = SIGNALS.filter(s =>
+    const relevantSignals = getSignals().filter(s =>
       s.title.toLowerCase().includes(lower) || s.summary.toLowerCase().includes(lower)
     ).slice(0, 5);
     const relevantNodes = MYTHOS_NODES.filter(n =>
@@ -693,7 +704,7 @@ router.post('/mcp', (req, res) => {
 router.get('/frontier-briefing', (_req, res) => {
   const latestMemo = RECALIBRATION_MEMOS[0];
   const topProposals = proposals.filter(p => p.status === 'new').slice(0, 3);
-  const recentSignals = SIGNALS.slice(0, 5);
+  const recentSignals = getSignals().slice(0, 5);
   res.json({ memo: latestMemo, topProposals, recentSignals });
 });
 

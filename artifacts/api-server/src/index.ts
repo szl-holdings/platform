@@ -48,6 +48,7 @@ import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
 import { startRosieEvolutionLoop } from './jobs/rosie-evolution-loop';
+import { startHeliosScanners } from './jobs/helios-scanners';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
@@ -527,6 +528,16 @@ export async function bootstrap(
         logger.info(
           '[rosie-loop] Disabled (ROSIE_LOOP_ENABLED=false). Unset or set to "true" to enable.',
         );
+      }
+
+      // Frontier Intelligence scanners — pulls real arXiv / HuggingFace
+      // signals into the Helios live store on a 6h cadence. Default ON;
+      // set HELIOS_SCANNERS_ENABLED=false to disable outbound calls (e.g.
+      // in CI environments without network egress).
+      if (process.env.HELIOS_SCANNERS_ENABLED !== 'false') {
+        startHeliosScanners();
+      } else {
+        logger.info('[helios-scanners] disabled via HELIOS_SCANNERS_ENABLED=false');
       }
 
       // Frontier Ingestion Engine — continuous pulls from Anthropic/OpenAI/
