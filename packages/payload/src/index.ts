@@ -558,3 +558,568 @@ export function panelRepoFacts(repoKey: PanelRepoKey) {
     defaultBranch: r.defaultBranch,
   };
 }
+
+// ===========================================================================
+// V7 namespace — Fly-High V7 audit pack.
+//
+// V6 stays canonical for replay-root, 13-DOI ledger, 5 byte-identical replays,
+// and the doctrine floor. V7 adds: doctrine refinements (Mythos exception,
+// git-author override), five specialist deliverables (doctrine sweep, hygiene
+// fix, BP fix, citation fix, PR triage), an org-wide baseline snapshot, and
+// the pending PM-decision register.
+//
+// All V7 constants are derived at module-load time from the raw V7 bundle
+// under packages/payload/raw_v7/ via resolveJsonModule imports — there are
+// no transcribed canonical values.
+// ===========================================================================
+
+import v7ManifestRaw from "../raw_v7/03_manifests/MANIFEST.json" with { type: "json" };
+import v7PrsRaw from "../raw_v7/02_specialists/pr_triage/all_prs_final.json" with { type: "json" };
+
+interface V7ManifestRaw {
+  schema: string;
+  generated_at_utc: string;
+  mission: string;
+  operator: {
+    byline: string;
+    orcid: string;
+    affiliation: string;
+    email: string;
+    github: string;
+  };
+  doctrine: {
+    version: string;
+    replay_root: string;
+    lambda_threshold: number;
+    critical_axes: { moralGrounding: number; measurabilityHonesty: number };
+    forbidden_patterns: ReadonlyArray<string>;
+    mythos_exception: string;
+    license_allowlist: ReadonlyArray<string>;
+    git_author_override: string;
+  };
+  specialists: {
+    doctrine_sweep: {
+      report: string;
+      files_scanned: number;
+      auto_fixes_applied_local: number;
+      live_repo_escalations: number;
+      status: string;
+    };
+    hygiene_fix: {
+      report: string;
+      repos_targeted: ReadonlyArray<string>;
+      files_drafted: number;
+      prs_proposed: number;
+      status: string;
+    };
+    bp_fix: {
+      report: string;
+      repos_targeted: ReadonlyArray<string>;
+      put_payloads_ready: number;
+      risk: string;
+      status: string;
+    };
+    citation_fix: {
+      report: string;
+      repos_drafted: number;
+      field_change: string;
+      status: string;
+    };
+    pr_triage: {
+      report: string;
+      total_open_prs: number;
+      categories: { MERGE: number; CLOSE: number; STALE: number; NEEDS_REVIEW: number };
+      merge_candidates: string;
+      close_urgency: string;
+      status: string;
+    };
+  };
+  github_org_baseline: {
+    repos_audited: number;
+    ci_failing: number;
+    code_scanning_alerts: number;
+    dependabot_high_critical: number;
+    scorecard_avg: number;
+    bp_compliant: number;
+    bp_weak: number;
+  };
+  active_crons: ReadonlyArray<{ id: string; cron: string; name: string }>;
+  pending_pm_decisions: ReadonlyArray<string>;
+  execution_order_recommendation: ReadonlyArray<string>;
+  files: ReadonlyArray<{ path: string; size_bytes: number; sha256: string }>;
+  file_count: number;
+  total_bytes: number;
+}
+
+interface V7PrRaw {
+  repo: string;
+  number: number;
+  title: string;
+  author: string;
+  branch: string;
+  base: string;
+  age_days: number;
+  last_update_days: number;
+  ci: string;
+  mergeable: string;
+  is_draft: boolean;
+  review_decision: string;
+  additions: number;
+  deletions: number;
+  doctrine_hits: ReadonlyArray<string>;
+  scorecard_cat: string | null;
+  category: "MERGE" | "CLOSE" | "STALE" | "NEEDS-REVIEW";
+  reason: string;
+  priority: number;
+  gh_cmd: string;
+  created: string;
+  updated: string;
+}
+
+const v7Manifest = v7ManifestRaw as unknown as V7ManifestRaw;
+const v7Prs = v7PrsRaw as unknown as ReadonlyArray<V7PrRaw>;
+
+export interface V7Pr {
+  readonly repo: string;
+  readonly number: number;
+  readonly title: string;
+  readonly author: string;
+  readonly category: "MERGE" | "CLOSE" | "STALE" | "NEEDS-REVIEW";
+  readonly reason: string;
+  readonly priority: number;
+  readonly ci: string;
+  readonly mergeable: string;
+  readonly isDraft: boolean;
+  readonly doctrineHits: ReadonlyArray<string>;
+  readonly ghCmd: string;
+  readonly url: string;
+  readonly created: string;
+  readonly updated: string;
+}
+
+function buildV7Pr(p: V7PrRaw): V7Pr {
+  return Object.freeze({
+    repo: p.repo,
+    number: p.number,
+    title: p.title,
+    author: p.author,
+    category: p.category,
+    reason: p.reason,
+    priority: p.priority,
+    ci: p.ci,
+    mergeable: p.mergeable,
+    isDraft: p.is_draft,
+    doctrineHits: Object.freeze([...p.doctrine_hits]),
+    ghCmd: p.gh_cmd,
+    url: `https://github.com/szl-holdings/${p.repo}/pull/${p.number}`,
+    created: p.created,
+    updated: p.updated,
+  });
+}
+
+export const V7_PRS: ReadonlyArray<V7Pr> = Object.freeze(v7Prs.map(buildV7Pr));
+
+export interface V7Doctrine {
+  readonly version: string;
+  readonly replayRoot: string;
+  readonly lambdaThreshold: number;
+  readonly moralGroundingFloor: number;
+  readonly measurabilityHonestyFloor: number;
+  readonly forbiddenPatterns: ReadonlyArray<string>;
+  readonly licenseAllowlist: ReadonlyArray<string>;
+  readonly mythosException: string;
+  readonly gitAuthorOverride: string;
+}
+
+export const V7_DOCTRINE: V7Doctrine = Object.freeze({
+  version: v7Manifest.doctrine.version,
+  replayRoot: v7Manifest.doctrine.replay_root,
+  lambdaThreshold: v7Manifest.doctrine.lambda_threshold,
+  moralGroundingFloor: v7Manifest.doctrine.critical_axes.moralGrounding,
+  measurabilityHonestyFloor: v7Manifest.doctrine.critical_axes.measurabilityHonesty,
+  forbiddenPatterns: Object.freeze([...v7Manifest.doctrine.forbidden_patterns]),
+  licenseAllowlist: Object.freeze([...v7Manifest.doctrine.license_allowlist]),
+  mythosException: v7Manifest.doctrine.mythos_exception,
+  gitAuthorOverride: v7Manifest.doctrine.git_author_override,
+});
+
+/** Canonical Mythos-exception phrase: extracted from the exception clause as
+ *  the substring inside single quotes. Used by the forbidden-pattern guard. */
+function extractMythosExceptionPhrase(clause: string): string {
+  // Pick the quoted substring that actually contains "Mythos" so we don't
+  // accidentally match an apostrophe-`s` pair such as `Anthropic's`.
+  const m = clause.match(/'([^']*Mythos[^']*)'/);
+  if (!m) {
+    throw new Error(
+      "@szl-holdings/payload: V7 mythos_exception clause missing quoted Mythos phrase",
+    );
+  }
+  return m[1];
+}
+
+export const V7_MYTHOS_EXCEPTION_PHRASE: string = extractMythosExceptionPhrase(
+  V7_DOCTRINE.mythosException,
+);
+
+/** Context in which a candidate string is being checked against the V7
+ *  doctrine. The git_author / git_committer / commit_metadata contexts honor
+ *  the historical-override clause and do NOT block forbidden patterns. */
+export type V7CheckContext =
+  | "doc"
+  | "code"
+  | "ui"
+  | "git_author"
+  | "git_committer"
+  | "commit_metadata";
+
+export interface V7ForbiddenHit {
+  readonly pattern: string;
+  readonly index: number;
+}
+
+/** Returns the list of forbidden-pattern hits in `text` under the V7
+ *  doctrine, honoring (a) the Mythos exception for the literal Anthropic
+ *  third-party model name and (b) the git-author override for git
+ *  author/committer/commit-metadata contexts. */
+export function v7ForbiddenHits(
+  text: string,
+  context: V7CheckContext = "doc",
+): ReadonlyArray<V7ForbiddenHit> {
+  if (
+    context === "git_author" ||
+    context === "git_committer" ||
+    context === "commit_metadata"
+  ) {
+    return Object.freeze([]);
+  }
+  const exception = V7_MYTHOS_EXCEPTION_PHRASE;
+  // Mask out every occurrence of the exception phrase before scanning so that
+  // its embedded "Mythos" substring does not register as a hit.
+  let scan = text;
+  if (exception.length > 0) {
+    scan = text.split(exception).join("\u0000".repeat(exception.length));
+  }
+  const hits: V7ForbiddenHit[] = [];
+  const lower = scan.toLowerCase();
+  for (const pattern of V7_DOCTRINE.forbiddenPatterns) {
+    const needle = pattern.toLowerCase();
+    let from = 0;
+    while (true) {
+      const i = lower.indexOf(needle, from);
+      if (i < 0) break;
+      hits.push(Object.freeze({ pattern, index: i }));
+      from = i + needle.length;
+    }
+  }
+  return Object.freeze(hits);
+}
+
+/** Convenience predicate. */
+export function v7IsForbidden(
+  text: string,
+  context: V7CheckContext = "doc",
+): boolean {
+  return v7ForbiddenHits(text, context).length > 0;
+}
+
+export interface V7SpecialistSummary {
+  readonly doctrineSweep: {
+    readonly filesScanned: number;
+    readonly autoFixesAppliedLocal: number;
+    readonly liveRepoEscalations: number;
+    readonly status: string;
+  };
+  readonly hygieneFix: {
+    readonly reposTargeted: ReadonlyArray<string>;
+    readonly filesDrafted: number;
+    readonly prsProposed: number;
+    readonly status: string;
+  };
+  readonly bpFix: {
+    readonly reposTargeted: ReadonlyArray<string>;
+    readonly putPayloadsReady: number;
+    readonly risk: string;
+    readonly status: string;
+  };
+  readonly citationFix: {
+    readonly reposDrafted: number;
+    readonly fieldChange: string;
+    readonly status: string;
+  };
+  readonly prTriage: {
+    readonly totalOpenPrs: number;
+    readonly merge: number;
+    readonly close: number;
+    readonly stale: number;
+    readonly needsReview: number;
+    readonly mergeCandidates: string;
+    readonly closeUrgency: string;
+    readonly status: string;
+  };
+}
+
+export const V7_SPECIALISTS: V7SpecialistSummary = Object.freeze({
+  doctrineSweep: Object.freeze({
+    filesScanned: v7Manifest.specialists.doctrine_sweep.files_scanned,
+    autoFixesAppliedLocal: v7Manifest.specialists.doctrine_sweep.auto_fixes_applied_local,
+    liveRepoEscalations: v7Manifest.specialists.doctrine_sweep.live_repo_escalations,
+    status: v7Manifest.specialists.doctrine_sweep.status,
+  }),
+  hygieneFix: Object.freeze({
+    reposTargeted: Object.freeze([...v7Manifest.specialists.hygiene_fix.repos_targeted]),
+    filesDrafted: v7Manifest.specialists.hygiene_fix.files_drafted,
+    prsProposed: v7Manifest.specialists.hygiene_fix.prs_proposed,
+    status: v7Manifest.specialists.hygiene_fix.status,
+  }),
+  bpFix: Object.freeze({
+    reposTargeted: Object.freeze([...v7Manifest.specialists.bp_fix.repos_targeted]),
+    putPayloadsReady: v7Manifest.specialists.bp_fix.put_payloads_ready,
+    risk: v7Manifest.specialists.bp_fix.risk,
+    status: v7Manifest.specialists.bp_fix.status,
+  }),
+  citationFix: Object.freeze({
+    reposDrafted: v7Manifest.specialists.citation_fix.repos_drafted,
+    fieldChange: v7Manifest.specialists.citation_fix.field_change,
+    status: v7Manifest.specialists.citation_fix.status,
+  }),
+  prTriage: Object.freeze({
+    totalOpenPrs: v7Manifest.specialists.pr_triage.total_open_prs,
+    merge: v7Manifest.specialists.pr_triage.categories.MERGE,
+    close: v7Manifest.specialists.pr_triage.categories.CLOSE,
+    stale: v7Manifest.specialists.pr_triage.categories.STALE,
+    needsReview: v7Manifest.specialists.pr_triage.categories.NEEDS_REVIEW,
+    mergeCandidates: v7Manifest.specialists.pr_triage.merge_candidates,
+    closeUrgency: v7Manifest.specialists.pr_triage.close_urgency,
+    status: v7Manifest.specialists.pr_triage.status,
+  }),
+});
+
+export interface V7GithubOrgBaseline {
+  readonly reposAudited: number;
+  readonly ciFailing: number;
+  readonly codeScanningAlerts: number;
+  readonly dependabotHighCritical: number;
+  readonly scorecardAvg: number;
+  readonly bpCompliant: number;
+  readonly bpWeak: number;
+}
+
+export const V7_ORG_BASELINE: V7GithubOrgBaseline = Object.freeze({
+  reposAudited: v7Manifest.github_org_baseline.repos_audited,
+  ciFailing: v7Manifest.github_org_baseline.ci_failing,
+  codeScanningAlerts: v7Manifest.github_org_baseline.code_scanning_alerts,
+  dependabotHighCritical: v7Manifest.github_org_baseline.dependabot_high_critical,
+  scorecardAvg: v7Manifest.github_org_baseline.scorecard_avg,
+  bpCompliant: v7Manifest.github_org_baseline.bp_compliant,
+  bpWeak: v7Manifest.github_org_baseline.bp_weak,
+});
+
+export interface V7Manifest {
+  readonly schema: string;
+  readonly generatedAtUtc: string;
+  readonly mission: string;
+  readonly fileCount: number;
+  readonly totalBytes: number;
+  readonly pendingPmDecisions: ReadonlyArray<string>;
+  readonly executionOrder: ReadonlyArray<string>;
+}
+
+export const V7: {
+  readonly manifest: V7Manifest;
+  readonly doctrine: V7Doctrine;
+  readonly specialists: V7SpecialistSummary;
+  readonly orgBaseline: V7GithubOrgBaseline;
+  readonly prs: ReadonlyArray<V7Pr>;
+} = Object.freeze({
+  manifest: Object.freeze({
+    schema: v7Manifest.schema,
+    generatedAtUtc: v7Manifest.generated_at_utc,
+    mission: v7Manifest.mission,
+    fileCount: v7Manifest.file_count,
+    totalBytes: v7Manifest.total_bytes,
+    pendingPmDecisions: Object.freeze([...v7Manifest.pending_pm_decisions]),
+    executionOrder: Object.freeze([...v7Manifest.execution_order_recommendation]),
+  }),
+  doctrine: V7_DOCTRINE,
+  specialists: V7_SPECIALISTS,
+  orgBaseline: V7_ORG_BASELINE,
+  prs: V7_PRS,
+});
+
+// ---------------------------------------------------------------------------
+// V7 panel facts — derived display strings rendered by the "Latest audit"
+// row in every GovernancePanel and by the Amaru V7 ribbon.
+// ---------------------------------------------------------------------------
+
+const V7_FILES_TEXT = `${V7_SPECIALISTS.doctrineSweep.filesScanned} files`;
+const V7_PRS_TEXT = `${V7_SPECIALISTS.prTriage.totalOpenPrs} PRs`;
+const V7_CLOSE_TEXT = `${V7_SPECIALISTS.prTriage.close} close`;
+const V7_BP_TEXT = `${V7_SPECIALISTS.bpFix.putPayloadsReady} BP`;
+const V7_CFF_TEXT = `${V7_SPECIALISTS.citationFix.reposDrafted} CFF`;
+
+export const V7_PANEL_FACTS = Object.freeze({
+  latestAuditLabel: "Fly-High V7",
+  latestAuditText: `Fly-High V7 \u00b7 ${V7_FILES_TEXT} \u00b7 ${V7_PRS_TEXT} \u00b7 ${V7_CLOSE_TEXT} \u00b7 ${V7_BP_TEXT} \u00b7 ${V7_CFF_TEXT}`,
+  filesScannedText: V7_FILES_TEXT,
+  prsTriagedText: V7_PRS_TEXT,
+  mergeProposedText: `${V7_SPECIALISTS.prTriage.merge} merge`,
+  closeProposedText: V7_CLOSE_TEXT,
+  needsReviewText: `${V7_SPECIALISTS.prTriage.needsReview} review`,
+  bpPayloadsText: `${V7_SPECIALISTS.bpFix.putPayloadsReady} ready`,
+  citationDraftsText: `${V7_SPECIALISTS.citationFix.reposDrafted} drafts`,
+  hygieneDraftsText: `${V7_SPECIALISTS.hygieneFix.filesDrafted} files \u00b7 ${V7_SPECIALISTS.hygieneFix.prsProposed} PRs`,
+  pendingDecisionsText: `${V7.manifest.pendingPmDecisions.length} pending`,
+  v7AuditRibbonText: `Latest audit: Fly-High V7 \u2014 ${V7_FILES_TEXT} scanned, ${V7_PRS_TEXT} triaged (${V7_SPECIALISTS.prTriage.merge} merge / ${V7_SPECIALISTS.prTriage.close} close)`,
+});
+
+export type V7PanelFactsKey = keyof typeof V7_PANEL_FACTS;
+
+// ---------------------------------------------------------------------------
+// V7 per-repo specialist materializations
+//
+// The V7 specialists produced concrete per-repo artifacts: 6 branch-protection
+// PUT payloads (ready for the BP-apply script), 13 CITATION.cff drafts +
+// 13 matching PR-body markdowns, and 2 hygiene-file drafts (SECURITY.md,
+// CONTRIBUTING.md, CODE_OF_CONDUCT.md, PR_BODY.md per repo). These are the
+// "blast radius" of the V7 pack — every byte that would be pushed live by an
+// apply script. They are surfaced here as typed exports so downstream tooling
+// can render, diff, or verify them without deep-importing from raw_v7/.
+//
+// BP payloads are full JSON content (static imports). CFF + hygiene drafts
+// are surfaced as { path, sha256, sizeBytes } records anchored to
+// MANIFEST.files[] — the raw bytes are verified by `verify:v7` and can be
+// read via the server entry (which has fs access).
+// ---------------------------------------------------------------------------
+
+import v7BpLutarLean from "../raw_v7/02_specialists/bp_fix/lutar-lean_bp_payload.json" with { type: "json" };
+import v7BpSzlTrust from "../raw_v7/02_specialists/bp_fix/szl-trust_bp_payload.json" with { type: "json" };
+import v7BpSzlCookbook from "../raw_v7/02_specialists/bp_fix/szl-cookbook_bp_payload.json" with { type: "json" };
+import v7BpSzlBrand from "../raw_v7/02_specialists/bp_fix/szl-brand_bp_payload.json" with { type: "json" };
+import v7BpVspOtel from "../raw_v7/02_specialists/bp_fix/vsp-otel_bp_payload.json" with { type: "json" };
+import v7BpAgiForecast from "../raw_v7/02_specialists/bp_fix/agi-forecast_bp_payload.json" with { type: "json" };
+
+export interface V7BpPayload {
+  readonly required_status_checks: {
+    readonly strict: boolean;
+    readonly checks: ReadonlyArray<{ readonly context: string; readonly app_id: number }>;
+  };
+  readonly enforce_admins: boolean;
+  readonly required_pull_request_reviews: {
+    readonly required_approving_review_count: number;
+    readonly dismiss_stale_reviews: boolean;
+    readonly require_code_owner_reviews: boolean;
+  };
+  readonly restrictions: unknown;
+  readonly allow_force_pushes: boolean;
+  readonly allow_deletions: boolean;
+  readonly required_conversation_resolution: boolean;
+  readonly required_linear_history: boolean;
+}
+
+export interface V7BpEntry {
+  readonly repo: string;
+  readonly path: string;
+  readonly sha256: string;
+  readonly sizeBytes: number;
+  readonly payload: V7BpPayload;
+}
+
+function manifestEntry(p: string): { sha256: string; sizeBytes: number } {
+  const e = v7Manifest.files.find((f) => f.path === p);
+  if (!e) {
+    throw new Error(`@szl-holdings/payload: V7 manifest missing file ${p}`);
+  }
+  return { sha256: e.sha256, sizeBytes: e.size_bytes };
+}
+
+function buildBpEntry(repo: string, payload: unknown): V7BpEntry {
+  const path = `02_specialists/bp_fix/${repo}_bp_payload.json`;
+  const m = manifestEntry(path);
+  return Object.freeze({
+    repo,
+    path,
+    sha256: m.sha256,
+    sizeBytes: m.sizeBytes,
+    payload: payload as V7BpPayload,
+  });
+}
+
+export const V7_BP_PAYLOADS: ReadonlyArray<V7BpEntry> = Object.freeze([
+  buildBpEntry("agi-forecast", v7BpAgiForecast),
+  buildBpEntry("lutar-lean", v7BpLutarLean),
+  buildBpEntry("szl-brand", v7BpSzlBrand),
+  buildBpEntry("szl-cookbook", v7BpSzlCookbook),
+  buildBpEntry("szl-trust", v7BpSzlTrust),
+  buildBpEntry("vsp-otel", v7BpVspOtel),
+]);
+
+export const V7_BP_BY_REPO: Readonly<Record<string, V7BpEntry>> = Object.freeze(
+  Object.fromEntries(V7_BP_PAYLOADS.map((e) => [e.repo, e])),
+);
+
+export interface V7DraftFile {
+  readonly path: string;
+  readonly sha256: string;
+  readonly sizeBytes: number;
+}
+
+export interface V7CitationDraft {
+  readonly repo: string;
+  readonly cff: V7DraftFile;
+  readonly prBody: V7DraftFile;
+}
+
+function draftFile(p: string): V7DraftFile {
+  const m = manifestEntry(p);
+  return Object.freeze({ path: p, sha256: m.sha256, sizeBytes: m.sizeBytes });
+}
+
+const V7_CITATION_REPOS: ReadonlyArray<string> = Object.freeze(
+  v7Manifest.files
+    .map((f) => {
+      const m = f.path.match(/^02_specialists\/citation_fix\/(.+)_CITATION\.cff$/);
+      return m ? m[1] : null;
+    })
+    .filter((r): r is string => r !== null)
+    .sort(),
+);
+
+export const V7_CITATION_DRAFTS: ReadonlyArray<V7CitationDraft> = Object.freeze(
+  V7_CITATION_REPOS.map((repo) =>
+    Object.freeze({
+      repo,
+      cff: draftFile(`02_specialists/citation_fix/${repo}_CITATION.cff`),
+      prBody: draftFile(`02_specialists/citation_fix/${repo}_PR_BODY.md`),
+    }),
+  ),
+);
+
+export const V7_CITATION_BY_REPO: Readonly<Record<string, V7CitationDraft>> =
+  Object.freeze(
+    Object.fromEntries(V7_CITATION_DRAFTS.map((d) => [d.repo, d])),
+  );
+
+export interface V7HygieneDraft {
+  readonly repo: string;
+  readonly security: V7DraftFile;
+  readonly contributing: V7DraftFile;
+  readonly codeOfConduct: V7DraftFile;
+  readonly prBody: V7DraftFile;
+}
+
+export const V7_HYGIENE_DRAFTS: ReadonlyArray<V7HygieneDraft> = Object.freeze(
+  V7_SPECIALISTS.hygieneFix.reposTargeted.map((repo) =>
+    Object.freeze({
+      repo,
+      security: draftFile(`02_specialists/hygiene/${repo}/SECURITY.md`),
+      contributing: draftFile(`02_specialists/hygiene/${repo}/CONTRIBUTING.md`),
+      codeOfConduct: draftFile(`02_specialists/hygiene/${repo}/CODE_OF_CONDUCT.md`),
+      prBody: draftFile(`02_specialists/hygiene/${repo}/PR_BODY.md`),
+    }),
+  ),
+);
+
+export const V7_HYGIENE_BY_REPO: Readonly<Record<string, V7HygieneDraft>> =
+  Object.freeze(
+    Object.fromEntries(V7_HYGIENE_DRAFTS.map((d) => [d.repo, d])),
+  );

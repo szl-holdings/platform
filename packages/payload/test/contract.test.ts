@@ -40,17 +40,33 @@ import {
   PUSH_QUEUE,
   REPLAY_ROOT_SHORT,
   REPOS,
+  V7,
+  V7_BP_BY_REPO,
+  V7_BP_PAYLOADS,
+  V7_CITATION_BY_REPO,
+  V7_CITATION_DRAFTS,
+  V7_DOCTRINE,
+  V7_HYGIENE_BY_REPO,
+  V7_HYGIENE_DRAFTS,
+  V7_MYTHOS_EXCEPTION_PHRASE,
+  V7_ORG_BASELINE,
+  V7_PANEL_FACTS,
+  V7_PRS,
+  V7_SPECIALISTS,
   getRepoFacts,
   hasRepo,
   panelRepoFacts,
   pushedAtUtc,
   shortSha,
+  v7ForbiddenHits,
+  v7IsForbidden,
   type PanelRepoKey,
 } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..", "..");
 const RAW = resolve(HERE, "..", "raw");
+const RAW_V7 = resolve(HERE, "..", "raw_v7");
 
 const master = JSON.parse(readFileSync(join(RAW, "payload.json"), "utf8"));
 const inventory = JSON.parse(
@@ -58,6 +74,15 @@ const inventory = JSON.parse(
 );
 const runtime = JSON.parse(
   readFileSync(join(RAW, "dev2_runtime/runtime_payload.json"), "utf8"),
+);
+const v7ManifestRaw = JSON.parse(
+  readFileSync(join(RAW_V7, "03_manifests", "MANIFEST.json"), "utf8"),
+);
+const v7PrsRaw = JSON.parse(
+  readFileSync(
+    join(RAW_V7, "02_specialists", "pr_triage", "all_prs_final.json"),
+    "utf8",
+  ),
 );
 
 // ---------------------------------------------------------------------------
@@ -300,6 +325,11 @@ describe("layer 3 — panels render only payload-derived facts", () => {
           ARXIV_SHA_SHORT,
           LICENSE_ALLOWLIST_SHORT_TEXT,
           DOI_LEDGER_COUNT,
+          V7,
+          V7_DOCTRINE,
+          V7_SPECIALISTS,
+          V7_ORG_BASELINE,
+          V7_PANEL_FACTS,
           panelRepoFacts,
           getRepoFacts,
           shortSha,
@@ -363,6 +393,295 @@ describe("layer 3 — panels render only payload-derived facts", () => {
           );
         }
       });
+
+      it("renders the V7 audit row from V7_PANEL_FACTS", () => {
+        expect(src).toMatch(/V7_PANEL_FACTS/);
+      });
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Layer 4: V7 raw -> V7 exports + V7 doctrine guard.
+//
+// Every V7 namespace export must equal its raw_v7 source byte-for-byte. The
+// derived V7_PANEL_FACTS strings must equal the formatter-of-exports. The
+// V7 forbidden-pattern guard must honor (a) the Mythos exception and (b)
+// the git-author override.
+// ---------------------------------------------------------------------------
+
+describe("layer 4 — V7 exports equal raw_v7 sources", () => {
+  it("V7 manifest header matches raw MANIFEST.json", () => {
+    expect(V7.manifest.schema).toBe(v7ManifestRaw.schema);
+    expect(V7.manifest.generatedAtUtc).toBe(v7ManifestRaw.generated_at_utc);
+    expect(V7.manifest.mission).toBe(v7ManifestRaw.mission);
+    expect(V7.manifest.fileCount).toBe(v7ManifestRaw.file_count);
+    expect(V7.manifest.totalBytes).toBe(v7ManifestRaw.total_bytes);
+    expect(V7.manifest.pendingPmDecisions).toEqual(
+      v7ManifestRaw.pending_pm_decisions,
+    );
+    expect(V7.manifest.executionOrder).toEqual(
+      v7ManifestRaw.execution_order_recommendation,
+    );
+  });
+
+  it("V7_DOCTRINE equals raw MANIFEST.doctrine", () => {
+    const d = v7ManifestRaw.doctrine;
+    expect(V7_DOCTRINE.version).toBe(d.version);
+    expect(V7_DOCTRINE.replayRoot).toBe(d.replay_root);
+    expect(V7_DOCTRINE.lambdaThreshold).toBe(d.lambda_threshold);
+    expect(V7_DOCTRINE.moralGroundingFloor).toBe(d.critical_axes.moralGrounding);
+    expect(V7_DOCTRINE.measurabilityHonestyFloor).toBe(
+      d.critical_axes.measurabilityHonesty,
+    );
+    expect(V7_DOCTRINE.forbiddenPatterns).toEqual(d.forbidden_patterns);
+    expect(V7_DOCTRINE.licenseAllowlist).toEqual(d.license_allowlist);
+    expect(V7_DOCTRINE.mythosException).toBe(d.mythos_exception);
+    expect(V7_DOCTRINE.gitAuthorOverride).toBe(d.git_author_override);
+  });
+
+  it("V7 doctrine pins to V6 replay-root (no replay-root drift)", () => {
+    expect(V7_DOCTRINE.replayRoot).toBe(DOCTRINE.replayRoot);
+    expect(V7_DOCTRINE.version).toBe(DOCTRINE.version);
+  });
+
+  it("V7_SPECIALISTS equals raw MANIFEST.specialists", () => {
+    const s = v7ManifestRaw.specialists;
+    expect(V7_SPECIALISTS.doctrineSweep.filesScanned).toBe(
+      s.doctrine_sweep.files_scanned,
+    );
+    expect(V7_SPECIALISTS.doctrineSweep.autoFixesAppliedLocal).toBe(
+      s.doctrine_sweep.auto_fixes_applied_local,
+    );
+    expect(V7_SPECIALISTS.doctrineSweep.liveRepoEscalations).toBe(
+      s.doctrine_sweep.live_repo_escalations,
+    );
+    expect(V7_SPECIALISTS.hygieneFix.reposTargeted).toEqual(
+      s.hygiene_fix.repos_targeted,
+    );
+    expect(V7_SPECIALISTS.hygieneFix.filesDrafted).toBe(s.hygiene_fix.files_drafted);
+    expect(V7_SPECIALISTS.hygieneFix.prsProposed).toBe(s.hygiene_fix.prs_proposed);
+    expect(V7_SPECIALISTS.bpFix.reposTargeted).toEqual(s.bp_fix.repos_targeted);
+    expect(V7_SPECIALISTS.bpFix.putPayloadsReady).toBe(s.bp_fix.put_payloads_ready);
+    expect(V7_SPECIALISTS.citationFix.reposDrafted).toBe(
+      s.citation_fix.repos_drafted,
+    );
+    expect(V7_SPECIALISTS.citationFix.fieldChange).toBe(s.citation_fix.field_change);
+    expect(V7_SPECIALISTS.prTriage.totalOpenPrs).toBe(s.pr_triage.total_open_prs);
+    expect(V7_SPECIALISTS.prTriage.merge).toBe(s.pr_triage.categories.MERGE);
+    expect(V7_SPECIALISTS.prTriage.close).toBe(s.pr_triage.categories.CLOSE);
+    expect(V7_SPECIALISTS.prTriage.stale).toBe(s.pr_triage.categories.STALE);
+    expect(V7_SPECIALISTS.prTriage.needsReview).toBe(
+      s.pr_triage.categories.NEEDS_REVIEW,
+    );
+  });
+
+  it("V7_ORG_BASELINE equals raw MANIFEST.github_org_baseline", () => {
+    const o = v7ManifestRaw.github_org_baseline;
+    expect(V7_ORG_BASELINE.reposAudited).toBe(o.repos_audited);
+    expect(V7_ORG_BASELINE.ciFailing).toBe(o.ci_failing);
+    expect(V7_ORG_BASELINE.codeScanningAlerts).toBe(o.code_scanning_alerts);
+    expect(V7_ORG_BASELINE.dependabotHighCritical).toBe(o.dependabot_high_critical);
+    expect(V7_ORG_BASELINE.scorecardAvg).toBe(o.scorecard_avg);
+    expect(V7_ORG_BASELINE.bpCompliant).toBe(o.bp_compliant);
+    expect(V7_ORG_BASELINE.bpWeak).toBe(o.bp_weak);
+  });
+
+  it("V7_PRS equals raw all_prs_final.json (length + category tally)", () => {
+    expect(V7_PRS.length).toBe(v7PrsRaw.length);
+    expect(V7_PRS.length).toBe(V7_SPECIALISTS.prTriage.totalOpenPrs);
+    const tally = { MERGE: 0, CLOSE: 0, STALE: 0, "NEEDS-REVIEW": 0 } as Record<
+      string,
+      number
+    >;
+    for (const p of V7_PRS) tally[p.category]++;
+    expect(tally.MERGE).toBe(V7_SPECIALISTS.prTriage.merge);
+    expect(tally.CLOSE).toBe(V7_SPECIALISTS.prTriage.close);
+    expect(tally.STALE).toBe(V7_SPECIALISTS.prTriage.stale);
+    expect(tally["NEEDS-REVIEW"]).toBe(V7_SPECIALISTS.prTriage.needsReview);
+  });
+
+  it("V7_PANEL_FACTS strings derive from V7_SPECIALISTS", () => {
+    const s = V7_SPECIALISTS;
+    expect(V7_PANEL_FACTS.filesScannedText).toBe(`${s.doctrineSweep.filesScanned} files`);
+    expect(V7_PANEL_FACTS.prsTriagedText).toBe(`${s.prTriage.totalOpenPrs} PRs`);
+    expect(V7_PANEL_FACTS.mergeProposedText).toBe(`${s.prTriage.merge} merge`);
+    expect(V7_PANEL_FACTS.closeProposedText).toBe(`${s.prTriage.close} close`);
+    expect(V7_PANEL_FACTS.needsReviewText).toBe(`${s.prTriage.needsReview} review`);
+    expect(V7_PANEL_FACTS.bpPayloadsText).toBe(`${s.bpFix.putPayloadsReady} ready`);
+    expect(V7_PANEL_FACTS.citationDraftsText).toBe(`${s.citationFix.reposDrafted} drafts`);
+    expect(V7_PANEL_FACTS.latestAuditLabel).toBe("Fly-High V7");
+    expect(V7_PANEL_FACTS.latestAuditText).toContain("Fly-High V7");
+    expect(V7_PANEL_FACTS.latestAuditText).toContain(`${s.doctrineSweep.filesScanned} files`);
+    expect(V7_PANEL_FACTS.latestAuditText).toContain(`${s.prTriage.totalOpenPrs} PRs`);
+    // V7 review requirement: the "Latest audit" row must surface the
+    // close-proposed metric so the 18-PR close batch is visible at a glance.
+    expect(V7_PANEL_FACTS.latestAuditText).toContain(`${s.prTriage.close} close`);
+    expect(V7_PANEL_FACTS.latestAuditText).toContain(`${s.bpFix.putPayloadsReady} BP`);
+    expect(V7_PANEL_FACTS.latestAuditText).toContain(`${s.citationFix.reposDrafted} CFF`);
+  });
+});
+
+import { createHash } from "node:crypto";
+import { statSync } from "node:fs";
+
+function rawV7Path(p: string): string {
+  return join(RAW_V7, ...p.split("/"));
+}
+
+describe("layer 4 — V7 per-repo materializations", () => {
+  it("V7_BP_PAYLOADS covers exactly the BP-fix-targeted repos", () => {
+    const got = V7_BP_PAYLOADS.map((e) => e.repo).slice().sort();
+    const want = [...V7_SPECIALISTS.bpFix.reposTargeted].sort();
+    expect(got).toEqual(want);
+    expect(V7_BP_PAYLOADS.length).toBe(V7_SPECIALISTS.bpFix.putPayloadsReady);
+  });
+
+  it("each V7 BP payload equals its raw JSON byte-for-byte (via SHA-256)", () => {
+    for (const entry of V7_BP_PAYLOADS) {
+      const raw = readFileSync(rawV7Path(entry.path));
+      const sha = createHash("sha256").update(raw).digest("hex");
+      expect(sha).toBe(entry.sha256);
+      expect(statSync(rawV7Path(entry.path)).size).toBe(entry.sizeBytes);
+      // Round-tripping the parsed payload must equal the raw file content
+      // (modulo whitespace — we normalize by re-parsing the raw file).
+      const parsed = JSON.parse(raw.toString("utf8"));
+      expect(entry.payload).toEqual(parsed);
+      // Every BP payload encodes the V7-required strict posture.
+      expect(entry.payload.required_status_checks.strict).toBe(true);
+      expect(entry.payload.enforce_admins).toBe(true);
+      expect(entry.payload.allow_force_pushes).toBe(false);
+      expect(entry.payload.allow_deletions).toBe(false);
+    }
+  });
+
+  it("V7_BP_BY_REPO indexes V7_BP_PAYLOADS by repo", () => {
+    for (const entry of V7_BP_PAYLOADS) {
+      expect(V7_BP_BY_REPO[entry.repo]).toBe(entry);
+    }
+  });
+
+  it("V7_CITATION_DRAFTS covers exactly the citation-fix-drafted repos", () => {
+    expect(V7_CITATION_DRAFTS.length).toBe(V7_SPECIALISTS.citationFix.reposDrafted);
+    for (const draft of V7_CITATION_DRAFTS) {
+      expect(draft.cff.path).toBe(
+        `02_specialists/citation_fix/${draft.repo}_CITATION.cff`,
+      );
+      expect(draft.prBody.path).toBe(
+        `02_specialists/citation_fix/${draft.repo}_PR_BODY.md`,
+      );
+    }
+  });
+
+  it("each V7 citation draft file matches manifest sha + size on disk", () => {
+    for (const draft of V7_CITATION_DRAFTS) {
+      for (const file of [draft.cff, draft.prBody]) {
+        const raw = readFileSync(rawV7Path(file.path));
+        const sha = createHash("sha256").update(raw).digest("hex");
+        expect(sha).toBe(file.sha256);
+        expect(statSync(rawV7Path(file.path)).size).toBe(file.sizeBytes);
+      }
+    }
+  });
+
+  it("V7_HYGIENE_DRAFTS covers exactly the hygiene-fix-targeted repos", () => {
+    const got = V7_HYGIENE_DRAFTS.map((d) => d.repo).slice().sort();
+    const want = [...V7_SPECIALISTS.hygieneFix.reposTargeted].sort();
+    expect(got).toEqual(want);
+  });
+
+  it("each V7 hygiene draft file matches manifest sha + size on disk", () => {
+    for (const draft of V7_HYGIENE_DRAFTS) {
+      for (const file of [
+        draft.security,
+        draft.contributing,
+        draft.codeOfConduct,
+        draft.prBody,
+      ]) {
+        const raw = readFileSync(rawV7Path(file.path));
+        const sha = createHash("sha256").update(raw).digest("hex");
+        expect(sha).toBe(file.sha256);
+        expect(statSync(rawV7Path(file.path)).size).toBe(file.sizeBytes);
+      }
+    }
+  });
+
+  it("the per-repo file counts match the specialist summary", () => {
+    // Hygiene specialist counts the 3 actual hygiene-policy files per repo
+    // (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md); PR_BODY.md is
+    // metadata for the eventual PR and is not counted as a drafted file.
+    const hygieneTotal = V7_HYGIENE_DRAFTS.length * 3;
+    expect(hygieneTotal).toBe(V7_SPECIALISTS.hygieneFix.filesDrafted);
+    // The aggregate of per-repo BP + citation + hygiene materializations
+    // matches the count surfaced in the panel.
+    expect(V7_BP_PAYLOADS.length).toBe(V7_SPECIALISTS.bpFix.putPayloadsReady);
+    expect(V7_CITATION_DRAFTS.length).toBe(V7_SPECIALISTS.citationFix.reposDrafted);
+  });
+});
+
+describe("layer 4 — V7 forbidden-pattern guard (Mythos + git-author refinements)", () => {
+  it("extracts the Mythos exception phrase from the doctrine clause", () => {
+    expect(V7_MYTHOS_EXCEPTION_PHRASE).toBe("Claude Mythos Preview");
+  });
+
+  it("ALLOWS 'Claude Mythos Preview' as a third-party model citation", () => {
+    const text =
+      "Anthropic's Claude Mythos Preview was used as a third-party model.";
+    expect(v7IsForbidden(text, "doc")).toBe(false);
+    expect(v7ForbiddenHits(text, "doc")).toHaveLength(0);
+  });
+
+  it("ALLOWS the phrase multiple times in one document", () => {
+    const text =
+      "Compared Claude Mythos Preview vs Claude Mythos Preview snapshot.";
+    expect(v7IsForbidden(text, "doc")).toBe(false);
+  });
+
+  it("BLOCKS bare 'Mythos' usage outside the exception phrase", () => {
+    const text = "The Mythos service handles routing.";
+    expect(v7IsForbidden(text, "doc")).toBe(true);
+    const hits = v7ForbiddenHits(text, "doc");
+    expect(hits.some((h) => h.pattern === "Mythos")).toBe(true);
+  });
+
+  it("BLOCKS 'Mythos' even when 'Claude' appears nearby without the exact phrase", () => {
+    const text = "Claude reviewed the Mythos design.";
+    expect(v7IsForbidden(text, "doc")).toBe(true);
+  });
+
+  it("ALLOWS exception phrase AND BLOCKS unrelated 'Mythos' in the same text", () => {
+    const text =
+      "We benchmarked Claude Mythos Preview; our internal Mythos product is unrelated.";
+    const hits = v7ForbiddenHits(text, "doc");
+    expect(hits.some((h) => h.pattern === "Mythos")).toBe(true);
+    expect(hits.length).toBe(1);
+  });
+
+  it("git-author/committer/commit_metadata contexts exempt all forbidden patterns", () => {
+    const text = "Stephen Paul Lutar Jr.";
+    expect(v7IsForbidden(text, "doc")).toBe(true);
+    expect(v7IsForbidden(text, "git_author")).toBe(false);
+    expect(v7IsForbidden(text, "git_committer")).toBe(false);
+    expect(v7IsForbidden(text, "commit_metadata")).toBe(false);
+  });
+
+  it("still blocks 'Jr.' in doc/code/ui contexts", () => {
+    for (const ctx of ["doc", "code", "ui"] as const) {
+      expect(v7IsForbidden("Author: Stephen P. Lutar Jr.", ctx)).toBe(true);
+    }
+  });
+
+  it("clean text passes all contexts", () => {
+    const text = "Author: Stephen P. Lutar — SZL Holdings.";
+    for (const ctx of [
+      "doc",
+      "code",
+      "ui",
+      "git_author",
+      "git_committer",
+      "commit_metadata",
+    ] as const) {
+      expect(v7IsForbidden(text, ctx)).toBe(false);
+    }
+  });
 });

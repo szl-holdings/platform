@@ -20,6 +20,7 @@ import {
   ARXIV_SHA_SHORT,
   DOCTRINE,
   PANEL_FACTS,
+  V7_PANEL_FACTS,
   getRepoFacts,
 } from '@szl-holdings/payload';
 
@@ -264,6 +265,7 @@ export function CarlotaJoGovernancePanels() {
             <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
             <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} />
             <Row label="Lineage source" value="@szl-holdings/payload" />
+            <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
           </div>
         </div>
       </div>

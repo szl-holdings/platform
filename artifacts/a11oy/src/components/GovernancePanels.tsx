@@ -3,6 +3,7 @@ import { StatusChip, StatusChipGroup } from '@szl-holdings/omnia-shell';
 import {
   DOCTRINE,
   PANEL_FACTS,
+  V7_PANEL_FACTS,
   panelRepoFacts,
   ARXIV_SHA_SHORT,
   THESIS_LINEAGE,
@@ -253,6 +254,7 @@ export function A11oyGovernancePanels() {
             <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
             <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} />
             <Row label="Lineage source" value="@szl-holdings/payload" />
+            <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
           </div>
         </div>
       </div>

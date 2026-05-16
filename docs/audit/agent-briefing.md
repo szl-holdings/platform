@@ -142,3 +142,102 @@ rg -l "THESIS_LINEAGE|THESIS_PAPERS" artifacts/*/src
 ```
 
 — end of briefing —
+
+---
+
+## V7 update — Fly-High V7 audit pack (post task #4970)
+
+**Author:** task #4970 (v7-payload-ingest)
+**Date:** 2026-05-16
+**Audience:** in-flight tasks #4929, #4939, #4940, #4952 and any future
+work touching doctrine surfaces.
+
+Task #4970 ingested the Fly-High V7 audit pack (87 files, staged at
+`packages/payload/raw_v7/`, schema `szl-holdings/fly-v7-replit-payload/v1`)
+into `@szl-holdings/payload` as a `V7` namespace alongside V6. V6 stays
+canonical for replay-root, the 13-DOI ledger, the 5 byte-identical
+replays, and the Λ floor. V7 adds **doctrine refinements** and **five
+specialist deliverables**.
+
+### V7.1 What the package now exports
+
+Import from `@szl-holdings/payload`:
+
+- `V7` — rollup `{ manifest, doctrine, specialists, orgBaseline, prs }`.
+- `V7_DOCTRINE` — pins `version: V6`, same `replayRoot`, plus the two
+  V7 refinements: `mythosException` and `gitAuthorOverride`.
+- `V7_SPECIALISTS` — `{ doctrineSweep, hygieneFix, bpFix, citationFix,
+  prTriage }`. Headline numbers: 582 files scanned, 6 BP PUT payloads,
+  13 CITATION.cff drafts, 68 open PRs triaged (12 MERGE / 18 CLOSE /
+  0 STALE / 38 NEEDS-REVIEW).
+- `V7_ORG_BASELINE` — live snapshot at V7 generation (16 repos, 0 CI
+  failing, scorecard avg 6.62, 10/6 BP compliant/weak).
+- `V7_PRS` — typed `readonly` array of all 68 triaged PRs with
+  `category`, `priority`, `reason`, `ghCmd`, and resolved upstream `url`.
+- `V7_PANEL_FACTS` — display strings rendered by the new "Latest audit"
+  row in every GovernancePanel and by the Amaru V7 ribbon.
+- `v7ForbiddenHits(text, context)` / `v7IsForbidden(text, context)` —
+  doctrine-aware guard that honors the Mythos exception and the
+  git-author override (context: `doc | code | ui | git_author |
+  git_committer | commit_metadata`).
+
+**Do not deep-import** from `packages/payload/raw_v7/`. Use the package.
+
+### V7.2 Two doctrine refinements you must respect
+
+1. **Mythos exception.** `Mythos` is **allowed** when it appears as part
+   of the exact phrase `Claude Mythos Preview` (citing Anthropic's
+   third-party model name). All other `Mythos` usage remains forbidden.
+   The phrase is extracted at module-load from
+   `V7_DOCTRINE.mythosException` — do not transcribe it.
+2. **Git author override.** Historical `Stephen Paul Lutar Jr.` git
+   `author`/`committer` metadata is explicitly approved by the user.
+   `v7ForbiddenHits(text, context)` returns `[]` when context is
+   `git_author`, `git_committer`, or `commit_metadata`. The literal
+   string in `doc` / `code` / `ui` contexts continues to fail.
+
+The pre-existing `scripts/check-forbidden-patterns.mjs` (from #4940) scans
+file contents, not git metadata, so the override is a no-op there. If you
+add new tooling that inspects git-author fields, use the typed guard.
+
+### V7.3 New documents
+
+- `docs/audit/v7-pr-triage.md` — human-reviewable rendering of all 68
+  PRs grouped by tier.
+- `docs/audit/v7-apply-runbook.md` — exact execution order for the 6
+  V7 apply scripts (token scopes, one-way-door inventory, post-condition
+  checks).
+- `docs/audit/v7-pm-decisions.md` — the 3 PM-decision items the V7
+  specialist explicitly refused to auto-resolve (Glasswing/Mythos in
+  `platform/`, BP review-count deadlock, missing CODEOWNERS in
+  `vsp-otel` / `agi-forecast`).
+
+### V7.4 Surface integration
+
+Every shipped artifact's `GovernancePanels.tsx` (`conduit`, `a11oy`,
+`sentra`, `counsel`, `terra`, `vessels`, `carlota-jo`) now renders a
+**"Latest audit"** row sourced from `V7_PANEL_FACTS.latestAuditText`.
+The Amaru landing (`conduit`) additionally exposes a small V7 ribbon
+chip on its governance ribbon.
+
+### V7.5 Integrity coverage
+
+- `packages/payload/scripts/verify-integrity-v7.mjs` — strict SHA-256 +
+  size verification of every file under `raw_v7/` against
+  `MANIFEST.files[]`. Mirrors the V6 verifier.
+- `pnpm -F @szl-holdings/payload verify` — V6 (unchanged).
+- `pnpm -F @szl-holdings/payload verify:v7` — V7.
+- `pnpm -F @szl-holdings/payload verify:all` — both.
+- `pnpm -F @szl-holdings/payload test` — contract test now includes a
+  4th layer asserting V7 exports equal raw_v7 sources, plus
+  unit tests for the Mythos exception and git-author override.
+
+### V7.6 What V7 does NOT do
+
+- It does not run any of the 6 apply scripts.
+- It does not flip arXiv / Zenodo one-way doors.
+- It does not modify `raw/` (V6) or `raw_v7/` (V7) byte contents.
+- It does not auto-resolve any of the 3 PM-decision items.
+
+These remain gated on Stephen.
+

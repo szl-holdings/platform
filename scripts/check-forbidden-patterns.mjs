@@ -27,6 +27,21 @@ const thesisRaw = JSON.parse(
 );
 const PATTERNS = thesisRaw.doctrine.forbidden_patterns;
 
+// V7 doctrine refinements (task #4970) — loaded from the V7 MANIFEST so the
+// script never drifts from `doctrine.mythos_exception`. The Mythos exception
+// allows the substring "Mythos" only when it appears inside the exact phrase
+// "Claude Mythos Preview" (citing Anthropic's third-party model name). The
+// git-author override does not apply to this script because we scan file
+// content, not git metadata.
+const v7ManifestRaw = JSON.parse(
+  readFileSync(join(ROOT, 'packages/payload/raw_v7/03_manifests/MANIFEST.json'), 'utf8'),
+);
+const V7_MYTHOS_EXCEPTION_PHRASE = (() => {
+  const clause = v7ManifestRaw?.doctrine?.mythos_exception ?? '';
+  const m = clause.match(/'([^']*Mythos[^']*)'/);
+  return m ? m[1] : 'Claude Mythos Preview';
+})();
+
 // Self-references in *this* file (and the briefing/scan reports) name the
 // patterns in order to define them. We allowlist by file path.
 const SELF_REFERENCE_ALLOWLIST = new Set([
@@ -36,6 +51,11 @@ const SELF_REFERENCE_ALLOWLIST = new Set([
   'docs/audit/agent-briefing.md',
   'docs/audit/github-deep-scan.md',
   'docs/audit/github-deep-scan.json',
+  // V7 audit documents (task #4970) — these docs DEFINE the V7 doctrine
+  // refinements and necessarily quote the forbidden patterns as terms.
+  'docs/audit/v7-pr-triage.md',
+  'docs/audit/v7-pm-decisions.md',
+  'docs/audit/v7-apply-runbook.md',
 ]);
 
 // Pre-existing legacy violations in docs/ from prior commits. New violations
@@ -131,7 +151,14 @@ for (const root of SCAN_ROOTS) {
   for (const file of walk(full)) {
     const rel = relative(ROOT, file);
     if (SELF_REFERENCE_ALLOWLIST.has(rel)) continue;
-    const text = readFileSync(file, 'utf8');
+    const rawText = readFileSync(file, 'utf8');
+    // V7 Mythos exception: mask out every occurrence of the exact phrase
+    // "Claude Mythos Preview" before scanning so its embedded "Mythos"
+    // substring does not register as a hit. Replacement preserves length so
+    // line numbers remain accurate.
+    const text = V7_MYTHOS_EXCEPTION_PHRASE
+      ? rawText.split(V7_MYTHOS_EXCEPTION_PHRASE).join('\u0000'.repeat(V7_MYTHOS_EXCEPTION_PHRASE.length))
+      : rawText;
     for (const pattern of PATTERNS) {
       // Word-ish boundary so "anonymous" doesn't catch "anonymousFunction"
       // when the pattern is a single bare lowercase word; for multi-word

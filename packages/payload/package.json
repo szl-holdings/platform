@@ -14,11 +14,14 @@
   "files": [
     "src",
     "raw",
+    "raw_v7",
     "scripts",
     "README.md"
   ],
   "scripts": {
     "verify": "node scripts/verify-integrity.mjs",
+    "verify:v7": "node scripts/verify-integrity-v7.mjs",
+    "verify:all": "node scripts/verify-integrity.mjs && node scripts/verify-integrity-v7.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

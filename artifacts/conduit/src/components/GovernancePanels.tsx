@@ -1,6 +1,7 @@
 import {
   ORG_SUMMARY,
   PANEL_FACTS,
+  V7_PANEL_FACTS,
   panelRepoFacts,
   THESIS_LINEAGE,
   THESIS_PAPERS,
@@ -170,6 +171,7 @@ export function ConduitGovernancePanels() {
       </div>
 
       <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        <Chip tone="gold" label={V7_PANEL_FACTS.latestAuditLabel} />
         <Chip tone="gold" label={`Λ floor ${PANEL_FACTS.lambdaFloorAndText}`} />
         <Chip tone="ok" label={`CI ${PANEL_FACTS.ciFailingText} failing`} />
         <Chip tone="ok" label={`Dependabot ${PANEL_FACTS.dependabotHighCritText} H/C`} />
@@ -227,6 +229,7 @@ export function ConduitGovernancePanels() {
           <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
           <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} mono />
           <Row label="Lineage source" value="@szl-holdings/payload" mono />
+          <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
         </PanelCard>
 
         <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">

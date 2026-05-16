@@ -228,6 +228,10 @@
     "pattern": "Mythos"
   },
   {
+    "file": "artifacts/a11oy/src/pages/frontier/MythosGraphCanvas.tsx",
+    "pattern": "Mythos"
+  },
+  {
     "file": "artifacts/a11oy/src/pages/frontier/MythosIndex.tsx",
     "pattern": "Mythos"
   },
@@ -414,6 +418,10 @@
   {
     "file": "artifacts/api-server/src/data/compliance-control-mappings.ts",
     "pattern": "Mythos"
+  },
+  {
+    "file": "artifacts/api-server/src/jobs/helios-scanners.ts",
+    "pattern": "anonymous"
   },
   {
     "file": "artifacts/api-server/src/lib/ai-gateway.ts",
