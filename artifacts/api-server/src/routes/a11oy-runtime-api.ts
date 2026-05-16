@@ -50,6 +50,7 @@ import {
 } from '../a11oy/runtime/operator/run-store.js';
 import { executeToolMock, getTool } from '../a11oy/runtime/tools/registry.js';
 import { randomUUID } from 'node:crypto';
+import { autonomyGate } from '@szl-holdings/formulas';
 
 const router = Router();
 const now = () => new Date().toISOString();
@@ -168,6 +169,26 @@ function err(res: Response, statusCode: number, type: string, message: string, r
 
 function findAction(id: string) {
   return LIVE_ACTIONS.find((a) => a.id === id);
+}
+
+/**
+ * Map a coarse risk band (low/medium/high/critical) to the canonical
+ * autonomy decision via `autonomyGate()` from `@szl-holdings/formulas`.
+ * Source: docs/thesis/v10-canonical.md §4.3.
+ */
+const RISK_LEVEL_TO_SCALAR: Record<string, number> = {
+  low: 0.1,
+  medium: 0.4,
+  high: 0.75,
+  critical: 0.95,
+};
+
+function deriveApprovalTier(riskLevel?: string): 'auto' | 'operator' | 'executive' {
+  const r = RISK_LEVEL_TO_SCALAR[(riskLevel ?? '').toLowerCase()] ?? 0.5;
+  const decision = autonomyGate(r);
+  if (decision === 'auto') return 'auto';
+  if (decision === 'approve') return 'operator';
+  return 'executive';
 }
 
 router.post('/a11oy/signals', async (req: Request, res: Response) => {
@@ -362,7 +383,7 @@ router.post('/a11oy/workcells', async (req: Request, res: Response) => {
       description,
       vertical,
       operatorId,
-      approvalTier: (approvalTier as 'auto' | 'operator' | 'executive' | undefined),
+      approvalTier: (approvalTier as 'auto' | 'operator' | 'executive' | undefined) ?? deriveApprovalTier(),
       originSignalIds,
       tools,
     });

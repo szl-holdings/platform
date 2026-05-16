@@ -45,6 +45,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl-holdings/formulas": "workspace:*",
     "@szl/alloy": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",

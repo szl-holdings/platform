@@ -1368,6 +1368,9 @@ importers:
       '@szl-holdings/document-intelligence':
         specifier: workspace:*
         version: link:../../packages/document-intelligence
+      '@szl-holdings/formulas':
+        specifier: workspace:*
+        version: link:../../lib/formulas
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -1730,6 +1733,9 @@ importers:
       '@szl-holdings/document-intelligence':
         specifier: workspace:*
         version: link:../../packages/document-intelligence
+      '@szl-holdings/formulas':
+        specifier: workspace:*
+        version: link:../../lib/formulas
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
