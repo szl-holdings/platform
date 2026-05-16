@@ -30,8 +30,13 @@ export type { IngestResult, IngestSuccess, IngestFailure } from './ingestors';
 export {
   buildDailySummary,
   canonicalize,
+  deriveMetrics,
+  CAPABILITY_SIGNAL_IDS,
+  SAFETY_SIGNAL_IDS,
   type ForecastSummary,
   type VariableSnapshot,
+  type HistoryEntry,
+  type DerivedMetrics,
 } from './forecast-summary';
 
 export {

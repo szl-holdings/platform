@@ -1,9 +1,10 @@
 # @workspace/agi-forecast
 
 MVP slice of the [`szl-holdings/agi-forecast`](https://github.com/szl-holdings/agi-forecast)
-proposal: registry + 3 live ingestors + daily-summary receipt + Brier ledger.
-Dashboard, derived metrics (horizon-velocity, alignment-debt, lutar-readiness),
-ouroboros replay-root wiring, and the remaining 9 ingestors are follow-ups.
+proposal: registry + 3 live ingestors + daily-summary receipt + derived
+metrics (horizon-velocity, alignment-debt, lutar-readiness) + Brier ledger.
+Dashboard, ouroboros replay-root wiring, and the remaining 9 ingestors are
+follow-ups.
 
 - License: Apache-2.0
 - Byline: Lutar, Stephen P. (ORCID 0009-0001-0110-4173)
