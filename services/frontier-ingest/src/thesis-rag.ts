@@ -37,7 +37,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { DevHashEmbeddingBackend } from '@workspace/alloy-embed-worker';
+import { DevHashEmbeddingBackend, getDefaultEmbedWorker } from '@workspace/alloy-embed-worker';
 import { registerThesisProbe, type ThesisProbe } from './classifier.js';
 import type { FrontierArtifact } from './types.js';
 
@@ -337,6 +337,83 @@ export function installDefaultThesisProbe(): boolean {
 export async function prewarmThesisCorpus(): Promise<number> {
   const chunks = await loadCorpus();
   return chunks.length;
+}
+
+/**
+ * Build a ThesisEmbedFn that routes through the Alloy Embedding
+ * Fabric's micro-batched worker queue (same queue powering `/v1/embed`).
+ * Uses the `cpu-local` backend by default — that backend talks to the
+ * substrate-py-workers BGE-M3 service, which gives real semantic
+ * embeddings (catches "self-distillation curriculum" ≈ "auto-evaluation
+ * feedback loop") instead of the deterministic hash-bag.
+ *
+ * Fallback chain (per-call, never throws):
+ *   1. Configured backend (default `cpu-local` / BGE-M3)
+ *   2. Local DevHashEmbeddingBackend (deterministic, zero-dep)
+ *   3. Empty vectors — the probe then returns `undefined` and the
+ *      keyword scorer takes over.
+ *
+ * This is the install hook referenced from api-server bootstrap and
+ * the Temporal worker: call once at startup, then
+ * `installDefaultThesisProbe()` (already idempotent — auto-installs
+ * on first import of `@workspace/frontier-ingest`).
+ */
+export function createEmbedWorkerThesisFn(opts: {
+  backendId?: string;
+  model?: string;
+} = {}): ThesisEmbedFn {
+  const backendId = opts.backendId ?? 'cpu-local';
+  const model = opts.model ?? 'aef-default';
+
+  return async (texts) => {
+    if (texts.length === 0) return [];
+    try {
+      const { queue } = getDefaultEmbedWorker();
+      const vectors = await new Promise<number[][]>((res, rej) => {
+        queue.enqueue(backendId, {
+          texts,
+          model,
+          pooling: 'mean',
+          normalize: true,
+          resolve: res,
+          reject: rej,
+        });
+      });
+      // Defensive: if the upstream returned the wrong shape, fall through
+      // to the deterministic backend so we never poison the corpus cache
+      // with empty vectors.
+      if (
+        Array.isArray(vectors) &&
+        vectors.length === texts.length &&
+        vectors.every((v) => Array.isArray(v) && v.length > 0)
+      ) {
+        return vectors;
+      }
+    } catch {
+      // Swallow and fall through to the dev-hash fallback.
+    }
+    try {
+      return await fabricEmbed(texts);
+    } catch {
+      return texts.map(() => [] as number[]);
+    }
+  };
+}
+
+/**
+ * Convenience installer: swap in the worker-backed embedder and
+ * register the default probe. Safe to call multiple times. Returns
+ * the backend id actually wired so the caller can log it.
+ */
+export function installEmbedWorkerThesisProbe(opts: {
+  backendId?: string;
+  model?: string;
+} = {}): { backendId: string; model: string } {
+  const backendId = opts.backendId ?? 'cpu-local';
+  const model = opts.model ?? 'aef-default';
+  setThesisEmbedFn(createEmbedWorkerThesisFn({ backendId, model }));
+  installDefaultThesisProbe();
+  return { backendId, model };
 }
 
 /**

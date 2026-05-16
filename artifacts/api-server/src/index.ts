@@ -550,7 +550,38 @@ export async function bootstrap(
       // proposal queue without further worker coupling. Listeners log their
       // dispatch into pino so the proof-chain is visible in workflow logs.
       try {
-        const { onPromotion, onCapReached, ensureFrontierIngestDbSchema, isFrontierIngestDbEnabled, dbListPromotionsShared } = await import('@workspace/frontier-ingest');
+        const { onPromotion, onCapReached, ensureFrontierIngestDbSchema, isFrontierIngestDbEnabled, dbListPromotionsShared, installEmbedWorkerThesisProbe, prewarmThesisCorpus } = await import('@workspace/frontier-ingest');
+        // Upgrade the thesis-RAG embedder from the in-process dev-hash
+        // backend to the Alloy Embedding Fabric's worker queue
+        // (default: cpu-local BGE-M3). This means thesisFit reflects
+        // real semantic similarity — "self-distillation curriculum"
+        // resonates with "auto-evaluation feedback loop" even with no
+        // shared vocabulary. The helper internally falls back to the
+        // dev-hash backend per-call when the BGE service is unreachable,
+        // so this is always safe to install. Operators can pick a
+        // different backend by setting FRONTIER_THESIS_EMBED_BACKEND
+        // (e.g. 'dev-hash' to opt back into the deterministic embedder).
+        try {
+          const backendId = process.env.FRONTIER_THESIS_EMBED_BACKEND ?? 'cpu-local';
+          const model = process.env.FRONTIER_THESIS_EMBED_MODEL ?? 'aef-default';
+          const installed = installEmbedWorkerThesisProbe({ backendId, model });
+          logger.info(installed, '[frontier-ingest] thesis-RAG embedder upgraded to fabric worker queue');
+          // Best-effort prewarm so the first discovery doesn't pay the
+          // corpus-embed latency. Gated behind FRONTIER_INGEST_ENABLED
+          // so we never make surprise outbound embed calls when the
+          // ingestion engine itself is disabled. Never blocks startup.
+          if (process.env.FRONTIER_INGEST_ENABLED === 'true') {
+            prewarmThesisCorpus()
+              .then((chunks) =>
+                logger.info({ chunks }, '[frontier-ingest] thesis corpus prewarmed'),
+              )
+              .catch((err) =>
+                logger.warn({ err }, '[frontier-ingest] thesis corpus prewarm failed (non-fatal)'),
+              );
+          }
+        } catch (probeErr) {
+          logger.warn({ err: probeErr }, '[frontier-ingest] thesis-RAG embedder upgrade failed — keeping default dev-hash');
+        }
         // Bootstrap the cross-process Postgres backend so the api-server,
         // the Temporal worker process, and any on-demand pulls share the
         // same artifacts/inbox/timeline/promotions/downstream state.

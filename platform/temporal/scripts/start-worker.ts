@@ -65,6 +65,30 @@ async function main() {
     process.exit(1);
   }
 
+  // Upgrade the frontier thesis-RAG embedder from the deterministic
+  // dev-hash backend to the Alloy Embedding Fabric's worker queue
+  // (default: cpu-local BGE-M3) so the Temporal worker process scores
+  // discoveries with real semantic similarity instead of vocabulary
+  // overlap. The helper falls back per-call to the dev-hash backend
+  // when the BGE service is unreachable, so this never breaks ingest.
+  try {
+    const { installEmbedWorkerThesisProbe } = await import(
+      "@workspace/frontier-ingest"
+    );
+    const backendId = process.env.FRONTIER_THESIS_EMBED_BACKEND ?? "cpu-local";
+    const model = process.env.FRONTIER_THESIS_EMBED_MODEL ?? "aef-default";
+    const installed = installEmbedWorkerThesisProbe({ backendId, model });
+    logger.info(
+      installed,
+      "[temporal-worker] thesis-RAG embedder upgraded to fabric worker queue",
+    );
+  } catch (err) {
+    logger.warn(
+      { err },
+      "[temporal-worker] thesis-RAG embedder upgrade failed — keeping default dev-hash",
+    );
+  }
+
   let bootstrapped: Awaited<ReturnType<typeof bootstrapTemporalWorker>>;
   try {
     bootstrapped = await bootstrapTemporalWorker();
