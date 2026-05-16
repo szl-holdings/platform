@@ -153,92 +153,13 @@ function rateLimiter(req: Request, res: Response, next: NextFunction): void {
 }
 
 // ─── Extension Negotiation ────────────────────────────────────────────────────
+//
+// Extension negotiation now lives inside `PRAXISMcpServer` — it overrides the
+// SDK's `initialize` handler to add the negotiated `extensions` map directly to
+// the result object. The gateway no longer needs to wrap `res.write`/`res.end`
+// to splice extensions into the response body (szl-holdings/platform#113).
 
 const SERVER_EXTENSIONS = (CAPABILITIES as unknown as Record<string, unknown>).extensions as Record<string, unknown>;
-
-function negotiateExtensions(clientExtensions: unknown): Record<string, unknown> {
-  if (!clientExtensions || typeof clientExtensions !== 'object') return {};
-  const accepted: Record<string, unknown> = {};
-  for (const key of Object.keys(clientExtensions as Record<string, unknown>)) {
-    if (key in SERVER_EXTENSIONS) {
-      accepted[key] = SERVER_EXTENSIONS[key];
-    }
-  }
-  return accepted;
-}
-
-/**
- * Wrap res.write/res.end so that the next single JSON-RPC response body
- * passing through has `extensions` injected into its `result`. Used to add
- * negotiated extensions to the SDK's `initialize` response without forking
- * the SDK transport (szl-holdings/platform#113).
- */
-function installExtensionInjector(res: Response, negotiated: Record<string, unknown>): void {
-  if (Object.keys(negotiated).length === 0) return;
-  const chunks: Buffer[] = [];
-  const origWrite = res.write.bind(res) as (chunk: unknown, ...rest: unknown[]) => boolean;
-  const origEnd = res.end.bind(res) as (chunk?: unknown, ...rest: unknown[]) => Response;
-  const origWriteHead = res.writeHead.bind(res) as (...args: unknown[]) => Response;
-  const origSetHeader = res.setHeader.bind(res) as (name: string, value: number | string | readonly string[]) => Response;
-  let intercepted = false;
-
-  const collect = (chunk: unknown): void => {
-    if (chunk == null) return;
-    if (Buffer.isBuffer(chunk)) chunks.push(chunk);
-    else if (typeof chunk === 'string') chunks.push(Buffer.from(chunk));
-    else if (chunk instanceof Uint8Array) chunks.push(Buffer.from(chunk));
-  };
-
-  // Swallow Content-Length from both setHeader() and writeHead() — we'll set
-  // the correct one ourselves at end() time, after rewriting the body.
-  (res as unknown as { setHeader: typeof res.setHeader }).setHeader = ((name: string, value: number | string | readonly string[]) => {
-    if (!intercepted && typeof name === 'string' && name.toLowerCase() === 'content-length') {
-      return res;
-    }
-    return origSetHeader(name, value);
-  }) as typeof res.setHeader;
-
-  (res as unknown as { writeHead: typeof res.writeHead }).writeHead = ((...args: unknown[]) => {
-    if (!intercepted) {
-      // writeHead(status, headers?) or writeHead(status, statusMessage, headers?)
-      for (const arg of args) {
-        if (arg && typeof arg === 'object' && !Array.isArray(arg)) {
-          for (const key of Object.keys(arg as Record<string, unknown>)) {
-            if (key.toLowerCase() === 'content-length') {
-              delete (arg as Record<string, unknown>)[key];
-            }
-          }
-        }
-      }
-    }
-    return origWriteHead(...args);
-  }) as typeof res.writeHead;
-
-  (res as unknown as { write: typeof res.write }).write = ((chunk: unknown, ...rest: unknown[]) => {
-    if (intercepted) return origWrite(chunk, ...rest);
-    collect(chunk);
-    return true;
-  }) as typeof res.write;
-
-  (res as unknown as { end: typeof res.end }).end = ((chunk?: unknown, ...rest: unknown[]) => {
-    if (intercepted) return origEnd(chunk, ...rest);
-    intercepted = true;
-    collect(chunk);
-    const raw = Buffer.concat(chunks).toString('utf8');
-    let body = raw;
-    try {
-      const parsed = JSON.parse(raw) as { result?: Record<string, unknown> };
-      if (parsed && typeof parsed === 'object' && parsed.result && typeof parsed.result === 'object') {
-        parsed.result.extensions = negotiated;
-        body = JSON.stringify(parsed);
-      }
-    } catch {
-      // Not JSON (e.g. SSE frame) — fall through and send original bytes.
-    }
-    try { origSetHeader('Content-Length', Buffer.byteLength(body).toString()); } catch { /* headers may be locked */ }
-    return origEnd(body, ...rest);
-  }) as typeof res.end;
-}
 
 // ─── OAuth 2.1 + PKCE ─────────────────────────────────────────────────────────
 
@@ -702,22 +623,10 @@ export function createHttpTransport(): express.Router {
       }
     }
 
-    // Extension negotiation (szl-holdings/platform#113): if the client sent
-    // `params.extensions` on initialize, intersect with the gateway's
-    // advertised SERVER_EXTENSIONS and inject the negotiated map into the
-    // SDK's initialize response by wrapping res.write/res.end.
-    if (bodyPeek?.method === 'initialize') {
-      const requestedExt = (bodyPeek.params?.extensions ?? null) as Record<string, unknown> | null;
-      if (requestedExt && typeof requestedExt === 'object') {
-        const negotiated: Record<string, unknown> = {};
-        for (const key of Object.keys(requestedExt)) {
-          if (key in SERVER_EXTENSIONS) {
-            negotiated[key] = (SERVER_EXTENSIONS as Record<string, unknown>)[key];
-          }
-        }
-        installExtensionInjector(res, negotiated);
-      }
-    }
+    // Extension negotiation is now handled inside PRAXISMcpServer via an
+    // override of the SDK's `initialize` request handler. The transport no
+    // longer needs to inspect the body or mutate the response stream here
+    // (szl-holdings/platform#113).
 
     try {
       await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
@@ -1268,5 +1177,3 @@ export function createAuthorizationServerMetadata(): express.RequestHandler {
   };
 }
 
-// Keep negotiateExtensions available for external callers
-export { negotiateExtensions };

@@ -945,12 +945,13 @@ test('18. Extension negotiation round-trip returns server extensions', async () 
       id: 1,
       method: 'initialize',
       params: {
-        capabilities: {},
-        clientInfo: { name: 'test-client', version: '1.0' },
-        extensions: {
-          'szl/governed-autonomy': {},
-          'szl/unknown-extension': {},
+        capabilities: {
+          extensions: {
+            'szl/governed-autonomy': {},
+            'szl/unknown-extension': {},
+          },
         },
+        clientInfo: { name: 'test-client', version: '1.0' },
       },
     }),
   });

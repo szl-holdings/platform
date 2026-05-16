@@ -13,7 +13,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { InitializeRequestSchema, type CallToolResult, type InitializeResult } from '@modelcontextprotocol/sdk/types.js';
 import { EventEmitter } from 'node:events';
 import { randomUUID, createHash } from 'node:crypto';
 import { z, type ZodRawShape } from 'zod';
@@ -157,6 +157,16 @@ export interface PRAXISMcpServerConfig {
 
   /** Roots definitions for tenant filesystem boundary enforcement */
   roots?: Array<{ uri: string; name?: string }>;
+
+  /**
+   * Server-advertised MCP extensions (vendor-prefixed extension identifiers
+   * mapped to their extension metadata objects). When the client includes
+   * `params.capabilities.extensions` on `initialize`, the wrapper intersects the client's
+   * keys with this map and returns the matched entries as `result.extensions`
+   * in the initialize response. Replaces the prior res.write-rewriting hack
+   * in the substrate gateway transport (szl-holdings/platform#113).
+   */
+  extensions?: Record<string, unknown>;
 }
 
 // ─── Task Registry ────────────────────────────────────────────────────────────
@@ -267,6 +277,48 @@ export class PRAXISMcpServer {
     if (config.enableApps) {
       this._registerAppsListTool();
     }
+
+    if (config.extensions && Object.keys(config.extensions).length > 0) {
+      this._installExtensionNegotiation(config.extensions);
+    }
+  }
+
+  /**
+   * Override the SDK's `initialize` handler so the result includes a
+   * `extensions` field containing the intersection of the client's requested
+   * extensions and the server's advertised set. Replaces the response-body
+   * rewriting hack that previously lived in the substrate gateway transport
+   * (szl-holdings/platform#113).
+   */
+  private _installExtensionNegotiation(advertised: Record<string, unknown>): void {
+    const lowLevelServer = this._sdk.server;
+    // Bind to the low-level Server's own implementation so we preserve the
+    // SDK's side effects (protocol version negotiation, recording client
+    // capabilities/info on the Server instance).
+    const originalOninit = (
+      lowLevelServer as unknown as {
+        _oninitialize: (req: unknown) => Promise<InitializeResult>;
+      }
+    )._oninitialize.bind(lowLevelServer);
+
+    lowLevelServer.setRequestHandler(InitializeRequestSchema, async (request) => {
+      const baseResult = await originalOninit(request);
+      // Per MCP spec, the client advertises extensions inside
+      // `params.capabilities.extensions` (see ClientCapabilitiesSchema).
+      const clientExt = (
+        request.params as { capabilities?: { extensions?: Record<string, unknown> } }
+      ).capabilities?.extensions;
+      if (!clientExt || typeof clientExt !== 'object') {
+        return baseResult;
+      }
+      const negotiated: Record<string, unknown> = {};
+      for (const key of Object.keys(clientExt)) {
+        if (Object.prototype.hasOwnProperty.call(advertised, key)) {
+          negotiated[key] = advertised[key];
+        }
+      }
+      return { ...baseResult, extensions: negotiated } as InitializeResult;
+    });
   }
 
   /** Access the raw SDK McpServer instance (for transport connection) */

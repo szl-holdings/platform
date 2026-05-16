@@ -28,7 +28,7 @@ import {
   type TenantContext,
 } from '@workspace/nexus-mcp';
 import { getCurrentActorId } from './request-context.js';
-import { GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
+import { CAPABILITIES, GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
 import { initGatewayIdentity } from './pqc-identity-init.js';
 import {
   getAvailableTools,
@@ -176,6 +176,7 @@ export function createGatewayServer(): PRAXISMcpServer {
       tenantId: 'substrate-gateway',
       domain: 'analytics',
     }),
+    extensions: (CAPABILITIES as unknown as { extensions: Record<string, unknown> }).extensions,
   });
 
   // ── Register domain Apps (from cached registry) ──────────────────────────────
