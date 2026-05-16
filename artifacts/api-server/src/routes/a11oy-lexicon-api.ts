@@ -41,6 +41,7 @@ import {
   sendSuccess,
 } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
+import { notifyLexiconReviewers } from '../lib/lexicon-notifications.js';
 import { addProductCapability, appendProof } from '../services/orchestration-store.js';
 
 const router: IRouter = Router();
@@ -380,6 +381,18 @@ export async function ensureLexiconEntryAndEnqueueReview(opts: {
       context: opts.context ?? {},
     })
     .returning();
+
+  // Fire-and-forget alert to designated approvers (task #4878). Only fires
+  // when a NEW review row was created above — when an open review already
+  // exists we return early without re-notifying, so operators don't get
+  // spammed by repeated gate misses for the same target.
+  void notifyLexiconReviewers({
+    reviewRequestId: review.id,
+    entryId: entry.id,
+    targetId: entry.targetId,
+    provider: entry.provider,
+    context: opts.context ?? null,
+  }).catch(() => {});
 
   return { entry, reviewRequestId: review.id };
 }
