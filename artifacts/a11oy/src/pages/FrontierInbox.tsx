@@ -54,6 +54,79 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   return (json.data ?? json) as T;
 }
 
+// Mirrors the slugify() in pages/Thesis.tsx so anchors line up with
+// the heading ids rendered on the canonical thesis viewer.
+function slugifyHeading(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[`*_~]/g, '')
+    .replace(/[^a-z0-9α-ωΑ-Ω→ω]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+interface ThesisCitation {
+  docId: string;
+  heading: string;
+  cos?: number;
+  raw: string;
+}
+
+// Parse a rationale line of the form
+//   "thesis-RAG: v10-canonical#Audit Closure Operator (cos=0.42); v9-canonical#Ouroboros (cos=0.31)"
+// into a list of structured citations. Returns null if the line is
+// not a thesis-RAG line so the caller can render it as plain text.
+function parseThesisRagLine(line: string): ThesisCitation[] | null {
+  const prefix = 'thesis-RAG:';
+  if (!line.startsWith(prefix)) return null;
+  const rest = line.slice(prefix.length).trim();
+  if (rest.length === 0) return [];
+  return rest
+    .split(';')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .map((raw): ThesisCitation => {
+      const cosMatch = /\(cos=([0-9.]+)\)\s*$/.exec(raw);
+      const cos = cosMatch ? Number(cosMatch[1]) : undefined;
+      const head = cosMatch ? raw.slice(0, cosMatch.index).trim() : raw;
+      const hashIdx = head.indexOf('#');
+      const docId = hashIdx >= 0 ? head.slice(0, hashIdx).trim() : head;
+      const heading = hashIdx >= 0 ? head.slice(hashIdx + 1).trim() : '';
+      return { docId, heading, cos, raw };
+    });
+}
+
+function ThesisCitations({ citations }: { citations: ThesisCitation[] }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[10px] font-mono uppercase text-neutral-500">thesis-RAG</span>
+      {citations.map((c, i) => {
+        const anchor = c.heading ? `#${slugifyHeading(c.heading)}` : '';
+        const href = `${BASE}/thesis${anchor}`;
+        const label = c.heading || c.docId;
+        return (
+          <Link
+            key={i}
+            href={href}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[10px] hover:underline"
+            style={{
+              color: '#c9b787',
+              backgroundColor: 'rgba(201,183,135,0.08)',
+              border: '1px solid rgba(201,183,135,0.25)',
+            }}
+            title={`${c.docId}${c.heading ? `#${c.heading}` : ''}${c.cos !== undefined ? ` · cos=${c.cos.toFixed(2)}` : ''}`}
+          >
+            <span className="text-neutral-500">{c.docId}</span>
+            <span>{label}</span>
+            {c.cos !== undefined && (
+              <span className="text-neutral-400">cos={c.cos.toFixed(2)}</span>
+            )}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 function ScoreBar({ label, value, color = '#c9b787' }: { label: string; value: number; color?: string }) {
   const pct = Math.max(0, Math.min(100, value * 100));
   return (
@@ -217,10 +290,20 @@ export function FrontierInbox() {
                 <ScoreBar label="Safety" value={s.safetySignal} color="#86efac" />
               </div>
 
-              <div className="text-[11px] text-neutral-400 space-y-0.5">
-                {s.rationale.map((r, i) => (
-                  <div key={i}>• {r}</div>
-                ))}
+              <div className="text-[11px] text-neutral-400 space-y-1">
+                {s.rationale.map((r, i) => {
+                  const citations = parseThesisRagLine(r);
+                  if (citations) {
+                    if (citations.length === 0) return null;
+                    return (
+                      <div key={i} className="flex items-start gap-1.5">
+                        <span className="text-neutral-600">•</span>
+                        <ThesisCitations citations={citations} />
+                      </div>
+                    );
+                  }
+                  return <div key={i}>• {r}</div>;
+                })}
               </div>
 
               {item.status !== 'pending' && (
