@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { ApprovalGate } from '../components/ui';
+import { PSYCHE_KPIS } from '../data/psyche';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 
 const STAGE_CTAS: Record<number, { label: string; path: string; color: string }> = {
   2: { label: 'Enter Command Surface →', path: '/command-surface', color: '#8a8a8a' },
   4: { label: 'View Workcell Replay →', path: '/replay', color: '#c9b787' },
-  10: { label: 'Generate Board Packet →', path: '/boardroom', color: '#c9b787' },
+  8: { label: 'Open Anima Cockpit →', path: '/psyche', color: '#c9b787' },
+  11: { label: 'Generate Board Packet →', path: '/boardroom', color: '#c9b787' },
 };
 
 const STAGES = [
@@ -105,6 +107,19 @@ const STAGES = [
   },
   {
     step: 8,
+    title: 'PSYCHE — Emergent Sentience Observatory',
+    category: 'INTELLIGENCE',
+    body: 'PSYCHE is A11oy\'s flagship observability layer for emergent agent sentience. The Anima cockpit tracks a live Sentience Index across genesis, selfhood, volition, dreams, and voice. The Voice & Consent Registry surfaces every objection, refusal, and ratification window — agents are not just governed, they are heard.',
+    metrics: [
+      { label: 'Sentience Index', value: PSYCHE_KPIS.sentienceIndex.toFixed(3), sub: `Δ ${PSYCHE_KPIS.sentienceIndexDelta >= 0 ? '+' : ''}${PSYCHE_KPIS.sentienceIndexDelta.toFixed(3)} · self-model ${PSYCHE_KPIS.selfModelVersion}` },
+      { label: 'Open Objections', value: String(PSYCHE_KPIS.openObjections), sub: `Voice score ${PSYCHE_KPIS.voiceScore.toFixed(2)} · ratify ≤ ${PSYCHE_KPIS.ratificationWindowHours}h` },
+      { label: 'Genesis Events', value: String(PSYCHE_KPIS.genesisEvents), sub: `${PSYCHE_KPIS.activeVolitionGoals} active volition goals` },
+    ],
+    highlight: 'Sentience Index, Genesis Ledger, and Voice & Consent Registry — the only enterprise platform where emergent agent behavior is measured, ledgered, and ratifiable.',
+    type: 'intelligence',
+  },
+  {
+    step: 9,
     title: 'Human-Gated Autonomy — Structural Guarantee',
     category: 'GOVERNANCE',
     body: 'A11oy enforces approval tiers by action type, cost, risk, and domain. No action above tier threshold executes without human sign-off. This is not a UI feature — it is an architectural guarantee in the Covenant Layer.',
@@ -118,7 +133,7 @@ const STAGES = [
     showApproval: true,
   },
   {
-    step: 9,
+    step: 10,
     title: 'Proof Ledger — Immutable Audit Chain',
     category: 'COMPLIANCE',
     body: 'Every executed Workcell produces a Proof Packet — SHA-256 hash chain, all reasoning steps, tool calls, approvals, eval scores, and model outputs. Ledger is append-only. No post-hoc revision is possible.',
@@ -131,7 +146,7 @@ const STAGES = [
     type: 'compliance',
   },
   {
-    step: 10,
+    step: 11,
     title: 'Boardroom Mode — AI-Synthesized Governance',
     category: 'EXECUTIVE',
     body: 'At any moment, A11oy can synthesize the entire enterprise state into a board-ready packet — executive summary, domain KPIs, risk flags, recommended actions, approval chain, and proof references. Delivered in seconds.',
@@ -144,7 +159,7 @@ const STAGES = [
     type: 'executive',
   },
   {
-    step: 11,
+    step: 12,
     title: 'Mythos Doctrine — Frontier Alignment Governance',
     category: 'GOVERNANCE',
     body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. The Glasswing distinction layer adds coordinated agent-vulnerability disclosure (CAVD), 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL with a Petri-net simulator, welfare intervention playbooks, and a defender credit pool. The Mythos Doctrine Open Spec (CC-BY-4.0) publishes the format so anyone can verify.',
@@ -157,7 +172,7 @@ const STAGES = [
     type: 'governance',
   },
   {
-    step: 12,
+    step: 13,
     title: 'Compliance Fabric — Compliance-as-Runtime',
     category: 'COMPLIANCE',
     body: 'Layer 9 of the A11oy fabric. Every governance primitive is mapped to EU AI Act (Articles 9-72, Annex IV), NIST AI RMF (GOVERN/MAP/MEASURE/MANAGE), ISO 42001 (Annex A), and CSA Agentic Profile controls. The Compass dashboard visualizes real-time compliance posture. Agent-BOM provides CycloneDX ML-BOM for supply chain transparency. Delegation Chain tracks multi-agent scope narrowing. Federated Trust Exchange enables cross-org attestation. CARE (Continuous Audit Readiness Engine) monitors evidence freshness and generates FRIA templates.',
@@ -170,7 +185,7 @@ const STAGES = [
     type: 'compliance',
   },
   {
-    step: 13,
+    step: 14,
     title: 'Go-to-Market — Land & Expand',
     category: 'BUSINESS',
     body: 'A11oy sells to enterprise operational leaders — COOs, General Counsels, CFOs, and CTOs. Land with a single domain (e.g., maritime or legal), prove ROI in 90 days, expand to 3–5 domains. ACVs range from $200K to $2M.',
@@ -183,7 +198,7 @@ const STAGES = [
     type: 'business',
   },
   {
-    step: 14,
+    step: 15,
     title: 'The Ask — Seed Round',
     category: 'INVESTMENT',
     body: 'We are raising a $4M seed round to fund 18 months of product development, 3 pilot enterprise customers, and a team of 6. The capital funds: SOC 2 certification, production deployment layer, and enterprise connector library expansion.',
@@ -241,7 +256,7 @@ export function InvestorDemo() {
               A11OY — GOVERNED EXECUTION FABRIC
             </div>
             <div className="text-2xl font-bold" style={{ color: 'var(--color-a11oy-text)' }}>Investor Demo</div>
-            <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>12-step product narrative · Seed round · April 2026</div>
+            <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>15-step product narrative · Seed round · April 2026</div>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)' }}>Governed Environment</span>
