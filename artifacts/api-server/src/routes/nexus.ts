@@ -32,9 +32,10 @@ import {
 const router = Router();
 
 // ─── PRAXIS privilege helpers ──────────────────────────────────────────────────
-// The PRAXIS control plane (memory, skills, tools, ingest, customizations) is a
-// shared, deployment-wide store. Only operators and administrators may mutate it.
-// Regular authenticated users retain read access to all GET endpoints.
+// The PRAXIS control plane (memory, skills, tools, research, ingest) is a
+// shared, deployment-wide store. Only operators and administrators may read or
+// mutate it. Regular authenticated users are denied access to control-plane GET
+// endpoints to prevent cross-tenant data disclosure (AF-020).
 
 const NEXUS_PRIVILEGED_ROLES = new Set(['super_admin', 'admin', 'ops']);
 
@@ -1340,7 +1341,7 @@ router.post(
   },
 );
 
-router.get('/research', async (_req: Request, res: Response) => {
+router.get('/research', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const runs = Array.from(researchStore.values())
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -1351,7 +1352,7 @@ router.get('/research', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/research/:id', async (req: Request, res: Response) => {
+router.get('/research/:id', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const run = researchStore.get(req.params.id as string);
     if (!run) {
@@ -1364,7 +1365,7 @@ router.get('/research/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/research/:id/stream', (req: Request, res: Response) => {
+router.get('/research/:id/stream', requireNexusOps, (req: Request, res: Response) => {
   const runId = req.params.id as string;
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -1405,7 +1406,7 @@ router.get('/research/:id/stream', (req: Request, res: Response) => {
 
 // ─── Memory Routes ────────────────────────────────────────────────────────────
 
-router.get('/memory', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get('/memory', requireNexusOps, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { search, type, pinned } = req.query as Record<string, string>;
     let items = Array.from(memoryStore.values());
@@ -1535,7 +1536,7 @@ router.delete(
 
 // ─── Skills Routes ────────────────────────────────────────────────────────────
 
-router.get('/skills', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get('/skills', requireNexusOps, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { search, enabled, pattern } = req.query as Record<string, string>;
     let skills = Array.from(skillStore.values());
@@ -1992,7 +1993,7 @@ export function __resetWebStealthPolicyForTest(): void {
 }
 
 // GET /api/nexus/tools/web.stealth/policy — returns current policy (no auth required)
-router.get('/tools/web.stealth/policy', async (_req: Request, res: Response) => {
+router.get('/tools/web.stealth/policy', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     sendSuccess(res, {
       allowlist: webStealthPolicy.allowlist,
@@ -2035,8 +2036,8 @@ router.put(
   },
 );
 
-// GET /api/nexus/tools/web.stealth/recent-calls — returns the last N audit entries (no auth required)
-router.get('/tools/web.stealth/recent-calls', async (req: Request, res: Response) => {
+// GET /api/nexus/tools/web.stealth/recent-calls — returns the last N audit entries (ops-only)
+router.get('/tools/web.stealth/recent-calls', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const limitRaw = Number((req.query as Record<string, string>).limit ?? '50');
     const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(1, limitRaw), 100) : 50;
@@ -2218,7 +2219,7 @@ router.post(
 
 router.use(['/leaders'], authMiddleware({ required: true }));
 
-router.get('/leaders', async (_req: Request, res: Response) => {
+router.get('/leaders', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const leaders = Array.from(leaderStore.values());
     sendSuccess(res, leaders);
@@ -2318,7 +2319,7 @@ router.post(
 
 // ─── Pattern Atlas Routes ─────────────────────────────────────────────────────
 
-router.get('/patterns', async (_req: Request, res: Response) => {
+router.get('/patterns', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const patterns = Array.from(patternStore.values());
     sendSuccess(res, patterns);
@@ -2329,7 +2330,7 @@ router.get('/patterns', async (_req: Request, res: Response) => {
 
 // ─── Protocol Bridge Routes ───────────────────────────────────────────────────
 
-router.get('/bridge/tools', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get('/bridge/tools', requireNexusOps, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { protocol } = req.query as { protocol?: string };
     let tools = Array.from(toolStore.values());
@@ -2701,7 +2702,7 @@ router.post(
   },
 );
 
-router.get('/bridge/video-render/:jobId', async (req: Request, res: Response) => {
+router.get('/bridge/video-render/:jobId', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const { jobId } = req.params;
     const job = videoRenderStore.get(jobId);
@@ -2715,7 +2716,7 @@ router.get('/bridge/video-render/:jobId', async (req: Request, res: Response) =>
   }
 });
 
-router.get('/bridge/video-render', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get('/bridge/video-render', requireNexusOps, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const jobs = Array.from(videoRenderStore.values())
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -3453,7 +3454,7 @@ router.post(
   },
 );
 
-router.get('/orchestrate', async (req: Request, res: Response) => {
+router.get('/orchestrate', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const callerIdentity = req.user?.email ?? req.user?.id?.toString();
     const elevated = isNexusPrivileged(req);
@@ -3476,7 +3477,7 @@ router.get('/orchestrate', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/orchestrate/:id', async (req: Request, res: Response) => {
+router.get('/orchestrate/:id', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const plan = orchestrationStore.get(req.params.id as string);
     if (!plan) {
@@ -3538,7 +3539,7 @@ router.post(
 
 // ─── Recipe Routes ────────────────────────────────────────────────────────────
 
-router.get('/recipes', async (_req: Request, res: Response) => {
+router.get('/recipes', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const recipes = Array.from(recipeRegistry.values());
     sendSuccess(res, recipes);
@@ -3547,7 +3548,7 @@ router.get('/recipes', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/recipes/:id', async (req: Request, res: Response) => {
+router.get('/recipes/:id', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const recipe = recipeRegistry.get(req.params.id as string);
     if (!recipe) {
@@ -3657,7 +3658,7 @@ async function runIngest(jobId: string, repoUrl: string) {
   }
 }
 
-router.get('/ingest', async (_req: Request, res: Response) => {
+router.get('/ingest', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const jobs = Array.from(ingestStore.values()).sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -3707,7 +3708,7 @@ router.post(
   },
 );
 
-router.get('/ingest/:id', async (req: Request, res: Response) => {
+router.get('/ingest/:id', requireNexusOps, async (req: Request, res: Response) => {
   try {
     const job = ingestStore.get(req.params.id as string);
     if (!job) {
@@ -4045,7 +4046,7 @@ router.get('/entity-duplicates', authMiddleware({ required: true }), requireRole
 
 // ─── Status Route ─────────────────────────────────────────────────────────────
 
-router.get('/status', async (_req: Request, res: Response) => {
+router.get('/status', requireNexusOps, async (_req: Request, res: Response) => {
   try {
     const activeSwarms = Array.from(researchStore.values()).filter(
       (r) => r.status === 'running' || r.status === 'pending',
@@ -4158,12 +4159,15 @@ router.post('/code/execute', async (req: Request, res: Response) => {
 
     const { source, label, domain, isDryRun, approvalClass, timeoutMs, sandboxPolicy } = parsed.data;
 
+    const callerTenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+    const callerUserId = req.user?.id?.toString() ?? null;
+
     const execution = await forgeRuntime.submit({
       taskId: randomUUID(),
       type: 'code',
       domain: domain as Parameters<typeof forgeRuntime.submit>[0]['domain'],
-      tenantId: req.user?.tenantId ?? null,
-      userId: req.user?.userId ?? null,
+      tenantId: callerTenantId,
+      userId: callerUserId,
       label,
       isDryRun,
       approvalClass: approvalClass as Parameters<typeof forgeRuntime.submit>[0]['approvalClass'],
@@ -4199,14 +4203,34 @@ router.get('/code/executions', (req: Request, res: Response) => {
       return;
     }
     const { limit, status, domain } = parsed.data;
-    const tenantId = req.user?.tenantId;
 
-    const executions = forgeRuntime.getHistory({
+    const isPrivileged = isNexusPrivileged(req);
+    const callerTenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+    const callerUserId = req.user?.id?.toString() ?? null;
+
+    let executions = forgeRuntime.getHistory({
       limit,
       status: status as Parameters<typeof forgeRuntime.getHistory>[0]['status'],
       domain: domain as Parameters<typeof forgeRuntime.getHistory>[0]['domain'],
-      ...(tenantId ? { tenantId } : {}),
     }).filter((e) => e.task.type === 'code');
+
+    // Non-privileged callers may only see their own tenant's executions.
+    // Always apply the filter — relying on null tenantId to skip it was the
+    // root cause of the global-history exposure (tenantId was always null
+    // because req.user has no tenantId property).
+    if (!isPrivileged) {
+      executions = executions.filter((e) => {
+        if (callerTenantId && e.task.tenantId != null) {
+          return e.task.tenantId === callerTenantId;
+        }
+        // Fall back to userId-based scoping when tenantId is unavailable.
+        if (callerUserId && e.task.userId != null) {
+          return e.task.userId === callerUserId;
+        }
+        // No binding on either side — deny by default.
+        return false;
+      });
+    }
 
     sendSuccess(res, {
       total: executions.length,
@@ -4235,11 +4259,27 @@ router.get('/code/executions/:id', (req: Request, res: Response) => {
       sendError(res, `Execution '${req.params.id}' not found`, 404);
       return;
     }
-    // Tenant isolation: only return executions belonging to the caller's tenant
-    const callerTenant = req.user?.tenantId;
-    if (callerTenant && execution.task.tenantId && execution.task.tenantId !== callerTenant) {
-      sendError(res, `Execution '${req.params.id}' not found`, 404);
-      return;
+    // Tenant isolation: only return executions belonging to the caller's tenant.
+    // Previously used req.user?.tenantId which does not exist on AuthenticatedUser,
+    // so the check was always skipped and every execution was globally readable.
+    const isPrivilegedCaller = isNexusPrivileged(req);
+    if (!isPrivilegedCaller) {
+      const callerTenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+      const callerUserId = req.user?.id?.toString() ?? null;
+
+      const tenantMatch =
+        callerTenantId != null &&
+        execution.task.tenantId != null &&
+        execution.task.tenantId === callerTenantId;
+      const userMatch =
+        callerUserId != null &&
+        execution.task.userId != null &&
+        execution.task.userId === callerUserId;
+
+      if (!tenantMatch && !userMatch) {
+        sendError(res, `Execution '${req.params.id}' not found`, 404);
+        return;
+      }
     }
 
     const timelineEvents = forgeTimeline.getEventsForExecution(execution.executionId, { limit: 100 });
@@ -4272,7 +4312,7 @@ router.get('/code/executions/:id', (req: Request, res: Response) => {
 // Displays QClaw-4B agent activity: reasoning chains, tool calls, confidence
 // scores, governance interactions, and cost savings vs. cloud models.
 
-router.get('/sovereign-ai', async (_req, res) => {
+router.get('/sovereign-ai', requireNexusOps, async (_req, res) => {
   try {
     const { inferenceTelemetry } = await import('../lib/inference-telemetry');
     const { providerCircuitBreaker } = await import('../lib/ai-gateway');
