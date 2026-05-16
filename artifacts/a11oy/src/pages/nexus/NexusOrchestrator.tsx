@@ -1057,7 +1057,10 @@ export default function Orchestrator() {
               Recent Orchestrations
             </h2>
             <div className="space-y-2">
-              {history.slice(0, 5).map((h) => (
+              {history.slice(0, 5).map((h) => {
+                const hCounts = getStepCounts(h);
+                const isDegraded = h.status === 'completed' && hCounts.degraded;
+                return (
                 <div
                   key={h.id}
                   className="w-full bg-praxis-surface border border-praxis rounded-lg px-4 py-3 hover:border-praxis-amber/20 transition-colors"
@@ -1071,17 +1074,28 @@ export default function Orchestrator() {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-mono text-muted-foreground/50">{h.id}</span>
-                      <span
-                        className={`text-[10px] font-mono ${
-                          h.status === 'completed'
-                            ? 'text-praxis-green'
-                            : h.status === 'failed'
-                              ? 'text-praxis-red'
-                              : 'text-praxis-cyan'
-                        }`}
-                      >
-                        {h.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {isDegraded && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-praxis-amber/10 text-praxis-amber border border-praxis-amber/30"
+                            title={`${hCounts.errored} step${hCounts.errored === 1 ? '' : 's'} failed mid-run`}
+                          >
+                            <AlertTriangle className="w-2.5 h-2.5" />
+                            DEGRADED
+                          </span>
+                        )}
+                        <span
+                          className={`text-[10px] font-mono ${
+                            h.status === 'completed'
+                              ? 'text-praxis-green'
+                              : h.status === 'failed'
+                                ? 'text-praxis-red'
+                                : 'text-praxis-cyan'
+                          }`}
+                        >
+                          {h.status}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">{h.intent}</p>
                     <div className="text-[10px] font-mono text-muted-foreground/40 mt-1">
@@ -1104,7 +1118,8 @@ export default function Orchestrator() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
