@@ -1,0 +1,23 @@
+{
+  "repo": "szl-holdings/szl-cookbook",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "szl-cookbook",
+    "full_name": "szl-holdings/szl-cookbook",
+    "description": "SZL Holdings engineering cookbook \u2014 Anthropic skills pattern. 9 skills covering pre-flight thinking, refactoring, review, debugging, dependencies, dead code, docs, and commit hygiene.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/szl-cookbook.git",
+    "pushed_at": "2026-05-15T03:50:49Z"
+  },
+  "latest_release": null,
+  "latest_tag": null,
+  "latest_commit_sha": "0593de09406cd524be701ab4d8719f99aeba8f4f",
+  "package_json": null,
+  "root_files": [
+    ".github", "README.md"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# szl-cookbook\n\n**SZL Holdings engineering cookbook.** A curated set of skills (Anthropic SKILL.md pattern) used by every engineer and every agent across the SZL Holdings platform.\n\n[![Skills](https://img.shields.io/badge/skills-9-2DA44E?style=flat-square)](#catalog)\n[![Pattern](https://img.shields.io/badge/pattern-Anthropic%20SKILL.md-805AD5?style=flat-square)](https://github.com/anthropics/anthropic-cookbook)"
+}

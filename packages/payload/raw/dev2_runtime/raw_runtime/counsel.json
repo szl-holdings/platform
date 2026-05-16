@@ -1,0 +1,28 @@
+{
+  "repo": "szl-holdings/counsel",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "counsel",
+    "full_name": "szl-holdings/counsel",
+    "description": "Legal matter command. Policy-gated AI workflows, document review, obligation mapping, and proof-chain delivery.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/counsel.git",
+    "pushed_at": "2026-05-15T03:48:33Z"
+  },
+  "latest_release": null,
+  "latest_tag": {
+    "name": "v1.0.0-alpha",
+    "sha": "ff0c594395656ac813d639706bc02a56b535d1e8"
+  },
+  "latest_commit_sha": "4decc1c773c06a877bfe6684ea23665e3775943a",
+  "package_json": null,
+  "root_files": [
+    ".github", "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "social-preview.svg"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# Counsel\n\n> Legal matter command.\n\n[![CI](https://github.com/szl-holdings/counsel/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/counsel/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/counsel/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/counsel/actions/workflows/codeql.yml)"
+}

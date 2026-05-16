@@ -1,0 +1,219 @@
+{
+  "generated_at": "2026-05-15T21:15:46Z",
+  "owner": "Dev-1 · Lutar, Stephen P.",
+  "author": "Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173",
+  "affiliation": "SZL Holdings",
+  "thesis_lineage": {
+    "TH1-TH3": {
+      "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms",
+      "theorems": [
+        {
+          "id": "TH1",
+          "name": "Lambda-Gate Invariant (Composability)",
+          "statement": "**Theorem 13 (Composability, TH1):** If systems \\(A\\) and \\(B\\) share a doctrine.json SHA and use compatible \\(\\Lambda\\)-floors (\\(A\\)'s exit floor \\(\\leq B\\)'s entry floor), their composition \\(A \\circ B\\) is itself doctrine-locked. Proven in \\cite{zenodo_v13_20162352}.",
+          "proof_status": "informal",
+          "depends_on": []
+        },
+        {
+          "id": "TH2",
+          "name": "Replay-DOI Duality",
+          "statement": "Every multi-agent computation in the SZL Holdings ecosystem is DOI-anchored (TH2/Replay-DOI Duality): the 5× byte-identical replay root \\(\\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\) is permanently anchored to Zenodo DOI 10.5281/zenodo.20119582, establishing an irreversible duality between deterministic replay and permanent citable priority. **Theorem 7 (Deterministic Replay, T5):** For canonical JSON + pinned PRNG (mulberry32, seed = constant) + frozen registry + Node \\(\\geq\\)20 LTS with pinned pnpm lockfile: \\(\\forall i \\in \\{1..5\\}: \\text{root}_i = \\texttt{1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b}\\). Proven by construction; empirically verified (K10).",
+          "proof_status": "informal",
+          "depends_on": ["TH1"]
+        },
+        {
+          "id": "TH3",
+          "name": "rho-Closure Completeness",
+          "statement": "**Theorem 5 (rho-Closure Composability, T1):** If \\(\\rho(r_1)\\) and \\(\\rho(r_2)\\), then \\(\\rho(r_1 \\circ r_2)\\) iff \\(W_1 \\cap W_2 = \\emptyset\\) or \\(\\exists w_3 \\in W \\setminus (W_1 \\cup W_2)\\) co-signing the composed root. Proven from A4 (dualWitnessDisjointness) and A6 (hashChainIntegrity). Production result: 100% rho-closure on 8,000/8,000 paired calls. **Theorem 9 (Anatomy Reduction, TH3)** (informal proof sketch; formal bisimulation pending in \\texttt{lutar-lean/Lutar/AnatomyReduction.lean}): Any system with \\(|R| > 8\\) is bisimilar (in the sense of Milner's observation equivalence) to a system with exactly 8 regions under the axiom set A1-A9. Any system with \\(|R| < 8\\) is missing at least one capability from the set {Lambda-kernel, covenant, attribution, hash-chain, proofs, tooling, thesis, trust-mesh} that is not recoverable by composition of the remaining regions.",
+          "proof_status": "informal",
+          "depends_on": ["TH1", "TH2"]
+        }
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "status": "published v11",
+      "file": "_files/thesis/th1_th3/paper.md",
+      "lines": 2319,
+      "sha256": "589ccb20200aaed0b98b2a04c2dc68874ca4f8457d2ab63d842f2fd3bed96391"
+    },
+    "TH4-TH7": {
+      "title": "Verifiable Multi-Agent Anatomy (TH4-TH7): Lutar Calculus and Unified Extension",
+      "theorems": [
+        {
+          "id": "TH4",
+          "name": "Lambda-Category Composability",
+          "statement": "**Theorem 4 (Lambda-Category Composability, TH4)** (conjectured): The receipt category \\(\\text{Rec}_\\Lambda\\) is a monoidal category; the gate function \\(\\Lambda\\) is a monoidal functor from \\(\\text{Rec}_\\Lambda\\) to \\(\\{0,1\\}\\). Pending Lean 4 proof in \\texttt{lutar-lean/Lutar/LaxFunctor.lean}.",
+          "proof_status": "conjectured",
+          "depends_on": ["TH1"]
+        },
+        {
+          "id": "TH5",
+          "name": "Chain Confluence (Receipt Chain as Cofree Comonad)",
+          "statement": "**Theorem 10 (Chain Confluence, TH5)** (conjectured): The receipt chain \\(\\langle r_1, r_2, \\ldots, r_n \\rangle\\) is the carrier of the cofree comonad \\(W_{\\text{chain}}(X) = \\nu Z. X \\times F_R(Z)\\). Replay determinism (T5) is a coalgebra morphism: two replay runs produce the same comonad element iff they agree on all observations. Corollary: The lutar-calculus is confluent: any well-typed computation from the same input reaches the same rho-closed chain (unique normal form). No two computation paths can diverge.",
+          "proof_status": "conjectured",
+          "depends_on": ["TH2", "TH4"]
+        },
+        {
+          "id": "TH6",
+          "name": "Bekenstein Entropy Bound via Data Processing Inequality",
+          "statement": "**Theorem 11 (Bekenstein via DPI, TH6):** The entropy of the receipt chain is bounded by: \\[H(\\text{receipt chain of length } n) \\leq H(\\text{registry}) \\leq 8 \\times |\\text{registry in bytes}|\\] Proof: By the data processing inequality: for any deterministic function \\(f\\), \\(H(f(X)) \\leq H(X)\\). The receipt chain is a deterministic function of the registry (under fixed PRNG seed, canonical JSON, frozen registry - T5). Therefore \\(H(\\text{chain}) \\leq H(\\text{registry}) \\leq 8A\\) bits. Note on prior claim (A7): The conjectured Bekenstein-style bound using physical Bekenstein entropy (A7) is superseded by Theorem 11, which provides a stronger, simpler proof via DPI. A7 is hereby classified as a corollary of TH6.",
+          "proof_status": "informal_proof_complete",
+          "depends_on": ["TH2", "TH5"]
+        },
+        {
+          "id": "TH7",
+          "name": "Curry-Howard Receipt Calculus",
+          "statement": "**Theorem 6 (Curry-Howard, TH7):** The receipt calculus satisfies the Curry-Howard correspondence: The type \\(\\texttt{PassReceipt}(r)\\) is inhabited iff \\(\\forall i: \\lambda_i(r) \\geq \\theta_i\\) — it is the proof term for the soundness proposition; Gate evaluation = proof construction (by the Lean type checker); Receipt building = proof serialization; Receipt verification = proof checking. This makes \\(\\mathcal{S}\\) the first multi-agent runtime whose operational type system is a proof assistant for its own safety properties. Machine-checked in Lean 4 with sorry-count = 0.",
+          "proof_status": "lean4_sorry_count_0",
+          "depends_on": ["TH4", "TH5", "TH6"]
+        }
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "status": "published v14",
+      "files": [
+        {
+          "path": "_files/thesis/th4_th7/phd_thesis.md",
+          "lines": 454,
+          "sha256": "bfed03475831a88b32395d91348950476e05bb13cd8fee3976fb9ef5bdae13c5"
+        },
+        {
+          "path": "_files/thesis/th4_th7/pm_math_report.md",
+          "lines": 372,
+          "sha256": "5f4020dfc9c44f028bd151c6bf9231937e21ac4fab3c7350fbaf31ddc17d6195"
+        }
+      ]
+    },
+    "TH8-GLR": {
+      "title": "Graded Lambda-Receipt Calculus (GLR): TH8 Proposal and Lean 4 Skeleton",
+      "theorems": [
+        {
+          "id": "TH8",
+          "name": "Graded Lambda-Receipt Identity",
+          "statement": "**Theorem TH8 (Graded Lambda-Receipt Identity).** Let \\((\\mathcal{S}_\\Lambda, \\cdot, \\mathbf{1})\\) be the Lambda-semiring and let \\(\\mathsf{G\\Lambda R}\\) be the graded type theory with linear receipts as defined above. Then:",
+          "proof_status": "research_theorem_gaps_identified",
+          "depends_on": ["TH4", "TH5", "TH6", "TH7"]
+        },
+        {
+          "id": "TH8a",
+          "name": "Capability Revocation by Construction",
+          "statement": "**(TH8a — Capability Revocation by Construction):** For any well-typed term \\(M\\) with \\(\\Gamma \\vdash^{\\mathbf{g}} M : \\mathsf{LReceipt}^{\\mathbf{g}'}\\), every well-formed reduction sequence in which \\(\\mathsf{pass}(M)\\) is invoked consumes the receipt irreversibly. That is, there is no well-typed context \\(C[\\cdot]\\) in \\(\\mathsf{G\\Lambda R}\\) such that \\(C[\\mathsf{pass}(M)]\\) reduces to a term containing a second occurrence of \\(\\mathsf{pass}(M)\\) with the same receipt. (In words: receipt capability revocation is a theorem of the type system, not a runtime policy.)",
+          "proof_status": "sorry_pending",
+          "depends_on": ["TH8"]
+        },
+        {
+          "id": "TH8b",
+          "name": "Deterministic Replay as Grade Identity",
+          "statement": "**(TH8b — Deterministic Replay as Grade Identity):** The 5× byte-identical replay invariant (A9) is the unique strong-monad identity in \\(\\mathsf{G\\Lambda R}\\): a term \\(M\\) is deterministically replayable iff its grade is \\(\\mathbf{1} = (1,1,\\ldots,1)\\) and its context \\(\\Gamma\\) is grade-\\(\\mathbf{1}\\)-closed (no subterm draws non-\\(\\mathbf{1}\\) grade). Equivalently, \\(\\mathsf{replay}_5(M)\\) type-checks iff \\(M\\) has grade \\(\\mathbf{1}\\).",
+          "proof_status": "sorry_pending",
+          "depends_on": ["TH8", "TH2"]
+        },
+        {
+          "id": "TH8c",
+          "name": "Lambda-Floor as Linear-Logic Provability",
+          "statement": "**(TH8c — Lambda-Floor as Linear-Logic Provability):** The gate floor \\(\\mathsf{floor}(\\mathbf{g})\\) is the graded analogue of provability: a term is gate-passable iff it is typeable in \\(\\mathsf{G\\Lambda R}\\) with grade \\(\\mathbf{g} \\sqsupseteq \\mathbf{g}_{\\min}\\). The 9-axis conjunctive AND gate (TH7) is the linear fragment of this provability judgment restricted to the grade semiring element \\(\\mathbf{g}_{\\min}\\).",
+          "proof_status": "sorry_pending",
+          "depends_on": ["TH8", "TH7"]
+        }
+      ],
+      "doi": "10.5281/zenodo.20119582",
+      "concept_doi": "10.5281/zenodo.19944926",
+      "status": "proposal + lean_skeleton",
+      "target_venue": "POPL 2027 (submission August 2026) or CAV 2027 (submission January 2027)",
+      "files": [
+        {
+          "path": "_files/thesis/th8_glr/proposal.md",
+          "lines": 432,
+          "sha256": "9987023124ff2c4683169623a84233ce9042b7a39cf4cd8a27a64a04d44c842b"
+        }
+      ],
+      "lean_skeleton_files": [
+        {
+          "path": "_files/thesis/lean_th8/GradedSemiring.lean",
+          "lines": 205,
+          "sha256": "ab2a7408f7ffafea456e5b452f9cde1f7c5a8ce451bb3bd3b65db6ddd0d24c1c"
+        },
+        {
+          "path": "_files/thesis/lean_th8/LinearReceipt.lean",
+          "lines": 167,
+          "sha256": "c2fe4846c218f04b095ae9474d5e9218bdbff30224c56c35841bb8b4e9c23fdd"
+        },
+        {
+          "path": "_files/thesis/lean_th8/GLR.lean",
+          "lines": 355,
+          "sha256": "91daa1ff0b4254947df55d1373e5005336c9fb2bef66a5d8b02fdfb3881ea2c2"
+        },
+        {
+          "path": "_files/thesis/lean_th8/StrongMonadIdentity.lean",
+          "lines": 193,
+          "sha256": "d4163cb55cb35abb08c916cc3cc3a5e2012ed56d206b1687c5fb69bbe1fbb75e"
+        },
+        {
+          "path": "_files/thesis/lean_th8/README.md",
+          "sha256": "95ef19b9ae8ff567b9eab206e2eb90266d0a2bb2017a2da674b306c555047afb"
+        },
+        {
+          "path": "_files/thesis/lean_th8/TH8_LEAN_SKELETON.md",
+          "sha256": "2c3669c5bd16c9723af030bac9d9198d9bda44c38200dded19653e1212442856"
+        }
+      ]
+    }
+  },
+  "fly_high_v6_audit": {
+    "doctrine_v6": "PASS",
+    "gap_fill_p0_fixes": 10,
+    "beautify_avg_score": 8.1,
+    "lean_th8_theorems": 35,
+    "lean_th8_sorries": 8,
+    "citation_hardening": "117 URLs, 99 OK, 2 mandatory fixes applied"
+  },
+  "fly_high_v6_files": {
+    "report": {
+      "path": "_files/thesis/fly_high_v6/FLY_HIGH_V6_REPORT.md",
+      "sha256": "a0b58a6282e4b88e224cd7bdfac0bf7cee3d3089065ad000f73a8b87d0cc74b9"
+    },
+    "doctrine_sweep": {
+      "path": "_files/thesis/fly_high_v6/DOCTRINE_SWEEP_V6.md",
+      "sha256": "131dfef4b03caa8596c651f98b73daf6d1132f7716d3fdb0257d5f28cd1d8ad5"
+    },
+    "gap_analysis": {
+      "path": "_files/thesis/fly_high_v6/GAP_ANALYSIS.md",
+      "sha256": "1006be172b5fe92bdf0e0d8aa56e3d26d7f5ccf117af7ab6e7355c3a937b7c21"
+    }
+  },
+  "arxiv_package": {
+    "path": "_files/thesis/arxiv_pkg/arxiv_submission.zip",
+    "sha256": "13ca4a0617dddfa619e97d48a65b042d13d229481354f085f7dcc9199af5973b",
+    "size_bytes": 39618,
+    "refs_bib": {
+      "path": "_files/thesis/arxiv_pkg/refs.bib",
+      "sha256": "f76d91575ee7eb62200535d303a501956d2cb637d3333a76a2c79cf9fc564834"
+    },
+    "ancillary_lean_files": [
+      "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/GradedSemiring.lean",
+      "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/LinearReceipt.lean",
+      "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/GLR.lean",
+      "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/StrongMonadIdentity.lean",
+      "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/README.md"
+    ],
+    "submission_status": "READY_AWAITING_CONFIRM",
+    "target_venue": "arXiv cs.LO + cs.PL",
+    "submission_one_way_door": true
+  },
+  "zenodo_deposit": {
+    "path": "_files/thesis/zenodo_pkg/deposit.json",
+    "sha256": "904ce8df249a48b795b9cc6de3ae38a07e4b4454da3deba9fb31e92ea162e234",
+    "submission_status": "READY_AWAITING_CONFIRM",
+    "target_version": "v14",
+    "mint_one_way_door": true
+  },
+  "doctrine": {
+    "byline": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "forbidden_patterns": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "license_text": "CC-BY-4.0",
+    "license_code": "Apache-2.0"
+  }
+}

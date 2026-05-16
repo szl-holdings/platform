@@ -1,0 +1,78 @@
+{
+  "generated": "2026-05-15T16:45:00Z",
+  "author": "Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173",
+  "description": "Replay root evidence and test counts for arXiv submission",
+  "replay_root": {
+    "value": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "label": "K10",
+    "source": "THESIS_BRIEF.md, knowledge.json",
+    "doi": "10.5281/zenodo.20119582",
+    "doi_url": "https://doi.org/10.5281/zenodo.20119582",
+    "conditions": {
+      "prng": "mulberry32",
+      "prng_seed": "fixed constant",
+      "json_serialization": "canonical (deterministic key ordering)",
+      "registry": "read-frozen during replay window",
+      "node_version": "24.0.0",
+      "dependency_pinning": "pnpm lockfile"
+    },
+    "replications": 5,
+    "all_byte_identical": true,
+    "verified_at": "2026-05-15T11:22:00-04:00",
+    "verification_method": "demo payload bench.test.ts"
+  },
+  "test_counts": {
+    "production_runtime": {
+      "repo": "szl-holdings/ouroboros",
+      "version": "v6.3.0",
+      "released": "2026-05-13",
+      "total": 218,
+      "passing": 218,
+      "failing": 0,
+      "doi": "10.5281/zenodo.20119582"
+    },
+    "demo_payload": {
+      "repo": "replit_payload_build",
+      "total": 37,
+      "passing": 37,
+      "failing": 0,
+      "breakdown": {
+        "ouroboros_core": 33,
+        "a11oy_covenant": 4
+      },
+      "verified_at": "2026-05-15T16:41:44Z",
+      "test_files": [
+        "test/lambda-gate.test.ts (12 tests)",
+        "test/receipt-chain.test.ts (8 tests)",
+        "test/bench.test.ts (4 tests)",
+        "test/dual-witness.test.ts (9 tests)",
+        "test/covenant-policy.test.ts (4 tests)"
+      ]
+    }
+  },
+  "benchmark_constants": {
+    "K01_receipt_build_p50_us": { "value": 11.5, "unit": "µs", "n_samples": 10000, "ci_99_lower": 11.40, "ci_99_upper": 11.60 },
+    "K02_receipt_build_p99_us": { "value": 50.7, "unit": "µs" },
+    "K03_receipt_verify_p50_us": { "value": 10.4, "unit": "µs", "n_samples": 10000 },
+    "K04_lambda9_base_p50_us": { "value": 3.12, "unit": "µs" },
+    "K05_lambda9_composed_p50_us": { "value": 3.29, "unit": "µs" },
+    "K06_rho_closure_rate": { "value": "100%", "n_samples": 8000, "ci_99_9_lower": 0.9994, "ci_99_9_upper": 1.0 },
+    "K07_http_calls_validated": { "value": 24800, "context": "Platform v11" },
+    "K08_lambda10_overhead_ms": { "value": "0.49-0.59", "unit": "ms/route" },
+    "K09_platform_p99_ms": { "value": 1.27, "unit": "ms" },
+    "K10_replay_root": { "value": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b" },
+    "K11_test_count_production": { "value": "218/218" },
+    "K12_test_count_demo": { "value": "37/37" },
+    "K13_bekenstein_fire_rate": { "value": 0.495, "note": "Sample size N not documented — flag M2-7 pending" },
+    "K14_receipt_build_p50_target_us": { "value": 5, "unit": "µs", "note": "Target post T3-Merkle-DAG at B=7" }
+  },
+  "doctrine_check": {
+    "script": "bash scripts/doctrine-check.sh",
+    "result": "PASS",
+    "verified_at": "2026-05-15T11:22:00-04:00",
+    "byline": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "forbidden_pattern_hits": 0
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "generated": "2026-05-15T16:45:00Z",
+  "author": "Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173",
+  "affiliation": "SZL Holdings",
+  "description": "Manifest of all szl-holdings repositories with commit SHAs and associated DOIs",
+  "repos": [
+    {
+      "repo": "szl-holdings/ouroboros",
+      "url": "https://github.com/szl-holdings/ouroboros",
+      "version": "v6.3.0",
+      "released": "2026-05-13",
+      "commit_sha": "6c5c28366 (production benchmark commit; exact SHA per gh api)",
+      "doi": "10.5281/zenodo.20119582",
+      "doi_url": "https://doi.org/10.5281/zenodo.20119582",
+      "tests": "218/218",
+      "license": "Apache-2.0",
+      "role": "Brain Stem \u2014 \u039b-gated receipt runtime"
+    },
+    {
+      "repo": "szl-holdings/a11oy",
+      "url": "https://github.com/szl-holdings/a11oy",
+      "version": "v1.0.0-alpha (v2.2.0 target with Math Pod V3)",
+      "commit_sha": "(latest main branch)",
+      "doi": "10.5281/zenodo.20119582",
+      "license": "Apache-2.0",
+      "role": "Heart \u2014 Covenant policy + agent approval queue"
+    },
+    {
+      "repo": "szl-holdings/sentra",
+      "url": "https://github.com/szl-holdings/sentra",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": "10.5281/zenodo.20119582",
+      "license": "Apache-2.0",
+      "role": "Wires \u2014 Attribution trail attr: E \u2192 A"
+    },
+    {
+      "repo": "szl-holdings/amaru",
+      "url": "https://github.com/szl-holdings/amaru",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": "10.5281/zenodo.20119582",
+      "license": "Apache-2.0",
+      "role": "Spine \u2014 Append-only coordination and protocol bridge"
+    },
+    {
+      "repo": "szl-holdings/lutar-lean",
+      "url": "https://github.com/szl-holdings/lutar-lean",
+      "version": "latest (PR #12 pending merge)",
+      "commit_sha": "(latest main branch)",
+      "doi": "10.5281/zenodo.20053148",
+      "doi_url": "https://doi.org/10.5281/zenodo.20053148",
+      "sorry_count": 0,
+      "license": "Apache-2.0",
+      "role": "Skeleton \u2014 Lean 4 axioms and formal proofs"
+    },
+    {
+      "repo": "szl-holdings/counsel",
+      "url": "https://github.com/szl-holdings/counsel",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Hands \u2014 Governance UI"
+    },
+    {
+      "repo": "szl-holdings/terra",
+      "url": "https://github.com/szl-holdings/terra",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Hands \u2014 Dashboards and visualization"
+    },
+    {
+      "repo": "szl-holdings/ouroboros-thesis",
+      "url": "https://github.com/szl-holdings/ouroboros-thesis",
+      "version": "latest",
+      "commit_sha": "(target of this arXiv submission PR)",
+      "doi": "10.5281/zenodo.20162352",
+      "doi_url": "https://doi.org/10.5281/zenodo.20162352",
+      "license": "CC-BY-4.0",
+      "role": "Full Body \u2014 Public-record thesis"
+    },
+    {
+      "repo": "szl-holdings/vessels",
+      "url": "https://github.com/szl-holdings/vessels",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Vessels \u2014 Identity anchoring"
+    },
+    {
+      "repo": "szl-holdings/szl-trust",
+      "url": "https://github.com/szl-holdings/szl-trust",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": "10.5281/zenodo.20119582",
+      "license": "Apache-2.0",
+      "role": "Vessels \u2014 doctrine.json + trust registry"
+    },
+    {
+      "repo": "szl-holdings/szl-cookbook",
+      "url": "https://github.com/szl-holdings/szl-cookbook",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Chakras \u2014 Reference implementations"
+    },
+    {
+      "repo": "szl-holdings/carlota-jo",
+      "url": "https://github.com/szl-holdings/carlota-jo",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Supporting repository"
+    },
+    {
+      "repo": "szl-holdings/.github",
+      "url": "https://github.com/szl-holdings/.github",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Org-level GitHub configuration"
+    },
+    {
+      "repo": "szl-holdings/szl-brand",
+      "url": "https://github.com/szl-holdings/szl-brand",
+      "version": "latest",
+      "commit_sha": "(latest main branch)",
+      "doi": null,
+      "license": "Apache-2.0",
+      "role": "Brand assets"
+    }
+  ],
+  "total_repos": 14,
+  "openssf_scorecard_avg": "6.83 (target: 8.0)",
+  "doctrine_sweep": "PASS (0 violations, 2026-05-15)",
+  "version": "v14 \u2014 Fly-High V6 upgrade",
+  "fly_high_v6": {
+    "generated": "2026-05-15T20:50:00Z",
+    "doctrine_sweep": "V6 PASS (0 real violations, 36 legit citations)",
+    "gap_fill": "10 P0 fixes applied, 8 new 2025-2026 citations added",
+    "beautify": "YAML frontmatter, H1->H2 hierarchy, 10 figure callouts",
+    "lean_th8_skeleton": "4 Lean files, 35 theorem signatures, 8 sorries, READY",
+    "citations": "99/117 OK, 2 mandatory fixes applied (Wadler DOI, Epoch CSV)"
+  }
+}

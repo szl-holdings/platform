@@ -1,0 +1,79 @@
+{
+  "source": "/home/user/workspace/evolution_pod/math_pod_v3/integration_evidence.txt",
+  "generated_by": "PM-Math · 2026-05-15",
+  "author": "Lutar, Stephen P. | ORCID: 0009-0001-0110-4173 | SZL Holdings",
+  "demo_payload_test_run": {
+    "command": "cd /home/user/workspace/replit_payload_build/code && pnpm test",
+    "timestamp": "2026-05-15T16:41:44Z",
+    "result": "37/37 PASS",
+    "breakdown": {
+      "ouroboros_tests": 33,
+      "a11oy_tests": 4,
+      "total": 37
+    },
+    "test_files": [
+      {"file": "test/lambda-gate.test.ts", "tests": 12, "duration_ms": 13},
+      {"file": "test/receipt-chain.test.ts", "tests": 8, "duration_ms": 7},
+      {"file": "test/bench.test.ts", "tests": 4, "duration_ms": 4},
+      {"file": "test/dual-witness.test.ts", "tests": 9, "duration_ms": 4},
+      {"file": "test/covenant-policy.test.ts", "tests": 4, "duration_ms": 4}
+    ]
+  },
+  "doctrine_check": {
+    "result": "PASS",
+    "byline": "Lutar, Stephen P. \u2713",
+    "orcid": "0009-0001-0110-4173 \u2713",
+    "forbidden_patterns": 0
+  },
+  "a11oy_knowledge_v040": {
+    "previous_version": "0.3.0",
+    "new_version": "0.4.0",
+    "files_modified": [
+      "src/derivations.ts",
+      "src/proposed_axioms.ts",
+      "src/theorems.ts",
+      "src/unified_extension.ts",
+      "package.json",
+      "README.md"
+    ],
+    "new_axioms": ["A10 temporalConsistency", "A11 causalSeparability", "A12 constructiveTransparency", "A13 adversarialRobustness", "A14 economicGrounding"],
+    "new_theorems": ["TH4 \u039b-Category", "TH6 Bekenstein DPI", "TH7 Curry-Howard"],
+    "total_axioms": 14
+  },
+  "vitest_assertions": [
+    "a11oy-knowledge v0.4.0 exports 14 axioms (A1-A14)",
+    "A1 has isDerived=true (U8 resolution)",
+    "A13 has maturity=proven (corollary by U10)",
+    "TH4, TH6, TH7 are present in theorems export",
+    "unified_extension.ts exports moonshot_claim string",
+    "composeReceipts (T1) with disjoint witnesses \u2192 rhoClosed=true",
+    "composeReceipts with overlapping witnesses \u2192 throws under require_third",
+    "temporalConsistency(gap=0ms) = 1.0",
+    "economicGrounding(cost=50, budget=100) = {pass: true, remaining: 50}",
+    "economicGrounding(cost=101, budget=100) = {pass: false}"
+  ],
+  "regression_status": {
+    "all_tests_pass": true,
+    "breaking_changes": false,
+    "perf_budget_preserved": true
+  },
+  "known_limitations": [
+    "Rust pool.rs and merkle.rs from Dev-1 are workspace drafts (not compiled against production ouroboros Rust codebase)",
+    "xoshiro256** PRNG migration (N4) requires fixture update to canonical-chain.seed.json",
+    "A15 (Persistent Homology Integrity) deferred to v0.5.0"
+  ],
+  "ouroboros_benchmarks_from_release": {
+    "tests": "218/218 PASS",
+    "receipt_build_p50_us": 11.5,
+    "receipt_build_p99_us": 50.7,
+    "receipt_build_ops_per_sec": 62764,
+    "receipt_verify_p50_us": 10.4,
+    "receipt_verify_ops_per_sec": 74149,
+    "lambda9_base_p50_us": 3.12,
+    "lambda9_composed_p50_us": 3.29,
+    "rho_closure": "8000/8000",
+    "platform_v11_http_calls": 24800,
+    "lambda10_overhead_median_ms_range": "0.49-0.59",
+    "lambda10_overhead_p99_ms_max": 1.27
+  }
+}

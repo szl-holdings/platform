@@ -1,0 +1,28 @@
+{
+  "repo": "szl-holdings/vessels",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "vessels",
+    "full_name": "szl-holdings/vessels",
+    "description": "Maritime fleet intelligence. Sanctions screening, dark-vessel detection, ownership graph analysis, and voyage analytics.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/vessels.git",
+    "pushed_at": "2026-05-15T03:48:32Z"
+  },
+  "latest_release": null,
+  "latest_tag": {
+    "name": "v1.0.0-alpha",
+    "sha": "64e0bd024a642f8cca51c4efe14cb60de3e1d70f"
+  },
+  "latest_commit_sha": "11e51f628353b0c8b6bb5b1e0b51236662452f76",
+  "package_json": null,
+  "root_files": [
+    ".github", "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "social-preview.svg"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# Vessels\n\n> Maritime fleet intelligence.\n\n[![CI](https://github.com/szl-holdings/vessels/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/vessels/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/vessels/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/vessels/actions/workflows/codeql.yml)"
+}

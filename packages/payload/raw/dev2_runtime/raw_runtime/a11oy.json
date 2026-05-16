@@ -1,0 +1,45 @@
+{
+  "repo": "szl-holdings/a11oy",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "a11oy",
+    "full_name": "szl-holdings/a11oy",
+    "description": "Governed agentic execution fabric. Policy gates, signal mesh, proof ledger, and \u039b invariant runtime.",
+    "language": "TypeScript",
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/a11oy.git",
+    "pushed_at": "2026-05-15T20:48:09Z"
+  },
+  "latest_release": null,
+  "latest_tag": {
+    "name": "v1.0.0-alpha",
+    "sha": "284ab434eb52424b83499567f8cb8e0d780864d3"
+  },
+  "latest_commit_sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5",
+  "package_json": {
+    "name": "@szl-holdings/a11oy-knowledge",
+    "version": "0.3.0",
+    "description": "Canonical knowledge graph for the a11oy covenant kernel: axioms A1-A14, theorems TH1-TH3, derivations T1-T10, constants K01-K13, DOI ledger, doctrine clauses, vertical routing.",
+    "scripts": ["build", "test", "typecheck"],
+    "dependencies": []
+  },
+  "packages": ["a11oy-knowledge"],
+  "src_files": [
+    "derivations.ts",
+    "index.ts",
+    "knowledge.json",
+    "proposed_axioms.ts",
+    "schema.ts",
+    "theorems.ts",
+    "vertical-router.ts"
+  ],
+  "test_files": ["knowledge.test.ts"],
+  "root_files": [
+    ".github", "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "packages", "social-preview.svg"
+  ],
+  "cargo_toml": null,
+  "readme_excerpt": "# A11oy\n\n> Governed agentic execution fabric.\n\n[![CI](https://github.com/szl-holdings/a11oy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/a11oy/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/a11oy/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/a11oy/actions/workflows/codeql.yml)",
+  "v040_build_note": "v0.4.0 workspace draft adds A10-A14 axioms, T1-T10 derivations, TH4/TH6/TH7 theorems, unified_extension.ts"
+}

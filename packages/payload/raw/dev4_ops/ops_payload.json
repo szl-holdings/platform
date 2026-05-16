@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-05-15T21:15:00Z",
+  "owner": "Dev-4 · Lutar, Stephen P.",
+  "identity": {
+    "name": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "affiliation": "SZL Holdings",
+    "email_primary": "stephen@szlholdings.com",
+    "email_secondary": "rosalutar@gmail.com",
+    "github_username": "stephenlutar2-hash",
+    "github_email_public": "stephenlutar2@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/stephen-l-279315240/",
+    "location": "NYC Metro, US citizen"
+  },
+  "doctrine": {
+    "version": "V6",
+    "forbidden_patterns": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "mythos_exception": "Only allowed when citing Anthropic Claude Mythos Preview as third-party model name",
+    "byline_canonical": "Lutar, Stephen P.",
+    "license_text": "CC-BY-4.0",
+    "license_code": "Apache-2.0",
+    "license_allowlist": ["Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY-4.0"],
+    "ingestion_policy": "PUBLIC_ONLY",
+    "byte_identical_replays_required": 5,
+    "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "lambda_axes_count": 9,
+    "lambda_conjunctive_floor": 0.90,
+    "moralGrounding_floor": 0.95,
+    "measurabilityHonesty_floor": 0.95
+  },
+  "active_crons": [
+    {
+      "id": "488505a8",
+      "schedule": "0 11 * * *",
+      "tz": "UTC",
+      "name": "daily_health_pulse",
+      "description": "Daily health pulse check at 11:00 UTC every day"
+    },
+    {
+      "id": "6a09e1d2",
+      "schedule": "0 13 * * 1,4",
+      "tz": "UTC",
+      "name": "scorecard_remediate",
+      "description": "Mon/Thu scorecard remediation at 13:00 UTC"
+    },
+    {
+      "id": "ab29919e",
+      "schedule": "0 13 1 * *",
+      "tz": "UTC",
+      "name": "series_a_deep_audit",
+      "description": "Monthly Series A deep audit on the 1st at 13:00 UTC"
+    },
+    {
+      "id": "cd08b398",
+      "schedule": "0 13 * * 2,5",
+      "tz": "UTC",
+      "name": "scorecard_verify",
+      "description": "Tue/Fri scorecard verification at 13:00 UTC"
+    },
+    {
+      "id": "fff8f098",
+      "schedule": "0 12 * * 1",
+      "tz": "UTC",
+      "name": "series_a_hygiene",
+      "description": "Weekly Series A hygiene check every Monday at 12:00 UTC"
+    }
+  ],
+  "connectors": [
+    {
+      "name": "github_mcp_direct",
+      "status": "DO_NOT_USE_USE_GH_CLI_INSTEAD"
+    },
+    {
+      "name": "google_drive",
+      "status": "active"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "github",
+      "type": "api_credentials",
+      "user": "stephenlutar2-hash",
+      "scopes": ["codespace", "gist", "notifications", "project", "read:org", "repo", "user", "workflow"],
+      "missing": ["admin:org"]
+    },
+    {
+      "id": "pplx-sdk",
+      "type": "api_credentials",
+      "purpose": "web search"
+    },
+    {
+      "id": "custom-cred:zenodo.org",
+      "type": "custom-credential",
+      "permissions": "READ_ONLY"
+    }
+  ],
+  "anthropic_applications": {
+    "regular_role": {
+      "file": "_files/ops/anthropic/anthropic_application_answers.md",
+      "status": "READY_TO_SUBMIT",
+      "word_counts": {
+        "why_anthropic": 326,
+        "cover_note": 185
+      },
+      "doctrine_clean": true,
+      "google_drive_link": "https://drive.google.com/file/d/1RPWFcDoMt0_AKuA3SrBMr73Zy1UD3Jit/view"
+    },
+    "fellows": {
+      "file": "_files/ops/anthropic/anthropic_fellows_application_answers.md",
+      "status": "97_PERCENT_READY",
+      "blocker": "3 references needed for Q7-Q9",
+      "cohort": "September 2026 Berkeley",
+      "team_selections": {
+        "primary": "AI Safety & Alignment",
+        "secondary": "Mech Interp & Model Internals",
+        "tertiary": "ML Systems & Performance"
+      },
+      "google_drive_link": "https://drive.google.com/file/d/16d6-sxkoj58dTXrhRPFToeekYGD0LIC4/view"
+    }
+  },
+  "github_merge_history": {
+    "files": [
+      "_files/ops/merge_logs/github_expert_diagnostic.md",
+      "_files/ops/merge_logs/github_expert_merge_log.md"
+    ],
+    "recent_merges": [
+      {
+        "repo": "szl-holdings/lutar-lean",
+        "pr": 12,
+        "sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09",
+        "sha_short": "fcae1aed",
+        "title": "feat(doctrine-v3): MoralGrounding + MeasurabilityHonesty theorems (zero sorry)",
+        "merged_at": "2026-05-15T19:04:05Z",
+        "method": "squash"
+      },
+      {
+        "repo": "szl-holdings/a11oy",
+        "pr": 20,
+        "sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5",
+        "sha_short": "3d0f9841",
+        "title": "feat(knowledge): Math Pod V3 — a11oy-knowledge v0.4.0 (TH4-TH7 + A10/A11/A14 + unified extension)",
+        "merged_at": "2026-05-15T19:06:01Z",
+        "method": "squash"
+      },
+      {
+        "repo": "szl-holdings/ouroboros-thesis",
+        "pr": 40,
+        "sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c",
+        "sha_short": "060eb8c8",
+        "title": "feat(thesis): Math Pod V3 + arXiv-ready main.tex.md + Unified Extension v0.4.0",
+        "merged_at": "2026-05-15T19:08:23Z",
+        "method": "squash"
+      }
+    ],
+    "structural_finding": "Self-only CODEOWNERS + platform self-approve ban requires either temporary BP relaxation OR second collaborator",
+    "recommendation": "Add second org collaborator with code-owner standing",
+    "pre_existing_doctrine_violations": {
+      "repo": "szl-holdings/ouroboros-thesis",
+      "scope": "historical paper versions v2-v12 only — PR #40 changed files are CLEAN",
+      "patterns_found": ["Jr.", "Stephen Paul", "AlloyScape", "Perplexity Computer"],
+      "action_required": "Separate remediation PR to correct historical files"
+    }
+  },
+  "standing_authorizations": {
+    "pm_overwatch": "CAN autonomously execute recoverable pushes if CI-green + doctrine-pass",
+    "one_way_doors_requiring_confirm": [
+      "Zenodo DOI mint",
+      "arXiv submission",
+      "npm publish if version exists",
+      "Branch protection edits",
+      "New schedule_cron",
+      "Force push to default branch"
+    ]
+  },
+  "push_queue": {
+    "ready": [
+      {
+        "id": "PUSH_2",
+        "name": "Zenodo v14 mint",
+        "blocker": "confirm_action"
+      },
+      {
+        "id": "PUSH_1",
+        "name": "arXiv submission",
+        "blocker": "confirm_action"
+      }
+    ],
+    "blocked": [
+      {
+        "id": "PUSH_4",
+        "name": "ouroboros v6.4.0-rc PR",
+        "blocker": "TS runtime code not implemented"
+      },
+      {
+        "id": "PUSH_6",
+        "name": "npm publish a11oy-knowledge v0.4.0",
+        "blocker": "npm token not in env"
+      }
+    ]
+  }
+}

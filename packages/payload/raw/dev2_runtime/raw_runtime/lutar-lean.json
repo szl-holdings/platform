@@ -1,0 +1,32 @@
+{
+  "repo": "szl-holdings/lutar-lean",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "lutar-lean",
+    "full_name": "szl-holdings/lutar-lean",
+    "description": "Machine-checked Lean 4 proofs of the Lutar Invariant (\u039b_k) \u2014 uniqueness theorem and Egyptian-exact weights. Companion to Paper v12.",
+    "language": "Lean",
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/lutar-lean.git",
+    "pushed_at": "2026-05-15T19:04:05Z"
+  },
+  "latest_release": null,
+  "latest_tag": null,
+  "latest_commit_sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09",
+  "lakefile_lean": {
+    "package": "lutar",
+    "mathlib_dep": "v4.13.0",
+    "mathlib_source": "https://github.com/leanprover-community/mathlib4.git",
+    "lean_lib": ["Lutar", "RefVectors"],
+    "lean_exe": ["check", "ref_vectors"]
+  },
+  "lean_toolchain": "leanprover/lean4:v4.13.0",
+  "root_files": [
+    ".github", ".gitignore", ".zenodo.json", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "Lutar.lean", "Lutar", "Main.lean",
+    "MainRef.lean", "README.md", "RefVectors.lean", "SECURITY.md",
+    "lakefile.lean", "lean-toolchain", "reference-vectors.json"
+  ],
+  "cargo_toml": null,
+  "readme_excerpt": "# lutar-lean\n\n**Machine-checked Lean 4 proofs of the Lutar Invariant.**\n\nThis repository is the formal companion to *\"The \u039b-Ouroboros Substrate: Four Machine-Verified Mechanisms for Governed AI Runtimes\"* (SZL Holdings, Paper v12). It contains the Lean 4 + Mathlib formalisation of:\n\n1. **Axioms A1\u2013A4** \u2014 the four properties any Lutar-style invariant must satisfy.\n2. **Theorem 1 (Uniqueness)** \u2014 under A1\u2013A4, the invariant \u039b_k is unique."
+}

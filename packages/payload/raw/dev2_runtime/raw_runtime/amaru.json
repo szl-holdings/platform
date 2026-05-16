@@ -1,0 +1,28 @@
+{
+  "repo": "szl-holdings/amaru",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "amaru",
+    "full_name": "szl-holdings/amaru",
+    "description": "Convergent multi-source data sync. Append-only delta logs, hash-verified ingest, and bounded loops with measurable convergence.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/amaru.git",
+    "pushed_at": "2026-05-15T12:58:31Z"
+  },
+  "latest_release": null,
+  "latest_tag": {
+    "name": "v1.0.0-alpha",
+    "sha": "716fd4c22b97fdda0826e92fb5a0d5ffba4400f0"
+  },
+  "latest_commit_sha": "6e1614d541d66fb95557a57d05dfe3c788e34c46",
+  "package_json": null,
+  "root_files": [
+    ".github", "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "social-preview.svg"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# Amaru\n\n> Convergent multi-source data sync.\n\n[![CI](https://github.com/szl-holdings/amaru/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/amaru/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/amaru/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/amaru/actions/workflows/codeql.yml)"
+}

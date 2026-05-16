@@ -1,0 +1,23 @@
+{
+  "repo": "szl-holdings/szl-trust",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "szl-trust",
+    "full_name": "szl-holdings/szl-trust",
+    "description": "SZL Holdings Public Trust Portal \u2014 Covenant Proof Standard (CPS) run artifacts. E4 Codex Kernel reference run with 12 receipts (mocked:false), Dresden Codex + IAU citations, deterministic replay.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/szl-trust.git",
+    "pushed_at": "2026-05-15T03:50:33Z"
+  },
+  "latest_release": null,
+  "latest_tag": null,
+  "latest_commit_sha": "24fd1238d5c06bf249625c60517c008eb9a2f253",
+  "package_json": null,
+  "root_files": [
+    ".github", "README.md"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# szl-trust\n\n**SZL Holdings Public Trust Portal.** Publishes verifiable run artifacts from the Covenant Proof Standard (CPS) \u2014 the proof-chain emitted by every governed execution across the SZL Holdings platform.\n\n[![Thesis](https://img.shields.io/badge/thesis-v11%20published%20%C2%B7%20v12%20in%20review-805AD5?style=flat-square)](https://github.com/szl-holdings/ouroboros-thesis)"
+}

@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-05-15T21:19:10.285007+00:00",
+  "generated_by": "GitHub Pro \u00b7 Lutar, Stephen P.",
+  "org": "szl-holdings",
+  "repo_count": 16,
+  "description": "Clone manifest for Replit materialization of all szl-holdings repositories",
+  "repos": {
+    "amaru": {
+      "full_name": "szl-holdings/amaru",
+      "clone_url_https": "https://github.com/szl-holdings/amaru.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/amaru.git",
+      "default_branch": "main",
+      "latest_commit_sha": "6e1614d541d66fb95557a57d05dfe3c788e34c46",
+      "latest_commit_sha_short": "6e1614d541d6",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/amaru.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/amaru.git",
+      "replit_config": {
+        "repo": "szl-holdings/amaru",
+        "branch": "main",
+        "sha": "6e1614d541d66fb95557a57d05dfe3c788e34c46"
+      }
+    },
+    "a11oy": {
+      "full_name": "szl-holdings/a11oy",
+      "clone_url_https": "https://github.com/szl-holdings/a11oy.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/a11oy.git",
+      "default_branch": "main",
+      "latest_commit_sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5",
+      "latest_commit_sha_short": "3d0f98412ee6",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/a11oy.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/a11oy.git",
+      "replit_config": {
+        "repo": "szl-holdings/a11oy",
+        "branch": "main",
+        "sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5"
+      }
+    },
+    "sentra": {
+      "full_name": "szl-holdings/sentra",
+      "clone_url_https": "https://github.com/szl-holdings/sentra.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/sentra.git",
+      "default_branch": "main",
+      "latest_commit_sha": "2ac304a9511ccbcf20414cdfcc164f9aed5b5092",
+      "latest_commit_sha_short": "2ac304a9511c",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/sentra.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/sentra.git",
+      "replit_config": {
+        "repo": "szl-holdings/sentra",
+        "branch": "main",
+        "sha": "2ac304a9511ccbcf20414cdfcc164f9aed5b5092"
+      }
+    },
+    "terra": {
+      "full_name": "szl-holdings/terra",
+      "clone_url_https": "https://github.com/szl-holdings/terra.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/terra.git",
+      "default_branch": "main",
+      "latest_commit_sha": "2ffac59c45550220772602f974fc95293a6754a2",
+      "latest_commit_sha_short": "2ffac59c4555",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/terra.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/terra.git",
+      "replit_config": {
+        "repo": "szl-holdings/terra",
+        "branch": "main",
+        "sha": "2ffac59c45550220772602f974fc95293a6754a2"
+      }
+    },
+    "vessels": {
+      "full_name": "szl-holdings/vessels",
+      "clone_url_https": "https://github.com/szl-holdings/vessels.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/vessels.git",
+      "default_branch": "main",
+      "latest_commit_sha": "11e51f628353b0c8b6bb5b1e0b51236662452f76",
+      "latest_commit_sha_short": "11e51f628353",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/vessels.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/vessels.git",
+      "replit_config": {
+        "repo": "szl-holdings/vessels",
+        "branch": "main",
+        "sha": "11e51f628353b0c8b6bb5b1e0b51236662452f76"
+      }
+    },
+    "counsel": {
+      "full_name": "szl-holdings/counsel",
+      "clone_url_https": "https://github.com/szl-holdings/counsel.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/counsel.git",
+      "default_branch": "main",
+      "latest_commit_sha": "4decc1c773c06a877bfe6684ea23665e3775943a",
+      "latest_commit_sha_short": "4decc1c773c0",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/counsel.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/counsel.git",
+      "replit_config": {
+        "repo": "szl-holdings/counsel",
+        "branch": "main",
+        "sha": "4decc1c773c06a877bfe6684ea23665e3775943a"
+      }
+    },
+    "carlota-jo": {
+      "full_name": "szl-holdings/carlota-jo",
+      "clone_url_https": "https://github.com/szl-holdings/carlota-jo.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/carlota-jo.git",
+      "default_branch": "main",
+      "latest_commit_sha": "d1a4ce0beccfffb19e6936a729c9831bfa9b4261",
+      "latest_commit_sha_short": "d1a4ce0beccf",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/carlota-jo.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/carlota-jo.git",
+      "replit_config": {
+        "repo": "szl-holdings/carlota-jo",
+        "branch": "main",
+        "sha": "d1a4ce0beccfffb19e6936a729c9831bfa9b4261"
+      }
+    },
+    "ouroboros": {
+      "full_name": "szl-holdings/ouroboros",
+      "clone_url_https": "https://github.com/szl-holdings/ouroboros.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/ouroboros.git",
+      "default_branch": "main",
+      "latest_commit_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+      "latest_commit_sha_short": "d64748cc9ad6",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/ouroboros.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/ouroboros.git",
+      "replit_config": {
+        "repo": "szl-holdings/ouroboros",
+        "branch": "main",
+        "sha": "d64748cc9ad67296be296c1ef6752ae181413fd7"
+      }
+    },
+    "ouroboros-thesis": {
+      "full_name": "szl-holdings/ouroboros-thesis",
+      "clone_url_https": "https://github.com/szl-holdings/ouroboros-thesis.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/ouroboros-thesis.git",
+      "default_branch": "main",
+      "latest_commit_sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c",
+      "latest_commit_sha_short": "060eb8c8c8a1",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/ouroboros-thesis.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/ouroboros-thesis.git",
+      "replit_config": {
+        "repo": "szl-holdings/ouroboros-thesis",
+        "branch": "main",
+        "sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c"
+      }
+    },
+    "lutar-lean": {
+      "full_name": "szl-holdings/lutar-lean",
+      "clone_url_https": "https://github.com/szl-holdings/lutar-lean.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/lutar-lean.git",
+      "default_branch": "main",
+      "latest_commit_sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09",
+      "latest_commit_sha_short": "fcae1aed26a3",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/lutar-lean.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/lutar-lean.git",
+      "replit_config": {
+        "repo": "szl-holdings/lutar-lean",
+        "branch": "main",
+        "sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09"
+      }
+    },
+    "szl-trust": {
+      "full_name": "szl-holdings/szl-trust",
+      "clone_url_https": "https://github.com/szl-holdings/szl-trust.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/szl-trust.git",
+      "default_branch": "main",
+      "latest_commit_sha": "24fd1238d5c06bf249625c60517c008eb9a2f253",
+      "latest_commit_sha_short": "24fd1238d5c0",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/szl-trust.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/szl-trust.git",
+      "replit_config": {
+        "repo": "szl-holdings/szl-trust",
+        "branch": "main",
+        "sha": "24fd1238d5c06bf249625c60517c008eb9a2f253"
+      }
+    },
+    "szl-cookbook": {
+      "full_name": "szl-holdings/szl-cookbook",
+      "clone_url_https": "https://github.com/szl-holdings/szl-cookbook.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/szl-cookbook.git",
+      "default_branch": "main",
+      "latest_commit_sha": "0593de09406cd524be701ab4d8719f99aeba8f4f",
+      "latest_commit_sha_short": "0593de09406c",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/szl-cookbook.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/szl-cookbook.git",
+      "replit_config": {
+        "repo": "szl-holdings/szl-cookbook",
+        "branch": "main",
+        "sha": "0593de09406cd524be701ab4d8719f99aeba8f4f"
+      }
+    },
+    "szl-brand": {
+      "full_name": "szl-holdings/szl-brand",
+      "clone_url_https": "https://github.com/szl-holdings/szl-brand.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/szl-brand.git",
+      "default_branch": "main",
+      "latest_commit_sha": "d86a37d5305a30886f7884cc4114cda48a8a3402",
+      "latest_commit_sha_short": "d86a37d5305a",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/szl-brand.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/szl-brand.git",
+      "replit_config": {
+        "repo": "szl-holdings/szl-brand",
+        "branch": "main",
+        "sha": "d86a37d5305a30886f7884cc4114cda48a8a3402"
+      }
+    },
+    ".github": {
+      "full_name": "szl-holdings/.github",
+      "clone_url_https": "https://github.com/szl-holdings/.github.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/.github.git",
+      "default_branch": "main",
+      "latest_commit_sha": "ae4e7ad21edac4451688e043727790da36f6c4b2",
+      "latest_commit_sha_short": "ae4e7ad21eda",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/.github.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/.github.git",
+      "replit_config": {
+        "repo": "szl-holdings/.github",
+        "branch": "main",
+        "sha": "ae4e7ad21edac4451688e043727790da36f6c4b2"
+      }
+    },
+    "vsp-otel": {
+      "full_name": "szl-holdings/vsp-otel",
+      "clone_url_https": "https://github.com/szl-holdings/vsp-otel.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/vsp-otel.git",
+      "default_branch": "main",
+      "latest_commit_sha": "7aca58d2d7ceecbd2ab7f576b63b320f94cacda1",
+      "latest_commit_sha_short": "7aca58d2d7ce",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/vsp-otel.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/vsp-otel.git",
+      "replit_config": {
+        "repo": "szl-holdings/vsp-otel",
+        "branch": "main",
+        "sha": "7aca58d2d7ceecbd2ab7f576b63b320f94cacda1"
+      }
+    },
+    "agi-forecast": {
+      "full_name": "szl-holdings/agi-forecast",
+      "clone_url_https": "https://github.com/szl-holdings/agi-forecast.git",
+      "clone_url_ssh": "git@github.com:szl-holdings/agi-forecast.git",
+      "default_branch": "main",
+      "latest_commit_sha": "2c729680a2d9f1ef3918baeab9d84d6201605330",
+      "latest_commit_sha_short": "2c729680a2d9",
+      "recommended_clone_command": "git clone --branch main --depth 1 https://github.com/szl-holdings/agi-forecast.git",
+      "full_clone_command": "git clone https://github.com/szl-holdings/agi-forecast.git",
+      "replit_config": {
+        "repo": "szl-holdings/agi-forecast",
+        "branch": "main",
+        "sha": "2c729680a2d9f1ef3918baeab9d84d6201605330"
+      }
+    }
+  }
+}

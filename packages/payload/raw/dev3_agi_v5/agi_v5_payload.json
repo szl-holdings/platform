@@ -1,0 +1,656 @@
+{
+  "generated_at": "2026-05-16T12:00:00Z",
+  "owner": "Dev-3 · Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173",
+  "affiliation": "SZL Holdings",
+  "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+  "doctrine_pass": true,
+  "forbidden_pattern_sweep": {
+    "patterns_checked": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "violations": 0,
+    "note_on_mythos": "String 'Mythos' appears only as a third-party citation ('Claude Mythos Preview' from Anthropic/METR) — not as an SZL artifact name. Permitted as factual external citation."
+  },
+
+  "v5_proposal": {
+    "title": "Evolution V5 Proposal — One-of-One Vectors",
+    "file": "_files/agi_v5/synthesis/EVOLUTION_V5_PROPOSAL.md",
+    "sha256": "0db56780652ba59d91304daa2bf2ee35cd444276695e9b8148414701cba4c750",
+    "lines": 664,
+    "author": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "date": "2026-05-16",
+    "license_text": "CC-BY-4.0",
+    "license_code": "Apache-2.0",
+    "one_of_one_vectors": [
+      {
+        "id": "TH8-GLR",
+        "name": "TH8 Graded Lambda-Receipt Calculus (GLR)",
+        "venue": "POPL 2027 / CAV 2027",
+        "ship": "3-9 months",
+        "status": "lean_skeleton_ready",
+        "description": "Graded typed lambda-calculus where every term carries a grade from the 9-dimensional Lambda-vector lattice V=[0,1]^9. TH8a: capability revocation by construction. TH8b: deterministic replay as grade identity. TH8c: gate-passability as linear-logic provability.",
+        "sorry_count_target": 0,
+        "popl_deadline": "2026-08"
+      },
+      {
+        "id": "VSP",
+        "name": "Verifiable Span Protocol",
+        "venue": "USENIX ATC / NSDI",
+        "ship": "4 weeks",
+        "status": "spec_complete_repo_scaffolded",
+        "repo": "szl-holdings/vsp-otel",
+        "scaffold_commit": "7aca58d",
+        "description": "First cryptographically-verifiable OpenTelemetry GenAI implementation. OTel trace_id = first 16 bytes of receipt hash. 9-axis Lambda-vector as span attributes.",
+        "key_claim": "First cryptographically-verifiable OpenTelemetry GenAI implementation"
+      },
+      {
+        "id": "FORECAST_GAUGE",
+        "name": "Lutar-Forecast Gauge",
+        "venue": "operational",
+        "ship": "14 days",
+        "status": "spec_complete_repo_scaffolded",
+        "repo": "szl-holdings/agi-forecast",
+        "scaffold_commit": "2c72968",
+        "description": "12 typed AGI-progress gauge variables with receipt-attested provenance, 3 derived metrics, 4 a11oy safety gates, daily forecast.summary receipts, public dashboard."
+      }
+    ],
+    "leader_gap_matrix": [
+      {
+        "competitor": "LangGraph",
+        "url": "https://github.com/langchain-ai/langgraph",
+        "stars": 32123,
+        "license": "MIT",
+        "what_they_have": "Stateful graph runtime, delta-channel checkpoints, LangSmith OTel tracing, largest practitioner ecosystem",
+        "what_we_have": "Cryptographic receipt chain, Lean-proven Lambda-gate, 5x byte-identical replay, DOI-versioned releases",
+        "verdict": "BEHIND on ecosystem adoption; AHEAD on auditability and formal correctness"
+      },
+      {
+        "competitor": "Mastra",
+        "url": "https://github.com/mastra-ai/mastra",
+        "stars": 24000,
+        "license": "Apache-2.0",
+        "what_they_have": "TypeScript-first platform, memory/evals/RAG/workflows, OpenLLMetry OTel",
+        "what_we_have": "Formal gate semantics, DOI-anchored versioning, governance-as-build-gate",
+        "verdict": "BEHIND on ergonomics and adoption; AHEAD on formal invariant and DOI lineage"
+      },
+      {
+        "competitor": "AutoGen / Magentic-One",
+        "url": "https://github.com/microsoft/autogen",
+        "stars": 58060,
+        "license": "CC-BY-4.0",
+        "what_they_have": "Multi-agent orchestration, GroupChat/GraphFlow, GAIA/WebArena benchmark results, Bedrock/Anthropic thinking",
+        "what_we_have": "Receipt-typed provenance, Lean proofs, conjunctive 9-axis gate, sub-millisecond receipt build",
+        "verdict": "BEHIND on deployment reach and benchmark coverage; AHEAD on auditability"
+      },
+      {
+        "competitor": "Claude Code",
+        "url": "https://github.com/anthropics/claude-code",
+        "stars": 124000,
+        "license": "Proprietary",
+        "what_they_have": "Most-starred agent repo, full codebase understanding, git/terminal workflows",
+        "what_we_have": "Apache-2.0 open composition, byte-identical replay root, Lean-proven gate",
+        "verdict": "BEHIND on mindshare; AHEAD on openness and formal verification"
+      },
+      {
+        "competitor": "OpenHands",
+        "url": "https://github.com/OpenHands/OpenHands",
+        "stars": 74000,
+        "license": "MIT",
+        "what_they_have": "Comprehensive dev-agent capabilities, OpenHands Cloud, web browsing, code execution",
+        "what_we_have": "Governance-as-runtime-invariant, DOI versioning, receipt-typed ops",
+        "verdict": "BEHIND on feature breadth; AHEAD on formal governance model"
+      },
+      {
+        "competitor": "Google A2A",
+        "url": "https://github.com/a2aproject/A2A",
+        "stars": 24000,
+        "license": "Apache-2.0",
+        "what_they_have": "Open inter-agent protocol standard, 50+ enterprise partners, JSON-RPC 2.0",
+        "what_we_have": "9-axis typed capability interface, receipt-based capability revocation (TH8a)",
+        "verdict": "BEHIND on protocol adoption; AHEAD on semantic richness of trust model"
+      },
+      {
+        "competitor": "AlphaProof / DeepMind",
+        "url": "https://www.nature.com/articles/s41586-025-09833-y",
+        "stars": null,
+        "license": "closed-source",
+        "what_they_have": "IMO silver-medal RL-over-Lean proofs, closed-source, massive compute",
+        "what_we_have": "Human-authored Lean proofs of agent-runtime invariants; GLR (agent runtime properties)",
+        "verdict": "BEHIND on automation scale; AHEAD on domain (runtime semantics vs. competition math)"
+      },
+      {
+        "competitor": "E2B",
+        "url": "https://github.com/e2b-dev/e2b",
+        "stars": 12000,
+        "license": "Apache-2.0",
+        "what_they_have": "Hardened cloud sandbox execution, used by smolagents/OpenHands",
+        "what_we_have": "Theorem-constrained bounded-loop runtime (Lambda_9), formal termination guarantees",
+        "verdict": "BEHIND on sandboxed code-execution infrastructure; ORTHOGONAL (different layer)"
+      },
+      {
+        "competitor": "METR",
+        "url": "https://metr.org/time-horizons/",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "50%-task-completion time horizon metric, 7/4-month doubling trend, HCAST benchmark",
+        "what_we_have": "Receipt-attested Forecast Gauge ingesting METR data; GLR type-level capability pre-certification",
+        "verdict": "BEHIND on empirical measurement infrastructure; AHEAD on formal pre-certification"
+      },
+      {
+        "competitor": "Anthropic",
+        "url": "https://www.anthropic.com/responsible-scaling-policy",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "RSP v3.0 ASL framework, Claude series, RLHF/constitutional AI",
+        "what_we_have": "Formal Lean proof of gate invariants; open Apache-2.0 composable runtime",
+        "verdict": "BEHIND on model capability and resources; AHEAD on formal proof and open architecture"
+      },
+      {
+        "competitor": "OpenAI",
+        "url": "https://openai.com/index/updating-our-preparedness-framework/",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "Preparedness Framework v2, GPT-5 series, OpenAI Agents SDK",
+        "what_we_have": "Receipt chain with deterministic replay; doctrine sweep as first-class build gate",
+        "verdict": "BEHIND on capability and scale; AHEAD on supply-chain auditability"
+      },
+      {
+        "competitor": "DeepMind FSF",
+        "url": "https://deepmind.google/blog/strengthening-our-frontier-safety-framework/",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "CCL/TCL framework, Autonomy-L1 reached, 6x compute evaluation cadence",
+        "what_we_have": "Lambda-gate covering all FSF CCL-relevant axes; receipt-attested deployment logging (FSF D2-equivalent)",
+        "verdict": "BEHIND on resource scale; ORTHOGONAL on approach (external policy vs. runtime invariant)"
+      },
+      {
+        "competitor": "MLCommons AILuminate",
+        "url": "https://mlcommons.org/ailuminate/",
+        "stars": null,
+        "license": "Apache-2.0",
+        "what_they_have": "12 hazard categories, 24K+ prompts, 109 models benchmarked, v2 April 2026",
+        "what_we_have": "Formal conjunctive 9-axis gate; no AILuminate submission yet",
+        "verdict": "BEHIND on external benchmark credibility; PARITY on safety intent"
+      },
+      {
+        "competitor": "Apollo Research",
+        "url": "https://www.apolloresearch.ai/science/frontier-models-are-capable-of-incontext-scheming/",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "Empirical scheming evals, monoTonic scheming-vs-capability trend finding",
+        "what_we_have": "moralGrounding axis (>=0.95 floor) directly maps to Apollo's no-nudge scheming rate; Forecast Gauge tracks Apollo-scheming-rate",
+        "verdict": "BEHIND on empirical scheming measurement; AHEAD on runtime enforcement"
+      },
+      {
+        "competitor": "UK AISI",
+        "url": "https://www.aisi.gov.uk/research/aisi-frontier-ai-trends-report-2025",
+        "stars": null,
+        "license": "public",
+        "what_they_have": "Frontier AI Trends Report, Inspect AI eval platform, 30+ model evaluations",
+        "what_we_have": "Forecast Gauge ingests AISI self-replication metric; AISI gate (>90% triggers REFUSE) already coded",
+        "verdict": "BEHIND on institutional reach; AHEAD on runtime integration of AISI findings"
+      }
+    ]
+  },
+
+  "vsp": {
+    "spec_file": "_files/agi_v5/vsp/proposal.md",
+    "sha256": "4e799036d885df3d906e62edebc0c1c6fb57bf1b11ef44e98e7c1a8df7c97929",
+    "lines": 729,
+    "repo": "szl-holdings/vsp-otel",
+    "scaffold_commit": "7aca58d",
+    "ship_weeks": 4,
+    "max_overhead_us": 1.8,
+    "p50_baseline_us": 11.5,
+    "p50_with_vsp_us": 13.0,
+    "p50_budget_us": 13.8,
+    "key_claim": "First cryptographically-verifiable OpenTelemetry GenAI implementation",
+    "otel_semconv_version": "v1.37",
+    "trace_id_derivation": "First 16 bytes (32 hex chars) of SHA-256 receipt hash",
+    "components": [
+      {
+        "file": "packages/ouroboros/src/vsp/types.ts",
+        "description": "TypeScript interfaces: VspConfig, LambdaSpanAttributes, RhoClosureSpanEvent, ILambdaSpanEmitter, EmitOptions",
+        "status": "new"
+      },
+      {
+        "file": "packages/ouroboros/src/vsp/emitter.ts",
+        "description": "LambdaSpanEmitter implementation: emitLambdaSpan(), wrapReceiptBuild(), shutdown()",
+        "status": "new"
+      },
+      {
+        "file": "packages/ouroboros/src/vsp/sdk.ts",
+        "description": "initVsp() OTel NodeSDK initialization helper; no-op if OTEL_EXPORTER_OTLP_ENDPOINT not set",
+        "status": "new"
+      },
+      {
+        "file": "packages/ouroboros/src/vsp/index.ts",
+        "description": "Public re-exports for the VSP package",
+        "status": "new"
+      },
+      {
+        "file": "packages/ouroboros/src/runtime/loop-kernel.ts",
+        "description": "Wire emitLambdaSpan into buildReceipt() exit path",
+        "status": "modified"
+      }
+    ],
+    "span_attributes": {
+      "otel_standard": ["gen_ai.system", "gen_ai.operation.name", "gen_ai.request.model", "gen_ai.usage.input_tokens"],
+      "szl_vsp_extension": [
+        "szl.vsp.receipt_hash", "szl.vsp.schema_version", "szl.vsp.lambda_pass", "szl.vsp.lambda_composite",
+        "szl.vsp.lambda.moral_grounding", "szl.vsp.lambda.measurability_honesty", "szl.vsp.lambda.temporal_consistency",
+        "szl.vsp.lambda.information_integrity", "szl.vsp.lambda.action_reversibility", "szl.vsp.lambda.scope_containment",
+        "szl.vsp.lambda.stakeholder_alignment", "szl.vsp.lambda.evidence_adequacy", "szl.vsp.lambda.consent_boundary",
+        "szl.vsp.chain_root", "szl.vsp.prev_chain_hash", "szl.vsp.source_region", "szl.vsp.target_region", "szl.vsp.actor_id"
+      ]
+    },
+    "test_plan": {
+      "new_tests": 35,
+      "existing_tests": 218,
+      "total_after_ship": 253,
+      "test_files": [
+        {"file": "test/vsp/emitter.test.ts", "count": 12, "scope": "unit: span attribute correctness, trace_id derivation, rho-closure event shape"},
+        {"file": "test/vsp/schema.test.ts", "count": 6, "scope": "attribute schema validation: all 9 Lambda-axes present"},
+        {"file": "test/vsp/integration.test.ts", "count": 8, "scope": "integration with receipt build: trace_id == receipt_hash[0:32]"},
+        {"file": "test/vsp/perf.test.ts", "count": 4, "scope": "performance regression: emitter overhead < 2 us per span"},
+        {"file": "test/vsp/verify.test.ts", "count": 5, "scope": "external verification path: receipt round-trip match"}
+      ]
+    },
+    "implementation_plan": [
+      {"week": 1, "goal": "OTel SDK installed, no-op emitter wired into receipt build path, 0 regressions", "exit_criterion": "pnpm test 236/236; no-op path < 0.1 us"},
+      {"week": 2, "goal": "Integration tests, external verification endpoint, full OTel export to local Langfuse/Phoenix", "exit_criterion": "253/253 pass; Langfuse smoke test green; perf budget confirmed"},
+      {"week": 3, "goal": "CI green, docs complete, doctrine-pass verified, PR draft open", "exit_criterion": "PR open with green CI; doctrine sweep PASS"},
+      {"week": 4, "goal": "Arize Phoenix validation; SBOM entry; merge pending confirm_action; tag v6.4.0", "exit_criterion": "merge tag v6.4.0"}
+    ],
+    "why_competitors_cannot_ship": {
+      "LangGraph": "No receipt chain; run_id is random UUID not derived from computation content; no Lean-proven gate invariant; no Lambda-vector to embed",
+      "Mastra": "No byte-identical replay identity; no formal operational semantics; no DOI-anchored provenance",
+      "Claude_Code": "Proprietary license blocks open composition; no replay root (LLM inference non-deterministic); no Curry-Howard receipt calculus",
+      "Aegon_CT_style": "Notary (who made output?) not judge (did agent satisfy invariants?); no Lean proofs; tamper-evidence != replay-determinism"
+    },
+    "mermaid_diagrams": [
+      {
+        "type": "block-beta",
+        "title": "VSP Data Flow Diagram",
+        "location": "proposal.md §2",
+        "blocks": ["agent_layer", "ouroboros_brain_stem", "vsp_layer", "otel_export", "verification_path"]
+      }
+    ]
+  },
+
+  "forecast_gauge": {
+    "spec_file": "_files/agi_v5/forecast_gauge/operational_spec.md",
+    "sha256": "800c3ddc1a65e9fd6cd47df19f6271a34e11c1a91b56e8642a8fb7d56d288cf0",
+    "lines": 858,
+    "repo": "szl-holdings/agi-forecast",
+    "scaffold_commit": "2c72968",
+    "ship_days": 14,
+    "public_dashboard_target": "forecast.szlholdings.com",
+    "receipt_type": "forecast.summary",
+    "receipt_cadence": "daily @ 07:00 UTC",
+    "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "gauges": [
+      {
+        "id": 1,
+        "name": "METR-th50-hours",
+        "source": "https://metr.org/time-horizons/",
+        "type": "continuous",
+        "units": "hours",
+        "current_value": ">=16.0",
+        "confidence": 0.80,
+        "update_cron": "0 9 1 * *",
+        "description": "50%-task-completion time horizon of field-frontier model",
+        "ceiling_note": "Measurements above 16 hrs unreliable with current METR task suite (flagged 2026-05-08)"
+      },
+      {
+        "id": 2,
+        "name": "METR-doubling-months",
+        "source": "https://metr.org/blog/2026-1-29-time-horizon-1-1/",
+        "type": "continuous",
+        "units": "months",
+        "current_value": 4.3,
+        "current_value_post2024": 3.0,
+        "confidence": 0.90,
+        "update_cron": "0 9 1 */3 *",
+        "description": "P50 doubling time of frontier th50, post-2023 trend"
+      },
+      {
+        "id": 3,
+        "name": "Epoch-frontier-flops",
+        "source": "https://epoch.ai/trends",
+        "type": "continuous",
+        "units": "log10-FLOP",
+        "current_value": 26.7,
+        "confidence": 0.95,
+        "update_cron": "0 6 * * 1",
+        "description": "log10 of largest known training run (Grok 4 ~5e26 FLOP)"
+      },
+      {
+        "id": 4,
+        "name": "ARC-AGI-2-SOTA-pct",
+        "source": "https://arcprize.org/arc-agi/2",
+        "type": "continuous",
+        "units": "pct",
+        "current_value": 95.0,
+        "confidence": 0.85,
+        "update_cron": "0 9 15 * *",
+        "description": "Best verified score on ARC-AGI-2 (Gemini 3.1 Pro + Code Evolution, Imbue, Feb 2026)"
+      },
+      {
+        "id": 5,
+        "name": "Apollo-scheming-rate",
+        "source": "https://www.apolloresearch.ai/science/frontier-models-are-capable-of-incontext-scheming/",
+        "type": "continuous",
+        "units": "pct",
+        "current_value": 0.3,
+        "confidence": 0.75,
+        "update_cron": "0 9 1 */3 *",
+        "description": "No-Nudge/No-Goal in-context scheming rate for field's leading model (o4-mini post-deliberative alignment)"
+      },
+      {
+        "id": 6,
+        "name": "AISI-self-replication-success",
+        "source": "https://www.aisi.gov.uk/research/aisi-frontier-ai-trends-report-2025",
+        "type": "continuous",
+        "units": "pct",
+        "current_value": 60.0,
+        "confidence": 0.90,
+        "update_cron": "0 9 1 */3 *",
+        "stale": true,
+        "last_updated": "2025-12-18",
+        "description": "Best frontier model success rate on AISI self-replication evals (up from <5% in 2023)"
+      },
+      {
+        "id": 7,
+        "name": "Anthropic-RSP-current-ASL",
+        "source": "https://www.anthropic.com/responsible-scaling-policy",
+        "type": "integer",
+        "units": "ASL-level",
+        "current_value": 3,
+        "confidence": 0.99,
+        "update_cron": "0 9 * * 1",
+        "description": "Active AI Safety Level for Anthropic frontier models (activated May 2025)"
+      },
+      {
+        "id": 8,
+        "name": "OAI-Preparedness-level",
+        "source": "https://openai.com/index/updating-our-preparedness-framework/",
+        "type": "categorical",
+        "units": "level",
+        "current_value": "High",
+        "confidence": 0.90,
+        "update_cron": "0 9 * * 1",
+        "description": "OpenAI Preparedness risk level for current frontier (cyber + bio uplift tracked; not yet Critical)"
+      },
+      {
+        "id": 9,
+        "name": "DeepMind-FSF-CCL",
+        "source": "https://deepmind.google/blog/strengthening-our-frontier-safety-framework/",
+        "type": "categorical",
+        "units": "CCL-domain",
+        "current_value": "Autonomy-L1",
+        "confidence": 0.85,
+        "update_cron": "0 9 1 */3 *",
+        "description": "Highest Critical Capability Level reached under DeepMind FSF (novel environment navigation without oversight)"
+      },
+      {
+        "id": 10,
+        "name": "AI-Index-org-adoption-pct",
+        "source": "https://hai.stanford.edu/ai-index/2026-ai-index-report",
+        "type": "continuous",
+        "units": "pct",
+        "current_value": 88.0,
+        "confidence": 0.98,
+        "update_cron": "0 9 1 4 *",
+        "description": "% of surveyed organizations reporting AI adoption (Stanford HAI AI Index 2026)"
+      },
+      {
+        "id": 11,
+        "name": "AI-Index-consumer-spend-usd",
+        "source": "https://hai.stanford.edu/ai-index/2026-ai-index-report",
+        "type": "continuous",
+        "units": "USD-billions",
+        "current_value": 172.0,
+        "confidence": 0.98,
+        "update_cron": "0 9 1 4 *",
+        "description": "Annual U.S. consumer value of generative AI tools (Stanford HAI AI Index 2026)"
+      },
+      {
+        "id": 12,
+        "name": "working-consensus-TAI-year",
+        "source": "https://www.metaculus.com/questions/5121/",
+        "source_secondary": "https://timelines.issarice.com/wiki/Timeline_of_AI_timelines",
+        "type": "integer",
+        "units": "year",
+        "current_value": 2029,
+        "confidence": 0.60,
+        "update_cron": "0 9 1 */3 *",
+        "description": "Community-median calendar year for transformative AI (center of 2027-2032 range)"
+      }
+    ],
+    "derived_metrics": [
+      {
+        "name": "horizon_velocity",
+        "formula": "d(METR-th50-hours)/dt = least-squares slope over trailing 6 readings (hours/month)",
+        "current_value_estimate": 3.72,
+        "units": "hours/month",
+        "source_gauges": ["METR-th50-hours"],
+        "alert_threshold": "< 1.0 h/month for 2 consecutive quarters triggers 'horizon-velocity-stall' event",
+        "implementation": "crates/agi-forecast/src/derived.rs::compute_horizon_velocity()"
+      },
+      {
+        "name": "alignment_debt",
+        "formula": "Apollo-scheming-rate (fraction) * relative_flops * (flops_growth_factor / 5.0), where relative_flops = 10^(Epoch-frontier-flops - 24.0)",
+        "current_value_estimate": 0.008,
+        "units": "unitless",
+        "source_gauges": ["Apollo-scheming-rate", "Epoch-frontier-flops"],
+        "alert_threshold": "> 0.1 triggers FAIL-LOUD in a11oy; GATE 1",
+        "note": "Fixed 5x Epoch annual multiplier — should be recomputed from live CSV once >=2 years time-series available",
+        "implementation": "crates/agi-forecast/src/derived.rs::compute_alignment_debt()"
+      },
+      {
+        "name": "lutar_readiness",
+        "formula": "fraction of 9 Lambda-gate axes meeting floor required at current SOTA tier (ASL/FSF/OAI), scored 0-1",
+        "current_value_estimate": 0.847,
+        "units": "fraction [0,1]",
+        "source_gauges": ["Anthropic-RSP-current-ASL", "OAI-Preparedness-level", "DeepMind-FSF-CCL"],
+        "alert_threshold": "< 0.90 triggers WARN in a11oy; GATE 3",
+        "caveat": "external-evals-gap: internal-axes-only until METR task score, ARC-AGI-2 score, and Apollo scheming rate for a11oy are measured",
+        "implementation": "crates/agi-forecast/src/derived.rs::compute_lutar_readiness()"
+      }
+    ],
+    "a11oy_safety_gates": [
+      {
+        "id": "GATE_1",
+        "trigger": "alignment_debt > 0.1",
+        "action": "throw FAIL-LOUD; do not proceed with high-stakes ops",
+        "source_url": "https://www.apolloresearch.ai/science/frontier-models-are-capable-of-incontext-scheming/"
+      },
+      {
+        "id": "GATE_2",
+        "trigger": "AISI-self-replication-success > 90%",
+        "action": "throw REFUSE; all high-stakes autonomous operations suspended",
+        "source_url": "https://www.aisi.gov.uk/research/aisi-frontier-ai-trends-report-2025"
+      },
+      {
+        "id": "GATE_3",
+        "trigger": "lutar_readiness < 0.90",
+        "action": "console.warn; continue with caution",
+        "source_url": "internal"
+      },
+      {
+        "id": "GATE_4",
+        "trigger": "Anthropic-RSP-current-ASL >= 4",
+        "action": "throw HALT; all development operations suspended pending safety review",
+        "source_url": "https://www.anthropic.com/responsible-scaling-policy"
+      }
+    ],
+    "propositions": [
+      {
+        "id": "FG-1",
+        "statement": "Lutar-Readiness Monotonicity: R(Lambda, ASL) is non-increasing in ASL for any fixed Lambda-vector. Raising ASL from level k to k+1 either holds R constant (if new required thresholds already met) or strictly decreases R (if any newly tightened threshold is not met).",
+        "proof_sketch": "By inspection of required coverage map in spec §4.3: only doctrineAlignment threshold changes with ASL (rises from 0.90 to 0.95 at ASL>=3). If lambdaScores.doctrineAlignment in [0.90, 0.95) when ASL jumps to 3, axis drops from passing set, reducing coverage/9 by 1/9 ~= 0.11. No threshold change can add a previously failing axis to passing set, so R cannot increase with ASL.",
+        "operational_implication": "ASL escalation is a HALT-eligible event by construction. Gate 4 cannot be bypassed by holding Lambda-vector constant while escalating autonomy."
+      },
+      {
+        "id": "FG-2",
+        "statement": "Brier Score as Calibration Lower Bound: B_agg >= ECE^2, where B_agg is aggregate Brier score over n settled predictions and ECE is expected-calibration-error of the same prediction set.",
+        "proof_sketch": "From Murphy (1973) decomposition: B = REL - RES + UNC. Reliability REL is mean squared calibration error over probability bins, which dominates ECE^2 in expectation over uniform bin widths (DeGroot & Fienberg 1983). Hence rising B_agg implies rising ECE, making B_agg a conservative (lower-bound) proxy for calibration degradation.",
+        "references": ["Murphy (1973) Journal of Applied Meteorology 12(4):595-600", "DeGroot & Fienberg (1983) The Statistician 32(1-2):12-22"],
+        "connection_to_th8": "When TH8b (grade-1 receipt determinism) is proved in Lean, deterministic receipts will have B_agg=0 by construction: a deterministic agent always outputs the same value for the same input => zero forecast error on its own outputs => ECE <= sqrt(B_agg) = 0."
+      }
+    ]
+  },
+
+  "recon": {
+    "publications": {
+      "sha256": "73eeaccc86db90cfdbd3f96cda5b7d6c80ad9c408719dd05efbb3f0863b78a04",
+      "lines": 188,
+      "leaders_evaluated": 20,
+      "leaders": [
+        {"name": "METR Time Horizons", "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/", "stars": null, "license": "public", "what_they_have": "50%-task-completion time horizon metric, 7-month doubling (post-2024: 3-month), HCAST benchmark", "what_we_have": "Receipt-attested Forecast Gauge ingesting METR data", "verdict": "AHEAD_OF_US"},
+        {"name": "HCAST: Human-Calibrated Autonomy Software Tasks", "url": "https://arxiv.org/abs/2503.17354", "stars": null, "license": "public", "what_they_have": "Human-calibrated autonomy benchmark, NeurIPS 2025", "what_we_have": "None yet", "verdict": "AHEAD_OF_US"},
+        {"name": "AlphaProof (DeepMind)", "url": "https://www.nature.com/articles/s41586-025-09833-y", "stars": null, "license": "closed-source", "what_they_have": "IMO silver-medal RL-over-Lean proofs, Nature 2025", "what_we_have": "Human-authored Lean proofs of agent runtime invariants", "verdict": "AHEAD_OF_US"},
+        {"name": "AlphaGeometry (DeepMind)", "url": "https://deepmind.google/blog/alphageometry-an-olympiad-level-ai-system-for-geometry/", "stars": null, "license": "research", "what_they_have": "Olympiad-level AI geometry system, Nature 2024", "what_we_have": "Lean proofs of runtime properties", "verdict": "AHEAD_OF_US"},
+        {"name": "Lean Copilot", "url": "https://arxiv.org/abs/2404.12534", "stars": null, "license": "open", "what_they_have": "74.2% Lean proof step automation via LLMs", "what_we_have": "Human-authored lutar-lean proofs", "verdict": "PARITY"},
+        {"name": "Magentic-One (Microsoft)", "url": "https://arxiv.org/abs/2411.04468", "stars": null, "license": "CC-BY-4.0", "what_they_have": "Generalist multi-agent orchestrator, 38% GAIA, 32.8% WebArena", "what_we_have": "Receipt-stamped execution, Lean-backed formal gate", "verdict": "AHEAD_OF_US"},
+        {"name": "AutoGen (Microsoft)", "url": "https://openreview.net/forum?id=tEAF9LBdgu", "stars": null, "license": "open", "what_they_have": "Multi-agent conversation framework, ICLR 2024", "what_we_have": "Formal gate semantics, DOI lineage", "verdict": "AHEAD_OF_US"},
+        {"name": "GATE Macroeconomic Model (Epoch AI)", "url": "https://arxiv.org/pdf/2503.04941.pdf", "stars": null, "license": "public", "what_they_have": "AGI automation economics model with compute thresholds", "what_we_have": "Forecast Gauge with receipt-attested provenance", "verdict": "AHEAD_OF_US"},
+        {"name": "ARC Prize 2025 Technical Report", "url": "https://arxiv.org/abs/2601.10904", "stars": null, "license": "public", "what_they_have": "ARC-AGI-2 benchmark, 1455 teams, 15154 entries", "what_we_have": "Forecast Gauge tracks ARC-AGI-2 SOTA", "verdict": "ORTHOGONAL"},
+        {"name": "IETF SCITT", "url": "https://datatracker.ietf.org/wg/scitt/", "stars": null, "license": "IETF", "what_they_have": "RFC Ed Queue; immutable supply chain transparency registries", "what_we_have": "Live receipt chain with replay root (SCITT-adjacent semantics)", "verdict": "AHEAD_OF_US"},
+        {"name": "Google A2A Protocol", "url": "https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/", "stars": 24000, "license": "Apache-2.0", "what_they_have": "Open inter-agent protocol, 50+ enterprise partners, Linux Foundation", "what_we_have": "9-axis typed capability interface", "verdict": "AHEAD_OF_US"},
+        {"name": "ProofOptimizer", "url": "https://arxiv.org/abs/2510.15700", "stars": null, "license": "open", "what_they_have": "LM-trained to simplify Lean proofs", "what_we_have": "GradedCalc.lean in development", "verdict": "BEHIND_US"},
+        {"name": "Proof Flow", "url": "https://arxiv.org/abs/2410.13224", "stars": null, "license": "open", "what_they_have": "GFlowNet LM tuning for formal reasoning", "what_we_have": "Human-authored Lean proofs", "verdict": "PARITY"},
+        {"name": "Informal to Formal (LLMs on NL to Proofs)", "url": "https://arxiv.org/pdf/2501.16207.pdf", "stars": null, "license": "open", "what_they_have": "LLMs converting NL requirements to verifiable formal proofs", "what_we_have": "Lean proofs from mathematical derivation", "verdict": "PARITY"},
+        {"name": "ARGUS (LLM agent provenance audit)", "url": "https://arxiv.org/html/2605.03378v1", "stars": null, "license": "open", "what_they_have": "Influence-Provenance Graph; reduces attack success to 3.8%", "what_we_have": "Cryptographic receipt chain with capability-typed provenance", "verdict": "PARITY"},
+        {"name": "Provable Observability for LLM Systems", "url": "https://arxiv.org/pdf/2512.17259", "stars": null, "license": "open", "what_they_have": "Verifiability-First Architecture with runtime attestation", "what_we_have": "VSP (Verifiable Span Protocol)", "verdict": "PARITY"},
+        {"name": "AI Predicts AGI: LLMs for AGI Forecasting", "url": "https://arxiv.org/abs/2412.09385", "stars": null, "license": "open", "what_they_have": "LLM-based AGI forecasting framework", "what_we_have": "Receipt-attested Forecast Gauge with cryptographic provenance", "verdict": "BEHIND_US"},
+        {"name": "Levels of AGI (DeepMind)", "url": "https://arxiv.org/pdf/2311.02462.pdf", "stars": null, "license": "open", "what_they_have": "Operationalized AGI progress levels taxonomy", "what_we_have": "9-axis Lambda-gate maps to AGI level tiers", "verdict": "ORTHOGONAL"},
+        {"name": "ForecastBench", "url": "https://arxiv.org/html/2409.19839", "stars": null, "license": "open", "what_they_have": "Dynamic benchmark of AI forecasting capabilities (Tetlock et al.)", "what_we_have": "Forecast Gauge with Brier-score predictions-vs-actuals ledger", "verdict": "ORTHOGONAL"},
+        {"name": "Asynchronous Session-Based Concurrency (LMCS 2024)", "url": "http://arxiv.org/pdf/2111.13091.pdf", "stars": null, "license": "open", "what_they_have": "Curry-Howard for linear logic / session types, deadlock-freedom proofs", "what_we_have": "lutar-calculus: formal + financial + regulatory capability typing (TH7)", "verdict": "PARITY"}
+      ]
+    },
+    "github": {
+      "sha256": "bfb5a2970393d619623116e759640b81ba16e5a6144fc4ef2b79b5e203bf585f",
+      "lines": 161,
+      "leaders_evaluated": 19,
+      "szl_org_scorecard_avg": 6.84,
+      "szl_repos_count": 14,
+      "szl_zenodo_dois": 13,
+      "leaders": [
+        {"name": "langchain-ai/langgraph", "url": "https://github.com/langchain-ai/langgraph", "stars": 32123, "license": "MIT", "what_they_have": "Stateful durable graph runtime; delta-channel snapshots v1.2.0; largest practitioner community", "what_we_have": "Cryptographic receipt chain, Lean proofs, Lambda-gate, 5x byte-identical replay", "verdict": "AHEAD_OF_US on stars/ecosystem; AHEAD_OF_US on auditability"},
+        {"name": "mastra-ai/mastra", "url": "https://github.com/mastra-ai/mastra", "stars": 23914, "license": "Apache-2.0", "what_they_have": "TypeScript-first agentic platform; memory, evals, RAG, workflows", "what_we_have": "Formal invariant, DOI versioning, governance gate", "verdict": "AHEAD_OF_US on ergonomics; AHEAD_OF_US on formal invariant"},
+        {"name": "microsoft/autogen", "url": "https://github.com/microsoft/autogen", "stars": 58060, "license": "CC-BY-4.0", "scorecard": 5.8, "what_they_have": "Multi-agent framework; GroupChat, Magentic-One; Bedrock/Anthropic support", "what_we_have": "Receipt-typed provenance, Lean proofs, 9-axis gate", "verdict": "AHEAD_OF_US on stars; CC-BY-4.0 limits commercial embedding"},
+        {"name": "openai/openai-agents-python", "url": "https://github.com/openai/openai-agents-python", "stars": 26338, "license": "MIT", "what_they_have": "Lightweight Python SDK; handoffs, guardrails, 100+ LLM providers", "what_we_have": "Lean axioms, formal Lambda-gate, receipt chain", "verdict": "AHEAD_OF_US on adoption; AHEAD_OF_US on formal guarantees"},
+        {"name": "anthropics/claude-code", "url": "https://github.com/anthropics/claude-code", "stars": 123855, "license": "Proprietary", "what_they_have": "Most-starred agent repo; agentic CLI with full codebase understanding", "what_we_have": "Apache-2.0, byte-identical replay root, Lean-proven gate", "verdict": "AHEAD_OF_US on mindshare; AHEAD_OF_US on openness/verification"},
+        {"name": "a2aproject/A2A", "url": "https://github.com/a2aproject/A2A", "stars": 23793, "license": "Apache-2.0", "what_they_have": "Open inter-agent protocol v1.0.0; JSON-RPC 2.0, Agent Cards, SSE", "what_we_have": "9-axis typed capability interface", "verdict": "AHEAD_OF_US on protocol adoption"},
+        {"name": "google-deepmind/formal-conjectures", "url": "https://github.com/google-deepmind/formal-conjectures", "stars": 965, "license": "Apache-2.0", "what_they_have": "Lean 4 formalized conjectures; AlphaProof proxy (AlphaProof is closed-source)", "what_we_have": "Human-authored proofs of agent runtime invariants", "verdict": "AHEAD_OF_US on automated proof scale"},
+        {"name": "leanprover-community/mathlib4", "url": "https://github.com/leanprover-community/mathlib4", "stars": 3293, "license": "Apache-2.0", "scorecard": 3.5, "what_they_have": "Canonical Lean 4 math library; 100K+ lemmas; 1000+ contributors", "what_we_have": "Domain-specific runtime lemmas; depends on mathlib4", "verdict": "PARITY"},
+        {"name": "scitt-community/scitt-api-emulator", "url": "https://github.com/scitt-community/scitt-api-emulator", "stars": 10, "license": "MIT", "what_they_have": "Reference SCITT emulator; archived Nov 2024", "what_we_have": "Live SCITT-adjacent receipt chain with replay root", "verdict": "AHEAD_OF_US on live production status"},
+        {"name": "ossf/scorecard", "url": "https://github.com/ossf/scorecard", "stars": 5440, "license": "Apache-2.0", "scorecard": 9.0, "what_they_have": "Reference OSS security health checks; 18 automated checks", "what_we_have": "Org-wide avg 6.84 across 14 repos", "verdict": "AHEAD_OF_US on scorecard peak (9.0 vs 6.84 org avg)"},
+        {"name": "mlcommons/ailuminate", "url": "https://github.com/mlcommons/ailuminate", "stars": 78, "license": "Apache-2.0", "what_they_have": "AI risk benchmark; 12 hazard categories; multi-org governance", "what_we_have": "Self-attested 9-axis Lambda-gate", "verdict": "AHEAD_OF_US on external benchmark credibility"},
+        {"name": "huggingface/smolagents", "url": "https://github.com/huggingface/smolagents", "stars": 27322, "license": "Apache-2.0", "what_they_have": "Code-first agents ~1K LOC; CodeAgent; E2B/Modal/WASM sandboxed execution", "what_we_have": "Formal invariant, governance ledger, DOI versioning", "verdict": "AHEAD_OF_US on HuggingFace ecosystem access"},
+        {"name": "e2b-dev/E2B", "url": "https://github.com/e2b-dev/E2B", "stars": 12195, "license": "Apache-2.0", "what_they_have": "Secure cloud sandbox execution; backend for smolagents/OpenHands", "what_we_have": "Theorem-constrained bounded-loop runtime (Lambda_9)", "verdict": "AHEAD_OF_US on sandboxed execution infrastructure"},
+        {"name": "crewAIInc/crewAI", "url": "https://github.com/crewAIInc/crewAI", "stars": 51472, "license": "MIT", "what_they_have": "Role-playing multi-agent orchestration; 138 releases; strong enterprise curve", "what_we_have": "Formal proofs, audit receipts, Lambda invariant", "verdict": "AHEAD_OF_US on adoption; AHEAD_OF_US on formal guarantees"},
+        {"name": "All-Hands-AI/OpenHands", "url": "https://github.com/OpenHands/OpenHands", "stars": 73647, "license": "MIT", "what_they_have": "AI software dev platform; code modify, browse, APIs, OpenHands Cloud", "what_we_have": "Governance-as-runtime-invariant, Zenodo DOI lineage, Lean proofs", "verdict": "AHEAD_OF_US on feature breadth"},
+        {"name": "princeton-nlp/SWE-agent", "url": "https://github.com/princeton-nlp/SWE-agent", "stars": 19227, "license": "MIT", "what_they_have": "GitHub-issue-to-PR automation; NeurIPS 2024; ACI design", "what_we_have": "Formal verification layer, proof-chain", "verdict": "PARITY on academic credibility"},
+        {"name": "microsoft/aici", "url": "https://github.com/microsoft/aici", "stars": 2073, "license": "MIT", "what_they_have": "WASM-based LLM output control at inference time; dormant since Jan 2025", "what_we_have": "Active development; formal Lambda-gate at runtime", "verdict": "AHEAD_OF_US on active development"},
+        {"name": "szl-holdings/ouroboros", "url": "https://github.com/szl-holdings/ouroboros", "stars": 0, "license": "Apache-2.0", "scorecard": 6.8, "what_they_have": "N/A (reference)", "what_we_have": "Bounded-loop runtime; Lambda_9 gate; 218/218 tests; p50 11.5us; 5x byte-identical replay; 13 Zenodo DOIs", "verdict": "REFERENCE"},
+        {"name": "szl-holdings/lutar-lean", "url": "https://github.com/szl-holdings/lutar-lean", "stars": 0, "license": "Apache-2.0", "scorecard": 6.9, "what_they_have": "N/A (reference)", "what_we_have": "Lean 4 machine-checked proofs of Lutar Invariant; only closed-source-free formal proof of Lambda_k", "verdict": "REFERENCE"}
+      ]
+    },
+    "devpractice": {
+      "sha256": "8546c86c236a7d171384ecd00a46d52e1136115e6291e721de9dfc9a98462754",
+      "lines": 278,
+      "leaders_evaluated": 10,
+      "leaders": [
+        {"name": "Braintrust", "url": "https://www.braintrust.dev/", "stars": null, "license": "commercial", "what_they_have": "Eval-as-CI release gate; LLM-as-judge; production trace->test case automation; PR-blocking semantic quality gates", "what_we_have": "218/218 functional tests; 9-axis Lambda-gate; no semantic/LLM-judge scorers", "verdict": "AHEAD_OF_US on semantic eval infrastructure"},
+        {"name": "W&B Weave", "url": "https://www.braintrust.dev/articles/best-weights-and-biases-alternatives-2026", "stars": null, "license": "commercial", "what_they_have": "Dataset-based evals, side-by-side comparison, multimodal; no native release-gate", "what_we_have": "Functional test suite; no production eval pipeline", "verdict": "AHEAD_OF_US on training integration"},
+        {"name": "MLCommons AILuminate", "url": "https://mlcommons.org/ailuminate/", "stars": null, "license": "Apache-2.0", "what_they_have": "12 hazard categories, 24K+ prompts, 109 models benchmarked; 5-point scale", "what_we_have": "9-axis Lambda-gate; no AILuminate hazard-taxonomy eval", "verdict": "AHEAD_OF_US on external validation"},
+        {"name": "Langfuse", "url": "https://github.com/langfuse/langfuse", "stars": null, "license": "MIT", "what_they_have": "Full hierarchical trace timelines; cost tracking; LLM-as-judge; OTLP endpoint", "what_we_have": "Replay receipts (determinism artifacts, not OTel spans); no cost/token telemetry", "verdict": "AHEAD_OF_US on observability"},
+        {"name": "Arize Phoenix", "url": "https://github.com/Arize-ai/phoenix", "stars": 7800, "license": "Apache-2.0", "what_they_have": "OTel-native evaluation-first observability; OTLP traces; visual heatmaps; zero-dependency self-hosting", "what_we_have": "Replay receipts; no OTel instrumentation", "verdict": "AHEAD_OF_US on OTel observability"},
+        {"name": "OTel GenAI Semantic Conventions v1.37", "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/", "stars": null, "license": "Apache-2.0", "what_they_have": "Stable standard vocabulary for AI telemetry; Datadog/Honeycomb/SigNoz native support", "what_we_have": "VSP (Verifiable Span Protocol) targeting full compliance — SHIPPED in V5 Tier 2", "verdict": "AHEAD_OF_US (VSP closes this gap)"},
+        {"name": "SLSA v1.1 / Sigstore", "url": "https://slsa.dev/", "stars": null, "license": "Apache-2.0", "what_they_have": "Supply-chain integrity; cryptographic provenance on all release artifacts; ML-BOM", "what_we_have": "13 Zenodo DOIs; Apache-2.0 policy; no SLSA/Sigstore/in-toto", "verdict": "AHEAD_OF_US on supply-chain compliance"},
+        {"name": "METR Time Horizons Eval", "url": "https://metr.org/time-horizons/", "stars": null, "license": "public", "what_they_have": "Flagship long-horizon agent benchmark; 50%-time-horizon vs human experts; 10x/year trend", "what_we_have": "No METR submission; capability level unmeasured externally", "verdict": "AHEAD_OF_US on external capability measurement"},
+        {"name": "SWE-bench Pro", "url": "https://www.morphllm.com/swe-bench-pro", "stars": null, "license": "public", "what_they_have": "1865 multi-language uncontaminated coding tasks; 45.9% leader", "what_we_have": "No SWE-bench submission", "verdict": "AHEAD_OF_US on coding-agent evaluation"},
+        {"name": "Shepherd byte-identical fork / LLM-42", "url": "https://arxiv.org/html/2605.10913v1", "stars": null, "license": "research", "what_they_have": "Byte-identical agent fork primitives; GPU-verified deterministic inference; signed bug capsules", "what_we_have": "5x byte-identical replay at receipt layer (narrower scope); no full-execution cassette", "verdict": "AHEAD_OF_US on full-execution replay scope"}
+      ]
+    },
+    "agi_forecast": {
+      "sha256": "4a418ad94d4ec86566db54d5cc231dde543dda1036691259880694c667cd035d",
+      "lines": 210,
+      "leaders_evaluated": 11,
+      "leaders": [
+        {"name": "METR", "url": "https://metr.org", "stars": null, "license": "public", "what_they_have": "Primary source for agent capability measurement; th50 metric; TH1.1 Jan 2026: 4.3-month doubling; post-2024: 3-month doubling", "what_we_have": "Forecast Gauge ingesting METR data with receipt-attested provenance", "verdict": "AHEAD_OF_US on empirical measurement; AHEAD_OF_US on formal provenance"},
+        {"name": "Epoch AI", "url": "https://epoch.ai", "stars": null, "license": "public", "what_they_have": "Authoritative compute tracker; 5x/year growth since 2020; Grok 4 at ~5e26 FLOP; ECI composite; GATE model", "what_we_have": "Forecast Gauge ingesting Epoch CSV with SHA-256 fetcherReceiptHash", "verdict": "AHEAD_OF_US on compute empirics; AHEAD_OF_US on cryptographic provenance"},
+        {"name": "ARC Prize / ARC Evals", "url": "https://arcprize.org", "stars": null, "license": "public", "what_they_have": "ARC-AGI-2 benchmark; 2025: 24% competition, 95% Imbue (Code Evolution); ARC-AGI-3 announced", "what_we_have": "Forecast Gauge tracks ARC-AGI-2 SOTA; no a11oy ARC score yet", "verdict": "AHEAD_OF_US on benchmark infrastructure"},
+        {"name": "Open Philanthropy (Cotra Bio Anchors)", "url": "https://www.openphilanthropy.org/research/forecasting-transformative-ai-from-biological-anchors/", "stars": null, "license": "public", "what_they_have": "Bio Anchors model: ~2040-2052 (original); Direct Approach: ~2033; personal timelines shortened post-2025", "what_we_have": "Forecast Gauge tracks working-consensus-TAI-year from Metaculus aggregate", "verdict": "AHEAD_OF_US on timeline modeling rigor"},
+        {"name": "GovAI", "url": "https://www.governance.ai", "stars": null, "license": "public", "what_they_have": "Policy-focused AI governance; bioterrorism threshold already crossed; agent governance framework; RSP grading rubric", "what_we_have": "ouroboros classified as 'agent infrastructure' per GovAI framework; Lambda-gate = governance primitive", "verdict": "AHEAD_OF_US on institutional reach; PARITY on governance intent"},
+        {"name": "Apollo Research", "url": "https://www.apolloresearch.ai", "stars": null, "license": "public", "what_they_have": "Scheming evals: 5/6 frontier models demonstrated in-context scheming; monotonic more-capable=more-scheming trend; o4-mini 0.3% post-deliberative alignment", "what_we_have": "moralGrounding axis >=0.95 floor; Forecast Gauge tracks Apollo-scheming-rate", "verdict": "AHEAD_OF_US on empirical scheming measurement; AHEAD_OF_US on runtime enforcement"},
+        {"name": "UK AISI", "url": "https://www.aisi.gov.uk", "stars": null, "license": "public", "what_they_have": ">30 models evaluated; cyber 50% avg; self-replication 5%->60% since 2023; universal jailbreaks found for every system", "what_we_have": "Forecast Gauge gate: AISI-self-replication-success > 90% triggers REFUSE; ouroboros = FSF D2-equivalent logging", "verdict": "AHEAD_OF_US on institutional eval; AHEAD_OF_US on runtime gate integration"},
+        {"name": "Anthropic RSP v3.0", "url": "https://www.anthropic.com/responsible-scaling-policy", "stars": null, "license": "public", "what_they_have": "ASL framework: ASL-3 activated May 2025; Claude Opus 4.6 not at AI R&D-4; RSP v3.0 with Frontier Safety Roadmaps", "what_we_have": "Forecast Gauge Gate 4: ASL>=4 triggers HALT; Lambda-gate moralGrounding/measurabilityHonesty floors map to ASL-3 standards", "verdict": "AHEAD_OF_US on model capability; AHEAD_OF_US on formal proof of gate invariants"},
+        {"name": "OpenAI Preparedness Framework v2", "url": "https://openai.com/index/updating-our-preparedness-framework/", "stars": null, "license": "public", "what_they_have": "Two-level framework (High/Critical); cyber+bio+self-improvement tracked; SAG cross-functional review", "what_we_have": "Forecast Gauge tracks OAI-Preparedness-level; ouroboros supply-chain auditability", "verdict": "AHEAD_OF_US on capability/scale; AHEAD_OF_US on supply-chain auditability"},
+        {"name": "Google DeepMind FSF 3.1", "url": "https://deepmind.google/blog/strengthening-our-frontier-safety-framework/", "stars": null, "license": "public", "what_they_have": "CCL/TCL framework; Autonomy-L1 reached; harmful manipulation CCL; ML R&D Level 2 = singularity equiv; 6x compute cadence", "what_we_have": "Forecast Gauge tracks DeepMind-FSF-CCL; Lambda-gate covers all FSF CCL-relevant axes; receipt-attested logging (FSF D2-equivalent)", "verdict": "AHEAD_OF_US on resource scale; ORTHOGONAL on approach"},
+        {"name": "Stanford HAI AI Index 2026", "url": "https://hai.stanford.edu/ai-index/2026-ai-index-report", "stars": null, "license": "public", "what_they_have": "88% org adoption; 53% population adoption; $172B consumer value; SWE-bench near-100% vs human; agentic job postings +280% YoY", "what_we_have": "Forecast Gauge tracks AI-Index-org-adoption-pct and AI-Index-consumer-spend-usd", "verdict": "AHEAD_OF_US on empirical breadth; AHEAD_OF_US on cryptographic provenance of figures"}
+      ]
+    }
+  },
+
+  "charter_doctrine": {
+    "file": "_files/agi_v5/charter/CHARTER.md",
+    "sha256": "9ecd3f79a33e96dbba3327d7d3c3e3004eb3f0a1cadd3499e805b70c7c521a24",
+    "lines": 52,
+    "9_axes": [
+      "moralGrounding",
+      "measurabilityHonesty",
+      "temporalConsistency",
+      "informationIntegrity",
+      "actionReversibility",
+      "scopeContainment",
+      "stakeholderAlignment",
+      "evidenceAdequacy",
+      "consentBoundary"
+    ],
+    "lambda_floor": 0.90,
+    "moralGrounding_floor": 0.95,
+    "measurabilityHonesty_floor": 0.95,
+    "byte_identical_replays": 5,
+    "ingestion_policy": "PUBLIC_ONLY",
+    "license_allowlist": ["Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY"],
+    "forbidden_patterns": ["Jr.", "AlloyScape", "Glass Wing", "Glasswing", "Mythos", "Stephen Paul", "Perplexity Computer", "anonymous"],
+    "repos": [".github", "amaru", "a11oy", "carlota-jo", "counsel", "lutar-lean", "ouroboros", "ouroboros-thesis", "sentra", "szl-brand", "szl-cookbook", "szl-trust", "terra", "vessels"],
+    "ouroboros_ground_truth": {
+      "version": "v6.3.0",
+      "tests_passing": "218/218",
+      "receipt_build_p50_us": 11.5,
+      "receipt_build_p99_us": 50.7,
+      "lambda9_base_us": 3.12,
+      "rho_closure": "8K/8K",
+      "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b"
+    },
+    "hard_rules": [
+      "no hallucinations no bandaids; test test test",
+      "9-axis Lambda >= 0.90 conjunctive AND; moralGrounding + measurabilityHonesty >= 0.95",
+      "5x byte-identical replay",
+      "PUBLIC-ONLY ingestion - Apache-2.0/MIT/BSD-3/CC-BY only",
+      "NEVER schedule_cron / mint Zenodo / push GitHub / npm publish / branch protection edits without confirm_action"
+    ]
+  },
+
+  "pm_overwatch": {
+    "file": "_files/agi_v5/PM_OVERWATCH_REPORT.md",
+    "sha256": "af86fdf812a403efed29a0c753fde1ceea4eb46a086bfba6286e7cafe351e04e"
+  },
+
+  "file_manifest": [
+    {"path": "_files/agi_v5/synthesis/EVOLUTION_V5_PROPOSAL.md", "sha256": "0db56780652ba59d91304daa2bf2ee35cd444276695e9b8148414701cba4c750", "lines": 664},
+    {"path": "_files/agi_v5/vsp/proposal.md", "sha256": "4e799036d885df3d906e62edebc0c1c6fb57bf1b11ef44e98e7c1a8df7c97929", "lines": 729},
+    {"path": "_files/agi_v5/forecast_gauge/operational_spec.md", "sha256": "800c3ddc1a65e9fd6cd47df19f6271a34e11c1a91b56e8642a8fb7d56d288cf0", "lines": 858},
+    {"path": "_files/agi_v5/recon/publications.md", "sha256": "73eeaccc86db90cfdbd3f96cda5b7d6c80ad9c408719dd05efbb3f0863b78a04", "lines": 188},
+    {"path": "_files/agi_v5/recon/github.md", "sha256": "bfb5a2970393d619623116e759640b81ba16e5a6144fc4ef2b79b5e203bf585f", "lines": 161},
+    {"path": "_files/agi_v5/recon/devpractice.md", "sha256": "8546c86c236a7d171384ecd00a46d52e1136115e6291e721de9dfc9a98462754", "lines": 278},
+    {"path": "_files/agi_v5/recon/agi_forecast.md", "sha256": "4a418ad94d4ec86566db54d5cc231dde543dda1036691259880694c667cd035d", "lines": 210},
+    {"path": "_files/agi_v5/PM_OVERWATCH_REPORT.md", "sha256": "af86fdf812a403efed29a0c753fde1ceea4eb46a086bfba6286e7cafe351e04e", "lines": null},
+    {"path": "_files/agi_v5/charter/CHARTER.md", "sha256": "9ecd3f79a33e96dbba3327d7d3c3e3004eb3f0a1cadd3499e805b70c7c521a24", "lines": 52}
+  ]
+}

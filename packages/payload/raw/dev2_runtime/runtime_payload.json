@@ -1,0 +1,465 @@
+{
+  "generated_at": "2026-05-17T00:00:00Z",
+  "owner": "Dev-2 \u00b7 Lutar, Stephen P.",
+  "orcid": "0009-0001-0110-4173",
+  "organization": "SZL Holdings",
+  "anatomy": {
+    "brain": {
+      "repo": "szl-holdings/ouroboros",
+      "version": "v6.3.0",
+      "language": "TypeScript",
+      "description": "Bounded-loop runtime implementing the Lutar Invariant \u039b. Audit-closure operator with sub-millisecond per-request overhead.",
+      "tests": "218/218 PASS",
+      "benchmarks": {
+        "receipt_build_p50_us": 11.5,
+        "receipt_build_p99_us": 50.7,
+        "receipt_build_ops_per_sec": 62764,
+        "receipt_verify_p50_us": 10.4,
+        "receipt_verify_ops_per_sec": 74149,
+        "lambda9_base_us": 3.12,
+        "lambda9_composed_us": 3.29,
+        "rho_closure": "8000/8000",
+        "platform_v11_http_calls": 24800,
+        "lambda10_overhead_median_ms": "0.49-0.59",
+        "lambda10_overhead_p99_ms_max": 1.27
+      },
+      "doi_concept": "10.5281/zenodo.19944926",
+      "doi_latest": "10.5281/zenodo.20119582",
+      "doi_runtime": "10.5281/zenodo.20162352",
+      "clone_url": "https://github.com/szl-holdings/ouroboros.git",
+      "latest_commit_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "pushed_at": "2026-05-15T03:47:54Z",
+      "release_published_at": "2026-05-13T16:48:19Z",
+      "package_json": {
+        "name": "@szl-holdings/ouroboros",
+        "version": "1.0.0",
+        "scripts": ["lint", "lint:ci", "format", "typecheck", "build", "test", "test:watch"]
+      },
+      "src_files": [
+        "almanac.ts", "consistency.ts", "depth-allocator.ts", "index.ts",
+        "loop-kernel.ts", "proof-route.ts", "react", "risk-tier.ts",
+        "runtime-contract.test.ts", "types.ts"
+      ],
+      "cargo_toml": null
+    },
+    "heart": {
+      "repo": "szl-holdings/a11oy",
+      "version": "v1.0.0-alpha",
+      "language": "TypeScript",
+      "description": "Governed agentic execution fabric. Policy gates, signal mesh, proof ledger, and \u039b invariant runtime.",
+      "tests": "4/4 PASS (covenant-policy suite; v0.4.0 adds 10 new assertions)",
+      "clone_url": "https://github.com/szl-holdings/a11oy.git",
+      "latest_commit_sha": "3d0f98412ee6738102634b47f7d8618a6e4cd2b5",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "pushed_at": "2026-05-15T20:48:09Z",
+      "package_json": {
+        "name": "@szl-holdings/a11oy-knowledge",
+        "version": "0.3.0",
+        "scripts": ["build", "test", "typecheck"]
+      },
+      "v040_ingest": {
+        "version": "0.4.0",
+        "new_axioms": ["A10", "A11", "A12", "A13", "A14"],
+        "new_theorems": ["TH4", "TH6", "TH7"],
+        "total_axioms": 14
+      },
+      "src_files": [
+        "derivations.ts", "index.ts", "knowledge.json", "proposed_axioms.ts",
+        "schema.ts", "theorems.ts", "vertical-router.ts"
+      ],
+      "test_files": ["knowledge.test.ts"],
+      "cargo_toml": null
+    },
+    "wires": {
+      "repo": "szl-holdings/sentra",
+      "version": "v1.0.0-alpha",
+      "language": null,
+      "description": "Cyber resilience command. Threat modeling, posture drift detection, incident response, and policy-gated remediation with full audit trails.",
+      "clone_url": "https://github.com/szl-holdings/sentra.git",
+      "latest_commit_sha": "2ac304a9511ccbcf20414cdfcc164f9aed5b5092",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "pushed_at": "2026-05-15T05:33:18Z",
+      "package_json": null,
+      "src_files": null,
+      "cargo_toml": null
+    },
+    "spine": {
+      "repo": "szl-holdings/amaru",
+      "version": "v1.0.0-alpha",
+      "language": null,
+      "description": "Convergent multi-source data sync. Append-only delta logs, hash-verified ingest, and bounded loops with measurable convergence.",
+      "clone_url": "https://github.com/szl-holdings/amaru.git",
+      "latest_commit_sha": "6e1614d541d66fb95557a57d05dfe3c788e34c46",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "pushed_at": "2026-05-15T12:58:31Z",
+      "package_json": null,
+      "src_files": null,
+      "cargo_toml": null
+    },
+    "skeleton": {
+      "repo": "szl-holdings/lutar-lean",
+      "version": null,
+      "language": "Lean",
+      "description": "Machine-checked Lean 4 proofs of the Lutar Invariant (\u039b_k) \u2014 uniqueness theorem and Egyptian-exact weights. Companion to Paper v12.",
+      "clone_url": "https://github.com/szl-holdings/lutar-lean.git",
+      "latest_commit_sha": "fcae1aed26a3d8b7fec8aa3dcbd4f334220efa09",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "pushed_at": "2026-05-15T19:04:05Z",
+      "lakefile_lean": {
+        "package": "lutar",
+        "lean_toolchain": "leanprover/lean4:v4.13.0",
+        "mathlib_dep": "v4.13.0",
+        "mathlib_source": "https://github.com/leanprover-community/mathlib4.git",
+        "lean_lib": ["Lutar", "RefVectors"],
+        "lean_exe": ["check", "ref_vectors"]
+      },
+      "root_files": [
+        ".zenodo.json", "CITATION.cff", "Lutar.lean", "Lutar", "Main.lean",
+        "MainRef.lean", "README.md", "RefVectors.lean", "lakefile.lean",
+        "lean-toolchain", "reference-vectors.json"
+      ],
+      "cargo_toml": null
+    },
+    "hands": [
+      {
+        "repo": "szl-holdings/counsel",
+        "version": "v1.0.0-alpha",
+        "language": null,
+        "description": "Legal matter command. Policy-gated AI workflows, document review, obligation mapping, and proof-chain delivery.",
+        "clone_url": "https://github.com/szl-holdings/counsel.git",
+        "latest_commit_sha": "4decc1c773c06a877bfe6684ea23665e3775943a",
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "pushed_at": "2026-05-15T03:48:33Z",
+        "package_json": null,
+        "src_files": null,
+        "cargo_toml": null
+      },
+      {
+        "repo": "szl-holdings/terra",
+        "version": "v1.0.0-alpha",
+        "language": null,
+        "description": "Real estate intelligence. Deal pipeline scoring, portfolio analytics, market signals, and AI-assisted underwriting.",
+        "clone_url": "https://github.com/szl-holdings/terra.git",
+        "latest_commit_sha": "2ffac59c45550220772602f974fc95293a6754a2",
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "pushed_at": "2026-05-15T14:40:14Z",
+        "package_json": null,
+        "src_files": null,
+        "cargo_toml": null
+      }
+    ],
+    "full_body": {
+      "repo": "szl-holdings/ouroboros-thesis",
+      "version": "paper-v12-1.0.0",
+      "language": "Python",
+      "description": "The Ouroboros Thesis \u2014 peer-reviewable preprints on bounded recursive computation and audit-closure operators for governed AI. Zenodo DOI-pinned. CC BY 4.0.",
+      "clone_url": "https://github.com/szl-holdings/ouroboros-thesis.git",
+      "latest_commit_sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c",
+      "default_branch": "main",
+      "license": "CC-BY-4.0",
+      "pushed_at": "2026-05-15T19:08:22Z",
+      "release_published_at": "2026-05-14T01:14:46Z",
+      "doi_concept": "10.5281/zenodo.19944926",
+      "doi_v11": "10.5281/zenodo.20119582",
+      "package_json": null,
+      "cargo_toml": null
+    },
+    "vessels": [
+      {
+        "repo": "szl-holdings/vessels",
+        "version": "v1.0.0-alpha",
+        "language": null,
+        "description": "Maritime fleet intelligence. Sanctions screening, dark-vessel detection, ownership graph analysis, and voyage analytics.",
+        "clone_url": "https://github.com/szl-holdings/vessels.git",
+        "latest_commit_sha": "11e51f628353b0c8b6bb5b1e0b51236662452f76",
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "pushed_at": "2026-05-15T03:48:32Z",
+        "package_json": null,
+        "src_files": null,
+        "cargo_toml": null
+      },
+      {
+        "repo": "szl-holdings/szl-trust",
+        "version": null,
+        "language": null,
+        "description": "SZL Holdings Public Trust Portal \u2014 Covenant Proof Standard (CPS) run artifacts. E4 Codex Kernel reference run with 12 receipts (mocked:false), Dresden Codex + IAU citations, deterministic replay.",
+        "clone_url": "https://github.com/szl-holdings/szl-trust.git",
+        "latest_commit_sha": "24fd1238d5c06bf249625c60517c008eb9a2f253",
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "pushed_at": "2026-05-15T03:50:33Z",
+        "package_json": null,
+        "src_files": null,
+        "cargo_toml": null
+      },
+      {
+        "repo": "szl-holdings/szl-cookbook",
+        "version": null,
+        "language": null,
+        "description": "SZL Holdings engineering cookbook \u2014 Anthropic skills pattern. 9 skills covering pre-flight thinking, refactoring, review, debugging, dependencies, dead code, docs, and commit hygiene.",
+        "clone_url": "https://github.com/szl-holdings/szl-cookbook.git",
+        "latest_commit_sha": "0593de09406cd524be701ab4d8719f99aeba8f4f",
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "pushed_at": "2026-05-15T03:50:49Z",
+        "package_json": null,
+        "src_files": null,
+        "cargo_toml": null
+      }
+    ],
+    "brand": {
+      "repo": "szl-holdings/szl-brand",
+      "version": null,
+      "language": "Python",
+      "description": "SZL Holdings brand assets \u2014 social preview images (1280\u00d7640 PNG), logo monograms, and brand guidance.",
+      "clone_url": "https://github.com/szl-holdings/szl-brand.git",
+      "latest_commit_sha": "d86a37d5305a30886f7884cc4114cda48a8a3402",
+      "default_branch": "main",
+      "license": "CC-BY-4.0",
+      "pushed_at": "2026-05-15T03:52:31Z",
+      "package_json": null,
+      "src_files": null,
+      "cargo_toml": null
+    }
+  },
+  "doi_ledger": [
+    {
+      "doi": "10.5281/zenodo.19944926",
+      "zenodo_id": 19944926,
+      "type": "concept",
+      "target": "ouroboros-thesis (concept DOI, all versions)",
+      "title": "Ouroboros Thesis \u2014 concept record",
+      "minted": "2026-04-30",
+      "version": "concept",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.19867281",
+      "zenodo_id": 19867281,
+      "type": "version",
+      "target": "ouroboros-thesis v1",
+      "title": "The Loop Is the Product (v1)",
+      "minted": "2026-04-30",
+      "version": "paper-v1-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.19934129",
+      "zenodo_id": 19934129,
+      "type": "version",
+      "target": "ouroboros-thesis v2",
+      "title": "The Loop Is the Product (v2)",
+      "minted": "2026-05-01",
+      "version": "paper-v2-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.19983066",
+      "zenodo_id": 19983066,
+      "type": "version",
+      "target": "ouroboros-thesis v3",
+      "title": "The Lutar Invariant (v3)",
+      "minted": "2026-05-02",
+      "version": "paper-v3-2.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20020841",
+      "zenodo_id": 20020841,
+      "type": "version",
+      "target": "ouroboros-thesis v4",
+      "title": "The Lutar Omega Formalism (v4)",
+      "minted": "2026-05-03",
+      "version": "paper-v4-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20020846",
+      "zenodo_id": 20020846,
+      "type": "version",
+      "target": "ouroboros-thesis v5",
+      "title": "Lineage-Aware RAG (v5)",
+      "minted": "2026-05-03",
+      "version": "paper-v5-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20020845",
+      "zenodo_id": 20020845,
+      "type": "version",
+      "target": "ouroboros-thesis v6",
+      "title": "Sealed Constitutional Guardrails (v6)",
+      "minted": "2026-05-03",
+      "version": "paper-v6-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20020848",
+      "zenodo_id": 20020848,
+      "type": "version",
+      "target": "ouroboros-thesis v7",
+      "title": "Tiered Continual Learning (v7)",
+      "minted": "2026-05-03",
+      "version": "paper-v7-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20020849",
+      "zenodo_id": 20020849,
+      "type": "version",
+      "target": "ouroboros-thesis v8",
+      "title": "Active Inference (v8)",
+      "minted": "2026-05-03",
+      "version": "paper-v8-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20053148",
+      "zenodo_id": 20053148,
+      "type": "version",
+      "target": "ouroboros-thesis v9",
+      "title": "Unified Operational Account (v9)",
+      "minted": "2026-05-06",
+      "version": "paper-v9-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20053163",
+      "zenodo_id": 20053163,
+      "type": "version",
+      "target": "ouroboros-thesis v10",
+      "title": "Audit-Closure Operator \u039b\u2081\u2080 (v10)",
+      "minted": "2026-05-06",
+      "version": "paper-v10-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20119582",
+      "zenodo_id": 20119582,
+      "type": "version",
+      "target": "ouroboros-thesis v11 paper",
+      "title": "Applied \u039b (v11): Measured Per-Request Latency Overhead of an Audit-Closure Operator in a Governed AI Runtime",
+      "minted": "2026-05-10",
+      "version": "paper-v11-1.0.1",
+      "status": "active",
+      "license": "cc-by-4.0",
+      "http_status": 200
+    },
+    {
+      "doi": "10.5281/zenodo.20162352",
+      "zenodo_id": 20162352,
+      "type": "version",
+      "target": "ouroboros runtime v6.3.0",
+      "title": "Ouroboros Runtime: A Bounded-Loop Audit-Closure System Implementing the Lutar Invariant \u039b",
+      "minted": "2026-05-13",
+      "version": "v6.3.0",
+      "status": "active",
+      "license": "apache-2.0",
+      "http_status": 200
+    }
+  ],
+  "doi_ledger_note": "13 DOIs listed (concept + v1\u2013v11 + runtime). DOIs 20173912 (v13 master), 20173920 (v12 master), 20174600 (doctrine-v2) are in doi_health.txt (HTTP 200) but have doctrine-violation flags (author field contained forbidden suffix in original deposit); included separately in anomalies below.",
+  "doi_count": 13,
+  "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+  "integration_evidence": {
+    "source_file": "/home/user/workspace/evolution_pod/math_pod_v3/integration_evidence.txt",
+    "demo_payload_tests": "37/37 PASS",
+    "test_breakdown": {
+      "ouroboros_core": 33,
+      "a11oy_covenant": 4
+    },
+    "doctrine_check": "PASS",
+    "forbidden_patterns_found": 0,
+    "byline_verified": "Lutar, Stephen P.",
+    "orcid_verified": "0009-0001-0110-4173",
+    "a11oy_v040_ingest": {
+      "previous_version": "0.3.0",
+      "new_version": "0.4.0",
+      "new_axioms_count": 5,
+      "total_axioms": 14,
+      "new_theorems": ["TH4 \u039b-Category", "TH6 Bekenstein DPI", "TH7 Curry-Howard"],
+      "regression_pass": true,
+      "perf_budget_preserved": true
+    },
+    "ouroboros_v630_benchmarks": {
+      "receipt_build_p50_us": 11.5,
+      "receipt_build_p99_us": 50.7,
+      "receipt_build_ops_per_sec": 62764,
+      "receipt_verify_p50_us": 10.4,
+      "receipt_verify_ops_per_sec": 74149,
+      "lambda9_base_us": 3.12,
+      "rho_closure": "8000/8000",
+      "platform_v11_http_calls": 24800,
+      "lambda10_median_overhead_ms": "0.49-0.59",
+      "lambda10_p99_overhead_ms_max": 1.27
+    }
+  },
+  "deployment_recipe": {
+    "node_version": ">=20 LTS (tested 22.x LTS)",
+    "lean_version": "leanprover/lean4:v4.13.0",
+    "rust_version": "stable (required for any Rust pool/merkle extensions; not compiled in this workspace)",
+    "mathlib_version": "v4.13.0",
+    "package_managers": ["pnpm", "lake", "cargo"],
+    "pnpm_version": "10.x",
+    "test_runners": ["vitest"],
+    "ci_tools": ["OpenSSF Scorecard", "CodeQL", "Dependabot", "TruffleHog"]
+  },
+  "anomalies": [
+    {
+      "id": "A01",
+      "severity": "INFO",
+      "description": "ouroboros root package.json shows version 1.0.0 (monorepo workspace root), while the release tag and inner package version is v6.3.0. This is expected pnpm monorepo behaviour \u2014 the workspace root version and the inner package version differ."
+    },
+    {
+      "id": "A02",
+      "severity": "INFO",
+      "description": "a11oy, sentra, amaru, counsel, terra, vessels, szl-trust, szl-cookbook, szl-brand have no formal GitHub release (only v1.0.0-alpha tags or no tags). These repos are scaffold-complete but not versioned with a semver release."
+    },
+    {
+      "id": "A03",
+      "severity": "INFO",
+      "description": "No Cargo.toml found in any szl-holdings repo via GitHub API. Rust pool.rs and merkle.rs exist as workspace drafts under /home/user/workspace but are not compiled against the production ouroboros codebase."
+    },
+    {
+      "id": "A04",
+      "severity": "INFO",
+      "description": "doi_health.txt lists 15 DOIs (HTTP 200 each). 13 are included in doi_ledger (concept + v1-v11 + runtime). The remaining 3 \u2014 20173912 (v13 master), 20173920 (v12 master), 20174600 (doctrine-v2) \u2014 resolve as HTTP 200 but were flagged in audits/publication_audit_v2.md for doctrine violations in the original Zenodo deposit (author name contained forbidden suffix). Corrected versions are noted in postmortem_doi_swap.md."
+    },
+    {
+      "id": "A05",
+      "severity": "INFO",
+      "description": "DOI swap documented in audits/may15_top_to_bottom/postmortem_doi_swap.md: 20173912 is v13 master, 20173920 is v12 master (counter-intuitive order \u2014 v13 was deposited first at 01:18 UTC, v12 second at 03:27 UTC). CI tripwire T11 (doi-title-gate.yml) implemented to prevent recurrence."
+    }
+  ]
+}

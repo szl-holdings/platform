@@ -1,0 +1,35 @@
+{
+  "repo": "szl-holdings/ouroboros-thesis",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "ouroboros-thesis",
+    "full_name": "szl-holdings/ouroboros-thesis",
+    "description": "The Ouroboros Thesis \u2014 peer-reviewable preprints on bounded recursive computation and audit-closure operators for governed AI. Zenodo DOI-pinned. CC BY 4.0.",
+    "language": "Python",
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/ouroboros-thesis.git",
+    "pushed_at": "2026-05-15T19:08:22Z"
+  },
+  "latest_release": {
+    "tag_name": "paper-v12-1.0.0",
+    "published_at": "2026-05-14T01:14:46Z",
+    "target_commitish": "main"
+  },
+  "latest_commit_sha": "060eb8c8c8a1957b2e1682bf01e99e9ef0dafa4c",
+  "package_json": null,
+  "zenodo_json": {
+    "title": "Ouroboros Thesis v11 \u2014 Applied \u039b: An Audit-Closure Operator with Measured Per-Request Latency Overhead in a Governed AI Runtime",
+    "upload_type": "publication",
+    "publication_type": "article",
+    "license": "cc-by-4.0",
+    "concept_doi": "10.5281/zenodo.19944926"
+  },
+  "root_files": [
+    ".github", ".zenodo.json", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "arxiv_pkg", "docs", "figures", "ouroboros-runtime-contract.v2.json",
+    "ouroboros-thesis-v2.docx", "ouroboros-thesis-v2.md", "papers",
+    "phd_thesis", "social-preview.svg", "v2", "zenodo_pkg"
+  ],
+  "readme_excerpt": "# The Ouroboros Thesis\n\n  > Bounded loops with measurable convergence as a first-class system primitive.\n\n  [![Concept DOI](https://img.shields.io/badge/concept%20DOI-10.5281%2Fzenodo.19944926-1f78b4?style=flat-square)](https://doi.org/10.5281/zenodo.19944926)\n  [![Latest paper](https://img.shields.io/badge/latest-v11%20APPLIED%20\u039b%20\u00b7%20v12%20in%20review-2da44e?style=flat-square)](./papers/v11/)"
+}

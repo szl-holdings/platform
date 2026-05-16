@@ -1,0 +1,48 @@
+{
+  "repo": "szl-holdings/ouroboros",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "ouroboros",
+    "full_name": "szl-holdings/ouroboros",
+    "description": "Bounded-loop runtime implementing the Lutar Invariant \u039b. Audit-closure operator with sub-millisecond per-request overhead. 172/172 tests, Apache-2.0.",
+    "language": "TypeScript",
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/ouroboros.git",
+    "license": "Apache-2.0",
+    "pushed_at": "2026-05-15T03:47:54Z"
+  },
+  "latest_release": {
+    "tag_name": "v6.3.0",
+    "name": "v6.3.0 \u2014 Series A Presentation Layer",
+    "published_at": "2026-05-13T16:48:19Z",
+    "target_commitish": "main"
+  },
+  "latest_commit_sha": "d64748cc9ad67296be296c1ef6752ae181413fd7",
+  "package_json": {
+    "name": "@szl-holdings/ouroboros",
+    "version": "1.0.0",
+    "scripts": ["lint", "lint:ci", "format", "typecheck", "build", "test", "test:watch"],
+    "dependencies": []
+  },
+  "src_files": [
+    "almanac.ts",
+    "consistency.ts",
+    "depth-allocator.ts",
+    "index.ts",
+    "loop-kernel.ts",
+    "proof-route.ts",
+    "react",
+    "risk-tier.ts",
+    "runtime-contract.test.ts",
+    "types.ts"
+  ],
+  "root_files": [
+    ".github", ".gitignore", ".node-version", ".npmrc", ".nvmrc",
+    "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md",
+    "LICENSE", "LUTAR_EVIDENCE.md", "NOTICE", "README.md", "SECURITY.md",
+    "biome.json", "docs", "package.json", "packages", "pnpm-lock.yaml",
+    "scripts", "social-preview.svg", "src", "tsconfig.json", "vitest.config.ts"
+  ],
+  "cargo_toml": null,
+  "readme_excerpt": "# @szl-holdings/ouroboros\n\n  > Bounded loops with measurable convergence as a system primitive \u2014 the v6 ecosystem layer (services, halts, routing, permissions, sandbox, agent registry) plus a structured government-procurement readiness module.\n\n  [![Tests](https://img.shields.io/badge/tests-218%2F218-2da44e?style=flat-square)](./packages/ouroboros)\n  [![Release](https://img.shields.io/badge/release-v6.2.0-2b6cb0?style=flat-square)](https://github.com/szl-holdings/ouroboros/releases/tag/v6.2.0)"
+}

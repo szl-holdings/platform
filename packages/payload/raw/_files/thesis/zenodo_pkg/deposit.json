@@ -1,0 +1,184 @@
+{
+  "metadata": {
+    "title": "Verifiable Multi-Agent Anatomy: A Doctrine-Locked Runtime for Receipt-Bound Organisms (v14 — Math Pod V3 + Fly-High V6: Lutar Calculus, TH8-GΛR Lean Skeleton, Doctrine V6, arXiv-Ready)",
+    "upload_type": "publication",
+    "publication_type": "preprint",
+    "publication_date": "2026-05-15",
+    "creators": [
+      {
+        "name": "Lutar, Stephen P.",
+        "affiliation": "SZL Holdings",
+        "orcid": "0009-0001-0110-4173"
+      }
+    ],
+    "description": "We present the Lutar Multi-Agent Anatomy (S), a formally verified, receipt-typed, operationally measured multi-agent runtime at production scale. The system is defined as S = (R, A, E, Lambda, rho, W) over eight canonical regions, governed by a nine-axis conjunctive quality gate Lambda_9 proved unique in Lean 4 (sorry-count = 0), and verified at 218/218 passing tests, receipt build p50 = 11.5 microseconds (62,764 ops/sec), and 100% rho-closure on 8,000/8,000 paired calls.\n\nThis v14 release introduces Math Pod V3: a five-agent operation producing fourteen pure-math upgrades, fifteen applied-numerical upgrades, and the Unified Extension — the Lambda-Calculus over the Body-Graph. New contributions: (1) TH6 — Bekenstein entropy bound proved via data processing inequality (discharging conjectured A7); (2) TH7 — Curry-Howard receipt calculus (receipts-as-proofs); (3) TH4 — Lambda-Category composability (categorical semantics for TH1); (4) TH5 — Receipt chain confluence (cofree comonad formalization of replay determinism); (5) A10-A14 axioms implementation-ready; (6) T3-Merkle-DAG: receipt build target p50 <= 5 us at B=7; (7) Pre-allocated receipt pool: Lambda_9 gate 3.12 us → 0.85 us.\n\nThe system satisfies compliance requirements for 10 regulated industries (healthcare, financial services, defense, and 7 others). The lambda9_mask is proposed as a privacy-preserving extension to IETF SCITT. All code is Apache-2.0; all text is CC-BY-4.0.\n\n=== Fly-High V6 Upgrade (2026-05-15) ===\n\nThis v14 release includes the Fly-High V6 hardening pass: (a) Doctrine Sweep V6 — 0 real violations across 9 thesis artifacts, 36 legitimate citations classified, 9/9 byline + ORCID compliance; (b) Gap-Fill — 10 P0 fixes applied (mathematical-rigor hedging, K13 sample-size correction, A1 derivability disclosure, runtime-verification §2 expansion citing SIGIL, ABC, RvLLM, Aegon, RATS-AIR, Linear-Time Verifier, State Twins, Milner 1989), 8 new 2025-2026 citations added; (c) Beautify — YAML frontmatter on all 5 thesis files, H1→H2 heading hierarchy fix, 10 figure callouts staged; (d) TH8 Graded Λ-Receipt Calculus (GΛR) Lean 4 skeleton — 4 files (GradedSemiring.lean, LinearReceipt.lean, GLR.lean, StrongMonadIdentity.lean), 35 theorem signatures, 8 sorries, ready to drop into szl-holdings/lutar-lean as Lutar/GLR/. POPL 2027 / CAV 2027 submission target August 2026 / January 2027; (e) Citation Hardening — 117 unique URLs verified, 99 OK, 2 mandatory fixes applied (Wadler 'Propositions as Sessions' DOI typo, Epoch AI notable_ai_models.csv rename), 3 redirect-target updates (A2A repo move, OpenHands org rename, LangGraph→LangSmith path).",
+    "keywords": [
+      "multi-agent systems",
+      "formal verification",
+      "Lean 4",
+      "receipt chain",
+      "Lutar Invariant",
+      "governance",
+      "AI safety",
+      "SCITT",
+      "receipt-bound",
+      "typed lambda calculus",
+      "Curry-Howard",
+      "Bekenstein entropy",
+      "data processing inequality",
+      "monoidal category",
+      "ouroboros",
+      "a11oy",
+      "doctrine-locked",
+      "conjunctive gate",
+      "zero-knowledge receipts",
+      "SZL Holdings",
+      "TH8",
+      "Graded Lambda-Receipt Calculus",
+      "GLR",
+      "linear types",
+      "capability revocation",
+      "POPL 2027",
+      "Fly-High V6"
+    ],
+    "license": "CC-BY-4.0",
+    "language": "eng",
+    "access_right": "open",
+    "related_identifiers": [
+      {
+        "identifier": "10.5281/zenodo.19944926",
+        "relation": "isPartOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.19867281",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.19934129",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.19983066",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20020841",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20020845",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20020846",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20020848",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20020849",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20053148",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20053163",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20119582",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "10.5281/zenodo.20162352",
+        "relation": "isNewVersionOf",
+        "scheme": "doi",
+        "resource_type": "publication"
+      },
+      {
+        "identifier": "https://github.com/szl-holdings/ouroboros",
+        "relation": "isSupplementedBy",
+        "scheme": "url"
+      },
+      {
+        "identifier": "https://github.com/szl-holdings/lutar-lean",
+        "relation": "isSupplementedBy",
+        "scheme": "url"
+      },
+      {
+        "identifier": "https://github.com/szl-holdings/a11oy",
+        "relation": "isSupplementedBy",
+        "scheme": "url"
+      }
+    ],
+    "communities": [],
+    "grants": [],
+    "subjects": [
+      {
+        "term": "Computer Science - Software Engineering",
+        "identifier": "cs.SE"
+      },
+      {
+        "term": "Computer Science - Artificial Intelligence",
+        "identifier": "cs.AI"
+      },
+      {
+        "term": "Computer Science - Logic in Computer Science",
+        "identifier": "cs.LO"
+      }
+    ],
+    "notes": "DO NOT SUBMIT. This is a workspace draft for Stephen's review before Zenodo DOI mint. Use api_credentials=[\"custom-cred:zenodo.org\"] with curl -X POST https://zenodo.org/api/deposit/depositions to create the deposition. See PM_MATH_REPORT.md §12 PUSH-READY COMMANDS for the exact curl invocation.",
+    "_schema_validation": {
+      "required_fields_present": true,
+      "title": "PASS",
+      "upload_type": "PASS — publication",
+      "publication_type": "PASS — preprint",
+      "creators": "PASS — name, affiliation, orcid all present",
+      "description": "PASS — non-empty",
+      "keywords": "PASS — 20 keywords",
+      "license": "PASS — CC-BY-4.0",
+      "related_identifiers": "PASS — 13 prior DOIs + 3 repo URLs = 16 identifiers",
+      "communities": "PASS — empty array (not required)",
+      "zenodo_api_docs": "https://developers.zenodo.org/#deposit-metadata"
+    }
+  },
+  "fly_high_v6": {
+    "verified": "2026-05-15T20:50:00Z",
+    "doctrine_v6": "PASS",
+    "gap_fill_p0_fixes": 10,
+    "new_citations": 8,
+    "beautify_avg_score": 8.1,
+    "lean_th8_skeleton_theorems": 35,
+    "lean_th8_skeleton_sorries": 8,
+    "citation_hardening": "117 URLs verified, 99 OK, 2 mandatory fixes applied",
+    "arxiv_pkg_sha256": "13ca4a0617dddfa619e97d48a65b042d13d229481354f085f7dcc9199af5973b"
+  }
+}

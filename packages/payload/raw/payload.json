@@ -1,0 +1,1393 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-15T21:22:51Z",
+  "generated_by": "PM-Lead · Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings",
+  "purpose": "Machine-to-machine handoff payload for Replit. Contains complete inventory of SZL Holdings thesis lineage, runtime stack, AGI/V5 evolution, operations, and full GitHub org audit.",
+  "consumer": "Replit (machine-readable)",
+  "identity": {
+    "name": "Lutar, Stephen P.",
+    "orcid": "0009-0001-0110-4173",
+    "affiliation": "SZL Holdings",
+    "email": "stephen@szlholdings.com",
+    "github_username": "stephenlutar2-hash",
+    "github_org": "szl-holdings"
+  },
+  "doctrine": {
+    "version": "V6",
+    "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+    "byline_canonical": "Lutar, Stephen P.",
+    "license_allowlist": [
+      "Apache-2.0",
+      "MIT",
+      "BSD-3-Clause",
+      "CC-BY-4.0"
+    ],
+    "ingestion_policy": "PUBLIC_ONLY",
+    "byte_identical_replays_required": 5,
+    "lambda_axes_count": 9,
+    "lambda_conjunctive_floor": 0.9,
+    "moralGrounding_floor": 0.95,
+    "measurabilityHonesty_floor": 0.95
+  },
+  "components": {
+    "thesis": {
+      "owner": "Dev-1",
+      "payload_file": "dev1_thesis/thesis_payload.json",
+      "staged_files_dir": "_files/thesis/",
+      "description": "TH1-TH3 (published v11), TH4-TH7 (arxiv-ready), TH8 GΛR (Lean skeleton)"
+    },
+    "runtime": {
+      "owner": "Dev-2",
+      "payload_file": "dev2_runtime/runtime_payload.json",
+      "raw_per_repo_dir": "dev2_runtime/raw_runtime/",
+      "description": "8-region anatomy: ouroboros (brain), a11oy (heart), sentra (wires), amaru (spine), lutar-lean (skeleton), counsel+terra (hands), ouroboros-thesis (full body), vessels+szl-trust+szl-cookbook (vessels)"
+    },
+    "agi_v5": {
+      "owner": "Dev-3",
+      "payload_file": "dev3_agi_v5/agi_v5_payload.json",
+      "staged_files_dir": "_files/agi_v5/",
+      "description": "V5 proposal, VSP, Forecast Gauge (12 gauges, 3 derived, 4 a11oy gates), 60 leader recon catalog"
+    },
+    "ops": {
+      "owner": "Dev-4",
+      "payload_file": "dev4_ops/ops_payload.json",
+      "staged_files_dir": "_files/ops/",
+      "description": "5 active crons, credentials map, connectors, Anthropic apps, GitHub merge logs, doctrine, push queue"
+    },
+    "github": {
+      "owner": "GitHub Pro",
+      "payload_file": "github_pro/github_inventory.json",
+      "audit_report": "github_pro/github_audit_report.md",
+      "clone_manifest": "github_pro/clone_manifest.json",
+      "raw_per_repo_dir": "github_pro/raw/",
+      "description": "Full inventory + audit of 16 szl-holdings repos: metadata, releases, tags, commits, BP, rulesets, CODEOWNERS, workflows, CI, PRs, scorecard, alerts, hygiene files, CITATION.cff verification"
+    }
+  },
+  "critical_findings": [],
+  "org_summary": {
+    "repos_total": 16,
+    "ci_failing": 0,
+    "open_prs": 64,
+    "open_alerts_code_scanning": 115,
+    "open_dependabot_high_critical": 0,
+    "scorecard_avg": 6.62,
+    "branch_protection_compliant": 10,
+    "branch_protection_weak": 6,
+    "hygiene_gaps": [
+      "vsp-otel",
+      "agi-forecast"
+    ]
+  },
+  "push_queue_ready_one_way_doors": [
+    {
+      "id": "PUSH_2_ZENODO_MINT",
+      "artifact": "_files/thesis/zenodo_pkg/deposit.json",
+      "target_version": "v14",
+      "status": "READY_AWAITING_CONFIRM",
+      "blocker": "confirm_action one-way door"
+    },
+    {
+      "id": "PUSH_1_ARXIV_SUBMIT",
+      "artifact": "_files/thesis/arxiv_pkg/arxiv_submission.zip",
+      "sha256": "13ca4a0617dddfa619e97d48a65b042d13d229481354f085f7dcc9199af5973b",
+      "status": "READY_AWAITING_CONFIRM",
+      "blocker": "confirm_action one-way door"
+    }
+  ],
+  "push_queue_blocked": [
+    {
+      "id": "PUSH_4_OUROBOROS_v6_4_0_rc",
+      "blocker": "TS runtime code (pool, merkle-dag, BLAKE3, xoshiro256**) not implemented"
+    },
+    {
+      "id": "PUSH_6_NPM_PUBLISH_a11oy_knowledge",
+      "blocker": "npm token not in env"
+    }
+  ],
+  "active_crons": [
+    {
+      "id": "488505a8",
+      "schedule_utc": "0 11 * * *",
+      "name": "daily_health_pulse"
+    },
+    {
+      "id": "6a09e1d2",
+      "schedule_utc": "0 13 * * 1,4",
+      "name": "scorecard_remediate"
+    },
+    {
+      "id": "ab29919e",
+      "schedule_utc": "0 13 1 * *",
+      "name": "series_a_deep_audit"
+    },
+    {
+      "id": "cd08b398",
+      "schedule_utc": "0 13 * * 2,5",
+      "name": "scorecard_verify"
+    },
+    {
+      "id": "fff8f098",
+      "schedule_utc": "0 12 * * 1",
+      "name": "series_a_hygiene"
+    }
+  ],
+  "file_integrity": {
+    "_critical_findings.json": {
+      "sha256": "aa0e1f273cd13172f7080ba750874fcf9979c2674545b9ab1bceb8c2f5ff9532",
+      "size_bytes": 2391
+    },
+    "github_pro/github_inventory.json": {
+      "sha256": "3dceb779695563f49d79281216fa09ced60ab7679ac8a1d0afcf7c0f832247e0",
+      "size_bytes": 183280
+    },
+    "github_pro/github_audit_report.md": {
+      "sha256": "b62eb6dbd8395d023a0cdf685ff1b8a93e5e29c53dc645d9c188298c076ce2a3",
+      "size_bytes": 39788
+    },
+    "github_pro/clone_manifest.json": {
+      "sha256": "7548abfb6d5204729292e872d3338e98a97130d0145c8225b46658a03080706a",
+      "size_bytes": 11885
+    },
+    "github_pro/raw/amaru/metadata.json": {
+      "sha256": "a65d97350633b9d18118b72a65ea0fe6d73909bc8a5316e67d7e7b0806c05cab",
+      "size_bytes": 7175
+    },
+    "github_pro/raw/amaru/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/amaru/tags.json": {
+      "sha256": "837724914408af33f6fee899fc3f1840afd20068c237e49dfad9c27234b054ad",
+      "size_bytes": 437
+    },
+    "github_pro/raw/amaru/commits.json": {
+      "sha256": "6b5c876777ac03f184f3cb41ee9abce5cf1c3d8ab5933add3465d84f06a2f7c2",
+      "size_bytes": 55848
+    },
+    "github_pro/raw/amaru/branch_protection.json": {
+      "sha256": "17a55b70fbfef329d30ef16543fbb025d1e41baed2150a4cb9eb8d27f6c29406",
+      "size_bytes": 1746
+    },
+    "github_pro/raw/amaru/rulesets.json": {
+      "sha256": "6b5c17f300521a0555f0af07045dea9b43dd6fa1024de1b217c3792d458fad7b",
+      "size_bytes": 1317
+    },
+    "github_pro/raw/amaru/codeowners.json": {
+      "sha256": "5ef006e779612e1dfa95500742dd0ed92f099871d23b3d499c9dcab3d1d5f761",
+      "size_bytes": 1741
+    },
+    "github_pro/raw/amaru/workflows.json": {
+      "sha256": "c7ee6b44b6a9b994390ddb5581ea7411a6fa2a162d599377102d62a18f9c2d60",
+      "size_bytes": 2546
+    },
+    "github_pro/raw/amaru/ci_status.json": {
+      "sha256": "ab1731acd2622894ce4191c9198efd74896f555d8fb33befb420c794578c39ee",
+      "size_bytes": 27411
+    },
+    "github_pro/raw/amaru/open_prs.json": {
+      "sha256": "82e7ae5a330506c39a97b109d3be3bc75631d8069c3bb9cf745fcfe501fbc85c",
+      "size_bytes": 11494
+    },
+    "github_pro/raw/amaru/code_scanning.json": {
+      "sha256": "a4cf5e020ca35370c228283cdb2e277393e500c0db156c6bc97587999a60b335",
+      "size_bytes": 28758
+    },
+    "github_pro/raw/amaru/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/amaru/scorecard.json": {
+      "sha256": "fc6e1369808092f3449d3677af0b2cb24e655ae2b43e4052df3214f3a176acbc",
+      "size_bytes": 8242
+    },
+    "github_pro/raw/amaru/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/amaru/citation.json": {
+      "sha256": "19bcd2921b9e26d56c6d607f683ad73766d7636572f83b72e8171ca1fe123c55",
+      "size_bytes": 3234
+    },
+    "github_pro/raw/amaru/citation.cff": {
+      "sha256": "1f20ebc57daba3ad09c2a2831ba13f022370a5af5ff4f3c010aa65c6b0dec63e",
+      "size_bytes": 1772
+    },
+    "github_pro/raw/a11oy/metadata.json": {
+      "sha256": "f1f3ef475fbddf0f870d594d13a3bc232e5c10d6ec369dea2e90e4c46ec8e554",
+      "size_bytes": 7149
+    },
+    "github_pro/raw/a11oy/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/a11oy/tags.json": {
+      "sha256": "23d4816b4456749460ae57a9e9a45a8c6c27f34bdcf0dee9b4bf541e6cfcfaad",
+      "size_bytes": 437
+    },
+    "github_pro/raw/a11oy/commits.json": {
+      "sha256": "160aa1ea510eb780f5ae64fd9031141f196eb2896a5739aa7f8d7f12a38cb7f7",
+      "size_bytes": 56316
+    },
+    "github_pro/raw/a11oy/branch_protection.json": {
+      "sha256": "5e32be968c7c4153307f18bae6e283fb8f0da05c3a43af111417b332ec9a6f41",
+      "size_bytes": 1746
+    },
+    "github_pro/raw/a11oy/rulesets.json": {
+      "sha256": "582751e6ca04d8df28fd0f7ca155e8c840f43f47427724fc29ec434a8f9b6a1f",
+      "size_bytes": 1317
+    },
+    "github_pro/raw/a11oy/codeowners.json": {
+      "sha256": "829ab3c8391c4554c59e81e6ca86ab746612242551ddd3eccd9b449876241856",
+      "size_bytes": 1741
+    },
+    "github_pro/raw/a11oy/workflows.json": {
+      "sha256": "f71fdc02a035f44850113847a24d9acd9ad99ab07ae1ceb694d98bc67d762867",
+      "size_bytes": 2546
+    },
+    "github_pro/raw/a11oy/ci_status.json": {
+      "sha256": "68db466f9f442fc6ddc61b4a8c81cbde340ac6e66cf677957d52d89eb4dfb2e9",
+      "size_bytes": 27411
+    },
+    "github_pro/raw/a11oy/open_prs.json": {
+      "sha256": "7eade1459b2854bc64aaba2367ed2372dbc5def13269bd4c8d7069d73fb8b0ed",
+      "size_bytes": 13837
+    },
+    "github_pro/raw/a11oy/code_scanning.json": {
+      "sha256": "09bb280666aa8024a8e911cdda0775fbd4ec2dba15b03d17b0e0c19bef365390",
+      "size_bytes": 28763
+    },
+    "github_pro/raw/a11oy/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/a11oy/scorecard.json": {
+      "sha256": "41cd1ab548e43340ab877f8bb6732c410ee8979e0770aa6af3ab1226eaa9dfc9",
+      "size_bytes": 8243
+    },
+    "github_pro/raw/a11oy/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/a11oy/citation.json": {
+      "sha256": "798fc23c0e6f47c75db1bcb7c165c5d4a8b01f8a019489171dddef8d8a1f7ffd",
+      "size_bytes": 3258
+    },
+    "github_pro/raw/a11oy/citation.cff": {
+      "sha256": "ac28dc59d40f29897a5c8844826a740a413d9d79108348bbfa77fcc00b2765c1",
+      "size_bytes": 1790
+    },
+    "github_pro/raw/sentra/metadata.json": {
+      "sha256": "860177fc8bdc6071a872fc7ca81d05951f2bca6a79acc1d826210bddeeb9a3e5",
+      "size_bytes": 7232
+    },
+    "github_pro/raw/sentra/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/sentra/tags.json": {
+      "sha256": "81a610cceaa41b332f023458ef0de2ee9993e46fc8aa23729861e49da63065f0",
+      "size_bytes": 440
+    },
+    "github_pro/raw/sentra/commits.json": {
+      "sha256": "456c4aa87f38f36bde1bb41f4405e28c8bd9fa014482342f73ec3da669993b38",
+      "size_bytes": 55918
+    },
+    "github_pro/raw/sentra/branch_protection.json": {
+      "sha256": "8dd649539aa206911ab69ac401f124ccb9fe95ee158b133eaa6daa7d3c22053c",
+      "size_bytes": 1752
+    },
+    "github_pro/raw/sentra/rulesets.json": {
+      "sha256": "4848447379879fd744b4b2497e710b2115cfdc0891a9cb81478c77e1ca09b101",
+      "size_bytes": 1326
+    },
+    "github_pro/raw/sentra/codeowners.json": {
+      "sha256": "93bf13ce4d2fe2164c01d88054b655190be14ac6472f2fba73bf10b19a251366",
+      "size_bytes": 1748
+    },
+    "github_pro/raw/sentra/workflows.json": {
+      "sha256": "2a29acde36ed7b491c73d99c0d543f33d9501c44bc6fde068766a45d558adebc",
+      "size_bytes": 2567
+    },
+    "github_pro/raw/sentra/ci_status.json": {
+      "sha256": "6d95f0516bf62087d8b930dc2f0b476a78d27dedf53ae2d53aaffaa62a6fb215",
+      "size_bytes": 27447
+    },
+    "github_pro/raw/sentra/open_prs.json": {
+      "sha256": "41a6e20a3fe59ae012e735a1587378ac44b67602883dfd0ed8f21a3d13e5f337",
+      "size_bytes": 9252
+    },
+    "github_pro/raw/sentra/code_scanning.json": {
+      "sha256": "f0bea6bfe50140ee1073925950fef35553b8cae0074c917c9d91431c8816aabf",
+      "size_bytes": 28779
+    },
+    "github_pro/raw/sentra/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/sentra/scorecard.json": {
+      "sha256": "6b11f120976a406754700f8e4adc894201d0769fce4937a9c91133f715dbb6f7",
+      "size_bytes": 8243
+    },
+    "github_pro/raw/sentra/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/sentra/citation.json": {
+      "sha256": "75a7256253b9ee8c93717b59dd145064e7519e471589d316c5cad6345d16fbfa",
+      "size_bytes": 3299
+    },
+    "github_pro/raw/sentra/citation.cff": {
+      "sha256": "a794e8f66d207e18f3f430c7d65c98a7b89302b3fae1a623f329a01239a380a7",
+      "size_bytes": 1813
+    },
+    "github_pro/raw/terra/metadata.json": {
+      "sha256": "e733ec1d09e5b1d399331a3b33a3cf217fe381d4c3a9ee6b29a65decce1b76c0",
+      "size_bytes": 7157
+    },
+    "github_pro/raw/terra/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/terra/tags.json": {
+      "sha256": "adaebde22b74b4246038b246ebdd1280af14223bb78abc43ead7c594ca4ee4e7",
+      "size_bytes": 437
+    },
+    "github_pro/raw/terra/commits.json": {
+      "sha256": "0300ff1f3f54e42ce60cb0225660e3203d25de6bcc0e76b30a4e4550711806c3",
+      "size_bytes": 55848
+    },
+    "github_pro/raw/terra/branch_protection.json": {
+      "sha256": "df99453931d27f34714893c4aac52ff525ddedce6499b28bcf0d19882b5a60b0",
+      "size_bytes": 1746
+    },
+    "github_pro/raw/terra/rulesets.json": {
+      "sha256": "5506d9502e2287b24cdaf8a8ae562a0c45ff1df8b6dffa6cc94ef55a5ea4dc70",
+      "size_bytes": 1317
+    },
+    "github_pro/raw/terra/codeowners.json": {
+      "sha256": "de79480bb08249038db6ac16e5c074605b7740ac117efaf2bcf3cfea875de2dc",
+      "size_bytes": 1741
+    },
+    "github_pro/raw/terra/workflows.json": {
+      "sha256": "06083a9537929ab983f927dd9bee47f0cfa9acc52d328a960f8c5c3714a4b24d",
+      "size_bytes": 2546
+    },
+    "github_pro/raw/terra/ci_status.json": {
+      "sha256": "a5b8eac5366aa166e529c3ea27197e32450148a93ad20e2d5423354161f9a314",
+      "size_bytes": 27411
+    },
+    "github_pro/raw/terra/open_prs.json": {
+      "sha256": "8f832d2da1030d89e969096829bd6c4446ab8aba88e0eb6b32a681a5ab7c3fba",
+      "size_bytes": 11494
+    },
+    "github_pro/raw/terra/code_scanning.json": {
+      "sha256": "5537960b243819f1741448b97043ffb784143c294941c0c51e4e62ce95f9aba5",
+      "size_bytes": 28758
+    },
+    "github_pro/raw/terra/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/terra/scorecard.json": {
+      "sha256": "7b0ea683b7cd2566653b1fa88ae407e7fad4fda49430079c1cbde269e76de6b4",
+      "size_bytes": 8242
+    },
+    "github_pro/raw/terra/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/terra/citation.json": {
+      "sha256": "d2c03ab6dd54771bdacd4232ebf58a1e3c489e6f72d1d35d486e58312c580d2d",
+      "size_bytes": 3184
+    },
+    "github_pro/raw/terra/citation.cff": {
+      "sha256": "f83bceee2e3334e8b1318842ae4437570731d63bcc540c6384cfb6f84270dd79",
+      "size_bytes": 1736
+    },
+    "github_pro/raw/vessels/metadata.json": {
+      "sha256": "43777f92fbf44091948bb6350db954b9a578b2f953f8b8b126ac772bf7a033c7",
+      "size_bytes": 7258
+    },
+    "github_pro/raw/vessels/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/vessels/tags.json": {
+      "sha256": "d4506ef3a04830274b7f1d02edd3fe553be503b47c7a8114d6edeb0ebc1d3bff",
+      "size_bytes": 443
+    },
+    "github_pro/raw/vessels/commits.json": {
+      "sha256": "03995756074150e9c69e74f48562d247b521f704ba6c4085aecfc3f383f0321d",
+      "size_bytes": 55988
+    },
+    "github_pro/raw/vessels/branch_protection.json": {
+      "sha256": "d92d988c094451ed785745f98c6facf074c4a4f3503d9a8a129c648b1121a545",
+      "size_bytes": 1758
+    },
+    "github_pro/raw/vessels/rulesets.json": {
+      "sha256": "679488ad62ad8ecc2e0848fff3d1c66b18d9decaaf60fa38cc7b7ed344b639de",
+      "size_bytes": 1335
+    },
+    "github_pro/raw/vessels/codeowners.json": {
+      "sha256": "b53afd08eb895759a30bb9747c716b837706dd4d78aff08accc3d9255d095ad8",
+      "size_bytes": 1755
+    },
+    "github_pro/raw/vessels/workflows.json": {
+      "sha256": "9601280b0b1e962183555e2df747ca55896883655b12aca41dfbb6084efe9859",
+      "size_bytes": 2588
+    },
+    "github_pro/raw/vessels/ci_status.json": {
+      "sha256": "52b40d03ea74b0982d0becf1e0009f6a9bd50d3fcb0c6bf83fef0a3a63fb0904",
+      "size_bytes": 24445
+    },
+    "github_pro/raw/vessels/open_prs.json": {
+      "sha256": "386bc390a7bf40b48d661939fe5c70defaf6471d8ab6781f039d6dec54ceb20b",
+      "size_bytes": 6989
+    },
+    "github_pro/raw/vessels/code_scanning.json": {
+      "sha256": "f063bcb761b7d5856a01fdc838e1845f02c3b25a0235d8fb472a55ddcc879609",
+      "size_bytes": 28800
+    },
+    "github_pro/raw/vessels/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/vessels/scorecard.json": {
+      "sha256": "7f83f25b3aa063c7e38dba50198e36cc630bc5b5590723c9adea61fd0e77304a",
+      "size_bytes": 8244
+    },
+    "github_pro/raw/vessels/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/vessels/citation.json": {
+      "sha256": "5e7e374b33c396b97a54331441b63f2d2c05ba72801183cdcec203b135ae802d",
+      "size_bytes": 3232
+    },
+    "github_pro/raw/vessels/citation.cff": {
+      "sha256": "f56ad69d2e2f0342aa8e7f65cf229f4516081f34be4ab4f96929933bd5765d89",
+      "size_bytes": 1761
+    },
+    "github_pro/raw/counsel/metadata.json": {
+      "sha256": "87119fdd2e59d42fbfab00a766b6cfe4868b89b733d212afdd59009c2cb9b766",
+      "size_bytes": 7247
+    },
+    "github_pro/raw/counsel/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/counsel/tags.json": {
+      "sha256": "e1b9a0e9b18bdb184a9ef2da756798172dcd2f75f63aa23a6b7cd394042cfc26",
+      "size_bytes": 443
+    },
+    "github_pro/raw/counsel/commits.json": {
+      "sha256": "24052a77985bf771c6fb6610fecca0752b48e8f488300aad27a427544982a224",
+      "size_bytes": 55988
+    },
+    "github_pro/raw/counsel/branch_protection.json": {
+      "sha256": "b13084086aee89aa839924bb78fad5385c1c92832ea6873a2055b665e275dab4",
+      "size_bytes": 1758
+    },
+    "github_pro/raw/counsel/rulesets.json": {
+      "sha256": "8fe3202d56d293e42234ac21a57eb57c83130858de6a6c2d5d8d8c142bd9286d",
+      "size_bytes": 1335
+    },
+    "github_pro/raw/counsel/codeowners.json": {
+      "sha256": "11a2c844bd6e3dbe30df6e4ebfea6b748eeaf5600802d09e8103bd046122daa5",
+      "size_bytes": 1755
+    },
+    "github_pro/raw/counsel/workflows.json": {
+      "sha256": "69cf5b37f88055b3e636356e2ae641eda95d30863c7b8b8ffb5e897f7cf72583",
+      "size_bytes": 2588
+    },
+    "github_pro/raw/counsel/ci_status.json": {
+      "sha256": "3979bb986d14f6a3198615c4d0619a233c35fa22ee6af87fcfbab1563b747043",
+      "size_bytes": 24445
+    },
+    "github_pro/raw/counsel/open_prs.json": {
+      "sha256": "590ea8b180ac6a4fde77691a85bc2e09b1125d1c7b7fe12f6c6bc98177bcbae5",
+      "size_bytes": 6989
+    },
+    "github_pro/raw/counsel/code_scanning.json": {
+      "sha256": "a68e424cf9c142a39c99a46f7831d8f414f1cfc404fe5064d8ec84477f8dba27",
+      "size_bytes": 28800
+    },
+    "github_pro/raw/counsel/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/counsel/scorecard.json": {
+      "sha256": "19827050d6ccdf24d226ade8c480426bbcdd86ad8ec27d4c3f083f5e6818a4f3",
+      "size_bytes": 8244
+    },
+    "github_pro/raw/counsel/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/counsel/citation.json": {
+      "sha256": "72f975d47c39d770688aa9ffd26acc17fcd77c39f2d623da6417705c53c2c1c1",
+      "size_bytes": 3194
+    },
+    "github_pro/raw/counsel/citation.cff": {
+      "sha256": "cb0a01513e32e0639eb0b9dbc2580601d9a804ce18e12402550694aee4c73e33",
+      "size_bytes": 1734
+    },
+    "github_pro/raw/carlota-jo/metadata.json": {
+      "sha256": "ebc46d4247ee06f08a2c5d55bbf16ce8146a620ceec574476eb8f7a8db5a403c",
+      "size_bytes": 7379
+    },
+    "github_pro/raw/carlota-jo/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/carlota-jo/tags.json": {
+      "sha256": "6311712f3a1b36b686884ad108da9dba4f02dca5f9a169a3a773f40b6f50e2fa",
+      "size_bytes": 452
+    },
+    "github_pro/raw/carlota-jo/commits.json": {
+      "sha256": "a7c42ba580c4bbb0794a56263e92487333df6eea80c88486ddfb85c067b17a4f",
+      "size_bytes": 56198
+    },
+    "github_pro/raw/carlota-jo/branch_protection.json": {
+      "sha256": "b651144208225722326493a26cb1b582d763606de889710525604a579087383d",
+      "size_bytes": 1776
+    },
+    "github_pro/raw/carlota-jo/rulesets.json": {
+      "sha256": "0ee8a6f1072f14eaeb4ddcf9cc7b878bb635b099c5fe05ced58582b95ccc4717",
+      "size_bytes": 1362
+    },
+    "github_pro/raw/carlota-jo/codeowners.json": {
+      "sha256": "21aa16b0319b4ae955a755e1feefcccc98dd56a0d6d48134394a2d025983127e",
+      "size_bytes": 1776
+    },
+    "github_pro/raw/carlota-jo/workflows.json": {
+      "sha256": "c97513741f008bdcbb10e72c40d290db399d20aa54ca9f80c3c2a0fe5ad361fc",
+      "size_bytes": 2651
+    },
+    "github_pro/raw/carlota-jo/ci_status.json": {
+      "sha256": "4335046f0ae352f90679a9135301241e886a558cecc1e8baea231ca97be489a3",
+      "size_bytes": 27591
+    },
+    "github_pro/raw/carlota-jo/open_prs.json": {
+      "sha256": "f08e9656fb05118156bf32cc3ec63eb18090af4064cb51ba362989d647718ad2",
+      "size_bytes": 9364
+    },
+    "github_pro/raw/carlota-jo/code_scanning.json": {
+      "sha256": "013fbf0ad4d1dc668cfd4415e30c1a2336c5bd6d387d07b8d88d60be30bd5bdf",
+      "size_bytes": 28863
+    },
+    "github_pro/raw/carlota-jo/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/carlota-jo/scorecard.json": {
+      "sha256": "f45655f01e90ccc62f22b533eb25e87838b6f7b210b212d694e5c7d854009630",
+      "size_bytes": 8247
+    },
+    "github_pro/raw/carlota-jo/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/carlota-jo/citation.json": {
+      "sha256": "13b8bfb858ea5570241f6d93710906fa36591f7ab9203144ab5839ee03777bce",
+      "size_bytes": 3315
+    },
+    "github_pro/raw/carlota-jo/citation.cff": {
+      "sha256": "7bf6c1fb3a2f8a1e62c1f33ca101371c010e89fc98334a302338c1a488442d9d",
+      "size_bytes": 1806
+    },
+    "github_pro/raw/ouroboros/metadata.json": {
+      "sha256": "a703105ebe06ccf0180ccdcca3a1b7e7c1de3b3ab04914647483372191f6b7bc",
+      "size_bytes": 7429
+    },
+    "github_pro/raw/ouroboros/latest_release.json": {
+      "sha256": "a3dc41caf7eb676ee9190e77e854292a8a6113c45be8f318e4144d33abdf4b9e",
+      "size_bytes": 2054
+    },
+    "github_pro/raw/ouroboros/tags.json": {
+      "sha256": "1fd53ccc60ac76c2958d3b5e973989fbf92a156edada586be9979055d56903d5",
+      "size_bytes": 1689
+    },
+    "github_pro/raw/ouroboros/commits.json": {
+      "sha256": "1322fe5e0f82554eeae309bdc3ffb3a5f7fd46cb194856cbb192dfef926ed33f",
+      "size_bytes": 52993
+    },
+    "github_pro/raw/ouroboros/branch_protection.json": {
+      "sha256": "15b0367d3a104419c042fa49b4ac29aad80b3b0a2d1a4502ad5c913928ef1e09",
+      "size_bytes": 1830
+    },
+    "github_pro/raw/ouroboros/rulesets.json": {
+      "sha256": "8b5952ad0271a944d70dc0d276c8ddfa027eea645db740b00e45267e0ebf4eed",
+      "size_bytes": 1353
+    },
+    "github_pro/raw/ouroboros/codeowners.json": {
+      "sha256": "04852009d22e5efbe827968b3a12a6c37c980bd13ff51c92327a278eea08f5ac",
+      "size_bytes": 1769
+    },
+    "github_pro/raw/ouroboros/workflows.json": {
+      "sha256": "dc489201359b3cdc38ee17f2eeb7ec8b8f9f0659afc1fa540e978ea82a2cf1ff",
+      "size_bytes": 1752
+    },
+    "github_pro/raw/ouroboros/ci_status.json": {
+      "sha256": "d9aeaa8d28dbfa172cb739b28e9f28e5f5d40c43b8cf3b3ec34ff8caef89d2f7",
+      "size_bytes": 6165
+    },
+    "github_pro/raw/ouroboros/open_prs.json": {
+      "sha256": "57d8383756b08cc17e95daf248f8fe13ada081e483d0b4c94eec81c6d03f6847",
+      "size_bytes": 5701
+    },
+    "github_pro/raw/ouroboros/code_scanning.json": {
+      "sha256": "be4efc586b1c68b4ffe0530957f7d1385e2b62c06f328735aeed3fd2835f2576",
+      "size_bytes": 28749
+    },
+    "github_pro/raw/ouroboros/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/ouroboros/scorecard.json": {
+      "sha256": "f62410a298f62873a506342c808aa9dbcbb1b3f484a23d53994a5d9bad0be65f",
+      "size_bytes": 8466
+    },
+    "github_pro/raw/ouroboros/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/ouroboros/citation.json": {
+      "sha256": "14edfba6e8a459db25a44dcf91e40deee96833e6029b8abedf7b4c4081f9ad16",
+      "size_bytes": 3174
+    },
+    "github_pro/raw/ouroboros/citation.cff": {
+      "sha256": "1685c326cebf9af2f34c711d76c1ddfbcfe4d1429bfed81a5633037c920f2d42",
+      "size_bytes": 1710
+    },
+    "github_pro/raw/ouroboros-thesis/metadata.json": {
+      "sha256": "d9dbfdd98572b94492a5222fee3a79b04fb2cdb7288357a0ba83a597457caf9c",
+      "size_bytes": 7783
+    },
+    "github_pro/raw/ouroboros-thesis/latest_release.json": {
+      "sha256": "61271217753628313cdb21162589daeaf4cfa82ea982003185441c1f947ff6a4",
+      "size_bytes": 1496
+    },
+    "github_pro/raw/ouroboros-thesis/tags.json": {
+      "sha256": "d98765a56c63cc6467aba5d7962fa2a7d62cbf36846d2c8ab0f68099c14cc5eb",
+      "size_bytes": 8020
+    },
+    "github_pro/raw/ouroboros-thesis/commits.json": {
+      "sha256": "75650aba0af94638172059585320a5f3c786ffb9bbcb9e3cc50f1ab540fd1671",
+      "size_bytes": 63737
+    },
+    "github_pro/raw/ouroboros-thesis/branch_protection.json": {
+      "sha256": "098a5e24dc55d146e0eab016d0bec51eab0e948038559bee3f7299d8729fa2fe",
+      "size_bytes": 1699
+    },
+    "github_pro/raw/ouroboros-thesis/rulesets.json": {
+      "sha256": "ad4b57d6006b8f79205ab44fad51cda99f9944215acab775dd6a1f04c5b75019",
+      "size_bytes": 1416
+    },
+    "github_pro/raw/ouroboros-thesis/codeowners.json": {
+      "sha256": "c1a308d023003c782b60fcb887ec0cd4465bc7737475420bec773b41ca09b09a",
+      "size_bytes": 1946
+    },
+    "github_pro/raw/ouroboros-thesis/workflows.json": {
+      "sha256": "4521fb55bc99999f1b33eba79c54188cc525af0b4566fb4d58da29cb4838c0f8",
+      "size_bytes": 1849
+    },
+    "github_pro/raw/ouroboros-thesis/ci_status.json": {
+      "sha256": "95a8d0af5f955183cc687ccfee90b335c64d03f6f81fe185d4441430a845cb0c",
+      "size_bytes": 27827
+    },
+    "github_pro/raw/ouroboros-thesis/open_prs.json": {
+      "sha256": "d31b0987816d3d3add8dce2c185740bb6898ce6514386b2dc9729205b42b5b97",
+      "size_bytes": 15307
+    },
+    "github_pro/raw/ouroboros-thesis/code_scanning.json": {
+      "sha256": "7040678e709096685e8e8e93d06d050028f1993f23ee2e7009a5674fdf565b7c",
+      "size_bytes": 25626
+    },
+    "github_pro/raw/ouroboros-thesis/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/ouroboros-thesis/scorecard.json": {
+      "sha256": "0138e9e69bfd3efadd6cd194356119c00ad4d5fe4e5518fbbeb244e9b9350256",
+      "size_bytes": 8017
+    },
+    "github_pro/raw/ouroboros-thesis/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/ouroboros-thesis/citation.json": {
+      "sha256": "eb7c456501cc7fe8ba6ee203f4c418fff1ce32c06293ba2636ebb9baad443f83",
+      "size_bytes": 5393
+    },
+    "github_pro/raw/ouroboros-thesis/citation.cff": {
+      "sha256": "32de6c8e78972bf4b3515190b3aacbbcac1d0d8e84317666e0c3d4cee96b989e",
+      "size_bytes": 3284
+    },
+    "github_pro/raw/lutar-lean/metadata.json": {
+      "sha256": "ebccb96517619aadf44d88feb42d958e0172aa7712dc190f2c0cdd40b4e963db",
+      "size_bytes": 7365
+    },
+    "github_pro/raw/lutar-lean/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/lutar-lean/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/lutar-lean/commits.json": {
+      "sha256": "71939bab463ec9febd4cbb8ecee7effb61bd03ce983266300bd3de9bbcfa544d",
+      "size_bytes": 61380
+    },
+    "github_pro/raw/lutar-lean/branch_protection.json": {
+      "sha256": "b2ac96d9712bd5d6a2751819425ce66c5d690f744f72da3e2bd1b2e0aba0f677",
+      "size_bytes": 928
+    },
+    "github_pro/raw/lutar-lean/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/lutar-lean/codeowners.json": {
+      "sha256": "6e4ac80d32d62d03414503697f4af48aa5c0ed9cfb01531354f0f8dfec6039cc",
+      "size_bytes": 2214
+    },
+    "github_pro/raw/lutar-lean/workflows.json": {
+      "sha256": "fa546afb2dd3411fcbf6b4abeb49732e5fa63ee72822dc3b7b6084eedb2f5aea",
+      "size_bytes": 2664
+    },
+    "github_pro/raw/lutar-lean/ci_status.json": {
+      "sha256": "2f663a11a9cb339c9c03c3f6396354af0d22ed2f6a8d36cc341876ad92eaf72c",
+      "size_bytes": 9212
+    },
+    "github_pro/raw/lutar-lean/open_prs.json": {
+      "sha256": "34cc092454f5cd9650ca6b36c2fbeb568c2d28ea7a3fd4e3ad162fbdbf28de11",
+      "size_bytes": 6037
+    },
+    "github_pro/raw/lutar-lean/code_scanning.json": {
+      "sha256": "5af720f5f4d7abba6a87bbd0e8a152bc9bff81aa010c702da0dc5bce2e316d12",
+      "size_bytes": 21299
+    },
+    "github_pro/raw/lutar-lean/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/lutar-lean/scorecard.json": {
+      "sha256": "3833ee04d8ad0214d5369a1530ac6f3a4e54b2e4fa5755332fa7ac14bbd4e304",
+      "size_bytes": 8065
+    },
+    "github_pro/raw/lutar-lean/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/lutar-lean/citation.json": {
+      "sha256": "c62f40ae1864bcf24a6124af95b1e346f3689835719bae8cdc33488472f8eebd",
+      "size_bytes": 3501
+    },
+    "github_pro/raw/lutar-lean/citation.cff": {
+      "sha256": "d1a9a16946dabb551a9e0c79cb31b6adee50500ff7d99bff5138b6f032d5d913",
+      "size_bytes": 1941
+    },
+    "github_pro/raw/szl-trust/metadata.json": {
+      "sha256": "81486c2fb7c77c5bf09a7ed7b60955066ea1c7557da3ec0cd2cb009970b72802",
+      "size_bytes": 7359
+    },
+    "github_pro/raw/szl-trust/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/szl-trust/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-trust/commits.json": {
+      "sha256": "2c7edafb41c156ab5baed21e414e025e5d8cec1da3041faca7eff3b79bab80ec",
+      "size_bytes": 49236
+    },
+    "github_pro/raw/szl-trust/branch_protection.json": {
+      "sha256": "cedaa321663e66b674514c11c9c8ce4092cefaf5b75a634d223c5d7c6c89bbd7",
+      "size_bytes": 1225
+    },
+    "github_pro/raw/szl-trust/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-trust/codeowners.json": {
+      "sha256": "c1088bf66697682ebf4c75c0a293c05ef72ae2886e17be41171ccffed1abd92c",
+      "size_bytes": 946
+    },
+    "github_pro/raw/szl-trust/workflows.json": {
+      "sha256": "a455c0857aa291a6de6e4699d38bdd5a10394799e495fbfcec406b2c7af1cb36",
+      "size_bytes": 2630
+    },
+    "github_pro/raw/szl-trust/ci_status.json": {
+      "sha256": "b2787de1ec65544531bf346452610d1fc499f16c3b707ae4603045b0aea74277",
+      "size_bytes": 21423
+    },
+    "github_pro/raw/szl-trust/open_prs.json": {
+      "sha256": "f5d0a3da3e62da10a9a4b0df934af0b8cb054e0ac69ad473a2dcffb24e35b682",
+      "size_bytes": 6018
+    },
+    "github_pro/raw/szl-trust/code_scanning.json": {
+      "sha256": "9f3cb2ace58b23642f584bbcac448b588b6cb327ed4e78ac109048f46238b084",
+      "size_bytes": 30517
+    },
+    "github_pro/raw/szl-trust/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-trust/scorecard.json": {
+      "sha256": "36a5a9315520f98e99518c2db025c5ec55800adf44a3f87a967df897b3463385",
+      "size_bytes": 8189
+    },
+    "github_pro/raw/szl-trust/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/szl-trust/citation.json": {
+      "sha256": "28abc839d85d9e88d0b2312beb4cb7625aedcc773b8da1c0f34a98db5dbb713d",
+      "size_bytes": 1995
+    },
+    "github_pro/raw/szl-trust/citation.cff": {
+      "sha256": "d2e2927972c6a4845e983814ca693206ed357e4673034749412d37d0df49c4d8",
+      "size_bytes": 853
+    },
+    "github_pro/raw/szl-cookbook/metadata.json": {
+      "sha256": "a859ffd3d38c318031a0687bc6b6328754008f5f6fa3396c05382ce8787186fb",
+      "size_bytes": 7454
+    },
+    "github_pro/raw/szl-cookbook/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/szl-cookbook/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-cookbook/commits.json": {
+      "sha256": "2f7d16c3a097c06e93064778111060c0a8831ea770541a85b9c4efaa64c2af07",
+      "size_bytes": 48319
+    },
+    "github_pro/raw/szl-cookbook/branch_protection.json": {
+      "sha256": "097c621b61dbfc0e3db887b66e29fe7b34b4ef5db5bfb2d828dea7780d9ad984",
+      "size_bytes": 1243
+    },
+    "github_pro/raw/szl-cookbook/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-cookbook/codeowners.json": {
+      "sha256": "cc0a6ccbeb5fb449a4cd26b25eafab9f22f05399f57ae0f7d83e5818ada2392c",
+      "size_bytes": 967
+    },
+    "github_pro/raw/szl-cookbook/workflows.json": {
+      "sha256": "18e50c62613f93ccb55e4deb5905e586e713bb66b881597f6c9ee0c31c702974",
+      "size_bytes": 2693
+    },
+    "github_pro/raw/szl-cookbook/ci_status.json": {
+      "sha256": "ffd6999fbc1ea782ea5ff11509ce7be6f67963227fbcd9276d8388b143e711d4",
+      "size_bytes": 18441
+    },
+    "github_pro/raw/szl-cookbook/open_prs.json": {
+      "sha256": "2b23c418a02b6249de271ab01d618c104837584f3070f319c525fa381121c95b",
+      "size_bytes": 3441
+    },
+    "github_pro/raw/szl-cookbook/code_scanning.json": {
+      "sha256": "5a7220d172c294fd86e8af237ebba9644e3dc7ab74ea18693e43e8a5aa7cb5f8",
+      "size_bytes": 24481
+    },
+    "github_pro/raw/szl-cookbook/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-cookbook/scorecard.json": {
+      "sha256": "13f8d769d8b41cea95243f15711fa2a36c74582438b18c7ad27b8fd44d0c6444",
+      "size_bytes": 7968
+    },
+    "github_pro/raw/szl-cookbook/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/szl-cookbook/citation.json": {
+      "sha256": "ca28082c1d1fa91c209ce88015a27b1a72acafb6454a7e7220614808a667b559",
+      "size_bytes": 1918
+    },
+    "github_pro/raw/szl-cookbook/citation.cff": {
+      "sha256": "cc9b7cd47977c7733094c151f07ce09ae0d46d470dc899fc4bafdf433636c6c0",
+      "size_bytes": 782
+    },
+    "github_pro/raw/szl-brand/metadata.json": {
+      "sha256": "41b7024d2e65d2c1d71fc12f176f8c566ee45e8618f4affb9489b3caccad6c4c",
+      "size_bytes": 7322
+    },
+    "github_pro/raw/szl-brand/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/szl-brand/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-brand/commits.json": {
+      "sha256": "46156d0723a98627cb78c5b15d2a836823644fc3335b8e817c140fa460373604",
+      "size_bytes": 55512
+    },
+    "github_pro/raw/szl-brand/branch_protection.json": {
+      "sha256": "dac8a38e1238a378ea076501b4654b9547f7c13287542c3259ca38a78d3e2222",
+      "size_bytes": 1225
+    },
+    "github_pro/raw/szl-brand/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-brand/codeowners.json": {
+      "sha256": "1ed79c56f63af385a7ee5be5462c74eddc562d0c7673b6e1d009b61bc625699a",
+      "size_bytes": 946
+    },
+    "github_pro/raw/szl-brand/workflows.json": {
+      "sha256": "c425da8fc1b618720e8304723ca22201486b90f4b9397283017c96b30dfb237a",
+      "size_bytes": 2630
+    },
+    "github_pro/raw/szl-brand/ci_status.json": {
+      "sha256": "de5aed72367e257d4c8c7fa182da24bc837abaea83fd090009de26239b69d794",
+      "size_bytes": 18366
+    },
+    "github_pro/raw/szl-brand/open_prs.json": {
+      "sha256": "8e9a3ba1d1f9a4b41a4364d25eeb4b9c081b49625af1b0d3e58044013ef10e76",
+      "size_bytes": 5715
+    },
+    "github_pro/raw/szl-brand/code_scanning.json": {
+      "sha256": "976e9904945214290e899012afe8b160d0aedb78dbaa29f5c4133d24b7a86221",
+      "size_bytes": 24424
+    },
+    "github_pro/raw/szl-brand/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/szl-brand/scorecard.json": {
+      "sha256": "7dcfa957b2fd2c7aba7bdf6ad2f2d1a9e4ceffa08316bb0b443a22a1f6e4b57e",
+      "size_bytes": 7990
+    },
+    "github_pro/raw/szl-brand/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/szl-brand/citation.json": {
+      "sha256": "d05b28103cb46d242973feeb908a0fac8d787cf692b6fb5d171e1a09605ee6c7",
+      "size_bytes": 1797
+    },
+    "github_pro/raw/szl-brand/citation.cff": {
+      "sha256": "65cd88684d6a699aa49f6776a6adfcd6be5aa1ed5b1b07b07b812d137dd315ea",
+      "size_bytes": 709
+    },
+    "github_pro/raw/.github/metadata.json": {
+      "sha256": "4d9b195a2906c4bcc192d7eee129bb8cfa96fd8a8bede180eaa108faa99fabe5",
+      "size_bytes": 7172
+    },
+    "github_pro/raw/.github/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/.github/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/.github/commits.json": {
+      "sha256": "bab06508b1158d91e8716bf25fd2e6b8855d5023f15a023539b73b80050a4e84",
+      "size_bytes": 59118
+    },
+    "github_pro/raw/.github/branch_protection.json": {
+      "sha256": "d2a79dda5cb0f3b97142745516d5416e3860bc5d9d4ac83e18564c56df7aecef",
+      "size_bytes": 1287
+    },
+    "github_pro/raw/.github/rulesets.json": {
+      "sha256": "152dbcb7e7f2cb127bd8b211f69826fa596b218cc594b2253859b0b978e5e1d4",
+      "size_bytes": 448
+    },
+    "github_pro/raw/.github/codeowners.json": {
+      "sha256": "ec40008d6784f35972608efe0f0c4cc8fdaf5e63a574f50a0d7510da126b2914",
+      "size_bytes": 1219
+    },
+    "github_pro/raw/.github/workflows.json": {
+      "sha256": "191f8a6d03ce298bc25de4bd68ec8bcbc9271098f65c17b7128e49de78a045dd",
+      "size_bytes": 12225
+    },
+    "github_pro/raw/.github/ci_status.json": {
+      "sha256": "9ea585a4b0bbaf0863a6672373754150d2231ecfe12a6f8964d369ab90f5ff5a",
+      "size_bytes": 15266
+    },
+    "github_pro/raw/.github/open_prs.json": {
+      "sha256": "fc4175fb0310dd3f2288e5c77d67c5d9457dd96e94b508204fc6adab99395865",
+      "size_bytes": 2288
+    },
+    "github_pro/raw/.github/code_scanning.json": {
+      "sha256": "bcbae255c9da575f016dc58c97e644d9fb3dd36ee1fd64c09c3a28ded48d190e",
+      "size_bytes": 73466
+    },
+    "github_pro/raw/.github/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/.github/scorecard.json": {
+      "sha256": "56e6c765984490ab1abbaeadf5dfe982c43599c5fdf8a819cbb76602b9af1f66",
+      "size_bytes": 10236
+    },
+    "github_pro/raw/.github/hygiene.json": {
+      "sha256": "152fe3b0e66474d96d6dc4b4811c922097d8266551d223db417e9ff8bfc2e831",
+      "size_bytes": 211
+    },
+    "github_pro/raw/.github/citation.json": {
+      "sha256": "78a86cedbfe8a2f0a308a67bb664345a5b9964f010f922fcbbc496fa84b02618",
+      "size_bytes": 2330
+    },
+    "github_pro/raw/.github/citation.cff": {
+      "sha256": "27acb00b413b00757494d55e5e3ba454005a64de93f2f579075c4a47fc102386",
+      "size_bytes": 1107
+    },
+    "github_pro/raw/vsp-otel/metadata.json": {
+      "sha256": "395e7c5e5939be70b489c66007fd72a4c1fdf0a4e697b32b397d07dce9537822",
+      "size_bytes": 7224
+    },
+    "github_pro/raw/vsp-otel/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/vsp-otel/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/vsp-otel/commits.json": {
+      "sha256": "cfffa2837cfddb2d8c13a66edfc986c1a24afca17efccd67e0176b88ddc6b5d6",
+      "size_bytes": 5875
+    },
+    "github_pro/raw/vsp-otel/branch_protection.json": {
+      "sha256": "5b9903d7621d37d6973f0025bd38abe5265dff6256df3189b9261a738f89c395",
+      "size_bytes": 922
+    },
+    "github_pro/raw/vsp-otel/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/vsp-otel/codeowners.json": {
+      "sha256": "20c396faa69e715df7ae4acc91971d2ca216e9907dfe0bb20b4d9b4a9ae569a8",
+      "size_bytes": 128
+    },
+    "github_pro/raw/vsp-otel/workflows.json": {
+      "sha256": "9204f7c1565307feee054ae08dd09b181f837e7663d11d7e34be30954b0b6d55",
+      "size_bytes": 893
+    },
+    "github_pro/raw/vsp-otel/ci_status.json": {
+      "sha256": "a64c32d0d524b453911acc0f447d8e98f076e5c746f93b04fee75dec4228b0ae",
+      "size_bytes": 3094
+    },
+    "github_pro/raw/vsp-otel/open_prs.json": {
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "size_bytes": 3
+    },
+    "github_pro/raw/vsp-otel/code_scanning.json": {
+      "sha256": "9231ee1c24b35209c3a04ff1cf24b6587444cccb3db6d525c68e84f7198fc4a0",
+      "size_bytes": 28889
+    },
+    "github_pro/raw/vsp-otel/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/vsp-otel/scorecard.json": {
+      "sha256": "6b50e70e9013a9c3961b0bd70f20f987ce7c8b4c48903488351fb3414f158a8e",
+      "size_bytes": 7247
+    },
+    "github_pro/raw/vsp-otel/hygiene.json": {
+      "sha256": "f50746d7bf640b6981d9272e7a77d058a97654aceba9e7f2a4d93e0debb84eaa",
+      "size_bytes": 214
+    },
+    "github_pro/raw/vsp-otel/citation.json": {
+      "sha256": "96d16800c8bdc43a59ce9a34089a2b4fa2ffc0cf0854b24a80d5f1b94bd636e5",
+      "size_bytes": 2205
+    },
+    "github_pro/raw/vsp-otel/citation.cff": {
+      "sha256": "ebf7491273708c9e3748e528cceb9960fff3ef8b6faaf757f5433f67bdb1cfba",
+      "size_bytes": 1011
+    },
+    "github_pro/raw/agi-forecast/metadata.json": {
+      "sha256": "60eb7ed1a6f21691e519dce3590e123a3aa85e09246a181078fc829ce2a9bc3c",
+      "size_bytes": 7422
+    },
+    "github_pro/raw/agi-forecast/latest_release.json": {
+      "sha256": "74f8d307c3b29edb8f1917ec74025ec331f64e411ecf83c345aa42b5d34c8f3c",
+      "size_bytes": 54
+    },
+    "github_pro/raw/agi-forecast/tags.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/agi-forecast/commits.json": {
+      "sha256": "9e7e49884988b2550480c7a8fa01df67e060bd190644007ae8bdba47ab5678ec",
+      "size_bytes": 5924
+    },
+    "github_pro/raw/agi-forecast/branch_protection.json": {
+      "sha256": "421e9f49f2ae98f83246adbdeaa474dc5b1003147858cef13109b9bb67f739e7",
+      "size_bytes": 938
+    },
+    "github_pro/raw/agi-forecast/rulesets.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/agi-forecast/codeowners.json": {
+      "sha256": "20c396faa69e715df7ae4acc91971d2ca216e9907dfe0bb20b4d9b4a9ae569a8",
+      "size_bytes": 128
+    },
+    "github_pro/raw/agi-forecast/workflows.json": {
+      "sha256": "ff6291ddfff6811791774a1397dce6da21cb5d1566b4f67d7125a06f45d695d3",
+      "size_bytes": 921
+    },
+    "github_pro/raw/agi-forecast/ci_status.json": {
+      "sha256": "63d0c37129e3b181fe83436266e2f14c6d9ec5006ef85221b5b81cd6a56e0e77",
+      "size_bytes": 3110
+    },
+    "github_pro/raw/agi-forecast/open_prs.json": {
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "size_bytes": 3
+    },
+    "github_pro/raw/agi-forecast/code_scanning.json": {
+      "sha256": "14246e3d9fd3f79a37b6c98b7e837d32b7f26591aaa8bd84feb472f23a1e15dd",
+      "size_bytes": 28973
+    },
+    "github_pro/raw/agi-forecast/dependabot_alerts.json": {
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "size_bytes": 2
+    },
+    "github_pro/raw/agi-forecast/scorecard.json": {
+      "sha256": "49543568aae4703ebb8761f29d0a832ff71058f57a104632970c8e3fa5a5828b",
+      "size_bytes": 7251
+    },
+    "github_pro/raw/agi-forecast/hygiene.json": {
+      "sha256": "f50746d7bf640b6981d9272e7a77d058a97654aceba9e7f2a4d93e0debb84eaa",
+      "size_bytes": 214
+    },
+    "github_pro/raw/agi-forecast/citation.json": {
+      "sha256": "7765d63de4a92f526feec4d0c8375fa7a2a793cb9594deeab1d5685c98e1e51c",
+      "size_bytes": 2365
+    },
+    "github_pro/raw/agi-forecast/citation.cff": {
+      "sha256": "d967353f119fbf3b897b8ff24f25769ee8da89c2cbb04934e7420a6e630a65fb",
+      "size_bytes": 1107
+    },
+    "dev1_thesis/thesis_payload.json": {
+      "sha256": "30c8879a6fd7492aa0c18470a31290c6cc5254d49b3117030e3a54b65b506c08",
+      "size_bytes": 13575
+    },
+    "dev2_runtime/integration_evidence.json": {
+      "sha256": "8a9defad920c34245922450355bde78d4109ed29a24d770fc057d8f41139a483",
+      "size_bytes": 3159
+    },
+    "dev2_runtime/runtime_payload.json": {
+      "sha256": "fbc09f560acb403e08b52b9af56cdb39ef64094c1b3b612950be4a8e357aa20e",
+      "size_bytes": 18304
+    },
+    "dev2_runtime/raw_runtime/ouroboros.json": {
+      "sha256": "92f4d32f21ce38e2a9ebb176e716032345969dd0b57c730d2314e67861499e33",
+      "size_bytes": 2167
+    },
+    "dev2_runtime/raw_runtime/a11oy.json": {
+      "sha256": "446f8df4df95f2e08894d60b62aa107ccfed2e6981192051b2d5dfdb328c3866",
+      "size_bytes": 2006
+    },
+    "dev2_runtime/raw_runtime/sentra.json": {
+      "sha256": "8d81f310b6701848b901c39d172bb4f69fe7e6919eff7b493a1f617b3aced0f9",
+      "size_bytes": 1328
+    },
+    "dev2_runtime/raw_runtime/amaru.json": {
+      "sha256": "ad20c1e3bca160110a880784efa8c3a4c4558c404959bfabb9e689ffff67eaaf",
+      "size_bytes": 1316
+    },
+    "dev2_runtime/raw_runtime/lutar-lean.json": {
+      "sha256": "ab0ba11248cf99702653ce9b82e699df0f77973f6afde2f98904299da7d34458",
+      "size_bytes": 1730
+    },
+    "dev2_runtime/raw_runtime/counsel.json": {
+      "sha256": "b5712a6b7e0691732895cad06987e3fa855e3052ff2029e393e3c477c73bcf9a",
+      "size_bytes": 1305
+    },
+    "dev2_runtime/raw_runtime/terra.json": {
+      "sha256": "51902f47035a24af3205d474c5ae27963293a841296e00c750736a3f5fc0a318",
+      "size_bytes": 1295
+    },
+    "dev2_runtime/raw_runtime/ouroboros-thesis.json": {
+      "sha256": "917805c3e78576ee45f918ce023d3644b3f5f832fe85e86013c8db5fd29f5de6",
+      "size_bytes": 1893
+    },
+    "dev2_runtime/raw_runtime/vessels.json": {
+      "sha256": "9a943c1ecf4e2963aea83c92b4c7e37629374148ac34702c9b8f2353a898210a",
+      "size_bytes": 1321
+    },
+    "dev2_runtime/raw_runtime/szl-trust.json": {
+      "sha256": "cfdaee803ffd00fad67f497dd9a76439143c6d9e5047f6794abd5da22bdbc2ee",
+      "size_bytes": 1196
+    },
+    "dev2_runtime/raw_runtime/szl-cookbook.json": {
+      "sha256": "55e6da80f5bc18585bd99069cc88ca4d86ae5bcdb9fad6180c1e40601f94e402",
+      "size_bytes": 1224
+    },
+    "dev2_runtime/raw_runtime/szl-brand.json": {
+      "sha256": "1981aea0a2cc6734cf7c95d422fa0ba131ae0cec5e56e11ff51d69e955980393",
+      "size_bytes": 1190
+    },
+    "dev3_agi_v5/agi_v5_payload.json": {
+      "sha256": "44100dc894701782d07042b63c1891347af9e40085322f525c7b2f06009775e8",
+      "size_bytes": 50842
+    },
+    "dev4_ops/ops_payload.json": {
+      "sha256": "fd8da9bcae15eb55a19658766634aaa968d8eefa7f5feff26260a1c550fcacb1",
+      "size_bytes": 6616
+    },
+    "_files/thesis/th1_th3/paper.md": {
+      "sha256": "589ccb20200aaed0b98b2a04c2dc68874ca4f8457d2ab63d842f2fd3bed96391",
+      "size_bytes": 230337
+    },
+    "_files/thesis/th4_th7/phd_thesis.md": {
+      "sha256": "bfed03475831a88b32395d91348950476e05bb13cd8fee3976fb9ef5bdae13c5",
+      "size_bytes": 37709
+    },
+    "_files/thesis/th4_th7/pm_math_report.md": {
+      "sha256": "5f4020dfc9c44f028bd151c6bf9231937e21ac4fab3c7350fbaf31ddc17d6195",
+      "size_bytes": 18184
+    },
+    "_files/thesis/th8_glr/proposal.md": {
+      "sha256": "9987023124ff2c4683169623a84233ce9042b7a39cf4cd8a27a64a04d44c842b",
+      "size_bytes": 42276
+    },
+    "_files/thesis/arxiv_pkg/refs.bib": {
+      "sha256": "f76d91575ee7eb62200535d303a501956d2cb637d3333a76a2c79cf9fc564834",
+      "size_bytes": 9974
+    },
+    "_files/thesis/arxiv_pkg/ancillary/repo-manifest.json": {
+      "sha256": "a61147ad849fa2e7811dd4731140e1e7225780e1d12be6f77a6b8245c479cd85",
+      "size_bytes": 5403
+    },
+    "_files/thesis/arxiv_pkg/ancillary/replay-evidence.json": {
+      "sha256": "1bc7d0fa4a06c3cce9fac7af2d1c39f4f93b96ca5c5a8236c082ada47e79b493",
+      "size_bytes": 3153
+    },
+    "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/GLR.lean": {
+      "sha256": "91daa1ff0b4254947df55d1373e5005336c9fb2bef66a5d8b02fdfb3881ea2c2",
+      "size_bytes": 15857
+    },
+    "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/GradedSemiring.lean": {
+      "sha256": "ab2a7408f7ffafea456e5b452f9cde1f7c5a8ce451bb3bd3b65db6ddd0d24c1c",
+      "size_bytes": 7101
+    },
+    "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/LinearReceipt.lean": {
+      "sha256": "c2fe4846c218f04b095ae9474d5e9218bdbff30224c56c35841bb8b4e9c23fdd",
+      "size_bytes": 6706
+    },
+    "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/StrongMonadIdentity.lean": {
+      "sha256": "d4163cb55cb35abb08c916cc3cc3a5e2012ed56d206b1687c5fb69bbe1fbb75e",
+      "size_bytes": 8311
+    },
+    "_files/thesis/arxiv_pkg/ancillary/lean_th8_skeleton/README.md": {
+      "sha256": "95ef19b9ae8ff567b9eab206e2eb90266d0a2bb2017a2da674b306c555047afb",
+      "size_bytes": 8153
+    },
+    "_files/thesis/zenodo_pkg/deposit.json": {
+      "sha256": "904ce8df249a48b795b9cc6de3ae38a07e4b4454da3deba9fb31e92ea162e234",
+      "size_bytes": 8322
+    },
+    "_files/thesis/fly_high_v6/FLY_HIGH_V6_REPORT.md": {
+      "sha256": "a0b58a6282e4b88e224cd7bdfac0bf7cee3d3089065ad000f73a8b87d0cc74b9",
+      "size_bytes": 6527
+    },
+    "_files/thesis/fly_high_v6/DOCTRINE_SWEEP_V6.md": {
+      "sha256": "131dfef4b03caa8596c651f98b73daf6d1132f7716d3fdb0257d5f28cd1d8ad5",
+      "size_bytes": 22022
+    },
+    "_files/thesis/fly_high_v6/GAP_ANALYSIS.md": {
+      "sha256": "1006be172b5fe92bdf0e0d8aa56e3d26d7f5ccf117af7ab6e7355c3a937b7c21",
+      "size_bytes": 35909
+    },
+    "_files/thesis/lean_th8/GLR.lean": {
+      "sha256": "91daa1ff0b4254947df55d1373e5005336c9fb2bef66a5d8b02fdfb3881ea2c2",
+      "size_bytes": 15857
+    },
+    "_files/thesis/lean_th8/GradedSemiring.lean": {
+      "sha256": "ab2a7408f7ffafea456e5b452f9cde1f7c5a8ce451bb3bd3b65db6ddd0d24c1c",
+      "size_bytes": 7101
+    },
+    "_files/thesis/lean_th8/LinearReceipt.lean": {
+      "sha256": "c2fe4846c218f04b095ae9474d5e9218bdbff30224c56c35841bb8b4e9c23fdd",
+      "size_bytes": 6706
+    },
+    "_files/thesis/lean_th8/StrongMonadIdentity.lean": {
+      "sha256": "d4163cb55cb35abb08c916cc3cc3a5e2012ed56d206b1687c5fb69bbe1fbb75e",
+      "size_bytes": 8311
+    },
+    "_files/thesis/lean_th8/README.md": {
+      "sha256": "95ef19b9ae8ff567b9eab206e2eb90266d0a2bb2017a2da674b306c555047afb",
+      "size_bytes": 8153
+    },
+    "_files/thesis/lean_th8/TH8_LEAN_SKELETON.md": {
+      "sha256": "2c3669c5bd16c9723af030bac9d9198d9bda44c38200dded19653e1212442856",
+      "size_bytes": 11000
+    },
+    "_files/agi_v5/PM_OVERWATCH_REPORT.md": {
+      "sha256": "af86fdf812a403efed29a0c753fde1ceea4eb46a086bfba6286e7cafe351e04e",
+      "size_bytes": 26342
+    },
+    "_files/agi_v5/vsp/proposal.md": {
+      "sha256": "4e799036d885df3d906e62edebc0c1c6fb57bf1b11ef44e98e7c1a8df7c97929",
+      "size_bytes": 48943
+    },
+    "_files/agi_v5/forecast_gauge/operational_spec.md": {
+      "sha256": "800c3ddc1a65e9fd6cd47df19f6271a34e11c1a91b56e8642a8fb7d56d288cf0",
+      "size_bytes": 51465
+    },
+    "_files/agi_v5/recon/publications.md": {
+      "sha256": "73eeaccc86db90cfdbd3f96cda5b7d6c80ad9c408719dd05efbb3f0863b78a04",
+      "size_bytes": 16495
+    },
+    "_files/agi_v5/recon/github.md": {
+      "sha256": "bfb5a2970393d619623116e759640b81ba16e5a6144fc4ef2b79b5e203bf585f",
+      "size_bytes": 23808
+    },
+    "_files/agi_v5/recon/devpractice.md": {
+      "sha256": "8546c86c236a7d171384ecd00a46d52e1136115e6291e721de9dfc9a98462754",
+      "size_bytes": 32770
+    },
+    "_files/agi_v5/recon/agi_forecast.md": {
+      "sha256": "4a418ad94d4ec86566db54d5cc231dde543dda1036691259880694c667cd035d",
+      "size_bytes": 35279
+    },
+    "_files/agi_v5/synthesis/EVOLUTION_V5_PROPOSAL.md": {
+      "sha256": "0db56780652ba59d91304daa2bf2ee35cd444276695e9b8148414701cba4c750",
+      "size_bytes": 59206
+    },
+    "_files/agi_v5/charter/CHARTER.md": {
+      "sha256": "9ecd3f79a33e96dbba3327d7d3c3e3004eb3f0a1cadd3499e805b70c7c521a24",
+      "size_bytes": 4996
+    },
+    "_files/ops/anthropic/anthropic_application_answers.md": {
+      "sha256": "09c6d060b09640357ea5bcb093cffceca6ca33c3138d6988b249fd5f2791bf65",
+      "size_bytes": 4488
+    },
+    "_files/ops/anthropic/anthropic_fellows_application_answers.md": {
+      "sha256": "9f3c475aa794433dd1053daae5065f71c64ee026dc8522e8485f35c1ca7aadbe",
+      "size_bytes": 11358
+    },
+    "_files/ops/merge_logs/github_expert_diagnostic.md": {
+      "sha256": "2e610203020f1caf967c4fac160f74b152d9e23934ca17f099537817b81d4e87",
+      "size_bytes": 6085
+    },
+    "_files/ops/merge_logs/github_expert_merge_log.md": {
+      "sha256": "359c9987fe3a4e00c2522fab2bd97071596f984f10141558692665d68aa2557a",
+      "size_bytes": 13756
+    }
+  },
+  "missing_files": [],
+  "user_directives": {
+    "git_author_metadata": "User has approved current state. NO action needed on commit author byline. CITATION.cff in each repo asserts canonical authorship."
+  },
+  "file_manifest_summary": {
+    "total_files": 312,
+    "total_bytes": 3357043,
+    "total_mb": 3.2
+  }
+}

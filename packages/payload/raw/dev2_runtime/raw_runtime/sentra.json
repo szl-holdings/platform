@@ -1,0 +1,28 @@
+{
+  "repo": "szl-holdings/sentra",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "sentra",
+    "full_name": "szl-holdings/sentra",
+    "description": "Cyber resilience command. Threat modeling, posture drift detection, incident response, and policy-gated remediation with full audit trails.",
+    "language": null,
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/sentra.git",
+    "pushed_at": "2026-05-15T05:33:18Z"
+  },
+  "latest_release": null,
+  "latest_tag": {
+    "name": "v1.0.0-alpha",
+    "sha": "d02cbdbd4b00ab747a804af46106dadbdb2ba676"
+  },
+  "latest_commit_sha": "2ac304a9511ccbcf20414cdfcc164f9aed5b5092",
+  "package_json": null,
+  "root_files": [
+    ".github", "CHANGELOG.md", "CITATION.cff", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md", "LICENSE", "NOTICE", "README.md", "SECURITY.md",
+    "social-preview.svg"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# Sentra\n\n> Cyber resilience command.\n\n[![CI](https://github.com/szl-holdings/sentra/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/sentra/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/sentra/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/sentra/actions/workflows/codeql.yml)"
+}

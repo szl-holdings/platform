@@ -1,0 +1,23 @@
+{
+  "repo": "szl-holdings/szl-brand",
+  "fetched_at": "2026-05-17T00:00:00Z",
+  "api_data": {
+    "name": "szl-brand",
+    "full_name": "szl-holdings/szl-brand",
+    "description": "SZL Holdings brand assets \u2014 social preview images (1280\u00d7640 PNG), logo monograms, and brand guidance. Upload these to repo Settings \u2192 Social preview.",
+    "language": "Python",
+    "default_branch": "main",
+    "clone_url": "https://github.com/szl-holdings/szl-brand.git",
+    "pushed_at": "2026-05-15T03:52:31Z"
+  },
+  "latest_release": null,
+  "latest_tag": null,
+  "latest_commit_sha": "d86a37d5305a30886f7884cc4114cda48a8a3402",
+  "package_json": null,
+  "root_files": [
+    ".github", "README.md"
+  ],
+  "src_files": null,
+  "cargo_toml": null,
+  "readme_excerpt": "# szl-brand\n\n**SZL Holdings brand assets.** Source-of-truth for social preview images, logo monograms, and brand guidance applied across the GitHub organization. Updated 2026-05-12.\n\n[![Banners](https://img.shields.io/badge/banners-14%20%C2%B7%201280\u00d7640%20PNG-2DA44E?style=flat-square)](#catalog-14-banners)\n[![Brand](https://img.shields.io/badge/accent-%23805ad5-805AD5?style=flat-square)](#design-system)"
+}

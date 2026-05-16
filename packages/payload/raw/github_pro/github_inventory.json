@@ -1,0 +1,5735 @@
+{
+  "generated_at": "2026-05-15T21:17:47.068560+00:00",
+  "generated_by": "GitHub Pro \u00b7 Lutar, Stephen P.",
+  "org": "szl-holdings",
+  "repo_count": 16,
+  "repos": {
+    "amaru": {
+      "metadata": {
+        "full_name": "szl-holdings/amaru",
+        "private": false,
+        "description": "Convergent multi-source data sync. Append-only delta logs, hash-verified ingest, and bounded loops with measurable convergence.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 73,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 5,
+        "created_at": "2026-04-30T17:32:20Z",
+        "updated_at": "2026-05-14T23:53:59Z",
+        "pushed_at": "2026-05-15T12:58:31Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "amaru",
+          "append-only-log",
+          "convergent-sync",
+          "data-convergence",
+          "governed-ingest",
+          "proof-chain",
+          "series-a"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "716fd4c22b97fdda0826e92fb5a0d5ffba4400f0"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "6e1614d541d6",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:53:55Z"
+        },
+        {
+          "sha": "9fb9dcbe1871",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:44Z"
+        },
+        {
+          "sha": "ba1c5835f130",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:40Z"
+        },
+        {
+          "sha": "5f46f51da487",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:32Z"
+        },
+        {
+          "sha": "23ca080bd815",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:26Z"
+        },
+        {
+          "sha": "25303d962b4c",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:21Z"
+        },
+        {
+          "sha": "fb749c3870dd",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:16Z"
+        },
+        {
+          "sha": "8ff327611bae",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:33:57Z"
+        },
+        {
+          "sha": "9af941570c88",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:54Z"
+        },
+        {
+          "sha": "26d89223a032",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:02Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812908,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812911,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195486,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Dependabot",
+          "Scorecard analysis",
+          "docs / External link check",
+          "secrets / TruffleHog Secret Scan",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "docs / Markdown lint",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 20,
+          "title": "chore(ci)(deps): bump github/codeql-action from 4.35.4 to 4.35.5",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T12:58:32Z",
+          "updatedAt": "2026-05-15T12:58:32Z",
+          "isDraft": false
+        },
+        {
+          "number": 19,
+          "title": "chore(ci)(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T12:58:14Z",
+          "updatedAt": "2026-05-15T12:58:15Z",
+          "isDraft": false
+        },
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:47:21Z",
+          "updatedAt": "2026-05-15T03:47:21Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:12:41Z",
+          "updatedAt": "2026-05-15T01:12:41Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:49Z",
+          "updatedAt": "2026-05-14T00:57:49Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:54:07Z",
+        "checks": [
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "a11oy": {
+      "metadata": {
+        "full_name": "szl-holdings/a11oy",
+        "private": false,
+        "description": "Governed agentic execution fabric. Policy gates, signal mesh, proof ledger, and \u039b invariant runtime.",
+        "default_branch": "main",
+        "language": "TypeScript",
+        "license": "NOASSERTION",
+        "size": 175,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 6,
+        "created_at": "2026-04-30T17:32:24Z",
+        "updated_at": "2026-05-15T19:06:28Z",
+        "pushed_at": "2026-05-15T20:48:09Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "a11oy",
+          "agent-fabric",
+          "agentic-execution",
+          "ai-governance",
+          "governed-ai",
+          "policy-gates",
+          "proof-chain",
+          "series-a"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "284ab434eb52424b83499567f8cb8e0d780864d3"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "3d0f98412ee6",
+          "message": "feat(knowledge): Math Pod V3 \u2014 a11oy-knowledge v0.4.0 (#20)",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T19:06:00Z"
+        },
+        {
+          "sha": "4117b06d602d",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#17)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:02Z"
+        },
+        {
+          "sha": "b248fac745d6",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:43Z"
+        },
+        {
+          "sha": "80e238204b28",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:06Z"
+        },
+        {
+          "sha": "98571ea520f7",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:01Z"
+        },
+        {
+          "sha": "5044df934972",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:41:56Z"
+        },
+        {
+          "sha": "b326b01e5d60",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:41:51Z"
+        },
+        {
+          "sha": "494d61b1028e",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:41:46Z"
+        },
+        {
+          "sha": "60c12fea8449",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:33:49Z"
+        },
+        {
+          "sha": "0c826b8e58d5",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:50Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812916,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812921,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195484,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Dependabot",
+          "Scorecard analysis",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / External link check",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan",
+          "Scorecard analysis",
+          "Analyze (actions)"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 22,
+          "title": "chore(ci)(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T20:48:10Z",
+          "updatedAt": "2026-05-15T20:48:11Z",
+          "isDraft": false
+        },
+        {
+          "number": 21,
+          "title": "chore(ci)(deps): bump github/codeql-action from 4.35.4 to 4.35.5",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T20:48:06Z",
+          "updatedAt": "2026-05-15T20:48:07Z",
+          "isDraft": false
+        },
+        {
+          "number": 19,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:49Z",
+          "updatedAt": "2026-05-15T03:48:49Z",
+          "isDraft": true
+        },
+        {
+          "number": 18,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:12:47Z",
+          "updatedAt": "2026-05-15T01:12:47Z",
+          "isDraft": true
+        },
+        {
+          "number": 16,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:16Z",
+          "updatedAt": "2026-05-14T00:58:16Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "feat(lambda-ql): T6-Builder \u2014 \u039b-QL parser + retriever + UI components [doctrine v2]",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-13T21:25:52Z",
+          "updatedAt": "2026-05-14T01:10:05Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-15T19:06:22Z",
+        "checks": [
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "14 out of 16 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 10,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 9,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "sentra": {
+      "metadata": {
+        "full_name": "szl-holdings/sentra",
+        "private": false,
+        "description": "Cyber resilience command. Threat modeling, posture drift detection, incident response, and policy-gated remediation with full audit trails.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 65,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 4,
+        "created_at": "2026-04-30T17:32:28Z",
+        "updated_at": "2026-05-14T23:54:15Z",
+        "pushed_at": "2026-05-15T05:33:18Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "cyber-resilience",
+          "governed-ai",
+          "incident-response",
+          "posture-drift",
+          "sentra",
+          "series-a",
+          "threat-modeling"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "d02cbdbd4b00ab747a804af46106dadbdb2ba676"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "2ac304a9511c",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:10Z"
+        },
+        {
+          "sha": "c0a329e5c488",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:44Z"
+        },
+        {
+          "sha": "35fd777b6333",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:18Z"
+        },
+        {
+          "sha": "bbfc29f17149",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:13Z"
+        },
+        {
+          "sha": "29279cfb3411",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:08Z"
+        },
+        {
+          "sha": "e3998cc17d37",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:03Z"
+        },
+        {
+          "sha": "28c11510068d",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:58Z"
+        },
+        {
+          "sha": "35e0a17041db",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:52Z"
+        },
+        {
+          "sha": "37c438b9f13e",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:12:10Z"
+        },
+        {
+          "sha": "fe4c649ab11c",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:19Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812923,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812926,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195490,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Dependabot",
+          "Scorecard analysis",
+          "docs / Markdown lint",
+          "docs / External link check",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 19,
+          "title": "chore(ci)(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T05:33:19Z",
+          "updatedAt": "2026-05-15T05:33:20Z",
+          "isDraft": false
+        },
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:51Z",
+          "updatedAt": "2026-05-15T03:48:51Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:12:53Z",
+          "updatedAt": "2026-05-15T01:12:53Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:43Z",
+          "updatedAt": "2026-05-14T00:57:43Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:54:33Z",
+        "checks": [
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "terra": {
+      "metadata": {
+        "full_name": "szl-holdings/terra",
+        "private": false,
+        "description": "Real estate intelligence. Deal pipeline scoring, portfolio analytics, market signals, and AI-assisted underwriting.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 67,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 5,
+        "created_at": "2026-04-30T17:32:36Z",
+        "updated_at": "2026-05-14T23:54:22Z",
+        "pushed_at": "2026-05-15T14:40:14Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "ai-underwriting",
+          "deal-pipeline",
+          "portfolio-analytics",
+          "proptech",
+          "real-estate",
+          "series-a",
+          "terra"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "c45d6ca2861fe7623056264566c8dc2ce93f9c59"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "2ffac59c4555",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:18Z"
+        },
+        {
+          "sha": "0fadf66cdecb",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:43Z"
+        },
+        {
+          "sha": "29d6373adb3a",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:50Z"
+        },
+        {
+          "sha": "03ec74f6c96a",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:45Z"
+        },
+        {
+          "sha": "1cb63540a59a",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:39Z"
+        },
+        {
+          "sha": "ea157b8e5811",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:34Z"
+        },
+        {
+          "sha": "844b4a346647",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:44:28Z"
+        },
+        {
+          "sha": "30bb70c4cf95",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:13Z"
+        },
+        {
+          "sha": "ae0b4f40c059",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:12:15Z"
+        },
+        {
+          "sha": "8bf54f048eb1",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:24Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812933,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812936,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195492,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Dependabot",
+          "Scorecard analysis",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan",
+          "docs / Markdown lint",
+          "docs / External link check",
+          "docs / Required files present",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 20,
+          "title": "chore(ci)(deps): bump github/codeql-action from 4.35.4 to 4.35.5",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T14:40:14Z",
+          "updatedAt": "2026-05-15T14:40:16Z",
+          "isDraft": false
+        },
+        {
+          "number": 19,
+          "title": "chore(ci)(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T14:39:56Z",
+          "updatedAt": "2026-05-15T14:39:57Z",
+          "isDraft": false
+        },
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:53Z",
+          "updatedAt": "2026-05-15T03:48:53Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:12:59Z",
+          "updatedAt": "2026-05-15T01:12:59Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:59Z",
+          "updatedAt": "2026-05-14T00:57:59Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:54:36Z",
+        "checks": [
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "vessels": {
+      "metadata": {
+        "full_name": "szl-holdings/vessels",
+        "private": false,
+        "description": "Maritime fleet intelligence. Sanctions screening, dark-vessel detection, ownership graph analysis, and voyage analytics.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 62,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 3,
+        "created_at": "2026-04-30T17:32:40Z",
+        "updated_at": "2026-05-14T23:54:30Z",
+        "pushed_at": "2026-05-15T03:48:32Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "dark-vessel",
+          "fleet-intelligence",
+          "maritime",
+          "sanctions-screening",
+          "series-a",
+          "trade-compliance",
+          "vessels"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "64e0bd024a642f8cca51c4efe14cb60de3e1d70f"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "11e51f628353",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:25Z"
+        },
+        {
+          "sha": "8fc6893cf1d4",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:44Z"
+        },
+        {
+          "sha": "a5ef25522bee",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:22Z"
+        },
+        {
+          "sha": "5ab1b1b6e8b6",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:16Z"
+        },
+        {
+          "sha": "a1770b50f670",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:11Z"
+        },
+        {
+          "sha": "8f1d50e9c333",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:06Z"
+        },
+        {
+          "sha": "c6cce6c7238c",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:01Z"
+        },
+        {
+          "sha": "9188c059f146",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:05Z"
+        },
+        {
+          "sha": "8fe6ebcf2d4c",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:12:21Z"
+        },
+        {
+          "sha": "bd9220a4ee22",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:29Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812938,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812943,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195493,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 8,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "docs / External link check",
+          "secrets / TruffleHog Secret Scan",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:55Z",
+          "updatedAt": "2026-05-15T03:48:55Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:13:05Z",
+          "updatedAt": "2026-05-15T01:13:05Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:25Z",
+          "updatedAt": "2026-05-14T00:57:25Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:55:06Z",
+        "checks": [
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "counsel": {
+      "metadata": {
+        "full_name": "szl-holdings/counsel",
+        "private": false,
+        "description": "Legal matter command. Policy-gated AI workflows, document review, obligation mapping, and proof-chain delivery.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 62,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 3,
+        "created_at": "2026-04-30T17:32:32Z",
+        "updated_at": "2026-05-14T23:54:38Z",
+        "pushed_at": "2026-05-15T03:48:33Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "compliance",
+          "counsel",
+          "document-review",
+          "legal-tech",
+          "matter-management",
+          "obligation-mapping",
+          "series-a"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "ff0c594395656ac813d639706bc02a56b535d1e8"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "4decc1c773c0",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:33Z"
+        },
+        {
+          "sha": "9abf40545be3",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:32:44Z"
+        },
+        {
+          "sha": "042837c4a888",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:48Z"
+        },
+        {
+          "sha": "131c3aaa3cb0",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:41Z"
+        },
+        {
+          "sha": "dc48782f16aa",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:36Z"
+        },
+        {
+          "sha": "99538a4ff43b",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:30Z"
+        },
+        {
+          "sha": "a031fb2cfa23",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:25Z"
+        },
+        {
+          "sha": "efd2d1ff0f2e",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:33:37Z"
+        },
+        {
+          "sha": "6cd140a98e3e",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:12:05Z"
+        },
+        {
+          "sha": "1fede3a603c0",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:13Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812929,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812931,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195488,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 8,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "docs / External link check",
+          "secrets / TruffleHog Secret Scan",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:57Z",
+          "updatedAt": "2026-05-15T03:48:57Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:13:12Z",
+          "updatedAt": "2026-05-15T01:13:12Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:40Z",
+          "updatedAt": "2026-05-14T00:57:40Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:54:55Z",
+        "checks": [
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "carlota-jo": {
+      "metadata": {
+        "full_name": "szl-holdings/carlota-jo",
+        "private": false,
+        "description": "Private advisory operations. Concierge workflow with proof-chain delivery and multi-party coordination for high-net-worth clients.",
+        "default_branch": "main",
+        "language": null,
+        "license": "NOASSERTION",
+        "size": 65,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 4,
+        "created_at": "2026-04-30T17:32:44Z",
+        "updated_at": "2026-05-14T23:54:46Z",
+        "pushed_at": "2026-05-15T08:23:22Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "advisory",
+          "ai-governance",
+          "carlota-jo",
+          "concierge-ai",
+          "family-office",
+          "proof-chain",
+          "series-a",
+          "uhnw"
+        ]
+      },
+      "latest_release": null,
+      "tags": [
+        {
+          "name": "v1.0.0-alpha",
+          "sha": "f572913a64dd4db7e6d6054af4cd26737eb798aa"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "d1a4ce0beccf",
+          "message": "fix: strip Jr. from README (doctrine compliance) (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T23:54:41Z"
+        },
+        {
+          "sha": "ee8cce289c6b",
+          "message": "docs(readme): bump runtime to v6.3.0 + add runtime DOI badge (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:33:10Z"
+        },
+        {
+          "sha": "b6af6f8967e6",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#9)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:15Z"
+        },
+        {
+          "sha": "a7fd182bc4f9",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#10)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:09Z"
+        },
+        {
+          "sha": "6ec885a900e4",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#11)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:43:04Z"
+        },
+        {
+          "sha": "f2174c06f734",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#12)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:58Z"
+        },
+        {
+          "sha": "688a5fb9c210",
+          "message": "chore(ci)(deps): bump step-security/harden-runner from 2.10.2 to 2.19.1 (#13)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:42:52Z"
+        },
+        {
+          "sha": "332d755a12e4",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#8)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:29Z"
+        },
+        {
+          "sha": "a50b970841b3",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218 ouroboros tests, v11 DOI, mechanisms I\u2013VI (#6)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:59Z"
+        },
+        {
+          "sha": "b14c960dfeca",
+          "message": "ci(codeql): scan actions only (no JS/TS source present) (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:11:07Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "Analyze (actions)",
+          "CodeQL",
+          "docs / External link check",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812947,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812951,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195487,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Dependabot",
+          "Scorecard analysis",
+          "secrets / TruffleHog Secret Scan",
+          "docs / External link check",
+          "docs / Required files present",
+          "docs / Validate CITATION.cff",
+          "docs / Markdown lint",
+          "Analyze (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 19,
+          "title": "chore(ci)(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3",
+          "author": "app/dependabot",
+          "createdAt": "2026-05-15T08:23:22Z",
+          "updatedAt": "2026-05-15T08:23:23Z",
+          "isDraft": false
+        },
+        {
+          "number": 18,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:58Z",
+          "updatedAt": "2026-05-15T03:48:58Z",
+          "isDraft": true
+        },
+        {
+          "number": 17,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:13:18Z",
+          "updatedAt": "2026-05-15T01:13:18Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:02Z",
+          "updatedAt": "2026-05-14T00:58:02Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-14T23:55:12Z",
+        "checks": [
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/25 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "SAST",
+            "score": 8,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "License",
+            "score": 9,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 4,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 8,
+            "reason": "13 out of 15 merged PRs checked by a CI test -- score normalized to 8"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "ouroboros": {
+      "metadata": {
+        "full_name": "szl-holdings/ouroboros",
+        "private": false,
+        "description": "Bounded-loop runtime implementing the Lutar Invariant \u039b. Audit-closure operator with sub-millisecond per-request overhead. 172/172 tests, Apache-2.0.",
+        "default_branch": "main",
+        "language": "TypeScript",
+        "license": "Apache-2.0",
+        "size": 366,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 6,
+        "created_at": "2026-04-30T17:33:45Z",
+        "updated_at": "2026-05-12T13:25:08Z",
+        "pushed_at": "2026-05-15T03:47:54Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "bounded-recursion",
+          "convergence",
+          "proof-chain",
+          "runtime",
+          "typescript",
+          "vitest"
+        ]
+      },
+      "latest_release": {
+        "tagName": "v6.3.0",
+        "name": "v6.3.0 \u2014 Series A Presentation Layer",
+        "publishedAt": "2026-05-13T16:48:19Z",
+        "isDraft": false,
+        "isPrerelease": false,
+        "asset_count": 0
+      },
+      "tags": [
+        {
+          "name": "v6.3.0",
+          "sha": "d64748cc9ad67296be296c1ef6752ae181413fd7"
+        },
+        {
+          "name": "v6.2.0",
+          "sha": "752657b8f9848c4a46a9fb5ab9636d6a4ed6ab34"
+        },
+        {
+          "name": "v6.1.0",
+          "sha": "e9fc4b86eae18bb7401b14cb0e53900ba8e47ad8"
+        },
+        {
+          "name": "v6.0.0",
+          "sha": "11e8dfd9e1e19a5d34f2e6934451ccf493afd6e9"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "d64748cc9ad6",
+          "message": "showcase(email): unify contact to stephen@szlholdings.com (#20)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:24:58Z"
+        },
+        {
+          "sha": "fd8ceaf16f5e",
+          "message": "readme: Series-A overhaul \u2014 verified 218/218, mechanisms I\u2013VI, v11 DOI (#22)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:17:08Z"
+        },
+        {
+          "sha": "95d853698edc",
+          "message": "fix(r3): explicit permissions: {} to resolve Scorecard Token-Permissions finding (#18)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-11T01:34:02Z"
+        },
+        {
+          "sha": "41bf085507e5",
+          "message": "chore(ci): bump reusable-scorecard pin to fix permissions (#17)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-10T22:19:00Z"
+        },
+        {
+          "sha": "aae29d2732b0",
+          "message": "fix(ci): remove workflow-level 'read-all' that blocks Scorecard startup (#16)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-10T22:17:36Z"
+        },
+        {
+          "sha": "58bfa97fc66f",
+          "message": "docs: add OpenSSF Scorecard badge and Mermaid runtime-architecture diagram (#15)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-10T22:15:48Z"
+        },
+        {
+          "sha": "f8055e189643",
+          "message": "chore(security): SHA-pin reusable workflow refs to .github@c8359e5 (#14)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-10T22:07:39Z"
+        },
+        {
+          "sha": "0a49a501e0a0",
+          "message": "fix(ci): remove branch_protection_rule trigger from Scorecard (causes startup_failure)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-10T16:25:27Z"
+        },
+        {
+          "sha": "138806605383",
+          "message": "chore: migrate ouroboros to pnpm 10 (Series-A)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-06T16:16:10Z"
+        },
+        {
+          "sha": "32cbccf7231c",
+          "message": "ci: adopt org-wide reusable workflows + Dependabot (#12)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-06T15:31:20Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "ci / lint",
+          "ci / typecheck",
+          "ci / test",
+          "ci / build",
+          "codeql / Analyze (javascript-typescript)",
+          "secrets / TruffleHog Secret Scan",
+          "dependency-review / Dependency Review",
+          "trivy / Trivy fs scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812871,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812873,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195494,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @stephenlutar2-hash\nNOTI",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 2,
+        "failing": [],
+        "passing": [
+          "Analyze (javascript-typescript)",
+          "scorecard / Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 29,
+          "title": "docs(anatomy): publish 4 anatomy PDFs (heart/brain/wires/full_body)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:27Z",
+          "updatedAt": "2026-05-15T03:48:27Z",
+          "isDraft": true
+        },
+        {
+          "number": 28,
+          "title": "feat(huklla T11): DOI-title CI gate (postmortem follow-up)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:46:51Z",
+          "updatedAt": "2026-05-15T03:46:51Z",
+          "isDraft": true
+        },
+        {
+          "number": 27,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:13:29Z",
+          "updatedAt": "2026-05-15T01:13:29Z",
+          "isDraft": true
+        },
+        {
+          "number": 26,
+          "title": "doctrine(readme): Apache-2.0 license badge, v6.3.0 release, v12+v13 DOI badges",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:09:27Z",
+          "updatedAt": "2026-05-15T03:45:49Z",
+          "isDraft": true
+        },
+        {
+          "number": 25,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:46Z",
+          "updatedAt": "2026-05-14T00:57:46Z",
+          "isDraft": true
+        },
+        {
+          "number": 24,
+          "title": "docs(readme): sync version badge and status to v6.3.0",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-13T19:21:02Z",
+          "updatedAt": "2026-05-13T19:21:02Z",
+          "isDraft": false
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.8,
+        "date": "2026-05-12T13:25:56Z",
+        "checks": [
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/27 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "SAST",
+            "score": 4,
+            "reason": "SAST tool is not run on all commits -- score normalized to 4"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 8,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 5,
+            "reason": "9 out of 18 merged PRs checked by a CI test -- score normalized to 5"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 11,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 10,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 9,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "ouroboros-thesis": {
+      "metadata": {
+        "full_name": "szl-holdings/ouroboros-thesis",
+        "private": false,
+        "description": "The Ouroboros Thesis \u2014 peer-reviewable preprints on bounded recursive computation and audit-closure operators for governed AI. Zenodo DOI-pinned. CC BY 4.0.",
+        "default_branch": "main",
+        "language": "Python",
+        "license": "CC-BY-4.0",
+        "size": 14270,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 6,
+        "created_at": "2026-04-30T17:33:38Z",
+        "updated_at": "2026-05-15T19:08:27Z",
+        "pushed_at": "2026-05-15T19:08:22Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": false,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "ai-governance",
+          "ai-safety",
+          "bounded-recursion",
+          "cc-by-4",
+          "convergence-traces",
+          "doi",
+          "research-paper",
+          "zenodo"
+        ]
+      },
+      "latest_release": {
+        "tagName": "paper-v12-1.0.0",
+        "name": "v12 \u2014 The \u039b-Ouroboros Substrate \u2014 Four Machine-Verified Mechanisms",
+        "publishedAt": "2026-05-14T01:14:46Z",
+        "isDraft": false,
+        "isPrerelease": false,
+        "asset_count": 0
+      },
+      "tags": [
+        {
+          "name": "v11.0.0",
+          "sha": "d495cdff6f2a4cb4f2d4198ef5e52db6b3ef1f4c"
+        },
+        {
+          "name": "v10.0.0",
+          "sha": "d495cdff6f2a4cb4f2d4198ef5e52db6b3ef1f4c"
+        },
+        {
+          "name": "v9.0.0",
+          "sha": "d495cdff6f2a4cb4f2d4198ef5e52db6b3ef1f4c"
+        },
+        {
+          "name": "v3.0.0",
+          "sha": "69a5416433671d7217de6be2b4b7b7b2fd2c5264"
+        },
+        {
+          "name": "v2.0.0",
+          "sha": "a3678e3ee23b0ed17b0a8ef1631977dc809bd840"
+        },
+        {
+          "name": "paper-v12-1.0.0",
+          "sha": "909d51dfb831abbf293bf3b5c7bc4fb7e30fea5e"
+        },
+        {
+          "name": "paper-v11-1.0.0",
+          "sha": "59f556efbfef4b66f790dd9103039e6e963b7633"
+        },
+        {
+          "name": "paper-v10-1.0.0",
+          "sha": "dd6c01d6b57474ef1935c413bd55cd65818b0776"
+        },
+        {
+          "name": "paper-v9-1.0.0",
+          "sha": "dd6c01d6b57474ef1935c413bd55cd65818b0776"
+        },
+        {
+          "name": "paper-v8-1.0.0",
+          "sha": "a42e586a179c3224faf5fe13e0d217e1266754c7"
+        },
+        {
+          "name": "paper-v7-1.0.0",
+          "sha": "a42e586a179c3224faf5fe13e0d217e1266754c7"
+        },
+        {
+          "name": "paper-v6-1.0.0",
+          "sha": "a42e586a179c3224faf5fe13e0d217e1266754c7"
+        },
+        {
+          "name": "paper-v5-1.0.0",
+          "sha": "a42e586a179c3224faf5fe13e0d217e1266754c7"
+        },
+        {
+          "name": "paper-v4-1.0.0",
+          "sha": "a42e586a179c3224faf5fe13e0d217e1266754c7"
+        },
+        {
+          "name": "paper-v3-2.0.0",
+          "sha": "b6feffe422c209f20a8cba0651d775f7cf1ba384"
+        },
+        {
+          "name": "paper-v3-1.0.0",
+          "sha": "089dce5fbce115c59a73a51540a0480bff603f92"
+        },
+        {
+          "name": "paper-v2-empirical-1.0.0",
+          "sha": "ce2071d9ae61efe9e5f580ead84eb738e758866a"
+        }
+      ],
+      "recent_commits": [
+        {
+          "sha": "060eb8c8c8a1",
+          "message": "feat(thesis): Math Pod V3 \u2014 arXiv-ready main.tex.md + Unified Extension v0.4.0 (#40)",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T19:08:22Z"
+        },
+        {
+          "sha": "909d51dfb831",
+          "message": "docs(readme): bump runtime badge to v6.3.0 + add runtime DOI badge (#33)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T16:59:15Z"
+        },
+        {
+          "sha": "edfd1dd5a749",
+          "message": "thesis: professional title rebrand across v1-v11 (Series A) (#32)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T16:47:46Z"
+        },
+        {
+          "sha": "1a9a79097850",
+          "message": "chore(ci)(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#28)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:51Z"
+        },
+        {
+          "sha": "9c660bb621ab",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#29)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:45Z"
+        },
+        {
+          "sha": "5df2584aa06d",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#30)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:40Z"
+        },
+        {
+          "sha": "28a9deb9b629",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#31)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:45:34Z"
+        },
+        {
+          "sha": "2b404d371122",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#27)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:44Z"
+        },
+        {
+          "sha": "c822ce0ef7bc",
+          "message": "paper(v12): The \u039b-Ouroboros Substrate \u2014 Four Machine-Verified Mechanisms (#25)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:25:53Z"
+        },
+        {
+          "sha": "d3a80cd264ad",
+          "message": "docs(publications): add canonical Thesis Publications record (24 innovations) (#24)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:25:48Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "docs / Validate CITATION.cff",
+          "docs / Markdown lint",
+          "docs / Required files present",
+          "docs / External link check",
+          "secrets / TruffleHog Secret Scan"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 15812874,
+          "name": "Protect default branch",
+          "enforcement": "active",
+          "target": "branch"
+        },
+        {
+          "id": 15812877,
+          "name": "Protect release tags",
+          "enforcement": "active",
+          "target": "tag"
+        },
+        {
+          "id": 16195489,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings / Ouroboros Thesis \u2014 Code owners\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Security-sensitive surface\nSECURITY.md               @stephenlutar2-hash\nLICENSE                   @step",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 9,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "docs / Required files present",
+          "docs / External link check",
+          "secrets / TruffleHog Secret Scan",
+          "docs / Markdown lint",
+          "docs / Validate CITATION.cff",
+          "Analyze (python)",
+          "Analyze (javascript-typescript)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 39,
+          "title": "docs(anatomy): publish 4 anatomy PDFs (heart/brain/wires/full_body)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:49:18Z",
+          "updatedAt": "2026-05-15T03:49:18Z",
+          "isDraft": true
+        },
+        {
+          "number": 38,
+          "title": "feat(huklla T11): DOI-title CI gate (postmortem follow-up)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:47:06Z",
+          "updatedAt": "2026-05-15T03:48:54Z",
+          "isDraft": true
+        },
+        {
+          "number": 37,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:04Z",
+          "updatedAt": "2026-05-15T01:14:04Z",
+          "isDraft": true
+        },
+        {
+          "number": 36,
+          "title": "doctrine(thesis): v13 latest-paper badge + v12/v13 DOI rows + CITATION.cff bump",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:09:40Z",
+          "updatedAt": "2026-05-15T03:49:25Z",
+          "isDraft": true
+        },
+        {
+          "number": 35,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:20Z",
+          "updatedAt": "2026-05-14T00:58:20Z",
+          "isDraft": true
+        },
+        {
+          "number": 34,
+          "title": "papers/v13: Ouroboros Thesis v13 (doctrine v2 PASS, GAP-02 re-loop)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:55:14Z",
+          "updatedAt": "2026-05-14T01:07:51Z",
+          "isDraft": false
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 7.2,
+        "date": "2026-05-15T19:08:46Z",
+        "checks": [
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/26 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 8,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "SAST",
+            "score": 9,
+            "reason": "SAST tool is not run on all commits -- score normalized to 9"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 10,
+            "reason": "21 out of 21 merged PRs checked by a CI test -- score normalized to 10"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 6,
+        "alerts": [
+          {
+            "number": 9,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "lutar-lean": {
+      "metadata": {
+        "full_name": "szl-holdings/lutar-lean",
+        "private": false,
+        "description": "Machine-checked Lean 4 proofs of the Lutar Invariant (\u039b_k) \u2014 uniqueness theorem and Egyptian-exact weights. Companion to Paper v12.",
+        "default_branch": "main",
+        "language": "Lean",
+        "license": "Apache-2.0",
+        "size": 121,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 5,
+        "created_at": "2026-05-12T03:16:47Z",
+        "updated_at": "2026-05-15T19:04:10Z",
+        "pushed_at": "2026-05-15T19:04:05Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "fcae1aed26a3",
+          "message": "feat(doctrine-v3): MoralGrounding + MeasurabilityHonesty theorems (zero sorry) (#12)",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T19:04:05Z"
+        },
+        {
+          "sha": "9a0d0fbdc5dd",
+          "message": "fix: strip Jr. from README copyright line (doctrine compliance) (#13)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-14T22:04:16Z"
+        },
+        {
+          "sha": "d62521ad5bde",
+          "message": "chore(repo): Series A hygiene \u2014 LICENSE, SECURITY, CITATION.cff, CODEOWNERS, Scorecard hardening (#9",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:40:46Z"
+        },
+        {
+          "sha": "a28b37e2ca23",
+          "message": "fix(lean): Mathlib v4.13.0 API compatibility \u2014 restore green build (#7)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:21:05Z"
+        },
+        {
+          "sha": "c6c5511f44ee",
+          "message": "chore(ci)(deps): Bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#3)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:14Z"
+        },
+        {
+          "sha": "b0ffa5b6e23b",
+          "message": "chore(ci)(deps): Bump actions/checkout from 4 to 6 (#4)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:10Z"
+        },
+        {
+          "sha": "72dccb0aefe6",
+          "message": "chore(ci)(deps): Bump actions/upload-artifact from 4.6.2 to 7.0.1 (#5)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:05Z"
+        },
+        {
+          "sha": "132d2f0ac27f",
+          "message": "chore(ci)(deps): Bump github/codeql-action from 3.29.4 to 4.35.4 (#6)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:00Z"
+        },
+        {
+          "sha": "1fa1ae465d59",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#2)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:33:29Z"
+        },
+        {
+          "sha": "9c71932e7a7d",
+          "message": "feat(ref-vectors): cross-runtime \u039b\u2089 parity check (lake exe ref_vectors)",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T07:01:20Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "# SZL Holdings \u2014 Code owners (lutar-lean)\n#\n# These owners will be requested for review when someone opens a pull request.\n# Order matters: the LAST matching pattern wins.\n\n# Default \u2014 all files require review by the SZL Holdings core team\n*       @stephenlutar2-hash\n\n# CI / repo configuration\n/.github/                 @stephenlutar2-hash\n/.github/workflows/       @stephenlutar2-hash\n\n# Lean library + executables\n/Lutar/                   @stephenlutar2-hash\nLutar.lean                @stephenlut",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "codeql.yml",
+        "lean.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 3,
+        "failing": [],
+        "passing": [
+          "build",
+          "scorecard / Scorecard analysis",
+          "Analyze actions (actions)"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 16,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:50:02Z",
+          "updatedAt": "2026-05-15T03:50:02Z",
+          "isDraft": true
+        },
+        {
+          "number": 15,
+          "title": "feat(huklla T11): DOI-title CI gate (postmortem follow-up)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:47:22Z",
+          "updatedAt": "2026-05-15T03:47:22Z",
+          "isDraft": true
+        },
+        {
+          "number": 14,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:10Z",
+          "updatedAt": "2026-05-15T01:14:10Z",
+          "isDraft": true
+        },
+        {
+          "number": 11,
+          "title": "feat(t7): GraphHop + RAGReceipt \u2014 Lean 4 kernel-verified PASS 60/60 5\u00d7",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T01:09:05Z",
+          "updatedAt": "2026-05-14T01:10:41Z",
+          "isDraft": true
+        },
+        {
+          "number": 10,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:10Z",
+          "updatedAt": "2026-05-14T00:58:10Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 7.1,
+        "date": "2026-05-15T19:04:26Z",
+        "checks": [
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/7 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 7,
+            "reason": "dependency not pinned by hash detected -- score normalized to 7"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "SAST",
+            "score": 10,
+            "reason": "SAST tool is run on all commits"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": -1,
+            "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authenticatio"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 10,
+            "reason": "9 out of 9 merged PRs checked by a CI test -- score normalized to 10"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 5,
+        "alerts": [
+          {
+            "number": 18,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 9,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "szl-trust": {
+      "metadata": {
+        "full_name": "szl-holdings/szl-trust",
+        "private": false,
+        "description": "SZL Holdings Public Trust Portal \u2014 Covenant Proof Standard (CPS) run artifacts. E4 Codex Kernel reference run with 12 receipts (mocked:false), Dresden Codex + IAU citations, deterministic replay.",
+        "default_branch": "main",
+        "language": null,
+        "license": "CC-BY-4.0",
+        "size": 56,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 4,
+        "created_at": "2026-05-12T00:20:03Z",
+        "updated_at": "2026-05-15T00:01:48Z",
+        "pushed_at": "2026-05-15T03:50:33Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "24fd1238d5c0",
+          "message": "fix: CITATION.cff \u2014 split name-particle, drop Jr suffix (doctrine BLOCK-02/03) (#9)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-15T00:01:43Z"
+        },
+        {
+          "sha": "a873002db02c",
+          "message": "chore(series-a): close all hygiene gaps (SECURITY, CITATION, CoC, CODEOWNERS) + bump runtime to v6.3",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:41:07Z"
+        },
+        {
+          "sha": "92c5b0139555",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#3)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:25Z"
+        },
+        {
+          "sha": "4bdb522a850f",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#4)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:20Z"
+        },
+        {
+          "sha": "059840555396",
+          "message": "chore(ci)(deps): bump actions/checkout from 4 to 6 (#5)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:16Z"
+        },
+        {
+          "sha": "13371de716b9",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#6)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:11Z"
+        },
+        {
+          "sha": "4492a58cee8d",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#2)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:36Z"
+        },
+        {
+          "sha": "edbae6abc3f1",
+          "message": "readme: Series-A overhaul \u2014 badges, verified counts, cross-refs (#1)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:18:37Z"
+        },
+        {
+          "sha": "c7d43ba518ad",
+          "message": "chore(license): use canonical CC-BY-4.0 text so GitHub detects SPDX ID",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T01:10:26Z"
+        },
+        {
+          "sha": "1b6855a7fd3b",
+          "message": "fix(license): replace proprietary LICENSE with CC-BY-4.0 to match README",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T01:09:03Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "# Default codeowners \u2014 Stephen P. Lutar Jr.\n* @stephenlutar2-hash\n",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 7,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Validate JSON manifests",
+          "Validate trust runs",
+          "Analyze actions (actions)",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 12,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:50:42Z",
+          "updatedAt": "2026-05-15T03:50:42Z",
+          "isDraft": true
+        },
+        {
+          "number": 11,
+          "title": "feat(huklla T11): DOI-title CI gate (postmortem follow-up)",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:47:37Z",
+          "updatedAt": "2026-05-15T03:47:37Z",
+          "isDraft": true
+        },
+        {
+          "number": 10,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:17Z",
+          "updatedAt": "2026-05-15T01:14:17Z",
+          "isDraft": true
+        },
+        {
+          "number": 8,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:38Z",
+          "updatedAt": "2026-05-14T00:58:38Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.9,
+        "date": "2026-05-15T01:09:39Z",
+        "checks": [
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 8,
+            "reason": "dependency not pinned by hash detected -- score normalized to 8"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/7 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "SAST",
+            "score": 9,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": -1,
+            "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authenticatio"
+          },
+          {
+            "name": "Contributors",
+            "score": 0,
+            "reason": "project has 0 contributing companies or organizations -- score normalized to 0"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 10,
+            "reason": "8 out of 8 merged PRs checked by a CI test -- score normalized to 10"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 10,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 9,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": true,
+        "compliant": true
+      }
+    },
+    "szl-cookbook": {
+      "metadata": {
+        "full_name": "szl-holdings/szl-cookbook",
+        "private": false,
+        "description": "SZL Holdings engineering cookbook \u2014 Anthropic skills pattern. 9 skills covering pre-flight thinking, refactoring, review, debugging, dependencies, dead code, docs, and commit hygiene.",
+        "default_branch": "main",
+        "language": null,
+        "license": "Apache-2.0",
+        "size": 57,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 3,
+        "created_at": "2026-05-12T00:18:35Z",
+        "updated_at": "2026-05-15T00:01:57Z",
+        "pushed_at": "2026-05-15T03:50:49Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "0593de09406c",
+          "message": "fix: CITATION.cff \u2014 split name-particle, drop Jr suffix (doctrine BLOCK-02/03) (#9)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-15T00:01:51Z"
+        },
+        {
+          "sha": "4c3e539fde12",
+          "message": "chore(series-a): close all hygiene gaps (SECURITY, CITATION, CoC, CODEOWNERS) + bump runtime to v6.3",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:41:07Z"
+        },
+        {
+          "sha": "18ca1108406e",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#3)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:03Z"
+        },
+        {
+          "sha": "41ec62a0c6a4",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#4)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:58Z"
+        },
+        {
+          "sha": "26781450cffb",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#5)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:52Z"
+        },
+        {
+          "sha": "f0bf7c820609",
+          "message": "chore(ci)(deps): bump actions/checkout from 4 to 6 (#6)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:47Z"
+        },
+        {
+          "sha": "8ac15fe17b5f",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#2)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:35:00Z"
+        },
+        {
+          "sha": "df2379feac77",
+          "message": "readme: Series-A overhaul \u2014 badges, verified counts, cross-refs (#1)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:14:23Z"
+        },
+        {
+          "sha": "d1e91f5edd99",
+          "message": "chore(license): use canonical Apache-2.0 text so GitHub detects SPDX ID",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T01:10:25Z"
+        },
+        {
+          "sha": "2aa60dd51574",
+          "message": "fix(license): replace proprietary LICENSE with Apache-2.0 to match README",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T01:08:54Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "# Default codeowners \u2014 Stephen P. Lutar Jr.\n* @stephenlutar2-hash\n",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 6,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Analyze actions (actions)",
+          "Validate cookbook skills",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 11,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:50:57Z",
+          "updatedAt": "2026-05-15T03:50:57Z",
+          "isDraft": true
+        },
+        {
+          "number": 10,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:28Z",
+          "updatedAt": "2026-05-15T01:14:28Z",
+          "isDraft": true
+        },
+        {
+          "number": 8,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:57:54Z",
+          "updatedAt": "2026-05-14T00:57:54Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.9,
+        "date": "2026-05-15T01:09:38Z",
+        "checks": [
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/7 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 9,
+            "reason": "dependency not pinned by hash detected -- score normalized to 9"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "SAST",
+            "score": 9,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": -1,
+            "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authenticatio"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Contributors",
+            "score": 0,
+            "reason": "project has 0 contributing companies or organizations -- score normalized to 0"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 10,
+            "reason": "8 out of 8 merged PRs checked by a CI test -- score normalized to 10"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 6,
+        "alerts": [
+          {
+            "number": 8,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": true,
+        "compliant": true
+      }
+    },
+    "szl-brand": {
+      "metadata": {
+        "full_name": "szl-holdings/szl-brand",
+        "private": false,
+        "description": "SZL Holdings brand assets \u2014 social preview images (1280\u00d7640 PNG), logo monograms, and brand guidance. Upload these to repo Settings \u2192 Social preview.",
+        "default_branch": "main",
+        "language": "Python",
+        "license": "CC-BY-4.0",
+        "size": 6279,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 5,
+        "created_at": "2026-05-12T00:28:07Z",
+        "updated_at": "2026-05-15T00:03:26Z",
+        "pushed_at": "2026-05-15T03:52:31Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "d86a37d5305a",
+          "message": "feat: motion library v1 + anatomy v3 + Glass Wing intake (#9)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-15T00:03:20Z"
+        },
+        {
+          "sha": "da0d6dc0a6ed",
+          "message": "chore(series-a): close all hygiene gaps (SECURITY, CITATION, CoC, CODEOWNERS) + bump runtime to v6.3",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-13T17:41:07Z"
+        },
+        {
+          "sha": "b682a45c3ecd",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#3)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:39Z"
+        },
+        {
+          "sha": "22e43e50bfe6",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#4)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:34Z"
+        },
+        {
+          "sha": "8d9c00579438",
+          "message": "chore(ci)(deps): bump actions/checkout from 4 to 6 (#5)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:29Z"
+        },
+        {
+          "sha": "0f15187cf4e9",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#6)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:46:24Z"
+        },
+        {
+          "sha": "3a869be98a9c",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#2)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:33:22Z"
+        },
+        {
+          "sha": "063f3b42552e",
+          "message": "readme: Series-A overhaul \u2014 badges, verified counts, cross-refs (#1)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:16:37Z"
+        },
+        {
+          "sha": "daa5cf663513",
+          "message": "feat(previews): regenerate 14 banners with post-audit verified stats",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T02:25:58Z"
+        },
+        {
+          "sha": "fa14f836419f",
+          "message": "chore(license): use canonical CC-BY-4.0 text so GitHub detects SPDX ID",
+          "author": "Stephen P. Lutar Jr.",
+          "date": "2026-05-12T01:10:27Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "# Default codeowners \u2014 Stephen P. Lutar Jr.\n* @stephenlutar2-hash\n",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "ci.yml",
+        "codeql.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 6,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Validate brand assets",
+          "Scorecard analysis",
+          "Analyze actions (actions)"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 13,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:51:47Z",
+          "updatedAt": "2026-05-15T03:51:47Z",
+          "isDraft": true
+        },
+        {
+          "number": 12,
+          "title": "feat(anatomy): publish 4 anatomy PDFs (heart/brain/wires/full_body) + originals",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:48:00Z",
+          "updatedAt": "2026-05-15T03:52:33Z",
+          "isDraft": true
+        },
+        {
+          "number": 11,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:37Z",
+          "updatedAt": "2026-05-15T01:14:37Z",
+          "isDraft": true
+        },
+        {
+          "number": 10,
+          "title": "docs(anatomy): doctrine fix \u2014 author metadata + PNG previews",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T00:41:05Z",
+          "updatedAt": "2026-05-15T00:41:05Z",
+          "isDraft": false
+        },
+        {
+          "number": 8,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:08Z",
+          "updatedAt": "2026-05-14T00:58:08Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.9,
+        "date": "2026-05-15T01:09:53Z",
+        "checks": [
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/8 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 9,
+            "reason": "dependency not pinned by hash detected -- score normalized to 9"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "SAST",
+            "score": 9,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": -1,
+            "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authenticatio"
+          },
+          {
+            "name": "Contributors",
+            "score": 0,
+            "reason": "project has 0 contributing companies or organizations -- score normalized to 0"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 10,
+            "reason": "8 out of 8 merged PRs checked by a CI test -- score normalized to 10"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 6,
+        "alerts": [
+          {
+            "number": 8,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": true,
+        "compliant": true
+      }
+    },
+    ".github": {
+      "metadata": {
+        "full_name": "szl-holdings/.github",
+        "private": false,
+        "description": "SZL Holdings organization profile and community files.",
+        "default_branch": "main",
+        "language": null,
+        "license": "Apache-2.0",
+        "size": 2069,
+        "stargazers_count": 1,
+        "watchers_count": 1,
+        "forks_count": 0,
+        "open_issues_count": 5,
+        "created_at": "2026-04-03T13:26:02Z",
+        "updated_at": "2026-05-13T15:50:45Z",
+        "pushed_at": "2026-05-15T03:53:36Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": [
+          "branding",
+          "community",
+          "organization",
+          "profile"
+        ]
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "ae4e7ad21eda",
+          "message": "chore(ci)(deps): bump trufflesecurity/trufflehog from 3.95.2 to 3.95.3 (#23)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:54Z"
+        },
+        {
+          "sha": "e55d55c6ffca",
+          "message": "chore(ci)(deps): bump pnpm/action-setup from 6.0.7 to 6.0.8 (#24)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:50Z"
+        },
+        {
+          "sha": "e134787fe68a",
+          "message": "chore(ci)(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1 (#25)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:44Z"
+        },
+        {
+          "sha": "cf24c0441ae1",
+          "message": "chore(ci)(deps): bump ossf/scorecard-action from 2.4.2 to 2.4.3 (#26)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:39Z"
+        },
+        {
+          "sha": "12bf3526b3b2",
+          "message": "chore(ci)(deps): bump github/codeql-action from 3.29.4 to 4.35.4 (#27)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13T15:47:34Z"
+        },
+        {
+          "sha": "54dba981cd8a",
+          "message": "ci: add OpenSSF Scorecard workflow + Dependabot config (#22)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:34:21Z"
+        },
+        {
+          "sha": "f0b273808057",
+          "message": "profile: Series-A overhaul \u2014 fix broken links, verified counts, v11 DOI table, add Lean kernel (#21)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T13:16:58Z"
+        },
+        {
+          "sha": "5432e948fa86",
+          "message": "feat(profile): refresh org README with APEX v2 reality (#20)",
+          "author": "Stephen Paul Lutar Jr.",
+          "date": "2026-05-12T00:49:55Z"
+        },
+        {
+          "sha": "94b10a316067",
+          "message": "chore(deps)(deps): bump actions/dependency-review-action (#19)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-11T23:08:05Z"
+        },
+        {
+          "sha": "56d25ae280ac",
+          "message": "chore(deps)(deps): bump pnpm/action-setup from 6.0.5 to 6.0.7 (#17)",
+          "author": "dependabot[bot]",
+          "date": "2026-05-11T23:08:00Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "compliant",
+        "required_status_checks": [
+          "All actions SHA-pinned"
+        ],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": true,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [
+        {
+          "id": 16195496,
+          "name": "series-a-default-branch",
+          "enforcement": "active",
+          "target": "branch"
+        }
+      ],
+      "codeowners": {
+        "present": true,
+        "content": "# Default code owner for all paths in repos that inherit from szl-holdings/.github.\n# Per-repo CODEOWNERS files override these defaults.\n\n* @stephenlutar2-hash\n\n# Reusable workflows: any change here propagates to every repo in the org.\n/.github/workflows/ @stephenlutar2-hash\n",
+        "path": ".github/CODEOWNERS"
+      },
+      "workflows": [
+        "pin-check.yml",
+        "reusable-codeql.yml",
+        "reusable-dependency-review.yml",
+        "reusable-docs-ci.yml",
+        "reusable-gitleaks.yml",
+        "reusable-node-ci.yml",
+        "reusable-release-please.yml",
+        "reusable-sbom.yml",
+        "reusable-scorecard.yml",
+        "reusable-secret-scan.yml",
+        "reusable-trivy.yml",
+        "reusable-workflow-lint.yml",
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 5,
+        "failing": [],
+        "passing": [
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "Scorecard analysis",
+          "All actions SHA-pinned",
+          "Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [
+        {
+          "number": 32,
+          "title": "polish(hygiene+doctrine): hygiene file backfill + doctrine sweep",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:52:10Z",
+          "updatedAt": "2026-05-15T03:52:10Z",
+          "isDraft": true
+        },
+        {
+          "number": 31,
+          "title": "feat(profile): add Anatomy section linking to szl-brand PDFs",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T03:49:28Z",
+          "updatedAt": "2026-05-15T03:53:37Z",
+          "isDraft": true
+        },
+        {
+          "number": 30,
+          "title": "doctrine(citation): merge P. into given-names; add email",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-15T01:14:46Z",
+          "updatedAt": "2026-05-15T01:14:46Z",
+          "isDraft": true
+        },
+        {
+          "number": 29,
+          "title": "feat(doctrine): DOCTRINE_V2 + T01/T02 STATUS",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T01:09:12Z",
+          "updatedAt": "2026-05-14T01:12:11Z",
+          "isDraft": true
+        },
+        {
+          "number": 28,
+          "title": "chore(security): 10/10 Scorecard payload",
+          "author": "stephenlutar2-hash",
+          "createdAt": "2026-05-14T00:58:10Z",
+          "updatedAt": "2026-05-14T00:58:10Z",
+          "isDraft": true
+        }
+      ],
+      "openssf_scorecard": {
+        "score": 6.5,
+        "date": "2026-05-15T01:09:49Z",
+        "checks": [
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/17 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 10,
+            "reason": "update tool detected"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 7,
+            "reason": "detected GitHub workflow tokens with excessive permissions"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 9,
+            "reason": "dependency not pinned by hash detected -- score normalized to 9"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "SAST",
+            "score": 7,
+            "reason": "SAST tool detected but not run on all commits"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 5,
+            "reason": "branch protection is not maximal on development and all release branches"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Contributors",
+            "score": 6,
+            "reason": "project has 2 contributing companies or organizations -- score normalized to 6"
+          },
+          {
+            "name": "CI-Tests",
+            "score": 7,
+            "reason": "17 out of 23 merged PRs checked by a CI test -- score normalized to 7"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 15,
+        "alerts": [
+          {
+            "number": 15,
+            "rule_id": "CITestsID",
+            "rule_severity": "error",
+            "rule_description": "CI-Tests",
+            "state": "open"
+          },
+          {
+            "number": 14,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 13,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 12,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 11,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 10,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 9,
+            "rule_id": "TokenPermissionsID",
+            "rule_severity": "error",
+            "rule_description": "Token-Permissions",
+            "state": "open"
+          },
+          {
+            "number": 8,
+            "rule_id": "TokenPermissionsID",
+            "rule_severity": "error",
+            "rule_description": "Token-Permissions",
+            "state": "open"
+          },
+          {
+            "number": 7,
+            "rule_id": "TokenPermissionsID",
+            "rule_severity": "error",
+            "rule_description": "Token-Permissions",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "TokenPermissionsID",
+            "rule_severity": "error",
+            "rule_description": "Token-Permissions",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "TokenPermissionsID",
+            "rule_severity": "error",
+            "rule_description": "Token-Permissions",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "PinnedDependenciesID",
+            "rule_severity": "error",
+            "rule_description": "Pinned-Dependencies",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": true,
+        "CONTRIBUTING.md": true,
+        "CODE_OF_CONDUCT.md": true,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": true,
+        "compliant": true
+      }
+    },
+    "vsp-otel": {
+      "metadata": {
+        "full_name": "szl-holdings/vsp-otel",
+        "private": false,
+        "description": "Verifiable Span Protocol \u2014 cryptographically-verifiable OpenTelemetry GenAI bridge. Lutar, Stephen P. ORCID 0009-0001-0110-4173",
+        "default_branch": "main",
+        "language": null,
+        "license": "Apache-2.0",
+        "size": 8,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 0,
+        "created_at": "2026-05-15T18:10:33Z",
+        "updated_at": "2026-05-15T18:12:48Z",
+        "pushed_at": "2026-05-15T18:12:44Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "7aca58d2d7ce",
+          "message": "feat(scaffold): initial README, CITATION.cff, scorecard workflow",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T18:12:43Z"
+        },
+        {
+          "sha": "ec9aeb38b4af",
+          "message": "Initial commit",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T18:10:34Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": false,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "",
+        "path": ""
+      },
+      "workflows": [
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 1,
+        "failing": [],
+        "passing": [
+          "scorecard / Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [],
+      "openssf_scorecard": {
+        "score": 5,
+        "date": "2026-05-15T18:13:07Z",
+        "checks": [
+          {
+            "name": "CI-Tests",
+            "score": -1,
+            "reason": "no pull request found"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/2 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "SAST",
+            "score": 0,
+            "reason": "no SAST tool detected"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 0,
+            "reason": "no update tool detected"
+          },
+          {
+            "name": "Contributors",
+            "score": 0,
+            "reason": "project has 0 contributing companies or organizations -- score normalized to 0"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 0,
+            "reason": "branch protection not enabled on development/release branches"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "DependencyUpdateToolID",
+            "rule_severity": "error",
+            "rule_description": "Dependency-Update-Tool",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": false,
+        "CONTRIBUTING.md": false,
+        "CODE_OF_CONDUCT.md": false,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    },
+    "agi-forecast": {
+      "metadata": {
+        "full_name": "szl-holdings/agi-forecast",
+        "private": false,
+        "description": "Lutar-Forecast Gauge \u2014 receipt-attested AGI capability gauges (METR, Epoch, ARC, Apollo, AISI, RSP, FSF). Lutar, Stephen P. ORCID 0009-0001-0110-4173",
+        "default_branch": "main",
+        "language": null,
+        "license": "Apache-2.0",
+        "size": 8,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "forks_count": 0,
+        "open_issues_count": 0,
+        "created_at": "2026-05-15T18:10:23Z",
+        "updated_at": "2026-05-15T18:12:48Z",
+        "pushed_at": "2026-05-15T18:12:44Z",
+        "archived": false,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "visibility": "public",
+        "topics": []
+      },
+      "latest_release": null,
+      "tags": [],
+      "recent_commits": [
+        {
+          "sha": "2c729680a2d9",
+          "message": "feat(scaffold): initial README, CITATION.cff, scorecard workflow",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T18:12:43Z"
+        },
+        {
+          "sha": "310e6da6b89e",
+          "message": "Initial commit",
+          "author": "Lutar, Stephen P.",
+          "date": "2026-05-15T18:10:24Z"
+        }
+      ],
+      "branch_protection": {
+        "status": "weak",
+        "required_status_checks": [],
+        "required_approving_review_count": 1,
+        "require_code_owner_reviews": false,
+        "dismiss_stale_reviews": true,
+        "enforce_admins": true
+      },
+      "rulesets": [],
+      "codeowners": {
+        "present": true,
+        "content": "",
+        "path": ""
+      },
+      "workflows": [
+        "scorecard.yml"
+      ],
+      "ci_status": {
+        "check_count": 1,
+        "failing": [],
+        "passing": [
+          "scorecard / Scorecard analysis"
+        ],
+        "pending": []
+      },
+      "open_prs": [],
+      "openssf_scorecard": {
+        "score": 5,
+        "date": "2026-05-15T18:13:06Z",
+        "checks": [
+          {
+            "name": "CI-Tests",
+            "score": -1,
+            "reason": "no pull request found"
+          },
+          {
+            "name": "Pinned-Dependencies",
+            "score": 10,
+            "reason": "all dependencies are pinned"
+          },
+          {
+            "name": "Code-Review",
+            "score": 0,
+            "reason": "Found 0/2 approved changesets -- score normalized to 0"
+          },
+          {
+            "name": "SAST",
+            "score": 0,
+            "reason": "no SAST tool detected"
+          },
+          {
+            "name": "Binary-Artifacts",
+            "score": 10,
+            "reason": "no binaries found in the repo"
+          },
+          {
+            "name": "Token-Permissions",
+            "score": 10,
+            "reason": "GitHub workflow tokens follow principle of least privilege"
+          },
+          {
+            "name": "Packaging",
+            "score": -1,
+            "reason": "packaging workflow not detected"
+          },
+          {
+            "name": "Dangerous-Workflow",
+            "score": 10,
+            "reason": "no dangerous workflow patterns detected"
+          },
+          {
+            "name": "Maintained",
+            "score": 0,
+            "reason": "project was created within the last 90 days. Please review its contents carefully"
+          },
+          {
+            "name": "Vulnerabilities",
+            "score": 10,
+            "reason": "0 existing vulnerabilities detected"
+          },
+          {
+            "name": "CII-Best-Practices",
+            "score": 0,
+            "reason": "no effort to earn an OpenSSF best practices badge detected"
+          },
+          {
+            "name": "Signed-Releases",
+            "score": -1,
+            "reason": "no releases found"
+          },
+          {
+            "name": "License",
+            "score": 10,
+            "reason": "license file detected"
+          },
+          {
+            "name": "Dependency-Update-Tool",
+            "score": 0,
+            "reason": "no update tool detected"
+          },
+          {
+            "name": "Fuzzing",
+            "score": 0,
+            "reason": "project is not fuzzed"
+          },
+          {
+            "name": "Branch-Protection",
+            "score": 0,
+            "reason": "branch protection not enabled on development/release branches"
+          },
+          {
+            "name": "Contributors",
+            "score": 0,
+            "reason": "project has 0 contributing companies or organizations -- score normalized to 0"
+          },
+          {
+            "name": "Security-Policy",
+            "score": 10,
+            "reason": "security policy file detected"
+          }
+        ]
+      },
+      "code_scanning_alerts": {
+        "count": 7,
+        "alerts": [
+          {
+            "number": 7,
+            "rule_id": "FuzzingID",
+            "rule_severity": "error",
+            "rule_description": "Fuzzing",
+            "state": "open"
+          },
+          {
+            "number": 6,
+            "rule_id": "CIIBestPracticesID",
+            "rule_severity": "error",
+            "rule_description": "CII-Best-Practices",
+            "state": "open"
+          },
+          {
+            "number": 5,
+            "rule_id": "MaintainedID",
+            "rule_severity": "error",
+            "rule_description": "Maintained",
+            "state": "open"
+          },
+          {
+            "number": 4,
+            "rule_id": "SASTID",
+            "rule_severity": "error",
+            "rule_description": "SAST",
+            "state": "open"
+          },
+          {
+            "number": 3,
+            "rule_id": "CodeReviewID",
+            "rule_severity": "error",
+            "rule_description": "Code-Review",
+            "state": "open"
+          },
+          {
+            "number": 2,
+            "rule_id": "DependencyUpdateToolID",
+            "rule_severity": "error",
+            "rule_description": "Dependency-Update-Tool",
+            "state": "open"
+          },
+          {
+            "number": 1,
+            "rule_id": "BranchProtectionID",
+            "rule_severity": "error",
+            "rule_description": "Branch-Protection",
+            "state": "open"
+          }
+        ],
+        "ghas_enabled": true
+      },
+      "dependabot_alerts": {
+        "count": 0,
+        "high_critical": []
+      },
+      "hygiene_files": {
+        "LICENSE": true,
+        "LICENSE.md": false,
+        "COPYING": false,
+        "SECURITY.md": false,
+        "CONTRIBUTING.md": false,
+        "CODE_OF_CONDUCT.md": false,
+        "CITATION.cff": true,
+        "README.md": true,
+        ".github_SECURITY.md": false,
+        ".github_README.md": false
+      },
+      "citation_cff": {
+        "present": true,
+        "has_lutar": true,
+        "has_orcid": true,
+        "has_szl_holdings": true,
+        "has_email": false,
+        "compliant": true
+      }
+    }
+  },
+  "org_summary": {
+    "total_stars": 1,
+    "total_open_prs": 64,
+    "total_open_alerts": 115,
+    "scorecard_avg": 6.62,
+    "ci_failing_repos": [],
+    "hygiene_missing": {
+      "SECURITY.md": [
+        "vsp-otel",
+        "agi-forecast"
+      ],
+      "CONTRIBUTING.md": [
+        "vsp-otel",
+        "agi-forecast"
+      ],
+      "CODE_OF_CONDUCT.md": [
+        "vsp-otel",
+        "agi-forecast"
+      ]
+    },
+    "branch_protection_status": {
+      "compliant": [
+        "amaru",
+        "a11oy",
+        "sentra",
+        "terra",
+        "vessels",
+        "counsel",
+        "carlota-jo",
+        "ouroboros",
+        "ouroboros-thesis",
+        ".github"
+      ],
+      "weak": [
+        "lutar-lean",
+        "szl-trust",
+        "szl-cookbook",
+        "szl-brand",
+        "vsp-otel",
+        "agi-forecast"
+      ],
+      "missing": []
+    }
+  }
+}
