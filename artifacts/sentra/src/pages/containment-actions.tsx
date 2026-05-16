@@ -8,6 +8,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { useSentraStore, ensureSeeded, EXECUTABLE_STATUSES, type ActionClass } from '@/lib/sentra-store';
 import { runPolicyGate, requiresApproval, ALLOWED_ACTION_CLASSES, SENTRA_DENIAL_MESSAGE } from '@/lib/policy-engine';
 import { getAdapter } from '@/lib/integration-adapters';
+import { ActionConfirmModal } from '@/components/action-confirm-modal';
 
 interface ContainmentAction {
   id: string;
@@ -204,50 +205,47 @@ function ActionCard({ action, onExecute }: {
   const [selectedAsset, setSelectedAsset] = useState('');
   const store = useSentraStore();
   const [execState, setExecState] = useState<ExecutionState | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const Icon = action.icon;
-  const ownedAssets = store.assets.filter(a => EXECUTABLE_STATUSES.includes(a.ownership_status));
+  // Include ALL assets in the dropdown so non-executable picks can surface the
+  // Safety Gate denial through the confirm modal instead of being hidden.
+  const selectableAssets = store.assets;
+  const selectedAssetObj = selectedAsset ? store.getAsset(selectedAsset) ?? null : null;
   const adapter = action.integration_id ? getAdapter(action.integration_id) : null;
   const adapterOk = !adapter || adapter.meta.status === 'configured';
 
-  async function handleRun() {
+  function handleClickExecute() {
+    if (!selectedAsset || !selectedAssetObj) return;
+    setConfirmOpen(true);
+  }
+
+  async function handleConfirm(decision: { allowed: boolean; needsApproval: boolean; reason: string; denialMessage: string | null }) {
+    setConfirmOpen(false);
     if (!selectedAsset) return;
     const asset = store.getAsset(selectedAsset);
     if (!asset) return;
 
-    // Run policy gate
-    const gateResult = runPolicyGate({
-      action_class: action.action_class,
-      target_asset_id: selectedAsset,
-      target_ownership_status: asset.ownership_status,
-      integration_tenant_id: asset.tenant_id,
-      requesting_tenant_id: asset.tenant_id,
-      asset_tenant_id: asset.tenant_id,
-      approval_status: action.requires_approval ? 'pending' : undefined,
-      audit_logging_enabled: true,
-      rollback_strategy_exists: true,
-      asset_exists: true,
-    });
-
-    // Log policy decision
+    // Always write a policy log entry for every execution attempt
     store.writePolicyLog({
       action_id: store.nextId('ACT'),
       action_class: action.action_class,
       target: asset.name,
       integration: action.integration_id,
-      reason: gateResult.reason,
+      reason: decision.reason,
       requested_by: 'Analyst (Console)',
       approval_id: null,
-      policy_result: gateResult.allowed ? 'allow' : 'deny',
-      denial_message: gateResult.denial_message,
+      policy_result: decision.allowed ? 'allow' : 'deny',
+      denial_message: decision.denialMessage,
     });
 
-    if (!gateResult.allowed) {
-      setExecState({ actionId: action.id, assetId: selectedAsset, status: 'blocked', message: gateResult.denial_message ?? SENTRA_DENIAL_MESSAGE });
+    if (!decision.allowed) {
+      setExecState({ actionId: action.id, assetId: selectedAsset, status: 'blocked', message: decision.denialMessage ?? SENTRA_DENIAL_MESSAGE });
+      setTimeout(() => setExecState(null), 5000);
       return;
     }
 
-    if (action.requires_approval) {
+    if (decision.needsApproval) {
       // Queue approval
       store.createApproval({
         tenant_id: asset.tenant_id,
@@ -358,16 +356,27 @@ function ActionCard({ action, onExecute }: {
             <select value={selectedAsset} onChange={e => setSelectedAsset(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 outline-none focus:border-[#c9b787]/40">
               <option value="">Select target asset…</option>
-              {ownedAssets.slice(0, 30).map(a => (
-                <option key={a.id} value={a.id}>{a.name} [{a.ownership_status}] [{a.type}]</option>
-              ))}
+              {selectableAssets.slice(0, 40).map(a => {
+                const executable = EXECUTABLE_STATUSES.includes(a.ownership_status);
+                return (
+                  <option key={a.id} value={a.id}>
+                    {executable ? '' : '⛔ '}{a.name} [{a.ownership_status}] [{a.type}]
+                  </option>
+                );
+              })}
             </select>
+            {selectedAssetObj && !EXECUTABLE_STATUSES.includes(selectedAssetObj.ownership_status) && (
+              <div className="flex items-start gap-1.5 text-[10px] font-mono px-3 py-2 rounded border border-red-500/30 bg-red-500/05 text-red-300">
+                <ShieldOff className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                <span>Safety Gate: target ownership '{selectedAssetObj.ownership_status}' is not executable. Confirming will log a denial — no action runs.</span>
+              </div>
+            )}
             <div className="flex items-center gap-2 flex-wrap">
-              <button onClick={handleRun} disabled={!selectedAsset}
+              <button onClick={handleClickExecute} disabled={!selectedAsset}
                 className="flex items-center gap-1.5 px-4 py-2 rounded text-[10px] font-mono font-bold border transition-all disabled:opacity-40"
                 style={{ borderColor: action.color, color: action.color, background: `${action.color}08` }}>
                 <Zap className="w-3.5 h-3.5" />
-                {action.requires_approval ? 'Queue Approval' : 'Execute (Stub)'}
+                {action.requires_approval ? 'Review & Queue Approval' : 'Review & Execute'}
               </button>
               {execState && (
                 <div className={cn('flex items-center gap-1.5 text-[10px] font-mono px-3 py-2 rounded border',
@@ -386,6 +395,18 @@ function ActionCard({ action, onExecute }: {
           </div>
         </div>
       )}
+
+      <ActionConfirmModal
+        open={confirmOpen}
+        asset={selectedAssetObj}
+        actionClass={action.action_class}
+        actionLabel={action.title}
+        reversible={action.reversible}
+        doctrineCitations={action.doctrine}
+        integrationId={action.integration_id}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 }

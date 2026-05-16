@@ -11,6 +11,8 @@ import {
   type ReportType
 } from '@/lib/sentra-store';
 import { runPolicyGate, ALLOWED_ACTION_CLASSES, requiresApproval } from '@/lib/policy-engine';
+import { ActionConfirmModal } from '@/components/action-confirm-modal';
+import { EXECUTABLE_STATUSES, type ActionClass } from '@/lib/sentra-store';
 
 const SEV_COLOR: Record<IncidentSeverity, string> = {
   critical: '#e05252', high: '#f59e0b', medium: '#c9b787', low: '#60a5fa',
@@ -87,73 +89,86 @@ function ContainPane({ incident }: { incident: Incident }) {
   const [selectedAction, setSelectedAction] = useState('');
   const [note, setNote] = useState('');
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const ownedAssets = store.assets.filter(a => ['owned', 'authorized', 'contracted_scope', 'lab'].includes(a.ownership_status));
+  // Include every affected asset (and a sample of owned ones) so non-executable
+  // selections can route through the Safety Gate denial modal rather than being
+  // hidden from the analyst.
   const incidentAssetIds = incident.affected_assets.map(a => a.asset_id);
-  // Show incident-affected owned assets first; fall back to all owned assets when none match registry.
-  const affectedOwned = ownedAssets.filter(a => incidentAssetIds.includes(a.id));
-  const relevantAssets = affectedOwned.length > 0 ? affectedOwned : ownedAssets.slice(0, 20);
+  const affectedAssets = store.assets.filter(a => incidentAssetIds.includes(a.id));
+  const fallbackOwned = store.assets.filter(a => EXECUTABLE_STATUSES.includes(a.ownership_status)).slice(0, 20);
+  const relevantAssets = affectedAssets.length > 0 ? affectedAssets : fallbackOwned;
 
   const playbook = store.playbooks.find(p => p.incident_id === incident.id);
+  const selectedAssetObj = selectedAsset ? store.getAsset(selectedAsset) ?? null : null;
+  const selectedActionClass = (selectedAction || 'preserve_evidence') as ActionClass;
 
-  async function handleQueueAction() {
+  function handleClickQueue() {
+    if (!selectedAsset || !selectedAction || !selectedAssetObj) return;
+    setConfirmOpen(true);
+  }
+
+  async function handleConfirm(decision: { allowed: boolean; needsApproval: boolean; reason: string; denialMessage: string | null; doctrineCitations: string[] }) {
+    setConfirmOpen(false);
     if (!selectedAsset || !selectedAction) return;
     const asset = store.getAsset(selectedAsset);
     if (!asset) return;
-
-    const gate = runPolicyGate({
-      action_class: selectedAction as Parameters<typeof runPolicyGate>[0]['action_class'],
-      target_asset_id: selectedAsset,
-      target_ownership_status: asset.ownership_status,
-      integration_tenant_id: asset.tenant_id,
-      requesting_tenant_id: asset.tenant_id,
-      asset_tenant_id: asset.tenant_id,
-      approval_status: requiresApproval(selectedAction as Parameters<typeof runPolicyGate>[0]['action_class']) ? 'pending' : undefined,
-      audit_logging_enabled: true,
-      rollback_strategy_exists: true,
-      asset_exists: true,
-    });
+    const actionClass = selectedAction as ActionClass;
 
     store.writePolicyLog({
       action_id: store.nextId('ACT'),
-      action_class: selectedAction,
+      action_class: actionClass,
       target: asset.name,
       integration: null,
-      reason: gate.reason,
+      reason: decision.reason,
       requested_by: 'Analyst (Incident Detail)',
       approval_id: null,
-      policy_result: gate.allowed ? 'allow' : 'deny',
-      denial_message: gate.denial_message,
+      policy_result: decision.allowed ? 'allow' : 'deny',
+      denial_message: decision.denialMessage,
     });
 
-    if (!gate.allowed) {
-      setResult({ ok: false, message: gate.denial_message ?? gate.reason });
+    if (!decision.allowed) {
+      setResult({ ok: false, message: decision.denialMessage ?? decision.reason });
+      setTimeout(() => setResult(null), 4000);
       return;
     }
 
-    if (requiresApproval(selectedAction as Parameters<typeof runPolicyGate>[0]['action_class'])) {
-      const blast = store.computeBlastRadius(selectedAsset, selectedAction as Parameters<typeof runPolicyGate>[0]['action_class']);
+    if (decision.needsApproval) {
+      const blast = store.computeBlastRadius(selectedAsset, actionClass);
       store.createApproval({
         tenant_id: asset.tenant_id,
         incident_id: incident.id,
         action_id: store.nextId('ACT'),
-        action_class: selectedAction as Parameters<typeof runPolicyGate>[0]['action_class'],
-        action_description: `${selectedAction.replace(/_/g, ' ')} on ${asset.name}${note ? ` — ${note}` : ''}`,
+        action_class: actionClass,
+        action_description: `${actionClass.replace(/_/g, ' ')} on ${asset.name}${note ? ` — ${note}` : ''}`,
         target_asset_id: selectedAsset,
         target_asset_name: asset.name,
         target_ownership_status: asset.ownership_status,
         integration_id: null,
         requested_by: 'Analyst (Incident Detail)',
-        doctrine_citations: gate.doctrine_citations,
+        doctrine_citations: decision.doctrineCitations,
         blast_radius_preview: blast,
         rollback_path: `Restore ${asset.name} via admin console — requires CISO approval`,
-        policy_class: selectedAction as Parameters<typeof runPolicyGate>[0]['action_class'],
+        policy_class: actionClass,
       });
-      store.advanceIncident(incident.id, 'approval_pending', 'Analyst', `Approval queued for ${selectedAction} on ${asset.name}`);
+      store.advanceIncident(incident.id, 'approval_pending', 'Analyst', `Approval queued for ${actionClass} on ${asset.name}`);
       setResult({ ok: true, message: `Approval queued — check Approval Queue for ${asset.name}` });
     } else {
-      store.addIncidentNote(incident.id, 'Analyst', `Action executed: ${selectedAction} on ${asset.name}${note ? ` — ${note}` : ''}`);
-      setResult({ ok: true, message: `Action logged: ${selectedAction} on ${asset.name}` });
+      store.writeAudit({
+        actor: 'Analyst (Incident Detail)',
+        action: actionClass,
+        action_class: actionClass,
+        target_asset_id: selectedAsset,
+        integration_id: null,
+        policy_decision: 'allow',
+        approval_id: null,
+        execution_result: 'success',
+        evidence_hash: null,
+        rollback_reference: null,
+        notes: `${actionClass} on ${asset.name}${note ? ` — ${note}` : ''}`,
+      });
+      store.addIncidentNote(incident.id, 'Analyst', `Action executed: ${actionClass} on ${asset.name}${note ? ` — ${note}` : ''}`);
+      setResult({ ok: true, message: `Action executed and logged: ${actionClass} on ${asset.name}` });
     }
     setTimeout(() => setResult(null), 4000);
     setNote('');
@@ -198,7 +213,7 @@ function ContainPane({ incident }: { incident: Incident }) {
         </div>
       )}
 
-      {/* Blast radius preview */}
+      {/* Blast radius preview (inline pre-flight; the confirm modal also shows it) */}
       {selectedAsset && selectedAction && (
         <BlastRadiusPreview assetId={selectedAsset} actionClass={selectedAction} />
       )}
@@ -208,13 +223,18 @@ function ContainPane({ incident }: { incident: Incident }) {
         <div className="text-[10px] font-mono uppercase text-slate-500">Queue Containment Action</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <div className="text-[10px] font-mono text-slate-500 mb-1">Target Asset (Owned/Authorized)</div>
+            <div className="text-[10px] font-mono text-slate-500 mb-1">Target Asset</div>
             <select value={selectedAsset} onChange={e => setSelectedAsset(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 outline-none focus:border-[#c9b787]/40">
               <option value="">Select asset…</option>
-              {relevantAssets.map(a => (
-                <option key={a.id} value={a.id}>{a.name} [{a.ownership_status}]</option>
-              ))}
+              {relevantAssets.map(a => {
+                const executable = EXECUTABLE_STATUSES.includes(a.ownership_status);
+                return (
+                  <option key={a.id} value={a.id}>
+                    {executable ? '' : '⛔ '}{a.name} [{a.ownership_status}]
+                  </option>
+                );
+              })}
             </select>
           </div>
           <div>
@@ -228,14 +248,20 @@ function ContainPane({ incident }: { incident: Incident }) {
             </select>
           </div>
         </div>
+        {selectedAssetObj && !EXECUTABLE_STATUSES.includes(selectedAssetObj.ownership_status) && (
+          <div className="flex items-start gap-1.5 text-[10px] font-mono px-3 py-2 rounded border border-red-500/30 bg-red-500/05 text-red-300">
+            <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
+            <span>Safety Gate: ownership '{selectedAssetObj.ownership_status}' is not executable. Confirming will log a denial — no action runs.</span>
+          </div>
+        )}
         <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
           placeholder="Justification note (optional)…"
           className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#c9b787]/40 resize-none" />
         <div className="flex items-center gap-3">
-          <button onClick={handleQueueAction} disabled={!selectedAsset || !selectedAction}
+          <button onClick={handleClickQueue} disabled={!selectedAsset || !selectedAction}
             className="flex items-center gap-1.5 px-4 py-2 rounded text-[10px] font-mono font-bold border transition-all disabled:opacity-40"
             style={{ borderColor: '#c9b787', color: '#c9b787', background: 'rgba(201,183,135,0.05)' }}>
-            <Zap className="w-3.5 h-3.5" /> Queue Action
+            <Zap className="w-3.5 h-3.5" /> Review & Queue
           </button>
           {result && (
             <div className={cn('flex items-center gap-1.5 text-[10px] font-mono px-3 py-1.5 rounded border',
@@ -246,6 +272,16 @@ function ContainPane({ incident }: { incident: Incident }) {
           )}
         </div>
       </div>
+
+      <ActionConfirmModal
+        open={confirmOpen}
+        asset={selectedAssetObj}
+        actionClass={selectedActionClass}
+        actionLabel={selectedAction ? selectedAction.replace(/_/g, ' ') : 'Containment Action'}
+        reversible={true}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 }
