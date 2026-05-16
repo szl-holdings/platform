@@ -10,6 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "biome lint ./src ./tests",
+    "install-opa": "bash scripts/install-opa.sh",
+    "pretest": "bash scripts/install-opa.sh",
     "test": "vitest run --reporter=verbose",
     "test:watch": "vitest"
   },
