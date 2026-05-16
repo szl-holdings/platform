@@ -489,6 +489,23 @@ export class StripeAdapter extends ServiceAdapter {
     }
   }
 
+  async getSubscriptionItem(
+    subscriptionItemId: string,
+  ): Promise<{ id: string; subscriptionId: string } | null> {
+    if (!this.isLive) return null;
+
+    try {
+      const data = (await this.stripeRequest(
+        `/subscription_items/${subscriptionItemId}`,
+      )) as { id: string; subscription: string };
+
+      return { id: data.id, subscriptionId: data.subscription };
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("404")) return null;
+      throw err;
+    }
+  }
+
   async createMeteredUsageRecord(
     subscriptionItemId: string,
     quantity: number,

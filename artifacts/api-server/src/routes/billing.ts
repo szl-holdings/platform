@@ -812,6 +812,33 @@ router.post(
         return;
       }
 
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'Tenant context is required');
+        return;
+      }
+
+      if (services.stripe.isLive) {
+        const item = await services.stripe.getSubscriptionItem(subscriptionItemId);
+        if (!item) {
+          sendNotFound(res, 'Subscription item');
+          return;
+        }
+        const [ownedSub] = await db
+          .select({ id: subscriptionsTable.id })
+          .from(subscriptionsTable)
+          .where(
+            and(
+              eq(subscriptionsTable.stripeSubscriptionId, item.subscriptionId),
+              eq(subscriptionsTable.orgId, orgId),
+            ),
+          );
+        if (!ownedSub) {
+          sendForbidden(res, 'Subscription item does not belong to your organization');
+          return;
+        }
+      }
+
       const record = await services.stripe.createMeteredUsageRecord(
         subscriptionItemId,
         quantity,
@@ -1029,6 +1056,26 @@ router.post(
         typeof cancelSubscriptionSchema
       >;
 
+      const cancelOrgId = req.tenantOrgId;
+      if (!cancelOrgId) {
+        sendForbidden(res, 'Tenant context is required');
+        return;
+      }
+
+      const [ownedCancelSub] = await db
+        .select({ id: subscriptionsTable.id })
+        .from(subscriptionsTable)
+        .where(
+          and(
+            eq(subscriptionsTable.stripeSubscriptionId, subscriptionId),
+            eq(subscriptionsTable.orgId, cancelOrgId),
+          ),
+        );
+      if (!ownedCancelSub) {
+        sendForbidden(res, 'Subscription does not belong to your organization');
+        return;
+      }
+
       if (!services.stripe.isLive) {
         sendSuccess(res, {
           status: 'canceled',
@@ -1056,7 +1103,12 @@ router.post(
           canceledAt: cancelImmediately ? new Date() : null,
           updatedAt: new Date(),
         })
-        .where(eq(subscriptionsTable.stripeSubscriptionId, subscriptionId));
+        .where(
+          and(
+            eq(subscriptionsTable.stripeSubscriptionId, subscriptionId),
+            eq(subscriptionsTable.orgId, cancelOrgId),
+          ),
+        );
 
       void writeBillingAudit({
         req,
@@ -1096,6 +1148,26 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { subscriptionId, newPriceId } = req.body as z.infer<typeof updateSubscriptionSchema>;
+
+      const updateOrgId = req.tenantOrgId;
+      if (!updateOrgId) {
+        sendForbidden(res, 'Tenant context is required');
+        return;
+      }
+
+      const [ownedUpdateSub] = await db
+        .select({ id: subscriptionsTable.id })
+        .from(subscriptionsTable)
+        .where(
+          and(
+            eq(subscriptionsTable.stripeSubscriptionId, subscriptionId),
+            eq(subscriptionsTable.orgId, updateOrgId),
+          ),
+        );
+      if (!ownedUpdateSub) {
+        sendForbidden(res, 'Subscription does not belong to your organization');
+        return;
+      }
 
       if (!services.stripe.isLive) {
         sendSuccess(res, {
