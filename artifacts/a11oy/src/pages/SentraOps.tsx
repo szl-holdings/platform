@@ -260,6 +260,11 @@ const JOBS: SentraJob[] = [
 
 type View = 'agents' | 'jobs' | 'doctrine';
 
+interface AgentTelemetry {
+  dispatches_today: number;
+  last_dispatch: string | null;
+}
+
 interface SentraOpsStatus {
   activeIncidents: number;
   pendingApprovals: number;
@@ -268,6 +273,7 @@ interface SentraOpsStatus {
   policyDenials: number;
   totalAssets: number;
   ownedAssets: number;
+  agents?: Record<string, AgentTelemetry>;
   lastUpdated: string;
 }
 
@@ -295,8 +301,20 @@ export function SentraOps() {
     return () => clearInterval(timer);
   }, []);
 
-  const activeAgents = AGENTS.filter(a => !killedAgents[a.id]);
-  const totalDispatches = AGENTS.reduce((s, a) => s + a.dispatches_today, 0);
+  // Merge live per-agent telemetry from the Sentra store (if available) over
+  // the static agent definitions so the dashboard reflects real activity.
+  const liveAgents: SentraAgent[] = AGENTS.map(a => {
+    const tele = sentraStatus?.agents?.[a.id];
+    if (!tele) return a;
+    return {
+      ...a,
+      dispatches_today: tele.dispatches_today,
+      last_dispatch: tele.last_dispatch ?? a.last_dispatch,
+    };
+  });
+
+  const activeAgents = liveAgents.filter(a => !killedAgents[a.id]);
+  const totalDispatches = liveAgents.reduce((s, a) => s + a.dispatches_today, 0);
 
   function handleKillSwitch(agentId: string, reason: string) {
     setKilledAgents(prev => ({ ...prev, [agentId]: reason || 'Emergency kill-switch activated by operator' }));
@@ -377,9 +395,14 @@ export function SentraOps() {
       {/* Agents view */}
       {view === 'agents' && (
         <div className="space-y-3">
-          {AGENTS.map(agent => {
+          {liveAgents.map(agent => {
             const killed = killedAgents[agent.id];
             const isSelected = selectedAgent === agent.id;
+            const tele = sentraStatus?.agents?.[agent.id];
+            const isLive = Boolean(tele);
+            const lastLabel = tele
+              ? (tele.last_dispatch ? new Date(tele.last_dispatch).toLocaleTimeString() : 'no activity yet')
+              : new Date(agent.last_dispatch).toLocaleTimeString();
             return (
               <div key={agent.id} className="rounded-lg border" style={{ background: T.surface, borderColor: killed ? T.red : T.border }}>
                 <div className="flex items-center gap-3 p-4 cursor-pointer" onClick={() => setSelectedAgent(isSelected ? null : agent.id)}>
@@ -391,7 +414,8 @@ export function SentraOps() {
                       {killed && <span className="text-[9px] font-mono text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded">KILLED</span>}
                     </div>
                     <div className="text-[10px] text-slate-600 mt-0.5">
-                      Trust: <span style={{ color: T.accent }}>{agent.trust_score}</span> · Dispatches today: {agent.dispatches_today} · Last: {new Date(agent.last_dispatch).toLocaleTimeString()}
+                      Trust: <span style={{ color: T.accent }}>{agent.trust_score}</span> · Dispatches today: <span style={{ color: isLive ? T.green : T.dim }}>{agent.dispatches_today}</span> · Last: {lastLabel}
+                      {isLive && <span className="ml-2 text-[9px] font-mono" style={{ color: T.green }}>● LIVE</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">

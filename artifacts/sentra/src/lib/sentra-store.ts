@@ -510,14 +510,94 @@ class SentraStore {
     try {
       const activeIncidents = this.incidents.filter(i => i.status !== 'closed').length;
       const pendingApprovals = this.approvals.filter(a => a.status === 'pending').length;
+      const denials = this.policyLogs.filter(p => p.policy_result === 'deny');
+
+      // Per-agent telemetry — dispatches today + most recent activity timestamp.
+      // Each agent's metric is derived from real store mutations so A11oy's
+      // SentraOps view reflects actual analyst/system activity rather than
+      // hard-coded mock counts.
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const dayStart = startOfDay.getTime();
+
+      const sinceToday = (iso: string) => new Date(iso).getTime() >= dayStart;
+      const latest = (items: { ts: string }[]): string | null => {
+        if (items.length === 0) return null;
+        let max = items[0].ts;
+        for (const it of items) if (it.ts > max) max = it.ts;
+        return max;
+      };
+
+      const containmentClasses = new Set([
+        'contain_owned_asset',
+        'revoke_owned_access',
+        'rotate_owned_secret',
+        'restore_owned_asset',
+      ]);
+
+      // Triage Navigator → incident detection events
+      const triageEvents = this.incidents.flatMap(i =>
+        i.timeline.filter(t => t.type === 'detection').map(t => ({ ts: t.timestamp }))
+      );
+      // Evidence Custodian → evidence collection / locking
+      const evidenceEvents = this.evidence.map(e => ({
+        ts: e.chain_of_custody[e.chain_of_custody.length - 1]?.timestamp ?? e.collected_at,
+      }));
+      // Containment Recommender → containment-class approval requests
+      const containmentEvents = this.approvals
+        .filter(a => containmentClasses.has(a.action_class))
+        .map(a => ({ ts: a.requested_at }));
+      // Attribution Analyst → incidents that have an attribution_draft
+      const attributionEvents = this.incidents
+        .filter(i => i.attribution_draft)
+        .map(i => ({ ts: i.attribution_draft!.drafted_at }));
+      // Report Generator → reports generated
+      const reportEvents = this.reports.map(r => ({ ts: r.generated_at }));
+      // Audit Verifier → every audit chain entry
+      const auditEvents = this.auditEntries.map(a => ({ ts: a.timestamp }));
+      // Policy Enforcement Monitor → every policy decision
+      const policyEvents = this.policyLogs.map(p => ({ ts: p.timestamp }));
+
+      const agents = {
+        'ag-triage': {
+          dispatches_today: triageEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(triageEvents),
+        },
+        'ag-evidence': {
+          dispatches_today: evidenceEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(evidenceEvents),
+        },
+        'ag-containment': {
+          dispatches_today: containmentEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(containmentEvents),
+        },
+        'ag-attribution': {
+          dispatches_today: attributionEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(attributionEvents),
+        },
+        'ag-report': {
+          dispatches_today: reportEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(reportEvents),
+        },
+        'ag-audit': {
+          dispatches_today: auditEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(auditEvents),
+        },
+        'ag-policy': {
+          dispatches_today: policyEvents.filter(e => sinceToday(e.ts)).length,
+          last_dispatch: latest(policyEvents),
+        },
+      };
+
       localStorage.setItem('sentra:ops-status', JSON.stringify({
         activeIncidents,
         pendingApprovals,
         auditEntries: this.auditEntries.length,
         evidenceItems: this.evidence.length,
-        policyDenials: this.policyLogs.filter(p => p.policy_result === 'deny').length,
+        policyDenials: denials.length,
         totalAssets: this.assets.length,
         ownedAssets: this.assets.filter(a => ['owned', 'authorized', 'contracted_scope', 'lab'].includes(a.ownership_status)).length,
+        agents,
         lastUpdated: new Date().toISOString(),
       }));
     } catch { /* storage unavailable */ }
@@ -1524,9 +1604,15 @@ let seeded = false;
 export function ensureSeeded() {
   if (seeded) return;
   seeded = true;
-  if (sentraStore.hydrate()) return;
+  if (sentraStore.hydrate()) {
+    // Refresh the cross-app status bridge immediately on hydrate so A11oy
+    // sees current telemetry on first render, even before any new mutation.
+    sentraStore.notify();
+    return;
+  }
   seedStore();
   sentraStore.persist();
+  sentraStore.notify();
 }
 
 // Auto-seed on module import so data is present before first render
