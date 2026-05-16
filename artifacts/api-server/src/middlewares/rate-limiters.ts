@@ -2,8 +2,26 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { sendError } from '../lib/api-response';
 import { verifyInternalHeader } from '../lib/internal-tokens';
+import { getConfig } from '../lib/runtime-config';
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * Build a `max` resolver for express-rate-limit that reads the live value
+ * from runtime config on each window evaluation. Falls back to the supplied
+ * code default when the DB row is absent or the lookup fails (getConfig is
+ * fail-safe and never throws). Cached for ~60s by the runtime-config layer,
+ * so changes propagate within one TTL without a server restart.
+ */
+function makeConfiguredMax(
+  key: Parameters<typeof getConfig>[0],
+  codeDefault: number,
+): (req: Request, res: Response) => Promise<number> {
+  return async () => {
+    const value = await getConfig<number>(key, codeDefault);
+    return Number.isFinite(value) && value > 0 ? value : codeDefault;
+  };
+}
 
 export function cacheControl(maxAgeSeconds: number) {
   return (_req: Request, res: Response, next: NextFunction) => {
@@ -62,7 +80,7 @@ export function skipForInternalCallers(req: Request): boolean {
 
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isProduction ? 200 : 1000,
+  max: makeConfiguredMax('rate_limit_global_max', isProduction ? 200 : 1000),
   // Emit BOTH the IETF draft `RateLimit-*` headers (standard) and the
   // widely-implemented legacy `X-RateLimit-Limit/Remaining/Reset` headers.
   // Legacy headers are what most SDKs and our public OpenAPI documents,
@@ -82,7 +100,7 @@ export const globalLimiter = rateLimit({
 
 export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isProduction ? 100 : 500,
+  max: makeConfiguredMax('rate_limit_write_max', isProduction ? 100 : 500),
   standardHeaders: true,
   legacyHeaders: true,
   keyGenerator: userOrgKeyGenerator,
@@ -181,7 +199,7 @@ export const gdprLimiter = rateLimit({
  */
 export const aiInferenceLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isProduction ? 30 : 200,
+  max: makeConfiguredMax('rate_limit_ai_inference_max', isProduction ? 30 : 200),
   standardHeaders: true,
   legacyHeaders: true,
   keyGenerator: userOrgKeyGenerator,
