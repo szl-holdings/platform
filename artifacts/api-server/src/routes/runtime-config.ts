@@ -255,7 +255,11 @@ interface ImportPlan {
  * Two-phase contract: callers ALWAYS preview first with `dryRun: true`, then
  * confirm with `dryRun: false`. The diff is computed against the live table
  * the same way in both phases, so the preview is faithful to what apply will
- * do (modulo concurrent edits — apply re-reads the row before each write).
+ * do (modulo concurrent edits between preview and apply — there is no row
+ * re-check during apply, so a value mutated by another operator in that
+ * window will be overwritten by the import). Each row is applied
+ * independently and per-row errors are recorded without aborting the rest
+ * of the import.
  *
  * Doctrine notes:
  * - Sensitive entries are silently SKIPPED. Importing a sensitive value
@@ -280,19 +284,30 @@ router.post(
       }
       const { entries, deleteMissing, dryRun } = parsed.data;
 
+      // `payloadKeys` tracks every key the operator mentioned in the payload,
+      // even keys we skip (duplicates, sensitive-flagged). This is what
+      // `deleteMissing` consults — a key the operator named is never
+      // considered "missing", otherwise a skipped sensitive payload entry
+      // would cause its non-sensitive live counterpart to be silently
+      // scheduled for deletion. `seenKeys` separately deduplicates the
+      // entries we actually plan to apply.
+      const payloadKeys = new Set<string>();
       const seenKeys = new Set<string>();
       const dedupedEntries: typeof entries = [];
       const skipped: ImportPlan['skipped'] = [];
       for (const e of entries) {
         if (seenKeys.has(e.key)) {
+          payloadKeys.add(e.key);
           skipped.push({ key: e.key, reason: 'duplicate key in payload' });
           continue;
         }
         if (e.isSensitive === true) {
+          payloadKeys.add(e.key);
           skipped.push({ key: e.key, reason: 'sensitive entries cannot be bulk-imported' });
           continue;
         }
         seenKeys.add(e.key);
+        payloadKeys.add(e.key);
         dedupedEntries.push(e);
       }
 
@@ -342,7 +357,7 @@ router.post(
       if (deleteMissing) {
         for (const cur of existing) {
           if (cur.isSensitive) continue; // never bulk-delete sensitive entries
-          if (seenKeys.has(cur.key)) continue;
+          if (payloadKeys.has(cur.key)) continue; // operator named this key (even if skipped) — leave it alone
           plan.deletes.push({
             key: cur.key,
             category: cur.category,

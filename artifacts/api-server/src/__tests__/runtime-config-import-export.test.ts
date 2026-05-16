@@ -427,6 +427,54 @@ describe('Runtime config bulk import — dry run', () => {
     expect(skippedKeys).toEqual(['live_secret', 'payload_secret']);
   });
 
+  it('does NOT delete a live key whose payload entry was skipped as sensitive', async () => {
+    // Regression for code-review finding: a payload entry flagged sensitive
+    // is skipped, but its key must still count as "present in payload" so
+    // deleteMissing does not silently destroy the corresponding live row.
+    seed('shared_key', { value: 'live', isSensitive: false });
+
+    const res = await request(buildApp())
+      .post('/runtime-config/_import')
+      .send({
+        entries: [
+          {
+            key: 'shared_key',
+            value: 'pasted',
+            valueType: 'string',
+            category: 'general',
+            isSensitive: true,
+          },
+        ],
+        deleteMissing: true,
+        dryRun: true,
+      });
+
+    expect(res.status).toBe(200);
+    const deletedKeys = (res.body.plan.deletes as Array<{ key: string }>).map((d) => d.key);
+    expect(deletedKeys).not.toContain('shared_key');
+    expect(res.body.plan.skipped.some((s: { key: string }) => s.key === 'shared_key')).toBe(true);
+
+    // And on apply, the live row must still exist.
+    const applyRes = await request(buildApp())
+      .post('/runtime-config/_import')
+      .send({
+        entries: [
+          {
+            key: 'shared_key',
+            value: 'pasted',
+            valueType: 'string',
+            category: 'general',
+            isSensitive: true,
+          },
+        ],
+        deleteMissing: true,
+        dryRun: false,
+      });
+    expect(applyRes.status).toBe(200);
+    expect(applyRes.body.result.deleted).toBe(0);
+    expect(store.get('shared_key')?.value).toBe('live');
+  });
+
   it('rejects malformed payloads with 400', async () => {
     const res = await request(buildApp())
       .post('/runtime-config/_import')
