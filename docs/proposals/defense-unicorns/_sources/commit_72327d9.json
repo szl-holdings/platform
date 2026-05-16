@@ -1,0 +1,257 @@
+{
+  "sha": "72327d9169eab5fcc5a88a45836946b0bf173512",
+  "node_id": "C_kwDOJ8k_wtoAKDcyMzI3ZDkxNjllYWI1ZmNjNWE4OGE0NTgzNjk0NmIwYmYxNzM1MTI",
+  "commit": {
+    "author": {
+      "name": "Chance Coleman",
+      "email": "139784371+chance-coleman@users.noreply.github.com",
+      "date": "2026-03-26T17:41:05Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-26T17:41:05Z"
+    },
+    "message": "fix(docs): llm friendly docs (#1360)",
+    "tree": {
+      "sha": "66669d733acadc5504b33ff9b82c0f0c3a5c3e10",
+      "url": "https://api.github.com/repos/defenseunicorns/uds-cli/git/trees/66669d733acadc5504b33ff9b82c0f0c3a5c3e10"
+    },
+    "url": "https://api.github.com/repos/defenseunicorns/uds-cli/git/commits/72327d9169eab5fcc5a88a45836946b0bf173512",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJpxW+xCRC1aQ7uu5UhlAAAkqkQAGMxG9KOIdBvPqqTFoUMYsp5\nESP2nzf24pS7CLeg/mzgFci7Q2zmz4DxEbhdFAPkGCEHBCCDSRNGHgBj4ZX91Nn5\nOsqSUsBO6XmDWS50hx4ntD/Ciau03f65y0/KB8Z0nPGcGSLPhrMkUjB5+GNvu+fT\ndrCbD7q8rl58KySL5b9/YKAzGVAt154BLeUmyMhXdHTolamnfdkr3vW07fHqk1uj\n1gqZucpg0hJocLUx9VIkSKQQFYmI2wN6VlaMBdqpwZsne1b90qrwutY+mCzoonLC\niNTIFennSl6RpcXaTCiCQoUKZVw1L/ZII2maxKsJJCJe6TmtMFMuOFCg+Uc89PfG\n/z23SQKRvk/wt+It+YZf3byrA/sUBMvx1l4btbScVOkU+vRJZJ+dEKhhd4f3jEij\nIZ2rd76ZH90vkEfP55JKgztxDA+yZRCxRiKzcuPmZpj6zjSNJzQemdz76C+nDlGM\nazz3plLFlEbUlJpGlq3iQByafTtUm2ZjvdKyC1ZvSc/rcoj4Tp7I1XMtdb1+mkH0\nEGWzpuQ16o7Z9kBcW6S76KlTJ5xaBWw67x9gBsQAwYJxZuXEJh489jl7szFkkb+r\n8g6Av7/k/1vyNHuh/ZRYvtRu9zOUU2/86iVfC9GG5rbAdaf749C/xWElGX7VhCd5\nUYTpVo+u52kVV53n91sE\n=e/2G\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 66669d733acadc5504b33ff9b82c0f0c3a5c3e10\nparent 92de644045f9caba671b9cf19997cdea11c65b1e\nauthor Chance Coleman <139784371+chance-coleman@users.noreply.github.com> 1774546865 -0600\ncommitter GitHub <noreply@github.com> 1774546865 -0600\n\nfix(docs): llm friendly docs (#1360)",
+      "verified_at": "2026-03-26T17:41:06Z"
+    }
+  },
+  "url": "https://api.github.com/repos/defenseunicorns/uds-cli/commits/72327d9169eab5fcc5a88a45836946b0bf173512",
+  "html_url": "https://github.com/defenseunicorns/uds-cli/commit/72327d9169eab5fcc5a88a45836946b0bf173512",
+  "comments_url": "https://api.github.com/repos/defenseunicorns/uds-cli/commits/72327d9169eab5fcc5a88a45836946b0bf173512/comments",
+  "author": {
+    "login": "chance-coleman",
+    "id": 139784371,
+    "node_id": "U_kgDOCFTwsw",
+    "avatar_url": "https://avatars.githubusercontent.com/u/139784371?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/chance-coleman",
+    "html_url": "https://github.com/chance-coleman",
+    "followers_url": "https://api.github.com/users/chance-coleman/followers",
+    "following_url": "https://api.github.com/users/chance-coleman/following{/other_user}",
+    "gists_url": "https://api.github.com/users/chance-coleman/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/chance-coleman/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/chance-coleman/subscriptions",
+    "organizations_url": "https://api.github.com/users/chance-coleman/orgs",
+    "repos_url": "https://api.github.com/users/chance-coleman/repos",
+    "events_url": "https://api.github.com/users/chance-coleman/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/chance-coleman/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "92de644045f9caba671b9cf19997cdea11c65b1e",
+      "url": "https://api.github.com/repos/defenseunicorns/uds-cli/commits/92de644045f9caba671b9cf19997cdea11c65b1e",
+      "html_url": "https://github.com/defenseunicorns/uds-cli/commit/92de644045f9caba671b9cf19997cdea11c65b1e"
+    }
+  ],
+  "stats": {
+    "total": 62,
+    "additions": 36,
+    "deletions": 26
+  },
+  "files": [
+    {
+      "sha": "9fbb836c4b499a0f17b6ee51200c926f2d9d2853",
+      "filename": "CONTRIBUTING.md",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/CONTRIBUTING.md",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/CONTRIBUTING.md",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/CONTRIBUTING.md?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -38,7 +38,7 @@ Specifically:\n Please ensure there is a GitHub issue for your proposed change, this helps the UDS CLI team to understand the context of the change and to track the progress of the work. If there isn't an issue for your change, please create one before starting work. The recommended workflow for contributing is as follows:\n \n \n-*Before starting development, we highly recommend reading through the UDS CLI [documentation](https://uds.defenseunicorns.com/reference/cli/overview/) and our [ADRs](./adr).\n+*Before starting development, we highly recommend reading through the UDS CLI [documentation](https://docs.defenseunicorns.com/cli/) and our [ADRs](./adr).\n \n 1. **Fork this repo** and clone it locally\n 1. **Create a branch** for your changes"
+    },
+    {
+      "sha": "9536da3f488acc32ddc1981b2b6343a0d906ef3c",
+      "filename": "README.md",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/README.md",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/README.md",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/README.md?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -13,7 +13,7 @@ brew install defenseunicorns/tap/uds\n UDS CLI binaries are also included with each [Github Release](https://github.com/defenseunicorns/uds-cli/releases)\n \n ## Official Documentation\n-Official documentation is located at [uds.defenseunicorns.com/reference/cli/overview/](https://uds.defenseunicorns.com/reference/cli/overview/)\n+Official documentation is located at [docs.defenseunicorns.com/cli/](https://docs.defenseunicorns.com/cli/)\n \n ## Quickstart\n UDS-CLI provides a mechanism to bundle and deploy multiple, independent Zarf packages. To create a `UDSBundle` of Zarf packages, create a `uds-bundle.yaml` file like so:"
+    },
+    {
+      "sha": "1f580ee91949a21a480ccbdcd1778c464e9b4816",
+      "filename": "docs/docs.config.json",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fdocs.config.json",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fdocs.config.json",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fdocs.config.json?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -2,6 +2,7 @@\n   \"id\": \"cli\",\n   \"label\": \"CLI\",\n   \"contentDir\": \"cli\",\n+  \"description\": \"The command-line tool for creating and deploying UDS Bundles. Wraps Zarf to add multi-package bundles (`uds-bundle.yaml`), a task runner (`uds run`), and cluster monitoring.\",\n   \"sidebarOrder\": [\n     \"getting-started\",\n     { \"dir\": \"how-to-guides\", \"label\": \"How-to Guides\" },"
+    },
+    {
+      "sha": "7296a59aa84befada12048a1f12ed74b32a6f60f",
+      "filename": "docs/getting-started/installation.mdx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Finstallation.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Finstallation.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fgetting-started%2Finstallation.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Installation\n+description: Install UDS CLI via Homebrew or direct download and add it to your PATH.\n next: true\n sidebar:\n   order: 2.2"
+    },
+    {
+      "sha": "8c30e7442d006e8ec636afd856ee3a8bfd070d16",
+      "filename": "docs/getting-started/overview.mdx",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 3,
+      "changes": 7,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Foverview.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Foverview.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fgetting-started%2Foverview.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Getting Started\n+description: Choose between installation and a quickstart to begin using UDS CLI for creating and deploying UDS Bundles.\n sidebar:\n   order: 2.1\n ---\n@@ -36,6 +37,6 @@ Choose your path based on your goal.\n \n Once you have the CLI installed and have deployed a basic bundle, explore the how-to guides:\n \n-- [Use Bundle Overrides](/how-to-guides/use-bundle-overrides/) — customize Helm chart values at deploy time\n-- [Use UDS Runner](/how-to-guides/use-uds-runner/) — automate bundle workflows with `tasks.yaml`\n-- [Monitor a Cluster](/how-to-guides/monitor-cluster/) — stream real-time Pepr logs from a running cluster\n+- [Use Bundle Overrides](/how-to-guides/use-bundle-overrides/): customize Helm chart values at deploy time\n+- [Use UDS Runner](/how-to-guides/use-uds-runner/): automate bundle workflows with `tasks.yaml`\n+- [Monitor a Cluster](/how-to-guides/monitor-cluster/): stream real-time Pepr logs from a running cluster"
+    },
+    {
+      "sha": "a854ce177c9d2f7cfef975e588747da1cf6f2d08",
+      "filename": "docs/getting-started/quickstart.mdx",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 4,
+      "changes": 9,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Fquickstart.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fgetting-started%2Fquickstart.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fgetting-started%2Fquickstart.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Quickstart\n+description: Write a uds-bundle.yaml, create a bundle from Zarf packages, and deploy it in a complete end-to-end walkthrough.\n prev: true\n sidebar:\n   order: 2.3\n@@ -91,7 +92,7 @@ uds zarf tools kubectl get pods -A\n ```\n \n > [!NOTE]\n-> A UDS Bundle is an OCI artifact containing one or more Zarf packages and a `uds-bundle.yaml` manifest. The manifest is entirely declarative — UDS CLI will not prompt for optional Zarf components at deploy time. To include an optional component, list it explicitly with `optionalComponents`.\n+> A UDS Bundle is an OCI artifact containing one or more Zarf packages and a `uds-bundle.yaml` manifest. The manifest is entirely declarative; UDS CLI will not prompt for optional Zarf components at deploy time. To include an optional component, list it explicitly with `optionalComponents`.\n \n ## Troubleshooting\n \n@@ -115,6 +116,6 @@ uds zarf tools kubectl get pods -A\n \n ## Related Documentation\n \n-- [Use Bundle Overrides](/how-to-guides/use-bundle-overrides/) — Customize package configuration at deploy time without modifying the bundle.\n-- [Use UDS Runner](/how-to-guides/use-uds-runner/) — Automate tasks with UDS Runner's built-in task execution.\n-- [Monitor a Cluster](/how-to-guides/monitor-cluster/) — Inspect running workloads and Pepr events from the CLI.\n+- [Use Bundle Overrides](/how-to-guides/use-bundle-overrides/): Customize package configuration at deploy time without modifying the bundle.\n+- [Use UDS Runner](/how-to-guides/use-uds-runner/): Automate tasks with UDS Runner's built-in task execution.\n+- [Monitor a Cluster](/how-to-guides/monitor-cluster/): Inspect running workloads and Pepr events from the CLI."
+    },
+    {
+      "sha": "45d3acd33c3e69e4db0e94969a0dafaef3f2c4fe",
+      "filename": "docs/how-to-guides/monitor-cluster.mdx",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 4,
+      "changes": 9,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fmonitor-cluster.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fmonitor-cluster.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fhow-to-guides%2Fmonitor-cluster.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Monitor a Cluster\n+description: Stream and filter logs from the UDS Pepr controllers to monitor policy actions and operator behavior in a running cluster.\n sidebar:\n   order: 3.4\n ---\n@@ -44,13 +45,13 @@ UDS Core runs two Pepr-based controllers that `uds monitor` streams logs from:\n \n    Run the command matching what you want to observe:\n \n-   **All logs** — aggregate admission and operator logs into a single stream:\n+   **All logs**: aggregate admission and operator logs into a single stream:\n \n    ```bash\n    uds monitor pepr\n    ```\n \n-   **Operator logs only** — UDS Package processing, status updates, and errors:\n+   **Operator logs only**: UDS Package processing, status updates, and errors:\n \n    ```bash\n    uds monitor pepr operator\n@@ -125,5 +126,5 @@ You should see a continuous stream of admission and operator events as activity\n \n ## Related Documentation\n \n-- [Use Bundle Overrides](/cli/how-to-guides/use-bundle-overrides/) — Tune deployments at runtime with Helm overrides and variables.\n-- [Use UDS Runner](/cli/how-to-guides/use-uds-runner/) — Automate workflows with `tasks.yaml`.\n+- [Use Bundle Overrides](/cli/how-to-guides/use-bundle-overrides/): Tune deployments at runtime with Helm overrides and variables.\n+- [Use UDS Runner](/cli/how-to-guides/use-uds-runner/): Automate workflows with `tasks.yaml`."
+    },
+    {
+      "sha": "125f34579cc271cb73355497ba739017e830f873",
+      "filename": "docs/how-to-guides/overview.mdx",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Foverview.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Foverview.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fhow-to-guides%2Foverview.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: How-to Guides\n+description: Guides for common UDS CLI operations including bundle overrides, the UDS Runner task system, and cluster monitoring.\n sidebar:\n   order: 3.1\n ---\n@@ -11,7 +12,7 @@ Task-oriented guides for common UDS CLI operations. Each guide assumes you have\n <CardGrid>\n   <LinkCard\n     title=\"Use Bundle Overrides\"\n-    description=\"Customize Helm chart values, variables, and namespaces in deployed Zarf packages — including uds-config.yaml and variable precedence rules.\"\n+    description=\"Customize Helm chart values, variables, and namespaces in deployed Zarf packages, including uds-config.yaml and variable precedence rules.\"\n     href=\"/cli/how-to-guides/use-bundle-overrides/\"\n   />\n   <LinkCard"
+    },
+    {
+      "sha": "1ec0add09416360ef766484bb3e1777c49542a51",
+      "filename": "docs/how-to-guides/use-bundle-overrides.mdx",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 5,
+      "changes": 11,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fuse-bundle-overrides.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fuse-bundle-overrides.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fhow-to-guides%2Fuse-bundle-overrides.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Use Bundle Overrides\n+description: Customize Helm chart values and variables inside Zarf packages using bundle overrides in uds-bundle.yaml and uds-config.yaml.\n sidebar:\n   order: 3.2\n ---\n@@ -119,8 +120,8 @@ overrides:\n    ```\n \n    Variable types:\n-   - `raw` (default) — string, int, map, etc.\n-   - `file` — the variable resolves to the **contents** of the referenced file\n+   - `raw` (default): string, int, map, etc.\n+   - `file`: the variable resolves to the **contents** of the referenced file\n \n    > [!CAUTION]\n    > If a variable accepts a file value but is missing `type: file`, the file will not be processed.\n@@ -178,7 +179,7 @@ overrides:\n      domain: uds.dev  # applied to all packages in the bundle\n    ```\n \n-   Place the file in your working directory or set its path via the `UDS_CONFIG` environment variable. The `uds-config.yaml` also supports `options` (global CLI settings) and `variables` (per-package overrides) — see the [full reference](https://github.com/defenseunicorns/uds-cli/blob/main/docs/reference/CLI/commands/uds_deploy.md) for details.\n+   Place the file in your working directory or set its path via the `UDS_CONFIG` environment variable. The `uds-config.yaml` also supports `options` (global CLI settings) and `variables` (per-package overrides); see the [full reference](https://github.com/defenseunicorns/uds-cli/blob/main/docs/reference/CLI/commands/uds_deploy.md) for details.\n \n 6. **Share variables across packages**\n \n@@ -257,5 +258,5 @@ Run `uds deploy` without `--confirm` to see the pre-deploy summary showing all c\n \n ## Related Documentation\n \n-- [Use UDS Runner](/cli/how-to-guides/use-uds-runner/) — Automate workflows with `tasks.yaml`.\n-- [Monitor a Cluster](/cli/how-to-guides/monitor-cluster/) — Stream real-time Pepr logs from a running cluster.\n+- [Use UDS Runner](/cli/how-to-guides/use-uds-runner/): Automate workflows with `tasks.yaml`.\n+- [Monitor a Cluster](/cli/how-to-guides/monitor-cluster/): Stream real-time Pepr logs from a running cluster."
+    },
+    {
+      "sha": "f94f1dde1c97d31396201495769691e70c279c7d",
+      "filename": "docs/how-to-guides/use-uds-runner.mdx",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 4,
+      "changes": 9,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fuse-uds-runner.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Fhow-to-guides%2Fuse-uds-runner.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Fhow-to-guides%2Fuse-uds-runner.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Use UDS Runner\n+description: Define and run complex build and operational workflows using UDS Runner's task system with tasks.yaml.\n sidebar:\n   order: 3.3\n ---\n@@ -134,7 +135,7 @@ uds run --list-all   # tasks in the current file and all included files\n \n **Symptom:** `task not found` error when running `uds run <task-name>`.\n \n-**Solution:** Verify the task name matches exactly — task names are case-sensitive.\n+**Solution:** Verify the task name matches exactly; task names are case-sensitive.\n \n ### Problem: Variable not applied\n \n@@ -146,7 +147,7 @@ uds run --list-all   # tasks in the current file and all included files\n \n **Symptom:** A task using `./zarf` fails with a \"command not found\" error.\n \n-**Solution:** Ensure you are using `./zarf`, not bare `zarf` — the vendored binary requires the `./` prefix.\n+**Solution:** Ensure you are using `./zarf`, not bare `zarf`; the vendored binary requires the `./` prefix.\n \n ### Problem: Wrong architecture detected\n \n@@ -156,5 +157,5 @@ uds run --list-all   # tasks in the current file and all included files\n \n ## Related Documentation\n \n-- [Monitor a Cluster](/cli/how-to-guides/monitor-cluster/) — Stream real-time Pepr admission and operator logs.\n-- [Use Bundle Overrides](/cli/how-to-guides/use-bundle-overrides/) — Customize deployments at runtime with Helm overrides and variables.\n+- [Monitor a Cluster](/cli/how-to-guides/monitor-cluster/): Stream real-time Pepr admission and operator logs.\n+- [Use Bundle Overrides](/cli/how-to-guides/use-bundle-overrides/): Customize deployments at runtime with Helm overrides and variables."
+    },
+    {
+      "sha": "18d533d3eda85e24f714f9658f91e30c6ea698e5",
+      "filename": "docs/index.mdx",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2,
+      "changes": 4,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Findex.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Findex.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Findex.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,6 +1,6 @@\n ---\n title: UDS CLI\n-description: The primary interface for deploying and managing UDS bundles and mission applications.\n+description: Index of UDS CLI documentation, the command-line tool for creating, deploying, and managing UDS Bundles on Kubernetes clusters.\n ---\n \n import { CardGrid, LinkCard } from '@astrojs/starlight/components';\n@@ -52,7 +52,7 @@ UDS CLI ships with a JSON schema for `uds-bundle.yaml`. To enable IDE autocomple\n \n ## Ecosystem Context\n \n-UDS CLI works alongside UDS Core — the platform layer providing networking, identity, security, and observability. To understand how bundles fit into the broader UDS ecosystem, see:\n+UDS CLI works alongside UDS Core, the platform layer providing networking, identity, security, and observability. To understand how bundles fit into the broader UDS ecosystem, see:\n \n - [Bundles concept](/core/concepts/configuration-and-packaging/bundles/)\n - [UDS Core overview](/core/)"
+    },
+    {
+      "sha": "73af693a1c7463cc471f5eaffb209f9f6a2438c3",
+      "filename": "docs/reference/overview.mdx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Freference%2Foverview.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Freference%2Foverview.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Freference%2Foverview.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Reference\n+description: Index of UDS CLI reference material covering command syntax, configuration schemas, and IDE setup for validation and autocompletion.\n sidebar:\n   order: 4.1\n ---"
+    },
+    {
+      "sha": "0596a0b6218e37038e981d186fb06422d3300508",
+      "filename": "docs/reference/schema-validation.mdx",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Freference%2Fschema-validation.mdx",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/docs%2Freference%2Fschema-validation.mdx",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/docs%2Freference%2Fschema-validation.mdx?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,5 +1,6 @@\n ---\n title: Schema Validation & IDE Setup\n+description: Configure schema validation and autocompletion for uds-bundle.yaml and uds-config.yaml in your IDE.\n sidebar:\n   order: 4.2\n ---"
+    },
+    {
+      "sha": "875b999dcb2bf73db1a348308caf1a2d8acc34a2",
+      "filename": "tasks/schema.yaml",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/defenseunicorns/uds-cli/blob/72327d9169eab5fcc5a88a45836946b0bf173512/tasks%2Fschema.yaml",
+      "raw_url": "https://github.com/defenseunicorns/uds-cli/raw/72327d9169eab5fcc5a88a45836946b0bf173512/tasks%2Fschema.yaml",
+      "contents_url": "https://api.github.com/repos/defenseunicorns/uds-cli/contents/tasks%2Fschema.yaml?ref=72327d9169eab5fcc5a88a45836946b0bf173512",
+      "patch": "@@ -1,4 +1,4 @@\n-# Copyright 2024 Defense Unicorns\n+# Copyright 2024-2026 Defense Unicorns\n # SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-Defense-Unicorns-Commercial\n \n tasks:"
+    }
+  ]
+}

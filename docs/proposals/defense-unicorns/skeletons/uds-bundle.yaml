@@ -1,0 +1,36 @@
+# SZL Holdings — Top-level UDS bundle (skeleton)
+# Authored by: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings
+# Status: SKELETON — composes the three SZL Zarf packages + an
+#         attestations sidecar per §04 Plane 1.
+
+kind: UDSBundle
+metadata:
+  name: szl-mesh
+  version: 0.1.0
+  description: |
+    A11oy + Sentra + Amaru composed as a single UDS bundle, with an
+    in-bundle hash-chained attestations sidecar verifiable offline
+    (no registry round-trip) per §05 Fix A.
+  authors: "Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings"
+
+packages:
+  - name: a11oy
+    repository: ghcr.io/szl-holdings/packages/a11oy
+    ref: 1.0.0-alpha
+    # path: ../szl-holdings/a11oy/deploy/zarf.yaml   # alt: local path
+
+  - name: sentra
+    repository: ghcr.io/szl-holdings/packages/sentra
+    ref: 1.0.0-alpha
+
+  - name: amaru
+    repository: ghcr.io/szl-holdings/packages/amaru
+    ref: 1.0.0-alpha
+
+  - name: szl-attestations
+    repository: ghcr.io/szl-holdings/packages/attestations
+    ref: 0.1.0
+    # The attestations package is generated at `uds-cli bundle create
+    # --attest` time and stitched in as the last component so its
+    # hash chain covers every artifact above it. Verifiable with:
+    #   uds-cli bundle verify --offline <bundle>.tar.zst

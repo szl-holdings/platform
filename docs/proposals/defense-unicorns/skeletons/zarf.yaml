@@ -1,0 +1,44 @@
+# SZL Holdings — A11oy Zarf package (skeleton)
+# Authored by: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings
+# Status: SKELETON — not yet a real, deployable package.
+# Reviewers: this is the substrate for Plane 1 of the mesh plan in §04.
+
+kind: ZarfPackageConfig
+metadata:
+  name: a11oy
+  version: 1.0.0-alpha
+  description: |
+    Governed agentic execution fabric. Policy gates, signal mesh, proof
+    ledger, and Λ-9 invariant runtime. Apache-2.0 / NOTICE per SZL
+    Doctrine V6 license allowlist.
+  url: https://github.com/szl-holdings/a11oy
+  authors: "Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings"
+
+components:
+  - name: a11oy-runtime
+    required: true
+    description: A11oy runtime container + proof-ledger sidecar mount.
+    images:
+      - ghcr.io/szl-holdings/a11oy:v1.0.0-alpha
+    manifests:
+      - name: a11oy
+        namespace: a11oy
+        files:
+          - manifests/a11oy-deployment.yaml
+          - manifests/a11oy-service.yaml
+          - manifests/proof-ledger-pvc.yaml
+
+  - name: a11oy-attestations
+    required: false
+    description: |
+      Sidecar component that mounts the proof-ledger and exposes
+      attestations.jsonl at /uds-bundle/attestations.jsonl for offline
+      verification (see §05 Fix A).
+    files:
+      - source: attestations.jsonl
+        target: /uds-bundle/attestations.jsonl
+        executable: false
+
+# Replay-root anchor (informational; surfaced into the attestation
+# manifest at bundle-create time):
+# replay_root: 1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b

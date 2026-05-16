@@ -3,6 +3,9 @@
 ## Overview
 SZL Holdings provides FORGE, a governed operational intelligence platform for regulated enterprises. Its core product, Alloy (A11oy), functions as a unified enterprise AI hub, integrating all products, agents, models, datasets, and governance records within the SZL ecosystem. The platform offers a controlled, auditable environment for AI applications, focusing on decision intelligence and operational oversight in highly regulated sectors. Key capabilities include Governed Workflow Orchestration, Maritime Intelligence, a Sovereign Execution Lab, the Continuum Business Observability Fabric, and OMNIA for Unified Portfolio Intelligence. The project aims to achieve market leadership in AI-driven operational intelligence for regulated industries.
 
+## Active engagements
+- Defense Unicorns / UDS meshing proposal for Andrew Greene — see `docs/proposals/defense-unicorns/`.
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.
