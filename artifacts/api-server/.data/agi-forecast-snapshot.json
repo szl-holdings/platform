@@ -1,0 +1,274 @@
+{
+  "lastRunAt": "2026-05-17T14:46:22.284Z",
+  "date": "2026-05-17",
+  "statuses": [
+    {
+      "id": "METR",
+      "label": "METR autonomy-task evaluation activity",
+      "source": "https://api.github.com/repos/METR/public-tasks",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.206Z",
+      "value": 123,
+      "error": null
+    },
+    {
+      "id": "EPOCH",
+      "label": "Epoch AI notable model count",
+      "source": "https://epoch.ai/data/notable_ai_models.csv",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.204Z",
+      "value": 6256,
+      "error": null
+    },
+    {
+      "id": "ARC",
+      "label": "ARC-AGI reference repository activity",
+      "source": "https://api.github.com/repos/fchollet/ARC-AGI",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.178Z",
+      "value": 4769,
+      "error": null
+    },
+    {
+      "id": "APOLLO",
+      "label": "Apollo Research scheming-eval activity index",
+      "source": "https://api.github.com/repos/ApolloResearch/deception-detection",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.256Z",
+      "value": 3,
+      "error": null
+    },
+    {
+      "id": "AISI",
+      "label": "UK AI Safety Institute Inspect framework release count",
+      "source": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.181Z",
+      "value": 0,
+      "error": null
+    },
+    {
+      "id": "RSP",
+      "label": "Anthropic Responsible Scaling Policy proxy (cookbook latest tag)",
+      "source": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1",
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T14:46:22.269Z",
+      "value": null,
+      "error": "rsp tags response empty"
+    },
+    {
+      "id": "FSF",
+      "label": "Google DeepMind Frontier Safety Framework proxy (deepmind-research latest tag)",
+      "source": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1",
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T14:46:22.156Z",
+      "value": null,
+      "error": "fsf tags response empty"
+    },
+    {
+      "id": "GPQA",
+      "label": "GPQA Diamond reference README max-score fraction",
+      "source": "https://api.github.com/repos/idavidrein/gpqa/readme",
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T14:46:22.207Z",
+      "value": null,
+      "error": "no benchmark percentage found in README"
+    },
+    {
+      "id": "MMLU",
+      "label": "MMLU reference README max-score fraction",
+      "source": "https://api.github.com/repos/hendrycks/test/readme",
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T14:46:22.177Z",
+      "value": null,
+      "error": "no benchmark percentage found in README"
+    },
+    {
+      "id": "SWE_BENCH",
+      "label": "SWE-bench Verified README max-score fraction",
+      "source": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.283Z",
+      "value": 0.08,
+      "error": null
+    },
+    {
+      "id": "HUMANEVAL",
+      "label": "HumanEval README max-score fraction",
+      "source": "https://api.github.com/repos/openai/human-eval/readme",
+      "ok": true,
+      "lastFetchedAt": "2026-05-17T14:46:22.222Z",
+      "value": 1,
+      "error": null
+    },
+    {
+      "id": "MATH",
+      "label": "MATH benchmark README max-score fraction",
+      "source": "https://api.github.com/repos/hendrycks/math/readme",
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T14:46:22.180Z",
+      "value": null,
+      "error": "no benchmark percentage found in README"
+    }
+  ],
+  "summary": {
+    "id": "forecast.summary@2026-05-17",
+    "date": "2026-05-17",
+    "ingestionPolicy": "PUBLIC_ONLY",
+    "snapshot": {
+      "METR": {
+        "ok": true,
+        "value": 123,
+        "fetchedAt": "2026-05-17T14:46:22.206Z",
+        "sourceUrl": "https://api.github.com/repos/METR/public-tasks"
+      },
+      "EPOCH": {
+        "ok": true,
+        "value": 6256,
+        "fetchedAt": "2026-05-17T14:46:22.204Z",
+        "sourceUrl": "https://epoch.ai/data/notable_ai_models.csv"
+      },
+      "ARC": {
+        "ok": true,
+        "value": 4769,
+        "fetchedAt": "2026-05-17T14:46:22.178Z",
+        "sourceUrl": "https://api.github.com/repos/fchollet/ARC-AGI"
+      },
+      "APOLLO": {
+        "ok": true,
+        "value": 3,
+        "fetchedAt": "2026-05-17T14:46:22.256Z",
+        "sourceUrl": "https://api.github.com/repos/ApolloResearch/deception-detection"
+      },
+      "AISI": {
+        "ok": true,
+        "value": 0,
+        "fetchedAt": "2026-05-17T14:46:22.181Z",
+        "sourceUrl": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100"
+      },
+      "RSP": {
+        "ok": false,
+        "error": "rsp tags response empty",
+        "fetchedAt": "2026-05-17T14:46:22.269Z",
+        "sourceUrl": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1"
+      },
+      "FSF": {
+        "ok": false,
+        "error": "fsf tags response empty",
+        "fetchedAt": "2026-05-17T14:46:22.156Z",
+        "sourceUrl": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1"
+      },
+      "GPQA": {
+        "ok": false,
+        "error": "no benchmark percentage found in README",
+        "fetchedAt": "2026-05-17T14:46:22.207Z",
+        "sourceUrl": "https://api.github.com/repos/idavidrein/gpqa/readme"
+      },
+      "MMLU": {
+        "ok": false,
+        "error": "no benchmark percentage found in README",
+        "fetchedAt": "2026-05-17T14:46:22.177Z",
+        "sourceUrl": "https://api.github.com/repos/hendrycks/test/readme"
+      },
+      "SWE_BENCH": {
+        "ok": true,
+        "value": 0.08,
+        "fetchedAt": "2026-05-17T14:46:22.283Z",
+        "sourceUrl": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme"
+      },
+      "HUMANEVAL": {
+        "ok": true,
+        "value": 1,
+        "fetchedAt": "2026-05-17T14:46:22.222Z",
+        "sourceUrl": "https://api.github.com/repos/openai/human-eval/readme"
+      },
+      "MATH": {
+        "ok": false,
+        "error": "no benchmark percentage found in README",
+        "fetchedAt": "2026-05-17T14:46:22.180Z",
+        "sourceUrl": "https://api.github.com/repos/hendrycks/math/readme"
+      }
+    },
+    "variables": [
+      {
+        "id": "METR",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/METR/public-tasks",
+        "license": "MIT"
+      },
+      {
+        "id": "EPOCH",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://epoch.ai/data/notable_ai_models.csv",
+        "license": "CC-BY-4.0"
+      },
+      {
+        "id": "ARC",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/fchollet/ARC-AGI",
+        "license": "Apache-2.0"
+      },
+      {
+        "id": "APOLLO",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/ApolloResearch/deception-detection",
+        "license": "MIT"
+      },
+      {
+        "id": "AISI",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100",
+        "license": "MIT"
+      },
+      {
+        "id": "RSP",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1",
+        "license": "MIT"
+      },
+      {
+        "id": "FSF",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1",
+        "license": "Apache-2.0"
+      },
+      {
+        "id": "GPQA",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/idavidrein/gpqa/readme",
+        "license": "MIT"
+      },
+      {
+        "id": "MMLU",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/hendrycks/test/readme",
+        "license": "MIT"
+      },
+      {
+        "id": "SWE_BENCH",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme",
+        "license": "MIT"
+      },
+      {
+        "id": "HUMANEVAL",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/openai/human-eval/readme",
+        "license": "MIT"
+      },
+      {
+        "id": "MATH",
+        "provenance": "PUBLIC_ONLY",
+        "source": "https://api.github.com/repos/hendrycks/math/readme",
+        "license": "MIT"
+      }
+    ],
+    "derived": {
+      "horizonVelocity": null,
+      "alignmentDebt": null,
+      "lutarReadiness": null
+    },
+    "receiptHash": "e2fd3c77a99dd3390ac1357744ad119e016019e1b0e94991490fded6eecb1912"
+  },
+  "runCount": 1
+}
