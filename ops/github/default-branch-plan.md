@@ -143,6 +143,25 @@ gh repo view szl-holdings/szl-holdings-platform --json defaultBranchRef
 
 **Decision:** `main` is the default and only published branch for `szl-holdings-platform`. The `master` branch has been retired.
 
+### 6.1 Operator script — fully retire the remote `master` ref
+
+GitHub keeps a `master → main` redirect after a default-branch rename, but the
+old `master` branch ref itself is *not* deleted automatically. To finish the
+retirement on the remote, run:
+
+```bash
+# Dry-run — verifies default branch, checks for the stale ref,
+# refuses to act if any open PRs still target master,
+# and prints the exact gh / curl delete commands.
+GH_TOKEN=<pat> bash ops/github/retire-master-branch.sh
+
+# Apply — actually deletes the ref.
+GH_TOKEN=<pat> bash ops/github/retire-master-branch.sh --apply
+```
+
+The script is idempotent (exits 0 if `master` is already gone) and refuses
+to delete if any open PR is still based on `master`.
+
 **Reviewed by:** Stephen Lutar
 **Date:** May 2026
 **Next review:** Before v1.0.0 release
