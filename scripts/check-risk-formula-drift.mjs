@@ -73,7 +73,15 @@ const RULES = [
     pattern: /(['"`])multi-party\1/,
     canonical: 'lib/formulas/src/governance.ts',
     symbol: 'autonomyGate',
-    allowed: [],
+    allowed: [
+      // Unit tests added in task #5035 that exercise the canonical
+      // autonomyGate end-to-end. They import autonomyGate from
+      // `@szl-holdings/formulas` and assert on its 'multi-party' output —
+      // they consume the canonical formula, they don't reimplement it.
+      `artifacts${sep}counsel${sep}src${sep}lib${sep}matter-risk.test.ts`,
+      `artifacts${sep}sentra${sep}src${sep}brain${sep}lib${sep}risk.test.ts`,
+      `artifacts${sep}terra${sep}src${sep}lib${sep}deal-score.test.ts`,
+    ],
   },
   {
     id: 'drift-score',
