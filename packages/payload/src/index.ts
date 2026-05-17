@@ -1011,6 +1011,18 @@ export const V7_PANEL_FACTS = Object.freeze({
   hygieneDraftsText: `${V7_SPECIALISTS.hygieneFix.filesDrafted} files \u00b7 ${V7_SPECIALISTS.hygieneFix.prsProposed} PRs`,
   pendingDecisionsText: `${V7.manifest.pendingPmDecisions.length} pending`,
   v7AuditRibbonText: `Latest audit: Fly-High V7 \u2014 ${V7_FILES_TEXT} scanned, ${V7_PRS_TEXT} triaged (${V7_SPECIALISTS.prTriage.merge} merge / ${V7_SPECIALISTS.prTriage.close} close)`,
+  // Canonical repo-relative paths for the V7 audit doc set. These point at
+  // the human-readable register (all open PRs categorised MERGE/CLOSE/STALE/
+  // NEEDS_REVIEW) and the pending PM-decision worksheet derived from
+  // MANIFEST.pending_pm_decisions[]. The GovernancePanels "Latest audit" row
+  // and the Amaru ribbon V7 chip link to these so operators can jump from a
+  // panel fact straight to the underlying triage source.
+  prTriageDocPath: "docs/audit/v7-pr-triage.md",
+  prTriageDocHref: "/docs/audit/v7-pr-triage.md",
+  prTriageDocTitle: "Fly-High V7 — PR Triage Register",
+  pmDecisionsDocPath: "docs/audit/v7-pm-decisions.md",
+  pmDecisionsDocHref: "/docs/audit/v7-pm-decisions.md",
+  pmDecisionsDocTitle: `Fly-High V7 — ${V7.manifest.pendingPmDecisions.length} Pending PM Decisions`,
 });
 
 export type V7PanelFactsKey = keyof typeof V7_PANEL_FACTS;

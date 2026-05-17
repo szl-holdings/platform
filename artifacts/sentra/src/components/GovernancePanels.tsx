@@ -99,7 +99,50 @@ function PanelCard({
   );
 }
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+type AuditLink = { label: string; href: string; title?: string };
+
+function AuditLinks({ links }: { links: ReadonlyArray<AuditLink> }) {
+  return (
+    <span style={{ display: 'inline-flex', gap: 6, marginLeft: 8, flexWrap: 'wrap' }}>
+      {links.map((l) => (
+        <a
+          key={l.href}
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={l.title ?? l.label}
+          style={{
+            fontFamily: MONO,
+            fontSize: 9,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: PALETTE.gold,
+            border: `1px solid ${PALETTE.rule}`,
+            background: 'rgba(255,255,255,0.03)',
+            padding: '1px 6px',
+            borderRadius: 2,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          ↗ {l.label}
+        </a>
+      ))}
+    </span>
+  );
+}
+
+function Row({
+  label,
+  value,
+  mono,
+  links,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  links?: ReadonlyArray<AuditLink>;
+}) {
   return (
     <div
       style={{
@@ -121,6 +164,7 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
         }}
       >
         {value}
+        {links && links.length > 0 ? <AuditLinks links={links} /> : null}
       </span>
     </div>
   );
@@ -227,7 +271,22 @@ export function SentraGovernancePanels() {
             <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
             <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} mono />
             <Row label="Lineage source" value="@szl-holdings/payload" mono />
-            <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
+            <Row
+              label="Latest audit"
+              value={V7_PANEL_FACTS.latestAuditText}
+              links={[
+                {
+                  label: 'PR triage',
+                  href: V7_PANEL_FACTS.prTriageDocHref,
+                  title: V7_PANEL_FACTS.prTriageDocTitle,
+                },
+                {
+                  label: 'PM decisions',
+                  href: V7_PANEL_FACTS.pmDecisionsDocHref,
+                  title: V7_PANEL_FACTS.pmDecisionsDocTitle,
+                },
+              ]}
+            />
           </PanelCard>
 
           <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">

@@ -81,11 +81,55 @@ const valueStyle: CSSProperties = {
   wordBreak: 'break-all',
 };
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+type AuditLink = { label: string; href: string; title?: string };
+
+function AuditLinks({ links }: { links: ReadonlyArray<AuditLink> }) {
+  return (
+    <span style={{ display: 'inline-flex', gap: 6, marginLeft: 8, flexWrap: 'wrap' }}>
+      {links.map((l) => (
+        <a
+          key={l.href}
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={l.title ?? l.label}
+          style={{
+            fontFamily: T.mono,
+            fontSize: 9,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: T.accent,
+            border: `1px solid rgba(255,255,255,0.12)`,
+            background: 'rgba(255,255,255,0.03)',
+            padding: '1px 6px',
+            borderRadius: 2,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          ↗ {l.label}
+        </a>
+      ))}
+    </span>
+  );
+}
+
+function Row({
+  label,
+  value,
+  links,
+}: {
+  label: string;
+  value: React.ReactNode;
+  links?: ReadonlyArray<AuditLink>;
+}) {
   return (
     <div style={rowStyle}>
       <span style={labelStyle}>{label}</span>
-      <span style={valueStyle}>{value}</span>
+      <span style={valueStyle}>
+        {value}
+        {links && links.length > 0 ? <AuditLinks links={links} /> : null}
+      </span>
     </div>
   );
 }
@@ -254,7 +298,22 @@ export function A11oyGovernancePanels() {
             <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
             <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} />
             <Row label="Lineage source" value="@szl-holdings/payload" />
-            <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
+            <Row
+              label="Latest audit"
+              value={V7_PANEL_FACTS.latestAuditText}
+              links={[
+                {
+                  label: 'PR triage',
+                  href: V7_PANEL_FACTS.prTriageDocHref,
+                  title: V7_PANEL_FACTS.prTriageDocTitle,
+                },
+                {
+                  label: 'PM decisions',
+                  href: V7_PANEL_FACTS.pmDecisionsDocHref,
+                  title: V7_PANEL_FACTS.pmDecisionsDocTitle,
+                },
+              ]}
+            />
           </div>
         </div>
       </div>

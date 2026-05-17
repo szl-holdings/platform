@@ -27,29 +27,48 @@ const TONE: Record<ChipTone, { fg: string; border: string; bg: string }> = {
   muted: { fg: PALETTE.muted, border: 'rgba(255,255,255,0.08)', bg: 'rgba(255,255,255,0.02)' },
 };
 
-function Chip({ tone = 'gold', label }: { tone?: ChipTone; label: string }) {
+function Chip({
+  tone = 'gold',
+  label,
+  href,
+  title,
+}: {
+  tone?: ChipTone;
+  label: string;
+  href?: string;
+  title?: string;
+}) {
   const t = TONE[tone];
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 8px',
-        fontFamily: MONO,
-        fontSize: 9,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        color: t.fg,
-        border: `1px solid ${t.border}`,
-        background: t.bg,
-        borderRadius: 2,
-      }}
-    >
+  const style = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '3px 8px',
+    fontFamily: MONO,
+    fontSize: 9,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase' as const,
+    color: t.fg,
+    border: `1px solid ${t.border}`,
+    background: t.bg,
+    borderRadius: 2,
+    textDecoration: 'none' as const,
+    cursor: href ? ('pointer' as const) : ('default' as const),
+  };
+  const inner = (
+    <>
       <span style={{ width: 4, height: 4, borderRadius: 999, background: t.fg }} />
       {label}
-    </span>
+    </>
   );
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" title={title ?? label} style={style}>
+        {inner}
+      </a>
+    );
+  }
+  return <span style={style}>{inner}</span>;
 }
 
 function PanelCard({
@@ -102,7 +121,50 @@ function PanelCard({
   );
 }
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+type AuditLink = { label: string; href: string; title?: string };
+
+function AuditLinks({ links }: { links: ReadonlyArray<AuditLink> }) {
+  return (
+    <span style={{ display: 'inline-flex', gap: 6, marginLeft: 8, flexWrap: 'wrap' }}>
+      {links.map((l) => (
+        <a
+          key={l.href}
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={l.title ?? l.label}
+          style={{
+            fontFamily: MONO,
+            fontSize: 9,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: PALETTE.gold,
+            border: `1px solid rgba(201,183,135,0.30)`,
+            background: 'rgba(201,183,135,0.06)',
+            padding: '1px 6px',
+            borderRadius: 2,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          ↗ {l.label}
+        </a>
+      ))}
+    </span>
+  );
+}
+
+function Row({
+  label,
+  value,
+  mono,
+  links,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  links?: ReadonlyArray<AuditLink>;
+}) {
   return (
     <div
       style={{
@@ -124,6 +186,7 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
         }}
       >
         {value}
+        {links && links.length > 0 ? <AuditLinks links={links} /> : null}
       </span>
     </div>
   );
@@ -171,7 +234,12 @@ export function ConduitGovernancePanels() {
       </div>
 
       <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        <Chip tone="gold" label={V7_PANEL_FACTS.latestAuditLabel} />
+        <Chip
+          tone="gold"
+          label={V7_PANEL_FACTS.latestAuditLabel}
+          href={V7_PANEL_FACTS.prTriageDocHref}
+          title={V7_PANEL_FACTS.prTriageDocTitle}
+        />
         <Chip tone="gold" label={`Λ floor ${PANEL_FACTS.lambdaFloorAndText}`} />
         <Chip tone="ok" label={`CI ${PANEL_FACTS.ciFailingText} failing`} />
         <Chip tone="ok" label={`Dependabot ${PANEL_FACTS.dependabotHighCritText} H/C`} />
@@ -229,7 +297,22 @@ export function ConduitGovernancePanels() {
           <Row label="Fly-High audit" value={`doctrine ${THESIS_LINEAGE.audit.doctrine} · P0 ${THESIS_LINEAGE.audit.p0Fixes} · beautify ${THESIS_LINEAGE.audit.beautifyAvg}`} />
           <Row label="Lineage updated" value={THESIS_LINEAGE.audit.updatedAt} mono />
           <Row label="Lineage source" value="@szl-holdings/payload" mono />
-          <Row label="Latest audit" value={V7_PANEL_FACTS.latestAuditText} />
+          <Row
+            label="Latest audit"
+            value={V7_PANEL_FACTS.latestAuditText}
+            links={[
+              {
+                label: 'PR triage',
+                href: V7_PANEL_FACTS.prTriageDocHref,
+                title: V7_PANEL_FACTS.prTriageDocTitle,
+              },
+              {
+                label: 'PM decisions',
+                href: V7_PANEL_FACTS.pmDecisionsDocHref,
+                title: V7_PANEL_FACTS.pmDecisionsDocTitle,
+              },
+            ]}
+          />
         </PanelCard>
 
         <PanelCard kicker="04 · SLO / status" title="Org posture, live counters">
