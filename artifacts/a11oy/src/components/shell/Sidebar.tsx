@@ -12,7 +12,7 @@ import {
   Palette, Sigma, MessageSquare, Brain, Beaker,
   Box, Cog, Newspaper, KeyRound, Boxes, Wrench,
   Gauge, Search, DollarSign, Mic2,
-  Telescope, BookOpenCheck, Lightbulb, BarChart, FileStack, ScanLine, HeartPulse
+  Telescope, BookOpenCheck, Lightbulb, BarChart, FileStack, ScanLine
 } from 'lucide-react';
 import { cn } from '@szl-holdings/design-system';
 
