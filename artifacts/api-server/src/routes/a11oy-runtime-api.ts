@@ -331,6 +331,7 @@ router.post('/a11oy/actions/:id/execute', async (req: Request, res: Response) =>
       originSignalIds: action.linkedSignalIds,
       vertical: action.vertical,
       riskLevel: action.riskLevel,
+      riskScore: action.riskScore,
       isDestructive: action.isDestructive,
       approvalRecordId: action.approvalRecordId,
     });
@@ -480,12 +481,13 @@ router.post('/a11oy/tools/:id/run', async (req: Request, res: Response) => {
     const tool = getTool(req.params.id);
     if (!tool) return err(res, 404, 'not_found', `Tool "${req.params.id}" not found.`);
 
-    const { actionId, vertical, approvalRecordId, originSignalIds, riskLevel } = req.body as {
+    const { actionId, vertical, approvalRecordId, originSignalIds, riskLevel, riskScore } = req.body as {
       actionId?: string;
       vertical?: string;
       approvalRecordId?: string;
       originSignalIds?: string[];
       riskLevel?: string;
+      riskScore?: number;
     };
 
     if (!actionId) return err(res, 400, 'validation', 'actionId is required to run a tool.');
@@ -496,6 +498,7 @@ router.post('/a11oy/tools/:id/run', async (req: Request, res: Response) => {
       actionId,
       vertical: vertical ?? 'alloy-core',
       riskLevel: riskLevel ?? tool.riskLevel,
+      riskScore,
       originSignalIds: originSignalIds ?? [],
       approvalRecordId,
     });
@@ -554,12 +557,13 @@ router.post('/a11oy/evals/run', async (req: Request, res: Response) => {
 
 router.post('/a11oy/pce', async (req: Request, res: Response) => {
   try {
-    const { actionId, workcellId, originSignalIds, vertical, riskLevel, isDestructive, policyViolations, approvalRecordId } = req.body as {
+    const { actionId, workcellId, originSignalIds, vertical, riskLevel, riskScore, isDestructive, policyViolations, approvalRecordId } = req.body as {
       actionId?: string;
       workcellId?: string;
       originSignalIds?: string[];
       vertical?: string;
       riskLevel?: string;
+      riskScore?: number;
       isDestructive?: boolean;
       policyViolations?: string[];
       approvalRecordId?: string;
@@ -575,6 +579,7 @@ router.post('/a11oy/pce', async (req: Request, res: Response) => {
       originSignalIds: originSignalIds ?? [],
       vertical,
       riskLevel: riskLevel ?? 'medium',
+      riskScore,
       isDestructive: isDestructive ?? false,
       policyViolations,
       approvalRecordId,

@@ -169,11 +169,27 @@ const DISCLOSURE_ACTION_KEYWORDS = [
   'data_sharing',
 ];
 
+/**
+ * Numeric score at or above which an action is treated as "critical" for
+ * PCE classification and policy escalation. Mirrors the `critical` band
+ * (≈0.95 on the band-to-scalar lookup) with a small margin so domain
+ * wrappers that emit slightly-below-1.0 scores still escalate.
+ */
+const CRITICAL_RISK_THRESHOLD = 0.85;
+
+function isCriticalRisk(opts: { riskScore?: number; riskLevel: string }): boolean {
+  if (typeof opts.riskScore === 'number' && Number.isFinite(opts.riskScore)) {
+    return Math.max(0, Math.min(1, opts.riskScore)) >= CRITICAL_RISK_THRESHOLD;
+  }
+  return opts.riskLevel === 'critical';
+}
+
 export function classifyRisk(opts: {
   riskLevel: string;
   isDestructive: boolean;
   vertical: string;
   action?: string;
+  riskScore?: number;
 }): RiskClass[] {
   const classes: RiskClass[] = [];
   if (['financial', 'revenue'].includes(opts.vertical)) classes.push('financial');
@@ -182,7 +198,7 @@ export function classifyRisk(opts: {
   if (opts.isDestructive) classes.push('data_destructive');
   if (['vessels-maritime', 'maritime'].includes(opts.vertical)) classes.push('operational');
   if (['lyte-revenue'].includes(opts.vertical)) classes.push('customer_facing');
-  if (opts.riskLevel === 'critical') classes.push('strategic');
+  if (isCriticalRisk({ riskScore: opts.riskScore, riskLevel: opts.riskLevel })) classes.push('strategic');
 
   const verticalLower = opts.vertical.toLowerCase();
   const actionLower = (opts.action ?? '').toLowerCase();
@@ -201,6 +217,7 @@ export function evaluatePolicies(opts: {
   riskClasses: RiskClass[];
   vertical: string;
   riskLevel: string;
+  riskScore?: number;
 }): PolicyEvaluation {
   const evalId = `pe-${randomUUID().slice(0, 8)}`;
   const approvalTier = opts.riskClasses
@@ -213,7 +230,10 @@ export function evaluatePolicies(opts: {
   const requiresApproval = approvalTier !== 'auto';
   const violations: string[] = [];
 
-  if (opts.riskLevel === 'critical' && approvalTier === 'operator') {
+  if (
+    isCriticalRisk({ riskScore: opts.riskScore, riskLevel: opts.riskLevel }) &&
+    approvalTier === 'operator'
+  ) {
     violations.push('critical_risk_requires_executive_approval');
   }
 
@@ -283,6 +303,13 @@ export interface PCEGateInput {
   originSignalIds: string[];
   vertical: string;
   riskLevel: string;
+  /**
+   * Optional continuous risk score in [0, 1] from a domain wrapper
+   * (Sentra/Counsel/Terra). When present, drives risk classification,
+   * approval-tier escalation, and the MirrorEval approvalTier hint
+   * instead of the coarse `riskLevel` band.
+   */
+  riskScore?: number;
   isDestructive: boolean;
   policyViolations?: string[];
   approvalRecordId?: string;
@@ -358,7 +385,9 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
     isDemoMode: demo,
     policyViolations: input.policyViolations,
     contextFreshness: 0.9,
-    approvalTier: input.riskLevel === 'critical' ? 'executive' : 'operator',
+    approvalTier: isCriticalRisk({ riskScore: input.riskScore, riskLevel: input.riskLevel })
+      ? 'executive'
+      : 'operator',
     riskLevel: input.riskLevel,
     actionDescription: input.actionDescription,
     disclosureContext,
@@ -379,6 +408,7 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
     isDestructive: input.isDestructive,
     vertical: input.vertical,
     action: input.actionDescription,
+    riskScore: input.riskScore,
   });
 
   const policyEval = evaluatePolicies({
@@ -386,6 +416,7 @@ export async function runPCEGate(input: PCEGateInput): Promise<PCEGateResult> {
     riskClasses,
     vertical: input.vertical,
     riskLevel: input.riskLevel,
+    riskScore: input.riskScore,
   });
 
   if (policyEval.requiresApproval && !input.approvalRecordId) {

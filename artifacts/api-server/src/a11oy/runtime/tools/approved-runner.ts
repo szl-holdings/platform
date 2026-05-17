@@ -8,6 +8,10 @@ export interface ApprovedRunOpts {
   actionId: string;
   vertical: string;
   riskLevel?: string;
+  /** Optional continuous risk score in [0, 1] from the calling domain
+   * wrapper. Forwarded to runPCEGate so PCE classification and policy
+   * escalation use the numeric score rather than the coarse riskLevel band. */
+  riskScore?: number;
   originSignalIds?: string[];
   approvalRecordId?: string;
   mirrorEvalResult?: MirrorEvalResult;
@@ -72,6 +76,7 @@ export async function runApprovedTool(opts: ApprovedRunOpts): Promise<ApprovedRu
       originSignalIds: opts.originSignalIds ?? [],
       vertical: opts.vertical,
       riskLevel: opts.riskLevel ?? tool.riskLevel,
+      riskScore: opts.riskScore,
       isDestructive: tool.isDestructive,
       approvalRecordId: opts.approvalRecordId,
       mirrorEvalResult: opts.mirrorEvalResult,
