@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "tsc -p tsconfig.json",
+    "prepare": "NODE_OPTIONS=--max-old-space-size=8192 tsc -p tsconfig.json",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",

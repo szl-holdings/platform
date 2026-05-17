@@ -16,7 +16,7 @@
   "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc",
-    "prepare": "tsc",
+    "prepare": "NODE_OPTIONS=--max-old-space-size=8192 tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
