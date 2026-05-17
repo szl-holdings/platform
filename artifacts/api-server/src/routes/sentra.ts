@@ -4,6 +4,7 @@ import { desc, eq, not, inArray, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
+import { authMiddleware } from '../middlewares/auth';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';

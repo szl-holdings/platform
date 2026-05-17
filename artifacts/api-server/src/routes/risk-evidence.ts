@@ -7,15 +7,16 @@
  * and RiskEvidenceList components in lib/shared-ui/src/risk-evidence.tsx.
  *
  * Endpoints:
- *   GET    /api/risk-evidence/:domain               — list runs for a domain
- *                                                     (public, unauthenticated)
- *   POST   /api/risk-evidence/:domain               — save a run; returns the
- *                                                     full record (with
- *                                                     evidenceId + savedAt)
- *                                                     REQUIRES authentication
- *   DELETE /api/risk-evidence/:domain/:evidenceId   — remove a run
- *                                                     REQUIRES authentication
- *   GET    /api/risk-evidence/by-id/:evidenceId     — resolve a single cited
+ *   GET    /api/risk-evidence/:domain               — public (unauthenticated)
+ *                                                     list runs for a domain
+ *   POST   /api/risk-evidence/:domain               — authenticated; saves a
+ *                                                     run and returns the full
+ *                                                     record (evidenceId +
+ *                                                     savedAt)
+ *   DELETE /api/risk-evidence/:domain/:evidenceId   — authenticated; removes
+ *                                                     a run
+ *   GET    /api/risk-evidence/by-id/:evidenceId     — public (unauthenticated)
+ *                                                     resolve a single cited
  *                                                     run server-side (used
  *                                                     by lender briefing
  *                                                     exports so the PDF
@@ -24,6 +25,11 @@
  *                                                     sensitivities for any
  *                                                     evidenceId referenced
  *                                                     in the briefing payload)
+ *
+ * Auth: GET endpoints are public so external reviewers and lender briefing
+ * exports can resolve cited runs without a session. POST (save) and DELETE
+ * (remove) require an authenticated session via authMiddleware() — anonymous
+ * creation and deletion are blocked.
  *
  * Storage: one JSONB row per domain in platform_settings
  *   namespace = "szl.riskEvidence"
@@ -47,8 +53,8 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import { validateBody } from '../lib/validation';
 
 const NAMESPACE = 'szl.riskEvidence';
 const MAX_RUNS_PER_DOMAIN = 200;

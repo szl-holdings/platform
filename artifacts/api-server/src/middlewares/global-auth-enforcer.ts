@@ -399,17 +399,6 @@ const PUBLIC_PREFIXES = [
   // which expose platform-wide MCP containment data and must stay behind
   // operator-only auth (authMiddleware + requireRole('super_admin', 'ops')).
   // NOTE: nothing to add here — see PUBLIC_EXACT_PATHS for the agent-mesh entries.
-  // Sentra cyber resilience cockpit — read-only GET routes are public so the
-  // demo surface can fetch live incident/alert data and summary counts without
-  // a session. Mutating routes (POST incidents, PATCH incidents/:id,
-  // PATCH alerts/:id, and all SIEM connection CUD routes) require authentication
-  // and are gated by authMiddleware() inside routes/sentra.ts and
-  // routes/sentra-siem.ts. The GET-only bypass is handled by the method-specific
-  // check further below.
-  // NOTE: "/api/sentra/" is intentionally absent from this prefix list.
-  // Read-only GET routes are whitelisted by the method-specific block further
-  // below; mutating routes fall through to the 401 response and are further
-  // gated by authMiddleware() inside routes/sentra.ts and routes/sentra-siem.ts.
   // PQC Identity & Governance Gateway — public verification API.
   // All endpoints are read-only or stateless verification (no data writes).
   // GET  /pqc/status, /pqc/certificates, /pqc/transparency-log
@@ -443,13 +432,6 @@ const PUBLIC_PREFIXES = [
   // Backs the Decision Center pages with the same signal/evidence/recommendation
   // bundle that gets seeded into the live signal mesh at boot.
   "/api/narratives/",
-  // Shared risk evidence store — GET (list/resolve) routes are public so
-  // external reviewers and lender briefing exports can read saved evidence
-  // without a session. POST (save) and DELETE (remove) require authentication;
-  // those methods fall through to the 401 enforcer below and are gated by
-  // authMiddleware() inside routes/risk-evidence.ts.
-  // NOTE: "/api/risk-evidence/" is intentionally absent from this prefix list.
-  // The read-only bypass is handled by the method-specific GET check further below.
   // Global Operations Fabric — snapshot + SSE stream for the Fabric page.
   // Public prefix bypasses this enforcer so the route handler can apply its own
   // production/demo guard: in production the handler checks req.user and returns
@@ -740,6 +722,34 @@ function isValidGatewayApiKey(req: Request): boolean {
   }
 }
 
+/**
+ * AIS/NMEA ingestion — POST /api/stream/ais-nmea.
+ * Requires a Bearer token; actual token validation (against AIS_INGEST_TOKEN
+ * env var or a registered AIS data source authToken) is performed in the route
+ * handler. The global enforcer's role is to reject completely unauthenticated
+ * requests before they reach the handler at all.
+ */
+function isValidAisNmeaIngestion(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  if (req.path !== "/api/stream/ais-nmea") return false;
+  const authHeader = req.headers["authorization"];
+  return typeof authHeader === "string" && authHeader.startsWith("Bearer ");
+}
+
+/**
+ * Sentra SIEM webhook ingest — POST /api/sentra/siem/ingest/:connectionId.
+ * This endpoint is CSRF-exempt and relies on HMAC-SHA256 signature
+ * verification performed inside the route handler (see routes/sentra-siem.ts).
+ * External SIEM platforms push events without a browser session, so the global
+ * enforcer passes these requests through to the route-level HMAC check rather
+ * than requiring a user session. Note: authentication is fully enforced by the
+ * route handler — unauthenticated or mis-signed payloads are rejected there.
+ */
+function isSentraSiemIngest(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  return req.path.startsWith("/api/sentra/siem/ingest/");
+}
+
 function isValidSiemWebhookToken(req: Request): boolean {
   if (req.method !== "POST") return false;
   if (req.path !== "/api/stream/webhook-siem") return false;
@@ -825,6 +835,16 @@ export function globalAuthEnforcer(
   }
 
   if (isValidGatewayApiKey(req)) {
+    next();
+    return;
+  }
+
+  if (isValidAisNmeaIngestion(req)) {
+    next();
+    return;
+  }
+
+  if (isSentraSiemIngest(req)) {
     next();
     return;
   }

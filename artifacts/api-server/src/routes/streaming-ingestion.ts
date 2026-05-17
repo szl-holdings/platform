@@ -294,11 +294,11 @@ streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response)
 });
 
 streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => {
-  // Require a registered AIS data source token delivered as a Bearer token in
-  // the Authorization header. This mirrors the /stream/webhook/:sourceToken
-  // pattern and closes the anonymous-ingest vector described in the security
-  // audit (unauthenticated callers could otherwise forge vessel positions that
-  // get stored in streamIngestedEventsTable and broadcast to live dashboards).
+  // Require a valid source token: either the AIS_INGEST_TOKEN environment
+  // variable or the authToken of a registered and enabled AIS webhook data
+  // source. The global auth enforcer already guarantees a Bearer token is
+  // present before this handler is reached, but we do a full token validation
+  // here as defence-in-depth.
   const authHeader = req.headers.authorization;
   const bearerToken =
     typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
@@ -306,21 +306,37 @@ streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => 
       : null;
 
   if (!bearerToken) {
-    sendUnauthorized(res, 'Missing Bearer source token');
+    sendUnauthorized(res, 'Missing Bearer token');
     return;
   }
 
-  const aisSources = listDataSources().filter(
-    (s) => s.category === 'ais' && s.authToken === bearerToken,
-  );
-  if (aisSources.length === 0) {
-    sendUnauthorized(res, 'Unknown or unauthorized AIS source token');
-    return;
+  let authenticated = false;
+  let sourceId: number | undefined;
+
+  const envToken = process.env.AIS_INGEST_TOKEN;
+  if (envToken) {
+    try {
+      const { timingSafeEqual: tse } = await import('node:crypto');
+      const a = Buffer.from(envToken, 'utf8');
+      const b = Buffer.from(bearerToken, 'utf8');
+      if (a.length === b.length && tse(a, b)) {
+        authenticated = true;
+      }
+    } catch {}
   }
 
-  const source = aisSources[0]!;
-  if (!source.enabled) {
-    sendError(res, 'AIS data source is paused', 423, 'LOCKED');
+  if (!authenticated) {
+    const matchedSource = listDataSources().find(
+      (s) => s.category === 'ais' && s.type === 'webhook' && s.authToken === bearerToken && s.enabled,
+    );
+    if (matchedSource) {
+      authenticated = true;
+      sourceId = matchedSource.id;
+    }
+  }
+
+  if (!authenticated) {
+    sendUnauthorized(res, 'Invalid or unrecognized source token');
     return;
   }
 
@@ -337,7 +353,7 @@ streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => 
     const normalized = normalizeAisNmea(sentence);
     if (normalized) {
       try {
-        ingestEvent({ ...normalized, sourceId: source.id }, source.id);
+        ingestEvent({ ...normalized, sourceId }, sourceId);
         accepted++;
       } catch {}
     }
