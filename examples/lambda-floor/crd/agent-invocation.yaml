@@ -1,0 +1,69 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentinvocations.doctrine.szl.io
+  annotations:
+    doctrine.szl.io/version: "V6"
+    doctrine.szl.io/replay-root: "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b"
+spec:
+  group: doctrine.szl.io
+  scope: Namespaced
+  names:
+    kind: AgentInvocation
+    listKind: AgentInvocationList
+    plural: agentinvocations
+    singular: agentinvocation
+    shortNames:
+      - ainv
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [agent, invocationId, lambda]
+              properties:
+                agent:
+                  type: string
+                  minLength: 1
+                invocationId:
+                  type: string
+                  minLength: 1
+                lambda:
+                  type: object
+                  description: >-
+                    Doctrine V6 9-axis Λ vector. Each value is in [0,1]. The
+                    `lambda-floor` Pepr capability denies admission unless
+                    every axis meets its floor and the conjunctive Λ ≥ 0.90.
+                  required:
+                    - moralGrounding
+                    - measurabilityHonesty
+                    - temporalConsistency
+                    - informationIntegrity
+                    - actionReversibility
+                    - scopeContainment
+                    - stakeholderAlignment
+                    - evidenceAdequacy
+                    - consentBoundary
+                  properties:
+                    moralGrounding:        { type: number, minimum: 0, maximum: 1 }
+                    measurabilityHonesty:  { type: number, minimum: 0, maximum: 1 }
+                    temporalConsistency:   { type: number, minimum: 0, maximum: 1 }
+                    informationIntegrity:  { type: number, minimum: 0, maximum: 1 }
+                    actionReversibility:   { type: number, minimum: 0, maximum: 1 }
+                    scopeContainment:      { type: number, minimum: 0, maximum: 1 }
+                    stakeholderAlignment:  { type: number, minimum: 0, maximum: 1 }
+                    evidenceAdequacy:      { type: number, minimum: 0, maximum: 1 }
+                    consentBoundary:       { type: number, minimum: 0, maximum: 1 }
+      additionalPrinterColumns:
+        - name: Agent
+          type: string
+          jsonPath: .spec.agent
+        - name: Invocation
+          type: string
+          jsonPath: .spec.invocationId

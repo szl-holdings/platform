@@ -1,0 +1,34 @@
+{
+  "name": "pepr-lambda-floor",
+  "version": "0.1.0",
+  "description": "Pepr capability that enforces the Doctrine V6 9-axis Λ-floor on AgentInvocation CRs.",
+  "license": "Apache-2.0",
+  "author": "Lutar, Stephen P. <stephen@szlholdings.com> (ORCID 0009-0001-0110-4173, SZL Holdings)",
+  "type": "module",
+  "main": "capabilities/lambda-floor.ts",
+  "scripts": {
+    "build": "pepr build",
+    "format": "pepr format",
+    "test": "vitest run",
+    "test:cluster": "pepr test"
+  },
+  "dependencies": {
+    "pepr": "^0.34.0",
+    "@noble/curves": "^1.4.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "typescript": "^5.4.0"
+  },
+  "pepr": {
+    "uuid": "lambda-floor-szl",
+    "onError": "reject",
+    "webhookTimeout": 10,
+    "alwaysIgnore": {
+      "namespaces": ["kube-system", "pepr-system"]
+    },
+    "includedFiles": [
+      "payload/lambda-floor-payload.json"
+    ]
+  }
+}

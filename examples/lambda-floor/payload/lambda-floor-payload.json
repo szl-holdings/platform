@@ -1,0 +1,21 @@
+{
+  "_comment": "Build-time slice of packages/payload/raw/payload.json -> doctrine. Bundled into the Pepr capability so the admission decision is hermetic and does not depend on a runtime payload fetch.",
+  "doctrine_version": "V6",
+  "replay_root": "1ed4d253e876f428c6e182f8ed8a569585442556b339529bbf8ec2522581698b",
+  "lambda_axes_count": 9,
+  "lambda_conjunctive_floor": 0.9,
+  "moralGrounding_floor": 0.95,
+  "measurabilityHonesty_floor": 0.95,
+  "license_allowlist": ["Apache-2.0", "MIT", "BSD-3-Clause", "CC-BY-4.0"],
+  "axes": [
+    { "id": "moralGrounding",       "floor": 0.95 },
+    { "id": "measurabilityHonesty", "floor": 0.95 },
+    { "id": "temporalConsistency", "floor": 0.90 },
+    { "id": "informationIntegrity", "floor": 0.90 },
+    { "id": "actionReversibility", "floor": 0.90 },
+    { "id": "scopeContainment",     "floor": 0.90 },
+    { "id": "stakeholderAlignment", "floor": 0.90 },
+    { "id": "evidenceAdequacy",     "floor": 0.90 },
+    { "id": "consentBoundary",      "floor": 0.90 }
+  ]
+}
