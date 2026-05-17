@@ -13,7 +13,12 @@
  * registry.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import {
+  LambdaSpanEmitter,
+  type LambdaAxes,
+  type VspLicense,
+} from '@szl-holdings/vsp-otel';
 import { logger } from '../lib/logger.js';
 
 export type A11oyProductId =
@@ -311,7 +316,106 @@ export function appendProof(input: EmitProofInput): ProofLedgerEntry {
   // working (see a11oy-orchestration.test.ts).
   void persistProof(entry, input.modelUsed);
 
+  // Fire-and-forget VSP span emission (task #5053). Every proof that flows
+  // through the A11oy fabric becomes a verifiable OTel span whose traceId
+  // is derived from the receipt hash. Failures are logged and swallowed
+  // like `persistProof` so we never block (or break) the orchestration hot
+  // path on observability concerns.
+  emitProofSpan(entry, input.modelUsed);
+
   return entry;
+}
+
+const proofSpanEmitter = new LambdaSpanEmitter({ tracerName: 'a11oy-orchestration' });
+
+/**
+ * Build the deterministic SHA-256 hash that anchors a proof's VSP receipt.
+ * Hashes a stable canonical form of the proof so the same proof always
+ * produces the same traceId — auditors can independently re-derive it from
+ * the durable `proof_ledger` row.
+ */
+function receiptHashForProof(entry: ProofLedgerEntry, modelUsed: string | undefined): string {
+  const canonical = JSON.stringify({
+    id: entry.id,
+    product: entry.product,
+    kind: entry.kind,
+    summary: entry.summary,
+    deepLink: entry.deepLink ?? null,
+    relatedProduct: entry.relatedProduct ?? null,
+    modelUsed: modelUsed ?? null,
+    ts: entry.ts,
+  });
+  return createHash('sha256').update(canonical).digest('hex');
+}
+
+/**
+ * Pull any Λ-axis scores that callers happened to drop into the proof
+ * payload under a `lambdaAxes` key. Unknown / non-finite values are
+ * ignored; missing payload yields `undefined` so the emitter doesn't
+ * stamp empty axis attributes.
+ */
+function extractLambdaAxes(payload: Record<string, unknown> | undefined): LambdaAxes | undefined {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const raw = (payload as { lambdaAxes?: unknown }).lambdaAxes;
+  if (!raw || typeof raw !== 'object') return undefined;
+  const axisKeys: readonly (keyof LambdaAxes)[] = [
+    'cleanliness',
+    'horizon',
+    'resonance',
+    'frustum',
+    'gaussClosure',
+    'invariance',
+    'moralGrounding',
+    'ontologicalGrounding',
+    'measurabilityHonesty',
+  ];
+  const out: LambdaAxes = {};
+  let any = false;
+  for (const k of axisKeys) {
+    const v = (raw as Record<string, unknown>)[k];
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      out[k] = v;
+      any = true;
+    }
+  }
+  return any ? out : undefined;
+}
+
+function emitProofSpan(entry: ProofLedgerEntry, modelUsed: string | undefined): void {
+  try {
+    const hash = receiptHashForProof(entry, modelUsed);
+    const license: VspLicense = 'Apache-2.0';
+    const span = proofSpanEmitter.emit(
+      {
+        hash,
+        name: `a11oy.proof.${entry.kind}`,
+        endpoint: entry.kind,
+        license,
+        lambdaAxes: extractLambdaAxes(entry.payload),
+        ts: entry.ts,
+      },
+      { endImmediately: false },
+    );
+    // Stamp proof-shaped attributes so VSP consumers (and the JSON exporter
+    // in tests) can correlate the span back to the ledger row without
+    // needing to re-query the orchestration store.
+    span.setAttribute('a11oy.proof.id', entry.id);
+    span.setAttribute('a11oy.product', entry.product);
+    span.setAttribute('a11oy.proof.kind', entry.kind);
+    span.setAttribute('a11oy.proof.summary', entry.summary);
+    if (entry.relatedProduct) {
+      span.setAttribute('a11oy.related_product', entry.relatedProduct);
+    }
+    if (entry.deepLink) {
+      span.setAttribute('a11oy.deep_link', entry.deepLink);
+    }
+    if (modelUsed) {
+      span.setAttribute('a11oy.model_used', modelUsed);
+    }
+    span.end();
+  } catch (err) {
+    logger.warn({ err, proofId: entry.id }, '[orchestration-store] proof span emit failed');
+  }
 }
 
 function applyProofToProduct(entry: ProofLedgerEntry, modelUsed: string | undefined): void {
