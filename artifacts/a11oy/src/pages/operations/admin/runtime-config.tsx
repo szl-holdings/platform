@@ -148,15 +148,24 @@ function HistoryDrawer({
   configKey,
   onClose,
   onReverted,
+  onViewAll,
 }: {
-  configKey: string;
+  configKey: string | null;
   onClose: () => void;
   onReverted: (key: string) => void;
+  onViewAll?: () => void;
 }) {
+  const isAllKeys = configKey === null;
   const { data, isLoading, error } = useStandardQuery<{ data: HistoryEntry[] }>({
-    queryKey: ['runtime-config-history', configKey],
+    queryKey: isAllKeys
+      ? ['runtime-config-history', '_all']
+      : ['runtime-config-history', configKey],
     queryFn: () =>
-      apiFetch(`/runtime-config/_history?key=${encodeURIComponent(configKey)}&limit=50`),
+      apiFetch(
+        isAllKeys
+          ? `/runtime-config/_history?limit=200`
+          : `/runtime-config/_history?key=${encodeURIComponent(configKey!)}&limit=50`,
+      ),
   });
   const [revertError, setRevertError] = useState<string | null>(null);
   const [pendingRevertId, setPendingRevertId] = useState<number | null>(null);
@@ -203,7 +212,22 @@ function HistoryDrawer({
               Change history
             </h2>
             <p className="text-[11px] text-muted-foreground mt-0.5 break-all">
-              <code className="font-mono">{configKey}</code> — last 50 entries
+              {isAllKeys ? (
+                <>All runtime_config events — last 200 entries</>
+              ) : (
+                <>
+                  <code className="font-mono">{configKey}</code> — last 50 entries{' '}
+                  {onViewAll && (
+                    <button
+                      type="button"
+                      onClick={onViewAll}
+                      className="ml-1 text-primary hover:underline"
+                    >
+                      View all changes →
+                    </button>
+                  )}
+                </>
+              )}
             </p>
           </div>
           <button
@@ -226,7 +250,7 @@ function HistoryDrawer({
             </div>
           ) : entries.length === 0 ? (
             <div className="p-6 text-center text-xs text-muted-foreground">
-              No recorded changes for this key
+              {isAllKeys ? 'No recorded runtime config changes' : 'No recorded changes for this key'}
             </div>
           ) : (
             <>
@@ -239,10 +263,11 @@ function HistoryDrawer({
                 {entries.map((entry, idx) => {
                   const prev = entry.metadata?.previousValue;
                   const next = entry.metadata?.newValue;
-                  const isCurrent = idx === 0;
+                  const isCurrent = !isAllKeys && idx === 0;
                   const isRevertEntry = entry.metadata?.revert === true;
                   const target = revertTargetValue(entry);
                   const canRevert =
+                    !isAllKeys &&
                     !isCurrent &&
                     target !== undefined &&
                     target !== null &&
@@ -250,6 +275,7 @@ function HistoryDrawer({
                   const isPending =
                     revertMutation.isPending && pendingRevertId === entry.id;
                   const handleRevert = () => {
+                    if (isAllKeys || !configKey) return;
                     if (target === undefined || target === null) return;
                     setPendingRevertId(entry.id);
                     setRevertError(null);
@@ -267,6 +293,11 @@ function HistoryDrawer({
                         >
                           {entry.action}
                         </span>
+                        {isAllKeys && entry.key && (
+                          <code className="font-mono text-foreground break-all">
+                            {entry.key}
+                          </code>
+                        )}
                         {isRevertEntry && (
                           <span
                             className="px-1.5 py-0.5 rounded font-medium uppercase tracking-wide text-[#8b7ac8] bg-[#8b7ac8]/10"
@@ -386,6 +417,7 @@ export default function RuntimeConfigAdmin() {
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [historyKey, setHistoryKey] = useState<string | null>(null);
+  const [historyAll, setHistoryAll] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
@@ -430,6 +462,7 @@ export default function RuntimeConfigAdmin() {
     }
     qc.invalidateQueries({ queryKey: ['runtime-config'] });
     qc.invalidateQueries({ queryKey: ['runtime-config-history'] });
+    qc.invalidateQueries({ queryKey: ['runtime-config-history', '_all'] });
     if (key) qc.invalidateQueries({ queryKey: ['runtime-config-history', key] });
   };
 
@@ -733,6 +766,14 @@ export default function RuntimeConfigAdmin() {
           >
             <Upload className={`w-3.5 h-3.5 ${importLoading === 'preview' ? 'animate-pulse' : ''}`} />
             {importLoading === 'preview' && !importPreview ? 'Reading…' : 'Import'}
+          </button>
+          <button
+            onClick={() => setHistoryAll(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors"
+            title="View all runtime_config change history"
+          >
+            <History className="w-3.5 h-3.5" />
+            View all changes
           </button>
           <button
             onClick={openCreate}
@@ -1161,10 +1202,17 @@ export default function RuntimeConfigAdmin() {
         </div>
       )}
 
-      {historyKey && (
+      {(historyKey || historyAll) && (
         <HistoryDrawer
-          configKey={historyKey}
-          onClose={() => setHistoryKey(null)}
+          configKey={historyAll ? null : historyKey}
+          onClose={() => {
+            setHistoryKey(null);
+            setHistoryAll(false);
+          }}
+          onViewAll={() => {
+            setHistoryKey(null);
+            setHistoryAll(true);
+          }}
           onReverted={(key) => {
             void invalidateAndRefresh(key);
           }}
