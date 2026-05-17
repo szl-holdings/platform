@@ -54,6 +54,27 @@ Choose A / B / C. If A, name each feature explicitly (e.g.
 `platform/internal/glasswing/**` is exempt for the literal string
 `Glasswing`).
 
+### Decision: A — doctrine exception (recorded 2026-05-17)
+
+**Rationale.** Both `Glasswing` and `Mythos` are live, customer-facing
+product feature names inside `platform/`. Renaming them (Option B) would
+break URLs and APIs without doctrinal benefit; marking `platform/` as
+out-of-scope (Option C) would gut V6's customer-facing coverage. The
+existing `Claude Mythos Preview` precedent already establishes that
+narrowly-scoped, path-anchored name exemptions are doctrine-compatible.
+
+**Scope (narrow, path-anchored — not a blanket allowance).**
+
+| Literal | Path prefix exempted |
+| ------- | -------------------- |
+| `Glasswing` | `platform/` (any subpath) |
+| `Mythos`    | `platform/` (any subpath) |
+
+Outside `platform/` both strings remain forbidden. The exception is
+encoded in `@szl-holdings/payload` as `V7_PLATFORM_NAME_EXCEPTIONS` and
+honored by `v7ForbiddenHits(text, context, path)` when `path` starts
+with `platform/`.
+
 ---
 
 ## Decision 2 — BP review-count deadlock
@@ -93,6 +114,30 @@ zero-effort path but defeats the BP-strict posture that V6 reports.
 Choose A / B / C / D. If B or C, name the second reviewer; the BP PUT
 payload references CODEOWNERS that does not yet exist for those identities.
 
+### Decision: A — set required_approving_review_count to 0 (recorded 2026-05-17)
+
+**Rationale.** Options B/C/D all require onboarding a second identity
+(human or bot) into the org, which is governance work that is out of
+scope for the V7 apply window and was not pre-approved by Stephen.
+Option A is the only path that unblocks `05_apply_bp.sh` without
+introducing a new identity. The strict CI / status-check gate is
+preserved; only the human-approval requirement is dropped. This is
+explicitly recorded as a **temporary** posture — to be revisited as a
+follow-up once a second reviewer (Option B or C) is named.
+
+**Concrete change to the 6 BP PUT payloads** in
+`raw_v7/05_apply_scripts/05_apply_bp.sh` (applied at apply-time, not by
+this task):
+
+- `required_approving_review_count: 1` → `required_approving_review_count: 0`
+- `require_code_owner_reviews: true` → `require_code_owner_reviews: false`
+- `required_status_checks.strict: true` — **unchanged** (CI gate kept)
+- `enforce_admins: true` — **unchanged**
+
+This keeps the BP-strict posture on every dimension except the
+human-approval count, which the org's single-owner reality makes
+unenforceable today.
+
 ---
 
 ## Decision 3 — `vsp-otel` / `agi-forecast` have no CODEOWNERS file
@@ -123,6 +168,37 @@ repos have strict BP with no merge path.
 ### Action requested from Stephen
 
 Choose A / B / C. If A, confirm the CODEOWNERS path mapping for each repo.
+
+### Decision: A — draft CODEOWNERS first (recorded 2026-05-17)
+
+**Rationale.** Decision 2 (above) was resolved by dropping
+`required_approving_review_count` to 0 and disabling
+`require_code_owner_reviews`, which neutralizes the deadlock that
+motivated the V7 specialist's coupled Option C. With the deadlock gone,
+the rationale for deferring (Option C) evaporates, and a softer BP
+payload (Option B) would leave these two repos diverging from the rest
+of the org. Drafting CODEOWNERS now keeps `vsp-otel` and `agi-forecast`
+on the same posture as the other four BP targets and lets
+`05_apply_bp.sh` run in one batch.
+
+**CODEOWNERS path mapping** (to be drafted at apply-time, not by this
+task; both repos use the same single-owner pattern as the rest of the
+org):
+
+```
+# .github/CODEOWNERS — vsp-otel
+*       @SLutar
+
+# .github/CODEOWNERS — agi-forecast
+*       @SLutar
+```
+
+The `03_open_hygiene_prs.sh` script should add this CODEOWNERS file to
+each of the two PRs it opens, alongside SECURITY.md / CONTRIBUTING.md /
+CODE_OF_CONDUCT.md. With Decision 2 already removing
+`require_code_owner_reviews`, the CODEOWNERS file is documentary rather
+than gating, but it preserves parity with the rest of the org for any
+future tightening.
 
 ---
 

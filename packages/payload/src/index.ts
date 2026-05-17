@@ -761,6 +761,31 @@ export const V7_MYTHOS_EXCEPTION_PHRASE: string = extractMythosExceptionPhrase(
   V7_DOCTRINE.mythosException,
 );
 
+/** Narrow, path-anchored name exceptions recorded by PM Decision 1 in
+ *  docs/audit/v7-pm-decisions.md (2026-05-17). Each entry exempts the literal
+ *  `pattern` from the V7 forbidden-pattern sweep when the candidate text's
+ *  repo-relative path starts with `pathPrefix`. This is NOT a blanket
+ *  allowance: outside the listed prefix, the pattern remains forbidden. */
+export interface V7PlatformNameException {
+  readonly pattern: string;
+  readonly pathPrefix: string;
+  readonly note: string;
+}
+
+export const V7_PLATFORM_NAME_EXCEPTIONS: ReadonlyArray<V7PlatformNameException> =
+  Object.freeze([
+    Object.freeze({
+      pattern: "Glasswing",
+      pathPrefix: "platform/",
+      note: "PM Decision 1 (2026-05-17): live customer-facing feature name in platform/.",
+    }),
+    Object.freeze({
+      pattern: "Mythos",
+      pathPrefix: "platform/",
+      note: "PM Decision 1 (2026-05-17): live customer-facing feature name in platform/.",
+    }),
+  ]);
+
 /** Context in which a candidate string is being checked against the V7
  *  doctrine. The git_author / git_committer / commit_metadata contexts honor
  *  the historical-override clause and do NOT block forbidden patterns. */
@@ -779,11 +804,16 @@ export interface V7ForbiddenHit {
 
 /** Returns the list of forbidden-pattern hits in `text` under the V7
  *  doctrine, honoring (a) the Mythos exception for the literal Anthropic
- *  third-party model name and (b) the git-author override for git
- *  author/committer/commit-metadata contexts. */
+ *  third-party model name, (b) the git-author override for git
+ *  author/committer/commit-metadata contexts, and (c) the path-anchored
+ *  platform-name exceptions recorded by PM Decision 1. The optional `path`
+ *  argument is the repo-relative path of the file containing `text`; when it
+ *  starts with an exception's `pathPrefix`, that exception's pattern is
+ *  masked before scanning. */
 export function v7ForbiddenHits(
   text: string,
   context: V7CheckContext = "doc",
+  path?: string,
 ): ReadonlyArray<V7ForbiddenHit> {
   if (
     context === "git_author" ||
@@ -792,12 +822,22 @@ export function v7ForbiddenHits(
   ) {
     return Object.freeze([]);
   }
-  const exception = V7_MYTHOS_EXCEPTION_PHRASE;
-  // Mask out every occurrence of the exception phrase before scanning so that
-  // its embedded "Mythos" substring does not register as a hit.
+  // Mask out every occurrence of the Mythos exception phrase, plus any
+  // path-anchored platform-name exceptions that apply, so their literal
+  // substrings do not register as forbidden-pattern hits.
   let scan = text;
-  if (exception.length > 0) {
-    scan = text.split(exception).join("\u0000".repeat(exception.length));
+  const mythosException = V7_MYTHOS_EXCEPTION_PHRASE;
+  if (mythosException.length > 0) {
+    scan = scan
+      .split(mythosException)
+      .join("\u0000".repeat(mythosException.length));
+  }
+  if (path !== undefined) {
+    for (const exc of V7_PLATFORM_NAME_EXCEPTIONS) {
+      if (exc.pattern.length === 0) continue;
+      if (!path.startsWith(exc.pathPrefix)) continue;
+      scan = scan.split(exc.pattern).join("\u0000".repeat(exc.pattern.length));
+    }
   }
   const hits: V7ForbiddenHit[] = [];
   const lower = scan.toLowerCase();
@@ -818,8 +858,9 @@ export function v7ForbiddenHits(
 export function v7IsForbidden(
   text: string,
   context: V7CheckContext = "doc",
+  path?: string,
 ): boolean {
-  return v7ForbiddenHits(text, context).length > 0;
+  return v7ForbiddenHits(text, context, path).length > 0;
 }
 
 export interface V7SpecialistSummary {
