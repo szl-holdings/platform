@@ -33,6 +33,42 @@ This document defines how we use GitHub as the platform for source control, code
 
 **Golden rule**: `main` must always pass CI and be deployable to production. Never commit directly to `main`.
 
+### No `master` branch triggers
+
+This repo's canonical trunk is `main`. The legacy `master` branch has been retired (see `ops/github/retire-master-branch.sh`). To keep workflows aligned with this convention, the `CI` workflow includes a **Workflow Branch Guard** job (`.github/workflows/ci.yml`, job id `workflow-branch-guard`) that fails the build if any file under `.github/workflows/` declares `master` as a `branches:` trigger.
+
+Both YAML forms are detected:
+
+```yaml
+# Form A — single-line bracket array
+on:
+  pull_request:
+    branches: [master, main]
+
+# Form B — multi-line block list
+on:
+  push:
+    branches:
+      - master
+      - main
+```
+
+The detection logic lives in the tracked script `ops/github/check-no-master-branch-triggers.sh` (the workflow YAMLs themselves are gitignored — see `ops/github/push-workflows.sh`). The CI job is a one-liner that invokes the script, so the rules and error messages stay reviewable in the repo even though the workflow file isn't.
+
+If the guard fails, the PR check log prints each offending file, line number, and content. Fix it by removing `master` from the `branches:` trigger so it only targets `main`. The check intentionally ignores `master` references that aren't `branches:` triggers — e.g. an `actions/checkout@master` example inside a code comment, or a `default_branch || 'master'` fallback in a `ref:` expression.
+
+Run it locally before pushing:
+
+```
+bash ops/github/check-no-master-branch-triggers.sh
+```
+
+The script has a built-in self-test (`--self-test`) that exercises the bracket form, the multiline form, the quoted form, and a negative fixture with comments and `ref:` fallbacks:
+
+```
+bash ops/github/check-no-master-branch-triggers.sh --self-test
+```
+
 ---
 
 ## Workflow: Feature Development
