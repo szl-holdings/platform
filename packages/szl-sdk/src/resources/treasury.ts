@@ -1,8 +1,22 @@
 import type { HttpClient } from '../http.js';
+import type { LambdaGate } from '../lambda-gate.js';
 import type { PaginationOptions, TreasuryAccount, TreasuryBalance, TreasurySummary } from '../types.js';
 
+export interface TreasuryTransfer {
+  id: string;
+  fromAccountId: number;
+  toAccountId: number;
+  amount: string;
+  currency: string;
+  status: 'pending' | 'submitted' | 'settled' | 'failed';
+  createdAt: string;
+}
+
 export class TreasuryResource {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly gate?: LambdaGate,
+  ) {}
 
   async addAccount(options: {
     label: string;
@@ -35,5 +49,23 @@ export class TreasuryResource {
     options: PaginationOptions & { accountId?: number } = {},
   ): Promise<unknown[]> {
     return this.http.get('/treasury/transactions', options);
+  }
+
+  async transfer(options: {
+    fromAccountId: number;
+    toAccountId: number;
+    amount: string;
+    currency: string;
+    memo?: string;
+    approvalToken?: string;
+  }): Promise<TreasuryTransfer> {
+    const { approvalToken, ...body } = options;
+    const gateDecision = this.gate
+      ? await this.gate.check('treasury.transfer', { approvalToken })
+      : undefined;
+    return this.http.request<TreasuryTransfer>('POST', '/treasury/transfers', {
+      body,
+      ...(gateDecision ? { gateDecision } : {}),
+    });
   }
 }

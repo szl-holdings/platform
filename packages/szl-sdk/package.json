@@ -21,7 +21,9 @@
   "keywords": ["szl-holdings", "sdk", "api", "typescript"],
   "license": "UNLICENSED",
   "dependencies": {
-    "@szl-holdings/szl-receipts": "workspace:*"
+    "@szl-holdings/policy-engine": "workspace:*",
+    "@szl-holdings/szl-receipts": "workspace:*",
+    "@workspace/ouroboros-invariant": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

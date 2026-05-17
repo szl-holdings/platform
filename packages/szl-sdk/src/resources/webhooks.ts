@@ -1,8 +1,12 @@
 import type { HttpClient } from '../http.js';
+import type { LambdaGate } from '../lambda-gate.js';
 import type { WebhookDelivery, WebhookEndpoint } from '../types.js';
 
 export class WebhooksResource {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly gate?: LambdaGate,
+  ) {}
 
   async list(): Promise<WebhookEndpoint[]> {
     return this.http.get<WebhookEndpoint[]>('/webhooks');
@@ -27,8 +31,13 @@ export class WebhooksResource {
     return this.http.post<WebhookEndpoint>(`/webhooks/endpoints/${id}`, options);
   }
 
-  async delete(id: string): Promise<void> {
-    return this.http.delete<void>(`/webhooks/endpoints/${id}`);
+  async delete(id: string, options: { approvalToken?: string } = {}): Promise<void> {
+    const gateDecision = this.gate
+      ? await this.gate.check('webhooks.delete', { approvalToken: options.approvalToken })
+      : undefined;
+    return this.http.request<void>('DELETE', `/webhooks/endpoints/${id}`, {
+      ...(gateDecision ? { gateDecision } : {}),
+    });
   }
 
   async ping(id: string): Promise<{ delivered: boolean; statusCode?: number; error?: string }> {

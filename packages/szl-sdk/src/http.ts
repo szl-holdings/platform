@@ -1,4 +1,5 @@
 import { SZLApiError, SZLAuthError, SZLNotFoundError, SZLRateLimitError } from './errors.js';
+import type { GateDecision } from './lambda-gate.js';
 import type { SZLClientOptions } from './types.js';
 import { hashJson } from './util/canonical.js';
 
@@ -16,6 +17,7 @@ export interface HttpRequestRecord {
   idempotencyKey: string;
   status: number;
   result: unknown;
+  gateDecision?: GateDecision;
 }
 
 export type HttpRequestObserver = (record: HttpRequestRecord) => void | Promise<void>;
@@ -28,6 +30,8 @@ export interface RequestOptions {
   idempotencyKey?: string;
   /** Extra headers; will not override Authorization/Content-Type. */
   headers?: Record<string, string>;
+  /** Λ-gate decision to record on the receipt for this call. */
+  gateDecision?: GateDecision;
 }
 
 export class HttpClient {
@@ -150,6 +154,7 @@ export class HttpClient {
               idempotencyKey: effectiveIdempotencyKey || paramsHash,
               status: lastStatus,
               result,
+              ...(options.gateDecision ? { gateDecision: options.gateDecision } : {}),
             });
           } catch {
             // Observer failures must never break the SDK call path.
@@ -170,6 +175,7 @@ export class HttpClient {
                 idempotencyKey: effectiveIdempotencyKey || paramsHash,
                 status: lastStatus || err.status,
                 result: { error: err.code, message: err.message },
+                ...(options.gateDecision ? { gateDecision: options.gateDecision } : {}),
               });
             } catch {}
           }

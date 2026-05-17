@@ -15,6 +15,20 @@
 export { SZLClient } from './client.js';
 export * from './types.js';
 export * from './errors.js';
+export {
+  LambdaGate,
+  SZLPolicyError,
+  constantProvider,
+  type LambdaGateOptions,
+  type LambdaInvariantProvider,
+  type GateDecision,
+} from './lambda-gate.js';
+export {
+  defaultPolicyProvider,
+  builtInDefaultProvider,
+  DEFAULT_SDK_AXES,
+  type DefaultPolicyProviderOptions,
+} from './default-policy-provider.js';
 export { ApiKeysResource } from './resources/api-keys.js';
 export { PortfolioResource } from './resources/portfolio.js';
 export { BriefingsResource } from './resources/briefings.js';

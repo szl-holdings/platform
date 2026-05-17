@@ -3,6 +3,8 @@ import { appendFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 import { HttpClient } from './http.js';
+import { LambdaGate, type LambdaGateOptions } from './lambda-gate.js';
+import { builtInDefaultProvider } from './default-policy-provider.js';
 import type { SZLClientOptions } from './types.js';
 import { ApiKeysResource } from './resources/api-keys.js';
 import { PortfolioResource } from './resources/portfolio.js';
@@ -29,6 +31,12 @@ export interface SZLReceiptsConfig {
 
 export interface SZLClientOptionsWithReceipts extends SZLClientOptions {
   receipts?: SZLReceiptsConfig;
+  /**
+   * Λ-gate that refuses destructive calls (webhooks.delete, apiKeys.revoke,
+   * treasury.transfer, esignature.send) when the runtime invariant is below
+   * threshold and the caller did not supply an `approvalToken`.
+   */
+  lambdaGate?: LambdaGateOptions | false;
 }
 
 class JsonlFileStorage implements ReceiptStorage {
@@ -115,6 +123,7 @@ export class SZLClient {
   readonly courtFilings: CourtFilingsResource;
   readonly plugins: PluginsResource;
   readonly receipts: ReceiptsHandle;
+  readonly lambdaGate?: LambdaGate;
 
   constructor(options: SZLClientOptionsWithReceipts) {
     if (!options.apiKey) throw new Error('SZLClient requires an apiKey');
@@ -149,7 +158,11 @@ export class SZLClient {
             method: record.method,
             params: record.body ?? { method: record.method, path: record.path },
             result: record.result,
-            metadata: { status: record.status, idempotencyKey: record.idempotencyKey },
+            metadata: {
+              status: record.status,
+              idempotencyKey: record.idempotencyKey,
+              ...(record.gateDecision ? { gateDecision: record.gateDecision } : {}),
+            },
           });
         } catch (err) {
           onError(err, { path: record.path, method: record.method });
@@ -159,13 +172,32 @@ export class SZLClient {
       this.receipts = new DisabledReceipts();
     }
 
-    this.apiKeys = new ApiKeysResource(this.http);
+    // Default-on governance: if the caller does not supply a gate, install a
+    // conservative one whose invariant is 0. That refuses every destructive
+    // call unless an explicit `approvalToken` is supplied, satisfying the
+    // "refuse risky calls automatically unless approved" contract. Callers
+    // can opt out with `lambdaGate: false` or replace the provider with a
+    // real evaluator (e.g. one wired to @workspace/ouroboros-invariant).
+    if (options.lambdaGate === false) {
+      this.lambdaGate = undefined;
+    } else if (options.lambdaGate) {
+      this.lambdaGate = new LambdaGate(options.lambdaGate);
+    } else {
+      // Built-in provider routes admission through @szl-holdings/policy-engine
+      // (block → invariant=0) and @workspace/ouroboros-invariant
+      // (lutarInvariant against conservative default axes). Yields Λ=0 out of
+      // the box so destructive calls refuse until either a real provider or
+      // an approvalToken is supplied.
+      this.lambdaGate = new LambdaGate({ threshold: 0.5, provider: builtInDefaultProvider() });
+    }
+
+    this.apiKeys = new ApiKeysResource(this.http, this.lambdaGate);
     this.portfolio = new PortfolioResource(this.http);
     this.briefings = new BriefingsResource(this.http);
     this.alerts = new AlertsResource(this.http);
-    this.webhooks = new WebhooksResource(this.http);
-    this.treasury = new TreasuryResource(this.http);
-    this.esignature = new EsignatureResource(this.http);
+    this.webhooks = new WebhooksResource(this.http, this.lambdaGate);
+    this.treasury = new TreasuryResource(this.http, this.lambdaGate);
+    this.esignature = new EsignatureResource(this.http, this.lambdaGate);
     this.courtFilings = new CourtFilingsResource(this.http);
     this.plugins = new PluginsResource(this.http);
   }
