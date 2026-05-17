@@ -11,6 +11,7 @@ import {
 import { withFilter } from 'graphql-subscriptions';
 import { FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
+import { requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 import type { GraphQLContext } from '../index.js';
 
 export const aegisTypeDefs = `#graphql
@@ -285,12 +286,10 @@ export const aegisResolvers = {
   },
   Subscription: {
     aegisIncidentUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(FIRESTORM_EVENTS.INCIDENT_UPDATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(FIRESTORM_EVENTS.INCIDENT_UPDATED);
+      },
     },
   },
 };

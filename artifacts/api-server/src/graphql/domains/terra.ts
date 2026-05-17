@@ -15,7 +15,7 @@ import {
 import { withFilter } from 'graphql-subscriptions';
 import { pubsub, TERRA_EVENTS } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
-import { parseIntId } from '../utils.js';
+import { parseIntId, requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 
 type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
 type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
@@ -434,20 +434,16 @@ export const terraResolvers = {
   },
   Subscription: {
     terraDealUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(TERRA_EVENTS.DEAL_UPDATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(TERRA_EVENTS.DEAL_UPDATED);
+      },
     },
     terraActionItemUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(TERRA_EVENTS.ACTION_ITEM_UPDATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(TERRA_EVENTS.ACTION_ITEM_UPDATED);
+      },
     },
   },
 };

@@ -10,6 +10,7 @@ import {
 import { withFilter } from 'graphql-subscriptions';
 import { CARLOTA_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
+import { requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 
 export const carlotaJoTypeDefs = `#graphql
   type CarlotaService {
@@ -242,12 +243,10 @@ export const carlotaJoResolvers = {
   },
   Subscription: {
     carlotaInquiryCreated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(CARLOTA_EVENTS.INQUIRY_CREATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(CARLOTA_EVENTS.INQUIRY_CREATED);
+      },
     },
   },
 };

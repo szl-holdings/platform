@@ -177,13 +177,22 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
         const wsUser = (ctx.extra as Record<string, unknown>).wsUser as
           | { id: number; displayName: string; email: string | null; roles: string[]; orgs: Array<{ orgId: number; orgSlug: string; orgName: string; role: string }> }
           | undefined;
+
+        if (!wsUser) {
+          throw new GraphQLError('Not authenticated', {
+            extensions: { code: 'UNAUTHENTICATED' },
+          });
+        }
+
         return {
           wsUser,
-          // Expose wsUser as req.user so existing auth directives and helpers
-          // (which read context.req.user) work correctly for subscriptions.
-          req: wsUser
-            ? { user: { id: wsUser.id, roles: wsUser.roles, orgs: wsUser.orgs } }
-            : undefined,
+          req: {
+            user: {
+              id: wsUser.id,
+              roles: wsUser.roles,
+              orgs: wsUser.orgs,
+            },
+          },
           loaders: createDataLoaders(),
         };
       },

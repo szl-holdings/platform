@@ -9,7 +9,7 @@ import {
 import { domainEventBus } from '../../lib/domain-events/index.js';
 import { CONTINUUM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
-import { parseIntId } from '../utils.js';
+import { parseIntId, requireAuthenticatedWsUser, requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 
 export { CONTINUUM_EVENTS, pubsub };
 
@@ -39,7 +39,7 @@ function ownerOf(resource: unknown): number | null {
   return typeof v === 'number' ? v : null;
 }
 
-function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriptionWsContext): boolean {
   if (!ctx?.wsUser) return false;
   if (!eventOrgIds?.length) return false;
   const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
@@ -1239,13 +1239,14 @@ export const continuumResolvers = {
   Subscription: {
     alloyWorkflowRunUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED),
+        (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+          requireOperatorWsUser(context);
+          return pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED);
+        },
         (
           payload: { alloyWorkflowRunUpdated: { workflowId: number }; _orgIds?: number[] },
           variables: { workflowId?: string },
-          context: SubscriberCtx,
         ) => {
-          if (!checkOrgAccess(payload._orgIds, context)) return false;
           if (!variables.workflowId) return true;
           return String(payload.alloyWorkflowRunUpdated.workflowId) === variables.workflowId;
         },
@@ -1253,25 +1254,24 @@ export const continuumResolvers = {
     },
     alloyApprovalRequired: {
       subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.APPROVAL_REQUIRED),
+        (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+          requireAuthenticatedWsUser(context);
+          return pubsub.asyncIterableIterator(CONTINUUM_EVENTS.APPROVAL_REQUIRED);
+        },
         (
-          payload: { alloyApprovalRequired: { reviewerUserId?: number }; _orgIds?: number[] },
-          _variables,
-          context: SubscriberCtx,
+          payload: { alloyApprovalRequired: { reviewerUserId?: number } },
+          _variables: unknown,
+          context: SubscriptionWsContext,
         ) => {
-          if (!checkOrgAccess(payload._orgIds, context)) return false;
-          // Only deliver approval events addressed to the connected user.
-          return payload.alloyApprovalRequired.reviewerUserId === context.wsUser?.id;
+          return payload.alloyApprovalRequired.reviewerUserId === context.wsUser.id;
         },
       ),
     },
     alloyWorkflowStatusChanged: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED);
+      },
     },
   },
 };

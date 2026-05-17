@@ -36,7 +36,7 @@ import {
 } from '../../lib/domain-services/lyte/index.js';
 import { withFilter } from 'graphql-subscriptions';
 import { LYTE_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import { parseIntId } from '../utils.js';
+import { parseIntId, requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 
 type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
 type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
@@ -856,28 +856,22 @@ export const lyteResolvers = {
 
   Subscription: {
     lyteIncidentUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(LYTE_EVENTS.INCIDENT_UPDATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(LYTE_EVENTS.INCIDENT_UPDATED);
+      },
     },
     lyteSignalUpdated: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(LYTE_EVENTS.SIGNAL_UPDATED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(LYTE_EVENTS.SIGNAL_UPDATED);
+      },
     },
     lyteQueueChanged: {
-      subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(LYTE_EVENTS.QUEUE_CHANGED),
-        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
-          return checkOrgAccess(payload._orgIds, context);
-        },
-      ),
+      subscribe: (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+        requireOperatorWsUser(context);
+        return pubsub.asyncIterableIterator(LYTE_EVENTS.QUEUE_CHANGED);
+      },
     },
   },
 };

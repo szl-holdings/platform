@@ -21,9 +21,6 @@
  *    a registered AIS source Bearer token (enforced in the route handler)
  *  - SIEM webhook (/api/stream/webhook-siem) — NOT public; requires Bearer token auth
  *    (SIEM_WEBHOOK_TOKEN env var or a registered SIEM webhook data source authToken)
- *  - Streaming SSE read endpoints (/api/stream/siem-events, /api/stream/market-data,
- *    /api/stream/ais-tracking, /api/stream/status) — NOT public; require session
- *    authentication enforced by authMiddleware() in streaming-ingestion.ts
  *  - A2A Federation discovery endpoints (/api/federation/agents*, /api/federation/health)
  *    POST /federation/agents/:id/chat uses its own FEDERATION_API_TOKENS bearer token
  *  - DOS Public API (/api/v1/*)
@@ -83,9 +80,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/booking/availability",
   "/api/booking/reservations",
   "/api/stream/ais-nmea",
-  // NOTE: /api/stream/siem-events, /api/stream/market-data, /api/stream/ais-tracking,
-  // and /api/stream/status are intentionally NOT in this allowlist. They require
-  // session authentication enforced by authMiddleware() in streaming-ingestion.ts.
   "/api/federation/health",
   "/api/federation/agents",
   // A2A delegation endpoint — public so external agents can delegate tasks without a

@@ -8,6 +8,7 @@ import {
   type VesselsStoragePort,
 } from '../../lib/domain-services/vessels/index.js';
 import { pubsub, VESSELS_EVENTS } from '../../lib/pubsub-bridge.js';
+import { requireOperatorWsUser, type SubscriptionWsContext } from '../utils.js';
 import type { GraphQLContext } from '../index.js';
 
 export const vesselsTypeDefs = `#graphql
@@ -194,22 +195,15 @@ export const vesselsResolvers = {
   Subscription: {
     vesselPositionUpdated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(VESSELS_EVENTS.POSITION_UPDATED),
-        async (
+        (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+          requireOperatorWsUser(context);
+          return pubsub.asyncIterableIterator(VESSELS_EVENTS.POSITION_UPDATED);
+        },
+        (
           payload: { vesselPositionUpdated: { vesselId: string | number } },
           variables: { vesselId?: string },
-          context: { wsUser?: { id: number; orgs: Array<{ orgId: number }> } },
         ) => {
-          if (!context?.wsUser) return false;
-          const vesselId = Number(payload.vesselPositionUpdated.vesselId);
-          if (!vesselId) return false;
-          const storage = await buildVesselsStorage();
-          const vessel = await storage.getVessel(vesselId);
-          if (!vessel) return false;
-          const vesselOrgId = (vessel as Record<string, unknown>).orgId as number | undefined;
-          if (!vesselOrgId) return false;
-          const userOrgIds = new Set(context.wsUser.orgs.map(o => o.orgId));
-          if (!userOrgIds.has(vesselOrgId)) return false;
+          const vesselId = payload.vesselPositionUpdated.vesselId;
           if (!variables.vesselId) return true;
           return String(vesselId) === variables.vesselId;
         },
@@ -217,22 +211,15 @@ export const vesselsResolvers = {
     },
     vesselSanctionsHit: {
       subscribe: withFilter(
-        () => pubsub.asyncIterableIterator(VESSELS_EVENTS.SANCTIONS_HIT),
-        async (
+        (_: unknown, __: unknown, context: SubscriptionWsContext) => {
+          requireOperatorWsUser(context);
+          return pubsub.asyncIterableIterator(VESSELS_EVENTS.SANCTIONS_HIT);
+        },
+        (
           payload: { vesselSanctionsHit: { vesselId: string | number } },
           variables: { vesselId?: string },
-          context: { wsUser?: { id: number; orgs: Array<{ orgId: number }> } },
         ) => {
-          if (!context?.wsUser) return false;
-          const vesselId = Number(payload.vesselSanctionsHit.vesselId);
-          if (!vesselId) return false;
-          const storage = await buildVesselsStorage();
-          const vessel = await storage.getVessel(vesselId);
-          if (!vessel) return false;
-          const vesselOrgId = (vessel as Record<string, unknown>).orgId as number | undefined;
-          if (!vesselOrgId) return false;
-          const userOrgIds = new Set(context.wsUser.orgs.map(o => o.orgId));
-          if (!userOrgIds.has(vesselOrgId)) return false;
+          const vesselId = payload.vesselSanctionsHit.vesselId;
           if (!variables.vesselId) return true;
           return String(vesselId) === variables.vesselId;
         },

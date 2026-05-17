@@ -45,8 +45,6 @@ function sseHeaders(res: Response): void {
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
     'X-Accel-Buffering': 'no',
-    // Do not allow cross-origin access to these authenticated feeds.
-    // Legitimate same-origin dashboards do not need this header.
   });
 }
 
