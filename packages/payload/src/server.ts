@@ -45,6 +45,20 @@ function pickRawRoot(): string {
 }
 const RAW_ROOT = pickRawRoot();
 
+// Surface the resolved RAW_ROOT once at boot so any future drift (e.g. a
+// stray `artifacts/<x>/raw/` showing up next to a bundled consumer) is
+// visible in logs. Debug-level via DEBUG=szl:payload or
+// SZL_PAYLOAD_DEBUG=1 to keep normal startup quiet.
+if (
+  process.env.SZL_PAYLOAD_DEBUG === "1" ||
+  (process.env.DEBUG ?? "").split(",").some((t) =>
+    t.trim() === "szl:payload" || t.trim() === "*",
+  )
+) {
+  // eslint-disable-next-line no-console
+  console.debug(`[szl:payload] RAW_ROOT resolved to ${RAW_ROOT}`);
+}
+
 function readJson<T = unknown>(rel: string): T {
   return JSON.parse(readFileSync(join(RAW_ROOT, rel), "utf8")) as T;
 }
