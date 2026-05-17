@@ -17,6 +17,8 @@ import { InitializeRequestSchema, type CallToolResult, type InitializeResult } f
 import { EventEmitter } from 'node:events';
 import { randomUUID, createHash } from 'node:crypto';
 import { z, type ZodRawShape } from 'zod';
+import { MultiplexingTransport } from './multiplexing-transport.js';
+import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 
 // ─── Governance Context ────────────────────────────────────────────────────────
 
@@ -741,6 +743,12 @@ export class PRAXISMcpServer {
     systemPrompt?: string;
     maxTokens: number;
     metadata?: Record<string, unknown>;
+    /**
+     * When the server is running in multiplexed mode, bind this sampling
+     * request to a specific session. If omitted and a multiplexer is in
+     * use, the first registered session is targeted. (Task #5068.)
+     */
+    sessionId?: string;
   }): Promise<{
     role: 'assistant';
     content: { type: 'text'; text: string };
@@ -768,12 +776,28 @@ export class PRAXISMcpServer {
     }
 
     try {
-      const result = await this._sdk.server.createMessage({
-        messages: params.messages,
-        modelPreferences: params.modelPreferences,
-        systemPrompt: params.systemPrompt,
-        maxTokens: params.maxTokens,
-      });
+      // In multiplexed mode the SDK Server's single `_transport` is the
+      // multiplexer, so a server-initiated sampling request needs to know
+      // which session to route to. Pick the caller-supplied session id, or
+      // fall back to the first live session, and bind it via the
+      // multiplexer's AsyncLocalStorage for the duration of the call.
+      const targetSid =
+        params.sessionId ?? this._multiplexer?.listSessions()[0];
+      const run = <T>(fn: () => Promise<T>): Promise<T> => {
+        if (this._multiplexer && targetSid) {
+          return this._multiplexer.runWithSession(targetSid, fn);
+        }
+        return fn();
+      };
+
+      const result = await run(() =>
+        this._sdk.server.createMessage({
+          messages: params.messages,
+          modelPreferences: params.modelPreferences,
+          systemPrompt: params.systemPrompt,
+          maxTokens: params.maxTokens,
+        }),
+      );
 
       const latencyMs = Date.now() - start;
       void this._writeProofChain({
@@ -1011,6 +1035,51 @@ export class PRAXISMcpServer {
 
   async close(): Promise<void> {
     return this._sdk.close();
+  }
+
+  // ─── Multiplexing: share one server across many sessions ────────────────────
+  //
+  // The SDK's underlying `Server` is one-shot: a single instance may only
+  // have `connect()` called once and tracks a single `_transport`. To host
+  // many concurrent Streamable HTTP sessions on one PRAXISMcpServer (and
+  // therefore pay tool/resource/prompt registration once at startup), we
+  // connect the SDK Server to a long-lived `MultiplexingTransport` and add
+  // each session's per-request transport as a sub-transport.
+  //
+  // Tracked: szl-holdings/platform#113, task #5068.
+
+  private _multiplexer: MultiplexingTransport | null = null;
+  private _multiplexerConnect: Promise<void> | null = null;
+
+  /** Lazily-created shared multiplexing transport. */
+  get multiplexer(): MultiplexingTransport {
+    if (!this._multiplexer) {
+      this._multiplexer = new MultiplexingTransport();
+    }
+    return this._multiplexer;
+  }
+
+  /**
+   * Attach a per-session sub-transport to the shared multiplexer. On first
+   * call this connects the SDK Server to the multiplexer (a one-time cost).
+   * Subsequent calls are O(1): they simply register the sub-transport for
+   * inbound dispatch and outbound routing.
+   *
+   * Returns a disposer that removes the session from the multiplexer (call
+   * from the sub-transport's `onclose`).
+   */
+  async attachSession(sub: Transport & { sessionId?: string }): Promise<() => void> {
+    const mux = this.multiplexer;
+    if (!this._multiplexerConnect) {
+      this._multiplexerConnect = this._sdk.connect(mux);
+    }
+    await this._multiplexerConnect;
+    return mux.addSession(sub);
+  }
+
+  /** Number of live sessions currently sharing this server. */
+  get sessionCount(): number {
+    return this._multiplexer?.sessionCount ?? 0;
   }
 
   // ─── Private: Built-in Capability Tools ─────────────────────────────────────

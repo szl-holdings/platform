@@ -1,21 +1,13 @@
 /**
  * Substrate MCP Gateway — PRAXISMcpServer Registration
  *
- * Creates and configures the PRAXISMcpServer instance that backs the Substrate
- * MCP Gateway. All substrate tools plus server-discovery tools are registered
- * here using the official SDK's typed registration API.
- *
- * This module is the single source of truth for the gateway's tool surface.
- * The MCP SDK's `Server` carries a one-shot `initialized` flag, so each
- * Streamable HTTP session needs its own `PRAXISMcpServer` + transport pair;
- * `createGatewayServer()` is the per-session factory used by the HTTP
- * transport, while `getGatewayServer()` returns a long-lived singleton for
- * stdio and module-level notifications. Expensive immutable inputs (PQC
- * identity, domain roots, domain Apps) are cached at the module level so
- * per-session construction only pays for SDK tool/resource/prompt
- * registration. A process-wide live-server registry fans out sampling
- * requests and resource/tool-list change notifications across every active
- * session.
+ * Builds the **single** `PRAXISMcpServer` instance that backs every transport
+ * (Streamable HTTP, legacy SSE, and stdio). Tool / resource / prompt
+ * registration happens exactly once, at module load. Concurrent Streamable
+ * HTTP sessions are multiplexed onto this one server via
+ * `PRAXISMcpServer.attachSession(subTransport)` — see
+ * `packages/nexus-mcp/src/multiplexing-transport.ts` and the changelog entry
+ * for task #5068.
  */
 
 import { z } from 'zod';
@@ -23,8 +15,6 @@ import {
   PRAXISMcpServer,
   buildTenantInstructions,
   createDomainApps,
-  type CryptographicIdentityConfig,
-  type PRAXISApp,
   type TenantContext,
 } from '@workspace/nexus-mcp';
 import { getCurrentActorId } from './request-context.js';
@@ -41,113 +31,51 @@ import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
 import { listRoots } from './domain-roots.js';
 import { setSamplingBridge } from './governed-sampling.js';
 
-// ─── Cached, immutable server inputs ──────────────────────────────────────────
+// ─── Singleton PRAXISMcpServer (shared across every transport / session) ─────
 //
-// The SDK's underlying `Server` carries a one-shot `initialized` flag, so a
-// single `PRAXISMcpServer` instance cannot host more than one Streamable HTTP
-// session. We therefore still build a fresh server per session, but everything
-// that is genuinely immutable across the gateway's lifetime — the PQC identity
-// (and its CA cert), the domain roots list, and the domain Apps registry — is
-// computed once at module load and reused. Previously each session re-ran the
-// identity bootstrap (which talks to the database) and rebuilt the domain apps
-// from scratch, which dominated session-creation cost under load.
-// Tracked: szl-holdings/platform#113 and the per-session-cost follow-up.
+// Task #5068: previously each Streamable HTTP session built its own
+// `PRAXISMcpServer` because the SDK's underlying `Server` is one-shot
+// (`Server.connect()` may only be invoked once; `_initialized` flips once).
+// `PRAXISMcpServer.attachSession()` now wires each per-session
+// `StreamableHTTPServerTransport` onto a long-lived multiplexing transport,
+// so a single server instance can host many concurrent sessions. The
+// expensive setup work (PQC identity bootstrap, domain root enumeration,
+// domain App construction, ~26 tool / N resource / N prompt SDK
+// registrations) happens here exactly once.
 
-let _cachedIdentity: CryptographicIdentityConfig | null = null;
-let _cachedDomainRoots: Array<{ uri: string; name?: string }> | null = null;
-let _cachedDomainApps: PRAXISApp[] | null = null;
-
-function getCachedIdentity(): CryptographicIdentityConfig {
-  if (!_cachedIdentity) {
-    _cachedIdentity = initGatewayIdentity();
-  }
-  return _cachedIdentity;
-}
-
-function getCachedDomainRoots(): Array<{ uri: string; name?: string }> {
-  if (!_cachedDomainRoots) {
-    _cachedDomainRoots = listRoots('substrate-gateway').map((r) => ({
-      uri: r.uri,
-      name: r.name,
-    }));
-  }
-  return _cachedDomainRoots;
-}
-
-function getCachedDomainApps(): PRAXISApp[] {
-  if (!_cachedDomainApps) {
-    _cachedDomainApps = createDomainApps();
-  }
-  return _cachedDomainApps;
-}
-
-// ─── Live server registry + global bridge fan-out ─────────────────────────────
-//
-// `setSamplingBridge` and `setResourceUpdateCallback` install process-wide
-// callbacks. When each session installed its own callbacks, the last session
-// to be created silently overwrote the bridges of all earlier sessions, so
-// resource-updated notifications and sampling requests only reached one
-// client. We now install the bridges exactly once and fan out to every live
-// server instance — including the stdio singleton.
-
-const _liveServers = new Set<PRAXISMcpServer>();
+let _server: PRAXISMcpServer | null = null;
 let _bridgesInstalled = false;
 
-function ensureGlobalBridges(): void {
+function ensureGlobalBridges(server: PRAXISMcpServer): void {
   if (_bridgesInstalled) return;
   _bridgesInstalled = true;
 
   setSamplingBridge({
     requestSampling: async (params) => {
-      // Any live server can satisfy a sampling request — pick the first
-      // (insertion order). In practice the gateway is rarely asked to sample
-      // from more than one client at a time.
-      const next = _liveServers.values().next();
-      if (next.done) {
-        throw new Error('No active MCP sessions available for sampling');
-      }
-      return next.value.requestSampling(params);
+      // With a shared server, target the first live multiplexer session.
+      // The multiplexer routes the server-initiated request back to that
+      // session's transport (see MultiplexingTransport.runWithSession).
+      return server.requestSampling(params);
     },
   });
 
   setResourceUpdateCallback((uri: string) => {
-    for (const server of _liveServers) {
-      void server.notifyResourceUpdated(uri);
-    }
+    void server.notifyResourceUpdated(uri);
   });
 }
 
-function registerLiveServer(server: PRAXISMcpServer): () => void {
-  _liveServers.add(server);
-  return () => {
-    _liveServers.delete(server);
-  };
-}
-
-// ─── Singleton PRAXISMcpServer (stdio / module-level notifications) ──────────
-
-let _server: PRAXISMcpServer | null = null;
-
 /**
- * Build a fully-configured PRAXISMcpServer instance.
- *
- * The MCP SDK's underlying `Server` carries a one-shot "initialized" flag, so
- * a single instance cannot service multiple Streamable HTTP sessions — every
- * fresh `initialize` request needs its own server + transport pair. Use this
- * factory from the HTTP transport's per-session bootstrap path; use
- * `getGatewayServer()` for stdio / singleton consumers (notifications, etc).
- *
- * Heavy inputs (PQC identity, domain roots, domain Apps) are cached at the
- * module level so per-session construction only pays for SDK registration
- * (tool/resource/prompt entries on the new `McpServer`).
- *
- * Tracked: szl-holdings/platform#113.
+ * Return (or build) the singleton PRAXISMcpServer for the Substrate Gateway.
+ * All callers — Streamable HTTP, legacy SSE, and stdio — share this instance.
  */
-export function createGatewayServer(): PRAXISMcpServer {
-  ensureGlobalBridges();
+export function getGatewayServer(): PRAXISMcpServer {
+  if (_server) return _server;
 
-  const cryptographicIdentity = getCachedIdentity();
-  const domainRoots = getCachedDomainRoots();
+  const cryptographicIdentity = initGatewayIdentity();
+  const domainRoots = listRoots('substrate-gateway').map((r) => ({
+    uri: r.uri,
+    name: r.name,
+  }));
 
   const server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
@@ -179,14 +107,13 @@ export function createGatewayServer(): PRAXISMcpServer {
     extensions: (CAPABILITIES as unknown as { extensions: Record<string, unknown> }).extensions,
   });
 
-  // ── Register domain Apps (from cached registry) ──────────────────────────────
-  for (const app of getCachedDomainApps()) {
+  // ── Register domain Apps ────────────────────────────────────────────────────
+  for (const app of createDomainApps()) {
     server.registerApp(app);
   }
 
   // ── Register substrate tools via SDK ─────────────────────────────────────────
-  const tools = getAvailableTools();
-  for (const tool of tools) {
+  for (const tool of getAvailableTools()) {
     _registerSubstrateTool(server, tool.name, tool.description, tool.inputSchema);
   }
 
@@ -251,27 +178,9 @@ export function createGatewayServer(): PRAXISMcpServer {
     );
   }
 
-  registerLiveServer(server);
+  ensureGlobalBridges(server);
+  _server = server;
   return server;
-}
-
-/**
- * Deregister a session-scoped server when its transport closes. Callers in the
- * HTTP transport invoke this from the transport's `onclose` hook so the live
- * servers set does not leak across the gateway's lifetime.
- */
-export function disposeGatewayServer(server: PRAXISMcpServer): void {
-  _liveServers.delete(server);
-}
-
-/**
- * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
- * Used for stdio transport and module-level notifications. The HTTP transport
- * builds fresh per-session servers via `createGatewayServer()`.
- */
-export function getGatewayServer(): PRAXISMcpServer {
-  if (!_server) _server = createGatewayServer();
-  return _server;
 }
 
 /**
@@ -298,11 +207,6 @@ function _registerSubstrateTool(
     // Attach PRAXIS governance envelopes to every tool response (including
     // agent_delegate). Both a trailing text content block (human-readable) and
     // a first-class _meta structured field (programmatic) are emitted.
-    //
-    // For agent_delegate the outer envelope records the MCP tool invocation
-    // itself. The inner proof (inside delegateToAgent) records the delegation
-    // act. These are distinct events and distinct proof records — they should
-    // both be present on the response.
     if (result._nexus) {
       const nexusBlock = {
         type: 'text' as const,
@@ -313,21 +217,12 @@ function _registerSubstrateTool(
           },
         }, null, 2),
       };
-      // Return a fully-typed CallToolResult with _meta for programmatic clients.
-      // The rawTool passthrough in PRAXISMcpServer.rawTool() detects content[]
-      // arrays and preserves _meta without re-serializing to text.
-      // Emit _meta with both:
-      //   • Canonical flat keys ("x-nexus-consciousness", "x-nexus-proof") for
-      //     strict MCP client interoperability and spec compliance.
-      //   • A nested "nexus" shorthand for clients that prefer structured access.
       const enriched: { content: typeof result.content; isError?: boolean; _meta: Record<string, unknown> } = {
         content: [...result.content, nexusBlock],
         isError: result.isError,
         _meta: {
-          // Canonical key form — primary contract
           'x-nexus-consciousness': result._nexus['x-nexus-consciousness'],
           'x-nexus-proof': result._nexus['x-nexus-proof'],
-          // Shorthand form — convenience alias for programmatic clients
           nexus: {
             consciousness: result._nexus['x-nexus-consciousness'],
             proof: result._nexus['x-nexus-proof'],
@@ -342,14 +237,13 @@ function _registerSubstrateTool(
 }
 
 /**
- * Notify every live gateway server that the tool list has changed. Call this
- * after enable_server / disable_server so connected clients on any session
- * (Streamable HTTP, legacy SSE, or stdio) receive a discovery refresh.
+ * Notify connected MCP clients that the tool list has changed. The shared
+ * PRAXISMcpServer broadcasts the SDK notification through every active
+ * multiplexer session; in-process SSE consumers are notified separately via
+ * the gateway's run-event bus.
  */
 export async function notifyToolListChanged(): Promise<void> {
-  for (const server of _liveServers) {
-    await server.notifyListChanged('tools/list_changed');
-  }
+  await getGatewayServer().notifyListChanged('tools/list_changed');
   emitToolListChanged();
 }
 

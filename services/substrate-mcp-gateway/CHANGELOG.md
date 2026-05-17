@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+### Changed — One PRAXISMcpServer now serves every Streamable HTTP session (#5068)
+
+Routing inside `MultiplexingTransport` prefers the AsyncLocalStorage-bound
+session for outbound sends (responses, in-handler sampling, related
+notifications). The inbound request-owner map is keyed by composite
+`${sid}::${requestId}` because JSON-RPC ids are only required to be unique
+*per connection* — two concurrent sessions can legally reuse the same id.
+A new `tests/e2e.test.ts` case (`29. concurrent sessions with colliding
+JSON-RPC ids…`) fires 10 parallel rounds across two sessions reusing
+identical request ids to guard against cross-session response leakage.
+
+
+The gateway previously built a fresh `PRAXISMcpServer` per Streamable HTTP
+session — even after task #5059 cached the heavy *inputs*, every initialize
+still re-registered ~26 tools, ~N resources, and ~N prompts on a brand-new
+SDK `McpServer`. The blocker was the MCP SDK's `Server` class: it carries a
+one-shot `initialized` flag and only allows `Server.connect()` once per
+instance.
+
+`PRAXISMcpServer` now exposes a `MultiplexingTransport` (in `packages/
+nexus-mcp/src/multiplexing-transport.ts`). On first call to
+`attachSession(sub)`, the SDK Server is connected to the multiplexer
+exactly once; subsequent calls just register the per-session
+`StreamableHTTPServerTransport` as a sub-transport. Inbound messages are
+forwarded onto the shared Server with the originating session id exposed
+both via `extra.sessionId` and via a dynamic `transport.sessionId` getter
+backed by `AsyncLocalStorage` (the SDK reads `capturedTransport.sessionId`
+synchronously inside `_onrequest`). Outbound sends route back to the
+correct session via response-id lookup, `relatedRequestId`, the
+ALS-active session, or — for un-targeted notifications — broadcast to
+every live session.
+
+Net effect: per-session cost is now just transport bookkeeping (one map
+insertion + onmessage/onclose hookup). Tool, resource, and prompt
+registration happen once at module load. The gateway server cache and
+`disposeGatewayServer()` are gone; every consumer (HTTP, legacy SSE,
+stdio) calls into the same singleton `getGatewayServer()`.
+
+`requestSampling()` accepts an optional `sessionId` so the bridge can
+target a specific client when more than one session is live; without it,
+the first registered session is picked (matching the previous live-server
+fan-out behaviour).
+
 ### Changed — Per-session gateway construction is now cheap
 
 The Streamable HTTP transport still builds a fresh `PRAXISMcpServer` per

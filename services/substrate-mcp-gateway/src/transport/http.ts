@@ -46,7 +46,7 @@ import { getAvailableTools } from '../handlers.js';
 import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
 import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-import { createGatewayServer, disposeGatewayServer } from '../nexus-gateway-server.js';
+import { getGatewayServer } from '../nexus-gateway-server.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
@@ -410,21 +410,18 @@ export function createHttpTransport(): express.Router {
     // clients that only watch our custom events also see lifecycle progress
     // (szl-holdings/platform#113).
     const sseTransport = new SSEServerTransport('/mcp/message', res);
-    const sessionServer = createGatewayServer();
+    const sharedServer = getGatewayServer();
     sseSessions.set(sseTransport.sessionId, sseTransport);
     sseTransport.onclose = () => {
       sseSessions.delete(sseTransport.sessionId);
-      disposeGatewayServer(sessionServer);
     };
     try {
-      await sessionServer.connect(sseTransport);
+      // Task #5068: the single shared PRAXISMcpServer hosts every session
+      // via its multiplexing transport, so per-session attach is just
+      // sub-transport registration — no fresh tool/resource/prompt setup.
+      await sharedServer.attachSession(sseTransport);
     } catch (err) {
       sseSessions.delete(sseTransport.sessionId);
-      // Connect failed before the SDK could wire `onclose`, so explicitly
-      // deregister the session server to keep `_liveServers` from leaking
-      // and to prevent the sampling bridge from routing requests at a dead
-      // instance (code-review follow-up on task #5059).
-      disposeGatewayServer(sessionServer);
       if (!res.headersSent) {
         res.status(500).json({
           error: 'SSE_CONNECT_FAILED',
@@ -606,20 +603,19 @@ export function createHttpTransport(): express.Router {
           streamableSessions.set(id, transport);
         },
       });
-      const sessionServer = createGatewayServer();
+      const sharedServer = getGatewayServer();
       transport.onclose = () => {
         if (transport.sessionId) {
           streamableSessions.delete(transport.sessionId);
         }
-        disposeGatewayServer(sessionServer);
       };
       try {
-        await sessionServer.connect(transport);
+        // Task #5068: attach this session's transport to the shared
+        // PRAXISMcpServer's multiplexer. Tool/resource/prompt registration
+        // already happened once at module load, so per-session cost is just
+        // map insertion + onmessage hookup inside MultiplexingTransport.
+        await sharedServer.attachSession(transport);
       } catch (err) {
-        // Mirror the SSE path: if `connect()` throws before the SDK wires
-        // its `onclose`, manually deregister so `_liveServers` does not
-        // leak a dead instance (code-review follow-up on task #5059).
-        disposeGatewayServer(sessionServer);
         if (transport.sessionId) {
           streamableSessions.delete(transport.sessionId);
         }

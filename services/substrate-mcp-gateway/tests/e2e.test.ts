@@ -1387,3 +1387,153 @@ test('28. initialize with capabilities.extensions echoes intersected server exte
     `Unknown client extension '${UNKNOWN_KEY}' must be dropped (got: ${Object.keys(extensions).join(', ')})`,
   );
 });
+
+test('29. concurrent sessions with colliding JSON-RPC ids receive their own responses (no cross-session routing leak)', async () => {
+  // Regression guard for shared-server multiplexing (task #5068): JSON-RPC
+  // request ids are only required to be unique *per connection*, not
+  // globally. Two concurrent Streamable HTTP sessions sending requests with
+  // the same id (e.g. `1`) must each receive their own response. A naive
+  // flat `Map<id, sessionId>` would let the second inbound request overwrite
+  // the first owner mapping and route both responses to the same session.
+
+  async function openSession(): Promise<string> {
+    const initParams = {
+      protocolVersion: '2025-11-25',
+      capabilities: {},
+      clientInfo: { name: 'e2e-concurrency', version: '1.0.0' },
+    };
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
+        Authorization: `Bearer ${TEST_API_KEY}`,
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: initParams }),
+    });
+    const sid = res.headers.get('mcp-session-id');
+    assert.ok(sid, 'initialize must return a session id');
+    // Drain body so the response is fully consumed.
+    await res.text();
+    return sid;
+  }
+
+  async function callListWorkflowsRaw(
+    sessionId: string,
+    requestId: number | string,
+    clientTag: string,
+  ): Promise<{ envelope: { id?: unknown; result?: unknown; error?: unknown }; rawBody: string }> {
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
+        Authorization: `Bearer ${TEST_API_KEY}`,
+        'Mcp-Session-Id': sessionId,
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: requestId,
+        method: 'tools/call',
+        params: {
+          name: 'substrate_list_workflows',
+          arguments: { _clientTag: clientTag },
+        },
+      }),
+    });
+    const ct = res.headers.get('content-type') ?? '';
+    const raw = await res.text();
+    let envelope: { id?: unknown; result?: unknown; error?: unknown } = {};
+    if (ct.includes('text/event-stream')) {
+      for (const line of raw.split('\n')) {
+        if (line.startsWith('data: ')) {
+          envelope = JSON.parse(line.slice(6));
+          break;
+        }
+      }
+    } else if (ct.includes('application/json')) {
+      envelope = JSON.parse(raw);
+    }
+    return { envelope, rawBody: raw };
+  }
+
+  // Open two distinct sessions.
+  const [sidA, sidB] = await Promise.all([openSession(), openSession()]);
+  assert.notEqual(sidA, sidB, 'Two initialize POSTs must yield distinct session ids');
+
+  // Fire 10 concurrent rounds. In each round, BOTH sessions reuse the
+  // identical JSON-RPC request id (intentional collision) so a flat
+  // request-id→session map would misroute or drop one response.
+  const ROUNDS = 10;
+  const results = await Promise.all(
+    Array.from({ length: ROUNDS }, (_, i) => {
+      const collidingId = i + 1; // same id on both sessions
+      return Promise.all([
+        callListWorkflowsRaw(sidA, collidingId, `A-${i}`),
+        callListWorkflowsRaw(sidB, collidingId, `B-${i}`),
+      ]);
+    }),
+  );
+
+  for (let i = 0; i < ROUNDS; i++) {
+    const [respA, respB] = results[i]!;
+    const expectedId = i + 1;
+    assert.equal(
+      respA.envelope.id,
+      expectedId,
+      `Round ${i} session A: response id must echo request id ${expectedId} (got ${respA.envelope.id}). Cross-session leak would surface here.`,
+    );
+    assert.equal(
+      respB.envelope.id,
+      expectedId,
+      `Round ${i} session B: response id must echo request id ${expectedId} (got ${respB.envelope.id}).`,
+    );
+    assert.ok(
+      respA.envelope.result && !respA.envelope.error,
+      `Round ${i} session A must succeed (got error: ${JSON.stringify(respA.envelope.error)})`,
+    );
+    assert.ok(
+      respB.envelope.result && !respB.envelope.error,
+      `Round ${i} session B must succeed (got error: ${JSON.stringify(respB.envelope.error)})`,
+    );
+  }
+
+  // Also fire notifications/initialized with colliding-absent-id semantics —
+  // a notification has no id, so this just exercises broadcast-vs-targeted
+  // routing under concurrency. Each session must accept its own notification
+  // (HTTP 202) without ever 4xx'ing.
+  const notifyResults = await Promise.all(
+    [sidA, sidB].map((sid) =>
+      fetch(`${baseUrl}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${TEST_API_KEY}`,
+          'Mcp-Session-Id': sid,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'notifications/initialized',
+        }),
+      }),
+    ),
+  );
+  for (const r of notifyResults) {
+    assert.equal(
+      r.status,
+      202,
+      `Concurrent notification on each session must return 202 (got ${r.status})`,
+    );
+  }
+
+  // Tear down both sessions.
+  await Promise.all(
+    [sidA, sidB].map((sid) =>
+      fetch(`${baseUrl}/mcp`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${TEST_API_KEY}`, 'Mcp-Session-Id': sid },
+      }),
+    ),
+  );
+});
