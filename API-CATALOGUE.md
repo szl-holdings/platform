@@ -1,7 +1,7 @@
 # API Catalogue — SZL Holdings DreamStack API
 
 > **Auto-generated** from `lib/api-spec/openapi.yaml` — do not edit by hand.
-> Last generated: **2026-04-22** | Spec version: **0.3.0** | Base URL: `/api`
+> Last generated: **2026-05-17** | Spec version: **0.3.0** | Base URL: `/api`
 
 Run `pnpm docs:generate` to refresh after editing the spec.
 
@@ -9,9 +9,9 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 
 | Metric | Value |
 |--------|-------|
-| Total paths | 4071 |
-| Total operations | 5040 |
-| Tag groups | 282 |
+| Total paths | 4089 |
+| Total operations | 5065 |
+| Tag groups | 283 |
 | Spec version | 0.3.0 |
 
 ## Table of Contents
@@ -108,6 +108,7 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 - [correlation-map](#correlation-map) (2 endpoints)
 - [cortex](#cortex) (19 endpoints)
 - [counsel](#counsel) (21 endpoints)
+- [conduit](#conduit) (25 endpoints)
 - [covenant-policy-api](#covenant-policy-api) (18 endpoints)
 - [crm](#crm) (28 endpoints)
 - [cross-app-handoffs](#cross-app-handoffs) (8 endpoints)
@@ -366,14 +367,14 @@ Project operations
 |--------|------|-------------|---------|
 | `GET` | /projects | `listProjects` | List all projects |
 | `POST` | /projects | `createProject` | Create a new project |
-| `GET` | /projects/{id} | `getProject` | Get a project by ID |
-| `PATCH` | /projects/{id} | `updateProject` | Update a project |
-| `DELETE` | /projects/{id} | `deleteProject` | Delete a project |
 | `GET` | /projects/projects | `projects_get_projects_projects` | [stub] List/get /projects/projects (projects) |
 | `POST` | /projects/projects | `projects_post_projects_projects` | [stub] Create/invoke /projects/projects (projects) |
 | `GET` | /projects/projects/{id} | `projects_get_projects_projects_id` | [stub] List/get /projects/projects/{id} (projects) |
 | `PATCH` | /projects/projects/{id} | `projects_patch_projects_projects_id` | [stub] Patch /projects/projects/{id} (projects) |
 | `DELETE` | /projects/projects/{id} | `projects_delete_projects_projects_id` | [stub] Delete /projects/projects/{id} (projects) |
+| `GET` | /projects/{id} | `getProject` | Get a project by ID |
+| `PATCH` | /projects/{id} | `updateProject` | Update a project |
+| `DELETE` | /projects/{id} | `deleteProject` | Delete a project |
 
 <a id="auth"></a>
 
@@ -399,8 +400,8 @@ Authentication and user management
 | `POST` | /auth/auth/register | `auth_post_auth_auth_register` | [stub] Create/invoke /auth/auth/register (auth) |
 | `GET` | /auth/auth/roles | `auth_get_auth_auth_roles` | [stub] List/get /auth/auth/roles (auth) |
 | `POST` | /auth/auth/sessions | `auth_post_auth_auth_sessions` | [stub] Create/invoke /auth/auth/sessions (auth) |
-| `DELETE` | /auth/auth/sessions/{id} | `auth_delete_auth_auth_sessions_id` | [stub] Delete /auth/auth/sessions/{id} (auth) |
 | `DELETE` | /auth/auth/sessions/current | `auth_delete_auth_auth_sessions_current` | [stub] Delete /auth/auth/sessions/current (auth) |
+| `DELETE` | /auth/auth/sessions/{id} | `auth_delete_auth_auth_sessions_id` | [stub] Delete /auth/auth/sessions/{id} (auth) |
 | `GET` | /auth/auth/users | `auth_get_auth_auth_users` | [stub] List/get /auth/auth/users (auth) |
 | `GET` | /auth/auth/verify-email | `auth_get_auth_auth_verify_email` | [stub] List/get /auth/auth/verify-email (auth) |
 | `POST` | /auth/auth/ws-ticket | `auth_post_auth_auth_ws_ticket` | [stub] Create/invoke /auth/auth/ws-ticket (auth) |
@@ -412,8 +413,8 @@ Authentication and user management
 | `POST` | /auth/register | `register` | Register a new user account |
 | `GET` | /auth/roles | `listRoles` | List all roles |
 | `POST` | /auth/sessions | `createSession` | Create a new session token |
-| `DELETE` | /auth/sessions/{id} | `deleteSession` | Revoke a session by ID |
 | `DELETE` | /auth/sessions/current | `deleteCurrentSession` | Revoke the current session (from Authorization header) |
+| `DELETE` | /auth/sessions/{id} | `deleteSession` | Revoke a session by ID |
 | `GET` | /auth/users | `listUsers` | List all users |
 | `GET` | /auth/verify-email | `verifyEmail` | Verify an email address with a token |
 | `POST` | /auth/ws-ticket | `createWsTicket` | Create a short-lived WebSocket upgrade ticket |
@@ -428,15 +429,15 @@ Integration connector management
 |--------|------|-------------|---------|
 | `GET` | /connectors | `listConnectors` | List all connectors |
 | `POST` | /connectors | `createConnector` | Create a new connector |
-| `GET` | /connectors/{id} | `getConnector` | Get a connector by ID |
-| `PATCH` | /connectors/{id} | `updateConnector` | Update a connector |
-| `DELETE` | /connectors/{id} | `deleteConnector` | Delete a connector |
 | `GET` | /connectors/connectors | `connectors_get_connectors_connectors` | [stub] List/get /connectors/connectors (connectors) |
 | `POST` | /connectors/connectors | `connectors_post_connectors_connectors` | [stub] Create/invoke /connectors/connectors (connectors) |
 | `GET` | /connectors/connectors/{id} | `connectors_get_connectors_connectors_id` | [stub] List/get /connectors/connectors/{id} (connectors) |
 | `PATCH` | /connectors/connectors/{id} | `connectors_patch_connectors_connectors_id` | [stub] Patch /connectors/connectors/{id} (connectors) |
 | `DELETE` | /connectors/connectors/{id} | `connectors_delete_connectors_connectors_id` | [stub] Delete /connectors/connectors/{id} (connectors) |
 | `GET` | /connectors/connectors/{id}/logs | `connectors_get_connectors_connectors_id_logs` | [stub] List/get /connectors/connectors/{id}/logs (connectors) |
+| `GET` | /connectors/{id} | `getConnector` | Get a connector by ID |
+| `PATCH` | /connectors/{id} | `updateConnector` | Update a connector |
+| `DELETE` | /connectors/{id} | `deleteConnector` | Delete a connector |
 
 <a id="notifications"></a>
 
@@ -448,15 +449,15 @@ Notification management
 |--------|------|-------------|---------|
 | `GET` | /notifications | `listNotifications` | List notifications |
 | `POST` | /notifications | `createNotification` | Create a notification |
-| `DELETE` | /notifications/{id} | `deleteNotification` | Delete a notification |
-| `PATCH` | /notifications/{id}/read | `markNotificationRead` | Mark notification as read |
 | `GET` | /notifications/notifications | `notifications_get_notifications_notifications` | [stub] List/get /notifications/notifications (notifications) |
 | `POST` | /notifications/notifications | `notifications_post_notifications_notifications` | [stub] Create/invoke /notifications/notifications (notifications) |
-| `DELETE` | /notifications/notifications/{id} | `notifications_delete_notifications_notifications_id` | [stub] Delete /notifications/notifications/{id} (notifications) |
-| `PATCH` | /notifications/notifications/{id}/read | `notifications_patch_notifications_notifications_id_read` | [stub] Patch /notifications/notifications/{id}/read (notifications) |
 | `GET` | /notifications/notifications/count | `notifications_get_notifications_notifications_count` | [stub] List/get /notifications/notifications/count (notifications) |
 | `PATCH` | /notifications/notifications/read-all | `notifications_patch_notifications_notifications_read_all` | [stub] Patch /notifications/notifications/read-all (notifications) |
+| `DELETE` | /notifications/notifications/{id} | `notifications_delete_notifications_notifications_id` | [stub] Delete /notifications/notifications/{id} (notifications) |
+| `PATCH` | /notifications/notifications/{id}/read | `notifications_patch_notifications_notifications_id_read` | [stub] Patch /notifications/notifications/{id}/read (notifications) |
 | `PATCH` | /notifications/read-all | `markAllNotificationsRead` | Mark all notifications as read for the current user |
+| `DELETE` | /notifications/{id} | `deleteNotification` | Delete a notification |
+| `PATCH` | /notifications/{id}/read | `markNotificationRead` | Mark notification as read |
 
 <a id="audit"></a>
 
@@ -582,18 +583,18 @@ Feature flag management
 |--------|------|-------------|---------|
 | `GET` | /feature-flags | `listFeatureFlags` | List feature flags |
 | `POST` | /feature-flags | `createFeatureFlag` | Create a feature flag |
-| `PATCH` | /feature-flags/{id} | `updateFeatureFlag` | Update a feature flag |
-| `DELETE` | /feature-flags/{id} | `deleteFeatureFlag` | Delete a feature flag |
 | `GET` | /feature-flags/feature-flags | `feature_flags_get_feature_flags_feature_flags` | [stub] List/get /feature-flags/feature-flags (feature-flags) |
 | `POST` | /feature-flags/feature-flags | `feature_flags_post_feature_flags_feature_flags` | [stub] Create/invoke /feature-flags/feature-flags (feature-flags) |
+| `GET` | /feature-flags/feature-flags/check/{key} | `feature_flags_get_feature_flags_feature_flags_check_key` | [stub] List/get /feature-flags/feature-flags/check/{key} (feature-flags) |
+| `POST` | /feature-flags/feature-flags/evaluate | `feature_flags_post_feature_flags_feature_flags_evaluate` | [stub] Create/invoke /feature-flags/feature-flags/evaluate (feature-flags) |
+| `GET` | /feature-flags/feature-flags/platform | `feature_flags_get_feature_flags_feature_flags_platform` | [stub] List/get /feature-flags/feature-flags/platform (feature-flags) |
 | `PATCH` | /feature-flags/feature-flags/{id} | `feature_flags_patch_feature_flags_feature_flags_id` | [stub] Patch /feature-flags/feature-flags/{id} (feature-flags) |
 | `DELETE` | /feature-flags/feature-flags/{id} | `feature_flags_delete_feature_flags_feature_flags_id` | [stub] Delete /feature-flags/feature-flags/{id} (feature-flags) |
 | `GET` | /feature-flags/feature-flags/{id}/overrides | `feature_flags_get_feature_flags_feature_flags_id_overrides` | [stub] List/get /feature-flags/feature-flags/{id}/overrides (feature-flags) |
 | `POST` | /feature-flags/feature-flags/{id}/overrides | `feature_flags_post_feature_flags_feature_flags_id_overrides` | [stub] Create/invoke /feature-flags/feature-flags/{id}/overrides (feature-flags) |
 | `DELETE` | /feature-flags/feature-flags/{id}/overrides/{overrideId} | `feature_flags_delete_feature_flags_feature_flags_id_overrides_overrideId` | [stub] Delete /feature-flags/feature-flags/{id}/overrides/{overrideId} (feature-flags) |
-| `GET` | /feature-flags/feature-flags/check/{key} | `feature_flags_get_feature_flags_feature_flags_check_key` | [stub] List/get /feature-flags/feature-flags/check/{key} (feature-flags) |
-| `POST` | /feature-flags/feature-flags/evaluate | `feature_flags_post_feature_flags_feature_flags_evaluate` | [stub] Create/invoke /feature-flags/feature-flags/evaluate (feature-flags) |
-| `GET` | /feature-flags/feature-flags/platform | `feature_flags_get_feature_flags_feature_flags_platform` | [stub] List/get /feature-flags/feature-flags/platform (feature-flags) |
+| `PATCH` | /feature-flags/{id} | `updateFeatureFlag` | Update a feature flag |
+| `DELETE` | /feature-flags/{id} | `deleteFeatureFlag` | Delete a feature flag |
 
 <a id="files"></a>
 
@@ -610,12 +611,12 @@ File and asset management
 | `GET` | /assets/files/{id} | `files_get_assets_files_id` | [stub] List/get /assets/files/{id} (files) |
 | `DELETE` | /assets/files/{id} | `files_delete_assets_files_id` | [stub] Delete /assets/files/{id} (files) |
 | `GET` | /files | `listFiles` | List files |
-| `GET` | /files/{id} | `getFile` | Get a file by ID |
 | `GET` | /files/assets | `files_get_files_assets` | [stub] List/get /files/assets (files) |
 | `GET` | /files/files | `files_get_files_files` | [stub] List/get /files/files (files) |
 | `POST` | /files/files | `files_post_files_files` | [stub] Create/invoke /files/files (files) |
 | `GET` | /files/files/{id} | `files_get_files_files_id` | [stub] List/get /files/files/{id} (files) |
 | `DELETE` | /files/files/{id} | `files_delete_files_files_id` | [stub] Delete /files/files/{id} (files) |
+| `GET` | /files/{id} | `getFile` | Get a file by ID |
 
 <a id="storage"></a>
 
@@ -685,20 +686,13 @@ Vessel tracking and cargo management
 |--------|------|-------------|---------|
 | `GET` | /vessels | `listVessels` | List all vessels |
 | `POST` | /vessels | `createVessel` | Add a new vessel |
-| `GET` | /vessels/{id} | `getVessel` | Get vessel details |
-| `PUT` | /vessels/{id} | `updateVessel` | Update a vessel |
-| `DELETE` | /vessels/{id} | `deleteVessel` | Remove a vessel |
-| `GET` | /vessels/{id}/cargo | `getVesselCargo` | Get cargo manifest for a vessel |
-| `GET` | /vessels/{id}/events | `getVesselEvents` | Get events for a specific vessel |
-| `GET` | /vessels/{id}/positions | `getVesselPositions` | Get position history for a vessel |
-| `GET` | /vessels/{id}/routes | `getVesselRoutes` | Get planned routes for a specific vessel |
 | `POST` | /vessels/alert-rules | `createVesselAlertRule` | Create a vessel alert rule |
+| `GET` | /vessels/alert-rules/all | `listVesselAlertRules` | List all vessel alert rules |
 | `PUT` | /vessels/alert-rules/{id} | `updateVesselAlertRule` | Update a vessel alert rule |
 | `DELETE` | /vessels/alert-rules/{id} | `deleteVesselAlertRule` | Delete a vessel alert rule |
-| `GET` | /vessels/alert-rules/all | `listVesselAlertRules` | List all vessel alert rules |
 | `POST` | /vessels/alerts | `createVesselAlert` | Create a vessel alert |
-| `DELETE` | /vessels/alerts/{id} | `deleteVesselAlert` | Dismiss a vessel alert |
 | `GET` | /vessels/alerts/all | `listVesselAlerts` | List all active vessel alerts |
+| `DELETE` | /vessels/alerts/{id} | `deleteVesselAlert` | Dismiss a vessel alert |
 | `GET` | /vessels/command-workflows | `listVesselCommandWorkflows` | List vessel command workflows |
 | `POST` | /vessels/command-workflows | `createVesselCommandWorkflow` | Create a vessel command workflow |
 | `PATCH` | /vessels/command-workflows/{id} | `updateVesselCommandWorkflow` | Update a vessel command workflow status |
@@ -715,29 +709,21 @@ Vessel tracking and cargo management
 | `GET` | /vessels/live/port-congestion | `getVesselLivePortCongestion` | Get real-time port congestion data |
 | `GET` | /vessels/live/weather-marine | `getVesselLiveMarineWeather` | Get live marine weather for a region |
 | `POST` | /vessels/routes | `createVesselRoute` | Create a new vessel route |
+| `GET` | /vessels/routes/all | `listAllVesselRoutes` | List all planned vessel routes |
 | `PUT` | /vessels/routes/{id} | `updateVesselRoute` | Update a vessel route |
 | `DELETE` | /vessels/routes/{id} | `deleteVesselRoute` | Delete a vessel route |
-| `GET` | /vessels/routes/all | `listAllVesselRoutes` | List all planned vessel routes |
 | `POST` | /vessels/simulations | `createVesselSimulation` | Run a route simulation |
-| `GET` | /vessels/simulations/{id} | `getVesselSimulation` | Get a route simulation result |
 | `GET` | /vessels/simulations/all | `listVesselSimulations` | List all route simulations |
+| `GET` | /vessels/simulations/{id} | `getVesselSimulation` | Get a route simulation result |
 | `GET` | /vessels/vessels | `vessels_get_vessels_vessels` | [stub] List/get /vessels/vessels (vessels) |
 | `POST` | /vessels/vessels | `vessels_post_vessels_vessels` | [stub] Create/invoke /vessels/vessels (vessels) |
-| `GET` | /vessels/vessels/{id} | `vessels_get_vessels_vessels_id` | [stub] List/get /vessels/vessels/{id} (vessels) |
-| `PUT` | /vessels/vessels/{id} | `vessels_put_vessels_vessels_id` | [stub] Update /vessels/vessels/{id} (vessels) |
-| `DELETE` | /vessels/vessels/{id} | `vessels_delete_vessels_vessels_id` | [stub] Delete /vessels/vessels/{id} (vessels) |
-| `GET` | /vessels/vessels/{id}/cargo | `vessels_get_vessels_vessels_id_cargo` | [stub] List/get /vessels/vessels/{id}/cargo (vessels) |
-| `GET` | /vessels/vessels/{id}/events | `vessels_get_vessels_vessels_id_events` | [stub] List/get /vessels/vessels/{id}/events (vessels) |
-| `GET` | /vessels/vessels/{id}/positions | `vessels_get_vessels_vessels_id_positions` | [stub] List/get /vessels/vessels/{id}/positions (vessels) |
-| `GET` | /vessels/vessels/{id}/route | `vessels_get_vessels_vessels_id_route` | [stub] List/get /vessels/vessels/{id}/route (vessels) |
-| `GET` | /vessels/vessels/{id}/routes | `vessels_get_vessels_vessels_id_routes` | [stub] List/get /vessels/vessels/{id}/routes (vessels) |
 | `POST` | /vessels/vessels/alert-rules | `vessels_post_vessels_vessels_alert_rules` | [stub] Create/invoke /vessels/vessels/alert-rules (vessels) |
+| `GET` | /vessels/vessels/alert-rules/all | `vessels_get_vessels_vessels_alert_rules_all` | [stub] List/get /vessels/vessels/alert-rules/all (vessels) |
 | `PUT` | /vessels/vessels/alert-rules/{id} | `vessels_put_vessels_vessels_alert_rules_id` | [stub] Update /vessels/vessels/alert-rules/{id} (vessels) |
 | `DELETE` | /vessels/vessels/alert-rules/{id} | `vessels_delete_vessels_vessels_alert_rules_id` | [stub] Delete /vessels/vessels/alert-rules/{id} (vessels) |
-| `GET` | /vessels/vessels/alert-rules/all | `vessels_get_vessels_vessels_alert_rules_all` | [stub] List/get /vessels/vessels/alert-rules/all (vessels) |
 | `POST` | /vessels/vessels/alerts | `vessels_post_vessels_vessels_alerts` | [stub] Create/invoke /vessels/vessels/alerts (vessels) |
-| `DELETE` | /vessels/vessels/alerts/{id} | `vessels_delete_vessels_vessels_alerts_id` | [stub] Delete /vessels/vessels/alerts/{id} (vessels) |
 | `GET` | /vessels/vessels/alerts/all | `vessels_get_vessels_vessels_alerts_all` | [stub] List/get /vessels/vessels/alerts/all (vessels) |
+| `DELETE` | /vessels/vessels/alerts/{id} | `vessels_delete_vessels_vessels_alerts_id` | [stub] Delete /vessels/vessels/alerts/{id} (vessels) |
 | `GET` | /vessels/vessels/command-workflows | `vessels_get_vessels_vessels_command_workflows` | [stub] List/get /vessels/vessels/command-workflows (vessels) |
 | `POST` | /vessels/vessels/command-workflows | `vessels_post_vessels_vessels_command_workflows` | [stub] Create/invoke /vessels/vessels/command-workflows (vessels) |
 | `PATCH` | /vessels/vessels/command-workflows/{id} | `vessels_patch_vessels_vessels_command_workflows_id` | [stub] Patch /vessels/vessels/command-workflows/{id} (vessels) |
@@ -754,14 +740,29 @@ Vessel tracking and cargo management
 | `GET` | /vessels/vessels/live/port-congestion | `vessels_get_vessels_vessels_live_port_congestion` | [stub] List/get /vessels/vessels/live/port-congestion (vessels) |
 | `GET` | /vessels/vessels/live/weather-marine | `vessels_get_vessels_vessels_live_weather_marine` | [stub] List/get /vessels/vessels/live/weather-marine (vessels) |
 | `POST` | /vessels/vessels/routes | `vessels_post_vessels_vessels_routes` | [stub] Create/invoke /vessels/vessels/routes (vessels) |
+| `GET` | /vessels/vessels/routes/all | `vessels_get_vessels_vessels_routes_all` | [stub] List/get /vessels/vessels/routes/all (vessels) |
 | `PUT` | /vessels/vessels/routes/{id} | `vessels_put_vessels_vessels_routes_id` | [stub] Update /vessels/vessels/routes/{id} (vessels) |
 | `DELETE` | /vessels/vessels/routes/{id} | `vessels_delete_vessels_vessels_routes_id` | [stub] Delete /vessels/vessels/routes/{id} (vessels) |
-| `GET` | /vessels/vessels/routes/all | `vessels_get_vessels_vessels_routes_all` | [stub] List/get /vessels/vessels/routes/all (vessels) |
 | `POST` | /vessels/vessels/simulations | `vessels_post_vessels_vessels_simulations` | [stub] Create/invoke /vessels/vessels/simulations (vessels) |
-| `GET` | /vessels/vessels/simulations/{id} | `vessels_get_vessels_vessels_simulations_id` | [stub] List/get /vessels/vessels/simulations/{id} (vessels) |
 | `GET` | /vessels/vessels/simulations/all | `vessels_get_vessels_vessels_simulations_all` | [stub] List/get /vessels/vessels/simulations/all (vessels) |
+| `GET` | /vessels/vessels/simulations/{id} | `vessels_get_vessels_vessels_simulations_id` | [stub] List/get /vessels/vessels/simulations/{id} (vessels) |
 | `GET` | /vessels/vessels/weather/snapshots | `vessels_get_vessels_vessels_weather_snapshots` | [stub] List/get /vessels/vessels/weather/snapshots (vessels) |
+| `GET` | /vessels/vessels/{id} | `vessels_get_vessels_vessels_id` | [stub] List/get /vessels/vessels/{id} (vessels) |
+| `PUT` | /vessels/vessels/{id} | `vessels_put_vessels_vessels_id` | [stub] Update /vessels/vessels/{id} (vessels) |
+| `DELETE` | /vessels/vessels/{id} | `vessels_delete_vessels_vessels_id` | [stub] Delete /vessels/vessels/{id} (vessels) |
+| `GET` | /vessels/vessels/{id}/cargo | `vessels_get_vessels_vessels_id_cargo` | [stub] List/get /vessels/vessels/{id}/cargo (vessels) |
+| `GET` | /vessels/vessels/{id}/events | `vessels_get_vessels_vessels_id_events` | [stub] List/get /vessels/vessels/{id}/events (vessels) |
+| `GET` | /vessels/vessels/{id}/positions | `vessels_get_vessels_vessels_id_positions` | [stub] List/get /vessels/vessels/{id}/positions (vessels) |
+| `GET` | /vessels/vessels/{id}/route | `vessels_get_vessels_vessels_id_route` | [stub] List/get /vessels/vessels/{id}/route (vessels) |
+| `GET` | /vessels/vessels/{id}/routes | `vessels_get_vessels_vessels_id_routes` | [stub] List/get /vessels/vessels/{id}/routes (vessels) |
 | `GET` | /vessels/weather/snapshots | `getVesselWeatherSnapshots` | Get weather snapshots for vessel locations |
+| `GET` | /vessels/{id} | `getVessel` | Get vessel details |
+| `PUT` | /vessels/{id} | `updateVessel` | Update a vessel |
+| `DELETE` | /vessels/{id} | `deleteVessel` | Remove a vessel |
+| `GET` | /vessels/{id}/cargo | `getVesselCargo` | Get cargo manifest for a vessel |
+| `GET` | /vessels/{id}/events | `getVesselEvents` | Get events for a specific vessel |
+| `GET` | /vessels/{id}/positions | `getVesselPositions` | Get position history for a vessel |
+| `GET` | /vessels/{id}/routes | `getVesselRoutes` | Get planned routes for a specific vessel |
 
 <a id="firestorm"></a>
 
@@ -913,12 +914,10 @@ Platform telemetry, web vitals, alerts, and health monitoring
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /observability | `listObservabilityApps` | List all app observability snapshots |
-| `GET` | /observability/{appSlug} | `getAppObservability` | Get observability snapshot for a specific app |
 | `GET` | /observability/admin/observability | `observability_get_observability_admin_observability` | [stub] List/get /observability/admin/observability (observability) |
 | `GET` | /observability/alerts | `getActiveAlerts` | Get all active system alerts |
 | `GET` | /observability/business-events | `getBusinessEvents` | Get business event counts and domain breakdown |
 | `GET` | /observability/observability | `observability_get_observability_observability` | [stub] List/get /observability/observability (observability) |
-| `GET` | /observability/observability/{appSlug} | `observability_get_observability_observability_appSlug` | [stub] List/get /observability/observability/{appSlug} (observability) |
 | `GET` | /observability/observability/alerts | `observability_get_observability_observability_alerts` | [stub] List/get /observability/observability/alerts (observability) |
 | `POST` | /observability/observability/alerts/{id}/resolve | `observability_post_observability_observability_alerts_id_resolve` | [stub] Create/invoke /observability/observability/alerts/{id}/resolve (observability) |
 | `GET` | /observability/observability/business-events | `observability_get_observability_observability_business_events` | [stub] List/get /observability/observability/business-events (observability) |
@@ -927,7 +926,9 @@ Platform telemetry, web vitals, alerts, and health monitoring
 | `GET` | /observability/observability/telemetry/product | `observability_get_observability_observability_telemetry_product` | [stub] List/get /observability/observability/telemetry/product (observability) |
 | `GET` | /observability/observability/telemetry/technical | `observability_get_observability_observability_telemetry_technical` | [stub] List/get /observability/observability/telemetry/technical (observability) |
 | `POST` | /observability/observability/vitals | `observability_post_observability_observability_vitals` | [stub] Create/invoke /observability/observability/vitals (observability) |
+| `GET` | /observability/observability/{appSlug} | `observability_get_observability_observability_appSlug` | [stub] List/get /observability/observability/{appSlug} (observability) |
 | `POST` | /observability/vitals | `recordWebVitals` | Record web vital metrics |
+| `GET` | /observability/{appSlug} | `getAppObservability` | Get observability snapshot for a specific app |
 
 <a id="terra"></a>
 
@@ -1381,11 +1382,11 @@ Skill library — AI agent skill definitions, runs, and lifecycle management
 | `GET` | /skill-runs/skills/{id}/runs | `skills_get_skill_runs_skills_id_runs` | [stub] List/get /skill-runs/skills/{id}/runs (skills) |
 | `GET` | /skills | `listSkills` | List available agent skills |
 | `POST` | /skills | `createSkill` | Create a new agent skill definition |
+| `GET` | /skills/skill-runs/{runId} | `skills_get_skills_skill_runs_runId` | [stub] List/get /skills/skill-runs/{runId} (skills) |
+| `POST` | /skills/skills/{id}/run | `skills_post_skills_skills_id_run` | [stub] Create/invoke /skills/skills/{id}/run (skills) |
 | `GET` | /skills/{id} | `getSkill` | Get an agent skill by ID |
 | `PATCH` | /skills/{id} | `updateSkill` | Update an agent skill |
 | `GET` | /skills/{id}/runs | `getSkillRuns` | List execution runs for a skill |
-| `GET` | /skills/skill-runs/{runId} | `skills_get_skills_skill_runs_runId` | [stub] List/get /skills/skill-runs/{runId} (skills) |
-| `POST` | /skills/skills/{id}/run | `skills_post_skills_skills_id_run` | [stub] Create/invoke /skills/skills/{id}/run (skills) |
 
 <a id="admin"></a>
 
@@ -1399,8 +1400,8 @@ Platform administration — users, roles, audit log, impersonation, and feature 
 | `GET` | /admin/export-history | `getAdminExportHistory` | Get export job history (admin) |
 | `GET` | /admin/feature-flags | `listAdminFeatureFlags` | List all feature flags (admin) |
 | `PUT` | /admin/feature-flags/{key} | `setAdminFeatureFlag` | Enable or disable a feature flag (admin) |
-| `POST` | /admin/impersonate/{userId} | `impersonateUser` | Start impersonating a user (admin) |
 | `POST` | /admin/impersonate/end | `endImpersonation` | End the current impersonation session |
+| `POST` | /admin/impersonate/{userId} | `impersonateUser` | Start impersonating a user (admin) |
 | `GET` | /admin/roles | `listAdminRoles` | List all platform roles |
 | `DELETE` | /admin/sessions/{userId} | `revokeUserSessions` | Revoke all sessions for a user (admin) |
 | `GET` | /admin/users | `listAdminUsers` | List all platform users (admin) |
@@ -1419,18 +1420,24 @@ Report builder — templates, generation, approval workflow, distribution, and s
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /reports | `listReports` | List generated reports |
-| `GET` | /reports/{reportId} | `getReport` | Get a report by ID |
-| `GET` | /reports/{reportId}/approval | `getReportApproval` | Get approval status for a report |
-| `POST` | /reports/{reportId}/distribute | `distributeReport` | Distribute a report to recipients |
-| `GET` | /reports/{reportId}/distributions | `listReportDistributions` | List distribution history for a report |
-| `GET` | /reports/{reportId}/pdf | `downloadReportPDF` | Download a report as PDF |
-| `POST` | /reports/{reportId}/request-approval | `requestReportApproval` | Submit a report for approval review |
-| `POST` | /reports/{reportId}/review | `submitReportReview` | Submit a compliance review for a report |
-| `PATCH` | /reports/{reportId}/status | `updateReportStatus` | Update a report status |
-| `GET` | /reports/{reportId}/versions | `listReportVersions` | List version history for a report |
 | `POST` | /reports/generate | `generateReport` | Generate a report from a template |
 | `POST` | /reports/narrative | `generateReportNarrative` | Generate an AI narrative section for a report |
 | `GET` | /reports/reports | `reports_get_reports_reports` | [stub] List/get /reports/reports (reports) |
+| `GET` | /reports/reports/brand-themes | `reports_get_reports_reports_brand_themes` | [stub] List/get /reports/reports/brand-themes (reports) |
+| `POST` | /reports/reports/generate | `reports_post_reports_reports_generate` | [stub] Create/invoke /reports/reports/generate (reports) |
+| `POST` | /reports/reports/narrative | `reports_post_reports_reports_narrative` | [stub] Create/invoke /reports/reports/narrative (reports) |
+| `GET` | /reports/reports/schedules | `reports_get_reports_reports_schedules` | [stub] List/get /reports/reports/schedules (reports) |
+| `POST` | /reports/reports/schedules | `reports_post_reports_reports_schedules` | [stub] Create/invoke /reports/reports/schedules (reports) |
+| `POST` | /reports/reports/schedules/run-due | `reports_post_reports_reports_schedules_run_due` | [stub] Create/invoke /reports/reports/schedules/run-due (reports) |
+| `PATCH` | /reports/reports/schedules/{scheduleId} | `reports_patch_reports_reports_schedules_scheduleId` | [stub] Patch /reports/reports/schedules/{scheduleId} (reports) |
+| `POST` | /reports/reports/schedules/{scheduleId}/run | `reports_post_reports_reports_schedules_scheduleId_run` | [stub] Create/invoke /reports/reports/schedules/{scheduleId}/run (reports) |
+| `GET` | /reports/reports/stats | `reports_get_reports_reports_stats` | [stub] List/get /reports/reports/stats (reports) |
+| `GET` | /reports/reports/templates | `reports_get_reports_reports_templates` | [stub] List/get /reports/reports/templates (reports) |
+| `POST` | /reports/reports/templates | `reports_post_reports_reports_templates` | [stub] Create/invoke /reports/reports/templates (reports) |
+| `GET` | /reports/reports/templates/built-in | `reports_get_reports_reports_templates_built_in` | [stub] List/get /reports/reports/templates/built-in (reports) |
+| `GET` | /reports/reports/templates/built-in/{key} | `reports_get_reports_reports_templates_built_in_key` | [stub] List/get /reports/reports/templates/built-in/{key} (reports) |
+| `GET` | /reports/reports/templates/{templateId} | `reports_get_reports_reports_templates_templateId` | [stub] List/get /reports/reports/templates/{templateId} (reports) |
+| `PATCH` | /reports/reports/templates/{templateId} | `reports_patch_reports_reports_templates_templateId` | [stub] Patch /reports/reports/templates/{templateId} (reports) |
 | `GET` | /reports/reports/{reportId} | `reports_get_reports_reports_reportId` | [stub] List/get /reports/reports/{reportId} (reports) |
 | `GET` | /reports/reports/{reportId}/approval | `reports_get_reports_reports_reportId_approval` | [stub] List/get /reports/reports/{reportId}/approval (reports) |
 | `POST` | /reports/reports/{reportId}/distribute | `reports_post_reports_reports_reportId_distribute` | [stub] Create/invoke /reports/reports/{reportId}/distribute (reports) |
@@ -1440,29 +1447,23 @@ Report builder — templates, generation, approval workflow, distribution, and s
 | `POST` | /reports/reports/{reportId}/review | `reports_post_reports_reports_reportId_review` | [stub] Create/invoke /reports/reports/{reportId}/review (reports) |
 | `PATCH` | /reports/reports/{reportId}/status | `reports_patch_reports_reports_reportId_status` | [stub] Patch /reports/reports/{reportId}/status (reports) |
 | `GET` | /reports/reports/{reportId}/versions | `reports_get_reports_reports_reportId_versions` | [stub] List/get /reports/reports/{reportId}/versions (reports) |
-| `GET` | /reports/reports/brand-themes | `reports_get_reports_reports_brand_themes` | [stub] List/get /reports/reports/brand-themes (reports) |
-| `POST` | /reports/reports/generate | `reports_post_reports_reports_generate` | [stub] Create/invoke /reports/reports/generate (reports) |
-| `POST` | /reports/reports/narrative | `reports_post_reports_reports_narrative` | [stub] Create/invoke /reports/reports/narrative (reports) |
-| `GET` | /reports/reports/schedules | `reports_get_reports_reports_schedules` | [stub] List/get /reports/reports/schedules (reports) |
-| `POST` | /reports/reports/schedules | `reports_post_reports_reports_schedules` | [stub] Create/invoke /reports/reports/schedules (reports) |
-| `PATCH` | /reports/reports/schedules/{scheduleId} | `reports_patch_reports_reports_schedules_scheduleId` | [stub] Patch /reports/reports/schedules/{scheduleId} (reports) |
-| `POST` | /reports/reports/schedules/{scheduleId}/run | `reports_post_reports_reports_schedules_scheduleId_run` | [stub] Create/invoke /reports/reports/schedules/{scheduleId}/run (reports) |
-| `POST` | /reports/reports/schedules/run-due | `reports_post_reports_reports_schedules_run_due` | [stub] Create/invoke /reports/reports/schedules/run-due (reports) |
-| `GET` | /reports/reports/stats | `reports_get_reports_reports_stats` | [stub] List/get /reports/reports/stats (reports) |
-| `GET` | /reports/reports/templates | `reports_get_reports_reports_templates` | [stub] List/get /reports/reports/templates (reports) |
-| `POST` | /reports/reports/templates | `reports_post_reports_reports_templates` | [stub] Create/invoke /reports/reports/templates (reports) |
-| `GET` | /reports/reports/templates/{templateId} | `reports_get_reports_reports_templates_templateId` | [stub] List/get /reports/reports/templates/{templateId} (reports) |
-| `PATCH` | /reports/reports/templates/{templateId} | `reports_patch_reports_reports_templates_templateId` | [stub] Patch /reports/reports/templates/{templateId} (reports) |
-| `GET` | /reports/reports/templates/built-in | `reports_get_reports_reports_templates_built_in` | [stub] List/get /reports/reports/templates/built-in (reports) |
-| `GET` | /reports/reports/templates/built-in/{key} | `reports_get_reports_reports_templates_built_in_key` | [stub] List/get /reports/reports/templates/built-in/{key} (reports) |
 | `GET` | /reports/schedules | `listReportSchedules` | List scheduled report jobs |
 | `GET` | /reports/stats | `getReportStats` | Get report generation statistics |
 | `GET` | /reports/templates | `listReportTemplates` | List custom report templates |
 | `POST` | /reports/templates | `createReportTemplate` | Create a report template |
-| `GET` | /reports/templates/{templateId} | `getReportTemplate` | Get a report template by ID |
-| `PATCH` | /reports/templates/{templateId} | `updateReportTemplate` | Update a report template |
 | `GET` | /reports/templates/built-in | `listBuiltInReportTemplates` | List built-in report templates |
 | `GET` | /reports/templates/built-in/{key} | `getBuiltInReportTemplate` | Get a built-in report template by key |
+| `GET` | /reports/templates/{templateId} | `getReportTemplate` | Get a report template by ID |
+| `PATCH` | /reports/templates/{templateId} | `updateReportTemplate` | Update a report template |
+| `GET` | /reports/{reportId} | `getReport` | Get a report by ID |
+| `GET` | /reports/{reportId}/approval | `getReportApproval` | Get approval status for a report |
+| `POST` | /reports/{reportId}/distribute | `distributeReport` | Distribute a report to recipients |
+| `GET` | /reports/{reportId}/distributions | `listReportDistributions` | List distribution history for a report |
+| `GET` | /reports/{reportId}/pdf | `downloadReportPDF` | Download a report as PDF |
+| `POST` | /reports/{reportId}/request-approval | `requestReportApproval` | Submit a report for approval review |
+| `POST` | /reports/{reportId}/review | `submitReportReview` | Submit a compliance review for a report |
+| `PATCH` | /reports/{reportId}/status | `updateReportStatus` | Update a report status |
+| `GET` | /reports/{reportId}/versions | `listReportVersions` | List version history for a report |
 
 <a id="exports"></a>
 
@@ -1587,9 +1588,9 @@ Auto-generated tag for aegis-digital-twin route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /aegis/aegis/scenarios/{scenarioId}/export | `aegis_digital_twin_get_aegis_aegis_scenarios_scenarioId_export` | [stub] List/get /aegis/aegis/scenarios/{scenarioId}/export (aegis-digital-twin) |
 | `POST` | /aegis/aegis/scenarios/export | `aegis_digital_twin_post_aegis_aegis_scenarios_export` | [stub] Create/invoke /aegis/aegis/scenarios/export (aegis-digital-twin) |
 | `GET` | /aegis/aegis/scenarios/library | `aegis_digital_twin_get_aegis_aegis_scenarios_library` | [stub] List/get /aegis/aegis/scenarios/library (aegis-digital-twin) |
+| `GET` | /aegis/aegis/scenarios/{scenarioId}/export | `aegis_digital_twin_get_aegis_aegis_scenarios_scenarioId_export` | [stub] List/get /aegis/aegis/scenarios/{scenarioId}/export (aegis-digital-twin) |
 
 <a id="aegis-intel"></a>
 
@@ -1714,8 +1715,8 @@ Auto-generated tag for agents route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `POST` | /agents/agents/approvals/{runId}/{stepId}/resolve | `agents_post_agents_agents_approvals_runId_stepId_resolve` | [stub] Create/invoke /agents/agents/approvals/{runId}/{stepId}/resolve (agents) |
 | `GET` | /agents/agents/approvals/pending | `agents_get_agents_agents_approvals_pending` | [stub] List/get /agents/agents/approvals/pending (agents) |
+| `POST` | /agents/agents/approvals/{runId}/{stepId}/resolve | `agents_post_agents_agents_approvals_runId_stepId_resolve` | [stub] Create/invoke /agents/agents/approvals/{runId}/{stepId}/resolve (agents) |
 | `GET` | /agents/agents/evals/auto-suites | `agents_get_agents_agents_evals_auto_suites` | [stub] List/get /agents/agents/evals/auto-suites (agents) |
 | `GET` | /agents/agents/runs/{runId}/step-log | `agents_get_agents_agents_runs_runId_step_log` | [stub] List/get /agents/agents/runs/{runId}/step-log (agents) |
 
@@ -1735,16 +1736,16 @@ Auto-generated tag for ai-ops-dashboard route group
 | `GET` | /ai/ai/ops/evaluators/stats | `ai_ops_dashboard_get_ai_ai_ops_evaluators_stats` | [stub] List/get /ai/ai/ops/evaluators/stats (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/policy/rules | `ai_ops_dashboard_get_ai_ai_ops_policy_rules` | [stub] List/get /ai/ai/ops/policy/rules (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/review-queue | `ai_ops_dashboard_get_ai_ai_ops_review_queue` | [stub] List/get /ai/ai/ops/review-queue (ai-ops-dashboard) |
+| `GET` | /ai/ai/ops/review-queue/stats | `ai_ops_dashboard_get_ai_ai_ops_review_queue_stats` | [stub] List/get /ai/ai/ops/review-queue/stats (ai-ops-dashboard) |
 | `PATCH` | /ai/ai/ops/review-queue/{reviewId}/claim | `ai_ops_dashboard_patch_ai_ai_ops_review_queue_reviewId_claim` | [stub] Patch /ai/ai/ops/review-queue/{reviewId}/claim (ai-ops-dashboard) |
 | `PATCH` | /ai/ai/ops/review-queue/{reviewId}/decision | `ai_ops_dashboard_patch_ai_ai_ops_review_queue_reviewId_decision` | [stub] Patch /ai/ai/ops/review-queue/{reviewId}/decision (ai-ops-dashboard) |
-| `GET` | /ai/ai/ops/review-queue/stats | `ai_ops_dashboard_get_ai_ai_ops_review_queue_stats` | [stub] List/get /ai/ai/ops/review-queue/stats (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/summary | `ai_ops_dashboard_get_ai_ai_ops_summary` | [stub] List/get /ai/ai/ops/summary (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/traces | `ai_ops_dashboard_get_ai_ai_ops_traces` | [stub] List/get /ai/ai/ops/traces (ai-ops-dashboard) |
+| `POST` | /ai/ai/ops/traces/capture | `ai_ops_dashboard_post_ai_ai_ops_traces_capture` | [stub] Create/invoke /ai/ai/ops/traces/capture (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/traces/{id}/feedback | `ai_ops_dashboard_get_ai_ai_ops_traces_id_feedback` | [stub] List/get /ai/ai/ops/traces/{id}/feedback (ai-ops-dashboard) |
 | `POST` | /ai/ai/ops/traces/{id}/feedback | `ai_ops_dashboard_post_ai_ai_ops_traces_id_feedback` | [stub] Create/invoke /ai/ai/ops/traces/{id}/feedback (ai-ops-dashboard) |
 | `GET` | /ai/ai/ops/traces/{traceId} | `ai_ops_dashboard_get_ai_ai_ops_traces_traceId` | [stub] List/get /ai/ai/ops/traces/{traceId} (ai-ops-dashboard) |
 | `PATCH` | /ai/ai/ops/traces/{traceId}/status | `ai_ops_dashboard_patch_ai_ai_ops_traces_traceId_status` | [stub] Patch /ai/ai/ops/traces/{traceId}/status (ai-ops-dashboard) |
-| `POST` | /ai/ai/ops/traces/capture | `ai_ops_dashboard_post_ai_ai_ops_traces_capture` | [stub] Create/invoke /ai/ai/ops/traces/capture (ai-ops-dashboard) |
 
 <a id="ai-routes"></a>
 
@@ -1756,9 +1757,9 @@ Auto-generated tag for ai-routes route group
 |--------|------|-------------|---------|
 | `POST` | /ai-routes/intelligence/ai/analyze-document | `ai_routes_post_ai_routes_intelligence_ai_analyze_document` | [stub] Create/invoke /ai-routes/intelligence/ai/analyze-document (ai-routes) |
 | `POST` | /ai-routes/intelligence/ai/chat | `ai_routes_post_ai_routes_intelligence_ai_chat` | [stub] Create/invoke /ai-routes/intelligence/ai/chat (ai-routes) |
+| `POST` | /ai-routes/intelligence/ai/chat/stream | `ai_routes_post_ai_routes_intelligence_ai_chat_stream` | [stub] Create/invoke /ai-routes/intelligence/ai/chat/stream (ai-routes) |
 | `DELETE` | /ai-routes/intelligence/ai/chat/{sessionId} | `ai_routes_delete_ai_routes_intelligence_ai_chat_sessionId` | [stub] Delete /ai-routes/intelligence/ai/chat/{sessionId} (ai-routes) |
 | `GET` | /ai-routes/intelligence/ai/chat/{sessionId}/history | `ai_routes_get_ai_routes_intelligence_ai_chat_sessionId_history` | [stub] List/get /ai-routes/intelligence/ai/chat/{sessionId}/history (ai-routes) |
-| `POST` | /ai-routes/intelligence/ai/chat/stream | `ai_routes_post_ai_routes_intelligence_ai_chat_stream` | [stub] Create/invoke /ai-routes/intelligence/ai/chat/stream (ai-routes) |
 | `POST` | /ai-routes/intelligence/ai/classify | `ai_routes_post_ai_routes_intelligence_ai_classify` | [stub] Create/invoke /ai-routes/intelligence/ai/classify (ai-routes) |
 | `POST` | /ai-routes/intelligence/ai/embed | `ai_routes_post_ai_routes_intelligence_ai_embed` | [stub] Create/invoke /ai-routes/intelligence/ai/embed (ai-routes) |
 | `POST` | /ai-routes/intelligence/ai/generate-image | `ai_routes_post_ai_routes_intelligence_ai_generate_image` | [stub] Create/invoke /ai-routes/intelligence/ai/generate-image (ai-routes) |
@@ -1816,12 +1817,12 @@ Auto-generated tag for alloy-digest route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /alloy/alloy/digest/{id} | `alloy_digest_get_alloy_alloy_digest_id` | [stub] List/get /alloy/alloy/digest/{id} (alloy-digest) |
 | `GET` | /alloy/alloy/digest/config | `alloy_digest_get_alloy_alloy_digest_config` | [stub] List/get /alloy/alloy/digest/config (alloy-digest) |
 | `PUT` | /alloy/alloy/digest/config | `alloy_digest_put_alloy_alloy_digest_config` | [stub] Update /alloy/alloy/digest/config (alloy-digest) |
 | `POST` | /alloy/alloy/digest/generate | `alloy_digest_post_alloy_alloy_digest_generate` | [stub] Create/invoke /alloy/alloy/digest/generate (alloy-digest) |
 | `GET` | /alloy/alloy/digest/history | `alloy_digest_get_alloy_alloy_digest_history` | [stub] List/get /alloy/alloy/digest/history (alloy-digest) |
 | `GET` | /alloy/alloy/digest/latest | `alloy_digest_get_alloy_alloy_digest_latest` | [stub] List/get /alloy/alloy/digest/latest (alloy-digest) |
+| `GET` | /alloy/alloy/digest/{id} | `alloy_digest_get_alloy_alloy_digest_id` | [stub] List/get /alloy/alloy/digest/{id} (alloy-digest) |
 
 <a id="alloy-email"></a>
 
@@ -1892,12 +1893,12 @@ Auto-generated tag for alloy-meetings route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /alloy/alloy/meetings | `alloy_meetings_get_alloy_alloy_meetings` | [stub] List/get /alloy/alloy/meetings (alloy-meetings) |
-| `GET` | /alloy/alloy/meetings/{id} | `alloy_meetings_get_alloy_alloy_meetings_id` | [stub] List/get /alloy/alloy/meetings/{id} (alloy-meetings) |
-| `PATCH` | /alloy/alloy/meetings/{id}/action-items/{itemId} | `alloy_meetings_patch_alloy_alloy_meetings_id_action_items_itemId` | [stub] Patch /alloy/alloy/meetings/{id}/action-items/{itemId} (alloy-meetings) |
-| `GET` | /alloy/alloy/meetings/{id}/follow-up | `alloy_meetings_get_alloy_alloy_meetings_id_follow_up` | [stub] List/get /alloy/alloy/meetings/{id}/follow-up (alloy-meetings) |
 | `GET` | /alloy/alloy/meetings/action-items/open | `alloy_meetings_get_alloy_alloy_meetings_action_items_open` | [stub] List/get /alloy/alloy/meetings/action-items/open (alloy-meetings) |
 | `POST` | /alloy/alloy/meetings/capture | `alloy_meetings_post_alloy_alloy_meetings_capture` | [stub] Create/invoke /alloy/alloy/meetings/capture (alloy-meetings) |
 | `POST` | /alloy/alloy/meetings/prep | `alloy_meetings_post_alloy_alloy_meetings_prep` | [stub] Create/invoke /alloy/alloy/meetings/prep (alloy-meetings) |
+| `GET` | /alloy/alloy/meetings/{id} | `alloy_meetings_get_alloy_alloy_meetings_id` | [stub] List/get /alloy/alloy/meetings/{id} (alloy-meetings) |
+| `PATCH` | /alloy/alloy/meetings/{id}/action-items/{itemId} | `alloy_meetings_patch_alloy_alloy_meetings_id_action_items_itemId` | [stub] Patch /alloy/alloy/meetings/{id}/action-items/{itemId} (alloy-meetings) |
+| `GET` | /alloy/alloy/meetings/{id}/follow-up | `alloy_meetings_get_alloy_alloy_meetings_id_follow_up` | [stub] List/get /alloy/alloy/meetings/{id}/follow-up (alloy-meetings) |
 
 <a id="alloy-policy-compiler"></a>
 
@@ -1952,8 +1953,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /actions/agents/{agentId}/versions | `alloy_runtime_post_actions_agents_agentId_versions` | [stub] Create/invoke /actions/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /actions/models | `alloy_runtime_get_actions_models` | [stub] List/get /actions/models (alloy-runtime) |
 | `POST` | /actions/models | `alloy_runtime_post_actions_models` | [stub] Create/invoke /actions/models (alloy-runtime) |
-| `GET` | /actions/models/{modelId} | `alloy_runtime_get_actions_models_modelId` | [stub] List/get /actions/models/{modelId} (alloy-runtime) |
 | `POST` | /actions/models/route | `alloy_runtime_post_actions_models_route` | [stub] Create/invoke /actions/models/route (alloy-runtime) |
+| `GET` | /actions/models/{modelId} | `alloy_runtime_get_actions_models_modelId` | [stub] List/get /actions/models/{modelId} (alloy-runtime) |
 | `GET` | /actions/prompts | `alloy_runtime_get_actions_prompts` | [stub] List/get /actions/prompts (alloy-runtime) |
 | `POST` | /actions/prompts | `alloy_runtime_post_actions_prompts` | [stub] Create/invoke /actions/prompts (alloy-runtime) |
 | `GET` | /actions/prompts/{promptId} | `alloy_runtime_get_actions_prompts_promptId` | [stub] List/get /actions/prompts/{promptId} (alloy-runtime) |
@@ -1981,8 +1982,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /agents/agents/{agentId}/versions | `alloy_runtime_post_agents_agents_agentId_versions` | [stub] Create/invoke /agents/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /agents/models | `alloy_runtime_get_agents_models` | [stub] List/get /agents/models (alloy-runtime) |
 | `POST` | /agents/models | `alloy_runtime_post_agents_models` | [stub] Create/invoke /agents/models (alloy-runtime) |
-| `GET` | /agents/models/{modelId} | `alloy_runtime_get_agents_models_modelId` | [stub] List/get /agents/models/{modelId} (alloy-runtime) |
 | `POST` | /agents/models/route | `alloy_runtime_post_agents_models_route` | [stub] Create/invoke /agents/models/route (alloy-runtime) |
+| `GET` | /agents/models/{modelId} | `alloy_runtime_get_agents_models_modelId` | [stub] List/get /agents/models/{modelId} (alloy-runtime) |
 | `GET` | /agents/prompts | `alloy_runtime_get_agents_prompts` | [stub] List/get /agents/prompts (alloy-runtime) |
 | `POST` | /agents/prompts | `alloy_runtime_post_agents_prompts` | [stub] Create/invoke /agents/prompts (alloy-runtime) |
 | `GET` | /agents/prompts/{promptId} | `alloy_runtime_get_agents_prompts_promptId` | [stub] List/get /agents/prompts/{promptId} (alloy-runtime) |
@@ -2010,8 +2011,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /models/agents/{agentId}/versions | `alloy_runtime_post_models_agents_agentId_versions` | [stub] Create/invoke /models/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /models/models | `alloy_runtime_get_models_models` | [stub] List/get /models/models (alloy-runtime) |
 | `POST` | /models/models | `alloy_runtime_post_models_models` | [stub] Create/invoke /models/models (alloy-runtime) |
-| `GET` | /models/models/{modelId} | `alloy_runtime_get_models_models_modelId` | [stub] List/get /models/models/{modelId} (alloy-runtime) |
 | `POST` | /models/models/route | `alloy_runtime_post_models_models_route` | [stub] Create/invoke /models/models/route (alloy-runtime) |
+| `GET` | /models/models/{modelId} | `alloy_runtime_get_models_models_modelId` | [stub] List/get /models/models/{modelId} (alloy-runtime) |
 | `GET` | /models/prompts | `alloy_runtime_get_models_prompts` | [stub] List/get /models/prompts (alloy-runtime) |
 | `POST` | /models/prompts | `alloy_runtime_post_models_prompts` | [stub] Create/invoke /models/prompts (alloy-runtime) |
 | `GET` | /models/prompts/{promptId} | `alloy_runtime_get_models_prompts_promptId` | [stub] List/get /models/prompts/{promptId} (alloy-runtime) |
@@ -2039,8 +2040,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /prompts/agents/{agentId}/versions | `alloy_runtime_post_prompts_agents_agentId_versions` | [stub] Create/invoke /prompts/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /prompts/models | `alloy_runtime_get_prompts_models` | [stub] List/get /prompts/models (alloy-runtime) |
 | `POST` | /prompts/models | `alloy_runtime_post_prompts_models` | [stub] Create/invoke /prompts/models (alloy-runtime) |
-| `GET` | /prompts/models/{modelId} | `alloy_runtime_get_prompts_models_modelId` | [stub] List/get /prompts/models/{modelId} (alloy-runtime) |
 | `POST` | /prompts/models/route | `alloy_runtime_post_prompts_models_route` | [stub] Create/invoke /prompts/models/route (alloy-runtime) |
+| `GET` | /prompts/models/{modelId} | `alloy_runtime_get_prompts_models_modelId` | [stub] List/get /prompts/models/{modelId} (alloy-runtime) |
 | `GET` | /prompts/prompts | `alloy_runtime_get_prompts_prompts` | [stub] List/get /prompts/prompts (alloy-runtime) |
 | `POST` | /prompts/prompts | `alloy_runtime_post_prompts_prompts` | [stub] Create/invoke /prompts/prompts (alloy-runtime) |
 | `GET` | /prompts/prompts/{promptId} | `alloy_runtime_get_prompts_prompts_promptId` | [stub] List/get /prompts/prompts/{promptId} (alloy-runtime) |
@@ -2068,8 +2069,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /recommendations/agents/{agentId}/versions | `alloy_runtime_post_recommendations_agents_agentId_versions` | [stub] Create/invoke /recommendations/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /recommendations/models | `alloy_runtime_get_recommendations_models` | [stub] List/get /recommendations/models (alloy-runtime) |
 | `POST` | /recommendations/models | `alloy_runtime_post_recommendations_models` | [stub] Create/invoke /recommendations/models (alloy-runtime) |
-| `GET` | /recommendations/models/{modelId} | `alloy_runtime_get_recommendations_models_modelId` | [stub] List/get /recommendations/models/{modelId} (alloy-runtime) |
 | `POST` | /recommendations/models/route | `alloy_runtime_post_recommendations_models_route` | [stub] Create/invoke /recommendations/models/route (alloy-runtime) |
+| `GET` | /recommendations/models/{modelId} | `alloy_runtime_get_recommendations_models_modelId` | [stub] List/get /recommendations/models/{modelId} (alloy-runtime) |
 | `GET` | /recommendations/prompts | `alloy_runtime_get_recommendations_prompts` | [stub] List/get /recommendations/prompts (alloy-runtime) |
 | `POST` | /recommendations/prompts | `alloy_runtime_post_recommendations_prompts` | [stub] Create/invoke /recommendations/prompts (alloy-runtime) |
 | `GET` | /recommendations/prompts/{promptId} | `alloy_runtime_get_recommendations_prompts_promptId` | [stub] List/get /recommendations/prompts/{promptId} (alloy-runtime) |
@@ -2097,8 +2098,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /signals/agents/{agentId}/versions | `alloy_runtime_post_signals_agents_agentId_versions` | [stub] Create/invoke /signals/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /signals/models | `alloy_runtime_get_signals_models` | [stub] List/get /signals/models (alloy-runtime) |
 | `POST` | /signals/models | `alloy_runtime_post_signals_models` | [stub] Create/invoke /signals/models (alloy-runtime) |
-| `GET` | /signals/models/{modelId} | `alloy_runtime_get_signals_models_modelId` | [stub] List/get /signals/models/{modelId} (alloy-runtime) |
 | `POST` | /signals/models/route | `alloy_runtime_post_signals_models_route` | [stub] Create/invoke /signals/models/route (alloy-runtime) |
+| `GET` | /signals/models/{modelId} | `alloy_runtime_get_signals_models_modelId` | [stub] List/get /signals/models/{modelId} (alloy-runtime) |
 | `GET` | /signals/prompts | `alloy_runtime_get_signals_prompts` | [stub] List/get /signals/prompts (alloy-runtime) |
 | `POST` | /signals/prompts | `alloy_runtime_post_signals_prompts` | [stub] Create/invoke /signals/prompts (alloy-runtime) |
 | `GET` | /signals/prompts/{promptId} | `alloy_runtime_get_signals_prompts_promptId` | [stub] List/get /signals/prompts/{promptId} (alloy-runtime) |
@@ -2126,8 +2127,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /workflow-runs/agents/{agentId}/versions | `alloy_runtime_post_workflow_runs_agents_agentId_versions` | [stub] Create/invoke /workflow-runs/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /workflow-runs/models | `alloy_runtime_get_workflow_runs_models` | [stub] List/get /workflow-runs/models (alloy-runtime) |
 | `POST` | /workflow-runs/models | `alloy_runtime_post_workflow_runs_models` | [stub] Create/invoke /workflow-runs/models (alloy-runtime) |
-| `GET` | /workflow-runs/models/{modelId} | `alloy_runtime_get_workflow_runs_models_modelId` | [stub] List/get /workflow-runs/models/{modelId} (alloy-runtime) |
 | `POST` | /workflow-runs/models/route | `alloy_runtime_post_workflow_runs_models_route` | [stub] Create/invoke /workflow-runs/models/route (alloy-runtime) |
+| `GET` | /workflow-runs/models/{modelId} | `alloy_runtime_get_workflow_runs_models_modelId` | [stub] List/get /workflow-runs/models/{modelId} (alloy-runtime) |
 | `GET` | /workflow-runs/prompts | `alloy_runtime_get_workflow_runs_prompts` | [stub] List/get /workflow-runs/prompts (alloy-runtime) |
 | `POST` | /workflow-runs/prompts | `alloy_runtime_post_workflow_runs_prompts` | [stub] Create/invoke /workflow-runs/prompts (alloy-runtime) |
 | `GET` | /workflow-runs/prompts/{promptId} | `alloy_runtime_get_workflow_runs_prompts_promptId` | [stub] List/get /workflow-runs/prompts/{promptId} (alloy-runtime) |
@@ -2155,8 +2156,8 @@ Auto-generated tag for alloy-runtime route group
 | `POST` | /workflows/agents/{agentId}/versions | `alloy_runtime_post_workflows_agents_agentId_versions` | [stub] Create/invoke /workflows/agents/{agentId}/versions (alloy-runtime) |
 | `GET` | /workflows/models | `alloy_runtime_get_workflows_models` | [stub] List/get /workflows/models (alloy-runtime) |
 | `POST` | /workflows/models | `alloy_runtime_post_workflows_models` | [stub] Create/invoke /workflows/models (alloy-runtime) |
-| `GET` | /workflows/models/{modelId} | `alloy_runtime_get_workflows_models_modelId` | [stub] List/get /workflows/models/{modelId} (alloy-runtime) |
 | `POST` | /workflows/models/route | `alloy_runtime_post_workflows_models_route` | [stub] Create/invoke /workflows/models/route (alloy-runtime) |
+| `GET` | /workflows/models/{modelId} | `alloy_runtime_get_workflows_models_modelId` | [stub] List/get /workflows/models/{modelId} (alloy-runtime) |
 | `GET` | /workflows/prompts | `alloy_runtime_get_workflows_prompts` | [stub] List/get /workflows/prompts (alloy-runtime) |
 | `POST` | /workflows/prompts | `alloy_runtime_post_workflows_prompts` | [stub] Create/invoke /workflows/prompts (alloy-runtime) |
 | `GET` | /workflows/prompts/{promptId} | `alloy_runtime_get_workflows_prompts_promptId` | [stub] List/get /workflows/prompts/{promptId} (alloy-runtime) |
@@ -2193,25 +2194,25 @@ Auto-generated tag for alloy-skills route group
 | `GET` | /alloy/alloy/agents/{agentId}/self-reflection | `alloy_skills_get_alloy_alloy_agents_agentId_self_reflection` | [stub] List/get /alloy/alloy/agents/{agentId}/self-reflection (alloy-skills) |
 | `GET` | /alloy/alloy/agents/{agentId}/skill-effectiveness | `alloy_skills_get_alloy_alloy_agents_agentId_skill_effectiveness` | [stub] List/get /alloy/alloy/agents/{agentId}/skill-effectiveness (alloy-skills) |
 | `GET` | /alloy/alloy/agents/{agentId}/trend | `alloy_skills_get_alloy_alloy_agents_agentId_trend` | [stub] List/get /alloy/alloy/agents/{agentId}/trend (alloy-skills) |
-| `POST` | /alloy/alloy/decisions/{decisionId}/outcome | `alloy_skills_post_alloy_alloy_decisions_decisionId_outcome` | [stub] Create/invoke /alloy/alloy/decisions/{decisionId}/outcome (alloy-skills) |
 | `GET` | /alloy/alloy/decisions/outcomes | `alloy_skills_get_alloy_alloy_decisions_outcomes` | [stub] List/get /alloy/alloy/decisions/outcomes (alloy-skills) |
+| `POST` | /alloy/alloy/decisions/{decisionId}/outcome | `alloy_skills_post_alloy_alloy_decisions_decisionId_outcome` | [stub] Create/invoke /alloy/alloy/decisions/{decisionId}/outcome (alloy-skills) |
 | `GET` | /alloy/alloy/performance/alerts | `alloy_skills_get_alloy_alloy_performance_alerts` | [stub] List/get /alloy/alloy/performance/alerts (alloy-skills) |
-| `PATCH` | /alloy/alloy/performance/alerts/{alertId}/resolve | `alloy_skills_patch_alloy_alloy_performance_alerts_alertId_resolve` | [stub] Patch /alloy/alloy/performance/alerts/{alertId}/resolve (alloy-skills) |
 | `POST` | /alloy/alloy/performance/alerts/evaluate | `alloy_skills_post_alloy_alloy_performance_alerts_evaluate` | [stub] Create/invoke /alloy/alloy/performance/alerts/evaluate (alloy-skills) |
+| `PATCH` | /alloy/alloy/performance/alerts/{alertId}/resolve | `alloy_skills_patch_alloy_alloy_performance_alerts_alertId_resolve` | [stub] Patch /alloy/alloy/performance/alerts/{alertId}/resolve (alloy-skills) |
 | `GET` | /alloy/alloy/self-improvement/config | `alloy_skills_get_alloy_alloy_self_improvement_config` | [stub] List/get /alloy/alloy/self-improvement/config (alloy-skills) |
 | `PUT` | /alloy/alloy/self-improvement/config | `alloy_skills_put_alloy_alloy_self_improvement_config` | [stub] Update /alloy/alloy/self-improvement/config (alloy-skills) |
 | `GET` | /alloy/alloy/skills | `alloy_skills_get_alloy_alloy_skills` | [stub] List/get /alloy/alloy/skills (alloy-skills) |
 | `POST` | /alloy/alloy/skills | `alloy_skills_post_alloy_alloy_skills` | [stub] Create/invoke /alloy/alloy/skills (alloy-skills) |
-| `GET` | /alloy/alloy/skills/{skillId} | `alloy_skills_get_alloy_alloy_skills_skillId` | [stub] List/get /alloy/alloy/skills/{skillId} (alloy-skills) |
-| `PATCH` | /alloy/alloy/skills/{skillId} | `alloy_skills_patch_alloy_alloy_skills_skillId` | [stub] Patch /alloy/alloy/skills/{skillId} (alloy-skills) |
-| `DELETE` | /alloy/alloy/skills/{skillId} | `alloy_skills_delete_alloy_alloy_skills_skillId` | [stub] Delete /alloy/alloy/skills/{skillId} (alloy-skills) |
-| `DELETE` | /alloy/alloy/skills/chains/{chainId} | `alloy_skills_delete_alloy_alloy_skills_chains_chainId` | [stub] Delete /alloy/alloy/skills/chains/{chainId} (alloy-skills) |
-| `POST` | /alloy/alloy/skills/chains/{chainId}/plan | `alloy_skills_post_alloy_alloy_skills_chains_chainId_plan` | [stub] Create/invoke /alloy/alloy/skills/chains/{chainId}/plan (alloy-skills) |
 | `POST` | /alloy/alloy/skills/chains/compose | `alloy_skills_post_alloy_alloy_skills_chains_compose` | [stub] Create/invoke /alloy/alloy/skills/chains/compose (alloy-skills) |
 | `GET` | /alloy/alloy/skills/chains/list | `alloy_skills_get_alloy_alloy_skills_chains_list` | [stub] List/get /alloy/alloy/skills/chains/list (alloy-skills) |
 | `GET` | /alloy/alloy/skills/chains/prebuilt/{scenario} | `alloy_skills_get_alloy_alloy_skills_chains_prebuilt_scenario` | [stub] List/get /alloy/alloy/skills/chains/prebuilt/{scenario} (alloy-skills) |
+| `DELETE` | /alloy/alloy/skills/chains/{chainId} | `alloy_skills_delete_alloy_alloy_skills_chains_chainId` | [stub] Delete /alloy/alloy/skills/chains/{chainId} (alloy-skills) |
+| `POST` | /alloy/alloy/skills/chains/{chainId}/plan | `alloy_skills_post_alloy_alloy_skills_chains_chainId_plan` | [stub] Create/invoke /alloy/alloy/skills/chains/{chainId}/plan (alloy-skills) |
 | `POST` | /alloy/alloy/skills/discover | `alloy_skills_post_alloy_alloy_skills_discover` | [stub] Create/invoke /alloy/alloy/skills/discover (alloy-skills) |
 | `POST` | /alloy/alloy/skills/select | `alloy_skills_post_alloy_alloy_skills_select` | [stub] Create/invoke /alloy/alloy/skills/select (alloy-skills) |
+| `GET` | /alloy/alloy/skills/{skillId} | `alloy_skills_get_alloy_alloy_skills_skillId` | [stub] List/get /alloy/alloy/skills/{skillId} (alloy-skills) |
+| `PATCH` | /alloy/alloy/skills/{skillId} | `alloy_skills_patch_alloy_alloy_skills_skillId` | [stub] Patch /alloy/alloy/skills/{skillId} (alloy-skills) |
+| `DELETE` | /alloy/alloy/skills/{skillId} | `alloy_skills_delete_alloy_alloy_skills_skillId` | [stub] Delete /alloy/alloy/skills/{skillId} (alloy-skills) |
 
 <a id="alloy-voice"></a>
 
@@ -2287,23 +2288,23 @@ Auto-generated tag for approvals route group
 |--------|------|-------------|---------|
 | `GET` | /approvals/approvals | `approvals_get_approvals_approvals` | [stub] List/get /approvals/approvals (approvals) |
 | `POST` | /approvals/approvals | `approvals_post_approvals_approvals` | [stub] Create/invoke /approvals/approvals (approvals) |
+| `GET` | /approvals/approvals/by-resource/{resourceType}/{resourceId} | `approvals_get_approvals_approvals_by_resource_resourceType_resourceId` | [stub] List/get /approvals/approvals/by-resource/{resourceType}/{resourceId} (approvals) |
 | `GET` | /approvals/approvals/{id} | `approvals_get_approvals_approvals_id` | [stub] List/get /approvals/approvals/{id} (approvals) |
 | `GET` | /approvals/approvals/{id}/audit-trail | `approvals_get_approvals_approvals_id_audit_trail` | [stub] List/get /approvals/approvals/{id}/audit-trail (approvals) |
 | `POST` | /approvals/approvals/{id}/comment | `approvals_post_approvals_approvals_id_comment` | [stub] Create/invoke /approvals/approvals/{id}/comment (approvals) |
 | `GET` | /approvals/approvals/{id}/comments | `approvals_get_approvals_approvals_id_comments` | [stub] List/get /approvals/approvals/{id}/comments (approvals) |
 | `POST` | /approvals/approvals/{id}/escalate | `approvals_post_approvals_approvals_id_escalate` | [stub] Create/invoke /approvals/approvals/{id}/escalate (approvals) |
 | `POST` | /approvals/approvals/{id}/review | `approvals_post_approvals_approvals_id_review` | [stub] Create/invoke /approvals/approvals/{id}/review (approvals) |
-| `GET` | /approvals/approvals/by-resource/{resourceType}/{resourceId} | `approvals_get_approvals_approvals_by_resource_resourceType_resourceId` | [stub] List/get /approvals/approvals/by-resource/{resourceType}/{resourceId} (approvals) |
 | `POST` | /approvals/audit-log/policy-appeal | `approvals_post_approvals_audit_log_policy_appeal` | [stub] Create/invoke /approvals/audit-log/policy-appeal (approvals) |
 | `GET` | /audit-log/approvals | `approvals_get_audit_log_approvals` | [stub] List/get /audit-log/approvals (approvals) |
 | `POST` | /audit-log/approvals | `approvals_post_audit_log_approvals` | [stub] Create/invoke /audit-log/approvals (approvals) |
+| `GET` | /audit-log/approvals/by-resource/{resourceType}/{resourceId} | `approvals_get_audit_log_approvals_by_resource_resourceType_resourceId` | [stub] List/get /audit-log/approvals/by-resource/{resourceType}/{resourceId} (approvals) |
 | `GET` | /audit-log/approvals/{id} | `approvals_get_audit_log_approvals_id` | [stub] List/get /audit-log/approvals/{id} (approvals) |
 | `GET` | /audit-log/approvals/{id}/audit-trail | `approvals_get_audit_log_approvals_id_audit_trail` | [stub] List/get /audit-log/approvals/{id}/audit-trail (approvals) |
 | `POST` | /audit-log/approvals/{id}/comment | `approvals_post_audit_log_approvals_id_comment` | [stub] Create/invoke /audit-log/approvals/{id}/comment (approvals) |
 | `GET` | /audit-log/approvals/{id}/comments | `approvals_get_audit_log_approvals_id_comments` | [stub] List/get /audit-log/approvals/{id}/comments (approvals) |
 | `POST` | /audit-log/approvals/{id}/escalate | `approvals_post_audit_log_approvals_id_escalate` | [stub] Create/invoke /audit-log/approvals/{id}/escalate (approvals) |
 | `POST` | /audit-log/approvals/{id}/review | `approvals_post_audit_log_approvals_id_review` | [stub] Create/invoke /audit-log/approvals/{id}/review (approvals) |
-| `GET` | /audit-log/approvals/by-resource/{resourceType}/{resourceId} | `approvals_get_audit_log_approvals_by_resource_resourceType_resourceId` | [stub] List/get /audit-log/approvals/by-resource/{resourceType}/{resourceId} (approvals) |
 | `POST` | /audit-log/audit-log/policy-appeal | `approvals_post_audit_log_audit_log_policy_appeal` | [stub] Create/invoke /audit-log/audit-log/policy-appeal (approvals) |
 
 <a id="apps-registry"></a>
@@ -2316,10 +2317,10 @@ Auto-generated tag for apps-registry route group
 |--------|------|-------------|---------|
 | `GET` | /apps-registry/admin/apps | `apps_registry_get_apps_registry_admin_apps` | [stub] List/get /apps-registry/admin/apps (apps-registry) |
 | `POST` | /apps-registry/admin/apps | `apps_registry_post_apps_registry_admin_apps` | [stub] Create/invoke /apps-registry/admin/apps (apps-registry) |
+| `GET` | /apps-registry/admin/apps/activity | `apps_registry_get_apps_registry_admin_apps_activity` | [stub] List/get /apps-registry/admin/apps/activity (apps-registry) |
 | `DELETE` | /apps-registry/admin/apps/{slug} | `apps_registry_delete_apps_registry_admin_apps_slug` | [stub] Delete /apps-registry/admin/apps/{slug} (apps-registry) |
 | `PUT` | /apps-registry/admin/apps/{slug}/owner-team | `apps_registry_put_apps_registry_admin_apps_slug_owner_team` | [stub] Update /apps-registry/admin/apps/{slug}/owner-team (apps-registry) |
 | `PUT` | /apps-registry/admin/apps/{slug}/status | `apps_registry_put_apps_registry_admin_apps_slug_status` | [stub] Update /apps-registry/admin/apps/{slug}/status (apps-registry) |
-| `GET` | /apps-registry/admin/apps/activity | `apps_registry_get_apps_registry_admin_apps_activity` | [stub] List/get /apps-registry/admin/apps/activity (apps-registry) |
 
 <a id="assets-cases"></a>
 
@@ -2404,23 +2405,23 @@ Auto-generated tag for atlas-spatial-runtime route group
 |--------|------|-------------|---------|
 | `GET` | /atlas/spatial/atlas/spatial/branches | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_branches` | [stub] List/get /atlas/spatial/atlas/spatial/branches (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/branches | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_branches` | [stub] Create/invoke /atlas/spatial/atlas/spatial/branches (atlas-spatial-runtime) |
+| `GET` | /atlas/spatial/atlas/spatial/branches/compare | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_branches_compare` | [stub] List/get /atlas/spatial/atlas/spatial/branches/compare (atlas-spatial-runtime) |
 | `GET` | /atlas/spatial/atlas/spatial/branches/{branchId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_branches_branchId` | [stub] List/get /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime) |
 | `PATCH` | /atlas/spatial/atlas/spatial/branches/{branchId} | `atlas_spatial_runtime_patch_atlas_spatial_atlas_spatial_branches_branchId` | [stub] Patch /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime) |
 | `DELETE` | /atlas/spatial/atlas/spatial/branches/{branchId} | `atlas_spatial_runtime_delete_atlas_spatial_atlas_spatial_branches_branchId` | [stub] Delete /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime) |
-| `GET` | /atlas/spatial/atlas/spatial/branches/compare | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_branches_compare` | [stub] List/get /atlas/spatial/atlas/spatial/branches/compare (atlas-spatial-runtime) |
 | `GET` | /atlas/spatial/atlas/spatial/cross-domain/summary | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_cross_domain_summary` | [stub] List/get /atlas/spatial/atlas/spatial/cross-domain/summary (atlas-spatial-runtime) |
-| `GET` | /atlas/spatial/atlas/spatial/drift/{twinId}/latest | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_drift_twinId_latest` | [stub] List/get /atlas/spatial/atlas/spatial/drift/{twinId}/latest (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/drift/assess | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_drift_assess` | [stub] Create/invoke /atlas/spatial/atlas/spatial/drift/assess (atlas-spatial-runtime) |
-| `GET` | /atlas/spatial/atlas/spatial/memory/{twinId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_memory_twinId` | [stub] List/get /atlas/spatial/atlas/spatial/memory/{twinId} (atlas-spatial-runtime) |
+| `GET` | /atlas/spatial/atlas/spatial/drift/{twinId}/latest | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_drift_twinId_latest` | [stub] List/get /atlas/spatial/atlas/spatial/drift/{twinId}/latest (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/memory/index | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_memory_index` | [stub] Create/invoke /atlas/spatial/atlas/spatial/memory/index (atlas-spatial-runtime) |
+| `GET` | /atlas/spatial/atlas/spatial/memory/{twinId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_memory_twinId` | [stub] List/get /atlas/spatial/atlas/spatial/memory/{twinId} (atlas-spatial-runtime) |
 | `GET` | /atlas/spatial/atlas/spatial/model-lanes | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_model_lanes` | [stub] List/get /atlas/spatial/atlas/spatial/model-lanes (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/model-lanes/invoke | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_model_lanes_invoke` | [stub] Create/invoke /atlas/spatial/atlas/spatial/model-lanes/invoke (atlas-spatial-runtime) |
-| `GET` | /atlas/spatial/atlas/spatial/proof-bundle/{contentType}/{contentId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_proof_bundle_contentType_contentId` | [stub] List/get /atlas/spatial/atlas/spatial/proof-bundle/{contentType}/{contentId} (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/proof-bundle/tag | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_proof_bundle_tag` | [stub] Create/invoke /atlas/spatial/atlas/spatial/proof-bundle/tag (atlas-spatial-runtime) |
+| `GET` | /atlas/spatial/atlas/spatial/proof-bundle/{contentType}/{contentId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_proof_bundle_contentType_contentId` | [stub] List/get /atlas/spatial/atlas/spatial/proof-bundle/{contentType}/{contentId} (atlas-spatial-runtime) |
 | `GET` | /atlas/spatial/atlas/spatial/replay/{twinId}/frame/{frameIndex} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_replay_twinId_frame_frameIndex` | [stub] List/get /atlas/spatial/atlas/spatial/replay/{twinId}/frame/{frameIndex} (atlas-spatial-runtime) |
 | `GET` | /atlas/spatial/atlas/spatial/replay/{twinId}/timeline | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_replay_twinId_timeline` | [stub] List/get /atlas/spatial/atlas/spatial/replay/{twinId}/timeline (atlas-spatial-runtime) |
-| `GET` | /atlas/spatial/atlas/spatial/snapshots/{twinId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_snapshots_twinId` | [stub] List/get /atlas/spatial/atlas/spatial/snapshots/{twinId} (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/snapshots/compare | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_snapshots_compare` | [stub] Create/invoke /atlas/spatial/atlas/spatial/snapshots/compare (atlas-spatial-runtime) |
+| `GET` | /atlas/spatial/atlas/spatial/snapshots/{twinId} | `atlas_spatial_runtime_get_atlas_spatial_atlas_spatial_snapshots_twinId` | [stub] List/get /atlas/spatial/atlas/spatial/snapshots/{twinId} (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/twins/incident | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_twins_incident` | [stub] Create/invoke /atlas/spatial/atlas/spatial/twins/incident (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/twins/matter | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_twins_matter` | [stub] Create/invoke /atlas/spatial/atlas/spatial/twins/matter (atlas-spatial-runtime) |
 | `POST` | /atlas/spatial/atlas/spatial/twins/port | `atlas_spatial_runtime_post_atlas_spatial_atlas_spatial_twins_port` | [stub] Create/invoke /atlas/spatial/atlas/spatial/twins/port (atlas-spatial-runtime) |
@@ -2465,10 +2466,10 @@ Auto-generated tag for briefing route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /briefing/briefing/{date} | `briefing_get_briefing_briefing_date` | [stub] List/get /briefing/briefing/{date} (briefing) |
 | `POST` | /briefing/briefing/generate | `briefing_post_briefing_briefing_generate` | [stub] Create/invoke /briefing/briefing/generate (briefing) |
 | `GET` | /briefing/briefing/history | `briefing_get_briefing_briefing_history` | [stub] List/get /briefing/briefing/history (briefing) |
 | `GET` | /briefing/briefing/today | `briefing_get_briefing_briefing_today` | [stub] List/get /briefing/briefing/today (briefing) |
+| `GET` | /briefing/briefing/{date} | `briefing_get_briefing_briefing_date` | [stub] List/get /briefing/briefing/{date} (briefing) |
 
 <a id="briefings"></a>
 
@@ -2479,10 +2480,10 @@ Auto-generated tag for briefings route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /briefings/briefings | `briefings_get_briefings_briefings` | [stub] List/get /briefings/briefings (briefings) |
+| `POST` | /briefings/briefings/generate | `briefings_post_briefings_briefings_generate` | [stub] Create/invoke /briefings/briefings/generate (briefings) |
 | `GET` | /briefings/briefings/{domain} | `briefings_get_briefings_briefings_domain` | [stub] List/get /briefings/briefings/{domain} (briefings) |
 | `PUT` | /briefings/briefings/{id}/approve | `briefings_put_briefings_briefings_id_approve` | [stub] Update /briefings/briefings/{id}/approve (briefings) |
 | `PUT` | /briefings/briefings/{id}/archive | `briefings_put_briefings_briefings_id_archive` | [stub] Update /briefings/briefings/{id}/archive (briefings) |
-| `POST` | /briefings/briefings/generate | `briefings_post_briefings_briefings_generate` | [stub] Create/invoke /briefings/briefings/generate (briefings) |
 
 <a id="business-events-ingestion"></a>
 
@@ -2768,9 +2769,9 @@ Auto-generated tag for carlota-time-tracking route group
 | `DELETE` | /booking/booking/time-entries/{id} | `carlota_time_tracking_delete_booking_booking_time_entries_id` | [stub] Delete /booking/booking/time-entries/{id} (carlota-time-tracking) |
 | `GET` | /booking/booking/time-invoices | `carlota_time_tracking_get_booking_booking_time_invoices` | [stub] List/get /booking/booking/time-invoices (carlota-time-tracking) |
 | `POST` | /booking/booking/time-invoices | `carlota_time_tracking_post_booking_booking_time_invoices` | [stub] Create/invoke /booking/booking/time-invoices (carlota-time-tracking) |
+| `POST` | /booking/booking/time-invoices/generate | `carlota_time_tracking_post_booking_booking_time_invoices_generate` | [stub] Create/invoke /booking/booking/time-invoices/generate (carlota-time-tracking) |
 | `PATCH` | /booking/booking/time-invoices/{id} | `carlota_time_tracking_patch_booking_booking_time_invoices_id` | [stub] Patch /booking/booking/time-invoices/{id} (carlota-time-tracking) |
 | `DELETE` | /booking/booking/time-invoices/{id} | `carlota_time_tracking_delete_booking_booking_time_invoices_id` | [stub] Delete /booking/booking/time-invoices/{id} (carlota-time-tracking) |
-| `POST` | /booking/booking/time-invoices/generate | `carlota_time_tracking_post_booking_booking_time_invoices_generate` | [stub] Create/invoke /booking/booking/time-invoices/generate (carlota-time-tracking) |
 
 <a id="certification-readiness"></a>
 
@@ -2887,11 +2888,11 @@ Auto-generated tag for cms route group
 | `DELETE` | /cms/cms/pages/{id} | `cms_delete_cms_cms_pages_id` | [stub] Delete /cms/cms/pages/{id} (cms) |
 | `GET` | /cms/cms/posts | `cms_get_cms_cms_posts` | [stub] List/get /cms/cms/posts (cms) |
 | `POST` | /cms/cms/posts | `cms_post_cms_cms_posts` | [stub] Create/invoke /cms/cms/posts (cms) |
+| `POST` | /cms/cms/posts/upload-image | `cms_post_cms_cms_posts_upload_image` | [stub] Create/invoke /cms/cms/posts/upload-image (cms) |
 | `PUT` | /cms/cms/posts/{id} | `cms_put_cms_cms_posts_id` | [stub] Update /cms/cms/posts/{id} (cms) |
 | `PATCH` | /cms/cms/posts/{id} | `cms_patch_cms_cms_posts_id` | [stub] Patch /cms/cms/posts/{id} (cms) |
 | `DELETE` | /cms/cms/posts/{id} | `cms_delete_cms_cms_posts_id` | [stub] Delete /cms/cms/posts/{id} (cms) |
 | `GET` | /cms/cms/posts/{slug} | `cms_get_cms_cms_posts_slug` | [stub] List/get /cms/cms/posts/{slug} (cms) |
-| `POST` | /cms/cms/posts/upload-image | `cms_post_cms_cms_posts_upload_image` | [stub] Create/invoke /cms/cms/posts/upload-image (cms) |
 | `GET` | /cms/cms/redirects | `cms_get_cms_cms_redirects` | [stub] List/get /cms/cms/redirects (cms) |
 | `POST` | /cms/cms/redirects | `cms_post_cms_cms_redirects` | [stub] Create/invoke /cms/cms/redirects (cms) |
 | `DELETE` | /cms/cms/redirects/{id} | `cms_delete_cms_cms_redirects_id` | [stub] Delete /cms/cms/redirects/{id} (cms) |
@@ -2953,9 +2954,9 @@ Auto-generated tag for command route group
 |--------|------|-------------|---------|
 | `POST` | /integrations/actions/{id}/resolve | `command_post_integrations_actions_id_resolve` | [stub] Create/invoke /integrations/actions/{id}/resolve (command) |
 | `GET` | /integrations/alerts | `command_get_integrations_alerts` | [stub] List/get /integrations/alerts (command) |
+| `GET` | /integrations/alerts/count | `command_get_integrations_alerts_count` | [stub] List/get /integrations/alerts/count (command) |
 | `GET` | /integrations/alerts/{alertId}/audit | `command_get_integrations_alerts_alertId_audit` | [stub] List/get /integrations/alerts/{alertId}/audit (command) |
 | `POST` | /integrations/alerts/{alertId}/state | `command_post_integrations_alerts_alertId_state` | [stub] Create/invoke /integrations/alerts/{alertId}/state (command) |
-| `GET` | /integrations/alerts/count | `command_get_integrations_alerts_count` | [stub] List/get /integrations/alerts/count (command) |
 | `GET` | /integrations/business-state | `command_get_integrations_business_state` | [stub] List/get /integrations/business-state (command) |
 | `GET` | /integrations/costs | `command_get_integrations_costs` | [stub] List/get /integrations/costs (command) |
 | `GET` | /integrations/costs/over-budget | `command_get_integrations_costs_over_budget` | [stub] List/get /integrations/costs/over-budget (command) |
@@ -2979,11 +2980,11 @@ Auto-generated tag for comments route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /comments/comments/activity-feed | `comments_get_comments_comments_activity_feed` | [stub] List/get /comments/comments/activity-feed (comments) |
 | `GET` | /comments/comments/{entityType}/{entityId} | `comments_get_comments_comments_entityType_entityId` | [stub] List/get /comments/comments/{entityType}/{entityId} (comments) |
 | `POST` | /comments/comments/{entityType}/{entityId} | `comments_post_comments_comments_entityType_entityId` | [stub] Create/invoke /comments/comments/{entityType}/{entityId} (comments) |
 | `PATCH` | /comments/comments/{id} | `comments_patch_comments_comments_id` | [stub] Patch /comments/comments/{id} (comments) |
 | `DELETE` | /comments/comments/{id} | `comments_delete_comments_comments_id` | [stub] Delete /comments/comments/{id} (comments) |
-| `GET` | /comments/comments/activity-feed | `comments_get_comments_comments_activity_feed` | [stub] List/get /comments/comments/activity-feed (comments) |
 
 <a id="competitive-intel"></a>
 
@@ -3114,17 +3115,17 @@ Auto-generated tag for content-crud route group
 |--------|------|-------------|---------|
 | `GET` | /content-crud/articles | `content_crud_get_content_crud_articles` | [stub] List/get /content-crud/articles (content-crud) |
 | `POST` | /content-crud/articles | `content_crud_post_content_crud_articles` | [stub] Create/invoke /content-crud/articles (content-crud) |
+| `GET` | /content-crud/articles/slug/{slug} | `content_crud_get_content_crud_articles_slug_slug` | [stub] List/get /content-crud/articles/slug/{slug} (content-crud) |
 | `GET` | /content-crud/articles/{id} | `content_crud_get_content_crud_articles_id` | [stub] List/get /content-crud/articles/{id} (content-crud) |
 | `PATCH` | /content-crud/articles/{id} | `content_crud_patch_content_crud_articles_id` | [stub] Patch /content-crud/articles/{id} (content-crud) |
 | `DELETE` | /content-crud/articles/{id} | `content_crud_delete_content_crud_articles_id` | [stub] Delete /content-crud/articles/{id} (content-crud) |
 | `GET` | /content-crud/articles/{id}/versions | `content_crud_get_content_crud_articles_id_versions` | [stub] List/get /content-crud/articles/{id}/versions (content-crud) |
-| `GET` | /content-crud/articles/slug/{slug} | `content_crud_get_content_crud_articles_slug_slug` | [stub] List/get /content-crud/articles/slug/{slug} (content-crud) |
 | `GET` | /content-crud/authors | `content_crud_get_content_crud_authors` | [stub] List/get /content-crud/authors (content-crud) |
 | `POST` | /content-crud/authors | `content_crud_post_content_crud_authors` | [stub] Create/invoke /content-crud/authors (content-crud) |
 | `GET` | /content-crud/automation-runs | `content_crud_get_content_crud_automation_runs` | [stub] List/get /content-crud/automation-runs (content-crud) |
 | `POST` | /content-crud/automation-runs | `content_crud_post_content_crud_automation_runs` | [stub] Create/invoke /content-crud/automation-runs (content-crud) |
-| `PATCH` | /content-crud/automation-runs/{id} | `content_crud_patch_content_crud_automation_runs_id` | [stub] Patch /content-crud/automation-runs/{id} (content-crud) |
 | `POST` | /content-crud/automation-runs/trigger/{jobType} | `content_crud_post_content_crud_automation_runs_trigger_jobType` | [stub] Create/invoke /content-crud/automation-runs/trigger/{jobType} (content-crud) |
+| `PATCH` | /content-crud/automation-runs/{id} | `content_crud_patch_content_crud_automation_runs_id` | [stub] Patch /content-crud/automation-runs/{id} (content-crud) |
 | `GET` | /content-crud/calendar | `content_crud_get_content_crud_calendar` | [stub] List/get /content-crud/calendar (content-crud) |
 | `POST` | /content-crud/calendar | `content_crud_post_content_crud_calendar` | [stub] Create/invoke /content-crud/calendar (content-crud) |
 | `PATCH` | /content-crud/calendar/{id} | `content_crud_patch_content_crud_calendar_id` | [stub] Patch /content-crud/calendar/{id} (content-crud) |
@@ -3143,8 +3144,8 @@ Auto-generated tag for content-crud route group
 | `POST` | /content-crud/distribution | `content_crud_post_content_crud_distribution` | [stub] Create/invoke /content-crud/distribution (content-crud) |
 | `PATCH` | /content-crud/distribution/{id} | `content_crud_patch_content_crud_distribution_id` | [stub] Patch /content-crud/distribution/{id} (content-crud) |
 | `GET` | /content-crud/integrations | `content_crud_get_content_crud_integrations` | [stub] List/get /content-crud/integrations (content-crud) |
-| `PATCH` | /content-crud/integrations/{id} | `content_crud_patch_content_crud_integrations_id` | [stub] Patch /content-crud/integrations/{id} (content-crud) |
 | `POST` | /content-crud/integrations/retry/{provider} | `content_crud_post_content_crud_integrations_retry_provider` | [stub] Create/invoke /content-crud/integrations/retry/{provider} (content-crud) |
+| `PATCH` | /content-crud/integrations/{id} | `content_crud_patch_content_crud_integrations_id` | [stub] Patch /content-crud/integrations/{id} (content-crud) |
 | `GET` | /content-crud/leads | `content_crud_get_content_crud_leads` | [stub] List/get /content-crud/leads (content-crud) |
 | `POST` | /content-crud/leads | `content_crud_post_content_crud_leads` | [stub] Create/invoke /content-crud/leads (content-crud) |
 | `PATCH` | /content-crud/leads/{id} | `content_crud_patch_content_crud_leads_id` | [stub] Patch /content-crud/leads/{id} (content-crud) |
@@ -3153,9 +3154,9 @@ Auto-generated tag for content-crud route group
 | `POST` | /content-crud/leads/{id}/notes | `content_crud_post_content_crud_leads_id_notes` | [stub] Create/invoke /content-crud/leads/{id}/notes (content-crud) |
 | `GET` | /content-crud/linktree | `content_crud_get_content_crud_linktree` | [stub] List/get /content-crud/linktree (content-crud) |
 | `POST` | /content-crud/linktree | `content_crud_post_content_crud_linktree` | [stub] Create/invoke /content-crud/linktree (content-crud) |
+| `GET` | /content-crud/linktree/admin | `content_crud_get_content_crud_linktree_admin` | [stub] List/get /content-crud/linktree/admin (content-crud) |
 | `PATCH` | /content-crud/linktree/{id} | `content_crud_patch_content_crud_linktree_id` | [stub] Patch /content-crud/linktree/{id} (content-crud) |
 | `DELETE` | /content-crud/linktree/{id} | `content_crud_delete_content_crud_linktree_id` | [stub] Delete /content-crud/linktree/{id} (content-crud) |
-| `GET` | /content-crud/linktree/admin | `content_crud_get_content_crud_linktree_admin` | [stub] List/get /content-crud/linktree/admin (content-crud) |
 | `GET` | /content-crud/newsletters | `content_crud_get_content_crud_newsletters` | [stub] List/get /content-crud/newsletters (content-crud) |
 | `POST` | /content-crud/newsletters | `content_crud_post_content_crud_newsletters` | [stub] Create/invoke /content-crud/newsletters (content-crud) |
 | `GET` | /content-crud/newsletters/{id} | `content_crud_get_content_crud_newsletters_id` | [stub] List/get /content-crud/newsletters/{id} (content-crud) |
@@ -3218,11 +3219,11 @@ Auto-generated tag for cortex route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /cortex/cortex/action-drafts | `cortex_get_cortex_cortex_action_drafts` | [stub] List/get /cortex/cortex/action-drafts (cortex) |
-| `POST` | /cortex/cortex/action-drafts/{id}/approve | `cortex_post_cortex_cortex_action_drafts_id_approve` | [stub] Create/invoke /cortex/cortex/action-drafts/{id}/approve (cortex) |
-| `POST` | /cortex/cortex/action-drafts/{id}/dismiss | `cortex_post_cortex_cortex_action_drafts_id_dismiss` | [stub] Create/invoke /cortex/cortex/action-drafts/{id}/dismiss (cortex) |
 | `GET` | /cortex/cortex/action-drafts/export | `cortex_get_cortex_cortex_action_drafts_export` | [stub] List/get /cortex/cortex/action-drafts/export (cortex) |
 | `POST` | /cortex/cortex/action-drafts/generate | `cortex_post_cortex_cortex_action_drafts_generate` | [stub] Create/invoke /cortex/cortex/action-drafts/generate (cortex) |
 | `DELETE` | /cortex/cortex/action-drafts/prune | `cortex_delete_cortex_cortex_action_drafts_prune` | [stub] Delete /cortex/cortex/action-drafts/prune (cortex) |
+| `POST` | /cortex/cortex/action-drafts/{id}/approve | `cortex_post_cortex_cortex_action_drafts_id_approve` | [stub] Create/invoke /cortex/cortex/action-drafts/{id}/approve (cortex) |
+| `POST` | /cortex/cortex/action-drafts/{id}/dismiss | `cortex_post_cortex_cortex_action_drafts_id_dismiss` | [stub] Create/invoke /cortex/cortex/action-drafts/{id}/dismiss (cortex) |
 | `GET` | /cortex/cortex/briefing/today | `cortex_get_cortex_cortex_briefing_today` | [stub] List/get /cortex/cortex/briefing/today (cortex) |
 | `GET` | /cortex/cortex/command-feed | `cortex_get_cortex_cortex_command_feed` | [stub] List/get /cortex/cortex/command-feed (cortex) |
 | `GET` | /cortex/cortex/domains | `cortex_get_cortex_cortex_domains` | [stub] List/get /cortex/cortex/domains (cortex) |
@@ -3266,6 +3267,40 @@ Auto-generated tag for counsel route group
 | `PATCH` | /counsel/obligations/{id} | `counselUpdateObligation` | Update an obligation (status, completed date, assignee, due date) |
 | `GET` | /counsel/proof-chain | `counselListProofChain` | List proof-chain entries for a matter |
 | `POST` | /counsel/proof-chain | `counselAppendProofChainEntry` | Append a proof-chain entry to a matter |
+
+<a id="conduit"></a>
+
+## conduit
+
+Conduit Reverse ETL — connections, syncs, field mappings, sync runs, and templates
+
+| Method | Path | Operation ID | Summary |
+|--------|------|-------------|---------|
+| `GET` | /conduit/connections | `listConduitConnections` | List all connections |
+| `POST` | /conduit/connections | `createConduitConnection` | Create a connection |
+| `GET` | /conduit/connections/{id} | `getConduitConnection` | Get a connection |
+| `PATCH` | /conduit/connections/{id} | `updateConduitConnection` | Update a connection |
+| `DELETE` | /conduit/connections/{id} | `deleteConduitConnection` | Delete a connection |
+| `POST` | /conduit/connections/{id}/test | `testConduitConnection` | Test a connection |
+| `GET` | /conduit/destinations/{destination}/objects | `listConduitDestinationObjects` | List available destination objects for a connector type |
+| `GET` | /conduit/destinations/{destination}/objects/{objectType}/fields | `listConduitDestinationFields` | List fields for a destination object |
+| `POST` | /conduit/sources/preview | `previewConduitSource` | Preview source rows for a given source configuration |
+| `GET` | /conduit/stats | `getConduitStats` | Get Conduit dashboard stats |
+| `GET` | /conduit/sync-runs | `listConduitSyncRuns` | List sync runs |
+| `GET` | /conduit/sync-runs/{id} | `getConduitSyncRun` | Get a sync run with details |
+| `GET` | /conduit/sync-runs/{id}/rows | `listConduitSyncRunRows` | List row-level errors for a sync run |
+| `POST` | /conduit/sync-runs/{id}/rows/{rowId}/retry | `retryConduitSyncRunRow` | Retry a failed row |
+| `GET` | /conduit/syncs | `listConduitSyncs` | List all syncs |
+| `POST` | /conduit/syncs | `createConduitSync` | Create a sync |
+| `GET` | /conduit/syncs/{id} | `getConduitSync` | Get a sync |
+| `PATCH` | /conduit/syncs/{id} | `updateConduitSync` | Update a sync |
+| `DELETE` | /conduit/syncs/{id} | `deleteConduitSync` | Delete a sync |
+| `GET` | /conduit/syncs/{id}/mappings | `getConduitSyncMappings` | Get field mappings for a sync |
+| `PUT` | /conduit/syncs/{id}/mappings | `updateConduitSyncMappings` | Replace field mappings for a sync |
+| `POST` | /conduit/syncs/{id}/run | `runConduitSync` | Trigger an immediate sync run |
+| `GET` | /conduit/templates | `listConduitTemplates` | List available sync templates |
+| `GET` | /conduit/templates/{id} | `getConduitTemplate` | Get a sync template |
+| `POST` | /conduit/templates/{id}/apply | `applyConduitTemplate` | Apply a template to create a pre-populated sync |
 
 <a id="covenant-policy-api"></a>
 
@@ -3382,15 +3417,15 @@ Auto-generated tag for crud route group
 |--------|------|-------------|---------|
 | `GET` | /crud/documents | `crud_get_crud_documents` | [stub] List/get /crud/documents (crud) |
 | `POST` | /crud/documents | `crud_post_crud_documents` | [stub] Create/invoke /crud/documents (crud) |
+| `PATCH` | /crud/documents/comments/{commentId}/resolve | `crud_patch_crud_documents_comments_commentId_resolve` | [stub] Patch /crud/documents/comments/{commentId}/resolve (crud) |
+| `GET` | /crud/documents/content-library | `crud_get_crud_documents_content_library` | [stub] List/get /crud/documents/content-library (crud) |
+| `GET` | /crud/documents/templates | `crud_get_crud_documents_templates` | [stub] List/get /crud/documents/templates (crud) |
+| `GET` | /crud/documents/templates/{id} | `crud_get_crud_documents_templates_id` | [stub] List/get /crud/documents/templates/{id} (crud) |
 | `PUT` | /crud/documents/{id} | `crud_put_crud_documents_id` | [stub] Update /crud/documents/{id} (crud) |
 | `DELETE` | /crud/documents/{id} | `crud_delete_crud_documents_id` | [stub] Delete /crud/documents/{id} (crud) |
 | `POST` | /crud/documents/{id}/comments | `crud_post_crud_documents_id_comments` | [stub] Create/invoke /crud/documents/{id}/comments (crud) |
 | `POST` | /crud/documents/{id}/restore | `crud_post_crud_documents_id_restore` | [stub] Create/invoke /crud/documents/{id}/restore (crud) |
 | `GET` | /crud/documents/{id}/versions | `crud_get_crud_documents_id_versions` | [stub] List/get /crud/documents/{id}/versions (crud) |
-| `PATCH` | /crud/documents/comments/{commentId}/resolve | `crud_patch_crud_documents_comments_commentId_resolve` | [stub] Patch /crud/documents/comments/{commentId}/resolve (crud) |
-| `GET` | /crud/documents/content-library | `crud_get_crud_documents_content_library` | [stub] List/get /crud/documents/content-library (crud) |
-| `GET` | /crud/documents/templates | `crud_get_crud_documents_templates` | [stub] List/get /crud/documents/templates (crud) |
-| `GET` | /crud/documents/templates/{id} | `crud_get_crud_documents_templates_id` | [stub] List/get /crud/documents/templates/{id} (crud) |
 | `GET` | /crud/firestorm/assessments | `crud_get_crud_firestorm_assessments` | [stub] List/get /crud/firestorm/assessments (crud) |
 | `POST` | /crud/firestorm/assessments | `crud_post_crud_firestorm_assessments` | [stub] Create/invoke /crud/firestorm/assessments (crud) |
 | `GET` | /crud/firestorm/assessments/{id} | `crud_get_crud_firestorm_assessments_id` | [stub] List/get /crud/firestorm/assessments/{id} (crud) |
@@ -3401,8 +3436,8 @@ Auto-generated tag for crud route group
 | `GET` | /crud/firestorm/findings/{id} | `crud_get_crud_firestorm_findings_id` | [stub] List/get /crud/firestorm/findings/{id} (crud) |
 | `PUT` | /crud/firestorm/findings/{id} | `crud_put_crud_firestorm_findings_id` | [stub] Update /crud/firestorm/findings/{id} (crud) |
 | `GET` | /crud/firestorm/reports | `crud_get_crud_firestorm_reports` | [stub] List/get /crud/firestorm/reports (crud) |
-| `GET` | /crud/firestorm/reports/{assessmentId} | `crud_get_crud_firestorm_reports_assessmentId` | [stub] List/get /crud/firestorm/reports/{assessmentId} (crud) |
 | `GET` | /crud/firestorm/reports/export-summary | `crud_get_crud_firestorm_reports_export_summary` | [stub] List/get /crud/firestorm/reports/export-summary (crud) |
+| `GET` | /crud/firestorm/reports/{assessmentId} | `crud_get_crud_firestorm_reports_assessmentId` | [stub] List/get /crud/firestorm/reports/{assessmentId} (crud) |
 | `GET` | /crud/firestorm/risk-scores | `crud_get_crud_firestorm_risk_scores` | [stub] List/get /crud/firestorm/risk-scores (crud) |
 | `POST` | /crud/firestorm/risk-scores | `crud_post_crud_firestorm_risk_scores` | [stub] Create/invoke /crud/firestorm/risk-scores (crud) |
 | `GET` | /crud/firestorm/scenarios | `crud_get_crud_firestorm_scenarios` | [stub] List/get /crud/firestorm/scenarios (crud) |
@@ -3547,8 +3582,8 @@ Auto-generated tag for decisions-receipts route group
 |--------|------|-------------|---------|
 | `GET` | /decisions/decisions/receipts | `decisions_receipts_get_decisions_decisions_receipts` | [stub] List/get /decisions/decisions/receipts (decisions-receipts) |
 | `POST` | /decisions/decisions/receipts | `decisions_receipts_post_decisions_decisions_receipts` | [stub] Create/invoke /decisions/decisions/receipts (decisions-receipts) |
-| `GET` | /decisions/decisions/receipts/{receiptId} | `decisions_receipts_get_decisions_decisions_receipts_receiptId` | [stub] List/get /decisions/decisions/receipts/{receiptId} (decisions-receipts) |
 | `GET` | /decisions/decisions/receipts/download/{receiptId} | `decisions_receipts_get_decisions_decisions_receipts_download_receiptId` | [stub] List/get /decisions/decisions/receipts/download/{receiptId} (decisions-receipts) |
+| `GET` | /decisions/decisions/receipts/{receiptId} | `decisions_receipts_get_decisions_decisions_receipts_receiptId` | [stub] List/get /decisions/decisions/receipts/{receiptId} (decisions-receipts) |
 
 <a id="decisions-runtime"></a>
 
@@ -3640,15 +3675,15 @@ Auto-generated tag for digital-twins route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /digital-twins/digital-twins | `digital_twins_get_digital_twins_digital_twins` | [stub] List/get /digital-twins/digital-twins (digital-twins) |
-| `GET` | /digital-twins/digital-twins/{twinId} | `digital_twins_get_digital_twins_digital_twins_twinId` | [stub] List/get /digital-twins/digital-twins/{twinId} (digital-twins) |
-| `PATCH` | /digital-twins/digital-twins/{twinId} | `digital_twins_patch_digital_twins_digital_twins_twinId` | [stub] Patch /digital-twins/digital-twins/{twinId} (digital-twins) |
-| `POST` | /digital-twins/digital-twins/{twinId}/simulate | `digital_twins_post_digital_twins_digital_twins_twinId_simulate` | [stub] Create/invoke /digital-twins/digital-twins/{twinId}/simulate (digital-twins) |
 | `POST` | /digital-twins/digital-twins/demo/seed | `digital_twins_post_digital_twins_digital_twins_demo_seed` | [stub] Create/invoke /digital-twins/digital-twins/demo/seed (digital-twins) |
 | `GET` | /digital-twins/digital-twins/entity/{entityId} | `digital_twins_get_digital_twins_digital_twins_entity_entityId` | [stub] List/get /digital-twins/digital-twins/entity/{entityId} (digital-twins) |
 | `POST` | /digital-twins/digital-twins/posture | `digital_twins_post_digital_twins_digital_twins_posture` | [stub] Create/invoke /digital-twins/digital-twins/posture (digital-twins) |
 | `POST` | /digital-twins/digital-twins/property | `digital_twins_post_digital_twins_digital_twins_property` | [stub] Create/invoke /digital-twins/digital-twins/property (digital-twins) |
 | `GET` | /digital-twins/digital-twins/type/{type} | `digital_twins_get_digital_twins_digital_twins_type_type` | [stub] List/get /digital-twins/digital-twins/type/{type} (digital-twins) |
 | `POST` | /digital-twins/digital-twins/vessel | `digital_twins_post_digital_twins_digital_twins_vessel` | [stub] Create/invoke /digital-twins/digital-twins/vessel (digital-twins) |
+| `GET` | /digital-twins/digital-twins/{twinId} | `digital_twins_get_digital_twins_digital_twins_twinId` | [stub] List/get /digital-twins/digital-twins/{twinId} (digital-twins) |
+| `PATCH` | /digital-twins/digital-twins/{twinId} | `digital_twins_patch_digital_twins_digital_twins_twinId` | [stub] Patch /digital-twins/digital-twins/{twinId} (digital-twins) |
+| `POST` | /digital-twins/digital-twins/{twinId}/simulate | `digital_twins_post_digital_twins_digital_twins_twinId_simulate` | [stub] Create/invoke /digital-twins/digital-twins/{twinId}/simulate (digital-twins) |
 
 <a id="doctrine"></a>
 
@@ -3697,12 +3732,12 @@ Auto-generated tag for domains route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /domains/domains/{domain}/graph | `domains_get_domains_domains_domain_graph` | [stub] List/get /domains/domains/{domain}/graph (domains) |
 | `GET` | /domains/domains/aegis/graph | `domains_get_domains_domains_aegis_graph` | [stub] List/get /domains/domains/aegis/graph (domains) |
 | `GET` | /domains/domains/lyte/graph | `domains_get_domains_domains_lyte_graph` | [stub] List/get /domains/domains/lyte/graph (domains) |
 | `GET` | /domains/domains/prism/graph | `domains_get_domains_domains_prism_graph` | [stub] List/get /domains/domains/prism/graph (domains) |
 | `GET` | /domains/domains/terra/graph | `domains_get_domains_domains_terra_graph` | [stub] List/get /domains/domains/terra/graph (domains) |
 | `GET` | /domains/domains/vessels/graph | `domains_get_domains_domains_vessels_graph` | [stub] List/get /domains/domains/vessels/graph (domains) |
+| `GET` | /domains/domains/{domain}/graph | `domains_get_domains_domains_domain_graph` | [stub] List/get /domains/domains/{domain}/graph (domains) |
 
 <a id="dos-public-api"></a>
 
@@ -3726,9 +3761,9 @@ Auto-generated tag for drift route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /drift/drift | `drift_get_drift_drift` | [stub] List/get /drift/drift (drift) |
-| `GET` | /drift/drift/{domain} | `drift_get_drift_drift_domain` | [stub] List/get /drift/drift/{domain} (drift) |
 | `GET` | /drift/drift/history | `drift_get_drift_drift_history` | [stub] List/get /drift/drift/history (drift) |
 | `POST` | /drift/drift/reset | `drift_post_drift_drift_reset` | [stub] Create/invoke /drift/drift/reset (drift) |
+| `GET` | /drift/drift/{domain} | `drift_get_drift_drift_domain` | [stub] List/get /drift/drift/{domain} (drift) |
 
 <a id="evals"></a>
 
@@ -3739,7 +3774,6 @@ Auto-generated tag for evals route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /evals/evals | `evals_get_evals_evals` | [stub] List/get /evals/evals (evals) |
-| `GET` | /evals/evals/{id} | `evals_get_evals_evals_id` | [stub] List/get /evals/evals/{id} (evals) |
 | `POST` | /evals/evals/run | `evals_post_evals_evals_run` | [stub] Create/invoke /evals/evals/run (evals) |
 | `POST` | /evals/evals/run-all | `evals_post_evals_evals_run_all` | [stub] Create/invoke /evals/evals/run-all (evals) |
 | `GET` | /evals/evals/runs | `evals_get_evals_evals_runs` | [stub] List/get /evals/evals/runs (evals) |
@@ -3748,6 +3782,7 @@ Auto-generated tag for evals route group
 | `GET` | /evals/evals/suites | `evals_get_evals_evals_suites` | [stub] List/get /evals/evals/suites (evals) |
 | `GET` | /evals/evals/suites/{suiteId} | `evals_get_evals_evals_suites_suiteId` | [stub] List/get /evals/evals/suites/{suiteId} (evals) |
 | `POST` | /evals/evals/suites/{suiteId}/runs/variant | `evals_post_evals_evals_suites_suiteId_runs_variant` | [stub] Create/invoke /evals/evals/suites/{suiteId}/runs/variant (evals) |
+| `GET` | /evals/evals/{id} | `evals_get_evals_evals_id` | [stub] List/get /evals/evals/{id} (evals) |
 | `POST` | /evals/v1/evals/run | `evals_post_evals_v1_evals_run` | [stub] Create/invoke /evals/v1/evals/run (evals) |
 
 <a id="events"></a>
@@ -3789,11 +3824,11 @@ Auto-generated tag for executive-briefings route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /executive/executive | `executive_briefings_get_executive_executive` | [stub] List/get /executive/executive (executive-briefings) |
-| `GET` | /executive/executive/{domain} | `executive_briefings_get_executive_executive_domain` | [stub] List/get /executive/executive/{domain} (executive-briefings) |
 | `GET` | /executive/executive/brief/{id} | `executive_briefings_get_executive_executive_brief_id` | [stub] List/get /executive/executive/brief/{id} (executive-briefings) |
 | `POST` | /executive/executive/generate | `executive_briefings_post_executive_executive_generate` | [stub] Create/invoke /executive/executive/generate (executive-briefings) |
 | `POST` | /executive/executive/generate/{domain} | `executive_briefings_post_executive_executive_generate_domain` | [stub] Create/invoke /executive/executive/generate/{domain} (executive-briefings) |
 | `GET` | /executive/executive/history | `executive_briefings_get_executive_executive_history` | [stub] List/get /executive/executive/history (executive-briefings) |
+| `GET` | /executive/executive/{domain} | `executive_briefings_get_executive_executive_domain` | [stub] List/get /executive/executive/{domain} (executive-briefings) |
 
 <a id="external-integrations"></a>
 
@@ -3815,8 +3850,8 @@ Auto-generated tag for external-integrations route group
 | `GET` | /integrations/integrations/siem/events | `external_integrations_get_integrations_integrations_siem_events` | [stub] List/get /integrations/integrations/siem/events (external-integrations) |
 | `GET` | /integrations/integrations/siem/rules | `external_integrations_get_integrations_integrations_siem_rules` | [stub] List/get /integrations/integrations/siem/rules (external-integrations) |
 | `GET` | /integrations/integrations/status | `external_integrations_get_integrations_integrations_status` | [stub] List/get /integrations/integrations/status (external-integrations) |
-| `GET` | /integrations/integrations/status/{adapter} | `external_integrations_get_integrations_integrations_status_adapter` | [stub] List/get /integrations/integrations/status/{adapter} (external-integrations) |
 | `POST` | /integrations/integrations/status/refresh | `external_integrations_post_integrations_integrations_status_refresh` | [stub] Create/invoke /integrations/integrations/status/refresh (external-integrations) |
+| `GET` | /integrations/integrations/status/{adapter} | `external_integrations_get_integrations_integrations_status_adapter` | [stub] List/get /integrations/integrations/status/{adapter} (external-integrations) |
 | `GET` | /integrations/integrations/webhooks/info | `external_integrations_get_integrations_integrations_webhooks_info` | [stub] List/get /integrations/integrations/webhooks/info (external-integrations) |
 | `POST` | /integrations/webhooks/inbound/jira | `external_integrations_post_integrations_webhooks_inbound_jira` | [stub] Create/invoke /integrations/webhooks/inbound/jira (external-integrations) |
 | `POST` | /integrations/webhooks/inbound/pagerduty | `external_integrations_post_integrations_webhooks_inbound_pagerduty` | [stub] Create/invoke /integrations/webhooks/inbound/pagerduty (external-integrations) |
@@ -3841,8 +3876,8 @@ Auto-generated tag for external-integrations route group
 | `GET` | /webhooks/integrations/siem/events | `external_integrations_get_webhooks_integrations_siem_events` | [stub] List/get /webhooks/integrations/siem/events (external-integrations) |
 | `GET` | /webhooks/integrations/siem/rules | `external_integrations_get_webhooks_integrations_siem_rules` | [stub] List/get /webhooks/integrations/siem/rules (external-integrations) |
 | `GET` | /webhooks/integrations/status | `external_integrations_get_webhooks_integrations_status` | [stub] List/get /webhooks/integrations/status (external-integrations) |
-| `GET` | /webhooks/integrations/status/{adapter} | `external_integrations_get_webhooks_integrations_status_adapter` | [stub] List/get /webhooks/integrations/status/{adapter} (external-integrations) |
 | `POST` | /webhooks/integrations/status/refresh | `external_integrations_post_webhooks_integrations_status_refresh` | [stub] Create/invoke /webhooks/integrations/status/refresh (external-integrations) |
+| `GET` | /webhooks/integrations/status/{adapter} | `external_integrations_get_webhooks_integrations_status_adapter` | [stub] List/get /webhooks/integrations/status/{adapter} (external-integrations) |
 | `GET` | /webhooks/integrations/webhooks/info | `external_integrations_get_webhooks_integrations_webhooks_info` | [stub] List/get /webhooks/integrations/webhooks/info (external-integrations) |
 | `POST` | /webhooks/webhooks/inbound/jira | `external_integrations_post_webhooks_webhooks_inbound_jira` | [stub] Create/invoke /webhooks/webhooks/inbound/jira (external-integrations) |
 | `POST` | /webhooks/webhooks/inbound/pagerduty | `external_integrations_post_webhooks_webhooks_inbound_pagerduty` | [stub] Create/invoke /webhooks/webhooks/inbound/pagerduty (external-integrations) |
@@ -4105,15 +4140,15 @@ Auto-generated tag for fusion route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /fusion/fusion/alerts | `fusion_get_fusion_fusion_alerts` | [stub] List/get /fusion/fusion/alerts (fusion) |
+| `POST` | /fusion/fusion/alerts/inject | `fusion_post_fusion_fusion_alerts_inject` | [stub] Create/invoke /fusion/fusion/alerts/inject (fusion) |
 | `POST` | /fusion/fusion/alerts/{alertId}/feedback | `fusion_post_fusion_fusion_alerts_alertId_feedback` | [stub] Create/invoke /fusion/fusion/alerts/{alertId}/feedback (fusion) |
 | `POST` | /fusion/fusion/alerts/{id}/acknowledge | `fusion_post_fusion_fusion_alerts_id_acknowledge` | [stub] Create/invoke /fusion/fusion/alerts/{id}/acknowledge (fusion) |
 | `POST` | /fusion/fusion/alerts/{id}/resolve | `fusion_post_fusion_fusion_alerts_id_resolve` | [stub] Create/invoke /fusion/fusion/alerts/{id}/resolve (fusion) |
-| `POST` | /fusion/fusion/alerts/inject | `fusion_post_fusion_fusion_alerts_inject` | [stub] Create/invoke /fusion/fusion/alerts/inject (fusion) |
 | `POST` | /fusion/fusion/demo/seed | `fusion_post_fusion_fusion_demo_seed` | [stub] Create/invoke /fusion/fusion/demo/seed (fusion) |
 | `GET` | /fusion/fusion/patterns | `fusion_get_fusion_fusion_patterns` | [stub] List/get /fusion/fusion/patterns (fusion) |
+| `POST` | /fusion/fusion/patterns/custom | `fusion_post_fusion_fusion_patterns_custom` | [stub] Create/invoke /fusion/fusion/patterns/custom (fusion) |
 | `GET` | /fusion/fusion/patterns/{id} | `fusion_get_fusion_fusion_patterns_id` | [stub] List/get /fusion/fusion/patterns/{id} (fusion) |
 | `POST` | /fusion/fusion/patterns/{id}/feedback | `fusion_post_fusion_fusion_patterns_id_feedback` | [stub] Create/invoke /fusion/fusion/patterns/{id}/feedback (fusion) |
-| `POST` | /fusion/fusion/patterns/custom | `fusion_post_fusion_fusion_patterns_custom` | [stub] Create/invoke /fusion/fusion/patterns/custom (fusion) |
 | `GET` | /fusion/fusion/predictive/alerts | `fusion_get_fusion_fusion_predictive_alerts` | [stub] List/get /fusion/fusion/predictive/alerts (fusion) |
 | `POST` | /fusion/fusion/predictive/alerts/{id}/resolve | `fusion_post_fusion_fusion_predictive_alerts_id_resolve` | [stub] Create/invoke /fusion/fusion/predictive/alerts/{id}/resolve (fusion) |
 | `POST` | /fusion/fusion/predictive/generate | `fusion_post_fusion_fusion_predictive_generate` | [stub] Create/invoke /fusion/fusion/predictive/generate (fusion) |
@@ -4302,6 +4337,8 @@ Auto-generated tag for guardian route group
 | `GET` | /actions/ledger/stream | `guardian_get_actions_ledger_stream` | [stub] List/get /actions/ledger/stream (guardian) |
 | `GET` | /actions/policies | `guardian_get_actions_policies` | [stub] List/get /actions/policies (guardian) |
 | `POST` | /actions/policies | `guardian_post_actions_policies` | [stub] Create/invoke /actions/policies (guardian) |
+| `GET` | /actions/policies/tiers | `guardian_get_actions_policies_tiers` | [stub] List/get /actions/policies/tiers (guardian) |
+| `PATCH` | /actions/policies/tiers/{tier} | `guardian_patch_actions_policies_tiers_tier` | [stub] Patch /actions/policies/tiers/{tier} (guardian) |
 | `GET` | /actions/policies/{id} | `guardian_get_actions_policies_id` | [stub] List/get /actions/policies/{id} (guardian) |
 | `PATCH` | /actions/policies/{id} | `guardian_patch_actions_policies_id` | [stub] Patch /actions/policies/{id} (guardian) |
 | `DELETE` | /actions/policies/{id} | `guardian_delete_actions_policies_id` | [stub] Delete /actions/policies/{id} (guardian) |
@@ -4309,8 +4346,6 @@ Auto-generated tag for guardian route group
 | `POST` | /actions/policies/{id}/assignments | `guardian_post_actions_policies_id_assignments` | [stub] Create/invoke /actions/policies/{id}/assignments (guardian) |
 | `DELETE` | /actions/policies/{id}/assignments/{assignmentId} | `guardian_delete_actions_policies_id_assignments_assignmentId` | [stub] Delete /actions/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /actions/policies/{id}/audit | `guardian_get_actions_policies_id_audit` | [stub] List/get /actions/policies/{id}/audit (guardian) |
-| `GET` | /actions/policies/tiers | `guardian_get_actions_policies_tiers` | [stub] List/get /actions/policies/tiers (guardian) |
-| `PATCH` | /actions/policies/tiers/{tier} | `guardian_patch_actions_policies_tiers_tier` | [stub] Patch /actions/policies/tiers/{tier} (guardian) |
 | `GET` | /actions/rollback-events | `guardian_get_actions_rollback_events` | [stub] List/get /actions/rollback-events (guardian) |
 | `POST` | /actions/rollback-events | `guardian_post_actions_rollback_events` | [stub] Create/invoke /actions/rollback-events (guardian) |
 | `GET` | /actions/rollback-events/{id} | `guardian_get_actions_rollback_events_id` | [stub] List/get /actions/rollback-events/{id} (guardian) |
@@ -4347,6 +4382,8 @@ Auto-generated tag for guardian route group
 | `GET` | /approvals/ledger/stream | `guardian_get_approvals_ledger_stream` | [stub] List/get /approvals/ledger/stream (guardian) |
 | `GET` | /approvals/policies | `guardian_get_approvals_policies` | [stub] List/get /approvals/policies (guardian) |
 | `POST` | /approvals/policies | `guardian_post_approvals_policies` | [stub] Create/invoke /approvals/policies (guardian) |
+| `GET` | /approvals/policies/tiers | `guardian_get_approvals_policies_tiers` | [stub] List/get /approvals/policies/tiers (guardian) |
+| `PATCH` | /approvals/policies/tiers/{tier} | `guardian_patch_approvals_policies_tiers_tier` | [stub] Patch /approvals/policies/tiers/{tier} (guardian) |
 | `GET` | /approvals/policies/{id} | `guardian_get_approvals_policies_id` | [stub] List/get /approvals/policies/{id} (guardian) |
 | `PATCH` | /approvals/policies/{id} | `guardian_patch_approvals_policies_id` | [stub] Patch /approvals/policies/{id} (guardian) |
 | `DELETE` | /approvals/policies/{id} | `guardian_delete_approvals_policies_id` | [stub] Delete /approvals/policies/{id} (guardian) |
@@ -4354,8 +4391,6 @@ Auto-generated tag for guardian route group
 | `POST` | /approvals/policies/{id}/assignments | `guardian_post_approvals_policies_id_assignments` | [stub] Create/invoke /approvals/policies/{id}/assignments (guardian) |
 | `DELETE` | /approvals/policies/{id}/assignments/{assignmentId} | `guardian_delete_approvals_policies_id_assignments_assignmentId` | [stub] Delete /approvals/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /approvals/policies/{id}/audit | `guardian_get_approvals_policies_id_audit` | [stub] List/get /approvals/policies/{id}/audit (guardian) |
-| `GET` | /approvals/policies/tiers | `guardian_get_approvals_policies_tiers` | [stub] List/get /approvals/policies/tiers (guardian) |
-| `PATCH` | /approvals/policies/tiers/{tier} | `guardian_patch_approvals_policies_tiers_tier` | [stub] Patch /approvals/policies/tiers/{tier} (guardian) |
 | `GET` | /approvals/rollback-events | `guardian_get_approvals_rollback_events` | [stub] List/get /approvals/rollback-events (guardian) |
 | `POST` | /approvals/rollback-events | `guardian_post_approvals_rollback_events` | [stub] Create/invoke /approvals/rollback-events (guardian) |
 | `GET` | /approvals/rollback-events/{id} | `guardian_get_approvals_rollback_events_id` | [stub] List/get /approvals/rollback-events/{id} (guardian) |
@@ -4393,6 +4428,8 @@ Auto-generated tag for guardian route group
 | `GET` | /audit/ledger/stream | `guardian_get_audit_ledger_stream` | [stub] List/get /audit/ledger/stream (guardian) |
 | `GET` | /audit/policies | `guardian_get_audit_policies` | [stub] List/get /audit/policies (guardian) |
 | `POST` | /audit/policies | `guardian_post_audit_policies` | [stub] Create/invoke /audit/policies (guardian) |
+| `GET` | /audit/policies/tiers | `guardian_get_audit_policies_tiers` | [stub] List/get /audit/policies/tiers (guardian) |
+| `PATCH` | /audit/policies/tiers/{tier} | `guardian_patch_audit_policies_tiers_tier` | [stub] Patch /audit/policies/tiers/{tier} (guardian) |
 | `GET` | /audit/policies/{id} | `guardian_get_audit_policies_id` | [stub] List/get /audit/policies/{id} (guardian) |
 | `PATCH` | /audit/policies/{id} | `guardian_patch_audit_policies_id` | [stub] Patch /audit/policies/{id} (guardian) |
 | `DELETE` | /audit/policies/{id} | `guardian_delete_audit_policies_id` | [stub] Delete /audit/policies/{id} (guardian) |
@@ -4400,8 +4437,6 @@ Auto-generated tag for guardian route group
 | `POST` | /audit/policies/{id}/assignments | `guardian_post_audit_policies_id_assignments` | [stub] Create/invoke /audit/policies/{id}/assignments (guardian) |
 | `DELETE` | /audit/policies/{id}/assignments/{assignmentId} | `guardian_delete_audit_policies_id_assignments_assignmentId` | [stub] Delete /audit/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /audit/policies/{id}/audit | `guardian_get_audit_policies_id_audit` | [stub] List/get /audit/policies/{id}/audit (guardian) |
-| `GET` | /audit/policies/tiers | `guardian_get_audit_policies_tiers` | [stub] List/get /audit/policies/tiers (guardian) |
-| `PATCH` | /audit/policies/tiers/{tier} | `guardian_patch_audit_policies_tiers_tier` | [stub] Patch /audit/policies/tiers/{tier} (guardian) |
 | `GET` | /audit/rollback-events | `guardian_get_audit_rollback_events` | [stub] List/get /audit/rollback-events (guardian) |
 | `POST` | /audit/rollback-events | `guardian_post_audit_rollback_events` | [stub] Create/invoke /audit/rollback-events (guardian) |
 | `GET` | /audit/rollback-events/{id} | `guardian_get_audit_rollback_events_id` | [stub] List/get /audit/rollback-events/{id} (guardian) |
@@ -4439,6 +4474,8 @@ Auto-generated tag for guardian route group
 | `GET` | /guardian/ledger/stream | `guardian_get_guardian_ledger_stream` | [stub] List/get /guardian/ledger/stream (guardian) |
 | `GET` | /guardian/policies | `guardian_get_guardian_policies` | [stub] List/get /guardian/policies (guardian) |
 | `POST` | /guardian/policies | `guardian_post_guardian_policies` | [stub] Create/invoke /guardian/policies (guardian) |
+| `GET` | /guardian/policies/tiers | `guardian_get_guardian_policies_tiers` | [stub] List/get /guardian/policies/tiers (guardian) |
+| `PATCH` | /guardian/policies/tiers/{tier} | `guardian_patch_guardian_policies_tiers_tier` | [stub] Patch /guardian/policies/tiers/{tier} (guardian) |
 | `GET` | /guardian/policies/{id} | `guardian_get_guardian_policies_id` | [stub] List/get /guardian/policies/{id} (guardian) |
 | `PATCH` | /guardian/policies/{id} | `guardian_patch_guardian_policies_id` | [stub] Patch /guardian/policies/{id} (guardian) |
 | `DELETE` | /guardian/policies/{id} | `guardian_delete_guardian_policies_id` | [stub] Delete /guardian/policies/{id} (guardian) |
@@ -4446,8 +4483,6 @@ Auto-generated tag for guardian route group
 | `POST` | /guardian/policies/{id}/assignments | `guardian_post_guardian_policies_id_assignments` | [stub] Create/invoke /guardian/policies/{id}/assignments (guardian) |
 | `DELETE` | /guardian/policies/{id}/assignments/{assignmentId} | `guardian_delete_guardian_policies_id_assignments_assignmentId` | [stub] Delete /guardian/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /guardian/policies/{id}/audit | `guardian_get_guardian_policies_id_audit` | [stub] List/get /guardian/policies/{id}/audit (guardian) |
-| `GET` | /guardian/policies/tiers | `guardian_get_guardian_policies_tiers` | [stub] List/get /guardian/policies/tiers (guardian) |
-| `PATCH` | /guardian/policies/tiers/{tier} | `guardian_patch_guardian_policies_tiers_tier` | [stub] Patch /guardian/policies/tiers/{tier} (guardian) |
 | `GET` | /guardian/rollback-events | `guardian_get_guardian_rollback_events` | [stub] List/get /guardian/rollback-events (guardian) |
 | `POST` | /guardian/rollback-events | `guardian_post_guardian_rollback_events` | [stub] Create/invoke /guardian/rollback-events (guardian) |
 | `GET` | /guardian/rollback-events/{id} | `guardian_get_guardian_rollback_events_id` | [stub] List/get /guardian/rollback-events/{id} (guardian) |
@@ -4485,6 +4520,8 @@ Auto-generated tag for guardian route group
 | `GET` | /guardrail-configs/ledger/stream | `guardian_get_guardrail_configs_ledger_stream` | [stub] List/get /guardrail-configs/ledger/stream (guardian) |
 | `GET` | /guardrail-configs/policies | `guardian_get_guardrail_configs_policies` | [stub] List/get /guardrail-configs/policies (guardian) |
 | `POST` | /guardrail-configs/policies | `guardian_post_guardrail_configs_policies` | [stub] Create/invoke /guardrail-configs/policies (guardian) |
+| `GET` | /guardrail-configs/policies/tiers | `guardian_get_guardrail_configs_policies_tiers` | [stub] List/get /guardrail-configs/policies/tiers (guardian) |
+| `PATCH` | /guardrail-configs/policies/tiers/{tier} | `guardian_patch_guardrail_configs_policies_tiers_tier` | [stub] Patch /guardrail-configs/policies/tiers/{tier} (guardian) |
 | `GET` | /guardrail-configs/policies/{id} | `guardian_get_guardrail_configs_policies_id` | [stub] List/get /guardrail-configs/policies/{id} (guardian) |
 | `PATCH` | /guardrail-configs/policies/{id} | `guardian_patch_guardrail_configs_policies_id` | [stub] Patch /guardrail-configs/policies/{id} (guardian) |
 | `DELETE` | /guardrail-configs/policies/{id} | `guardian_delete_guardrail_configs_policies_id` | [stub] Delete /guardrail-configs/policies/{id} (guardian) |
@@ -4492,8 +4529,6 @@ Auto-generated tag for guardian route group
 | `POST` | /guardrail-configs/policies/{id}/assignments | `guardian_post_guardrail_configs_policies_id_assignments` | [stub] Create/invoke /guardrail-configs/policies/{id}/assignments (guardian) |
 | `DELETE` | /guardrail-configs/policies/{id}/assignments/{assignmentId} | `guardian_delete_guardrail_configs_policies_id_assignments_assignmentId` | [stub] Delete /guardrail-configs/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /guardrail-configs/policies/{id}/audit | `guardian_get_guardrail_configs_policies_id_audit` | [stub] List/get /guardrail-configs/policies/{id}/audit (guardian) |
-| `GET` | /guardrail-configs/policies/tiers | `guardian_get_guardrail_configs_policies_tiers` | [stub] List/get /guardrail-configs/policies/tiers (guardian) |
-| `PATCH` | /guardrail-configs/policies/tiers/{tier} | `guardian_patch_guardrail_configs_policies_tiers_tier` | [stub] Patch /guardrail-configs/policies/tiers/{tier} (guardian) |
 | `GET` | /guardrail-configs/rollback-events | `guardian_get_guardrail_configs_rollback_events` | [stub] List/get /guardrail-configs/rollback-events (guardian) |
 | `POST` | /guardrail-configs/rollback-events | `guardian_post_guardrail_configs_rollback_events` | [stub] Create/invoke /guardrail-configs/rollback-events (guardian) |
 | `GET` | /guardrail-configs/rollback-events/{id} | `guardian_get_guardrail_configs_rollback_events_id` | [stub] List/get /guardrail-configs/rollback-events/{id} (guardian) |
@@ -4531,6 +4566,8 @@ Auto-generated tag for guardian route group
 | `GET` | /ledger/ledger/stream | `guardian_get_ledger_ledger_stream` | [stub] List/get /ledger/ledger/stream (guardian) |
 | `GET` | /ledger/policies | `guardian_get_ledger_policies` | [stub] List/get /ledger/policies (guardian) |
 | `POST` | /ledger/policies | `guardian_post_ledger_policies` | [stub] Create/invoke /ledger/policies (guardian) |
+| `GET` | /ledger/policies/tiers | `guardian_get_ledger_policies_tiers` | [stub] List/get /ledger/policies/tiers (guardian) |
+| `PATCH` | /ledger/policies/tiers/{tier} | `guardian_patch_ledger_policies_tiers_tier` | [stub] Patch /ledger/policies/tiers/{tier} (guardian) |
 | `GET` | /ledger/policies/{id} | `guardian_get_ledger_policies_id` | [stub] List/get /ledger/policies/{id} (guardian) |
 | `PATCH` | /ledger/policies/{id} | `guardian_patch_ledger_policies_id` | [stub] Patch /ledger/policies/{id} (guardian) |
 | `DELETE` | /ledger/policies/{id} | `guardian_delete_ledger_policies_id` | [stub] Delete /ledger/policies/{id} (guardian) |
@@ -4538,8 +4575,6 @@ Auto-generated tag for guardian route group
 | `POST` | /ledger/policies/{id}/assignments | `guardian_post_ledger_policies_id_assignments` | [stub] Create/invoke /ledger/policies/{id}/assignments (guardian) |
 | `DELETE` | /ledger/policies/{id}/assignments/{assignmentId} | `guardian_delete_ledger_policies_id_assignments_assignmentId` | [stub] Delete /ledger/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /ledger/policies/{id}/audit | `guardian_get_ledger_policies_id_audit` | [stub] List/get /ledger/policies/{id}/audit (guardian) |
-| `GET` | /ledger/policies/tiers | `guardian_get_ledger_policies_tiers` | [stub] List/get /ledger/policies/tiers (guardian) |
-| `PATCH` | /ledger/policies/tiers/{tier} | `guardian_patch_ledger_policies_tiers_tier` | [stub] Patch /ledger/policies/tiers/{tier} (guardian) |
 | `GET` | /ledger/rollback-events | `guardian_get_ledger_rollback_events` | [stub] List/get /ledger/rollback-events (guardian) |
 | `POST` | /ledger/rollback-events | `guardian_post_ledger_rollback_events` | [stub] Create/invoke /ledger/rollback-events (guardian) |
 | `GET` | /ledger/rollback-events/{id} | `guardian_get_ledger_rollback_events_id` | [stub] List/get /ledger/rollback-events/{id} (guardian) |
@@ -4577,6 +4612,8 @@ Auto-generated tag for guardian route group
 | `GET` | /policies/ledger/stream | `guardian_get_policies_ledger_stream` | [stub] List/get /policies/ledger/stream (guardian) |
 | `GET` | /policies/policies | `guardian_get_policies_policies` | [stub] List/get /policies/policies (guardian) |
 | `POST` | /policies/policies | `guardian_post_policies_policies` | [stub] Create/invoke /policies/policies (guardian) |
+| `GET` | /policies/policies/tiers | `guardian_get_policies_policies_tiers` | [stub] List/get /policies/policies/tiers (guardian) |
+| `PATCH` | /policies/policies/tiers/{tier} | `guardian_patch_policies_policies_tiers_tier` | [stub] Patch /policies/policies/tiers/{tier} (guardian) |
 | `GET` | /policies/policies/{id} | `guardian_get_policies_policies_id` | [stub] List/get /policies/policies/{id} (guardian) |
 | `PATCH` | /policies/policies/{id} | `guardian_patch_policies_policies_id` | [stub] Patch /policies/policies/{id} (guardian) |
 | `DELETE` | /policies/policies/{id} | `guardian_delete_policies_policies_id` | [stub] Delete /policies/policies/{id} (guardian) |
@@ -4584,8 +4621,6 @@ Auto-generated tag for guardian route group
 | `POST` | /policies/policies/{id}/assignments | `guardian_post_policies_policies_id_assignments` | [stub] Create/invoke /policies/policies/{id}/assignments (guardian) |
 | `DELETE` | /policies/policies/{id}/assignments/{assignmentId} | `guardian_delete_policies_policies_id_assignments_assignmentId` | [stub] Delete /policies/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /policies/policies/{id}/audit | `guardian_get_policies_policies_id_audit` | [stub] List/get /policies/policies/{id}/audit (guardian) |
-| `GET` | /policies/policies/tiers | `guardian_get_policies_policies_tiers` | [stub] List/get /policies/policies/tiers (guardian) |
-| `PATCH` | /policies/policies/tiers/{tier} | `guardian_patch_policies_policies_tiers_tier` | [stub] Patch /policies/policies/tiers/{tier} (guardian) |
 | `GET` | /policies/rollback-events | `guardian_get_policies_rollback_events` | [stub] List/get /policies/rollback-events (guardian) |
 | `POST` | /policies/rollback-events | `guardian_post_policies_rollback_events` | [stub] Create/invoke /policies/rollback-events (guardian) |
 | `GET` | /policies/rollback-events/{id} | `guardian_get_policies_rollback_events_id` | [stub] List/get /policies/rollback-events/{id} (guardian) |
@@ -4623,6 +4658,8 @@ Auto-generated tag for guardian route group
 | `GET` | /rollback-events/ledger/stream | `guardian_get_rollback_events_ledger_stream` | [stub] List/get /rollback-events/ledger/stream (guardian) |
 | `GET` | /rollback-events/policies | `guardian_get_rollback_events_policies` | [stub] List/get /rollback-events/policies (guardian) |
 | `POST` | /rollback-events/policies | `guardian_post_rollback_events_policies` | [stub] Create/invoke /rollback-events/policies (guardian) |
+| `GET` | /rollback-events/policies/tiers | `guardian_get_rollback_events_policies_tiers` | [stub] List/get /rollback-events/policies/tiers (guardian) |
+| `PATCH` | /rollback-events/policies/tiers/{tier} | `guardian_patch_rollback_events_policies_tiers_tier` | [stub] Patch /rollback-events/policies/tiers/{tier} (guardian) |
 | `GET` | /rollback-events/policies/{id} | `guardian_get_rollback_events_policies_id` | [stub] List/get /rollback-events/policies/{id} (guardian) |
 | `PATCH` | /rollback-events/policies/{id} | `guardian_patch_rollback_events_policies_id` | [stub] Patch /rollback-events/policies/{id} (guardian) |
 | `DELETE` | /rollback-events/policies/{id} | `guardian_delete_rollback_events_policies_id` | [stub] Delete /rollback-events/policies/{id} (guardian) |
@@ -4630,8 +4667,6 @@ Auto-generated tag for guardian route group
 | `POST` | /rollback-events/policies/{id}/assignments | `guardian_post_rollback_events_policies_id_assignments` | [stub] Create/invoke /rollback-events/policies/{id}/assignments (guardian) |
 | `DELETE` | /rollback-events/policies/{id}/assignments/{assignmentId} | `guardian_delete_rollback_events_policies_id_assignments_assignmentId` | [stub] Delete /rollback-events/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /rollback-events/policies/{id}/audit | `guardian_get_rollback_events_policies_id_audit` | [stub] List/get /rollback-events/policies/{id}/audit (guardian) |
-| `GET` | /rollback-events/policies/tiers | `guardian_get_rollback_events_policies_tiers` | [stub] List/get /rollback-events/policies/tiers (guardian) |
-| `PATCH` | /rollback-events/policies/tiers/{tier} | `guardian_patch_rollback_events_policies_tiers_tier` | [stub] Patch /rollback-events/policies/tiers/{tier} (guardian) |
 | `GET` | /rollback-events/rollback-events | `guardian_get_rollback_events_rollback_events` | [stub] List/get /rollback-events/rollback-events (guardian) |
 | `POST` | /rollback-events/rollback-events | `guardian_post_rollback_events_rollback_events` | [stub] Create/invoke /rollback-events/rollback-events (guardian) |
 | `GET` | /rollback-events/rollback-events/{id} | `guardian_get_rollback_events_rollback_events_id` | [stub] List/get /rollback-events/rollback-events/{id} (guardian) |
@@ -4669,6 +4704,8 @@ Auto-generated tag for guardian route group
 | `GET` | /tool-approvals/ledger/stream | `guardian_get_tool_approvals_ledger_stream` | [stub] List/get /tool-approvals/ledger/stream (guardian) |
 | `GET` | /tool-approvals/policies | `guardian_get_tool_approvals_policies` | [stub] List/get /tool-approvals/policies (guardian) |
 | `POST` | /tool-approvals/policies | `guardian_post_tool_approvals_policies` | [stub] Create/invoke /tool-approvals/policies (guardian) |
+| `GET` | /tool-approvals/policies/tiers | `guardian_get_tool_approvals_policies_tiers` | [stub] List/get /tool-approvals/policies/tiers (guardian) |
+| `PATCH` | /tool-approvals/policies/tiers/{tier} | `guardian_patch_tool_approvals_policies_tiers_tier` | [stub] Patch /tool-approvals/policies/tiers/{tier} (guardian) |
 | `GET` | /tool-approvals/policies/{id} | `guardian_get_tool_approvals_policies_id` | [stub] List/get /tool-approvals/policies/{id} (guardian) |
 | `PATCH` | /tool-approvals/policies/{id} | `guardian_patch_tool_approvals_policies_id` | [stub] Patch /tool-approvals/policies/{id} (guardian) |
 | `DELETE` | /tool-approvals/policies/{id} | `guardian_delete_tool_approvals_policies_id` | [stub] Delete /tool-approvals/policies/{id} (guardian) |
@@ -4676,8 +4713,6 @@ Auto-generated tag for guardian route group
 | `POST` | /tool-approvals/policies/{id}/assignments | `guardian_post_tool_approvals_policies_id_assignments` | [stub] Create/invoke /tool-approvals/policies/{id}/assignments (guardian) |
 | `DELETE` | /tool-approvals/policies/{id}/assignments/{assignmentId} | `guardian_delete_tool_approvals_policies_id_assignments_assignmentId` | [stub] Delete /tool-approvals/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /tool-approvals/policies/{id}/audit | `guardian_get_tool_approvals_policies_id_audit` | [stub] List/get /tool-approvals/policies/{id}/audit (guardian) |
-| `GET` | /tool-approvals/policies/tiers | `guardian_get_tool_approvals_policies_tiers` | [stub] List/get /tool-approvals/policies/tiers (guardian) |
-| `PATCH` | /tool-approvals/policies/tiers/{tier} | `guardian_patch_tool_approvals_policies_tiers_tier` | [stub] Patch /tool-approvals/policies/tiers/{tier} (guardian) |
 | `GET` | /tool-approvals/rollback-events | `guardian_get_tool_approvals_rollback_events` | [stub] List/get /tool-approvals/rollback-events (guardian) |
 | `POST` | /tool-approvals/rollback-events | `guardian_post_tool_approvals_rollback_events` | [stub] Create/invoke /tool-approvals/rollback-events (guardian) |
 | `GET` | /tool-approvals/rollback-events/{id} | `guardian_get_tool_approvals_rollback_events_id` | [stub] List/get /tool-approvals/rollback-events/{id} (guardian) |
@@ -4715,6 +4750,8 @@ Auto-generated tag for guardian route group
 | `GET` | /tools/ledger/stream | `guardian_get_tools_ledger_stream` | [stub] List/get /tools/ledger/stream (guardian) |
 | `GET` | /tools/policies | `guardian_get_tools_policies` | [stub] List/get /tools/policies (guardian) |
 | `POST` | /tools/policies | `guardian_post_tools_policies` | [stub] Create/invoke /tools/policies (guardian) |
+| `GET` | /tools/policies/tiers | `guardian_get_tools_policies_tiers` | [stub] List/get /tools/policies/tiers (guardian) |
+| `PATCH` | /tools/policies/tiers/{tier} | `guardian_patch_tools_policies_tiers_tier` | [stub] Patch /tools/policies/tiers/{tier} (guardian) |
 | `GET` | /tools/policies/{id} | `guardian_get_tools_policies_id` | [stub] List/get /tools/policies/{id} (guardian) |
 | `PATCH` | /tools/policies/{id} | `guardian_patch_tools_policies_id` | [stub] Patch /tools/policies/{id} (guardian) |
 | `DELETE` | /tools/policies/{id} | `guardian_delete_tools_policies_id` | [stub] Delete /tools/policies/{id} (guardian) |
@@ -4722,8 +4759,6 @@ Auto-generated tag for guardian route group
 | `POST` | /tools/policies/{id}/assignments | `guardian_post_tools_policies_id_assignments` | [stub] Create/invoke /tools/policies/{id}/assignments (guardian) |
 | `DELETE` | /tools/policies/{id}/assignments/{assignmentId} | `guardian_delete_tools_policies_id_assignments_assignmentId` | [stub] Delete /tools/policies/{id}/assignments/{assignmentId} (guardian) |
 | `GET` | /tools/policies/{id}/audit | `guardian_get_tools_policies_id_audit` | [stub] List/get /tools/policies/{id}/audit (guardian) |
-| `GET` | /tools/policies/tiers | `guardian_get_tools_policies_tiers` | [stub] List/get /tools/policies/tiers (guardian) |
-| `PATCH` | /tools/policies/tiers/{tier} | `guardian_patch_tools_policies_tiers_tier` | [stub] Patch /tools/policies/tiers/{tier} (guardian) |
 | `GET` | /tools/rollback-events | `guardian_get_tools_rollback_events` | [stub] List/get /tools/rollback-events (guardian) |
 | `POST` | /tools/rollback-events | `guardian_post_tools_rollback_events` | [stub] Create/invoke /tools/rollback-events (guardian) |
 | `GET` | /tools/rollback-events/{id} | `guardian_get_tools_rollback_events_id` | [stub] List/get /tools/rollback-events/{id} (guardian) |
@@ -4761,9 +4796,9 @@ Auto-generated tag for health-integrations route group
 | `GET` | /health/integrations/cisa/kev/ransomware | `health_integrations_get_health_integrations_cisa_kev_ransomware` | [stub] List/get /health/integrations/cisa/kev/ransomware (health-integrations) |
 | `GET` | /health/integrations/cisa/kev/search | `health_integrations_get_health_integrations_cisa_kev_search` | [stub] List/get /health/integrations/cisa/kev/search (health-integrations) |
 | `GET` | /health/integrations/health | `health_integrations_get_health_integrations_health` | [stub] List/get /health/integrations/health (health-integrations) |
-| `GET` | /health/integrations/health/{name} | `health_integrations_get_health_integrations_health_name` | [stub] List/get /health/integrations/health/{name} (health-integrations) |
 | `GET` | /health/integrations/health/live | `health_integrations_get_health_integrations_health_live` | [stub] List/get /health/integrations/health/live (health-integrations) |
 | `GET` | /health/integrations/health/test | `health_integrations_get_health_integrations_health_test` | [stub] List/get /health/integrations/health/test (health-integrations) |
+| `GET` | /health/integrations/health/{name} | `health_integrations_get_health_integrations_health_name` | [stub] List/get /health/integrations/health/{name} (health-integrations) |
 | `GET` | /health/integrations/misp-taxii/collections | `health_integrations_get_health_integrations_misp_taxii_collections` | [stub] List/get /health/integrations/misp-taxii/collections (health-integrations) |
 | `GET` | /health/integrations/misp-taxii/indicators | `health_integrations_get_health_integrations_misp_taxii_indicators` | [stub] List/get /health/integrations/misp-taxii/indicators (health-integrations) |
 | `GET` | /health/integrations/new-relic/alerts | `health_integrations_get_health_integrations_new_relic_alerts` | [stub] List/get /health/integrations/new-relic/alerts (health-integrations) |
@@ -4784,9 +4819,9 @@ Auto-generated tag for health-integrations route group
 | `GET` | /integrations/integrations/cisa/kev/ransomware | `health_integrations_get_integrations_integrations_cisa_kev_ransomware` | [stub] List/get /integrations/integrations/cisa/kev/ransomware (health-integrations) |
 | `GET` | /integrations/integrations/cisa/kev/search | `health_integrations_get_integrations_integrations_cisa_kev_search` | [stub] List/get /integrations/integrations/cisa/kev/search (health-integrations) |
 | `GET` | /integrations/integrations/health | `health_integrations_get_integrations_integrations_health` | [stub] List/get /integrations/integrations/health (health-integrations) |
-| `GET` | /integrations/integrations/health/{name} | `health_integrations_get_integrations_integrations_health_name` | [stub] List/get /integrations/integrations/health/{name} (health-integrations) |
 | `GET` | /integrations/integrations/health/live | `health_integrations_get_integrations_integrations_health_live` | [stub] List/get /integrations/integrations/health/live (health-integrations) |
 | `GET` | /integrations/integrations/health/test | `health_integrations_get_integrations_integrations_health_test` | [stub] List/get /integrations/integrations/health/test (health-integrations) |
+| `GET` | /integrations/integrations/health/{name} | `health_integrations_get_integrations_integrations_health_name` | [stub] List/get /integrations/integrations/health/{name} (health-integrations) |
 | `GET` | /integrations/integrations/misp-taxii/collections | `health_integrations_get_integrations_integrations_misp_taxii_collections` | [stub] List/get /integrations/integrations/misp-taxii/collections (health-integrations) |
 | `GET` | /integrations/integrations/misp-taxii/indicators | `health_integrations_get_integrations_integrations_misp_taxii_indicators` | [stub] List/get /integrations/integrations/misp-taxii/indicators (health-integrations) |
 | `GET` | /integrations/integrations/new-relic/alerts | `health_integrations_get_integrations_integrations_new_relic_alerts` | [stub] List/get /integrations/integrations/new-relic/alerts (health-integrations) |
@@ -4944,11 +4979,11 @@ Auto-generated tag for invitations route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /orgs/orgs/accept-invite | `invitations_get_orgs_orgs_accept_invite` | [stub] List/get /orgs/orgs/accept-invite (invitations) |
+| `POST` | /orgs/orgs/accept-invite | `invitations_post_orgs_orgs_accept_invite` | [stub] Create/invoke /orgs/orgs/accept-invite (invitations) |
 | `GET` | /orgs/orgs/{orgSlug}/invitations | `invitations_get_orgs_orgs_orgSlug_invitations` | [stub] List/get /orgs/orgs/{orgSlug}/invitations (invitations) |
 | `DELETE` | /orgs/orgs/{orgSlug}/invitations/{invitationId} | `invitations_delete_orgs_orgs_orgSlug_invitations_invitationId` | [stub] Delete /orgs/orgs/{orgSlug}/invitations/{invitationId} (invitations) |
 | `POST` | /orgs/orgs/{orgSlug}/invite | `invitations_post_orgs_orgs_orgSlug_invite` | [stub] Create/invoke /orgs/orgs/{orgSlug}/invite (invitations) |
-| `GET` | /orgs/orgs/accept-invite | `invitations_get_orgs_orgs_accept_invite` | [stub] List/get /orgs/orgs/accept-invite (invitations) |
-| `POST` | /orgs/orgs/accept-invite | `invitations_post_orgs_orgs_accept_invite` | [stub] Create/invoke /orgs/orgs/accept-invite (invitations) |
 
 <a id="jobs"></a>
 
@@ -4958,13 +4993,13 @@ Auto-generated tag for jobs route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `POST` | /jobs/jobs/durable/{jobId}/cancel | `jobs_post_jobs_jobs_durable_jobId_cancel` | [stub] Create/invoke /jobs/jobs/durable/{jobId}/cancel (jobs) |
 | `GET` | /jobs/jobs/durable/dashboard | `jobs_get_jobs_jobs_durable_dashboard` | [stub] List/get /jobs/jobs/durable/dashboard (jobs) |
 | `GET` | /jobs/jobs/durable/dead-letter | `jobs_get_jobs_jobs_durable_dead_letter` | [stub] List/get /jobs/jobs/durable/dead-letter (jobs) |
 | `POST` | /jobs/jobs/durable/dead-letter/{jobId}/replay | `jobs_post_jobs_jobs_durable_dead_letter_jobId_replay` | [stub] Create/invoke /jobs/jobs/durable/dead-letter/{jobId}/replay (jobs) |
 | `POST` | /jobs/jobs/durable/enqueue | `jobs_post_jobs_jobs_durable_enqueue` | [stub] Create/invoke /jobs/jobs/durable/enqueue (jobs) |
 | `GET` | /jobs/jobs/durable/recent | `jobs_get_jobs_jobs_durable_recent` | [stub] List/get /jobs/jobs/durable/recent (jobs) |
 | `GET` | /jobs/jobs/durable/stats | `jobs_get_jobs_jobs_durable_stats` | [stub] List/get /jobs/jobs/durable/stats (jobs) |
+| `POST` | /jobs/jobs/durable/{jobId}/cancel | `jobs_post_jobs_jobs_durable_jobId_cancel` | [stub] Create/invoke /jobs/jobs/durable/{jobId}/cancel (jobs) |
 | `POST` | /jobs/jobs/enqueue | `jobs_post_jobs_jobs_enqueue` | [stub] Create/invoke /jobs/jobs/enqueue (jobs) |
 | `GET` | /jobs/jobs/recent | `jobs_get_jobs_jobs_recent` | [stub] List/get /jobs/jobs/recent (jobs) |
 | `GET` | /jobs/jobs/registry | `jobs_get_jobs_jobs_registry` | [stub] List/get /jobs/jobs/registry (jobs) |
@@ -5111,8 +5146,8 @@ Auto-generated tag for lyte-extended route group
 | `GET` | /core/insights/narratives | `lyte_extended_get_core_insights_narratives` | [stub] List/get /core/insights/narratives (lyte-extended) |
 | `GET` | /core/readiness | `lyte_extended_get_core_readiness` | [stub] List/get /core/readiness (lyte-extended) |
 | `POST` | /core/readiness | `lyte_extended_post_core_readiness` | [stub] Create/invoke /core/readiness (lyte-extended) |
-| `PATCH` | /core/readiness/{id} | `lyte_extended_patch_core_readiness_id` | [stub] Patch /core/readiness/{id} (lyte-extended) |
 | `GET` | /core/readiness/score | `lyte_extended_get_core_readiness_score` | [stub] List/get /core/readiness/score (lyte-extended) |
+| `PATCH` | /core/readiness/{id} | `lyte_extended_patch_core_readiness_id` | [stub] Patch /core/readiness/{id} (lyte-extended) |
 | `GET` | /core/saved-views | `lyte_extended_get_core_saved_views` | [stub] List/get /core/saved-views (lyte-extended) |
 | `POST` | /core/saved-views | `lyte_extended_post_core_saved_views` | [stub] Create/invoke /core/saved-views (lyte-extended) |
 | `PATCH` | /core/saved-views/{id} | `lyte_extended_patch_core_saved_views_id` | [stub] Patch /core/saved-views/{id} (lyte-extended) |
@@ -5169,10 +5204,10 @@ Auto-generated tag for lyte-observability route group
 | `DELETE` | /lyte/lyte/alerts/{id} | `lyte_observability_delete_lyte_lyte_alerts_id` | [stub] Delete /lyte/lyte/alerts/{id} (lyte-observability) |
 | `GET` | /lyte/lyte/dashboards | `lyte_observability_get_lyte_lyte_dashboards` | [stub] List/get /lyte/lyte/dashboards (lyte-observability) |
 | `POST` | /lyte/lyte/dashboards | `lyte_observability_post_lyte_lyte_dashboards` | [stub] Create/invoke /lyte/lyte/dashboards (lyte-observability) |
+| `GET` | /lyte/lyte/dashboards/shared/{token} | `lyte_observability_get_lyte_lyte_dashboards_shared_token` | [stub] List/get /lyte/lyte/dashboards/shared/{token} (lyte-observability) |
 | `GET` | /lyte/lyte/dashboards/{id} | `lyte_observability_get_lyte_lyte_dashboards_id` | [stub] List/get /lyte/lyte/dashboards/{id} (lyte-observability) |
 | `PUT` | /lyte/lyte/dashboards/{id} | `lyte_observability_put_lyte_lyte_dashboards_id` | [stub] Update /lyte/lyte/dashboards/{id} (lyte-observability) |
 | `DELETE` | /lyte/lyte/dashboards/{id} | `lyte_observability_delete_lyte_lyte_dashboards_id` | [stub] Delete /lyte/lyte/dashboards/{id} (lyte-observability) |
-| `GET` | /lyte/lyte/dashboards/shared/{token} | `lyte_observability_get_lyte_lyte_dashboards_shared_token` | [stub] List/get /lyte/lyte/dashboards/shared/{token} (lyte-observability) |
 | `GET` | /lyte/lyte/escalations | `lyte_observability_get_lyte_lyte_escalations` | [stub] List/get /lyte/lyte/escalations (lyte-observability) |
 | `POST` | /lyte/lyte/escalations | `lyte_observability_post_lyte_lyte_escalations` | [stub] Create/invoke /lyte/lyte/escalations (lyte-observability) |
 | `PATCH` | /lyte/lyte/escalations/{id} | `lyte_observability_patch_lyte_lyte_escalations_id` | [stub] Patch /lyte/lyte/escalations/{id} (lyte-observability) |
@@ -5251,11 +5286,6 @@ Auto-generated tag for memory route group
 |--------|------|-------------|---------|
 | `GET` | /memory/memory | `memory_get_memory_memory` | [stub] List/get /memory/memory (memory) |
 | `POST` | /memory/memory | `memory_post_memory_memory` | [stub] Create/invoke /memory/memory (memory) |
-| `GET` | /memory/memory/{id} | `memory_get_memory_memory_id` | [stub] List/get /memory/memory/{id} (memory) |
-| `PUT` | /memory/memory/{id} | `memory_put_memory_memory_id` | [stub] Update /memory/memory/{id} (memory) |
-| `DELETE` | /memory/memory/{id} | `memory_delete_memory_memory_id` | [stub] Delete /memory/memory/{id} (memory) |
-| `POST` | /memory/memory/{id}/pin | `memory_post_memory_memory_id_pin` | [stub] Create/invoke /memory/memory/{id}/pin (memory) |
-| `DELETE` | /memory/memory/{id}/pin | `memory_delete_memory_memory_id_pin` | [stub] Delete /memory/memory/{id}/pin (memory) |
 | `POST` | /memory/memory/behaviors/decay-freshness | `memory_post_memory_memory_behaviors_decay_freshness` | [stub] Create/invoke /memory/memory/behaviors/decay-freshness (memory) |
 | `POST` | /memory/memory/behaviors/distill-lessons | `memory_post_memory_memory_behaviors_distill_lessons` | [stub] Create/invoke /memory/memory/behaviors/distill-lessons (memory) |
 | `POST` | /memory/memory/behaviors/enforce-retention | `memory_post_memory_memory_behaviors_enforce_retention` | [stub] Create/invoke /memory/memory/behaviors/enforce-retention (memory) |
@@ -5264,6 +5294,11 @@ Auto-generated tag for memory route group
 | `GET` | /memory/memory/search | `memory_get_memory_memory_search` | [stub] List/get /memory/memory/search (memory) |
 | `GET` | /memory/memory/stats/summary | `memory_get_memory_memory_stats_summary` | [stub] List/get /memory/memory/stats/summary (memory) |
 | `GET` | /memory/memory/tiers/overview | `memory_get_memory_memory_tiers_overview` | [stub] List/get /memory/memory/tiers/overview (memory) |
+| `GET` | /memory/memory/{id} | `memory_get_memory_memory_id` | [stub] List/get /memory/memory/{id} (memory) |
+| `PUT` | /memory/memory/{id} | `memory_put_memory_memory_id` | [stub] Update /memory/memory/{id} (memory) |
+| `DELETE` | /memory/memory/{id} | `memory_delete_memory_memory_id` | [stub] Delete /memory/memory/{id} (memory) |
+| `POST` | /memory/memory/{id}/pin | `memory_post_memory_memory_id_pin` | [stub] Create/invoke /memory/memory/{id}/pin (memory) |
+| `DELETE` | /memory/memory/{id}/pin | `memory_delete_memory_memory_id_pin` | [stub] Delete /memory/memory/{id}/pin (memory) |
 
 <a id="microsoft-graph"></a>
 
@@ -5310,17 +5345,17 @@ Auto-generated tag for ml-pipeline route group
 |--------|------|-------------|---------|
 | `GET` | /ml/ml/ab-tests | `ml_pipeline_get_ml_ml_ab_tests` | [stub] List/get /ml/ml/ab-tests (ml-pipeline) |
 | `POST` | /ml/ml/ab-tests | `ml_pipeline_post_ml_ml_ab_tests` | [stub] Create/invoke /ml/ml/ab-tests (ml-pipeline) |
+| `GET` | /ml/ml/ab-tests/summary | `ml_pipeline_get_ml_ml_ab_tests_summary` | [stub] List/get /ml/ml/ab-tests/summary (ml-pipeline) |
 | `POST` | /ml/ml/ab-tests/{testId}/assign | `ml_pipeline_post_ml_ml_ab_tests_testId_assign` | [stub] Create/invoke /ml/ml/ab-tests/{testId}/assign (ml-pipeline) |
 | `POST` | /ml/ml/ab-tests/{testId}/conclude | `ml_pipeline_post_ml_ml_ab_tests_testId_conclude` | [stub] Create/invoke /ml/ml/ab-tests/{testId}/conclude (ml-pipeline) |
 | `GET` | /ml/ml/ab-tests/{testId}/evaluate | `ml_pipeline_get_ml_ml_ab_tests_testId_evaluate` | [stub] List/get /ml/ml/ab-tests/{testId}/evaluate (ml-pipeline) |
 | `POST` | /ml/ml/ab-tests/{testId}/outcome | `ml_pipeline_post_ml_ml_ab_tests_testId_outcome` | [stub] Create/invoke /ml/ml/ab-tests/{testId}/outcome (ml-pipeline) |
-| `GET` | /ml/ml/ab-tests/summary | `ml_pipeline_get_ml_ml_ab_tests_summary` | [stub] List/get /ml/ml/ab-tests/summary (ml-pipeline) |
 | `GET` | /ml/ml/datasets | `ml_pipeline_get_ml_ml_datasets` | [stub] List/get /ml/ml/datasets (ml-pipeline) |
 | `POST` | /ml/ml/datasets | `ml_pipeline_post_ml_ml_datasets` | [stub] Create/invoke /ml/ml/datasets (ml-pipeline) |
-| `GET` | /ml/ml/datasets/{datasetId} | `ml_pipeline_get_ml_ml_datasets_datasetId` | [stub] List/get /ml/ml/datasets/{datasetId} (ml-pipeline) |
-| `POST` | /ml/ml/datasets/{datasetId}/refresh | `ml_pipeline_post_ml_ml_datasets_datasetId_refresh` | [stub] Create/invoke /ml/ml/datasets/{datasetId}/refresh (ml-pipeline) |
 | `POST` | /ml/ml/datasets/bootstrap | `ml_pipeline_post_ml_ml_datasets_bootstrap` | [stub] Create/invoke /ml/ml/datasets/bootstrap (ml-pipeline) |
 | `GET` | /ml/ml/datasets/summary | `ml_pipeline_get_ml_ml_datasets_summary` | [stub] List/get /ml/ml/datasets/summary (ml-pipeline) |
+| `GET` | /ml/ml/datasets/{datasetId} | `ml_pipeline_get_ml_ml_datasets_datasetId` | [stub] List/get /ml/ml/datasets/{datasetId} (ml-pipeline) |
+| `POST` | /ml/ml/datasets/{datasetId}/refresh | `ml_pipeline_post_ml_ml_datasets_datasetId_refresh` | [stub] Create/invoke /ml/ml/datasets/{datasetId}/refresh (ml-pipeline) |
 | `POST` | /ml/ml/explain | `ml_pipeline_post_ml_ml_explain` | [stub] Create/invoke /ml/ml/explain (ml-pipeline) |
 | `POST` | /ml/ml/explain/shap | `ml_pipeline_post_ml_ml_explain_shap` | [stub] Create/invoke /ml/ml/explain/shap (ml-pipeline) |
 | `GET` | /ml/ml/features | `ml_pipeline_get_ml_ml_features` | [stub] List/get /ml/ml/features (ml-pipeline) |
@@ -5653,9 +5688,9 @@ Auto-generated tag for ops-management route group
 | `POST` | /ops/ops/alert-events/{id}/acknowledge | `ops_management_post_ops_ops_alert_events_id_acknowledge` | [stub] Create/invoke /ops/ops/alert-events/{id}/acknowledge (ops-management) |
 | `GET` | /ops/ops/alert-rules | `ops_management_get_ops_ops_alert_rules` | [stub] List/get /ops/ops/alert-rules (ops-management) |
 | `POST` | /ops/ops/alert-rules | `ops_management_post_ops_ops_alert_rules` | [stub] Create/invoke /ops/ops/alert-rules (ops-management) |
+| `POST` | /ops/ops/alert-rules/evaluate | `ops_management_post_ops_ops_alert_rules_evaluate` | [stub] Create/invoke /ops/ops/alert-rules/evaluate (ops-management) |
 | `PATCH` | /ops/ops/alert-rules/{id} | `ops_management_patch_ops_ops_alert_rules_id` | [stub] Patch /ops/ops/alert-rules/{id} (ops-management) |
 | `DELETE` | /ops/ops/alert-rules/{id} | `ops_management_delete_ops_ops_alert_rules_id` | [stub] Delete /ops/ops/alert-rules/{id} (ops-management) |
-| `POST` | /ops/ops/alert-rules/evaluate | `ops_management_post_ops_ops_alert_rules_evaluate` | [stub] Create/invoke /ops/ops/alert-rules/evaluate (ops-management) |
 | `GET` | /ops/ops/incidents | `ops_management_get_ops_ops_incidents` | [stub] List/get /ops/ops/incidents (ops-management) |
 | `POST` | /ops/ops/incidents | `ops_management_post_ops_ops_incidents` | [stub] Create/invoke /ops/ops/incidents (ops-management) |
 | `GET` | /ops/ops/incidents/{id} | `ops_management_get_ops_ops_incidents_id` | [stub] List/get /ops/ops/incidents/{id} (ops-management) |
@@ -5817,8 +5852,8 @@ Auto-generated tag for partner-portal route group
 | `GET` | /org-branding/partner/accounts/{id} | `partner_portal_get_org_branding_partner_accounts_id` | [stub] List/get /org-branding/partner/accounts/{id} (partner-portal) |
 | `PATCH` | /org-branding/partner/accounts/{id} | `partner_portal_patch_org_branding_partner_accounts_id` | [stub] Patch /org-branding/partner/accounts/{id} (partner-portal) |
 | `POST` | /org-branding/partner/accounts/{id}/tenants | `partner_portal_post_org_branding_partner_accounts_id_tenants` | [stub] Create/invoke /org-branding/partner/accounts/{id}/tenants (partner-portal) |
-| `DELETE` | /org-branding/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_org_branding_partner_accounts_id_tenants_orgId` | [stub] Delete /org-branding/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `POST` | /org-branding/partner/accounts/{id}/tenants/assign | `partner_portal_post_org_branding_partner_accounts_id_tenants_assign` | [stub] Create/invoke /org-branding/partner/accounts/{id}/tenants/assign (partner-portal) |
+| `DELETE` | /org-branding/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_org_branding_partner_accounts_id_tenants_orgId` | [stub] Delete /org-branding/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `GET` | /org-branding/partner/accounts/{id}/usage | `partner_portal_get_org_branding_partner_accounts_id_usage` | [stub] List/get /org-branding/partner/accounts/{id}/usage (partner-portal) |
 | `GET` | /org-branding/partner/me | `partner_portal_get_org_branding_partner_me` | [stub] List/get /org-branding/partner/me (partner-portal) |
 | `GET` | /org-branding/resolve-domain | `partner_portal_get_org_branding_resolve_domain` | [stub] List/get /org-branding/resolve-domain (partner-portal) |
@@ -5837,8 +5872,8 @@ Auto-generated tag for partner-portal route group
 | `GET` | /orgs/partner/accounts/{id} | `partner_portal_get_orgs_partner_accounts_id` | [stub] List/get /orgs/partner/accounts/{id} (partner-portal) |
 | `PATCH` | /orgs/partner/accounts/{id} | `partner_portal_patch_orgs_partner_accounts_id` | [stub] Patch /orgs/partner/accounts/{id} (partner-portal) |
 | `POST` | /orgs/partner/accounts/{id}/tenants | `partner_portal_post_orgs_partner_accounts_id_tenants` | [stub] Create/invoke /orgs/partner/accounts/{id}/tenants (partner-portal) |
-| `DELETE` | /orgs/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_orgs_partner_accounts_id_tenants_orgId` | [stub] Delete /orgs/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `POST` | /orgs/partner/accounts/{id}/tenants/assign | `partner_portal_post_orgs_partner_accounts_id_tenants_assign` | [stub] Create/invoke /orgs/partner/accounts/{id}/tenants/assign (partner-portal) |
+| `DELETE` | /orgs/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_orgs_partner_accounts_id_tenants_orgId` | [stub] Delete /orgs/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `GET` | /orgs/partner/accounts/{id}/usage | `partner_portal_get_orgs_partner_accounts_id_usage` | [stub] List/get /orgs/partner/accounts/{id}/usage (partner-portal) |
 | `GET` | /orgs/partner/me | `partner_portal_get_orgs_partner_me` | [stub] List/get /orgs/partner/me (partner-portal) |
 | `GET` | /orgs/resolve-domain | `partner_portal_get_orgs_resolve_domain` | [stub] List/get /orgs/resolve-domain (partner-portal) |
@@ -5857,8 +5892,8 @@ Auto-generated tag for partner-portal route group
 | `GET` | /partner/partner/accounts/{id} | `partner_portal_get_partner_partner_accounts_id` | [stub] List/get /partner/partner/accounts/{id} (partner-portal) |
 | `PATCH` | /partner/partner/accounts/{id} | `partner_portal_patch_partner_partner_accounts_id` | [stub] Patch /partner/partner/accounts/{id} (partner-portal) |
 | `POST` | /partner/partner/accounts/{id}/tenants | `partner_portal_post_partner_partner_accounts_id_tenants` | [stub] Create/invoke /partner/partner/accounts/{id}/tenants (partner-portal) |
-| `DELETE` | /partner/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_partner_partner_accounts_id_tenants_orgId` | [stub] Delete /partner/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `POST` | /partner/partner/accounts/{id}/tenants/assign | `partner_portal_post_partner_partner_accounts_id_tenants_assign` | [stub] Create/invoke /partner/partner/accounts/{id}/tenants/assign (partner-portal) |
+| `DELETE` | /partner/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_partner_partner_accounts_id_tenants_orgId` | [stub] Delete /partner/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `GET` | /partner/partner/accounts/{id}/usage | `partner_portal_get_partner_partner_accounts_id_usage` | [stub] List/get /partner/partner/accounts/{id}/usage (partner-portal) |
 | `GET` | /partner/partner/me | `partner_portal_get_partner_partner_me` | [stub] List/get /partner/partner/me (partner-portal) |
 | `GET` | /partner/resolve-domain | `partner_portal_get_partner_resolve_domain` | [stub] List/get /partner/resolve-domain (partner-portal) |
@@ -5877,8 +5912,8 @@ Auto-generated tag for partner-portal route group
 | `GET` | /resolve-domain/partner/accounts/{id} | `partner_portal_get_resolve_domain_partner_accounts_id` | [stub] List/get /resolve-domain/partner/accounts/{id} (partner-portal) |
 | `PATCH` | /resolve-domain/partner/accounts/{id} | `partner_portal_patch_resolve_domain_partner_accounts_id` | [stub] Patch /resolve-domain/partner/accounts/{id} (partner-portal) |
 | `POST` | /resolve-domain/partner/accounts/{id}/tenants | `partner_portal_post_resolve_domain_partner_accounts_id_tenants` | [stub] Create/invoke /resolve-domain/partner/accounts/{id}/tenants (partner-portal) |
-| `DELETE` | /resolve-domain/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_resolve_domain_partner_accounts_id_tenants_orgId` | [stub] Delete /resolve-domain/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `POST` | /resolve-domain/partner/accounts/{id}/tenants/assign | `partner_portal_post_resolve_domain_partner_accounts_id_tenants_assign` | [stub] Create/invoke /resolve-domain/partner/accounts/{id}/tenants/assign (partner-portal) |
+| `DELETE` | /resolve-domain/partner/accounts/{id}/tenants/{orgId} | `partner_portal_delete_resolve_domain_partner_accounts_id_tenants_orgId` | [stub] Delete /resolve-domain/partner/accounts/{id}/tenants/{orgId} (partner-portal) |
 | `GET` | /resolve-domain/partner/accounts/{id}/usage | `partner_portal_get_resolve_domain_partner_accounts_id_usage` | [stub] List/get /resolve-domain/partner/accounts/{id}/usage (partner-portal) |
 | `GET` | /resolve-domain/partner/me | `partner_portal_get_resolve_domain_partner_me` | [stub] List/get /resolve-domain/partner/me (partner-portal) |
 | `GET` | /resolve-domain/resolve-domain | `partner_portal_get_resolve_domain_resolve_domain` | [stub] List/get /resolve-domain/resolve-domain (partner-portal) |
@@ -5891,11 +5926,6 @@ Auto-generated tag for pdf route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /pdf/documents/{id} | `pdf_get_pdf_documents_id` | [stub] List/get /pdf/documents/{id} (pdf) |
-| `POST` | /pdf/documents/{id}/docusign/embed/{sigId} | `pdf_post_pdf_documents_id_docusign_embed_sigId` | [stub] Create/invoke /pdf/documents/{id}/docusign/embed/{sigId} (pdf) |
-| `POST` | /pdf/documents/{id}/docusign/send | `pdf_post_pdf_documents_id_docusign_send` | [stub] Create/invoke /pdf/documents/{id}/docusign/send (pdf) |
-| `GET` | /pdf/documents/{id}/pdf | `pdf_get_pdf_documents_id_pdf` | [stub] List/get /pdf/documents/{id}/pdf (pdf) |
-| `GET` | /pdf/documents/{id}/versions/{versionA}/diff/{versionB} | `pdf_get_pdf_documents_id_versions_versionA_diff_versionB` | [stub] List/get /pdf/documents/{id}/versions/{versionA}/diff/{versionB} (pdf) |
 | `GET` | /pdf/documents/batch-pdf | `pdf_get_pdf_documents_batch_pdf` | [stub] List/get /pdf/documents/batch-pdf (pdf) |
 | `POST` | /pdf/documents/batch-pdf | `pdf_post_pdf_documents_batch_pdf` | [stub] Create/invoke /pdf/documents/batch-pdf (pdf) |
 | `GET` | /pdf/documents/batch-pdf/{batchId} | `pdf_get_pdf_documents_batch_pdf_batchId` | [stub] List/get /pdf/documents/batch-pdf/{batchId} (pdf) |
@@ -5905,6 +5935,11 @@ Auto-generated tag for pdf route group
 | `POST` | /pdf/documents/pdf-jobs/{jobId}/retry | `pdf_post_pdf_documents_pdf_jobs_jobId_retry` | [stub] Create/invoke /pdf/documents/pdf-jobs/{jobId}/retry (pdf) |
 | `GET` | /pdf/documents/pdf-output/{filename} | `pdf_get_pdf_documents_pdf_output_filename` | [stub] List/get /pdf/documents/pdf-output/{filename} (pdf) |
 | `GET` | /pdf/documents/signing-dashboard | `pdf_get_pdf_documents_signing_dashboard` | [stub] List/get /pdf/documents/signing-dashboard (pdf) |
+| `GET` | /pdf/documents/{id} | `pdf_get_pdf_documents_id` | [stub] List/get /pdf/documents/{id} (pdf) |
+| `POST` | /pdf/documents/{id}/docusign/embed/{sigId} | `pdf_post_pdf_documents_id_docusign_embed_sigId` | [stub] Create/invoke /pdf/documents/{id}/docusign/embed/{sigId} (pdf) |
+| `POST` | /pdf/documents/{id}/docusign/send | `pdf_post_pdf_documents_id_docusign_send` | [stub] Create/invoke /pdf/documents/{id}/docusign/send (pdf) |
+| `GET` | /pdf/documents/{id}/pdf | `pdf_get_pdf_documents_id_pdf` | [stub] List/get /pdf/documents/{id}/pdf (pdf) |
+| `GET` | /pdf/documents/{id}/versions/{versionA}/diff/{versionB} | `pdf_get_pdf_documents_id_versions_versionA_diff_versionB` | [stub] List/get /pdf/documents/{id}/versions/{versionA}/diff/{versionB} (pdf) |
 
 <a id="pipeline-deals"></a>
 
@@ -5991,12 +6026,12 @@ Auto-generated tag for playbooks route group
 |--------|------|-------------|---------|
 | `GET` | /playbooks/rmm/playbooks | `playbooks_get_playbooks_rmm_playbooks` | [stub] List/get /playbooks/rmm/playbooks (playbooks) |
 | `POST` | /playbooks/rmm/playbooks | `playbooks_post_playbooks_rmm_playbooks` | [stub] Create/invoke /playbooks/rmm/playbooks (playbooks) |
-| `PATCH` | /playbooks/rmm/playbooks/{id} | `playbooks_patch_playbooks_rmm_playbooks_id` | [stub] Patch /playbooks/rmm/playbooks/{id} (playbooks) |
-| `DELETE` | /playbooks/rmm/playbooks/{id} | `playbooks_delete_playbooks_rmm_playbooks_id` | [stub] Delete /playbooks/rmm/playbooks/{id} (playbooks) |
-| `POST` | /playbooks/rmm/playbooks/{id}/execute | `playbooks_post_playbooks_rmm_playbooks_id_execute` | [stub] Create/invoke /playbooks/rmm/playbooks/{id}/execute (playbooks) |
 | `GET` | /playbooks/rmm/playbooks/executions | `playbooks_get_playbooks_rmm_playbooks_executions` | [stub] List/get /playbooks/rmm/playbooks/executions (playbooks) |
 | `POST` | /playbooks/rmm/playbooks/executions/{id}/approve | `playbooks_post_playbooks_rmm_playbooks_executions_id_approve` | [stub] Create/invoke /playbooks/rmm/playbooks/executions/{id}/approve (playbooks) |
 | `POST` | /playbooks/rmm/playbooks/executions/{id}/reject | `playbooks_post_playbooks_rmm_playbooks_executions_id_reject` | [stub] Create/invoke /playbooks/rmm/playbooks/executions/{id}/reject (playbooks) |
+| `PATCH` | /playbooks/rmm/playbooks/{id} | `playbooks_patch_playbooks_rmm_playbooks_id` | [stub] Patch /playbooks/rmm/playbooks/{id} (playbooks) |
+| `DELETE` | /playbooks/rmm/playbooks/{id} | `playbooks_delete_playbooks_rmm_playbooks_id` | [stub] Delete /playbooks/rmm/playbooks/{id} (playbooks) |
+| `POST` | /playbooks/rmm/playbooks/{id}/execute | `playbooks_post_playbooks_rmm_playbooks_id_execute` | [stub] Create/invoke /playbooks/rmm/playbooks/{id}/execute (playbooks) |
 
 <a id="policy-modes"></a>
 
@@ -6008,12 +6043,12 @@ Auto-generated tag for policy-modes route group
 |--------|------|-------------|---------|
 | `GET` | /policy-modes/policy-modes | `policy_modes_get_policy_modes_policy_modes` | [stub] List/get /policy-modes/policy-modes (policy-modes) |
 | `POST` | /policy-modes/policy-modes | `policy_modes_post_policy_modes_policy_modes` | [stub] Create/invoke /policy-modes/policy-modes (policy-modes) |
-| `GET` | /policy-modes/policy-modes/{id} | `policy_modes_get_policy_modes_policy_modes_id` | [stub] List/get /policy-modes/policy-modes/{id} (policy-modes) |
-| `PATCH` | /policy-modes/policy-modes/{id} | `policy_modes_patch_policy_modes_policy_modes_id` | [stub] Patch /policy-modes/policy-modes/{id} (policy-modes) |
-| `DELETE` | /policy-modes/policy-modes/{id} | `policy_modes_delete_policy_modes_policy_modes_id` | [stub] Delete /policy-modes/policy-modes/{id} (policy-modes) |
 | `POST` | /policy-modes/policy-modes/evaluate | `policy_modes_post_policy_modes_policy_modes_evaluate` | [stub] Create/invoke /policy-modes/policy-modes/evaluate (policy-modes) |
 | `GET` | /policy-modes/policy-modes/meta | `policy_modes_get_policy_modes_policy_modes_meta` | [stub] List/get /policy-modes/policy-modes/meta (policy-modes) |
 | `GET` | /policy-modes/policy-modes/resolve | `policy_modes_get_policy_modes_policy_modes_resolve` | [stub] List/get /policy-modes/policy-modes/resolve (policy-modes) |
+| `GET` | /policy-modes/policy-modes/{id} | `policy_modes_get_policy_modes_policy_modes_id` | [stub] List/get /policy-modes/policy-modes/{id} (policy-modes) |
+| `PATCH` | /policy-modes/policy-modes/{id} | `policy_modes_patch_policy_modes_policy_modes_id` | [stub] Patch /policy-modes/policy-modes/{id} (policy-modes) |
+| `DELETE` | /policy-modes/policy-modes/{id} | `policy_modes_delete_policy_modes_policy_modes_id` | [stub] Delete /policy-modes/policy-modes/{id} (policy-modes) |
 
 <a id="powerbi"></a>
 
@@ -6101,8 +6136,8 @@ Auto-generated tag for prism-counsel-court route group
 | `GET` | /prism-counsel/copilot/drafts | `prism_counsel_court_get_prism_counsel_copilot_drafts` | [stub] List/get /prism-counsel/copilot/drafts (prism-counsel-court) |
 | `POST` | /prism-counsel/copilot/drafts/{draftId}/advance | `prism_counsel_court_post_prism_counsel_copilot_drafts_draftId_advance` | [stub] Create/invoke /prism-counsel/copilot/drafts/{draftId}/advance (prism-counsel-court) |
 | `POST` | /prism-counsel/copilot/generate-draft | `prism_counsel_court_post_prism_counsel_copilot_generate_draft` | [stub] Create/invoke /prism-counsel/copilot/generate-draft (prism-counsel-court) |
-| `GET` | /prism-counsel/court/dockets/{id} | `prism_counsel_court_get_prism_counsel_court_dockets_id` | [stub] List/get /prism-counsel/court/dockets/{id} (prism-counsel-court) |
 | `GET` | /prism-counsel/court/dockets/search | `prism_counsel_court_get_prism_counsel_court_dockets_search` | [stub] List/get /prism-counsel/court/dockets/search (prism-counsel-court) |
+| `GET` | /prism-counsel/court/dockets/{id} | `prism_counsel_court_get_prism_counsel_court_dockets_id` | [stub] List/get /prism-counsel/court/dockets/{id} (prism-counsel-court) |
 | `GET` | /prism-counsel/court/filings/recent | `prism_counsel_court_get_prism_counsel_court_filings_recent` | [stub] List/get /prism-counsel/court/filings/recent (prism-counsel-court) |
 | `GET` | /prism-counsel/court/judges/search | `prism_counsel_court_get_prism_counsel_court_judges_search` | [stub] List/get /prism-counsel/court/judges/search (prism-counsel-court) |
 | `POST` | /prism-counsel/court/matters/{matterId}/link-docket | `prism_counsel_court_post_prism_counsel_court_matters_matterId_link_docket` | [stub] Create/invoke /prism-counsel/court/matters/{matterId}/link-docket (prism-counsel-court) |
@@ -6232,8 +6267,8 @@ Auto-generated tag for prism-counsel-pilot route group
 | `PATCH` | /prism-counsel/pilot/reviews/{id}/state | `prism_counsel_pilot_patch_prism_counsel_pilot_reviews_id_state` | [stub] Patch /prism-counsel/pilot/reviews/{id}/state (prism-counsel-pilot) |
 | `POST` | /prism-counsel/pilot/reviews/{id}/submit-signoff | `prism_counsel_pilot_post_prism_counsel_pilot_reviews_id_submit_signoff` | [stub] Create/invoke /prism-counsel/pilot/reviews/{id}/submit-signoff (prism-counsel-pilot) |
 | `GET` | /prism-counsel/pilot/signoffs | `prism_counsel_pilot_get_prism_counsel_pilot_signoffs` | [stub] List/get /prism-counsel/pilot/signoffs (prism-counsel-pilot) |
-| `POST` | /prism-counsel/pilot/signoffs/{id}/resolve | `prism_counsel_pilot_post_prism_counsel_pilot_signoffs_id_resolve` | [stub] Create/invoke /prism-counsel/pilot/signoffs/{id}/resolve (prism-counsel-pilot) |
 | `GET` | /prism-counsel/pilot/signoffs/pending | `prism_counsel_pilot_get_prism_counsel_pilot_signoffs_pending` | [stub] List/get /prism-counsel/pilot/signoffs/pending (prism-counsel-pilot) |
+| `POST` | /prism-counsel/pilot/signoffs/{id}/resolve | `prism_counsel_pilot_post_prism_counsel_pilot_signoffs_id_resolve` | [stub] Create/invoke /prism-counsel/pilot/signoffs/{id}/resolve (prism-counsel-pilot) |
 | `GET` | /prism-counsel/pilot/today | `prism_counsel_pilot_get_prism_counsel_pilot_today` | [stub] List/get /prism-counsel/pilot/today (prism-counsel-pilot) |
 | `GET` | /prism-counsel/pilot/today/brief | `prism_counsel_pilot_get_prism_counsel_pilot_today_brief` | [stub] List/get /prism-counsel/pilot/today/brief (prism-counsel-pilot) |
 | `POST` | /prism-counsel/pilot/today/brief/generate | `prism_counsel_pilot_post_prism_counsel_pilot_today_brief_generate` | [stub] Create/invoke /prism-counsel/pilot/today/brief/generate (prism-counsel-pilot) |
@@ -6266,11 +6301,11 @@ Auto-generated tag for prism-counsel-pilot-one route group
 | `POST` | /prism-counsel/pilot-one/copilot/pilot-one/execute | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_copilot_pilot_one_execute` | [stub] Create/invoke /prism-counsel/pilot-one/copilot/pilot-one/execute (prism-counsel-pilot-one) |
 | `POST` | /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/compute | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_forecasts_pilot_one_matterId_compute` | [stub] Create/invoke /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/compute (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/diff-view | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_forecasts_pilot_one_matterId_diff_view` | [stub] List/get /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/diff-view (prism-counsel-pilot-one) |
+| `GET` | /prism-counsel/pilot-one/friction/portfolio/view | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_friction_portfolio_view` | [stub] List/get /prism-counsel/pilot-one/friction/portfolio/view (prism-counsel-pilot-one) |
+| `POST` | /prism-counsel/pilot-one/friction/recommendations/{id}/accept | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_friction_recommendations_id_accept` | [stub] Create/invoke /prism-counsel/pilot-one/friction/recommendations/{id}/accept (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/friction/{matterId} | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_friction_matterId` | [stub] List/get /prism-counsel/pilot-one/friction/{matterId} (prism-counsel-pilot-one) |
 | `POST` | /prism-counsel/pilot-one/friction/{matterId}/compute | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_friction_matterId_compute` | [stub] Create/invoke /prism-counsel/pilot-one/friction/{matterId}/compute (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/friction/{matterId}/recommendations | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_friction_matterId_recommendations` | [stub] List/get /prism-counsel/pilot-one/friction/{matterId}/recommendations (prism-counsel-pilot-one) |
-| `GET` | /prism-counsel/pilot-one/friction/portfolio/view | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_friction_portfolio_view` | [stub] List/get /prism-counsel/pilot-one/friction/portfolio/view (prism-counsel-pilot-one) |
-| `POST` | /prism-counsel/pilot-one/friction/recommendations/{id}/accept | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_friction_recommendations_id_accept` | [stub] Create/invoke /prism-counsel/pilot-one/friction/recommendations/{id}/accept (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/portfolio/action-effectiveness | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_portfolio_action_effectiveness` | [stub] List/get /prism-counsel/pilot-one/portfolio/action-effectiveness (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/portfolio/benchmarks | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_portfolio_benchmarks` | [stub] List/get /prism-counsel/pilot-one/portfolio/benchmarks (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/portfolio/best-next-30/{userId} | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_portfolio_best_next_30_userId` | [stub] List/get /prism-counsel/pilot-one/portfolio/best-next-30/{userId} (prism-counsel-pilot-one) |
@@ -6278,12 +6313,12 @@ Auto-generated tag for prism-counsel-pilot-one route group
 | `POST` | /prism-counsel/pilot-one/portfolio/quiet-risk/{matterId} | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_portfolio_quiet_risk_matterId` | [stub] Create/invoke /prism-counsel/pilot-one/portfolio/quiet-risk/{matterId} (prism-counsel-pilot-one) |
 | `POST` | /prism-counsel/pilot-one/portfolio/run-learning | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_portfolio_run_learning` | [stub] Create/invoke /prism-counsel/pilot-one/portfolio/run-learning (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/portfolio/watchlist | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_portfolio_watchlist` | [stub] List/get /prism-counsel/pilot-one/portfolio/watchlist (prism-counsel-pilot-one) |
-| `GET` | /prism-counsel/pilot-one/pressure/{matterId} | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_pressure_matterId` | [stub] List/get /prism-counsel/pilot-one/pressure/{matterId} (prism-counsel-pilot-one) |
-| `POST` | /prism-counsel/pilot-one/pressure/{matterId}/compute | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_pressure_matterId_compute` | [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/compute (prism-counsel-pilot-one) |
-| `POST` | /prism-counsel/pilot-one/pressure/{matterId}/events | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_pressure_matterId_events` | [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/events (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/pressure/carrier/patterns | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_pressure_carrier_patterns` | [stub] List/get /prism-counsel/pilot-one/pressure/carrier/patterns (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/pressure/portfolio/view | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_pressure_portfolio_view` | [stub] List/get /prism-counsel/pilot-one/pressure/portfolio/view (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/pressure/silence-windows | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_pressure_silence_windows` | [stub] List/get /prism-counsel/pilot-one/pressure/silence-windows (prism-counsel-pilot-one) |
+| `GET` | /prism-counsel/pilot-one/pressure/{matterId} | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_pressure_matterId` | [stub] List/get /prism-counsel/pilot-one/pressure/{matterId} (prism-counsel-pilot-one) |
+| `POST` | /prism-counsel/pilot-one/pressure/{matterId}/compute | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_pressure_matterId_compute` | [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/compute (prism-counsel-pilot-one) |
+| `POST` | /prism-counsel/pilot-one/pressure/{matterId}/events | `prism_counsel_pilot_one_post_prism_counsel_pilot_one_pressure_matterId_events` | [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/events (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/worldline/recovery-markers | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_worldline_recovery_markers` | [stub] List/get /prism-counsel/pilot-one/worldline/recovery-markers (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/worldline/regulatory | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_worldline_regulatory` | [stub] List/get /prism-counsel/pilot-one/worldline/regulatory (prism-counsel-pilot-one) |
 | `GET` | /prism-counsel/pilot-one/worldline/signal-overlays | `prism_counsel_pilot_one_get_prism_counsel_pilot_one_worldline_signal_overlays` | [stub] List/get /prism-counsel/pilot-one/worldline/signal-overlays (prism-counsel-pilot-one) |
@@ -6374,13 +6409,13 @@ Auto-generated tag for prism-counsel-s31 route group
 | `GET` | /prism-counsel/s31/model-mesh/stats | `prism_counsel_s31_get_prism_counsel_s31_model_mesh_stats` | [stub] List/get /prism-counsel/s31/model-mesh/stats (prism-counsel-s31) |
 | `GET` | /prism-counsel/s31/pressure-graph/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_pressure_graph_matterId` | [stub] List/get /prism-counsel/s31/pressure-graph/{matterId} (prism-counsel-s31) |
 | `POST` | /prism-counsel/s31/pressure-graph/{matterId}/compute | `prism_counsel_s31_post_prism_counsel_s31_pressure_graph_matterId_compute` | [stub] Create/invoke /prism-counsel/s31/pressure-graph/{matterId}/compute (prism-counsel-s31) |
+| `GET` | /prism-counsel/s31/proof-chain/audit-packet/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_audit_packet_matterId` | [stub] List/get /prism-counsel/s31/proof-chain/audit-packet/{matterId} (prism-counsel-s31) |
+| `GET` | /prism-counsel/s31/proof-chain/matter/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_matter_matterId` | [stub] List/get /prism-counsel/s31/proof-chain/matter/{matterId} (prism-counsel-s31) |
+| `GET` | /prism-counsel/s31/proof-chain/pending-reviews | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_pending_reviews` | [stub] List/get /prism-counsel/s31/proof-chain/pending-reviews (prism-counsel-s31) |
 | `POST` | /prism-counsel/s31/proof-chain/{id}/approve | `prism_counsel_s31_post_prism_counsel_s31_proof_chain_id_approve` | [stub] Create/invoke /prism-counsel/s31/proof-chain/{id}/approve (prism-counsel-s31) |
 | `POST` | /prism-counsel/s31/proof-chain/{id}/review | `prism_counsel_s31_post_prism_counsel_s31_proof_chain_id_review` | [stub] Create/invoke /prism-counsel/s31/proof-chain/{id}/review (prism-counsel-s31) |
 | `GET` | /prism-counsel/s31/proof-chain/{id}/trace | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_id_trace` | [stub] List/get /prism-counsel/s31/proof-chain/{id}/trace (prism-counsel-s31) |
 | `GET` | /prism-counsel/s31/proof-chain/{id}/verify | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_id_verify` | [stub] List/get /prism-counsel/s31/proof-chain/{id}/verify (prism-counsel-s31) |
-| `GET` | /prism-counsel/s31/proof-chain/audit-packet/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_audit_packet_matterId` | [stub] List/get /prism-counsel/s31/proof-chain/audit-packet/{matterId} (prism-counsel-s31) |
-| `GET` | /prism-counsel/s31/proof-chain/matter/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_matter_matterId` | [stub] List/get /prism-counsel/s31/proof-chain/matter/{matterId} (prism-counsel-s31) |
-| `GET` | /prism-counsel/s31/proof-chain/pending-reviews | `prism_counsel_s31_get_prism_counsel_s31_proof_chain_pending_reviews` | [stub] List/get /prism-counsel/s31/proof-chain/pending-reviews (prism-counsel-s31) |
 | `GET` | /prism-counsel/s31/worldline/features/{matterId} | `prism_counsel_s31_get_prism_counsel_s31_worldline_features_matterId` | [stub] List/get /prism-counsel/s31/worldline/features/{matterId} (prism-counsel-s31) |
 | `POST` | /prism-counsel/s31/worldline/fetch/{sourceId} | `prism_counsel_s31_post_prism_counsel_s31_worldline_fetch_sourceId` | [stub] Create/invoke /prism-counsel/s31/worldline/fetch/{sourceId} (prism-counsel-s31) |
 | `POST` | /prism-counsel/s31/worldline/initialize | `prism_counsel_s31_post_prism_counsel_s31_worldline_initialize` | [stub] Create/invoke /prism-counsel/s31/worldline/initialize (prism-counsel-s31) |
@@ -6420,10 +6455,10 @@ Auto-generated tag for proof-chain route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /proof-chain/proof-chain | `proof_chain_get_proof_chain_proof_chain` | [stub] List/get /proof-chain/proof-chain (proof-chain) |
-| `GET` | /proof-chain/proof-chain/{id} | `proof_chain_get_proof_chain_proof_chain_id` | [stub] List/get /proof-chain/proof-chain/{id} (proof-chain) |
-| `POST` | /proof-chain/proof-chain/{id}/review | `proof_chain_post_proof_chain_proof_chain_id_review` | [stub] Create/invoke /proof-chain/proof-chain/{id}/review (proof-chain) |
 | `GET` | /proof-chain/proof-chain/by-content/{contentType}/{contentId} | `proof_chain_get_proof_chain_proof_chain_by_content_contentType_contentId` | [stub] List/get /proof-chain/proof-chain/by-content/{contentType}/{contentId} (proof-chain) |
 | `POST` | /proof-chain/proof-chain/tag | `proof_chain_post_proof_chain_proof_chain_tag` | [stub] Create/invoke /proof-chain/proof-chain/tag (proof-chain) |
+| `GET` | /proof-chain/proof-chain/{id} | `proof_chain_get_proof_chain_proof_chain_id` | [stub] List/get /proof-chain/proof-chain/{id} (proof-chain) |
+| `POST` | /proof-chain/proof-chain/{id}/review | `proof_chain_post_proof_chain_proof_chain_id_review` | [stub] Create/invoke /proof-chain/proof-chain/{id}/review (proof-chain) |
 
 <a id="providers"></a>
 
@@ -6437,12 +6472,12 @@ Auto-generated tag for providers route group
 | `GET` | /providers/rmm/health | `providers_get_providers_rmm_health` | [stub] List/get /providers/rmm/health (providers) |
 | `GET` | /providers/rmm/providers | `providers_get_providers_rmm_providers` | [stub] List/get /providers/rmm/providers (providers) |
 | `POST` | /providers/rmm/providers | `providers_post_providers_rmm_providers` | [stub] Create/invoke /providers/rmm/providers (providers) |
+| `POST` | /providers/rmm/providers/probe | `providers_post_providers_rmm_providers_probe` | [stub] Create/invoke /providers/rmm/providers/probe (providers) |
 | `GET` | /providers/rmm/providers/{id} | `providers_get_providers_rmm_providers_id` | [stub] List/get /providers/rmm/providers/{id} (providers) |
 | `PATCH` | /providers/rmm/providers/{id} | `providers_patch_providers_rmm_providers_id` | [stub] Patch /providers/rmm/providers/{id} (providers) |
 | `DELETE` | /providers/rmm/providers/{id} | `providers_delete_providers_rmm_providers_id` | [stub] Delete /providers/rmm/providers/{id} (providers) |
 | `POST` | /providers/rmm/providers/{id}/sync | `providers_post_providers_rmm_providers_id_sync` | [stub] Create/invoke /providers/rmm/providers/{id}/sync (providers) |
 | `POST` | /providers/rmm/providers/{id}/test | `providers_post_providers_rmm_providers_id_test` | [stub] Create/invoke /providers/rmm/providers/{id}/test (providers) |
-| `POST` | /providers/rmm/providers/probe | `providers_post_providers_rmm_providers_probe` | [stub] Create/invoke /providers/rmm/providers/probe (providers) |
 
 <a id="public-status"></a>
 
@@ -6491,11 +6526,11 @@ Auto-generated tag for pulse route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /briefings/briefings/saved | `pulse_get_briefings_briefings_saved` | [stub] List/get /briefings/briefings/saved (pulse) |
+| `GET` | /briefings/briefings/search | `pulse_get_briefings_briefings_search` | [stub] List/get /briefings/briefings/search (pulse) |
 | `GET` | /briefings/briefings/{id} | `pulse_get_briefings_briefings_id` | [stub] List/get /briefings/briefings/{id} (pulse) |
 | `POST` | /briefings/briefings/{id}/save | `pulse_post_briefings_briefings_id_save` | [stub] Create/invoke /briefings/briefings/{id}/save (pulse) |
 | `DELETE` | /briefings/briefings/{id}/save | `pulse_delete_briefings_briefings_id_save` | [stub] Delete /briefings/briefings/{id}/save (pulse) |
-| `GET` | /briefings/briefings/saved | `pulse_get_briefings_briefings_saved` | [stub] List/get /briefings/briefings/saved (pulse) |
-| `GET` | /briefings/briefings/search | `pulse_get_briefings_briefings_search` | [stub] List/get /briefings/briefings/search (pulse) |
 | `GET` | /briefings/confidence | `pulse_get_briefings_confidence` | [stub] List/get /briefings/confidence (pulse) |
 | `GET` | /briefings/custom | `pulse_get_briefings_custom` | [stub] List/get /briefings/custom (pulse) |
 | `POST` | /briefings/custom | `pulse_post_briefings_custom` | [stub] Create/invoke /briefings/custom (pulse) |
@@ -6517,12 +6552,12 @@ Auto-generated tag for pulse route group
 | `GET` | /briefings/today | `pulse_get_briefings_today` | [stub] List/get /briefings/today (pulse) |
 | `GET` | /briefings/unsubscribe | `pulse_get_briefings_unsubscribe` | [stub] List/get /briefings/unsubscribe (pulse) |
 | `GET` | /confidence/briefings | `pulse_get_confidence_briefings` | [stub] List/get /confidence/briefings (pulse) |
-| `GET` | /confidence/briefings/{id} | `pulse_get_confidence_briefings_id` | [stub] List/get /confidence/briefings/{id} (pulse) |
-| `POST` | /confidence/briefings/{id}/save | `pulse_post_confidence_briefings_id_save` | [stub] Create/invoke /confidence/briefings/{id}/save (pulse) |
-| `DELETE` | /confidence/briefings/{id}/save | `pulse_delete_confidence_briefings_id_save` | [stub] Delete /confidence/briefings/{id}/save (pulse) |
 | `POST` | /confidence/briefings/generate | `pulse_post_confidence_briefings_generate` | [stub] Create/invoke /confidence/briefings/generate (pulse) |
 | `GET` | /confidence/briefings/saved | `pulse_get_confidence_briefings_saved` | [stub] List/get /confidence/briefings/saved (pulse) |
 | `GET` | /confidence/briefings/search | `pulse_get_confidence_briefings_search` | [stub] List/get /confidence/briefings/search (pulse) |
+| `GET` | /confidence/briefings/{id} | `pulse_get_confidence_briefings_id` | [stub] List/get /confidence/briefings/{id} (pulse) |
+| `POST` | /confidence/briefings/{id}/save | `pulse_post_confidence_briefings_id_save` | [stub] Create/invoke /confidence/briefings/{id}/save (pulse) |
+| `DELETE` | /confidence/briefings/{id}/save | `pulse_delete_confidence_briefings_id_save` | [stub] Delete /confidence/briefings/{id}/save (pulse) |
 | `GET` | /confidence/confidence | `pulse_get_confidence_confidence` | [stub] List/get /confidence/confidence (pulse) |
 | `GET` | /confidence/custom | `pulse_get_confidence_custom` | [stub] List/get /confidence/custom (pulse) |
 | `POST` | /confidence/custom | `pulse_post_confidence_custom` | [stub] Create/invoke /confidence/custom (pulse) |
@@ -6544,12 +6579,12 @@ Auto-generated tag for pulse route group
 | `GET` | /confidence/today | `pulse_get_confidence_today` | [stub] List/get /confidence/today (pulse) |
 | `GET` | /confidence/unsubscribe | `pulse_get_confidence_unsubscribe` | [stub] List/get /confidence/unsubscribe (pulse) |
 | `GET` | /custom/briefings | `pulse_get_custom_briefings` | [stub] List/get /custom/briefings (pulse) |
-| `GET` | /custom/briefings/{id} | `pulse_get_custom_briefings_id` | [stub] List/get /custom/briefings/{id} (pulse) |
-| `POST` | /custom/briefings/{id}/save | `pulse_post_custom_briefings_id_save` | [stub] Create/invoke /custom/briefings/{id}/save (pulse) |
-| `DELETE` | /custom/briefings/{id}/save | `pulse_delete_custom_briefings_id_save` | [stub] Delete /custom/briefings/{id}/save (pulse) |
 | `POST` | /custom/briefings/generate | `pulse_post_custom_briefings_generate` | [stub] Create/invoke /custom/briefings/generate (pulse) |
 | `GET` | /custom/briefings/saved | `pulse_get_custom_briefings_saved` | [stub] List/get /custom/briefings/saved (pulse) |
 | `GET` | /custom/briefings/search | `pulse_get_custom_briefings_search` | [stub] List/get /custom/briefings/search (pulse) |
+| `GET` | /custom/briefings/{id} | `pulse_get_custom_briefings_id` | [stub] List/get /custom/briefings/{id} (pulse) |
+| `POST` | /custom/briefings/{id}/save | `pulse_post_custom_briefings_id_save` | [stub] Create/invoke /custom/briefings/{id}/save (pulse) |
+| `DELETE` | /custom/briefings/{id}/save | `pulse_delete_custom_briefings_id_save` | [stub] Delete /custom/briefings/{id}/save (pulse) |
 | `GET` | /custom/confidence | `pulse_get_custom_confidence` | [stub] List/get /custom/confidence (pulse) |
 | `GET` | /custom/custom | `pulse_get_custom_custom` | [stub] List/get /custom/custom (pulse) |
 | `POST` | /custom/custom | `pulse_post_custom_custom` | [stub] Create/invoke /custom/custom (pulse) |
@@ -6571,12 +6606,12 @@ Auto-generated tag for pulse route group
 | `GET` | /custom/today | `pulse_get_custom_today` | [stub] List/get /custom/today (pulse) |
 | `GET` | /custom/unsubscribe | `pulse_get_custom_unsubscribe` | [stub] List/get /custom/unsubscribe (pulse) |
 | `GET` | /demo/briefings | `pulse_get_demo_briefings` | [stub] List/get /demo/briefings (pulse) |
-| `GET` | /demo/briefings/{id} | `pulse_get_demo_briefings_id` | [stub] List/get /demo/briefings/{id} (pulse) |
-| `POST` | /demo/briefings/{id}/save | `pulse_post_demo_briefings_id_save` | [stub] Create/invoke /demo/briefings/{id}/save (pulse) |
-| `DELETE` | /demo/briefings/{id}/save | `pulse_delete_demo_briefings_id_save` | [stub] Delete /demo/briefings/{id}/save (pulse) |
 | `POST` | /demo/briefings/generate | `pulse_post_demo_briefings_generate` | [stub] Create/invoke /demo/briefings/generate (pulse) |
 | `GET` | /demo/briefings/saved | `pulse_get_demo_briefings_saved` | [stub] List/get /demo/briefings/saved (pulse) |
 | `GET` | /demo/briefings/search | `pulse_get_demo_briefings_search` | [stub] List/get /demo/briefings/search (pulse) |
+| `GET` | /demo/briefings/{id} | `pulse_get_demo_briefings_id` | [stub] List/get /demo/briefings/{id} (pulse) |
+| `POST` | /demo/briefings/{id}/save | `pulse_post_demo_briefings_id_save` | [stub] Create/invoke /demo/briefings/{id}/save (pulse) |
+| `DELETE` | /demo/briefings/{id}/save | `pulse_delete_demo_briefings_id_save` | [stub] Delete /demo/briefings/{id}/save (pulse) |
 | `GET` | /demo/confidence | `pulse_get_demo_confidence` | [stub] List/get /demo/confidence (pulse) |
 | `GET` | /demo/custom | `pulse_get_demo_custom` | [stub] List/get /demo/custom (pulse) |
 | `POST` | /demo/custom | `pulse_post_demo_custom` | [stub] Create/invoke /demo/custom (pulse) |
@@ -6598,12 +6633,12 @@ Auto-generated tag for pulse route group
 | `GET` | /demo/today | `pulse_get_demo_today` | [stub] List/get /demo/today (pulse) |
 | `GET` | /demo/unsubscribe | `pulse_get_demo_unsubscribe` | [stub] List/get /demo/unsubscribe (pulse) |
 | `GET` | /dissents/briefings | `pulse_get_dissents_briefings` | [stub] List/get /dissents/briefings (pulse) |
-| `GET` | /dissents/briefings/{id} | `pulse_get_dissents_briefings_id` | [stub] List/get /dissents/briefings/{id} (pulse) |
-| `POST` | /dissents/briefings/{id}/save | `pulse_post_dissents_briefings_id_save` | [stub] Create/invoke /dissents/briefings/{id}/save (pulse) |
-| `DELETE` | /dissents/briefings/{id}/save | `pulse_delete_dissents_briefings_id_save` | [stub] Delete /dissents/briefings/{id}/save (pulse) |
 | `POST` | /dissents/briefings/generate | `pulse_post_dissents_briefings_generate` | [stub] Create/invoke /dissents/briefings/generate (pulse) |
 | `GET` | /dissents/briefings/saved | `pulse_get_dissents_briefings_saved` | [stub] List/get /dissents/briefings/saved (pulse) |
 | `GET` | /dissents/briefings/search | `pulse_get_dissents_briefings_search` | [stub] List/get /dissents/briefings/search (pulse) |
+| `GET` | /dissents/briefings/{id} | `pulse_get_dissents_briefings_id` | [stub] List/get /dissents/briefings/{id} (pulse) |
+| `POST` | /dissents/briefings/{id}/save | `pulse_post_dissents_briefings_id_save` | [stub] Create/invoke /dissents/briefings/{id}/save (pulse) |
+| `DELETE` | /dissents/briefings/{id}/save | `pulse_delete_dissents_briefings_id_save` | [stub] Delete /dissents/briefings/{id}/save (pulse) |
 | `GET` | /dissents/confidence | `pulse_get_dissents_confidence` | [stub] List/get /dissents/confidence (pulse) |
 | `GET` | /dissents/custom | `pulse_get_dissents_custom` | [stub] List/get /dissents/custom (pulse) |
 | `POST` | /dissents/custom | `pulse_post_dissents_custom` | [stub] Create/invoke /dissents/custom (pulse) |
@@ -6625,12 +6660,12 @@ Auto-generated tag for pulse route group
 | `GET` | /dissents/today | `pulse_get_dissents_today` | [stub] List/get /dissents/today (pulse) |
 | `GET` | /dissents/unsubscribe | `pulse_get_dissents_unsubscribe` | [stub] List/get /dissents/unsubscribe (pulse) |
 | `GET` | /domain-panel/briefings | `pulse_get_domain_panel_briefings` | [stub] List/get /domain-panel/briefings (pulse) |
-| `GET` | /domain-panel/briefings/{id} | `pulse_get_domain_panel_briefings_id` | [stub] List/get /domain-panel/briefings/{id} (pulse) |
-| `POST` | /domain-panel/briefings/{id}/save | `pulse_post_domain_panel_briefings_id_save` | [stub] Create/invoke /domain-panel/briefings/{id}/save (pulse) |
-| `DELETE` | /domain-panel/briefings/{id}/save | `pulse_delete_domain_panel_briefings_id_save` | [stub] Delete /domain-panel/briefings/{id}/save (pulse) |
 | `POST` | /domain-panel/briefings/generate | `pulse_post_domain_panel_briefings_generate` | [stub] Create/invoke /domain-panel/briefings/generate (pulse) |
 | `GET` | /domain-panel/briefings/saved | `pulse_get_domain_panel_briefings_saved` | [stub] List/get /domain-panel/briefings/saved (pulse) |
 | `GET` | /domain-panel/briefings/search | `pulse_get_domain_panel_briefings_search` | [stub] List/get /domain-panel/briefings/search (pulse) |
+| `GET` | /domain-panel/briefings/{id} | `pulse_get_domain_panel_briefings_id` | [stub] List/get /domain-panel/briefings/{id} (pulse) |
+| `POST` | /domain-panel/briefings/{id}/save | `pulse_post_domain_panel_briefings_id_save` | [stub] Create/invoke /domain-panel/briefings/{id}/save (pulse) |
+| `DELETE` | /domain-panel/briefings/{id}/save | `pulse_delete_domain_panel_briefings_id_save` | [stub] Delete /domain-panel/briefings/{id}/save (pulse) |
 | `GET` | /domain-panel/confidence | `pulse_get_domain_panel_confidence` | [stub] List/get /domain-panel/confidence (pulse) |
 | `GET` | /domain-panel/custom | `pulse_get_domain_panel_custom` | [stub] List/get /domain-panel/custom (pulse) |
 | `POST` | /domain-panel/custom | `pulse_post_domain_panel_custom` | [stub] Create/invoke /domain-panel/custom (pulse) |
@@ -6652,12 +6687,12 @@ Auto-generated tag for pulse route group
 | `GET` | /domain-panel/today | `pulse_get_domain_panel_today` | [stub] List/get /domain-panel/today (pulse) |
 | `GET` | /domain-panel/unsubscribe | `pulse_get_domain_panel_unsubscribe` | [stub] List/get /domain-panel/unsubscribe (pulse) |
 | `GET` | /export/briefings | `pulse_get_export_briefings` | [stub] List/get /export/briefings (pulse) |
-| `GET` | /export/briefings/{id} | `pulse_get_export_briefings_id` | [stub] List/get /export/briefings/{id} (pulse) |
-| `POST` | /export/briefings/{id}/save | `pulse_post_export_briefings_id_save` | [stub] Create/invoke /export/briefings/{id}/save (pulse) |
-| `DELETE` | /export/briefings/{id}/save | `pulse_delete_export_briefings_id_save` | [stub] Delete /export/briefings/{id}/save (pulse) |
 | `POST` | /export/briefings/generate | `pulse_post_export_briefings_generate` | [stub] Create/invoke /export/briefings/generate (pulse) |
 | `GET` | /export/briefings/saved | `pulse_get_export_briefings_saved` | [stub] List/get /export/briefings/saved (pulse) |
 | `GET` | /export/briefings/search | `pulse_get_export_briefings_search` | [stub] List/get /export/briefings/search (pulse) |
+| `GET` | /export/briefings/{id} | `pulse_get_export_briefings_id` | [stub] List/get /export/briefings/{id} (pulse) |
+| `POST` | /export/briefings/{id}/save | `pulse_post_export_briefings_id_save` | [stub] Create/invoke /export/briefings/{id}/save (pulse) |
+| `DELETE` | /export/briefings/{id}/save | `pulse_delete_export_briefings_id_save` | [stub] Delete /export/briefings/{id}/save (pulse) |
 | `GET` | /export/confidence | `pulse_get_export_confidence` | [stub] List/get /export/confidence (pulse) |
 | `GET` | /export/custom | `pulse_get_export_custom` | [stub] List/get /export/custom (pulse) |
 | `POST` | /export/custom | `pulse_post_export_custom` | [stub] Create/invoke /export/custom (pulse) |
@@ -6679,12 +6714,12 @@ Auto-generated tag for pulse route group
 | `GET` | /export/today | `pulse_get_export_today` | [stub] List/get /export/today (pulse) |
 | `GET` | /export/unsubscribe | `pulse_get_export_unsubscribe` | [stub] List/get /export/unsubscribe (pulse) |
 | `GET` | /pulse/briefings | `pulse_get_pulse_briefings` | [stub] List/get /pulse/briefings (pulse) |
-| `GET` | /pulse/briefings/{id} | `pulse_get_pulse_briefings_id` | [stub] List/get /pulse/briefings/{id} (pulse) |
-| `POST` | /pulse/briefings/{id}/save | `pulse_post_pulse_briefings_id_save` | [stub] Create/invoke /pulse/briefings/{id}/save (pulse) |
-| `DELETE` | /pulse/briefings/{id}/save | `pulse_delete_pulse_briefings_id_save` | [stub] Delete /pulse/briefings/{id}/save (pulse) |
 | `POST` | /pulse/briefings/generate | `pulse_post_pulse_briefings_generate` | [stub] Create/invoke /pulse/briefings/generate (pulse) |
 | `GET` | /pulse/briefings/saved | `pulse_get_pulse_briefings_saved` | [stub] List/get /pulse/briefings/saved (pulse) |
 | `GET` | /pulse/briefings/search | `pulse_get_pulse_briefings_search` | [stub] List/get /pulse/briefings/search (pulse) |
+| `GET` | /pulse/briefings/{id} | `pulse_get_pulse_briefings_id` | [stub] List/get /pulse/briefings/{id} (pulse) |
+| `POST` | /pulse/briefings/{id}/save | `pulse_post_pulse_briefings_id_save` | [stub] Create/invoke /pulse/briefings/{id}/save (pulse) |
+| `DELETE` | /pulse/briefings/{id}/save | `pulse_delete_pulse_briefings_id_save` | [stub] Delete /pulse/briefings/{id}/save (pulse) |
 | `GET` | /pulse/confidence | `pulse_get_pulse_confidence` | [stub] List/get /pulse/confidence (pulse) |
 | `GET` | /pulse/custom | `pulse_get_pulse_custom` | [stub] List/get /pulse/custom (pulse) |
 | `POST` | /pulse/custom | `pulse_post_pulse_custom` | [stub] Create/invoke /pulse/custom (pulse) |
@@ -6706,12 +6741,12 @@ Auto-generated tag for pulse route group
 | `GET` | /pulse/today | `pulse_get_pulse_today` | [stub] List/get /pulse/today (pulse) |
 | `GET` | /pulse/unsubscribe | `pulse_get_pulse_unsubscribe` | [stub] List/get /pulse/unsubscribe (pulse) |
 | `GET` | /subscriptions/briefings | `pulse_get_subscriptions_briefings` | [stub] List/get /subscriptions/briefings (pulse) |
-| `GET` | /subscriptions/briefings/{id} | `pulse_get_subscriptions_briefings_id` | [stub] List/get /subscriptions/briefings/{id} (pulse) |
-| `POST` | /subscriptions/briefings/{id}/save | `pulse_post_subscriptions_briefings_id_save` | [stub] Create/invoke /subscriptions/briefings/{id}/save (pulse) |
-| `DELETE` | /subscriptions/briefings/{id}/save | `pulse_delete_subscriptions_briefings_id_save` | [stub] Delete /subscriptions/briefings/{id}/save (pulse) |
 | `POST` | /subscriptions/briefings/generate | `pulse_post_subscriptions_briefings_generate` | [stub] Create/invoke /subscriptions/briefings/generate (pulse) |
 | `GET` | /subscriptions/briefings/saved | `pulse_get_subscriptions_briefings_saved` | [stub] List/get /subscriptions/briefings/saved (pulse) |
 | `GET` | /subscriptions/briefings/search | `pulse_get_subscriptions_briefings_search` | [stub] List/get /subscriptions/briefings/search (pulse) |
+| `GET` | /subscriptions/briefings/{id} | `pulse_get_subscriptions_briefings_id` | [stub] List/get /subscriptions/briefings/{id} (pulse) |
+| `POST` | /subscriptions/briefings/{id}/save | `pulse_post_subscriptions_briefings_id_save` | [stub] Create/invoke /subscriptions/briefings/{id}/save (pulse) |
+| `DELETE` | /subscriptions/briefings/{id}/save | `pulse_delete_subscriptions_briefings_id_save` | [stub] Delete /subscriptions/briefings/{id}/save (pulse) |
 | `GET` | /subscriptions/confidence | `pulse_get_subscriptions_confidence` | [stub] List/get /subscriptions/confidence (pulse) |
 | `GET` | /subscriptions/custom | `pulse_get_subscriptions_custom` | [stub] List/get /subscriptions/custom (pulse) |
 | `POST` | /subscriptions/custom | `pulse_post_subscriptions_custom` | [stub] Create/invoke /subscriptions/custom (pulse) |
@@ -6733,12 +6768,12 @@ Auto-generated tag for pulse route group
 | `GET` | /subscriptions/today | `pulse_get_subscriptions_today` | [stub] List/get /subscriptions/today (pulse) |
 | `GET` | /subscriptions/unsubscribe | `pulse_get_subscriptions_unsubscribe` | [stub] List/get /subscriptions/unsubscribe (pulse) |
 | `GET` | /today/briefings | `pulse_get_today_briefings` | [stub] List/get /today/briefings (pulse) |
-| `GET` | /today/briefings/{id} | `pulse_get_today_briefings_id` | [stub] List/get /today/briefings/{id} (pulse) |
-| `POST` | /today/briefings/{id}/save | `pulse_post_today_briefings_id_save` | [stub] Create/invoke /today/briefings/{id}/save (pulse) |
-| `DELETE` | /today/briefings/{id}/save | `pulse_delete_today_briefings_id_save` | [stub] Delete /today/briefings/{id}/save (pulse) |
 | `POST` | /today/briefings/generate | `pulse_post_today_briefings_generate` | [stub] Create/invoke /today/briefings/generate (pulse) |
 | `GET` | /today/briefings/saved | `pulse_get_today_briefings_saved` | [stub] List/get /today/briefings/saved (pulse) |
 | `GET` | /today/briefings/search | `pulse_get_today_briefings_search` | [stub] List/get /today/briefings/search (pulse) |
+| `GET` | /today/briefings/{id} | `pulse_get_today_briefings_id` | [stub] List/get /today/briefings/{id} (pulse) |
+| `POST` | /today/briefings/{id}/save | `pulse_post_today_briefings_id_save` | [stub] Create/invoke /today/briefings/{id}/save (pulse) |
+| `DELETE` | /today/briefings/{id}/save | `pulse_delete_today_briefings_id_save` | [stub] Delete /today/briefings/{id}/save (pulse) |
 | `GET` | /today/confidence | `pulse_get_today_confidence` | [stub] List/get /today/confidence (pulse) |
 | `GET` | /today/custom | `pulse_get_today_custom` | [stub] List/get /today/custom (pulse) |
 | `POST` | /today/custom | `pulse_post_today_custom` | [stub] Create/invoke /today/custom (pulse) |
@@ -6760,12 +6795,12 @@ Auto-generated tag for pulse route group
 | `GET` | /today/today | `pulse_get_today_today` | [stub] List/get /today/today (pulse) |
 | `GET` | /today/unsubscribe | `pulse_get_today_unsubscribe` | [stub] List/get /today/unsubscribe (pulse) |
 | `GET` | /unsubscribe/briefings | `pulse_get_unsubscribe_briefings` | [stub] List/get /unsubscribe/briefings (pulse) |
-| `GET` | /unsubscribe/briefings/{id} | `pulse_get_unsubscribe_briefings_id` | [stub] List/get /unsubscribe/briefings/{id} (pulse) |
-| `POST` | /unsubscribe/briefings/{id}/save | `pulse_post_unsubscribe_briefings_id_save` | [stub] Create/invoke /unsubscribe/briefings/{id}/save (pulse) |
-| `DELETE` | /unsubscribe/briefings/{id}/save | `pulse_delete_unsubscribe_briefings_id_save` | [stub] Delete /unsubscribe/briefings/{id}/save (pulse) |
 | `POST` | /unsubscribe/briefings/generate | `pulse_post_unsubscribe_briefings_generate` | [stub] Create/invoke /unsubscribe/briefings/generate (pulse) |
 | `GET` | /unsubscribe/briefings/saved | `pulse_get_unsubscribe_briefings_saved` | [stub] List/get /unsubscribe/briefings/saved (pulse) |
 | `GET` | /unsubscribe/briefings/search | `pulse_get_unsubscribe_briefings_search` | [stub] List/get /unsubscribe/briefings/search (pulse) |
+| `GET` | /unsubscribe/briefings/{id} | `pulse_get_unsubscribe_briefings_id` | [stub] List/get /unsubscribe/briefings/{id} (pulse) |
+| `POST` | /unsubscribe/briefings/{id}/save | `pulse_post_unsubscribe_briefings_id_save` | [stub] Create/invoke /unsubscribe/briefings/{id}/save (pulse) |
+| `DELETE` | /unsubscribe/briefings/{id}/save | `pulse_delete_unsubscribe_briefings_id_save` | [stub] Delete /unsubscribe/briefings/{id}/save (pulse) |
 | `GET` | /unsubscribe/confidence | `pulse_get_unsubscribe_confidence` | [stub] List/get /unsubscribe/confidence (pulse) |
 | `GET` | /unsubscribe/custom | `pulse_get_unsubscribe_custom` | [stub] List/get /unsubscribe/custom (pulse) |
 | `POST` | /unsubscribe/custom | `pulse_post_unsubscribe_custom` | [stub] Create/invoke /unsubscribe/custom (pulse) |
@@ -6848,10 +6883,10 @@ Auto-generated tag for push-preferences route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /push-preferences/push-preferences | `push_preferences_get_push_preferences_push_preferences` | [stub] List/get /push-preferences/push-preferences (push-preferences) |
+| `GET` | /push-preferences/push-preferences/categories/{appId} | `push_preferences_get_push_preferences_push_preferences_categories_appId` | [stub] List/get /push-preferences/push-preferences/categories/{appId} (push-preferences) |
 | `GET` | /push-preferences/push-preferences/{appId} | `push_preferences_get_push_preferences_push_preferences_appId` | [stub] List/get /push-preferences/push-preferences/{appId} (push-preferences) |
 | `DELETE` | /push-preferences/push-preferences/{appId} | `push_preferences_delete_push_preferences_push_preferences_appId` | [stub] Delete /push-preferences/push-preferences/{appId} (push-preferences) |
 | `PUT` | /push-preferences/push-preferences/{appId}/{category} | `push_preferences_put_push_preferences_push_preferences_appId_category` | [stub] Update /push-preferences/push-preferences/{appId}/{category} (push-preferences) |
-| `GET` | /push-preferences/push-preferences/categories/{appId} | `push_preferences_get_push_preferences_push_preferences_categories_appId` | [stub] List/get /push-preferences/push-preferences/categories/{appId} (push-preferences) |
 
 <a id="push-tokens"></a>
 
@@ -6862,8 +6897,8 @@ Auto-generated tag for push-tokens route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `POST` | /push-tokens/push-tokens | `push_tokens_post_push_tokens_push_tokens` | [stub] Create/invoke /push-tokens/push-tokens (push-tokens) |
-| `DELETE` | /push-tokens/push-tokens/{token} | `push_tokens_delete_push_tokens_push_tokens_token` | [stub] Delete /push-tokens/push-tokens/{token} (push-tokens) |
 | `GET` | /push-tokens/push-tokens/me | `push_tokens_get_push_tokens_push_tokens_me` | [stub] List/get /push-tokens/push-tokens/me (push-tokens) |
+| `DELETE` | /push-tokens/push-tokens/{token} | `push_tokens_delete_push_tokens_push_tokens_token` | [stub] Delete /push-tokens/push-tokens/{token} (push-tokens) |
 
 <a id="rate-cards"></a>
 
@@ -6876,10 +6911,10 @@ Auto-generated tag for rate-cards route group
 | `GET` | /rate-cards/metering/dashboard/{orgId} | `rate_cards_get_rate_cards_metering_dashboard_orgId` | [stub] List/get /rate-cards/metering/dashboard/{orgId} (rate-cards) |
 | `GET` | /rate-cards/metering/rate-cards | `rate_cards_get_rate_cards_metering_rate_cards` | [stub] List/get /rate-cards/metering/rate-cards (rate-cards) |
 | `POST` | /rate-cards/metering/rate-cards | `rate_cards_post_rate_cards_metering_rate_cards` | [stub] Create/invoke /rate-cards/metering/rate-cards (rate-cards) |
+| `GET` | /rate-cards/metering/rate-cards/assignments/{orgId} | `rate_cards_get_rate_cards_metering_rate_cards_assignments_orgId` | [stub] List/get /rate-cards/metering/rate-cards/assignments/{orgId} (rate-cards) |
 | `GET` | /rate-cards/metering/rate-cards/{id} | `rate_cards_get_rate_cards_metering_rate_cards_id` | [stub] List/get /rate-cards/metering/rate-cards/{id} (rate-cards) |
 | `PUT` | /rate-cards/metering/rate-cards/{id} | `rate_cards_put_rate_cards_metering_rate_cards_id` | [stub] Update /rate-cards/metering/rate-cards/{id} (rate-cards) |
 | `POST` | /rate-cards/metering/rate-cards/{id}/assign | `rate_cards_post_rate_cards_metering_rate_cards_id_assign` | [stub] Create/invoke /rate-cards/metering/rate-cards/{id}/assign (rate-cards) |
-| `GET` | /rate-cards/metering/rate-cards/assignments/{orgId} | `rate_cards_get_rate_cards_metering_rate_cards_assignments_orgId` | [stub] List/get /rate-cards/metering/rate-cards/assignments/{orgId} (rate-cards) |
 | `GET` | /rate-cards/metering/usage | `rate_cards_get_rate_cards_metering_usage` | [stub] List/get /rate-cards/metering/usage (rate-cards) |
 | `GET` | /rate-cards/metering/usage/{orgId} | `rate_cards_get_rate_cards_metering_usage_orgId` | [stub] List/get /rate-cards/metering/usage/{orgId} (rate-cards) |
 
@@ -6927,12 +6962,12 @@ Auto-generated tag for reflections route group
 |--------|------|-------------|---------|
 | `GET` | /reflections/reflections | `reflections_get_reflections_reflections` | [stub] List/get /reflections/reflections (reflections) |
 | `POST` | /reflections/reflections | `reflections_post_reflections_reflections` | [stub] Create/invoke /reflections/reflections (reflections) |
+| `GET` | /reflections/reflections/by-trace/{traceId} | `reflections_get_reflections_reflections_by_trace_traceId` | [stub] List/get /reflections/reflections/by-trace/{traceId} (reflections) |
 | `GET` | /reflections/reflections/{id} | `reflections_get_reflections_reflections_id` | [stub] List/get /reflections/reflections/{id} (reflections) |
 | `POST` | /reflections/reflections/{id}/skills/{skillName}/adopt | `reflections_post_reflections_reflections_id_skills_skillName_adopt` | [stub] Create/invoke /reflections/reflections/{id}/skills/{skillName}/adopt (reflections) |
 | `POST` | /reflections/reflections/{id}/skills/{skillName}/reject | `reflections_post_reflections_reflections_id_skills_skillName_reject` | [stub] Create/invoke /reflections/reflections/{id}/skills/{skillName}/reject (reflections) |
 | `POST` | /reflections/reflections/{id}/strategy/{index}/apply | `reflections_post_reflections_reflections_id_strategy_index_apply` | [stub] Create/invoke /reflections/reflections/{id}/strategy/{index}/apply (reflections) |
 | `POST` | /reflections/reflections/{id}/strategy/{index}/defer | `reflections_post_reflections_reflections_id_strategy_index_defer` | [stub] Create/invoke /reflections/reflections/{id}/strategy/{index}/defer (reflections) |
-| `GET` | /reflections/reflections/by-trace/{traceId} | `reflections_get_reflections_reflections_by_trace_traceId` | [stub] List/get /reflections/reflections/by-trace/{traceId} (reflections) |
 
 <a id="replay"></a>
 
@@ -6959,8 +6994,8 @@ Auto-generated tag for research route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /research/intelligence/ai-models | `research_get_research_intelligence_ai_models` | [stub] List/get /research/intelligence/ai-models (research) |
-| `GET` | /research/intelligence/ai-models/{modelId} | `research_get_research_intelligence_ai_models_modelId` | [stub] List/get /research/intelligence/ai-models/{modelId} (research) |
 | `GET` | /research/intelligence/ai-models/summary | `research_get_research_intelligence_ai_models_summary` | [stub] List/get /research/intelligence/ai-models/summary (research) |
+| `GET` | /research/intelligence/ai-models/{modelId} | `research_get_research_intelligence_ai_models_modelId` | [stub] List/get /research/intelligence/ai-models/{modelId} (research) |
 | `POST` | /research/intelligence/ai/advisory | `research_post_research_intelligence_ai_advisory` | [stub] Create/invoke /research/intelligence/ai/advisory (research) |
 | `POST` | /research/intelligence/ai/campaign-copy | `research_post_research_intelligence_ai_campaign_copy` | [stub] Create/invoke /research/intelligence/ai/campaign-copy (research) |
 | `POST` | /research/intelligence/ai/content-ideas | `research_post_research_intelligence_ai_content_ideas` | [stub] Create/invoke /research/intelligence/ai/content-ideas (research) |
@@ -7008,10 +7043,10 @@ Auto-generated tag for risk-evidence route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /risk-evidence/risk-evidence/by-id/{evidenceId} | `risk_evidence_get_risk_evidence_risk_evidence_by_id_evidenceId` | [stub] List/get /risk-evidence/risk-evidence/by-id/{evidenceId} (risk-evidence) |
 | `GET` | /risk-evidence/risk-evidence/{domain} | `risk_evidence_get_risk_evidence_risk_evidence_domain` | [stub] List/get /risk-evidence/risk-evidence/{domain} (risk-evidence) |
 | `POST` | /risk-evidence/risk-evidence/{domain} | `risk_evidence_post_risk_evidence_risk_evidence_domain` | [stub] Create/invoke /risk-evidence/risk-evidence/{domain} (risk-evidence) |
 | `DELETE` | /risk-evidence/risk-evidence/{domain}/{evidenceId} | `risk_evidence_delete_risk_evidence_risk_evidence_domain_evidenceId` | [stub] Delete /risk-evidence/risk-evidence/{domain}/{evidenceId} (risk-evidence) |
-| `GET` | /risk-evidence/risk-evidence/by-id/{evidenceId} | `risk_evidence_get_risk_evidence_risk_evidence_by_id_evidenceId` | [stub] List/get /risk-evidence/risk-evidence/by-id/{evidenceId} (risk-evidence) |
 
 <a id="scim"></a>
 
@@ -7123,12 +7158,12 @@ Auto-generated tag for signal-chains route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /signal-chains/signal-chains | `signal_chains_get_signal_chains_signal_chains` | [stub] List/get /signal-chains/signal-chains (signal-chains) |
-| `GET` | /signal-chains/signal-chains/{id} | `signal_chains_get_signal_chains_signal_chains_id` | [stub] List/get /signal-chains/signal-chains/{id} (signal-chains) |
-| `GET` | /signal-chains/signal-chains/{id}/audit | `signal_chains_get_signal_chains_signal_chains_id_audit` | [stub] List/get /signal-chains/signal-chains/{id}/audit (signal-chains) |
-| `POST` | /signal-chains/signal-chains/{id}/trigger | `signal_chains_post_signal_chains_signal_chains_id_trigger` | [stub] Create/invoke /signal-chains/signal-chains/{id}/trigger (signal-chains) |
 | `GET` | /signal-chains/signal-chains/audit-log | `signal_chains_get_signal_chains_signal_chains_audit_log` | [stub] List/get /signal-chains/signal-chains/audit-log (signal-chains) |
 | `GET` | /signal-chains/signal-chains/audit-log/export | `signal_chains_get_signal_chains_signal_chains_audit_log_export` | [stub] List/get /signal-chains/signal-chains/audit-log/export (signal-chains) |
 | `POST` | /signal-chains/signal-chains/evaluate | `signal_chains_post_signal_chains_signal_chains_evaluate` | [stub] Create/invoke /signal-chains/signal-chains/evaluate (signal-chains) |
+| `GET` | /signal-chains/signal-chains/{id} | `signal_chains_get_signal_chains_signal_chains_id` | [stub] List/get /signal-chains/signal-chains/{id} (signal-chains) |
+| `GET` | /signal-chains/signal-chains/{id}/audit | `signal_chains_get_signal_chains_signal_chains_id_audit` | [stub] List/get /signal-chains/signal-chains/{id}/audit (signal-chains) |
+| `POST` | /signal-chains/signal-chains/{id}/trigger | `signal_chains_post_signal_chains_signal_chains_id_trigger` | [stub] Create/invoke /signal-chains/signal-chains/{id}/trigger (signal-chains) |
 
 <a id="signatures"></a>
 
@@ -7138,14 +7173,14 @@ Auto-generated tag for signatures route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /signatures/documents/sign/{token} | `signatures_get_signatures_documents_sign_token` | [stub] List/get /signatures/documents/sign/{token} (signatures) |
+| `POST` | /signatures/documents/sign/{token}/decline | `signatures_post_signatures_documents_sign_token_decline` | [stub] Create/invoke /signatures/documents/sign/{token}/decline (signatures) |
+| `POST` | /signatures/documents/sign/{token}/submit | `signatures_post_signatures_documents_sign_token_submit` | [stub] Create/invoke /signatures/documents/sign/{token}/submit (signatures) |
 | `POST` | /signatures/documents/{id}/sign | `signatures_post_signatures_documents_id_sign` | [stub] Create/invoke /signatures/documents/{id}/sign (signatures) |
 | `POST` | /signatures/documents/{id}/sign/{sigId} | `signatures_post_signatures_documents_id_sign_sigId` | [stub] Create/invoke /signatures/documents/{id}/sign/{sigId} (signatures) |
 | `GET` | /signatures/documents/{id}/signatures | `signatures_get_signatures_documents_id_signatures` | [stub] List/get /signatures/documents/{id}/signatures (signatures) |
 | `POST` | /signatures/documents/{id}/signatures/{sigId}/decline | `signatures_post_signatures_documents_id_signatures_sigId_decline` | [stub] Create/invoke /signatures/documents/{id}/signatures/{sigId}/decline (signatures) |
 | `POST` | /signatures/documents/{id}/signatures/{sigId}/remind | `signatures_post_signatures_documents_id_signatures_sigId_remind` | [stub] Create/invoke /signatures/documents/{id}/signatures/{sigId}/remind (signatures) |
-| `GET` | /signatures/documents/sign/{token} | `signatures_get_signatures_documents_sign_token` | [stub] List/get /signatures/documents/sign/{token} (signatures) |
-| `POST` | /signatures/documents/sign/{token}/decline | `signatures_post_signatures_documents_sign_token_decline` | [stub] Create/invoke /signatures/documents/sign/{token}/decline (signatures) |
-| `POST` | /signatures/documents/sign/{token}/submit | `signatures_post_signatures_documents_sign_token_submit` | [stub] Create/invoke /signatures/documents/sign/{token}/submit (signatures) |
 
 <a id="simulation-whatif"></a>
 
@@ -7244,6 +7279,7 @@ Auto-generated tag for teams route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `GET` | /teams/teams/schedules | `teams_get_teams_teams_schedules` | [stub] List/get /teams/teams/schedules (teams) |
 | `GET` | /teams/teams/{team} | `teams_get_teams_teams_team` | [stub] List/get /teams/teams/{team} (teams) |
 | `POST` | /teams/teams/{team}/page | `teams_post_teams_teams_team_page` | [stub] Create/invoke /teams/teams/{team}/page (teams) |
 | `GET` | /teams/teams/{team}/pages | `teams_get_teams_teams_team_pages` | [stub] List/get /teams/teams/{team}/pages (teams) |
@@ -7251,8 +7287,8 @@ Auto-generated tag for teams route group
 | `PUT` | /teams/teams/{team}/schedule | `teams_put_teams_teams_team_schedule` | [stub] Update /teams/teams/{team}/schedule (teams) |
 | `POST` | /teams/teams/{team}/schedule/overrides | `teams_post_teams_teams_team_schedule_overrides` | [stub] Create/invoke /teams/teams/{team}/schedule/overrides (teams) |
 | `DELETE` | /teams/teams/{team}/schedule/overrides/{id} | `teams_delete_teams_teams_team_schedule_overrides_id` | [stub] Delete /teams/teams/{team}/schedule/overrides/{id} (teams) |
-| `GET` | /teams/teams/schedules | `teams_get_teams_teams_schedules` | [stub] List/get /teams/teams/schedules (teams) |
 | `GET` | /teams/users/{id}/pages | `teams_get_teams_users_id_pages` | [stub] List/get /teams/users/{id}/pages (teams) |
+| `GET` | /users/teams/schedules | `teams_get_users_teams_schedules` | [stub] List/get /users/teams/schedules (teams) |
 | `GET` | /users/teams/{team} | `teams_get_users_teams_team` | [stub] List/get /users/teams/{team} (teams) |
 | `POST` | /users/teams/{team}/page | `teams_post_users_teams_team_page` | [stub] Create/invoke /users/teams/{team}/page (teams) |
 | `GET` | /users/teams/{team}/pages | `teams_get_users_teams_team_pages` | [stub] List/get /users/teams/{team}/pages (teams) |
@@ -7260,7 +7296,6 @@ Auto-generated tag for teams route group
 | `PUT` | /users/teams/{team}/schedule | `teams_put_users_teams_team_schedule` | [stub] Update /users/teams/{team}/schedule (teams) |
 | `POST` | /users/teams/{team}/schedule/overrides | `teams_post_users_teams_team_schedule_overrides` | [stub] Create/invoke /users/teams/{team}/schedule/overrides (teams) |
 | `DELETE` | /users/teams/{team}/schedule/overrides/{id} | `teams_delete_users_teams_team_schedule_overrides_id` | [stub] Delete /users/teams/{team}/schedule/overrides/{id} (teams) |
-| `GET` | /users/teams/schedules | `teams_get_users_teams_schedules` | [stub] List/get /users/teams/schedules (teams) |
 | `GET` | /users/users/{id}/pages | `teams_get_users_users_id_pages` | [stub] List/get /users/users/{id}/pages (teams) |
 
 <a id="telemetry"></a>
@@ -7282,9 +7317,9 @@ Auto-generated tag for tenant-health route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /tenant-health/tenant-health | `tenant_health_get_tenant_health_tenant_health` | [stub] List/get /tenant-health/tenant-health (tenant-health) |
+| `GET` | /tenant-health/tenant-health/benchmarks | `tenant_health_get_tenant_health_tenant_health_benchmarks` | [stub] List/get /tenant-health/tenant-health/benchmarks (tenant-health) |
 | `GET` | /tenant-health/tenant-health/{orgId} | `tenant_health_get_tenant_health_tenant_health_orgId` | [stub] List/get /tenant-health/tenant-health/{orgId} (tenant-health) |
 | `POST` | /tenant-health/tenant-health/{orgId}/compute | `tenant_health_post_tenant_health_tenant_health_orgId_compute` | [stub] Create/invoke /tenant-health/tenant-health/{orgId}/compute (tenant-health) |
-| `GET` | /tenant-health/tenant-health/benchmarks | `tenant_health_get_tenant_health_tenant_health_benchmarks` | [stub] List/get /tenant-health/tenant-health/benchmarks (tenant-health) |
 
 <a id="tenants"></a>
 
@@ -7339,13 +7374,13 @@ Auto-generated tag for terra-cognitive route group
 |--------|------|-------------|---------|
 | `GET` | /terra/terra/cognitive/covenants | `terra_cognitive_get_terra_terra_cognitive_covenants` | [stub] List/get /terra/terra/cognitive/covenants (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants | `terra_cognitive_post_terra_terra_cognitive_covenants` | [stub] Create/invoke /terra/terra/cognitive/covenants (terra-cognitive) |
-| `PATCH` | /terra/terra/cognitive/covenants/{id} | `terra_cognitive_patch_terra_terra_cognitive_covenants_id` | [stub] Patch /terra/terra/cognitive/covenants/{id} (terra-cognitive) |
-| `DELETE` | /terra/terra/cognitive/covenants/{id} | `terra_cognitive_delete_terra_terra_cognitive_covenants_id` | [stub] Delete /terra/terra/cognitive/covenants/{id} (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants/financials/ingest | `terra_cognitive_post_terra_terra_cognitive_covenants_financials_ingest` | [stub] Create/invoke /terra/terra/cognitive/covenants/financials/ingest (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants/financials/sync | `terra_cognitive_post_terra_terra_cognitive_covenants_financials_sync` | [stub] Create/invoke /terra/terra/cognitive/covenants/financials/sync (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants/scan | `terra_cognitive_post_terra_terra_cognitive_covenants_scan` | [stub] Create/invoke /terra/terra/cognitive/covenants/scan (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants/seed | `terra_cognitive_post_terra_terra_cognitive_covenants_seed` | [stub] Create/invoke /terra/terra/cognitive/covenants/seed (terra-cognitive) |
 | `POST` | /terra/terra/cognitive/covenants/submit-review | `terra_cognitive_post_terra_terra_cognitive_covenants_submit_review` | [stub] Create/invoke /terra/terra/cognitive/covenants/submit-review (terra-cognitive) |
+| `PATCH` | /terra/terra/cognitive/covenants/{id} | `terra_cognitive_patch_terra_terra_cognitive_covenants_id` | [stub] Patch /terra/terra/cognitive/covenants/{id} (terra-cognitive) |
+| `DELETE` | /terra/terra/cognitive/covenants/{id} | `terra_cognitive_delete_terra_terra_cognitive_covenants_id` | [stub] Delete /terra/terra/cognitive/covenants/{id} (terra-cognitive) |
 | `GET` | /terra/terra/cognitive/diligence-room | `terra_cognitive_get_terra_terra_cognitive_diligence_room` | [stub] List/get /terra/terra/cognitive/diligence-room (terra-cognitive) |
 | `PATCH` | /terra/terra/cognitive/diligence-room/evidence/{evidenceId} | `terra_cognitive_patch_terra_terra_cognitive_diligence_room_evidence_evidenceId` | [stub] Patch /terra/terra/cognitive/diligence-room/evidence/{evidenceId} (terra-cognitive) |
 | `GET` | /terra/terra/cognitive/diligence-room/evidence/{evidenceId}/download | `terra_cognitive_get_terra_terra_cognitive_diligence_room_evidence_evidenceId_download` | [stub] List/get /terra/terra/cognitive/diligence-room/evidence/{evidenceId}/download (terra-cognitive) |
@@ -7424,9 +7459,9 @@ Auto-generated tag for terra-modules route group
 | `DELETE` | /terra/terra/exchanges-1031/{id} | `terra_modules_delete_terra_terra_exchanges_1031_id` | [stub] Delete /terra/terra/exchanges-1031/{id} (terra-modules) |
 | `GET` | /terra/terra/leases | `terra_modules_get_terra_terra_leases` | [stub] List/get /terra/terra/leases (terra-modules) |
 | `POST` | /terra/terra/leases | `terra_modules_post_terra_terra_leases` | [stub] Create/invoke /terra/terra/leases (terra-modules) |
+| `POST` | /terra/terra/leases/upload | `terra_modules_post_terra_terra_leases_upload` | [stub] Create/invoke /terra/terra/leases/upload (terra-modules) |
 | `PUT` | /terra/terra/leases/{id} | `terra_modules_put_terra_terra_leases_id` | [stub] Update /terra/terra/leases/{id} (terra-modules) |
 | `DELETE` | /terra/terra/leases/{id} | `terra_modules_delete_terra_terra_leases_id` | [stub] Delete /terra/terra/leases/{id} (terra-modules) |
-| `POST` | /terra/terra/leases/upload | `terra_modules_post_terra_terra_leases_upload` | [stub] Create/invoke /terra/terra/leases/upload (terra-modules) |
 | `GET` | /terra/terra/pro-forma-projects | `terra_modules_get_terra_terra_pro_forma_projects` | [stub] List/get /terra/terra/pro-forma-projects (terra-modules) |
 | `POST` | /terra/terra/pro-forma-projects | `terra_modules_post_terra_terra_pro_forma_projects` | [stub] Create/invoke /terra/terra/pro-forma-projects (terra-modules) |
 | `PUT` | /terra/terra/pro-forma-projects/{id} | `terra_modules_put_terra_terra_pro_forma_projects_id` | [stub] Update /terra/terra/pro-forma-projects/{id} (terra-modules) |
@@ -7497,29 +7532,29 @@ Auto-generated tag for traces route group
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
 | `GET` | /runs/runs | `traces_get_runs_runs` | [stub] List/get /runs/runs (traces) |
+| `GET` | /runs/runs/health | `traces_get_runs_runs_health` | [stub] List/get /runs/runs/health (traces) |
 | `GET` | /runs/runs/{id} | `traces_get_runs_runs_id` | [stub] List/get /runs/runs/{id} (traces) |
 | `POST` | /runs/runs/{id}/replay | `traces_post_runs_runs_id_replay` | [stub] Create/invoke /runs/runs/{id}/replay (traces) |
-| `GET` | /runs/runs/health | `traces_get_runs_runs_health` | [stub] List/get /runs/runs/health (traces) |
 | `GET` | /runs/traces | `traces_get_runs_traces` | [stub] List/get /runs/traces (traces) |
+| `GET` | /runs/traces/regressions | `traces_get_runs_traces_regressions` | [stub] List/get /runs/traces/regressions (traces) |
 | `GET` | /runs/traces/{id} | `traces_get_runs_traces_id` | [stub] List/get /runs/traces/{id} (traces) |
 | `POST` | /runs/traces/{id}/comment | `traces_post_runs_traces_id_comment` | [stub] Create/invoke /runs/traces/{id}/comment (traces) |
 | `GET` | /runs/traces/{id}/diff/{compareId} | `traces_get_runs_traces_id_diff_compareId` | [stub] List/get /runs/traces/{id}/diff/{compareId} (traces) |
 | `POST` | /runs/traces/{id}/grade | `traces_post_runs_traces_id_grade` | [stub] Create/invoke /runs/traces/{id}/grade (traces) |
 | `POST` | /runs/traces/{id}/link-entity | `traces_post_runs_traces_id_link_entity` | [stub] Create/invoke /runs/traces/{id}/link-entity (traces) |
 | `POST` | /runs/traces/{id}/replay | `traces_post_runs_traces_id_replay` | [stub] Create/invoke /runs/traces/{id}/replay (traces) |
-| `GET` | /runs/traces/regressions | `traces_get_runs_traces_regressions` | [stub] List/get /runs/traces/regressions (traces) |
 | `GET` | /traces/runs | `traces_get_traces_runs` | [stub] List/get /traces/runs (traces) |
+| `GET` | /traces/runs/health | `traces_get_traces_runs_health` | [stub] List/get /traces/runs/health (traces) |
 | `GET` | /traces/runs/{id} | `traces_get_traces_runs_id` | [stub] List/get /traces/runs/{id} (traces) |
 | `POST` | /traces/runs/{id}/replay | `traces_post_traces_runs_id_replay` | [stub] Create/invoke /traces/runs/{id}/replay (traces) |
-| `GET` | /traces/runs/health | `traces_get_traces_runs_health` | [stub] List/get /traces/runs/health (traces) |
 | `GET` | /traces/traces | `traces_get_traces_traces` | [stub] List/get /traces/traces (traces) |
+| `GET` | /traces/traces/regressions | `traces_get_traces_traces_regressions` | [stub] List/get /traces/traces/regressions (traces) |
 | `GET` | /traces/traces/{id} | `traces_get_traces_traces_id` | [stub] List/get /traces/traces/{id} (traces) |
 | `POST` | /traces/traces/{id}/comment | `traces_post_traces_traces_id_comment` | [stub] Create/invoke /traces/traces/{id}/comment (traces) |
 | `GET` | /traces/traces/{id}/diff/{compareId} | `traces_get_traces_traces_id_diff_compareId` | [stub] List/get /traces/traces/{id}/diff/{compareId} (traces) |
 | `POST` | /traces/traces/{id}/grade | `traces_post_traces_traces_id_grade` | [stub] Create/invoke /traces/traces/{id}/grade (traces) |
 | `POST` | /traces/traces/{id}/link-entity | `traces_post_traces_traces_id_link_entity` | [stub] Create/invoke /traces/traces/{id}/link-entity (traces) |
 | `POST` | /traces/traces/{id}/replay | `traces_post_traces_traces_id_replay` | [stub] Create/invoke /traces/traces/{id}/replay (traces) |
-| `GET` | /traces/traces/regressions | `traces_get_traces_traces_regressions` | [stub] List/get /traces/traces/regressions (traces) |
 
 <a id="trust-provenance"></a>
 
@@ -7546,7 +7581,6 @@ Auto-generated tag for unified-settings route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `DELETE` | /settings/settings/{tier}/{id} | `unified_settings_delete_settings_settings_tier_id` | [stub] Delete /settings/settings/{tier}/{id} (unified-settings) |
 | `GET` | /settings/settings/audit | `unified_settings_get_settings_settings_audit` | [stub] List/get /settings/settings/audit (unified-settings) |
 | `GET` | /settings/settings/platform | `unified_settings_get_settings_settings_platform` | [stub] List/get /settings/settings/platform (unified-settings) |
 | `POST` | /settings/settings/platform | `unified_settings_post_settings_settings_platform` | [stub] Create/invoke /settings/settings/platform (unified-settings) |
@@ -7555,6 +7589,7 @@ Auto-generated tag for unified-settings route group
 | `POST` | /settings/settings/tenant/{orgId} | `unified_settings_post_settings_settings_tenant_orgId` | [stub] Create/invoke /settings/settings/tenant/{orgId} (unified-settings) |
 | `GET` | /settings/settings/user | `unified_settings_get_settings_settings_user` | [stub] List/get /settings/settings/user (unified-settings) |
 | `POST` | /settings/settings/user | `unified_settings_post_settings_settings_user` | [stub] Create/invoke /settings/settings/user (unified-settings) |
+| `DELETE` | /settings/settings/{tier}/{id} | `unified_settings_delete_settings_settings_tier_id` | [stub] Delete /settings/settings/{tier}/{id} (unified-settings) |
 
 <a id="usage"></a>
 
@@ -7579,8 +7614,8 @@ Auto-generated tag for users route group
 |--------|------|-------------|---------|
 | `GET` | /users/admin/audit-log | `users_get_users_admin_audit_log` | [stub] List/get /users/admin/audit-log (users) |
 | `GET` | /users/admin/export-history | `users_get_users_admin_export_history` | [stub] List/get /users/admin/export-history (users) |
-| `POST` | /users/admin/impersonate/{userId} | `users_post_users_admin_impersonate_userId` | [stub] Create/invoke /users/admin/impersonate/{userId} (users) |
 | `POST` | /users/admin/impersonate/end | `users_post_users_admin_impersonate_end` | [stub] Create/invoke /users/admin/impersonate/end (users) |
+| `POST` | /users/admin/impersonate/{userId} | `users_post_users_admin_impersonate_userId` | [stub] Create/invoke /users/admin/impersonate/{userId} (users) |
 | `GET` | /users/admin/roles | `users_get_users_admin_roles` | [stub] List/get /users/admin/roles (users) |
 | `DELETE` | /users/admin/sessions/{userId} | `users_delete_users_admin_sessions_userId` | [stub] Delete /users/admin/sessions/{userId} (users) |
 | `GET` | /users/admin/users | `users_get_users_admin_users` | [stub] List/get /users/admin/users (users) |
@@ -7624,9 +7659,9 @@ Auto-generated tag for verifier route group
 |--------|------|-------------|---------|
 | `GET` | /verifier/verifier | `verifier_get_verifier_verifier` | [stub] List/get /verifier/verifier (verifier) |
 | `POST` | /verifier/verifier | `verifier_post_verifier_verifier` | [stub] Create/invoke /verifier/verifier (verifier) |
+| `GET` | /verifier/verifier/target/{targetType}/{targetId} | `verifier_get_verifier_verifier_target_targetType_targetId` | [stub] List/get /verifier/verifier/target/{targetType}/{targetId} (verifier) |
 | `GET` | /verifier/verifier/{id} | `verifier_get_verifier_verifier_id` | [stub] List/get /verifier/verifier/{id} (verifier) |
 | `DELETE` | /verifier/verifier/{id} | `verifier_delete_verifier_verifier_id` | [stub] Delete /verifier/verifier/{id} (verifier) |
-| `GET` | /verifier/verifier/target/{targetType}/{targetId} | `verifier_get_verifier_verifier_target_targetType_targetId` | [stub] List/get /verifier/verifier/target/{targetType}/{targetId} (verifier) |
 
 <a id="vessels-cognitive"></a>
 
@@ -7661,12 +7696,6 @@ Auto-generated tag for vessels-extended route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
-| `GET` | /vessels/vessels/{id}/detail | `vessels_extended_get_vessels_vessels_id_detail` | [stub] List/get /vessels/vessels/{id}/detail (vessels-extended) |
-| `GET` | /vessels/vessels/{id}/exceptions | `vessels_extended_get_vessels_vessels_id_exceptions` | [stub] List/get /vessels/vessels/{id}/exceptions (vessels-extended) |
-| `GET` | /vessels/vessels/{id}/maintenance | `vessels_extended_get_vessels_vessels_id_maintenance` | [stub] List/get /vessels/vessels/{id}/maintenance (vessels-extended) |
-| `GET` | /vessels/vessels/{id}/port-calls | `vessels_extended_get_vessels_vessels_id_port_calls` | [stub] List/get /vessels/vessels/{id}/port-calls (vessels-extended) |
-| `GET` | /vessels/vessels/{id}/sanctions | `vessels_extended_get_vessels_vessels_id_sanctions` | [stub] List/get /vessels/vessels/{id}/sanctions (vessels-extended) |
-| `GET` | /vessels/vessels/{id}/voyages | `vessels_extended_get_vessels_vessels_id_voyages` | [stub] List/get /vessels/vessels/{id}/voyages (vessels-extended) |
 | `GET` | /vessels/vessels/corridors | `vessels_extended_get_vessels_vessels_corridors` | [stub] List/get /vessels/vessels/corridors (vessels-extended) |
 | `GET` | /vessels/vessels/corridors/{id} | `vessels_extended_get_vessels_vessels_corridors_id` | [stub] List/get /vessels/vessels/corridors/{id} (vessels-extended) |
 | `GET` | /vessels/vessels/dashboard | `vessels_extended_get_vessels_vessels_dashboard` | [stub] List/get /vessels/vessels/dashboard (vessels-extended) |
@@ -7688,10 +7717,16 @@ Auto-generated tag for vessels-extended route group
 | `POST` | /vessels/vessels/seed | `vessels_extended_post_vessels_vessels_seed` | [stub] Create/invoke /vessels/vessels/seed (vessels-extended) |
 | `GET` | /vessels/vessels/track/{vesselId} | `vessels_extended_get_vessels_vessels_track_vesselId` | [stub] List/get /vessels/vessels/track/{vesselId} (vessels-extended) |
 | `GET` | /vessels/vessels/voyage-economics | `vessels_extended_get_vessels_vessels_voyage_economics` | [stub] List/get /vessels/vessels/voyage-economics (vessels-extended) |
-| `GET` | /vessels/vessels/voyage-economics/{id} | `vessels_extended_get_vessels_vessels_voyage_economics_id` | [stub] List/get /vessels/vessels/voyage-economics/{id} (vessels-extended) |
 | `GET` | /vessels/vessels/voyage-economics/analytics | `vessels_extended_get_vessels_vessels_voyage_economics_analytics` | [stub] List/get /vessels/vessels/voyage-economics/analytics (vessels-extended) |
+| `GET` | /vessels/vessels/voyage-economics/{id} | `vessels_extended_get_vessels_vessels_voyage_economics_id` | [stub] List/get /vessels/vessels/voyage-economics/{id} (vessels-extended) |
 | `GET` | /vessels/vessels/voyages | `vessels_extended_get_vessels_vessels_voyages` | [stub] List/get /vessels/vessels/voyages (vessels-extended) |
 | `GET` | /vessels/vessels/voyages/{id} | `vessels_extended_get_vessels_vessels_voyages_id` | [stub] List/get /vessels/vessels/voyages/{id} (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/detail | `vessels_extended_get_vessels_vessels_id_detail` | [stub] List/get /vessels/vessels/{id}/detail (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/exceptions | `vessels_extended_get_vessels_vessels_id_exceptions` | [stub] List/get /vessels/vessels/{id}/exceptions (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/maintenance | `vessels_extended_get_vessels_vessels_id_maintenance` | [stub] List/get /vessels/vessels/{id}/maintenance (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/port-calls | `vessels_extended_get_vessels_vessels_id_port_calls` | [stub] List/get /vessels/vessels/{id}/port-calls (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/sanctions | `vessels_extended_get_vessels_vessels_id_sanctions` | [stub] List/get /vessels/vessels/{id}/sanctions (vessels-extended) |
+| `GET` | /vessels/vessels/{id}/voyages | `vessels_extended_get_vessels_vessels_id_voyages` | [stub] List/get /vessels/vessels/{id}/voyages (vessels-extended) |
 
 <a id="vessels-freight"></a>
 
@@ -7798,11 +7833,11 @@ Auto-generated tag for vessels-psc route group
 
 | Method | Path | Operation ID | Summary |
 |--------|------|-------------|---------|
+| `PATCH` | /vessels/vessels/psc/checklist/{itemId} | `vessels_psc_patch_vessels_vessels_psc_checklist_itemId` | [stub] Patch /vessels/vessels/psc/checklist/{itemId} (vessels-psc) |
+| `GET` | /vessels/vessels/psc/profiles | `vessels_psc_get_vessels_vessels_psc_profiles` | [stub] List/get /vessels/vessels/psc/profiles (vessels-psc) |
 | `GET` | /vessels/vessels/{id}/psc/checklist | `vessels_psc_get_vessels_vessels_id_psc_checklist` | [stub] List/get /vessels/vessels/{id}/psc/checklist (vessels-psc) |
 | `POST` | /vessels/vessels/{id}/psc/checklist | `vessels_psc_post_vessels_vessels_id_psc_checklist` | [stub] Create/invoke /vessels/vessels/{id}/psc/checklist (vessels-psc) |
 | `GET` | /vessels/vessels/{id}/psc/inspections | `vessels_psc_get_vessels_vessels_id_psc_inspections` | [stub] List/get /vessels/vessels/{id}/psc/inspections (vessels-psc) |
-| `PATCH` | /vessels/vessels/psc/checklist/{itemId} | `vessels_psc_patch_vessels_vessels_psc_checklist_itemId` | [stub] Patch /vessels/vessels/psc/checklist/{itemId} (vessels-psc) |
-| `GET` | /vessels/vessels/psc/profiles | `vessels_psc_get_vessels_vessels_psc_profiles` | [stub] List/get /vessels/vessels/psc/profiles (vessels-psc) |
 
 <a id="vessels-trading"></a>
 

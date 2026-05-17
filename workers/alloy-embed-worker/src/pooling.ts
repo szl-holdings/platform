@@ -36,7 +36,7 @@ function meanPooling(tokenVectors: number[][]): number[] {
       throw new Error(`meanPooling: dimension mismatch — expected ${dim}, got ${vec.length}`);
     }
     for (let i = 0; i < dim; i++) {
-      sum[i]! += vec[i]!;
+      sum[i] = (sum[i] ?? 0) + (vec[i] ?? 0);
     }
   }
 
