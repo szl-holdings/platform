@@ -87,5 +87,54 @@
     "artifacts/api-server/"
   ],
   "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
-  "lineAllowlist": []
+  "lineAllowlist": [
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 7,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — INCA_CEQUES=41 and INCA_HUACAS=328 are real ceque-system metrics, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 54,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA is the ceques/huacas ratio constant, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 100,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — test description for ceques/huacas ratio, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 101,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA constant assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 102,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — incaCequeHuacasPerDay() function assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 434,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — test #25 title referencing ceques and huacas, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 435,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — Q_I_INCA constant assertion, not the banned product codename"
+    },
+    {
+      "file": "tests/api/innovations-formula-codex-binding.test.ts",
+      "line": 436,
+      "term": "INCA",
+      "reason": "Historical Inca civilization reference — incaCequeHuacasPerDay() function assertion, not the banned product codename"
+    }
+  ]
 }
