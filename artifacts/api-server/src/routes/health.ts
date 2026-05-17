@@ -190,6 +190,33 @@ router.get('/healthz', async (_req, res) => {
         remoteUpload: backupHealth.remoteUpload,
       },
     },
+    orchestrator: await (async () => {
+      const isEnabled =
+        process.env.A11OY_ORCHESTRATOR_ENABLED === 'true' ||
+        (process.env.NODE_ENV !== 'production' && process.env.A11OY_ORCHESTRATOR_ENABLED !== 'false');
+      if (!isEnabled) return { featureEnabled: false };
+      try {
+        const result = await healthPool.query(
+          `SELECT
+             COUNT(*) FILTER (WHERE lifecycle = 'active')::int AS active_packs,
+             COUNT(*) FILTER (WHERE lifecycle = 'pending_activation')::int AS pending_packs,
+             COUNT(*)::int AS total_packs
+           FROM domain_packs`,
+        );
+        const row = result.rows[0];
+        return {
+          featureEnabled: true,
+          ready: true,
+          migrationsApplied: true,
+          registryQueryable: true,
+          activePacks: row?.active_packs ?? 0,
+          pendingPacks: row?.pending_packs ?? 0,
+          totalPacks: row?.total_packs ?? 0,
+        };
+      } catch {
+        return { featureEnabled: true, ready: false, registryQueryable: false };
+      }
+    })(),
     platform: {
       apps: PLATFORM_APPS,
       totalApps: PLATFORM_APPS.length,
@@ -232,6 +259,58 @@ router.get('/health/detailed', productionAdminGuard, async (_req: Request, res: 
     FIELD_ENCRYPTION_KEY: !!process.env.FIELD_ENCRYPTION_KEY,
   };
 
+  const orchestratorHealth = await (async () => {
+    const isEnabled =
+      process.env.A11OY_ORCHESTRATOR_ENABLED === 'true' ||
+      (process.env.NODE_ENV !== 'production' &&
+        process.env.A11OY_ORCHESTRATOR_ENABLED !== 'false');
+    if (!isEnabled) return { featureEnabled: false };
+    try {
+      const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [packStats, activations24h, lastFailEvent] = await Promise.all([
+        healthPool.query<{
+          active_packs: number; draft_packs: number;
+          pending_packs: number; total_packs: number;
+        }>(
+          `SELECT
+             COUNT(*) FILTER (WHERE lifecycle = 'active')::int       AS active_packs,
+             COUNT(*) FILTER (WHERE lifecycle = 'draft')::int        AS draft_packs,
+             COUNT(*) FILTER (WHERE lifecycle = 'pending_activation')::int AS pending_packs,
+             COUNT(*)::int                                           AS total_packs
+           FROM domain_packs`,
+        ),
+        healthPool.query<{ cnt: number }>(
+          `SELECT COUNT(*)::int AS cnt FROM domain_pack_audit_events
+           WHERE action = 'activated' AND created_at > $1`,
+          [since24h],
+        ),
+        healthPool.query<{ detail: unknown }>(
+          `SELECT detail FROM domain_pack_audit_events
+           WHERE outcome = 'fail' ORDER BY created_at DESC LIMIT 1`,
+        ),
+      ]);
+      const row = packStats.rows[0];
+      return {
+        featureEnabled: true,
+        migrationsApplied: true,
+        registryQueryable: true,
+        activePacks:      row?.active_packs  ?? 0,
+        draftPacks:       row?.draft_packs   ?? 0,
+        pendingPacks:     row?.pending_packs ?? 0,
+        totalPacks:       row?.total_packs   ?? 0,
+        activations24h:   activations24h.rows[0]?.cnt ?? 0,
+        lastActivationErrorDetail: lastFailEvent.rows[0]?.detail ?? null,
+      };
+    } catch (err) {
+      return {
+        featureEnabled: true,
+        migrationsApplied: false,
+        registryQueryable: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  })();
+
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -264,6 +343,7 @@ router.get('/health/detailed', productionAdminGuard, async (_req: Request, res: 
       apps: PLATFORM_APPS,
       totalApps: PLATFORM_APPS.length,
     },
+    orchestrator: orchestratorHealth,
     envStatus: sensitiveEnvStatus,
   });
 });

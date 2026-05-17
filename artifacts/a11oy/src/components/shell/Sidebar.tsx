@@ -8,7 +8,7 @@ import {
   Briefcase, FileText, Target, GitBranch, Database, Lock,
   GitFork, History, BookOpen, SquareTerminal, Sliders,
   FlaskConical, Workflow, Download, BarChart2, BookMarked, ShieldAlert,
-  Swords, Waves, Microscope, TrendingUp, FlaskRound,
+  Swords, Waves, Microscope, TrendingUp, FlaskRound, Package, PenTool, Share2, HeartPulse,
   Palette, Sigma, MessageSquare, Brain, Beaker,
   Box, Cog, Newspaper, KeyRound, Boxes, Wrench,
   Gauge, Search, DollarSign, Mic2,
@@ -284,6 +284,20 @@ const psycheSections: NavSection[] = [
   },
 ];
 
+const orchestratorSections: NavSection[] = [
+  {
+    id: 'vertical-orchestrator',
+    label: 'Vertical Orchestrator',
+    defaultOpen: false,
+    items: [
+      { id: 'orch-catalog', name: 'Domain Pack Catalog', icon: Package, path: '/orchestrator/catalog' },
+      { id: 'orch-compose', name: 'Compose Pack', icon: PenTool, path: '/orchestrator/compose' },
+      { id: 'orch-wiring', name: 'Governance Wiring', icon: Share2, path: '/orchestrator/wiring/counsel' },
+      { id: 'orch-health', name: 'Pack Health', icon: HeartPulse, path: '/orchestrator/health/counsel' },
+    ],
+  },
+];
+
 const argoSections: NavSection[] = [
   {
     id: 'argo-core',
@@ -453,6 +467,15 @@ export function Sidebar() {
 
         <SectionHeader>PSYCHE</SectionHeader>
         {psycheSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+
+        {(import.meta.env.PROD
+          ? import.meta.env.VITE_A11OY_ORCHESTRATOR_ENABLED === 'true'
+          : import.meta.env.VITE_A11OY_ORCHESTRATOR_ENABLED !== 'false') && (
+          <>
+            <SectionHeader>Vertical Orchestrator</SectionHeader>
+            {orchestratorSections.map(s => <CollapsibleSection key={s.id} section={s} />)}
+          </>
+        )}
 
         <SectionHeader>Argo</SectionHeader>
         {argoSections.map(s => <CollapsibleSection key={s.id} section={s} />)}

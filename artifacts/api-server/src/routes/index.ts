@@ -883,4 +883,20 @@ router.use(lazyMatch("/governance", () => import("./governance-gates"), "governa
 // GET  /eval-harness/gate-status
 router.use(lazyMatch("/eval-harness", () => import("./eval-harness"), "eval-harness"));
 
+// A11oy Vertical Orchestrator — self-serve DomainPack onboarding.
+// Feature flag: A11OY_ORCHESTRATOR_ENABLED (default off in prod, on in dev).
+// Mounted at /a11oy/orchestrator/* to align with the A11oy frontend useApiData base (/api/a11oy).
+// GET    /a11oy/orchestrator/packs                          — catalog (public A11oy surface)
+// GET    /a11oy/orchestrator/packs/:slug                    — single pack detail
+// POST   /a11oy/orchestrator/packs                          — draft new pack (adminGuard)
+// POST   /a11oy/orchestrator/packs/:slug/validate           — validate pack body (adminGuard)
+// POST   /a11oy/orchestrator/packs/:slug/request-activation — submit for approval queue (adminGuard)
+// POST   /a11oy/orchestrator/packs/:slug/activate           — approve activation (adminGuard)
+// POST   /a11oy/orchestrator/packs/:slug/reject             — reject pending pack (adminGuard)
+// DELETE /a11oy/orchestrator/packs/:slug                    — delete draft/rejected pack (adminGuard)
+// GET    /a11oy/orchestrator/packs/:slug/health             — per-pack health KPIs
+// GET    /a11oy/orchestrator/packs/:slug/audit              — pack audit trail
+// GET    /a11oy/orchestrator/status                         — orchestrator readiness probe
+router.use(lazyMatch("/a11oy/orchestrator", () => import("./a11oy-vertical-orchestrator"), "a11oy-vertical-orchestrator"));
+
 export default router;

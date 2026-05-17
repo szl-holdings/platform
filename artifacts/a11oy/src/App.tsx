@@ -164,6 +164,10 @@ const CapabilityFabric = lazy(() => import('./pages/CapabilityFabric').then(m =>
 const PlannerCanvas = lazy(() => import('./pages/PlannerCanvas').then(m => ({ default: m.PlannerCanvas })));
 const OntologyGraph = lazy(() => import('./pages/OntologyGraph').then(m => ({ default: m.OntologyGraph })));
 const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ default: m.LearningLoop })));
+const OrchestratorCatalog = lazy(() => import('./pages/orchestrator/OrchestratorCatalog').then(m => ({ default: m.OrchestratorCatalog })));
+const OrchestratorCompose = lazy(() => import('./pages/orchestrator/OrchestratorCompose').then(m => ({ default: m.OrchestratorCompose })));
+const OrchestratorWiring = lazy(() => import('./pages/orchestrator/OrchestratorWiring').then(m => ({ default: m.OrchestratorWiring })));
+const OrchestratorHealth = lazy(() => import('./pages/orchestrator/OrchestratorHealth').then(m => ({ default: m.OrchestratorHealth })));
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
@@ -1605,6 +1609,17 @@ function AppInner() {
         <Route path="/nexus">
           <RedirectTo to="/primitives" />
         </Route>
+        {/* ── Vertical Orchestrator ── */}
+        {(import.meta.env.PROD
+          ? import.meta.env.VITE_A11OY_ORCHESTRATOR_ENABLED === 'true'
+          : import.meta.env.VITE_A11OY_ORCHESTRATOR_ENABLED !== 'false') && (
+          <>
+            <Route path={`${base}/orchestrator/wiring/:slug`} component={OrchestratorWiring} />
+            <Route path={`${base}/orchestrator/health/:slug`} component={OrchestratorHealth} />
+            <Route path={`${base}/orchestrator/catalog`} component={OrchestratorCatalog} />
+            <Route path={`${base}/orchestrator/compose`} component={OrchestratorCompose} />
+          </>
+        )}
         <Route path="/a11oy/:rest*">
           <LegacyA11oyRedirect />
         </Route>
