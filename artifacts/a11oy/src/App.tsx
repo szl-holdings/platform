@@ -731,6 +731,7 @@ function AppInner() {
         <Route path={`${base}/cognitive-reflexivity`} component={CognitiveReflexivity} />
         <Route path={`${base}/ouroboros`} component={Ouroboros} />
         <Route path={`${base}/thesis`} component={Thesis} />
+        <Route path={`${base}/thesis/:version`} component={Thesis} />
         <Route path={`${base}/formulas/:id`} component={CodexNode} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route path={`${base}/doctrine`} component={DoctrineOverview} />

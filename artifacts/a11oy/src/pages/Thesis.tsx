@@ -1,29 +1,70 @@
 /**
- * A11oy /thesis — Canonical Ouroboros Thesis v9 surface.
+ * A11oy /thesis — Canonical Ouroboros Thesis viewer.
+ *
+ * Routes:
+ *   /a11oy/thesis             → default to the latest available canonical
+ *   /a11oy/thesis/:version    → load docs/thesis/<version>-canonical.md
+ *                               where :version is "v9", "v10", etc.
  *
  * Two-pane layout:
- *   – Left: TOC of every heading in docs/thesis/v9-canonical.md
+ *   – Left: TOC of every heading in the currently-loaded canonical
  *   – Right: live KPI cards, formula cards (v1..v7+Ω) deep-linking to
  *            /a11oy/formulas/<codex-node-id> and to /api/ouroboros/lutar/*,
  *            then the FULL canonical thesis rendered inline with stable
  *            anchors (so a TOC click and a /formulas page back-link both
  *            scroll to the right section).
  *
- * The canonical markdown file is imported via Vite's `?raw` so it is bundled
- * at build time — there is no extra request, no drift, and no re-authoring.
+ * All canonical markdown files are imported via Vite's `?raw` so they are
+ * bundled at build time — there is no extra request, no drift, and no
+ * re-authoring. Discovery citations (`v10-canonical#…`, `v8-canonical#…`)
+ * resolve to the right doc by selecting the matching version here.
  *
  * Author: Stephen P. Lutar — SZL Holdings — ORCID 0009-0001-0110-4173
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useRoute } from 'wouter';
 import { Layout } from '../components/layout';
 import { Card, PageHeader, SectionTitle, KpiCard, StatusPill } from '../components/ui';
-// Vite: import the canonical thesis markdown as a raw string at build time.
-// Path is relative from artifacts/a11oy/src/pages/ → repo-root docs/thesis/.
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore — vite '?raw' import
-import canonicalMarkdown from '../../../../docs/thesis/v9-canonical.md?raw';
 import { THESIS_LINEAGE, THESIS_PAPERS } from '@szl-holdings/payload';
+
+// Vite: eagerly import every v{N}-canonical.md as a raw string at build time.
+// Path is relative from artifacts/a11oy/src/pages/ → repo-root docs/thesis/.
+const CANONICAL_MODULES = import.meta.glob('../../../../docs/thesis/v*-canonical.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+interface CanonicalDoc {
+  version: string; // e.g. "v9", "v10"
+  versionNum: number; // 9, 10 — used for ordering
+  slug: string; // e.g. "v9-canonical"
+  markdown: string;
+}
+
+const CANONICAL_DOCS: CanonicalDoc[] = Object.entries(CANONICAL_MODULES)
+  .map(([path, markdown]): CanonicalDoc | null => {
+    const m = /\/v(\d+)-canonical\.md$/.exec(path);
+    if (!m) return null;
+    const versionNum = Number(m[1]);
+    return {
+      version: `v${versionNum}`,
+      versionNum,
+      slug: `v${versionNum}-canonical`,
+      markdown,
+    };
+  })
+  .filter((d): d is CanonicalDoc => d !== null)
+  .sort((a, b) => a.versionNum - b.versionNum);
+
+// Default canonical = highest version found on disk.
+const LATEST_CANONICAL: CanonicalDoc =
+  CANONICAL_DOCS[CANONICAL_DOCS.length - 1] ?? {
+    version: 'v9',
+    versionNum: 9,
+    slug: 'v9-canonical',
+    markdown: '',
+  };
 
 const GOLD = '#c9b787';
 const GREY = '#8a8a8a';
@@ -276,6 +317,20 @@ function FormulaCard({ row }: { row: FormulaRow }) {
 }
 
 export default function Thesis() {
+  const [, params] = useRoute(`${BASE}/thesis/:version`);
+  const requestedVersion = params?.version;
+
+  // Resolve the requested version (e.g. "v9", "v10") against the bundled
+  // canonical docs. Fall back to the latest available version when the route
+  // is `/thesis` with no param, or when the requested version is unknown.
+  const { active, missing } = useMemo(() => {
+    if (!requestedVersion) return { active: LATEST_CANONICAL, missing: false };
+    const normalized = requestedVersion.toLowerCase().replace(/-canonical$/, '');
+    const found = CANONICAL_DOCS.find((d) => d.version === normalized);
+    if (found) return { active: found, missing: false };
+    return { active: LATEST_CANONICAL, missing: true };
+  }, [requestedVersion]);
+
   const [summary, setSummary] = useState<CodexSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -288,24 +343,79 @@ export default function Thesis() {
     return () => { cancelled = true; };
   }, []);
 
+  // After the active canonical's content mounts, scroll to the hash anchor
+  // (if any). Router-driven version switches don't reliably fire native
+  // hash scrolling, so we do it explicitly whenever the version changes.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+    // Defer until after layout so the freshly-rendered headings exist.
+    const id = window.setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [active.version]);
+
   const newInV9 = useMemo(() => FORMULA_ROWS.filter((r) => r.newInV9).length, []);
 
-  // Build a TOC from h2 headings in canonicalMarkdown
+  // Build a TOC from h2 headings in the active canonical doc.
   const toc = useMemo(() => {
-    return tokenize(canonicalMarkdown as string)
+    return tokenize(active.markdown)
       .filter((t) => t.type === 'h2')
       .map((t) => ({ text: t.text!, anchor: t.anchor! }));
-  }, []);
+  }, [active.markdown]);
+
+  const headerTitle =
+    active.versionNum >= 10
+      ? `${active.version} — EXHAUSTIVE-AUDIT`
+      : `${active.version} — UNIFIED-OPERATIONAL`;
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6" style={{ color: '#f5f5f5' }}>
         <PageHeader
           label="OUROBOROS THESIS"
-          title="v10 — EXHAUSTIVE-AUDIT"
+          title={headerTitle}
           subtitle="The Lutar Invariant family v1 → v7 + Ω, sealed by the Λ₁₀ Audit Closure Operator over six artefact dimensions"
           status="LIVE"
         />
+
+        {/* Version picker — reviewers can jump between every canonical
+            revision available on disk. Citations from the Frontier Inbox
+            land here pre-selected via `/thesis/:version#heading`. */}
+        <Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-mono uppercase" style={{ color: GREY, letterSpacing: '0.08em' }}>
+              Canonical revision
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {CANONICAL_DOCS.map((d) => {
+                const isActive = d.version === active.version;
+                return (
+                  <Link
+                    key={d.version}
+                    href={`${BASE}/thesis/${d.version}`}
+                    className="px-2 py-1 rounded font-mono text-xs hover:opacity-80"
+                    style={{
+                      backgroundColor: isActive ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.04)',
+                      color: isActive ? GOLD : '#d4d4d4',
+                      border: `1px solid ${isActive ? GOLD : 'rgba(245,245,245,0.12)'}`,
+                    }}
+                  >
+                    {d.slug}
+                  </Link>
+                );
+              })}
+            </div>
+            {missing && requestedVersion && (
+              <span className="text-[10px] font-mono ml-auto" style={{ color: '#e08a4a' }}>
+                No canonical doc for "{requestedVersion}" — showing {active.slug}
+              </span>
+            )}
+          </div>
+        </Card>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <KpiCard label="Lutar versions" value={FORMULA_ROWS.length} sub="v1..v7 + Ω" accent={GOLD} />
@@ -345,7 +455,7 @@ export default function Thesis() {
             </ul>
             <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(245,245,245,0.08)' }}>
               <div style={{ color: GREY, marginBottom: 4 }}>Source</div>
-              <code className="text-xs font-mono">docs/thesis/v9-canonical.md</code>
+              <code className="text-xs font-mono">docs/thesis/{active.slug}.md</code>
             </div>
           </aside>
 
@@ -373,7 +483,7 @@ export default function Thesis() {
                 <div>Source: @szl-holdings/payload</div>
               </div>
             </div>
-            <MarkdownView md={canonicalMarkdown as string} />
+            <MarkdownView md={active.markdown} />
           </Card>
         </div>
 

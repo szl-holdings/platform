@@ -101,7 +101,12 @@ function ThesisCitations({ citations }: { citations: ThesisCitation[] }) {
       <span className="text-[10px] font-mono uppercase text-neutral-500">thesis-RAG</span>
       {citations.map((c, i) => {
         const anchor = c.heading ? `#${slugifyHeading(c.heading)}` : '';
-        const href = `${BASE}/thesis${anchor}`;
+        // Pull the version slug (e.g. "v10") out of a docId like
+        // "v10-canonical" so the link routes to /thesis/v10 and lands on
+        // the correct canonical revision rather than the default one.
+        const versionMatch = /^v(\d+)(?:-canonical)?$/i.exec(c.docId.trim());
+        const versionSeg = versionMatch ? `/v${versionMatch[1]}` : '';
+        const href = `${BASE}/thesis${versionSeg}${anchor}`;
         const label = c.heading || c.docId;
         return (
           <Link
