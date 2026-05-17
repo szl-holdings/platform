@@ -53,6 +53,9 @@ import {
   V7_PANEL_FACTS,
   V7_PRS,
   V7_SPECIALISTS,
+  THESIS_LINEAGE,
+  THESIS_PAPERS,
+  THESIS_TIMELINE,
   getRepoFacts,
   hasRepo,
   panelRepoFacts,
@@ -343,6 +346,15 @@ describe("layer 3 — panels render only payload-derived facts", () => {
           REPLAY_ROOT_FULL: DOCTRINE.replayRoot,
           SZL_BRAND_SHA: getRepoFacts("szl-brand").latestCommitSha,
           LUTAR_LEAN_SHA: getRepoFacts("lutar-lean").latestCommitSha,
+          // Top-level thesis exports referenced by every panel.
+          THESIS_LINEAGE,
+          THESIS_PAPERS,
+          THESIS_TIMELINE,
+          // Mocked `.map((p) => ...)` closure variable. Panels iterate
+          // THESIS_PAPERS and reference `p.key`, `p.status`, `p.version`,
+          // etc. inside the callback — bind a real paper so those
+          // expressions resolve without us having to parse the JSX scope.
+          p: THESIS_PAPERS[0],
         };
 
         // Extract every JSX `value={...}` expression body. This regex is
