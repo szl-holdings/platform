@@ -295,6 +295,7 @@ const VoyageDeskPage = lazy(() => import('@/pages/voyage-desk'));
 const FleetWhatChangedPage = lazy(() => import('@/pages/fleet-what-changed'));
 const ExceptionQueuePage = lazy(() => import('@/pages/exception-queue'));
 const RouteRiskPage = lazy(() => import('@/pages/route-risk'));
+const VesselsCpsLaneConsolePage = lazy(() => import('@/pages/cps-lane-console'));
 const ConstellationPage = lazy(() => import('@/pages/constellation'));
 const VesselsApprovalReviewPage = lazy(() => import('@/pages/vessels-approval-review'));
 const TrustProvenancePage = lazy(() => import('@/pages/trust-provenance'));
@@ -896,6 +897,12 @@ function VesselsSidebarContent({
           icon: <Navigation className="w-3.5 h-3.5" />,
         },
         {
+          id: 'cps-console',
+          label: 'CPS — Route Risk',
+          href: '/cps-console',
+          icon: <Shield className="w-3.5 h-3.5" />,
+        },
+        {
           id: 'approval-review',
           label: 'Review & Approval',
           href: '/approval-review',
@@ -1181,6 +1188,7 @@ function DashboardRouter() {
         <Route path="/what-changed" component={FleetWhatChangedPage} />
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
+        <Route path="/cps-console" component={VesselsCpsLaneConsolePage} />
         <Route path="/constellation" component={ConstellationPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />

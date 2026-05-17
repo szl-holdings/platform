@@ -109,6 +109,7 @@ const DiligencePrep = lazy(() => import('@/pages/diligence-prep'));
 const ReadinessBoard = lazy(() => import('@/pages/readiness-board'));
 const ApprovalReview = lazy(() => import('@/pages/approval-review'));
 const TrustProvenancePage = lazy(() => import('@/pages/trust-provenance'));
+const TerraCpsLaneConsolePage = lazy(() => import('@/pages/cps-lane-console'));
 const DistressRadar = lazy(() => import('@/pages/distress-radar'));
 const NeighborhoodMomentum = lazy(() => import('@/pages/neighborhood-momentum'));
 const SellerMotivation = lazy(() => import('@/pages/seller-motivation'));
@@ -218,6 +219,7 @@ function PrivateRouter() {
         <Route path="/readiness-board" component={ReadinessBoard} />
         <Route path="/approval-review" component={ApprovalReview} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
+        <Route path="/cps-console" component={TerraCpsLaneConsolePage} />
         <Route path="/distress-radar" component={DistressRadar} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/forecast" component={ForecastPage} />
@@ -353,6 +355,15 @@ const terraCommands: CommandItem[] = [
     group: 'Navigation',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/transactions');
+    },
+  },
+  {
+    id: 'nav-cps-console',
+    label: 'CPS — Market Anomaly',
+    icon: '⚡',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/cps-console');
     },
   },
   {

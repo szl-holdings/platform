@@ -676,6 +676,31 @@ export function canApproveAtTier(principal: CpsPrincipal, tier: CpsApprovalTier)
   return principal.roles.some((r) => requiredRoles.includes(r));
 }
 
+const CROSS_LANE_CATEGORIES = new Set([
+  'maritime-compliance',
+  'real-estate-risk',
+  'legal-risk',
+  'client-protection',
+]);
+
+function publishCrossLaneSignalIfApplicable(
+  run: CpsPayloadRun,
+  payload: CpsPayloadDefinition,
+  proofBundle: CpsProofBundle,
+): void {
+  if (!CROSS_LANE_CATEGORIES.has(payload.category)) return;
+  domainEventBus.publish('cross-lane.incident-signal', {
+    source: payload.category,
+    payloadId: payload.id,
+    runId: run.id,
+    riskLevel: run.decide?.riskLevel ?? 'low',
+    actionCount: run.actions.length,
+    proofBundleId: proofBundle.id,
+    linkedCaseId: run.linkedCaseId,
+    timestamp: run.completedAt,
+  });
+}
+
 export async function executePayloadRun(
   payloadId: string,
   principal: CpsPrincipal,
@@ -835,6 +860,8 @@ export async function executePayloadRun(
       proofBundleId: proofBundle.id,
       linkedCaseId: run.linkedCaseId,
     });
+
+    publishCrossLaneSignalIfApplicable(run, payload, proofBundle);
   } catch (err) {
     run.status = 'failed';
     run.error = err instanceof Error ? err.message : String(err);
@@ -988,6 +1015,8 @@ export async function approveRun(
     proofBundleId: proofBundle.id,
     linkedCaseId: run.linkedCaseId,
   });
+
+  publishCrossLaneSignalIfApplicable(run, payload, proofBundle);
 
   return run;
 }

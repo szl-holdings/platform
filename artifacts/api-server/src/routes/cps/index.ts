@@ -27,8 +27,18 @@ import {
 } from '../../lib/domain-services/cps/index.js';
 import { FLAGSHIP_PAYLOADS } from '../../lib/domain-services/cps/payloads.js';
 import { checkPayloadMaturityGate } from '../../jobs/adversary-emulation-loop.js';
+import { VESSELS_CPS_PAYLOADS } from '../../lib/domain-services/vessels/cps-payload.js';
+import { TERRA_CPS_PAYLOADS } from '../../lib/domain-services/terra/cps-payload.js';
+import { COUNSEL_CPS_PAYLOADS } from '../../lib/domain-services/prism-counsel/cps-payload.js';
+import { CARLOTA_CPS_PAYLOADS } from '../../lib/domain-services/carlota-jo/cps-payload.js';
 
-for (const payload of FLAGSHIP_PAYLOADS) {
+for (const payload of [
+  ...FLAGSHIP_PAYLOADS,
+  ...VESSELS_CPS_PAYLOADS,
+  ...TERRA_CPS_PAYLOADS,
+  ...COUNSEL_CPS_PAYLOADS,
+  ...CARLOTA_CPS_PAYLOADS,
+]) {
   registerPayload(payload);
 }
 

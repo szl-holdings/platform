@@ -65,6 +65,7 @@ const DecisionCenterPage = lazy(() => import('./pages/decision-center'));
 const AlertsPage = lazy(() => import('./pages/alerts'));
 const ApprovalsPage = lazy(() => import('./pages/approvals'));
 const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
+const CounselCpsLaneConsolePage = lazy(() => import('./pages/cps-lane-console'));
 const AefKnowledgeSearchPage = lazy(() => import('./pages/aef-knowledge-search'));
 const ForecastPage = lazy(() => import('./pages/forecast'));
 const MatterKnowledgePage = lazy(() => import('./pages/matter-knowledge'));
@@ -168,6 +169,12 @@ function CounselSidebarContent({
           label: 'Approvals',
           href: '/approvals',
           icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/cps-console',
+          label: 'CPS — Docket Risk',
+          href: '/cps-console',
+          icon: <Shield className="w-3.5 h-3.5" />,
         },
         {
           id: '/trust',
@@ -372,6 +379,7 @@ function DashboardRouter() {
         <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/approvals" component={ApprovalsPage} />
+        <Route path="/cps-console" component={CounselCpsLaneConsolePage} />
         <Route path="/trust" component={TrustProvenancePage} />
         <Route path="/knowledge" component={MatterKnowledgePage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />

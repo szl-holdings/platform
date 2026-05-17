@@ -112,6 +112,7 @@ const CapacityPlanner = lazy(() => import('@/pages/capacity-planner'));
 const KnowledgeVault = lazy(() => import('@/pages/knowledge-vault'));
 const BenchmarkDatabase = lazy(() => import('@/pages/benchmark-database'));
 const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
+const CarlotaCpsLaneConsolePage = lazy(() => import('@/pages/cps-lane-console'));
 const ReadinessChecklistPage = lazy(() => import('@/pages/readiness-checklist'));
 const OpenEvaluationPage = lazy(() => import('@/pages/open-evaluation'));
 const StrategicReadinessPage = lazy(() => import('@/pages/strategic-readiness'));
@@ -333,6 +334,7 @@ function Router() {
         <Route path="/profitability-analytics" component={ProfitabilityAnalytics} />
         <Route path="/atlas-execute" component={CarlotaJoAtlasExecute} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
+        <Route path="/cps-console" component={CarlotaCpsLaneConsolePage} />
         <Route path="/readiness-checklist" component={ReadinessChecklistPage} />
         <Route path="/open-evaluation" component={OpenEvaluationPage} />
 
@@ -481,6 +483,16 @@ const carlotaCommands: CommandItem[] = [
     keywords: ['dashboard', 'os', 'platform', 'overview'],
     action: () => {
       navTo('/consulting-os');
+    },
+  },
+  {
+    id: 'nav-cps-console',
+    label: 'CPS — Client Protection',
+    icon: '🛡️',
+    group: 'AI Platform',
+    keywords: ['cps', 'client', 'protection', 'risk', 'gate', 'proof'],
+    action: () => {
+      navTo('/cps-console');
     },
   },
   {
