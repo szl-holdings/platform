@@ -1,49 +1,43 @@
 # SZL Holdings — Platform Metrics
-> Auto-generated 2026-04-27T03:50:50.019Z by `scripts/audit/generate-platform-metrics.ts`
+> Auto-generated 2026-05-17T10:06:02.201Z by `scripts/audit/generate-platform-metrics.ts`
 > **These numbers are code-derived. Do not hand-edit.**
 
 ## Repository Scale
 
 | Metric | Count |
 |--------|-------|
-| TypeScript files (.ts) | 3,801 |
-| React/TSX files (.tsx) | 2,434 |
-| Total TS + TSX | 6,235 |
-| Python files (.py) | 145 |
-| CSS/SCSS files | 19 |
-| Markdown docs | 1679 |
+| TypeScript files (.ts) | 4,715 |
+| React/TSX files (.tsx) | 1,800 |
+| Total TS + TSX | 6,515 |
+| Python files (.py) | 235 |
+| CSS/SCSS files | 12 |
+| Markdown docs | 2000 |
 | Screenshot assets | 0 |
 
 ## Architecture
 
 | Metric | Count |
 |--------|-------|
-| Artifact directories on disk | 18 (15 formally registered; 3 unregistered: conduit, pluginmesh, artifacts/audit evidence dir — helios folded into A11oy, task #4364) |
-| Library packages (lib/) | 51 |
-| Standalone packages (packages/) | 101 |
-| Total packages | 152 |
+| Artifact directories on disk (filtered) | 13 |
+| Library packages (lib/) | 57 |
+| Standalone packages (packages/) | 144 |
+| Total packages | 201 |
 
 ### Artifact Registry
 
 | Name | Kind |
 |------|------|
 | @workspace/a11oy | web |
-| @workspace/aegis | web |
 | @workspace/api-server | backend |
-| audit | web |
 | @workspace/carlota-jo | web |
 | @workspace/command | web |
 | @workspace/conduit | web |
 | @workspace/counsel | web |
-| ~~@workspace/helios~~ | folded into A11oy Frontier Intelligence (task #4364) |
-| @workspace/lyte-command-center | web |
-| @workspace/mockup-sandbox | design |
-| @workspace/pluginmesh | web |
-| @workspace/pulse | web |
+| @workspace/lexicon | web |
+| mockup-sandbox | design |
+| pulse | web |
+| rosie | web |
 | @workspace/sentra | web |
-| @workspace/szl-demo-video | video |
-| @workspace/szl-holdings | web |
-| @workspace/szl-holdings-mobile | mobile |
 | @workspace/terra | web |
 | @workspace/vessels | web |
 
@@ -51,17 +45,17 @@
 
 | Metric | Count |
 |--------|-------|
-| Route files (recursive) | 180 |
-| Route handlers (GET/POST/PUT/PATCH/DELETE) | 6,063 |
-| Database table definitions (Drizzle pgTable) | 1047 |
-| SQL migrations | 59 |
+| Route files (recursive) | 211 |
+| Route handlers (GET/POST/PUT/PATCH/DELETE) | 7,781 |
+| Database table definitions (Drizzle pgTable) | 1261 |
+| SQL migrations | 76 |
 
 ## Quality & CI
 
 | Metric | Count |
 |--------|-------|
-| Test files (.test.ts/tsx, .spec.ts/tsx) | 387 |
-| GitHub CI workflows | 25 |
+| Test files (.test.ts/tsx, .spec.ts/tsx) | 590 |
+| GitHub CI workflows | 29 |
 
 ## Platform Primitives
 

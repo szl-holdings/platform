@@ -11,7 +11,7 @@
 | Category | Items Found |
 |----------|------------|
 | Stale metric counts in docs | 3 documents with outdated package/artifact counts (all fixed in this audit) |
-| Unregistered on-disk artifacts | 1 (artifacts/audit evidence dir) — conduit registered; helios folded into A11oy (#4364); pluginmesh removed (#4897) |
+| Unregistered on-disk artifacts (audit evidence dir) | Resolved — `artifacts/audit` excluded from metrics enumeration (#5022); conduit registered; helios folded into A11oy (#4364); pluginmesh removed (#4897) |
 | Scripts declared but not reliably runnable | 4 (typecheck, lint, build, test — all currently fail) |
 | Deprecated artifact references in docs | 2 (CORTEX Mobile, prism-counsel CI workflow) |
 | Brand/name drift (Alloy vs A11oy) | 1 document (PLATFORM_OVERVIEW.md — fixed in this audit) |
@@ -35,13 +35,14 @@
 
 | Source | Value | Notes |
 |--------|-------|-------|
-| `README.md` "Platform Scale" (prior) | 14 | Stale — **since updated to 14 registered artifacts (canonical)** |
-| `docs/platform-facts.md` | 14 registered / 20 total | Includes archived |
-| `generated/platform-metrics.json` (2026-04-27T03:50:50Z) | **19** artifact directories on disk | Includes 4 unregistered |
+| `README.md` "Platform Scale" (prior) | 14 | Stale — predates removal of `aegis`, `lyte-command-center`, `szl-demo-video`, `szl-holdings`, `szl-holdings-mobile` and addition of `lexicon`, `rosie`; current canonical on-disk count is **13** |
+| `docs/platform-facts.md` | 14 registered / 20 total | Stale — see README note above; needs refresh |
+| `generated/platform-metrics.json` (2026-05-17) | **13** artifact directories on disk | Canonical count. `artifacts/audit` evidence dir excluded by metrics scripts (#5022); historical 2026-04-27 snapshot reported 19 (included audit + 5 other dirs since removed) |
 | Workflow manager | 17 artifact workflows | conduit now registered; pluginmesh removed (#4897) |
-| Workspace artifact registry snapshot | **14 registered** | Canonical for deployment purposes |
 
-**Action required:** Only `artifacts/audit` (an evidence directory mistakenly counted as an artifact by the metrics script) remains — update metrics script to exclude it. `conduit` is now formally registered. `helios` was folded into A11oy (task #4364). `pluginmesh` was removed from the monorepo (task #4897). README correctly says 14 registered artifacts.
+**Status — FINDING-004 (audit evidence dir):** RESOLVED. Both metrics generators (`scripts/audit/generate-platform-metrics.ts` and `scripts/generate-platform-metrics.ts`) now explicitly exclude `artifacts/audit` from artifact enumeration (task #5022). `conduit` is formally registered; `helios` was folded into A11oy (#4364); `pluginmesh` was removed from the monorepo (#4897).
+
+**Remaining (separate) drift:** Reconciling the canonical registered-artifact count vs. the on-disk artifact count (currently 13 dirs on disk) is tracked as separate follow-up work and is not part of #5022.
 
 ---
 

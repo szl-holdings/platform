@@ -1,33 +1,25 @@
 {
-  "generated_at": "2026-04-27T03:50:50.019Z",
+  "generated_at": "2026-05-17T10:06:02.201Z",
   "generator": "scripts/audit/generate-platform-metrics.ts",
   "repository": {
-    "typescript_files": 3801,
-    "tsx_files": 2434,
-    "total_ts_tsx": 6235,
-    "python_files": 145,
-    "css_files": 19,
-    "markdown_docs": 1679,
+    "typescript_files": 4715,
+    "tsx_files": 1800,
+    "total_ts_tsx": 6515,
+    "python_files": 235,
+    "css_files": 12,
+    "markdown_docs": 2000,
     "screenshot_assets": 0
   },
   "architecture": {
-    "artifacts": 19,
+    "artifacts": 13,
     "artifact_list": [
       {
         "name": "@workspace/a11oy",
         "kind": "web"
       },
       {
-        "name": "@workspace/aegis",
-        "kind": "web"
-      },
-      {
         "name": "@workspace/api-server",
         "kind": "backend"
-      },
-      {
-        "name": "audit",
-        "kind": "web"
       },
       {
         "name": "@workspace/carlota-jo",
@@ -46,41 +38,24 @@
         "kind": "web"
       },
       {
-        "name": "@workspace/helios",
-        "kind": "folded",
-        "note": "Folded into A11oy Frontier Intelligence (task #4364)"
-      },
-      {
-        "name": "@workspace/lyte-command-center",
+        "name": "@workspace/lexicon",
         "kind": "web"
       },
       {
-        "name": "@workspace/mockup-sandbox",
+        "name": "mockup-sandbox",
         "kind": "design"
       },
       {
-        "name": "@workspace/pluginmesh",
+        "name": "pulse",
         "kind": "web"
       },
       {
-        "name": "@workspace/pulse",
+        "name": "rosie",
         "kind": "web"
       },
       {
         "name": "@workspace/sentra",
         "kind": "web"
-      },
-      {
-        "name": "@workspace/szl-demo-video",
-        "kind": "video"
-      },
-      {
-        "name": "@workspace/szl-holdings",
-        "kind": "web"
-      },
-      {
-        "name": "@workspace/szl-holdings-mobile",
-        "kind": "mobile"
       },
       {
         "name": "@workspace/terra",
@@ -91,19 +66,19 @@
         "kind": "web"
       }
     ],
-    "lib_packages": 51,
-    "standalone_packages": 101,
-    "total_packages": 152
+    "lib_packages": 57,
+    "standalone_packages": 144,
+    "total_packages": 201
   },
   "api_surface": {
-    "route_files_recursive": 180,
-    "route_handlers": 6063,
-    "db_tables_defined": 1047,
-    "migrations": 59
+    "route_files_recursive": 211,
+    "route_handlers": 7781,
+    "db_tables_defined": 1261,
+    "migrations": 76
   },
   "quality": {
-    "test_files": 387,
-    "ci_workflows": 25
+    "test_files": 590,
+    "ci_workflows": 29
   },
   "platform_primitives": [
     {

@@ -60,12 +60,16 @@ function countGithubWorkflows(): number {
   return fs.readdirSync(dir).filter((f) => f.endsWith(".yml") || f.endsWith(".yaml")).length;
 }
 
+// Directories under `artifacts/` that are NOT deployable artifacts and must be
+// excluded from artifact enumeration (e.g. evidence folders from diligence audits).
+const ARTIFACT_DIR_EXCLUDES = new Set<string>(["audit"]);
+
 function getArtifacts(): { name: string; kind: string; path: string }[] {
   const artifactsDir = path.join(ROOT, "artifacts");
   if (!fs.existsSync(artifactsDir)) return [];
   const dirs = fs
     .readdirSync(artifactsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && !d.name.startsWith("."));
+    .filter((d) => d.isDirectory() && !d.name.startsWith(".") && !ARTIFACT_DIR_EXCLUDES.has(d.name));
 
   return dirs.map((d) => {
     const pkgPath = path.join(artifactsDir, d.name, "package.json");
@@ -192,7 +196,7 @@ const md = `# SZL Holdings — Platform Metrics
 
 | Metric | Count |
 |--------|-------|
-| Registered artifacts | ${metrics.architecture.artifacts} |
+| Artifact directories on disk (filtered) | ${metrics.architecture.artifacts} |
 | Library packages (lib/) | ${metrics.architecture.lib_packages} |
 | Standalone packages (packages/) | ${metrics.architecture.standalone_packages} |
 | Total packages | ${metrics.architecture.total_packages} |

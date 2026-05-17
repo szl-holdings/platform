@@ -19,10 +19,11 @@ import { join, resolve } from 'node:path';
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const DRY_RUN = process.argv.includes('--dry-run');
 
-function countDir(path: string): number {
+function countDir(path: string, excludes: string[] = []): number {
   if (!existsSync(path)) return 0;
   try {
     return readdirSync(path).filter((entry) => {
+      if (excludes.includes(entry)) return false;
       const full = join(path, entry);
       return statSync(full).isDirectory();
     }).length;
@@ -30,6 +31,10 @@ function countDir(path: string): number {
     return 0;
   }
 }
+
+// Directories under `artifacts/` that are NOT deployable artifacts and must be
+// excluded from artifact counts (e.g. evidence folders from diligence audits).
+const ARTIFACT_DIR_EXCLUDES = ['audit'];
 
 function countFiles(path: string, ext?: string): number {
   if (!existsSync(path)) return 0;
@@ -82,7 +87,7 @@ function countScripts(): number {
 
 // Structural counts
 const structural = {
-  artifactCount: countDir(join(ROOT, 'artifacts')),
+  artifactCount: countDir(join(ROOT, 'artifacts'), ARTIFACT_DIR_EXCLUDES),
   activeArtifactCount: countRegisteredArtifacts(),
   packageCount: countDir(join(ROOT, 'packages')),
   libCount: countDir(join(ROOT, 'lib')),
