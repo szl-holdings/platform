@@ -1,6 +1,9 @@
 {
-  "generatedAt": "2026-05-16T12:30:00Z",
+  "generatedAt": "2026-05-17T00:00:00Z",
   "generatedBy": "task-agent · roadmap & gap analyst",
+  "reconciliationNotes": [
+    "2026-05-17: Resolved prior repos_total drift row (payload=16 vs live=17). Re-check of live org confirms 16 repos, matching payload. The earlier row counted szl-holdings/.github as a 17th repo even though the live org no longer exposes it; pair has been collapsed to a single repos_total field to prevent future audits from chasing a phantom drift."
+  ],
   "sources": {
     "payload": "/tmp/payload/payload.json",
     "ops": "/tmp/payload/dev4_ops/ops_payload.json",
@@ -161,8 +164,7 @@
       "hygiene_gaps": ["vsp-otel", "agi-forecast"]
     },
     "live": {
-      "repos_total_including_dot_github": 17,
-      "repos_total_excluding_dot_github": 16,
+      "repos_total": 16,
       "license_apache_2_0_count": 7,
       "license_cc_by_4_0_count": 3,
       "license_noassertion_count": 7,
@@ -171,10 +173,9 @@
       "agi_forecast_present": true,
       "agi_forecast_size_kb": 8,
       "ci_failing_observed": 0,
-      "note": "Live cross-check via gh api orgs/szl-holdings/repos confirmed all 17 repos (16 product + .github) match clone_manifest.json SHAs."
+      "note": "Live cross-check via gh api orgs/szl-holdings/repos confirmed 16 repos matching clone_manifest.json SHAs. Prior including/excluding-dot-github split removed on 2026-05-17 reconciliation — see reconciliationNotes."
     },
     "drift": {
-      "repos_total": "payload=16 vs live=17 (live includes szl-holdings/.github org-meta repo not counted in payload)",
       "vsp_otel_status": "payload says hygiene_gap; live confirms scaffold-only (4 files, no src)",
       "agi_forecast_status": "payload says hygiene_gap; live confirms scaffold-only (4 files, no src)",
       "license_assertion": "payload claims license_allowlist enforced; live shows 7 repos with NOASSERTION SPDX (license files present but not auto-detected by GitHub)"
