@@ -1,5 +1,5 @@
 {
-  "lastRunAt": "2026-05-17T15:20:06.505Z",
+  "lastRunAt": "2026-05-17T20:12:24.128Z",
   "date": "2026-05-17",
   "statuses": [
     {
@@ -7,7 +7,7 @@
       "label": "METR autonomy-task evaluation activity",
       "source": "https://api.github.com/repos/METR/public-tasks",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:04.244Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.984Z",
       "value": 123,
       "error": null
     },
@@ -16,7 +16,7 @@
       "label": "Epoch AI notable model count",
       "source": "https://epoch.ai/data/notable_ai_models.csv",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:06.504Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.976Z",
       "value": 6256,
       "error": null
     },
@@ -25,7 +25,7 @@
       "label": "ARC-AGI reference repository activity",
       "source": "https://api.github.com/repos/fchollet/ARC-AGI",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:04.245Z",
+      "lastFetchedAt": "2026-05-17T20:12:24.008Z",
       "value": 4769,
       "error": null
     },
@@ -34,7 +34,7 @@
       "label": "Apollo Research scheming-eval activity index",
       "source": "https://api.github.com/repos/ApolloResearch/deception-detection",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:04.245Z",
+      "lastFetchedAt": "2026-05-17T20:12:24.046Z",
       "value": 3,
       "error": null
     },
@@ -43,7 +43,7 @@
       "label": "UK AI Safety Institute Inspect framework release count",
       "source": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:04.201Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.961Z",
       "value": 0,
       "error": null
     },
@@ -52,7 +52,7 @@
       "label": "Anthropic Responsible Scaling Policy proxy (cookbook latest tag)",
       "source": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T15:20:06.472Z",
+      "lastFetchedAt": "2026-05-17T20:12:24.127Z",
       "value": null,
       "error": "rsp tags response empty"
     },
@@ -61,7 +61,7 @@
       "label": "Google DeepMind Frontier Safety Framework proxy (deepmind-research latest tag)",
       "source": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T15:20:04.202Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.948Z",
       "value": null,
       "error": "fsf tags response empty"
     },
@@ -70,7 +70,7 @@
       "label": "GPQA Diamond reference README max-score fraction",
       "source": "https://api.github.com/repos/idavidrein/gpqa/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T15:20:04.214Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.999Z",
       "value": null,
       "error": "no benchmark percentage found in README"
     },
@@ -79,7 +79,7 @@
       "label": "MMLU reference README max-score fraction",
       "source": "https://api.github.com/repos/hendrycks/test/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T15:20:04.208Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.983Z",
       "value": null,
       "error": "no benchmark percentage found in README"
     },
@@ -88,7 +88,7 @@
       "label": "SWE-bench Verified README max-score fraction",
       "source": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:06.474Z",
+      "lastFetchedAt": "2026-05-17T20:12:24.089Z",
       "value": 0.08,
       "error": null
     },
@@ -97,7 +97,7 @@
       "label": "HumanEval README max-score fraction",
       "source": "https://api.github.com/repos/openai/human-eval/readme",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T15:20:04.214Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.979Z",
       "value": 1,
       "error": null
     },
@@ -106,7 +106,7 @@
       "label": "MATH benchmark README max-score fraction",
       "source": "https://api.github.com/repos/hendrycks/math/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T15:20:04.215Z",
+      "lastFetchedAt": "2026-05-17T20:12:23.978Z",
       "value": null,
       "error": "no benchmark percentage found in README"
     }
@@ -119,73 +119,73 @@
       "METR": {
         "ok": true,
         "value": 123,
-        "fetchedAt": "2026-05-17T15:20:04.244Z",
+        "fetchedAt": "2026-05-17T20:12:23.984Z",
         "sourceUrl": "https://api.github.com/repos/METR/public-tasks"
       },
       "EPOCH": {
         "ok": true,
         "value": 6256,
-        "fetchedAt": "2026-05-17T15:20:06.504Z",
+        "fetchedAt": "2026-05-17T20:12:23.976Z",
         "sourceUrl": "https://epoch.ai/data/notable_ai_models.csv"
       },
       "ARC": {
         "ok": true,
         "value": 4769,
-        "fetchedAt": "2026-05-17T15:20:04.245Z",
+        "fetchedAt": "2026-05-17T20:12:24.008Z",
         "sourceUrl": "https://api.github.com/repos/fchollet/ARC-AGI"
       },
       "APOLLO": {
         "ok": true,
         "value": 3,
-        "fetchedAt": "2026-05-17T15:20:04.245Z",
+        "fetchedAt": "2026-05-17T20:12:24.046Z",
         "sourceUrl": "https://api.github.com/repos/ApolloResearch/deception-detection"
       },
       "AISI": {
         "ok": true,
         "value": 0,
-        "fetchedAt": "2026-05-17T15:20:04.201Z",
+        "fetchedAt": "2026-05-17T20:12:23.961Z",
         "sourceUrl": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100"
       },
       "RSP": {
         "ok": false,
         "error": "rsp tags response empty",
-        "fetchedAt": "2026-05-17T15:20:06.472Z",
+        "fetchedAt": "2026-05-17T20:12:24.127Z",
         "sourceUrl": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1"
       },
       "FSF": {
         "ok": false,
         "error": "fsf tags response empty",
-        "fetchedAt": "2026-05-17T15:20:04.202Z",
+        "fetchedAt": "2026-05-17T20:12:23.948Z",
         "sourceUrl": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1"
       },
       "GPQA": {
         "ok": false,
         "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T15:20:04.214Z",
+        "fetchedAt": "2026-05-17T20:12:23.999Z",
         "sourceUrl": "https://api.github.com/repos/idavidrein/gpqa/readme"
       },
       "MMLU": {
         "ok": false,
         "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T15:20:04.208Z",
+        "fetchedAt": "2026-05-17T20:12:23.983Z",
         "sourceUrl": "https://api.github.com/repos/hendrycks/test/readme"
       },
       "SWE_BENCH": {
         "ok": true,
         "value": 0.08,
-        "fetchedAt": "2026-05-17T15:20:06.474Z",
+        "fetchedAt": "2026-05-17T20:12:24.089Z",
         "sourceUrl": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme"
       },
       "HUMANEVAL": {
         "ok": true,
         "value": 1,
-        "fetchedAt": "2026-05-17T15:20:04.214Z",
+        "fetchedAt": "2026-05-17T20:12:23.979Z",
         "sourceUrl": "https://api.github.com/repos/openai/human-eval/readme"
       },
       "MATH": {
         "ok": false,
         "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T15:20:04.215Z",
+        "fetchedAt": "2026-05-17T20:12:23.978Z",
         "sourceUrl": "https://api.github.com/repos/hendrycks/math/readme"
       }
     },
@@ -268,7 +268,7 @@
       "alignmentDebt": null,
       "lutarReadiness": null
     },
-    "receiptHash": "632a1d9b3865f4791d4d7f7a3a9fe34e139f108a34f7b4b032d3e9fffd834099"
+    "receiptHash": "a550ac3e0e9d0b8389da012bed6c5e40f5c5157a2421482056e050a003c42e5b"
   },
   "runCount": 1
 }
