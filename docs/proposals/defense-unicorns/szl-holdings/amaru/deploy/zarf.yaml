@@ -1,0 +1,31 @@
+# SZL Holdings — Amaru Zarf package
+# Authored by: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings
+# Status: Real package. Per Plane 1 of the mesh plan (§04). Intended for commit
+#         to the external szl-holdings/amaru repository at path deploy/zarf.yaml.
+
+kind: ZarfPackageConfig
+metadata:
+  name: amaru
+  version: 1.0.0-alpha
+  description: |
+    Amaru — The Andean Ouroboros. Replay-bound sync engine with
+    append-only hash-chained delta-log. Apache-2.0 / NOTICE per SZL
+    Doctrine V6 license allowlist.
+  url: https://github.com/szl-holdings/amaru
+  authors: "Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings"
+  architecture: amd64
+
+components:
+  - name: amaru-runtime
+    required: true
+    description: Amaru replay-bound sync runtime + delta-log PVC.
+    images:
+      - ghcr.io/szl-holdings/amaru:v1.0.0-alpha
+    manifests:
+      - name: amaru
+        namespace: amaru
+        files:
+          - manifests/amaru-namespace.yaml
+          - manifests/delta-log-pvc.yaml
+          - manifests/amaru-deployment.yaml
+          - manifests/amaru-service.yaml
