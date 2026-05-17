@@ -840,6 +840,9 @@ importers:
       '@workspace/agents-tools':
         specifier: workspace:*
         version: link:../../packages/agents-tools
+      '@workspace/agi-forecast':
+        specifier: workspace:*
+        version: link:../../packages/agi-forecast
       '@workspace/alloy':
         specifier: workspace:*
         version: link:../../packages/alloy

@@ -49,6 +49,7 @@ import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
 import { startRosieEvolutionLoop } from './jobs/rosie-evolution-loop';
 import { startHeliosScanners } from './jobs/helios-scanners';
+import { startAgiForecastIngest, stopAgiForecastIngest } from './jobs/agi-forecast-ingest';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
@@ -539,6 +540,14 @@ export async function bootstrap(
       } else {
         logger.info('[helios-scanners] disabled via HELIOS_SCANNERS_ENABLED=false');
       }
+
+      // AGI-forecast ingestors (#5095) — runs every PUBLIC_ONLY gauge
+      // ingestor on a daily cadence and persists the snapshot so the
+      // dashboard always reflects current state rather than the last
+      // manual invocation. Per-ingestor failures are returned as typed
+      // IngestFailure values and never block sibling ingestors or the
+      // next scheduled run. Disable with AGI_FORECAST_INGEST_ENABLED=false.
+      startAgiForecastIngest();
 
       // Frontier Ingestion Engine — continuous pulls from Anthropic/OpenAI/
       // Google/NVIDIA/HuggingFace. Default OFF so we never make surprise
@@ -1415,6 +1424,7 @@ export async function bootstrap(
     stopHealthDegradationWatcher();
     stopPrismBusBridge();
     stopAtlasExportProcessor();
+    stopAgiForecastIngest();
     stopEmbeddingWorker();
     stopLoadMetricsSampling();
     await stopIntelligenceFeeds();

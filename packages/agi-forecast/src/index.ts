@@ -51,6 +51,15 @@ export {
 export { LICENSE_ALLOWLIST, assertAllowedLicense, type AllowedLicense } from './licenses';
 
 export {
+  runAllPublicIngestors,
+  PUBLIC_INGESTORS,
+  type IngestorFn,
+  type VariableStatus,
+  type ScheduledRunResult,
+  type RunOptions,
+} from './scheduler';
+
+export {
   FORECAST_REPLAY_CHAIN_ID,
   forecastSummaryLeaf,
   anchorForecastSummaries,
