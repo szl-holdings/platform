@@ -1,16 +1,16 @@
 /**
- * @szl-holdings/vsp-otel — Verifiable Span Protocol, OTel bridge MVP.
+ * @szl-holdings/vsp-otel — Verifiable Span Protocol, OTel bridge.
  *
  * Author: Lutar, Stephen P. (ORCID 0009-0001-0110-4173)
  * License: Apache-2.0
  *
- * Public surface (MVP slice):
- *   - LambdaSpanEmitter — emits one OTel span per Λ-receipt.
- *   - recordRhoClosure  — records a `rho.closure` span event.
- *
- * OTLP exporter wiring is intentionally out of scope; this layer depends on
- * `@opentelemetry/api` only so callers can plug in any SDK / exporter they
- * choose (NodeSDK + OTLP gRPC, BatchSpanProcessor + HTTP, etc.).
+ * Public surface:
+ *   - LambdaSpanEmitter       — emits one OTel span per Λ-receipt. Set
+ *     `vendor` to mirror VSP attrs into Honeycomb/Datadog/Phoenix shapes.
+ *   - recordRhoClosure        — records a `rho.closure` span event.
+ *   - startVspNodeSdk         — NodeSDK bootstrap with OTLP gRPC/HTTP wiring.
+ *   - applyVendorAttributes   — pure mirror function (used by the emitter,
+ *     exported for callers that create spans themselves).
  */
 
 export {
@@ -27,3 +27,15 @@ export type {
   RhoWitnessPair,
   LambdaSpanEmitterOptions,
 } from './lambda-span-emitter.js';
+
+export { applyVendorAttributes } from './vendor-adapters.js';
+
+export type { VspVendor, VendorMirrorInfo } from './vendor-adapters.js';
+
+export { startVspNodeSdk } from './node-sdk-bootstrap.js';
+
+export type {
+  VspNodeSdk,
+  VspNodeSdkOptions,
+  OtlpProtocol,
+} from './node-sdk-bootstrap.js';

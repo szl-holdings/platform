@@ -32,6 +32,8 @@ import {
   trace,
 } from '@opentelemetry/api';
 
+import { applyVendorAttributes, type VspVendor } from './vendor-adapters.js';
+
 /**
  * License allowlist enforced on every emitted span. Sourced from Doctrine V6
  * license hygiene: only permissive / public-license values are allowed to
@@ -116,6 +118,12 @@ export interface LambdaSpanEmitterOptions {
   tracer?: Tracer;
   /** Override the tracer name when constructing the default tracer. */
   tracerName?: string;
+  /**
+   * Optional vendor adapter — when set, the emitter stamps vendor-shaped
+   * mirror attributes (Honeycomb/Datadog/Phoenix) alongside the
+   * canonical `gen_ai.*` namespace. Originals are never modified.
+   */
+  vendor?: import('./vendor-adapters.js').VspVendor;
 }
 
 export interface EmitOptions {
@@ -181,12 +189,14 @@ function buildParentContextWithTraceId(traceId: string): Context {
 
 export class LambdaSpanEmitter {
   private readonly tracer: Tracer;
+  private readonly vendor: VspVendor;
   /** Last derived traceId, exposed for tests / verification harnesses. */
   public lastTraceId: string | null = null;
 
   constructor(options: LambdaSpanEmitterOptions = {}) {
     this.tracer =
       options.tracer ?? trace.getTracer(options.tracerName ?? 'vsp-otel');
+    this.vendor = options.vendor ?? 'none';
   }
 
   /**
@@ -220,11 +230,8 @@ export class LambdaSpanEmitter {
     };
 
     const parentCtx = buildParentContextWithTraceId(traceId);
-    const span = this.tracer.startSpan(
-      receipt.name ?? receipt.endpoint ?? 'lambda.span',
-      spanOptions,
-      parentCtx,
-    );
+    const spanName = receipt.name ?? receipt.endpoint ?? 'lambda.span';
+    const span = this.tracer.startSpan(spanName, spanOptions, parentCtx);
 
     // Stamp the receipt hash + derived traceId as attributes for
     // downstream verification (auditors can independently re-derive and
@@ -245,6 +252,17 @@ export class LambdaSpanEmitter {
           span.setAttribute(`gen_ai.lambda.${axis}`, value);
         }
       }
+    }
+
+    // Stamp vendor-shaped mirrors AFTER the canonical attrs are set.
+    // The emitter owns the span name + axes so we pass them in
+    // explicitly — the adapter never has to introspect private span
+    // internals to recover them.
+    if (this.vendor !== 'none') {
+      applyVendorAttributes(span, this.vendor, {
+        spanName,
+        lambdaAxes: axes,
+      });
     }
 
     if (opts.endImmediately) {
