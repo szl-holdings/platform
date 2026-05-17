@@ -1,0 +1,10 @@
+kind: ZarfPackageConfig
+metadata:
+  name: pkg-b
+  version: 0.0.1
+components:
+  - name: artifact-b
+    required: true
+    files:
+      - source: ./artifact.txt
+        target: /opt/pkg-b/artifact.txt

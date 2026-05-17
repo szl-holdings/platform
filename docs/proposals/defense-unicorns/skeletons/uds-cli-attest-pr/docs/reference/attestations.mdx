@@ -1,0 +1,92 @@
+---
+title: In-bundle attestations
+description: Hash-chained, offline-verifiable component attestations inside a UDS bundle.
+---
+
+# In-bundle attestations
+
+`uds-cli bundle create --attest` writes an append-only,
+hash-chained JSON-Lines sidecar at the well-known path
+`/uds-bundle/attestations.jsonl` inside the bundle payload. The
+sidecar is then walked by `uds-cli bundle verify --offline` with no
+registry round-trip.
+
+Use this when you need to confirm the chain of custody of every
+component in an airgapped environment that cannot reach the registry
+that produced the Cosign signature on the outer artifact.
+
+## Quickstart
+
+```bash
+# Generate keys once (any tool that emits hex-encoded raw keys works;
+# see the example at fixtures/roundtrip/keygen.sh in this PR).
+uds-cli bundle create \
+  --attest \
+  --attest-signer-did "did:plat:my-org-prod" \
+  --attest-ed25519-seed     ./keys/ed25519.seed.hex \
+  --attest-ml-dsa-65-priv   ./keys/mldsa65.priv.hex \
+  --attest-trust-root       ./keys/trust-root.json \
+  -o ./out
+
+uds-cli bundle verify --offline ./out/my-bundle.tar.zst
+```
+
+## Record schema
+
+Each line of `attestations.jsonl` is exactly one JSON object:
+
+| Field         | Type   | Notes                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------- |
+| `i`           | int    | 0-based monotonic record index. `verify` rejects gaps.                 |
+| `ts`          | RFC3339| Wall-clock at emit. Not security-bearing; advisory only.               |
+| `component`   | string | The `name` of the Zarf component the artifact belongs to.              |
+| `artifact`    | string | Image ref or relative path of the emitted artifact.                    |
+| `sha256`      | hex    | Lowercase hex SHA-256 of the artifact bytes.                           |
+| `prev_hash`   | hex    | `this_hash` of record `i-1`, or 64 zero chars for `i=0`.               |
+| `this_hash`   | hex    | `sha256(prev_hash || canonical_payload)` where canonical payload is the record with `this_hash` and `sig` cleared. |
+| `signer_did`  | string | DID resolved against `/uds-bundle/trust-root.json`.                    |
+| `sig.ed25519` | hex    | Ed25519 signature over the canonical payload.                          |
+| `sig.ml-dsa-65` | hex  | ML-DSA-65 (Dilithium3) signature over the canonical payload.           |
+
+The hybrid Ed25519 + ML-DSA-65 signature pair mirrors NIST's published
+"classical + post-quantum" guidance and is the same posture SZL ships
+on its own production artifacts.
+
+## Verify exit codes
+
+| Exit | Code                | Meaning                                                |
+| ---- | ------------------- | ------------------------------------------------------ |
+| 0    | (none)              | Chain OK, all signatures verify.                       |
+| 1    | (generic)           | I/O error or other non-attest error.                   |
+| 2    | `BROKEN_CHAIN`      | `prev_hash` or `this_hash` recompute mismatch.         |
+| 3    | `BAD_SIGNATURE`     | Ed25519 or ML-DSA-65 signature failed to verify.       |
+| 4    | `MISSING_ARTIFACT`  | Expected artifact absent from chain.                   |
+| 5    | `UNKNOWN_SIGNER`    | `signer_did` not present in `trust-root.json`.         |
+| 6    | `MALFORMED`         | A record in `attestations.jsonl` is not valid JSON.    |
+| 7    | `BAD_INDEX`         | Record `i` field is out of sequence.                   |
+
+## Threat model
+
+The in-bundle chain defends against:
+
+* **Component tamper after build**: any byte flip in any artifact
+  invalidates the recomputed `this_hash` and is caught as
+  `BROKEN_CHAIN`.
+* **Record splice / reorder**: the prev-hash linkage is one-way; any
+  splice produces a `BROKEN_CHAIN` at the splice point.
+* **Forged record by unknown signer**: rejected as `UNKNOWN_SIGNER`.
+* **Quantum break of Ed25519 alone**: hybrid ML-DSA-65 still gates.
+
+It does **not** defend against:
+
+* A trust-root that already includes a compromised signer DID. The
+  trust root is itself a sensitive artifact; rotate signer keys on
+  the cadence specified by your organisation's signing doctrine.
+* Replay of an entire valid bundle. Use the outer Cosign signature
+  + transparency-log timestamp for replay defense.
+
+## Relation to existing Cosign signing
+
+Cosign signs the OCI layer holding the bundle. The in-bundle chain
+signs each component inside the bundle. The two are complementary —
+disable neither in production.

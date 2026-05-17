@@ -1,0 +1,13 @@
+kind: UDSBundle
+metadata:
+  name: attest-roundtrip
+  version: 0.0.1
+  description: Minimal two-component bundle used by attest-roundtrip CI.
+
+packages:
+  - name: pkg-a
+    path: ./pkg-a
+    ref: 0.0.1
+  - name: pkg-b
+    path: ./pkg-b
+    ref: 0.0.1

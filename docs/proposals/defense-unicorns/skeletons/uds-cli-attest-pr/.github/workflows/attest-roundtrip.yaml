@@ -1,0 +1,37 @@
+name: attest-roundtrip
+
+on:
+  pull_request:
+    paths:
+      - "src/cmd/bundle.go"
+      - "src/pkg/bundle/**"
+      - "src/pkg/attest/**"
+      - "ci/roundtrip.sh"
+      - "fixtures/roundtrip/**"
+      - ".github/workflows/attest-roundtrip.yaml"
+  push:
+    branches: [main]
+
+jobs:
+  roundtrip:
+    name: create → tamper → verify (--offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build uds
+        run: make build
+
+      - name: Run round-trip
+        env:
+          UDS_CLI: ./build/uds
+        run: bash ci/roundtrip.sh
+
+      - name: Run attest unit tests
+        run: go test ./src/pkg/attest/...

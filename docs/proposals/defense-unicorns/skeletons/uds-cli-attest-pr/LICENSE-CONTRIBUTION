@@ -1,0 +1,28 @@
+SZL Holdings contribution license — defenseunicorns/uds-cli PR
+==============================================================
+
+Author: Lutar, Stephen P. · ORCID 0009-0001-0110-4173 · SZL Holdings
+Date:   2026-05-17
+
+This contribution (all files added or modified in this pull request that
+carry the SZL Holdings copyright header) is offered under a dual license,
+at the recipient's option:
+
+  * Apache License, Version 2.0
+    https://www.apache.org/licenses/LICENSE-2.0
+
+  * GNU Affero General Public License, Version 3.0
+    https://www.gnu.org/licenses/agpl-3.0.html
+
+Rationale: the upstream `defenseunicorns/uds-cli` project is AGPL-3.0
+licensed. The Apache-2.0 grant is included so that downstream consumers
+that bind by SZL Doctrine V6 license allowlists (Apache-2.0, MIT,
+BSD-3-Clause, CC-BY-4.0) may continue to consume the SZL-authored
+portion of the merged artifact under Apache-2.0 if they choose to fork
+or re-vendor it independently of the upstream AGPL artifact.
+
+The merged artifact, as shipped by `defenseunicorns/uds-cli`, remains
+AGPL-3.0 in aggregate. This dual grant does not relicense any pre-existing
+upstream code.
+
+SPDX-License-Identifier: Apache-2.0 OR AGPL-3.0-or-later
