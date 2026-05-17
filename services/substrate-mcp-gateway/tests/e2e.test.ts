@@ -1012,8 +1012,7 @@ test('21. MCP discovery endpoint returns server manifest', async () => {
     protocolVersion: string;
     toolCount: number;
     authMethods: string[];
-    extensions: unknown;
-    capabilities: unknown;
+    capabilities: { extensions?: Record<string, unknown> } & Record<string, unknown>;
   };
   assert.equal(manifest.name, 'szl-substrate-mcp-gateway');
   assert.equal(manifest.protocolVersion, '2025-11-25');
@@ -1021,8 +1020,17 @@ test('21. MCP discovery endpoint returns server manifest', async () => {
   assert.ok(Array.isArray(manifest.authMethods), 'authMethods must be an array');
   assert.ok(manifest.authMethods.includes('bearer_token'), 'bearer_token auth must be listed');
   assert.ok(manifest.authMethods.includes('oauth2_pkce'), 'oauth2_pkce must be listed');
-  assert.ok(manifest.extensions, 'extensions must be present in manifest');
   assert.ok(manifest.capabilities, 'capabilities must be present in manifest');
+  // Per the MCP spec (task #5072), server-supported extensions live inside
+  // capabilities.extensions — NOT as a sibling field at the manifest root.
+  assert.ok(
+    manifest.capabilities.extensions && typeof manifest.capabilities.extensions === 'object',
+    'capabilities.extensions must be present in manifest (spec-compliant location)',
+  );
+  assert.ok(
+    !('extensions' in (manifest as unknown as Record<string, unknown>)),
+    'Top-level `extensions` field must not be present (it was a leftover from the old response-rewriting hack)',
+  );
 });
 
 test('22. Notifications 202 Accepted — initialized, cancelled, roots/list_changed', async () => {
@@ -1318,29 +1326,37 @@ test('27. POST with a previously-DELETEd session id returns a JSON 404 envelope'
   assert.equal(body.error?.data?.sessionId, sessionId, 'Error data must echo the offending session id');
 });
 
-test('28. initialize with params.extensions echoes intersected server extensions and rewrites Content-Length', async () => {
-  // Pins the extension-negotiation wrapper from szl-holdings/platform#113:
+test('28. initialize with capabilities.extensions echoes intersected server extensions with correct framing', async () => {
+  // Pins extension negotiation at the spec-compliant location (task #5072):
+  //   • Clients advertise extensions on `params.capabilities.extensions`
+  //     (matches the official MCP SDK schema). Test 18 is the canonical
+  //     positive example; this test additionally pins HTTP framing.
   //   • Only extensions advertised by the server (CAPABILITIES.extensions) are
-  //     echoed back; unknown client keys must be dropped.
-  //   • Because we inject `extensions` into the SDK's already-serialised body,
-  //     Content-Length must be rewritten to match the post-injection byte
-  //     length — otherwise HTTP/1.1 keep-alive truncates the next response.
+  //     echoed back at `result.extensions`; unknown client keys must be
+  //     dropped.
+  //   • The SDK now owns serialization, so Content-Length must match the
+  //     emitted body byte length (or transfer-encoding must be chunked) —
+  //     a mismatch would truncate the response on HTTP/1.1 keep-alive.
   const UNKNOWN_KEY = 'client/never-supported-by-server-xyz';
   const KNOWN_KEY = 'szl/governed-autonomy';
 
   const res = await postInitialize({
-    extensions: {
-      [KNOWN_KEY]: { version: '1.0' },
-      [UNKNOWN_KEY]: { version: '9.9' },
+    capabilities: {
+      extensions: {
+        [KNOWN_KEY]: { version: '1.0' },
+        [UNKNOWN_KEY]: { version: '9.9' },
+      },
     },
   });
   assert.equal(res.status, 200, 'initialize with extensions must return 200');
 
-  // Framing contract: the wrapper rewrites the body to inject extensions, so
-  // either Content-Length must match the rewritten byte length, OR the response
-  // must fall back to chunked transfer-encoding (which auto-frames). What must
-  // NEVER happen is a stale Content-Length from the pre-injection body —
-  // that would truncate the response on HTTP/1.1 keep-alive connections.
+  // Framing contract: the SDK now owns serialization of the initialize
+  // response (extensions are added inside the SDK handler, not spliced in
+  // afterwards). Either Content-Length must match the emitted body byte
+  // length, OR the response must fall back to chunked transfer-encoding
+  // (which auto-frames). A stale Content-Length would truncate the response
+  // on HTTP/1.1 keep-alive connections; this assertion is what would catch a
+  // future regression that re-introduced post-serialization body rewriting.
   const raw = await res.text();
   const actualByteLen = Buffer.byteLength(raw);
   const contentLengthHdr = res.headers.get('content-length');

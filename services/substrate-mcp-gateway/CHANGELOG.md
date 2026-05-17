@@ -52,13 +52,19 @@ and HTML 500 pages on most of the paths the e2e suite exercises, leaving 19 of
   produced a 400. The MCP spec requires 404. Fix: explicitly return a 404
   JSON envelope when an unknown `Mcp-Session-Id` is supplied.
 
-- **Extension negotiation**: clients that send `params.extensions` on
-  `initialize` expect the server to echo back the intersection with its
-  own advertised extensions. The SDK does not implement extension
-  negotiation, so the response was missing the `extensions` field. Fix:
-  wrap `res.write` / `res.end` / `res.writeHead` / `res.setHeader` for the
-  initialize response, parse the JSON-RPC body, inject the negotiated
-  `extensions` object, and re-emit with a corrected `Content-Length`.
+- **Extension negotiation** (spec-compliant location, task #5072):
+  clients advertise extensions on `initialize` at
+  `params.capabilities.extensions` — the location defined by the
+  official MCP SDK schema. The server echoes back the intersection
+  with its own advertised set at `result.extensions`. Negotiation now
+  lives inside `PRAXISMcpServer`, which overrides the SDK's
+  `initialize` handler and reads the parsed schema directly. The
+  earlier response-rewriting hack (wrapping `res.write` / `res.end`
+  and recomputing `Content-Length` to splice extensions into the
+  serialized body, which had to inspect the raw request body for a
+  top-level `params.extensions`) has been removed. Test 18 in the
+  e2e suite is the canonical example of the spec-compliant shape;
+  test 28 additionally pins HTTP framing.
 
 - **Accept header tolerance**: the SDK strictly requires
   `application/json, text/event-stream` on POST. Many real MCP clients

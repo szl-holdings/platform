@@ -154,12 +154,16 @@ function rateLimiter(req: Request, res: Response, next: NextFunction): void {
 
 // ─── Extension Negotiation ────────────────────────────────────────────────────
 //
-// Extension negotiation now lives inside `PRAXISMcpServer` — it overrides the
-// SDK's `initialize` handler to add the negotiated `extensions` map directly to
-// the result object. The gateway no longer needs to wrap `res.write`/`res.end`
-// to splice extensions into the response body (szl-holdings/platform#113).
-
-const SERVER_EXTENSIONS = (CAPABILITIES as unknown as Record<string, unknown>).extensions as Record<string, unknown>;
+// Per the MCP 2025-11-25 spec, clients advertise extensions on `initialize` at
+// `params.capabilities.extensions`, and the server echoes back the intersection
+// with its own advertised set at `result.extensions`. The negotiation now lives
+// inside `PRAXISMcpServer`, which overrides the SDK's `initialize` handler to
+// read from the SDK's parsed schema (no raw body inspection) and add the
+// negotiated `extensions` map directly to the result object.
+//
+// The gateway no longer wraps `res.write`/`res.end` to splice extensions into
+// the response body — that was a hack left over from before the SDK exposed a
+// hook (szl-holdings/platform#113, task #5072).
 
 // ─── OAuth 2.1 + PKCE ─────────────────────────────────────────────────────────
 
@@ -1129,7 +1133,10 @@ export function createDiscoveryHandler(): express.RequestHandler {
         resourcePrefixes: ['nexus://convergence/', 'nexus://signals/', 'nexus://agents/', 'nexus://evidence/', 'nexus://proof/'],
       },
       authMethods: ['bearer_token', 'oauth2_pkce', 'enterprise_idjag'],
-      extensions: SERVER_EXTENSIONS,
+      // Note: server-supported MCP extensions are advertised inside
+      // `capabilities.extensions` above (the spec-compliant location).
+      // The previous top-level `extensions` field was a leftover from the
+      // response-rewriting hack and has been removed (task #5072).
     });
   };
 }
