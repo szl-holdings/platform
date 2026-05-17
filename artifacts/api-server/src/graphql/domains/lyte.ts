@@ -34,8 +34,42 @@ import {
   VALID_SIGNAL_SEVERITIES,
   VALID_SIGNAL_STATUSES,
 } from '../../lib/domain-services/lyte/index.js';
+import { withFilter } from 'graphql-subscriptions';
 import { LYTE_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { parseIntId } from '../utils.js';
+
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
 
 export const lyteTypeDefs = `#graphql
   type OperationalOwner {
@@ -615,12 +649,15 @@ export const lyteResolvers = {
     triageLyteSignal: async (
       _: unknown,
       args: { id: string; status: string; rationale?: string; nextAction?: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await triageLyteSignal(await buildLyteStorage(), parseIntId(args.id), args);
-        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildSignalQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -628,16 +665,18 @@ export const lyteResolvers = {
       }
     },
 
-    assignLyteSignalOwner: async (_: unknown, args: { id: string; assignee: string }) => {
+    assignLyteSignalOwner: async (_: unknown, args: { id: string; assignee: string }, context: PublisherCtx) => {
       try {
         const result = await assignLyteSignalOwner(
           await buildLyteStorage(),
           parseIntId(args.id),
           args.assignee,
         );
-        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildSignalQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -648,6 +687,7 @@ export const lyteResolvers = {
     escalateLyteSignal: async (
       _: unknown,
       args: { id: string; reason?: string; targetRole: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await escalateLyteSignal(
@@ -655,9 +695,11 @@ export const lyteResolvers = {
           parseIntId(args.id),
           args,
         );
-        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.SIGNAL_UPDATED, { lyteSignalUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildSignalQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -665,16 +707,18 @@ export const lyteResolvers = {
       }
     },
 
-    updateLyteIncident: async (_: unknown, args: { id: string; status: string }) => {
+    updateLyteIncident: async (_: unknown, args: { id: string; status: string }, context: PublisherCtx) => {
       try {
         const result = await updateLyteIncident(
           await buildLyteStorage(),
           parseIntId(args.id),
           args.status,
         );
-        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildIncidentQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -682,16 +726,18 @@ export const lyteResolvers = {
       }
     },
 
-    assignLyteIncidentOwner: async (_: unknown, args: { id: string; assignee: string }) => {
+    assignLyteIncidentOwner: async (_: unknown, args: { id: string; assignee: string }, context: PublisherCtx) => {
       try {
         const result = await assignLyteIncidentOwner(
           await buildLyteStorage(),
           parseIntId(args.id),
           args.assignee,
         );
-        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildIncidentQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -702,6 +748,7 @@ export const lyteResolvers = {
     escalateLyteIncident: async (
       _: unknown,
       args: { id: string; reason?: string; targetRole: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await escalateLyteIncident(
@@ -709,9 +756,11 @@ export const lyteResolvers = {
           parseIntId(args.id),
           args,
         );
-        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildIncidentQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -722,6 +771,7 @@ export const lyteResolvers = {
     resolveLyteIncident: async (
       _: unknown,
       args: { id: string; resolution: string; rootCause?: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await resolveLyteIncident(
@@ -729,9 +779,11 @@ export const lyteResolvers = {
           parseIntId(args.id),
           args,
         );
-        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result });
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
+        pubsub.publish(LYTE_EVENTS.INCIDENT_UPDATED, { lyteIncidentUpdated: result, _orgIds: orgIds });
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildIncidentQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -742,6 +794,7 @@ export const lyteResolvers = {
     updateLyteActionState: async (
       _: unknown,
       args: { id: string; state: string; rationale?: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await updateLyteActionState(
@@ -749,8 +802,10 @@ export const lyteResolvers = {
           parseIntId(args.id),
           args,
         );
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildActionQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -758,15 +813,17 @@ export const lyteResolvers = {
       }
     },
 
-    assignLyteActionOwner: async (_: unknown, args: { id: string; assignedTo: string }) => {
+    assignLyteActionOwner: async (_: unknown, args: { id: string; assignedTo: string }, context: PublisherCtx) => {
       try {
         const result = await assignLyteActionOwner(
           await buildLyteStorage(),
           parseIntId(args.id),
           args.assignedTo,
         );
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildActionQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -777,6 +834,7 @@ export const lyteResolvers = {
     escalateLyteAction: async (
       _: unknown,
       args: { id: string; reason?: string; targetRole: string },
+      context: PublisherCtx,
     ) => {
       try {
         const result = await escalateLyteAction(
@@ -784,8 +842,10 @@ export const lyteResolvers = {
           parseIntId(args.id),
           args,
         );
+        const orgIds = await resolveResourceOrgIds(ownerOf(result), context.req?.user?.id);
         pubsub.publish(LYTE_EVENTS.QUEUE_CHANGED, {
           lyteQueueChanged: buildActionQueueItem(result as Record<string, unknown>),
+          _orgIds: orgIds,
         });
         return result;
       } catch (err) {
@@ -796,13 +856,28 @@ export const lyteResolvers = {
 
   Subscription: {
     lyteIncidentUpdated: {
-      subscribe: () => pubsub.asyncIterableIterator(LYTE_EVENTS.INCIDENT_UPDATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(LYTE_EVENTS.INCIDENT_UPDATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
     lyteSignalUpdated: {
-      subscribe: () => pubsub.asyncIterableIterator(LYTE_EVENTS.SIGNAL_UPDATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(LYTE_EVENTS.SIGNAL_UPDATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
     lyteQueueChanged: {
-      subscribe: () => pubsub.asyncIterableIterator(LYTE_EVENTS.QUEUE_CHANGED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(LYTE_EVENTS.QUEUE_CHANGED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

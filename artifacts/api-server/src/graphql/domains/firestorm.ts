@@ -8,6 +8,7 @@ import {
   listFirestormIncidents,
   updateFirestormIncident,
 } from '../../lib/domain-services/firestorm/index.js';
+import { withFilter } from 'graphql-subscriptions';
 import { FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
 import type { GraphQLContext } from '../index.js';
@@ -71,6 +72,39 @@ export const aegisTypeDefs = `#graphql
 
 /** @deprecated Use aegisTypeDefs */
 export const firestormTypeDefs = aegisTypeDefs;
+
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
 
 async function buildFirestormStorage(): Promise<FirestormStoragePort> {
   const { db } = await import('@szl-holdings/db');
@@ -163,7 +197,6 @@ async function buildFirestormStorage(): Promise<FirestormStoragePort> {
         .where(eq(firestormIncidentsTable.id, id))
         .returning();
       const incident = rows[0];
-      pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { aegisIncidentUpdated: incident });
       publish(WS_CHANNELS.AEGIS_INCIDENTS, 'incident-updated', {
         id: incident.id,
         status: incident.status,
@@ -235,13 +268,16 @@ export const aegisResolvers = {
     },
   },
   Mutation: {
-    updateAegisIncident: async (_: unknown, args: { id: string; status: string }) => {
+    updateAegisIncident: async (_: unknown, args: { id: string; status: string }, context: PublisherCtx) => {
       try {
-        return await updateFirestormIncident(
+        const incident = await updateFirestormIncident(
           await buildFirestormStorage(),
           parseInt(args.id, 10),
           args.status,
         );
+        const orgIds = await resolveResourceOrgIds(null, context.req?.user?.id);
+        pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { aegisIncidentUpdated: incident, _orgIds: orgIds });
+        return incident;
       } catch (err) {
         throw new Error(`Failed to update incident: ${err}`);
       }
@@ -249,7 +285,12 @@ export const aegisResolvers = {
   },
   Subscription: {
     aegisIncidentUpdated: {
-      subscribe: () => pubsub.asyncIterableIterator(FIRESTORM_EVENTS.INCIDENT_UPDATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(FIRESTORM_EVENTS.INCIDENT_UPDATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

@@ -7,6 +7,7 @@ import {
   listCarlotaReservations,
   listCarlotaServices,
 } from '../../lib/domain-services/carlota-jo/index.js';
+import { withFilter } from 'graphql-subscriptions';
 import { CARLOTA_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
 
@@ -64,6 +65,39 @@ export const carlotaJoTypeDefs = `#graphql
     carlotaInquiryCreated: CarlotaInquiry!
   }
 `;
+
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
 
 async function buildCarlotaStorage(): Promise<CarlotaJoStoragePort> {
   const { db } = await import('@szl-holdings/db');
@@ -158,7 +192,6 @@ async function buildCarlotaStorage(): Promise<CarlotaJoStoragePort> {
         service: inquiry.service,
         status: inquiry.status,
       });
-      pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: inquiry });
       return inquiry;
     },
   };
@@ -195,9 +228,13 @@ export const carlotaJoResolvers = {
     createCarlotaInquiry: async (
       _: unknown,
       args: { name: string; email: string; service: string; message: string },
+      context: PublisherCtx,
     ) => {
       try {
-        return await createCarlotaInquiry(await buildCarlotaStorage(), args);
+        const inquiry = await createCarlotaInquiry(await buildCarlotaStorage(), args);
+        const orgIds = await resolveResourceOrgIds(ownerOf(inquiry), context.req?.user?.id);
+        pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: inquiry, _orgIds: orgIds });
+        return inquiry;
       } catch (err) {
         throw new Error(`Failed to create inquiry: ${err}`);
       }
@@ -205,7 +242,12 @@ export const carlotaJoResolvers = {
   },
   Subscription: {
     carlotaInquiryCreated: {
-      subscribe: () => pubsub.asyncIterableIterator(CARLOTA_EVENTS.INQUIRY_CREATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(CARLOTA_EVENTS.INQUIRY_CREATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

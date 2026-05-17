@@ -195,24 +195,46 @@ export const vesselsResolvers = {
     vesselPositionUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(VESSELS_EVENTS.POSITION_UPDATED),
-        (
-          payload: { vesselPositionUpdated: { vesselId: string } },
+        async (
+          payload: { vesselPositionUpdated: { vesselId: string | number } },
           variables: { vesselId?: string },
+          context: { wsUser?: { id: number; orgs: Array<{ orgId: number }> } },
         ) => {
+          if (!context?.wsUser) return false;
+          const vesselId = Number(payload.vesselPositionUpdated.vesselId);
+          if (!vesselId) return false;
+          const storage = await buildVesselsStorage();
+          const vessel = await storage.getVessel(vesselId);
+          if (!vessel) return false;
+          const vesselOrgId = (vessel as Record<string, unknown>).orgId as number | undefined;
+          if (!vesselOrgId) return false;
+          const userOrgIds = new Set(context.wsUser.orgs.map(o => o.orgId));
+          if (!userOrgIds.has(vesselOrgId)) return false;
           if (!variables.vesselId) return true;
-          return payload.vesselPositionUpdated.vesselId === variables.vesselId;
+          return String(vesselId) === variables.vesselId;
         },
       ),
     },
     vesselSanctionsHit: {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(VESSELS_EVENTS.SANCTIONS_HIT),
-        (
-          payload: { vesselSanctionsHit: { vesselId: string } },
+        async (
+          payload: { vesselSanctionsHit: { vesselId: string | number } },
           variables: { vesselId?: string },
+          context: { wsUser?: { id: number; orgs: Array<{ orgId: number }> } },
         ) => {
+          if (!context?.wsUser) return false;
+          const vesselId = Number(payload.vesselSanctionsHit.vesselId);
+          if (!vesselId) return false;
+          const storage = await buildVesselsStorage();
+          const vessel = await storage.getVessel(vesselId);
+          if (!vessel) return false;
+          const vesselOrgId = (vessel as Record<string, unknown>).orgId as number | undefined;
+          if (!vesselOrgId) return false;
+          const userOrgIds = new Set(context.wsUser.orgs.map(o => o.orgId));
+          if (!userOrgIds.has(vesselOrgId)) return false;
           if (!variables.vesselId) return true;
-          return String(payload.vesselSanctionsHit.vesselId) === String(variables.vesselId);
+          return String(vesselId) === variables.vesselId;
         },
       ),
     },

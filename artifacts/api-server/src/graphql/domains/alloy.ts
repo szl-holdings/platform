@@ -13,6 +13,39 @@ import { parseIntId } from '../utils.js';
 
 export { ALLOY_EVENTS, pubsub };
 
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
+
 // ─── Workflow State Machine ────────────────────────────────────────────────────
 // Enforced at mutation layer. Every status change validates against this matrix.
 // DB schema status enum: draft | pending | running | waiting_approval | approved | rejected | completed | failed | cancelled
@@ -771,6 +804,7 @@ export const alloyResolvers = {
         domain?: string;
         requiresApproval?: boolean;
       },
+      context: PublisherCtx,
     ) => {
       try {
         const { db } = await import('@szl-holdings/db');
@@ -795,8 +829,10 @@ export const alloyResolvers = {
           actorType: 'user',
           newState: { status: 'draft', name: args.name },
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
@@ -804,7 +840,7 @@ export const alloyResolvers = {
       }
     },
 
-    submitAlloyWorkflow: async (_: unknown, args: { id: string }) => {
+    submitAlloyWorkflow: async (_: unknown, args: { id: string }, context: PublisherCtx) => {
       try {
         const { db } = await import('@szl-holdings/db');
         const { alloyWorkflows } = await import('@szl-holdings/db/schema');
@@ -838,8 +874,10 @@ export const alloyResolvers = {
           previousState: { status: 'draft' },
           newState: { status: 'pending' },
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         const { alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
         const { desc: descFn } = await import('drizzle-orm');
@@ -850,8 +888,10 @@ export const alloyResolvers = {
           .orderBy(descFn(alloyWorkflowRuns.runNumber))
           .limit(1);
         if (latestRuns[0]) {
+          const runOrgIds = await resolveResourceOrgIds(latestRuns[0].ownerUserId, context.req?.user?.id);
           pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, {
             alloyWorkflowRunUpdated: latestRuns[0],
+            _orgIds: runOrgIds,
           });
         }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
@@ -860,7 +900,7 @@ export const alloyResolvers = {
       }
     },
 
-    cancelAlloyWorkflow: async (_: unknown, args: { id: string; reason?: string }) => {
+    cancelAlloyWorkflow: async (_: unknown, args: { id: string; reason?: string }, context: PublisherCtx) => {
       try {
         const { db } = await import('@szl-holdings/db');
         const { alloyWorkflows, alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
@@ -890,8 +930,10 @@ export const alloyResolvers = {
           newState: { status: 'cancelled' },
           notes: args.reason,
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         const cancelledRuns = await db
           .update(alloyWorkflowRuns)
@@ -899,7 +941,8 @@ export const alloyResolvers = {
           .where(and(eq(alloyWorkflowRuns.workflowId, id), eq(alloyWorkflowRuns.status, 'started')))
           .returning();
         for (const run of cancelledRuns) {
-          pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+          const runOrgIds = await resolveResourceOrgIds(run.ownerUserId, context.req?.user?.id);
+          pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run, _orgIds: runOrgIds });
         }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
@@ -907,7 +950,7 @@ export const alloyResolvers = {
       }
     },
 
-    retryAlloyWorkflow: async (_: unknown, args: { id: string }) => {
+    retryAlloyWorkflow: async (_: unknown, args: { id: string }, context: PublisherCtx) => {
       try {
         const { db } = await import('@szl-holdings/db');
         const { alloyWorkflows, alloyWorkflowRuns } = await import('@szl-holdings/db/schema');
@@ -941,8 +984,10 @@ export const alloyResolvers = {
           previousState: { status: existing.status },
           newState: { status: 'pending' },
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         const [latestFailedRun] = await db
           .select()
@@ -962,7 +1007,8 @@ export const alloyResolvers = {
             .where(eq(alloyWorkflowRuns.id, latestFailedRun.id))
             .returning();
           if (retriedRun) {
-            pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: retriedRun });
+            const retriedRunOrgIds = await resolveResourceOrgIds(retriedRun.ownerUserId, context.req?.user?.id);
+            pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: retriedRun, _orgIds: retriedRunOrgIds });
           }
         }
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
@@ -979,6 +1025,7 @@ export const alloyResolvers = {
         reviewerUserId?: string;
         expiresInHours?: number;
       },
+      context: PublisherCtx,
     ) => {
       try {
         const { db } = await import('@szl-holdings/db');
@@ -1024,7 +1071,8 @@ export const alloyResolvers = {
           .orderBy(desc(alloyApprovals.createdAt))
           .limit(1);
         const approval = rows[0];
-        pubsub.publish(ALLOY_EVENTS.APPROVAL_REQUIRED, { alloyApprovalRequired: approval });
+        const approvalOrgIds = await resolveResourceOrgIds(approval.requestedByUserId, context.req?.user?.id);
+        pubsub.publish(ALLOY_EVENTS.APPROVAL_REQUIRED, { alloyApprovalRequired: approval, _orgIds: approvalOrgIds });
         return approval;
       } catch (err) {
         throw new Error(`Failed to request approval: ${err}`);
@@ -1083,6 +1131,7 @@ export const alloyResolvers = {
     runAlloyWorkflow: async (
       _: unknown,
       args: { workflowId: string; overrideApproval?: boolean },
+      context: PublisherCtx,
     ) => {
       try {
         const { db } = await import('@szl-holdings/db');
@@ -1101,7 +1150,8 @@ export const alloyResolvers = {
           );
         }
         const run = await startWorkflowRun(id, { overrideApproval: args.overrideApproval });
-        pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        const runOrgIds = await resolveResourceOrgIds(run.ownerUserId, context.req?.user?.id);
+        pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run, _orgIds: runOrgIds });
         publish(WS_CHANNELS.WORKFLOW_RUNS, 'workflow-run-started', {
           id: run.id,
           workflowId: run.workflowId,
@@ -1116,6 +1166,7 @@ export const alloyResolvers = {
     advanceAlloyWorkflowStep: async (
       _: unknown,
       args: { runId: string; stepNumber: number; result: string; error?: string },
+      context: PublisherCtx,
     ) => {
       try {
         if (!['completed', 'failed'].includes(args.result)) {
@@ -1137,7 +1188,8 @@ export const alloyResolvers = {
           .where(eq(alloyWorkflowRuns.id, parseIntId(args.runId)))
           .limit(1);
         const run = rows[0];
-        pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        const runOrgIds = await resolveResourceOrgIds(run.ownerUserId, context.req?.user?.id);
+        pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run, _orgIds: runOrgIds });
         return run;
       } catch (err) {
         throw new Error(`Failed to advance step: ${err}`);
@@ -1147,6 +1199,7 @@ export const alloyResolvers = {
     createAlloySignalWorkflow: async (
       _: unknown,
       args: { signalId: string; workflowType?: string; priority?: string },
+      context: PublisherCtx,
     ) => {
       try {
         const signalId = parseInt(args.signalId, 10);
@@ -1193,8 +1246,13 @@ export const alloyResolvers = {
         }
 
         if (workflow) {
+          const signalWorkflowOrgIds = await resolveResourceOrgIds(
+            ownerOf(workflow) ?? signal?.ownerUserId ?? null,
+            context.req?.user?.id,
+          );
           pubsub.publish(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED, {
             alloyWorkflowStatusChanged: enrichWorkflow(workflow as unknown as Record<string, unknown>),
+            _orgIds: signalWorkflowOrgIds,
           });
         }
         return workflow ? enrichWorkflow(workflow as unknown as Record<string, unknown>) : null;
@@ -1242,9 +1300,11 @@ export const alloyResolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED),
         (
-          payload: { alloyWorkflowRunUpdated: { workflowId: number } },
+          payload: { alloyWorkflowRunUpdated: { workflowId: number }; _orgIds?: number[] },
           variables: { workflowId?: string },
+          context: SubscriberCtx,
         ) => {
+          if (!checkOrgAccess(payload._orgIds, context)) return false;
           if (!variables.workflowId) return true;
           return String(payload.alloyWorkflowRunUpdated.workflowId) === variables.workflowId;
         },
@@ -1254,16 +1314,23 @@ export const alloyResolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(ALLOY_EVENTS.APPROVAL_REQUIRED),
         (
-          payload: { alloyApprovalRequired: { reviewerUserId?: number } },
-          variables: { reviewerUserId?: string },
+          payload: { alloyApprovalRequired: { reviewerUserId?: number }; _orgIds?: number[] },
+          _variables,
+          context: SubscriberCtx,
         ) => {
-          if (!variables.reviewerUserId) return true;
-          return String(payload.alloyApprovalRequired.reviewerUserId) === variables.reviewerUserId;
+          if (!checkOrgAccess(payload._orgIds, context)) return false;
+          // Only deliver approval events addressed to the connected user.
+          return payload.alloyApprovalRequired.reviewerUserId === context.wsUser?.id;
         },
       ),
     },
     alloyWorkflowStatusChanged: {
-      subscribe: () => pubsub.asyncIterableIterator(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(ALLOY_EVENTS.WORKFLOW_STATUS_CHANGED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

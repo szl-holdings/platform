@@ -179,6 +179,11 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
           | undefined;
         return {
           wsUser,
+          // Expose wsUser as req.user so existing auth directives and helpers
+          // (which read context.req.user) work correctly for subscriptions.
+          req: wsUser
+            ? { user: { id: wsUser.id, roles: wsUser.roles, orgs: wsUser.orgs } }
+            : undefined,
           loaders: createDataLoaders(),
         };
       },

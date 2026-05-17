@@ -12,9 +12,43 @@ import {
   updateTerraActionItem,
   updateTerraDeal,
 } from '../../lib/domain-services/terra/index.js';
+import { withFilter } from 'graphql-subscriptions';
 import { pubsub, TERRA_EVENTS } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
 import { parseIntId } from '../utils.js';
+
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
 
 export const terraTypeDefs = `#graphql
   type TerraProperty {
@@ -205,7 +239,6 @@ async function buildTerraStorage(): Promise<TerraStoragePort> {
         stage: (deal as any).stage,
         probability: (deal as any).probability,
       });
-      pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: deal });
       return deal;
     },
     async listLeads(args) {
@@ -271,7 +304,6 @@ async function buildTerraStorage(): Promise<TerraStoragePort> {
         propertyId: item.propertyId,
         status: item.status,
       });
-      pubsub.publish(TERRA_EVENTS.ACTION_ITEM_UPDATED, { terraActionItemUpdated: item });
       return item;
     },
     async writeAuditLog(entry) {
@@ -351,12 +383,16 @@ export const terraResolvers = {
     updateTerraDeal: async (
       _: unknown,
       args: { id: string; stage?: string; probability?: number },
+      context: PublisherCtx,
     ) => {
       try {
-        return await updateTerraDeal(await buildTerraStorage(), parseIntId(args.id), {
+        const deal = await updateTerraDeal(await buildTerraStorage(), parseIntId(args.id), {
           stage: args.stage,
           probability: args.probability,
         });
+        const orgIds = await resolveResourceOrgIds(ownerOf(deal), context.req?.user?.id);
+        pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: deal, _orgIds: orgIds });
+        return deal;
       } catch (err) {
         throw new Error(`Failed to update deal: ${err}`);
       }
@@ -374,12 +410,16 @@ export const terraResolvers = {
     updateTerraActionItem: async (
       _: unknown,
       args: { id: string; status?: string; recommendedAction?: string },
+      context: PublisherCtx,
     ) => {
       try {
-        return await updateTerraActionItem(await buildTerraStorage(), parseIntId(args.id), {
+        const item = await updateTerraActionItem(await buildTerraStorage(), parseIntId(args.id), {
           status: args.status,
           recommendedAction: args.recommendedAction,
         });
+        const orgIds = await resolveResourceOrgIds(ownerOf(item), context.req?.user?.id);
+        pubsub.publish(TERRA_EVENTS.ACTION_ITEM_UPDATED, { terraActionItemUpdated: item, _orgIds: orgIds });
+        return item;
       } catch (err) {
         throw new Error(`Failed to update action item: ${err}`);
       }
@@ -394,10 +434,20 @@ export const terraResolvers = {
   },
   Subscription: {
     terraDealUpdated: {
-      subscribe: () => pubsub.asyncIterableIterator(TERRA_EVENTS.DEAL_UPDATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(TERRA_EVENTS.DEAL_UPDATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
     terraActionItemUpdated: {
-      subscribe: () => pubsub.asyncIterableIterator(TERRA_EVENTS.ACTION_ITEM_UPDATED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(TERRA_EVENTS.ACTION_ITEM_UPDATED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

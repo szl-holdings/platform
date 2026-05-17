@@ -13,6 +13,39 @@ import { parseIntId } from '../utils.js';
 
 export { CONTINUUM_EVENTS, pubsub };
 
+type PublisherCtx = { req?: { user?: { id?: number; orgs?: Array<{ orgId: number }> } } };
+type SubscriberCtx = { wsUser?: { id: number; orgs: Array<{ orgId: number }> } };
+
+async function resolveResourceOrgIds(
+  ownerUserId: number | null | undefined,
+  actorId: number | null | undefined,
+): Promise<number[]> {
+  const userId = ownerUserId ?? actorId;
+  if (!userId) return [];
+  const { db } = await import('@szl-holdings/db');
+  const { orgMembersTable } = await import('@szl-holdings/db/schema');
+  const { eq } = await import('drizzle-orm');
+  const rows = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+function ownerOf(resource: unknown): number | null {
+  if (resource == null || typeof resource !== 'object') return null;
+  const r = resource as Record<string, unknown>;
+  const v = r['ownerUserId'] ?? r['requestedByUserId'] ?? r['createdByUserId'];
+  return typeof v === 'number' ? v : null;
+}
+
+function checkOrgAccess(eventOrgIds: number[] | undefined, ctx: SubscriberCtx): boolean {
+  if (!ctx?.wsUser) return false;
+  if (!eventOrgIds?.length) return false;
+  const userOrgIds = new Set(ctx.wsUser.orgs.map(o => o.orgId));
+  return eventOrgIds.some(id => userOrgIds.has(id));
+}
+
 // ─── Workflow State Machine ────────────────────────────────────────────────────
 // Enforced at mutation layer. Every status change validates against this matrix.
 // DB schema status enum: draft | pending | running | waiting_approval | approved | rejected | completed | failed | cancelled
@@ -801,7 +834,7 @@ export const continuumResolvers = {
       }
     },
 
-    submitContinuumWorkflow: async (_: unknown, args: { id: string }) => {
+    submitContinuumWorkflow: async (_: unknown, args: { id: string }, context: PublisherCtx) => {
       try {
         const { db } = await import('@szl-holdings/db');
         const { alloyWorkflows } = await import('@szl-holdings/db/schema');
@@ -835,8 +868,10 @@ export const continuumResolvers = {
           previousState: { status: 'draft' },
           newState: { status: 'pending' },
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
@@ -844,7 +879,7 @@ export const continuumResolvers = {
       }
     },
 
-    cancelContinuumWorkflow: async (_: unknown, args: { id: string; reason?: string }) => {
+    cancelContinuumWorkflow: async (_: unknown, args: { id: string; reason?: string }, context: PublisherCtx) => {
       try {
         const { db } = await import('@szl-holdings/db');
         const { alloyWorkflows } = await import('@szl-holdings/db/schema');
@@ -874,8 +909,10 @@ export const continuumResolvers = {
           newState: { status: 'cancelled' },
           notes: args.reason,
         });
+        const wfOrgIds = await resolveResourceOrgIds(wf.ownerUserId, context.req?.user?.id);
         pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED, {
           alloyWorkflowStatusChanged: enrichWorkflow(wf as unknown as Record<string, unknown>),
+          _orgIds: wfOrgIds,
         });
         return enrichWorkflow(wf as unknown as Record<string, unknown>);
       } catch (err) {
@@ -931,6 +968,7 @@ export const continuumResolvers = {
         reviewerUserId?: string;
         expiresInHours?: number;
       },
+      context: PublisherCtx,
     ) => {
       try {
         const { db } = await import('@szl-holdings/db');
@@ -976,7 +1014,8 @@ export const continuumResolvers = {
           .orderBy(desc(alloyApprovals.createdAt))
           .limit(1);
         const approval = rows[0];
-        pubsub.publish(CONTINUUM_EVENTS.APPROVAL_REQUIRED, { alloyApprovalRequired: approval });
+        const approvalOrgIds = await resolveResourceOrgIds(approval.requestedByUserId, context.req?.user?.id);
+        pubsub.publish(CONTINUUM_EVENTS.APPROVAL_REQUIRED, { alloyApprovalRequired: approval, _orgIds: approvalOrgIds });
         return approval;
       } catch (err) {
         throw new Error(`Failed to request approval: ${err}`);
@@ -1035,6 +1074,7 @@ export const continuumResolvers = {
     runContinuumWorkflow: async (
       _: unknown,
       args: { workflowId: string; overrideApproval?: boolean },
+      context: PublisherCtx,
     ) => {
       try {
         const { db } = await import('@szl-holdings/db');
@@ -1053,7 +1093,8 @@ export const continuumResolvers = {
           );
         }
         const run = await startWorkflowRun(id, { overrideApproval: args.overrideApproval });
-        pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        const runOrgIds = await resolveResourceOrgIds(run.ownerUserId, context.req?.user?.id);
+        pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run, _orgIds: runOrgIds });
         publish(WS_CHANNELS.WORKFLOW_RUNS, 'workflow-run-started', {
           id: run.id,
           workflowId: run.workflowId,
@@ -1068,6 +1109,7 @@ export const continuumResolvers = {
     advanceContinuumWorkflowStep: async (
       _: unknown,
       args: { runId: string; stepNumber: number; result: string; error?: string },
+      context: PublisherCtx,
     ) => {
       try {
         if (!['completed', 'failed'].includes(args.result)) {
@@ -1089,7 +1131,8 @@ export const continuumResolvers = {
           .where(eq(alloyWorkflowRuns.id, parseIntId(args.runId)))
           .limit(1);
         const run = rows[0];
-        pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        const runOrgIds = await resolveResourceOrgIds(run.ownerUserId, context.req?.user?.id);
+        pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run, _orgIds: runOrgIds });
         return run;
       } catch (err) {
         throw new Error(`Failed to advance step: ${err}`);
@@ -1099,6 +1142,7 @@ export const continuumResolvers = {
     createContinuumSignalWorkflow: async (
       _: unknown,
       args: { signalId: string; workflowType?: string; priority?: string },
+      context: PublisherCtx,
     ) => {
       try {
         const signalId = parseInt(args.signalId, 10);
@@ -1141,6 +1185,14 @@ export const continuumResolvers = {
             signalId,
             workflowType,
             priority,
+          });
+          const signalWorkflowOrgIds = await resolveResourceOrgIds(
+            ownerOf(workflow) ?? signal?.ownerUserId ?? null,
+            context.req?.user?.id,
+          );
+          pubsub.publish(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED, {
+            alloyWorkflowStatusChanged: enrichWorkflow(workflow as unknown as Record<string, unknown>),
+            _orgIds: signalWorkflowOrgIds,
           });
         }
 
@@ -1189,9 +1241,11 @@ export const continuumResolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_RUN_UPDATED),
         (
-          payload: { alloyWorkflowRunUpdated: { workflowId: number } },
+          payload: { alloyWorkflowRunUpdated: { workflowId: number }; _orgIds?: number[] },
           variables: { workflowId?: string },
+          context: SubscriberCtx,
         ) => {
+          if (!checkOrgAccess(payload._orgIds, context)) return false;
           if (!variables.workflowId) return true;
           return String(payload.alloyWorkflowRunUpdated.workflowId) === variables.workflowId;
         },
@@ -1201,16 +1255,23 @@ export const continuumResolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.APPROVAL_REQUIRED),
         (
-          payload: { alloyApprovalRequired: { reviewerUserId?: number } },
-          variables: { reviewerUserId?: string },
+          payload: { alloyApprovalRequired: { reviewerUserId?: number }; _orgIds?: number[] },
+          _variables,
+          context: SubscriberCtx,
         ) => {
-          if (!variables.reviewerUserId) return true;
-          return String(payload.alloyApprovalRequired.reviewerUserId) === variables.reviewerUserId;
+          if (!checkOrgAccess(payload._orgIds, context)) return false;
+          // Only deliver approval events addressed to the connected user.
+          return payload.alloyApprovalRequired.reviewerUserId === context.wsUser?.id;
         },
       ),
     },
     alloyWorkflowStatusChanged: {
-      subscribe: () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED),
+      subscribe: withFilter(
+        () => pubsub.asyncIterableIterator(CONTINUUM_EVENTS.WORKFLOW_STATUS_CHANGED),
+        (payload: { _orgIds?: number[] }, _variables, context: SubscriberCtx) => {
+          return checkOrgAccess(payload._orgIds, context);
+        },
+      ),
     },
   },
 };

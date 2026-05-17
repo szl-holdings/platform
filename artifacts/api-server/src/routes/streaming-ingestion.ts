@@ -45,7 +45,8 @@ function sseHeaders(res: Response): void {
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
     'X-Accel-Buffering': 'no',
-    'Access-Control-Allow-Origin': '*',
+    // Do not allow cross-origin access to these authenticated feeds.
+    // Legitimate same-origin dashboards do not need this header.
   });
 }
 
@@ -82,7 +83,7 @@ function startSseStream(
   });
 }
 
-streamingRouter.get('/stream/siem-events', (req: Request, res: Response) => {
+streamingRouter.get('/stream/siem-events', authMiddleware(), (req: Request, res: Response) => {
   startSseStream(req, res, 'siem', (r) => {
     const TYPES = [
       'port_scan',
@@ -117,7 +118,7 @@ streamingRouter.get('/stream/siem-events', (req: Request, res: Response) => {
   });
 });
 
-streamingRouter.get('/stream/market-data', (req: Request, res: Response) => {
+streamingRouter.get('/stream/market-data', authMiddleware(), (req: Request, res: Response) => {
   startSseStream(req, res, 'market', (r) => {
     const TICKERS = ['BTC-USD', 'ETH-USD', 'S&P500', 'NASDAQ', 'AAPL', 'NVDA'];
     const BASE_PRICES: Record<string, number> = {
@@ -155,7 +156,7 @@ streamingRouter.get('/stream/market-data', (req: Request, res: Response) => {
   });
 });
 
-streamingRouter.get('/stream/ais-tracking', (req: Request, res: Response) => {
+streamingRouter.get('/stream/ais-tracking', authMiddleware(), (req: Request, res: Response) => {
   startSseStream(req, res, 'ais', (r) => {
     const vessels = [
       {
@@ -461,7 +462,7 @@ streamingRouter.get('/stream/sources/:id', (req: Request, res: Response) => {
   res.json({ source: { ...source, authToken: source.authToken ? '***' : undefined } });
 });
 
-streamingRouter.get('/stream/status', (_req, res) => {
+streamingRouter.get('/stream/status', authMiddleware(), (_req, res) => {
   const stats = getIngestionStats();
   res.json({
     status: 'healthy',
