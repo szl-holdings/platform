@@ -16,5 +16,7 @@ export type {
   UseAefSearchState,
 } from './hooks.js';
 export { useAefEmbed, useAefSearch } from './hooks.js';
+export { AefMockClient } from './testing/mock-client.js';
+export type { AefMockClientOptions, AefMockResponses } from './testing/mock-client.js';
 
 export const AEF_SDK_VERSION = '0.1.0' as const;

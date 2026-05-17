@@ -24,3 +24,5 @@ export { TreasuryResource } from './resources/treasury.js';
 export { EsignatureResource } from './resources/esignature.js';
 export { CourtFilingsResource } from './resources/court-filings.js';
 export { PluginsResource } from './resources/plugins.js';
+export { SZLMockClient } from './testing/mock-client.js';
+export type { SZLMockClientOptions, SZLMockResponses } from './testing/mock-client.js';
