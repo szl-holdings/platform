@@ -1,22 +1,22 @@
 {
-  "lastRunAt": "2026-05-17T20:38:12.588Z",
+  "lastRunAt": "2026-05-17T21:15:43.837Z",
   "date": "2026-05-17",
   "statuses": [
     {
       "id": "METR",
       "label": "METR autonomy-task evaluation activity",
       "source": "https://api.github.com/repos/METR/public-tasks",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.488Z",
-      "value": 123,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.350Z",
+      "value": null,
+      "error": "fetch failed"
     },
     {
       "id": "EPOCH",
       "label": "Epoch AI notable model count",
       "source": "https://epoch.ai/data/notable_ai_models.csv",
       "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.456Z",
+      "lastFetchedAt": "2026-05-17T21:15:43.832Z",
       "value": 6256,
       "error": null
     },
@@ -24,91 +24,91 @@
       "id": "ARC",
       "label": "ARC-AGI reference repository activity",
       "source": "https://api.github.com/repos/fchollet/ARC-AGI",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.462Z",
-      "value": 4769,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.354Z",
+      "value": null,
+      "error": "This operation was aborted"
     },
     {
       "id": "APOLLO",
       "label": "Apollo Research scheming-eval activity index",
       "source": "https://api.github.com/repos/ApolloResearch/deception-detection",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.515Z",
-      "value": 3,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.354Z",
+      "value": null,
+      "error": "This operation was aborted"
     },
     {
       "id": "AISI",
       "label": "UK AI Safety Institute Inspect framework release count",
       "source": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.457Z",
-      "value": 0,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.355Z",
+      "value": null,
+      "error": "This operation was aborted"
     },
     {
       "id": "RSP",
       "label": "Anthropic Responsible Scaling Policy proxy (cookbook latest tag)",
       "source": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T20:38:12.582Z",
+      "lastFetchedAt": "2026-05-17T21:15:12.355Z",
       "value": null,
-      "error": "rsp tags response empty"
+      "error": "This operation was aborted"
     },
     {
       "id": "FSF",
       "label": "Google DeepMind Frontier Safety Framework proxy (deepmind-research latest tag)",
       "source": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T20:38:12.446Z",
+      "lastFetchedAt": "2026-05-17T21:15:12.356Z",
       "value": null,
-      "error": "fsf tags response empty"
+      "error": "This operation was aborted"
     },
     {
       "id": "GPQA",
       "label": "GPQA Diamond reference README max-score fraction",
       "source": "https://api.github.com/repos/idavidrein/gpqa/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T20:38:12.496Z",
+      "lastFetchedAt": "2026-05-17T21:15:12.356Z",
       "value": null,
-      "error": "no benchmark percentage found in README"
+      "error": "This operation was aborted"
     },
     {
       "id": "MMLU",
       "label": "MMLU reference README max-score fraction",
       "source": "https://api.github.com/repos/hendrycks/test/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T20:38:12.587Z",
+      "lastFetchedAt": "2026-05-17T21:15:12.357Z",
       "value": null,
-      "error": "no benchmark percentage found in README"
+      "error": "This operation was aborted"
     },
     {
       "id": "SWE_BENCH",
       "label": "SWE-bench Verified README max-score fraction",
       "source": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.552Z",
-      "value": 0.08,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.357Z",
+      "value": null,
+      "error": "This operation was aborted"
     },
     {
       "id": "HUMANEVAL",
       "label": "HumanEval README max-score fraction",
       "source": "https://api.github.com/repos/openai/human-eval/readme",
-      "ok": true,
-      "lastFetchedAt": "2026-05-17T20:38:12.458Z",
-      "value": 1,
-      "error": null
+      "ok": false,
+      "lastFetchedAt": "2026-05-17T21:15:12.358Z",
+      "value": null,
+      "error": "This operation was aborted"
     },
     {
       "id": "MATH",
       "label": "MATH benchmark README max-score fraction",
       "source": "https://api.github.com/repos/hendrycks/math/readme",
       "ok": false,
-      "lastFetchedAt": "2026-05-17T20:38:12.457Z",
+      "lastFetchedAt": "2026-05-17T21:15:12.359Z",
       "value": null,
-      "error": "no benchmark percentage found in README"
+      "error": "This operation was aborted"
     }
   ],
   "summary": {
@@ -117,75 +117,75 @@
     "ingestionPolicy": "PUBLIC_ONLY",
     "snapshot": {
       "METR": {
-        "ok": true,
-        "value": 123,
-        "fetchedAt": "2026-05-17T20:38:12.488Z",
+        "ok": false,
+        "error": "fetch failed",
+        "fetchedAt": "2026-05-17T21:15:12.350Z",
         "sourceUrl": "https://api.github.com/repos/METR/public-tasks"
       },
       "EPOCH": {
         "ok": true,
         "value": 6256,
-        "fetchedAt": "2026-05-17T20:38:12.456Z",
+        "fetchedAt": "2026-05-17T21:15:43.832Z",
         "sourceUrl": "https://epoch.ai/data/notable_ai_models.csv"
       },
       "ARC": {
-        "ok": true,
-        "value": 4769,
-        "fetchedAt": "2026-05-17T20:38:12.462Z",
+        "ok": false,
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.354Z",
         "sourceUrl": "https://api.github.com/repos/fchollet/ARC-AGI"
       },
       "APOLLO": {
-        "ok": true,
-        "value": 3,
-        "fetchedAt": "2026-05-17T20:38:12.515Z",
+        "ok": false,
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.354Z",
         "sourceUrl": "https://api.github.com/repos/ApolloResearch/deception-detection"
       },
       "AISI": {
-        "ok": true,
-        "value": 0,
-        "fetchedAt": "2026-05-17T20:38:12.457Z",
+        "ok": false,
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.355Z",
         "sourceUrl": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100"
       },
       "RSP": {
         "ok": false,
-        "error": "rsp tags response empty",
-        "fetchedAt": "2026-05-17T20:38:12.582Z",
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.355Z",
         "sourceUrl": "https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1"
       },
       "FSF": {
         "ok": false,
-        "error": "fsf tags response empty",
-        "fetchedAt": "2026-05-17T20:38:12.446Z",
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.356Z",
         "sourceUrl": "https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1"
       },
       "GPQA": {
         "ok": false,
-        "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T20:38:12.496Z",
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.356Z",
         "sourceUrl": "https://api.github.com/repos/idavidrein/gpqa/readme"
       },
       "MMLU": {
         "ok": false,
-        "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T20:38:12.587Z",
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.357Z",
         "sourceUrl": "https://api.github.com/repos/hendrycks/test/readme"
       },
       "SWE_BENCH": {
-        "ok": true,
-        "value": 0.08,
-        "fetchedAt": "2026-05-17T20:38:12.552Z",
+        "ok": false,
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.357Z",
         "sourceUrl": "https://api.github.com/repos/princeton-nlp/SWE-bench/readme"
       },
       "HUMANEVAL": {
-        "ok": true,
-        "value": 1,
-        "fetchedAt": "2026-05-17T20:38:12.458Z",
+        "ok": false,
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.358Z",
         "sourceUrl": "https://api.github.com/repos/openai/human-eval/readme"
       },
       "MATH": {
         "ok": false,
-        "error": "no benchmark percentage found in README",
-        "fetchedAt": "2026-05-17T20:38:12.457Z",
+        "error": "This operation was aborted",
+        "fetchedAt": "2026-05-17T21:15:12.359Z",
         "sourceUrl": "https://api.github.com/repos/hendrycks/math/readme"
       }
     },
@@ -268,7 +268,7 @@
       "alignmentDebt": null,
       "lutarReadiness": null
     },
-    "receiptHash": "b69460c78c96986d6af7e8fecbcaa9db9f22cbae6d8a1dd70728d5704f0ffc4c"
+    "receiptHash": "f1fc4ff4fe112de3afe40ef992713818c995985bd66c93adcefa601de82f4dd8"
   },
   "runCount": 1
 }
