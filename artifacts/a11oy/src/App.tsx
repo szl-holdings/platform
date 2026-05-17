@@ -173,6 +173,10 @@ const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience')
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
 const FrontierEngine = lazy(() => import('./pages/Frontier').then(m => ({ default: m.Frontier })));
 const FrontierInbox = lazy(() => import('./pages/FrontierInbox').then(m => ({ default: m.FrontierInbox })));
+const CommandHome = lazy(() => import('./pages/command/CommandHome').then(m => ({ default: m.CommandHome })));
+const CommandFrontierProposals = lazy(() => import('./pages/command/CommandFrontierProposals').then(m => ({ default: m.CommandFrontierProposals })));
+const CommandInbox = lazy(() => import('./pages/command/CommandInbox').then(m => ({ default: m.CommandInbox })));
+const CommandApprovals = lazy(() => import('./pages/command/CommandApprovals').then(m => ({ default: m.CommandApprovals })));
 const FrontierFeed = lazy(() => import('./pages/frontier/FrontierFeed').then(m => ({ default: m.FrontierFeed })));
 const FrontierMythos = lazy(() => import('./pages/frontier/MythosIndex').then(m => ({ default: m.MythosIndex })));
 const FrontierProposals = lazy(() => import('./pages/frontier/CapabilityProposals').then(m => ({ default: m.CapabilityProposals })));
@@ -1598,9 +1602,11 @@ function AppInner() {
         </Route>
 
         {/* ── Deprecated standalone surfaces — redirect to consolidated paths ── */}
-        <Route path="/command">
-          <RedirectTo to="/command-surface" />
-        </Route>
+        {/* /command is owned by the consolidated Command operator console
+            (registered below as /command, /command/inbox, /command/frontier/proposals,
+            /command/approvals). The old `/command -> /command-surface` redirect
+            was retired in task #5090; CommandSurface is still reachable directly
+            at /command-surface and ${base}/command-surface for any deep links. */}
         <Route path="/pulse">
           <RedirectTo to="/strategy/briefings" />
         </Route>
@@ -1621,6 +1627,28 @@ function AppInner() {
             <Route path={`${base}/orchestrator/compose`} component={OrchestratorCompose} />
           </>
         )}
+        {/* Operator console — consolidated from former /command artifact (task #5090).
+            Canonical paths are `/a11oy/command/*`. These specific routes are
+            registered BEFORE the catch-all LegacyA11oyRedirect so the redirect
+            does not strip the `/a11oy/` prefix off of them. Pages are wrapped
+            in the existing A11oy `WithShell` (FabricShellProvider + DemoMode +
+            AppShell) so they live inside the standard A11oy chrome; the
+            inner `CommandShell` (rendered by each page) adds the operator
+            console sub-navigation. Legacy `/command/*` URLs (kept reachable
+            via the artifact.toml `paths` allowlist) hard-redirect to the
+            canonical `/a11oy/command/*` form below. */}
+        <Route path="/a11oy/command" component={() => <WithShell><CommandHome /></WithShell>} />
+        <Route path="/a11oy/command/inbox" component={() => <WithShell><CommandInbox /></WithShell>} />
+        <Route path="/a11oy/command/frontier/proposals" component={() => <WithShell><CommandFrontierProposals /></WithShell>} />
+        <Route path="/a11oy/command/approvals" component={() => <WithShell><CommandApprovals /></WithShell>} />
+
+        <Route path="/command"><RedirectTo to="/a11oy/command" /></Route>
+        <Route path="/command/:rest*">
+          {({ rest }: { rest?: string }) => (
+            <RedirectTo to={`/a11oy/command${rest ? `/${rest}` : ''}`} />
+          )}
+        </Route>
+
         <Route path="/a11oy/:rest*">
           <LegacyA11oyRedirect />
         </Route>

@@ -510,6 +510,9 @@ importers:
       '@szl-holdings/shared-contracts':
         specifier: workspace:*
         version: link:../../packages/shared-contracts
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1202,6 +1205,9 @@ importers:
       '@szl-holdings/shared-proxy':
         specifier: workspace:*
         version: link:../../packages/shared-proxy
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1250,39 +1256,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      wouter:
-        specifier: ^3.3.5
-        version: 3.9.0(react@19.1.0)
-
-  artifacts/command:
-    devDependencies:
-      '@szl-holdings/shared-proxy':
-        specifier: workspace:*
-        version: link:../../packages/shared-proxy
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: 'catalog:'
-        version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
-      react-dom:
-        specifier: 19.1.0
-        version: 19.1.0(react@19.1.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vite:
-        specifier: 7.3.2
-        version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       wouter:
         specifier: ^3.3.5
         version: 3.9.0(react@19.1.0)
@@ -1344,6 +1317,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1492,6 +1468,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -1706,6 +1685,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -1854,6 +1836,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -2005,6 +1990,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl-holdings/szl-doctrine':
+        specifier: workspace:*
+        version: link:../../packages/szl-doctrine
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -4989,6 +4977,21 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@25.3.5)(@vitest/ui@4.1.2(vitest@4.1.2))(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/szl-doctrine:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/szl-receipts:
     devDependencies:

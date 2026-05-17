@@ -1,0 +1,28 @@
+{
+  "name": "@szl-holdings/szl-doctrine",
+  "version": "0.1.0",
+  "description": "Typed Doctrine V6 constants and SZL Payload V8 references — single canonical source for every artifact's GovernancePanels.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./panels": "./src/panels.tsx"
+  },
+  "files": ["src", "README.md"],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check:drift": "tsx scripts/check-payload-v8-drift.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:"
+  }
+}

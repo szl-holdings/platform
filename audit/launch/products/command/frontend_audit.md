@@ -1,4 +1,12 @@
 # Command — Unified Operations: Frontend Audit
+
+> **Task #5090 consolidation note (May 17, 2026):** This audit is historical.
+> The Command operator console has been consolidated into the A11oy artifact;
+> the live operator surface is now `/a11oy/command/*` (with `/command/*` kept as
+> a legacy alias). The former `artifacts/command/` directory has been moved to
+> `archive/command/`.
+
+
 **Phase:** 2 + 10  
 **Date:** April 19, 2026  
 **Auditor:** growth capital Launch Readiness Program (Task #2068)

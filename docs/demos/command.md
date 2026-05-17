@@ -1,5 +1,12 @@
 # Command — Unified Command: Demo Script
 
+> **Task #5090 consolidation note:** The Command operator console now lives inside
+> the A11oy artifact. URLs in this script (`/command/...`) resolve through the
+> A11oy router; the canonical home is `/a11oy/command` and the legacy `/command/*`
+> paths are aliased for backward compatibility. The standalone `artifacts/command/`
+> directory has been moved to `archive/command/` and is no longer registered.
+
+
 **Duration:** 8–10 minutes  
 **Persona:** Marcus Holt (CFO / Executive)  
 **URL:** `/command/`  

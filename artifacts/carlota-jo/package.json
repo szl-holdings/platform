@@ -21,6 +21,7 @@
     "@szl-holdings/mcp-client": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/payload": "workspace:*",
+    "@szl-holdings/szl-doctrine": "workspace:*",
     "@szl-holdings/security-headers": "workspace:*",
     "@szl-holdings/shared-proxy": "workspace:*",
     "@tailwindcss/vite": "catalog:",

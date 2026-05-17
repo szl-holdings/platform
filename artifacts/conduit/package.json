@@ -19,6 +19,7 @@
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/payload": "workspace:*",
+    "@szl-holdings/szl-doctrine": "workspace:*",
     "@szl-holdings/security-headers": "workspace:*",
     "@szl-holdings/shared-proxy": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",

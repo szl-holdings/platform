@@ -6,6 +6,15 @@ SZL Holdings provides FORGE, a governed operational intelligence platform for re
 ## Active engagements
 - Defense Unicorns / UDS meshing proposal for Andrew Greene — see `docs/proposals/defense-unicorns/`.
 
+## Canonical sources
+- `.local/payload-v8/` is the canonical doctrine + thesis + manifest source
+  for the SZL Holdings platform (Doctrine V6, replay root, license allowlist,
+  thesis ledger, gap counts, anatomy figures, Lean TH8 skeleton, MANIFEST.json).
+  All artifacts must surface these facts via the shared
+  `@szl-holdings/szl-doctrine` package — never copy values into per-artifact
+  code. Drift between the package constants and the payload is enforced by
+  `pnpm run check:szl-doctrine-drift` (wired into `lint:ci`).
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

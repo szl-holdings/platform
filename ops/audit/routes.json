@@ -28,12 +28,14 @@
     },
     {
       "id": "command",
-      "title": "Unified Command",
-      "previewPath": "/command",
+      "title": "Command — Operator Console (consolidated into A11oy)",
+      "previewPath": "/a11oy/command",
+      "note": "Task #5090: consolidated under artifacts/a11oy; legacy /command/* also resolves.",
       "routes": [
-        { "path": "/command/", "label": "Home" },
-        { "path": "/command/map", "label": "Ecosystem Map" },
-        { "path": "/command/status", "label": "Status" }
+        { "path": "/a11oy/command", "label": "Home" },
+        { "path": "/a11oy/command/frontier/proposals", "label": "Frontier Proposals" },
+        { "path": "/command", "label": "Home (legacy alias)" },
+        { "path": "/command/frontier/proposals", "label": "Frontier Proposals (legacy alias)" }
       ]
     },
     {
