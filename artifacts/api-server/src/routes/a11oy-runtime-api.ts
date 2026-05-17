@@ -204,7 +204,7 @@ const RISK_LEVEL_TO_SCALAR: Record<string, number> = {
  * `autonomyGate()`. Falls back to the coarse band lookup only when no
  * numeric score is available, for legacy callers.
  */
-function deriveApprovalTier(
+export function deriveApprovalTier(
   riskLevel?: string,
   riskScore?: number,
 ): 'auto' | 'operator' | 'executive' {
