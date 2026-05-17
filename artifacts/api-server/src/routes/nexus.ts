@@ -96,6 +96,11 @@ const NEXUS_OWNED_PREFIXES = [
   '/status',
 ];
 router.use(NEXUS_OWNED_PREFIXES, authMiddleware({ required: true }));
+// AF-020 hardening: until per-tenant scoping is implemented the NEXUS control
+// plane is a single shared store. Restrict ALL methods (including GET reads) to
+// privileged operators so that a basic authenticated account cannot enumerate or
+// exfiltrate memory, research, skills, tools, or ingest data from other tenants.
+router.use(NEXUS_OWNED_PREFIXES, requireNexusOps);
 router.use(perUserApiSlidingLimiter);
 
 // ─── In-memory stores ────────────────────────────────────────────────────────
@@ -1992,8 +1997,8 @@ export function __resetWebStealthPolicyForTest(): void {
   webStealthAuditLog.length = 0;
 }
 
-// GET /api/nexus/tools/web.stealth/policy — returns current policy (no auth required)
-router.get('/tools/web.stealth/policy', requireNexusOps, async (_req: Request, res: Response) => {
+// GET /api/nexus/tools/web.stealth/policy — returns current policy (ops+ required)
+router.get('/tools/web.stealth/policy', authMiddleware({ required: true }), requireNexusOps, async (_req: Request, res: Response) => {
   try {
     sendSuccess(res, {
       allowlist: webStealthPolicy.allowlist,
@@ -2036,8 +2041,8 @@ router.put(
   },
 );
 
-// GET /api/nexus/tools/web.stealth/recent-calls — returns the last N audit entries (ops-only)
-router.get('/tools/web.stealth/recent-calls', requireNexusOps, async (req: Request, res: Response) => {
+// GET /api/nexus/tools/web.stealth/recent-calls — returns the last N audit entries (ops+ required)
+router.get('/tools/web.stealth/recent-calls', authMiddleware({ required: true }), requireNexusOps, async (req: Request, res: Response) => {
   try {
     const limitRaw = Number((req.query as Record<string, string>).limit ?? '50');
     const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(1, limitRaw), 100) : 50;
@@ -4102,7 +4107,7 @@ const catalogSearchBodySchema = z.object({
   enabledOnly: z.boolean().default(false),
 });
 
-router.use(['/catalog'], authMiddleware({ required: true }));
+router.use(['/catalog'], authMiddleware({ required: true }), requireNexusOps);
 
 router.post('/catalog/search', async (req: Request, res: Response) => {
   try {
