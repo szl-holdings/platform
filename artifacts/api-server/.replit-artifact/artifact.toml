@@ -34,7 +34,7 @@ BASE_PATH = "/agent-gateway"
 name = "temporal-worker"
 paths = []
 localPort = 6801
-autoStart = true
+autoStart = false
 
 [services.development]
 run = "pnpm --filter @szl-holdings/temporal-tests run worker:start"
@@ -49,7 +49,7 @@ TEMPORAL_TASK_QUEUE = "szl-platform"
 name = "temporal-approval-worker"
 paths = []
 localPort = 6802
-autoStart = true
+autoStart = false
 
 [services.development]
 run = "pnpm --filter @szl-holdings/temporal-tests run worker:approval:start"

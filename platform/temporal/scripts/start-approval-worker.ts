@@ -44,12 +44,31 @@ async function main() {
   const started = Date.now();
   const taskQueue =
     process.env[APPROVAL_TASK_QUEUE_ENV] ?? DEFAULT_APPROVAL_TASK_QUEUE;
-  const endpoint = process.env.TEMPORAL_ENDPOINT ?? "localhost:7233";
-  const totalTimeoutMs = Number(process.env.TEMPORAL_READINESS_TIMEOUT_MS ?? 5 * 60 * 1_000);
+  const endpointFromEnv = process.env.TEMPORAL_ENDPOINT;
+  const endpoint = endpointFromEnv ?? "localhost:7233";
+  // See start-worker.ts for rationale: when no TEMPORAL_ENDPOINT is configured
+  // (typical dev / Replit workspace where no Temporal server is running),
+  // short-circuit to a 5s probe and exit(0) so the workflow reports
+  // "finished" instead of burning 5 min and crashing red.
+  const skipIfUnreachable =
+    process.env.TEMPORAL_SKIP_IF_UNREACHABLE === "true" || !endpointFromEnv;
+  const defaultTimeoutMs = skipIfUnreachable ? 5_000 : 5 * 60 * 1_000;
+  const rawTimeout = process.env.TEMPORAL_READINESS_TIMEOUT_MS;
+  const parsedTimeout = rawTimeout === undefined ? defaultTimeoutMs : Number(rawTimeout);
+  const totalTimeoutMs = Number.isFinite(parsedTimeout) && parsedTimeout >= 0
+    ? parsedTimeout
+    : defaultTimeoutMs;
 
   try {
     await waitForTemporalReady({ endpoint, totalTimeoutMs });
   } catch (err) {
+    if (skipIfUnreachable) {
+      console.warn(
+        "[temporal-approval-worker] Temporal Frontend unreachable — no TEMPORAL_ENDPOINT configured; exiting cleanly",
+        { endpoint, err: err instanceof Error ? { message: err.message } : err },
+      );
+      process.exit(0);
+    }
     console.error(
       "[temporal-approval-worker] FATAL: Temporal Frontend never became reachable",
       err instanceof Error ? { message: err.message } : err,

@@ -48,15 +48,32 @@ async function main() {
     );
   }
 
-  const endpoint = process.env.TEMPORAL_ENDPOINT ?? "localhost:7233";
+  const endpointFromEnv = process.env.TEMPORAL_ENDPOINT;
+  const endpoint = endpointFromEnv ?? "localhost:7233";
+  // When no TEMPORAL_ENDPOINT is configured (typical dev / Replit workspace
+  // where no Temporal server is running) we don't want to burn the workflow's
+  // 5-minute readiness window and then crash with exit(1) — that just lights
+  // the workflow up red on every restart. Short-circuit to a 5s probe and a
+  // graceful exit(0) so the workflow reports "finished" instead of "failed".
+  const skipIfUnreachable =
+    process.env.TEMPORAL_SKIP_IF_UNREACHABLE === "true" || !endpointFromEnv;
+  const defaultTimeoutMs = skipIfUnreachable ? 5_000 : 5 * 60 * 1_000;
   const totalTimeoutMs = parseTimeoutEnv(
     process.env.TEMPORAL_READINESS_TIMEOUT_MS,
-    5 * 60 * 1_000,
+    defaultTimeoutMs,
   );
 
   try {
     await waitForTemporalReady({ endpoint, totalTimeoutMs });
   } catch (err) {
+    if (skipIfUnreachable) {
+      logger.warn(
+        { endpoint, err: err instanceof Error ? { message: err.message } : err },
+        "[temporal-worker] Temporal Frontend unreachable — no TEMPORAL_ENDPOINT configured; exiting cleanly",
+      );
+      await shutdownTracer(4_000).catch(() => {});
+      process.exit(0);
+    }
     logger.error(
       { err: err instanceof Error ? { message: err.message } : err },
       "[temporal-worker] FATAL: Temporal Frontend never became reachable",
