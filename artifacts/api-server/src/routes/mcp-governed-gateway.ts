@@ -1242,7 +1242,7 @@ router.get('/rate-limits', authMiddleware(), requireRole('super_admin', 'admin',
   res.json({ rateLimits: limits });
 });
 
-router.get('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
+router.get('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const tenantId = resolveTenantId(req);
   const keys = [...apiKeys.values()]
     .filter(k => !tenantId || k.tenantId === tenantId)
@@ -1260,7 +1260,7 @@ router.get('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'o
   res.json({ keys, total: keys.length });
 });
 
-router.post('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
+router.post('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const callerTenant = resolveTenantId(req);
   const { label, tenantId, scopes, rateLimit } = req.body ?? {};
   if (!label || typeof label !== 'string') return res.status(400).json({ error: 'label is required' });
@@ -1297,7 +1297,7 @@ router.post('/api-keys', authMiddleware(), requireRole('super_admin', 'admin', '
   });
 });
 
-router.delete('/api-keys/:id', authMiddleware(), requireRole('super_admin', 'admin', 'ops'), (req: Request, res: Response) => {
+router.delete('/api-keys/:id', authMiddleware(), requireRole('super_admin', 'admin', 'ops', 'exec'), (req: Request, res: Response) => {
   const callerTenant = resolveTenantId(req);
   const key = apiKeys.get(req.params.id!);
   if (!key) return res.status(404).json({ error: 'API key not found' });

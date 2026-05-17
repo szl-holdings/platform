@@ -14,14 +14,24 @@ import { and, desc, eq } from 'drizzle-orm';
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { PRAXISMcpServer as NexusMcpServer, buildTenantInstructions, createDomainApps } from '@workspace/nexus-mcp';
+import {
+  PRAXISMcpServer as NexusMcpServer,
+  buildTenantInstructions,
+  createDomainApps,
+} from '@workspace/nexus-mcp';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
-import { gatewayApiKeyGate, getToolGovernanceMetadata, recordGatewayLifecycleEvent, recordGatewayMcpCall, updateGatewayCallPostExecution } from './mcp-governed-gateway';
+import {
+  gatewayApiKeyGate,
+  getToolGovernanceMetadata,
+  recordGatewayLifecycleEvent,
+  recordGatewayMcpCall,
+  updateGatewayCallPostExecution,
+} from './mcp-governed-gateway';
 
 /**
  * Restricts raw MCP transport access to gateway-key holders or session users
@@ -49,13 +59,15 @@ function requireOperatorOrGatewayKey(req: Request, res: Response, next: NextFunc
       return;
     }
     res.status(403).json({
-      error: 'Insufficient permissions — raw MCP transport requires operator role or a gateway API key',
+      error:
+        'Insufficient permissions — raw MCP transport requires operator role or a gateway API key',
       hint: 'Use POST /api/mcp-governed-gateway/tool-call with a gateway API key for governed tool access',
     });
     return;
   }
   res.status(401).json({
-    error: 'Authentication required — provide a gateway API key via Authorization: Bearer header, or authenticate via session with operator role',
+    error:
+      'Authentication required — provide a gateway API key via Authorization: Bearer header, or authenticate via session with operator role',
   });
 }
 
@@ -150,9 +162,7 @@ async function writeAuditLog(params: {
 
 function buildInternalUrl(path: string): string {
   const devDomain = process.env.REPLIT_DEV_DOMAIN;
-  const base = devDomain
-    ? `https://${devDomain}`
-    : `http://localhost:${process.env.PORT || 3000}`;
+  const base = devDomain ? `https://${devDomain}` : `http://localhost:${process.env.PORT || 3000}`;
   return `${base}${path}`;
 }
 
@@ -512,9 +522,18 @@ const HF_MCP_TOOLS: McpTool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Search query (e.g. "code generation", "text-to-image")' },
-        author: { type: 'string', description: 'Filter by author/organization (e.g. "meta-llama", "mistralai")' },
-        task: { type: 'string', description: 'Filter by task (e.g. "text-generation", "image-classification")' },
+        query: {
+          type: 'string',
+          description: 'Search query (e.g. "code generation", "text-to-image")',
+        },
+        author: {
+          type: 'string',
+          description: 'Filter by author/organization (e.g. "meta-llama", "mistralai")',
+        },
+        task: {
+          type: 'string',
+          description: 'Filter by task (e.g. "text-generation", "image-classification")',
+        },
         limit: { type: 'number', description: 'Max results to return (default 5)' },
       },
       required: ['query'],
@@ -527,7 +546,10 @@ const HF_MCP_TOOLS: McpTool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Search query (e.g. "medical QA", "code instructions")' },
+        query: {
+          type: 'string',
+          description: 'Search query (e.g. "medical QA", "code instructions")',
+        },
         author: { type: 'string', description: 'Filter by author/organization' },
         limit: { type: 'number', description: 'Max results (default 5)' },
       },
@@ -541,7 +563,10 @@ const HF_MCP_TOOLS: McpTool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Paper search query (e.g. "reasoning", "diffusion models")' },
+        query: {
+          type: 'string',
+          description: 'Paper search query (e.g. "reasoning", "diffusion models")',
+        },
         limit: { type: 'number', description: 'Max results (default 5)' },
       },
       required: ['query'],
@@ -567,7 +592,10 @@ const HF_MCP_TOOLS: McpTool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        model_id: { type: 'string', description: 'Full model ID (e.g. "meta-llama/Llama-3.1-8B-Instruct")' },
+        model_id: {
+          type: 'string',
+          description: 'Full model ID (e.g. "meta-llama/Llama-3.1-8B-Instruct")',
+        },
       },
       required: ['model_id'],
     },
@@ -579,7 +607,10 @@ const HF_MCP_TOOLS: McpTool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        dataset_id: { type: 'string', description: 'Full dataset ID (e.g. "HuggingFaceFW/fineweb")' },
+        dataset_id: {
+          type: 'string',
+          description: 'Full dataset ID (e.g. "HuggingFaceFW/fineweb")',
+        },
       },
       required: ['dataset_id'],
     },
@@ -1498,7 +1529,20 @@ function buildTenantCtx(user: AuthenticatedUser | undefined) {
 
 interface GatewayContext {
   apiKey: { id: string; tenantId: string; scopes: string[] };
-  connection: { connectionId: string; agentName: string; agentType: string; apiKeyId: string; tenantId: string; connectedAt: string; lastActivityAt: string; status: string; toolCallCount: number; approvedCount: number; rejectedCount: number; proofPacketCount: number };
+  connection: {
+    connectionId: string;
+    agentName: string;
+    agentType: string;
+    apiKeyId: string;
+    tenantId: string;
+    connectedAt: string;
+    lastActivityAt: string;
+    status: string;
+    toolCallCount: number;
+    approvedCount: number;
+    rejectedCount: number;
+    proofPacketCount: number;
+  };
 }
 
 function createAlloyMcpServer(
@@ -1506,7 +1550,11 @@ function createAlloyMcpServer(
   gatewayCtx?: GatewayContext,
 ): NexusMcpServer {
   const ctx = gatewayCtx
-    ? { ...buildTenantCtx(user), tenantId: gatewayCtx.apiKey.tenantId, actorId: `gateway:${gatewayCtx.connection.agentName}` }
+    ? {
+        ...buildTenantCtx(user),
+        tenantId: gatewayCtx.apiKey.tenantId,
+        actorId: `gateway:${gatewayCtx.connection.agentName}`,
+      }
     : buildTenantCtx(user);
 
   const server = new NexusMcpServer({
@@ -1546,7 +1594,8 @@ function createAlloyMcpServer(
   for (const tool of ALL_TOOLS) {
     const capturedTool = tool;
     const govMeta = getToolGovernanceMetadata(capturedTool.name);
-    const govSuffix = `\n\n[Governance] Risk: ${govMeta.riskLevel}` +
+    const govSuffix =
+      `\n\n[Governance] Risk: ${govMeta.riskLevel}` +
       (govMeta.approvalRequired ? ` | Approval: ${govMeta.approvalTier}` : '') +
       (govMeta.isDestructive ? ' | DESTRUCTIVE' : '');
     server.rawTool(
@@ -1557,7 +1606,15 @@ function createAlloyMcpServer(
         if (gatewayCtx) {
           if (!gatewayCtx.apiKey.scopes.includes('tools:execute')) {
             return {
-              content: [{ type: 'text' as const, text: JSON.stringify({ error: 'API key does not have tools:execute scope', requiredScope: 'tools:execute' }) }],
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify({
+                    error: 'API key does not have tools:execute scope',
+                    requiredScope: 'tools:execute',
+                  }),
+                },
+              ],
               isError: true,
             };
           }
@@ -1569,19 +1626,43 @@ function createAlloyMcpServer(
           );
           if (govResult.disposition === 'blocked') {
             return {
-              content: [{ type: 'text' as const, text: JSON.stringify({ error: 'Tool call blocked by governance policy', disposition: 'blocked', proofPacketId: govResult.proofPacketId }) }],
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify({
+                    error: 'Tool call blocked by governance policy',
+                    disposition: 'blocked',
+                    proofPacketId: govResult.proofPacketId,
+                  }),
+                },
+              ],
               isError: true,
             };
           }
           if (govResult.disposition === 'pending_approval') {
             return {
-              content: [{ type: 'text' as const, text: JSON.stringify({ status: 'pending_approval', message: 'Tool call requires human approval before execution', approvalId: govResult.approvalId, proofPacketId: govResult.proofPacketId }) }],
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify({
+                    status: 'pending_approval',
+                    message: 'Tool call requires human approval before execution',
+                    approvalId: govResult.approvalId,
+                    proofPacketId: govResult.proofPacketId,
+                  }),
+                },
+              ],
               isError: false,
             };
           }
           const execResult = await executeTool(capturedTool.name, args, user);
-          const resultText = execResult.content?.map((c: { text?: string }) => c.text ?? '').join('') ?? '';
-          updateGatewayCallPostExecution(govResult.callId, resultText, execResult.isError ? resultText : undefined);
+          const resultText =
+            execResult.content?.map((c: { text?: string }) => c.text ?? '').join('') ?? '';
+          updateGatewayCallPostExecution(
+            govResult.callId,
+            resultText,
+            execResult.isError ? resultText : undefined,
+          );
           return execResult;
         }
         return executeTool(capturedTool.name, args, user);
@@ -1624,21 +1705,16 @@ function createAlloyMcpServer(
         argsShape[arg.name] = z.string().optional().describe(arg.description);
       }
     }
-    server.prompt(
-      capturedPrompt.name,
-      capturedPrompt.description,
-      argsShape,
-      async (args) => {
-        const messages = buildPromptMessages(capturedPrompt.name, args as Record<string, string>);
-        return {
-          description: capturedPrompt.description,
-          messages: messages.map((m) => ({
-            role: m.role as 'user' | 'assistant',
-            content: { type: 'text' as const, text: m.content.text },
-          })),
-        };
-      },
-    );
+    server.prompt(capturedPrompt.name, capturedPrompt.description, argsShape, async (args) => {
+      const messages = buildPromptMessages(capturedPrompt.name, args as Record<string, string>);
+      return {
+        description: capturedPrompt.description,
+        messages: messages.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: { type: 'text' as const, text: m.content.text },
+        })),
+      };
+    });
   }
 
   return server;
@@ -1679,27 +1755,45 @@ router.get('/mcp/health', (_req: Request, res: Response) => {
   });
 });
 
-router.get('/mcp/tools', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, (req: Request, res: Response) => {
-  if (req.gatewayApiKey && req.gatewayConnection) {
-    recordGatewayLifecycleEvent(
-      req.gatewayConnection as Parameters<typeof recordGatewayLifecycleEvent>[0],
-      'discover',
-    );
-  }
-  const toolsWithGovernance = ALL_TOOLS.map(t => ({
-    ...t,
-    governance: getToolGovernanceMetadata(t.name),
-  }));
-  res.json({
-    tools: toolsWithGovernance,
-    count: toolsWithGovernance.length,
-    categories: {
-      domain: DOMAIN_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
-      platform: PLATFORM_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
-      data: DATA_TOOLS.map((t) => ({ name: t.name, description: t.description, governance: getToolGovernanceMetadata(t.name) })),
-    },
-  });
-});
+router.get(
+  '/mcp/tools',
+  gatewayApiKeyGate,
+  authMiddleware({ required: false }),
+  requireOperatorOrGatewayKey,
+  (req: Request, res: Response) => {
+    if (req.gatewayApiKey && req.gatewayConnection) {
+      recordGatewayLifecycleEvent(
+        req.gatewayConnection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+        'discover',
+      );
+    }
+    const toolsWithGovernance = ALL_TOOLS.map((t) => ({
+      ...t,
+      governance: getToolGovernanceMetadata(t.name),
+    }));
+    res.json({
+      tools: toolsWithGovernance,
+      count: toolsWithGovernance.length,
+      categories: {
+        domain: DOMAIN_TOOLS.map((t) => ({
+          name: t.name,
+          description: t.description,
+          governance: getToolGovernanceMetadata(t.name),
+        })),
+        platform: PLATFORM_TOOLS.map((t) => ({
+          name: t.name,
+          description: t.description,
+          governance: getToolGovernanceMetadata(t.name),
+        })),
+        data: DATA_TOOLS.map((t) => ({
+          name: t.name,
+          description: t.description,
+          governance: getToolGovernanceMetadata(t.name),
+        })),
+      },
+    });
+  },
+);
 
 router.get(
   '/mcp/resources',
@@ -1711,46 +1805,59 @@ router.get(
   },
 );
 
-router.get('/mcp/prompts', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, (_req: Request, res: Response) => {
-  res.json({ prompts: MCP_PROMPTS, count: MCP_PROMPTS.length });
-});
+router.get(
+  '/mcp/prompts',
+  gatewayApiKeyGate,
+  authMiddleware({ required: false }),
+  requireOperatorOrGatewayKey,
+  (_req: Request, res: Response) => {
+    res.json({ prompts: MCP_PROMPTS, count: MCP_PROMPTS.length });
+  },
+);
 
 // ── Legacy SSE endpoint (MCP 2024-11-05) ────────────────────────────────────
 //
 // Creates a per-session SSEServerTransport backed by a fresh NexusMcpServer
 // instance scoped to the authenticated user's tenant context.
 
-router.get('/mcp/sse', gatewayApiKeyGate, authMiddleware({ required: false }), requireOperatorOrGatewayKey, async (req: Request, res: Response) => {
-  const sessionId = randomUUID();
-  const transport = new SSEServerTransport('/api/mcp/message', res);
-  sseSessions.set(sessionId, transport);
+router.get(
+  '/mcp/sse',
+  gatewayApiKeyGate,
+  authMiddleware({ required: false }),
+  requireOperatorOrGatewayKey,
+  async (req: Request, res: Response) => {
+    const sessionId = randomUUID();
+    const transport = new SSEServerTransport('/api/mcp/message', res);
+    sseSessions.set(sessionId, transport);
 
-  const gwCtx = req.gatewayApiKey && req.gatewayConnection
-    ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
-    : undefined;
+    const gwCtx =
+      req.gatewayApiKey && req.gatewayConnection
+        ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+        : undefined;
 
-  if (gwCtx?.connection) {
-    recordGatewayLifecycleEvent(
-      gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
-      'connect',
-    );
-  }
-
-  req.on('close', () => {
-    sseSessions.delete(sessionId);
     if (gwCtx?.connection) {
       recordGatewayLifecycleEvent(
         gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
-        'disconnect',
+        'connect',
       );
     }
-  });
 
-  res.setHeader('X-Session-Id', sessionId);
+    req.on('close', () => {
+      sseSessions.delete(sessionId);
+      if (gwCtx?.connection) {
+        recordGatewayLifecycleEvent(
+          gwCtx.connection as Parameters<typeof recordGatewayLifecycleEvent>[0],
+          'disconnect',
+        );
+      }
+    });
 
-  const mcpServer = createAlloyMcpServer(req.user, gwCtx);
-  await mcpServer.connect(transport);
-});
+    res.setHeader('X-Session-Id', sessionId);
+
+    const mcpServer = createAlloyMcpServer(req.user, gwCtx);
+    await mcpServer.connect(transport);
+  },
+);
 
 // ── Legacy SSE message endpoint ───────────────────────────────────────────────
 
@@ -1791,9 +1898,10 @@ router.post(
       return;
     }
 
-    const gwCtx = req.gatewayApiKey && req.gatewayConnection
-      ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
-      : undefined;
+    const gwCtx =
+      req.gatewayApiKey && req.gatewayConnection
+        ? { apiKey: req.gatewayApiKey, connection: req.gatewayConnection }
+        : undefined;
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
@@ -1935,7 +2043,7 @@ router.get('/mcp/nexus/verify/:hash', async (req: Request, res: Response) => {
         signal: AbortSignal.timeout(5_000),
       });
       if (upstream.ok) {
-        const gatewayResult = await upstream.json() as unknown;
+        const gatewayResult = (await upstream.json()) as unknown;
         res.json({
           ...(typeof gatewayResult === 'object' && gatewayResult !== null ? gatewayResult : {}),
           source: 'substrate-mcp-gateway',
@@ -1965,7 +2073,7 @@ router.get('/mcp/nexus/verify/:hash', async (req: Request, res: Response) => {
     message: `No proof record found for hash '${hash}'.`,
     hint: [
       'Proofs issued by the Alloy MCP Server are available here immediately after a tool call.',
-      'Proofs issued by the Substrate MCP Gateway are available at that gateway\'s /mcp/nexus/verify/:hash endpoint.',
+      "Proofs issued by the Substrate MCP Gateway are available at that gateway's /mcp/nexus/verify/:hash endpoint.",
       'Set the SUBSTRATE_MCP_GATEWAY_URL environment variable to enable cross-gateway verification.',
     ].join(' '),
     lookupAttemptedAt: new Date().toISOString(),
