@@ -3,7 +3,7 @@ import { GAUGE_VARIABLES, type GaugeVariable } from './gauge-registry';
 import { assertAllowedLicense } from './licenses';
 import type { IngestResult } from './ingestors/_fetch';
 
-export type VariableSnapshot = Record<string, IngestResult<number> | { ok: 'manual'; lastUpdated: string | null }>;
+export type VariableSnapshot = Record<string, IngestResult<number | string> | { ok: 'manual'; lastUpdated: string | null }>;
 
 export interface HistoryEntry {
   readonly date: string;

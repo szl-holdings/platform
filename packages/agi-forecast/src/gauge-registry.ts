@@ -36,8 +36,11 @@ function manualVar(v: Omit<ManualVariable, 'provenance' | 'source' | 'lastUpdate
 
 /**
  * 12 gauge variables proposed in szl-holdings/agi-forecast README.
- * Three are ingested live from public, no-auth sources (PUBLIC_ONLY).
- * The remaining nine are typed stubs (MANUAL) awaiting follow-up ingestors.
+ * All are ingested live from public, no-auth, license-allowlisted sources
+ * (PUBLIC_ONLY): GitHub repo metadata/releases/tags/READMEs and Epoch AI's
+ * CSV. Units are heterogeneous (commits, model-count, stars, open-issues,
+ * reports, semver, fraction) — see each entry's `unit` field for the
+ * semantic shape of the ingested value.
  */
 export const GAUGE_VARIABLES: readonly GaugeVariable[] = [
   publicVar({
@@ -66,73 +69,73 @@ export const GAUGE_VARIABLES: readonly GaugeVariable[] = [
   }),
   publicVar({
     id: 'APOLLO',
-    label: 'Apollo Research scheming-eval reach',
+    label: 'Apollo Research scheming-eval activity index',
     source: 'https://api.github.com/repos/ApolloResearch/deception-detection',
-    unit: 'stars',
+    unit: 'open-issues',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'AISI',
-    label: 'UK AI Safety Institute Inspect framework reach',
-    source: 'https://api.github.com/repos/UKGovernmentBEIS/inspect_ai',
-    unit: 'stars',
+    label: 'UK AI Safety Institute Inspect framework release count',
+    source: 'https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases?per_page=100',
+    unit: 'reports',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'RSP',
-    label: 'Anthropic Responsible Scaling Policy proxy (cookbook reach)',
-    source: 'https://api.github.com/repos/anthropics/anthropic-cookbook',
-    unit: 'stars',
+    label: 'Anthropic Responsible Scaling Policy proxy (cookbook latest tag)',
+    source: 'https://api.github.com/repos/anthropics/anthropic-cookbook/tags?per_page=1',
+    unit: 'semver',
     cadence: 'event-driven',
     license: 'MIT',
   }),
   publicVar({
     id: 'FSF',
-    label: 'Google DeepMind Frontier Safety Framework proxy (deepmind-research reach)',
-    source: 'https://api.github.com/repos/google-deepmind/deepmind-research',
-    unit: 'stars',
+    label: 'Google DeepMind Frontier Safety Framework proxy (deepmind-research latest tag)',
+    source: 'https://api.github.com/repos/google-deepmind/deepmind-research/tags?per_page=1',
+    unit: 'semver',
     cadence: 'event-driven',
     license: 'Apache-2.0',
   }),
   publicVar({
     id: 'GPQA',
-    label: 'GPQA Diamond reference repository reach',
-    source: 'https://api.github.com/repos/idavidrein/gpqa',
-    unit: 'stars',
+    label: 'GPQA Diamond reference README max-score fraction',
+    source: 'https://api.github.com/repos/idavidrein/gpqa/readme',
+    unit: 'fraction',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'MMLU',
-    label: 'MMLU reference repository reach',
-    source: 'https://api.github.com/repos/hendrycks/test',
-    unit: 'stars',
+    label: 'MMLU reference README max-score fraction',
+    source: 'https://api.github.com/repos/hendrycks/test/readme',
+    unit: 'fraction',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'SWE_BENCH',
-    label: 'SWE-bench Verified reference repository reach',
-    source: 'https://api.github.com/repos/princeton-nlp/SWE-bench',
-    unit: 'stars',
+    label: 'SWE-bench Verified README max-score fraction',
+    source: 'https://api.github.com/repos/princeton-nlp/SWE-bench/readme',
+    unit: 'fraction',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'HUMANEVAL',
-    label: 'HumanEval reference repository reach',
-    source: 'https://api.github.com/repos/openai/human-eval',
-    unit: 'stars',
+    label: 'HumanEval README max-score fraction',
+    source: 'https://api.github.com/repos/openai/human-eval/readme',
+    unit: 'fraction',
     cadence: 'monthly',
     license: 'MIT',
   }),
   publicVar({
     id: 'MATH',
-    label: 'MATH benchmark reference repository reach',
-    source: 'https://api.github.com/repos/hendrycks/math',
-    unit: 'stars',
+    label: 'MATH benchmark README max-score fraction',
+    source: 'https://api.github.com/repos/hendrycks/math/readme',
+    unit: 'fraction',
     cadence: 'monthly',
     license: 'MIT',
   }),
