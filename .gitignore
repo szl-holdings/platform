@@ -197,3 +197,4 @@ screenshots/raw
 # FORGE signing keys — private key material; never commit
 .forge-skill-keys/
 **/forge-keys/ed25519-private.pem
+artifacts/api-server/.data/
