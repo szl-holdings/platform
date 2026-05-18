@@ -391,6 +391,18 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // Vessels / Sentra / Amaru — Operational Core snapshot bridge.
+  // The `/{app}/ops-core/snapshot` endpoints are the cross-app orchestration
+  // surface consumed by each app's browser `*-store.ts` (polling every 15s)
+  // and by a11oy's <{App}Ops /> pages. Returns aggregate counters + module
+  // mount metadata only — no PII, no row contents. Org-scoped DB counts are
+  // computed only when the caller has an org session; anonymous callers get
+  // `org_scoped: false` and zeros for per-org counters, which is the correct
+  // signal for "no tenant attached" rather than a 401 brick wall. The handler
+  // uses `authMiddleware({ required: false })` for opportunistic hydration.
+  "/api/vessels/ops-core/",
+  "/api/sentra/ops-core/",
+  "/api/amaru/ops-core/",
   // Agent Mesh telemetry — the three genuinely-public paths (state, index, scan)
   // are listed in PUBLIC_EXACT_PATHS above using exact Set.has() matching.
   // The broad "/api/agent-mesh/" prefix is intentionally absent here to prevent

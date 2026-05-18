@@ -175,9 +175,13 @@ export default function AutonomousRoutingPage() {
   const [selectedRoute, setSelectedRoute] = useState(ROUTES[0]);
   const [recalculating, setRecalculating] = useState(false);
 
+  // Route alternatives are bound to the static ROUTES roster. The
+  // optimizer adapter (vessels-extended /routes/recompute) is on the
+  // roadmap; until then we do not pretend a 2.2s solver run with a
+  // setTimeout spinner — recalculation is a synchronous view-reset.
   const handleRecalc = () => {
     setRecalculating(true);
-    setTimeout(() => setRecalculating(false), 2200);
+    Promise.resolve().then(() => setRecalculating(false));
   };
 
   return (

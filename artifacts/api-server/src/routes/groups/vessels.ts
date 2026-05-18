@@ -4,6 +4,14 @@ import { perUserApiSlidingLimiter } from '../../middlewares/sliding-window-limit
 import { tenantScope } from '../../middlewares/tenant-scope';
 
 export function register(router: IRouter): void {
+  // Vessels Operational Core — mounted FIRST, before the group's
+  // tenantScope({ required: true }) wall, so the cross-app orchestration
+  // snapshot can be polled without a session. The route's own
+  // authMiddleware({ required: false }) still hydrates org-scoped counters
+  // when a session is present; anonymous callers receive `org_scoped: false`.
+  // Listed in PUBLIC_PREFIXES ("/api/vessels/ops-core/") for defense in depth.
+  router.use(lazyMatch('/vessels', () => import('../vessels-ops-core'), 'vessels-ops-core'));
+
   router.use('/vessels', tenantScope({ required: true }));
   router.use('/vessels', perUserApiSlidingLimiter);
 
@@ -25,8 +33,7 @@ export function register(router: IRouter): void {
   router.use(lazyMatch('/vessels', () => import('../vessels-forecasts'), 'vessels-forecasts'));
   router.use(lazyMatch('/vessels', () => import('../vessels-formula-thesis'), 'vessels-formula-thesis'));
 
-  // Vessels Operational Core — Series A executive aggregator over all
-  // vessels-* sub-routers above. Surfaces live counts, module health,
-  // inherited mechanisms, formula pillars, DOI proof bindings. Read-only.
-  router.use(lazyMatch('/vessels', () => import('../vessels-ops-core'), 'vessels-ops-core'));
+  // NOTE: vessels-ops-core is mounted at the TOP of this function (before
+  // the tenantScope wall) so it can be polled anonymously by the
+  // cross-app orchestration bridge. Do not re-mount it here.
 }

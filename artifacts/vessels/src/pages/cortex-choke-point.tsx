@@ -167,10 +167,17 @@ export default function CortexChokePointPage() {
   const selected = useMemo(() => POINTS.find((p) => p.id === selectedId)!, [selectedId]);
   const sc = statusColor(selected.status);
 
+  // Decision twin mint. The twin is currently composed from the static
+  // POINTS roster (disruption probability, alt-routing, freight & war-risk
+  // premium deltas). The server-side twin compositor lives under
+  // /api/vessels/digital-twin and will replace this synchronous path when
+  // wired through the cortex route. No setTimeout pretense — the spinner
+  // flips for one microtask so the operator sees a deterministic mint, not
+  // a fake "950ms simulation".
   function runDecisionTwin() {
     setRunning(true);
     setTwinMinted(false);
-    setTimeout(() => { setRunning(false); setTwinMinted(true); }, 950);
+    Promise.resolve().then(() => { setRunning(false); setTwinMinted(true); });
   }
 
   return (

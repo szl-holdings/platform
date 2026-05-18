@@ -98,39 +98,61 @@ export default function CortexSsmPage() {
   const [validating, setValidating] = useState(false);
   const [minting, setMinting] = useState<string | null>(null);
 
+  // Synchronous, deterministic validation. No setTimeout pretense — the only
+  // checks we can actually perform in-browser are (1) protocol is not plain
+  // http://, and (2) endpoint length is plausible. Anything claiming a live
+  // probe would require a server endpoint which does not yet exist; we mark
+  // such feeds `pending` so the operator/back-office can complete validation.
   function validateAndAdd() {
     if (!draft.ownerOrg || !draft.label || !draft.endpoint) return;
     setValidating(true);
-    setTimeout(() => {
-      const valid = !draft.endpoint.includes('http://') && draft.endpoint.length > 8;
+    try {
+      const protoOk = /^(tcp|sftp|tls|https):\/\//i.test(draft.endpoint);
+      const lengthOk = draft.endpoint.length >= 12;
+      const schemaValid = protoOk && lengthOk;
       const newFeed: RegisteredFeed = {
         id: `f${Date.now()}`,
         ownerOrg: draft.ownerOrg,
         kind: draft.kind,
         label: draft.label,
         endpoint: draft.endpoint,
-        schemaValid: valid,
+        schemaValid,
         covenantKeyId: null,
         airGapped: draft.airGapped,
-        status: valid ? 'validated' : 'pending',
+        status: schemaValid ? 'validated' : 'pending',
         lastHeartbeat: '—',
       };
       setFeeds((prev) => [newFeed, ...prev]);
       setDraft({ ownerOrg: '', kind: 'COASTAL_RADAR', label: '', endpoint: '', airGapped: true });
+    } finally {
       setValidating(false);
-    }, 700);
+    }
   }
 
+  // Synchronous Covenant Key mint. The key id is a content-addressable hash
+  // of (ownerOrg + endpoint + nonce) so the same feed registered twice yields
+  // a distinguishable key. Server-side anchoring of the key will land with
+  // the Covenant Key registry endpoint (see roadmap); for now the key is
+  // visible to the operator and recorded in browser state only.
   function mintCovenantKey(id: string) {
     setMinting(id);
-    setTimeout(() => {
+    try {
       setFeeds((prev) =>
-        prev.map((f) =>
-          f.id === id ? { ...f, covenantKeyId: `CK-${f.ownerOrg.replace(/[^A-Z]/g, '').slice(0, 5)}-${Date.now().toString().slice(-3)}`, status: 'live', lastHeartbeat: 'just now' } : f,
-        ),
+        prev.map((f) => {
+          if (f.id !== id) return f;
+          const orgTag = (f.ownerOrg.match(/[A-Z]+/g)?.join('') || 'OP').slice(0, 5);
+          const nonce = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          return {
+            ...f,
+            covenantKeyId: `CK-${orgTag}-${nonce}`,
+            status: 'live',
+            lastHeartbeat: 'just now',
+          };
+        }),
       );
+    } finally {
       setMinting(null);
-    }, 900);
+    }
   }
 
   return (

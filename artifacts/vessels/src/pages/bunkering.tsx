@@ -174,9 +174,14 @@ export default function BunkeringPage() {
   const [tab, setTab] = useState<'prices' | 'consumption' | 'hedging'>('prices');
   const [refreshing, setRefreshing] = useState(false);
 
+  // Bunker prices are bound to the static BUNKER_PRICES roster below until the
+  // live bunker-feed adapter is wired (roadmap: vessels-extended bunker route).
+  // Refresh is a no-op view-reset; we do NOT pretend a 1.8s "fetch" with a
+  // setTimeout spinner. The "LIVE PRICES" badge above is rendered honestly
+  // when the adapter is wired; until then, the seed source is the source.
   const handleRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1800);
+    Promise.resolve().then(() => setRefreshing(false));
   };
 
   const cheapestVlsfo = BUNKER_PRICES.reduce((a, b) => (a.vlsfo < b.vlsfo ? a : b));

@@ -213,6 +213,12 @@ router.use(lazyMatch("/geo-intel", () => import("./geo-intel"), "geo-intel"));
 // Public endpoints (no auth) — consumed by Command geo-intel map and Vessels dashboard.
 router.use(lazyMatch("/rf-intel", () => import("./rf-intel"), "rf-intel"));
 
+// Sentra / Amaru — Operational Core snapshot bridges. Parity surfaces with
+// vessels-ops-core. Public (PUBLIC_PREFIXES "/api/{app}/ops-core/"). Consumed
+// by each app's `*-store.ts` and a11oy's <{App}Ops /> pages.
+router.use(lazyMatch("/sentra/ops-core", () => import("./sentra-ops-core"), "sentra-ops-core"));
+router.use(lazyMatch("/amaru/ops-core", () => import("./amaru-ops-core"), "amaru-ops-core"));
+
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection
 // via the global csrfMiddleware mounted in server.ts.
