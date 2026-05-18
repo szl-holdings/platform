@@ -79,6 +79,22 @@ export class ReceiptChain {
     return receipt;
   }
 
+  /**
+   * Append a pre-built receipt row directly. Used by `StreamSession` so
+   * stream-chunk receipts (whose `paramsHash` is computed from raw bytes,
+   * not from `hashJson(params)`) can still flow through the same storage
+   * and Merkle root as ordinary receipts. The caller MUST have already
+   * computed `seq`, `prevHash`, and `selfHash` consistently with the
+   * current chain head; otherwise `verify()` will report a break.
+   */
+  async appendRaw(receipt: LambdaReceipt): Promise<LambdaReceipt> {
+    if (this.closed) throw new Error('ReceiptChain: cannot append to a closed chain');
+    await this.ensureLoaded();
+    await this.storage.append(receipt);
+    this.cache.push(receipt);
+    return receipt;
+  }
+
   /** Return the full chain (load from storage if not yet cached). */
   async readAll(): Promise<LambdaReceipt[]> {
     await this.ensureLoaded();

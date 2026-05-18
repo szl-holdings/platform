@@ -44,6 +44,23 @@ export interface AuditClosureReceipt {
   selfHash: string;
 }
 
+/**
+ * Per-stream closure receipt. Folded at end-of-stream over the per-chunk
+ * `LambdaReceipt`s emitted by a `StreamSession`. Unlike `AuditClosureReceipt`
+ * it scopes to a contiguous seq range and does NOT seal the underlying chain.
+ *
+ * `reason` records whether the stream completed normally (`end`) or was cut
+ * short by the consumer (`abort`). Any byte-level tampering of a streamed
+ * chunk changes its `paramsHash`, which in turn changes `merkleRoot` and
+ * `selfHash` — so tampering is detectable offline.
+ */
+export interface StreamClosureReceipt extends AuditClosureReceipt {
+  streamId: string;
+  firstSeq: number;
+  lastSeq: number;
+  reason: 'end' | 'abort';
+}
+
 export interface ReceiptStorage {
   /** Append a single receipt row. Implementations MUST be append-only. */
   append(receipt: LambdaReceipt): Promise<void> | void;

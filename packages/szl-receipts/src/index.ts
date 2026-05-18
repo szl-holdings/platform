@@ -12,6 +12,7 @@
 export type {
   LambdaReceipt,
   AuditClosureReceipt,
+  StreamClosureReceipt,
   ReceiptStorage,
   ReceiptChainOptions,
   AppendInput,
@@ -20,3 +21,12 @@ export type {
 export { canonicalJson, sha256Hex, hashJson } from './hash.js';
 export { merkleRoot } from './merkle.js';
 export { ReceiptChain } from './chain.js';
+export {
+  StreamSession,
+  streamWithReceipts,
+  parseSSE,
+  type SSEFrame,
+  type StreamSessionOptions,
+  type StreamWithReceiptsOptions,
+  type ReceiptedStream,
+} from './stream.js';
