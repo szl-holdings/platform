@@ -69,11 +69,29 @@ function countDbTables(schemaDir: string): number {
 }
 
 function countRegisteredArtifacts(): number {
-  const replitPath = join(ROOT, '.replit');
-  if (!existsSync(replitPath)) return 0;
-  const content = readFileSync(replitPath, 'utf-8');
-  const matches = content.match(/\[\[artifacts\]\]/g);
-  return matches ? matches.length : 0;
+  // The canonical artifact registry is the set of directories under
+  // `artifacts/` — the same source the artifacts skill / workspace registry
+  // walks when enumerating registered artifacts. Previously this script
+  // grepped `.replit` for `[[artifacts]]` blocks (only 2 entries) and
+  // silently drifted from the truth.
+  const artifactsDir = join(ROOT, 'artifacts');
+  if (!existsSync(artifactsDir)) {
+    throw new Error(
+      `Canonical artifact registry directory not found at ${artifactsDir}. ` +
+        'Cannot compute activeArtifactCount. Update scripts/generate-platform-metrics.ts ' +
+        'if the registry has moved.',
+    );
+  }
+  const entries = readdirSync(artifactsDir, { withFileTypes: true }).filter(
+    (d) => d.isDirectory() && !d.name.startsWith('.'),
+  );
+  if (entries.length === 0) {
+    throw new Error(
+      `Found 0 registered artifacts under ${artifactsDir}. ` +
+        'Registry appears empty — refusing to write a zero count.',
+    );
+  }
+  return entries.length;
 }
 
 function countScripts(): number {
@@ -85,7 +103,11 @@ function countScripts(): number {
   }).length;
 }
 
-// Structural counts
+// Structural counts.
+// `artifactCount` is the filtered count of deployable artifact directories
+// (excludes the `audit/` evidence folder). `activeArtifactCount` is the
+// unfiltered canonical registry count — every directory under `artifacts/`.
+// These two numbers can legitimately differ.
 const structural = {
   artifactCount: countDir(join(ROOT, 'artifacts'), ARTIFACT_DIR_EXCLUDES),
   activeArtifactCount: countRegisteredArtifacts(),

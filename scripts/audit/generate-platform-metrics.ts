@@ -64,6 +64,31 @@ function countGithubWorkflows(): number {
 // excluded from artifact enumeration (e.g. evidence folders from diligence audits).
 const ARTIFACT_DIR_EXCLUDES = new Set<string>(["audit"]);
 
+function countRegisteredArtifacts(): number {
+  // Canonical artifact registry — every directory under `artifacts/` is a
+  // registered artifact (same source the artifacts skill / workspace registry
+  // walks). Previously the root script grepped `.replit` for `[[artifacts]]`
+  // blocks (only 2 entries) and silently drifted from the truth.
+  const artifactsDir = path.join(ROOT, "artifacts");
+  if (!fs.existsSync(artifactsDir)) {
+    throw new Error(
+      `Canonical artifact registry directory not found at ${artifactsDir}. ` +
+        "Cannot compute activeArtifactCount. Update scripts/audit/generate-platform-metrics.ts " +
+        "if the registry has moved.",
+    );
+  }
+  const entries = fs
+    .readdirSync(artifactsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && !d.name.startsWith("."));
+  if (entries.length === 0) {
+    throw new Error(
+      `Found 0 registered artifacts under ${artifactsDir}. ` +
+        "Registry appears empty — refusing to write a zero count.",
+    );
+  }
+  return entries.length;
+}
+
 function getArtifacts(): { name: string; kind: string; path: string }[] {
   const artifactsDir = path.join(ROOT, "artifacts");
   if (!fs.existsSync(artifactsDir)) return [];
@@ -90,6 +115,7 @@ function getArtifacts(): { name: string; kind: string; path: string }[] {
 }
 
 const artifacts = getArtifacts();
+const activeArtifactCount = countRegisteredArtifacts();
 const libs = listDirs("lib");
 const packages = listDirs("packages");
 
@@ -146,7 +172,12 @@ const metrics = {
     screenshot_assets: screenshotFiles,
   },
   architecture: {
+    // `artifacts` is the filtered list of deployable artifact directories
+    // (e.g. excludes the `audit/` evidence folder). `activeArtifactCount` is
+    // the unfiltered canonical registry count — every directory under
+    // `artifacts/`. These two numbers can legitimately differ.
     artifacts: artifacts.length,
+    activeArtifactCount,
     artifact_list: artifacts.map((a) => ({ name: a.name, kind: a.kind })),
     lib_packages: libs.length,
     standalone_packages: packages.length,
@@ -196,6 +227,7 @@ const md = `# SZL Holdings — Platform Metrics
 
 | Metric | Count |
 |--------|-------|
+| Active registered artifacts (canonical registry) | ${metrics.architecture.activeArtifactCount} |
 | Artifact directories on disk (filtered) | ${metrics.architecture.artifacts} |
 | Library packages (lib/) | ${metrics.architecture.lib_packages} |
 | Standalone packages (packages/) | ${metrics.architecture.standalone_packages} |

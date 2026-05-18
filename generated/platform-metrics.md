@@ -1,27 +1,28 @@
 # SZL Holdings — Platform Metrics
-> Auto-generated 2026-05-17T10:06:02.201Z by `scripts/audit/generate-platform-metrics.ts`
+> Auto-generated 2026-05-18T19:05:03.065Z by `scripts/audit/generate-platform-metrics.ts`
 > **These numbers are code-derived. Do not hand-edit.**
 
 ## Repository Scale
 
 | Metric | Count |
 |--------|-------|
-| TypeScript files (.ts) | 4,715 |
-| React/TSX files (.tsx) | 1,800 |
-| Total TS + TSX | 6,515 |
-| Python files (.py) | 235 |
-| CSS/SCSS files | 12 |
-| Markdown docs | 2000 |
+| TypeScript files (.ts) | 4,893 |
+| React/TSX files (.tsx) | 1,593 |
+| Total TS + TSX | 6,486 |
+| Python files (.py) | 291 |
+| CSS/SCSS files | 9 |
+| Markdown docs | 2078 |
 | Screenshot assets | 0 |
 
 ## Architecture
 
 | Metric | Count |
 |--------|-------|
+| Active registered artifacts (canonical registry) | 14 |
 | Artifact directories on disk (filtered) | 13 |
 | Library packages (lib/) | 57 |
-| Standalone packages (packages/) | 144 |
-| Total packages | 201 |
+| Standalone packages (packages/) | 147 |
+| Total packages | 204 |
 
 ### Artifact Registry
 
@@ -29,32 +30,32 @@
 |------|------|
 | @workspace/a11oy | web |
 | @workspace/api-server | backend |
-| @workspace/carlota-jo | web |
-| @workspace/command | web |
+| carlota-jo | web |
+| command | web |
 | @workspace/conduit | web |
-| @workspace/counsel | web |
+| counsel | web |
 | @workspace/lexicon | web |
 | mockup-sandbox | design |
 | pulse | web |
 | rosie | web |
 | @workspace/sentra | web |
-| @workspace/terra | web |
 | @workspace/vessels | web |
+| @workspace/vessels-pitch | web |
 
 ## API Surface
 
 | Metric | Count |
 |--------|-------|
-| Route files (recursive) | 211 |
-| Route handlers (GET/POST/PUT/PATCH/DELETE) | 7,781 |
-| Database table definitions (Drizzle pgTable) | 1261 |
-| SQL migrations | 76 |
+| Route files (recursive) | 212 |
+| Route handlers (GET/POST/PUT/PATCH/DELETE) | 7,921 |
+| Database table definitions (Drizzle pgTable) | 1269 |
+| SQL migrations | 79 |
 
 ## Quality & CI
 
 | Metric | Count |
 |--------|-------|
-| Test files (.test.ts/tsx, .spec.ts/tsx) | 590 |
+| Test files (.test.ts/tsx, .spec.ts/tsx) | 715 |
 | GitHub CI workflows | 29 |
 
 ## Platform Primitives

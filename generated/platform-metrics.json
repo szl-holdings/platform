@@ -1,17 +1,18 @@
 {
-  "generated_at": "2026-05-17T10:06:02.201Z",
+  "generated_at": "2026-05-18T19:05:03.065Z",
   "generator": "scripts/audit/generate-platform-metrics.ts",
   "repository": {
-    "typescript_files": 4715,
-    "tsx_files": 1800,
-    "total_ts_tsx": 6515,
-    "python_files": 235,
-    "css_files": 12,
-    "markdown_docs": 2000,
+    "typescript_files": 4893,
+    "tsx_files": 1593,
+    "total_ts_tsx": 6486,
+    "python_files": 291,
+    "css_files": 9,
+    "markdown_docs": 2078,
     "screenshot_assets": 0
   },
   "architecture": {
     "artifacts": 13,
+    "activeArtifactCount": 14,
     "artifact_list": [
       {
         "name": "@workspace/a11oy",
@@ -22,11 +23,11 @@
         "kind": "backend"
       },
       {
-        "name": "@workspace/carlota-jo",
+        "name": "carlota-jo",
         "kind": "web"
       },
       {
-        "name": "@workspace/command",
+        "name": "command",
         "kind": "web"
       },
       {
@@ -34,7 +35,7 @@
         "kind": "web"
       },
       {
-        "name": "@workspace/counsel",
+        "name": "counsel",
         "kind": "web"
       },
       {
@@ -58,26 +59,26 @@
         "kind": "web"
       },
       {
-        "name": "@workspace/terra",
+        "name": "@workspace/vessels",
         "kind": "web"
       },
       {
-        "name": "@workspace/vessels",
+        "name": "@workspace/vessels-pitch",
         "kind": "web"
       }
     ],
     "lib_packages": 57,
-    "standalone_packages": 144,
-    "total_packages": 201
+    "standalone_packages": 147,
+    "total_packages": 204
   },
   "api_surface": {
-    "route_files_recursive": 211,
-    "route_handlers": 7781,
-    "db_tables_defined": 1261,
-    "migrations": 76
+    "route_files_recursive": 212,
+    "route_handlers": 7921,
+    "db_tables_defined": 1269,
+    "migrations": 79
   },
   "quality": {
-    "test_files": 590,
+    "test_files": 715,
     "ci_workflows": 29
   },
   "platform_primitives": [
