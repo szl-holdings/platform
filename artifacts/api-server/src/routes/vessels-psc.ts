@@ -14,6 +14,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
+import { buildSeedChecklist, PARIS_MOU_CHECKLIST } from '../lib/vessels/psc-paris-mou';
 import { authMiddleware, parseIdParam } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 
@@ -177,13 +178,7 @@ router.get(
 
 const DEFAULT_CHECKLIST: Array<{ category: string; status: 'pass' | 'fail' | 'action_required' }> =
   [
-    { category: 'ISM Code — SMS Manual', status: 'pass' },
-    { category: 'Fire Detection System', status: 'pass' },
-    { category: 'MARPOL — Oil Record Book current', status: 'pass' },
-    { category: 'Life Saving Appliances', status: 'pass' },
-    { category: 'ISPS Documentation', status: 'pass' },
-    { category: 'Navigation Equipment', status: 'pass' },
-    { category: 'Crew Certificates', status: 'pass' },
+    ...buildSeedChecklist().map((i) => ({ category: i.category, status: i.status })),
   ];
 
 async function ensureChecklistForVessel(vesselId: number, orgId: number | null | undefined) {
@@ -218,7 +213,18 @@ router.get('/vessels/:id/psc/checklist', authMiddleware(), tenantScope(), async 
       .from(vesselsPscChecklistItemsTable)
       .where(eq(vesselsPscChecklistItemsTable.vesselId, vesselId))
       .orderBy(asc(vesselsPscChecklistItemsTable.sortOrder), asc(vesselsPscChecklistItemsTable.id));
-    sendSuccess(res, rows);
+    // Enrich each seeded row with the Paris MoU code, detainable flag, and
+    // convention reference so the frontend gets the full Annex-10 model.
+    const annexIndex = new Map(
+      PARIS_MOU_CHECKLIST.map((i) => [`${i.category} — ${i.item}`, i]),
+    );
+    const enriched = rows.map((row) => {
+      const meta = annexIndex.get(row.category);
+      return meta
+        ? { ...row, code: meta.code, detainable: meta.detainable, convention: meta.convention }
+        : { ...row, code: null, detainable: null, convention: null };
+    });
+    sendSuccess(res, enriched);
   } catch (err) {
     handleRouteError(res, err, 'Failed to load PSC checklist');
   }

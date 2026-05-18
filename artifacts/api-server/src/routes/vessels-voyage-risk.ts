@@ -153,35 +153,22 @@ export interface VoyageRiskScore {
   };
 }
 
-// ─── Embedded sanctions watchlist (public/demo) ───────────────────────────────
+// ─── Embedded sanctions watchlist — derived from our curated registry ─────────
+// (Source of truth: artifacts/api-server/src/lib/vessels/sanctions-registry.ts)
+import { SANCTIONED_ENTITIES } from '../lib/vessels/sanctions-registry';
 
-const SANCTIONS_WATCHLIST = [
-  {
-    name: 'Sovcomflot',
-    aliases: ['sovcomflot', 'scf'],
-    lists: ['US SDN', 'EU Consolidated', 'UK OFSI'],
-    jurisdiction: 'Russia',
-  },
-  {
-    name: 'IRISL',
-    aliases: ['irisl', 'islamic republic of iran shipping'],
-    lists: ['US SDN', 'EU Consolidated'],
-    jurisdiction: 'Iran',
-  },
-  {
-    name: 'National Iranian Tanker',
-    aliases: ['nitc', 'national iranian tanker'],
-    lists: ['US SDN'],
-    jurisdiction: 'Iran',
-  },
-  {
-    name: 'Black Sea Tanker Holdings',
-    aliases: ['black sea tanker', 'bsth'],
-    lists: ['US SDN'],
-    jurisdiction: 'Cyprus',
-  },
-  { name: 'Palmali', aliases: ['palmali'], lists: ['US SDN'], jurisdiction: 'Russia' },
-];
+const SANCTIONS_WATCHLIST = SANCTIONED_ENTITIES.map((e) => ({
+  name: e.name,
+  aliases: e.aliases,
+  lists: e.lists.map((l) =>
+    l === 'OFAC_SDN' ? 'US SDN'
+      : l === 'EU_CONSOLIDATED' ? 'EU Consolidated'
+      : l === 'UK_OFSI' ? 'UK OFSI'
+      : l === 'UN_SC' ? 'UN Security Council'
+      : l,
+  ),
+  jurisdiction: e.jurisdiction,
+}));
 
 const SHADOW_FLEET_PORTS = [
   'Novorossiysk',

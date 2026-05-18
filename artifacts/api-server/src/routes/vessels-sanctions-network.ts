@@ -6,6 +6,16 @@ import { handleRouteError, sendNotFound, sendSuccess } from '../lib/api-response
 import { broadcastWs, pubsub, VESSELS_EVENTS } from '../lib/pubsub-bridge.js';
 import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
+import {
+  SANCTIONED_ENTITIES,
+  HIGH_RISK_FLAG_REGISTRIES,
+  SANCTIONED_PORT_CORRIDORS,
+  lookupEntity,
+  isHighRiskFlag,
+  isSanctionedPortCorridor,
+  registryStats,
+  type SanctionedEntity,
+} from '../lib/vessels/sanctions-registry';
 
 const router: IRouter = Router();
 
@@ -57,17 +67,24 @@ const RULES_LIBRARY: Omit<SanctionsRule, 'triggered'>[] = [
   { id: 'r10', ruleCode: 'CARGO-ORI-005', description: 'Cargo origin linked to sanctioned commodity corridor', list: 'INTERNAL', severity: 'medium', score: 12 },
 ];
 
-const HIGH_RISK_FLAGS = new Set(['KM', 'KP', 'IR', 'SY', 'CU', 'VE', 'BZ', 'TG', 'ST', 'GW']);
-const FOC_FLAGS = new Set(['KM', 'PA', 'MH', 'PW', 'BZ', 'TG', 'KI', 'TV', 'SL', 'GN']);
-const SANCTIONED_PORTS = new Set([
-  'bandar abbas', 'kharg island', 'assaluyeh', 'latakia', 'tartus',
-  'havana', 'crimea', 'sevastopol', 'vladivostok',
-]);
-const SDN_OWNER_KEYWORDS = [
-  'silk road maritime', 'caspian marine', 'black sea petroleum',
-  'eastern crude', 'persian gulf trade', 'bosphorus maritime',
-];
-const EU_MANAGER_KEYWORDS = ['bosphorus maritime', 'black sea maritime', 'volga ship', 'caspian crude'];
+// Sanctioned-jurisdiction inferred ownership risk (programme-state flags):
+const HIGH_RISK_FLAGS = new Set(['KP', 'IR', 'SY', 'CU', 'VE', 'RU']);
+// Flag-of-convenience risk derived from the registry's FoC table.
+const FOC_FLAGS = new Set(HIGH_RISK_FLAG_REGISTRIES.map((r) => r.code));
+// Port-call corridor risk derived from the registry's curated list.
+const SANCTIONED_PORTS = new Set(SANCTIONED_PORT_CORRIDORS.map((p) => p.toLowerCase()));
+// Owner / manager alias indices derived from the curated entity registry —
+// no more hard-coded keyword arrays; every match is traceable to a
+// concrete OFAC / EU / UK / UN designation.
+const SDN_OWNER_ENTITIES: SanctionedEntity[] = SANCTIONED_ENTITIES.filter(
+  (e) => e.lists.includes('OFAC_SDN'),
+);
+const EU_MANAGER_ENTITIES: SanctionedEntity[] = SANCTIONED_ENTITIES.filter(
+  (e) => e.lists.includes('EU_CONSOLIDATED'),
+);
+const UK_OFSI_ENTITIES: SanctionedEntity[] = SANCTIONED_ENTITIES.filter(
+  (e) => e.lists.includes('UK_OFSI'),
+);
 
 interface VesselRow {
   id: number;
@@ -99,40 +116,58 @@ function evaluateRules(vessel: VesselRow): { rules: SanctionsRule[]; triggeredId
   const currentPortLower = currentPort.toLowerCase();
   const lastPortLower = lastPort.toLowerCase();
 
-  if (SDN_OWNER_KEYWORDS.some((k) => ownerLower.includes(k))) {
+  // R01 — Registered owner appears on OFAC SDN list (registry-backed lookup)
+  const ownerSdnMatch = lookupEntity(owner).find((m) =>
+    m.entity.lists.includes('OFAC_SDN') && m.confidence >= 0.55,
+  );
+  if (ownerSdnMatch) {
     triggeredIds.push('r01');
-    evidence['r01'] = `Owner "${owner}" matches SDN keyword pattern`;
+    evidence['r01'] = `Owner "${owner}" matches ${ownerSdnMatch.entity.name} — ${ownerSdnMatch.entity.programme} (${ownerSdnMatch.entity.designatedAt}); confidence ${(ownerSdnMatch.confidence * 100).toFixed(0)}%`;
   }
 
+  // R02 — Beneficial owner domiciled in sanctioned jurisdiction (programme-state)
   if (HIGH_RISK_FLAGS.has(flag)) {
     triggeredIds.push('r02');
-    evidence['r02'] = `Owner jurisdiction inferred from flag state ${flag} — high-risk territory`;
+    evidence['r02'] = `Flag state ${flag} is subject to active sanctions programme — owner jurisdiction inferred high-risk`;
   }
 
-  if (EU_MANAGER_KEYWORDS.some((k) => managerLower.includes(k))) {
+  // R03 — Ship manager on EU Consolidated list
+  const managerEuMatch = lookupEntity(manager).find((m) =>
+    m.entity.lists.includes('EU_CONSOLIDATED') && m.confidence >= 0.55,
+  );
+  if (managerEuMatch) {
     triggeredIds.push('r03');
-    evidence['r03'] = `Manager "${manager}" matches EU Consolidated designation pattern`;
+    evidence['r03'] = `Manager "${manager}" matches ${managerEuMatch.entity.name} on EU Consolidated list — ${managerEuMatch.entity.programme}`;
   }
 
+  // R04 — AIS dark behaviour
   if (aisBlackout > 8) {
     triggeredIds.push('r04');
     evidence['r04'] = `AIS blackout recorded: ${aisBlackout.toFixed(1)}h in potentially sanctioned corridor`;
   }
 
-  const portCalls = [currentPortLower, lastPortLower].filter(Boolean);
-  if (portCalls.some((p) => [...SANCTIONED_PORTS].some((sp) => p.includes(sp)))) {
+  // R05 — Prior call at sanctioned-corridor port (registry-backed)
+  const currentPortHit = isSanctionedPortCorridor(currentPort);
+  const lastPortHit = isSanctionedPortCorridor(lastPort);
+  if (currentPortHit.hit || lastPortHit.hit) {
     triggeredIds.push('r05');
-    evidence['r05'] = `Port call recorded at known sanctioned port: ${currentPort || lastPort}`;
+    evidence['r05'] = `Port call at sanctioned-corridor terminal: ${currentPortHit.port ?? lastPortHit.port}`;
   }
 
-  if (FOC_FLAGS.has(flag)) {
+  // R06 — Flag of convenience (registry-backed)
+  const flagCheck = isHighRiskFlag(flag);
+  if (flagCheck.hit) {
     triggeredIds.push('r06');
-    evidence['r06'] = `Flag state ${flag} is a recognised flag-of-convenience jurisdiction`;
+    evidence['r06'] = `Flag state ${flagCheck.registry ?? flag}: ${flagCheck.rationale}`;
   }
 
-  if (chartererLower.includes('eagle') || chartererLower.includes('persian') || chartererLower.includes('oriental')) {
+  // R07 — Charterer on UK OFSI list (registry-backed)
+  const chartererUkMatch = lookupEntity(charterer).find((m) =>
+    m.entity.lists.includes('UK_OFSI') && m.confidence >= 0.55,
+  );
+  if (chartererUkMatch) {
     triggeredIds.push('r07');
-    evidence['r07'] = `Charterer "${charterer}" linked to elevated-risk commodity network`;
+    evidence['r07'] = `Charterer "${charterer}" matches ${chartererUkMatch.entity.name} on UK OFSI Consolidated list`;
   }
 
   const rules = RULES_LIBRARY.map((r) => ({
@@ -239,6 +274,9 @@ function buildNetworkFromVessel(vessel: VesselRow, rules: SanctionsRule[]): { no
   return { nodes, edges };
 }
 
+// Demo network templates retained ONLY for vessel IDs that have no row in the
+// registry yet (used by the storyboard/sample-data flow). Real vessels always
+// flow through the registry-backed evaluateRules() path above.
 const DEMO_OVERRIDES: Record<string, { score: number; nodes: NetworkNode[]; edges: NetworkEdge[]; summary?: string }> = {
   '1': {
     score: 78,
@@ -309,23 +347,9 @@ router.get('/sanctions/score/:vesselId', authMiddleware(), tenantScope({ require
 
     const demoOverride = DEMO_OVERRIDES[vesselIdStr];
 
-    if (demoOverride && vessel) {
-      const triggeredIds = DEMO_RULES[vesselIdStr] ?? [];
-      rules = RULES_LIBRARY.map((r) => ({ ...r, triggered: triggeredIds.includes(r.id) }));
-      score = demoOverride.score;
-      networkNodes = demoOverride.nodes;
-      networkEdges = demoOverride.edges;
-      dataSource = 'simulated';
-      summary = demoOverride.summary ?? buildSummary(vessel, rules, score);
-    } else if (demoOverride && !vessel) {
-      const triggeredIds = DEMO_RULES[vesselIdStr] ?? [];
-      rules = RULES_LIBRARY.map((r) => ({ ...r, triggered: triggeredIds.includes(r.id) }));
-      score = demoOverride.score;
-      networkNodes = demoOverride.nodes;
-      networkEdges = demoOverride.edges;
-      dataSource = 'simulated';
-      summary = demoOverride.summary ?? '';
-    } else if (vessel) {
+    if (vessel) {
+      // Always prefer the registry-backed real evaluation when we have a
+      // vessel row, even for demo IDs — every signal becomes traceable.
       const result = evaluateRules(vessel);
       rules = result.rules;
       score = Math.min(100, result.rules.filter((r) => r.triggered).reduce((s, r) => s + r.score, 0));
@@ -334,6 +358,14 @@ router.get('/sanctions/score/:vesselId', authMiddleware(), tenantScope({ require
       networkEdges = network.edges;
       dataSource = 'live';
       summary = buildSummary(vessel, rules, score);
+    } else if (demoOverride && !vessel) {
+      const triggeredIds = DEMO_RULES[vesselIdStr] ?? [];
+      rules = RULES_LIBRARY.map((r) => ({ ...r, triggered: triggeredIds.includes(r.id) }));
+      score = demoOverride.score;
+      networkNodes = demoOverride.nodes;
+      networkEdges = demoOverride.edges;
+      dataSource = 'simulated';
+      summary = demoOverride.summary ?? '';
     } else {
       rules = RULES_LIBRARY.map((r) => ({ ...r, triggered: false }));
       score = 0;
@@ -384,26 +416,17 @@ router.get('/sanctions/portfolio', authMiddleware(), tenantScope({ required: fal
     }
 
     const holdings = vessels.map((vessel) => {
-      const vesselIdStr = String(vessel.id);
-      const demoOverride = DEMO_OVERRIDES[vesselIdStr];
-      const triggeredIds = DEMO_RULES[vesselIdStr] ?? [];
-
-      let score: number;
-      let tier: SanctionsTier;
-      let dataSource: 'live' | 'simulated';
-      let sanctionedNetworkNodes = 0;
-
-      if (demoOverride) {
-        score = demoOverride.score;
-        tier = computeTier(score);
-        dataSource = 'simulated';
-        sanctionedNetworkNodes = demoOverride.nodes.filter((n) => n.sanctioned).length;
-      } else {
-        const result = evaluateRules(vessel);
-        score = Math.min(100, result.rules.filter((r) => r.triggered).reduce((s, r) => s + r.score, 0));
-        tier = computeTier(score);
-        dataSource = 'live';
-      }
+      // Mirror the score endpoint: live DB row always wins over the demo
+      // template; demo only fires when there is no row whatsoever.
+      const result = evaluateRules(vessel);
+      const score = Math.min(
+        100,
+        result.rules.filter((r) => r.triggered).reduce((s, r) => s + r.score, 0),
+      );
+      const tier = computeTier(score);
+      const dataSource: 'live' | 'simulated' = 'live';
+      const { nodes } = buildNetworkFromVessel(vessel, result.rules);
+      const sanctionedNetworkNodes = nodes.filter((n) => n.sanctioned).length;
 
       return {
         vesselId: vessel.id,
@@ -430,6 +453,20 @@ router.get('/sanctions/network/:vesselId', authMiddleware(), tenantScope({ requi
     const vesselId = parseInt(vesselIdStr, 10);
     if (Number.isNaN(vesselId)) return sendNotFound(res, 'Vessel');
 
+    // Live DB row always wins; demo template only when there is no row.
+    let vessel: VesselRow | null = null;
+    try {
+      const [row] = await db.select().from(vesselsTable).where(eq(vesselsTable.id, vesselId)).limit(1);
+      vessel = (row as VesselRow | undefined) ?? null;
+    } catch {
+    }
+
+    if (vessel) {
+      const { rules } = evaluateRules(vessel);
+      const { nodes, edges } = buildNetworkFromVessel(vessel, rules);
+      return sendSuccess(res, { vesselId, networkNodes: nodes, networkEdges: edges, computedAt: new Date().toISOString(), dataSource: 'live' });
+    }
+
     const demoOverride = DEMO_OVERRIDES[vesselIdStr];
     if (demoOverride) {
       return sendSuccess(res, {
@@ -441,18 +478,7 @@ router.get('/sanctions/network/:vesselId', authMiddleware(), tenantScope({ requi
       });
     }
 
-    let vessel: VesselRow | null = null;
-    try {
-      const [row] = await db.select().from(vesselsTable).where(eq(vesselsTable.id, vesselId)).limit(1);
-      vessel = (row as VesselRow | undefined) ?? null;
-    } catch {
-    }
-
-    if (!vessel) return sendNotFound(res, 'Vessel');
-
-    const { rules } = evaluateRules(vessel);
-    const { nodes, edges } = buildNetworkFromVessel(vessel, rules);
-    return sendSuccess(res, { vesselId, networkNodes: nodes, networkEdges: edges, computedAt: new Date().toISOString(), dataSource: 'live' });
+    return sendNotFound(res, 'Vessel');
   } catch (err) {
     return handleRouteError(res, err, 'Failed to fetch vessel network');
   }
