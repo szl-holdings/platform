@@ -47,6 +47,7 @@ router.get('/status', (_req: Request, res: Response) => {
       runCount: snap.runCount,
       statuses: snap.statuses,
       summary: snap.summary,
+      history: snap.history,
     });
   } catch (err) {
     return handleRouteError(res, err, 'agi-forecast.status');

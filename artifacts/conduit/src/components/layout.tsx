@@ -52,6 +52,7 @@ const coreItems = [
   { name: 'Templates', href: '/templates', icon: LayoutTemplate },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Admin Usage', href: '/admin/usage', icon: Gauge },
+  { name: 'AGI Forecast', href: '/agi-forecast', icon: Telescope },
 ];
 
 const fabricItems = [

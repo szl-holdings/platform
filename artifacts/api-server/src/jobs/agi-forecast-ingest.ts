@@ -32,6 +32,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import {
   runAllPublicIngestors,
+  type DerivedMetrics,
   type ScheduledRunResult,
   type VariableStatus,
 } from '@workspace/agi-forecast';
@@ -42,6 +43,20 @@ const SNAPSHOT_FILE = path.join(DATA_DIR, 'agi-forecast-snapshot.json');
 
 const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000; // daily
 const DEFAULT_KICKOFF_MS = 60_000; // 1 minute after boot
+
+/** How many daily derived-metric points to retain on disk for the sparkline. */
+const HISTORY_CAP = 30;
+
+/**
+ * Trimmed per-day record stored in `history` — keeps only what the dashboard
+ * needs to render a sparkline. Full snapshots are not retained, to keep the
+ * persisted file small.
+ */
+export interface DerivedHistoryEntry {
+  readonly date: string;
+  readonly derived: DerivedMetrics;
+  readonly receiptHash: string;
+}
 
 export interface PersistedSnapshot {
   /** Wall-clock ISO timestamp the most recent run finished at. */
@@ -54,6 +69,12 @@ export interface PersistedSnapshot {
   readonly summary: ScheduledRunResult['summary'];
   /** Cumulative number of scheduled runs since process start. */
   readonly runCount: number;
+  /**
+   * Trailing daily derived metrics, oldest-first, capped at HISTORY_CAP.
+   * One entry per ISO date — later runs on the same date overwrite the
+   * previous entry for that date.
+   */
+  readonly history: readonly DerivedHistoryEntry[];
 }
 
 let _intervalHandle: NodeJS.Timeout | null = null;
@@ -89,6 +110,11 @@ async function loadPersistedSnapshot(): Promise<PersistedSnapshot | null> {
       typeof parsed.lastRunAt === 'string' &&
       Array.isArray(parsed.statuses)
     ) {
+      // History is a newer field — backfill an empty array when reading
+      // older snapshot files so callers always see a defined array.
+      if (!Array.isArray(parsed.history)) {
+        return { ...parsed, history: [] };
+      }
       return parsed;
     }
     return null;
@@ -128,12 +154,27 @@ export function runAgiForecastIngestOnce(): Promise<PersistedSnapshot> {
       _runCount += 1;
       const ok = result.statuses.filter((s) => s.ok).length;
       const failed = result.statuses.length - ok;
+      // Append today's derived metrics to the trailing history, replacing
+      // any prior entry for the same date so re-runs on a single day
+      // collapse to the most recent value. Kept oldest-first and capped.
+      const priorHistory = _latest?.history ?? [];
+      const merged: DerivedHistoryEntry[] = [
+        ...priorHistory.filter((h) => h.date !== result.date),
+        {
+          date: result.date,
+          derived: result.summary.derived,
+          receiptHash: result.summary.receiptHash,
+        },
+      ];
+      merged.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+      const history = merged.slice(-HISTORY_CAP);
       const snap: PersistedSnapshot = {
         lastRunAt: result.finishedAt,
         date: result.date,
         statuses: result.statuses,
         summary: result.summary,
         runCount: _runCount,
+        history,
       };
       _latest = snap;
       await writePersistedSnapshot(snap);

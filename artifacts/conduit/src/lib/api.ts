@@ -308,6 +308,52 @@ export const listDestinationFields = (destination: string, objectType: string) =
 export const previewSource = (body: { sourceType: string; sourceMeta?: Record<string, unknown>; mappings?: Array<Omit<SyncMapping, 'id' | 'syncId'>> }) =>
   apiFetch<SourcePreview>('/conduit/sources/preview', { method: 'POST', body: JSON.stringify(body) });
 
+// ─── AGI Forecast ─────────────────────────────────────────────────────────────
+export interface AgiForecastDerived {
+  horizonVelocity: number | null;
+  alignmentDebt: number | null;
+  lutarReadiness: number | null;
+}
+
+export interface AgiForecastHistoryEntry {
+  date: string;
+  derived: AgiForecastDerived;
+  receiptHash: string;
+}
+
+export interface AgiForecastStatusPresent {
+  present: true;
+  lastRunAt: string;
+  date: string;
+  runCount: number;
+  statuses: Array<{
+    id: string;
+    label?: string;
+    source?: string;
+    ok: boolean;
+    lastFetchedAt: string | null;
+    value?: number | string | null;
+    error?: string | null;
+  }>;
+  summary: {
+    id: string;
+    date: string;
+    ingestionPolicy: 'PUBLIC_ONLY';
+    derived: AgiForecastDerived;
+    receiptHash: string;
+  };
+  history: AgiForecastHistoryEntry[];
+}
+
+export interface AgiForecastStatusAbsent {
+  present: false;
+  message: string;
+}
+
+export type AgiForecastStatus = AgiForecastStatusPresent | AgiForecastStatusAbsent;
+
+export const getAgiForecastStatus = () => apiFetch<AgiForecastStatus>('/agi-forecast/status');
+
 // ─── Destination list ─────────────────────────────────────────────────────────
 export const DESTINATIONS = [
   { id: 'salesforce', label: 'Salesforce', color: '#00A1E0' },
