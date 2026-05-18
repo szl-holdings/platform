@@ -73,6 +73,7 @@ const EvalEvolution = lazy(() => import('./pages/EvalEvolution').then(m => ({ de
 const LessonGraph = lazy(() => import('./pages/LessonGraph').then(m => ({ default: m.LessonGraph })));
 const OperatorProfile = lazy(() => import('./pages/OperatorProfile').then(m => ({ default: m.OperatorProfile })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const SzlOperationalCore = lazy(() => import('./pages/SzlOperationalCore'));
 const NowBoard = lazy(() => import('./pages/NowBoard').then(m => ({ default: m.NowBoard })));
 const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ default: m.CommandSurface })));
 const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default: m.SignalMesh })));
@@ -541,6 +542,9 @@ function AppInner() {
     <Suspense fallback={<Loader />}>
       <Switch>
         <Route path="/" component={HomePage} />
+        <Route path={`${base}/szl-ops`}>
+          <WithShell><SzlOperationalCore /></WithShell>
+        </Route>
         <Route path={`${base}/loop-reasoner`}>
           <WithShell><LoopReasoner /></WithShell>
         </Route>

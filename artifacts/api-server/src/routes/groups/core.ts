@@ -28,6 +28,11 @@ export function register(router: IRouter): void {
   // GET-only by design: R0513 watches; halt authority belongs to HUKLLA.
   router.use(lazyMatch('/amaru', () => import('../amaru-proxy'), 'amaru-proxy'));
 
+  // SZL Operational Core snapshot — surfaces the master operational payload
+  // (17 DOIs, 15 repos, 36 PRs, 14 crons, 6 mechanisms) with live GitHub +
+  // DOI status. Cached in-process for 60s. Read-only.
+  router.use(lazyMatch('/szl-ops', () => import('../szl-ops'), 'szl-ops'));
+
   router.use(lazyMatch(['/healthz', '/health'], () => import('../health'), 'health'));
   router.use(
     lazyMatch(

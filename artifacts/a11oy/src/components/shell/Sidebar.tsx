@@ -37,6 +37,7 @@ interface NavSection {
 const topItems: NavItem[] = [
   { id: 'whats-new', name: "What's New", icon: Newspaper, path: '/whats-new', badge: 'NEW' },
   { id: 'console', name: 'Console', icon: Terminal, path: '/console' },
+  { id: 'szl-ops', name: 'SZL Operational Core', icon: ShieldCheck, path: '/szl-ops', badge: 'LIVE' },
 ];
 
 const foundrySections: NavSection[] = [
