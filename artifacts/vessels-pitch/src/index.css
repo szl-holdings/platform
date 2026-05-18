@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: var(--slide-primary);
+  --color-accent: var(--slide-accent);
+  --color-gold: var(--slide-gold);
+  --color-alert: var(--slide-alert);
+  --color-bg: var(--slide-bg);
+  --color-panel: var(--slide-panel);
+  --color-text: var(--slide-text);
+  --color-muted: var(--slide-muted);
+  --color-rule: var(--slide-rule);
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
+}
+
+:root {
+  --slide-primary: #06607F;       /* Dorian LPG teal */
+  --slide-accent: #1B7094;        /* Dorian link / interactive */
+  --slide-gold: #c9b787;          /* Vessels warm-gold signature */
+  --slide-alert: #EE3524;         /* Dorian red — used only for risk/alert */
+  --slide-bg: #0a1419;            /* deep maritime night */
+  --slide-panel: #0f1d24;         /* card / panel */
+  --slide-text: #f5f1e8;          /* warm off-white */
+  --slide-muted: #8a9499;
+  --slide-rule: #1c2d35;
+  --font-display-family: "DM Sans", system-ui, sans-serif;
+  --font-body-family: "DM Sans", system-ui, sans-serif;
+  --font-mono-family: "DM Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--slide-bg);
+  color: var(--slide-text);
+  font-family: var(--font-body-family);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide-viewer {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}

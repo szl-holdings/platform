@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/vessels-pitch/"
+title = "Vessels x Dorian LPG — Pitch"
+version = "1.0.0"
+id = "artifacts/vessels-pitch"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/vessels-pitch/" ]
+localPort = 24631
+
+[services.development]
+run = "pnpm --filter @workspace/vessels-pitch run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vessels-pitch", "run", "build" ]
+publicDir = "artifacts/vessels-pitch/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24631"
+BASE_PATH = "/vessels-pitch/"

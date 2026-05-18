@@ -6,8 +6,6 @@ import {
   type LambdaReceipt,
   type ReceiptStorage,
 } from '@szl-holdings/szl-receipts';
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
 import { type AefClientConfig, resolveConfig } from './config.js';
 import {
   AefAuthError,
@@ -28,6 +26,17 @@ function sleep(ms: number): Promise<void> {
 export interface AefReceiptsConfig {
   enabled: boolean;
   operatorId: string;
+  /**
+   * Optional persistent storage. Construct file-backed storage from
+   * `@workspace/aef-sdk/node-storage` in Node-only entry points.
+   */
+  storage?: ReceiptStorage;
+  /**
+   * @deprecated File-backed storage is no longer auto-constructed inside
+   * the client (to keep browser bundles free of `node:fs`). Pass a
+   * `JsonlFileStorage(path)` via `storage` instead. This field is now
+   * ignored.
+   */
   storagePath?: string;
   /**
    * Invoked when a receipt append fails. Receipt errors never block the
@@ -44,21 +53,14 @@ export interface AefReceiptsHandle {
   close(): Promise<AuditClosureReceipt>;
 }
 
-class JsonlFileStorage implements ReceiptStorage {
-  constructor(private readonly path: string) {
-    mkdirSync(dirname(path), { recursive: true });
-  }
-  append(receipt: LambdaReceipt): void {
-    appendFileSync(this.path, JSON.stringify(receipt) + '\n', 'utf8');
-  }
-  readAll(): LambdaReceipt[] {
-    if (!existsSync(this.path)) return [];
-    return readFileSync(this.path, 'utf8')
-      .split('\n')
-      .filter((l) => l.trim().length > 0)
-      .map((l) => JSON.parse(l) as LambdaReceipt);
-  }
-}
+// File-backed JSONL storage now lives in `./node-storage.ts` so that
+// browser bundles don't pull in `node:fs` / `node:path`. Callers that
+// previously used `receipts: { storagePath }` should construct a storage
+// instance themselves and pass it via `receipts: { storage }`:
+//
+//   import { JsonlFileStorage } from '@workspace/aef-sdk/node-storage';
+//   new AefClient({ receipts: { enabled: true, operatorId,
+//     storage: new JsonlFileStorage('/var/log/aef-receipts.jsonl') } });
 
 class DisabledReceipts implements AefReceiptsHandle {
   readonly enabled = false;
@@ -96,10 +98,15 @@ export class AefClient {
       if (!receipts.operatorId) {
         throw new Error('AefClient: receipts.operatorId is required when receipts.enabled is true');
       }
-      const storage = receipts.storagePath ? new JsonlFileStorage(receipts.storagePath) : undefined;
+      if (receipts.storagePath && !receipts.storage) {
+        console.warn(
+          '[aef-sdk] receipts.storagePath is deprecated and ignored — pass a '
+            + "`storage` instance from '@workspace/aef-sdk/node-storage' instead.",
+        );
+      }
       this.chain = new ReceiptChain({
         operatorId: receipts.operatorId,
-        ...(storage ? { storage } : {}),
+        ...(receipts.storage ? { storage: receipts.storage } : {}),
       });
       this.receipts = new EnabledReceipts(this.chain);
       this.onReceiptError =

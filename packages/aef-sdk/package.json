@@ -17,6 +17,10 @@
       "types": "./dist/hooks.d.ts",
       "import": "./src/hooks.ts"
     },
+    "./node-storage": {
+      "types": "./dist/node-storage.d.ts",
+      "import": "./src/node-storage.ts"
+    },
     "./errors": {
       "types": "./dist/errors.d.ts",
       "import": "./src/errors.ts"

@@ -27,10 +27,10 @@ export const LANE_ACCENT_HEX = {
     muted: 'rgba(74,110,181,0.10)',
   },
   vessels: {
-    primary: '#0ea5e9',
-    primaryLight: '#38bdf8',
-    accent: '#0284c7',
-    muted: 'rgba(14,165,233,0.10)',
+    primary: '#c9b787',
+    primaryLight: '#d4c598',
+    accent: '#b5a070',
+    muted: 'rgba(201,183,135,0.10)',
   },
   aegis: {
     primary: '#3b82f6',

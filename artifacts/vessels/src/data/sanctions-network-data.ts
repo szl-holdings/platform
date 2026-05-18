@@ -60,7 +60,7 @@ export interface SanctionsExposureScore {
   vesselId: string | number;
   score: number;
   tier: 'clear' | 'watch' | 'high' | 'critical';
-  dataSource: 'live' | 'simulated';
+  dataSource: 'live' | 'modeled';
   computedAt: string;
   rules: SanctionsRule[];
   networkNodes: EntityNode[];
@@ -76,7 +76,7 @@ export interface PortfolioSanctionsHolding {
   vesselType: string;
   score: number;
   tier: 'clear' | 'watch' | 'high' | 'critical';
-  dataSource: 'live' | 'simulated';
+  dataSource: 'live' | 'modeled';
   topRules: SanctionsRule[];
   owner: string;
   hullValue: number;
@@ -189,7 +189,7 @@ export const VESSEL_SANCTIONS_SCORES: Record<string, SanctionsExposureScore> = {
     vesselId: 1,
     score: 78,
     tier: 'high',
-    dataSource: 'simulated',
+    dataSource: 'modeled',
     computedAt: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
     summary:
       'Registered owner Meridian Bulk Holdings Ltd has direct linkage to an OFAC SDN-listed entity via a 62%-owned subsidiary. Flag state (Comoros) is a recognised high-evasion jurisdiction. AIS dark event recorded in Persian Gulf corridor 11 days ago.',
@@ -269,7 +269,7 @@ export const VESSEL_SANCTIONS_SCORES: Record<string, SanctionsExposureScore> = {
     vesselId: 2,
     score: 22,
     tier: 'clear',
-    dataSource: 'live',
+    dataSource: 'modeled',
     computedAt: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
     summary:
       'No direct sanctions matches detected. Owner and manager entities are EU-registered with clean compliance histories. Flag state (Marshall Islands) is low-risk. All counterparties clear.',
@@ -333,7 +333,7 @@ export const VESSEL_SANCTIONS_SCORES: Record<string, SanctionsExposureScore> = {
     vesselId: 3,
     score: 91,
     tier: 'critical',
-    dataSource: 'simulated',
+    dataSource: 'modeled',
     computedAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
     summary:
       'CRITICAL: Ship manager directly named on EU Consolidated sanctions list (March 2025 update). Vessel conducted AIS-dark transit in Red Sea corridor and completed port call at Bandar Abbas 47 days ago. P&I Club has served notice of withdrawal of cover.',
@@ -423,7 +423,7 @@ export const VESSEL_SANCTIONS_SCORES: Record<string, SanctionsExposureScore> = {
     vesselId: 4,
     score: 38,
     tier: 'watch',
-    dataSource: 'live',
+    dataSource: 'modeled',
     computedAt: new Date(Date.now() - 1000 * 60 * 31).toISOString(),
     summary:
       'Charterer Eagle Gas Transport FZE operates from a jurisdiction with elevated sanctions evasion risk. Flag state (Bahamas) is compliant. No direct SDN or list matches. Elevated due to trade route overlap.',
@@ -495,7 +495,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'Capesize Bulker',
     score: 91,
     tier: 'critical',
-    dataSource: 'simulated',
+    dataSource: 'modeled',
     topRules: makeRules(['r03', 'r05', 'r08']).filter((r) => r.triggered),
     owner: 'Caspian Marine Holdings LLC',
     hullValue: 48000000,
@@ -510,7 +510,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'VLCC Tanker',
     score: 78,
     tier: 'high',
-    dataSource: 'simulated',
+    dataSource: 'modeled',
     topRules: makeRules(['r02', 'r04']).filter((r) => r.triggered),
     owner: 'Meridian Bulk Holdings Ltd',
     hullValue: 85000000,
@@ -525,7 +525,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'LNG Carrier',
     score: 38,
     tier: 'watch',
-    dataSource: 'live',
+    dataSource: 'modeled',
     topRules: makeRules(['r06', 'r10']).filter((r) => r.triggered),
     owner: 'Fjord Shipping AS',
     hullValue: 210000000,
@@ -540,7 +540,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'Panamax Bulk',
     score: 12,
     tier: 'clear',
-    dataSource: 'live',
+    dataSource: 'modeled',
     topRules: [],
     owner: 'Atlantica Bulk Carriers SA',
     hullValue: 32000000,
@@ -555,7 +555,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'Container',
     score: 22,
     tier: 'clear',
-    dataSource: 'live',
+    dataSource: 'modeled',
     topRules: [],
     owner: 'Atlantic Container Lines BV',
     hullValue: 125000000,
@@ -570,7 +570,7 @@ export const PORTFOLIO_SANCTIONS_HOLDINGS: PortfolioSanctionsHolding[] = [
     vesselType: 'Chemical Tanker',
     score: 55,
     tier: 'watch',
-    dataSource: 'simulated',
+    dataSource: 'modeled',
     topRules: makeRules(['r06', 'r05']).filter((r) => r.triggered),
     owner: 'Gulf Chemical Carriers FZE',
     hullValue: 28000000,

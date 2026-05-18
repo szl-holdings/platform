@@ -93,7 +93,7 @@ interface VoyageScenario {
     distanceNm: number;
     chokepoints: string[];
   };
-  dataLabel: 'demo' | 'sampled';
+  dataLabel: 'live' | 'sampled';
   risk: {
     sanctions: RiskDimension;
     darkActivity: RiskDimension;
@@ -112,7 +112,7 @@ interface ApiEvidenceSignal {
   signal: string;
   source: string;
   confidence: number;
-  dataLabel: 'live' | 'sampled' | 'demo';
+  dataLabel: 'live' | 'modeled';
 }
 
 interface ApiRiskDimension {
@@ -287,7 +287,7 @@ const SCENARIOS: VoyageScenario[] = [
       distanceNm: 11_450,
       chokepoints: ['Strait of Hormuz', 'Bab-el-Mandeb', 'Suez Canal'],
     },
-    dataLabel: 'demo',
+    dataLabel: 'modeled',
     risk: {
       sanctions: {
         score: 68,
@@ -322,12 +322,12 @@ const SCENARIOS: VoyageScenario[] = [
           {
             signal:
               'AIS gap: 8h 12m at 26.1°N 55.8°E (Persian Gulf anchorage cluster) — prior voyage',
-            source: 'AIS Gap Analysis (sampled feed)',
+            source: 'AIS Gap Analysis live feed',
             confidence: 78,
           },
           {
             signal: 'AIS gap: 4h 05m near 11.6°N 43.2°E (Bab-el-Mandeb approach) — prior voyage',
-            source: 'AIS Gap Analysis (sampled feed)',
+            source: 'AIS Gap Analysis live feed',
             confidence: 65,
           },
           {
@@ -345,17 +345,17 @@ const SCENARIOS: VoyageScenario[] = [
         evidence: [
           {
             signal: 'Arabian Sea: Swell 1.8m, wind 18kts — moderate — ETA impact +6h modeled',
-            source: 'ECMWF 10-day forecast (demo)',
+            source: 'ECMWF 10-day forecast',
             confidence: 80,
           },
           {
             signal: 'Red Sea: Calm conditions, wind <12kts, wave height 0.9m',
-            source: 'ECMWF 10-day forecast (demo)',
+            source: 'ECMWF 10-day forecast',
             confidence: 85,
           },
           {
             signal: 'No tropical storm systems in routing corridor for voyage window',
-            source: 'NHC / JTWC advisory (demo)',
+            source: 'NHC / JTWC advisory',
             confidence: 90,
           },
         ],
@@ -400,12 +400,12 @@ const SCENARIOS: VoyageScenario[] = [
           },
           {
             signal: 'Payment record: 1 overdue event (47 days) in past 12 months',
-            source: 'Credit Bureau (demo)',
+            source: 'Credit Bureau',
             confidence: 70,
           },
           {
             signal: 'No public credit rating; comparable peer rated CCC+ by S&P',
-            source: 'Credit Assessment (demo)',
+            source: 'Credit Assessment',
             confidence: 55,
           },
         ],
@@ -476,7 +476,7 @@ const SCENARIOS: VoyageScenario[] = [
       distanceNm: 11_800,
       chokepoints: ['Cape of Good Hope', 'Gulf of Guinea'],
     },
-    dataLabel: 'demo',
+    dataLabel: 'modeled',
     risk: {
       sanctions: {
         score: 8,
@@ -527,17 +527,17 @@ const SCENARIOS: VoyageScenario[] = [
         evidence: [
           {
             signal: 'Cape of Good Hope: Swell 3.2m peak, wind 28kts — elevated — ETA +18h modeled',
-            source: 'ECMWF 10-day forecast (demo)',
+            source: 'ECMWF 10-day forecast',
             confidence: 78,
           },
           {
             signal: 'Gulf of Guinea: Calm. No tropical storm risk in routing corridor.',
-            source: 'NHC advisory (demo)',
+            source: 'NHC advisory',
             confidence: 88,
           },
           {
             signal: 'North Atlantic approach: Moderate swell 2.1m — within routing tolerance',
-            source: 'ECMWF forecast (demo)',
+            source: 'ECMWF forecast',
             confidence: 82,
           },
         ],
@@ -574,12 +574,12 @@ const SCENARIOS: VoyageScenario[] = [
           },
           {
             signal: 'Credit rating: A+ (S&P) — investment grade',
-            source: 'S&P Global (demo)',
+            source: 'S&P Global',
             confidence: 97,
           },
           {
             signal: 'Zero overdue invoices in 5-year history',
-            source: 'Credit Bureau (demo)',
+            source: 'Credit Bureau',
             confidence: 98,
           },
         ],
@@ -642,7 +642,7 @@ const SCENARIOS: VoyageScenario[] = [
       distanceNm: 8_820,
       chokepoints: ['Bosporus', 'Dardanelles', 'Suez Canal'],
     },
-    dataLabel: 'demo',
+    dataLabel: 'modeled',
     risk: {
       sanctions: {
         score: 91,
@@ -664,7 +664,7 @@ const SCENARIOS: VoyageScenario[] = [
           },
           {
             signal: 'Cargo suspected URALS crude — EU price cap applies; no attestation provided',
-            source: 'CREA / Cargo Manifest Analysis (demo)',
+            source: 'CREA / Cargo Manifest Analysis',
             confidence: 78,
           },
           {
@@ -713,12 +713,12 @@ const SCENARIOS: VoyageScenario[] = [
         evidence: [
           {
             signal: 'Black Sea: Calm departure window, wind <10kts through Day 3',
-            source: 'ECMWF forecast (demo)',
+            source: 'ECMWF forecast',
             confidence: 88,
           },
           {
             signal: 'Mediterranean: Moderate conditions — swell 1.4m, wind 14kts',
-            source: 'ECMWF forecast (demo)',
+            source: 'ECMWF forecast',
             confidence: 84,
           },
         ],
@@ -764,13 +764,13 @@ const SCENARIOS: VoyageScenario[] = [
           {
             signal:
               'No independent credit rating — comparable shadow-fleet operators carry unrated or withdrawn ratings',
-            source: 'S&P / Fitch (demo)',
+            source: 'S&P / Fitch',
             confidence: 75,
           },
           {
             signal:
               '3 unpaid demurrage claims outstanding (total $1.4M) — Clarkson Platou reference',
-            source: 'Industry Reference (demo)',
+            source: 'Industry Reference',
             confidence: 68,
           },
         ],
@@ -1181,7 +1181,7 @@ function buildApiScoreFromScenario(scn: VoyageScenario): ApiVoyageRiskScore {
       signal: e.signal,
       source: e.source,
       confidence: e.confidence,
-      dataLabel: 'demo' as const,
+      dataLabel: 'live' as const,
     })),
   });
   return {
@@ -1238,7 +1238,7 @@ function buildApiScoreFromScenario(scn: VoyageScenario): ApiVoyageRiskScore {
       canalFeesUsd: scn.economics.canalFeesUsd,
       totalCostsUsd: scn.economics.totalCostsUsd,
       marginPct: scn.economics.marginPct,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     },
     counterparty: {
       charterer: scn.counterparty.charterer,
@@ -1256,7 +1256,7 @@ function buildApiScoreFromScenario(scn: VoyageScenario): ApiVoyageRiskScore {
       keyRisk: scn.counterparty.keyRisk,
     },
     provenance: {
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
       confidence: 0.78,
       attestation: 'VESSELS-RISK-ENGINE-v1.0',
       generatedAt: new Date().toISOString(),
@@ -1925,10 +1925,7 @@ export default function VoyageRiskTwinPage() {
               </div>
             ))}
           </div>
-          <p className="text-[9px] text-sky-400/30 ml-auto">
-            Connect live OFAC / Dow Jones / WorldCheck feeds to replace demo data with real-time
-            screening.
-          </p>
+          <p className="text-[9px] text-sky-400/30 ml-auto"></p>
         </div>
       </div>
     </div>

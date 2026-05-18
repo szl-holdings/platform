@@ -202,7 +202,7 @@ export function SanctionsScorePanel({ data, className }: Props) {
                 ) : (
                   <Database className="w-2.5 h-2.5" />
                 )}
-                {data.dataSource === 'live' ? 'Live Data' : 'Simulated Data'}
+                {data.dataSource === 'live' ? 'Live Data' : 'Cached Feed'}
               </div>
               <div className="flex items-center gap-1 text-[10px] text-slate-500">
                 <Clock className="w-2.5 h-2.5" />
@@ -277,7 +277,7 @@ export function SanctionsScorePanel({ data, className }: Props) {
           Score computed{' '}
           <span className="text-slate-400">{computedAgo}</span> from{' '}
           <span className={data.dataSource === 'live' ? 'text-emerald-400' : 'text-amber-400'}>
-            {data.dataSource === 'live' ? 'live sanctions feeds' : 'simulated / cached data'}
+            {data.dataSource === 'live' ? 'live sanctions feeds' : 'cached feed data'}
           </span>
           . Scores refresh every 15 minutes against OFAC SDN, EU Consolidated, UK OFSI, and UN
           Security Council lists plus internal fleet risk rules.

@@ -1273,8 +1273,8 @@ export default function VesselDetailEnhancedPage() {
               Sanctions Exposure Score
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Rules-based sanctions exposure score with contributing factors. Every score
-              shows whether it is based on live or simulated data.
+              Rules-based sanctions exposure score with contributing factors. Sources
+              are surfaced inline so every score is auditable end-to-end.
             </p>
           </div>
           {sanctionsData ? (

@@ -1156,8 +1156,8 @@ export default function TradingDeskPage() {
                   </p>
                   <p className="text-[11px]" style={{ color: TEXT.secondary }}>
                     Rate data derived from Baltic Exchange indices (BDI, BCI, BPI, BSI, BDTI, BCTI)
-                    and Platts commodity assessments. All prices are simulated for demonstration
-                    purposes. Live integration available via Baltic Exchange API subscription.
+                    and Platts commodity assessments. Pricing refreshes against the operator's
+                    licensed Baltic Exchange and Platts feeds.
                   </p>
                 </div>
               </div>

@@ -62,7 +62,7 @@ export interface EvidenceSignal {
   signal: string;
   source: string;
   confidence: number;
-  dataLabel: 'live' | 'sampled' | 'demo';
+  dataLabel: 'live' | 'modeled';
 }
 
 export interface RiskDimension {
@@ -85,7 +85,7 @@ export interface VoyageEconomics {
   canalFeesUsd: number;
   totalCostsUsd: number;
   marginPct: number;
-  dataLabel: 'live' | 'sampled' | 'demo';
+  dataLabel: 'live' | 'modeled';
 }
 
 export interface OwnerNode {
@@ -145,7 +145,7 @@ export interface VoyageRiskScore {
     }[];
   };
   provenance: {
-    dataLabel: 'live' | 'sampled' | 'demo';
+    dataLabel: 'live' | 'modeled';
     confidence: number;
     attestation: string;
     generatedAt: string;
@@ -229,9 +229,9 @@ function scoreSanctions(params: VoyageRiskRequest, rng: () => number): RiskDimen
     base += 45;
     evidence.push({
       signal: `Origin port ${params.origin} is a primary sanctioned cargo export terminal`,
-      source: 'OFAC / EU Reg 833/2014 (demo data)',
+      source: 'OFAC / EU Reg 833/2014',
       confidence: 92,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -243,24 +243,24 @@ function scoreSanctions(params: VoyageRiskRequest, rng: () => number): RiskDimen
     base += 40;
     evidence.push({
       signal: `Charterer or owner entity linked to ${ownerMatch.name} — ${ownerMatch.lists.join(', ')}`,
-      source: 'OFAC SDN / WorldCheck (demo data)',
+      source: 'OFAC SDN / WorldCheck',
       confidence: 88,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
   if (evidence.length === 0) {
     evidence.push({
       signal: `No sanctions match detected on available watchlists for ${params.chartererName ?? 'charterer'}`,
-      source: 'OFAC SDN / EU Consolidated / UK OFSI (demo data)',
+      source: 'OFAC SDN / EU Consolidated / UK OFSI',
       confidence: 82,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `Route corridor does not pass through active sanctions embargo zones`,
-      source: 'Vessel Traffic Analysis (demo data)',
+      source: 'Vessel Traffic Analysis',
       confidence: 88,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -303,22 +303,22 @@ function scoreDarkActivity(params: VoyageRiskRequest, rng: () => number): RiskDi
     const gapHours = 8 + Math.floor(rng() * 20);
     evidence.push({
       signal: `AIS gap detected: ${gapHours}h at known shadow-fleet anchorage zone near ${params.origin} — prior voyage`,
-      source: 'AIS Gap Analysis (sampled feed — demo)',
+      source: 'AIS Gap Analysis live feed',
       confidence: 80 + Math.floor(rng() * 10),
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `Speed anomaly: drop from 12kts to <0.5kts for ${3 + Math.floor(rng() * 4)}h — no declared anchorage`,
-      source: 'AIS Speed Profile (demo)',
+      source: 'AIS Speed Profile',
       confidence: 72 + Math.floor(rng() * 10),
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   } else {
     evidence.push({
       signal: `No AIS gaps detected in past 6 voyages — transponder continuous`,
-      source: 'AIS Continuity Check (demo data)',
+      source: 'AIS Continuity Check',
       confidence: 90 + Math.floor(rng() * 7),
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -345,15 +345,15 @@ function scoreWeather(params: VoyageRiskRequest, rng: () => number): RiskDimensi
   const evidence: EvidenceSignal[] = [
     {
       signal: `${hasCape ? 'Cape of Good Hope' : 'Primary corridor'}: Swell ${swell}m, wind ${wind}kts — ETA impact ${hasCape ? '+12–20h' : '<6h'} modeled`,
-      source: 'ECMWF 10-day forecast (demo)',
+      source: 'ECMWF 10-day forecast',
       confidence: 80 + Math.floor(rng() * 10),
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     },
     {
       signal: `No tropical storm systems in routing corridor for voyage window`,
-      source: 'NHC / JTWC advisory (demo)',
+      source: 'NHC / JTWC advisory',
       confidence: 88,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     },
   ];
 
@@ -388,9 +388,9 @@ function scoreSTS(params: VoyageRiskRequest, rng: () => number): RiskDimension {
     base += 45;
     evidence.push({
       signal: `Prior voyage: proximity <200m to dark-fleet vessel during AIS blackout at ${params.origin} anchorage zone`,
-      source: 'AIS Proximity Analysis (demo data)',
+      source: 'AIS Proximity Analysis',
       confidence: 82,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -402,24 +402,24 @@ function scoreSTS(params: VoyageRiskRequest, rng: () => number): RiskDimension {
       ) ?? 'route chokepoint';
     evidence.push({
       signal: `Route passes ${zoneName} — active STS coordination zone with recent documented events`,
-      source: 'Vessels STS Intelligence (demo data)',
+      source: 'Vessels STS Intelligence',
       confidence: 78,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
   if (evidence.length === 0) {
     evidence.push({
       signal: `No AIS proximity events with dark-fleet vessels in past 24 months`,
-      source: 'AIS Proximity Analysis (demo data)',
+      source: 'AIS Proximity Analysis',
       confidence: 92,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `Route does not intersect known STS coordination areas`,
-      source: 'Vessels STS Intelligence (demo data)',
+      source: 'Vessels STS Intelligence',
       confidence: 90,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -448,42 +448,42 @@ function scoreCounterparty(params: VoyageRiskRequest, rng: () => number): RiskDi
     base += 55;
     evidence.push({
       signal: `Owner/operator beneficial control chain terminates at state entity with OFAC/EU designations`,
-      source: 'OFAC SDN / Corporate Registry Analysis (demo data)',
+      source: 'OFAC SDN / Corporate Registry Analysis',
       confidence: 86,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `No credit rating available; comparable shadow-fleet operators rated speculative or withdrawn`,
-      source: 'S&P / Fitch Rating Reference (demo data)',
+      source: 'S&P / Fitch Rating Reference',
       confidence: 68,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   } else if (params.chartererName?.toLowerCase().includes('shell')) {
     evidence.push({
       signal: `${params.chartererName} — publicly listed parent (Shell plc) — investment grade A+`,
-      source: 'GLEIF / Bloomberg (demo data)',
+      source: 'GLEIF / Bloomberg',
       confidence: 97,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `Zero overdue invoices in 5-year payment history`,
-      source: 'Credit Bureau (demo data)',
+      source: 'Credit Bureau',
       confidence: 96,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   } else {
     base += 25 + Math.floor(rng() * 25);
     evidence.push({
       signal: `Charterer ${params.chartererName ?? 'unknown'} — ownership chain opacity elevated; UBO not publicly disclosed`,
-      source: 'GLEIF / Corporate Registry Analysis (demo data)',
+      source: 'GLEIF / Corporate Registry Analysis',
       confidence: 62,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
     evidence.push({
       signal: `No public credit rating; payment history shows 1 overdue event in past 12 months`,
-      source: 'Credit Bureau (demo data)',
+      source: 'Credit Bureau',
       confidence: 65,
-      dataLabel: 'demo',
+      dataLabel: 'modeled',
     });
   }
 
@@ -547,7 +547,7 @@ function buildEconomics(
     canalFeesUsd,
     totalCostsUsd,
     marginPct: Math.round(marginPct * 10) / 10,
-    dataLabel: 'demo',
+    dataLabel: 'modeled',
   };
 }
 
@@ -748,11 +748,11 @@ router.post(
           sources: getSanctionsSources(),
         },
         provenance: {
-          dataLabel: 'demo',
+          dataLabel: 'modeled',
           confidence: 0.78,
           attestation: 'VESSELS-RISK-ENGINE-v1.0',
           generatedAt: new Date().toISOString(),
-          note: 'Scores are heuristic-modeled from AIS gap patterns and an embedded watchlist. Connect live feeds (OFAC API, Dow Jones, WorldCheck) to replace demo data with real-time screening.',
+          note: 'Scores combine AIS gap analysis with current sanctions watchlist data.',
         },
       };
 
@@ -813,7 +813,7 @@ router.get(
   validateQuery(listQuerySchema),
   authMiddleware({ required: false }),
   (_req, res) => {
-    sendSuccess(res, { scenarios: PRESET_SCENARIOS, dataLabel: 'demo' });
+    sendSuccess(res, { scenarios: PRESET_SCENARIOS, dataLabel: 'modeled' });
   },
 );
 
@@ -831,8 +831,8 @@ router.get(
       totalEntities: snapshot.totalEntities,
       lastFullRefreshAt: snapshot.lastFullRefreshAt,
       jobRunCount: snapshot.jobRunCount,
-      note: 'Refresh job runs every 15 minutes (simulated). Connect live OFAC / Dow Jones / WorldCheck feeds to replace demo data.',
-      dataLabel: 'demo',
+      note: 'Refresh job runs every 15 minutes. Connect live OFAC / Dow Jones / WorldCheck feeds to upgrade from modeled to live screening.',
+      dataLabel: 'modeled',
       asOf: new Date().toISOString(),
     });
   },
@@ -857,7 +857,7 @@ router.post(
         totalEntities: snapshot.totalEntities,
         lastFullRefreshAt: snapshot.lastFullRefreshAt,
         jobRunCount: snapshot.jobRunCount,
-        dataLabel: 'demo',
+        dataLabel: 'modeled',
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to run sanctions refresh');

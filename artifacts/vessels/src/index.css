@@ -4,6 +4,9 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+@source "../../../lib/shared-ui/src/**/*.{ts,tsx}";
+@source "../../../packages/design-system/src/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @media (prefers-reduced-motion: reduce) {
@@ -59,45 +62,45 @@
 }
 
 :root {
-  /* Vessels product — accent.blue (var(--gi-accent-blue) ≈ hsl(210 52% 55%)) */
-  --background: 216 30% 4%;
-  --foreground: 205 18% 92%;
-  --border: 214 24% 11%;
-  --input: 214 24% 13%;
-  --ring: 210 52% 55%;
-  --card: 215 26% 6%;
-  --card-foreground: 205 18% 92%;
-  --popover: 215 26% 8%;
-  --popover-foreground: 205 18% 92%;
-  --primary: 210 52% 55%;
-  --primary-foreground: 216 30% 4%;
-  --secondary: 214 24% 11%;
-  --secondary-foreground: 205 15% 75%;
-  --muted: 214 24% 9%;
-  --muted-foreground: 210 12% 60%;
-  --accent: 196 45% 44%;
-  --accent-foreground: 205 18% 92%;
-  --destructive: 352 44% 45%;
+  /* Vessels — warm-executive gold, A11oy/Sentra family. */
+  --background: 0 0% 4%;
+  --foreground: 0 0% 96%;
+  --border: 0 0% 10%;
+  --input: 0 0% 12%;
+  --ring: 41 30% 60%;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 96%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 96%;
+  --primary: 41 30% 65%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 70%;
+  --muted: 0 0% 9%;
+  --muted-foreground: 0 0% 54%;
+  --accent: 41 30% 65%;
+  --accent-foreground: 0 0% 96%;
+  --destructive: 0 50% 45%;
   --destructive-foreground: 0 0% 100%;
-  --chart-1: 210 52% 55%;
-  --chart-2: 196 45% 44%;
+  --chart-1: 41 30% 65%;
+  --chart-2: 150 25% 42%;
   --chart-3: 35 65% 48%;
-  --chart-4: 152 38% 42%;
-  --chart-5: 352 44% 45%;
-  --sidebar: 216 32% 3%;
-  --sidebar-foreground: 205 15% 70%;
-  --sidebar-border: 214 24% 10%;
-  --sidebar-primary: 210 52% 55%;
-  --sidebar-primary-foreground: 216 30% 4%;
-  --sidebar-accent: 214 24% 9%;
-  --sidebar-accent-foreground: 205 18% 92%;
-  --sidebar-ring: 210 52% 55%;
+  --chart-4: 270 44% 54%;
+  --chart-5: 200 30% 50%;
+  --sidebar: 0 0% 3%;
+  --sidebar-foreground: 0 0% 60%;
+  --sidebar-border: 0 0% 9%;
+  --sidebar-primary: 41 30% 65%;
+  --sidebar-primary-foreground: 0 0% 4%;
+  --sidebar-accent: 0 0% 9%;
+  --sidebar-accent-foreground: 0 0% 96%;
+  --sidebar-ring: 41 30% 65%;
 
-  /* Vessels product tokens */
-  --vessels-ocean-dim:   rgba(77, 143, 204, 0.08);
-  --vessels-ocean-border:rgba(77, 143, 204, 0.16);
-  --vessels-teal-dim:    rgba(62, 168, 154, 0.08);
-  --vessels-marine:      hsl(215 26% 16%);
+  /* Vessels product tokens — gold-tinted (kept for backwards compat) */
+  --vessels-ocean-dim:    rgba(201, 183, 135, 0.08);
+  --vessels-ocean-border: rgba(201, 183, 135, 0.16);
+  --vessels-teal-dim:     rgba(90, 138, 110, 0.08);
+  --vessels-marine:       #141414;
 }
 
 @layer base {
@@ -105,24 +108,25 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    background: #0a0a0a;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
-  ::selection { background: rgba(77, 143, 204, 0.2); color: hsl(205 18% 92%); }
+  ::selection { background: rgba(201, 183, 135, 0.2); color: #f5f5f5; }
 }
 
 :focus-visible {
-  outline: 2px solid var(--gi-accent-blue);
+  outline: 2px solid #c9b787;
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gi-border-subtle); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--gi-border-default); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
 
 .skip-to-content {
   position: absolute;
@@ -130,8 +134,8 @@
   left: 1rem;
   z-index: 9999;
   padding: 0.625rem 1.25rem;
-  background: var(--gi-accent-blue);
-  color: #020a14;
+  background: #c9b787;
+  color: #0a0a0a;
   font-weight: 700;
   font-size: 0.875rem;
   border-radius: 2px;
@@ -140,51 +144,93 @@
 }
 .skip-to-content:focus { top: 1rem; }
 
-.vessel-panel {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-top: 1px solid rgba(77, 143, 204, 0.14);
+.label-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #555;
+}
+
+/* Sentra-family aliases — Vessels-named classes used across the pages map to the
+   same warm-gold glass-panel pattern. */
+.vessel-panel,
+.sentra-panel {
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(201,183,135,0.12);
   border-radius: var(--radius-lg);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.vessel-panel:hover {
-  border-top-color: rgba(77, 143, 204, 0.28);
-  border-color: rgba(77, 143, 204, 0.18);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.32);
+.vessel-panel:hover,
+.sentra-panel:hover {
+  border-top-color: rgba(201,183,135,0.25);
+  border-color: rgba(201,183,135,0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-.vessel-card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-left: 2px solid rgba(77, 143, 204, 0.3);
+.vessel-card,
+.sentra-card {
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 2px solid rgba(201,183,135,0.2);
   border-radius: var(--radius-lg);
   transition: border-left-color 0.18s ease, background 0.18s ease;
 }
-.vessel-card:hover {
-  border-left-color: rgba(77, 143, 204, 0.6);
-  background: hsl(215 26% 7%);
+.vessel-card:hover,
+.sentra-card:hover {
+  border-left-color: rgba(201,183,135,0.5);
+  background: #161616;
 }
 
 .stat-panel {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-top: 1px solid rgba(77, 143, 204, 0.14);
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(201,183,135,0.12);
   border-radius: var(--radius-lg);
   transition: border-color 0.15s ease;
 }
-.stat-panel:hover { border-color: rgba(77, 143, 204, 0.24); }
+.stat-panel:hover { border-color: rgba(201,183,135,0.2); }
 
-.kpi-accent-rule { border-top: 2px solid rgba(77, 143, 204, 0.38); }
+.kpi-accent-rule { border-top: 2px solid rgba(201,183,135,0.3); }
 
-.exception-critical { border-left: 2px solid var(--gi-accent-red); }
-.exception-high     { border-left: 2px solid var(--gi-accent-amber); }
-.exception-medium   { border-left: 2px solid var(--gi-accent-amber); }
-.exception-low      { border-left: 2px solid var(--gi-accent-green); }
+.glass-panel {
+  background: rgba(14,14,14,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 
-.badge-underway  { background: rgba(77, 143, 204, 0.1);  color: #6ea8d8; border: 1px solid rgba(77, 143, 204, 0.22); }
-.badge-anchored  { background: rgba(201, 168, 92, 0.1);  color: var(--gi-accent-amber); border: 1px solid rgba(201, 168, 92, 0.22); }
-.badge-moored    { background: rgba(91, 170, 138, 0.1);  color: var(--gi-accent-green); border: 1px solid rgba(91, 170, 138, 0.22); }
-.badge-exception { background: rgba(201, 96, 112, 0.1);  color: var(--gi-accent-red);   border: 1px solid rgba(201, 96, 112, 0.22); }
+.hero-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,183,135,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #f5f5f5 0%, #c9b787 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.accent-line {
+  width: 32px;
+  height: 2px;
+  background: linear-gradient(90deg, #c9b787, rgba(201,183,135,0.2));
+}
+
+.exception-critical { border-left: 2px solid #b85450; }
+.exception-high     { border-left: 2px solid #c9b787; }
+.exception-medium   { border-left: 2px solid #c9b787; }
+.exception-low      { border-left: 2px solid #5a8a6e; }
+
+.badge-underway  { background: rgba(201,183,135,0.10); color: #c9b787; border: 1px solid rgba(201,183,135,0.24); }
+.badge-anchored  { background: rgba(201,183,135,0.06); color: #d4c598; border: 1px solid rgba(201,183,135,0.18); }
+.badge-moored    { background: rgba(90,138,110,0.10);  color: #5a8a6e; border: 1px solid rgba(90,138,110,0.22); }
+.badge-exception { background: rgba(184,84,80,0.10);   color: #b85450; border: 1px solid rgba(184,84,80,0.22); }
 
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
@@ -235,7 +281,7 @@
 .animate-panel-reveal   { animation: panel-reveal 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 .route-active {
-  stroke: var(--gi-accent-blue);
+  stroke: #c9b787;
   stroke-width: 2;
   stroke-dasharray: 8 4;
   animation: route-dash 2s linear infinite;
@@ -244,9 +290,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    hsl(var(--muted)) 25%,
-    hsl(var(--muted-foreground) / 0.06) 50%,
-    hsl(var(--muted)) 75%
+    #1a1a1a 25%,
+    rgba(255,255,255,0.04) 50%,
+    #1a1a1a 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;

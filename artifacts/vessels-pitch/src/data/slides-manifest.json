@@ -1,0 +1,130 @@
+[
+  {
+    "id": "11111111-1111-4111-8111-000000000001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Vessels x Dorian LPG",
+    "description": "Title slide — Maritime intelligence for the VLGC fleet",
+    "speakerNotes": "- Open by naming the audience: Dorian LPG, NYSE LPG, the Hadjipateras family business.\n- Land the one-line proposition: visibility, sanctions cover, freight intelligence for the VLGC fleet.\n- Set tone: this is a working session, not a marketing pitch."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000002",
+    "position": 2,
+    "filepath": "src/pages/slides/TheMeeting.tsx",
+    "title": "Why we are in the room",
+    "description": "Acknowledgement of Dorian's position and exposure surface",
+    "speakerNotes": "- Acknowledge the fleet they built: 25+ modern VLGCs, dual-fuel LPG propulsion, Helios Pool.\n- Name the trade lane: USG to Far East arbitrage.\n- Frame the risk surface: sanctioned-adjacent waters, gray-fleet counterparties, STS transfers."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000003",
+    "position": 3,
+    "filepath": "src/pages/slides/WhyNow.tsx",
+    "title": "The compliance perimeter moved",
+    "description": "Three macro pressures on the gas-carrier compliance perimeter",
+    "speakerNotes": "- OFAC LPG sanctions have widened materially since 2024.\n- Dark-fleet behavior is migrating from crude tankers into the gas-carrier segment.\n- Insurers and trade-finance banks now require voyage-level, not annual, evidence."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000004",
+    "position": 4,
+    "filepath": "src/pages/slides/DorianToday.tsx",
+    "title": "Dorian today",
+    "description": "Listing, fleet, commercial structure, trade lane snapshot",
+    "speakerNotes": "- NYSE LPG, listed 2014, Stamford and Athens.\n- 25+ modern VLGCs, ECO and LPG dual-fuel.\n- Helios LPG Pool for commercial management.\n- US Gulf to Far East as the dominant arbitrage lane."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000005",
+    "position": 5,
+    "filepath": "src/pages/slides/ExposureSurface.tsx",
+    "title": "Six surfaces of exposure",
+    "description": "Where a single bad signal becomes a real problem",
+    "speakerNotes": "- Walk the six exposure surfaces quickly.\n- Stress: any one of them, unmonitored, is a headline or a P and I issue.\n- This is the surface Vessels is built to cover end to end."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000006",
+    "position": 6,
+    "filepath": "src/pages/slides/WhatIsVessels.tsx",
+    "title": "What Vessels is",
+    "description": "One operating layer: tracking, screening, provenance",
+    "speakerNotes": "- One line: one operating layer for visibility, screening, and voyage-level provenance.\n- Wired into your existing workflow, not a replacement for it."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000007",
+    "position": 7,
+    "filepath": "src/pages/slides/FleetTracking.tsx",
+    "title": "Fleet tracking",
+    "description": "AIS, satellite, port-call fusion across 1,200+ gas carriers",
+    "speakerNotes": "- Terrestrial AIS, satellite AIS, and port-call data fused.\n- 1,200+ gas carriers, 15-second median refresh.\n- Replay voyages, diff against filed plans, alert on deviations."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000008",
+    "position": 8,
+    "filepath": "src/pages/slides/SanctionsScreening.tsx",
+    "title": "Sanctions screening",
+    "description": "OFAC, EU, UK, UN, port-state and UBO feeds, continuous",
+    "speakerNotes": "- Every list that matters, live, not annual.\n- Walk the sample screen: charterer, vessel, UBO hops, risk score, action.\n- Each screen produces a signed receipt your team can defend."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000009",
+    "position": 9,
+    "filepath": "src/pages/slides/DarkVesselDetection.tsx",
+    "title": "Dark vessel detection",
+    "description": "AIS gap forensics, STS rendezvous inference, SAR cross-check",
+    "speakerNotes": "- Show the AIS gap pattern: vessel goes dark, four-hour gap, comes back.\n- Cross-check with SAR satellite, find the second hull alongside.\n- Counterparty is sanctioned. The system flagged the gap before the insurer asked."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000010",
+    "position": 10,
+    "filepath": "src/pages/slides/VoyageEconomics.tsx",
+    "title": "Voyage economics",
+    "description": "Baltic LPG, Mt Belvieu, Argus FE, bunker spreads",
+    "speakerNotes": "- Baltic LPG, Mt Belvieu, Argus FE, bunker spreads wired in.\n- Pre-fixture TCE per option, sensitivity to bunker spread.\n- Note clearly: the chart values are illustrative of feed structure, not today's print."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000011",
+    "position": 11,
+    "filepath": "src/pages/slides/CounterpartyDD.tsx",
+    "title": "Counterparty due diligence",
+    "description": "UBO graph traversal and composite risk score",
+    "speakerNotes": "- Every counterparty walked all the way up the ownership chain.\n- Show the three-hop UBO match that ends at an SDN entity.\n- Composite risk score: sanctions distance, PEP, port-state history, AIS behaviour, adverse media."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000012",
+    "position": 12,
+    "filepath": "src/pages/slides/TrustReceipts.tsx",
+    "title": "SZL trust receipts",
+    "description": "Cryptographic, chained, defensible audit primitives",
+    "speakerNotes": "- This is the moat. Every screen and every decision is hashed at the source.\n- Chained, tamper-evident, verifiable.\n- When an examiner asks what you knew and when, you hand them an answer, not a screenshot folder."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000013",
+    "position": 13,
+    "filepath": "src/pages/slides/WorkflowFit.tsx",
+    "title": "Workflow fit",
+    "description": "Chartering, operations, compliance and legal",
+    "speakerNotes": "- Three desks at Dorian, one operating layer.\n- Chartering: faster fixtures with the math.\n- Operations: see the gap before the email.\n- Compliance and legal: defensible by default."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000014",
+    "position": 14,
+    "filepath": "src/pages/slides/PilotProposal.tsx",
+    "title": "90-day pilot proposal",
+    "description": "Three vessels, capped fee, returnable against year-one",
+    "speakerNotes": "- Ninety days. Three vessels. A live answer, not a slide.\n- Two weeks to wire up, six weeks live, two weeks readout.\n- Capped pilot fee, returnable against year-one. Full data export on exit, no lock-in."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000015",
+    "position": 15,
+    "filepath": "src/pages/slides/WhyUs.tsx",
+    "title": "Why Vessels",
+    "description": "Shared platform, maritime-first, receipts as primitive",
+    "speakerNotes": "- We sit in the same operating family as A11oy and Sentra. Shared identity, shared receipts.\n- Maritime-first domain model, not a generic CRM with a shipping skin.\n- Receipts as a primitive, not a feature.\n- Open data export. If we ever fail you, you walk with everything."
+  },
+  {
+    "id": "11111111-1111-4111-8111-000000000016",
+    "position": 16,
+    "filepath": "src/pages/slides/NextSteps.tsx",
+    "title": "Next steps",
+    "description": "Pick three vessels — live in two weeks",
+    "speakerNotes": "- Decision today: pilot scope and vessel selection.\n- Decision next week: compliance and IT sign-off, short-form MSA.\n- Decision in ninety days: fleet-wide rollout under the Helios pool."
+  }
+]

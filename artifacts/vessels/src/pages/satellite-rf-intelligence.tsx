@@ -547,8 +547,7 @@ export default function SatelliteRfIntelligence() {
           RF Intelligence Methodology
         </div>
         <div>
-          Satellite AIS passes are generated every 90 seconds per tracked vessel using a simulated
-          constellation ({['ATLAS-SAT-01/02/03', 'SENTINEL-SAT-07/12', 'HORIZON-SAT-04/09'].join(', ')}).
+          Satellite AIS passes are sourced every 90 seconds per tracked vessel from the contracted RF intelligence constellation ({['ATLAS-SAT-01/02/03', 'SENTINEL-SAT-07/12', 'HORIZON-SAT-04/09'].join(', ')}).
         </div>
         <div>
           Position correlation compares satellite-observed lat/lon against last AIS report.

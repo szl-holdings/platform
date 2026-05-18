@@ -1025,3 +1025,9 @@ id = "_JDwMuBhj8_uO_9UKwbMW"
 uri = "file://docs/proposals/defense-unicorns/tuesday/09_followup_responses.md"
 type = "text"
 title = "09 — Pre-drafted replies to Andrew's four likely responses"
+
+[[outputs]]
+id = "hf_0zUrWFHj-6q6FA4zhJ"
+uri = "file://.local/outputs/Vessels-Dorian-LPG-Pitch.zip"
+type = "unspecified"
+title = "Vessels x Dorian LPG — Pitch (PPTX + PDF)"

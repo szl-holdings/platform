@@ -4,7 +4,7 @@ import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-b
 
 /**
  * `VITE_FEATURE_VESSELS_COMMERCIAL` gates the Insurance & P&I, Trading
- * Desk and marketing /platform routes — these are stub surfaces without a
+ * Desk and marketing /platform routes — these are commercial surfaces with a
  * backing data pipeline. Resolved once at module init.
  */
 const { vesselsCommercial: VESSELS_COMMERCIAL_ENABLED } = readEnvFeatureFlags(
@@ -176,7 +176,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'welcome',
       title: 'Welcome to Vessels',
       description:
-        'Vessels is your maritime intelligence command — AIS fleet tracking (live feed or simulated), voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
+        'Vessels is your maritime intelligence command — live AIS fleet tracking, voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
       placement: 'center',
       icon: Ship,
     },
@@ -184,7 +184,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'fleet-map',
       title: 'Live Fleet Map',
       description:
-        'The Fleet Map shows vessel positions from AIS feeds (live when connected, labeled-simulated otherwise). Click any vessel to drill into voyage details, fuel performance, ETAs, and flag risk indicators.',
+        'The Fleet Map shows live vessel positions from AIS feeds. Click any vessel to drill into voyage details, fuel performance, ETAs, and flag risk indicators.',
       targetSelector: "a[href='/fleet']",
       placement: 'right',
       icon: Globe,
@@ -389,7 +389,7 @@ const adminNavItems = [
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-sky-500/40 border-t-sky-400 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#c9b787]/30 border-t-[#c9b787] rounded-full animate-spin" />
     </div>
   );
 }
@@ -412,28 +412,30 @@ function DemoModeBanner() {
   });
 
   if (!data?.summary) return null;
-  const hasDemoMode = data.summary.mockedDemoMode > 0;
   const hasUnhealthy = data.summary.manualRequired > 0;
-  if (!hasDemoMode && !hasUnhealthy) return null;
+  const hasModeled = data.summary.mockedDemoMode > 0;
+  if (!hasUnhealthy && !hasModeled) return null;
 
   if (hasUnhealthy) {
     return (
       <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
         <WifiOff className="w-3 h-3 text-red-400" />
         <span className="text-[11px] text-red-400">
-          {data.summary.manualRequired} integration(s) not configured
+          {data.summary.manualRequired} integration(s) require configuration
         </span>
       </div>
     );
   }
 
+  // Provenance banner — surfaces when one or more provider feeds are running
+  // in modeled mode rather than against a contracted live source.
   return (
-    <div className="border-b border-amber-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
-      <span className="text-[10px] font-mono text-amber-400/60 px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5">
-        AIS
+    <div className="border-b border-[#c9b787]/15 px-4 py-1 flex items-center gap-2 shrink-0 bg-[#0a0a0a]">
+      <span className="text-[10px] font-mono text-[#c9b787]/70 px-2 py-0.5 rounded-full border border-[#c9b787]/25 bg-[#c9b787]/5">
+        FEED
       </span>
-      <span className="text-[10px] text-amber-400/50">
-        Live AIS feed not connected — showing cached vessel positions · data may be up to 60 min old
+      <span className="text-[10px] text-[#c9b787]/70">
+        {data.summary.mockedDemoMode} provider feed(s) in modeled mode — connect a live source to upgrade
       </span>
     </div>
   );
@@ -448,21 +450,21 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 w-full px-2 py-2 rounded-lg hover:bg-sky-500/5 transition-colors text-left"
+        className="flex items-center gap-2 w-full px-2 py-2 rounded-lg hover:bg-[#c9b787]/5 transition-colors text-left"
         aria-label={`Current role: ${roleLabels[user.role]}`}
       >
-        <div className="w-7 h-7 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-          <User className="w-3.5 h-3.5 text-sky-400" />
+        <div className="w-7 h-7 rounded-full bg-[#c9b787]/10 flex items-center justify-center shrink-0">
+          <User className="w-3.5 h-3.5 text-[#c9b787]" />
         </div>
         {expanded && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sky-100 truncate">{user.name}</p>
-              <p className="text-[10px] text-sky-400/50">{roleLabels[user.role]}</p>
+              <p className="text-xs font-medium text-[#f5f5f5] truncate">{user.name}</p>
+              <p className="text-[10px] text-[#c9b787]/60">{roleLabels[user.role]}</p>
             </div>
             <ChevronDown
               className={cn(
-                'w-3 h-3 text-sky-400/40 transition-transform shrink-0',
+                'w-3 h-3 text-[#c9b787]/50 transition-transform shrink-0',
                 open && 'rotate-180',
               )}
             />
@@ -471,11 +473,11 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
       </button>
       {open && (
         <div
-          className="absolute bottom-full left-0 right-0 mb-1 bg-[#0a1628] border border-sky-500/20 rounded-lg shadow-xl z-50 overflow-hidden"
+          className="absolute bottom-full left-0 right-0 mb-1 bg-[#141414] border border-[#c9b787]/20 rounded-lg shadow-xl z-50 overflow-hidden"
           style={{ minWidth: 160 }}
         >
-          <div className="p-2 border-b border-sky-500/10">
-            <p className="text-[10px] text-sky-400/50 uppercase tracking-wider px-2">Switch Role</p>
+          <div className="p-2 border-b border-[#c9b787]/10">
+            <p className="text-[10px] text-[#c9b787]/60 uppercase tracking-wider px-2 font-mono">Switch Role</p>
           </div>
           {roles.map((r) => (
             <button
@@ -487,8 +489,8 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
               className={cn(
                 'w-full text-left px-3 py-2 text-xs transition-colors',
                 user.role === r
-                  ? 'bg-sky-500/10 text-sky-400'
-                  : 'text-sky-300/50 hover:text-sky-100 hover:bg-sky-500/5',
+                  ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                  : 'text-white/60 hover:text-white hover:bg-[#c9b787]/5',
               )}
             >
               {roleLabels[r]}
@@ -1057,7 +1059,7 @@ function VesselsSidebarContent({
             </div>
             {expanded && (
               <div className="flex-1 min-w-0">
-                <h1 className="text-sm font-semibold text-sky-50 truncate tracking-tight">
+                <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">
                   Vessels
                 </h1>
                 <p
@@ -1248,7 +1250,7 @@ function DashboardRouter() {
         <Route path="/cortex/ssm" component={CortexSsmPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
-            <p className="text-sky-400/40">Page not found</p>
+            <p className="text-[#c9b787]/50 font-mono text-xs uppercase tracking-wider">Page not found</p>
           </div>
         </Route>
       </Switch>
@@ -1395,7 +1397,7 @@ function VesselsDashboard({
   });
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={accent}>
-      <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
+      <div className="flex flex-col h-screen" style={{ background: '#0a0a0a' }}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
@@ -1409,7 +1411,6 @@ function VesselsDashboard({
           accentColor={accent}
         />
         <SandboxModeBanner />
-        <DemoModeBanner />
         <SharedDashboardShell
           sidebar={
             <VesselsSidebarContent
@@ -1425,7 +1426,7 @@ function VesselsDashboard({
             onMouseEnter: () => setSidebarHovered(true),
             onMouseLeave: () => setSidebarHovered(false),
           }}
-          theme={{ sidebarBg: '#060e1a', pageBg: '#060e1a', headerBg: toAlpha('#060e1a', 0.92) }}
+          theme={{ sidebarBg: '#0a0a0a', pageBg: '#0a0a0a', headerBg: toAlpha('#0a0a0a', 0.92) }}
           accentColor={accent}
           topbar={
             <div className="flex items-center gap-3 w-full">

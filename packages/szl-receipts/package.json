@@ -19,6 +19,9 @@
     "test": "vitest run --passWithNoTests"
   },
   "license": "UNLICENSED",
+  "dependencies": {
+    "@noble/hashes": "1.8.0"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:",
