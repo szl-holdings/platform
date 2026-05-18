@@ -2,6 +2,7 @@
   "repository": "szl-holdings/szl-holdings-platform",
   "description": "Platform ecosystem for business observability, AI orchestration, maritime intelligence, and secure execution — built by Stephen Lutar.",
   "homepage": "https://szlholdings.com",
+  "visibility": "public",
   "topics": [
     "typescript",
     "react",

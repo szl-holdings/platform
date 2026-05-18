@@ -2,6 +2,7 @@
   "repository": "szl-holdings/szl-holdings-platform",
   "description": "Governed operational intelligence software — Lyte · Alloy · Aegis · Vessels · Terra",
   "homepage": "https://szlholdings.com",
+  "visibility": "public",
   "topics": [
     "szl-holdings",
     "lyte",
