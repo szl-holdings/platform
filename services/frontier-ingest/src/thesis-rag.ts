@@ -65,14 +65,41 @@ interface ThesisChunk {
 // `setThesisEmbedFn()` call from api-server bootstrap.
 
 const fabricBackend = new DevHashEmbeddingBackend();
+const FABRIC_BACKEND_ID = 'aef-dev-hash';
+const FABRIC_MODEL = fabricBackend.descriptor.supportedModels[0] ?? 'aef-dev-hash';
+
+// Provenance of the most recent embedFn call. Module-scoped so the
+// configured embedFn can mark itself as healthy or as having
+// fallen through to the dev-hash backend, without changing the
+// ThesisEmbedFn return shape.
+interface EmbedProvenance {
+  backendId: string;
+  model: string;
+  degraded: boolean;
+}
+let lastEmbedProvenance: EmbedProvenance = {
+  backendId: FABRIC_BACKEND_ID,
+  model: FABRIC_MODEL,
+  degraded: false,
+};
+function setEmbedProvenance(p: EmbedProvenance): void {
+  lastEmbedProvenance = p;
+}
 
 const fabricEmbed: ThesisEmbedFn = async (texts) => {
   if (texts.length === 0) return [];
   const resp = await fabricBackend.embed({
     texts,
-    model: fabricBackend.descriptor.supportedModels[0] ?? 'aef-dev-hash',
+    model: FABRIC_MODEL,
     pooling: fabricBackend.descriptor.defaultPooling,
     normalize: true,
+  });
+  // Default embedder = fabric dev-hash. Not "degraded" — it's the
+  // configured backend when no override is installed.
+  setEmbedProvenance({
+    backendId: FABRIC_BACKEND_ID,
+    model: FABRIC_MODEL,
+    degraded: false,
   });
   return resp.vectors;
 };
@@ -83,21 +110,28 @@ let corpusLoadPromise: Promise<ThesisChunk[]> | null = null;
 
 // LRU cache: Map preserves insertion order. On every read we delete
 // and re-insert the key so the most-recently-touched id moves to the
-// end; eviction removes the first key (true LRU).
-const artifactVectorCache = new Map<string, number[]>();
+// end; eviction removes the first key (true LRU). We cache provenance
+// alongside the vector so a cache hit still reports the embedder
+// that originally produced the vector (instead of leaking whichever
+// backend happened to handle the most recent embed call).
+interface CachedEmbedding {
+  vec: number[];
+  provenance: EmbedProvenance;
+}
+const artifactVectorCache = new Map<string, CachedEmbedding>();
 
-function touch(id: string, vec: number[]): number[] {
+function touch(id: string, entry: CachedEmbedding): CachedEmbedding {
   artifactVectorCache.delete(id);
-  artifactVectorCache.set(id, vec);
+  artifactVectorCache.set(id, entry);
   while (artifactVectorCache.size > ARTIFACT_CACHE_MAX) {
     const oldest = artifactVectorCache.keys().next().value;
     if (oldest === undefined) break;
     artifactVectorCache.delete(oldest);
   }
-  return vec;
+  return entry;
 }
 
-function readLruCache(id: string): number[] | undefined {
+function readLruCache(id: string): CachedEmbedding | undefined {
   const v = artifactVectorCache.get(id);
   if (v === undefined) return undefined;
   // Touch on read — move to most-recent end of the LRU list.
@@ -263,7 +297,7 @@ async function loadCorpus(): Promise<ThesisChunk[]> {
   return corpusLoadPromise;
 }
 
-async function embedArtifact(a: FrontierArtifact): Promise<number[]> {
+async function embedArtifact(a: FrontierArtifact): Promise<CachedEmbedding> {
   const cached = readLruCache(a.id);
   if (cached) return cached;
   const text = [a.title, a.summary ?? '', a.tags.join(' ')]
@@ -276,8 +310,12 @@ async function embedArtifact(a: FrontierArtifact): Promise<number[]> {
   } catch {
     vec = [];
   }
-  touch(a.id, vec);
-  return vec;
+  // Snapshot provenance set by the embedFn we just awaited so a
+  // later embed call (for another artifact) can't retroactively
+  // change this artifact's recorded backend.
+  const entry: CachedEmbedding = { vec, provenance: { ...lastEmbedProvenance } };
+  touch(a.id, entry);
+  return entry;
 }
 
 /**
@@ -289,7 +327,7 @@ async function embedArtifact(a: FrontierArtifact): Promise<number[]> {
 export const defaultThesisProbe: ThesisProbe = async (artifact) => {
   const chunks = await loadCorpus();
   if (chunks.length === 0) return undefined;
-  const av = await embedArtifact(artifact);
+  const { vec: av, provenance } = await embedArtifact(artifact);
   if (av.length === 0) return undefined;
 
   // Top-K mean is more stable than single-best (which can spike on a
@@ -313,7 +351,13 @@ export const defaultThesisProbe: ThesisProbe = async (artifact) => {
     .filter((x) => x.s > 0.05)
     .map((x) => `${x.c.docId}#${x.c.heading} (cos=${x.s.toFixed(2)})`);
 
-  return citations.length > 0 ? { score, citations } : { score };
+  const base = {
+    score,
+    backendId: provenance.backendId,
+    model: provenance.model,
+    degraded: provenance.degraded,
+  };
+  return citations.length > 0 ? { ...base, citations } : base;
 };
 
 /**
@@ -387,14 +431,30 @@ export function createEmbedWorkerThesisFn(opts: {
         vectors.length === texts.length &&
         vectors.every((v) => Array.isArray(v) && v.length > 0)
       ) {
+        setEmbedProvenance({ backendId, model, degraded: false });
         return vectors;
       }
     } catch {
       // Swallow and fall through to the dev-hash fallback.
     }
     try {
-      return await fabricEmbed(texts);
+      const v = await fabricEmbed(texts);
+      // fabricEmbed already set provenance to {aef-dev-hash, …,
+      // degraded:false}. From the configured-backend caller's
+      // perspective this IS a degradation — we wanted `backendId`
+      // but only got the deterministic backend. Overwrite the flag.
+      setEmbedProvenance({
+        backendId: FABRIC_BACKEND_ID,
+        model: FABRIC_MODEL,
+        degraded: true,
+      });
+      return v;
     } catch {
+      setEmbedProvenance({
+        backendId: FABRIC_BACKEND_ID,
+        model: FABRIC_MODEL,
+        degraded: true,
+      });
       return texts.map(() => [] as number[]);
     }
   };

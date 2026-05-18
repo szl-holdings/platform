@@ -37,6 +37,17 @@ export interface CodexScore {
   safetySignal: number;
   composite: number;
   rationale: string[];
+  // Provenance of the thesisFit signal: which embedder backend +
+  // model actually produced this score. Optional so legacy items
+  // (scored before the embedder was instrumented) round-trip
+  // unchanged. `embedderDegraded=true` means the configured backend
+  // failed and the deterministic dev-hash fallback was used —
+  // operators should treat thesisFit as a coarse signal in that
+  // case. Absent when thesisFit came from the keyword scorer only
+  // (no thesis probe ran).
+  embedderBackendId?: string;
+  embedderModel?: string;
+  embedderDegraded?: boolean;
 }
 
 export interface EvidencePack {

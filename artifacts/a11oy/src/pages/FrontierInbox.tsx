@@ -14,6 +14,12 @@ interface CodexScore {
   safetySignal: number;
   composite: number;
   rationale: string[];
+  // Optional embedder provenance (added by frontier-ingest so
+  // operators can tell whether thesisFit came from the configured
+  // semantic backend or the deterministic dev-hash fallback).
+  embedderBackendId?: string;
+  embedderModel?: string;
+  embedderDegraded?: boolean;
 }
 
 interface FrontierArtifact {
@@ -227,6 +233,27 @@ export function FrontierInbox() {
         </div>
       )}
 
+      {items.some((it) => it.evidence.score.embedderDegraded) && (
+        <div
+          className="mb-4 px-3 py-2 rounded text-xs flex items-start gap-2"
+          style={{
+            backgroundColor: 'rgba(245,158,11,0.12)',
+            color: '#fcd34d',
+            border: '1px solid rgba(245,158,11,0.35)',
+          }}
+        >
+          <span className="font-mono uppercase text-[10px] px-1.5 py-0.5 rounded"
+                style={{ backgroundColor: 'rgba(245,158,11,0.20)', color: '#fde68a' }}>
+            DEGRADED
+          </span>
+          <span>
+            Some items in this view were scored with the deterministic <code>aef-dev-hash</code> fallback
+            because the configured semantic embedder was unreachable. Treat their thesis-fit as a coarse
+            signal until the configured backend recovers.
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-3 mb-6">
         <KpiCard label="Pending" value={counts.pending} accent="#c9b787" />
         <KpiCard label="Approved" value={counts.approved} accent="#22c55e" />
@@ -257,6 +284,23 @@ export function FrontierInbox() {
                     <StatusPill status={item.status === 'pending' ? 'GATED' : item.status === 'approved' ? 'APPROVED' : 'WARN'} />
                     {item.evidence.promotionTarget && (
                       <span className="text-[10px] font-mono text-neutral-400">→ {item.evidence.promotionTarget}</span>
+                    )}
+                    {s.embedderBackendId && (
+                      <span
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded uppercase cursor-help"
+                        title={
+                          s.embedderDegraded
+                            ? `thesis-fit scored by ${s.embedderBackendId}/${s.embedderModel ?? '?'} — DEGRADED fallback (configured backend was unreachable)`
+                            : `thesis-fit scored by ${s.embedderBackendId}/${s.embedderModel ?? '?'}`
+                        }
+                        style={
+                          s.embedderDegraded
+                            ? { backgroundColor: 'rgba(245,158,11,0.18)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.35)' }
+                            : { backgroundColor: 'rgba(96,165,250,0.14)', color: '#93c5fd', border: '1px solid rgba(96,165,250,0.30)' }
+                        }
+                      >
+                        {s.embedderDegraded ? '⚠ ' : ''}embed: {s.embedderBackendId}
+                      </span>
                     )}
                   </div>
                   <a href={a.url} target="_blank" rel="noreferrer" className="text-sm text-neutral-100 hover:text-amber-300 break-words">

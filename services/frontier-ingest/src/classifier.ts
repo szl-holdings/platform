@@ -59,11 +59,22 @@ function estimateSafety(a: FrontierArtifact): number {
  * probe returns a [0,1] score plus citations that are surfaced in
  * the rationale so the proof chain stays inspectable.
  */
+export interface ThesisProbeResult {
+  score: number;
+  citations?: string[];
+  // Provenance for the proof chain: which embedder backend + model
+  // produced `score`. `degraded=true` means the configured backend
+  // (e.g. BGE-M3 worker queue) was unreachable and the
+  // deterministic dev-hash fallback was used.
+  backendId?: string;
+  model?: string;
+  degraded?: boolean;
+}
 export interface ThesisProbe {
   (artifact: FrontierArtifact):
-    | { score: number; citations?: string[] }
+    | ThesisProbeResult
     | undefined
-    | Promise<{ score: number; citations?: string[] } | undefined>;
+    | Promise<ThesisProbeResult | undefined>;
 }
 let thesisProbe: ThesisProbe | undefined;
 export function registerThesisProbe(p: ThesisProbe | undefined): void {
@@ -75,7 +86,7 @@ export async function scoreArtifact(a: FrontierArtifact): Promise<CodexScore> {
   const ouroborosKw = scoreKeywords(haystack, KEYWORDS_OUROBOROS);
   const lutarKw = scoreKeywords(haystack, KEYWORDS_LUTAR);
   const keywordThesisFit = scoreKeywords(haystack, KEYWORDS_THESIS);
-  let probe: { score: number; citations?: string[] } | undefined;
+  let probe: ThesisProbeResult | undefined;
   try {
     probe = await thesisProbe?.(a);
   } catch {
@@ -145,8 +156,23 @@ export async function scoreArtifact(a: FrontierArtifact): Promise<CodexScore> {
   if (lutarKw > 0.3) rationale.push(`lutar ${lutarKw.toFixed(2)} (improves routing)`);
   if (costSignal > 0.7) rationale.push(`cost-signal ${costSignal.toFixed(2)} (likely expensive — operator review)`);
   if (safetySignal < 0.3) rationale.push(`safety ${safetySignal.toFixed(2)} (boundary-pushing — quarantine)`);
+  if (probe?.backendId) {
+    const tag = probe.degraded ? ` (fallback — configured backend unavailable)` : '';
+    rationale.push(`embedder ${probe.backendId}/${probe.model ?? '?'}${tag}`);
+  }
 
-  return { ouroboros: ouroborosKw, lutar: lutarKw, thesisFit, costSignal, safetySignal, composite, rationale };
+  return {
+    ouroboros: ouroborosKw,
+    lutar: lutarKw,
+    thesisFit,
+    costSignal,
+    safetySignal,
+    composite,
+    rationale,
+    embedderBackendId: probe?.backendId,
+    embedderModel: probe?.model,
+    embedderDegraded: probe?.degraded,
+  };
 }
 
 function clamp01(n: number): number {
