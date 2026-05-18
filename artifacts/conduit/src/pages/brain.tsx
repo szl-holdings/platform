@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Brain } from 'lucide-react';
 
-const AMARU_BASE = '/amaru';
+const AMARU_BASE = '/api/amaru';
 const CHAKRAS = ['root', 'sacral', 'solar', 'heart', 'throat', 'third_eye', 'crown'] as const;
 type ChakraName = (typeof CHAKRAS)[number];
 
