@@ -73,6 +73,28 @@ export const sentraFindingsTable = pgTable(
       .notNull()
       .default('open'),
     chainReceiptId: text('chain_receipt_id'),
+    /**
+     * Amaru cortex classification (see migration 0151):
+     *  - `amaruClassifiedAt` — wall-clock when the cortex pass ran
+     *  - `amaruOriginalSeverity` / `amaruOriginalScore` — detector-emitted
+     *    values, recorded only when the cortex actually changed them
+     *  - `amaruClassification` — structured reason / adversary tags /
+     *    signals the cortex used (also recorded on no-op so reviewers
+     *    can confirm the pass ran)
+     * The post-classification severity/score live in `severity`/`score`.
+     */
+    amaruClassifiedAt: timestamp('amaru_classified_at', { withTimezone: true }),
+    amaruOriginalSeverity: text('amaru_original_severity', {
+      enum: ['critical', 'high', 'medium', 'low', 'info'],
+    }),
+    amaruOriginalScore: integer('amaru_original_score'),
+    amaruClassification: jsonb('amaru_classification').$type<{
+      mode: 'amaru-cortex' | 'amaru-unavailable' | 'amaru-disabled';
+      reason: string;
+      adversaryTags?: string[];
+      signals?: Record<string, unknown>;
+      bumpedSteps?: number;
+    } | null>(),
     emittedAt: timestamp('emitted_at', { withTimezone: true }).notNull(),
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
     resolvedBy: text('resolved_by'),

@@ -53,6 +53,10 @@ import {
   runTsDetector,
   sentraDetectorRegistry,
 } from '../lib/sentra-detector-registry';
+import {
+  type ClassifiedFinding,
+  classifyFindings,
+} from '../lib/sentra-amaru-classifier';
 
 const router: IRouter = Router();
 
@@ -198,26 +202,33 @@ function bpsToScore(bps: number): number {
 async function persistFindings(opts: {
   detectorId: string;
   runId: string;
-  findings: Finding[];
+  classified: ClassifiedFinding[];
   chainReceiptId: string;
 }) {
-  if (opts.findings.length === 0) return [];
-  const rows = opts.findings.map((f) => ({
-    id: f.id,
-    detectorId: opts.detectorId,
-    runId: opts.runId,
-    severity: f.severity,
-    score: severityToBps(f.score),
-    title: f.title,
-    summary: f.summary,
-    attackTechniques: f.attackTechniques ?? null,
-    affectedAssets: f.affectedAssets ?? [],
-    evidence: f.evidence ?? {},
-    recommendedAction: f.recommendedAction ?? null,
-    governanceClass: f.governanceClass,
-    chainReceiptId: opts.chainReceiptId,
-    emittedAt: new Date(f.emittedAt),
-  }));
+  if (opts.classified.length === 0) return [];
+  const rows = opts.classified.map((c) => {
+    const f = c.finding;
+    return {
+      id: f.id,
+      detectorId: opts.detectorId,
+      runId: opts.runId,
+      severity: f.severity,
+      score: severityToBps(f.score),
+      title: f.title,
+      summary: f.summary,
+      attackTechniques: f.attackTechniques ?? null,
+      affectedAssets: f.affectedAssets ?? [],
+      evidence: f.evidence ?? {},
+      recommendedAction: f.recommendedAction ?? null,
+      governanceClass: f.governanceClass,
+      chainReceiptId: opts.chainReceiptId,
+      amaruClassifiedAt: new Date(c.classifiedAt),
+      amaruOriginalSeverity: c.originalSeverity ?? null,
+      amaruOriginalScore: c.originalScoreBps ?? null,
+      amaruClassification: c.classification,
+      emittedAt: new Date(f.emittedAt),
+    };
+  });
   await db.insert(sentraFindingsTable).values(rows).onConflictDoNothing();
   return rows;
 }
@@ -499,21 +510,37 @@ router.post(
         trace,
       });
 
+      // Amaru cortex classification / enrichment. Runs BEFORE persistence
+      // and BEFORE the A11oy handoff so the row written to
+      // `sentra_findings` and the severity used for escalation both
+      // reflect the post-classification view. Override (when the cortex
+      // changed severity) is recorded on the finding row itself via
+      // `amaru_original_*` + `amaru_classification`.
+      const classified = await classifyFindings(findings);
+      const postFindings = classified.map((c) => c.finding);
+
       await persistFindings({
         detectorId,
         runId,
-        findings,
+        classified,
         chainReceiptId: receipt.selfHash,
       });
-      // AMARU_HOOK: classification / enrichment pass would run here
-      // before findings reach the alerts/queue surface.
-      await maybeHandoff(findings);
+      await maybeHandoff(postFindings);
 
       sendCreated(res, {
         runId,
         status,
         durationMs: finishedAt.getTime() - startedAt.getTime(),
-        findings,
+        findings: postFindings,
+        amaruClassifications: classified.map((c) => ({
+          findingId: c.finding.id,
+          classifiedAt: c.classifiedAt,
+          originalSeverity: c.originalSeverity,
+          originalScoreBps: c.originalScoreBps,
+          severity: c.finding.severity,
+          score: c.finding.score,
+          classification: c.classification,
+        })),
         chainReceiptId: receipt.selfHash,
         errorMessage,
       });
@@ -586,6 +613,17 @@ router.get('/sentra/findings', async (req: Request, res: Response) => {
         governanceClass: r.governanceClass,
         status: r.status,
         chainReceiptId: r.chainReceiptId ?? undefined,
+        amaru: r.amaruClassifiedAt
+          ? {
+              classifiedAt: r.amaruClassifiedAt.toISOString(),
+              originalSeverity: r.amaruOriginalSeverity ?? undefined,
+              originalScore:
+                r.amaruOriginalScore != null
+                  ? bpsToScore(r.amaruOriginalScore)
+                  : undefined,
+              classification: r.amaruClassification ?? undefined,
+            }
+          : undefined,
         emittedAt: r.emittedAt.toISOString(),
         resolvedAt: r.resolvedAt?.toISOString(),
         resolvedBy: r.resolvedBy ?? undefined,
