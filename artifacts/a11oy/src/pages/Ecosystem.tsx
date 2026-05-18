@@ -35,6 +35,11 @@ interface AppCard {
     degraded_module_ids: string[]; unprobed_module_ids: string[];
     formula_count: number | null; doi_bindings: number | null;
   } | null;
+  // Round 6: stamped server-side. True iff this app is in the current
+  // Series-A focus set (sentra/amaru/vessels). a11oy itself is the
+  // orchestrator and isn't in `apps[]`. Archived apps still render but
+  // in a dimmed bottom row.
+  focus?: boolean;
   _error?: string;
 }
 interface OrgRepoLite { slug: string; verdict: RepoVerdict; language: string | null; size_kb: number | null; }
@@ -50,8 +55,11 @@ interface EcoSnap {
   ecosystem_verdict: AppVerdict;
   counts: {
     apps_total: number; apps_operational: number; apps_degraded: number; apps_unreachable: number;
+    apps_focus?: number; apps_archived?: number;
+    apps_archived_operational?: number; apps_archived_degraded?: number;
     org_repos: number; org_operational: number; org_daylight: number; org_theater_flags: number; org_evidence_missing: number;
   };
+  round6_focus?: { slugs: string[]; orchestrator: string; note: string };
   apps: AppCard[]; org: OrgSummary;
   notes: { provenance: string; cache_ttl_s: number; method_scope: string };
 }
@@ -134,12 +142,34 @@ export default function Ecosystem() {
         </div>
       )}
 
-      {/* Section 1: per-app surfaces */}
+      {/* Round 6 focus banner — visible at-a-glance funding narrative */}
+      {snap?.round6_focus && (
+        <div style={{
+          background: T.surfaceHi, border: `1px solid ${T.purple}55`, borderLeft: `4px solid ${T.purple}`,
+          borderRadius: 8, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap',
+        }}>
+          <div style={{ fontSize: 11, color: T.purple, fontWeight: 600, letterSpacing: 0.5 }}>ROUND 6 FOCUS</div>
+          <div style={{ fontSize: 13, color: T.text }}>
+            {/* Architect R6 MEDIUM: derive banner slugs from `apps[].focus`
+                (the same array the grids render from) instead of the
+                parallel `round6_focus.slugs` field, so the banner and the
+                focus-grid can never disagree. The server field stays in the
+                snapshot as documentation. */}
+            <strong>{snap.round6_focus.orchestrator}</strong> orchestrates {apps.filter(a => a.focus !== false).map(a => a.slug).join(' · ')}
+          </div>
+          <div style={{ fontSize: 11, color: T.dim, flex: 1, minWidth: 280 }}>{snap.round6_focus.note}</div>
+        </div>
+      )}
+
+      {/* Section 1: per-app surfaces — FOCUS apps first, archived in dimmed row */}
       {snap && (
         <>
-          <SectionHead title="Vertical surfaces · per-app ops-core" subtitle={`${apps.length} product verticals · live fanout to /api/{slug}/ops-core/snapshot`} />
+          <SectionHead
+            title={`Vertical surfaces · focus (${apps.filter(a => a.focus !== false).length})`}
+            subtitle={`Series-A push targets · live fanout to /api/{slug}/ops-core/snapshot`}
+          />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16, marginBottom: 32 }}>
-            {apps.map(a => (
+            {apps.filter(a => a.focus !== false).map(a => (
               <div key={a.slug} style={{
                 background: T.surface, border: `1px solid ${T.border}`, borderLeft: `4px solid ${appColor(a.verdict)}`,
                 borderRadius: 8, padding: 16,
@@ -188,6 +218,30 @@ export default function Ecosystem() {
               </div>
             ))}
           </div>
+
+          {/* Round 6: archived apps row — dimmed, still mounted, surfaced honestly */}
+          {apps.some(a => a.focus === false) && (
+            <>
+              <SectionHead
+                title={`Archived · ${apps.filter(a => a.focus === false).length} verticals`}
+                subtitle="Still mounted; deferred from the Round-6 Series-A push. Flip `focus: true` in ecosystem.ts APPS to re-include."
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10, marginBottom: 32, opacity: 0.55 }}>
+                {apps.filter(a => a.focus === false).map(a => (
+                  <div key={a.slug} style={{
+                    background: T.surface, border: `1px solid ${T.border}`, borderLeft: `3px solid ${appColor(a.verdict)}`,
+                    borderRadius: 6, padding: '8px 12px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                      <span style={{ fontWeight: 500 }}>{a.title.split(' — ')[0]}</span>
+                      <span style={{ fontSize: 10, color: appColor(a.verdict) }}>{a.verdict.slice(0, 3)}</span>
+                    </div>
+                    <div style={{ fontSize: 10, color: T.dim, marginTop: 2 }}>{a.anatomy} · {a.evidence?.modules_healthy ?? '—'}/{a.evidence?.modules_total ?? '—'}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Section 2: public org repos */}
           <SectionHead title={`Public org · ${org?.total ?? '—'} GitHub repos`} subtitle={`live from /api/org-intelligence/snapshot · source: ${org?.listing_source ?? '—'} · most recent push: ${org?.most_recently_pushed ?? '—'}`} />

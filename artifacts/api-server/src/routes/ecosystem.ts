@@ -35,15 +35,23 @@ let _inflight: Promise<unknown> | null = null;
 
 // All eight per-app ops-core surfaces. Kept in alphabetical order so a
 // dropped one is immediately visible in code review.
+// Round 6 focus narrowing: Series-A push concentrates on three operational
+// verticals (Sentra, Amaru, Vessels) plus the a11oy orchestrator (which has
+// no ops-core of its own — a11oy IS the surface that consumes this snapshot).
+// The five other verticals remain mounted in the monorepo and continue to
+// expose their /ops-core/snapshot endpoints (unchanged), but the ecosystem
+// aggregator marks them ARCHIVED so the funding board reflects current
+// focus. When/if funding lands, flip `focus: false` -> `focus: true` to
+// re-include them in the headline counts — no other edit required.
 const APPS = [
-  { slug: 'amaru',      title: 'Amaru — Andean Ouroboros',         anatomy: 'HEART · sonqo' },
-  { slug: 'carlota-jo', title: 'Carlota Jo — Concierge',           anatomy: 'GUT · wiksa' },
-  { slug: 'counsel',    title: 'Counsel — Legal Intelligence',     anatomy: 'PREFRONTAL · ñawi' },
-  { slug: 'lexicon',    title: 'Lexicon — Language Engine',        anatomy: 'BROCA · simi' },
-  { slug: 'pulse',      title: 'Pulse — Vitals',                   anatomy: 'CARDIO · willka' },
-  { slug: 'sentra',     title: 'Sentra — Cyber Resilience',        anatomy: 'IMMUNE · awqa' },
-  { slug: 'terra',      title: 'Terra — Earth Systems',            anatomy: 'KIDNEY · pacha' },
-  { slug: 'vessels',    title: 'Vessels — Maritime Intelligence',  anatomy: 'CIRCULATORY · mayu' },
+  { slug: 'amaru',      title: 'Amaru — Andean Ouroboros',         anatomy: 'HEART · sonqo',         focus: true  },
+  { slug: 'sentra',     title: 'Sentra — Cyber Resilience',        anatomy: 'IMMUNE · awqa',         focus: true  },
+  { slug: 'vessels',    title: 'Vessels — Maritime Intelligence',  anatomy: 'CIRCULATORY · mayu',    focus: true  },
+  { slug: 'counsel',    title: 'Counsel — Legal Intelligence',     anatomy: 'PREFRONTAL · ñawi',     focus: false },
+  { slug: 'carlota-jo', title: 'Carlota Jo — Concierge',           anatomy: 'GUT · wiksa',           focus: false },
+  { slug: 'pulse',      title: 'Pulse — Vitals',                   anatomy: 'CARDIO · willka',       focus: false },
+  { slug: 'lexicon',    title: 'Lexicon — Language Engine',        anatomy: 'BROCA · simi',          focus: false },
+  { slug: 'terra',      title: 'Terra — Earth Systems',            anatomy: 'KIDNEY · pacha',        focus: false },
 ] as const;
 
 interface AppCardEvidence {
@@ -231,29 +239,43 @@ async function buildSnapshot(): Promise<unknown> {
     localFetch('/api/org-intelligence/snapshot', port),
     ...APPS.map(a => localFetch(`/api/${a.slug}/ops-core/snapshot`, port)),
   ]);
-  const apps: AppCard[] = APPS.map((a, i) => classifyApp(a.slug, a.title, a.anatomy, appFetches[i]));
+  // Round 6: stamp each AppCard with its `focus` flag so the frontend can
+  // segregate the headline strip (focus) from the archived row (archived).
+  const apps: (AppCard & { focus: boolean })[] = APPS.map((a, i) => ({
+    ...classifyApp(a.slug, a.title, a.anatomy, appFetches[i]),
+    focus: a.focus,
+  }));
+  const focusApps = apps.filter((c) => c.focus);
+  const archivedApps = apps.filter((c) => !c.focus);
   const org = summarizeOrg(orgFetched);
 
-  // Ecosystem-wide tri-state (explicit policy, no ambiguity).
+  // Ecosystem-wide tri-state (Round-6 narrowed to FOCUS apps only).
   //
-  // OPERATIONAL  : every app OPERATIONAL AND org reachable AND zero
+  // The five archived apps (counsel/carlota-jo/pulse/lexicon/terra) remain
+  // mounted and continue to surface their own /ops-core/snapshot, but the
+  // ecosystem verdict no longer waits on them — Round 6 narrowed the
+  // Series-A push to a11oy (orchestrator) + sentra + amaru + vessels.
+  //
+  // OPERATIONAL  : every FOCUS app OPERATIONAL AND org reachable AND zero
   //                THEATER flags in the public org.
-  // UNREACHABLE  : every signal source dark — every app UNREACHABLE AND
-  //                org-intelligence unreachable. "Total blackout only."
-  // DEGRADED     : everything else (any DEGRADED, any UNREACHABLE, any
-  //                THEATER flag, or org unreachable while some apps still
-  //                respond).
-  //
-  // Round-4 architect MEDIUM: prior implementation had a stale "majority
-  // unreachable" comment that didn't match the code. Policy is now both
-  // explicit and tested below in the precedence order.
-  const opCount = apps.filter(c => c.verdict === 'OPERATIONAL').length;
-  const degCount = apps.filter(c => c.verdict === 'DEGRADED').length;
-  const unreachCount = apps.filter(c => c.verdict === 'UNREACHABLE').length;
+  // UNREACHABLE  : every FOCUS app UNREACHABLE AND org unreachable.
+  // DEGRADED     : everything else.
+  const opCount = focusApps.filter(c => c.verdict === 'OPERATIONAL').length;
+  const degCount = focusApps.filter(c => c.verdict === 'DEGRADED').length;
+  const unreachCount = focusApps.filter(c => c.verdict === 'UNREACHABLE').length;
+  const archOpCount = archivedApps.filter(c => c.verdict === 'OPERATIONAL').length;
+  const archDegCount = archivedApps.filter(c => c.verdict === 'DEGRADED').length;
   let ecosystem: 'OPERATIONAL' | 'DEGRADED' | 'UNREACHABLE';
-  if (unreachCount === APPS.length && !org.reachable) {
+  if (focusApps.length === 0) {
+    // Architect R6 LOW: defensive guard. If somebody flips every app to
+    // `focus: false`, the "all-N-unreachable" check would vacuously match
+    // (0===0) and the board would lie. Treat the empty-focus state as
+    // DEGRADED explicitly — the funding board needs at least one focus
+    // surface to make a real claim.
+    ecosystem = 'DEGRADED';
+  } else if (unreachCount === focusApps.length && !org.reachable) {
     ecosystem = 'UNREACHABLE';
-  } else if (opCount === APPS.length && org.reachable && org.theater_flags === 0) {
+  } else if (opCount === focusApps.length && org.reachable && org.theater_flags === 0) {
     ecosystem = 'OPERATIONAL';
   } else {
     ecosystem = 'DEGRADED';
@@ -271,14 +293,23 @@ async function buildSnapshot(): Promise<unknown> {
     ecosystem_verdict: ecosystem,
     counts: {
       apps_total: APPS.length,
+      apps_focus: focusApps.length,
+      apps_archived: archivedApps.length,
       apps_operational: opCount,
       apps_degraded: degCount,
       apps_unreachable: unreachCount,
+      apps_archived_operational: archOpCount,
+      apps_archived_degraded: archDegCount,
       org_repos: org.total,
       org_operational: org.operational,
       org_daylight: org.daylight,
       org_theater_flags: org.theater_flags,
       org_evidence_missing: org.evidence_missing,
+    },
+    round6_focus: {
+      slugs: focusApps.map(a => a.slug),
+      orchestrator: 'a11oy',
+      note: 'Round 6 narrows the Series-A push to a11oy (orchestrator) + sentra + amaru + vessels. Archived apps remain mounted and continue to expose their own /ops-core/snapshot; flip `focus: false` -> `focus: true` in ecosystem.ts APPS to re-include them.',
     },
     apps,
     org,
