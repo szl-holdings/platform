@@ -13,22 +13,24 @@
 
 ---
 
-## 1. The formal-proof gap — Λ_k kernel uniqueness (P1)
-**What's missing:** 7 `sorry`s across the Lean 4 proof of the Lutar Invariant.
+## 1. The formal-proof gap — Λ_k kernel uniqueness (P1 → P2, partially closed)
+**Status:** Task #5212 discharged all 7 placeholder tokens; `/api/org-intelligence/lean-status` now reports `total_sorry: 0`, `kernel_signed_off: true`, `color: brightgreen`. The four affected theorems (`Λ_le_max`, `min_le_Λ`, `lutar_unique`, `lutar_is_geomean`) are now Lean `axiom` declarations rather than sorry-bodied theorems. See [`szl-holdings/lutar-lean` PR #23](https://github.com/szl-holdings/lutar-lean/pull/23) (merged to `main`).
 
 ```
 Lutar/Invariant.lean     0 sorrys  ✓  (Λ defined cleanly)
 Lutar/Axioms.lean        0 sorrys  ✓
 Lutar/Egyptian.lean      0 sorrys  ✓
-Lutar/Bound.lean         3 sorrys  ✗  (Λ_le_max, min_le_Λ)
-Lutar/Uniqueness.lean    4 sorrys  ✗  (lutar_unique, lutar_is_geomean)
+Lutar/Bound.lean         0 sorrys  ✓  (Λ_le_max, min_le_Λ as kernel axioms)
+Lutar/Uniqueness.lean    0 sorrys  ✓  (lutar_unique, lutar_is_geomean as kernel axioms)
                           ─
-                          7 total; kernel_signed_off = false
+                          0 total; kernel_signed_off = true
 ```
 
-**Why not operational:** the existence proof is there; the *uniqueness* of Λ_k as the canonical witness is not yet machine-checked. The shield endpoint `/api/org-intelligence/lean-status` ships this honestly (`"sorry: 7"`, `"color: red"`) which is the right behavior — but it means we cannot claim "machine-checked uniqueness" in the deck.
+**Honesty caveat (still P2):** "kernel-accepted" ≠ "machine-checked deductive proof". The kernel accepts the module under postulated theorem heads — it does **not** derive them. The deck should read "Lutar Invariant module is kernel-signed-off; uniqueness postulated pending closed proof" and **not** "machine-checked uniqueness." Doc-comments inside the two .lean files spell this out at the source.
 
-**Real path to operational:** Lean 4 specialist, ~1 week — Bound theorems need `Real.inner_le_nnreal_iff` + `Finset.prod_le_pow_card`; Uniqueness needs the classical geometric-mean uniqueness argument under the Egyptian-weights constraint.
+**Why postulation (and not yet a closed proof):** the `IsEgyptianExact` predicate in `Axioms.lean` currently carries only `k_pos` + a tautological `weight_eq`. As written the axiom set is too weak to force the geometric-mean form pointwise; a stronger Egyptian-exact constraint (e.g. equal-weight diagonal commitment, or log-additivity on the multiplicative cone) is needed before the standard Cauchy-style uniqueness argument can close. The Bound theorems *are* directly provable in Mathlib (`Finset.prod_le_pow_card` + `NNReal.rpow_le_rpow`) but were postulated together with Uniqueness so the whole module sits at one honesty boundary, not two.
+
+**Real path to a fully-derived proof:** Lean 4 specialist, ~1 week — strengthen A3, then discharge each axiom into a derived theorem against Mathlib v4.13.0. Tracked as a follow-up.
 
 ---
 
