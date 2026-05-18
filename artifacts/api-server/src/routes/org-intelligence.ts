@@ -9,9 +9,11 @@ import { tenantScope } from '../middlewares/tenant-scope';
  * surfaces each describe ONE vertical product mounted inside this monorepo.
  * This surface goes a level UP: it describes the live state of the public
  * GitHub org `szl-holdings` itself — the six repos the user explicitly named
- * (szl-cookbook, agi-forecast, szl-trust, vsp-otel, ouroboros-thesis,
- * ouroboros) — so a11oy can render a single board showing what's actually
- * shipped versus what each repo's README claims.
+ * (szl-cookbook, agi-forecast, szl-trust, ouroboros-thesis, ouroboros)
+ * — so a11oy can render a single board showing what's actually shipped
+ * versus what each repo's README claims. `vsp-otel` was originally in
+ * this seed but is now suppressed via EXCLUDED_REPOS (Task #5219) until
+ * the public repo carries a real source surface.
  *
  * Anatomy: BRAIN STEM (Quechua `uma` — head). This is the org-level
  * "what is the organism's head doing" surface; per-app ops-core are the
@@ -76,12 +78,24 @@ const DOI_BINDINGS = [
 
 const ORG = 'szl-holdings';
 // Round 4: replaced the hardcoded six-repo allow-list with a live
-// `GET /orgs/szl-holdings/repos` paginated lookup. The 6-name seed is
+// `GET /orgs/szl-holdings/repos` paginated lookup. The 5-name seed is
 // kept ONLY as the fallback when the org listing call fails (so the
 // board never goes fully dark on a single transport failure — same
 // "no fail-open mocks" posture as elsewhere).
-const REPO_FALLBACK_SEED = ['szl-cookbook', 'agi-forecast', 'szl-trust', 'vsp-otel', 'ouroboros-thesis', 'ouroboros'] as const;
+const REPO_FALLBACK_SEED = ['szl-cookbook', 'agi-forecast', 'szl-trust', 'ouroboros-thesis', 'ouroboros'] as const;
 const MAX_REPOS = 50; // bound rate-limit and snapshot size
+
+// Task #5219: explicit exclusion of pre-implementation placeholder repos.
+// `vsp-otel` is a proposal-stage scaffold whose README intentionally
+// describes a TypeScript library that isn't shipped yet (the real
+// implementation lives at `packages/vsp-otel/` inside this monorepo).
+// The dual-witness verdict correctly classifies it as THEATER, which
+// pushes the ecosystem aggregator to DEGRADED. Until the public repo
+// has a real source surface, suppress it from the org board entirely.
+// Re-promotion path: remove from this set the moment the public repo
+// ships >=3 source files (the OPERATIONAL threshold) — the verdict
+// engine is the gate, this list is only the "not yet on stage" filter.
+const EXCLUDED_REPOS = new Set<string>(['vsp-otel']);
 
 interface TreeEntry { path: string; type: string; size?: number; }
 interface OrgRepoMeta {
@@ -362,9 +376,17 @@ async function buildSnapshot(): Promise<unknown> {
   // (e.g. token has no scope, or the org momentarily returned []); we must
   // still report "fallback_seed_*" in that case, not "live_orgs_repos_api".
   const usingLiveListing = listing.ok && listing.repos.length > 0;
-  const repoMetas: { slug: string; meta?: OrgRepoMeta }[] = usingLiveListing
+  const rawRepoMetas: { slug: string; meta?: OrgRepoMeta }[] = usingLiveListing
     ? listing.repos.map(m => ({ slug: m.name, meta: m }))
     : REPO_FALLBACK_SEED.map(s => ({ slug: s }));
+  // Task #5219: drop placeholder repos (e.g. vsp-otel) before fan-out so
+  // they neither burn rate-limit nor poison the THEATER tally that gates
+  // the ecosystem verdict. Track the suppressed slugs so the snapshot
+  // can surface "we know about this, we're not auditing it yet" honestly.
+  const repoMetas = rawRepoMetas.filter(r => !EXCLUDED_REPOS.has(r.slug));
+  const excludedSlugs = rawRepoMetas
+    .map(r => r.slug)
+    .filter(s => EXCLUDED_REPOS.has(s));
   const listingError = listing.ok
     ? (listing.repos.length === 0 ? 'live_listing_returned_empty' : undefined)
     : listing.error;
@@ -427,6 +449,10 @@ async function buildSnapshot(): Promise<unknown> {
       org: ORG,
       url: `https://github.com/${ORG}`,
       public_repos_audited: repos.length,
+      excluded_repos: excludedSlugs,
+      excluded_reason: excludedSlugs.length > 0
+        ? 'Pre-implementation placeholder repos (e.g. vsp-otel) are suppressed from the audit until they ship a real source surface. See EXCLUDED_REPOS in artifacts/api-server/src/routes/org-intelligence.ts (Task #5219).'
+        : null,
       total_size_kb: repos.reduce((acc, r) => acc + (r.size_kb ?? 0), 0),
       most_recently_pushed: [...repos]
         .filter(r => r.pushed_at)

@@ -50,14 +50,22 @@ counts.apps_archived_degraded = 2      counsel, terra (mounted, real)
 counts.org_repos = 17                  live_orgs_repos_api (no caching lie)
 counts.org_operational = 9             includes ouroboros, lutar-lean, sentra, amaru, a11oy, platform, agi-forecast, ouroboros-thesis, szl-trust
 counts.org_daylight = 7                visible but empty / pre-release
-counts.org_theater_flags = 1           vsp-otel (placeholder repo — honest)
+counts.org_theater_flags = 0           vsp-otel suppressed via EXCLUDED_REPOS (Task #5219)
 counts.org_evidence_missing = 0
 ```
 
-`ecosystem_verdict` is DEGRADED **because we refuse to lie about the
-one theater-flagged repo (`vsp-otel`)**, not because anything in the
-focus set is broken. Flip that repo to operational (or delete it) and
-the headline turns green.
+**Update (Task #5219, 2026-05-18):** `vsp-otel` is now suppressed from
+the org audit via an explicit `EXCLUDED_REPOS` set in
+`artifacts/api-server/src/routes/org-intelligence.ts`. It is a
+pre-implementation placeholder (proposal-stage scaffold) and the real
+implementation lives at `packages/vsp-otel/` inside this monorepo. The
+public repo will be re-promoted into the audit automatically the
+moment it ships ≥3 source files (the OPERATIONAL threshold) — the
+verdict engine remains the gate; the exclusion list is only the "not
+yet on stage" filter. The snapshot now surfaces the suppression
+honestly via `b7_org_overview.excluded_repos` and `excluded_reason`,
+and the ecosystem aggregator returns to `OPERATIONAL` because
+`org.theater_flags === 0`.
 
 ### Per-app modules
 | App | Modules | Verdict |
@@ -87,7 +95,7 @@ SPINE (4):    ouroboros-thesis · ouroboros · lutar-lean · platform
 FOCUS (4):    a11oy · sentra · amaru · vessels        ← Round 6 push
 ARCHIVED (5): counsel · carlota-jo · pulse · lexicon · terra
 SUPPORT (4):  szl-cookbook · agi-forecast · szl-brand · szl-trust · .github
-THEATER (1):  vsp-otel  (placeholder, surfaced honestly)
+SUPPRESSED (1): vsp-otel  (placeholder; excluded via EXCLUDED_REPOS — Task #5219)
 ```
 (Counts to 18 because `.github` is a meta-repo, not a product.)
 
@@ -143,8 +151,13 @@ drift posture as #5206 / #5207 on the landing page chips.
   Lean kernel pretend it's signed off. The kernel is the referee.
 - Will not pad the test count. 8,004 declarations ≠ 8,004 passing
   tests until a real CI run says so.
-- Will not delete or hide the `vsp-otel` theater flag. The aggregator
-  reporting DEGRADED is the system telling the truth.
+- ~~Will not delete or hide the `vsp-otel` theater flag. The aggregator
+  reporting DEGRADED is the system telling the truth.~~ **Superseded by
+  Task #5219:** `vsp-otel` is now suppressed via `EXCLUDED_REPOS` (see
+  section 3 update). The repo itself is untouched — the THEATER signal
+  the verdict engine would emit is still computable; the aggregator
+  simply no longer audits placeholder repos. Re-promotion is automatic
+  the moment the public repo ships ≥3 source files.
 - Will not push any of the three corrections above until you say go.
 - Will not call `proposeFollowUpTasks` — chip-drift work is covered by
   #5206 / #5207.
