@@ -1445,64 +1445,32 @@ function AppContent({
       clearSentryUser();
     }
   }, [user?.id]);
-  const isDashboard =
-    location.startsWith('/dashboard') ||
-    location.startsWith('/fleet') ||
-    location.startsWith('/vessel') ||
-    location.startsWith('/exceptions') ||
-    location.startsWith('/economics') ||
-    location.startsWith('/maintenance') ||
-    location.startsWith('/command') ||
-    location.startsWith('/analytics') ||
-    location.startsWith('/intelligence') ||
-    location.startsWith('/corridors') ||
-    location.startsWith('/alerts') ||
-    location.startsWith('/weather') ||
-    location.startsWith('/port-analytics') ||
-    location.startsWith('/co2-emissions') ||
-    location.startsWith('/risk-scoring') ||
-    location.startsWith('/dark-vessel-detection') ||
-    location.startsWith('/sanctions-screening') ||
-    location.startsWith('/cyber-threats') ||
-    location.startsWith('/incidents') ||
-    location.startsWith('/agent-insights') ||
-    location.startsWith('/vessels-list') ||
-    location.startsWith('/routes') ||
-    location.startsWith('/command-workflows') ||
-    location.startsWith('/document-engine') ||
-    location.startsWith('/voyage-desk') ||
-    location.startsWith('/what-changed') ||
-    location.startsWith('/exception-queue') ||
-    location.startsWith('/route-risk') ||
-    location.startsWith('/approval-review') ||
-    location.startsWith('/disruption-forecast') ||
-    location.startsWith('/dark-fleet-economics') ||
-    location.startsWith('/sanctions-heat') ||
-    location.startsWith('/voyage-pnl') ||
-    location.startsWith('/trade-flow-heatmap') ||
-    location.startsWith('/intelligence-briefs') ||
-    location.startsWith('/digital-twin') ||
-    location.startsWith('/autonomous-routing') ||
-    location.startsWith('/predictive-maintenance-ml') ||
-    location.startsWith('/blockchain-bol') ||
-    location.startsWith('/decarbonization') ||
-    location.startsWith('/port-twin') ||
-    location.startsWith('/piracy-sanctions') ||
-    location.startsWith('/weather-routing') ||
-    location.startsWith('/bunkering') ||
-    location.startsWith('/charter-party') ||
-    location.startsWith('/demurrage') ||
-    location.startsWith('/freight-rates') ||
-    location.startsWith('/sts-detection') ||
-    location.startsWith('/crew-tracker') ||
-    location.startsWith('/bunker-optimizer') ||
-    location.startsWith('/psc-inspector') ||
-    location.startsWith('/insurance-panel') ||
-    location.startsWith('/atlas-runtime') ||
-    location.startsWith('/replay') ||
-    location.startsWith('/scenario-branches') ||
-    location.startsWith('/satellite-rf-intelligence') ||
-    location.startsWith('/med-shadow-fleet');
+  // Marketing/landing routes — anything else is a dashboard route. Using an
+  // explicit denylist of marketing paths means new dashboard routes added in
+  // `DashboardRouter` work automatically without having to thread them
+  // through this allowlist (Round-7 tab-repair fix — previously, paths like
+  // /decision-center, /cortex/*, /atlas-execute, /field-atlas, /benchmarks,
+  // /governed-cockpit, /aef-search, /operational-core, /cps-console,
+  // /constellation, /trust-provenance, /evidence, /voyage-twin,
+  // /voyage-risk-twin, /geo-decision-center, /risk-simulation,
+  // /voyage-calculator, /owner-cargo-graph, /route-anomaly-engine,
+  // /sanctions-chain-explorer, /counterparty-risk-map, /trading-desk,
+  // /ais-decode, /commodity-flow, /ais-live, /forecast, and /atlas-artifacts
+  // silently fell through to MarketingHomePage).
+  const MARKETING_PREFIXES = [
+    '/pulse',
+    '/platform',
+    '/capabilities',
+    '/use-cases',
+    '/security',
+    '/pricing',
+    '/demo',
+    '/fleet-assessment',
+    '/legal',
+  ];
+  const isMarketing =
+    location === '/' || MARKETING_PREFIXES.some((p) => location === p || location.startsWith(p + '/'));
+  const isDashboard = !isMarketing;
 
   if (isDashboard) {
     // Vessels dashboards are open by default — no in-app sign-on or persona

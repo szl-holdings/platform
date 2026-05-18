@@ -472,6 +472,19 @@ const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-
 const HuntDetailPage = lazy(() => import('@/pages/hunt-detail'));
 const CrisisSimulatorRunPage = lazy(() => import('@/pages/crisis-simulator-run'));
 
+// R7 Series-A blocker: aliases for stale hrefs found in pages/components.
+const AliasDashboardPage = lazy(() => import('@/pages/dashboard'));
+const AliasEnterpriseDemoPage = lazy(() => import('@/pages/enterprise-demo'));
+const AliasDecisionConsolePage = lazy(() => import('@/pages/decision-console'));
+const AliasTradecraftPage = lazy(() => import('@/pages/tradecraft-engine'));
+const AliasXdrConsolePage = lazy(() => import('@/pages/xdr-console'));
+const AliasGovEnterprisePage = lazy(() => import('@/pages/governance/enterprise-governance'));
+const AliasGovTrustAnalyticsPage = lazy(() => import('@/pages/governance/trust-analytics'));
+const AliasMspOpsObservabilityPage = lazy(() => import('@/pages/msp/ops-observability'));
+const AliasMspProviderSettingsPage = lazy(() => import('@/pages/msp/provider-settings'));
+const AliasWorldlineRegistryPage = lazy(() => import('@/pages/worldline-registry'));
+const AliasBenchmarksPage = lazy(() => import('@/pages/benchmarks'));
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
@@ -555,6 +568,21 @@ function DashboardRoutes() {
           <SentraBillingPage />
         </Suspense>
       </Route>
+      {/* R7 Series-A blocker: nav→route aliases. Older pages still
+          ship hardcoded hrefs that pre-date the route consolidation. We
+          mount each missing path against the real page component instead
+          of leaving the user with the "Page not found" wall. */}
+      <Route path="/home"><Suspense fallback={<PageLoader />}><AliasDashboardPage /></Suspense></Route>
+      <Route path="/demo"><Suspense fallback={<PageLoader />}><AliasEnterpriseDemoPage /></Suspense></Route>
+      <Route path="/decision-console"><Suspense fallback={<PageLoader />}><AliasDecisionConsolePage /></Suspense></Route>
+      <Route path="/tradecraft"><Suspense fallback={<PageLoader />}><AliasTradecraftPage /></Suspense></Route>
+      <Route path="/xdr-console"><Suspense fallback={<PageLoader />}><AliasXdrConsolePage /></Suspense></Route>
+      <Route path="/gov/governance"><Suspense fallback={<PageLoader />}><AliasGovEnterprisePage /></Suspense></Route>
+      <Route path="/gov/trust-analytics"><Suspense fallback={<PageLoader />}><AliasGovTrustAnalyticsPage /></Suspense></Route>
+      <Route path="/msp/ops-console"><Suspense fallback={<PageLoader />}><AliasMspOpsObservabilityPage /></Suspense></Route>
+      <Route path="/ops/provider-settings"><Suspense fallback={<PageLoader />}><AliasMspProviderSettingsPage /></Suspense></Route>
+      <Route path="/command/strategy/worldline-registry"><Suspense fallback={<PageLoader />}><AliasWorldlineRegistryPage /></Suspense></Route>
+      <Route path="/command/open-eval-hub"><Suspense fallback={<PageLoader />}><AliasBenchmarksPage /></Suspense></Route>
       <Route>
         <div className="flex flex-col items-center justify-center h-full p-10 text-center">
           <Shield className="w-10 h-10 text-[#f5f5f5]/50 mb-4" />

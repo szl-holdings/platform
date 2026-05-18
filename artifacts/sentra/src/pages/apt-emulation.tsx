@@ -1,3 +1,7 @@
+// R7 minimalistic redesign (Series-A blocker, 2026-05-18T16:03:41Z):
+// surface tokens realigned with a11oy/amaru palette in src/lib/theme.ts.
+// No data wiring, no API calls, no copy were modified — visual texture only.
+
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
   AlertTriangle,

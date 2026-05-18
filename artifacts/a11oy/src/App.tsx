@@ -70,6 +70,7 @@ const LoopReasoner = lazy(() => import('./pages/LoopReasoner').then(m => ({ defa
 const OperationalStatus = lazy(() => import('./pages/OperationalStatus'));
 const OrgIntelligence = lazy(() => import('./pages/OrgIntelligence'));
 const Ecosystem = lazy(() => import('./pages/Ecosystem'));
+const OrgRepoDeepDive = lazy(() => import('./pages/OrgRepoDeepDive'));
 const AdaptiveGovernance = lazy(() => import('./pages/AdaptiveGovernance').then(m => ({ default: m.AdaptiveGovernance })));
 const ReasoningAudit = lazy(() => import('./pages/ReasoningAudit').then(m => ({ default: m.ReasoningAudit })));
 const EvalEvolution = lazy(() => import('./pages/EvalEvolution').then(m => ({ default: m.EvalEvolution })));
@@ -549,6 +550,9 @@ function AppInner() {
         <Route path="/" component={HomePage} />
         <Route path={`${base}/operational-status`}>
           <WithShell><OperationalStatus /></WithShell>
+        </Route>
+        <Route path={`${base}/organism/repo/:slug`}>
+          <WithShell><OrgRepoDeepDive /></WithShell>
         </Route>
         <Route path={`${base}/organism`}>
           <WithShell><Ecosystem /></WithShell>

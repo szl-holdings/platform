@@ -1,3 +1,7 @@
+// R7 minimalistic redesign (Series-A blocker, 2026-05-18T16:03:41Z):
+// surface tokens realigned with a11oy/amaru palette in src/lib/theme.ts.
+// No data wiring, no API calls, no copy were modified — visual texture only.
+
 import { copyrightLine } from '@szl-holdings/brand-registry';
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
@@ -23,7 +27,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { AEGIS_MITRE_COVERAGE, metricDisplay } from '../lib/claims';
 
-const BG = '#0a0a0a';
+const BG = '#0b0d12';
 
 const workspaces = [
   {
@@ -235,7 +239,7 @@ export default function AegisHomePage() {
       style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/[0.04]' : 'bg-transparent'}`}
+        className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? 'bg-[#0b0d12]/90 backdrop-blur-2xl border-b border-white/[0.04]' : 'bg-transparent'}`}
       >
         <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -285,7 +289,7 @@ export default function AegisHomePage() {
       </nav>
 
       {mobileNav && (
-        <div className="fixed inset-0 z-40 bg-[#0a0a0a]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[#0b0d12]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
           {[
             { label: 'Architecture', href: '#architecture' },
             { label: 'Convergence', href: '#convergence' },
@@ -379,7 +383,7 @@ export default function AegisHomePage() {
               { value: '94%', label: 'AI model confidence' },
               { value: '12.8K', label: 'Endpoints managed' },
             ].map((s) => (
-              <div key={s.label} className="bg-[#0a0a0a] py-5 px-5">
+              <div key={s.label} className="bg-[#0b0d12] py-5 px-5">
                 <span className="text-[22px] font-extrabold font-mono text-white block">
                   {s.value}
                 </span>
@@ -563,7 +567,7 @@ export default function AegisHomePage() {
               style={{ background: 'rgba(255,255,255,0.04)' }}
             >
               {operatingModel.map((step, i) => (
-                <div key={step.phase} className="bg-[#0a0a0a] p-8">
+                <div key={step.phase} className="bg-[#0b0d12] p-8">
                   <div className="flex items-center gap-3 mb-5">
                     <span aria-hidden="true" className="text-[36px] font-extrabold text-white/[0.55] font-mono leading-none">
                       {String(i + 1).padStart(2, '0')}
@@ -613,7 +617,7 @@ export default function AegisHomePage() {
                   desc: "OBSERVE \u2192 UNDERSTAND \u2192 DECIDE \u2192 EXECUTE. The same decision framework applies whether you're triaging a breach or validating a model.",
                 },
               ].map((item) => (
-                <div key={item.title} className="bg-[#0a0a0a] p-8">
+                <div key={item.title} className="bg-[#0b0d12] p-8">
                   <item.icon size={20} className="text-white/60 mb-5" />
                   <h3 className="text-[14px] font-bold text-white mb-3">{item.title}</h3>
                   <p className="text-[12px] leading-[1.85] text-white/65">{item.desc}</p>

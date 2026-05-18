@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../components/ui/PageHeader';
 
 /**
  * a11oy / Ecosystem — unified board for the entire SZL Holdings organism.
@@ -256,16 +256,16 @@ export default function Ecosystem() {
             }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
                 {org.repos.map(r => (
-                  <div key={r.slug} style={{
+                  <a key={r.slug} href={`/a11oy/organism/repo/${r.slug}`} style={{
                     background: T.surfaceHi, border: `1px solid ${T.border}`, borderLeft: `3px solid ${repoColor(r.verdict)}`,
-                    borderRadius: 4, padding: '8px 12px',
-                  }}>
+                    borderRadius: 4, padding: '8px 12px', textDecoration: 'none', color: T.text, display: 'block',
+                  }} title={`Deep-dive ${r.slug} — live GitHub data`}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
                       <span style={{ fontWeight: 500 }}>{r.slug}</span>
                       <span style={{ fontSize: 10, color: repoColor(r.verdict), padding: '1px 6px', borderRadius: 3, background: `${repoColor(r.verdict)}1a`, border: `1px solid ${repoColor(r.verdict)}55` }}>{r.verdict.slice(0, 3)}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>{r.language ?? '—'} · {r.size_kb ? `${r.size_kb} KB` : '—'}</div>
-                  </div>
+                    <div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>{r.language ?? '—'} · {r.size_kb ? `${r.size_kb} KB` : '—'} · <span style={{ color: T.blue }}>deep-dive →</span></div>
+                  </a>
                 ))}
               </div>
               <div style={{ marginTop: 12, fontSize: 11, color: T.dim, borderTop: `1px solid ${T.border}`, paddingTop: 8 }}>
