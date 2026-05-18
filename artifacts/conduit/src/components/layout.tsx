@@ -38,9 +38,11 @@ import {
   SlidersHorizontal,
   SearchCheck,
   Code2,
+  Infinity as InfinityIcon,
 } from 'lucide-react';
 
 const coreItems = [
+  { name: 'Operational Core', href: '/operational-core', icon: InfinityIcon },
   { name: 'Cockpit', href: '/cockpit', icon: Activity },
   { name: 'Brain', href: '/brain', icon: Brain },
   { name: 'Compute', href: '/compute', icon: Cpu },

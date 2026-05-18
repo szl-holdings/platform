@@ -21,6 +21,7 @@ import OuroborosPage from '@/pages/ouroboros';
 import AmaruThesisPage from '@/pages/thesis';
 import BrainPage from '@/pages/brain';
 import ConduitSigil from '@/pages/sigil';
+import OperationalCorePage from '@/pages/operational-core';
 import SovereignAiHub from '@/pages/sovereign-ai-hub/index';
 import ModelFleetConsole from '@/pages/sovereign-ai-hub/model-fleet';
 import InferenceObservatory from '@/pages/sovereign-ai-hub/inference';
@@ -84,6 +85,7 @@ function AppContent() {
         <Route path="/thesis" component={AmaruThesisPage} />
         <Route path="/brain" component={BrainPage} />
         <Route path="/sigil" component={ConduitSigil} />
+        <Route path="/operational-core" component={OperationalCorePage} />
         <Route path="/sovereign-ai-hub" component={SovereignAiHub} />
         <Route path="/sovereign-ai-hub/model-fleet" component={ModelFleetConsole} />
         <Route path="/sovereign-ai-hub/inference" component={InferenceObservatory} />
