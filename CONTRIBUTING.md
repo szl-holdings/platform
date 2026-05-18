@@ -63,6 +63,30 @@ chore(deps): bump drizzle-orm to 0.38
 5. **Documentation updated** — architecture, API spec, or CHANGELOG as needed
 6. **Code review approved** — at least one approving review from a CODEOWNER
 
+### Code Owner Reviewer Policy
+
+Every path in [`.github/CODEOWNERS`](./.github/CODEOWNERS) lists **two** code
+owners so that the "Require review from Code Owners" branch protection rule is
+always satisfiable without disabling `enforce_admins`:
+
+- **`@stephenlutar2-hash`** — founder / primary maintainer.
+- **`@szl-holdings/platform-maintainers`** — maintainer team acting as the
+  secondary reviewer. The team includes the founder plus the org's review bot;
+  membership is managed in the [`szl-holdings/.github`](https://github.com/szl-holdings/.github)
+  repository, which is the canonical source for this CODEOWNERS file and is
+  mirrored to every repo in the org.
+
+When one owner authors a PR (including routine doctrine PRs like citation /
+license / security metadata updates), the *other* owner is the required
+reviewer. Maintenance PRs must merge under this policy — **do not** temporarily
+disable `enforce_admins` on `main` branch protection to land a self-authored
+PR. Disabling admin enforcement, even briefly, widens the blast radius of any
+other concurrent operation and is reserved for documented incident response
+only.
+
+If a new owner is added to a path, add them on the same line in CODEOWNERS so
+the two-owner invariant is preserved.
+
 ### Code Review Expectations
 
 Reviewers check for:

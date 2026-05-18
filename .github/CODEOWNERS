@@ -4,80 +4,103 @@
 # Each line maps a path pattern to its owner(s).
 # Owners are required reviewers for pull requests touching those paths.
 #
-# Syntax: pattern  @owner
+# Syntax: pattern  @owner1 @owner2
 # Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Reviewer policy
+# ---------------
+# Every rule below lists TWO code owners so that any single owner can author a
+# PR and still satisfy the "Require review from Code Owners" branch protection
+# rule via the other owner — without disabling `enforce_admins`.
+#
+# Owners:
+#   @stephenlutar2-hash             — Founder / primary maintainer
+#   @szl-holdings/platform-maintainers — Maintainer team (secondary reviewer;
+#                                        currently aliases the founder + the
+#                                        org's review bot, see CONTRIBUTING.md)
+#
+# When a maintainer authors a PR, the other owner (team or founder) is the
+# required reviewer. Doctrine / citation / license maintenance PRs are
+# expected to self-merge cleanly under this policy without admin override.
 
 # Default owner — all files not matched by a more specific rule
-*  @stephenlutar2-hash
+*  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Platform primitives & shared libraries ─────────────────────────────────────
-/lib/  @stephenlutar2-hash
-/lib/db/  @stephenlutar2-hash
-/lib/auth/  @stephenlutar2-hash
-/lib/audit/  @stephenlutar2-hash
-/lib/ai-engine/  @stephenlutar2-hash
-/lib/shared-ui/  @stephenlutar2-hash
-/lib/api-zod/  @stephenlutar2-hash
-/lib/services/  @stephenlutar2-hash
-/lib/outcome-graph/  @stephenlutar2-hash
-/lib/proof-chain/  @stephenlutar2-hash
-/lib/covenant-policy/  @stephenlutar2-hash
-/lib/monte-carlo/  @stephenlutar2-hash
-/lib/workflow-engine/  @stephenlutar2-hash
-/lib/observability/  @stephenlutar2-hash
-/lib/forge-runtime/  @stephenlutar2-hash
-/lib/prism-bus/  @stephenlutar2-hash
+/lib/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/db/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/auth/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/audit/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/ai-engine/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/shared-ui/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/api-zod/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/services/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/outcome-graph/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/proof-chain/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/covenant-policy/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/monte-carlo/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/workflow-engine/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/observability/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/forge-runtime/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/lib/prism-bus/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── API Server ────────────────────────────────────────────────────────────────
-/artifacts/api-server/  @stephenlutar2-hash
-/artifacts/api-server/src/routes/  @stephenlutar2-hash
-/artifacts/api-server/src/routes/admin/  @stephenlutar2-hash
+/artifacts/api-server/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/artifacts/api-server/src/routes/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/artifacts/api-server/src/routes/admin/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Platform command surfaces ──────────────────────────────────────────────────
-/artifacts/szl-holdings/  @stephenlutar2-hash
-/artifacts/command/  @stephenlutar2-hash
+/artifacts/szl-holdings/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/artifacts/command/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Domain packs ──────────────────────────────────────────────────────────────
-/artifacts/terra/  @stephenlutar2-hash
-/artifacts/vessels/  @stephenlutar2-hash
-/artifacts/carlota-jo/  @stephenlutar2-hash
+/artifacts/terra/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/artifacts/vessels/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/artifacts/carlota-jo/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Mobile (APEX) ───────────────────────────────────────────────────────────
-/artifacts/szl-holdings-mobile/  @stephenlutar2-hash
+/artifacts/szl-holdings-mobile/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 # /artifacts/cortex-mobile/  — archived; superseded by szl-holdings-mobile
 
 # ── Internal tooling ──────────────────────────────────────────────────────────
-/artifacts/mockup-sandbox/  @stephenlutar2-hash
+/artifacts/mockup-sandbox/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Infrastructure & CI/CD ───────────────────────────────────────────────────
-/infra/  @stephenlutar2-hash
-/.github/  @stephenlutar2-hash
-/.github/workflows/  @stephenlutar2-hash
+/infra/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/.github/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/.github/workflows/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Operational docs ─────────────────────────────────────────────────────────
-/ops/  @stephenlutar2-hash
+/ops/  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Documentation ────────────────────────────────────────────────────────────
-/docs/  @stephenlutar2-hash
-README.md  @stephenlutar2-hash
-CHANGELOG.md  @stephenlutar2-hash
+/docs/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+README.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+CHANGELOG.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+
+# ── Citation, license & metadata (doctrine maintenance) ──────────────────────
+# These files attract frequent founder-authored maintenance PRs (name particles,
+# DOI bumps, license refreshes). The dual-owner policy lets them merge without
+# disabling `enforce_admins` on branch protection.
+CITATION.cff  @stephenlutar2-hash @szl-holdings/platform-maintainers
+LICENSE  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Database schema & migrations ─────────────────────────────────────────────
-**/migrations/  @stephenlutar2-hash
-**/schema.ts  @stephenlutar2-hash
+**/migrations/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+**/schema.ts  @stephenlutar2-hash @szl-holdings/platform-maintainers
 
 # ── Security-sensitive files ──────────────────────────────────────────────────
-SECURITY.md  @stephenlutar2-hash
-INCIDENT_RESPONSE.md  @stephenlutar2-hash
-SUPPORT.md  @stephenlutar2-hash
-threat_model.md  @stephenlutar2-hash
-KNOWN-GAPS.md  @stephenlutar2-hash
-AUDIT_FINDINGS_REGISTER.md  @stephenlutar2-hash
-CODE_OF_CONDUCT.md  @stephenlutar2-hash
-LICENSE.md  @stephenlutar2-hash
-.env.example  @stephenlutar2-hash
-.gitleaks.toml  @stephenlutar2-hash
-/security/  @stephenlutar2-hash
-/audit/security/  @stephenlutar2-hash
-/docs/trust/  @stephenlutar2-hash
-/docs/security/  @stephenlutar2-hash
+SECURITY.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+INCIDENT_RESPONSE.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+SUPPORT.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+threat_model.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+KNOWN-GAPS.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+AUDIT_FINDINGS_REGISTER.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+CODE_OF_CONDUCT.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+LICENSE.md  @stephenlutar2-hash @szl-holdings/platform-maintainers
+.env.example  @stephenlutar2-hash @szl-holdings/platform-maintainers
+.gitleaks.toml  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/security/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/audit/security/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/docs/trust/  @stephenlutar2-hash @szl-holdings/platform-maintainers
+/docs/security/  @stephenlutar2-hash @szl-holdings/platform-maintainers

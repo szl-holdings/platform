@@ -15,7 +15,7 @@ This document defines the branch protection policy for the SZL Holdings platform
 | Require pull request before merging | Enabled | No direct pushes to master |
 | Required approvals | 1 | Minimum; increase to 2 when team grows |
 | Dismiss stale approvals on new push | Enabled | Prevents rubber-stamping |
-| Require Code Owner review | Enabled | CODEOWNERS enforced |
+| Require Code Owner review | Enabled | CODEOWNERS enforced; every path lists two owners so self-authored maintenance PRs are reviewable without disabling `enforce_admins` (see `CONTRIBUTING.md` → "Code Owner Reviewer Policy") |
 | Require conversation resolution | Enabled | No unresolved threads at merge |
 | Require branches to be up to date | Enabled | Prevents stale PR merges |
 | Do not allow bypassing for admins | Enabled | Admins follow the same process |
