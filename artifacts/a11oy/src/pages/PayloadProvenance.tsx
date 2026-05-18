@@ -202,8 +202,8 @@ export function PayloadProvenance() {
         </Card>
       </div>
 
-      {/* 4. 16-repo grid */}
-      <SectionTitle>Org · 16 repositories</SectionTitle>
+      {/* 4. Full org-wide repo grid */}
+      <SectionTitle>Org · {ORG_SUMMARY.reposTotal} repositories</SectionTitle>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
         {REPOS.map(r => (
           <Card key={r.name}>

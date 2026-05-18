@@ -1,4 +1,5 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
+import { PANEL_FACTS, DOI_LEDGER_COUNT } from '@szl-holdings/payload';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { SentraGovernancePanels } from '../components/GovernancePanels';
@@ -520,7 +521,7 @@ export default function SentraLandingPage() {
             <span className="text-[12px] text-[#888]">Sentra</span>
             <span className="mono text-[10px] text-[#555]">/ by SZL Holdings · Doctrine V6</span>
           </div>
-          <span className="mono text-[10px] text-[#555] tracking-wider uppercase">PUBLIC_ONLY · 16 repos · 13 DOI</span>
+          <span className="mono text-[10px] text-[#555] tracking-wider uppercase">{PANEL_FACTS.ingestionPolicyText} · {PANEL_FACTS.reposCountText} repos · {DOI_LEDGER_COUNT} DOI</span>
         </div>
       </footer>
 

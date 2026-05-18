@@ -19,6 +19,9 @@
   "peerDependencies": {
     "react": ">=18"
   },
+  "dependencies": {
+    "@szl-holdings/payload": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@types/node": "catalog:",
