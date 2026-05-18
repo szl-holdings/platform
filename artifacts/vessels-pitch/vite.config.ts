@@ -4,27 +4,16 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT;
+// Align with sibling artifacts (conduit, sentra, vessels): the
+// workflow command does not export PORT/BASE_PATH, so a hard throw
+// here permanently broke `pnpm run dev` for vessels-pitch. Prefer
+// the orchestrator-injected value when present, fall back to the
+// artifact's previously-assigned port + its registered preview path.
+const rawPort = process.env.PORT ?? process.env.VITE_PORT;
+const parsedPort = rawPort ? Number(rawPort) : NaN;
+const port = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 24631;
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+const basePath = process.env.BASE_PATH ?? '/vessels-pitch/';
 
 export default defineConfig({
   base: basePath,
